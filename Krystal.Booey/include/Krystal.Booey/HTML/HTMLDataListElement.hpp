@@ -1,6 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo::dom
+{
+  class HTMLCollection;
+}
 
 namespace krys::boo::html
 {
@@ -9,8 +15,16 @@ namespace krys::boo::html
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDataListElement);
 
+  private:
+    // A [SameObject] collection, held weakly as it holds the datalist.
+    WeakPtr<dom::HTMLCollection> _options;
+
   public:
     HTMLDataListElement(dom::Document &document) noexcept;
+
+    /// @brief The option elements that are descendants of the datalist.
+    /// @see https://html.spec.whatwg.org/#dom-datalist-options
+    KRYS_NODISCARD Ref<dom::HTMLCollection> Options() noexcept;
   };
 }
 

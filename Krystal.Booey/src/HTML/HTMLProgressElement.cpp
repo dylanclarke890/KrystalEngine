@@ -80,8 +80,11 @@ namespace krys::boo::html
 
 #pragma region HTMLProgressElement
 
+  // https://html.spec.whatwg.org/#dom-progress-value
+  // https://html.spec.whatwg.org/#concept-progress-current-value
   double HTMLProgressElement::Value() const noexcept
   {
+    // An indeterminate progress bar has no value attribute, so its value is 0 too.
     double value = ParseHTMLFloatingPointNumberValue(GetAttribute(u8"value").value_or(dom::DOMString()));
     return !std::isfinite(value) || value < 0 ? 0 : std::min(value, Max());
   }
@@ -91,6 +94,7 @@ namespace krys::boo::html
     Reflect<double>(*this, u8"value", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#concept-progress-maximum
   double HTMLProgressElement::Max() const noexcept
   {
     double max = ParseHTMLFloatingPointNumberValue(GetAttribute(u8"max").value_or(dom::DOMString()));
@@ -105,6 +109,7 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-progress-position
   double HTMLProgressElement::Position() const noexcept
   {
     if (!IsDeterminate())

@@ -155,8 +155,16 @@ namespace krys::boo::html
 
   Ref<dom::HTMLCollection> HTMLFieldSetElement::Elements() noexcept
   {
-    return CreateRef<dom::LiveHTMLCollection>(*this, [](const dom::Element &element)
-                                              { return element.IsFormListedElement(); });
+    if (auto *elements = _elements.get())
+    {
+      return ShareRef(*elements);
+    }
+    // The elements IDL attribute must return an HTMLCollection rooted at the fieldset element, whose filter
+    // matches listed elements.
+    Ref<dom::HTMLCollection> elements = CreateRef<dom::LiveHTMLCollection>(
+      *this, [](const dom::Element &element) { return element.IsFormListedElement(); });
+    _elements = CreateWeakPtr<dom::HTMLCollection>(elements.get());
+    return elements;
   }
 
   void HTMLFieldSetElement::AddInvalidDescendant(const HTMLElement &invalidFormControlElement) noexcept

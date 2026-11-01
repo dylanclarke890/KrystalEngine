@@ -53,8 +53,10 @@ namespace krys::boo::html
       *TextControlInnerTextElement::Create(NodeDocument(), IsInnerTextElementEditable()));
   }
 
+  // https://html.spec.whatwg.org/#the-textarea-element:children-changed-steps
   void HTMLTextAreaElement::OnChildrenChanged() noexcept
   {
+    // If the element's dirty value flag is false, set the element's raw value to its child text content.
     HTMLTextFormControlElement::OnChildrenChanged();
     SetLastChangeWasNotUserEdit();
     if (_isDirty)
@@ -252,8 +254,10 @@ namespace krys::boo::html
     SetSelectionRange(start, end, direction, ForBindings::Yes);
   }
 
+  // https://html.spec.whatwg.org/#the-textarea-element:concept-node-clone-ext
   void HTMLTextAreaElement::OnClone(dom::Node &copy, bool subtree) noexcept
   {
+    // Propagate the raw value and dirty value flag from node to copy.
     HTMLTextFormControlElement::OnClone(copy, subtree);
     auto &clone = Downcast<HTMLTextAreaElement>(copy);
     clone.SetValueCommon(Value(), TextFieldEventBehavior::DispatchNoEvent,
@@ -275,13 +279,11 @@ namespace krys::boo::html
 
     if (localName == u8"wrap")
     {
-      // The virtual/physical values were a Netscape extension of HTML 3.0, now deprecated.
-      // The soft/hard /off values are a recommendation for HTML 4 extension by IE and NS 4.
+      // https://html.spec.whatwg.org/#attr-textarea-wrap
+      // Soft or Hard; off (no wrapping when rendered) is the rendering section's.
       auto newValue = value.value_or(dom::DOMStringView());
       WrapMethod wrap;
-      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"physical")
-          || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"hard")
-          || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"on"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"hard"))
       {
         wrap = HardWrap;
       }
@@ -332,8 +334,11 @@ namespace krys::boo::html
     return true;
   }
 
+  // https://html.spec.whatwg.org/#the-textarea-element:concept-form-reset-control
   void HTMLTextAreaElement::Reset() noexcept
   {
+    // Set the user validity to false, the dirty value flag back to false, and the raw value to its child text
+    // content.
     SetInteractedWithSinceLastFormSubmitEvent(false);
     SetNonDirtyValue(DefaultValue(), TextControlSetValueSelection::SetSelectionToEnd);
   }
@@ -344,11 +349,20 @@ namespace krys::boo::html
     return _value;
   }
 
+  // https://html.spec.whatwg.org/#dom-textarea-value
   dom::ExceptionOr<void> HTMLTextAreaElement::SetValue(dom::DOMStringView value,
                                                        TextFieldEventBehavior eventBehavior,
                                                        TextControlSetValueSelection selection) noexcept
   {
+    // 1. Let oldAPIValue be this element's API value.
+    // 2. Set this element's raw value to the new value.
+    // 4. If the new API value is different from oldAPIValue, then move the text entry cursor position to the
+    // end
+    //    of the text control, unselecting any selected text and resetting the selection direction to "none".
+    // (SetValueCommon.)
     SetValueCommon(value, eventBehavior, selection);
+
+    // 3. Set this element's dirty value flag to true.
     _isDirty = true;
     UpdateValidity();
     return {};
@@ -428,6 +442,7 @@ namespace krys::boo::html
     (void)SetValue(state[0]);
   }
 
+  // https://html.spec.whatwg.org/#dom-textarea-defaultvalue
   dom::DOMString HTMLTextAreaElement::DefaultValue() const noexcept
   {
     return dom::TextAlgorithms::ChildTextContent(*this);
@@ -438,6 +453,7 @@ namespace krys::boo::html
     (void)TextContent(krys::move(defaultValue));
   }
 
+  // https://html.spec.whatwg.org/#dom-textarea-textlength
   uint32 HTMLTextAreaElement::TextLength() const noexcept
   {
     return static_cast<uint32>(LengthForAPIValue(Value()));

@@ -10,8 +10,10 @@ namespace krys::boo::layout::tests
   using style::tests::ResolverFixture;
   using GaugeRegion = html::HTMLMeterElement::GaugeRegion;
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLMeterElement: values and gauge regions",
-                   "[HTML][HTMLMeterElement]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "HTMLMeterElement: values and gauge regions",
+    "[HTML][HTMLMeterElement][html:the-meter-element][html:dom-meter-value][html:dom-meter-min]"
+    "[html:dom-meter-max][html:dom-meter-low][html:dom-meter-high][html:dom-meter-optimum]")
   {
     ResolverFixture fixture {
       AhemDocument(u8"meter{vertical-align:top}",

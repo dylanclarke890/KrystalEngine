@@ -700,13 +700,21 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/RadioNodeList.cpp
 		tests/HTML/HTMLMapElement.cpp
 		tests/HTML/HTMLMeterElement.cpp
+		tests/HTML/HTMLDataListElement.cpp
+		tests/HTML/HTMLOptGroupElement.cpp
+		tests/HTML/HTMLOptionElement.cpp
+		tests/HTML/HTMLFieldSetElement.cpp
+		tests/HTML/HTMLOutputElement.cpp
+		tests/HTML/HTMLProgressElement.cpp
 		tests/HTML/HTMLSelectElement.cpp
+		tests/HTML/HTMLSelectedContentElement.cpp
 		tests/HTML/HTMLSlotElement.cpp
 		tests/HTML/HTMLTableCellElement.cpp
 		tests/HTML/HTMLTableElement.cpp
 		tests/HTML/HTMLTableRowElement.cpp
 		tests/HTML/HTMLTableSectionElement.cpp
 		tests/HTML/HTMLTemplateElement.cpp
+		tests/HTML/HTMLTextAreaElement.cpp
 		tests/HTML/HTMLTextFormControlElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
 		tests/HTML/HTMLLinkElement.cpp

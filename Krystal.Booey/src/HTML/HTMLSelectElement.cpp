@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
@@ -224,6 +225,7 @@ namespace krys::boo::html
     SelectOption(optionIndex, flags);
   }
 
+  // https://html.spec.whatwg.org/#placeholder-label-option
   bool HTMLSelectElement::HasPlaceholderLabelOption() const noexcept
   {
     // The select element has no placeholder label option if it has an attribute "multiple" specified or a
@@ -237,13 +239,22 @@ namespace krys::boo::html
       return false;
     }
 
-    int32 listIndex = OptionToListIndex(0);
-    if (listIndex)
+    // The first option element in the list of options, if its value is the empty string and it has no
+    // ancestor optgroup in between itself and the select element.
+    auto *option = Item(0);
+    if (!option || !option->Value().empty())
     {
       return false;
     }
-    auto &option = Downcast<HTMLOptionElement>(*ListItems()[static_cast<size_t>(listIndex)]);
-    return option.Value().empty();
+    for (auto *ancestor = option->ParentNode(); ancestor && ancestor != this;
+         ancestor = ancestor->ParentNode())
+    {
+      if (Is<HTMLOptGroupElement>(*ancestor))
+      {
+        return false;
+      }
+    }
+    return true;
   }
 
   bool HTMLSelectElement::ValueMissing() const noexcept
@@ -403,9 +414,18 @@ namespace krys::boo::html
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-select-value
   void HTMLSelectElement::Value(dom::DOMStringView value) noexcept
   {
-    // Find the option with Value() matching the given parameter and make it the current selection.
+    // 1. Let firstMatchingOption be null.
+    // 2. For each option of this's list of options:
+    // 2a. Set option's selectedness to false.
+    // 2b. If firstMatchingOption is null and option's value is equal to the given value, then set
+    //     firstMatchingOption to option.
+    // 3. If firstMatchingOption is not null, then set firstMatchingOption's selectedness to true and set
+    //    firstMatchingOption's dirtiness to true.
+    // 4. Update a select's descendant selectedcontent elements given this.
+    // (Selecting the matching option's index, or none.)
     int32 optionIndex = 0;
     for (auto &item : ListItems())
     {
@@ -449,8 +469,10 @@ namespace krys::boo::html
       if (_size != oldSize)
       {
         InvalidateStyleAndRenderersForSubtree();
-        SetRecalcListItems();
-        UpdateValidity();
+
+        // Whenever a select element's size attribute is set, changed, or removed, reset a select's
+        // selectedness given the select element and false.
+        ResetSelectedness(false);
       }
     }
     else if (localName == u8"multiple")
@@ -489,18 +511,31 @@ namespace krys::boo::html
 
   Ref<dom::HTMLCollection> HTMLSelectElement::SelectedOptions() noexcept
   {
-    return CreateRef<dom::LiveHTMLCollection>(*this,
-                                              [this](const dom::Element &element)
-                                              {
-                                                auto *option = DynamicDowncast<HTMLOptionElement>(element);
-                                                return option && option->OwnerSelectElement() == this
-                                                       && option->Selected();
-                                              });
+    if (auto *selectedOptions = _selectedOptions.get())
+    {
+      return ShareRef(*selectedOptions);
+    }
+    Ref<dom::HTMLCollection> selectedOptions = CreateRef<dom::LiveHTMLCollection>(
+      *this,
+      [this](const dom::Element &element)
+      {
+        auto *option = DynamicDowncast<HTMLOptionElement>(element);
+        return option && option->OwnerSelectElement() == this && option->Selected();
+      });
+    _selectedOptions = CreateWeakPtr<dom::HTMLCollection>(selectedOptions.get());
+    return selectedOptions;
   }
 
   Ref<HTMLOptionsCollection> HTMLSelectElement::Options() noexcept
   {
-    return CreateRef<HTMLOptionsCollection>(*this);
+    if (auto *options = _options.get())
+    {
+      // Only ever an HTMLOptionsCollection.
+      return ShareRef(static_cast<HTMLOptionsCollection &>(*options));
+    }
+    auto options = CreateRef<HTMLOptionsCollection>(*this);
+    _options = CreateWeakPtr<dom::HTMLCollection>(options.get());
+    return options;
   }
 
   void HTMLSelectElement::UpdateListItemSelectedStates(AllowStyleInvalidation allowStyleInvalidation) noexcept
@@ -1005,6 +1040,37 @@ namespace krys::boo::html
     // Collections don't cache their items, so there is nothing to invalidate.
   }
 
+  void HTMLSelectElement::ResetSelectedness(bool hasChanged) noexcept
+  {
+    // 1. If the result of running the selectedness setting algorithm given select is true, then set
+    // hasChanged
+    //    to true.
+    // (Running it while finding the list of options again, and comparing the selected option.)
+    RefPtr<HTMLOptionElement> previouslySelected = ShareRefPtr(FirstSelectedOption());
+    SetRecalcListItems();
+    UpdateListItemSelectedStates();
+    UpdateValidity();
+    if (FirstSelectedOption() != previouslySelected.get())
+    {
+      hasChanged = true;
+    }
+
+    // 2. If hasChanged is false, then return.
+    if (!hasChanged)
+    {
+      return;
+    }
+
+    // 3. Update a select's descendant selectedcontent elements given select.
+    FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
+  }
+
+  HTMLOptionElement *HTMLSelectElement::FirstSelectedOption() const noexcept
+  {
+    int32 index = SelectedIndex();
+    return index >= 0 ? Item(static_cast<uint32>(index)) : nullptr;
+  }
+
   void HTMLSelectElement::SetRecalcListItems() noexcept
   {
     _shouldRecalcListItems = true;
@@ -1028,17 +1094,15 @@ namespace krys::boo::html
 
     _shouldRecalcListItems = false;
 
+    // https://html.spec.whatwg.org/#selectedness-setting-algorithm
+    // (Steps 4 to 6, while finding the list of options; an option selected for being the first enabled one
+    // is deselected by a later selected one.)
     RefPtr<HTMLOptionElement> foundSelected;
-    RefPtr<HTMLOptionElement> firstOption;
     auto handleOptionElement = [&](HTMLOptionElement &option)
     {
       _listItems.push_back(WeakPtr<HTMLElement>::WithRef(option));
       if (updateSelectedStates && !_multiple)
       {
-        if (!firstOption)
-        {
-          firstOption = ShareRef(option);
-        }
         if (option.SelectedWithoutUpdate())
         {
           if (foundSelected)
@@ -1111,11 +1175,6 @@ namespace krys::boo::html
       }
       node = dom::TreeQueries::Next(*node, &select);
     }
-
-    if (!foundSelected && _size <= 1 && firstOption && !firstOption->SelectedWithoutUpdate())
-    {
-      firstOption->SetSelectedState(true, allowStyleInvalidation);
-    }
   }
 
   int32 HTMLSelectElement::SelectedIndex() const noexcept
@@ -1138,9 +1197,21 @@ namespace krys::boo::html
     return -1;
   }
 
+  // https://html.spec.whatwg.org/#set-the-selected-index
   void HTMLSelectElement::SelectedIndex(int32 index) noexcept
   {
-    SelectOption(index, {SelectOptionFlag::DeselectOtherOptions});
+    // 1. Let firstMatchingOption be null.
+    // 2. For each option of select's list of options:
+    // 2a. Set option's selectedness to false.
+    // 2b. If firstMatchingOption is null and option's index is equal to value, then set firstMatchingOption
+    // to
+    //     option.
+    // 3. If firstMatchingOption is not null, then set firstMatchingOption's selectedness to true and set
+    //    firstMatchingOption's dirtiness to true.
+    SelectOption(index, {SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::MakeOptionDirty});
+
+    // 4. Update a select's descendant selectedcontent elements given select.
+    FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
   }
 
   void HTMLSelectElement::OptionSelectionStateChanged(HTMLOptionElement &option,
@@ -1190,6 +1261,16 @@ namespace krys::boo::html
         SetActiveSelectionEndIndex(listIndex);
       }
       option->SetSelectedState(true);
+      if (flags.ContainsAny({SelectOptionFlag::MakeOptionDirty, SelectOptionFlag::UserDriven}))
+      {
+        option->MakeDirty();
+      }
+    }
+
+    // Picking an option sends select update notifications, which update the selectedcontent elements.
+    if (flags.Contains(SelectOptionFlag::UserDriven))
+    {
+      FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
     }
 
     InvalidateSelectedItems();
@@ -1318,16 +1399,18 @@ namespace krys::boo::html
     {
       InvalidateStyleAndRenderersForSubtree();
     }
+    // https://html.spec.whatwg.org/#reset-a-select's-selectedness
     if (oldMultiple != _multiple)
     {
+      // 1. If the multiple attribute was removed, then set the selectedness of all but the first option
+      // element
+      //    with its selectedness set to true in select's list of options to false.
       if (oldSelectedIndex >= 0)
       {
-        SelectedIndex(oldSelectedIndex);
+        SelectOption(oldSelectedIndex, {SelectOptionFlag::DeselectOtherOptions});
       }
-      else
-      {
-        Reset();
-      }
+      // 2. Reset a select's selectedness given select and true.
+      ResetSelectedness(true);
     }
   }
 
@@ -1356,11 +1439,15 @@ namespace krys::boo::html
     return successful;
   }
 
+  // https://html.spec.whatwg.org/#the-select-element:concept-form-reset-control
   void HTMLSelectElement::Reset() noexcept
   {
+    // 1. Set selectElement's user validity to false.
+    // (SetInteractedWithSinceLastFormSubmitEvent below.)
     RefPtr<HTMLOptionElement> firstOption;
     RefPtr<HTMLOptionElement> selectedOption;
 
+    // 2. For each optionElement of selectElement's list of options:
     for (auto &element : ListItems())
     {
       auto *option = DynamicDowncast<HTMLOptionElement>(element.get());
@@ -1369,7 +1456,14 @@ namespace krys::boo::html
         continue;
       }
 
+      // 2b. Set optionElement's dirtiness to false.
       option->ResetDirtiness();
+
+      // 2a. If optionElement has a selected attribute, then set optionElement's selectedness to true;
+      // otherwise
+      //     set it to false.
+      // 3. Run the selectedness setting algorithm given selectElement.
+      // (Both at once, keeping the last selected option and the first enabled one.)
       if (option->HasAttribute(u8"selected"))
       {
         if (selectedOption && !_multiple)
@@ -1395,6 +1489,8 @@ namespace krys::boo::html
       firstOption->SetSelectedState(true);
     }
 
+    // 4. Update a select's descendant selectedcontent elements given selectElement.
+    FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
     SetInteractedWithSinceLastFormSubmitEvent(false);
     InvalidateSelectedItems();
     SetOptionsChangedOnRenderer();
@@ -1678,6 +1774,7 @@ namespace krys::boo::html
         option && !option->IsDisabledFormControl())
     {
       option->SetSelectedState(true);
+      option->MakeDirty();
     }
 
     // If there was no SelectedIndex() for the previous initialization, or if we're doing a single selection,
@@ -1691,6 +1788,9 @@ namespace krys::boo::html
     InvalidateSelectedItems();
     SetActiveSelectionEndIndex(listIndex);
     UpdateListBoxSelection(!multiSelect);
+
+    // Picking an option sends select update notifications, which update the selectedcontent elements.
+    FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
   }
 
   void HTMLSelectElement::ListBoxDefaultEventHandler(dom::Event &event) noexcept

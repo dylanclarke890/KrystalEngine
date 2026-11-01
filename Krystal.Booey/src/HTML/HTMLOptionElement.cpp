@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
@@ -58,7 +59,10 @@ namespace krys::boo::html
     {
       (void)element->SetAttribute(dom::DOMStringAtom(u8"selected"), dom::DOMString());
     }
-    element->Selected(selected);
+
+    // 6. If selected is true, then set option's selectedness to true; otherwise set its selectedness to false
+    //    (even if defaultSelected is true).
+    element->SetSelectedState(selected);
 
     return element;
   }
@@ -106,13 +110,18 @@ namespace krys::boo::html
     return nullptr;
   }
 
+  // https://html.spec.whatwg.org/#dom-option-label
   dom::DOMString HTMLOptionElement::Label() const noexcept
   {
+    // 1. Let attribute be this's label attribute.
+    // 2. If attribute is null, then return the result of getting an option element's label given this and
+    //    false.
+    // 3. Return attribute's value.
     if (auto label = GetAttribute(u8"label"))
     {
       return dom::DOMString(*label);
     }
-    return CollectOptionInnerTextCollapsingWhitespace();
+    return OptionLabel();
   }
 
   void HTMLOptionElement::Label(dom::DOMString &&value) noexcept
@@ -139,19 +148,30 @@ namespace krys::boo::html
     return _isSelected;
   }
 
+  // https://html.spec.whatwg.org/#dom-option-selected
   void HTMLOptionElement::Selected(bool value) noexcept
   {
+    // 2. Set this's dirtiness to true.
     _dirtiness = true;
     if (_isSelected == value)
     {
       return;
     }
 
+    // 1. Set this's selectedness to the given value.
     SetSelectedState(value);
+
+    // 3. Ask for a reset given this.
+    // https://html.spec.whatwg.org/#ask-for-a-reset
+    // 1. Let select be option's cached nearest ancestor select element.
+    // 2. If select is null, then return.
+    // 3. Run the selectedness setting algorithm given select.
+    // 4. Update a select's descendant selectedcontent elements given select.
 
     if (RefPtr<HTMLSelectElement> select = ShareRefPtr(OwnerSelectElement()))
     {
       select->OptionSelectionStateChanged(*this, value);
+      FormControlAlgorithms::UpdateDescendantSelectedContents(*select);
     }
   }
 
@@ -227,13 +247,13 @@ namespace krys::boo::html
 
   dom::DOMString HTMLOptionElement::DisplayLabel() const noexcept
   {
-    // Same as Label() but ignores the label content attribute in quirks mode for compatibility with other
-    // browsers.
+    // Same as OptionLabel() but ignores the label content attribute in quirks mode for compatibility with
+    // other browsers.
     if (NodeDocument().InQuirksMode())
     {
       return CollectOptionInnerTextCollapsingWhitespace();
     }
-    return Label();
+    return OptionLabel();
   }
 
   dom::DOMString HTMLOptionElement::TextIndentedToRespectGroupLabel() const noexcept
@@ -242,15 +262,15 @@ namespace krys::boo::html
     {
       if (Is<HTMLOptGroupElement>(*ancestor))
       {
-        return u8"    " + Label();
+        return u8"    " + OptionLabel();
       }
       if (Is<HTMLDataListElement>(*ancestor) || Is<HTMLSelectElement>(*ancestor)
           || Is<HTMLOptionElement>(*ancestor) || Is<HTMLHRElement>(*ancestor))
       {
-        return Label();
+        return OptionLabel();
       }
     }
-    return Label();
+    return OptionLabel();
   }
 
   void HTMLOptionElement::SetSelectedState(bool selected,
@@ -299,38 +319,77 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#the-option-element:html-element-post-connection-steps
+  void HTMLOptionElement::OnPostConnection() noexcept
+  {
+    HTMLElement::OnPostConnection();
+
+    // Update descendant selectedcontent elements for an option given insertedOption.
+    FormControlAlgorithms::UpdateDescendantSelectedContentsForOption(*this);
+  }
+
+  // https://html.spec.whatwg.org/#the-option-element:html-element-removing-steps
   void HTMLOptionElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
-    UpdateOwnerSelect();
+
+    // 1. Let selects be the result of update an option's nearest ancestor select given removedNode.
+    // 2. For each select of selects: queue a microtask to update a select's descendant selectedcontent
+    // elements
+    //    given select.
+    if (RefPtr<HTMLSelectElement> oldSelect = UpdateOwnerSelect(); oldSelect && _isSelected)
+    {
+      FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*oldSelect);
+    }
   }
 
+  // https://html.spec.whatwg.org/#the-option-element:html-element-moving-steps
   void HTMLOptionElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
-    UpdateOwnerSelect();
+
+    // 1. Let selects be the result of update an option's nearest ancestor select given movedNode.
+    // 2. For each select of selects: queue a microtask to update a select's descendant selectedcontent
+    // elements
+    //    given select.
+    RefPtr<HTMLSelectElement> oldSelect = UpdateOwnerSelect();
+    if (oldSelect && _isSelected)
+    {
+      FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*oldSelect);
+    }
     OnInsert();
+    if (RefPtr<HTMLSelectElement> newSelect = ShareRefPtr(OwnerSelectElement());
+        newSelect && newSelect != oldSelect && Selected())
+    {
+      FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*newSelect);
+    }
   }
 
-  void HTMLOptionElement::UpdateOwnerSelect() noexcept
+  // https://html.spec.whatwg.org/#update-an-option's-nearest-ancestor-select
+  RefPtr<HTMLSelectElement> HTMLOptionElement::UpdateOwnerSelect() noexcept
   {
+    // (The new select is set by OnInsert, which runs the selectedness setting algorithm by finding the list
+    // of options again.)
     if (!_ownerSelect)
     {
-      return;
+      return nullptr;
     }
 
+    // 4. If oldSelect is newSelect, then return « ».
     if (auto *select =
           HTMLSelectElement::FindOwnerSelect(ParentNode(), HTMLSelectElement::ExcludeOptGroup::No))
     {
       if (select == _ownerSelect.get())
       {
-        return;
+        return nullptr;
       }
     }
 
+    // 6b. Let hasChanged be the result of running the selectedness setting algorithm given select.
     RefPtr<HTMLSelectElement> select = ShareRefPtr(_ownerSelect.get());
     _ownerSelect = nullptr;
     select->SetRecalcListItems();
+    return select;
   }
 
   void HTMLOptionElement::OnChildrenChanged() noexcept
@@ -368,6 +427,15 @@ namespace krys::boo::html
         {
           renderer->Repaint();
         }
+
+        // https://html.spec.whatwg.org/#concept-option-disabled
+        // 1. Let select be the option element's cached nearest ancestor select element.
+        // 2. If select is null, then return.
+        // 3. Reset a select's selectedness given select and false.
+        if (RefPtr<HTMLSelectElement> select = ShareRefPtr(OwnerSelectElement()))
+        {
+          select->ResetSelectedness(false);
+        }
       }
     }
     else if (localName == u8"selected")
@@ -376,14 +444,24 @@ namespace krys::boo::html
                                                                value.has_value());
       _isDefault = value.has_value();
 
-      // Whenever an option element's selected attribute is added or removed, if its dirtiness is false, its
-      // selectedness must follow it.
+      // https://html.spec.whatwg.org/#concept-option-selectedness
+      // 1. Let hasChanged be false.
+      // 2. If option's dirtiness is false:
+      // 2a. If the selected attribute was added and option's selectedness is false, then set option's
+      //     selectedness to true and set hasChanged to true.
+      // 2b. If the selected attribute was removed and option's selectedness is true, then set option's
+      //     selectedness to false and set hasChanged to true.
+      // 3. Let select be option's cached nearest ancestor select element.
+      // 4. If select is null, then return.
+      // 5. Reset a select's selectedness given select and hasChanged.
+      // (Only when it changed: the selectedness setting algorithm changes nothing otherwise.)
       if (oldValue.has_value() != value.has_value() && !_dirtiness && _isSelected != value.has_value())
       {
         SetSelectedState(value.has_value());
         if (RefPtr<HTMLSelectElement> select = ShareRefPtr(OwnerSelectElement()))
         {
           select->OptionSelectionStateChanged(*this, value.has_value());
+          FormControlAlgorithms::UpdateDescendantSelectedContents(*select);
         }
       }
     }
@@ -400,14 +478,23 @@ namespace krys::boo::html
 
 #pragma endregion
 
+  // https://html.spec.whatwg.org/#get-html-aware-text-content
   dom::DOMString HTMLOptionElement::CollectOptionInnerText() const noexcept
   {
+    // 1. Let text be the empty string.
     dom::DOMString text;
-    // Text nodes inside script elements are not part of the option text.
+
+    // 2. For each descendant descendant of element in tree order:
+    // 2a. If descendant is a script or SVG script element, then continue skipping all descendants of
+    //     descendant.
+    // (2c, the img alt step, is only for includeAltText, which no caller passes.)
+    // 2d. If descendant is an img element, then continue skipping all descendants of descendant.
+    // (img elements have no children.)
     for (auto *node = FirstChild(); node; node = IsScriptElement(*node)
                                                    ? dom::TreeQueries::NextSkippingChildren(*node, this)
                                                    : dom::TreeQueries::Next(*node, this))
     {
+      // 2b. If descendant is a Text node, then set text to the concatenation of text and descendant's data.
       if (auto *textNode = DynamicDowncast<dom::Text>(*node))
       {
         text += textNode->Data();
@@ -418,6 +505,20 @@ namespace krys::boo::html
 
   dom::DOMString HTMLOptionElement::CollectOptionInnerTextCollapsingWhitespace() const noexcept
   {
+    // 3. Return the result of strip and collapse ASCII whitespace given text.
     return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(CollectOptionInnerText());
+  }
+
+  // https://html.spec.whatwg.org/#concept-option-label
+  dom::DOMString HTMLOptionElement::OptionLabel() const noexcept
+  {
+    // 1. If option has a label attribute whose value is not the empty string, then return that value.
+    if (auto label = GetAttribute(u8"label"); label && !label->empty())
+    {
+      return dom::DOMString(*label);
+    }
+
+    // 2. Return the result of get HTML-aware text content given option and includeAltText.
+    return CollectOptionInnerTextCollapsingWhitespace();
   }
 }

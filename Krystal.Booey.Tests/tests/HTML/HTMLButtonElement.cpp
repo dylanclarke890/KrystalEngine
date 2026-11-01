@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/ToggleEvent.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
@@ -83,8 +84,62 @@ namespace krys::boo::html::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "HTMLButtonElement: type is the button's state, submit when Auto",
+                   "[HTML][HTMLButtonElement][html:dom-button-type][html:attr-button-type-auto-state]"
+                   "[html:concept-submit-button]")
+  {
+    NavigationFixture fixture(u8"<button id=b>B</button>");
+    auto &button = fixture.Get<HTMLButtonElement>(u8"b");
+    CHECK(Narrow(button.Type()) == "submit");
+    button.Type(u8"RESET");
+    CHECK(Narrow(button.Type()) == "reset");
+    CHECK(NarrowOrNull(button.GetAttribute(u8"type")) == "RESET");
+    button.Type(u8"Button");
+    CHECK(Narrow(button.Type()) == "button");
+    button.Type(u8"bogus");
+    CHECK(Narrow(button.Type()) == "submit");
+    // The Auto state, with a command: not a submit button.
+    button.Command(u8"--spin");
+    CHECK(Narrow(button.Type()) == "button");
+    CHECK_FALSE(button.IsSubmitButton());
+  }
+
+  TEST_CASE("HTMLButtonElement: a button whose parent is a select isn't a submit button in the Auto state",
+            "[HTML][HTMLButtonElement][html:concept-submit-button][!shouldfail]")
+  {
+    // FIXME: Customizable selects.
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto select = document->CreateElement(u8"select").ReleaseValue();
+    auto button = document->CreateElement(u8"button").ReleaseValue();
+    REQUIRE_FALSE(select->AppendChild(*button).HasException());
+    CHECK_FALSE(Downcast<HTMLButtonElement>(*button).IsSubmitButton());
+  }
+
+  TEST_CASE("HTMLButtonElement: a button in a document that isn't fully active does nothing",
+            "[HTML][HTMLButtonElement][html:the-button-element]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto button = document->CreateElement(u8"button").ReleaseValue();
+    auto target = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(target->SetAttribute(u8"id", u8"t").HasException());
+    REQUIRE_FALSE(button->SetAttribute(u8"commandfor", u8"t").HasException());
+    REQUIRE_FALSE(button->SetAttribute(u8"command", u8"--spin").HasException());
+    auto body = document->CreateElement(u8"body").ReleaseValue();
+    REQUIRE_FALSE(body->AppendChild(*button).HasException());
+    REQUIRE_FALSE(body->AppendChild(*target).HasException());
+    REQUIRE_FALSE(document->AppendChild(*body).HasException());
+    REQUIRE(Downcast<HTMLButtonElement>(*button).CommandForElement().get() == target.get());
+
+    int commands = 0;
+    auto listener = target->AddEventListener(u8"command", [&](dom::Event &) { ++commands; });
+    Downcast<HTMLElement>(*button).Click();
+    CHECK(commands == 0);
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLButtonElement: command attributes",
-                   "[HTML][HTMLButtonElement]")
+                   "[HTML][HTMLButtonElement][html:attr-button-command][html:dom-button-command]"
+                   "[html:attr-button-command-unknown-state][html:attr-button-command-custom]")
   {
     NavigationFixture fixture(u8"<button id=b>B</button><div id=p popover></div>"
                               u8"<form><button id=f commandfor=p>F</button><button id=fs type=submit "
@@ -141,7 +196,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLButtonElement: popover commands",
-                   "[HTML][HTMLButtonElement]")
+                   "[HTML][HTMLButtonElement][html:determine-if-command-is-valid][html:the-button-element]")
   {
     NavigationFixture fixture(
       u8"<style>body { margin: 0 } button { display: block; width: 50px; height: 20px; margin: 0 }</style>"
@@ -216,7 +271,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLButtonElement: dialog commands",
-                   "[HTML][HTMLButtonElement]")
+                   "[HTML][HTMLButtonElement][html:determine-if-command-is-valid][html:the-button-element]")
   {
     NavigationFixture fixture(
       u8"<button id=open commandfor=d command=show-modal>O</button>"

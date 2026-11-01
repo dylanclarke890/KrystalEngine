@@ -18,6 +18,8 @@ namespace krys::boo::html
 
   private:
     List<WeakPtr<HTMLElement>> _invalidDescendants;
+    // A [SameObject] collection, held weakly as it holds the fieldset.
+    WeakPtr<dom::HTMLCollection> _elements;
 
   public:
     HTMLFieldSetElement(dom::Document &document) noexcept;

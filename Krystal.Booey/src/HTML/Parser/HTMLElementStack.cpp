@@ -56,11 +56,11 @@ namespace krys::boo::html
 
     back->FinishParsingChildren();
 
-    // When an option element is popped off the stack of open elements of an HTML parser or XML parser, the
-    // user agent must run maybe clone an option into selectedcontent given the option element.
+    // An option's children come after its post-connection steps, so a popped option updates its select's
+    // selectedcontent elements again.
     if (auto *option = DynamicDowncast<HTMLOptionElement>(back.get()))
     {
-      FormControlAlgorithms::MaybeCloneOptionIntoSelectedContent(*option);
+      FormControlAlgorithms::UpdateDescendantSelectedContentsForOption(*option);
     }
   }
 

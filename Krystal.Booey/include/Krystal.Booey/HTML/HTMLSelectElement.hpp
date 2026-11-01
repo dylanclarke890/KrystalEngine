@@ -38,6 +38,7 @@ namespace krys::boo::html
     {
       DeselectOtherOptions,
       DispatchChangeEvent,
+      MakeOptionDirty,
       UserDriven,
     };
     using SelectOptionFlags = EnumSet<SelectOptionFlag>;
@@ -50,6 +51,9 @@ namespace krys::boo::html
 
     /// @brief The options, optgroups and hrs of the select, in order.
     mutable List<WeakPtr<HTMLElement>> _listItems;
+    // [SameObject] collections, held weakly as they hold the select.
+    WeakPtr<dom::HTMLCollection> _options;
+    WeakPtr<dom::HTMLCollection> _selectedOptions;
     List<bool> _lastOnChangeSelection;
     List<bool> _cachedStateForActiveSelection;
     TypeAhead _typeAhead;
@@ -193,6 +197,12 @@ namespace krys::boo::html
 
     void OptionElementChildrenChanged() noexcept;
     void SetRecalcListItems() noexcept;
+
+    /// @brief Runs the selectedness setting algorithm, then updates the selectedcontent elements if it or
+    /// @p hasChanged changed the selection.
+    /// @see https://html.spec.whatwg.org/#reset-a-select's-selectedness
+    void ResetSelectedness(bool hasChanged) noexcept;
+
     void InvalidateSelectedItems() noexcept;
     void UpdateListItemSelectedStates(
       AllowStyleInvalidation allowStyleInvalidation = AllowStyleInvalidation::Yes) noexcept;
@@ -288,6 +298,9 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#placeholder-label-option
     KRYS_NODISCARD bool HasPlaceholderLabelOption() const noexcept;
+
+    /// @brief The first option in the list of options whose selectedness is true, if any.
+    KRYS_NODISCARD HTMLOptionElement *FirstSelectedOption() const noexcept;
 
     void DispatchChangeEventForMenuList() noexcept;
     void RecalcListItems(bool updateSelectedStates = true, AllowStyleInvalidation allowStyleInvalidation =

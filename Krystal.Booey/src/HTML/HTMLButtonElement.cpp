@@ -80,13 +80,22 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#the-button-element:activation-behaviour
   void HTMLButtonElement::ActivationBehavior(dom::Event &event) noexcept
   {
+    // 1. If element is disabled, then return.
     if (IsDisabledFormControl())
     {
       return;
     }
 
+    // 2. If element's node document is not fully active, then return.
+    if (!NodeDocument().IsFullyActive())
+    {
+      return;
+    }
+
+    // 3. If element has a form owner:
     if (Form())
     {
       // Update layout before processing form actions in case the style changes the form or button
@@ -94,10 +103,14 @@ namespace krys::boo::html
       (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets();
       if (RefPtr<HTMLFormElement> currentForm = ShareRefPtr(Form()))
       {
+        // 3a. If element is a submit button, then submit element's form owner from element with
+        //     userInvolvement set to event's user navigation involvement, and return.
         if (_type == ButtonType::Submit)
         {
           currentForm->SubmitIfPossible(&event, this);
         }
+        // 3b. If element's type attribute is in the Reset Button state, then reset element's form owner, and
+        //     return.
         if (_type == ButtonType::Reset)
         {
           currentForm->Reset();
@@ -109,6 +122,7 @@ namespace krys::boo::html
         return;
       }
 
+      // 3c. If element's type attribute is in the Auto state, then return.
       if (_type == ButtonType::Button
           && !text::IsASCIICaselessEqual(
             dom::DOMStringView(GetAttribute(u8"type").value_or(dom::DOMString())),
@@ -118,12 +132,15 @@ namespace krys::boo::html
       }
     }
 
+    // 4. Let target be the result of running element's get the commandfor-associated element.
+    // 5. If target is not null:
     if (CommandForElement())
     {
       HandleCommand();
       return;
     }
 
+    // 6. Otherwise, run the popover target attribute activation behavior given element and event's target.
     HandlePopoverTargetAction(event.Target().get());
   }
 
@@ -214,8 +231,11 @@ namespace krys::boo::html
     return IsSubmitButton() && HasAttribute(u8"type");
   }
 
+  // https://html.spec.whatwg.org/#concept-submit-button
   void HTMLButtonElement::ComputeType(dom::DOMStringView typeAttributeValue) noexcept
   {
+    // FIXME: A button whose parent is a select isn't a submit button in the Auto state, once there are
+    // customizable selects.
     auto oldType = _type;
     if (text::IsASCIICaselessEqual(typeAttributeValue, dom::DOMStringView(u8"reset")))
     {
@@ -254,6 +274,7 @@ namespace krys::boo::html
     return ElementForAttributeInternal(dom::DOMStringAtom(u8"commandfor"));
   }
 
+  // https://html.spec.whatwg.org/#attr-button-command
   dom::CommandType HTMLButtonElement::GetCommandType() const noexcept
   {
     auto action = GetAttribute(u8"command");
@@ -270,6 +291,7 @@ namespace krys::boo::html
       }
     }
 
+    // A custom command keyword is a string that starts with "--".
     if (action->starts_with(u8"--"))
     {
       return dom::CommandType::Custom;
@@ -286,19 +308,34 @@ namespace krys::boo::html
       return;
     }
 
+    // 5a. Let command be element's command attribute.
     auto commandRaw = GetAttribute(u8"command");
     auto command = GetCommandType();
 
+    // 5b. If the result of determining if a command is valid for a target given command and target is false,
+    //     then return.
+    // https://html.spec.whatwg.org/#determine-if-command-is-valid
+    // 1. If command is in the Unknown state, then return false.
     if (command == dom::CommandType::Invalid)
     {
       return;
     }
 
+    // 2. If command is in the Custom state, then return true.
+    // 3. If target is not an HTML element, then return false.
+    // 4. If command is in any of the following states: Toggle Popover; Show Popover; Hide Popover then return
+    //    true.
+    // 5. If this standard does not define is valid command steps for target's local name, then return false.
+    // 6. Otherwise, return the result of running target's corresponding is valid command steps given command.
+    // (Steps 3 to 6 are Element::IsValidCommandType and its overrides.)
     if (command != dom::CommandType::Custom && !invokee->IsValidCommandType(command))
     {
       return;
     }
 
+    // 5c. Let continue be the result of firing an event named command at target, using CommandEvent, with its
+    //     command attribute initialized to command, its source attribute initialized to element, and its
+    //     cancelable attribute initialized to true.
     dom::CommandEventInit init;
     init.Bubbles = false;
     init.Cancelable = true;
@@ -308,21 +345,40 @@ namespace krys::boo::html
     auto event = dom::CommandEvent::Create(dom::DOMStringAtom(EventNames::Command), init, true);
     (void)dom::EventDispatcher::DispatchToTarget(*event, invokee.get());
 
-    if (!event->DefaultPrevented() && command != dom::CommandType::Custom)
+    // 5d. If continue is false, then return.
+    // 5e. If target is not connected, then return.
+    // 5f. If command is in the Custom state, then return.
+    if (event->DefaultPrevented() || !invokee->IsConnected() || command == dom::CommandType::Custom)
     {
-      (void)invokee->HandleCommandInternal(*this, command);
+      return;
     }
+
+    // 5g. If command is in the Hide Popover state: ...
+    // 5h. Otherwise, if command is in the Toggle Popover state: ...
+    // 5i. Otherwise, if command is in the Show Popover state: ...
+    // 5j. Otherwise, if this standard defines command steps for target's local name, then run the
+    //     corresponding command steps given target, element, and command.
+    // (HTMLElement::HandleCommandInternal and its overrides; showing and hiding check the popover's
+    // validity.)
+    (void)invokee->HandleCommandInternal(*this, command);
   }
 
 #pragma region HTMLButtonElement
 
+  // https://html.spec.whatwg.org/#dom-button-command
   dom::DOMString HTMLButtonElement::Command() const noexcept
   {
+    // 1. Let command be this's command attribute.
     auto command = GetCommandType();
+
+    // 2. If command is in the Custom state, then return command's value.
     if (command == dom::CommandType::Custom)
     {
       return GetAttribute(u8"command").value_or(dom::DOMString());
     }
+
+    // 3. If command is in the Unknown state, then return the empty string.
+    // 4. Return the keyword corresponding to the value of command.
     for (const auto &[keyword, type] : CommandKeywords)
     {
       if (type == command)
@@ -430,9 +486,15 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#dom-button-type
   dom::DOMString HTMLButtonElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    // 1. If this is a submit button, then return "submit".
+    // 2. Let state be this's type attribute.
+    // 3. Assert: state is not in the Submit Button state.
+    // 4. If state is in the Auto state, then return "button".
+    // 5. Return the keyword value corresponding to state.
+    return FormControlType();
   }
 
   void HTMLButtonElement::Type(dom::DOMString &&value) noexcept

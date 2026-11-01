@@ -127,12 +127,19 @@ namespace krys::boo::html
       _dirtiness = false;
     }
 
+    /// @brief Makes the option dirty, as picking it or setting its select's selected index or value does.
+    void MakeDirty() noexcept
+    {
+      _dirtiness = true;
+    }
+
     bool AccessKeyAction(bool sendMouseEvents) noexcept final;
 
   protected:
 #pragma region Extension Hooks
 
     void OnInsert() noexcept override;
+    void OnPostConnection() noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnChildrenChanged() noexcept override;
@@ -143,10 +150,16 @@ namespace krys::boo::html
 #pragma endregion
 
   private:
-    void UpdateOwnerSelect() noexcept;
+    /// @brief Forgets the option's select if it's no longer its nearest ancestor select.
+    /// @return The select it forgot, if any.
+    RefPtr<HTMLSelectElement> UpdateOwnerSelect() noexcept;
 
     KRYS_NODISCARD dom::DOMString CollectOptionInnerText() const noexcept;
     KRYS_NODISCARD dom::DOMString CollectOptionInnerTextCollapsingWhitespace() const noexcept;
+
+    /// @brief The option's label: its non-empty `label` attribute, or its text.
+    /// @see https://html.spec.whatwg.org/#concept-option-label
+    KRYS_NODISCARD dom::DOMString OptionLabel() const noexcept;
   };
 }
 

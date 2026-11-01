@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionsCollection.hpp"
@@ -73,7 +74,10 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: list items", "[HTML][HTMLSelectElement]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "HTMLSelectElement: list items",
+    "[HTML][HTMLSelectElement][html:concept-select-option-list][html:dom-select-type]"
+    "[html:dom-select-length][html:dom-select-item][html:dom-select-nameditem][html:dom-select-add]")
   {
     EditorFixture fixture(u8"<select id=s>"
                           u8"<option id=a>A</option>"
@@ -193,8 +197,7 @@ namespace krys::boo::tests
       auto result = select.Add(RefPtr<HTMLOptionElement>(newOption(u8"n")), before(u8"o"));
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == dom::ExceptionCode::NotFoundError);
-      REQUIRE_FALSE(
-        select.Add(ShareRefPtr(&OptionById(fixture, u8"c")), before(u8"c")).HasException());
+      REQUIRE_FALSE(select.Add(ShareRefPtr(&OptionById(fixture, u8"c")), before(u8"c")).HasException());
       CHECK(ListItemIds(select) == u8"a g b c");
     }
 
@@ -233,7 +236,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: selection", "[HTML][HTMLSelectElement]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: selection",
+                   "[HTML][HTMLSelectElement][html:concept-form-reset-control][html:dom-select-type]"
+                   "[html:reset-a-select's-selectedness]")
   {
     EditorFixture fixture(u8"<select id=s>"
                           u8"<option id=a value=1>A</option>"
@@ -262,11 +267,15 @@ namespace krys::boo::tests
     OptionById(fixture, u8"a").Selected(true);
     CHECK(select.SelectedIndex() == 0);
 
-    // A clean option's selectedness follows its selected attribute; a dirty one's doesn't.
+    // A clean option's selectedness follows its selected attribute; a dirty one's doesn't. Setting the value
+    // made c dirty.
     REQUIRE_FALSE(OptionById(fixture, u8"c").SetAttribute(u8"selected", u8"").HasException());
-    CHECK(select.SelectedIndex() == 2);
+    CHECK(select.SelectedIndex() == 0);
+    OptionById(fixture, u8"b").RemoveAttribute(u8"selected");
+    REQUIRE_FALSE(OptionById(fixture, u8"b").SetAttribute(u8"selected", u8"").HasException());
+    CHECK(select.SelectedIndex() == 1);
     REQUIRE_FALSE(OptionById(fixture, u8"a").SetAttribute(u8"selected", u8"").HasException());
-    CHECK(select.SelectedIndex() == 2);
+    CHECK(select.SelectedIndex() == 1);
 
     // Resetting selects the last option with the attribute, and cleans the options.
     select.Reset();
@@ -295,35 +304,127 @@ namespace krys::boo::tests
     CHECK(select.SelectedIndex() == -1);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: options text and labels",
-                   "[HTML][HTMLSelectElement]")
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "HTMLSelectElement: the selectedness setting algorithm selects the first enabled option",
+                   "[HTML][HTMLSelectElement][html:selectedness-setting-algorithm][html:ask-for-a-reset]"
+                   "[html:reset-a-select's-selectedness][html:concept-select-size]")
   {
     EditorFixture fixture(
-      u8"<select id=s><option id=a label=Label>  Some <b>bold</b>  text <script>x</script></option>"
-      u8"<option id=b>B</option></select>");
-
-    auto &a = OptionById(fixture, u8"a");
-    CHECK(a.Text() == u8"Some bold text");
-    CHECK(a.Label() == u8"Label");
-    CHECK(a.Value() == u8"Some bold text");
-    CHECK(OptionById(fixture, u8"b").Label() == u8"B");
-
-    // Setting the text keeps a menu list's selection.
+      u8"<select id=s><option id=a disabled>A</option><option id=b>B</option><option id=c>C</option></select>"
+      u8"<select id=z size=0><option>A</option></select>"
+      u8"<select id=l size=4><option>A</option><option>B</option></select>");
     auto &select = SelectById(fixture, u8"s");
-    select.SelectedIndex(1);
-    OptionById(fixture, u8"b").Text(u8"Bee");
     CHECK(select.SelectedIndex() == 1);
-    CHECK(select.Value() == u8"Bee");
 
-    auto created = HTMLOptionElement::CreateForLegacyFactoryFunction(*fixture.Document, u8"New",
-                                                                     dom::DOMString(u8"n"), true, false);
-    REQUIRE_FALSE(created.HasException());
-    auto option = created.ReleaseValue();
-    CHECK(option->LocalName() == u8"option");
-    CHECK(option->Text() == u8"New");
-    CHECK(option->Value() == u8"n");
-    CHECK(option->DefaultSelected());
-    CHECK_FALSE(option->Selected());
+    // Removing the selected option selects the first enabled one, and with none, none.
+    OptionById(fixture, u8"c").Selected(true);
+    (void)OptionById(fixture, u8"c").Remove();
+    CHECK(select.SelectedIndex() == 1);
+    (void)OptionById(fixture, u8"b").Remove();
+    CHECK(select.SelectedIndex() == -1);
+
+    // A size of 0 is the default display size, as in browsers.
+    CHECK(SelectById(fixture, u8"z").SelectedIndex() == 0);
+
+    // A list box selects nothing of its own, until its display size is 1.
+    auto &listBox = SelectById(fixture, u8"l");
+    CHECK(listBox.SelectedIndex() == -1);
+    listBox.Size(1u);
+    CHECK(listBox.SelectedIndex() == 0);
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture,
+    "HTMLSelectElement: the list of options leaves out what's in options, selects and nested optgroups",
+    "[HTML][HTMLSelectElement][html:concept-select-option-list][html:dom-select-remove]")
+  {
+    EditorFixture fixture(u8"<select id=s><option id=a>A</option></select>");
+    auto &select = SelectById(fixture, u8"s");
+    auto &document = *fixture.Document;
+
+    auto inOption = CreateRef<HTMLOptionElement>(document);
+    REQUIRE_FALSE(OptionById(fixture, u8"a").AppendChild(*inOption).HasException());
+    auto outer = document.CreateElement(u8"optgroup").ReleaseValue();
+    auto inner = document.CreateElement(u8"optgroup").ReleaseValue();
+    REQUIRE_FALSE(inner->AppendChild(*CreateRef<HTMLOptionElement>(document)).HasException());
+    REQUIRE_FALSE(outer->AppendChild(*inner).HasException());
+    REQUIRE_FALSE(select.AppendChild(*outer).HasException());
+    auto innerSelect = document.CreateElement(u8"select").ReleaseValue();
+    REQUIRE_FALSE(innerSelect->AppendChild(*CreateRef<HTMLOptionElement>(document)).HasException());
+    REQUIRE_FALSE(select.AppendChild(*innerSelect).HasException());
+    CHECK(select.Length() == 1u);
+
+    // remove() with no arguments removes the select.
+    Ref<HTMLSelectElement> keep = ShareRef(select);
+    (void)select.Remove();
+    CHECK_FALSE(keep->ParentNode());
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture,
+    "HTMLSelectElement: selectedIndex and value select the matching option, or none, and make it dirty",
+    "[HTML][HTMLSelectElement][html:set-the-selected-index][html:dom-select-selectedindex]"
+    "[html:dom-select-value]")
+  {
+    EditorFixture fixture(u8"<select id=s><option id=a>A</option><option id=b selected>B</option></select>");
+    auto &select = SelectById(fixture, u8"s");
+    select.SelectedIndex(5);
+    CHECK(select.SelectedIndex() == -1);
+    select.Value(u8"A");
+    CHECK(select.SelectedIndex() == 0);
+    select.Value(u8"nothing");
+    CHECK(select.SelectedIndex() == -1);
+
+    // A dirty option doesn't follow its selected attribute.
+    select.SelectedIndex(1);
+    OptionById(fixture, u8"b").RemoveAttribute(u8"selected");
+    CHECK(select.SelectedIndex() == 1);
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture,
+    "HTMLSelectElement: the placeholder label option is the first, empty, option outside optgroups",
+    "[HTML][HTMLSelectElement][html:placeholder-label-option]")
+  {
+    EditorFixture fixture(
+      u8"<select id=r required><option value=''>-</option><option>B</option></select>"
+      u8"<select id=hr required><hr><option value=''>-</option></select>"
+      u8"<select id=g required><optgroup><option value=''>-</option></optgroup></select>");
+    auto &select = SelectById(fixture, u8"r");
+    CHECK(select.ValueMissing());
+    select.SelectedIndex(1);
+    CHECK_FALSE(select.ValueMissing());
+    CHECK(SelectById(fixture, u8"hr").ValueMissing());
+    CHECK_FALSE(SelectById(fixture, u8"g").ValueMissing());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "HTMLSelectElement: options and selectedOptions are the same collections each time",
+                   "[HTML][HTMLSelectElement][html:dom-select-options][html:dom-select-selectedoptions]")
+  {
+    EditorFixture fixture(u8"<select id=s><option>A</option></select>");
+    auto &select = SelectById(fixture, u8"s");
+    CHECK(select.Options().get() == select.Options().get());
+    CHECK(select.SelectedOptions().get() == select.SelectedOptions().get());
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "HTMLSelectElement: picking an option fires input, then change",
+    "[HTML][HTMLSelectElement][html:send-select-update-notifications][html:concept-select-pick]")
+  {
+    EditorFixture fixture(u8"<select id=s><option>A</option><option>B</option></select>");
+    auto &select = SelectById(fixture, u8"s");
+    List<std::string> events;
+    auto log = [&](dom::Event &event)
+    {
+      events.push_back(Narrow(event.Type().View()) + (event.Bubbles() ? " bubbles" : "")
+                       + (event.Composed() ? " composed" : ""));
+    };
+    auto input = select.AddEventListener(u8"input", log);
+    auto change = select.AddEventListener(u8"change", log);
+    select.OptionSelectedByUser(1, true);
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(events == List<std::string> {"input bubbles composed", "change bubbles"});
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: keyboard", "[HTML][HTMLSelectElement]")
