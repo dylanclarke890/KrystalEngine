@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableRowElement.hpp"
@@ -34,6 +35,20 @@ namespace krys::boo::html
     }
   }
 
+  /// @see https://html.spec.whatwg.org/#attr-th-scope
+  template <>
+  struct EnumeratedAttributeTraits<"scope", HTMLTableCellElement>
+  {
+    static inline KeywordStateMappingArray<4> StateMappings = {
+      KeywordStateMapping {u8"row", AttributeState::Row}, KeywordStateMapping {u8"col", AttributeState::Col},
+      KeywordStateMapping {u8"rowgroup", AttributeState::RowGroup},
+      KeywordStateMapping {u8"colgroup", AttributeState::ColGroup}};
+
+    // The Auto state has no keyword.
+    constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+  };
+
   uint32 HTMLTableCellElement::ColSpan() const noexcept
   {
     return Reflect<uint32, ReflectDefault<uint32> {1}, ReflectRange<uint32> {1, 1'000}>(*this, u8"colspan");
@@ -66,7 +81,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTableCellElement::Scope() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"scope").value_or(u8"");
+    return EnumeratedAttribute<"scope", HTMLTableCellElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"scope"));
   }
 
   void HTMLTableCellElement::Scope(dom::DOMString &&value) noexcept

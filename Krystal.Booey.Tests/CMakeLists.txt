@@ -92,6 +92,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
 		include/Krystal.Booey.Tests/Rendering/MathML/MathMLTestUtils.hpp
 		include/Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp
+		include/Krystal.Booey.Tests/HTML/TableTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/BuilderTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/ResolverTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
@@ -700,7 +701,10 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLMeterElement.cpp
 		tests/HTML/HTMLSelectElement.cpp
 		tests/HTML/HTMLSlotElement.cpp
+		tests/HTML/HTMLTableCellElement.cpp
 		tests/HTML/HTMLTableElement.cpp
+		tests/HTML/HTMLTableRowElement.cpp
+		tests/HTML/HTMLTableSectionElement.cpp
 		tests/HTML/HTMLTemplateElement.cpp
 		tests/HTML/HTMLTextFormControlElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp

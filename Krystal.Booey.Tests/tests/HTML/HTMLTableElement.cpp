@@ -1,64 +1,15 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/HTMLCollection.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey.Tests/HTML/TableTestUtils.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCaptionElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableSectionElement.hpp"
-#include <string>
 
 namespace krys::boo::html::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD std::string TableText(dom::DOMStringView text) noexcept
-    {
-      return std::string(reinterpret_cast<const char *>(text.data()), text.size());
-    }
-
-    // The ids of the collection's elements, in order.
-    KRYS_NODISCARD List<std::string> TableIds(const dom::HTMLCollection &collection) noexcept
-    {
-      List<std::string> ids;
-      for (size_t i = 0; i < collection.Length(); ++i)
-      {
-        ids.push_back(TableText(collection.Item(i)->Id()));
-      }
-      return ids;
-    }
-
-    // A document with a body holding a table, whose markup the test sets.
-    struct TableDocument
-    {
-      Ref<dom::HTMLDocument> Document {CreateRef<dom::HTMLDocument>()};
-      RefPtr<dom::Element> Body;
-
-      TableDocument() noexcept
-      {
-        auto html = Document->CreateElement(dom::DOMStringAtom(u8"html")).ReleaseValue();
-        (void)Document->AppendChild(*html);
-        Body = Document->CreateElement(dom::DOMStringAtom(u8"body")).ReleaseValue();
-        (void)html->AppendChild(*Body);
-      }
-
-      HTMLTableElement &Table(dom::DOMStringView markup) noexcept
-      {
-        dom::DOMString tableMarkup(u8"<table id=t>");
-        tableMarkup += markup;
-        tableMarkup += u8"</table>";
-        (void)Body->InnerHTML(tableMarkup);
-        return Downcast<HTMLTableElement>(Downcast<HTMLElement>(*Body->FirstElementChild()));
-      }
-
-      KRYS_NODISCARD std::string Markup() const noexcept
-      {
-        return TableText(Body->FirstElementChild()->InnerHTML());
-      }
-    };
-  }
-
-  TEST_CASE("HTMLTableElement: caption", "[HTML][HTMLTableElement]")
+  TEST_CASE("HTMLTableElement: caption",
+            "[HTML][HTMLTableElement][html:dom-table-caption][html:dom-table-createcaption]"
+            "[html:dom-table-deletecaption][html:create-a-table-element]")
   {
     TableDocument data;
 
@@ -88,7 +39,10 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLTableElement: tHead and tFoot", "[HTML][HTMLTableElement]")
+  TEST_CASE(
+    "HTMLTableElement: tHead and tFoot",
+    "[HTML][HTMLTableElement][html:dom-table-thead][html:dom-table-createthead][html:dom-table-deletethead]"
+    "[html:dom-table-tfoot][html:dom-table-createtfoot][html:dom-table-deletetfoot]")
   {
     TableDocument data;
 
@@ -130,7 +84,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLTableElement: tBodies and createTBody", "[HTML][HTMLTableElement]")
+  TEST_CASE("HTMLTableElement: tBodies and createTBody",
+            "[HTML][HTMLTableElement][html:dom-table-tbodies][html:dom-table-createtbody]")
   {
     TableDocument data;
     auto &table = data.Table(u8"<tbody id=a></tbody><tfoot></tfoot><tbody id=b><tr><td><table><tbody "
@@ -145,7 +100,7 @@ namespace krys::boo::html::tests
     CHECK(table.LastElementChild() == body.get());
   }
 
-  TEST_CASE("HTMLTableElement: rows", "[HTML][HTMLTableElement]")
+  TEST_CASE("HTMLTableElement: rows", "[HTML][HTMLTableElement][html:dom-table-rows]")
   {
     TableDocument data;
 
@@ -174,23 +129,10 @@ namespace krys::boo::html::tests
       (void)table.InsertRow();
       CHECK(rows->Length() == 2);
     }
-
-    SECTION("give each row its indexes")
-    {
-      auto &table =
-        data.Table(u8"<tbody><tr id=b1></tr><tr id=b2></tr></tbody><thead><tr id=h1></tr></thead>");
-      auto rows = table.Rows();
-      auto &b2 = Downcast<HTMLTableRowElement>(Downcast<HTMLElement>(*rows->NamedItem(u8"b2")));
-      CHECK(b2.RowIndex() == 2);
-      CHECK(b2.SectionRowIndex() == 1);
-
-      auto orphan = CreateTableElement<HTMLTableRowElement>(*data.Document, u8"tr");
-      CHECK(orphan->RowIndex() == -1);
-      CHECK(orphan->SectionRowIndex() == -1);
-    }
   }
 
-  TEST_CASE("HTMLTableElement: insertRow and deleteRow", "[HTML][HTMLTableElement]")
+  TEST_CASE("HTMLTableElement: insertRow and deleteRow",
+            "[HTML][HTMLTableElement][html:dom-table-insertrow][html:dom-table-deleterow]")
   {
     TableDocument data;
 
@@ -248,65 +190,5 @@ namespace krys::boo::html::tests
       REQUIRE_FALSE(table.DeleteRow(0).HasException());
       CHECK_FALSE(table.DeleteRow(-1).HasException());
     }
-  }
-
-  TEST_CASE("HTMLTableSectionElement: rows, insertRow and deleteRow", "[HTML][HTMLTableSectionElement]")
-  {
-    TableDocument data;
-    auto &table = data.Table(u8"<tbody><tr id=a></tr><tr id=b></tr></tbody>");
-    auto &body = *table.TBodies()->Item(0);
-    auto &section = Downcast<HTMLTableSectionElement>(Downcast<HTMLElement>(body));
-    auto rows = section.Rows();
-    CHECK(TableIds(*rows) == List<std::string> {"a", "b"});
-    CHECK(section.Rows().get() == rows.get());
-
-    auto row = section.InsertRow(1);
-    REQUIRE_FALSE(row.HasException());
-    CHECK(rows->Item(1).get() == row.Value().get());
-    CHECK(section.InsertRow(3).HasValue());
-    auto result = section.InsertRow(5);
-    REQUIRE(result.HasException());
-    CHECK(result.GetException().Code() == dom::ExceptionCode::IndexSizeError);
-
-    REQUIRE_FALSE(section.DeleteRow(0).HasException());
-    CHECK(rows->Length() == 3);
-    REQUIRE_FALSE(section.DeleteRow(-1).HasException());
-    CHECK(rows->Length() == 2);
-    auto deleteResult = section.DeleteRow(2);
-    REQUIRE(deleteResult.HasException());
-    CHECK(deleteResult.GetException().Code() == dom::ExceptionCode::IndexSizeError);
-  }
-
-  TEST_CASE("HTMLTableRowElement: cells, insertCell and deleteCell", "[HTML][HTMLTableRowElement]")
-  {
-    TableDocument data;
-    auto &table = data.Table(u8"<tr><td id=a></td><th id=b></th></tr>");
-    auto &row = Downcast<HTMLTableRowElement>(Downcast<HTMLElement>(*table.Rows()->Item(0)));
-    auto cells = row.Cells();
-    CHECK(TableIds(*cells) == List<std::string> {"a", "b"});
-    CHECK(row.Cells().get() == cells.get());
-
-    auto &b = Downcast<HTMLTableCellElement>(Downcast<HTMLElement>(*cells->Item(1)));
-    CHECK(b.CellIndex() == 1);
-    auto orphan = CreateTableElement<HTMLTableCellElement>(*data.Document, u8"td");
-    CHECK(orphan->CellIndex() == -1);
-
-    auto cell = row.InsertCell(0);
-    REQUIRE_FALSE(cell.HasException());
-    CHECK(cell.Value()->LocalName() == u8"td");
-    CHECK(cells->Item(0).get() == cell.Value().get());
-    CHECK(b.CellIndex() == 2);
-    CHECK(row.InsertCell(-1).HasValue());
-    CHECK(cells->Length() == 4);
-    auto result = row.InsertCell(6);
-    REQUIRE(result.HasException());
-    CHECK(result.GetException().Code() == dom::ExceptionCode::IndexSizeError);
-
-    REQUIRE_FALSE(row.DeleteCell(-1).HasException());
-    REQUIRE_FALSE(row.DeleteCell(0).HasException());
-    CHECK(TableIds(*cells) == List<std::string> {"a", "b"});
-    auto deleteResult = row.DeleteCell(2);
-    REQUIRE(deleteResult.HasException());
-    CHECK(deleteResult.GetException().Code() == dom::ExceptionCode::IndexSizeError);
   }
 }

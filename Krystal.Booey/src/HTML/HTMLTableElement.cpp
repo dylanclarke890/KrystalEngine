@@ -64,7 +64,11 @@ namespace krys::boo::html
   dom::ExceptionOr<void> HTMLTableElement::Caption(RefPtr<HTMLTableCaptionElement> &&caption) noexcept
   {
     CEReactionsScope ceReactions;
+
+    // 1. Remove the first caption element child of this, if any.
     DeleteCaption();
+
+    // 2. If the given value is not null, then insert it as the first node of this.
     if (!caption)
     {
       return {};
@@ -78,12 +82,19 @@ namespace krys::boo::html
 
   Ref<HTMLTableCaptionElement> HTMLTableElement::CreateCaption() noexcept
   {
+    // 1. If this has a caption element child, then return the first such element.
     if (auto existingCaption = Caption())
     {
       return Ref<HTMLTableCaptionElement>(krys::move(existingCaption));
     }
+
+    // 2. Let caption be the result of creating a table element given this and "caption".
     auto caption = CreateTableElement<HTMLTableCaptionElement>(NodeDocument(), u8"caption");
+
+    // 3. Insert caption as the first node of this.
     (void)Caption(RefPtr<HTMLTableCaptionElement>(caption));
+
+    // 4. Return caption.
     return caption;
   }
 
@@ -104,17 +115,24 @@ namespace krys::boo::html
   dom::ExceptionOr<void> HTMLTableElement::THead(RefPtr<HTMLTableSectionElement> &&head) noexcept
   {
     CEReactionsScope ceReactions;
+
+    // 1. If the given value is neither null nor a thead element, then throw a "HierarchyRequestError"
+    //    DOMException.
     if (head && !head->HasTagName(TagName::thead)) KRYS_UNLIKELY
     {
       return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
     }
 
+    // 2. Remove the first thead element child of this, if any.
     DeleteTHead();
+
+    // 3. If the given value is not null, then insert it immediately before the first element child of this
+    //    that is neither a caption element nor a colgroup element, if any; otherwise insert it at the end of
+    //    this.
     if (!head)
     {
       return {};
     }
-
     dom::Node *child = FirstChild();
     for (; child; child = child->NextSibling())
     {
@@ -134,12 +152,21 @@ namespace krys::boo::html
 
   Ref<HTMLTableSectionElement> HTMLTableElement::CreateTHead() noexcept
   {
+    // 1. If this has a thead element child, then return the first such element.
     if (auto existingHead = THead())
     {
       return Ref<HTMLTableSectionElement>(krys::move(existingHead));
     }
+
+    // 2. Let thead be the result of creating a table element given this and "thead".
     auto head = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"thead");
+
+    // 3. Insert thead immediately before the first element child of this that is neither a caption element
+    // nor
+    //    a colgroup element, if any; otherwise insert thead at the end of this.
     (void)THead(RefPtr<HTMLTableSectionElement>(head));
+
+    // 4. Return thead.
     return head;
   }
 
@@ -160,12 +187,18 @@ namespace krys::boo::html
   dom::ExceptionOr<void> HTMLTableElement::TFoot(RefPtr<HTMLTableSectionElement> &&foot) noexcept
   {
     CEReactionsScope ceReactions;
+
+    // 1. If the given value is neither null nor a tfoot element, then throw a "HierarchyRequestError"
+    //    DOMException.
     if (foot && !foot->HasTagName(TagName::tfoot)) KRYS_UNLIKELY
     {
       return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
     }
 
+    // 2. Remove the first tfoot element child of this, if any.
     DeleteTFoot();
+
+    // 3. If the given value is not null, then insert it at the end of this.
     if (!foot)
     {
       return {};
@@ -180,12 +213,19 @@ namespace krys::boo::html
 
   Ref<HTMLTableSectionElement> HTMLTableElement::CreateTFoot() noexcept
   {
+    // 1. If this has a tfoot element child, then return the first such element.
     if (auto existingFoot = TFoot())
     {
       return Ref<HTMLTableSectionElement>(krys::move(existingFoot));
     }
+
+    // 2. Let tfoot be the result of creating a table element given this and "tfoot".
     auto foot = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tfoot");
+
+    // 3. Insert tfoot at the end of this.
     (void)TFoot(RefPtr<HTMLTableSectionElement>(foot));
+
+    // 4. Return tfoot.
     return foot;
   }
 
@@ -214,9 +254,16 @@ namespace krys::boo::html
 
   Ref<HTMLTableSectionElement> HTMLTableElement::CreateTBody() noexcept
   {
+    // 1. Let tbody be the result of creating a table element given this and "tbody".
     auto body = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tbody");
+
+    // 2. Insert tbody immediately after the last tbody element child of this, if any; otherwise insert tbody
+    // at
+    //    the end of this.
     auto *lastBody = LastBody();
     (void)InsertBefore(*body, lastBody ? lastBody->NextSibling() : nullptr);
+
+    // 3. Return tbody.
     return body;
   }
 
@@ -246,6 +293,10 @@ namespace krys::boo::html
 
   dom::ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableElement::InsertRow(int32 index) noexcept
   {
+    // 1. If index is less than −1 or greater than the number of elements in the rows collection, then throw
+    // an
+    //    "IndexSizeError" DOMException.
+    // (Greater is found while walking the rows.)
     if (index < -1)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
@@ -276,20 +327,37 @@ namespace krys::boo::html
       }
     }
 
-    RefPtr<dom::ContainerNode> parent;
+    // 2. Let tr be the result of creating a table element given this and "tr".
     auto &document = NodeDocument();
+    auto newRow = CreateTableElement<HTMLTableRowElement>(document, u8"tr");
+
+    RefPtr<dom::ContainerNode> parent;
+    // 5. Otherwise, if index is −1 or equal to the number of items in the rows collection, then append tr to
+    //    the parent of the last tr element in the rows collection.
+    // 6. Otherwise, insert tr immediately before the indexth tr element in the rows collection, in the same
+    //    parent.
     if (lastRow)
     {
       parent = ShareRefPtr(row ? row->ParentNode() : lastRow->ParentNode());
     }
     else
     {
+      // 4. Otherwise, if the rows collection has zero elements in it, then append tr to the last tbody
+      // element
+      //    in this.
+      // (The last tbody child, as in browsers.)
       parent = ShareRefPtr<dom::ContainerNode>(LastBody());
+
+      // 3. If the rows collection has zero elements in it, and this has no tbody elements in it:
       if (!parent)
       {
+        // 3a. Let tbody be the result of creating a table element given this and "tbody".
         auto newBody = CreateTableElement<HTMLTableSectionElement>(document, u8"tbody");
-        auto newRow = CreateTableElement<HTMLTableRowElement>(document, u8"tr");
+
+        // 3b. Append tr to tbody.
         (void)newBody->AppendChild(*newRow);
+
+        // 3c. Append tbody to this.
         if (auto result = AppendChild(*newBody); result.HasException())
         {
           return result.ReleaseException();
@@ -297,19 +365,27 @@ namespace krys::boo::html
         return newRow;
       }
     }
-
-    auto newRow = CreateTableElement<HTMLTableRowElement>(document, u8"tr");
     if (auto result = parent->InsertBefore(*newRow, row.get()); result.HasException())
     {
       return result.ReleaseException();
     }
+
+    // 7. Return tr.
     return newRow;
   }
 
   dom::ExceptionOr<void> HTMLTableElement::DeleteRow(int32 index) noexcept
   {
     CEReactionsScope ceReactions;
+
+    // 1. If index is less than −1 or greater than or equal to the number of elements in the rows collection,
+    //    then throw an "IndexSizeError" DOMException.
+    // (Found while walking the rows.)
     RefPtr<HTMLTableRowElement> row;
+
+    // 2. If index is −1, then remove the last element in the rows collection from its parent, or do nothing
+    // if
+    //    the rows collection is empty.
     if (index == -1)
     {
       row = ShareRefPtr(HTMLTableRowsCollection::LastRow(*this));
@@ -333,6 +409,8 @@ namespace krys::boo::html
         return dom::Exception {dom::ExceptionCode::IndexSizeError};
       }
     }
+
+    // 3. Otherwise, remove the indexth element in the rows collection from its parent.
     return row->Remove();
   }
 

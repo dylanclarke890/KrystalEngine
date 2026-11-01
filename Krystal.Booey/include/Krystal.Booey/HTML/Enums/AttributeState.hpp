@@ -58,7 +58,11 @@ namespace krys::boo::html
     Descriptions,
     Chapters,
     Metadata,
+    Row,
+    Col,
+    RowGroup,
+    ColGroup,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 48uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 52uz);

@@ -8,68 +8,70 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [4.9 Tabular data](https://html.spec.whatwg.org/#tables)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [4.9.1 The table element](https://html.spec.whatwg.org/#the-table-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableElement`; `rows` is `HTMLTableRowsCollection`, and table elements are created by `CreateTableElement`. Its presentational hints are Rendering's.
 
-- [ ] [create a table element](https://html.spec.whatwg.org/#create-a-table-element) — To create a table element given a table element tableElement and a string localName, return the result of creating an element given tableElement's node document, localName, and the HTML namespace.
+- [x] [create a table element](https://html.spec.whatwg.org/#create-a-table-element) — To create a table element given a table element tableElement and a string localName, return the result of creating an element given tableElement's node document, localName, and the HTML namespace.
 
-- [ ] [HTMLTableElement.caption](https://html.spec.whatwg.org/#dom-table-caption) — The caption getter steps are to return the first caption element child of this, if any; otherwise null.
+- [x] [HTMLTableElement.caption](https://html.spec.whatwg.org/#dom-table-caption) — The caption getter steps are to return the first caption element child of this, if any; otherwise null.
 
-- [ ] [The caption setter steps](https://html.spec.whatwg.org/#dom-table-caption) — The caption setter steps are:
+- [x] [The caption setter steps](https://html.spec.whatwg.org/#dom-table-caption) — The caption setter steps are:
   - 1. Remove the first caption element child of this, if any.
   - 2. If the given value is not null, then insert it as the first node of this.
 
-- [ ] [HTMLTableElement.createCaption()](https://html.spec.whatwg.org/#dom-table-createcaption) — The createCaption() method steps are:
+- [x] [HTMLTableElement.createCaption()](https://html.spec.whatwg.org/#dom-table-createcaption) — The createCaption() method steps are:
   - 1. If this has a caption element child, then return the first such element.
   - 2. Let caption be the result of creating a table element given this and "caption".
   - 3. Insert caption as the first node of this.
   - 4. Return caption.
 
-- [ ] [HTMLTableElement.deleteCaption()](https://html.spec.whatwg.org/#dom-table-deletecaption) — The deleteCaption() method steps are to remove the first caption element child of this, if any.
+- [x] [HTMLTableElement.deleteCaption()](https://html.spec.whatwg.org/#dom-table-deletecaption) — The deleteCaption() method steps are to remove the first caption element child of this, if any.
 
-- [ ] [HTMLTableElement.tHead](https://html.spec.whatwg.org/#dom-table-thead) — The tHead getter steps are to return the first thead element child of this, if any; otherwise null.
+- [x] [HTMLTableElement.tHead](https://html.spec.whatwg.org/#dom-table-thead) — The tHead getter steps are to return the first thead element child of this, if any; otherwise null.
 
-- [ ] [The tHead setter steps](https://html.spec.whatwg.org/#dom-table-thead) — The tHead setter steps are:
+- [x] [The tHead setter steps](https://html.spec.whatwg.org/#dom-table-thead) — The tHead setter steps are:
   - 1. If the given value is neither null nor a thead element, then throw a "HierarchyRequestError" DOMException.
   - 2. Remove the first thead element child of this, if any.
   - 3. If the given value is not null, then insert it immediately before the first element child of this that is neither a caption element nor a colgroup element, if any; otherwise insert it at the end of this.
 
-- [ ] [HTMLTableElement.createTHead()](https://html.spec.whatwg.org/#dom-table-createthead) — The createTHead() method steps are:
+- [x] [HTMLTableElement.createTHead()](https://html.spec.whatwg.org/#dom-table-createthead) — The createTHead() method steps are:
   - 1. If this has a thead element child, then return the first such element.
   - 2. Let thead be the result of creating a table element given this and "thead".
   - 3. Insert thead immediately before the first element child of this that is neither a caption element nor a colgroup element, if any; otherwise insert thead at the end of this.
   - 4. Return thead.
 
-- [ ] [HTMLTableElement.deleteTHead()](https://html.spec.whatwg.org/#dom-table-deletethead) — The deleteTHead() method steps are to remove the first thead element child of this, if any.
+- [x] [HTMLTableElement.deleteTHead()](https://html.spec.whatwg.org/#dom-table-deletethead) — The deleteTHead() method steps are to remove the first thead element child of this, if any.
 
-- [ ] [HTMLTableElement.tFoot](https://html.spec.whatwg.org/#dom-table-tfoot) — The tFoot getter steps are to return the first tfoot element child of this, if any; otherwise null.
+- [x] [HTMLTableElement.tFoot](https://html.spec.whatwg.org/#dom-table-tfoot) — The tFoot getter steps are to return the first tfoot element child of this, if any; otherwise null.
 
-- [ ] [The tFoot setter steps](https://html.spec.whatwg.org/#dom-table-tfoot) — The tFoot setter steps are:
+- [x] [The tFoot setter steps](https://html.spec.whatwg.org/#dom-table-tfoot) — The tFoot setter steps are:
   - 1. If the given value is neither null nor a tfoot element, then throw a "HierarchyRequestError" DOMException.
   - 2. Remove the first tfoot element child of this, if any.
   - 3. If the given value is not null, then insert it at the end of this.
 
-- [ ] [HTMLTableElement.createTFoot()](https://html.spec.whatwg.org/#dom-table-createtfoot) — The createTFoot() method steps are:
+- [x] [HTMLTableElement.createTFoot()](https://html.spec.whatwg.org/#dom-table-createtfoot) — The createTFoot() method steps are:
   - 1. If this has a tfoot element child, then return the first such element.
   - 2. Let tfoot be the result of creating a table element given this and "tfoot".
   - 3. Insert tfoot at the end of this.
   - 4. Return tfoot.
 
-- [ ] [HTMLTableElement.deleteTFoot()](https://html.spec.whatwg.org/#dom-table-deletetfoot) — The deleteTFoot() method steps are to remove the first tfoot element child of this, if any.
+- [x] [HTMLTableElement.deleteTFoot()](https://html.spec.whatwg.org/#dom-table-deletetfoot) — The deleteTFoot() method steps are to remove the first tfoot element child of this, if any.
 
-- [ ] [HTMLTableElement.tBodies](https://html.spec.whatwg.org/#dom-table-tbodies) — The tBodies getter steps are to return an HTMLCollection rooted at this, whose filter matches only tbody elements that are children of this.
+- [x] [HTMLTableElement.tBodies](https://html.spec.whatwg.org/#dom-table-tbodies) — The tBodies getter steps are to return an HTMLCollection rooted at this, whose filter matches only tbody elements that are children of this.
 
-- [ ] [HTMLTableElement.createTBody()](https://html.spec.whatwg.org/#dom-table-createtbody) — The createTBody() method steps are:
+- [x] [HTMLTableElement.createTBody()](https://html.spec.whatwg.org/#dom-table-createtbody) — The createTBody() method steps are:
   - 1. Let tbody be the result of creating a table element given this and "tbody".
   - 2. Insert tbody immediately after the last tbody element child of this, if any; otherwise insert tbody at the end of this.
   - 3. Return tbody.
 
-- [ ] [HTMLTableElement.rows](https://html.spec.whatwg.org/#dom-table-rows) — The rows getter steps are to return an HTMLCollection rooted at this, whose filter matches only tr elements that are either children of this, or children of thead, tbody, or tfoot elements that are themselves children of this. The elements in the collection must be ordered such that those elements whose parent is a thead are included first, in tree order, followed by those elements whose parent is either this or a tbody element, again in tree order, followed finally by those elements whose parent is a tfoot element, still in tree order.
+- [x] [HTMLTableElement.rows](https://html.spec.whatwg.org/#dom-table-rows) — The rows getter steps are to return an HTMLCollection rooted at this, whose filter matches only tr elements that are either children of this, or children of thead, tbody, or tfoot elements that are themselves children of this. The elements in the collection must be ordered such that those elements whose parent is a thead are included first, in tree order, followed by those elements whose parent is either this or a tbody element, again in tree order, followed finally by those elements whose parent is a tfoot element, still in tree order.
 
-- [ ] [HTMLTableElement.insertRow(index)](https://html.spec.whatwg.org/#dom-table-insertrow) — The insertRow(index) method steps are:
+- [x] [HTMLTableElement.insertRow(index)](https://html.spec.whatwg.org/#dom-table-insertrow) — The insertRow(index) method steps are:
   - 1. If index is less than −1 or greater than the number of elements in the rows collection, then throw an "IndexSizeError" DOMException.
   - 2. Let tr be the result of creating a table element given this and "tr".
   - 3. If the rows collection has zero elements in it, and this has no tbody elements in it:
@@ -81,114 +83,125 @@ Status: unreviewed
   - 6. Otherwise, insert tr immediately before the indexth tr element in the rows collection, in the same parent.
   - 7. Return tr.
 
-- [ ] [HTMLTableElement.deleteRow(index)](https://html.spec.whatwg.org/#dom-table-deleterow) — The deleteRow(index) method steps are:
+- [x] [HTMLTableElement.deleteRow(index)](https://html.spec.whatwg.org/#dom-table-deleterow) — The deleteRow(index) method steps are:
   - 1. If index is less than −1 or greater than or equal to the number of elements in the rows collection, then throw an "IndexSizeError" DOMException.
   - 2. If index is −1, then remove the last element in the rows collection from its parent, or do nothing if the rows collection is empty.
   - 3. Otherwise, remove the indexth element in the rows collection from its parent.
 
 ##### [4.9.1.1 Techniques for describing tables](https://html.spec.whatwg.org/#table-descriptions-techniques)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.9.1.2 Techniques for table design](https://html.spec.whatwg.org/#table-layout-techniques)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 #### [4.9.2 The caption element](https://html.spec.whatwg.org/#the-caption-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableCaptionElement`; its obsolete `align` is reflected.
 
 #### [4.9.3 The colgroup element](https://html.spec.whatwg.org/#the-colgroup-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableColElement`: `span` is reflected, clamped to 1 to 1000.
 <!-- definitions: attr-colgroup-span -->
 
 #### [4.9.4 The col element](https://html.spec.whatwg.org/#the-col-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableColElement`, as for `colgroup`.
 <!-- definitions: attr-col-span -->
 
 #### [4.9.5 The tbody element](https://html.spec.whatwg.org/#the-tbody-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableSectionElement`.
 
-- [ ] [HTMLTableSectionElement.rows](https://html.spec.whatwg.org/#dom-tbody-rows) — The rows attribute must return an HTMLCollection rooted at this element, whose filter matches only tr elements that are children of this element.
+- [x] [HTMLTableSectionElement.rows](https://html.spec.whatwg.org/#dom-tbody-rows) — The rows attribute must return an HTMLCollection rooted at this element, whose filter matches only tr elements that are children of this element.
 
-- [ ] [HTMLTableSectionElement.insertRow(index)](https://html.spec.whatwg.org/#dom-tbody-insertrow) — The insertRow(index) method must act as follows:
+- [x] [HTMLTableSectionElement.insertRow(index)](https://html.spec.whatwg.org/#dom-tbody-insertrow) — The insertRow(index) method must act as follows:
   - 1. If index is less than −1 or greater than the number of elements in the rows collection, throw an "IndexSizeError" DOMException.
   - 2. Let table row be the result of creating an element given this element's node document, "tr", and the HTML namespace.
   - 3. If index is −1 or equal to the number of items in the rows collection, then append table row to this element.
   - 4. Otherwise, insert table row as a child of this element, immediately before the indexth tr element in the rows collection.
   - 5. Return table row.
 
-- [ ] [HTMLTableSectionElement.deleteRow(index)](https://html.spec.whatwg.org/#dom-tbody-deleterow) — The deleteRow(index) method must, when invoked, act as follows:
+- [x] [HTMLTableSectionElement.deleteRow(index)](https://html.spec.whatwg.org/#dom-tbody-deleterow) — The deleteRow(index) method must, when invoked, act as follows:
   - 1. If index is less than −1 or greater than or equal to the number of elements in the rows collection, then throw an "IndexSizeError" DOMException.
   - 2. If index is −1, then remove the last element in the rows collection from this element, or do nothing if the rows collection is empty.
   - 3. Otherwise, remove the indexth element in the rows collection from this element.
 
 #### [4.9.6 The thead element](https://html.spec.whatwg.org/#the-thead-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableSectionElement`.
 
 #### [4.9.7 The tfoot element](https://html.spec.whatwg.org/#the-tfoot-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableSectionElement`.
 
 #### [4.9.8 The tr element](https://html.spec.whatwg.org/#the-tr-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableRowElement`.
 
-- [ ] [HTMLTableRowElement.rowIndex](https://html.spec.whatwg.org/#dom-tr-rowindex) — The rowIndex attribute must, if this element has a parent table element, or a parent tbody, thead, or tfoot element and a grandparent table element, return the index of this tr element in that table element's rows collection. If there is no such table element, then the attribute must return −1.
+- [x] [HTMLTableRowElement.rowIndex](https://html.spec.whatwg.org/#dom-tr-rowindex) — The rowIndex attribute must, if this element has a parent table element, or a parent tbody, thead, or tfoot element and a grandparent table element, return the index of this tr element in that table element's rows collection. If there is no such table element, then the attribute must return −1.
 
-- [ ] [HTMLTableRowElement.sectionRowIndex](https://html.spec.whatwg.org/#dom-tr-sectionrowindex) — The sectionRowIndex attribute must, if this element has a parent table, tbody, thead, or tfoot element, return the index of the tr element in the parent element's rows collection (for tables, that's HTMLTableElement's rows collection; for table sections, that's HTMLTableSectionElement's rows collection). If there is no such parent element, then the attribute must return −1.
+- [x] [HTMLTableRowElement.sectionRowIndex](https://html.spec.whatwg.org/#dom-tr-sectionrowindex) — The sectionRowIndex attribute must, if this element has a parent table, tbody, thead, or tfoot element, return the index of the tr element in the parent element's rows collection (for tables, that's HTMLTableElement's rows collection; for table sections, that's HTMLTableSectionElement's rows collection). If there is no such parent element, then the attribute must return −1.
 
-- [ ] [HTMLTableRowElement.cells](https://html.spec.whatwg.org/#dom-tr-cells) — The cells attribute must return an HTMLCollection rooted at this tr element, whose filter matches only td and th elements that are children of the tr element.
+- [x] [HTMLTableRowElement.cells](https://html.spec.whatwg.org/#dom-tr-cells) — The cells attribute must return an HTMLCollection rooted at this tr element, whose filter matches only td and th elements that are children of the tr element.
 
-- [ ] [HTMLTableRowElement.insertCell(index)](https://html.spec.whatwg.org/#dom-tr-insertcell) — The insertCell(index) method must act as follows:
+- [x] [HTMLTableRowElement.insertCell(index)](https://html.spec.whatwg.org/#dom-tr-insertcell) — The insertCell(index) method must act as follows:
   - 1. If index is less than −1 or greater than the number of elements in the cells collection, then throw an "IndexSizeError" DOMException.
   - 2. Let table cell be the result of creating an element given this tr element's node document, "td", and the HTML namespace.
   - 3. If index is equal to −1 or equal to the number of items in cells collection, then append table cell to this tr element.
   - 4. Otherwise, insert table cell as a child of this tr element, immediately before the indexth td or th element in the cells collection.
   - 5. Return table cell.
 
-- [ ] [HTMLTableRowElement.deleteCell(index)](https://html.spec.whatwg.org/#dom-tr-deletecell) — The deleteCell(index) method must act as follows:
+- [x] [HTMLTableRowElement.deleteCell(index)](https://html.spec.whatwg.org/#dom-tr-deletecell) — The deleteCell(index) method must act as follows:
   - 1. If index is less than −1 or greater than or equal to the number of elements in the cells collection, then throw an "IndexSizeError" DOMException.
   - 2. If index is −1, then remove the last element in the cells collection from its parent, or do nothing if the cells collection is empty.
   - 3. Otherwise, remove the indexth element in the cells collection from its parent.
 
 #### [4.9.9 The td element](https://html.spec.whatwg.org/#the-td-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableCellElement`.
 
 #### [4.9.10 The th element](https://html.spec.whatwg.org/#the-th-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableCellElement`. Fixed: `scope` wasn't limited to its known values.
 <!-- definitions: attr-th-scope attr-th-abbr -->
 
-- [ ] [Auto](https://html.spec.whatwg.org/#attr-th-scope-auto-state) — The attribute's missing value default and invalid value default are both the Auto state. (In this state the header cell applies to a set of cells selected based on context.)
+- [x] [Auto](https://html.spec.whatwg.org/#attr-th-scope-auto-state) — The attribute's missing value default and invalid value default are both the Auto state. (In this state the header cell applies to a set of cells selected based on context.)
+  > `EnumeratedAttributeTraits<"scope", HTMLTableCellElement>`: the missing and invalid value default, with no keyword.
 
 #### [4.9.11 Attributes common to td and th elements](https://html.spec.whatwg.org/#attributes-common-to-td-and-th-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTableCellElement`: `colSpan` (1 to 1000) and `rowSpan` (0 to 65534) are clamped, and `cellIndex` is its index among its row's cells.
 <!-- definitions: attr-tdth-colspan attr-tdth-rowspan attr-tdth-headers -->
 
-- [ ] [HTMLTableCellElement.cellIndex](https://html.spec.whatwg.org/#dom-tdth-cellindex) — The cellIndex IDL attribute must, if the element has a parent tr element, return the index of the cell's element in the parent element's cells collection. If there is no such parent element, then the attribute must return −1.
+- [x] [HTMLTableCellElement.cellIndex](https://html.spec.whatwg.org/#dom-tdth-cellindex) — The cellIndex IDL attribute must, if the element has a parent tr element, return the index of the cell's element in the parent element's cells collection. If there is no such parent element, then the attribute must return −1.
 
-- [ ] [HTMLTableCellElement.scope](https://html.spec.whatwg.org/#dom-th-scope) — The scope IDL attribute must reflect the content attribute of the same name, limited to only known values.
+- [x] [HTMLTableCellElement.scope](https://html.spec.whatwg.org/#dom-th-scope) — The scope IDL attribute must reflect the content attribute of the same name, limited to only known values.
 
 #### [4.9.12 Processing model](https://html.spec.whatwg.org/#table-processing-model)
 
-Status: unreviewed
+Status: n/a (the table model is for header cells and accessibility; layout follows CSS tables)
 <!-- definitions: table-model concept-slots concept-cell concept-row concept-column concept-row-group concept-column-group table-model-error -->
 
-- [ ] [table](https://html.spec.whatwg.org/#concept-table) — A table consists of cells aligned on a two-dimensional grid of slots with coordinates (x, y). The grid is finite, and is either empty or has one or more slots. If the grid has one or more slots, then the x coordinates are always in the range 0 ≤ x < xwidth, and the y coordinates are always in the range 0 ≤ y < yheight. If one or both of xwidth and yheight are zero, then the table is empty (has no slots). Tables correspond to table elements.
+- [x] [table](https://html.spec.whatwg.org/#concept-table) — A table consists of cells aligned on a two-dimensional grid of slots with coordinates (x, y). The grid is finite, and is either empty or has one or more slots. If the grid has one or more slots, then the x coordinates are always in the range 0 ≤ x < xwidth, and the y coordinates are always in the range 0 ≤ y < yheight. If one or both of xwidth and yheight are zero, then the table is empty (has no slots). Tables correspond to table elements.
 
 ##### [4.9.12.1 Forming a table](https://html.spec.whatwg.org/#forming-a-table)
 
-Status: unreviewed
+Status: n/a (the table model is for header cells and accessibility; layout follows CSS tables)
 <!-- definitions: concept-table-advance -->
 
-- [ ] [To determine which elements correspond to which slots in a table associated wit…](https://html.spec.whatwg.org/#forming-a-table) — To determine which elements correspond to which slots in a table associated with a table element, to determine the dimensions of the table (xwidth and yheight), and to determine if there are any table model errors, user agents must use the following algorithm:
+- [x] [To determine which elements correspond to which slots in a table associated wit…](https://html.spec.whatwg.org/#forming-a-table) — To determine which elements correspond to which slots in a table associated with a table element, to determine the dimensions of the table (xwidth and yheight), and to determine if there are any table model errors, user agents must use the following algorithm:
   - 1. Let xwidth be 0.
   - 2. Let yheight be 0.
   - 3. Let pending tfoot elements be a list of tfoot elements, initially empty.
@@ -225,19 +238,19 @@ Status: unreviewed
   - 20. If there exists a row or column in the table containing only slots that do not have a cell anchored to them, then this is a table model error.
   - 21. Return the table.
 
-- [ ] [algorithm for processing row groups](https://html.spec.whatwg.org/#algorithm-for-processing-row-groups) — The algorithm for processing row groups, which is invoked by the set of steps above for processing thead, tbody, and tfoot elements, is:
+- [x] [algorithm for processing row groups](https://html.spec.whatwg.org/#algorithm-for-processing-row-groups) — The algorithm for processing row groups, which is invoked by the set of steps above for processing thead, tbody, and tfoot elements, is:
   - 1. Let ystart have the value of yheight.
   - 2. For each tr element that is a child of the element being processed, in tree order, run the algorithm for processing rows.
   - 3. If yheight > ystart, then let all the last rows in the table from y=ystart to y=yheight-1 form a new row group, anchored at the slot with coordinate (0, ystart), with height yheight-ystart, corresponding to the element being processed.
   - 4. Run the algorithm for ending a row group.
 
-- [ ] [algorithm for ending a row group](https://html.spec.whatwg.org/#algorithm-for-ending-a-row-group) — The algorithm for ending a row group, which is invoked by the set of steps above when starting and ending a block of rows, is:
+- [x] [algorithm for ending a row group](https://html.spec.whatwg.org/#algorithm-for-ending-a-row-group) — The algorithm for ending a row group, which is invoked by the set of steps above when starting and ending a block of rows, is:
   - 1. While ycurrent is less than yheight, follow these steps:
     - 1a. Run the algorithm for growing downward-growing cells.
     - 1b. Increase ycurrent by 1.
   - 2. Empty the list of downward-growing cells.
 
-- [ ] [algorithm for processing rows](https://html.spec.whatwg.org/#algorithm-for-processing-rows) — The algorithm for processing rows, which is invoked by the set of steps above for processing tr elements, is:
+- [x] [algorithm for processing rows](https://html.spec.whatwg.org/#algorithm-for-processing-rows) — The algorithm for processing rows, which is invoked by the set of steps above for processing tr elements, is:
   - 1. If yheight is equal to ycurrent, then increase yheight by 1. (ycurrent is never greater than yheight.)
   - 2. Let xcurrent be 0.
   - 3. Run the algorithm for growing downward-growing cells.
@@ -258,13 +271,13 @@ Status: unreviewed
   - 18. Let current cell be the next td or th element child in the tr element being processed.
   - 19. Return to the step labeled cells.
 
-- [ ] [algorithm for growing downward-growing cells](https://html.spec.whatwg.org/#algorithm-for-growing-downward-growing-cells) — When the algorithms above require the user agent to run the algorithm for growing downward-growing cells, the user agent must, for each {cell, cellx, width} tuple in the list of downward-growing cells, if any, extend the cell cell so that it also covers the slots with coordinates (x, ycurrent), where cellx ≤ x < cellx+width.
+- [x] [algorithm for growing downward-growing cells](https://html.spec.whatwg.org/#algorithm-for-growing-downward-growing-cells) — When the algorithms above require the user agent to run the algorithm for growing downward-growing cells, the user agent must, for each {cell, cellx, width} tuple in the list of downward-growing cells, if any, extend the cell cell so that it also covers the slots with coordinates (x, ycurrent), where cellx ≤ x < cellx+width.
 
 ##### [4.9.12.2 Forming relationships between data cells and header cells](https://html.spec.whatwg.org/#header-and-data-cell-semantics)
 
-Status: unreviewed
+Status: n/a (the table model is for header cells and accessibility; layout follows CSS tables)
 
-- [ ] [algorithm for assigning header cells](https://html.spec.whatwg.org/#algorithm-for-assigning-header-cells) — Each cell can be assigned zero or more header cells. The algorithm for assigning header cells to a cell principal cell is as follows.
+- [x] [algorithm for assigning header cells](https://html.spec.whatwg.org/#algorithm-for-assigning-header-cells) — Each cell can be assigned zero or more header cells. The algorithm for assigning header cells to a cell principal cell is as follows.
   - 1. Let header list be an empty list of cells.
   - 2. Let (principalx, principaly) be the coordinate of the slot to which the principal cell is anchored.
   - 3. If the principal cell has a headers attribute specified If principal cell does not have a headers attribute specified
@@ -281,7 +294,7 @@ Status: unreviewed
   - 6. Remove principal cell from the header list if it is there.
   - 7. Assign the headers in the header list to the principal cell.
 
-- [ ] [internal algorithm for scanning and assigning header cells](https://html.spec.whatwg.org/#internal-algorithm-for-scanning-and-assigning-header-cells) — The internal algorithm for scanning and assigning header cells, given a principal cell, a header list, an initial coordinate (initialx, initialy), and Δx and Δy increments, is as follows:
+- [x] [internal algorithm for scanning and assigning header cells](https://html.spec.whatwg.org/#internal-algorithm-for-scanning-and-assigning-header-cells) — The internal algorithm for scanning and assigning header cells, given a principal cell, a header list, an initial coordinate (initialx, initialy), and Δx and Δy increments, is as follows:
   - 1. Let x equal initialx.
   - 2. Let y equal initialy.
   - 3. Let opaque headers be an empty list of cells.
@@ -298,16 +311,16 @@ Status: unreviewed
     - 9e. If blocked is false, then add the current cell to the header list.
   - 10. Return to the step labeled loop.
 
-- [ ] [column header](https://html.spec.whatwg.org/#column-header) — A header cell anchored at the slot with coordinate (x, y) with width width and height height is said to be a column header if any of the following are true:
+- [x] [column header](https://html.spec.whatwg.org/#column-header) — A header cell anchored at the slot with coordinate (x, y) with width width and height height is said to be a column header if any of the following are true:
 
-- [ ] [row header](https://html.spec.whatwg.org/#row-header) — A header cell anchored at the slot with coordinate (x, y) with width width and height height is said to be a row header if any of the following are true:
+- [x] [row header](https://html.spec.whatwg.org/#row-header) — A header cell anchored at the slot with coordinate (x, y) with width width and height height is said to be a row header if any of the following are true:
 
-- [ ] [column group header](https://html.spec.whatwg.org/#column-group-header) — A header cell is said to be a column group header if its scope attribute is in the Column Group state.
+- [x] [column group header](https://html.spec.whatwg.org/#column-group-header) — A header cell is said to be a column group header if its scope attribute is in the Column Group state.
 
-- [ ] [row group header](https://html.spec.whatwg.org/#row-group-header) — A header cell is said to be a row group header if its scope attribute is in the Row Group state.
+- [x] [row group header](https://html.spec.whatwg.org/#row-group-header) — A header cell is said to be a row group header if its scope attribute is in the Row Group state.
 
-- [ ] [empty cell](https://html.spec.whatwg.org/#empty-cell) — A cell is said to be an empty cell if it contains no elements and its child text content, if any, consists only of ASCII whitespace.
+- [x] [empty cell](https://html.spec.whatwg.org/#empty-cell) — A cell is said to be an empty cell if it contains no elements and its child text content, if any, consists only of ASCII whitespace.
 
 #### [4.9.13 Examples](https://html.spec.whatwg.org/#table-examples)
 
-Status: unreviewed
+Status: n/a (examples)

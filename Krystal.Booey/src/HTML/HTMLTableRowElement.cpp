@@ -106,6 +106,8 @@ namespace krys::boo::html
 
   dom::ExceptionOr<Ref<HTMLTableCellElement>> HTMLTableRowElement::InsertCell(int32 index) noexcept
   {
+    // 1. If index is less than −1 or greater than the number of elements in the cells collection, throw
+    //    an "IndexSizeError" DOMException.
     if (index < -1)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
@@ -117,7 +119,14 @@ namespace krys::boo::html
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
     }
 
+    // 2. Let table cell be the result of creating an element given this element's node document, "td", and
+    //    the HTML namespace.
     auto cell = CreateTableElement<HTMLTableCellElement>(NodeDocument(), u8"td");
+
+    // 3. If index is −1 or equal to the number of items in the cells collection, then append table cell to
+    //    this element.
+    // 4. Otherwise, insert table cell as a child of this element, immediately before the indexth element in
+    //    the cells collection.
     auto result = numCells == index || index == -1 ? AppendChild(*cell)
                                                    : InsertBefore(*cell, children->Item(index).get());
     if (result.HasException())
@@ -130,6 +139,12 @@ namespace krys::boo::html
   dom::ExceptionOr<void> HTMLTableRowElement::DeleteCell(int32 index) noexcept
   {
     CEReactionsScope ceReactions;
+
+    // 1. If index is less than −1 or greater than or equal to the number of elements in the cells
+    //    collection, then throw an "IndexSizeError" DOMException.
+    // 2. If index is −1, then remove the last element in the cells collection from this element, or do
+    //    nothing if the cells collection is empty.
+    // 3. Otherwise, remove the indexth element in the cells collection from this element.
     auto children = Cells();
     auto numCells = static_cast<int32>(children->Length());
     if (index == -1)
