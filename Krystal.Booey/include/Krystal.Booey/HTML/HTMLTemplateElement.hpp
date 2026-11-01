@@ -32,6 +32,12 @@ namespace krys::boo::html
     /// @brief Sets the template contents to the declarative shadow root @p shadow.
     void SetTemplateContents(dom::ShadowRoot &shadow) noexcept;
 
+    /// @see https://html.spec.whatwg.org/#dom-template-htmlfor
+    KRYS_NODISCARD dom::DOMString HtmlFor() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-template-htmlfor
+    void HtmlFor(dom::DOMString &&value) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootmode
     KRYS_NODISCARD dom::DOMString ShadowRootMode() const noexcept;
 
@@ -71,6 +77,8 @@ namespace krys::boo::html
 #pragma endregion
 
   protected:
+    void OnAdopt(dom::Document &oldDocument) noexcept override;
+
     /// @see https://html.spec.whatwg.org/#template-clone
     void OnClone(dom::Node &copy, bool subtree) noexcept override;
   };

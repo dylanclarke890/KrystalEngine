@@ -25,6 +25,7 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"name", krys::move(name));
   }
 
+  // https://html.spec.whatwg.org/#dom-slot-assignednodes
   List<Ref<dom::Node>> HTMLSlotElement::AssignedNodes(const AssignedNodesOptions &options) noexcept
   {
     // 1. If options["flatten"] is false, then return this's assigned nodes.
@@ -46,6 +47,7 @@ namespace krys::boo::html
     return dom::SlotAlgorithms::FindFlattenedSlottables(*this);
   }
 
+  // https://html.spec.whatwg.org/#dom-slot-assignedelements
   List<Ref<dom::Element>> HTMLSlotElement::AssignedElements(const AssignedNodesOptions &options) noexcept
   {
     // 1. If options["flatten"] is false, then return this's assigned nodes, filtered to contain only Element
@@ -62,6 +64,7 @@ namespace krys::boo::html
     return elements;
   }
 
+  // https://html.spec.whatwg.org/#dom-slot-assign
   void HTMLSlotElement::Assign(const List<dom::ElementOrText> &nodes) noexcept
   {
     // 1. For each node of this's manually assigned nodes, set node's manual slot assignment to null.

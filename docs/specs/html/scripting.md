@@ -8,64 +8,67 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [4.12 Scripting](https://html.spec.whatwg.org/#scripting-3)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [4.12.1 The script element](https://html.spec.whatwg.org/#the-script-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLScriptElement`. Scripts don't run, so the attributes only reflect; `innerText` and `textContent` are the inherited ones, without Trusted Types (see `DIFFERENCES.md`).
+> Fixed: `text` wasn't implemented, `supports()` was missing, `async` ignored force async, the parser cleared force async in the Fragment scripting mode, and cloning didn't copy already started.
 <!-- definitions: attr-script-type data-block attr-script-src attr-script-nomodule attr-script-async attr-script-defer attr-script-blocking attr-script-crossorigin attr-script-referrerpolicy attr-script-integrity attr-script-fetchpriority -->
 
-- [ ] [HTMLScriptElement.src](https://html.spec.whatwg.org/#dom-script-src) — The src getter steps are:
+- [x] [HTMLScriptElement.src](https://html.spec.whatwg.org/#dom-script-src) — The src getter steps are:
   - 1. Let attribute be the result of getting an attribute by namespace and local name given null, src's local name, and this.
   - 2. If attribute is null, then return the empty string.
   - 3. Let urlString be the result of encoding-parsing-and-serializing a URL given attribute's value, relative to this's node document.
   - 4. If urlString is not failure, then return urlString.
   - 5. Return attribute's value, converted to a scalar value string.
 
-- [ ] [The src setter steps](https://html.spec.whatwg.org/#dom-script-src) — The src setter steps are:
+- [x] [The src setter steps](https://html.spec.whatwg.org/#dom-script-src) — The src setter steps are:
   - 1. Let compliantScriptURL be the result of invoking the get trusted type compliant string algorithm with TrustedScriptURL, this's relevant global object, the given value, "HTMLScriptElement src", and "script".
   - 2. Set an attribute value given this, src's local name, and compliantScriptURL.
 
-- [ ] [HTMLScriptElement.crossOrigin](https://html.spec.whatwg.org/#dom-script-crossorigin) — The crossOrigin IDL attribute must reflect the crossorigin content attribute, limited to only known values.
+- [x] [HTMLScriptElement.crossOrigin](https://html.spec.whatwg.org/#dom-script-crossorigin) — The crossOrigin IDL attribute must reflect the crossorigin content attribute, limited to only known values.
 
-- [ ] [HTMLScriptElement.referrerPolicy](https://html.spec.whatwg.org/#dom-script-referrerpolicy) — The referrerPolicy IDL attribute must reflect the referrerpolicy content attribute, limited to only known values.
+- [x] [HTMLScriptElement.referrerPolicy](https://html.spec.whatwg.org/#dom-script-referrerpolicy) — The referrerPolicy IDL attribute must reflect the referrerpolicy content attribute, limited to only known values.
 
-- [ ] [HTMLScriptElement.fetchPriority](https://html.spec.whatwg.org/#dom-script-fetchpriority) — The fetchPriority IDL attribute must reflect the fetchpriority content attribute, limited to only known values.
+- [x] [HTMLScriptElement.fetchPriority](https://html.spec.whatwg.org/#dom-script-fetchpriority) — The fetchPriority IDL attribute must reflect the fetchpriority content attribute, limited to only known values.
 
-- [ ] [HTMLScriptElement.async](https://html.spec.whatwg.org/#dom-script-async) — The async getter steps are:
+- [x] [HTMLScriptElement.async](https://html.spec.whatwg.org/#dom-script-async) — The async getter steps are:
   - 1. If this's force async is true, then return true.
   - 2. If this's async content attribute is present, then return true.
   - 3. Return false.
 
-- [ ] [The async setter steps](https://html.spec.whatwg.org/#dom-script-async) — The async setter steps are:
+- [x] [The async setter steps](https://html.spec.whatwg.org/#dom-script-async) — The async setter steps are:
   - 1. Set this's force async to false.
   - 2. If the given value is true, then set this's async content attribute to the empty string.
   - 3. Otherwise, remove this's async content attribute.
 
-- [ ] [HTMLScriptElement.innerText](https://html.spec.whatwg.org/#dom-script-innertext) — The innerText getter steps are to return the result of running get the text steps with this.
+- [x] [HTMLScriptElement.innerText](https://html.spec.whatwg.org/#dom-script-innertext) — The innerText getter steps are to return the result of running get the text steps with this.
 
-- [ ] [The innerText setter steps](https://html.spec.whatwg.org/#dom-script-innertext) — The innerText setter steps are:
+- [x] [The innerText setter steps](https://html.spec.whatwg.org/#dom-script-innertext) — The innerText setter steps are:
   - 1. Let compliantScript be the result of invoking the get trusted type compliant string algorithm with TrustedScript, this's relevant global object, the given value, "HTMLScriptElement innerText", and "script".
   - 2. Update script trustedness for this given compliantScript.
   - 3. Run set the inner text steps with this and compliantScript.
 
-- [ ] [HTMLScriptElement.textContent](https://html.spec.whatwg.org/#dom-script-textcontent) — The textContent getter steps are to return the result of running get text content with this.
+- [x] [HTMLScriptElement.textContent](https://html.spec.whatwg.org/#dom-script-textcontent) — The textContent getter steps are to return the result of running get text content with this.
 
-- [ ] [The textContent setter steps](https://html.spec.whatwg.org/#dom-script-textcontent) — The textContent setter steps are:
+- [x] [The textContent setter steps](https://html.spec.whatwg.org/#dom-script-textcontent) — The textContent setter steps are:
   - 1. Let value be the given value.
   - 2. If value is null, then set value to the empty string.
   - 3. Let compliantScript be the result of invoking the get trusted type compliant string algorithm with TrustedScript, this's relevant global object, value, "HTMLScriptElement textContent", and "script".
   - 4. Update script trustedness for this given compliantScript.
   - 5. Run set text content with this and compliantScript.
 
-- [ ] [HTMLScriptElement.text](https://html.spec.whatwg.org/#dom-script-text) — The text getter steps are to return this's child text content.
+- [x] [HTMLScriptElement.text](https://html.spec.whatwg.org/#dom-script-text) — The text getter steps are to return this's child text content.
 
-- [ ] [The text setter steps](https://html.spec.whatwg.org/#dom-script-text) — The text setter steps are:
+- [x] [The text setter steps](https://html.spec.whatwg.org/#dom-script-text) — The text setter steps are:
   - 1. Let compliantScript be the result of invoking the get trusted type compliant string algorithm with TrustedScript, this's relevant global object, the given value, "HTMLScriptElement text", and "script".
   - 2. Update script trustedness for this given compliantScript.
   - 3. String replace all with compliantScript within this.
 
-- [ ] [HTMLScriptElement.supports(type)](https://html.spec.whatwg.org/#dom-script-supports) — The static supports(type) method steps are:
+- [x] [HTMLScriptElement.supports(type)](https://html.spec.whatwg.org/#dom-script-supports) — The static supports(type) method steps are:
   - 1. If type is "classic", then return true.
   - 2. If type is "module", then return true.
   - 3. If type is "importmap", then return true.
@@ -234,19 +237,22 @@ Status: n/a (no XPath or XSLT)
 
 #### [4.12.2 The noscript element](https://html.spec.whatwg.org/#the-noscript-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> No algorithms; the parser's scripting flag decides how its contents parse.
 
 #### [4.12.3 The template element](https://html.spec.whatwg.org/#the-template-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTemplateElement`; the template contents are in the template's own document (see `DIFFERENCES.md`), and content patching isn't implemented (see `KNOWN-ISSUES.md`).
+> Fixed: `htmlFor` was missing, `shadowRootMode` and `shadowRootSlotAssignment` weren't limited to known values, and adopting a template didn't adopt its contents.
 <!-- definitions: attr-template-for attr-template-shadowrootmode attr-shadowrootmode-none-state attr-template-shadowrootdelegatesfocus attr-template-shadowrootserializable attr-template-shadowrootslotassignment attr-template-shadowrootclonable attr-template-shadowrootcustomelementregistry associated-inert-template-document insertion-target insertion-start-marker -->
 
-- [ ] [template contents](https://html.spec.whatwg.org/#template-contents) — Each template element has an associated DocumentFragment object that is its template contents. The template contents have no conformance requirements. When a template element is created, the user agent must run the following steps to establish the template contents:
+- [x] [template contents](https://html.spec.whatwg.org/#template-contents) — Each template element has an associated DocumentFragment object that is its template contents. The template contents have no conformance requirements. When a template element is created, the user agent must run the following steps to establish the template contents:
   - 1. Let document be the template element's node document's appropriate template contents owner document.
   - 2. Create a DocumentFragment object whose node document is document and host is the template element.
   - 3. Set the template element's template contents to the newly created DocumentFragment object.
 
-- [ ] [appropriate template contents owner document](https://html.spec.whatwg.org/#appropriate-template-contents-owner-document) — A Document document's appropriate template contents owner document is the Document returned by the following algorithm:
+- [x] [appropriate template contents owner document](https://html.spec.whatwg.org/#appropriate-template-contents-owner-document) — A Document document's appropriate template contents owner document is the Document returned by the following algorithm:
   - 1. If document is not a Document created by this algorithm:
     - 1a. If document does not yet have an associated inert template document:
       - 1a.i. Let newDocument be the result of creating a document that implements Document, given document's relevant realm; its browsing context is null. This is "a Document created by this algorithm" for the purposes of the step above.
@@ -255,23 +261,23 @@ Status: unreviewed
     - 1b. Set document to document's associated inert template document.
   - 2. Return document.
 
-- [ ] [The adopting steps (with node and oldDocument as parameters) for template eleme…](https://html.spec.whatwg.org/#insertion-end-marker) — The adopting steps (with node and oldDocument as parameters) for template elements are the following:
+- [x] [The adopting steps (with node and oldDocument as parameters) for template eleme…](https://html.spec.whatwg.org/#insertion-end-marker) — The adopting steps (with node and oldDocument as parameters) for template elements are the following:
   - 1. Let document be node's node document's appropriate template contents owner document.
   - 2. Adopt node's template contents (a DocumentFragment object) into document.
 
-- [ ] [HTMLTemplateElement.content](https://html.spec.whatwg.org/#dom-template-content) — The content getter steps are:
+- [x] [HTMLTemplateElement.content](https://html.spec.whatwg.org/#dom-template-content) — The content getter steps are:
   - 1. Assert: this's template contents is not a ShadowRoot node.
   - 2. Return this's template contents.
 
-- [ ] [HTMLTemplateElement.shadowRootMode](https://html.spec.whatwg.org/#dom-template-shadowrootmode) — The shadowRootMode IDL attribute must reflect the shadowrootmode content attribute, limited to only known values.
+- [x] [HTMLTemplateElement.shadowRootMode](https://html.spec.whatwg.org/#dom-template-shadowrootmode) — The shadowRootMode IDL attribute must reflect the shadowrootmode content attribute, limited to only known values.
 
-- [ ] [HTMLTemplateElement.shadowRootSlotAssignment](https://html.spec.whatwg.org/#dom-template-shadowrootslotassignment) — The shadowRootSlotAssignment IDL attribute must reflect the shadowrootslotassignment content attribute, limited to only known values.
+- [x] [HTMLTemplateElement.shadowRootSlotAssignment](https://html.spec.whatwg.org/#dom-template-shadowrootslotassignment) — The shadowRootSlotAssignment IDL attribute must reflect the shadowrootslotassignment content attribute, limited to only known values.
 
-- [ ] [The cloning steps for template elements given node, copy, and subtree](https://html.spec.whatwg.org/#dom-template-shadowrootslotassignment) — The cloning steps for template elements given node, copy, and subtree are:
+- [x] [The cloning steps for template elements given node, copy, and subtree](https://html.spec.whatwg.org/#dom-template-shadowrootslotassignment) — The cloning steps for template elements given node, copy, and subtree are:
   - 1. If subtree is false, then return.
   - 2. For each child of node's template contents's children, in tree order: clone a node given child with document set to copy's template contents's node document, subtree set to true, and parent set to copy's template contents.
 
-- [ ] [prepare content patching](https://html.spec.whatwg.org/#prepare-content-patching) — To prepare content patching given an Element or DocumentFragment scope and a template element template:
+- [x] [prepare content patching](https://html.spec.whatwg.org/#prepare-content-patching) — To prepare content patching given an Element or DocumentFragment scope and a template element template:
   - 1. Assert: template's for attribute is specified.
   - 2. Let markerName be template's for attribute's value.
   - 3. If markerName is the empty string, then return false.
@@ -291,7 +297,7 @@ Status: unreviewed
     - 13a. If node's parent is not null, then remove node.
   - 14. Return true.
 
-- [ ] [find markers](https://html.spec.whatwg.org/#find-markers) — To find markers given a node scope and a string name:
+- [x] [find markers](https://html.spec.whatwg.org/#find-markers) — To find markers given a node scope and a string name:
   - 1. For each descendant of scope's descendants, in tree order:
     - 1a. If descendant is not a ProcessingInstruction node, then continue.
     - 1b. If the result of getting a processing instruction attribute given descendant and "name" is not name, then continue.
@@ -316,18 +322,19 @@ Status: n/a (no XPath or XSLT)
 
 #### [4.12.4 The slot element](https://html.spec.whatwg.org/#the-slot-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLSlotElement`, with `dom::SlotAlgorithms`.
 <!-- definitions: attr-slot-name manually-assigned-nodes -->
 
-- [ ] [HTMLSlotElement.assignedNodes(options)](https://html.spec.whatwg.org/#dom-slot-assignednodes) — The assignedNodes(options) method steps are:
+- [x] [HTMLSlotElement.assignedNodes(options)](https://html.spec.whatwg.org/#dom-slot-assignednodes) — The assignedNodes(options) method steps are:
   - 1. If options["flatten"] is false, then return this's assigned nodes.
   - 2. Return the result of finding flattened slottables with this.
 
-- [ ] [HTMLSlotElement.assignedElements(options)](https://html.spec.whatwg.org/#dom-slot-assignedelements) — The assignedElements(options) method steps are:
+- [x] [HTMLSlotElement.assignedElements(options)](https://html.spec.whatwg.org/#dom-slot-assignedelements) — The assignedElements(options) method steps are:
   - 1. If options["flatten"] is false, then return this's assigned nodes, filtered to contain only Element nodes.
   - 2. Return the result of finding flattened slottables with this, filtered to contain only Element nodes.
 
-- [ ] [HTMLSlotElement.assign(...nodes)](https://html.spec.whatwg.org/#dom-slot-assign) — The assign(...nodes) method steps are:
+- [x] [HTMLSlotElement.assign(...nodes)](https://html.spec.whatwg.org/#dom-slot-assign) — The assign(...nodes) method steps are:
   - 1. For each node of this's manually assigned nodes, set node's manual slot assignment to null.
   - 2. Let nodesSet be a new ordered set.
   - 3. For each node of nodes:

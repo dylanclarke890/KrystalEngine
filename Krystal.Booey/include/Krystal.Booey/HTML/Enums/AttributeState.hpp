@@ -68,7 +68,10 @@ namespace krys::boo::html
     URLEncoded,
     FormData,
     TextPlain,
+    Open,
+    Closed,
+    Named,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 58uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 61uz);

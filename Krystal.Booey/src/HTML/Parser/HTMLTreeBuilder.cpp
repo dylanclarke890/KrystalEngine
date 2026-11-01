@@ -872,9 +872,8 @@ namespace krys::boo::html
             if (_scriptingMode != ParserScriptingMode::Fragment)
             {
               script._parserDocument = &_document;
+              script._forceAsync = false;
             }
-
-            script._forceAsync = false;
 
             if (_scriptingMode == ParserScriptingMode::Inert)
             {

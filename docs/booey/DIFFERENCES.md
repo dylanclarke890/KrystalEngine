@@ -105,6 +105,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `select()` on a text control focuses it, as browsers do; the specification only selects its text. Resetting a form from its own `reset` event does nothing (a reset is locked while it runs), as in upstream and Chrome; the specification would reset again.
 - Activating interactive content inside a summary, such as a link or a text field, doesn't toggle its details (`HTMLSummaryElement::ActivationBehavior`), as in upstream and Chrome; the specification's activation behaviour toggles it whatever the event's target.
 - A details element closes for its name group only once it's connected (`HTMLDetailsElement::OnPostConnection`), as upstream: open details with the same name stay open in a disconnected tree, and when that tree is connected the earlier ones close rather than the later. The specification's insertion steps run in any tree, as each is inserted.
+- A script's `src`, `text`, `innerText` and `textContent` setters take plain strings, as there are no Trusted Types, so they keep no script text. `HTMLScriptElement::Supports` gives the specification's answer although no script runs.
 - A legacy colour value that starts with `#` keeps the 128 code points after it (`HTMLElement::ParseLegacyColorValue`), as upstream and Chrome do; the specification truncates to 128 code points before removing the `#`.
 
 ### From WebKit

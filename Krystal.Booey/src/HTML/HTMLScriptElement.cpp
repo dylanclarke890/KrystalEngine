@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
@@ -44,13 +46,23 @@ namespace krys::boo::html
     Reflect<bool>(*this, u8"nomodule", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#dom-script-async
   bool HTMLScriptElement::Async() const noexcept
   {
-    return Reflect<bool>(*this, u8"async");
+    // 1. If this's force async is true, then return true.
+    // 2. If this's async content attribute is present, then return true.
+    // 3. Return false.
+    return _forceAsync || Reflect<bool>(*this, u8"async");
   }
 
+  // https://html.spec.whatwg.org/#dom-script-async
   void HTMLScriptElement::Async(bool value) noexcept
   {
+    // 1. Set this's force async to false.
+    _forceAsync = false;
+
+    // 2. If the given value is true, then set this's async content attribute to the empty string.
+    // 3. Otherwise, remove this's async content attribute.
     Reflect<bool>(*this, u8"async", krys::move(value));
   }
 
@@ -81,10 +93,30 @@ namespace krys::boo::html
                                              dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"blocking" && _blocking)
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      return;
+    }
+    if (localName == u8"blocking" && _blocking)
     {
       _blocking->AssociatedAttributeValueChanged();
     }
+    // When an async attribute is added to a script element el, the user agent must set el's force async to
+    // false.
+    else if (localName == u8"async" && value && !oldValue)
+    {
+      _forceAsync = false;
+    }
+  }
+
+  // https://html.spec.whatwg.org/#the-script-element:concept-node-clone-ext
+  void HTMLScriptElement::OnClone(dom::Node &copy, bool subtree) noexcept
+  {
+    HTMLElement::OnClone(copy, subtree);
+
+    // The cloning steps for script elements given node, copy, and subtree are to set copy's already started
+    // to node's already started.
+    Downcast<HTMLScriptElement>(copy)._alreadyStarted = _alreadyStarted;
   }
 
   Maybe<dom::DOMString> HTMLScriptElement::CrossOrigin() const noexcept
@@ -130,17 +162,31 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#dom-script-text
   dom::DOMString HTMLScriptElement::Text() const noexcept
   {
-    // FIXME: Implement the text attribute.
-    krys_not_implemented();
+    // The text getter steps are to return this's child text content.
+    return dom::TextAlgorithms::ChildTextContent(*this);
   }
 
+  // https://html.spec.whatwg.org/#dom-script-text
   void HTMLScriptElement::Text(dom::DOMString &&value) noexcept
   {
-    (void)value;
-    krys_not_implemented();
-    // FIXME: Implement the text attribute.
+    // 1. (Skipped: there are no Trusted Types.)
+    // 2. (Skipped: there are no Trusted Types.)
+    // 3. String replace all with compliantScript within this.
+    (void)dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
+  }
+
+  // https://html.spec.whatwg.org/#dom-script-supports
+  bool HTMLScriptElement::Supports(dom::DOMStringView type) noexcept
+  {
+    // 1. If type is "classic", then return true.
+    // 2. If type is "module", then return true.
+    // 3. If type is "importmap", then return true.
+    // 4. If type is "speculationrules", then return true.
+    // 5. Return false.
+    return type == u8"classic" || type == u8"module" || type == u8"importmap" || type == u8"speculationrules";
   }
 
 #pragma endregion

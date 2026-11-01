@@ -709,6 +709,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLProgressElement.cpp
 		tests/HTML/HTMLSelectElement.cpp
 		tests/HTML/HTMLSelectedContentElement.cpp
+		tests/HTML/HTMLScriptElement.cpp
 		tests/HTML/HTMLSlotElement.cpp
 		tests/HTML/HTMLTableCellElement.cpp
 		tests/HTML/HTMLTableElement.cpp
