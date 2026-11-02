@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
@@ -47,6 +48,50 @@ namespace krys::boo
         builder.Append(*it);
       }
       return krys::move(builder).ToString();
+    }
+  }
+
+  namespace
+  {
+    /// @brief Whether a response of the MIME type @p mimeType (an essence) is loaded as a text document: a
+    /// JavaScript MIME type, a JSON MIME type that isn't an XML MIME type, `text/css`, `text/plain` or
+    /// `text/vtt`.
+    /// @see https://html.spec.whatwg.org/#navigate-text
+    KRYS_NODISCARD bool IsTextDocumentMIMEType(utf8_stringview mimeType) noexcept
+    {
+      // https://mimesniff.spec.whatwg.org/#javascript-mime-type
+      static constexpr utf8_stringview TextTypes[] = {u8"application/ecmascript",
+                                                      u8"application/javascript",
+                                                      u8"application/x-ecmascript",
+                                                      u8"application/x-javascript",
+                                                      u8"text/ecmascript",
+                                                      u8"text/javascript",
+                                                      u8"text/javascript1.0",
+                                                      u8"text/javascript1.1",
+                                                      u8"text/javascript1.2",
+                                                      u8"text/javascript1.3",
+                                                      u8"text/javascript1.4",
+                                                      u8"text/javascript1.5",
+                                                      u8"text/jscript",
+                                                      u8"text/livescript",
+                                                      u8"text/x-ecmascript",
+                                                      u8"text/x-javascript",
+                                                      u8"application/json",
+                                                      u8"text/json",
+                                                      u8"text/css",
+                                                      u8"text/plain",
+                                                      u8"text/vtt"};
+      for (auto type : TextTypes)
+      {
+        if (text::IsASCIICaselessEqual(mimeType, type))
+        {
+          return true;
+        }
+      }
+      // https://mimesniff.spec.whatwg.org/#json-mime-type: a subtype that ends in "+json".
+      auto slash = mimeType.find(u8'/');
+      return slash != utf8_stringview::npos && mimeType.size() - slash > 5
+             && text::IsASCIICaselessEqual(mimeType.substr(mimeType.size() - 5), utf8_stringview(u8"+json"));
     }
   }
 
@@ -108,6 +153,10 @@ namespace krys::boo
     if (auto *htmlDocument = DynamicDowncast<dom::HTMLDocument>(document.get()))
     {
       _parser = CreateRef<html::HTMLDocumentParser>(*htmlDocument);
+      if (IsTextDocumentMIMEType(_mimeType))
+      {
+        _parser->StartPlainText();
+      }
     }
     else
     {

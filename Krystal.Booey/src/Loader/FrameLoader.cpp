@@ -842,6 +842,7 @@ namespace krys::boo
            || page->GetChromeClient().RunBeforeUnloadConfirmPanel(beforeUnloadEvent->ReturnValue(), _frame);
   }
 
+  // https://html.spec.whatwg.org/#unload-a-document
   void FrameLoader::DispatchUnloadEvents(UnloadEventPolicy unloadEventPolicy) noexcept
   {
     RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
@@ -850,19 +851,37 @@ namespace krys::boo
       return;
     }
 
+    // 1. Assert: this is running as part of a task queued on oldDocument's relevant agent's event loop.
+    // 2.-4. (There's no unload timing info, as there's no navigation timing.)
+    // 5. Let intendToKeepInBfcache be true if the user agent intends to keep oldDocument alive in a session
+    //    history entry, such that it can later be used for history traversal.
+    // (The document's back/forward cache state.)
+    // 6. Let eventLoop be oldDocument's relevant agent's event loop.
+    // 7. Increase eventLoop's termination nesting level by 1.
+    // (There's no script to terminate.)
+    // 8. Increase oldDocument's unload counter by 1.
     UnloadCountIncrementer unloadCountIncrementer(document.get());
 
+    // (The events are fired once, after the document's load event.)
     if (_didCallImplicitClose && !_wasUnloadEventEmitted)
     {
       SetForScope dismissal(_pageDismissalEventBeingDispatched, true);
+      // 9. If intendToKeepInBfcache is false, then set oldDocument's salvageable state to false.
+      // 10. If oldDocument's page showing is true:
+      // 10a. Set oldDocument's page showing to false.
+      // 10b. Fire a page transition event named pagehide at oldDocument's relevant global object with
+      //      oldDocument's salvageable state.
       if (unloadEventPolicy == UnloadEventPolicy::UnloadAndPageHide)
       {
         document->DispatchPagehideEvent(document->GetBackForwardCacheState()
                                         == dom::BackForwardCacheState::AboutToEnterBackForwardCache);
       }
 
+      // 10c. Update the visibility state of oldDocument to "hidden".
       // FIXME: The visibility (visibilitychange), once there's one.
 
+      // 12. If oldDocument's salvageable state is false, then fire an event named unload at oldDocument's
+      //     relevant global object, with legacy target override flag set.
       if (document->GetBackForwardCacheState() == dom::BackForwardCacheState::NotInBackForwardCache)
       {
         if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document->Window()))

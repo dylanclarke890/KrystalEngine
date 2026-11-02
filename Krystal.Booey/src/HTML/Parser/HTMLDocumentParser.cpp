@@ -226,6 +226,24 @@ namespace krys::boo::html
     return fragment;
   }
 
+  void HTMLDocumentParser::StartPlainText() noexcept
+  {
+    // https://html.spec.whatwg.org/#navigate-text
+    // 3. ... Before any script execution occurs, the user agent must wait for scripts may run for the
+    //    newly-created document to be true for the Document. When no bytes have yet been obtained, the user
+    //    agent must act as if the tree builder had emitted a start tag token with tag name "pre" followed by
+    //    a single U+000A LINE FEED (LF) character, and switch the HTML parser's tokenizer to the PLAINTEXT
+    //    state.
+    HTMLToken token;
+    token.BeginStartTag(U'p');
+    token.AppendToName(U'r');
+    token.AppendToName(U'e');
+    _treeBuilder.ProcessToken(HTMLTokenAtom(token));
+    token.AppendToCharacters(U'\n');
+    _treeBuilder.ProcessToken(HTMLTokenAtom(token));
+    _tokenizer.State(TokenizerState::PLAINTEXT);
+  }
+
   void HTMLDocumentParser::PumpTokenizer() noexcept
   {
     while (!IsStopped())

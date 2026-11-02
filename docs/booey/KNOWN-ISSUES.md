@@ -381,7 +381,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - Remote loading: there is no network loader, cookies, origins, CORS, referrers, pings, preloads or integrity checks; the host pushes data in through the loader strategy. `navigator.cookieEnabled` is false.
 - `DocumentLoader` has no redirects, content policies (responses shown as downloads), archives or streaming; the main resource arrives whole on a networking task. `POST` bodies do not reach the loader strategy, so a reload or history traversal cannot re-post one. There is no progress tracker, and HTTP status checks, `X-Content-Type-Options: nosniff` and content type parsing (`ParsedContentType`) are absent because responses carry no headers or statuses.
-- `DocumentWriter` takes HTML in UTF-8 only (BOMs removed, split sequences kept, invalid bytes replaced), with no other encodings or document types; form `accept-charset` is not honoured.
+- `DocumentWriter` takes HTML, XML and text documents in UTF-8 only (BOMs removed, split sequences kept, invalid bytes replaced), with no other encodings; there are no image, media or plug-in documents. Form `accept-charset` is not honoured.
 - `NavigationScheduler` has no page blocks, client redirect notifications or user gesture forwarding, and no sandboxed automatic features flag. The only pragmas are `refresh`, `content-language` and `default-style`; the `Content-Language` header is ignored.
 - Prerendering, speculation rules, `javascript:` URLs, `pagereveal`/`pageswap` and view transitions are not implemented. Icons, manifests and alternate style sheet sets chosen by script are not loaded.
 - No DOM `URL` interface or `URLSearchParams` (`url::URL` is internal), so WPT `setters_tests.json` is not run.

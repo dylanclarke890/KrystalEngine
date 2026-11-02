@@ -213,7 +213,14 @@ namespace krys::boo::dom
         return document;
       }
 
-      return CreateRef<HTMLDocument>();
+      // A text document is an HTML document of its type.
+      // https://html.spec.whatwg.org/#navigate-text
+      auto document = CreateRef<HTMLDocument>();
+      if (!contentType.empty())
+      {
+        document->_contentType = DOMString(contentType);
+      }
+      return document;
     };
 
     auto document = create();

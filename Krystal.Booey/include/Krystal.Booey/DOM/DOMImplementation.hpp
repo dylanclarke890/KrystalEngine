@@ -67,8 +67,9 @@ namespace krys::boo::dom
 #pragma endregion
 
     /// @brief Makes the document a load of @p contentType at @p url shows: XHTML, SVG and other XML
-    /// documents for their types, and an HTML document for the rest.
-    // FIXME: Text, image, media and plug-in documents, once there are those.
+    /// documents for their types, and an HTML document of the type for the rest (a text document's, whose
+    /// parser the writer starts in plain text).
+    // FIXME: Image, media and plug-in documents, once there are those.
     KRYS_NODISCARD static Ref<Document> CreateDocument(utf8_stringview contentType,
                                                        const url::URL &url) noexcept;
   };

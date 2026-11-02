@@ -46,6 +46,10 @@ namespace krys::boo::html
 
     void PumpTokenizer() noexcept;
 
+    /// @brief Makes the parser take all its input as text, in a `pre` element: a text document's parser.
+    /// @see https://html.spec.whatwg.org/#navigate-text
+    void StartPlainText() noexcept;
+
     KRYS_NODISCARD InputStream &InputStream() noexcept
     {
       return _input;

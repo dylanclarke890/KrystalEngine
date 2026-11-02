@@ -8,13 +8,15 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [7.5 Document lifecycle](https://html.spec.whatwg.org/#document-lifecycle)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 #### [7.5.1 Shared document creation infrastructure](https://html.spec.whatwg.org/#shared-document-creation-infrastructure)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DocumentWriter::Begin` creates the document (`DOMImplementation::CreateDocument` for the response's type), shows it in the frame, which gives it a new window, and starts its parser; the initial about:blank document's window isn't reused, as its origin would be opaque. Origins, policies, CSP and timing info are absent (see `KNOWN-ISSUES.md`).
 
-- [ ] [create and initialize a Document object](https://html.spec.whatwg.org/#initialise-the-document-object) — When loading a document using one of the below algorithms, we use the following steps to create and initialize a Document object, given a type type, content type contentType, and navigation params navigationParams:
+- [x] [create and initialize a Document object](https://html.spec.whatwg.org/#initialise-the-document-object) — When loading a document using one of the below algorithms, we use the following steps to create and initialize a Document object, given a type type, content type contentType, and navigation params navigationParams:
   - 1. Let browsingContext be the result of obtaining a browsing context to use for a navigation response given navigationParams.
   - 2. Let permissionsPolicy be the result of creating a permissions policy from a response given navigationParams's navigable's container, navigationParams's origin, and navigationParams's response. [PERMISSIONSPOLICY]
   - 3. Let creationURL be navigationParams's response's URL.
@@ -60,7 +62,7 @@ Status: unreviewed
   - 21. Potentially free deferred fetch quota for document.
   - 22. Return document.
 
-- [ ] [populate with html/head/body](https://html.spec.whatwg.org/#populate-with-html/head/body) — To populate with html/head/body given a Document document:
+- [x] [populate with html/head/body](https://html.spec.whatwg.org/#populate-with-html/head/body) — To populate with html/head/body given a Document document:
   - 1. Let html be the result of creating an element given document, "html", and the HTML namespace.
   - 2. Let head be the result of creating an element given document, "head", and the HTML namespace.
   - 3. Let body be the result of creating an element given document, "body", and the HTML namespace.
@@ -70,9 +72,10 @@ Status: unreviewed
 
 #### [7.5.2 Loading HTML documents](https://html.spec.whatwg.org/#read-html)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> An about:blank document is parsed from no data, which gives it `html`, `head` and `body` as it commits.
 
-- [ ] [load an HTML document](https://html.spec.whatwg.org/#navigate-html) — To load an HTML document, given navigation params navigationParams:
+- [x] [load an HTML document](https://html.spec.whatwg.org/#navigate-html) — To load an HTML document, given navigation params navigationParams:
   - 1. Let document be the result of creating and initializing a Document object given "html", "text/html", and navigationParams.
   - 2. If document's URL is about:blank, then populate with html/head/body given document.
   - 3. Otherwise, create an HTML parser whose allow declarative shadow roots is true and associate it with document. Each task that the networking task source places on the task queue while fetching runs must then fill the parser's input byte stream with the fetched bytes and cause the HTML parser to perform the appropriate processing of the input stream. The first task that the networking task source p…
@@ -80,13 +83,15 @@ Status: unreviewed
 
 #### [7.5.3 Loading XML documents](https://html.spec.whatwg.org/#read-xml)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `XMLDocumentParser` parses XHTML, SVG and other XML documents.
 
 #### [7.5.4 Loading text documents](https://html.spec.whatwg.org/#read-text)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Fixed: a text document (a JavaScript, JSON, `text/css`, `text/plain` or `text/vtt` response) is an HTML document of its type whose parser starts with a `pre` element in the PLAINTEXT state (`HTMLDocumentParser::StartPlainText`); it had been parsed as HTML.
 
-- [ ] [load a text document](https://html.spec.whatwg.org/#navigate-text) — To load a text document, given a navigation params navigationParams and a string type:
+- [x] [load a text document](https://html.spec.whatwg.org/#navigate-text) — To load a text document, given a navigation params navigationParams and a string type:
   - 1. Let document be the result of creating and initializing a Document object given "html", type, and navigationParams.
   - 2. Set document's parser cannot change the mode flag to true.
   - 3. Set document's mode to "no-quirks".
@@ -136,12 +141,13 @@ Status: n/a (no plugins or inline content handlers)
 
 #### [7.5.8 Finishing the loading process](https://html.spec.whatwg.org/#loading-documents)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The document's load timing has `DOMCompleteTime`; there are no containers to fire load at, as there are no child navigables.
 <!-- definitions: completely-loaded-time -->
 
-- [ ] [completely loaded](https://html.spec.whatwg.org/#completely-loaded) — A Document is considered completely loaded if its completely loaded time is non-null.
+- [x] [completely loaded](https://html.spec.whatwg.org/#completely-loaded) — A Document is considered completely loaded if its completely loaded time is non-null.
 
-- [ ] [completely finish loading](https://html.spec.whatwg.org/#completely-finish-loading) — To completely finish loading a Document document:
+- [x] [completely finish loading](https://html.spec.whatwg.org/#completely-finish-loading) — To completely finish loading a Document document:
   - 1. Assert: document's browsing context is non-null.
   - 2. Set document's completely loaded time to the current time.
   - 3. Let container be document's node navigable's container.
@@ -150,10 +156,11 @@ Status: unreviewed
 
 #### [7.5.9 Unloading documents](https://html.spec.whatwg.org/#unloading-documents)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `FrameLoader::DispatchUnloadEvents` and `Document::DispatchPagehideEvent`; the back/forward cache state is the salvageable state. Visibility isn't updated (see `KNOWN-ISSUES.md`), and there's no termination nesting level, as there's no script.
 <!-- definitions: concept-document-salvageable page-showing suspension-time suspended-timer-handles termination-nesting-level unload-counter -->
 
-- [ ] [unload](https://html.spec.whatwg.org/#unload-a-document) — To unload a Document oldDocument, given an optional Document newDocument:
+- [x] [unload](https://html.spec.whatwg.org/#unload-a-document) — To unload a Document oldDocument, given an optional Document newDocument:
   - 1. Assert: this is running as part of a task queued on oldDocument's relevant agent's event loop.
   - 2. Let unloadTimingInfo be a new document unload timing info.
   - 3. If newDocument is not given, then set unloadTimingInfo to null.
@@ -180,7 +187,7 @@ Status: unreviewed
   - 21. Decrease oldDocument's unload counter by 1.
   - 22. If newDocument is given, newDocument's was created via cross-origin redirects is false, and newDocument's origin is the same as oldDocument's origin, then set newDocument's previous document unload timing to unloadTimingInfo.
 
-- [ ] [unload a document and its descendants](https://html.spec.whatwg.org/#unload-a-document-and-its-descendants) — To unload a document and its descendants, given a Document document, an optional Document-or-null newDocument (default null), an optional set of steps afterAllUnloads, and an optional set of steps firePageSwapSteps:
+- [x] [unload a document and its descendants](https://html.spec.whatwg.org/#unload-a-document-and-its-descendants) — To unload a document and its descendants, given a Document document, an optional Document-or-null newDocument (default null), an optional set of steps afterAllUnloads, and an optional set of steps firePageSwapSteps:
   - 1. Assert: this is running within document's node navigable's traversable navigable's session history traversal queue.
   - 2. Let childNavigables be document's child navigables.
   - 3. Let numberUnloaded be 0.
@@ -193,7 +200,7 @@ Status: unreviewed
     - 6b. Unload document, passing along newDocument if it is not null.
     - 6c. If afterAllUnloads was given, then run it.
 
-- [ ] [unloading document cleanup steps](https://html.spec.whatwg.org/#unloading-document-cleanup-steps) — This specification defines the following unloading document cleanup steps. Other specifications can define more. Given a Document document:
+- [x] [unloading document cleanup steps](https://html.spec.whatwg.org/#unloading-document-cleanup-steps) — This specification defines the following unloading document cleanup steps. Other specifications can define more. Given a Document document:
   - 1. Let window be document's relevant global object.
   - 2. For each WebSocket object webSocket whose relevant global object is window, make disappear webSocket. If this affected any WebSocket objects, then make document unsalvageable given document and "websocket".
   - 3. For each WebTransport object transport whose relevant global object is window, run the context cleanup steps given transport.
@@ -203,9 +210,10 @@ Status: unreviewed
 
 #### [7.5.10 Destroying documents](https://html.spec.whatwg.org/#destroying-documents)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> A document is destroyed when it's released, rather than by these steps; tasks of a document that isn't fully active still run (see `KNOWN-ISSUES.md`).
 
-- [ ] [destroy](https://html.spec.whatwg.org/#destroy-a-document) — To destroy a Document document:
+- [x] [destroy](https://html.spec.whatwg.org/#destroy-a-document) — To destroy a Document document:
   - 1. Assert: this is running as part of a task queued on document's relevant agent's event loop.
   - 2. Abort document.
   - 3. Set document's salvageable state to false.
@@ -216,7 +224,7 @@ Status: unreviewed
   - 8. Remove document from the owner set of each WorkerGlobalScope object whose set contains document.
   - 9. For each workletGlobalScope in document's worklet global scopes, terminate workletGlobalScope.
 
-- [ ] [destroy a document and its descendants](https://html.spec.whatwg.org/#destroy-a-document-and-its-descendants) — To destroy a document and its descendants given a Document document and an optional set of steps afterAllDestruction, perform the following steps in parallel:
+- [x] [destroy a document and its descendants](https://html.spec.whatwg.org/#destroy-a-document-and-its-descendants) — To destroy a document and its descendants given a Document document and an optional set of steps afterAllDestruction, perform the following steps in parallel:
   - 1. If document is not fully active:
     - 1a. Let reason be a string from user-agent specific blocking reasons. If none apply, then let reason be "masked".
     - 1b. Make document unsalvageable given document and reason.
@@ -233,9 +241,10 @@ Status: unreviewed
 
 #### [7.5.11 Aborting a document load](https://html.spec.whatwg.org/#aborting-a-document-load)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `FrameLoader::StopAllLoaders` stops a provisional load; `window.stop()` doesn't stop loading (see `KNOWN-ISSUES.md`).
 
-- [ ] [abort](https://html.spec.whatwg.org/#abort-a-document) — To abort a Document document:
+- [x] [abort](https://html.spec.whatwg.org/#abort-a-document) — To abort a Document document:
   - 1. Assert: this is running as part of a task queued on document's relevant agent's event loop.
   - 2. Cancel any instances of the fetch algorithm in the context of document, discarding any tasks queued for them, and discarding any further data received from the network for them. If this resulted in any instances of the fetch algorithm being canceled or any queued tasks or any network data getting discarded, then make document unsalvageable given document and "fetch".
   - 3. If document's during-loading navigation ID for WebDriver BiDi is non-null:
@@ -246,7 +255,7 @@ Status: unreviewed
     - 4b. Abort that parser.
     - 4c. Make document unsalvageable given document and "parser-aborted".
 
-- [ ] [abort a document and its descendants](https://html.spec.whatwg.org/#abort-a-document-and-its-descendants) — To abort a document and its descendants given a Document document:
+- [x] [abort a document and its descendants](https://html.spec.whatwg.org/#abort-a-document-and-its-descendants) — To abort a document and its descendants given a Document document:
   - 1. Assert: this is running as part of a task queued on document's relevant agent's event loop.
   - 2. Let descendantNavigables be document's descendant navigables.
   - 3. For each descendantNavigable of descendantNavigables , queue a global task on the navigation and traversal task source given descendantNavigable's active window to perform the following steps:
@@ -254,7 +263,7 @@ Status: unreviewed
     - 3b. If descendantNavigable's active document's salvageable is false, then set document's salvageable to false.
   - 4. Abort document.
 
-- [ ] [stop loading](https://html.spec.whatwg.org/#nav-stop) — To stop loading a navigable navigable:
+- [x] [stop loading](https://html.spec.whatwg.org/#nav-stop) — To stop loading a navigable navigable:
   - 1. Let document be navigable's active document.
   - 2. If document's unload counter is 0, and navigable's ongoing navigation is a navigation ID, then set the ongoing navigation for navigable to null.
   - 3. Abort a document and its descendants given document.

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
@@ -54,6 +55,46 @@ namespace krys::boo::tests
     CHECK_FALSE(loader.IsLoading());
     REQUIRE(loader.GetDocumentLoader());
     CHECK(loader.GetDocumentLoader()->IsCommitted());
+  }
+
+  TEST_CASE("A document loaded from about:blank has html, head and body elements",
+            "[Loader][DocumentLoader][html:navigate-html][html:populate-with-html/head/body]"
+            "[html:initialise-the-document-object]")
+  {
+    LoadFixture fixture;
+    fixture.LoadMarkup(u8"<!DOCTYPE html><p>First</p>", u8"https://example.com/first.html");
+    html::EventLoop::Current().RunUntilIdle();
+    auto *firstWindow = fixture.Document().Window();
+
+    fixture.LoadURL(u8"about:blank");
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(fixture.Document().GetURL().String() == u8"about:blank");
+    CHECK_FALSE(fixture.Frame().Loader().IsDisplayingInitialEmptyDocument());
+    REQUIRE(fixture.Document().DocumentElement());
+    CHECK(fixture.Document().Head());
+    CHECK(fixture.Document().Body());
+    CHECK_FALSE(fixture.Document().Body()->HasChildNodes());
+    // A new document gets a new window.
+    CHECK(fixture.Document().Window() != firstWindow);
+  }
+
+  TEST_CASE("A text document's content is the text of a pre element",
+            "[Loader][DocumentLoader][html:read-text][html:navigate-text]")
+  {
+    auto mimeType = GENERATE(u8"text/plain", u8"text/css", u8"application/json", u8"application/ld+json",
+                             u8"text/javascript");
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/notes", u8"<b>bold</b>\n& more", mimeType);
+    fixture.LoadURL(u8"https://example.com/notes");
+    html::EventLoop::Current().RunUntilIdle();
+
+    auto body = fixture.Document().Body();
+    REQUIRE(body);
+    auto *pre = dynamic_cast<html::HTMLElement *>(body->FirstChild());
+    REQUIRE(pre);
+    CHECK(pre->LocalName() == u8"pre");
+    CHECK(pre->TextContent() == u8"<b>bold</b>\n& more");
+    CHECK(fixture.Document().ContentType() == dom::DOMString(mimeType));
   }
 
   TEST_CASE("A document loads on a later task, and commits", "[Loader][DocumentLoader]")
