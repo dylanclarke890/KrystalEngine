@@ -1124,10 +1124,18 @@ namespace krys::boo::html
           case TagName::template_:
           case TagName::title:
           {
+            // 1. Parse error.
             ParseError(token);
 
-            _openElementStack.Push({TagName::html, Namespace::HTML, *_head, {}});
+            // 2. Push the node pointed to by the head element pointer onto the stack of open elements.
+            _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
+
+            // 3. Process the token using the rules for the "in head" insertion mode.
             InHeadMode(krys::move(token));
+
+            // 4. Remove the node pointed to by the head element pointer from the stack of open elements. (It
+            // might
+            //    not be the current node at this point.)
             _openElementStack.Remove(*_head);
 
             return;
