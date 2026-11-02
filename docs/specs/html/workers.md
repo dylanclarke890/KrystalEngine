@@ -8,7 +8,8 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [10 Web workers](https://html.spec.whatwg.org/#workers)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Only `navigator.hardwareConcurrency` applies: there are no workers.
 
 ### [10.1 Introduction](https://html.spec.whatwg.org/#introduction-15)
 
@@ -64,7 +65,8 @@ Status: n/a (no workers)
 
 ### [10.2 Infrastructure](https://html.spec.whatwg.org/#infrastructure-2)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Only `navigator.hardwareConcurrency` applies.
 
 #### [10.2.1 The global scope](https://html.spec.whatwg.org/#the-global-scope)
 
@@ -313,9 +315,10 @@ Status: n/a (no workers)
 
 #### [10.2.7 Concurrent hardware capabilities](https://html.spec.whatwg.org/#navigator.hardwareconcurrency)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Navigator::HardwareConcurrency`: 4 or 8, as upstream (see `DIFFERENCES.md`).
 
-- [ ] [NavigatorConcurrentHardware.navigator.hardwareConcurrency](https://html.spec.whatwg.org/#dom-navigator-hardwareconcurrency) — The navigator.hardwareConcurrency attribute's getter must return a number between 1 and the number of logical processors potentially available to the user agent. If this cannot be determined, the getter must return 1.
+- [x] [NavigatorConcurrentHardware.navigator.hardwareConcurrency](https://html.spec.whatwg.org/#dom-navigator-hardwareconcurrency) — The navigator.hardwareConcurrency attribute's getter must return a number between 1 and the number of logical processors potentially available to the user agent. If this cannot be determined, the getter must return 1.
 
 ### [10.3 APIs available to workers](https://html.spec.whatwg.org/#apis-available-to-workers)
 

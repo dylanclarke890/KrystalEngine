@@ -218,8 +218,11 @@ namespace krys::boo
     return *_mimeTypes;
   }
 
+  // https://html.spec.whatwg.org/#dom-navigator-hardwareconcurrency
   uint64 Navigator::HardwareConcurrency() const noexcept
   {
+    // Return a number between 1 and the number of logical processors potentially available to the user agent.
+    // (4 below 8 processors, 8 from 8, to limit fingerprinting.)
     // Enforce a maximum for the number of cores reported to mitigate fingerprinting for the minority of
     // machines with large numbers of cores.
     static uint64 numberOfCores = std::thread::hardware_concurrency() < 8 ? 4 : 8;

@@ -1224,7 +1224,8 @@ namespace krys::boo::tests
     "[html:safelisted-scheme][html:cookies][html:dom-navigator-cookieenabled][html:pdf-viewing-support]"
     "[html:dom-navigator-plugins][html:dom-navigator-mimetypes][html:dom-navigator-javaenabled]"
     "[html:dom-navigator-pdfviewerenabled][html:dom-pluginarray-length][html:dom-pluginarray-nameditem]"
-    "[html:dom-mimetypearray-length]")
+    "[html:dom-mimetypearray-length][html:navigator.hardwareconcurrency][html:dom-navigator-"
+    "hardwareconcurrency]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
