@@ -1192,7 +1192,20 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window's navigator", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's navigator",
+    "[Page][LocalDOMWindow][html:the-navigator-object][html:dom-navigator][html:dom-clientinformation]"
+    "[html:client-identification][html:dom-navigator-appcodename][html:dom-navigator-appname]"
+    "[html:dom-navigator-appversion][html:dom-navigator-platform][html:dom-navigator-product]"
+    "[html:dom-navigator-productsub][html:dom-navigator-useragent][html:dom-navigator-vendor]"
+    "[html:dom-navigator-vendorsub][html:dom-navigator-taintenabled][html:language-preferences]"
+    "[html:dom-navigator-language][html:dom-navigator-languages][html:navigator.online]"
+    "[html:dom-navigator-online][html:custom-handlers][html:dom-navigator-registerprotocolhandler]"
+    "[html:dom-navigator-unregisterprotocolhandler][html:normalize-protocol-handler-parameters]"
+    "[html:safelisted-scheme][html:cookies][html:dom-navigator-cookieenabled][html:pdf-viewing-support]"
+    "[html:dom-navigator-plugins][html:dom-navigator-mimetypes][html:dom-navigator-javaenabled]"
+    "[html:dom-navigator-pdfviewerenabled][html:dom-pluginarray-length][html:dom-pluginarray-nameditem]"
+    "[html:dom-mimetypearray-length]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
