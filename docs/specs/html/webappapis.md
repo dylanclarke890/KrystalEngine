@@ -8,11 +8,13 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [8 Web application APIs](https://html.spec.whatwg.org/#webappapis)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ### [8.1 Scripting](https://html.spec.whatwg.org/#scripting)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below; scripts themselves are n/a.
 
 #### [8.1.1 Introduction](https://html.spec.whatwg.org/#introduction-11)
 
@@ -82,7 +84,8 @@ Status: n/a (no JavaScript)
 
 #### [8.1.3 Realms and their counterparts](https://html.spec.whatwg.org/#realms-and-their-counterparts)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ##### [8.1.3.1 Environments](https://html.spec.whatwg.org/#environments)
 
@@ -182,21 +185,23 @@ Status: n/a (no JavaScript)
 
 ##### [8.1.3.4 Enabling and disabling scripting](https://html.spec.whatwg.org/#enabling-and-disabling-scripting)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> There's no script engine, so scripting is disabled for the parser (`<noscript>` is parsed as markup); the host says whether scripting counts as enabled for lazy loading (`MediaEnvironment::CanExecuteScripts`, see `DIFFERENCES.md`).
 
-- [ ] [Scripting is enabled](https://html.spec.whatwg.org/#concept-environment-script) — Scripting is enabled for an environment settings object settings when all of the following conditions are true:
+- [x] [Scripting is enabled](https://html.spec.whatwg.org/#concept-environment-script) — Scripting is enabled for an environment settings object settings when all of the following conditions are true:
 
-- [ ] [Scripting is disabled](https://html.spec.whatwg.org/#concept-environment-noscript) — Scripting is disabled for an environment settings object when scripting is not enabled for it, i.e., when any of the above conditions are false.
+- [x] [Scripting is disabled](https://html.spec.whatwg.org/#concept-environment-noscript) — Scripting is disabled for an environment settings object when scripting is not enabled for it, i.e., when any of the above conditions are false.
 
-- [ ] [Scripting is disabled](https://html.spec.whatwg.org/#concept-n-noscript) — Scripting is disabled for a platform object object if any of the following are true:
+- [x] [Scripting is disabled](https://html.spec.whatwg.org/#concept-n-noscript) — Scripting is disabled for a platform object object if any of the following are true:
 
-- [ ] [Scripting is enabled](https://html.spec.whatwg.org/#concept-n-script) — Scripting is enabled for a platform object object, when object's scripting is not disabled.
+- [x] [Scripting is enabled](https://html.spec.whatwg.org/#concept-n-script) — Scripting is enabled for a platform object object, when object's scripting is not disabled.
 
 ##### [8.1.3.5 Secure contexts](https://html.spec.whatwg.org/#secure-contexts)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::IsSecureContext`: the document's URL is potentially trustworthy; there are no ancestors to check.
 
-- [ ] [secure context](https://html.spec.whatwg.org/#secure-context) — An environment environment is a secure context if the following algorithm returns true:
+- [x] [secure context](https://html.spec.whatwg.org/#secure-context) — An environment environment is a secure context if the following algorithm returns true:
   - 1. If environment is an environment settings object:
     - 1a. Let global be environment's global object.
     - 1b. If global is a WorkerGlobalScope:
@@ -207,11 +212,12 @@ Status: unreviewed
   - 3. If the result of Is url potentially trustworthy? given environment's top-level creation URL is "Potentially Trustworthy", then return true.
   - 4. Return false.
 
-- [ ] [non-secure context](https://html.spec.whatwg.org/#non-secure-context) — An environment is a non-secure context if it is not a secure context.
+- [x] [non-secure context](https://html.spec.whatwg.org/#non-secure-context) — An environment is a non-secure context if it is not a secure context.
 
 #### [8.1.4 Script processing model](https://html.spec.whatwg.org/#scripting-processing-model)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ##### [8.1.4.1 Scripts](https://html.spec.whatwg.org/#script-structs)
 
@@ -549,16 +555,17 @@ Status: n/a (no JavaScript)
 
 ##### [8.1.4.6 Runtime script errors](https://html.spec.whatwg.org/#runtime-script-errors)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::ReportError` reports an exception, with a message and a value but no script location (FIXME).
 <!-- definitions: report-exception-omiterror report-the-exception -->
 
-- [ ] [extract error information](https://html.spec.whatwg.org/#extract-error) — To extract error information from a JavaScript value exception:
+- [x] [extract error information](https://html.spec.whatwg.org/#extract-error) — To extract error information from a JavaScript value exception:
   - 1. Let attributes be an empty map keyed by IDL attributes.
   - 2. Set attributes[error] to exception.
   - 3. Set attributes[message], attributes[filename], attributes[lineno], and attributes[colno] to implementation-defined values derived from exception.
   - 4. Return attributes.
 
-- [ ] [report an exception](https://html.spec.whatwg.org/#report-an-exception) — To report an exception exception which is a JavaScript value, for a particular global object global and optional boolean omitError (default false):
+- [x] [report an exception](https://html.spec.whatwg.org/#report-an-exception) — To report an exception exception which is a JavaScript value, for a particular global object global and optional boolean omitError (default false):
   - 1. Let notHandled be true.
   - 2. Let errorInfo be the result of extracting error information from exception.
   - 3. Let script be a script found in an implementation-defined way, or null. This should usually be the running script (most notably during run a classic script).
@@ -576,17 +583,17 @@ Status: unreviewed
       - 7b.iii. If notHandled is true, then report exception for workerObject's relevant global object with omitError set to true.
     - 7c. Otherwise, the user agent may report exception to a developer console.
 
-- [ ] [WindowOrWorkerGlobalScope.reportError(e)](https://html.spec.whatwg.org/#dom-reporterror) — The reportError(e) method steps are to report an exception e for this.
+- [x] [WindowOrWorkerGlobalScope.reportError(e)](https://html.spec.whatwg.org/#dom-reporterror) — The reportError(e) method steps are to report an exception e for this.
 
-- [ ] [ErrorEvent.message](https://html.spec.whatwg.org/#dom-errorevent-message) — The message attribute must return the value it was initialized to. It represents the error message.
+- [x] [ErrorEvent.message](https://html.spec.whatwg.org/#dom-errorevent-message) — The message attribute must return the value it was initialized to. It represents the error message.
 
-- [ ] [ErrorEvent.filename](https://html.spec.whatwg.org/#dom-errorevent-filename) — The filename attribute must return the value it was initialized to. It represents the URL of the script in which the error originally occurred.
+- [x] [ErrorEvent.filename](https://html.spec.whatwg.org/#dom-errorevent-filename) — The filename attribute must return the value it was initialized to. It represents the URL of the script in which the error originally occurred.
 
-- [ ] [ErrorEvent.lineno](https://html.spec.whatwg.org/#dom-errorevent-lineno) — The lineno attribute must return the value it was initialized to. It represents the line number where the error occurred in the script.
+- [x] [ErrorEvent.lineno](https://html.spec.whatwg.org/#dom-errorevent-lineno) — The lineno attribute must return the value it was initialized to. It represents the line number where the error occurred in the script.
 
-- [ ] [ErrorEvent.colno](https://html.spec.whatwg.org/#dom-errorevent-colno) — The colno attribute must return the value it was initialized to. It represents the column number where the error occurred in the script.
+- [x] [ErrorEvent.colno](https://html.spec.whatwg.org/#dom-errorevent-colno) — The colno attribute must return the value it was initialized to. It represents the column number where the error occurred in the script.
 
-- [ ] [ErrorEvent.error](https://html.spec.whatwg.org/#dom-errorevent-error) — The error attribute must return the value it was initialized to. It must initially be initialized to undefined. Where appropriate, it is set to the object representing the error (e.g., the exception object in the case of an uncaught exception).
+- [x] [ErrorEvent.error](https://html.spec.whatwg.org/#dom-errorevent-error) — The error attribute must return the value it was initialized to. It must initially be initialized to undefined. Where appropriate, it is set to the object representing the error (e.g., the exception object in the case of an uncaught exception).
 
 ##### [8.1.4.7 Unhandled promise rejections](https://html.spec.whatwg.org/#unhandled-promise-rejections)
 
@@ -908,25 +915,28 @@ Status: n/a (no JavaScript)
 
 #### [8.1.7 Event loops](https://html.spec.whatwg.org/#event-loops)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ##### [8.1.7.1 Definitions](https://html.spec.whatwg.org/#definitions-3)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `html::EventLoop`: one process-wide loop (FIXME), with a single queue for every task source, which keeps each source's tasks in order. A task of a document is runnable unless the document's tasks are suspended, and is dropped once its active objects are stopped; a document that isn't fully active otherwise still runs its tasks (see `KNOWN-ISSUES.md`).
 <!-- definitions: event-loop concept-agent-event-loop worker-event-loop-2 worklet-event-loop task-queue concept-task concept-task-steps concept-task-source concept-task-document script-evaluation-environment-settings-object-set task-source currently-running-task microtask-queue microtask performing-a-microtask-checkpoint last-render-opportunity-time last-idle-period-start-time -->
 
-- [ ] [window event loop](https://html.spec.whatwg.org/#window-event-loop) — The event loop of a similar-origin window agent is known as a window event loop. The event loop of a dedicated worker agent, shared worker agent, or service worker agent is known as a worker event loop. And the event loop of a worklet agent is known as a worklet event loop.
+- [x] [window event loop](https://html.spec.whatwg.org/#window-event-loop) — The event loop of a similar-origin window agent is known as a window event loop. The event loop of a dedicated worker agent, shared worker agent, or service worker agent is known as a worker event loop. And the event loop of a worklet agent is known as a worklet event loop.
 
-- [ ] [runnable](https://html.spec.whatwg.org/#concept-task-runnable) — A task is runnable if its document is either null or fully active.
+- [x] [runnable](https://html.spec.whatwg.org/#concept-task-runnable) — A task is runnable if its document is either null or fully active.
 
-- [ ] [same-loop windows](https://html.spec.whatwg.org/#same-loop-windows) — To get the same-loop windows for a window event loop loop, return all Window objects whose relevant agent's event loop is loop.
+- [x] [same-loop windows](https://html.spec.whatwg.org/#same-loop-windows) — To get the same-loop windows for a window event loop loop, return all Window objects whose relevant agent's event loop is loop.
 
 ##### [8.1.7.2 Queuing tasks](https://html.spec.whatwg.org/#queuing-tasks)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `EventLoop::QueueTask` (with a document for a global or element task) and `QueueMicrotask`.
 <!-- definitions: microtask-task-source implied-event-loop -->
 
-- [ ] [queue a task](https://html.spec.whatwg.org/#queue-a-task) — To queue a task on a task source source, which performs a series of steps steps, optionally given an event loop event loop and a document document:
+- [x] [queue a task](https://html.spec.whatwg.org/#queue-a-task) — To queue a task on a task source source, which performs a series of steps steps, optionally given an event loop event loop and a document document:
   - 1. If event loop was not given, set event loop to the implied event loop.
   - 2. If document was not given, set document to the implied document.
   - 3. Let task be a new task.
@@ -937,16 +947,16 @@ Status: unreviewed
   - 8. Let queue be the task queue to which source is associated on event loop.
   - 9. Append task to queue.
 
-- [ ] [queue a global task](https://html.spec.whatwg.org/#queue-a-global-task) — To queue a global task on a task source source, with a global object global and a series of steps steps:
+- [x] [queue a global task](https://html.spec.whatwg.org/#queue-a-global-task) — To queue a global task on a task source source, with a global object global and a series of steps steps:
   - 1. Let event loop be global's relevant agent's event loop.
   - 2. Let document be global's associated Document, if global is a Window object; otherwise null.
   - 3. Queue a task given source, event loop, document, and steps.
 
-- [ ] [queue an element task](https://html.spec.whatwg.org/#queue-an-element-task) — To queue an element task on a task source source, with an element element and a series of steps steps:
+- [x] [queue an element task](https://html.spec.whatwg.org/#queue-an-element-task) — To queue an element task on a task source source, with an element element and a series of steps steps:
   - 1. Let global be element's relevant global object.
   - 2. Queue a global task given source, global, and steps.
 
-- [ ] [queue a microtask](https://html.spec.whatwg.org/#queue-a-microtask) — To queue a microtask which performs a series of steps steps, optionally given a document document:
+- [x] [queue a microtask](https://html.spec.whatwg.org/#queue-a-microtask) — To queue a microtask which performs a series of steps steps, optionally given a document document:
   - 1. Assert: there is a surrounding agent. I.e., this algorithm is not called while in parallel.
   - 2. Let eventLoop be the surrounding agent's event loop.
   - 3. If document was not given, set document to the implied document.
@@ -957,7 +967,7 @@ Status: unreviewed
   - 8. Set microtask's script evaluation environment settings object set to an empty set.
   - 9. Enqueue microtask on eventLoop's microtask queue.
 
-- [ ] [implied document](https://html.spec.whatwg.org/#implied-document) — The implied document when queuing a task on an event loop event loop is determined as follows:
+- [x] [implied document](https://html.spec.whatwg.org/#implied-document) — The implied document when queuing a task on an event loop event loop is determined as follows:
   - 1. If event loop is not a window event loop, then return null.
   - 2. If the task is being queued in the context of an element, then return the element's node document.
   - 3. If the task is being queued in the context of a browsing context, then return the browsing context's active document.
@@ -966,10 +976,12 @@ Status: unreviewed
 
 ##### [8.1.7.3 Processing model](https://html.spec.whatwg.org/#event-loop-processing-model)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Fixed: the focus fixup step of updating the rendering sets the Navigation API's focus changed during ongoing navigation to false, so a navigation that finishes afterwards resets the focus.
+> `EventLoop::RunNextTask` runs the oldest runnable task and a microtask checkpoint; the host runs the loop (`Run`), updates the rendering (`Page::UpdateRendering`, in upstream's order of steps) and starts idle periods each frame. There's no long task reporting or canvas context loss.
 <!-- definitions: update-the-rendering context-lost-steps synchronous-section -->
 
-- [ ] [An event loop must continually run through the following steps for as long as i…](https://html.spec.whatwg.org/#event-loop-processing-model) — An event loop must continually run through the following steps for as long as it exists:
+- [x] [An event loop must continually run through the following steps for as long as i…](https://html.spec.whatwg.org/#event-loop-processing-model) — An event loop must continually run through the following steps for as long as it exists:
   - 1. Let oldestTask and taskStartTime be null.
   - 2. If the event loop has a task queue with at least one runnable task:
     - 2a. Let taskQueue be one such task queue, chosen in an implementation-defined manner.
@@ -1012,7 +1024,7 @@ Status: unreviewed
       - 6a.iii. Update the rendering of that dedicated worker to reflect the current state.
     - 6b. If there are no tasks in the event loop's task queues and the WorkerGlobalScope object's closing flag is true, then destroy the event loop, aborting these steps, resuming the run a worker steps described in the Web workers section below.
 
-- [ ] [A window event loop eventLoop must also run the following in parallel, as long…](https://html.spec.whatwg.org/#event-loop-processing-model) — A window event loop eventLoop must also run the following in parallel, as long as it exists:
+- [x] [A window event loop eventLoop must also run the following in parallel, as long…](https://html.spec.whatwg.org/#event-loop-processing-model) — A window event loop eventLoop must also run the following in parallel, as long as it exists:
   - 1. Wait until at least one navigable whose active document's relevant agent's event loop is eventLoop might have a rendering opportunity.
   - 2. Set eventLoop's last render opportunity time to the unsafe shared current time.
   - 3. For each navigable that has a rendering opportunity, queue a global task on the rendering task source given navigable's active window to update the rendering:
@@ -1063,9 +1075,9 @@ Status: unreviewed
     - 3v. For each doc of docs, update the rendering or user interface of doc and its node navigable to reflect the current state.
     - 3w. For each doc of docs, process top layer removals given doc.
 
-- [ ] [rendering opportunity](https://html.spec.whatwg.org/#rendering-opportunity) — A navigable has a rendering opportunity if the user agent is currently able to present the contents of the navigable to the user, accounting for hardware refresh rate constraints and user agent throttling for performance reasons, but considering content presentable even if it's outside the viewport.
+- [x] [rendering opportunity](https://html.spec.whatwg.org/#rendering-opportunity) — A navigable has a rendering opportunity if the user agent is currently able to present the contents of the navigable to the user, accounting for hardware refresh rate constraints and user agent throttling for performance reasons, but considering content presentable even if it's outside the viewport.
 
-- [ ] [perform a microtask checkpoint](https://html.spec.whatwg.org/#perform-a-microtask-checkpoint) — When a user agent is to perform a microtask checkpoint:
+- [x] [perform a microtask checkpoint](https://html.spec.whatwg.org/#perform-a-microtask-checkpoint) — When a user agent is to perform a microtask checkpoint:
   - 1. If the event loop's performing a microtask checkpoint is true, then return.
   - 2. Set the event loop's performing a microtask checkpoint to true.
   - 3. While the event loop's microtask queue is not empty:
@@ -1079,11 +1091,11 @@ Status: unreviewed
   - 7. Set the event loop's performing a microtask checkpoint to false.
   - 8. Record timing info for microtask checkpoint.
 
-- [ ] [await a stable state](https://html.spec.whatwg.org/#await-a-stable-state) — When an algorithm running in parallel is to await a stable state, the user agent must queue a microtask that runs the following steps, and must then stop executing (execution of the algorithm resumes when the microtask is run, as described in the following steps):
+- [x] [await a stable state](https://html.spec.whatwg.org/#await-a-stable-state) — When an algorithm running in parallel is to await a stable state, the user agent must queue a microtask that runs the following steps, and must then stop executing (execution of the algorithm resumes when the microtask is run, as described in the following steps):
   - 1. Run the algorithm's synchronous section.
   - 2. Resume execution of the algorithm in parallel, if appropriate, as described in the algorithm's steps.
 
-- [ ] [spin the event loop](https://html.spec.whatwg.org/#spin-the-event-loop) — Algorithm steps that say to spin the event loop until a condition goal is met are equivalent to substituting in the following algorithm steps:
+- [x] [spin the event loop](https://html.spec.whatwg.org/#spin-the-event-loop) — Algorithm steps that say to spin the event loop until a condition goal is met are equivalent to substituting in the following algorithm steps:
   - 1. Let task be the event loop's currently running task.
   - 2. Let task source be task's source.
   - 3. Let old stack be a copy of the JavaScript execution context stack.
@@ -1096,7 +1108,7 @@ Status: unreviewed
       - 6b.ii. Perform any steps that appear after this spin the event loop instance in the original algorithm.
   - 7. Stop task, allowing whatever algorithm that invoked it to resume.
 
-- [ ] [pause](https://html.spec.whatwg.org/#pause) — Some of the algorithms in this specification, for historical reasons, require the user agent to pause while running a task until a condition goal is met. This means running the following steps:
+- [x] [pause](https://html.spec.whatwg.org/#pause) — Some of the algorithms in this specification, for historical reasons, require the user agent to pause while running a task until a condition goal is met. This means running the following steps:
   - 1. Let global be the current global object.
   - 2. Let timeBeforePause be the current high resolution time given global.
   - 3. If necessary, update the rendering or user interface of any Document or navigable to reflect the current state.
@@ -1105,39 +1117,43 @@ Status: unreviewed
 
 ##### [8.1.7.4 Generic task sources](https://html.spec.whatwg.org/#generic-task-sources)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `TaskSource`.
 <!-- definitions: dom-manipulation-task-source user-interaction-task-source networking-task-source navigation-and-traversal-task-source rendering-task-source -->
 
 ##### [8.1.7.5 Dealing with the event loop from other specifications](https://html.spec.whatwg.org/#event-loop-for-spec-authors)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> No requirements.
 
-- [ ] [Putting this all together, we can provide a template for a typical algorithm th…](https://html.spec.whatwg.org/#event-loop-for-spec-authors) — Putting this all together, we can provide a template for a typical algorithm that needs to do work asynchronously:
+- [x] [Putting this all together, we can provide a template for a typical algorithm th…](https://html.spec.whatwg.org/#event-loop-for-spec-authors) — Putting this all together, we can provide a template for a typical algorithm that needs to do work asynchronously:
   - 1. Do any synchronous setup work, while still on the event loop. This may include converting realm-specific JavaScript values into realm-agnostic specification-level values.
   - 2. Perform a set of potentially-expensive steps in parallel, operating entirely on realm-agnostic values, and producing a realm-agnostic result.
   - 3. Queue a global task, on a specified task source and given an appropriate global object, to convert the realm-agnostic result back into observable effects on the observable world of JavaScript objects on the event loop.
 
 #### [8.1.8 Events](https://html.spec.whatwg.org/#events)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ##### [8.1.8.1 Event handlers](https://html.spec.whatwg.org/#event-handler-attributes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Event handlers are C++ functions set with `SetOn<Name>()`; content attributes are inert (see `DIFFERENCES.md`).
 <!-- definitions: event-handlers event-handler-value event-handler-listener event-handler-name event-handler-target event-handler-map event-handler-content-attributes event-handler-event-type internal-raw-uncompiled-handler -->
 
-- [ ] [determine the target of an event handler](https://html.spec.whatwg.org/#determining-the-target-of-an-event-handler) — To determine the target of an event handler, given an EventTarget object eventTarget on which the event handler is exposed, and an event handler name name, the following steps are taken:
+- [x] [determine the target of an event handler](https://html.spec.whatwg.org/#determining-the-target-of-an-event-handler) — To determine the target of an event handler, given an EventTarget object eventTarget on which the event handler is exposed, and an event handler name name, the following steps are taken:
   - 1. If eventTarget is not a body element or a frameset element, then return eventTarget.
   - 2. If name is not the name of an attribute member of the WindowEventHandlers interface mixin and the Window-reflecting body element event handler set does not contain name, then return eventTarget.
   - 3. If eventTarget's node document is not an active document, then return null.
   - 4. Return eventTarget's node document's relevant global object.
 
-- [ ] [The getter of an event handler IDL attribute with name name, when called, must…](https://html.spec.whatwg.org/#event-handler-idl-attributes) — The getter of an event handler IDL attribute with name name, when called, must run these steps:
+- [x] [The getter of an event handler IDL attribute with name name, when called, must…](https://html.spec.whatwg.org/#event-handler-idl-attributes) — The getter of an event handler IDL attribute with name name, when called, must run these steps:
   - 1. Let eventTarget be the result of determining the target of an event handler given this object and name.
   - 2. If eventTarget is null, then return null.
   - 3. Return the result of getting the current value of the event handler given eventTarget and name.
 
-- [ ] [The setter of an event handler IDL attribute with name name, when called, must…](https://html.spec.whatwg.org/#event-handler-idl-attributes) — The setter of an event handler IDL attribute with name name, when called, must run these steps:
+- [x] [The setter of an event handler IDL attribute with name name, when called, must…](https://html.spec.whatwg.org/#event-handler-idl-attributes) — The setter of an event handler IDL attribute with name name, when called, must run these steps:
   - 1. Let eventTarget be the result of determining the target of an event handler given this object and name.
   - 2. If eventTarget is null, then return.
   - 3. If the given value is null, then deactivate an event handler given eventTarget and name.
@@ -1147,7 +1163,7 @@ Status: unreviewed
     - 4c. Set eventHandler's value to the given value.
     - 4d. Activate an event handler given eventTarget and name.
 
-- [ ] [deactivate an event handler](https://html.spec.whatwg.org/#deactivate-an-event-handler) — To deactivate an event handler given an EventTarget object eventTarget and a string name that is the name of an event handler, run these steps:
+- [x] [deactivate an event handler](https://html.spec.whatwg.org/#deactivate-an-event-handler) — To deactivate an event handler given an EventTarget object eventTarget and a string name that is the name of an event handler, run these steps:
   - 1. Let handlerMap be eventTarget's event handler map.
   - 2. Let eventHandler be handlerMap[name].
   - 3. Set eventHandler's value to null.
@@ -1155,11 +1171,11 @@ Status: unreviewed
   - 5. If listener is not null, then remove an event listener with eventTarget and listener.
   - 6. Set eventHandler's listener to null.
 
-- [ ] [erase all event listeners and handlers](https://html.spec.whatwg.org/#erase-all-event-listeners-and-handlers) — To erase all event listeners and handlers given an EventTarget object eventTarget, run these steps:
+- [x] [erase all event listeners and handlers](https://html.spec.whatwg.org/#erase-all-event-listeners-and-handlers) — To erase all event listeners and handlers given an EventTarget object eventTarget, run these steps:
   - 1. If eventTarget has an associated event handler map, then for each name → eventHandler of eventTarget's associated event handler map, deactivate an event handler given eventTarget and name.
   - 2. Remove all event listeners given eventTarget.
 
-- [ ] [activate an event handler](https://html.spec.whatwg.org/#activate-an-event-handler) — To activate an event handler given an EventTarget object eventTarget and a string name that is the name of an event handler, run these steps:
+- [x] [activate an event handler](https://html.spec.whatwg.org/#activate-an-event-handler) — To activate an event handler given an EventTarget object eventTarget and a string name that is the name of an event handler, run these steps:
   - 1. Let handlerMap be eventTarget's event handler map.
   - 2. Let eventHandler be handlerMap[name].
   - 3. If eventHandler's listener is not null, then return.
@@ -1168,7 +1184,7 @@ Status: unreviewed
   - 6. Add an event listener with eventTarget and listener.
   - 7. Set eventHandler's listener to listener.
 
-- [ ] [The event handler processing algorithm](https://html.spec.whatwg.org/#the-event-handler-processing-algorithm) — The event handler processing algorithm for an EventTarget object eventTarget, a string name representing the name of an event handler, and an Event object event is as follows:
+- [x] [The event handler processing algorithm](https://html.spec.whatwg.org/#the-event-handler-processing-algorithm) — The event handler processing algorithm for an EventTarget object eventTarget, a string name representing the name of an event handler, and an Event object event is as follows:
   - 1. If the result of WebDriver BiDi scripting is enabled with eventTarget's relevant settings object is false, then return.
   - 2. Let callback be the result of getting the current value of the event handler given eventTarget and name.
   - 3. If callback is null, then return.
@@ -1179,7 +1195,7 @@ Status: unreviewed
     - 7a. Set event's canceled flag.
     - 7b. If event's returnValue attribute's value is the empty string, then set event's returnValue attribute's value to return value.
 
-- [ ] [get the current value of the event handler](https://html.spec.whatwg.org/#getting-the-current-value-of-the-event-handler) — When the user agent is to get the current value of the event handler given an EventTarget object eventTarget and a string name that is the name of an event handler, it must run these steps:
+- [x] [get the current value of the event handler](https://html.spec.whatwg.org/#getting-the-current-value-of-the-event-handler) — When the user agent is to get the current value of the event handler given an EventTarget object eventTarget and a string name that is the name of an event handler, it must run these steps:
   - 1. Let handlerMap be eventTarget's event handler map.
   - 2. Let eventHandler be handlerMap[name].
   - 3. If eventHandler's value is an internal raw uncompiled handler:
@@ -1209,19 +1225,22 @@ Status: unreviewed
 
 ##### [8.1.8.2 Event handlers on elements, Document objects, and Window objects](https://html.spec.whatwg.org/#event-handlers-on-elements,-document-objects,-and-window-objects)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `EventHandlerAttributes` forwards the Window-reflecting body element event handlers of `<body>` and `<frameset>` to the window.
 
-- [ ] [Window-reflecting body element event handler set](https://html.spec.whatwg.org/#window-reflecting-body-element-event-handler-set) — We call the set of the names of the event handlers listed in the first column of this table the Window-reflecting body element event handler set.
+- [x] [Window-reflecting body element event handler set](https://html.spec.whatwg.org/#window-reflecting-body-element-event-handler-set) — We call the set of the names of the event handlers listed in the first column of this table the Window-reflecting body element event handler set.
 
 ###### [8.1.8.2.1 IDL definitions](https://html.spec.whatwg.org/#idl-definitions)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The `On<Name>()` handlers of `HTMLElement`, `Document` and `LocalDOMWindow`.
 
 ##### [8.1.8.3 Event firing](https://html.spec.whatwg.org/#event-firing)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `dom::SimulateClick` fires a click: a `PointerEvent` that bubbles, is cancelable and composed, with a pointer ID of -1.
 
-- [ ] [Firing a synthetic pointer event named e](https://html.spec.whatwg.org/#fire-a-synthetic-pointer-event) — Firing a synthetic pointer event named e at target, with an optional not trusted flag, means running these steps:
+- [x] [Firing a synthetic pointer event named e](https://html.spec.whatwg.org/#fire-a-synthetic-pointer-event) — Firing a synthetic pointer event named e at target, with an optional not trusted flag, means running these steps:
   - 1. Let event be the result of creating an event using PointerEvent.
   - 2. Initialize event's type attribute to e.
   - 3. Initialize event's bubbles and cancelable attributes to true.
@@ -1232,29 +1251,31 @@ Status: unreviewed
   - 8. event's getModifierState() method is to return values appropriately describing the current state of the key input device.
   - 9. Return the result of dispatching event at target.
 
-- [ ] [Firing a click event](https://html.spec.whatwg.org/#fire-a-click-event) — Firing a click event at target means firing a synthetic pointer event named click at target.
+- [x] [Firing a click event](https://html.spec.whatwg.org/#fire-a-click-event) — Firing a click event at target means firing a synthetic pointer event named click at target.
 
 ### [8.2 The WindowOrWorkerGlobalScope mixin](https://html.spec.whatwg.org/#windoworworkerglobalscope-mixin)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::Origin` and `IsSecureContext`; `CrossOriginIsolated` is false.
 
-- [ ] [WindowOrWorkerGlobalScope.isSecureContext](https://html.spec.whatwg.org/#dom-issecurecontext) — The isSecureContext getter steps are to return true if this's relevant settings object is a secure context, or false otherwise.
+- [x] [WindowOrWorkerGlobalScope.isSecureContext](https://html.spec.whatwg.org/#dom-issecurecontext) — The isSecureContext getter steps are to return true if this's relevant settings object is a secure context, or false otherwise.
 
-- [ ] [WindowOrWorkerGlobalScope.origin](https://html.spec.whatwg.org/#dom-origin) — The origin getter steps are to return this's relevant settings object's origin, serialized.
+- [x] [WindowOrWorkerGlobalScope.origin](https://html.spec.whatwg.org/#dom-origin) — The origin getter steps are to return this's relevant settings object's origin, serialized.
 
-- [ ] [WindowOrWorkerGlobalScope.crossOriginIsolated](https://html.spec.whatwg.org/#dom-crossoriginisolated) — The crossOriginIsolated getter steps are to return this's relevant settings object's cross-origin isolated capability.
+- [x] [WindowOrWorkerGlobalScope.crossOriginIsolated](https://html.spec.whatwg.org/#dom-crossoriginisolated) — The crossOriginIsolated getter steps are to return this's relevant settings object's cross-origin isolated capability.
 
-- [ ] [An element implementing the WindowOrWorkerGlobalScope mixin has the following e…](https://html.spec.whatwg.org/#dom-crossoriginisolated) — An element implementing the WindowOrWorkerGlobalScope mixin has the following extract an origin steps:
+- [x] [An element implementing the WindowOrWorkerGlobalScope mixin has the following e…](https://html.spec.whatwg.org/#dom-crossoriginisolated) — An element implementing the WindowOrWorkerGlobalScope mixin has the following extract an origin steps:
   - 1. If this's relevant settings object's origin is not same origin-domain with the entry settings object's origin, then return null.
   - 2. Return this's relevant settings object's origin.
 
 ### [8.3 Base64 utility methods](https://html.spec.whatwg.org/#atob)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::Btoa` and `Atob`.
 
-- [ ] [WindowOrWorkerGlobalScope.btoa(data)](https://html.spec.whatwg.org/#dom-btoa) — The btoa(data) method must throw an "InvalidCharacterError" DOMException if data contains any character whose code point is greater than U+00FF. Otherwise, the user agent must convert data to a byte sequence whose nth byte is the eight-bit representation of the nth code point of data, and then must apply forgiving-base64 encode to that byte sequence and return the result.
+- [x] [WindowOrWorkerGlobalScope.btoa(data)](https://html.spec.whatwg.org/#dom-btoa) — The btoa(data) method must throw an "InvalidCharacterError" DOMException if data contains any character whose code point is greater than U+00FF. Otherwise, the user agent must convert data to a byte sequence whose nth byte is the eight-bit representation of the nth code point of data, and then must apply forgiving-base64 encode to that byte sequence and return the result.
 
-- [ ] [WindowOrWorkerGlobalScope.atob(data)](https://html.spec.whatwg.org/#dom-atob) — The atob(data) method steps are:
+- [x] [WindowOrWorkerGlobalScope.atob(data)](https://html.spec.whatwg.org/#dom-atob) — The atob(data) method steps are:
   - 1. Let decodedData be the result of running forgiving-base64 decode on data.
   - 2. If decodedData is failure, then throw an "InvalidCharacterError" DOMException.
   - 3. Return decodedData.

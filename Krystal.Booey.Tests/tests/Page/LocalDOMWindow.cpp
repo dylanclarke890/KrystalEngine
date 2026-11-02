@@ -1080,7 +1080,11 @@ namespace krys::boo::tests
     CHECK(ParseWindowFeatures(u8"popup=no").Popup == false);
   }
 
-  TEST_CASE("A window's global scope", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's global scope",
+    "[Page][LocalDOMWindow][html:windoworworkerglobalscope-mixin][html:dom-origin][html:dom-issecurecontext]"
+    "[html:dom-crossoriginisolated][html:secure-contexts][html:atob][html:dom-btoa][html:dom-atob]"
+    "[html:runtime-script-errors][html:dom-reporterror][html:report-an-exception]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -1371,7 +1375,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Event handler attributes", "[Page][LocalDOMWindow][EventHandlers]")
+  TEST_CASE("Event handler attributes",
+            "[Page][LocalDOMWindow][EventHandlers][html:event-handler-attributes]"
+            "[html:the-event-handler-processing-algorithm][html:event-handler-idl-attributes]"
+            "[html:window-reflecting-body-element-event-handler-set]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><body><button id=button>Go</button></body>");
     auto &window = fixture.Window();

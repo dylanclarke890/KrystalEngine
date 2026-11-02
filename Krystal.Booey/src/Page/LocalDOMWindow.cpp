@@ -1209,23 +1209,36 @@ namespace krys::boo
   void LocalDOMWindow::ReportError(const dom::DOMString &message,
                                    RefPtr<html::SerializedScriptValue> &&error) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-reporterror: report an exception e for this.
     // https://html.spec.whatwg.org/#report-an-exception
-    // If target is in error reporting mode, then return.
+    // 1. Let notHandled be true.
+    // 2. Let errorInfo be the result of extracting error information from exception.
+    // (The message and the value; there's no script location.)
+    // 3. Let script be a script found in an implementation-defined way, or null.
+    // 4. If script is a classic script and script's muted errors is true, then ...
+    // 5. If omitError is true, then set errorInfo[error] to null.
+    // (There are no scripts.)
+    // 6. If global is not in error reporting mode:
     if (_errorReportingMode)
     {
       return;
     }
 
-    // Set target's error reporting mode to true, and fire an event named error at target, using ErrorEvent,
-    // with the cancelable attribute initialized to true.
+    // 6a. Set global's in error reporting mode to true.
+    // 6b. If global implements EventTarget, then set notHandled to the result of firing an event named error
+    //     at global, using ErrorEvent, with the cancelable attribute initialized to true, and additional
+    //     attributes initialized according to errorInfo.
     // FIXME: The script's location (filename, line and column), once there's scripting.
     _errorReportingMode = true;
     Ref<dom::Event> event = html::ErrorEvent::Create(dom::DOMString(message), {}, 0, 0, krys::move(error));
     Ref<LocalDOMWindow> protectedThis = ShareRef(*this);
     bool notHandled = dom::EventDispatcher::DispatchToTarget(*event, this);
+    // 6c. Set global's in error reporting mode to false.
     _errorReportingMode = false;
 
-    // If notHandled is true, then report the exception to the developer console.
+    // 7. If notHandled is true:
+    // 7a. Set errorInfo[error] to null.
+    // 7c. Otherwise, the user agent may report exception to a developer console.
     if (notHandled)
     {
       if (auto *page = GetPage())

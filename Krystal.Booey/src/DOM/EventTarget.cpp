@@ -119,8 +119,22 @@ namespace krys::boo::dom
           return;
         }
         // https://html.spec.whatwg.org/#the-event-handler-processing-algorithm
+        // 1. If the result of WebDriver BiDi scripting is enabled with eventTarget's relevant settings object
+        //    is false, then return.
+        // 2. Let callback be the result of getting the current value of the event handler given eventTarget
+        //    and name.
+        // 3. If callback is null, then return.
+        // 4. If callback's associated realm's global object is a Window object whose associated Document is
+        //    not fully active, then return.
+        // (Handlers are C++ functions, with no realm.)
         if (auto *handler = target->EventHandlerValue(name))
         {
+          // 5. Let special error event handling be true if event is an ErrorEvent object, event's type is
+          //    "error", and event's currentTarget implements the WindowOrWorkerGlobalScope mixin.
+          // 6. Process the Event object event: let return value be the result of invoking callback with
+          //    « event ».
+          // 7. Process return value.
+          // (A handler takes the event, and cancels it with PreventDefault() rather than a return value.)
           auto current = *handler;
           current(event);
         }

@@ -349,6 +349,45 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE("The focus fixup doesn't stop a finished navigation resetting the focus",
+            "[Page][Navigation][html:update-the-rendering][html:potentially-reset-the-focus]")
+  {
+    NavigationFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/form.html",
+                             u8"<!DOCTYPE html><input id=first><input id=auto autofocus>", u8"text/html");
+    fixture.Visit(u8"https://example.com/form.html");
+    fixture.TestPage->UpdateRendering();
+    RefPtr<dom::Document> document = ShareRefPtr(&fixture.Document());
+    auto *first = Downcast<html::HTMLElement>(document->GetElementById(u8"first").get());
+    auto *autofocused = document->GetElementById(u8"auto").get();
+
+    Func<void(dom::ExceptionOr<void>)> finish;
+    fixture.OnNavigate = [&](NavigateEvent &event)
+    {
+      NavigateEvent::NavigationInterceptOptions options;
+      options.Handler = [&](Func<void(dom::ExceptionOr<void>)> &&completion)
+      {
+        finish = krys::move(completion);
+      };
+      REQUIRE_FALSE(event.Intercept(*document, krys::move(options)).HasException());
+    };
+    (void)fixture.GetNavigation().Navigate(u8"#next");
+    fixture.Run();
+    REQUIRE(finish);
+
+    // The focus moves while the navigation is ongoing, then the fixup takes it back to the viewport.
+    first->Focus();
+    REQUIRE(document->FocusedElement() == first);
+    REQUIRE_FALSE(first->SetAttribute(dom::DOMStringAtom(u8"disabled"), dom::DOMString()).HasException());
+    fixture.TestPage->UpdateRendering();
+    REQUIRE(document->FocusedElement() == nullptr);
+
+    // So the navigation's finish resets the focus.
+    finish({});
+    fixture.Run();
+    CHECK(document->FocusedElement() == autofocused);
+  }
+
   TEST_CASE(
     "Traversing to another document",
     "[Page][Navigation][html:fire-a-traverse-navigate-event][html:performing-a-navigation-api-traversal]"

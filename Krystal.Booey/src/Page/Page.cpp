@@ -17,6 +17,7 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Navigation.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -292,12 +293,20 @@ namespace krys::boo
                       [](dom::Document &document)
                       {
                         // If the focused area of the document is not a focusable area, run the focusing steps
-                        // for the document's viewport.
+                        // for the document's viewport, and set the document's relevant global object's
+                        // navigation API's focus changed during ongoing navigation to false.
                         if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement()))
                         {
                           if (!html::FocusAlgorithms::IsFocusableArea(*focusedElement))
                           {
                             html::FocusAlgorithms::FocusingSteps(document);
+                            if (auto *window = document.Window())
+                            {
+                              if (auto *navigation = window->NavigationIfExists())
+                              {
+                                navigation->SetFocusChanged(FocusDidChange::No);
+                              }
+                            }
                           }
                         }
                       });
