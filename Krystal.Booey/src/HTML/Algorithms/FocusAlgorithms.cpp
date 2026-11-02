@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/FocusEvent.hpp"
+#include "Krystal.Booey/DOM/Events/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"

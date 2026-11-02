@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
-#include "Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"

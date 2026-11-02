@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/History/HistoryItem.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"

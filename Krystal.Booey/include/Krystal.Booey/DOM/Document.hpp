@@ -1,23 +1,17 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Dicts/ElementCreationOptions.hpp"
-#include "Krystal.Booey/DOM/Dicts/ImportNodeOptions.hpp"
-#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
+#include "Krystal.Booey/DOM/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
-#include "Krystal.Booey/DOM/Enums/BackForwardCacheState.hpp"
-#include "Krystal.Booey/DOM/Enums/ContentRelevancy.hpp"
-#include "Krystal.Booey/DOM/Enums/DocumentFlags.hpp"
-#include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
-#include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
-#include "Krystal.Booey/DOM/Enums/QuirksMode.hpp"
-#include "Krystal.Booey/DOM/Enums/ReasonForSuspension.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/IdleCallbackController.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/DocumentRareData.hpp"
+#include "Krystal.Booey/DOM/LayoutOptions.hpp"
+#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/DOM/ScriptedAnimationController.hpp"
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
@@ -40,11 +34,16 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/BoolOr.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::text
@@ -138,6 +137,62 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  enum class PopoverState : uint8;
+  /// @brief Where a document is in entering the back/forward cache.
+  enum class BackForwardCacheState : uint8
+  {
+    NotInBackForwardCache,
+    /// @brief Its page is leaving it: `pagehide` fires before it's cached.
+    AboutToEnterBackForwardCache,
+    InBackForwardCache
+  };
+
+  /// @brief Various flags used for optimizations in the Document class.
+  enum class DocumentFlags : uint16
+  {
+    None = 0,
+
+    /// @brief Indicates the type of the document is 'xml'.
+    /// @see https://dom.spec.whatwg.org/#concept-document-type
+    IsXMLDocument = 1 << 1,
+
+    /// @brief Indicates the type of the document is 'html'.
+    /// @see https://dom.spec.whatwg.org/#concept-document-type
+    IsHTMLDocument = 1 << 2,
+
+    /// @brief Indicates the type of the document is 'xhtml'.
+    IsXHTMLDocument = 1 << 3,
+
+    /// @brief Indicates the type of the document is 'svg'.
+    IsSVGDocument = 1 << 4,
+  };
+
+  /// @see https://dom.spec.whatwg.org/#concept-document-mode
+  enum class QuirksMode : uint8
+  {
+    NoQuirks,
+    Quirks,
+    LimitedQuirks
+  };
+
+  /// @brief Why a document's tasks and active objects (its timers, its animation frame callbacks) are
+  /// suspended.
+  enum class ReasonForSuspension : uint8
+  {
+    JavaScriptDebuggerPaused,
+    WillDeferLoading,
+    /// @brief The document is in the back/forward cache.
+    BackForwardCache,
+    /// @brief The host suspended the page.
+    PageWillBeSuspended
+  };
+}
+
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::DocumentFlags, 5uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::QuirksMode, 3uz);
+
+namespace krys::boo::dom
+{
   class Attr;
   class CDATASection;
   class Comment;
@@ -180,6 +235,24 @@ namespace krys::boo::dom
     double LoadEventStartTime {0};
     double LoadEventEndTime {0};
   };
+
+  /// @see https://dom.spec.whatwg.org/#dictdef-elementcreationoptions
+  struct ElementCreationOptions
+  {
+    RefPtr<html::CustomElementRegistry> CustomElementRegistry;
+    DOMStringAtom Is {DOMStringAtom::Null()};
+  };
+
+  using ElementCreationOptionsOrString = Variant<ElementCreationOptions, DOMString>;
+
+  /// @see https://dom.spec.whatwg.org/#dictdef-importnodeoptions
+  struct ImportNodeOptions
+  {
+    RefPtr<html::CustomElementRegistry> CustomElementRegistry;
+    bool SelfOnly {false};
+  };
+
+  using BoolOrImportNodeOptions = BoolOr<ImportNodeOptions>;
 
   /// @brief A document: the root of a node tree. It's an XML document unless it's an `HTMLDocument`.
   /// @see https://dom.spec.whatwg.org/#concept-document

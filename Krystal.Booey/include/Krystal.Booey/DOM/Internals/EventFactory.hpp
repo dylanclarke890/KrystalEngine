@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

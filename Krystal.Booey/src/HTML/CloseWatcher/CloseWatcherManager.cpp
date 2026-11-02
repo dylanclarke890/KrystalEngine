@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include <ranges>
 
 namespace krys::boo::html

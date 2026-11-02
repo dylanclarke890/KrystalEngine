@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
-#include "Krystal.Booey/DOM/ToggleEventTask.hpp"
+#include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -12,6 +12,42 @@ namespace krys::boo::html
 {
   class HTMLElement;
 }
+
+namespace krys::boo::dom
+{
+  /// @brief The state of an element's `popover` attribute.
+  /// @see https://html.spec.whatwg.org/#attr-popover
+  enum class PopoverState : uint8
+  {
+    None,
+    Auto,
+    Manual,
+    Hint
+  };
+
+  /// @see https://html.spec.whatwg.org/#popover-visibility-state
+  enum class PopoverVisibilityState : bool
+  {
+    Hidden,
+    Showing
+  };
+
+  /// @brief Whether hiding a popover returns the focus to the element focused before it showed.
+  enum class FocusPreviousElement : bool
+  {
+    No,
+    Yes
+  };
+
+  /// @brief Whether showing or hiding a popover fires its `beforetoggle` and `toggle` events.
+  enum class FireEvents : bool
+  {
+    No,
+    Yes
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::PopoverState, 4uz);
 
 namespace krys::boo::dom
 {

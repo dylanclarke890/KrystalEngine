@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLHeadingElement.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Dicts/ShadowRootInit.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"

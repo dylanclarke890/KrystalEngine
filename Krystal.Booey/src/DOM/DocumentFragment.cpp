@@ -2,10 +2,10 @@
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
-#include "Krystal.Booey/DOM/HTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
-#include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
 namespace krys::boo::dom

@@ -90,12 +90,12 @@ Status: n/a (heading only)
 ### [2.1. Introduction to "DOM Events"](https://dom.spec.whatwg.org/#introduction-to-dom-events)
 
 Status: reviewed (2026-10-31)
-> The examples are tested in `tests/DOM/EventTarget.cpp`: adding and removing listeners, removing them with a signal, a synthetic `CustomEvent`, `dispatchEvent()`'s return value and the capture and bubble order.
+> The examples are tested in `tests/DOM/Events/EventTarget.cpp`: adding and removing listeners, removing them with a signal, a synthetic `CustomEvent`, `dispatchEvent()`'s return value and the capture and bubble order.
 
 ### [2.2. Interface Event](https://dom.spec.whatwg.org/#interface-event)
 
 Status: reviewed (2026-10-30)
-> Code: `Event` (`Event.hpp`/`Event.cpp`), with the path in `EventPathItem` and the phases in `EventPhaseType`. The flags are `Event`'s data members. Tests: `tests/DOM/Event.cpp`.
+> Code: `Event` (`Event.hpp`/`Event.cpp`), with the path in `EventPathItem` and the phases in `EventPhaseType`. The flags are `Event`'s data members. Tests: `tests/DOM/Events/Event.cpp`.
 <!-- definitions: concept-event potential-event-target event-target event-relatedtarget event-touch-target-list event-path event-path-item event-path-invocation-target event-path-invocation-target-in-shadow-tree event-path-shadow-adjusted-target event-path-relatedtarget event-path-touch-target-list event-path-root-of-closed-tree event-path-slot-in-closed-tree dom-event-none dom-event-capturing_phase dom-event-at_target dom-event-bubbling_phase stop-propagation-flag stop-immediate-propagation-flag canceled-flag in-passive-listener-flag composed-flag initialized-flag dispatch-flag dom-event-cancelable -->
 
 - [x] [Event.type](https://dom.spec.whatwg.org/#dom-event-type) — The type attribute must return the value it was initialized to. When an event is created the attribute must be initialized to the empty string.
@@ -197,7 +197,7 @@ Status: reviewed (2026-10-30)
 ### [2.4. Interface CustomEvent](https://dom.spec.whatwg.org/#interface-customevent)
 
 Status: reviewed (2026-10-30)
-> Code: `CustomEvent<T>` (`CustomEvent.hpp`); its `any` detail is a `Maybe<T>` (`DIFFERENCES.md`). Tests: `tests/DOM/CustomEvent.cpp`.
+> Code: `CustomEvent<T>` (`CustomEvent.hpp`); its `any` detail is a `Maybe<T>` (`DIFFERENCES.md`). Tests: `tests/DOM/Events/CustomEvent.cpp`.
 
 - [x] [CustomEvent.detail](https://dom.spec.whatwg.org/#dom-customevent-detail) — The detail attribute must return the value it was initialized to.
 
@@ -209,7 +209,7 @@ Status: reviewed (2026-10-30)
 ### [2.5. Constructing events](https://dom.spec.whatwg.org/#constructing-events)
 
 Status: reviewed (2026-10-30)
-> Code: the constructor and the inner event creation steps are `Event`'s constructor, with each derived interface's constructor initializing its own dictionary members and running its event constructing steps; create an event is `EventFactory::Create<TEvent>()`. `Event::Create` and the derived interfaces' `Create` functions make trusted events directly, as create an event followed by initializing their attributes. Tests: `tests/DOM/Event.cpp`, `tests/DOM/Internals/EventFactory.cpp`.
+> Code: the constructor and the inner event creation steps are `Event`'s constructor, with each derived interface's constructor initializing its own dictionary members and running its event constructing steps; create an event is `EventFactory::Create<TEvent>()`. `Event::Create` and the derived interfaces' `Create` functions make trusted events directly, as create an event followed by initializing their attributes. Tests: `tests/DOM/Events/Event.cpp`, `tests/DOM/Internals/EventFactory.cpp`.
 <!-- definitions: concept-event-constructor-ext -->
 
 - [x] [constructor (Event)](https://dom.spec.whatwg.org/#concept-event-constructor) — When a constructor of the Event interface, or of an interface that inherits from the Event interface, is invoked, these steps must be run, given the arguments type and eventInitDict:
@@ -240,7 +240,7 @@ Status: n/a (guidance for specification authors)
 ### [2.7. Interface EventTarget](https://dom.spec.whatwg.org/#interface-eventtarget)
 
 Status: reviewed (2026-10-30)
-> Code: `EventTarget` (the methods, the event listener list, get the parent and the activation behaviours), `EventTargetAlgorithms` (flatten, flatten more, default passive value, add, remove and remove all event listeners) and `EventListener`. Tests: `tests/DOM/EventTarget.cpp`, `tests/DOM/Algorithms/EventTargetAlgorithms.cpp`.
+> Code: `EventTarget` (the methods, the event listener list, get the parent and the activation behaviours), `EventTargetAlgorithms` (flatten, flatten more, default passive value, add, remove and remove all event listeners) and `EventListener`. Tests: `tests/DOM/Events/EventTarget.cpp`, `tests/DOM/Algorithms/EventTargetAlgorithms.cpp`.
 <!-- definitions: eventtarget-event-listener-list concept-event-listener event-listener-type event-listener-callback event-listener-capture event-listener-passive event-listener-once event-listener-signal event-listener-removed get-the-parent eventtarget-activation-behavior eventtarget-legacy-pre-activation-behavior eventtarget-legacy-canceled-activation-behavior -->
 
 - [x] [flatten (Event)](https://dom.spec.whatwg.org/#concept-flatten-options) — To flatten options, run these steps:
@@ -305,7 +305,7 @@ Status: n/a (service workers)
 ### [2.9. Dispatching events](https://dom.spec.whatwg.org/#dispatching-events)
 
 Status: reviewed (2026-10-30)
-> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/DOM/Algorithms/EventDispatcher.cpp`, with the path's effects in `tests/DOM/Event.cpp` and the window in `tests/Page/LocalDOMWindow.cpp`.
+> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/DOM/Algorithms/EventDispatcher.cpp`, with the path's effects in `tests/DOM/Events/Event.cpp` and the window in `tests/Page/LocalDOMWindow.cpp`.
 
 - [x] [dispatch](https://dom.spec.whatwg.org/#concept-event-dispatch) — To dispatch an event event to an EventTarget object target, with an optional legacy target override flag and an optional legacyOutputDidListenersThrowFlag:
   - 1. Set event’s dispatch flag.
@@ -835,7 +835,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.5. Mixin DocumentOrShadowRoot](https://dom.spec.whatwg.org/#mixin-documentorshadowroot)
 
 Status: reviewed (2026-10-31)
-> Code: `DocumentOrShadowRoot`, a base of `Document` and `ShadowRoot` that keeps either's custom element registry. Tests: `tests/DOM/DocumentOrShadowRoot.cpp`.
+> Code: `DocumentOrShadowRoot`, a base of `Document` and `ShadowRoot` that keeps either's custom element registry. Tests: `tests/DOM/Mixins/DocumentOrShadowRoot.cpp`.
 
 - [x] [DocumentOrShadowRoot.customElementRegistry](https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry) — The customElementRegistry getter steps are:
   - 1. If this is a document, then return this’s custom element registry.
@@ -935,13 +935,13 @@ Status: reviewed (2026-10-31)
 #### [4.2.10. Old-style collections: NodeList and HTMLCollection](https://dom.spec.whatwg.org/#old-style-collections)
 
 Status: reviewed (2026-10-31)
-> Live collections are `LiveNodeList` and `LiveHTMLCollection`, which walk the root's descendants with their filter on each access; static ones are `StaticNodeList` and `StaticHTMLCollection`. Tests: `tests/DOM/NodeList.cpp`.
+> Live collections are `LiveNodeList` and `LiveHTMLCollection`, which walk the root's descendants with their filter on each access; static ones are `StaticNodeList` and `StaticHTMLCollection`. Tests: `tests/DOM/Collections/NodeList.cpp`.
 <!-- definitions: concept-collection concept-collection-live concept-collection-static represented-by-the-collection -->
 
 ##### [4.2.10.1. Interface NodeList](https://dom.spec.whatwg.org/#interface-nodelist)
 
 Status: reviewed (2026-10-31)
-> Code: `NodeList`, with `LiveNodeList` and `StaticNodeList` (`LabelsNodeList` and `RadioNodeList` are HTML's). Its supported property indices are `IsSupportedPropertyIndex`, and `begin()`/`end()` make it iterable. Tests: `tests/DOM/NodeList.cpp`.
+> Code: `NodeList`, with `LiveNodeList` and `StaticNodeList` (`LabelsNodeList` and `RadioNodeList` are HTML's). Its supported property indices are `IsSupportedPropertyIndex`, and `begin()`/`end()` make it iterable. Tests: `tests/DOM/Collections/NodeList.cpp`.
 
 - [x] [NodeList.length](https://dom.spec.whatwg.org/#dom-nodelist-length) — The length attribute must return the number of nodes represented by the collection.
 
@@ -950,7 +950,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.10.2. Interface HTMLCollection](https://dom.spec.whatwg.org/#interface-htmlcollection)
 
 Status: reviewed (2026-10-31)
-> Code: `HTMLCollection`, with `LiveHTMLCollection` and `StaticHTMLCollection` (`HTMLFormControlsCollection` and `HTMLTableRowsCollection` are HTML's). Tests: `tests/DOM/HTMLCollection.cpp`.
+> Code: `HTMLCollection`, with `LiveHTMLCollection` and `StaticHTMLCollection` (`HTMLFormControlsCollection` and `HTMLTableRowsCollection` are HTML's). Tests: `tests/DOM/Collections/HTMLCollection.cpp`.
 
 - [x] [HTMLCollection.length](https://dom.spec.whatwg.org/#dom-htmlcollection-length) — The length getter steps are to return the number of nodes represented by the collection.
 
@@ -1074,7 +1074,7 @@ Status: reviewed (2026-10-31)
 #### [4.3.3. Interface MutationRecord](https://dom.spec.whatwg.org/#interface-mutationrecord)
 
 Status: reviewed (2026-10-31)
-> `MutationRecord` (`MutationRecord.hpp`) has a subclass per type in `DOM/Internals/MutationRecord/`; attribute and character data records create their empty `addedNodes` and `removedNodes` lists when first asked, and keep them.
+> `MutationRecord` (`MutationRecord.hpp`) has a subclass per type in `DOM/MutationObservers/`; attribute and character data records create their empty `addedNodes` and `removedNodes` lists when first asked, and keep them.
 <!-- definitions: dom-mutationrecord-target dom-mutationrecord-addednodes dom-mutationrecord-removednodes dom-mutationrecord-previoussibling dom-mutationrecord-nextsibling dom-mutationrecord-attributename dom-mutationrecord-attributenamespace dom-mutationrecord-oldvalue -->
 
 - [x] [MutationRecord.type](https://dom.spec.whatwg.org/#dom-mutationrecord-type) — The type, target, addedNodes, removedNodes, previousSibling, nextSibling, attributeName, attributeNamespace, and oldValue attributes must return the values they were initialized to.
@@ -2568,7 +2568,7 @@ Status: reviewed (2026-10-31)
 ### [6.3. Interface NodeFilter](https://dom.spec.whatwg.org/#interface-nodefilter)
 
 Status: reviewed (2026-10-31)
-> NodeFilter is `DOM/Callbacks/NodeFilter.hpp`, a C++ subclass with `AcceptNode`; its constants are the `FilterResult` (`DOM/Enums/FilterResult.hpp`) and `WhatToShow` (`DOM/Enums/WhatToShow.hpp`) enumerations, the legacy `SHOW_ENTITY_REFERENCE`, `SHOW_ENTITY` and `SHOW_NOTATION` included.
+> NodeFilter is `DOM/NodeFilter.hpp`, a C++ subclass with `AcceptNode`; its constants are the `FilterResult` (`DOM/NodeFilter.hpp`) and `WhatToShow` (`DOM/NodeFilter.hpp`) enumerations, the legacy `SHOW_ENTITY_REFERENCE`, `SHOW_ENTITY` and `SHOW_NOTATION` included.
 <!-- definitions: dom-nodefilter-filter_accept dom-nodefilter-filter_reject dom-nodefilter-filter_skip dom-nodefilter-show_all dom-nodefilter-show_element dom-nodefilter-show_attribute dom-nodefilter-show_text dom-nodefilter-show_cdata_section dom-nodefilter-show_processing_instruction dom-nodefilter-show_comment dom-nodefilter-show_document dom-nodefilter-show_document_type dom-nodefilter-show_document_fragment -->
 
 ## [7. Sets](https://dom.spec.whatwg.org/#sets)

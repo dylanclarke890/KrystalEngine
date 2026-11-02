@@ -2,8 +2,8 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo::dom

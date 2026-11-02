@@ -1,11 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/GetRootNodeOptions.hpp"
-#include "Krystal.Booey/DOM/Enums/DocumentPosition.hpp"
-#include "Krystal.Booey/DOM/Enums/NodeFlags.hpp"
-#include "Krystal.Booey/DOM/Enums/NodeStyleFlags.hpp"
-#include "Krystal.Booey/DOM/Enums/NodeType.hpp"
-#include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
@@ -14,6 +9,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -27,6 +23,141 @@ namespace krys::boo
   class RenderStyle;
   enum class TextDirection : bool;
 }
+
+namespace krys::boo::dom
+{
+  /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
+  struct GetRootNodeOptions
+  {
+    bool Composed = false;
+  };
+
+  /// @see https://dom.spec.whatwg.org/#dom-node-nodetype
+  enum class NodeType : uint8
+  {
+    NONE = 0,
+    /// @see https://dom.spec.whatwg.org/#dom-node-element_node
+    ELEMENT_NODE = 1,
+    /// @see https://dom.spec.whatwg.org/#dom-node-attribute_node
+    ATTRIBUTE_NODE = 2,
+    /// @see https://dom.spec.whatwg.org/#dom-node-text_node
+    TEXT_NODE = 3,
+    /// @see https://dom.spec.whatwg.org/#dom-node-cdata_section_node
+    CDATA_SECTION_NODE = 4,
+    ENTITY_REFERENCE_NODE = 5, // legacy
+    ENTITY_NODE = 6,           // legacy
+    /// @see https://dom.spec.whatwg.org/#dom-node-processing_instruction_node
+    PROCESSING_INSTRUCTION_NODE = 7,
+    /// @see https://dom.spec.whatwg.org/#dom-node-comment_node
+    COMMENT_NODE = 8,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_node
+    DOCUMENT_NODE = 9,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_type_node
+    DOCUMENT_TYPE_NODE = 10,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_fragment_node
+    DOCUMENT_FRAGMENT_NODE = 11,
+    NOTATION_NODE = 12, // legacy
+  };
+
+  /// @brief Various flags for optimizing certain node checks.
+  enum class NodeFlags : uint32
+  {
+    None = 0,
+    IsConnected = 1 << 0,
+    IsInShadowTree = 1 << 1,
+    IsCharacterData = 1 << 2,
+    IsContainerNode = 1 << 3,
+    IsShadowRoot = 1 << 4,
+    IsUnknownElement = 1 << 5,
+    IsHTMLElement = 1 << 6,
+    IsSVGElement = 1 << 7,
+    IsMathMLElement = 1 << 8,
+    IsHTMLSlotElement = 1 << 9,
+    /// @brief Set while the parser is inserting the element's children; see `Element::FinishParsingChildren`.
+    IsParsingChildren = 1 << 10,
+    /// @brief Set when the inline style has changed since the `style` attribute was last written; see
+    /// `Element::SynchronizeAllAttributes`.
+    StyleAttributeIsDirty = 1 << 11,
+    /// @brief Set when the element's computed style (`Element::ComputedStyle`) may be out of date.
+    IsComputedStyleInvalid = 1 << 12,
+    HasInvalidRenderer = 1 << 13,
+    StyleResolutionShouldRecompositeLayer = 1 << 14,
+    NeedsUpdateQueryContainerDependentStyle = 1 << 15,
+    /// @brief Set while the element has user action state (hover, active or focus) in its document's
+    /// `UserActionElementSet`.
+    IsUserActionElement = 1 << 16,
+    /// @brief Set on the `PseudoElement`s generated for `::before` and `::after`.
+    IsPseudoElement = 1 << 17,
+    /// @brief Set on a node an end point of the frame's selection is anchored in, and on its ancestors.
+    ContainsSelectionEndPoint = 1 << 18,
+    /// @brief Set on elements whose style is resolved by `Element::ResolveCustomStyle`.
+    HasCustomStyleResolveCallbacks = 1 << 19,
+    /// @brief Set on an SVG element when one of its properties has changed since the attribute it reflects
+    /// was last written; see `Element::SynchronizeAllAttributes`.
+    AnimatedSVGAttributesAreDirty = 1 << 20,
+    /// @brief Set on an SVG element whose renderer needs laying out again after a change to the element; see
+    /// `style::Update::AddSVGRendererUpdate`.
+    NeedsSVGRendererUpdate = 1 << 21,
+    /// @brief Set on an SVG element waiting for an id as a pending resource of its tree scope; see
+    /// `DocumentOrShadowRoot::AddPendingSVGResource`.
+    HasPendingResources = 1 << 22,
+    /// @brief Set on a node whose text may decide the auto directionality of an ancestor (an element whose
+    /// `dir` is `auto`, or a `<bdi>`), and on that element; see `ElementTextDirection.hpp`.
+    SelfOrPrecedingNodesAffectDirAuto = 1 << 23,
+    /// @brief Set on a node whose directionality is kept (`EffectiveTextDirectionIsRTL`) rather than the
+    /// document element's.
+    UsesEffectiveTextDirection = 1 << 24,
+    /// @brief The kept directionality, set when it's right to left.
+    EffectiveTextDirectionIsRTL = 1 << 25,
+  };
+
+  /// @brief The style resolution state of a node: whether its descendants need resolving, and the style
+  /// relations selector matching recorded on it.
+  enum class NodeStyleFlags : uint16
+  {
+    None = 0,
+    DescendantNeedsStyleResolution = 1 << 0,
+    DirectChildNeedsStyleResolution = 1 << 1,
+
+    AffectedByHasWithPositionalPseudoClass = 1 << 2,
+    ChildrenAffectedByFirstChildRules = 1 << 3,
+    ChildrenAffectedByLastChildRules = 1 << 4,
+    AffectsNextSiblingElementStyle = 1 << 5,
+    StyleIsAffectedByPreviousSibling = 1 << 6,
+    DescendantsAffectedByPreviousSibling = 1 << 7,
+    StyleAffectedByEmpty = 1 << 8,
+    // We optimize for :first-child and :last-child. The other positional child selectors like nth-child or
+    // *-child-of-type, we will just give up and re-evaluate whenever children change at all.
+    ChildrenAffectedByForwardPositionalRules = 1 << 9,
+    DescendantsAffectedByForwardPositionalRules = 1 << 10,
+    ChildrenAffectedByBackwardPositionalRules = 1 << 11,
+    DescendantsAffectedByBackwardPositionalRules = 1 << 12,
+  };
+
+  /// @brief The bits `compareDocumentPosition()` returns.
+  /// @see https://dom.spec.whatwg.org/#dom-node-comparedocumentposition
+  enum class DocumentPosition : uint8
+  {
+    DOCUMENT_POSITION_EQUIVALENT = 0x00,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_position_disconnected
+    DOCUMENT_POSITION_DISCONNECTED = 0x01,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_position_preceding
+    DOCUMENT_POSITION_PRECEDING = 0x02,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_position_following
+    DOCUMENT_POSITION_FOLLOWING = 0x04,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_position_contains
+    DOCUMENT_POSITION_CONTAINS = 0x08,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_position_contained_by
+    DOCUMENT_POSITION_CONTAINED_BY = 0x10,
+    /// @see https://dom.spec.whatwg.org/#dom-node-document_position_implementation_specific
+    DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20,
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::NodeType, 13u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 26u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeStyleFlags, 13u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::DocumentPosition, 7u);
 
 namespace krys::boo::dom
 {

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
-#include "Krystal.Booey/DOM/HTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLLegendElement.hpp"

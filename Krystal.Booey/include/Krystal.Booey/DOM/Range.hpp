@@ -4,11 +4,24 @@
 #include "Krystal.Booey/DOM/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/DOMRectList.hpp"
-#include "Krystal.Booey/DOM/Enums/BoundaryPointComparator.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include <compare>
+
+namespace krys::boo::dom
+{
+  /// @see https://dom.spec.whatwg.org/#dom-range-compareboundarypoints
+  enum class BoundaryPointComparator
+  {
+    StartToStart,
+    StartToEnd,
+    EndToEnd,
+    EndToStart,
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::BoundaryPointComparator, 4u)
 
 namespace krys::boo::dom
 {

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/NumberInputType.hpp"
-#include "Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"

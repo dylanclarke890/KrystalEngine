@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGTextContentElement.hpp"
-#include "Krystal.Booey/DOM/Dicts/DOMPointInit.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"

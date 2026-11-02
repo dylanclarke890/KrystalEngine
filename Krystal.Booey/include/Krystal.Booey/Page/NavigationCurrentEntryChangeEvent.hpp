@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/EventInit.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/Page/NavigationHistoryEntry.hpp"
 #include "Krystal.Booey/Page/NavigationNavigationType.hpp"
 #include "Krystal.Core/Attributes.hpp"

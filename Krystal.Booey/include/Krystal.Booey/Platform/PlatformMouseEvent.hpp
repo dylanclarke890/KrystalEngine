@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/PointerEventTypeNames.hpp"
+#include "Krystal.Booey/DOM/Events/PointerEventTypeNames.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/PlatformEvent.hpp"

@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/DOMRectInit.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -9,6 +8,15 @@
 
 namespace krys::boo::dom
 {
+  /// @see https://drafts.fxtf.org/geometry/#dictdef-domrectinit
+  struct DOMRectInit
+  {
+    double X {0};
+    double Y {0};
+    double Width {0};
+    double Height {0};
+  };
+
   /// @brief A rectangle whose coordinates can't be changed through it.
   /// @see https://drafts.fxtf.org/geometry/#domrectreadonly
   class DOMRectReadOnly : public RefCounted<DOMRectReadOnly>

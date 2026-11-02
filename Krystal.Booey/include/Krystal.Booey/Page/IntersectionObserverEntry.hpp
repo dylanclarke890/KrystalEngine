@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/DOMRectInit.hpp"
 #include "Krystal.Booey/DOM/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Core/RefCounted.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
-#include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 
 namespace krys::boo::html

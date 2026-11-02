@@ -3,8 +3,8 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/AbortController.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Types/Exception.hpp"
 
 namespace krys::boo::dom::tests

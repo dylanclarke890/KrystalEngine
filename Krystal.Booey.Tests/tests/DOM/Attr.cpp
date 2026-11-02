@@ -3,8 +3,8 @@
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/MutationRecord.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/MutationRecord.hpp"
 
 namespace krys::boo::dom::tests
 {

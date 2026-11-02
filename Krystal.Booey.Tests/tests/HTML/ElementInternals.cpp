@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/ElementInternals.hpp"
 #include "Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp"
-#include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"

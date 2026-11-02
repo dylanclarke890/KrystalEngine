@@ -1,8 +1,6 @@
-﻿#include "Krystal.Booey/DOM/Callbacks/NodeFilter.hpp"
+﻿#include "Krystal.Booey/DOM/NodeFilter.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Enums/FilterResult.hpp"
-#include "Krystal.Booey/DOM/Enums/NodeType.hpp"
-#include "Krystal.Booey/DOM/Enums/WhatToShow.hpp"
+#include "Krystal.Booey/DOM/Node.hpp"
 
 namespace krys::boo::dom::tests
 {

@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/AbortController.hpp"
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Internals/Event/EventListener.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 
 namespace krys::boo::dom

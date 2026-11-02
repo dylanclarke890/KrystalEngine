@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/ResetInputType.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"

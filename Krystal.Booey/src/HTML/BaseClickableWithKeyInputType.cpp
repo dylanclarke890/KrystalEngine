@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/BaseClickableWithKeyInputType.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 
 namespace krys::boo::html

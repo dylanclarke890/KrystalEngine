@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
-#include "Krystal.Booey/DOM/InputEvent.hpp"
+#include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 
 namespace krys::boo::tests
 {

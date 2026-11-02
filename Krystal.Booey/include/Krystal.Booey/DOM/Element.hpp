@@ -7,21 +7,16 @@
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Dicts/GetHTMLOptions.hpp"
-#include "Krystal.Booey/DOM/Dicts/PointerLockOptions.hpp"
-#include "Krystal.Booey/DOM/Dicts/ShadowRootInit.hpp"
+#include "Krystal.Booey/DOM/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/Enums/CommandType.hpp"
-#include "Krystal.Booey/DOM/Enums/ContentRelevancy.hpp"
-#include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
-#include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
-#include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
-#include "Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
+#include "Krystal.Booey/DOM/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/ParserContentPolicy.hpp"
+#include "Krystal.Booey/DOM/PointerLockOptions.hpp"
+#include "Krystal.Booey/DOM/SelectionRestorationMode.hpp"
 #include "Krystal.Booey/DOM/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
@@ -33,6 +28,7 @@
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
@@ -95,6 +91,51 @@ namespace krys::boo::xml
 
 namespace krys::boo::dom
 {
+  enum class PopoverState : uint8;
+  /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
+  enum class CustomElementState : uint8
+  {
+    Undefined,
+    Failed,
+    Uncustomized,
+    Precustomized,
+    Custom
+  };
+
+  /// @brief The state of a button's `command` attribute: the command it sends its `commandfor` element.
+  /// @see https://html.spec.whatwg.org/#attr-button-command
+  enum class CommandType : uint8
+  {
+    Invalid,
+
+    /// @brief A command starting with `--`, which only the element's `command` listeners carry out.
+    Custom,
+
+    TogglePopover,
+    HidePopover,
+    ShowPopover,
+
+    ShowModal,
+    Close,
+    RequestClose
+  };
+
+  /// @see https://dom.spec.whatwg.org/#insert-adjacent
+  enum class InsertAdjacentWhere : uint8
+  {
+    BeforeBegin,
+    AfterBegin,
+    BeforeEnd,
+    AfterEnd
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::CustomElementState, 5uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::CommandType, 8uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::InsertAdjacentWhere, 4uz);
+
+namespace krys::boo::dom
+{
   class DatasetDOMStringMap;
   class ElementRareData;
   class HTMLCollection;
@@ -102,6 +143,7 @@ namespace krys::boo::dom
   class PopoverData;
   class PseudoElement;
   class ShadowRoot;
+  struct ShadowRootInit;
 
   /// @brief A node with a qualified name and attributes.
   /// @see https://dom.spec.whatwg.org/#interface-element

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/TypeAhead.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include <unicode/uchar.h>

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/HTML/Enums/TaskSource.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

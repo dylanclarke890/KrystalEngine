@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/History/BackForwardCache.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/History/CachedPage.hpp"
 #include "Krystal.Booey/History/HistoryItem.hpp"

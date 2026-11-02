@@ -1,13 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Enums/ShadowRootMode.hpp"
-#include "Krystal.Booey/DOM/Enums/SlotAssignmentMode.hpp"
+#include "Krystal.Booey/DOM/GetHTMLOptions.hpp"
+#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/ParserContentPolicy.hpp"
 #include "Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo::css
@@ -17,11 +16,61 @@ namespace krys::boo::css
 
 namespace krys::boo::html
 {
+  class CustomElementRegistry;
   class HTMLTreeBuilder;
 }
 
 namespace krys::boo::dom
 {
+  /// @see https://dom.spec.whatwg.org/#enumdef-shadowrootmode
+  enum class ShadowRootMode : uint8
+  {
+    Open,
+    Closed,
+    /// @brief A shadow root the user agent attaches for an element's insides (a form control's), which
+    /// pages can't see.
+    UserAgent
+  };
+
+  /// @see https://dom.spec.whatwg.org/#enumdef-slotassignmentmode
+  enum class SlotAssignmentMode : uint8
+  {
+    Manual,
+    Named
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::ShadowRootMode, 3u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::SlotAssignmentMode, 2u);
+
+namespace krys::boo::dom
+{
+  struct DelegatesFocus : public StronglyTypedBool<DelegatesFocus>
+  {
+    using Base::Base;
+  };
+
+  struct Clonable : public StronglyTypedBool<Clonable>
+  {
+    using Base::Base;
+  };
+
+  struct Serialisable : public StronglyTypedBool<Serialisable>
+  {
+    using Base::Base;
+  };
+
+  /// @see https://dom.spec.whatwg.org/#dictdef-shadowrootinit
+  struct ShadowRootInit
+  {
+    ShadowRootMode Mode {ShadowRootMode::Open};
+    DelegatesFocus DelegatesFocus {false};
+    SlotAssignmentMode SlotAssignment {SlotAssignmentMode::Named};
+    Clonable Clonable {false};
+    Serialisable Serialisable {false};
+    html::CustomElementRegistry *CustomElementRegistry {nullptr};
+  };
+
   /// @brief The root of a shadow tree, attached to its host element.
   /// @see https://dom.spec.whatwg.org/#interface-shadowroot
   /// @see https://dom.spec.whatwg.org/#concept-shadow-root

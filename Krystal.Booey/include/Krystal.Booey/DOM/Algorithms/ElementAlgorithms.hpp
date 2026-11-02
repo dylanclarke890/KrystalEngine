@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -12,6 +11,9 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  enum class InsertAdjacentWhere : uint8;
+  enum class ShadowRootMode : uint8;
+  enum class SlotAssignmentMode : uint8;
   class Element;
   class Attr;
   class Node;

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/IdleCallbackController.hpp"
 #include "Krystal.Booey/DOM/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"

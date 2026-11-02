@@ -5,8 +5,8 @@
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
@@ -178,7 +178,8 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("HTMLImageElement: srcset picks by density, and by width with sizes",
-            "[HTML][HTMLImageElement][html:select-an-image-source][html:density-corrected-intrinsic-width-and-height]")
+            "[HTML][HTMLImageElement][html:select-an-image-source][html:density-corrected-intrinsic-width-"
+            "and-height]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///one.png"] = images::PNG;
@@ -209,9 +210,10 @@ namespace krys::boo::tests
     CHECK(widths.CurrentURL().String() == u8"file:///small.png");
   }
 
-  TEST_CASE("HTMLImageElement: a picture's sources, by type and media",
-            "[HTML][HTMLImageElement][html:dom-img-currentsrc][html:the-source-element][html:update-the-source-set]"
-            "[html:select-an-image-source]")
+  TEST_CASE(
+    "HTMLImageElement: a picture's sources, by type and media",
+    "[HTML][HTMLImageElement][html:dom-img-currentsrc][html:the-source-element][html:update-the-source-set]"
+    "[html:select-an-image-source]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///photo.jpg"] = images::JPEG;

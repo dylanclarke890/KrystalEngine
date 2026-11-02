@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 
 namespace krys::boo
 {

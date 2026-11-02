@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/StaticRange.hpp"
 #include "Krystal.Booey/Editing/BreakBlockquoteCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"

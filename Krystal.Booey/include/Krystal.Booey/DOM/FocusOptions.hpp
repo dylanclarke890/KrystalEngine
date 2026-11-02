@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp"
+#include "Krystal.Booey/DOM/SelectionRestorationMode.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

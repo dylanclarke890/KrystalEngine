@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Callbacks/NodeFilter.hpp"
-#include "Krystal.Booey/DOM/Enums/WhatToShow.hpp"
+#include "Krystal.Booey/DOM/NodeFilter.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

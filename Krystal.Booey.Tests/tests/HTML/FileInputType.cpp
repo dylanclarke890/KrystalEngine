@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/FileInputType.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
-#include "Krystal.Booey/DOM/FormDataEvent.hpp"
+#include "Krystal.Booey/DOM/Events/FormDataEvent.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"

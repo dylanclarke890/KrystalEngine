@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Enums/MutationRecordType.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -14,6 +13,7 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  enum class MutationRecordType : uint8;
   class MutationObserver;
   class Node;
   class RegisteredObserver;

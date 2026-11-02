@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/DOMPointInit.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint3D.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -15,6 +14,15 @@ namespace krys::boo::css
 namespace krys::boo::dom
 {
   class DOMPoint;
+
+  /// @see https://drafts.fxtf.org/geometry/#dictdef-dompointinit
+  struct DOMPointInit
+  {
+    double X {0};
+    double Y {0};
+    double Z {0};
+    double W {1};
+  };
 
   /// @brief A point whose coordinates can't be changed through it.
   /// @see https://drafts.fxtf.org/geometry/#dompointreadonly

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Enums/ContentRelevancy.hpp"
+#include "Krystal.Booey/DOM/ContentRelevancy.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

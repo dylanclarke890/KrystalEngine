@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Enums/FilterResult.hpp"
+#include "Krystal.Booey/DOM/NodeFilter.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

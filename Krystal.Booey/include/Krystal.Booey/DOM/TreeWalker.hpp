@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Callbacks/NodeFilter.hpp"
-#include "Krystal.Booey/DOM/Enums/FilterResult.hpp"
 #include "Krystal.Booey/DOM/Internals/TraversalBase.hpp"
+#include "Krystal.Booey/DOM/NodeFilter.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
 namespace krys::boo::dom

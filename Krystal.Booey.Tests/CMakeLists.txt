@@ -58,7 +58,7 @@ target_precompile_headers(Krystal.Booey.Tests
     <Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp>
     <Krystal.Booey/DOM/Attr.hpp>
     <Krystal.Booey/DOM/Document.hpp>
-    <Krystal.Booey/DOM/EventTarget.hpp>
+    <Krystal.Booey/DOM/Events/EventTarget.hpp>
     <Krystal.Booey/DOM/Node.hpp>
     <Krystal.Booey/DOM/ShadowRoot.hpp>
     <Krystal.Booey/DOM/Types/DOMString.hpp>
@@ -406,11 +406,15 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderHTMLCanvas.cpp
 		tests/Rendering/ImageQualityController.cpp
 		tests/Rendering/HitTestResult.cpp
-		tests/DOM/KeyboardEvent.cpp
-		tests/DOM/EventListenerHandle.cpp
-		tests/DOM/MouseEvent.cpp
-		tests/DOM/PointerEvent.cpp
-		tests/DOM/WheelEvent.cpp
+		tests/DOM/Events/CustomEvent.cpp
+		tests/DOM/Events/Event.cpp
+		tests/DOM/Events/EventListenerHandle.cpp
+		tests/DOM/Events/EventTarget.cpp
+		tests/DOM/Events/KeyboardEvent.cpp
+		tests/DOM/Events/MouseEvent.cpp
+		tests/DOM/Events/PointerEvent.cpp
+		tests/DOM/Events/ToggleEvent.cpp
+		tests/DOM/Events/WheelEvent.cpp
 		tests/DOM/AbortController.cpp
 		tests/DOM/AbortSignal.cpp
 		tests/Page/EventHandler.cpp
@@ -604,6 +608,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Internals/EventFactory.cpp
 		tests/DOM/Internals/QualifiedNameCache.cpp
 		tests/DOM/Mixins/ChildNode.cpp
+		tests/DOM/Mixins/DocumentOrShadowRoot.cpp
 		tests/DOM/Mixins/NonDocumentTypeChildNode.cpp
 		tests/DOM/Mixins/NonElementParentNode.cpp
 		tests/DOM/Mixins/ParentNode.cpp
@@ -618,29 +623,25 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/DatasetDOMStringMap.cpp
 		tests/DOM/Document.cpp
 		tests/DOM/DocumentFragment.cpp
-		tests/DOM/DocumentOrShadowRoot.cpp
 		tests/DOM/DocumentType.cpp
 		tests/DOM/DOMParsing.cpp
 		tests/DOM/HTMLInsertionMethods.cpp
 		tests/DOM/DOMImplementation.cpp
 		tests/DOM/DOMTokenList.cpp
-		tests/DOM/CustomEvent.cpp
 		tests/DOM/Element.cpp
 		tests/DOM/ElementCSSOMView.cpp
 		tests/DOM/ElementTextDirection.cpp
-		tests/DOM/Event.cpp
-		tests/DOM/EventTarget.cpp
 		tests/DOM/DOMRectList.cpp
-		tests/DOM/HTMLCollection.cpp
-		tests/DOM/MutationObserver.cpp
-		tests/DOM/MutationRecord.cpp
+		tests/DOM/Collections/HTMLCollection.cpp
+		tests/DOM/Collections/NodeList.cpp
+		tests/DOM/MutationObservers/MutationObserver.cpp
+		tests/DOM/MutationObservers/MutationRecord.cpp
 		tests/DOM/NamedNodeMap.cpp
 		tests/DOM/Node.cpp
 		tests/DOM/NodeLifetime.cpp
 		tests/DOM/Position.cpp
 		tests/DOM/SimpleRange.cpp
 		tests/DOM/TopLayer.cpp
-		tests/DOM/ToggleEvent.cpp
 		tests/Editing/TextIterator.cpp
 		tests/Editing/VisiblePosition.cpp
 		tests/Editing/VisibleSelection.cpp
@@ -654,7 +655,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Editing/VisibleUnits.cpp
 		tests/DOM/NodeFilter.cpp
 		tests/DOM/NodeIterator.cpp
-		tests/DOM/NodeList.cpp
 		tests/DOM/ProcessingInstruction.cpp
 		tests/DOM/PseudoElement.cpp
 		tests/DOM/Range.cpp

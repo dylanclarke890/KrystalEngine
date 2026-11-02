@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Internals/MutationObserver/RegisteredObserver.hpp"
-#include "Krystal.Booey/DOM/Internals/MutationObserver/TransientRegisteredObserver.hpp"
-#include "Krystal.Booey/DOM/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/RegisteredObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/TransientRegisteredObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

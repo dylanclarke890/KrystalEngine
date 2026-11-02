@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/HTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 
 namespace krys::boo::html
 {
