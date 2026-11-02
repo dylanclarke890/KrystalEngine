@@ -97,7 +97,10 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("pushState() and replaceState() add and replace the document's entries", "[Page][History]")
+  TEST_CASE("pushState() and replaceState() add and replace the document's entries",
+            "[Page][History][html:dom-history-pushstate][html:dom-history-replacestate]"
+            "[html:shared-history-push/replace-state-steps][html:can-have-its-url-rewritten]"
+            "[html:url-and-history-update-steps][html:dom-history-length][html:dom-history-state]")
   {
     HistoryAPIFixture fixture;
     auto &history = fixture.GetHistory();
@@ -139,6 +142,18 @@ namespace krys::boo::tests
       CHECK(fixture.Length() == 2);
     }
 
+    SECTION("a URL with another scheme can change only its fragment")
+    {
+      LoadFixture other;
+      other.LoadMarkup(u8"<!DOCTYPE html>", u8"app://game/menu.html?tab=1");
+      html::EventLoop::Current().RunUntilIdle();
+      auto &otherHistory = other.Document().Window()->GetHistory();
+      CHECK(otherHistory.PushState(nullptr, u8"", u8"?tab=2").HasException());
+      CHECK(otherHistory.PushState(nullptr, u8"", u8"options.html?tab=1").HasException());
+      REQUIRE_FALSE(otherHistory.PushState(nullptr, u8"", u8"#audio").HasException());
+      CHECK(other.Document().GetURL().String() == u8"app://game/menu.html?tab=1#audio");
+    }
+
     SECTION("too many states in a short time are a SecurityError")
     {
       dom::ExceptionOr<void> result;
@@ -151,7 +166,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Going back and forward between pushed states fires popstate", "[Page][History]")
+  TEST_CASE("Going back and forward between pushed states fires popstate",
+            "[Page][History][html:dom-history-go][html:dom-history-back][html:dom-history-forward]"
+            "[html:delta-traverse][html:the-popstateevent-interface]")
   {
     HistoryAPIFixture fixture;
     auto &history = fixture.GetHistory();
@@ -192,7 +209,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("History's other members", "[Page][History]")
+  TEST_CASE(
+    "History's other members",
+    "[Page][History][html:the-history-interface][html:dom-history][html:dom-history-scroll-restoration]"
+    "[html:dom-history-go]")
   {
     HistoryAPIFixture fixture;
     auto &history = fixture.GetHistory();

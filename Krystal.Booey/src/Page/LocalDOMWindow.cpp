@@ -222,28 +222,30 @@ namespace krys::boo
     return *_customElementRegistry;
   }
 
+  // https://html.spec.whatwg.org/#dom-name
   dom::DOMString LocalDOMWindow::Name() const noexcept
   {
-    // If this's navigable is null, then return the empty string.
+    // 1. If this's navigable is null, then return the empty string.
     auto *frame = Frame();
     if (!frame)
     {
       return {};
     }
-    // Return this's navigable's target name.
+    // 2. Return this's navigable's target name.
     return frame->SpecifiedName();
   }
 
+  // https://html.spec.whatwg.org/#dom-name
   void LocalDOMWindow::SetName(dom::DOMString &&name) noexcept
   {
-    // If this's navigable is null, then return.
+    // 1. If this's navigable is null, then return.
     auto *frame = Frame();
     if (!frame)
     {
       return;
     }
-    // Set this's navigable's active session history entry's document state's navigable target name to the
-    // given value.
+    // 2. Set this's navigable's active session history entry's document state's navigable target name to the
+    //    given value.
     frame->SetSpecifiedName(krys::move(name));
   }
 
@@ -301,27 +303,37 @@ namespace krys::boo
     return *_toolbar;
   }
 
+  // https://html.spec.whatwg.org/#dom-window-close
   void LocalDOMWindow::Close() noexcept
   {
-    // Let thisTraversable be this's navigable; if it isn't a top-level traversable (a frame is), or its is
-    // closing is true, then return.
+    // 1. Let thisTraversable be this's navigable.
+    // 2. If thisTraversable is not a top-level traversable, then return.
+    // 3. If thisTraversable's is closing is true, then return.
+    // (The frame is the page's top-level traversable.)
     RefPtr<Page> page = ShareRefPtr(GetPage());
     if (!page || page->IsClosing())
     {
       return;
     }
 
+    // 4. Let browsingContext be thisTraversable's active browsing context.
+    // 5. Let sourceSnapshotParams be the result of snapshotting source snapshot params given
+    // thisTraversable's
+    //    active document.
+    // 6. If all the following are true: thisTraversable is script-closable; the incumbent global object's
+    //    browsing context is familiar with browsingContext; and the incumbent global object's navigable is
+    //    allowed by sandboxing to navigate thisTraversable, given sourceSnapshotParams, then:
     // FIXME: Only if the page is script-closable (opened by script, or with one session history entry); a
     // warning on the console otherwise.
 
-    // The page may ask to stay.
+    // (The page may ask to stay, through beforeunload, as definitely closing would prompt.)
     if (auto *frame = Frame(); frame && !frame->Loader().ShouldClose())
     {
       return;
     }
 
-    // Set thisTraversable's is closing to true, and queue a task on the DOM manipulation task source to
-    // definitely close thisTraversable.
+    // 6a. Set thisTraversable's is closing to true.
+    // 6b. Queue a task on the DOM manipulation task source to definitely close thisTraversable.
     page->SetIsClosing();
     html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
                                          [weakPage = CreateWeakPtr(page.get())]
@@ -345,13 +357,15 @@ namespace krys::boo
     return page && page->IsClosing();
   }
 
+  // https://html.spec.whatwg.org/#dom-window-stop
   void LocalDOMWindow::Stop() noexcept
   {
-    // If this's navigable is null, then return.
+    // 1. If this's navigable is null, then return.
     if (!Frame())
     {
       return;
     }
+    // 2. Stop loading this's navigable.
     // FIXME: Stop loading this's navigable.
   }
 
@@ -370,16 +384,23 @@ namespace krys::boo
     page->GetChromeClient().Focus();
   }
 
+  // https://html.spec.whatwg.org/#dom-top
   LocalDOMWindow *LocalDOMWindow::Top() noexcept
   {
-    // If this's navigable is null, then return null. Return this's navigable's top-level traversable's active
-    // WindowProxy: a frame is the only one in its tree.
+    // 1. If this's navigable is null, then return null.
+    // 2. Return this's navigable's top-level traversable's active WindowProxy.
+    // (A frame is the only one in its tree.)
     return Frame() ? this : nullptr;
   }
 
+  // https://html.spec.whatwg.org/#dom-parent
   LocalDOMWindow *LocalDOMWindow::Parent() noexcept
   {
-    // If this's navigable is null, then return null. A frame has no parent, so return its active WindowProxy.
+    // 1. Let navigable be this's navigable.
+    // 2. If navigable is null, then return null.
+    // 3. If navigable's parent is not null, then set navigable to navigable's parent.
+    // 4. Return navigable's active WindowProxy.
+    // (A frame has no parent.)
     return Frame() ? this : nullptr;
   }
 
@@ -1001,16 +1022,21 @@ namespace krys::boo
                                                           dom::DOMStringView featuresString) noexcept
   {
     // https://html.spec.whatwg.org/#window-open-steps
+    // 1. If the event loop's termination nesting level is nonzero, then return null.
+    // (There's no script to terminate; a window that isn't shown in a frame has no navigable.)
     if (!IsCurrentlyDisplayedInFrame())
     {
       return static_cast<LocalDOMWindow *>(nullptr);
     }
 
+    // 2. Let sourceDocument be the entry global object's associated Document.
     RefPtr<dom::Document> document = ShareRefPtr(Document());
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
 
-    // If url is not the empty string, then parse it relative to the entry settings object; on failure, throw
-    // a "SyntaxError" DOMException.
+    // 3. Let urlRecord be null.
+    // 4. If url is not the empty string:
+    // 4a. Set urlRecord to the result of encoding-parsing a URL given url, relative to sourceDocument.
+    // 4b. If urlRecord is failure, then throw a "SyntaxError" DOMException.
     url::URL urlRecord;
     if (!urlString.empty())
     {
@@ -1021,36 +1047,61 @@ namespace krys::boo
       }
     }
 
-    // If target is the empty string, then set target to "_blank".
+    // 5. If target is the empty string, then set target to "_blank".
     if (target.View().empty())
     {
       target = dom::DOMStringAtom(u8"_blank");
     }
 
+    // 6. Let tokenizedFeatures be the result of tokenizing features.
+    // 7.-10. (WindowFeatures parses noopener and noreferrer, and leaves them out of the popup check.)
     auto features = ParseWindowFeatures(featuresString);
+    // 13. Let targetNavigable and windowType be the result of applying the rules for choosing a navigable
+    //     given target, sourceDocument's node navigable, and noopener.
     auto *targetFrame = frame->Loader().FindFrameForNavigation(target.View());
 
-    // A new window needs transient activation: popups are blocked otherwise.
+    // 14. If targetNavigable is null, then return null.
+    // (A new window needs transient activation: popups are blocked otherwise.)
     if (!targetFrame && !HasTransientActivation())
     {
       return static_cast<LocalDOMWindow *>(nullptr);
     }
 
+    // 11. Let referrerPolicy be the empty string.
+    // 12. If noreferrer is true, then set noopener to true and set referrerPolicy to "no-referrer".
     auto referrerPolicy =
       features.WantsNoReferrer() ? ReferrerPolicy::NoReferrer : ReferrerPolicy::EmptyString;
 
+    // 16. Otherwise:
     if (targetFrame)
     {
-      // An existing browsing context: navigate it, unless there's no URL.
+      // 16a. If urlRecord is not null, then navigate targetNavigable to urlRecord using sourceDocument, with
+      //      referrerPolicy set to referrerPolicy and exceptionsEnabled set to true.
       if (!urlRecord.IsNull())
       {
         frame->Loader().ChangeLocation(urlRecord, dom::DOMStringAtom(u8"_self"), nullptr, referrerPolicy,
                                        null, dom::DOMStringAtom::Null());
       }
+      // 16b. If noopener is false, then set targetNavigable's active browsing context's opener browsing
+      //      context to sourceDocument's browsing context.
+      // (There are no other browsing contexts to be the opener.)
+      // 18. If noopener is true and target is not an ASCII case-insensitive match for "_self", "_parent", or
+      //     "_top", then return null.
+      if (features.WantsNoOpener() && !text::IsASCIICaselessEqual(target.View(), utf8_stringview(u8"_self"))
+          && !text::IsASCIICaselessEqual(target.View(), utf8_stringview(u8"_parent"))
+          && !text::IsASCIICaselessEqual(target.View(), utf8_stringview(u8"_top")))
+      {
+        return static_cast<LocalDOMWindow *>(nullptr);
+      }
+      // 19. Return targetNavigable's active WindowProxy.
       return this;
     }
 
-    // A new browsing context: the host opens it, asked by the client's new window policy.
+    // 15. If windowType is either "new and unrestricted" or "new with no opener": the host opens it, asked by
+    //     the client's new window policy, with the features (the popup check and the browsing context
+    //     features) and about:blank if there's no URL.
+    // 17. If windowType is "new with no opener", then return null.
+    // (The new window is never returned, as there are no other windows.)
     FrameLoadRequest request(ShareRef(*document),
                              ResourceRequest(urlRecord.IsNull() ? url::URL(u8"about:blank") : urlRecord),
                              target);

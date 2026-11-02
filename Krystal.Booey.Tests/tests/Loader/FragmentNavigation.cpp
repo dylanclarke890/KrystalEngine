@@ -66,7 +66,10 @@ namespace krys::boo::tests
     CHECK(document.FindAnchor(u8"missing") == nullptr);
   }
 
-  TEST_CASE("Fragment navigation", "[Loader][FragmentNavigation]")
+  TEST_CASE(
+    "Fragment navigation",
+    "[Loader][FragmentNavigation][html:the-hashchangeevent-interface][html:dom-hashchangeevent-oldurl]"
+    "[html:dom-hashchangeevent-newurl]")
   {
     FragmentFixture fixture;
     List<std::pair<std::string, std::string>> hashChanges;

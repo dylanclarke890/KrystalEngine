@@ -42,13 +42,47 @@ namespace krys::boo
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-history-length
+  // https://html.spec.whatwg.org/#can-have-its-url-rewritten
+  bool CanHaveURLRewritten(const dom::Document &document, const url::URL &targetURL) noexcept
+  {
+    // 1. Let documentURL be document's URL.
+    const auto &documentURL = document.GetURL();
+    // 2. If targetURL and documentURL differ in their scheme, username, password, host, or port components,
+    //    then return false.
+    if (!url::ProtocolHostAndPortAreEqual(targetURL, documentURL) || targetURL.User() != documentURL.User()
+        || targetURL.Password() != documentURL.Password())
+    {
+      return false;
+    }
+    // 3. If targetURL's scheme is an HTTP(S) scheme, then return true.
+    if (targetURL.ProtocolIsInHTTPFamily())
+    {
+      return true;
+    }
+    // 4. If targetURL's scheme is "file":
+    if (targetURL.ProtocolIsFile())
+    {
+      // 4a. If targetURL and documentURL differ in their path component, then return false.
+      // 4b. Return true.
+      return targetURL.Path() == documentURL.Path();
+    }
+    // 5. If targetURL and documentURL differ in their path component or query components, then return false.
+    // 6. Return true.
+    return targetURL.Path() == documentURL.Path() && targetURL.HasQuery() == documentURL.HasQuery()
+           && targetURL.Query() == documentURL.Query();
+  }
+
   dom::ExceptionOr<uint32> History::Length() const noexcept
   {
+    // 1. If this's relevant global object's associated Document is not fully active, then throw a
+    //    "SecurityError" DOMException.
     auto *frame = Frame();
     if (!IsDocumentFullyActive(frame))
     {
       return DocumentNotFullyActive();
     }
+    // 2. Return this's length.
     auto *page = frame->GetPage();
     if (!page)
     {
@@ -57,13 +91,18 @@ namespace krys::boo
     return page->BackForward().Count();
   }
 
+  // https://html.spec.whatwg.org/#dom-history-scroll-restoration
   dom::ExceptionOr<History::ScrollRestoration> History::GetScrollRestoration() const noexcept
   {
+    // 1. If this's relevant global object's associated Document is not fully active, then throw a
+    //    "SecurityError" DOMException.
     auto *frame = Frame();
     if (!IsDocumentFullyActive(frame))
     {
       return DocumentNotFullyActive();
     }
+    // 2. Return this's relevant global object's navigable's active session history entry's scroll
+    //    restoration mode.
     auto *historyItem = frame->Loader().History().CurrentItem();
     if (!historyItem)
     {
@@ -72,13 +111,18 @@ namespace krys::boo
     return historyItem->ShouldRestoreScrollPosition() ? ScrollRestoration::Auto : ScrollRestoration::Manual;
   }
 
+  // https://html.spec.whatwg.org/#dom-history-scroll-restoration
   dom::ExceptionOr<void> History::SetScrollRestoration(ScrollRestoration scrollRestoration) noexcept
   {
+    // 1. If this's relevant global object's associated Document is not fully active, then throw a
+    //    "SecurityError" DOMException.
     auto *frame = Frame();
     if (!IsDocumentFullyActive(frame))
     {
       return DocumentNotFullyActive();
     }
+    // 2. Set this's relevant global object's navigable's active session history entry's scroll restoration
+    //    mode to the given value.
     if (auto *historyItem = frame->Loader().History().CurrentItem())
     {
       historyItem->SetShouldRestoreScrollPosition(scrollRestoration == ScrollRestoration::Auto);
@@ -86,13 +130,17 @@ namespace krys::boo
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-history-state
   dom::ExceptionOr<html::SerializedScriptValue *> History::State() noexcept
   {
+    // 1. If this's relevant global object's associated Document is not fully active, then throw a
+    //    "SecurityError" DOMException.
     auto *frame = Frame();
     if (!IsDocumentFullyActive(frame))
     {
       return DocumentNotFullyActive();
     }
+    // 2. Return this's state.
     _lastStateObjectRequested = ShareRefPtr(StateInternal());
     return _lastStateObjectRequested.get();
   }
@@ -123,13 +171,23 @@ namespace krys::boo
     return Go(1);
   }
 
+  // https://html.spec.whatwg.org/#delta-traverse
   dom::ExceptionOr<void> History::Go(int32 distance) noexcept
   {
+    // 1. Let document be history's relevant global object's associated Document.
+    // 2. If document is not fully active, then throw a "SecurityError" DOMException.
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
     if (!IsDocumentFullyActive(frame.get()))
     {
       return DocumentNotFullyActive();
     }
+    // 3. If history's relevant global object's navigable's allowed to perform a navigation or history update
+    //    returns blocked, then return.
+    // (There's no such limit for traversals.)
+    // 4. If delta is 0, then reload document's node navigable, and return.
+    // 5. Traverse the history by a delta given document's node navigable's traversable navigable, delta, and
+    //    with sourceDocument set to document.
+    // (Going to the current entry reloads it.)
     frame->GetNavigationScheduler().ScheduleHistoryNavigation(distance);
     return {};
   }
@@ -198,6 +256,9 @@ namespace krys::boo
                                                    dom::DOMStringView urlString,
                                                    NavigationHistoryBehavior historyBehavior) noexcept
   {
+    // https://html.spec.whatwg.org/#shared-history-push/replace-state-steps
+    // 1. Let document be history's relevant global object's associated Document.
+    // 2. If document is not fully active, then throw a "SecurityError" DOMException.
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
     if (!IsDocumentFullyActive(frame.get()))
     {
@@ -209,6 +270,9 @@ namespace krys::boo
       return {};
     }
 
+    // 3. Let serializedData be StructuredSerializeForStorage(data). Rethrow any exceptions.
+    // (The state is serialized already.)
+    // 4. Let newURL be document's URL.
     RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
     const auto &documentURL = document->GetURL();
     auto fullURL = documentURL;
@@ -228,34 +292,40 @@ namespace krys::boo
       return dom::Exception {dom::ExceptionCode::SecurityError, krys::move(message)};
     };
 
+    // 5. If url is not null or the empty string:
     if (!urlString.empty())
     {
+      // 5a. Set newURL to the result of encoding-parsing a URL given url, relative to the relevant settings
+      //     object of history.
       fullURL = document->CompleteURL(urlString);
+      // 5b. If newURL is failure, then throw a "SecurityError" DOMException.
       if (!fullURL.IsValid())
       {
         return blocked(u8"URL is invalid");
       }
 
-      // The checks below are loosely implementing https://html.spec.whatwg.org/#can-have-its-url-rewritten
-      if (!url::ProtocolHostAndPortAreEqual(fullURL, documentURL) || fullURL.User() != documentURL.User()
-          || fullURL.Password() != documentURL.Password())
+      // 5c. If document cannot have its URL rewritten to newURL, then throw a "SecurityError" DOMException.
+      if (!CanHaveURLRewritten(*document, fullURL))
       {
-        return blocked(u8"Protocols, domains, ports, usernames, and passwords must match.");
+        return blocked(
+          u8"Only the path, query and fragment of an http: or https: URL, the query and fragment "
+          u8"of a file: URL, and the fragment of any other may change.");
       }
-
-      if (fullURL.ProtocolIsFile() && fullURL.FileSystemPath() != documentURL.FileSystemPath())
-      {
-        return blocked(u8"Only differences in query and fragment are allowed for file: URLs.");
-      }
-
-      // FIXME: The sandboxed documents' and origins' checks, once there are origins.
     }
 
+    // 6. If history's relevant global object's navigable's allowed to perform a navigation or history update
+    //    returns blocked, then return.
+    // (Too many calls in a short time, or too much state, is an exception instead.)
     if (auto result = UpdateAndCheckStateObjectQuota(fullURL, historyBehavior); result.HasException())
     {
       return result.ReleaseException();
     }
 
+    // 7. Let navigation be history's relevant global object's navigation API.
+    // 8. Let continue be the result of firing a push/replace/reload navigate event at navigation with
+    //    navigationType set to historyHandling, isSameDocument set to true, destinationURL set to newURL, and
+    //    classicHistoryAPIState set to serializedData.
+    // 9. If continue is false, then return.
     if (!document->Window()->GetNavigation().DispatchPushReplaceReloadNavigateEvent(
           fullURL,
           historyBehavior == NavigationHistoryBehavior::Push ? NavigationNavigationType::Push
@@ -265,6 +335,8 @@ namespace krys::boo
       return {};
     }
 
+    // 10. Run the URL and history update steps given document and newURL, with serializedData set to
+    //     serializedData and historyHandling set to historyHandling.
     frame->Loader().UpdateURLAndHistory(fullURL, krys::move(data), historyBehavior);
     return {};
   }

@@ -48,7 +48,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<NavigationHistoryEntry> Create(Navigation &navigation,
                                                              const NavigationHistoryEntry &other) noexcept;
 
-    /// @brief The entry's URL; null if its document isn't fully active.
+    /// @brief The entry's URL; empty if its document isn't fully active.
     /// @see https://html.spec.whatwg.org/#dom-navigationhistoryentry-url
     KRYS_NODISCARD Maybe<dom::USVString> URL() const noexcept;
     /// @see https://html.spec.whatwg.org/#dom-navigationhistoryentry-key

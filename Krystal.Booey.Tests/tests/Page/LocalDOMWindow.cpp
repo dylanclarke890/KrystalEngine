@@ -413,7 +413,8 @@ namespace krys::boo::tests
     CHECK(resizes == 2);
   }
 
-  TEST_CASE("A window asks its host to focus and close it", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window asks its host to focus and close it",
+            "[Page][LocalDOMWindow][html:dom-window-close][html:dom-window-closed]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -436,7 +437,42 @@ namespace krys::boo::tests
     CHECK(fixture.CloseRequests == 1);
   }
 
-  TEST_CASE("A window's named objects", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's related windows and browser interface elements",
+            "[Page][LocalDOMWindow][html:the-window-object][html:dom-window][html:dom-self][html:dom-frames]"
+            "[html:dom-document-defaultview][html:concept-document-window][html:dom-length][html:dom-top]"
+            "[html:dom-parent][html:dom-opener][html:dom-frameelement][html:browser-interface-elements]"
+            "[html:dom-barprop-visible][html:dom-window-status]")
+  {
+    WindowFixture fixture;
+    auto &window = fixture.Window();
+
+    CHECK(&window.Window() == &window);
+    CHECK(&window.Self() == &window);
+    CHECK(&window.Frames() == &window);
+    CHECK(fixture.Document->DefaultView() == &window);
+    CHECK(window.Document() == fixture.Document.get());
+
+    // A frame is the only one in its tree.
+    CHECK(window.Length() == 0);
+    CHECK(window.Top() == &window);
+    CHECK(window.Parent() == &window);
+    CHECK(window.Opener() == nullptr);
+    CHECK(window.FrameElement() == nullptr);
+
+    // The bars are all visible, and the status does nothing but keep its value.
+    CHECK(window.Locationbar().Visible());
+    CHECK(window.Menubar().Visible());
+    CHECK(window.Personalbar().Visible());
+    CHECK(window.Scrollbars().Visible());
+    CHECK(window.Statusbar().Visible());
+    CHECK(window.Toolbar().Visible());
+    window.SetStatus(dom::DOMString(u8"Loading"));
+    CHECK(window.Status() == u8"Loading");
+  }
+
+  TEST_CASE("A window's named objects",
+            "[Page][LocalDOMWindow][html:named-access-on-the-window-object][html:dom-window-nameditem-filter]"
+            "[html:document-tree-child-navigable-target-name-property-set]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html>"
                           u8"<img name=picture>"
@@ -961,7 +997,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window opens windows through the host", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window opens windows through the host",
+            "[Page][LocalDOMWindow][html:dom-open][html:window-open-steps][html:dom-name]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -997,12 +1034,26 @@ namespace krys::boo::tests
     CHECK_FALSE(navigations[1].IsNewWindow);
     CHECK(navigations[1].URL == "https://example.com/dir/page.html#here");
 
+    // With noopener, an existing browsing context is returned only for _self, _parent and _top.
+    window.SetName(dom::DOMString(u8"main"));
+    auto named = window.Open(u8"#named", dom::DOMStringAtom(u8"main"), u8"noopener");
+    REQUIRE_FALSE(named.HasException());
+    CHECK(named.Value() == nullptr);
+    CHECK(navigations.size() == 3);
+    auto selfNoOpener = window.Open(u8"", dom::DOMStringAtom(u8"_SELF"), u8"noopener");
+    REQUIRE_FALSE(selfNoOpener.HasException());
+    CHECK(selfNoOpener.Value() == &window);
+
     // A URL that can't be parsed is a SyntaxError.
     auto invalid = window.Open(u8"https://exa mple.com/", dom::DOMStringAtom(u8"_self"));
     CHECK(invalid.HasException());
   }
 
-  TEST_CASE("Window features", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "Window features",
+    "[Page][LocalDOMWindow][html:concept-window-open-features-tokenize][html:popup-window-is-requested]"
+    "[html:concept-window-open-features-parse-boolean][html:feature-separator]"
+    "[html:get-noopener-for-window-open]")
   {
     auto features = ParseWindowFeatures(u8" left = 10 , top=20,width=300 height=200, popup");
     CHECK(features.X == 10.f);

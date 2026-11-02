@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
+#include "Krystal.Booey/Page/History.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -240,6 +241,8 @@ namespace krys::boo::tests
                                                                 [this](html::PageTransitionEvent &event)
                                                                 {
                                                                   CHECK_FALSE(event.Persisted());
+                                                                  CHECK(event.Bubbles());
+                                                                  CHECK(event.Cancelable());
                                                                   Events.push_back("pageshow");
                                                                 }));
           // load doesn't reach the window from the document's own listeners, and DOMContentLoaded does.
@@ -250,7 +253,9 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("The end of parsing and the load event", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "The end of parsing and the load event",
+    "[Loader][DocumentLoader][html:the-pagetransitionevent-interface][html:fire-a-page-transition-event]")
   {
     LoadFixture fixture;
     EndRecorder recorder;
@@ -305,7 +310,11 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Leaving a document: beforeunload, pagehide and unload", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "Leaving a document: beforeunload, pagehide and unload",
+    "[Loader][DocumentLoader][html:the-beforeunloadevent-interface][html:dom-beforeunloadevent-returnvalue]"
+    "[html:the-pagetransitionevent-interface][html:dom-pagetransitionevent-persisted]"
+    "[html:fire-a-page-transition-event]")
   {
     LoadFixture fixture;
     fixture.LoadMarkup(u8"<!DOCTYPE html><body><p>First</p></body>", u8"https://example.com/first.html");
@@ -333,6 +342,8 @@ namespace krys::boo::tests
                                                                         [&](html::PageTransitionEvent &event)
                                                                         {
                                                                           CHECK_FALSE(event.Persisted());
+                                                                          CHECK(event.Bubbles());
+                                                                          CHECK(event.Cancelable());
                                                                           events.push_back("pagehide");
                                                                         });
     auto unload = window->AddEventListener(u8"unload",
@@ -486,7 +497,13 @@ namespace krys::boo::tests
     CHECK(paragraph->Matches(u8":lang(de)").Value());
   }
 
-  TEST_CASE("A window's Location", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "A window's Location",
+    "[Loader][DocumentLoader][html:the-location-interface][html:dom-location][html:dom-document-location]"
+    "[html:location-object-navigate][html:dom-location-href][html:dom-location-origin]"
+    "[html:dom-location-protocol][html:dom-location-host][html:dom-location-pathname]"
+    "[html:dom-location-search][html:dom-location-hash][html:dom-location-assign]"
+    "[html:dom-location-replace][html:dom-location-reload][html:dom-location-ancestororigins]")
   {
     LoadFixture fixture;
     fixture.Strategy.AddText(u8"https://example.com/dir/next.html", u8"<!DOCTYPE html><p id=next>Next</p>",
@@ -513,6 +530,25 @@ namespace krys::boo::tests
       location.Hash(u8"here");
       CHECK(fixture.Document().GetURL().String() == u8"https://example.com/dir/page.html?q=1#here");
       CHECK(&fixture.Document() == before.get());
+    }
+
+    SECTION("setting the hash to the fragment it has does nothing, and the empty string is an empty fragment")
+    {
+      auto length = window.GetHistory().Length().ReleaseValue();
+      location.Hash(u8"#top");
+      CHECK(window.GetHistory().Length().ReleaseValue() == length);
+      location.Hash(u8"");
+      CHECK(fixture.Document().GetURL().String() == u8"https://example.com/dir/page.html?q=1#");
+    }
+
+    SECTION(
+      "setting the protocol navigates only to an HTTP(S) scheme, and throws for one that isn't a scheme")
+    {
+      REQUIRE_FALSE(location.Protocol(u8"ftp").HasException());
+      CHECK_FALSE(fixture.Frame().GetNavigationScheduler().LocationChangePending());
+      CHECK(location.Protocol(u8"1http").HasException());
+      REQUIRE_FALSE(location.Protocol(u8"http:").HasException());
+      CHECK(fixture.Frame().GetNavigationScheduler().LocationChangePending());
     }
 
     SECTION("assign() navigates on a later task")

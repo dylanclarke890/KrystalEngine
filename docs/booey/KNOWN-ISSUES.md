@@ -372,6 +372,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `FrameLoader` does not fire `visibilitychange`, and a document left or cached keeps its visibility state (FIXMEs in `FrameLoader.cpp` and `CachedPage.cpp`).
 - `ScheduledFormSubmission` does not count as a quick redirect, so a pending submission does not stop a page being cached.
 - `Navigation` has no `sourceSnapshotParams` (FIXME in `Navigation.cpp`), does not consume history-action user activation on a traversal, and does not set destination state. `NavigationHistoryEntry` does not hide another document's entry URL for its referrer policy.
+- `NavigateEvent.intercept()` has no `precommitHandler`, so there's no `NavigationPrecommitController` (FIXME in `NavigateEvent.cpp`). There's no `notRestoredReasons` (`NotRestoredReasons`) on navigation timing.
+- `window.stop()` does not stop loading (FIXME in `LocalDOMWindow.cpp`).
 - The unloaded document keeps its event listeners (upstream removes them).
 - `Document::ShouldScheduleLayout` does not wait for the view to be visually non-empty (FIXME in `Document.cpp`), and a deferred `SetNeedsLayout` is never made to happen (upstream's FIXME in `LocalFrameViewLayoutContext.cpp`).
 
