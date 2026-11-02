@@ -8,51 +8,54 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [6.11 Drag and drop](https://html.spec.whatwg.org/#dnd)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below; drags stay in the page (see `KNOWN-ISSUES.md`).
 
 #### [6.11.1 Introduction](https://html.spec.whatwg.org/#event-drag)
 
-Status: unreviewed
+Status: n/a (introduction)
 
 #### [6.11.2 The drag data store](https://html.spec.whatwg.org/#the-drag-data-store)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The data transfer's pasteboard (a `StaticPasteboard` for `dragstart` and `new DataTransfer()`) and its `StoreMode`.
 <!-- definitions: drag-data-store drag-data-store-item-list the-drag-data-item-kind the-drag-data-item-type-string drag-data-store-default-feedback drag-data-store-bitmap drag-data-store-hot-spot-coordinate drag-data-store-mode concept-dnd-rw concept-dnd-ro concept-dnd-p drag-data-store-allowed-effects-state -->
 
-- [ ] [created](https://html.spec.whatwg.org/#create-a-drag-data-store) — When a drag data store is created, it must be initialized such that its drag data store item list is empty, it has no drag data store default feedback, it has no drag data store bitmap and drag data store hot spot coordinate, its drag data store mode is protected mode, and its drag data store allowed effects state is the string "uninitialized".
+- [x] [created](https://html.spec.whatwg.org/#create-a-drag-data-store) — When a drag data store is created, it must be initialized such that its drag data store item list is empty, it has no drag data store default feedback, it has no drag data store bitmap and drag data store hot spot coordinate, its drag data store mode is protected mode, and its drag data store allowed effects state is the string "uninitialized".
 
 #### [6.11.3 The DataTransfer interface](https://html.spec.whatwg.org/#the-datatransfer-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DataTransfer`, as upstream's: it normalises and sanitises types and data, and only a drag's effects can be set (see `DIFFERENCES.md`).
 <!-- definitions: dom-datatransfer-dropeffect-none dom-datatransfer-dropeffect-copy dom-datatransfer-dropeffect-link dom-datatransfer-dropeffect-move dom-datatransfer-effectallowed-none dom-datatransfer-effectallowed-copy dom-datatransfer-effectallowed-copylink dom-datatransfer-effectallowed-copymove dom-datatransfer-effectallowed-link dom-datatransfer-effectallowed-linkmove dom-datatransfer-effectallowed-move dom-datatransfer-effectallowed-all dom-datatransfer-effectallowed-uninitialized -->
 
-- [ ] [types array](https://html.spec.whatwg.org/#concept-datatransfer-types) — A DataTransfer object has an associated types array, which is a FrozenArray<DOMString>, initially empty. When the contents of the DataTransfer object's drag data store item list change, or when the DataTransfer object becomes no longer associated with a drag data store, run the following steps:
+- [x] [types array](https://html.spec.whatwg.org/#concept-datatransfer-types) — A DataTransfer object has an associated types array, which is a FrozenArray<DOMString>, initially empty. When the contents of the DataTransfer object's drag data store item list change, or when the DataTransfer object becomes no longer associated with a drag data store, run the following steps:
   - 1. Let L be an empty sequence.
   - 2. If the DataTransfer object is still associated with a drag data store:
     - 2a. For each item in the DataTransfer object's drag data store item list whose kind is text, add an entry to L consisting of the item's type string.
     - 2b. If there are any items in the DataTransfer object's drag data store item list whose kind is File, then add an entry to L consisting of the string "Files". (This value can be distinguished from the other values because it is not lowercase.)
   - 3. Set the DataTransfer object's types array to the result of creating a frozen array from L.
 
-- [ ] [DataTransfer.DataTransfer()](https://html.spec.whatwg.org/#dom-datatransfer) — The DataTransfer() constructor, when invoked, must return a newly created DataTransfer object initialized as follows:
+- [x] [DataTransfer.DataTransfer()](https://html.spec.whatwg.org/#dom-datatransfer) — The DataTransfer() constructor, when invoked, must return a newly created DataTransfer object initialized as follows:
   - 1. Set the drag data store's item list to be an empty list.
   - 2. Set the drag data store's mode to read/write mode.
   - 3. Set the dropEffect and effectAllowed to "none".
 
-- [ ] [DataTransfer.dropEffect](https://html.spec.whatwg.org/#dom-datatransfer-dropeffect) — The dropEffect attribute controls the drag-and-drop feedback that the user is given during a drag-and-drop operation. When the DataTransfer object is created, the dropEffect attribute is set to a string value. On getting, it must return its current value. On setting, if the new value is one of "none", "copy", "link", or "move", then the attribute's current value must be set to the new value. Other values must be ignored.
+- [x] [DataTransfer.dropEffect](https://html.spec.whatwg.org/#dom-datatransfer-dropeffect) — The dropEffect attribute controls the drag-and-drop feedback that the user is given during a drag-and-drop operation. When the DataTransfer object is created, the dropEffect attribute is set to a string value. On getting, it must return its current value. On setting, if the new value is one of "none", "copy", "link", or "move", then the attribute's current value must be set to the new value. Other values must be ignored.
 
-- [ ] [DataTransfer.effectAllowed](https://html.spec.whatwg.org/#dom-datatransfer-effectallowed) — The effectAllowed attribute is used in the drag-and-drop processing model to initialize the dropEffect attribute during the dragenter and dragover events. When the DataTransfer object is created, the effectAllowed attribute is set to a string value. On getting, it must return its current value. On setting, if the drag data store's mode is the read/write mode and the new value is one of "none", "copy", "copyLink", "copyMove", "link", "linkMove", "move", "all", or "uninitialized", then the attribute's current value must be set to the new value. Otherwise, it must be left unchanged.
+- [x] [DataTransfer.effectAllowed](https://html.spec.whatwg.org/#dom-datatransfer-effectallowed) — The effectAllowed attribute is used in the drag-and-drop processing model to initialize the dropEffect attribute during the dragenter and dragover events. When the DataTransfer object is created, the effectAllowed attribute is set to a string value. On getting, it must return its current value. On setting, if the drag data store's mode is the read/write mode and the new value is one of "none", "copy", "copyLink", "copyMove", "link", "linkMove", "move", "all", or "uninitialized", then the attribute's current value must be set to the new value. Otherwise, it must be left unchanged.
 
-- [ ] [DataTransfer.items](https://html.spec.whatwg.org/#dom-datatransfer-items) — The items attribute must return a DataTransferItemList object associated with the DataTransfer object.
+- [x] [DataTransfer.items](https://html.spec.whatwg.org/#dom-datatransfer-items) — The items attribute must return a DataTransferItemList object associated with the DataTransfer object.
 
-- [ ] [DataTransfer.setDragImage(image, x, y)](https://html.spec.whatwg.org/#dom-datatransfer-setdragimage) — The setDragImage(image, x, y) method must run the following steps:
+- [x] [DataTransfer.setDragImage(image, x, y)](https://html.spec.whatwg.org/#dom-datatransfer-setdragimage) — The setDragImage(image, x, y) method must run the following steps:
   - 1. If the DataTransfer object is no longer associated with a drag data store, return. Nothing happens.
   - 2. If the drag data store's mode is not the read/write mode, return. Nothing happens.
   - 3. If image is an img element, then set the drag data store bitmap to the element's image (at its natural size); otherwise, set the drag data store bitmap to an image generated from the given element (the exact mechanism for doing so is not currently specified).
   - 4. Set the drag data store hot spot coordinate to the given x, y coordinate.
 
-- [ ] [DataTransfer.types](https://html.spec.whatwg.org/#dom-datatransfer-types) — The types attribute must return this DataTransfer object's types array.
+- [x] [DataTransfer.types](https://html.spec.whatwg.org/#dom-datatransfer-types) — The types attribute must return this DataTransfer object's types array.
 
-- [ ] [DataTransfer.getData(format)](https://html.spec.whatwg.org/#dom-datatransfer-getdata) — The getData(format) method must run the following steps:
+- [x] [DataTransfer.getData(format)](https://html.spec.whatwg.org/#dom-datatransfer-getdata) — The getData(format) method must run the following steps:
   - 1. If the DataTransfer object is no longer associated with a drag data store, then return the empty string.
   - 2. If the drag data store's mode is the protected mode, then return the empty string.
   - 3. Let format be the first argument, converted to ASCII lowercase.
@@ -64,7 +67,7 @@ Status: unreviewed
   - 9. If convert-to-URL is true, then parse result as appropriate for text/uri-list data, and then set result to the first URL from the list, if any, or the empty string otherwise. [RFC2483]
   - 10. Return result.
 
-- [ ] [DataTransfer.setData(format, data)](https://html.spec.whatwg.org/#dom-datatransfer-setdata) — The setData(format, data) method must run the following steps:
+- [x] [DataTransfer.setData(format, data)](https://html.spec.whatwg.org/#dom-datatransfer-setdata) — The setData(format, data) method must run the following steps:
   - 1. If the DataTransfer object is no longer associated with a drag data store, return. Nothing happens.
   - 2. If the drag data store's mode is not the read/write mode, return. Nothing happens.
   - 3. Let format be the first argument, converted to ASCII lowercase.
@@ -72,7 +75,7 @@ Status: unreviewed
   - 5. Remove the item in the drag data store item list whose kind is text and whose type string is equal to format, if there is one.
   - 6. Add an item to the drag data store item list whose kind is text, whose type string is equal to format, and whose data is the string given by the method's second argument.
 
-- [ ] [DataTransfer.clearData(format)](https://html.spec.whatwg.org/#dom-datatransfer-cleardata) — The clearData(format) method must run the following steps:
+- [x] [DataTransfer.clearData(format)](https://html.spec.whatwg.org/#dom-datatransfer-cleardata) — The clearData(format) method must run the following steps:
   - 1. If the DataTransfer object is no longer associated with a drag data store, return. Nothing happens.
   - 2. If the drag data store's mode is not the read/write mode, return. Nothing happens.
   - 3. If the method was called with no arguments, remove each item in the drag data store item list whose kind is Plain Unicode string, and return.
@@ -80,7 +83,7 @@ Status: unreviewed
   - 5. If format equals "text", change it to "text/plain". If format equals "url", change it to "text/uri-list".
   - 6. Remove the item in the drag data store item list whose kind is text and whose type string is equal to format, if there is one.
 
-- [ ] [DataTransfer.files](https://html.spec.whatwg.org/#dom-datatransfer-files) — The files attribute must return a live FileList sequence consisting of File objects representing the files found by the following steps. Furthermore, for a given FileList object and a given underlying file, the same File object must be used each time.
+- [x] [DataTransfer.files](https://html.spec.whatwg.org/#dom-datatransfer-files) — The files attribute must return a live FileList sequence consisting of File objects representing the files found by the following steps. Furthermore, for a given FileList object and a given underlying file, the same File object must be used each time.
   - 1. Start with an empty list L.
   - 2. If the DataTransfer object is no longer associated with a drag data store, the FileList is empty. Return the empty list L.
   - 3. If the drag data store's mode is the protected mode, return the empty list L.
@@ -89,49 +92,54 @@ Status: unreviewed
 
 ##### [6.11.3.1 The DataTransferItemList interface](https://html.spec.whatwg.org/#the-datatransferitemlist-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DataTransferItemList`.
+> Fixed: `clear()` cleared data that couldn't be written, such as a drop's.
 
-- [ ] [DataTransferItemList.length](https://html.spec.whatwg.org/#dom-datatransferitemlist-length) — The length attribute must return zero if the object is in the disabled mode; otherwise it must return the number of items in the drag data store item list.
+- [x] [DataTransferItemList.length](https://html.spec.whatwg.org/#dom-datatransferitemlist-length) — The length attribute must return zero if the object is in the disabled mode; otherwise it must return the number of items in the drag data store item list.
 
-- [ ] [DataTransferItemList.add()](https://html.spec.whatwg.org/#dom-datatransferitemlist-add) — The add() method must run the following steps:
+- [x] [DataTransferItemList.add()](https://html.spec.whatwg.org/#dom-datatransferitemlist-add) — The add() method must run the following steps:
   - 1. If the DataTransferItemList object is not in the read/write mode, return null.
   - 2. Jump to the appropriate set of steps from the following list: If the first argument to the method is a string If there is already an item in the drag data store item list whose kind is text and whose type string is equal to the value of the method's second argument, converted to ASCII lowercase, then throw a "NotSupportedError" DOMException. Otherwise, add an item to the drag data store item list…
   - 3. Determine the value of the indexed property corresponding to the newly added item, and return that value (a newly created DataTransferItem object).
 
-- [ ] [DataTransferItemList.remove(index)](https://html.spec.whatwg.org/#dom-datatransferitemlist-remove) — The remove(index) method must run these steps:
+- [x] [DataTransferItemList.remove(index)](https://html.spec.whatwg.org/#dom-datatransferitemlist-remove) — The remove(index) method must run these steps:
   - 1. If the DataTransferItemList object is not in the read/write mode, throw an "InvalidStateError" DOMException.
   - 2. If the drag data store does not contain an indexth item, then return.
   - 3. Remove the indexth item from the drag data store.
 
-- [ ] [DataTransferItemList.clear()](https://html.spec.whatwg.org/#dom-datatransferitemlist-clear) — The clear() method, if the DataTransferItemList object is in the read/write mode, must remove all the items from the drag data store. Otherwise, it must do nothing.
+- [x] [DataTransferItemList.clear()](https://html.spec.whatwg.org/#dom-datatransferitemlist-clear) — The clear() method, if the DataTransferItemList object is in the read/write mode, must remove all the items from the drag data store. Otherwise, it must do nothing.
 
 ##### [6.11.3.2 The DataTransferItem interface](https://html.spec.whatwg.org/#the-datatransferitem-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DataTransferItem`; `getAsFile()` returns the same file each time, and there's no `getAsEntry` (see `DIFFERENCES.md` and `KNOWN-ISSUES.md`).
+> Fixed: a removed item's `kind` wasn't empty.
 
-- [ ] [DataTransferItem.kind](https://html.spec.whatwg.org/#dom-datatransferitem-kind) — The kind attribute must return the empty string if the DataTransferItem object is in the disabled mode; otherwise it must return the string given in the cell from the second column of the following table from the row whose cell in the first column contains the drag data item kind of the item represented by the DataTransferItem object:
+- [x] [DataTransferItem.kind](https://html.spec.whatwg.org/#dom-datatransferitem-kind) — The kind attribute must return the empty string if the DataTransferItem object is in the disabled mode; otherwise it must return the string given in the cell from the second column of the following table from the row whose cell in the first column contains the drag data item kind of the item represented by the DataTransferItem object:
 
-- [ ] [DataTransferItem.type](https://html.spec.whatwg.org/#dom-datatransferitem-type) — The type attribute must return the empty string if the DataTransferItem object is in the disabled mode; otherwise it must return the drag data item type string of the item represented by the DataTransferItem object.
+- [x] [DataTransferItem.type](https://html.spec.whatwg.org/#dom-datatransferitem-type) — The type attribute must return the empty string if the DataTransferItem object is in the disabled mode; otherwise it must return the drag data item type string of the item represented by the DataTransferItem object.
 
-- [ ] [DataTransferItem.getAsString(callback)](https://html.spec.whatwg.org/#dom-datatransferitem-getasstring) — The getAsString(callback) method must run the following steps:
+- [x] [DataTransferItem.getAsString(callback)](https://html.spec.whatwg.org/#dom-datatransferitem-getasstring) — The getAsString(callback) method must run the following steps:
   - 1. If the callback is null, return.
   - 2. If the DataTransferItem object is not in the read/write mode or the read-only mode, return. The callback is never invoked.
   - 3. If the drag data item kind is not text, then return. The callback is never invoked.
   - 4. Otherwise, queue a task to invoke callback, passing the actual data of the item represented by the DataTransferItem object as the argument.
 
-- [ ] [DataTransferItem.getAsFile()](https://html.spec.whatwg.org/#dom-datatransferitem-getasfile) — The getAsFile() method must run the following steps:
+- [x] [DataTransferItem.getAsFile()](https://html.spec.whatwg.org/#dom-datatransferitem-getasfile) — The getAsFile() method must run the following steps:
   - 1. If the DataTransferItem object is not in the read/write mode or the read-only mode, then return null.
   - 2. If the drag data item kind is not File, then return null.
   - 3. Return a new File object representing the actual data of the item represented by the DataTransferItem object.
 
 #### [6.11.4 The DragEvent interface](https://html.spec.whatwg.org/#the-dragevent-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DragEvent`; drag events are fired by `EventHandler::DispatchDragEvent`.
 <!-- definitions: concept-platform-dropeffect-override -->
 
-- [ ] [DragEvent.dataTransfer](https://html.spec.whatwg.org/#dom-dragevent-datatransfer) — The dataTransfer attribute of the DragEvent interface must return the value it was initialized to. It represents the context information for the event.
+- [x] [DragEvent.dataTransfer](https://html.spec.whatwg.org/#dom-dragevent-datatransfer) — The dataTransfer attribute of the DragEvent interface must return the value it was initialized to. It represents the context information for the event.
 
-- [ ] [fire a DND event](https://html.spec.whatwg.org/#fire-a-dnd-event) — When a user agent is required to fire a DND event named e at an element, using a particular drag data store, and optionally with a specific related target, the user agent must run the following steps:
+- [x] [fire a DND event](https://html.spec.whatwg.org/#fire-a-dnd-event) — When a user agent is required to fire a DND event named e at an element, using a particular drag data store, and optionally with a specific related target, the user agent must run the following steps:
   - 1. Let dataDragStoreWasChanged be false.
   - 2. If no specific related target was provided, set related target to null.
   - 3. Let window be the relevant global object of the Document object of the specified target element.
@@ -150,10 +158,11 @@ Status: unreviewed
 
 #### [6.11.5 Processing model](https://html.spec.whatwg.org/#drag-and-drop-processing-model)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DragController` and `EventHandler`, as upstream's (see `DIFFERENCES.md`); drag events' modifier keys are missing (see `KNOWN-ISSUES.md`).
 <!-- definitions: source-node list-of-dragged-nodes initiate-the-drag-and-drop-operation immediate-user-selection current-target-element current-drag-operation concept-current-drag-operation-none concept-current-drag-operation-copy concept-current-drag-operation-link -->
 
-- [ ] [User agents must, as soon as the drag operation is initiated and every 350ms (±…](https://html.spec.whatwg.org/#concept-current-drag-operation-move) — User agents must, as soon as the drag operation is initiated and every 350ms (±200ms) thereafter for as long as the drag operation is ongoing, queue a task to perform the following steps in sequence:
+- [x] [User agents must, as soon as the drag operation is initiated and every 350ms (±…](https://html.spec.whatwg.org/#concept-current-drag-operation-move) — User agents must, as soon as the drag operation is initiated and every 350ms (±200ms) thereafter for as long as the drag operation is ongoing, queue a task to perform the following steps in sequence:
   - 1. If the user agent is still performing the previous iteration of the sequence (if any) when the next iteration becomes due, return for this iteration (effectively "skipping missed frames" of the drag-and-drop operation).
   - 2. Fire a DND event named drag at the source node. If this event is canceled, the user agent must set the current drag operation to "none" (no drag operation).
   - 3. If the drag event was not canceled and the user has not ended the drag-and-drop operation, check the state of the drag-and-drop operation, as follows:
@@ -175,15 +184,17 @@ Status: unreviewed
 
 #### [6.11.6 Events summary](https://html.spec.whatwg.org/#dndevents)
 
-Status: unreviewed
+Status: n/a (summary)
 
 #### [6.11.7 The draggable attribute](https://html.spec.whatwg.org/#the-draggable-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement::Draggable`; objects don't show images, so none is draggable by default.
 <!-- definitions: attr-draggable dom-draggable -->
 
-- [ ] [Auto](https://html.spec.whatwg.org/#attr-draggable-auto-state) — The attribute's missing value default and invalid value default are both the Auto state. The auto state uses the default behavior of the user agent.
+- [x] [Auto](https://html.spec.whatwg.org/#attr-draggable-auto-state) — The attribute's missing value default and invalid value default are both the Auto state. The auto state uses the default behavior of the user agent.
 
 #### [6.11.8 Security risks in the drag-and-drop model](https://html.spec.whatwg.org/#security-risks-in-the-drag-and-drop-model)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Data is only given to `drop` (read-only) and `dragstart` (read/write); other events get protected data transfers.

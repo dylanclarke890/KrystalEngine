@@ -67,14 +67,24 @@ namespace krys::boo::dom
     return items[index];
   }
 
+  // https://html.spec.whatwg.org/#dom-datatransferitemlist-add
   ExceptionOr<RefPtr<DataTransferItem>> DataTransferItemList::Add(Document &document, DOMStringView data,
                                                                   DOMStringView type) noexcept
   {
+    // 1. If the DataTransferItemList object is not in the read/write mode, return null.
     if (!_dataTransfer.CanWriteData())
     {
       return RefPtr<DataTransferItem>();
     }
 
+    // 2. If the first argument to the method is a string: If there is already an item in the drag data store
+    //    item list whose kind is text and whose type string is equal to the value of the method's second
+    //    argument, converted to ASCII lowercase, then throw a "NotSupportedError" DOMException. Otherwise,
+    //    add an item to the drag data store item list whose kind is text, whose type string is equal to the
+    //    value of the method's second argument, converted to ASCII lowercase, and whose data is the string
+    //    given by the method's first argument.
+    // 3. Determine the value of the indexed property corresponding to the newly added item, and return that
+    //    value (a newly created DataTransferItem object).
     for (auto &item : EnsureItems())
     {
       if (!item->IsFile() && text::IsASCIICaselessEqual(item->Type(), type))
@@ -92,8 +102,17 @@ namespace krys::boo::dom
     return RefPtr<DataTransferItem>(_items->back());
   }
 
+  // https://html.spec.whatwg.org/#dom-datatransferitemlist-add
   RefPtr<DataTransferItem> DataTransferItemList::Add(Ref<File> &&file) noexcept
   {
+    // 1. If the DataTransferItemList object is not in the read/write mode, return null.
+    // 2. If the first argument to the method is a File: Add an item to the drag data store item list whose
+    // kind
+    //    is File, whose type string is the type of the File, converted to ASCII lowercase, and whose data is
+    //    the same as the File's data.
+    // (A File's type is already lowercase.)
+    // 3. Determine the value of the indexed property corresponding to the newly added item, and return that
+    //    value (a newly created DataTransferItem object).
     if (!_dataTransfer.CanWriteData())
     {
       return nullptr;
@@ -105,18 +124,24 @@ namespace krys::boo::dom
     return _items->back();
   }
 
+  // https://html.spec.whatwg.org/#dom-datatransferitemlist-remove
   ExceptionOr<void> DataTransferItemList::Remove(uint32 index) noexcept
   {
+    // 1. If the DataTransferItemList object is not in the read/write mode, throw an "InvalidStateError"
+    //    DOMException.
     if (!_dataTransfer.CanWriteData())
     {
       return Exception {ExceptionCode::InvalidStateError};
     }
 
+    // 2. If the drag data store does not contain an indexth item, then return.
     auto &items = EnsureItems();
     if (items.size() <= index)
     {
       return {};
     }
+
+    // 3. Remove the indexth item from the drag data store.
 
     // FIXME: Remove the file from the pasteboard object once we add support for it.
     Ref<DataTransferItem> removedItem = items[index];
@@ -134,8 +159,16 @@ namespace krys::boo::dom
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-datatransferitemlist-clear
   void DataTransferItemList::Clear() noexcept
   {
+    // The clear() method, if the DataTransferItemList object is in the read/write mode, must remove all the
+    // items from the drag data store. Otherwise, it must do nothing.
+    if (!_dataTransfer.CanWriteData())
+    {
+      return;
+    }
+
     _dataTransfer.GetPasteboard().Clear();
     bool removedItemContainingFile = false;
     if (_items)

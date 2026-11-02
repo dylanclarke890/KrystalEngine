@@ -29,7 +29,12 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "DataTransfer: data", "[DOM][DataTransfer]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "DataTransfer: data",
+                   "[DOM][DataTransfer][html:drag-data-store][html:drag-data-store-mode]"
+                   "[html:create-a-drag-data-store][html:dom-datatransfer][html:dom-datatransfer-dropeffect]"
+                   "[html:dom-datatransfer-effectallowed][html:dom-datatransfer-types]"
+                   "[html:concept-datatransfer-types][html:dom-datatransfer-getdata]"
+                   "[html:dom-datatransfer-setdata][html:dom-datatransfer-cleardata]")
   {
     EditorFixture fixture(u8"<p>x</p>");
     auto &document = *fixture.Document;
@@ -132,7 +137,12 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "DataTransfer: items", "[DOM][DataTransfer]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "DataTransfer: items",
+                   "[DOM][DataTransfer][html:dom-datatransfer-items][html:dom-datatransfer-files]"
+                   "[html:dom-datatransferitemlist-length][html:dom-datatransferitemlist-add]"
+                   "[html:dom-datatransferitemlist-remove][html:dom-datatransferitemlist-clear]"
+                   "[html:dom-datatransferitem-kind][html:dom-datatransferitem-type]"
+                   "[html:dom-datatransferitem-getasstring][html:dom-datatransferitem-getasfile]")
   {
     EditorFixture fixture(u8"<p>x</p>");
     auto &document = *fixture.Document;
@@ -161,7 +171,9 @@ namespace krys::boo::tests
       CHECK(items.Length() == 3);
       dataTransfer->ClearData(u8"text/plain");
       CHECK(items.Length() == 2);
+      // A removed item is in the disabled mode.
       CHECK(plain->Type().empty());
+      CHECK(plain->GetKind().empty());
 
       CHECK_FALSE(items.Remove(0).HasException());
       CHECK(dataTransfer->GetData(document, u8"text/html").empty());
@@ -206,6 +218,12 @@ namespace krys::boo::tests
       REQUIRE_FALSE(added.HasException());
       CHECK_FALSE(added.Value());
       CHECK(readOnlyItems.Remove(0).HasException());
+
+      // Nor cleared.
+      auto length = readOnlyItems.Length();
+      readOnlyItems.Clear();
+      CHECK(readOnlyItems.Length() == length);
+      CHECK(readOnly->GetData(document, u8"text/plain") == u8"text");
     }
   }
 
@@ -278,7 +296,8 @@ namespace krys::boo::tests
     text.SetText(u8"a\u00A0b");
     CHECK(text.Text() == u8"a b");
   }
-  TEST_CASE_METHOD(css::tests::ValueFixture, "DataTransfer: the drag image", "[DOM][DataTransfer]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "DataTransfer: the drag image",
+                   "[DOM][DataTransfer][html:dom-datatransfer-setdragimage]")
   {
     EditorFixture fixture(u8"<div id=a style=\"width:30px;height:20px\">a</div><div id=b>b</div>");
     auto &document = *fixture.Document;

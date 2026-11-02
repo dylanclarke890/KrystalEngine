@@ -202,7 +202,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLAnchorElement: the rest of its interface", "[HTML][HTMLAnchorElement][html:dom-a-text]")
+  TEST_CASE("HTMLAnchorElement: the rest of its interface",
+            "[HTML][HTMLAnchorElement][html:dom-a-text][html:dom-draggable][html:attr-draggable]"
+            "[html:attr-draggable-auto-state]")
   {
     NavigationFixture fixture(
       u8R"(<a id=a href="x" target=t hreflang=fr type="text/html" rel="noreferrer">A<b>a</b></a>

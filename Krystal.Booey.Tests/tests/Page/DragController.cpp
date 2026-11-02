@@ -241,7 +241,8 @@ namespace krys::boo::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "DragController: dragging a draggable element",
-                   "[Page][DragController]")
+                   "[Page][DragController][html:drag-and-drop-processing-model][html:fire-a-dnd-event]"
+                   "[html:dom-dragevent-datatransfer]")
   {
     DragFixture fixture(u8"<div id=src draggable=true>source</div><div id=dst>target</div>");
     auto &document = *fixture.Document;
