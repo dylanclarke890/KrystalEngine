@@ -328,7 +328,9 @@ namespace krys::boo::tests
     "Leaving a document: beforeunload, pagehide and unload",
     "[Loader][DocumentLoader][html:the-beforeunloadevent-interface][html:dom-beforeunloadevent-returnvalue]"
     "[html:the-pagetransitionevent-interface][html:dom-pagetransitionevent-persisted]"
-    "[html:fire-a-page-transition-event]")
+    "[html:fire-a-page-transition-event][html:checking-if-unloading-is-canceled][html:steps-to-fire-"
+    "beforeunload]"
+    "[html:navigate]")
   {
     LoadFixture fixture;
     fixture.LoadMarkup(u8"<!DOCTYPE html><body><p>First</p></body>", u8"https://example.com/first.html");
@@ -338,6 +340,12 @@ namespace krys::boo::tests
 
     List<std::string> events;
     bool stay = false;
+    // Navigating from the events does nothing.
+    auto tryToNavigate = [&]
+    {
+      REQUIRE_FALSE(window->GetLocation().Assign(u8"https://example.com/elsewhere.html").HasException());
+      CHECK_FALSE(fixture.Frame().GetNavigationScheduler().LocationChangePending());
+    };
     auto beforeUnload =
       window->AddEventListener<html::BeforeUnloadEvent>(u8"beforeunload",
                                                         [&](html::BeforeUnloadEvent &event)
@@ -351,6 +359,7 @@ namespace krys::boo::tests
                                                           }
                                                           // No dialogs while unloading.
                                                           window->Alert(u8"Leaving");
+                                                          tryToNavigate();
                                                         });
     auto pageHide = window->AddEventListener<html::PageTransitionEvent>(u8"pagehide",
                                                                         [&](html::PageTransitionEvent &event)
@@ -359,6 +368,7 @@ namespace krys::boo::tests
                                                                           CHECK(event.Bubbles());
                                                                           CHECK(event.Cancelable());
                                                                           events.push_back("pagehide");
+                                                                          tryToNavigate();
                                                                         });
     auto unload = window->AddEventListener(u8"unload",
                                            [&](dom::Event &event)
@@ -366,6 +376,7 @@ namespace krys::boo::tests
                                              CHECK(event.Target().get() == first.get());
                                              events.push_back("unload");
                                              window->Alert(u8"Gone");
+                                             tryToNavigate();
                                            });
 
     SECTION("a document is unloaded as the next one commits")
@@ -374,6 +385,7 @@ namespace krys::boo::tests
       CHECK(events == List<std::string> {"beforeunload"});
       html::EventLoop::Current().RunUntilIdle();
       CHECK(events == List<std::string> {"beforeunload", "pagehide", "unload"});
+      CHECK(fixture.Document().GetURL().String() == u8"https://example.com/second.html");
       CHECK_FALSE(first->PageShowing());
       CHECK(fixture.Chrome->Alerts.empty());
       CHECK(fixture.Chrome->ConfirmPanels == 0);

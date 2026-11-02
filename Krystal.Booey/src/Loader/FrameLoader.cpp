@@ -670,20 +670,47 @@ namespace krys::boo
                                         RefPtr<html::SerializedScriptValue> &&stateObject,
                                         NavigationHistoryBehavior historyHandling) noexcept
   {
+    // https://html.spec.whatwg.org/#url-and-history-update-steps
     krys_debug_assert(_frame.Document() && _documentLoader);
 
+    // 1. Let navigable be document's node navigable.
+    // 2. Let activeEntry be navigable's active session history entry.
+    // 3. Let newEntry be a new session history entry, with URL newURL, serialized state serializedData if
+    // it's
+    //    not null, otherwise activeEntry's classic history API state, and activeEntry's document state,
+    //    scroll restoration mode and persisted user state.
+    // (HistoryController::PushState and ReplaceState make the entry, below.)
+    // 4. If document's is initial about:blank is true, then set historyHandling to "replace".
     if (_isDisplayingInitialEmptyDocument)
     {
       historyHandling = NavigationHistoryBehavior::Replace;
     }
 
-    // FIXME: Restoring the history object state (step 2 of the steps), once state is deserialized.
+    // 5. Let entryToReplace be activeEntry if historyHandling is "replace", otherwise null.
+    // 6. If entryToReplace is non-null, then set newEntry's navigation API key to entryToReplace's navigation
+    //    API key.
+    // 7. If historyHandling is "push": increment document's history object's index, and set its length to its
+    //    index + 1.
+    // (The history object reads its length from the back/forward list.)
+    // 8. If serializedData is not null, then restore the history object state given document and newEntry.
+    // (History reads its state from the current item.)
 
+    // 9. Set the URL given document to newURL.
     if (auto *document = _frame.Document())
     {
       document->UpdateURLForPushOrReplaceState(newURL);
     }
 
+    // 10. Set document's latest entry to newEntry.
+    // 11. Set navigable's active session history entry to newEntry.
+    // 12. Update the navigation API entries for a same-document navigation given document's relevant global
+    //     object's navigation API, newEntry, and historyHandling.
+    // 13. Let traversable be navigable's traversable navigable.
+    // 14. Append the following session history synchronous navigation steps involving navigable to
+    //     traversable:
+    // 14a. Finalize a same-document navigation given traversable, navigable, newEntry, entryToReplace,
+    //      historyHandling, and "none".
+    // (HistoryController updates the item and the Navigation API's entries, at once.)
     if (historyHandling == NavigationHistoryBehavior::Replace)
     {
       _history->ReplaceState(krys::move(stateObject), newURL);
@@ -754,6 +781,9 @@ namespace krys::boo
     };
   }
 
+  // https://html.spec.whatwg.org/#checking-if-unloading-is-canceled
+  // (The frame's document is the only one to fire beforeunload at, and a traversal's navigate event fires
+  // later, as the traversal happens.)
   bool FrameLoader::ShouldClose() noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);
@@ -762,12 +792,18 @@ namespace krys::boo
       return true;
     }
 
+    // https://html.spec.whatwg.org/#steps-to-fire-beforeunload
+    // 2. Increase the document's unload counter by 1.
+    // 12. Decrease document's unload counter by 1.
     UnloadCountIncrementer unloadCountIncrementer(frame->Document());
     return DispatchBeforeUnloadEvent();
   }
 
   bool FrameLoader::DispatchBeforeUnloadEvent() noexcept
   {
+    // https://html.spec.whatwg.org/#steps-to-fire-beforeunload
+    // 1. Let unloadPromptCanceled be false.
+    // (A document without a body gets no beforeunload.)
     RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
     RefPtr<LocalDOMWindow> window = document ? ShareRefPtr(document->Window()) : nullptr;
     if (!window || !document->BodyOrFrameset())
@@ -775,21 +811,32 @@ namespace krys::boo
       return true;
     }
 
+    // 3. Increase document's relevant agent's event loop's termination nesting level by 1.
+    // 4. Let eventFiringResult be the result of firing an event named beforeunload at document's relevant
+    //    global object, using BeforeUnloadEvent, with the cancelable attribute initialized to true.
+    // 5. Decrease document's relevant agent's event loop's termination nesting level by 1.
+    // (There's no script to terminate; no dialogs are shown while it's dispatched.)
     auto beforeUnloadEvent = html::BeforeUnloadEvent::Create();
     {
       SetForScope dismissal(_pageDismissalEventBeingDispatched, true);
       (void)dom::EventDispatcher::DispatchToTarget(*beforeUnloadEvent, window.get(), true);
     }
 
-    // Web pages can request we ask for confirmation before navigating by cancelling the event, or setting its
-    // returnValue to a non-empty string; only if the user has interacted with the page (it has sticky
-    // activation).
+    // 6. If all of the following are true: unloadPromptShown is false; document's active sandboxing flag set
+    //    does not have its sandboxed modals flag set; document's relevant global object has sticky
+    //    activation; eventFiringResult is false, or the returnValue attribute of event is not the empty
+    //    string; and showing an unload prompt is unlikely to be annoying, deceptive, or pointless, then:
     bool asksToStay = beforeUnloadEvent->DefaultPrevented() || !beforeUnloadEvent->ReturnValue().empty();
     if (!asksToStay || !window->HasStickyActivation())
     {
       return true;
     }
 
+    // 6a. Set unloadPromptShown to true.
+    // 6d.i. Ask the user to confirm that they wish to unload the document, and pause while waiting for the
+    //       user's response.
+    // 6d.ii. If the user did not confirm the page navigation, then set unloadPromptCanceled to true.
+    // (The host asks, with the returnValue to show if it wants.)
     auto *page = _frame.GetPage();
     return !page
            || page->GetChromeClient().RunBeforeUnloadConfirmPanel(beforeUnloadEvent->ReturnValue(), _frame);
@@ -1192,6 +1239,13 @@ namespace krys::boo
   {
     krys_assert(frameLoadRequest.GetResourceRequest().HTTPMethod() == u8"GET");
 
+    // https://html.spec.whatwg.org/#navigate
+    // 9. If navigable's active document's unload counter is greater than 0, then return.
+    if (!IsNavigationAllowed())
+    {
+      return;
+    }
+
     // The target is ignored when the download attribute is set, as the link is downloaded rather than
     // followed.
     auto effectiveFrameName = frameLoadRequest.DownloadAttribute() == dom::DOMStringAtom::Null()
@@ -1296,6 +1350,13 @@ namespace krys::boo
                                     RefPtr<FormSubmission> &&formSubmission) noexcept
   {
     auto frameName = request.FrameName();
+
+    // https://html.spec.whatwg.org/#navigate
+    // 9. If navigable's active document's unload counter is greater than 0, then return.
+    if (!IsNavigationAllowed())
+    {
+      return;
+    }
 
     ResourceRequest workingResourceRequest(request.GetResourceRequest().URL());
     workingResourceRequest.SetHTTPMethod(u8"POST");

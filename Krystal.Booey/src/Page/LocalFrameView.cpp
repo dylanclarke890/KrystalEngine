@@ -2705,12 +2705,23 @@ namespace krys::boo
   {
     krys_assert(Frame().Document());
 
+    // A text fragment's range is the indicated part, as the text fragments specification has it.
     if (ScrollToTextFragment())
     {
       return true;
     }
 
+    // https://html.spec.whatwg.org/#the-indicated-part-of-the-document
+    // 1. If document's URL does not equal url with exclude fragments set to true, then return null.
+    // (url is the document's.)
+    // 2. Let fragment be url's fragment.
     auto fragmentIdentifier = url.FragmentIdentifier();
+    // 3. If fragment is the empty string, then return the special value top of the document.
+    // 4. Let potentialIndicatedElement be the result of finding a potential indicated element given document
+    //    and fragment.
+    // 5. If potentialIndicatedElement is not null, then return potentialIndicatedElement.
+    // (ScrollToAnchorFragment also takes a fragment that's "top" to be the top of the document, as step 10
+    // would.)
     if (ScrollToAnchorFragment(fragmentIdentifier))
     {
       return true;
@@ -2718,14 +2729,22 @@ namespace krys::boo
 
     if (fragmentIdentifier.data())
     {
-      // https://html.spec.whatwg.org/#find-a-potential-indicated-element, with the fragment percent-decoded.
+      // 6. Let fragmentBytes be the result of percent-decoding fragment.
+      // 7. Let decodedFragment be the result of running UTF-8 decode without BOM on fragmentBytes.
       auto decoded = url::URLParser::PercentDecode(fragmentIdentifier);
+      // 8. Set potentialIndicatedElement to the result of finding a potential indicated element given
+      // document
+      //    and decodedFragment.
+      // 9. If potentialIndicatedElement is not null, then return potentialIndicatedElement.
+      // 10. If decodedFragment is an ASCII case-insensitive match for the string top, then return the top of
+      //     the document.
       if (decoded != fragmentIdentifier && ScrollToAnchorFragment(decoded))
       {
         return true;
       }
     }
 
+    // 11. Return null.
     ResetScrollAnchor();
     return false;
   }
@@ -2743,7 +2762,12 @@ namespace krys::boo
 
     RefPtr<dom::Element> anchorElement = ShareRefPtr(document.FindAnchor(fragmentIdentifier));
 
-    // Setting to null will clear the current target.
+    // https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier
+    // 1. If document's indicated part is null, then set document's target element to null.
+    // 2a. Set document's target element to null.
+    // 3a. Assert: document's indicated part is an element.
+    // 3b. Let target be document's indicated part.
+    // 3c. Set document's target element to target.
     document.SetCSSTarget(anchorElement.get());
 
     if (Is<svg::SVGDocument>(document))
@@ -2773,11 +2797,17 @@ namespace krys::boo
       return false;
     }
 
+    // 3d. Run the ancestor revealing algorithm on target.
     if (anchorElement)
     {
       (void)dom::RevealClosedDetailsAndHiddenUntilFoundAncestors(*anchorElement);
     }
 
+    // 2. Otherwise, if document's indicated part is top of the document:
+    // 2b. Scroll to the beginning of the document for document.
+    // 3e. Scroll target into view, with behavior set to "auto", block set to "start", and inline set to
+    //     "nearest".
+    // (The scroll position is kept at the anchor while layout changes, until the user scrolls.)
     dom::ContainerNode *scrollPositionAnchor = anchorElement.get();
     if (!scrollPositionAnchor)
     {
@@ -2787,8 +2817,8 @@ namespace krys::boo
 
     if (anchorElement)
     {
-      // Run the focusing steps for target, with the Document's viewport as the fallback target, and move the
-      // sequential focus navigation starting point to target.
+      // 3f. Run the focusing steps for target, with the Document's viewport as the fallback target.
+      // 3g. Move the sequential focus navigation starting point to target.
       dom::FocusOptions options;
       options.FocusVisible = true;
       html::FocusAlgorithms::FocusingSteps(*anchorElement, &document, options);

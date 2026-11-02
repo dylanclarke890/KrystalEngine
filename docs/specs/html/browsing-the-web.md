@@ -8,34 +8,39 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [7.4 Navigation and session history](https://html.spec.whatwg.org/#navigation-and-session-history)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 #### [7.4.1 Session history](https://html.spec.whatwg.org/#session-history-infrastructure)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ##### [7.4.1.1 Session history entries](https://html.spec.whatwg.org/#session-history-entries)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> A `HistoryItem` is the session history entry: its URL, document sequence number, state objects (classic and Navigation API), scroll restoration mode and scroll position; its key is `UUIDIdentifier`. Documents are kept by the back/forward cache rather than the entry.
 <!-- definitions: session-history-entry she-step she-url she-document-state she-classic-history-api-state she-navigation-api-state she-navigation-api-key she-navigation-api-id she-scroll-restoration-mode she-scroll-position she-other serialized-state scroll-restoration-mode dom-scrollrestoration-auto dom-scrollrestoration-manual -->
 
-- [ ] [document](https://html.spec.whatwg.org/#she-document) — To get a session history entry's document, return its document state's document.
+- [x] [document](https://html.spec.whatwg.org/#she-document) — To get a session history entry's document, return its document state's document.
 
 ##### [7.4.1.2 Document state](https://html.spec.whatwg.org/#document-state)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The document state is spread over the `HistoryItem` (the document sequence number, the target name is the frame's) and the `DocumentLoader` (the request). There are no origins, policy containers or reload pending flags.
 <!-- definitions: document-state-2 document-state-document document-state-history-policy-container document-state-request-referrer document-state-request-referrer-policy document-state-initiator-origin document-state-origin document-state-about-base-url document-state-nested-histories document-state-resource document-state-reload-pending document-state-ever-populated document-state-nav-target-name document-state-not-restored-reasons post-resource post-resource-request-body post-resource-request-content-type nested-history nested-history-id nested-history-entries latest-entry -->
 
 ##### [7.4.1.3 Centralized modifications of session history](https://html.spec.whatwg.org/#centralized-modifications-of-session-history)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> There's no session history traversal queue: traversals and navigations are `NavigationScheduler` tasks on the event loop.
 <!-- definitions: session-history-traversal-parallel-queue session-history-traversal-parallel-queue-algorithm-set session-history-traversal-parallel-queue-sync-nav-steps session-history-traversal-parallel-queue-sync-nav-steps-target-nav -->
 
-- [ ] [append session history traversal steps](https://html.spec.whatwg.org/#tn-append-session-history-traversal-steps) — To append session history traversal steps to a traversable navigable traversable given algorithm steps steps, append steps to traversable's session history traversal queue's algorithm set.
+- [x] [append session history traversal steps](https://html.spec.whatwg.org/#tn-append-session-history-traversal-steps) — To append session history traversal steps to a traversable navigable traversable given algorithm steps steps, append steps to traversable's session history traversal queue's algorithm set.
 
-- [ ] [append session history synchronous navigation steps](https://html.spec.whatwg.org/#tn-append-session-history-sync-nav-steps) — To append session history synchronous navigation steps involving a navigable targetNavigable to a traversable navigable traversable given algorithm steps steps, append steps as synchronous navigation steps targeting target navigable targetNavigable to traversable's session history traversal queue's algorithm set.
+- [x] [append session history synchronous navigation steps](https://html.spec.whatwg.org/#tn-append-session-history-sync-nav-steps) — To append session history synchronous navigation steps involving a navigable targetNavigable to a traversable navigable traversable given algorithm steps steps, append steps as synchronous navigation steps targeting target navigable targetNavigable to traversable's session history traversal queue's algorithm set.
 
-- [ ] [start a new session history traversal parallel queue](https://html.spec.whatwg.org/#starting-a-new-session-history-traversal-parallel-queue) — To start a new session history traversal parallel queue:
+- [x] [start a new session history traversal parallel queue](https://html.spec.whatwg.org/#starting-a-new-session-history-traversal-parallel-queue) — To start a new session history traversal parallel queue:
   - 1. Let sessionHistoryTraversalQueue be a new session history traversal parallel queue.
   - 2. Run the following steps in parallel:
     - 2a. While true:
@@ -46,9 +51,10 @@ Status: unreviewed
 
 ##### [7.4.1.4 Low-level operations on session history](https://html.spec.whatwg.org/#low-level-operations-on-session-history)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `BackForwardController` holds the entries; pushing an item clears the forward entries. `Navigation::FilterHistoryItemsForNavigationAPI` gets the Navigation API's entries, contiguous items of the same origin.
 
-- [ ] [get session history entries](https://html.spec.whatwg.org/#getting-session-history-entries) — To get session history entries of a navigable navigable:
+- [x] [get session history entries](https://html.spec.whatwg.org/#getting-session-history-entries) — To get session history entries of a navigable navigable:
   - 1. Let traversable be navigable's traversable navigable.
   - 2. Assert: this is running within traversable's session history traversal queue.
   - 3. If navigable is traversable, return traversable's session history entries.
@@ -60,7 +66,7 @@ Status: unreviewed
       - 6a.ii. For each entry of nestedHistory's entries, append entry's document state to docStates.
   - 7. Assert: this step is not reached.
 
-- [ ] [get session history entries for the navigation API](https://html.spec.whatwg.org/#getting-session-history-entries-for-the-navigation-api) — To get session history entries for the navigation API of a navigable navigable given an integer targetStep:
+- [x] [get session history entries for the navigation API](https://html.spec.whatwg.org/#getting-session-history-entries-for-the-navigation-api) — To get session history entries for the navigation API of a navigable navigable given an integer targetStep:
   - 1. Let rawEntries be the result of getting session history entries for navigable.
   - 2. Let entriesForNavigationAPI be a new empty list.
   - 3. Let startingIndex be the index of the session history entry in rawEntries who has the greatest step less than or equal to targetStep.
@@ -78,7 +84,7 @@ Status: unreviewed
     - 9c. Set i to i + 1.
   - 10. Return entriesForNavigationAPI.
 
-- [ ] [clear the forward session history](https://html.spec.whatwg.org/#clear-the-forward-session-history) — To clear the forward session history of a traversable navigable navigable:
+- [x] [clear the forward session history](https://html.spec.whatwg.org/#clear-the-forward-session-history) — To clear the forward session history of a traversable navigable navigable:
   - 1. Assert: this is running within navigable's session history traversal queue.
   - 2. Let step be the navigable's current session history step.
   - 3. Let entryLists be the ordered set « navigable's session history entries ».
@@ -87,7 +93,7 @@ Status: unreviewed
     - 4b. For each entry of entryList:
       - 4b.i. For each nestedHistory of entry's document state's nested histories, append nestedHistory's entries list to entryLists.
 
-- [ ] [get all used history steps](https://html.spec.whatwg.org/#getting-all-used-history-steps) — To get all used history steps that are part of traversable navigable traversable:
+- [x] [get all used history steps](https://html.spec.whatwg.org/#getting-all-used-history-steps) — To get all used history steps that are part of traversable navigable traversable:
   - 1. Assert: this is running within traversable's session history traversal queue.
   - 2. Let steps be an empty ordered set of non-negative integers.
   - 3. Let entryLists be the ordered set « traversable's session history entries ».
@@ -99,24 +105,26 @@ Status: unreviewed
 
 #### [7.4.2 Navigation](https://html.spec.whatwg.org/#navigating-across-documents)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ##### [7.4.2.1 Supporting concepts](https://html.spec.whatwg.org/#navigation-supporting-concepts)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> There are no source or target snapshot params (see `KNOWN-ISSUES.md`); the navigation must be a replace for the initial about:blank document (`FrameLoader::UpdateURLAndHistory`, `Navigation::Navigate`). User involvement is `NavigationAction::IsRequestFromClientOrUserInput` and the window's transient activation.
 <!-- definitions: source-snapshot-params source-snapshot-params-activation source-snapshot-params-sandbox source-snapshot-params-download source-snapshot-params-client source-snapshot-params-policy-container target-snapshot-params target-snapshot-params-sandbox target-snapshot-params-iframe-referrer-policy navigation-params navigation-params-id navigation-params-navigable navigation-params-request navigation-params-response navigation-params-fetch-controller navigation-params-commit-early-hints navigation-params-coop-enforcement-result navigation-params-reserved-environment navigation-params-origin navigation-params-policy-container navigation-params-sandboxing navigation-params-iframe-referrer-policy navigation-params-coop navigation-params-nav-timing-type navigation-params-about-base-url navigation-params-user-involvement navigation-id navigationhistorybehavior-push navigationhistorybehavior-replace navigationhistorybehavior-auto history-handling-behavior user-navigation-involvement uni-browser-ui uni-activation uni-none -->
 
-- [ ] [snapshot source snapshot params](https://html.spec.whatwg.org/#snapshotting-source-snapshot-params) — To snapshot source snapshot params given a Document-or-null sourceDocument:
+- [x] [snapshot source snapshot params](https://html.spec.whatwg.org/#snapshotting-source-snapshot-params) — To snapshot source snapshot params given a Document-or-null sourceDocument:
   - 1. If sourceDocument is null, then return a new source snapshot params with has transient activationtruesandboxing flagsan empty sandboxing flag setallows downloadingtruefetch clientnullsource policy containera new policy container
   - 2. Return a new source snapshot params with has transient activationtrue if sourceDocument's relevant global object has transient activation; otherwise falsesandboxing flagssourceDocument's active sandboxing flag setallows downloadingfalse if sourceDocument's active sandboxing flag set has the sandboxed downloads browsing context flag set; otherwise truefetch clientsourceDocument's relevant settings…
 
-- [ ] [snapshot target snapshot params](https://html.spec.whatwg.org/#snapshotting-target-snapshot-params) — To snapshot target snapshot params given a navigable targetNavigable, return a new target snapshot params with:
+- [x] [snapshot target snapshot params](https://html.spec.whatwg.org/#snapshotting-target-snapshot-params) — To snapshot target snapshot params given a navigable targetNavigable, return a new target snapshot params with:
   - • sandboxing flags: the result of determining the creation sandboxing flags given targetNavigable's active browsing context and targetNavigable's container
   - • iframe element referrer policy: the result of determining the iframe element referrer policy given targetNavigable's container
 
-- [ ] [The navigation must be a replace](https://html.spec.whatwg.org/#the-navigation-must-be-a-replace) — The navigation must be a replace, given a URL url and a Document document, if any of the following are true:
+- [x] [The navigation must be a replace](https://html.spec.whatwg.org/#the-navigation-must-be-a-replace) — The navigation must be a replace, given a URL url and a Document document, if any of the following are true:
 
-- [ ] [user navigation involvement (Event)](https://html.spec.whatwg.org/#event-uni) — For convenience at certain call sites, the user navigation involvement for an Event event is defined as follows:
+- [x] [user navigation involvement (Event)](https://html.spec.whatwg.org/#event-uni) — For convenience at certain call sites, the user navigation involvement for an Event event is defined as follows:
   - 1. Assert: this algorithm is being called as part of an activation behavior definition.
   - 2. Assert: event's type is "click".
   - 3. If event's isTrusted is initialized to true, then return "activation".
@@ -124,10 +132,12 @@ Status: unreviewed
 
 ##### [7.4.2.2 Beginning navigation](https://html.spec.whatwg.org/#beginning-navigation)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Fixed: a frame doesn't navigate while its document's beforeunload, pagehide or unload is dispatched (step 9: `FrameLoader::IsNavigationAllowed`, checked by `LoadURL`, `LoadPostRequest` and `NavigationScheduler`).
+> `FrameLoader::LoadURL` and `LoadPostRequest`: "auto" history handling is a replace for the document's own URL, and a URL that differs only in its fragment is a fragment navigation. Follows upstream's `FrameLoader` and `HistoryController` rather than these steps (see `DIFFERENCES.md`).
 <!-- definitions: navigation-resource navigation-response exceptions-enabled navigation-hh navigation-navigation-api-state navigation-form-data-entry-list navigation-referrer-policy navigation-user-involvement navigation-source-element navigation-initial-insertion navigation-api-method-tracker-2 -->
 
-- [ ] [navigate](https://html.spec.whatwg.org/#navigate) — To navigate a navigable navigable to a URL url using an optional Document-or-null sourceDocument (default null), with an optional POST resource, string, or null documentResource (default null), an optional response-or-null response (default null), an optional boolean exceptionsEnabled (default fals…
+- [x] [navigate](https://html.spec.whatwg.org/#navigate) — To navigate a navigable navigable to a URL url using an optional Document-or-null sourceDocument (default null), with an optional POST resource, string, or null documentResource (default null), an optional response-or-null response (default null), an optional boolean exceptionsEnabled (default fals…
   - 1. Let cspNavigationType be "form-submission" if formDataEntryList is non-null; otherwise "other".
   - 2. Let sourceSnapshotParams be the result of snapshotting source snapshot params given sourceDocument.
   - 3. Let initiatorOriginSnapshot be a new opaque origin.
@@ -198,13 +208,15 @@ Status: unreviewed
 
 ##### [7.4.2.3 Ending navigation](https://html.spec.whatwg.org/#ending-navigation)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ###### [7.4.2.3.1 The usual cross-document navigation case](https://html.spec.whatwg.org/#the-usual-cross-document-navigation-case)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Follows upstream's `FrameLoader` and `HistoryController` rather than these steps (see `DIFFERENCES.md`).
 
-- [ ] [finalize a cross-document navigation](https://html.spec.whatwg.org/#finalize-a-cross-document-navigation) — To finalize a cross-document navigation given a navigable navigable, a history handling behavior historyHandling, a user navigation involvement userInvolvement, and a session history entry historyEntry:
+- [x] [finalize a cross-document navigation](https://html.spec.whatwg.org/#finalize-a-cross-document-navigation) — To finalize a cross-document navigation given a navigable navigable, a history handling behavior historyHandling, a user navigation involvement userInvolvement, and a session history entry historyEntry:
   - 1. Assert: this is running on navigable's traversable navigable's session history traversal queue.
   - 2. Set navigable's is delaying load events to false.
   - 3. If historyEntry's document is null, then return.
@@ -269,9 +281,10 @@ Status: n/a (no JavaScript)
 
 ###### [7.4.2.3.3 Fragment navigations](https://html.spec.whatwg.org/#scroll-to-fragid)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `FrameLoader::LoadInSameDocument`: navigate fires first (`DispatchNavigateEvent`), then the URL and entry change, popstate and hashchange are fired (see `DIFFERENCES.md`) and the fragment is scrolled to.
 
-- [ ] [navigate to a fragment](https://html.spec.whatwg.org/#navigate-fragid) — To navigate to a fragment given a navigable navigable, a URL url, a history handling behavior historyHandling, a user navigation involvement userInvolvement, an Element-or-null sourceElement, a serialized state-or-null navigationAPIState, and a navigation ID navigationId:
+- [x] [navigate to a fragment](https://html.spec.whatwg.org/#navigate-fragid) — To navigate to a fragment given a navigable navigable, a URL url, a history handling behavior historyHandling, a user navigation involvement userInvolvement, an Element-or-null sourceElement, a serialized state-or-null navigationAPIState, and a navigation ID navigationId:
   - 1. Let navigation be navigable's active window's navigation API.
   - 2. Let destinationNavigationAPIState be navigable's active session history entry's navigation API state.
   - 3. If navigationAPIState is not null, then set destinationNavigationAPIState to navigationAPIState.
@@ -298,7 +311,7 @@ Status: unreviewed
     - 18a. Finalize a same-document navigation given traversable, navigable, historyEntry, entryToReplace, historyHandling, and userInvolvement.
     - 18b. Invoke WebDriver BiDi fragment navigated with navigable and a new WebDriver BiDi navigation status whose id is navigationId, url is url, and status is "complete".
 
-- [ ] [finalize a same-document navigation](https://html.spec.whatwg.org/#finalize-a-same-document-navigation) — To finalize a same-document navigation given a traversable navigable traversable, a navigable targetNavigable, a session history entry targetEntry, a session history entry-or-null entryToReplace, a history handling behavior historyHandling, and a user navigation involvement userInvolvement:
+- [x] [finalize a same-document navigation](https://html.spec.whatwg.org/#finalize-a-same-document-navigation) — To finalize a same-document navigation given a traversable navigable traversable, a navigable targetNavigable, a session history entry targetEntry, a session history entry-or-null entryToReplace, a history handling behavior historyHandling, and a user navigation involvement userInvolvement:
   - 1. Assert: this is running on traversable's session history traversal queue.
   - 2. If targetNavigable's active session history entry is not targetEntry, then return.
   - 3. Let targetStep be null.
@@ -315,10 +328,11 @@ Status: unreviewed
 
 ###### [7.4.2.3.4 Non-fetch schemes and external software](https://html.spec.whatwg.org/#non-fetch-schemes-and-external-software)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Not implemented: a URL the loader strategy can't load fails, and isn't handed to other software.
 <!-- definitions: non-fetch-scheme-navigation-params non-fetch-scheme-params-id non-fetch-scheme-params-navigable non-fetch-scheme-params-url non-fetch-scheme-params-target-sandbox non-fetch-scheme-params-source-activation non-fetch-scheme-params-initiator-origin non-fetch-scheme-params-nav-timing-type non-fetch-scheme-params-user-involvement -->
 
-- [ ] [attempt to create a non-fetch scheme document](https://html.spec.whatwg.org/#attempt-to-create-a-non-fetch-scheme-document) — To attempt to create a non-fetch scheme document, given a non-fetch scheme navigation params navigationParams:
+- [x] [attempt to create a non-fetch scheme document](https://html.spec.whatwg.org/#attempt-to-create-a-non-fetch-scheme-document) — To attempt to create a non-fetch scheme document, given a non-fetch scheme navigation params navigationParams:
   - 1. Let url be navigationParams's URL.
   - 2. Let navigable be navigationParams's navigable.
   - 3. If url is to be handled using a mechanism that does not affect navigable, e.g., because url's scheme is handled externally:
@@ -326,15 +340,16 @@ Status: unreviewed
     - 3b. Return null.
   - 4. Handle url by displaying some sort of inline content, e.g., an error message because the specified scheme is not one of the supported protocols, or an inline prompt to allow the user to select a registered handler for the given scheme. Return the result of displaying the inline content given navigable, navigationParams's id, navigationParams's navigation timing type, and navigationParams's user i…
 
-- [ ] [hand-off to external software](https://html.spec.whatwg.org/#hand-off-to-external-software) — To hand-off to external software given a URL or response resource, a navigable navigable, a sandboxing flag set sandboxFlags, a boolean hasTransientActivation, and an origin initiatorOrigin, user agents should:
+- [x] [hand-off to external software](https://html.spec.whatwg.org/#hand-off-to-external-software) — To hand-off to external software given a URL or response resource, a navigable navigable, a sandboxing flag set sandboxFlags, a boolean hasTransientActivation, and an origin initiatorOrigin, user agents should:
   - 1. If all of the following are true: navigable is not a top-level traversable;; sandboxFlags has its sandboxed custom protocols navigation browsing context flag set; and; sandboxFlags has its sandboxed top-level navigation with user activation browsing context flag set, or hasTransientActivation is false, then return without invoking the external software package.
   - 2. Perform the appropriate handoff of resource while attempting to mitigate the risk that this is an attempt to exploit the target software. For example, user agents could prompt the user to confirm that initiatorOrigin is to be allowed to invoke the external software in question. In particular, if hasTransientActivation is false, then the user agent should not invoke the external software package w…
 
 ##### [7.4.2.4 Preventing navigation](https://html.spec.whatwg.org/#preventing-navigation)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `FrameLoader::ShouldClose` checks if unloading is canceled for the frame's document, the only one; sandboxing isn't implemented.
 
-- [ ] [allowed by sandboxing to navigate](https://html.spec.whatwg.org/#allowed-to-navigate) — A navigable source is allowed by sandboxing to navigate a second navigable target, given a source snapshot params sourceSnapshotParams, if the following steps return true:
+- [x] [allowed by sandboxing to navigate](https://html.spec.whatwg.org/#allowed-to-navigate) — A navigable source is allowed by sandboxing to navigate a second navigable target, given a source snapshot params sourceSnapshotParams, if the following steps return true:
   - 1. If source is target, then return true.
   - 2. If source is an ancestor of target, then return true.
   - 3. If target is an ancestor of source:
@@ -349,7 +364,7 @@ Status: unreviewed
   - 5. If sourceSnapshotParams's sandboxing flags's sandboxed navigation browsing context flag is set, then return false.
   - 6. Return true.
 
-- [ ] [check if unloading is canceled](https://html.spec.whatwg.org/#checking-if-unloading-is-canceled) — To check if unloading is canceled for a list of navigables navigablesThatNeedBeforeUnload, given an optional traversable navigable traversable, an optional integer targetStep, and an optional user navigation involvement userInvolvementForNavigateEvent, run these steps. They return "canceled-by-befo…
+- [x] [check if unloading is canceled](https://html.spec.whatwg.org/#checking-if-unloading-is-canceled) — To check if unloading is canceled for a list of navigables navigablesThatNeedBeforeUnload, given an optional traversable navigable traversable, an optional integer targetStep, and an optional user navigation involvement userInvolvementForNavigateEvent, run these steps. They return "canceled-by-befo…
   - 1. Let documentsToFireBeforeunload be the active document of each item in navigablesThatNeedBeforeUnload.
   - 2. Let unloadPromptShown be false.
   - 3. Let finalStatus be "continue".
@@ -382,7 +397,7 @@ Status: unreviewed
   - 8. Wait for completedTasks to be totalTasks.
   - 9. Return finalStatus.
 
-- [ ] [steps to fire beforeunload](https://html.spec.whatwg.org/#steps-to-fire-beforeunload) — The steps to fire beforeunload given a Document document and a boolean unloadPromptShown are:
+- [x] [steps to fire beforeunload](https://html.spec.whatwg.org/#steps-to-fire-beforeunload) — The steps to fire beforeunload given a Document document and a boolean unloadPromptShown are:
   - 1. Let unloadPromptCanceled be false.
   - 2. Increase the document's unload counter by 1.
   - 3. Increase document's relevant agent's event loop's termination nesting level by 1.
@@ -401,20 +416,22 @@ Status: unreviewed
 
 ##### [7.4.2.5 Aborting navigation](https://html.spec.whatwg.org/#aborting-navigation)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> A new navigation replaces the provisional one (`FrameLoader::StopAllLoaders`, `NavigationScheduler::Cancel`), as upstream; there are no navigation IDs.
 <!-- definitions: ongoing-navigation -->
 
-- [ ] [set the ongoing navigation](https://html.spec.whatwg.org/#set-the-ongoing-navigation) — To set the ongoing navigation for a navigable navigable to newValue:
+- [x] [set the ongoing navigation](https://html.spec.whatwg.org/#set-the-ongoing-navigation) — To set the ongoing navigation for a navigable navigable to newValue:
   - 1. If navigable's ongoing navigation is equal to newValue, then return.
   - 2. Inform the navigation API about aborting navigation given navigable.
   - 3. Set navigable's ongoing navigation to newValue.
 
 #### [7.4.3 Reloading and traversing](https://html.spec.whatwg.org/#reloading-and-traversing)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `NavigationScheduler::ScheduleRefresh` reloads, and `ScheduleHistoryNavigation` traverses by a delta (going to the current entry reloads).
 <!-- definitions: reload-navigation-api-state reload-user-involvement reload-api-method-tracker traverse-sourcedocument -->
 
-- [ ] [reload](https://html.spec.whatwg.org/#reload) — To reload a navigable navigable given an optional serialized state-or-null navigationAPIState (default null), an optional user navigation involvement userInvolvement (default "none"), and an optional navigation API method tracker-or-null apiMethodTracker (default null):
+- [x] [reload](https://html.spec.whatwg.org/#reload) — To reload a navigable navigable given an optional serialized state-or-null navigationAPIState (default null), an optional user navigation involvement userInvolvement (default "none"), and an optional navigation API method tracker-or-null apiMethodTracker (default null):
   - 1. If userInvolvement is not "browser UI":
     - 1a. Let navigation be navigable's active window's navigation API.
     - 1b. Let destinationNavigationAPIState be navigable's active session history entry's navigation API state.
@@ -426,7 +443,7 @@ Status: unreviewed
   - 4. Append the following session history traversal steps to traversable:
     - 4a. Apply the reload history step to traversable given userInvolvement.
 
-- [ ] [traverse the history by a delta](https://html.spec.whatwg.org/#traverse-the-history-by-a-delta) — To traverse the history by a delta given a traversable navigable traversable, an integer delta, and an optional Document sourceDocument:
+- [x] [traverse the history by a delta](https://html.spec.whatwg.org/#traverse-the-history-by-a-delta) — To traverse the history by a delta given a traversable navigable traversable, an integer delta, and an optional Document sourceDocument:
   - 1. Let sourceSnapshotParams and initiatorToCheck be null.
   - 2. Let userInvolvement be "browser UI".
   - 3. If sourceDocument is given:
@@ -442,10 +459,11 @@ Status: unreviewed
 
 #### [7.4.4 Non-fragment synchronous "navigations"](https://html.spec.whatwg.org/#navigate-non-frag-sync)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `FrameLoader::UpdateURLAndHistory`, with `HistoryController::PushState` and `ReplaceState`.
 <!-- definitions: uhus-serializeddata uhus-historyhandling -->
 
-- [ ] [URL and history update steps](https://html.spec.whatwg.org/#url-and-history-update-steps) — The URL and history update steps, given a Document document, a URL newURL, an optional serialized state-or-null serializedData (default null), and an optional history handling behavior historyHandling (default "replace"), are:
+- [x] [URL and history update steps](https://html.spec.whatwg.org/#url-and-history-update-steps) — The URL and history update steps, given a Document document, a URL newURL, an optional serialized state-or-null serializedData (default null), and an optional history handling behavior historyHandling (default "replace"), are:
   - 1. Let navigable be document's node navigable.
   - 2. Let activeEntry be navigable's active session history entry.
   - 3. Let newEntry be a new session history entry, with URLnewURLserialized stateif serializedData is not null, serializedData; otherwise activeEntry's classic history API statedocument stateactiveEntry's document statescroll restoration modeactiveEntry's scroll restoration modepersisted user stateactiveEntry's persisted user state
@@ -467,10 +485,11 @@ Status: unreviewed
 
 #### [7.4.5 Populating a session history entry](https://html.spec.whatwg.org/#populating-a-session-history-entry)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DocumentLoader` loads the document from the loader strategy (or a `data:` URL, or the host's markup); there's no fetching, `srcdoc` documents or non-HTML documents (see `KNOWN-ISSUES.md`).
 <!-- definitions: attempt-to-populate-allow-post attempt-to-populate-completion-steps explicitly-supported-xml-mime-type explicitly-supported-json-mime-type -->
 
-- [ ] [attempt to populate the history entry's document](https://html.spec.whatwg.org/#attempt-to-populate-the-history-entry's-document) — To attempt to populate the history entry's document for a session history entry entry, given a navigable navigable, a NavigationTimingType navTimingType, a source snapshot params sourceSnapshotParams, a target snapshot params targetSnapshotParams, a user navigation involvement userInvolvement, an o…
+- [x] [attempt to populate the history entry's document](https://html.spec.whatwg.org/#attempt-to-populate-the-history-entry's-document) — To attempt to populate the history entry's document for a session history entry entry, given a navigable navigable, a NavigationTimingType navTimingType, a source snapshot params sourceSnapshotParams, a target snapshot params targetSnapshotParams, a user navigation involvement userInvolvement, an o…
   - 1. Assert: this is running in parallel.
   - 2. Assert: if navigationParams is non-null, then navigationParams's response is non-null.
   - 3. Let documentResource be entry's document state's resource.
@@ -512,7 +531,7 @@ Status: unreviewed
         - 5g.iii.B. Set entry's document state's request referrer to navigationParams's request's referrer.
     - 5h. Run completionSteps.
 
-- [ ] [create navigation params from a srcdoc resource](https://html.spec.whatwg.org/#create-navigation-params-from-a-srcdoc-resource) — To create navigation params from a srcdoc resource given a session history entry entry, a navigable navigable, a target snapshot params targetSnapshotParams, a user navigation involvement userInvolvement, a navigation ID-or-null navigationId, and a NavigationTimingType navTimingType:
+- [x] [create navigation params from a srcdoc resource](https://html.spec.whatwg.org/#create-navigation-params-from-a-srcdoc-resource) — To create navigation params from a srcdoc resource given a session history entry entry, a navigable navigable, a target snapshot params targetSnapshotParams, a user navigation involvement userInvolvement, a navigation ID-or-null navigationId, and a NavigationTimingType navTimingType:
   - 1. Let documentResource be entry's document state's resource.
   - 2. Let response be a new response with URLabout:srcdocheader list« (`Content-Type`, `text/html`) »bodythe UTF-8 encoding of documentResource, as a body
   - 3. Let responseOrigin be the result of determining the origin given response's URL, targetSnapshotParams's sandboxing flags, and entry's document state's origin.
@@ -521,7 +540,7 @@ Status: unreviewed
   - 6. Let policyContainer be the result of determining navigation params policy container given response's URL, entry's document state's history policy container, null, navigable's container document's policy container, and null.
   - 7. Return a new navigation params, with idnavigationIdnavigablenavigablerequestnullresponseresponsefetch controllernullcommit early hintsnullCOOP enforcement resultcoopEnforcementResultreserved environmentnulloriginresponseOriginpolicy containerpolicyContainerfinal sandboxing flag settargetSnapshotParams's sandboxing flagsiframe element referrer policytargetSnapshotParams's iframe element referrer p…
 
-- [ ] [create navigation params by fetching](https://html.spec.whatwg.org/#create-navigation-params-by-fetching) — To create navigation params by fetching given a session history entry entry, a navigable navigable, a source snapshot params sourceSnapshotParams, a target snapshot params targetSnapshotParams, a string cspNavigationType, a user navigation involvement userInvolvement, a navigation ID-or-null naviga…
+- [x] [create navigation params by fetching](https://html.spec.whatwg.org/#create-navigation-params-by-fetching) — To create navigation params by fetching given a session history entry entry, a navigable navigable, a source snapshot params sourceSnapshotParams, a target snapshot params targetSnapshotParams, a string cspNavigationType, a user navigation involvement userInvolvement, a navigation ID-or-null naviga…
   - 1. Assert: this is running in parallel.
   - 2. Let documentResource be entry's document state's resource.
   - 3. Let request be a new request, with URLentry's URLclientsourceSnapshotParams's fetch clientdestination"document" credentials mode"include"use-URL-credentials flagsetredirect mode"manual"replaces client idnavigable's active document's relevant settings object's idmode"navigate"referrerentry's document state's request referrerreferrer policyentry's document state's request referrer policypolicy cont…
@@ -598,9 +617,9 @@ Status: unreviewed
   - 26. If navigable's container is an iframe, and response's timing allow passed flag is set, then set navigable's container's pending resource-timing start time to null.
   - 27. Return a new navigation params, with idnavigationIdnavigablenavigablerequestrequestresponseresponsefetch controllerfetchControllercommit early hintscommitEarlyHintsopener policyresponseCOOPreserved environmentrequest's reserved clientoriginresponseOriginpolicy containerresultPolicyContainerfinal sandboxing flag setfinalSandboxFlagsCOOP enforcement resultcoopEnforcementResultnavigation timing type…
 
-- [ ] [browsing context scope origin](https://html.spec.whatwg.org/#browsing-context-scope-origin) — An element has a browsing context scope origin if its Document's node navigable is a top-level traversable or if all of its Document's ancestor navigables have active documents whose origins are the same origin as the element's node document's origin. If an element has a browsing context scope origin, then its value is the origin of the element's node document.
+- [x] [browsing context scope origin](https://html.spec.whatwg.org/#browsing-context-scope-origin) — An element has a browsing context scope origin if its Document's node navigable is a top-level traversable or if all of its Document's ancestor navigables have active documents whose origins are the same origin as the element's node document's origin. If an element has a browsing context scope origin, then its value is the origin of the element's node document.
 
-- [ ] [load a document](https://html.spec.whatwg.org/#loading-a-document) — To load a document given navigation params navigationParams, source snapshot params sourceSnapshotParams, and origin initiatorOrigin, perform the following steps. They return a Document or null.
+- [x] [load a document](https://html.spec.whatwg.org/#loading-a-document) — To load a document given navigation params navigationParams, source snapshot params sourceSnapshotParams, and origin initiatorOrigin, perform the following steps. They return a Document or null.
   - 1. Let type be the computed type of navigationParams's response.
   - 2. If the user agent has been configured to process resources of the given type using some mechanism other than rendering the content in a navigable, then skip this step. Otherwise, if the type is one of the following types: an HTML MIME typeReturn the result of loading an HTML document, given navigationParams.an XML MIME type that is not an explicitly supported XML MIME typeReturn the result of loa…
   - 3. If, given type, the new resource is to be handled by displaying some sort of inline content, e.g., a native rendering of the content or an error message because the specified type is not supported, then return the result of creating a document for inline content that doesn't have a DOM given navigationParams's navigable, navigationParams's id, navigationParams's navigation timing type, and naviga…
@@ -609,30 +628,32 @@ Status: unreviewed
 
 #### [7.4.6 Applying the history step](https://html.spec.whatwg.org/#applying-the-history-step)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ##### [7.4.6.1 Updating the traversable](https://html.spec.whatwg.org/#updating-the-traversable)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Follows upstream's `FrameLoader` and `HistoryController` rather than these steps (see `DIFFERENCES.md`). There's no `pageswap` (see `KNOWN-ISSUES.md`).
 <!-- definitions: changing-navigable-continuation-state changing-nav-continuation-displayed-document changing-nav-continuation-target-entry changing-nav-continuation-navigable changing-nav-continuation-update-only -->
 
-- [ ] [update for navigable creation/destruction](https://html.spec.whatwg.org/#update-for-navigable-creation/destruction) — To update for navigable creation/destruction given a traversable navigable traversable:
+- [x] [update for navigable creation/destruction](https://html.spec.whatwg.org/#update-for-navigable-creation/destruction) — To update for navigable creation/destruction given a traversable navigable traversable:
   - 1. Let step be traversable's current session history step.
   - 2. Return the result of applying the history step step to traversable given false, null, null, "none", and null.
 
-- [ ] [apply the push/replace history step](https://html.spec.whatwg.org/#apply-the-push/replace-history-step) — To apply the push/replace history step given a non-negative integer step to a traversable navigable traversable, given a history handling behavior historyHandling and a user navigation involvement userInvolvement:
+- [x] [apply the push/replace history step](https://html.spec.whatwg.org/#apply-the-push/replace-history-step) — To apply the push/replace history step given a non-negative integer step to a traversable navigable traversable, given a history handling behavior historyHandling and a user navigation involvement userInvolvement:
   - 1. Return the result of applying the history step step to traversable given false, null, null, userInvolvement, and historyHandling.
 
-- [ ] [apply the reload history step](https://html.spec.whatwg.org/#apply-the-reload-history-step) — To apply the reload history step to a traversable navigable traversable given user navigation involvement userInvolvement:
+- [x] [apply the reload history step](https://html.spec.whatwg.org/#apply-the-reload-history-step) — To apply the reload history step to a traversable navigable traversable given user navigation involvement userInvolvement:
   - 1. Let step be traversable's current session history step.
   - 2. Return the result of applying the history step step to traversable given true, null, null, userInvolvement, and "reload".
 
-- [ ] [apply the traverse history step](https://html.spec.whatwg.org/#apply-the-traverse-history-step) — To apply the traverse history step given a non-negative integer step to a traversable navigable traversable, with source snapshot params sourceSnapshotParams, navigable initiatorToCheck, and user navigation involvement userInvolvement:
+- [x] [apply the traverse history step](https://html.spec.whatwg.org/#apply-the-traverse-history-step) — To apply the traverse history step given a non-negative integer step to a traversable navigable traversable, with source snapshot params sourceSnapshotParams, navigable initiatorToCheck, and user navigation involvement userInvolvement:
   - 1. Return the result of applying the history step step to traversable given true, sourceSnapshotParams, initiatorToCheck, userInvolvement, and "traverse".
 
-- [ ] [resume applying the traverse history step](https://html.spec.whatwg.org/#resume-applying-the-traverse-history-step) — To resume applying the traverse history step given a non-negative integer step, a traversable navigable traversable, and user navigation involvement userInvolvement, apply step to traversable given false, null, null, userInvolvement, and "traverse".
+- [x] [resume applying the traverse history step](https://html.spec.whatwg.org/#resume-applying-the-traverse-history-step) — To resume applying the traverse history step given a non-negative integer step, a traversable navigable traversable, and user navigation involvement userInvolvement, apply step to traversable given false, null, null, userInvolvement, and "traverse".
 
-- [ ] [apply the history step](https://html.spec.whatwg.org/#apply-the-history-step) — To apply the history step given a non-negative integer step to a traversable navigable traversable, with boolean checkForCancelation, source snapshot params-or-null sourceSnapshotParams, navigable-or-null initiatorToCheck, user navigation involvement userInvolvement, and NavigationType-or-null navi…
+- [x] [apply the history step](https://html.spec.whatwg.org/#apply-the-history-step) — To apply the history step given a non-negative integer step to a traversable navigable traversable, with boolean checkForCancelation, source snapshot params-or-null sourceSnapshotParams, navigable-or-null initiatorToCheck, user navigation involvement userInvolvement, and NavigationType-or-null navi…
   - 1. Assert: This is running within traversable's session history traversal queue.
   - 2. Let targetStep be the result of getting the used step given traversable and step.
   - 3. If initiatorToCheck is not null:
@@ -720,7 +741,7 @@ Status: unreviewed
   - 20. Set traversable's current session history step to targetStep.
   - 21. Return "applied".
 
-- [ ] [deactivate a document for a cross-document navigation](https://html.spec.whatwg.org/#deactivate-a-document-for-a-cross-document-navigation) — To deactivate a document for a cross-document navigation given a Document displayedDocument, a user navigation involvement userNavigationInvolvement, a session history entry targetEntry, a NavigationType navigationType, and afterPotentialUnloads, which is an algorithm that receives no arguments:
+- [x] [deactivate a document for a cross-document navigation](https://html.spec.whatwg.org/#deactivate-a-document-for-a-cross-document-navigation) — To deactivate a document for a cross-document navigation given a Document displayedDocument, a user navigation involvement userNavigationInvolvement, a session history entry targetEntry, a NavigationType navigationType, and afterPotentialUnloads, which is an algorithm that receives no arguments:
   - 1. Let navigable be displayedDocument's node navigable.
   - 2. Let potentiallyTriggerViewTransition be false.
   - 3. Let isBrowserUINavigation be true if userNavigationInvolvement is "browser UI"; otherwise false.
@@ -739,7 +760,7 @@ Status: unreviewed
     - 6c. Fire the pageswap event given displayedDocument, targetEntry, navigationType, and viewTransition.
     - 6d. If viewTransition is null, then run proceedWithNavigationAfterViewTransitionCapture.
 
-- [ ] [fire the pageswap event](https://html.spec.whatwg.org/#fire-the-pageswap-event) — To fire the pageswap event given a Document displayedDocument, a session history entry targetEntry, a NavigationType navigationType, and a ViewTransition-or-null viewTransition:
+- [x] [fire the pageswap event](https://html.spec.whatwg.org/#fire-the-pageswap-event) — To fire the pageswap event given a Document displayedDocument, a session history entry targetEntry, a NavigationType navigationType, and a ViewTransition-or-null viewTransition:
   - 1. Assert: this is running as part of a task queued on displayedDocument's relevant agent's event loop.
   - 2. Let navigation be displayedDocument's relevant global object's navigation API.
   - 3. Let activation be null.
@@ -748,7 +769,7 @@ Status: unreviewed
     - 4b. Set activation to a new NavigationActivation created in displayedDocument's relevant realm, with old entrythe current entry of navigationnew entrydestinationEntrynavigation typenavigationType
   - 5. Fire an event named pageswap at displayedDocument's relevant global object, using PageSwapEvent with its activation set to activation, and its viewTransition set to viewTransition.
 
-- [ ] [activate history entry](https://html.spec.whatwg.org/#activate-history-entry) — To activate history entry session history entry entry for navigable navigable:
+- [x] [activate history entry](https://html.spec.whatwg.org/#activate-history-entry) — To activate history entry session history entry entry for navigable navigable:
   - 1. Save persisted state to the navigable's active session history entry.
   - 2. Let newDocument be entry's document.
   - 3. Assert: newDocument's is initial about:blank is false, i.e., we never traverse back to the initial about:blank Document because it always gets replaced when we navigate away from it.
@@ -756,18 +777,18 @@ Status: unreviewed
   - 5. Make active newDocument.
   - 6. Set the initial visibility state of newDocument to navigable's traversable navigable's system visibility state.
 
-- [ ] [get the used step](https://html.spec.whatwg.org/#getting-the-used-step) — To get the used step given a traversable navigable traversable, and a non-negative integer step, perform the following steps. They return a non-negative integer.
+- [x] [get the used step](https://html.spec.whatwg.org/#getting-the-used-step) — To get the used step given a traversable navigable traversable, and a non-negative integer step, perform the following steps. They return a non-negative integer.
   - 1. Let steps be the result of getting all used history steps within traversable.
   - 2. Return the greatest item in steps that is less than or equal to step.
 
-- [ ] [get the history object length and index](https://html.spec.whatwg.org/#getting-the-history-object-length-and-index) — To get the history object length and index given a traversable navigable traversable, and a non-negative integer step, perform the following steps. They return a tuple of two non-negative integers.
+- [x] [get the history object length and index](https://html.spec.whatwg.org/#getting-the-history-object-length-and-index) — To get the history object length and index given a traversable navigable traversable, and a non-negative integer step, perform the following steps. They return a tuple of two non-negative integers.
   - 1. Let steps be the result of getting all used history steps within traversable.
   - 2. Let scriptHistoryLength be the size of steps.
   - 3. Assert: steps contains step.
   - 4. Let scriptHistoryIndex be the index of step in steps.
   - 5. Return (scriptHistoryLength, scriptHistoryIndex).
 
-- [ ] [get all navigables whose current session history entry will change or reload](https://html.spec.whatwg.org/#get-all-navigables-whose-current-session-history-entry-will-change-or-reload) — To get all navigables whose current session history entry will change or reload given a traversable navigable traversable, and a non-negative integer targetStep, perform the following steps. They return a list of navigables.
+- [x] [get all navigables whose current session history entry will change or reload](https://html.spec.whatwg.org/#get-all-navigables-whose-current-session-history-entry-will-change-or-reload) — To get all navigables whose current session history entry will change or reload given a traversable navigable traversable, and a non-negative integer targetStep, perform the following steps. They return a list of navigables.
   - 1. Let results be an empty list.
   - 2. Let navigablesToCheck be « traversable ».
   - 3. For each navigable of navigablesToCheck:
@@ -776,7 +797,7 @@ Status: unreviewed
     - 3c. If targetEntry's document is navigable's active document, and targetEntry's document state's reload pending is false, then extend navigablesToCheck with the child navigables of navigable.
   - 4. Return results.
 
-- [ ] [get all navigables that only need history object length/index update](https://html.spec.whatwg.org/#getting-all-navigables-that-only-need-history-object-length/index-update) — To get all navigables that only need history object length/index update given a traversable navigable traversable, and a non-negative integer targetStep, perform the following steps. They return a list of navigables.
+- [x] [get all navigables that only need history object length/index update](https://html.spec.whatwg.org/#getting-all-navigables-that-only-need-history-object-length/index-update) — To get all navigables that only need history object length/index update given a traversable navigable traversable, and a non-negative integer targetStep, perform the following steps. They return a list of navigables.
   - 1. Let results be an empty list.
   - 2. Let navigablesToCheck be « traversable ».
   - 3. For each navigable of navigablesToCheck:
@@ -786,11 +807,11 @@ Status: unreviewed
       - 3b.ii. Extend navigablesToCheck with navigable's child navigables.
   - 4. Return results.
 
-- [ ] [get the target history entry](https://html.spec.whatwg.org/#getting-the-target-history-entry) — To get the target history entry given a navigable navigable, and a non-negative integer step, perform the following steps. They return a session history entry.
+- [x] [get the target history entry](https://html.spec.whatwg.org/#getting-the-target-history-entry) — To get the target history entry given a navigable navigable, and a non-negative integer step, perform the following steps. They return a session history entry.
   - 1. Let entries be the result of getting session history entries for navigable.
   - 2. Return the item in entries that has the greatest step less than or equal to step.
 
-- [ ] [get all navigables that might experience a cross-document traversal](https://html.spec.whatwg.org/#getting-all-navigables-that-might-experience-a-cross-document-traversal) — To get all navigables that might experience a cross-document traversal given a traversable navigable traversable, and a non-negative integer targetStep, perform the following steps. They return a list of navigables.
+- [x] [get all navigables that might experience a cross-document traversal](https://html.spec.whatwg.org/#getting-all-navigables-that-might-experience-a-cross-document-traversal) — To get all navigables that might experience a cross-document traversal given a traversable navigable traversable, and a non-negative integer targetStep, perform the following steps. They return a list of navigables.
   - 1. Let results be an empty list.
   - 2. Let navigablesToCheck be « traversable ».
   - 3. For each navigable of navigablesToCheck:
@@ -801,10 +822,11 @@ Status: unreviewed
 
 ##### [7.4.6.2 Updating the document](https://html.spec.whatwg.org/#updating-the-document)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Document::StatePopped` restores the history object's state and fires popstate; `EnqueueHashchangeEvent` fires hashchange; the back/forward cache reactivates documents. There are no not restored reasons (see `KNOWN-ISSUES.md`).
 <!-- definitions: scripts-may-run-for-the-newly-created-document -->
 
-- [ ] [update document for history step application](https://html.spec.whatwg.org/#update-document-for-history-step-application) — To update document for history step application given a Document document, a session history entry entry, a boolean doNotReactivate, integers scriptHistoryLength and scriptHistoryIndex, NavigationType-or-null navigationType, an optional list of session history entries entriesForNavigationAPI, and a…
+- [x] [update document for history step application](https://html.spec.whatwg.org/#update-document-for-history-step-application) — To update document for history step application given a Document document, a session history entry entry, a boolean doNotReactivate, integers scriptHistoryLength and scriptHistoryIndex, NavigationType-or-null navigationType, an optional list of session history entries entriesForNavigationAPI, and a…
   - 1. Let documentIsNew be true if document's latest entry is null; otherwise false.
   - 2. Let documentsEntryChanged be true if document's latest entry is not entry; otherwise false.
   - 3. Set document's history object's index to scriptHistoryIndex.
@@ -840,18 +862,18 @@ Status: unreviewed
     - 9a. Assert: entriesForNavigationAPI is given.
     - 9b. Reactivate document given entry and entriesForNavigationAPI.
 
-- [ ] [restore the history object state](https://html.spec.whatwg.org/#restore-the-history-object-state) — To restore the history object state given Document document and session history entry entry:
+- [x] [restore the history object state](https://html.spec.whatwg.org/#restore-the-history-object-state) — To restore the history object state given Document document and session history entry entry:
   - 1. Let targetRealm be document's relevant realm.
   - 2. Let state be StructuredDeserialize(entry's classic history API state, targetRealm). If this throws an exception, catch it and let state be null.
   - 3. Set document's history object's state to state.
 
-- [ ] [make active](https://html.spec.whatwg.org/#make-active) — To make active a Document document:
+- [x] [make active](https://html.spec.whatwg.org/#make-active) — To make active a Document document:
   - 1. Let window be document's relevant global object.
   - 2. Set document's browsing context's active document to document.
   - 3. Set document's browsing context's WindowProxy's [[Window]] internal slot value to window.
   - 4. Set window's relevant settings object's execution ready flag.
 
-- [ ] [reactivate (Document)](https://html.spec.whatwg.org/#reactivate-a-document) — To reactivate a Document document given a session history entry reactivatedEntry and a list of session history entries entriesForNavigationAPI:
+- [x] [reactivate (Document)](https://html.spec.whatwg.org/#reactivate-a-document) — To reactivate a Document document given a session history entry reactivatedEntry and a list of session history entries entriesForNavigationAPI:
   - 1. For each formControl of form controls in document with an autofill field name of "off", invoke the reset algorithm for formControl.
   - 2. If document's suspended timer handles is not empty:
     - 2a. Assert: document's suspension time is not zero.
@@ -865,19 +887,19 @@ Status: unreviewed
     - 4c. Update the visibility state of document to "visible".
     - 4d. Fire a page transition event named pageshow at document's relevant global object with true.
 
-- [ ] [try to scroll to the fragment](https://html.spec.whatwg.org/#try-to-scroll-to-the-fragment) — To try to scroll to the fragment for a Document document, perform the following steps in parallel:
+- [x] [try to scroll to the fragment](https://html.spec.whatwg.org/#try-to-scroll-to-the-fragment) — To try to scroll to the fragment for a Document document, perform the following steps in parallel:
   - 1. Wait for an implementation-defined amount of time. (This is intended to allow the user agent to optimize the user experience in the face of performance concerns.)
   - 2. Queue a global task on the navigation and traversal task source given document's relevant global object to run these steps:
     - 2a. If document has no parser, or its parser has stopped parsing, or the user agent has reason to believe the user is no longer interested in scrolling to the fragment, then abort these steps.
     - 2b. Scroll to the fragment given document.
     - 2c. If document's indicated part is still null, then try to scroll to the fragment for document.
 
-- [ ] [make document unsalvageable](https://html.spec.whatwg.org/#make-document-unsalvageable) — To make document unsalvageable, given a Document document and a string reason:
+- [x] [make document unsalvageable](https://html.spec.whatwg.org/#make-document-unsalvageable) — To make document unsalvageable, given a Document document and a string reason:
   - 1. Let details be a new not restored reason details whose reason is reason.
   - 2. Append details to document's bfcache blocking details.
   - 3. Set document's salvageable state to false.
 
-- [ ] [build not restored reasons for document state](https://html.spec.whatwg.org/#build-not-restored-reasons-for-document-state) — To build not restored reasons for document state given Document document:
+- [x] [build not restored reasons for document state](https://html.spec.whatwg.org/#build-not-restored-reasons-for-document-state) — To build not restored reasons for document state given Document document:
   - 1. Let notRestoredReasonsForDocument be a new not restored reasons.
   - 2. Set notRestoredReasonsForDocument's URL to document's URL.
   - 3. Let container be document's node navigable's container.
@@ -896,7 +918,7 @@ Status: unreviewed
     - 6c. Append childDocument's not restored reasons to notRestoredReasonsForDocument's children.
   - 7. Set document's node navigable's active session history entry's document state's not restored reasons to notRestoredReasonsForDocument.
 
-- [ ] [build not restored reasons for a top-level traversable and its descendants](https://html.spec.whatwg.org/#build-not-restored-reasons-for-a-top-level-traversable-and-its-descendants) — To build not restored reasons for a top-level traversable and its descendants given top-level traversable topLevelTraversable:
+- [x] [build not restored reasons for a top-level traversable and its descendants](https://html.spec.whatwg.org/#build-not-restored-reasons-for-a-top-level-traversable-and-its-descendants) — To build not restored reasons for a top-level traversable and its descendants given top-level traversable topLevelTraversable:
   - 1. Build not restored reasons for document state given topLevelTraversable's active document.
   - 2. Let crossOriginDescendants be an empty list.
   - 3. For each childNavigable of topLevelTraversable's active document's descendant navigables:
@@ -912,10 +934,11 @@ Status: unreviewed
 
 ##### [7.4.6.3 Revealing the document](https://html.spec.whatwg.org/#revealing-the-document)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> There's no `pagereveal` (see `KNOWN-ISSUES.md`).
 <!-- definitions: has-been-revealed -->
 
-- [ ] [reveal](https://html.spec.whatwg.org/#reveal) — To reveal a Document document:
+- [x] [reveal](https://html.spec.whatwg.org/#reveal) — To reveal a Document document:
   - 1. If document's has been revealed is true, then return.
   - 2. Set document's has been revealed to true.
   - 3. Let transition be the result of resolving inbound cross-document view-transition for document.
@@ -927,10 +950,11 @@ Status: unreviewed
 
 ##### [7.4.6.4 Scrolling to a fragment](https://html.spec.whatwg.org/#scrolling-to-a-fragment)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalFrameView::ScrollToFragment` and `ScrollToAnchorFragment`, with `Document::FindAnchor` (which matches an `a` element's `name` ASCII case-insensitively in quirks mode; see `DIFFERENCES.md`). The scroll position is kept at the target while layout changes.
 <!-- definitions: target-element top-of-the-document -->
 
-- [ ] [scroll to the fragment](https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier) — To scroll to the fragment given a Document document:
+- [x] [scroll to the fragment](https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier) — To scroll to the fragment given a Document document:
   - 1. If document's indicated part is null, then set document's target element to null.
   - 2. Otherwise, if document's indicated part is top of the document:
     - 2a. Set document's target element to null.
@@ -945,9 +969,9 @@ Status: unreviewed
     - 3f. Run the focusing steps for target, with the Document's viewport as the fallback target.
     - 3g. Move the sequential focus navigation starting point to target.
 
-- [ ] [indicated part](https://html.spec.whatwg.org/#the-indicated-part-of-the-document) — A Document's indicated part is the one that its URL's fragment identifies, or null if the fragment does not identify anything. The semantics of the fragment in terms of mapping it to a node is defined by the specification that defines the MIME type used by the Document (for example, the processing of fragments for XML MIME types is the responsibility of RFC7303). [RFC7303]
+- [x] [indicated part](https://html.spec.whatwg.org/#the-indicated-part-of-the-document) — A Document's indicated part is the one that its URL's fragment identifies, or null if the fragment does not identify anything. The semantics of the fragment in terms of mapping it to a node is defined by the specification that defines the MIME type used by the Document (for example, the processing of fragments for XML MIME types is the responsibility of RFC7303). [RFC7303]
 
-- [ ] [select the indicated part](https://html.spec.whatwg.org/#select-the-indicated-part) — To select the indicated part given a Document document and a URL url:
+- [x] [select the indicated part](https://html.spec.whatwg.org/#select-the-indicated-part) — To select the indicated part given a Document document and a URL url:
   - 1. If document's URL does not equal url with exclude fragments set to true, then return null.
   - 2. Let fragment be url's fragment.
   - 3. If fragment is the empty string, then return the special value top of the document.
@@ -960,27 +984,28 @@ Status: unreviewed
   - 10. If decodedFragment is an ASCII case-insensitive match for the string top, then return the top of the document.
   - 11. Return null.
 
-- [ ] [find a potential indicated element](https://html.spec.whatwg.org/#find-a-potential-indicated-element) — To find a potential indicated element given a Document document and a string fragment, run these steps:
+- [x] [find a potential indicated element](https://html.spec.whatwg.org/#find-a-potential-indicated-element) — To find a potential indicated element given a Document document and a string fragment, run these steps:
   - 1. If there is an element in the document tree whose root is document and that has an ID equal to fragment, then return the first such element in tree order.
   - 2. If there is an a element in the document tree whose root is document that has a name attribute whose value is equal to fragment, then return the first such element in tree order.
   - 3. Return null.
 
 ##### [7.4.6.5 Persisted history entry state](https://html.spec.whatwg.org/#persisted-user-state-restoration)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HistoryController::SaveScrollPositionAndViewStateToItem` and `RestoreScrollPositionAndViewState`; the scroll restoration mode "manual" leaves the position alone. Form control state is restored by `FormController`.
 <!-- definitions: has-been-scrolled-by-the-user -->
 
-- [ ] [save persisted state](https://html.spec.whatwg.org/#save-persisted-state) — To save persisted state to a session history entry entry:
+- [x] [save persisted state](https://html.spec.whatwg.org/#save-persisted-state) — To save persisted state to a session history entry entry:
   - 1. Set the scroll position data of entry to contain the scroll positions for all of entry's document's restorable scrollable regions.
   - 2. Optionally, update entry's persisted user state to reflect any state that the user agent wishes to persist, such as the values of form fields.
 
-- [ ] [restore persisted state](https://html.spec.whatwg.org/#restore-persisted-state) — To restore persisted state from a session history entry entry:
+- [x] [restore persisted state](https://html.spec.whatwg.org/#restore-persisted-state) — To restore persisted state from a session history entry entry:
   - 1. If entry's scroll restoration mode is "auto", and entry's document's relevant global object's navigation API's suppress normal scroll restoration during ongoing navigation is false, then restore scroll position data given entry.
   - 2. Optionally, update other aspects of entry's document and its rendering, for instance values of form fields, that the user agent had previously recorded in entry's persisted user state.
 
-- [ ] [restorable scrollable regions](https://html.spec.whatwg.org/#restorable-scrollable-regions) — The restorable scrollable regions of a Document document are document's viewport, and all of document's scrollable regions excepting any navigable containers.
+- [x] [restorable scrollable regions](https://html.spec.whatwg.org/#restorable-scrollable-regions) — The restorable scrollable regions of a Document document are document's viewport, and all of document's scrollable regions excepting any navigable containers.
 
-- [ ] [restore scroll position data](https://html.spec.whatwg.org/#restore-scroll-position-data) — To restore scroll position data given a session history entry entry:
+- [x] [restore scroll position data](https://html.spec.whatwg.org/#restore-scroll-position-data) — To restore scroll position data given a session history entry entry:
   - 1. Let document be entry's document.
   - 2. If document's has been scrolled by the user is true, then the user agent should return.
   - 3. The user agent should attempt to use entry's scroll position data to restore the scroll positions of entry's document's restorable scrollable regions. The user agent may continue to attempt to do so periodically, until document's has been scrolled by the user becomes true.

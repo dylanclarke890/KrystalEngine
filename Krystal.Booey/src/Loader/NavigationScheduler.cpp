@@ -330,7 +330,8 @@ namespace krys::boo
   void NavigationScheduler::ScheduleRedirect(dom::Document &initiatingDocument, double delay,
                                              const url::URL &url, IsMetaRefresh) noexcept
   {
-    if (!_frame.GetPage() || delay < 0 || delay > INT_MAX / 1'000 || url.IsEmpty())
+    if (!_frame.GetPage() || !_frame.Loader().IsNavigationAllowed() || delay < 0 || delay > INT_MAX / 1'000
+        || url.IsEmpty())
     {
       return;
     }
@@ -345,7 +346,9 @@ namespace krys::boo
   void NavigationScheduler::ScheduleLocationChange(dom::Document &initiatingDocument, const url::URL &url,
                                                    NavigationHistoryBehavior historyHandling) noexcept
   {
-    if (!_frame.GetPage())
+    // https://html.spec.whatwg.org/#navigate
+    // 9. If navigable's active document's unload counter is greater than 0, then return.
+    if (!_frame.GetPage() || !_frame.Loader().IsNavigationAllowed())
     {
       return;
     }
