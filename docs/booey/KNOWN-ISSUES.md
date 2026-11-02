@@ -264,7 +264,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - SVG images keep the light appearance and do not copy the embedding page's settings (generic font families, dark appearance), because image observers cannot reach them (FIXME in `SVGImage.cpp`). The page of an SVG image has no loader strategy, so it loads only `data:` URLs.
 - `SVGImageElement` does not reload when its CORS setting changes. `SVGUseElement` loading another file does not carry the fetch mode, destination or sniffing policy (FIXMEs).
 - Drags: no drag icon for a dragged image's file (`CreateDragImageIconForCachedImageFilename` returns none), the response's suggested filename is not parsed, colours cannot be dragged or dropped, and there are no text indicators or visible paths. `PasteboardImage` and `SelectionData` carry no image, so nothing prefers images' types when pasting.
-- Krystal.UI's `FileLoaderStrategy` reads files synchronously on the main thread, and `FileStorageProvider` writes local storage on every change on the main thread (FIXMEs).
+- Krystal.UI's `FileLoaderStrategy` reads files synchronously on the main thread (FIXME).
 
 ## SVG
 

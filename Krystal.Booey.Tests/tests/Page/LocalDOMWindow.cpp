@@ -36,8 +36,6 @@
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Plugins/DOMMimeTypeArray.hpp"
 #include "Krystal.Booey/Plugins/DOMPluginArray.hpp"
-#include "Krystal.Booey/Storage/Storage.hpp"
-#include "Krystal.Booey/Storage/StorageEvent.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
 namespace krys::boo::tests
@@ -1312,110 +1310,6 @@ namespace krys::boo::tests
       CHECK(navigator.RegisterProtocolHandler(u8"mailto", u8"x").HasException());
       CHECK(navigator.RegisterProtocolHandler(u8"mailto", u8"https://other.example/?%s").HasException());
       CHECK(fixture.Chrome->ProtocolHandlers.size() == 3);
-    }
-  }
-
-  TEST_CASE("Storage maps keep their order and quota", "[Page][LocalDOMWindow][Storage]")
-  {
-    StorageMap map(20);
-    Maybe<dom::DOMString> oldValue;
-    CHECK(map.SetItem(u8"b", u8"one", oldValue));
-    CHECK_FALSE(oldValue);
-    CHECK(map.SetItem(u8"a", u8"two", oldValue));
-    CHECK(map.Key(0) == dom::DOMString(u8"b"));
-    CHECK(map.Key(1) == dom::DOMString(u8"a"));
-    CHECK_FALSE(map.Key(2));
-    // Sizes are UTF-16 bytes: b + one + a + two is 16 bytes, so 4 more fit.
-    CHECK(map.SetItem(u8"b", u8"three", oldValue));
-    CHECK(oldValue == dom::DOMString(u8"one"));
-    CHECK_FALSE(map.SetItem(u8"c", u8"x", oldValue));
-    CHECK(map.GetItem(u8"b") == dom::DOMString(u8"three"));
-    CHECK(map.RemoveItem(u8"b") == dom::DOMString(u8"three"));
-    CHECK(map.Length() == 1);
-    CHECK(StorageMap::SizeInBytes(u8"\U0001F600") == 4);
-  }
-
-  TEST_CASE("A window's session and local storage", "[Page][LocalDOMWindow][Storage]")
-  {
-    WindowFixture first;
-    WindowFixture second;
-    first.Document->SetURL(url::URL(u8"https://example.com/one.html"));
-    second.Document->SetURL(url::URL(u8"https://example.com/two.html"));
-
-    auto local = first.Window().LocalStorage();
-    REQUIRE_FALSE(local.HasException());
-    auto &storage = *local.Value();
-    CHECK(first.Window().LocalStorage().Value() == &storage);
-    CHECK(first.Window().OptionalLocalStorage() == &storage);
-    REQUIRE_FALSE(storage.Clear().HasException());
-
-    REQUIRE_FALSE(storage.SetItem(u8"score", u8"10").HasException());
-    CHECK(storage.GetItem(u8"score") == dom::DOMString(u8"10"));
-    CHECK(storage.Length() == 1);
-    CHECK(storage.Key(0) == dom::DOMString(u8"score"));
-    CHECK(storage.SupportedPropertyNames() == List<dom::DOMString> {u8"score"});
-
-    SECTION("local storage is shared by an origin's windows, which hear of changes")
-    {
-      auto &other = *second.Window().LocalStorage().Value();
-      CHECK(other.GetItem(u8"score") == dom::DOMString(u8"10"));
-
-      List<std::string> heard;
-      auto otherListener = second.Window().AddEventListener<StorageEvent>(
-        u8"storage",
-        [&](StorageEvent &event)
-        {
-          CHECK(event.IsTrusted());
-          CHECK(event.StorageArea() == &other);
-          CHECK(event.URL() == u8"https://example.com/one.html");
-          heard.push_back((event.Key() ? Str(*event.Key()) : "null") + ":"
-                          + (event.OldValue() ? Str(*event.OldValue()) : "null") + ":"
-                          + (event.NewValue() ? Str(*event.NewValue()) : "null"));
-        });
-      // The window that made the change isn't told.
-      bool sourceHeard = false;
-      auto sourceListener =
-        first.Window().AddEventListener(u8"storage", [&](dom::Event &) { sourceHeard = true; });
-
-      REQUIRE_FALSE(storage.SetItem(u8"score", u8"20").HasException());
-      // Setting the same value changes nothing.
-      REQUIRE_FALSE(storage.SetItem(u8"score", u8"20").HasException());
-      REQUIRE_FALSE(storage.RemoveItem(u8"score").HasException());
-      REQUIRE_FALSE(storage.RemoveItem(u8"missing").HasException());
-      REQUIRE_FALSE(storage.SetItem(u8"level", u8"3").HasException());
-      REQUIRE_FALSE(storage.Clear().HasException());
-      REQUIRE_FALSE(storage.Clear().HasException());
-      CHECK(heard.empty());
-
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(heard == List<std::string> {"score:10:20", "score:20:null", "level:null:3", "null:null:null"});
-      CHECK_FALSE(sourceHeard);
-    }
-
-    SECTION("session storage is the page's")
-    {
-      auto &session = *first.Window().SessionStorage().Value();
-      REQUIRE_FALSE(session.SetItem(u8"tab", u8"inventory").HasException());
-      CHECK(second.Window().SessionStorage().Value()->GetItem(u8"tab") == null);
-      CHECK(&session.Area() != &storage.Area());
-    }
-
-    SECTION("the quota")
-    {
-      dom::DOMString big(2 * 1'024 * 1'024, u8'x');
-      REQUIRE_FALSE(storage.SetItem(u8"big", big).HasException());
-      auto exceeded = storage.SetItem(u8"bigger", big);
-      REQUIRE(exceeded.HasException());
-      CHECK(exceeded.GetException().Code() == dom::ExceptionCode::QuotaExceededError);
-      REQUIRE_FALSE(storage.Clear().HasException());
-    }
-
-    SECTION("opaque origins have no storage")
-    {
-      WindowFixture opaque;
-      opaque.Document->SetURL(url::URL(u8"data:text/html,hi"));
-      CHECK(opaque.Window().LocalStorage().HasException());
-      CHECK(opaque.Window().SessionStorage().HasException());
     }
   }
 

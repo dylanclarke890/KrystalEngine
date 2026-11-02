@@ -54,7 +54,6 @@ namespace krys::boo
   class LocalFrame;
   class Page;
   class Screen;
-  class Storage;
   class VisualViewport;
 
   /// @note There are no transfers: there are no message ports.
@@ -90,8 +89,6 @@ namespace krys::boo
     mutable RefPtr<boo::History> _history;
     mutable RefPtr<boo::Navigation> _navigation;
     mutable RefPtr<html::CloseWatcherManager> _closeWatcherManager;
-    RefPtr<Storage> _sessionStorage;
-    RefPtr<Storage> _localStorage;
     mutable RefPtr<Screen> _screen;
     mutable RefPtr<VisualViewport> _visualViewport;
     dom::DOMString _status;
@@ -592,23 +589,6 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-window-postmessage-options
     dom::ExceptionOr<void> PostMessage(RefPtr<html::SerializedScriptValue> &&message,
                                        const WindowPostMessageOptions &options = {}) noexcept;
-
-#pragma endregion
-
-#pragma region Storage - https://html.spec.whatwg.org/#webstorage
-
-    /// @brief The page's session storage for the document's origin.
-    /// @return `SecurityError` if the origin is opaque.
-    /// @see https://html.spec.whatwg.org/#dom-sessionstorage
-    dom::ExceptionOr<Storage *> SessionStorage() noexcept;
-
-    /// @brief The origin's local storage, through the host's storage provider.
-    /// @return `SecurityError` if the origin is opaque.
-    /// @see https://html.spec.whatwg.org/#dom-localstorage
-    dom::ExceptionOr<Storage *> LocalStorage() noexcept;
-
-    KRYS_NODISCARD Storage *OptionalSessionStorage() const noexcept;
-    KRYS_NODISCARD Storage *OptionalLocalStorage() const noexcept;
 
 #pragma endregion
 

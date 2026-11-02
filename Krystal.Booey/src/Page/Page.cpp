@@ -349,21 +349,6 @@ namespace krys::boo
     FinalizeRenderingUpdate();
   }
 
-  Ref<StorageArea> Page::SessionStorageArea(dom::DOMStringView origin) noexcept
-  {
-    dom::DOMString key(origin);
-    auto it = _sessionStorageAreas.find(key);
-    if (it != _sessionStorageAreas.end())
-    {
-      return it->second;
-    }
-    // Session storage has no quota beyond the local storage's, as upstream.
-    Ref<StorageArea> area =
-      MemoryStorageArea::Create(StorageType::Session, MemoryStorageArea::DefaultLocalStorageQuota);
-    _sessionStorageAreas.emplace(krys::move(key), area);
-    return area;
-  }
-
   void Page::NetworkStateChanged(bool isOnLine) noexcept
   {
     List<Ref<dom::Document>> documents;

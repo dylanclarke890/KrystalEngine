@@ -368,11 +368,6 @@ namespace krys::boo::dom
       return false;
     }
 
-    KRYS_NODISCARD virtual bool IsStorageEvent() const noexcept
-    {
-      return false;
-    }
-
     KRYS_NODISCARD virtual bool IsPageTransitionEvent() const noexcept
     {
       return false;

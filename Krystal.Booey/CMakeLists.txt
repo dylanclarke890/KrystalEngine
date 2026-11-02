@@ -2000,9 +2000,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/Language.hpp
   include/Krystal.Booey/Plugins/DOMMimeTypeArray.hpp
   include/Krystal.Booey/Plugins/DOMPluginArray.hpp
-  include/Krystal.Booey/Storage/Storage.hpp
-  include/Krystal.Booey/Storage/StorageArea.hpp
-  include/Krystal.Booey/Storage/StorageEvent.hpp
   include/Krystal.Booey/HTML/EventHandlerAttributes.hpp
 
   # Loading documents (B3b)
@@ -3475,8 +3472,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Page/WindowFeatures.cpp
   src/Page/Navigator.cpp
   src/Platform/Language.cpp
-  src/Storage/Storage.cpp
-  src/Storage/StorageArea.cpp
   src/HTML/EventHandlerAttributes.cpp
 
   # Loading documents (B3b)

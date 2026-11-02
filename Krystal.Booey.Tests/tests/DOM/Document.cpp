@@ -43,8 +43,6 @@
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Storage/Storage.hpp"
-#include "Krystal.Booey/Storage/StorageEvent.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -255,7 +253,6 @@ namespace krys::boo::dom::tests
     CHECK(Is<html::MessageEvent>(*create(u8"messageevent")));
     CHECK(Is<MouseEvent>(*create(u8"mouseevent")));
     CHECK(Is<MouseEvent>(*create(u8"mouseevents")));
-    CHECK(Is<StorageEvent>(*create(u8"storageevent")));
     CHECK(Is<TextEvent>(*create(u8"textevent")));
     CHECK(Is<TouchEvent>(*create(u8"touchevent")));
     for (auto name : {u8"uievent", u8"uievents"})
@@ -282,8 +279,9 @@ namespace krys::boo::dom::tests
             "[DOM][Document][Event][dom:dom-document-createevent]")
   {
     auto document = CreateRef<HTMLDocument>();
-    for (auto name : {u8"", u8"foo", u8"mouseeventz", u8"devicemotionevent", u8"deviceorientationevent",
-                      u8"wheelevent", u8"keyboardevents", u8"popstateevent", u8"mutationevent"})
+    for (auto name :
+         {u8"", u8"foo", u8"mouseeventz", u8"devicemotionevent", u8"deviceorientationevent", u8"wheelevent",
+          u8"keyboardevents", u8"popstateevent", u8"mutationevent", u8"storageevent"})
     {
       auto event = document->CreateEvent(name);
       REQUIRE(event.HasException());
@@ -332,32 +330,17 @@ namespace krys::boo::dom::tests
       CHECK(message.Source() == nullptr);
     }
 
-    SECTION("initStorageEvent")
-    {
-      auto event = document->CreateEvent(u8"storageevent").ReleaseValue();
-      auto &storage = Downcast<StorageEvent>(*event);
-      storage.InitStorageEvent(DOMStringAtom(u8"storage"), false, true, DOMString(u8"key"), null,
-                               DOMString(u8"value"), u8"https://example.com/");
-      CHECK(storage.Type() == u8"storage");
-      CHECK(storage.Cancelable());
-      CHECK(storage.Key() == DOMString(u8"key"));
-      CHECK_FALSE(storage.OldValue());
-      CHECK(storage.NewValue() == DOMString(u8"value"));
-      CHECK(storage.URL() == u8"https://example.com/");
-      CHECK(storage.StorageArea() == nullptr);
-    }
-
     SECTION("Not while it's being dispatched")
     {
-      auto event = document->CreateEvent(u8"storageevent").ReleaseValue();
-      auto &storage = Downcast<StorageEvent>(*event);
-      storage.InitStorageEvent(DOMStringAtom(u8"storage"));
+      auto event = document->CreateEvent(u8"messageevent").ReleaseValue();
+      auto &message = Downcast<html::MessageEvent>(*event);
+      message.InitMessageEvent(DOMStringAtom(u8"message"));
       auto element = document->CreateElement(u8"div").ReleaseValue();
-      auto handle =
-        element->AddEventListener<StorageEvent>(DOMStringAtom(u8"storage"), [](StorageEvent &dispatched)
-                                                { dispatched.InitStorageEvent(DOMStringAtom(u8"other")); });
-      CHECK_FALSE(element->DispatchEvent(storage).HasException());
-      CHECK(storage.Type() == u8"storage");
+      auto handle = element->AddEventListener<html::MessageEvent>(
+        DOMStringAtom(u8"message"),
+        [](html::MessageEvent &dispatched) { dispatched.InitMessageEvent(DOMStringAtom(u8"other")); });
+      CHECK_FALSE(element->DispatchEvent(message).HasException());
+      CHECK(message.Type() == u8"message");
     }
   }
 

@@ -146,7 +146,6 @@ namespace krys::boo::html
   X(PageSwap, u8"pageswap")                                                                                  \
   X(PopState, u8"popstate")                                                                                  \
   X(RejectionHandled, u8"rejectionhandled")                                                                  \
-  X(Storage, u8"storage")                                                                                    \
   X(UnhandledRejection, u8"unhandledrejection")                                                              \
   X(Unload, u8"unload")
 

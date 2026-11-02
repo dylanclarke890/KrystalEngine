@@ -38,7 +38,6 @@
 #include "Krystal.Booey/Page/WindowFeatures.hpp"
 #include "Krystal.Booey/Platform/Language.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Storage/Storage.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Base64.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
@@ -125,58 +124,6 @@ namespace krys::boo
     {
       function(*window);
     }
-  }
-
-  dom::ExceptionOr<Storage *> LocalDOMWindow::SessionStorage() noexcept
-  {
-    // If this's associated Document's session storage holder is non-null, then return it.
-    if (_sessionStorage)
-    {
-      return _sessionStorage.get();
-    }
-
-    // Let map be the result of running obtain a session storage bottle map; if map is failure (an opaque
-    // origin, or no browsing session), then throw a "SecurityError" DOMException.
-    auto *document = Document();
-    auto *page = GetPage();
-    auto origin = Origin();
-    if (!document || !page || origin == u8"null")
-    {
-      return dom::ExceptionCode::SecurityError;
-    }
-
-    _sessionStorage = Storage::Create(*this, page->SessionStorageArea(origin));
-    return _sessionStorage.get();
-  }
-
-  dom::ExceptionOr<Storage *> LocalDOMWindow::LocalStorage() noexcept
-  {
-    if (_localStorage)
-    {
-      return _localStorage.get();
-    }
-
-    auto *document = Document();
-    auto origin = Origin();
-    if (!document || !Frame() || origin == u8"null")
-    {
-      return dom::ExceptionCode::SecurityError;
-    }
-
-    auto *provider = PlatformStrategies::Singleton().GetStorageProvider();
-    StorageProvider &storageProvider = provider ? *provider : MemoryStorageProvider::Singleton();
-    _localStorage = Storage::Create(*this, storageProvider.LocalStorageArea(origin));
-    return _localStorage.get();
-  }
-
-  Storage *LocalDOMWindow::OptionalSessionStorage() const noexcept
-  {
-    return _sessionStorage.get();
-  }
-
-  Storage *LocalDOMWindow::OptionalLocalStorage() const noexcept
-  {
-    return _localStorage.get();
   }
 
   Ref<LocalDOMWindow> LocalDOMWindow::Create(dom::Document &document) noexcept

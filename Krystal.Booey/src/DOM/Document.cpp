@@ -144,8 +144,6 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
-#include "Krystal.Booey/Storage/Storage.hpp"
-#include "Krystal.Booey/Storage/StorageEvent.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
@@ -692,10 +690,6 @@ namespace krys::boo::dom
       if (matches(u8"messageevent"))
       {
         return CreateRef<html::MessageEvent>(empty);
-      }
-      if (matches(u8"storageevent"))
-      {
-        return CreateRef<StorageEvent>(empty);
       }
       if (matches(u8"mouseevent") || matches(u8"mouseevents"))
       {

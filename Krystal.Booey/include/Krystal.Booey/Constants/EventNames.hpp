@@ -59,7 +59,6 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview Resize = u8"resize";
   constexpr utf8_stringview Message = u8"message";
   constexpr utf8_stringview LanguageChange = u8"languagechange";
-  constexpr utf8_stringview Storage = u8"storage";
   constexpr utf8_stringview Online = u8"online";
   constexpr utf8_stringview Offline = u8"offline";
   constexpr utf8_stringview BeforePrint = u8"beforeprint";

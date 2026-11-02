@@ -8,41 +8,41 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [12 Web storage](https://html.spec.whatwg.org/#webstorage)
 
-Status: unreviewed
+Status: n/a (not planned: no Web storage)
 
 ### [12.1 Introduction](https://html.spec.whatwg.org/#introduction-16)
 
-Status: unreviewed
+Status: n/a (not planned: no Web storage)
 
 ### [12.2 The API](https://html.spec.whatwg.org/#storage)
 
-Status: unreviewed
+Status: n/a (not planned: no Web storage)
 
 #### [12.2.1 The Storage interface](https://html.spec.whatwg.org/#the-storage-interface)
 
-Status: unreviewed
+Status: n/a (not planned: no Web storage)
 <!-- definitions: concept-storage-map concept-storage-type -->
 
-- [ ] [reorder](https://html.spec.whatwg.org/#concept-storage-reorder) — To reorder a Storage object storage, reorder storage's map's entries in an implementation-defined manner.
+- [x] [reorder](https://html.spec.whatwg.org/#concept-storage-reorder) — To reorder a Storage object storage, reorder storage's map's entries in an implementation-defined manner.
 
-- [ ] [broadcast](https://html.spec.whatwg.org/#concept-storage-broadcast) — To broadcast a Storage object storage, given a key, oldValue, and newValue, run these steps:
+- [x] [broadcast](https://html.spec.whatwg.org/#concept-storage-broadcast) — To broadcast a Storage object storage, given a key, oldValue, and newValue, run these steps:
   - 1. Let thisDocument be storage's relevant global object's associated Document.
   - 2. Let url be the serialization of thisDocument's URL.
   - 3. Let remoteStorages be all Storage objects excluding storage whose: type is storage's type; relevant settings object's origin is same origin with storage's relevant settings object's origin and, if type is "session", whose relevant settings object's associated Document's node navigable's traversable navigable is thisDocument's node navigable's traversable navigable.
   - 4. For each remoteStorage of remoteStorages: queue a global task on the DOM manipulation task source given remoteStorage's relevant global object to fire an event named storage at remoteStorage's relevant global object, using StorageEvent, with key initialized to key, oldValue initialized to oldValue, newValue initialized to newValue, url initialized to url, and storageArea initialized to remoteStor…
 
-- [ ] [Storage.length](https://html.spec.whatwg.org/#dom-storage-length) — The length getter steps are to return this's map's size.
+- [x] [Storage.length](https://html.spec.whatwg.org/#dom-storage-length) — The length getter steps are to return this's map's size.
 
-- [ ] [Storage.key(index)](https://html.spec.whatwg.org/#dom-storage-key) — The key(index) method steps are:
+- [x] [Storage.key(index)](https://html.spec.whatwg.org/#dom-storage-key) — The key(index) method steps are:
   - 1. If index is greater than or equal to this's map's size, then return null.
   - 2. Let keys be the result of running get the keys on this's map.
   - 3. Return keys[index].
 
-- [ ] [Storage.getItem(key)](https://html.spec.whatwg.org/#dom-storage-getitem) — The getItem(key) method steps are:
+- [x] [Storage.getItem(key)](https://html.spec.whatwg.org/#dom-storage-getitem) — The getItem(key) method steps are:
   - 1. If this's map[key] does not exist, then return null.
   - 2. Return this's map[key].
 
-- [ ] [Storage.setItem(key, value)](https://html.spec.whatwg.org/#dom-storage-setitem) — The setItem(key, value) method steps are:
+- [x] [Storage.setItem(key, value)](https://html.spec.whatwg.org/#dom-storage-setitem) — The setItem(key, value) method steps are:
   - 1. Let oldValue be null.
   - 2. Let reorder be true.
   - 3. If this's map[key] exists:
@@ -54,24 +54,24 @@ Status: unreviewed
   - 6. If reorder is true, then reorder this.
   - 7. Broadcast this with key, oldValue, and value.
 
-- [ ] [Storage.removeItem(key)](https://html.spec.whatwg.org/#dom-storage-removeitem) — The removeItem(key) method steps are:
+- [x] [Storage.removeItem(key)](https://html.spec.whatwg.org/#dom-storage-removeitem) — The removeItem(key) method steps are:
   - 1. If this's map[key] does not exist, then return.
   - 2. Set oldValue to this's map[key].
   - 3. Remove this's map[key].
   - 4. Reorder this.
   - 5. Broadcast this with key, oldValue, and null.
 
-- [ ] [Storage.clear()](https://html.spec.whatwg.org/#dom-storage-clear) — The clear() method steps are:
+- [x] [Storage.clear()](https://html.spec.whatwg.org/#dom-storage-clear) — The clear() method steps are:
   - 1. If this's map is empty, then return.
   - 2. Clear this's map.
   - 3. Broadcast this with null, null, and null.
 
 #### [12.2.2 The sessionStorage getter](https://html.spec.whatwg.org/#the-sessionstorage-attribute)
 
-Status: unreviewed
+Status: n/a (not planned: no Web storage)
 <!-- definitions: session-storage-holder -->
 
-- [ ] [WindowSessionStorage.sessionStorage](https://html.spec.whatwg.org/#dom-sessionstorage) — The sessionStorage getter steps are:
+- [x] [WindowSessionStorage.sessionStorage](https://html.spec.whatwg.org/#dom-sessionstorage) — The sessionStorage getter steps are:
   - 1. If this's associated Document's session storage holder is non-null, then return this's associated Document's session storage holder.
   - 2. Let map be the result of running obtain a session storage bottle map with this's relevant settings object and "sessionStorage".
   - 3. If map is failure, then throw a "SecurityError" DOMException.
@@ -81,10 +81,10 @@ Status: unreviewed
 
 #### [12.2.3 The localStorage getter](https://html.spec.whatwg.org/#the-localstorage-attribute)
 
-Status: unreviewed
+Status: n/a (not planned: no Web storage)
 <!-- definitions: local-storage-holder -->
 
-- [ ] [WindowLocalStorage.localStorage](https://html.spec.whatwg.org/#dom-localstorage) — The localStorage getter steps are:
+- [x] [WindowLocalStorage.localStorage](https://html.spec.whatwg.org/#dom-localstorage) — The localStorage getter steps are:
   - 1. If this's associated Document's local storage holder is non-null, then return this's associated Document's local storage holder.
   - 2. Let map be the result of running obtain a local storage bottle map with this's relevant settings object and "localStorage".
   - 3. If map is failure, then throw a "SecurityError" DOMException.
@@ -94,12 +94,12 @@ Status: unreviewed
 
 #### [12.2.4 The StorageEvent interface](https://html.spec.whatwg.org/#the-storageevent-interface)
 
-Status: unreviewed
+Status: n/a (not planned: no Web storage)
 <!-- definitions: dom-storageevent-oldvalue dom-storageevent-newvalue dom-storageevent-url dom-storageevent-storagearea -->
 
-- [ ] [StorageEvent.key](https://html.spec.whatwg.org/#dom-storageevent-key) — The key, oldValue, newValue, url, and storageArea attributes must return the values they were initialized to.
+- [x] [StorageEvent.key](https://html.spec.whatwg.org/#dom-storageevent-key) — The key, oldValue, newValue, url, and storageArea attributes must return the values they were initialized to.
 
-- [ ] [StorageEvent.initStorageEvent(type, bubbles, cancelable, key, oldValue, newValue, url, storageArea)](https://html.spec.whatwg.org/#dom-storageevent-initstorageevent) — The initStorageEvent(type, bubbles, cancelable, key, oldValue, newValue, url, storageArea) method must initialize the event in a manner analogous to the similarly-named initEvent() method. [DOM]
+- [x] [StorageEvent.initStorageEvent(type, bubbles, cancelable, key, oldValue, newValue, url, storageArea)](https://html.spec.whatwg.org/#dom-storageevent-initstorageevent) — The initStorageEvent(type, bubbles, cancelable, key, oldValue, newValue, url, storageArea) method must initialize the event in a manner analogous to the similarly-named initEvent() method. [DOM]
 
 ### [12.3 Privacy](https://html.spec.whatwg.org/#privacy)
 

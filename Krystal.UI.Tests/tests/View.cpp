@@ -49,7 +49,6 @@
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
-#include "Krystal.UI/FileStorageProvider.hpp"
 #include "Krystal.UI/Input.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
 #include <filesystem>
@@ -2748,35 +2747,6 @@ namespace krys::ui::tests
 
     view.SetUserAgent(u8"KrystalGame/1.0");
     CHECK(window.GetNavigator().UserAgent() == u8"KrystalGame/1.0");
-  }
-
-  TEST_CASE("View: local storage kept in files", "[UI]")
-  {
-    auto directory = std::filesystem::temp_directory_path() / "KrystalStorageTest";
-    std::filesystem::remove_all(directory);
-
-    {
-      FileStorageProvider provider(directory);
-      auto area = provider.LocalStorageArea(u8"https://example.com");
-      Maybe<boo::dom::DOMString> oldValue;
-      REQUIRE(area->SetItem(u8"name", u8"Ada \u00e9", oldValue));
-      REQUIRE(area->SetItem(u8"level", u8"3", oldValue));
-      CHECK(provider.PathForOrigin(u8"https://example.com").filename() == "https___example_com.storage");
-      CHECK(std::filesystem::exists(provider.PathForOrigin(u8"https://example.com")));
-    }
-
-    // Another provider reads the items back, in order.
-    FileStorageProvider provider(directory);
-    auto area = provider.LocalStorageArea(u8"https://example.com");
-    CHECK(area->Length() == 2);
-    CHECK(area->Key(0) == boo::dom::DOMString(u8"name"));
-    CHECK(area->Item(u8"name") == boo::dom::DOMString(u8"Ada \u00e9"));
-    CHECK(area->Item(u8"level") == boo::dom::DOMString(u8"3"));
-    (void)area->RemoveItem(u8"level");
-
-    FileStorageProvider again(directory);
-    CHECK(again.LocalStorageArea(u8"https://example.com")->Length() == 1);
-    std::filesystem::remove_all(directory);
   }
 
   TEST_CASE("View: loads pages on a later task, and tells the host", "[UI]")
