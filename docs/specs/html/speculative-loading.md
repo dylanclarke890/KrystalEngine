@@ -379,7 +379,8 @@ Status: n/a (no frame tree)
 
 ### [7.8 The `Refresh` header](https://html.spec.whatwg.org/#the-refresh-header)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Not implemented, as responses have no headers (see `KNOWN-ISSUES.md`); `<meta http-equiv=refresh>` runs the shared declarative refresh steps (`Document::ProcessMetaHttpEquiv`).
 <!-- definitions: refresh -->
 
 ### [7.9 Browser user interface considerations](https://html.spec.whatwg.org/#nav-traversal-ui)
