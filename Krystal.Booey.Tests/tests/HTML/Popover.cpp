@@ -95,7 +95,13 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Popover: showing and hiding", "[HTML][Popover]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Popover: showing and hiding",
+                   "[HTML][Popover][html:the-popover-attribute][html:attr-popover]"
+                   "[html:attr-popover-none-state][html:dom-popover][html:popover-visibility-state]"
+                   "[html:dom-showpopover][html:dom-hidepopover][html:dom-togglepopover][html:show-popover]"
+                   "[html:hide-popover-algorithm][html:check-popover-validity]"
+                   "[html:queue-a-popover-toggle-event-task][html:popover-close-watcher]"
+                   "[html:popover-focusing-steps]")
   {
     NavigationFixture fixture(u8"<div id=p popover><input id=field autofocus></div><div id=plain></div>"
                               u8"<button id=before>B</button>");
@@ -210,7 +216,10 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Popover: stacks", "[HTML][Popover]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Popover: stacks",
+                   "[HTML][Popover][html:hide-popover-stack-until][html:hide-popovers-until]"
+                   "[html:topmost-popover-ancestor][html:topmost-auto-or-hint-popover]"
+                   "[html:light-dismiss-open-popovers][html:hint-stack-parent][html:popover-light-dismiss]")
   {
     NavigationFixture fixture(
       u8"<style>body { margin: 0 } [popover] { inset: auto; margin: 0; padding: 0; border: 0; width: 50px;"
@@ -349,9 +358,51 @@ namespace krys::boo::html::tests
     }
   }
 
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "Popover: the popover a click is on or targets",
+    "[HTML][Popover][html:topmost-clicked-popover][html:nearest-inclusive-open-popover]"
+    "[html:nearest-inclusive-target-popover][html:target-popover][html:get-the-popover-stack-position]")
+  {
+    NavigationFixture fixture(
+      u8"<div id=p popover><span id=in>In</span></div><div id=q popover=hint></div>"
+      u8"<button id=toggle commandfor=p command=toggle-popover></button>"
+      u8"<button id=custom commandfor=p command=--custom popovertarget=p></button>"
+      u8"<button id=target popovertarget=p></button>"
+      u8"<form><button id=formAuto commandfor=p command=show-popover></button>"
+      u8"<button id=formButton type=button commandfor=p command=show-popover></button></form>"
+      u8"<button id=disabled disabled commandfor=p command=toggle-popover></button>");
+    auto &document = *fixture.Document;
+    auto &p = Downcast<HTMLElement>(fixture.ById(u8"p"));
+    auto &q = Downcast<HTMLElement>(fixture.ById(u8"q"));
+    REQUIRE_FALSE(p.ShowPopover().HasException());
+    auto clicked = [&](dom::DOMStringView id)
+    {
+      return document.TopmostClickedPopover(fixture.ById(id)).get();
+    };
+
+    CHECK(clicked(u8"in") == &p);
+    CHECK(clicked(u8"toggle") == &p);
+    CHECK(clicked(u8"target") == &p);
+    // A commandfor target with a command that isn't a popover command targets nothing, even with a
+    // popovertarget.
+    CHECK_FALSE(clicked(u8"custom"));
+    // So does a button in the Auto state with a form owner, or a disabled one.
+    CHECK_FALSE(clicked(u8"formAuto"));
+    CHECK(clicked(u8"formButton") == &p);
+    CHECK_FALSE(clicked(u8"disabled"));
+
+    // The popover higher in the stacks wins: hint popovers are above auto popovers.
+    REQUIRE_FALSE(q.ShowPopover().HasException());
+    REQUIRE_FALSE(q.AppendChild(*fixture.ById(u8"toggle").CloneNode(false).ReleaseValue()).HasException());
+    CHECK(clicked(u8"in") == &p);
+    CHECK(document.TopmostClickedPopover(*q.FirstChild()).get() == &q);
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Popover: invokers",
                    "[HTML][Popover][html:focus-navigation-scope-owner]"
-                   "[html:associated-focus-navigation-owner]")
+                   "[html:associated-focus-navigation-owner][html:the-popover-target-attributes][html:"
+                   "popover-target-element]"
+                   "[html:popover-target-attribute-activation-behavior][html:dom-popovertargetaction]")
   {
     NavigationFixture fixture(
       u8"<button id=t popovertarget=p>T</button><button id=after>A</button>"

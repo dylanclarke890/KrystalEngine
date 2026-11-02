@@ -8,23 +8,24 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [6.12 The popover attribute](https://html.spec.whatwg.org/#the-popover-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement`'s popover members (`ShowPopoverInternal`, `HidePopoverInternal`, `CheckPopoverValidity`, `RunPopoverFocusingSteps`), the element's `PopoverData`, and `Document`'s popover stacks; the showing auto and hint popover lists are the top layer's. The toggle task tracker is `ToggleEventTask`, which skips the earlier task rather than removing it. There's no fullscreen flag to check.
 <!-- definitions: attr-popover popover-visibility-state popover-hidden-state popover-showing-state popover-pointerdown-target popover-trigger popover-hiding popover-toggle-task-tracker popover-close-watcher opened-in-popover-mode hiding-popover-nesting-count showing-popover -->
 
-- [ ] [No Popover](https://html.spec.whatwg.org/#attr-popover-none-state) — The attribute's missing value default is the No Popover state, its invalid value default is the Manual state, and its empty value default is the Auto state.
+- [x] [No Popover](https://html.spec.whatwg.org/#attr-popover-none-state) — The attribute's missing value default is the No Popover state, its invalid value default is the Manual state, and its empty value default is the Auto state.
 
-- [ ] [HTMLElement.popover](https://html.spec.whatwg.org/#dom-popover) — The popover IDL attribute must reflect the popover attribute, limited to only known values.
+- [x] [HTMLElement.popover](https://html.spec.whatwg.org/#dom-popover) — The popover IDL attribute must reflect the popover attribute, limited to only known values.
 
-- [ ] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#hint-stack-parent) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used for all HTML elements:
+- [x] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#hint-stack-parent) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used for all HTML elements:
   - 1. If namespace is not null, then return.
   - 2. If localName is not popover, then return.
   - 3. If element's popover visibility state is in the showing state and oldValue and value are in different states, then run the hide popover algorithm given element, true, true, false, and null.
 
-- [ ] [HTMLElement.showPopover(options)](https://html.spec.whatwg.org/#dom-showpopover) — The showPopover(options) method steps are:
+- [x] [HTMLElement.showPopover(options)](https://html.spec.whatwg.org/#dom-showpopover) — The showPopover(options) method steps are:
   - 1. Let source be options["source"] if it exists; otherwise, null.
   - 2. Run show popover given this, true, and source.
 
-- [ ] [show popover](https://html.spec.whatwg.org/#show-popover) — To show popover, given an HTML element element, a boolean throwExceptions, and an HTML element or null source:
+- [x] [show popover](https://html.spec.whatwg.org/#show-popover) — To show popover, given an HTML element element, a boolean throwExceptions, and an HTML element or null source:
   - 1. Let document be element's node document.
   - 2. If document's showing popover is true, or document's hiding popover nesting count is not 0:
     - 2a. If throwExceptions is true, then throw a "InvalidStateError" DOMException.
@@ -81,7 +82,7 @@ Status: unreviewed
   - 25. Run cleanupShowingSteps.
   - 26. Queue a popover toggle event task given element, "closed", "open", and source.
 
-- [ ] [queue a popover toggle event task](https://html.spec.whatwg.org/#queue-a-popover-toggle-event-task) — To queue a popover toggle event task given an element element, a string oldState, a string newState, and an Element or null source:
+- [x] [queue a popover toggle event task](https://html.spec.whatwg.org/#queue-a-popover-toggle-event-task) — To queue a popover toggle event task given an element element, a string oldState, a string newState, and an Element or null source:
   - 1. If element's popover toggle task tracker is not null:
     - 1a. Set oldState to element's popover toggle task tracker's old state.
     - 1b. Remove element's popover toggle task tracker's task from its task queue.
@@ -91,10 +92,10 @@ Status: unreviewed
     - 2b. Set element's popover toggle task tracker to null.
   - 3. Set element's popover toggle task tracker to a struct with task set to the just-queued task and old state set to oldState.
 
-- [ ] [HTMLElement.hidePopover()](https://html.spec.whatwg.org/#dom-hidepopover) — The hidePopover() method steps are:
+- [x] [HTMLElement.hidePopover()](https://html.spec.whatwg.org/#dom-hidepopover) — The hidePopover() method steps are:
   - 1. Run the hide popover algorithm given this, true, true, true, and null.
 
-- [ ] [hide a popover](https://html.spec.whatwg.org/#hide-popover-algorithm) — To hide a popover given an HTML element element, a boolean focusPreviousElement, a boolean fireEvents, a boolean throwExceptions, and an HTML element or null source:
+- [x] [hide a popover](https://html.spec.whatwg.org/#hide-popover-algorithm) — To hide a popover given an HTML element element, a boolean focusPreviousElement, a boolean fireEvents, a boolean throwExceptions, and an HTML element or null source:
   - 1. Let validityResult be the result of running check popover validity given element, true, and null. If this throws an exception, catch it, and let validityResult be that exception.
   - 2. If validityResult is not true:
     - 2a. If throwExceptions is true and validityResult is a DOMException, then throw validityResult.
@@ -142,7 +143,7 @@ Status: unreviewed
     - 21b. Set element's popover close watcher to null.
   - 22. Run cleanupSteps.
 
-- [ ] [HTMLElement.togglePopover(options)](https://html.spec.whatwg.org/#dom-togglepopover) — The togglePopover(options) method steps are:
+- [x] [HTMLElement.togglePopover(options)](https://html.spec.whatwg.org/#dom-togglepopover) — The togglePopover(options) method steps are:
   - 1. Let force be null.
   - 2. If options is a boolean, set force to options.
   - 3. Otherwise, if options["force"] exists, set force to options["force"].
@@ -154,14 +155,14 @@ Status: unreviewed
     - 7b. Run check popover validity given this, expectedToBeShowing, and null.
   - 8. Return true if this's popover visibility state is showing; otherwise false.
 
-- [ ] [hide popovers until](https://html.spec.whatwg.org/#hide-popovers-until) — To hide popovers until, given a Document document, an HTML element or null endpoint, a boolean focusPreviousElement, and a boolean fireEvents:
+- [x] [hide popovers until](https://html.spec.whatwg.org/#hide-popovers-until) — To hide popovers until, given a Document document, an HTML element or null endpoint, a boolean focusPreviousElement, and a boolean fireEvents:
   - 1. Let endpointIsHint be true if document's showing hint popover list contains endpoint; otherwise false.
   - 2. Run hide popover stack until given document, endpoint, Hint, focusPreviousElement, and fireEvents.
   - 3. Let autoEndpoint be endpoint.
   - 4. If endpointIsHint is true, then set autoEndpoint to document's hint stack parent.
   - 5. Run hide popover stack until given document, autoEndpoint, Auto, focusPreviousElement, and fireEvents.
 
-- [ ] [hide popover stack until](https://html.spec.whatwg.org/#hide-popover-stack-until) — To hide popover stack until, given a Document document, an HTML element or null endpoint, an Auto or Hint stackType, a boolean focusPreviousElement, and a boolean fireEvents:
+- [x] [hide popover stack until](https://html.spec.whatwg.org/#hide-popover-stack-until) — To hide popover stack until, given a Document document, an HTML element or null endpoint, an Auto or Hint stackType, a boolean focusPreviousElement, and a boolean fireEvents:
   - 1. Let popoverList be document's showing auto popover list if stackType is Auto; otherwise document's showing hint popover list.
   - 2. Let lastHideIndex be 0 if popoverList does not contain endpoint; otherwise the index of endpoint in popoverList plus 1.
   - 3. Let toHide be a slice of popoverList from lastHideIndex, in reverse order.
@@ -173,7 +174,7 @@ Status: unreviewed
     - 8a. If toRemain contains popover, then continue.
     - 8b. Run the hide popover algorithm given popover, focusPreviousElement, false, false, and null.
 
-- [ ] [topmost popover ancestor](https://html.spec.whatwg.org/#topmost-popover-ancestor) — To find the topmost popover ancestor, given a Node newPopoverOrTopLayerElement, an HTML element or null source, and a boolean isPopover, perform the following steps. They return an HTML element or null.
+- [x] [topmost popover ancestor](https://html.spec.whatwg.org/#topmost-popover-ancestor) — To find the topmost popover ancestor, given a Node newPopoverOrTopLayerElement, an HTML element or null source, and a boolean isPopover, perform the following steps. They return an HTML element or null.
   - 1. If isPopover is true:
     - 1a. Assert: newPopoverOrTopLayerElement is an HTML element.
     - 1b. Assert: newPopoverOrTopLayerElement's popover attribute is not in the No Popover State or the Manual state.
@@ -189,19 +190,19 @@ Status: unreviewed
   - 9. If ancestorIndex is -1, then return null.
   - 10. Return combinedPopovers[ancestorIndex].
 
-- [ ] [nearest inclusive open popover](https://html.spec.whatwg.org/#nearest-inclusive-open-popover) — To find the nearest inclusive open popover given a Node node, perform the following steps. They return an HTML element or null.
+- [x] [nearest inclusive open popover](https://html.spec.whatwg.org/#nearest-inclusive-open-popover) — To find the nearest inclusive open popover given a Node node, perform the following steps. They return an HTML element or null.
   - 1. Let currentNode be node.
   - 2. While currentNode is not null:
     - 2a. If currentNode's opened in popover mode is "auto" or "hint", and currentNode's popover visibility state is showing, then return currentNode.
     - 2b. Set currentNode to currentNode's parent in the flat tree.
   - 3. Return null.
 
-- [ ] [find the topmost auto or hint popover](https://html.spec.whatwg.org/#topmost-auto-or-hint-popover) — To find the topmost auto or hint popover given a Document document, perform the following steps. They return an HTML element or null.
+- [x] [find the topmost auto or hint popover](https://html.spec.whatwg.org/#topmost-auto-or-hint-popover) — To find the topmost auto or hint popover given a Document document, perform the following steps. They return an HTML element or null.
   - 1. If document's showing hint popover list is not empty, then return document's showing hint popover list's last element.
   - 2. If document's showing auto popover list is not empty, then return document's showing auto popover list's last element.
   - 3. Return null.
 
-- [ ] [popover focusing steps](https://html.spec.whatwg.org/#popover-focusing-steps) — To perform the popover focusing steps for an HTML element subject:
+- [x] [popover focusing steps](https://html.spec.whatwg.org/#popover-focusing-steps) — To perform the popover focusing steps for an HTML element subject:
   - 1. If the allow focus steps given subject's node document return false, then return.
   - 2. If subject is a dialog element, then run the dialog focusing steps given subject and return.
   - 3. If subject has the autofocus attribute, then let control be subject.
@@ -213,19 +214,19 @@ Status: unreviewed
   - 9. Empty topDocument's autofocus candidates.
   - 10. Set topDocument's autofocus processed flag to true.
 
-- [ ] [check popover validity](https://html.spec.whatwg.org/#check-popover-validity) — To check popover validity for an HTML element element given a boolean expectedToBeShowing and a Document or null expectedDocument, perform the following steps. They throw an exception or return a boolean.
+- [x] [check popover validity](https://html.spec.whatwg.org/#check-popover-validity) — To check popover validity for an HTML element element given a boolean expectedToBeShowing and a Document or null expectedDocument, perform the following steps. They throw an exception or return a boolean.
   - 1. If element's popover attribute is in the No Popover state, then throw a "NotSupportedError" DOMException.
   - 2. If any of the following are true: expectedToBeShowing is true and element's popover visibility state is not showing; or; expectedToBeShowing is false and element's popover visibility state is not hidden, then return false.
   - 3. If any of the following are true: expectedToBeShowing is false and element is not connected;; expectedToBeShowing is false and element's node document is not fully active;; expectedDocument is not null and element's node document is not expectedDocument;; element is a dialog element and its is modal is set to true; or; element's fullscreen flag is set, then throw an "InvalidStateError" DOMExcepti…
   - 4. Return true.
 
-- [ ] [showing auto popover list](https://html.spec.whatwg.org/#auto-popover-list) — To get the showing auto popover list for a Document document:
+- [x] [showing auto popover list](https://html.spec.whatwg.org/#auto-popover-list) — To get the showing auto popover list for a Document document:
   - 1. Let popovers be « ».
   - 2. For each Element element of document's top layer:
     - 2a. If all of the following are true: element is an HTML element;; element's opened in popover mode is "auto"; and; element's popover visibility state is showing, then append element to popovers.
   - 3. Return popovers.
 
-- [ ] [showing hint popover list](https://html.spec.whatwg.org/#showing-hint-popover-list) — To get the showing hint popover list for a Document document:
+- [x] [showing hint popover list](https://html.spec.whatwg.org/#showing-hint-popover-list) — To get the showing hint popover list for a Document document:
   - 1. Let popovers be « ».
   - 2. For each Element element of document's top layer:
     - 2a. If all of the following are true: element is an HTML element;; element's opened in popover mode is "hint"; and; element's popover visibility state is showing, then append element to popovers.
@@ -233,12 +234,13 @@ Status: unreviewed
 
 #### [6.12.1 The popover target attributes](https://html.spec.whatwg.org/#the-popover-target-attributes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLFormControlElement::PopoverTargetElement` and `HandlePopoverTargetAction`.
 <!-- definitions: attr-popovertarget attr-popovertargetaction -->
 
-- [ ] [HTMLElement.popoverTargetAction](https://html.spec.whatwg.org/#dom-popovertargetaction) — The popoverTargetAction IDL attribute must reflect the popovertargetaction attribute, limited to only known values.
+- [x] [HTMLElement.popoverTargetAction](https://html.spec.whatwg.org/#dom-popovertargetaction) — The popoverTargetAction IDL attribute must reflect the popovertargetaction attribute, limited to only known values.
 
-- [ ] [popover target attribute activation behavior](https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior) — To run the popover target attribute activation behavior given a Node node and a Node eventTarget:
+- [x] [popover target attribute activation behavior](https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior) — To run the popover target attribute activation behavior given a Node node and a Node eventTarget:
   - 1. Let popover be node's popover target element.
   - 2. If popover is null, then return.
   - 3. If eventTarget is a shadow-including inclusive descendant of popover and popover is a shadow-including descendant of node, then return.
@@ -249,7 +251,7 @@ Status: unreviewed
     - 7a. Let validity be the result of running check popover validity given popover, false, and null. If this throws an exception, catch it, and let validity be false.
     - 7b. If validity is true, then run show popover given popover, false, and node.
 
-- [ ] [popover target element](https://html.spec.whatwg.org/#popover-target-element) — To get the popover target element given a Node node, perform the following steps. They return an HTML element or null.
+- [x] [popover target element](https://html.spec.whatwg.org/#popover-target-element) — To get the popover target element given a Node node, perform the following steps. They return an HTML element or null.
   - 1. If node is not a button, then return null.
   - 2. If node is disabled, then return null.
   - 3. If node has a form owner and node is a submit button, then return null.
@@ -260,9 +262,11 @@ Status: unreviewed
 
 #### [6.12.2 Popover light dismiss](https://html.spec.whatwg.org/#popover-light-dismiss)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Document::HandleLightDismiss` and `TopmostClickedPopover`; the topmost popover ancestor also counts a source that's an open popover (see `DIFFERENCES.md`).
+> Fixed: a button's `commandfor` popover counted as the popover it targets whatever its command, and whatever its form owner and type.
 
-- [ ] [light dismiss open popovers](https://html.spec.whatwg.org/#light-dismiss-open-popovers) — To light dismiss open popovers, given a PointerEvent event:
+- [x] [light dismiss open popovers](https://html.spec.whatwg.org/#light-dismiss-open-popovers) — To light dismiss open popovers, given a PointerEvent event:
   - 1. Assert: event's isTrusted attribute is true.
   - 2. Let target be event's target.
   - 3. Let document be target's node document.
@@ -275,27 +279,27 @@ Status: unreviewed
     - 6d. If sameTarget is false, then return.
     - 6e. Run hide popovers until given document, ancestor, false, and true.
 
-- [ ] [topmost clicked popover](https://html.spec.whatwg.org/#topmost-clicked-popover) — To find the topmost clicked popover, given a Node node:
+- [x] [topmost clicked popover](https://html.spec.whatwg.org/#topmost-clicked-popover) — To find the topmost clicked popover, given a Node node:
   - 1. Let clickedPopover be the result of running nearest inclusive open popover given node.
   - 2. Let targetPopover be the result of running nearest inclusive target popover given node.
   - 3. If the result of getting the popover stack position given clickedPopover is greater than the result of getting the popover stack position given targetPopover, then return clickedPopover.
   - 4. Return targetPopover.
 
-- [ ] [get the popover stack position](https://html.spec.whatwg.org/#get-the-popover-stack-position) — To get the popover stack position, given an HTML element popover:
+- [x] [get the popover stack position](https://html.spec.whatwg.org/#get-the-popover-stack-position) — To get the popover stack position, given an HTML element popover:
   - 1. Let hintList be popover's node document's showing hint popover list.
   - 2. Let autoList be popover's node document's showing auto popover list.
   - 3. If popover is in hintList, then return the index of popover in hintList + the size of autoList + 1.
   - 4. If popover is in autoList, then return the index of popover in autoList + 1.
   - 5. Return 0.
 
-- [ ] [nearest inclusive target popover](https://html.spec.whatwg.org/#nearest-inclusive-target-popover) — To find the nearest inclusive target popover given a Node node:
+- [x] [nearest inclusive target popover](https://html.spec.whatwg.org/#nearest-inclusive-target-popover) — To find the nearest inclusive target popover given a Node node:
   - 1. Let currentNode be node.
   - 2. While currentNode is not null:
     - 2a. Let targetPopover be currentNode's target popover.
     - 2b. If targetPopover is not null and targetPopover's popover attribute is in the Auto state or the Hint state, and targetPopover's popover visibility state is showing, then return targetPopover.
     - 2c. Set currentNode to currentNode's ancestor in the flat tree.
 
-- [ ] [target popover](https://html.spec.whatwg.org/#target-popover) — To get the target popover given a Node node, perform the following steps. They return an HTML element or null.
+- [x] [target popover](https://html.spec.whatwg.org/#target-popover) — To get the target popover given a Node node, perform the following steps. They return an HTML element or null.
   - 1. If node is not a button element, then return node's popover target element.
   - 2. If node is disabled, then return null.
   - 3. Let target be the result of running node's get the commandfor-associated element.

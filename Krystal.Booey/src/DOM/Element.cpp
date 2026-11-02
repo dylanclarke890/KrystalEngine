@@ -3112,13 +3112,20 @@ namespace krys::boo::dom
     InvalidateStyleInternal();
   }
 
+  // https://html.spec.whatwg.org/#topmost-popover-ancestor
   RefPtr<html::HTMLElement> Element::TopmostPopoverAncestor(html::HTMLElement *source,
                                                             bool isPopover) noexcept
   {
+    // 1. If isPopover is true: assert: newPopoverOrTopLayerElement is an HTML element; its popover attribute
+    //    is not in the No Popover State or the Manual state; its popover visibility state is not in the
+    //    popover showing state.
+    // 2. Otherwise: Assert: source is null.
     (void)isPopover;
     krys_debug_assert(isPopover || !source);
 
-    // The showing auto popovers, then the showing hint popovers.
+    // 3. Let document be newPopoverOrTopLayerElement's node document.
+    // 4. Let combinedPopovers be document's showing auto popover list extended with document's showing hint
+    //    popover list.
     auto &document = NodeDocument();
     auto combinedPopovers = document.ShowingAutoPopoverList();
     auto hintPopovers = document.ShowingHintPopoverList();
@@ -3140,15 +3147,25 @@ namespace krys::boo::dom
       return index;
     };
 
+    // 5. Let popoverAncestorIndex be the index of the last item in combinedPopovers of which
+    //    newPopoverOrTopLayerElement is a flat tree descendant, otherwise -1.
     auto index = ancestorIndex(ParentElementInComposedTree());
+    // 6. Let sourceAncestorIndex be -1.
+    // 7. If source is not null, then set sourceAncestorIndex to the index of the last item in
+    // combinedPopovers
+    //    of which source is a flat tree descendant, otherwise -1.
+    // (Or source itself, as other engines have it.)
+    // 8. Let ancestorIndex be the maximum of popoverAncestorIndex and sourceAncestorIndex.
     if (source)
     {
       index = std::max(index, ancestorIndex(source));
     }
+    // 9. If ancestorIndex is -1, then return null.
     if (index == -1)
     {
       return nullptr;
     }
+    // 10. Return combinedPopovers[ancestorIndex].
     return combinedPopovers[static_cast<size_t>(index)];
   }
 

@@ -2523,19 +2523,30 @@ namespace krys::boo::dom
     krys_debug_assert(event.IsTrusted());
 
     // 1. Run light dismiss open popovers with event.
-    // (A release on the popover, or on an invoker of a popover, that the press was on hides the popovers
-    // above it.)
+    // https://html.spec.whatwg.org/#light-dismiss-open-popovers
+    // 1. Assert: event's isTrusted attribute is true.
+    // 2. Let target be event's target.
+    // 3. Let document be target's node document.
+    // 4. If the result of running topmost auto or hint popover given document is null, then return.
     if (TopmostAutoOrHintPopover())
     {
       RefPtr<html::HTMLElement> ancestor = TopmostClickedPopover(target);
+      // 5. If event's type is "pointerdown": set document's popover pointerdown target to the result of
+      //    running topmost clicked popover given target.
       if (event.Type() == EventNames::PointerDown)
       {
         _popoverPointerDownTarget = CreateWeakPtr(ancestor.get());
       }
+      // 6. If event's type is "pointerup":
       else if (event.Type() == EventNames::PointerUp)
       {
+        // 6a. Let ancestor be the result of running topmost clicked popover given target.
+        // 6b. Let sameTarget be true if ancestor is document's popover pointerdown target.
         bool sameTarget = ancestor.get() == _popoverPointerDownTarget.get();
+        // 6c. Set document's popover pointerdown target to null.
         _popoverPointerDownTarget = nullptr;
+        // 6d. If sameTarget is false, then return.
+        // 6e. Run hide popovers until given document, ancestor, false, and true.
         if (sameTarget)
         {
           HideAllPopoversUntil(ancestor.get(), FocusPreviousElement::No, FireEvents::Yes);
@@ -2670,8 +2681,14 @@ namespace krys::boo::dom
     return popovers;
   }
 
+  // https://html.spec.whatwg.org/#topmost-auto-or-hint-popover
   html::HTMLElement *Document::TopmostAutoOrHintPopover() const noexcept
   {
+    // 1. If document's showing hint popover list is not empty, then return document's showing hint popover
+    //    list's last element.
+    // 2. If document's showing auto popover list is not empty, then return document's showing auto popover
+    //    list's last element.
+    // 3. Return null.
     for (auto element = _topLayerElements.rbegin(); element != _topLayerElements.rend(); ++element)
     {
       if (auto *popover = DynamicDowncast<html::HTMLElement>(element->get());
@@ -2685,53 +2702,75 @@ namespace krys::boo::dom
     return autoPopovers.empty() ? nullptr : autoPopovers.back().get();
   }
 
+  // https://html.spec.whatwg.org/#hide-popovers-until
   void Document::HideAllPopoversUntil(html::HTMLElement *endpoint, FocusPreviousElement focusPreviousElement,
                                       FireEvents fireEvents) noexcept
   {
+    // 1. Let endpointIsHint be true if document's showing hint popover list contains endpoint; otherwise
+    //    false.
     auto hintPopovers = ShowingHintPopoverList();
     bool endpointIsHint =
       endpoint
       && std::ranges::find(hintPopovers, endpoint, [](auto &popover) { return popover.get(); })
            != hintPopovers.end();
 
+    // 2. Run hide popover stack until given document, endpoint, Hint, focusPreviousElement, and fireEvents.
     HidePopoverStackUntil(endpoint, PopoverState::Hint, focusPreviousElement, fireEvents);
 
-    // If endpoint is a hint popover, the auto popovers are hidden but for those it opened from.
+    // 3. Let autoEndpoint be endpoint.
     RefPtr<html::HTMLElement> autoEndpoint = ShareRefPtr(endpoint);
+    // 4. If endpointIsHint is true, then set autoEndpoint to document's hint stack parent.
     if (endpointIsHint)
     {
       autoEndpoint = ShareRefPtr(HintStackParent());
     }
+    // 5. Run hide popover stack until given document, autoEndpoint, Auto, focusPreviousElement, and
+    //    fireEvents.
     HidePopoverStackUntil(autoEndpoint.get(), PopoverState::Auto, focusPreviousElement, fireEvents);
   }
 
+  // https://html.spec.whatwg.org/#hide-popover-stack-until
   void Document::HidePopoverStackUntil(html::HTMLElement *endpoint, PopoverState stackType,
                                        FocusPreviousElement focusPreviousElement,
                                        FireEvents fireEvents) noexcept
   {
     krys_debug_assert(stackType == PopoverState::Auto || stackType == PopoverState::Hint);
+    // 1. Let popoverList be document's showing auto popover list if stackType is Auto; otherwise document's
+    //    showing hint popover list.
     auto popoverList = stackType == PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
 
+    // 2. Let lastHideIndex be 0 if popoverList does not contain endpoint; otherwise the index of endpoint in
+    //    popoverList plus 1.
+    // 3. Let toHide be a slice of popoverList from lastHideIndex, in reverse order.
+    // 4. Let toRemain be a slice of popoverList from 0 to lastHideIndex.
     auto endpointIt = std::ranges::find(popoverList, endpoint, [](auto &popover) { return popover.get(); });
     auto lastHideIndex =
       endpointIt == popoverList.end() ? 0uz : static_cast<size_t>(endpointIt - popoverList.begin()) + 1;
     List<Ref<html::HTMLElement>> toHide {popoverList.rbegin(), popoverList.rend() - lastHideIndex};
     List<Ref<html::HTMLElement>> toRemain {popoverList.begin(), popoverList.begin() + lastHideIndex};
 
+    // 5. For each popover of toHide: run the hide popover algorithm given popover, focusPreviousElement,
+    //    fireEvents, false, and null.
     for (auto &popover : toHide)
     {
       (void)popover->HidePopoverInternal(focusPreviousElement, fireEvents, false, nullptr);
     }
 
-    // Popovers shown while hiding (by beforetoggle listeners) are hidden too, without events.
+    // 6. Let newPopoverList be document's showing auto popover list if stackType is Auto; otherwise
+    // document's
+    //    showing hint popover list.
+    // 7. Let toCheck be newPopoverList in reverse order.
     auto newPopoverList =
       stackType == PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
+    // 8. For each popover of toCheck:
     for (auto popover = newPopoverList.rbegin(); popover != newPopoverList.rend(); ++popover)
     {
+      // 8a. If toRemain contains popover, then continue.
       if (std::ranges::find(toRemain, *popover) != toRemain.end())
       {
         continue;
       }
+      // 8b. Run the hide popover algorithm given popover, focusPreviousElement, false, false, and null.
       (void)(*popover)->HidePopoverInternal(focusPreviousElement, FireEvents::No, false, nullptr);
     }
   }
@@ -2741,6 +2780,65 @@ namespace krys::boo::dom
     _hintStackParent = CreateWeakPtr(element);
   }
 
+  namespace
+  {
+    /// @see https://html.spec.whatwg.org/#target-popover
+    KRYS_NODISCARD RefPtr<html::HTMLElement> TargetPopover(html::HTMLElement &element) noexcept
+    {
+      auto *control = DynamicDowncast<html::HTMLFormControlElement>(element);
+      // 1. If node is not a button element, then return node's popover target element.
+      auto *button = DynamicDowncast<html::HTMLButtonElement>(element);
+      if (!button)
+      {
+        return control ? control->PopoverTargetElement() : nullptr;
+      }
+      // 2. If node is disabled, then return null.
+      if (button->IsDisabledFormControl())
+      {
+        return nullptr;
+      }
+      // 3. Let target be the result of running node's get the commandfor-associated element.
+      // 4. If target is null, then return node's popover target element.
+      RefPtr<Element> target = button->CommandForElement();
+      if (!target)
+      {
+        return button->PopoverTargetElement();
+      }
+      // 5. If node has a form owner:
+      if (button->Form())
+      {
+        // 5a. If element is a submit button, then return null.
+        // 5b. If element's type attribute is in the Reset Button state, then return null.
+        // 5c. If element's type attribute is in the Auto state, then return null.
+        // (A button with a command or commandfor attribute and no valid type is in the Auto state, which
+        // behaves as the Button state.)
+        if (button->IsSubmitButton() || button->Type() == u8"reset"
+            || !text::IsASCIICaselessEqual(
+              DOMStringView(button->GetAttribute(u8"type").value_or(DOMString())), DOMStringView(u8"button")))
+        {
+          return nullptr;
+        }
+      }
+      // 6. Let command be node's command attribute.
+      // 7. If command is not in the Toggle Popover, Hide Popover, or Show Popover states, then return null.
+      auto command = button->GetCommandType();
+      if (command != CommandType::TogglePopover && command != CommandType::HidePopover
+          && command != CommandType::ShowPopover)
+      {
+        return nullptr;
+      }
+      // 8. If target's popover attribute is in the No Popover state, then return null.
+      auto *popover = DynamicDowncast<html::HTMLElement>(*target);
+      if (!popover || popover->GetPopoverState() == PopoverState::None)
+      {
+        return nullptr;
+      }
+      // 9. Return target.
+      return ShareRefPtr(popover);
+    }
+  }
+
+  // https://html.spec.whatwg.org/#topmost-clicked-popover
   RefPtr<html::HTMLElement> Document::TopmostClickedPopover(Node &node) const noexcept
   {
     auto *startElement = DynamicDowncast<Element>(node);
@@ -2749,10 +2847,13 @@ namespace krys::boo::dom
       startElement = node.ParentElementInComposedTree();
     }
 
-    // The nearest inclusive open popover, and the nearest inclusive target popover: the showing auto or
-    // hint popover an element is or is in, or the one it (a button) shows.
+    // 1. Let clickedPopover be the result of running nearest inclusive open popover given node.
+    // 2. Let targetPopover be the result of running nearest inclusive target popover given node.
+    // https://html.spec.whatwg.org/#nearest-inclusive-open-popover
+    // https://html.spec.whatwg.org/#nearest-inclusive-target-popover
+    // (Both walk the flat tree up from node, so they're found together.)
     html::HTMLElement *clickedPopover = nullptr;
-    html::HTMLElement *targetPopover = nullptr;
+    RefPtr<html::HTMLElement> targetPopover;
     for (auto *element = startElement; element && (!clickedPopover || !targetPopover);
          element = element->ParentElementInComposedTree())
     {
@@ -2761,43 +2862,35 @@ namespace krys::boo::dom
       {
         continue;
       }
+      // If currentNode's opened in popover mode is "auto" or "hint", and currentNode's popover visibility
+      // state is showing, then return currentNode.
       if (!clickedPopover && htmlElement->IsPopoverShowing()
           && htmlElement->GetPopoverData()->OpenedInPopoverMode() != PopoverState::None)
       {
         clickedPopover = htmlElement;
       }
+      // Let targetPopover be currentNode's target popover. If targetPopover is not null and targetPopover's
+      // popover attribute is in the Auto state or the Hint state, and targetPopover's popover visibility
+      // state is showing, then return targetPopover.
       if (!targetPopover)
       {
-        auto isShowingAutoOrHintPopover = [](html::HTMLElement *popover)
+        auto popover = TargetPopover(*htmlElement);
+        if (popover && popover->IsPopoverShowing()
+            && (popover->GetPopoverState() == PopoverState::Auto
+                || popover->GetPopoverState() == PopoverState::Hint))
         {
-          return popover && popover->IsPopoverShowing()
-                 && (popover->GetPopoverState() == PopoverState::Auto
-                     || popover->GetPopoverState() == PopoverState::Hint);
-        };
-        RefPtr<html::HTMLElement> popover;
-        if (auto *button = DynamicDowncast<html::HTMLButtonElement>(*htmlElement))
-        {
-          RefPtr<Element> commandForElement = button->CommandForElement();
-          popover =
-            ShareRefPtr(commandForElement ? DynamicDowncast<html::HTMLElement>(*commandForElement) : nullptr);
-        }
-        if (!isShowingAutoOrHintPopover(popover.get()))
-        {
-          auto *control = DynamicDowncast<html::HTMLFormControlElement>(*htmlElement);
-          popover = control ? control->PopoverTargetElement() : nullptr;
-        }
-        if (isShowingAutoOrHintPopover(popover.get()))
-        {
-          targetPopover = popover.get();
+          targetPopover = krys::move(popover);
         }
       }
     }
 
-    // The popover stack position: hint popovers are above auto popovers, and 0 is neither.
+    // https://html.spec.whatwg.org/#get-the-popover-stack-position
     auto autoPopovers = ShowingAutoPopoverList();
     auto hintPopovers = ShowingHintPopoverList();
     auto stackPosition = [&](html::HTMLElement *popover) -> size_t
     {
+      // 1. Let hintList be popover's node document's showing hint popover list.
+      // 2. Let autoList be popover's node document's showing auto popover list.
       if (!popover)
       {
         return 0;
@@ -2806,18 +2899,28 @@ namespace krys::boo::dom
       {
         return element.get();
       };
+      // 3. If popover is in hintList, then return the index of popover in hintList + the size of autoList +
+      //    1.
       if (auto it = std::ranges::find(hintPopovers, popover, byPointer); it != hintPopovers.end())
       {
         return static_cast<size_t>(it - hintPopovers.begin()) + autoPopovers.size() + 1;
       }
+      // 4. If popover is in autoList, then return the index of popover in autoList + 1.
       if (auto it = std::ranges::find(autoPopovers, popover, byPointer); it != autoPopovers.end())
       {
         return static_cast<size_t>(it - autoPopovers.begin()) + 1;
       }
+      // 5. Return 0.
       return 0;
     };
-    return ShareRefPtr(stackPosition(clickedPopover) > stackPosition(targetPopover) ? clickedPopover
-                                                                                    : targetPopover);
+    // 3. If the result of getting the popover stack position given clickedPopover is greater than the result
+    //    of getting the popover stack position given targetPopover, then return clickedPopover.
+    if (stackPosition(clickedPopover) > stackPosition(targetPopover.get()))
+    {
+      return ShareRefPtr(clickedPopover);
+    }
+    // 4. Return targetPopover.
+    return targetPopover;
   }
 
   Element *Document::FindAnchor(DOMStringView name) const noexcept

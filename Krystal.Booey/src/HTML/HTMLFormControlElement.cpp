@@ -214,9 +214,10 @@ namespace krys::boo::html
     return GetAttribute(u8"value");
   }
 
+  // https://html.spec.whatwg.org/#popover-target-element
   RefPtr<HTMLElement> HTMLFormControlElement::PopoverTargetElement() const noexcept
   {
-    // Only buttons invoke popovers.
+    // 1. If node is not a button, then return null.
     if (auto *inputElement = DynamicDowncast<HTMLInputElement>(*this))
     {
       if (!inputElement->IsTextButton() && !inputElement->IsImageButton())
@@ -229,16 +230,22 @@ namespace krys::boo::html
       return nullptr;
     }
 
+    // 2. If node is disabled, then return null.
     if (IsDisabledFormControl())
     {
       return nullptr;
     }
 
+    // 3. If node has a form owner and node is a submit button, then return null.
     if (Form() && IsSubmitButton())
     {
       return nullptr;
     }
 
+    // 4. Let popoverElement be the result of running node's get the popovertarget-associated element.
+    // 5. If popoverElement is null, then return null.
+    // 6. If popoverElement's popover attribute is in the No Popover state, then return null.
+    // 7. Return popoverElement.
     RefPtr<dom::Element> element = ElementForAttributeInternal(dom::DOMStringAtom(u8"popovertarget"));
     auto *popover = element ? DynamicDowncast<HTMLElement>(*element) : nullptr;
     if (popover && popover->GetPopoverState() != dom::PopoverState::None)
@@ -260,6 +267,9 @@ namespace krys::boo::html
     SetElementAttribute(dom::DOMStringAtom(u8"popovertarget"), element);
   }
 
+  // https://html.spec.whatwg.org/#dom-popovertargetaction
+  // The popoverTargetAction IDL attribute must reflect the popovertargetaction attribute, limited to only
+  // known values.
   dom::DOMString HTMLFormControlElement::PopoverTargetAction() const noexcept
   {
     auto value = Reflect<dom::DOMString>(*this, u8"popovertargetaction");
@@ -273,8 +283,11 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"popovertargetaction", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior
   void HTMLFormControlElement::HandlePopoverTargetAction(dom::EventTarget *eventTarget) noexcept
   {
+    // 1. Let popover be node's popover target element.
+    // 2. If popover is null, then return.
     RefPtr<HTMLElement> popover = PopoverTargetElement();
     if (!popover)
     {
@@ -282,7 +295,8 @@ namespace krys::boo::html
     }
     krys_debug_assert(popover->GetPopoverData());
 
-    // An activation inside the popover, which is inside the button, doesn't toggle it.
+    // 3. If eventTarget is a shadow-including inclusive descendant of popover and popover is a
+    //    shadow-including descendant of node, then return.
     if (auto *eventTargetNode = DynamicDowncast<dom::Node>(eventTarget);
         eventTargetNode && dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*eventTargetNode, *popover)
         && dom::TreeQueries::IsShadowIncludingDescendant(*popover, *this))
@@ -292,19 +306,31 @@ namespace krys::boo::html
 
     auto action = EnumeratedAttribute<"popovertargetaction", HTMLFormControlElement>::ResolveState(
       GetAttribute(dom::DOMStringAtom(u8"popovertargetaction")));
+    // 4. If node's popovertargetaction attribute is in the show state and popover's popover visibility state
+    //    is showing, then return.
     if (action == AttributeState::Show && popover->IsPopoverShowing())
     {
       return;
     }
+    // 5. If node's popovertargetaction attribute is in the hide state and popover's popover visibility state
+    //    is hidden, then return.
     if (action == AttributeState::Hide && !popover->IsPopoverShowing())
     {
       return;
     }
 
+    // 6. If popover's popover visibility state is showing, then run the hide popover algorithm given popover,
+    //    true, true, false, and node.
     if (popover->IsPopoverShowing())
     {
       (void)popover->HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, this);
     }
+    // 7. Otherwise:
+    // 7a. Let validity be the result of running check popover validity given popover, false, and null. If
+    // this
+    //     throws an exception, catch it, and let validity be false.
+    // 7b. If validity is true, then run show popover given popover, false, and node.
+    // (Show popover checks the validity first, and doesn't throw.)
     else
     {
       (void)popover->ShowPopoverInternal(this, false);
