@@ -8,16 +8,18 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [8.7 Timers](https://html.spec.whatwg.org/#timers)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::SetTimeout`/`SetInterval`/`ClearTimeout`/`ClearInterval` and `DOMTimer` (the timer initialization steps); handlers are C++ functions. Clamping and repeating follow upstream (see `DIFFERENCES.md`).
+> `EventLoop::ScheduleTask` runs steps after a timeout, with no map of active timers.
 <!-- definitions: map-of-settimeout-and-setinterval-ids dom-clearinterval timer-nesting-level timer-task-source map-of-active-timers -->
 
-- [ ] [WindowOrWorkerGlobalScope.setTimeout(handler, timeout, ...arguments)](https://html.spec.whatwg.org/#dom-settimeout) — The setTimeout(handler, timeout, ...arguments) method steps are to return the result of running the timer initialization steps given this, handler, timeout, arguments, and false.
+- [x] [WindowOrWorkerGlobalScope.setTimeout(handler, timeout, ...arguments)](https://html.spec.whatwg.org/#dom-settimeout) — The setTimeout(handler, timeout, ...arguments) method steps are to return the result of running the timer initialization steps given this, handler, timeout, arguments, and false.
 
-- [ ] [WindowOrWorkerGlobalScope.setInterval(handler, timeout, ...arguments)](https://html.spec.whatwg.org/#dom-setinterval) — The setInterval(handler, timeout, ...arguments) method steps are to return the result of running the timer initialization steps given this, handler, timeout, arguments, and true.
+- [x] [WindowOrWorkerGlobalScope.setInterval(handler, timeout, ...arguments)](https://html.spec.whatwg.org/#dom-setinterval) — The setInterval(handler, timeout, ...arguments) method steps are to return the result of running the timer initialization steps given this, handler, timeout, arguments, and true.
 
-- [ ] [WindowOrWorkerGlobalScope.clearTimeout(id)](https://html.spec.whatwg.org/#dom-cleartimeout) — The clearTimeout(id) and clearInterval(id) method steps are to remove this's map of setTimeout and setInterval IDs[id].
+- [x] [WindowOrWorkerGlobalScope.clearTimeout(id)](https://html.spec.whatwg.org/#dom-cleartimeout) — The clearTimeout(id) and clearInterval(id) method steps are to remove this's map of setTimeout and setInterval IDs[id].
 
-- [ ] [timer initialization steps](https://html.spec.whatwg.org/#timer-initialisation-steps) — To perform the timer initialization steps, given a WindowOrWorkerGlobalScope global, a string or Function or TrustedScript handler, a number timeout, a list arguments, a boolean repeat, and optionally (and only if repeat is true) a number previousId, perform the following steps. They return a numbe…
+- [x] [timer initialization steps](https://html.spec.whatwg.org/#timer-initialisation-steps) — To perform the timer initialization steps, given a WindowOrWorkerGlobalScope global, a string or Function or TrustedScript handler, a number timeout, a list arguments, a boolean repeat, and optionally (and only if repeat is true) a number previousId, perform the following steps. They return a numbe…
   - 1. If handler is not a Function and previousId was not given:
     - 1a. Let globalName be "Window" if global is a Window object; "WorkerGlobalScope" otherwise.
     - 1b. Let methodName be "setInterval" if repeat is true; "setTimeout" otherwise.
@@ -59,7 +61,7 @@ Status: unreviewed
   - 14. Set global's map of setTimeout and setInterval IDs[id] to uniqueHandle.
   - 15. Return id.
 
-- [ ] [run steps after a timeout](https://html.spec.whatwg.org/#run-steps-after-a-timeout) — To run steps after a timeout, given a WindowOrWorkerGlobalScope global, a string orderingIdentifier, a number milliseconds, and a set of steps completionSteps, perform the following steps. They return a unique internal value.
+- [x] [run steps after a timeout](https://html.spec.whatwg.org/#run-steps-after-a-timeout) — To run steps after a timeout, given a WindowOrWorkerGlobalScope global, a string orderingIdentifier, a number milliseconds, and a set of steps completionSteps, perform the following steps. They return a unique internal value.
   - 1. Let timerKey be a new unique internal value.
   - 2. Let startTime be the current high resolution time given global.
   - 3. Set global's map of active timers[timerKey] to startTime plus milliseconds.
@@ -73,20 +75,23 @@ Status: unreviewed
 
 ### [8.8 Microtask queuing](https://html.spec.whatwg.org/#microtask-queuing)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::QueueMicrotask`.
 
-- [ ] [WindowOrWorkerGlobalScope.queueMicrotask(callback)](https://html.spec.whatwg.org/#dom-queuemicrotask) — The queueMicrotask(callback) method must queue a microtask to invoke callback with « » and "report".
+- [x] [WindowOrWorkerGlobalScope.queueMicrotask(callback)](https://html.spec.whatwg.org/#dom-queuemicrotask) — The queueMicrotask(callback) method must queue a microtask to invoke callback with « » and "report".
 
 ### [8.9 User prompts](https://html.spec.whatwg.org/#user-prompts)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 #### [8.9.1 Simple dialogs](https://html.spec.whatwg.org/#simple-dialogs)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::Alert`/`Confirm`/`Prompt` ask the host's `ChromeClient`, which may truncate; there's no WebDriver BiDi or sandboxed modals flag (FIXME).
 <!-- definitions: dom-alert -->
 
-- [ ] [Window.alert()](https://html.spec.whatwg.org/#dom-alert-noargs) — The alert() and alert(message) method steps are:
+- [x] [Window.alert()](https://html.spec.whatwg.org/#dom-alert-noargs) — The alert() and alert(message) method steps are:
   - 1. If we cannot show simple dialogs for this, then return.
   - 2. If the method was invoked with no arguments, then let message be the empty string; otherwise, let message be the method's first argument.
   - 3. Set message to the result of normalizing newlines given message.
@@ -97,7 +102,7 @@ Status: unreviewed
     - 6b. Optionally, pause while waiting for the user to acknowledge the message.
   - 7. Invoke WebDriver BiDi user prompt closed with this, "alert", and true.
 
-- [ ] [Window.confirm(message)](https://html.spec.whatwg.org/#dom-confirm) — The confirm(message) method steps are:
+- [x] [Window.confirm(message)](https://html.spec.whatwg.org/#dom-confirm) — The confirm(message) method steps are:
   - 1. If we cannot show simple dialogs for this, then return false.
   - 2. Set message to the result of normalizing newlines given message.
   - 3. Set message to the result of optionally truncating message.
@@ -111,7 +116,7 @@ Status: unreviewed
   - 9. Invoke WebDriver BiDi user prompt closed with this, "confirm", and accepted.
   - 10. Return accepted.
 
-- [ ] [Window.prompt(message, default)](https://html.spec.whatwg.org/#dom-prompt) — The prompt(message, default) method steps are:
+- [x] [Window.prompt(message, default)](https://html.spec.whatwg.org/#dom-prompt) — The prompt(message, default) method steps are:
   - 1. If we cannot show simple dialogs for this, then return null.
   - 2. Set message to the result of normalizing newlines given message.
   - 3. Set message to the result of optionally truncating message.
@@ -126,9 +131,9 @@ Status: unreviewed
   - 10. Invoke WebDriver BiDi user prompt closed with this, "prompt", false if result is null or true otherwise, and result.
   - 11. Return result.
 
-- [ ] [optionally truncate a simple dialog string](https://html.spec.whatwg.org/#optionally-truncate-a-simple-dialog-string) — To optionally truncate a simple dialog string s, return either s itself or some string derived from s that is shorter. User agents should not provide UI for displaying the elided portion of s, as this makes it too easy for abusers to create dialogs of the form "Important security alert! Click 'Show More' for full details!".
+- [x] [optionally truncate a simple dialog string](https://html.spec.whatwg.org/#optionally-truncate-a-simple-dialog-string) — To optionally truncate a simple dialog string s, return either s itself or some string derived from s that is shorter. User agents should not provide UI for displaying the elided portion of s, as this makes it too easy for abusers to create dialogs of the form "Important security alert! Click 'Show More' for full details!".
 
-- [ ] [cannot show simple dialogs](https://html.spec.whatwg.org/#cannot-show-simple-dialogs) — We cannot show simple dialogs for a Window window when the following algorithm returns true:
+- [x] [cannot show simple dialogs](https://html.spec.whatwg.org/#cannot-show-simple-dialogs) — We cannot show simple dialogs for a Window window when the following algorithm returns true:
   - 1. If the active sandboxing flag set of window's associated Document has the sandboxed modals flag set, then return true.
   - 2. If window's relevant agent's event loop's termination nesting level is nonzero, then optionally return true.
   - 3. Optionally, return true. (For example, the user agent might give the user the option to ignore all modal dialogs, and would thus abort at this step whenever the method was invoked.)
@@ -136,17 +141,19 @@ Status: unreviewed
 
 #### [8.9.2 Printing](https://html.spec.whatwg.org/#printing)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Fixed: `print()` while the document is loading prints once its load event has fired (`LocalDOMWindow::FinishedLoading`, from `Document::ImplicitClose`).
+> `LocalDOMWindow::Print` and `RunPrintingSteps`; there are no child navigables.
 <!-- definitions: print-when-loaded -->
 
-- [ ] [Window.print()](https://html.spec.whatwg.org/#dom-print) — The print() method steps are:
+- [x] [Window.print()](https://html.spec.whatwg.org/#dom-print) — The print() method steps are:
   - 1. Let document be this's associated Document.
   - 2. If document is not fully active, then return.
   - 3. If document's unload counter is greater than 0, then return.
   - 4. If document is ready for post-load tasks, then run the printing steps for document.
   - 5. Otherwise, set document's print when loaded flag.
 
-- [ ] [printing steps](https://html.spec.whatwg.org/#printing-steps) — The printing steps for a Document document are:
+- [x] [printing steps](https://html.spec.whatwg.org/#printing-steps) — The printing steps for a Document document are:
   - 1. The user agent may display a message to the user or return (or both).
   - 2. If the active sandboxing flag set of document has the sandboxed modals flag set, then return.
   - 3. The user agent must fire an event named beforeprint at the relevant global object of document, as well as any child navigable in it.

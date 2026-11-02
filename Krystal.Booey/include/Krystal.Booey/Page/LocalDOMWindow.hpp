@@ -110,6 +110,9 @@ namespace krys::boo
     dom::DOMHighResTimeStamp _lastHistoryActionActivationTimestamp;
     /// @see https://html.spec.whatwg.org/#concept-error-reporting-mode
     bool _errorReportingMode {false};
+    /// @brief Whether `print()` was called before the document loaded, so it prints once it has.
+    /// @see https://html.spec.whatwg.org/#print-when-loaded
+    bool _shouldPrintWhenFinishedLoading {false};
     /// @brief How many listeners for gamepad events the window has: it's registered with the gamepad
     /// manager while it has any.
     uint32 _gamepadEventListenerCount {0};
@@ -489,9 +492,13 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<dom::DOMString> Prompt(const dom::DOMString &message = {},
                                                 const dom::DOMString &defaultValue = {}) noexcept;
 
-    /// @brief Fires `beforeprint`, asks the host to print the page, then fires `afterprint`.
+    /// @brief Fires `beforeprint`, asks the host to print the page, then fires `afterprint`; waits for the
+    /// document to load first if it hasn't yet.
     /// @see https://html.spec.whatwg.org/#dom-print
     void Print() noexcept;
+
+    /// @brief The document has loaded: prints it if `print()` asked to while it was loading.
+    void FinishedLoading() noexcept;
 
 #pragma endregion
 
@@ -699,6 +706,9 @@ namespace krys::boo
 
     /// @brief Whether @p element is a named object of the window with the name @p name.
     KRYS_NODISCARD static bool IsNamedObject(const dom::Element &element, dom::DOMStringView name) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#printing-steps
+    void RunPrintingSteps(LocalFrame &frame) noexcept;
   };
 }
 

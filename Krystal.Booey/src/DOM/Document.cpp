@@ -3626,6 +3626,16 @@ namespace krys::boo::dom
       return;
     }
 
+    // Print if print() asked to while the document was loading.
+    if (RefPtr<LocalDOMWindow> window = _domWindow)
+    {
+      window->FinishedLoading();
+    }
+    if (!Frame())
+    {
+      return;
+    }
+
     UpdateStyleIfNeeded();
 
     // Always do a layout after loading if needed.

@@ -705,7 +705,12 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window's timers", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's timers",
+    "[Page][LocalDOMWindow][html:timers][html:dom-settimeout][html:dom-setinterval][html:dom-cleartimeout]"
+    "[html:dom-clearinterval][html:timer-initialisation-steps][html:run-steps-after-a-timeout]"
+    "[html:timer-nesting-level][html:map-of-settimeout-and-setinterval-ids][html:microtask-queuing]"
+    "[html:dom-queuemicrotask]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -898,7 +903,10 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("A window's user prompts go to the host", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's user prompts go to the host",
+    "[Page][LocalDOMWindow][html:simple-dialogs][html:dom-alert][html:dom-alert-noargs][html:dom-confirm]"
+    "[html:dom-prompt][html:cannot-show-simple-dialogs][html:printing][html:dom-print]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -918,7 +926,10 @@ namespace krys::boo::tests
     List<std::string> events;
     auto before = window.AddEventListener(u8"beforeprint", [&](dom::Event &) { events.push_back("before"); });
     auto after = window.AddEventListener(u8"afterprint", [&](dom::Event &) { events.push_back("after"); });
+    // The document was parsed rather than loaded, so it prints once it finishes loading.
     window.Print();
+    CHECK(fixture.Chrome->PrintRequests == 0);
+    fixture.Document->ImplicitClose();
     CHECK(fixture.Chrome->PrintRequests == 1);
     CHECK(events == List<std::string> {"before", "after"});
 

@@ -565,6 +565,36 @@ namespace krys::boo::tests
   }
 
   TEST_CASE(
+    "Window.print(): a document still loading prints once it has loaded",
+    "[Loader][DocumentLoader][html:dom-print][html:print-when-loaded][html:printing-steps][html:the-end]")
+  {
+    LoadFixture fixture;
+    List<std::string> events;
+    List<dom::EventListenerHandle> handles;
+    fixture.Client->OnClearWindowObject = [&]
+    {
+      auto *window = fixture.Document().Window();
+      handles.push_back(window->AddEventListener(u8"load", [&](dom::Event &) { events.push_back("load"); }));
+      handles.push_back(
+        window->AddEventListener(u8"beforeprint", [&](dom::Event &) { events.push_back("beforeprint"); }));
+      handles.push_back(
+        window->AddEventListener(u8"afterprint", [&](dom::Event &) { events.push_back("afterprint"); }));
+      window->Print();
+    };
+
+    fixture.LoadMarkup(u8"<!DOCTYPE html><p>Page</p>", u8"https://example.com/page.html");
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(events == List<std::string> {"load", "beforeprint", "afterprint"});
+    CHECK(fixture.Chrome->PrintRequests == 1);
+
+    SECTION("once it has loaded, it prints at once")
+    {
+      fixture.Document().Window()->Print();
+      CHECK(fixture.Chrome->PrintRequests == 2);
+    }
+  }
+
+  TEST_CASE(
     "A window's Location",
     "[Loader][DocumentLoader][html:the-location-interface][html:dom-location][html:dom-document-location]"
     "[html:location-object-navigate][html:dom-location-href][html:dom-location-origin]"

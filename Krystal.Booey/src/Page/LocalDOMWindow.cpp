@@ -917,9 +917,16 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#cannot-show-simple-dialogs
     KRYS_NODISCARD bool CannotShowSimpleDialogs(const LocalDOMWindow &window) noexcept
     {
-      // If the document's unload counter is greater than 0 (beforeunload, pagehide or unload is being
-      // dispatched), return true.
+      // 1. If the active sandboxing flag set of window's associated Document has the sandboxed modals flag
+      //    set, then return true.
       // FIXME: The sandboxed modals flag, once there's sandboxing.
+      // 2. If window's relevant agent's event loop's termination nesting level is nonzero, then optionally
+      //    return true.
+      // (There's no script to terminate.)
+      // 3. Optionally, return true.
+      // (A window without a page can't show them, nor can a document whose unload counter is greater than
+      // 0, as beforeunload, pagehide or unload is being dispatched.)
+      // 4. Return false.
       auto *document = window.Document();
       return !window.Frame() || !window.GetPage() || !document || document->UnloadCounter() > 0;
     }
@@ -951,69 +958,154 @@ namespace krys::boo
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-alert
   void LocalDOMWindow::Alert(const dom::DOMString &message) noexcept
   {
-    // If we cannot show simple dialogs for this, then return.
+    // 1. If we cannot show simple dialogs for this, then return.
     if (CannotShowSimpleDialogs(*this))
     {
       return;
     }
 
-    // Set message to the result of normalizing newlines given message, and show it to the user.
+    // 2. If the method was invoked with no arguments, then let message be the empty string; otherwise, let
+    //    message be the method's first argument.
+    // 3. Set message to the result of normalizing newlines given message.
+    // 4. Set message to the result of optionally truncating message.
+    // (The host may truncate it.)
+    // 5. Let userPromptHandler be WebDriver BiDi user prompt opened with this, "alert", and message.
+    // (There's no WebDriver, so userPromptHandler is "none".)
+    // 6. If userPromptHandler is "none":
+    // 6a. Show message to the user, treating U+000A LF as a line break.
+    // 6b. Optionally, pause while waiting for the user to acknowledge the message.
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
     GetPage()->GetChromeClient().RunJavaScriptAlert(*Frame(),
                                                     infra::StringAlgorithms::NormalizeNewlines(message));
+    // 7. Invoke WebDriver BiDi user prompt closed with this, "alert", and true.
   }
 
+  // https://html.spec.whatwg.org/#dom-confirm
   bool LocalDOMWindow::Confirm(const dom::DOMString &message) noexcept
   {
+    // 1. If we cannot show simple dialogs for this, then return false.
     if (CannotShowSimpleDialogs(*this))
     {
       return false;
     }
 
+    // 2. Set message to the result of normalizing newlines given message.
+    // 3. Set message to the result of optionally truncating message.
+    // 4. Show message to the user, treating U+000A LF as a line break, and ask the user to respond with a
+    //    positive or negative response.
+    // 5. Let userPromptHandler be WebDriver BiDi user prompt opened with this, "confirm", and message.
+    // 6. Let accepted be false.
+    // 7. If userPromptHandler is "none":
+    // 7a. Pause until the user responds either positively or negatively.
+    // 7b. If the user responded positively, then set accepted to true.
+    // 8. If userPromptHandler is "accept", then set accepted to true.
+    // 9. Invoke WebDriver BiDi user prompt closed with this, "confirm", and accepted.
+    // 10. Return accepted.
+    // (The host shows the message, may truncate it, and answers; there's no WebDriver.)
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
     return GetPage()->GetChromeClient().RunJavaScriptConfirm(
       *Frame(), infra::StringAlgorithms::NormalizeNewlines(message));
   }
 
+  // https://html.spec.whatwg.org/#dom-prompt
   Maybe<dom::DOMString> LocalDOMWindow::Prompt(const dom::DOMString &message,
                                                const dom::DOMString &defaultValue) noexcept
   {
+    // 1. If we cannot show simple dialogs for this, then return null.
     if (CannotShowSimpleDialogs(*this))
     {
       return null;
     }
 
+    // 2. Set message to the result of normalizing newlines given message.
+    // 3. Set message to the result of optionally truncating message.
+    // 4. Set default to the result of optionally truncating default.
+    // 5. Show message to the user, treating U+000A LF as a line break, and ask the user to either respond
+    //    with a string value or abort. The response must be defaulted to the value given by default.
+    // 6. Let userPromptHandler be WebDriver BiDi user prompt opened with this, "prompt", and message.
+    // 7. Let result be null.
+    // 8. If userPromptHandler is "none":
+    // 8a. Pause while waiting for the user's response.
+    // 8b. If the user did not abort, then set result to the string that the user responded with.
+    // 9. Otherwise, if userPromptHandler is "accept", then set result to the empty string.
+    // 10. Invoke WebDriver BiDi user prompt closed with this, "prompt", false if result is null or true
+    //     otherwise, and result.
+    // 11. Return result.
+    // (The host shows the message, may truncate it and the default, and answers; there's no WebDriver.)
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
     return GetPage()->GetChromeClient().RunJavaScriptPrompt(
       *Frame(), infra::StringAlgorithms::NormalizeNewlines(message), defaultValue);
   }
 
+  // https://html.spec.whatwg.org/#dom-print
   void LocalDOMWindow::Print() noexcept
   {
-    // https://html.spec.whatwg.org/#printing-steps
+    // 1. Let document be this's associated Document.
+    RefPtr<dom::Document> document = ShareRefPtr(Document());
+    // 2. If document is not fully active, then return.
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
-    if (!frame || !GetPage())
+    if (!frame || !GetPage() || !document || !document->IsFullyActive())
     {
       return;
     }
 
-    // Not while the document is unloading.
-    if (Document()->UnloadCounter() > 0)
+    // 3. If document's unload counter is greater than 0, then return.
+    if (document->UnloadCounter() > 0)
     {
       return;
     }
 
-    // FIXME: Printing once the document has loaded (shouldPrintWhenFinishedLoading).
+    // 4. If document is ready for post-load tasks, then run the printing steps for document.
+    // (The initial about:blank document is never loaded, so it's ready straight away.)
+    if (document->LoadEventFinished() || frame->Loader().IsDisplayingInitialEmptyDocument())
+    {
+      _shouldPrintWhenFinishedLoading = false;
+      RunPrintingSteps(*frame);
+      return;
+    }
+    // 5. Otherwise, set document's print when loaded flag.
+    _shouldPrintWhenFinishedLoading = true;
+  }
+
+  void LocalDOMWindow::FinishedLoading() noexcept
+  {
+    // https://html.spec.whatwg.org/#the-end
+    // 10. If the Document's print when loaded flag is set, then run the printing steps.
+    if (!_shouldPrintWhenFinishedLoading)
+    {
+      return;
+    }
+    _shouldPrintWhenFinishedLoading = false;
+    if (RefPtr<LocalFrame> frame = ShareRefPtr(Frame()); frame && GetPage())
+    {
+      RunPrintingSteps(*frame);
+    }
+  }
+
+  // https://html.spec.whatwg.org/#printing-steps
+  void LocalDOMWindow::RunPrintingSteps(LocalFrame &frame) noexcept
+  {
+    // 1. The user agent may display a message to the user or return (or both).
+    // 2. If the active sandboxing flag set of document has the sandboxed modals flag set, then return.
+    // FIXME: The sandboxed modals flag, once there's sandboxing.
+    // 3. The user agent must fire an event named beforeprint at the relevant global object of document, as
+    //    well as any child navigable in it.
+    // (There are no child navigables.)
     (void)dom::EventDispatcher::FireEvent(dom::DOMStringAtom(EventNames::BeforePrint), *this);
+    // 4. The user agent should offer the user the opportunity to obtain a physical form (or the
+    //    representation of a physical form) of document.
     if (auto *page = GetPage())
     {
-      page->GetChromeClient().Print(*frame);
+      page->GetChromeClient().Print(frame);
     }
+    // 5. The user agent must fire an event named afterprint at the relevant global object of document, as
+    //    well as any child navigables in it.
     (void)dom::EventDispatcher::FireEvent(dom::DOMStringAtom(EventNames::AfterPrint), *this);
   }
 
@@ -1352,47 +1444,61 @@ namespace krys::boo
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-settimeout
   int32 LocalDOMWindow::SetTimeout(Func<void()> &&handler, int32 timeout) noexcept
   {
+    // Return the result of running the timer initialization steps given this, handler, timeout, arguments,
+    // and false.
     auto *document = Document();
     if (!document)
     {
       return 0;
     }
+    // 5. If timeout is less than 0, then set timeout to 0.
     return DOMTimer::Install(*document, krys::move(handler), std::chrono::milliseconds(std::max(timeout, 0)),
                              DOMTimer::Type::SingleShot);
   }
 
+  // https://html.spec.whatwg.org/#dom-cleartimeout
   void LocalDOMWindow::ClearTimeout(int32 id) noexcept
   {
+    // Remove this's map of setTimeout and setInterval IDs[id].
     if (auto *document = Document())
     {
       DOMTimer::RemoveById(*document, id);
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-setinterval
   int32 LocalDOMWindow::SetInterval(Func<void()> &&handler, int32 timeout) noexcept
   {
+    // Return the result of running the timer initialization steps given this, handler, timeout, arguments,
+    // and true.
     auto *document = Document();
     if (!document)
     {
       return 0;
     }
+    // 5. If timeout is less than 0, then set timeout to 0.
     return DOMTimer::Install(*document, krys::move(handler), std::chrono::milliseconds(std::max(timeout, 0)),
                              DOMTimer::Type::Repeating);
   }
 
+  // https://html.spec.whatwg.org/#dom-clearinterval
   void LocalDOMWindow::ClearInterval(int32 id) noexcept
   {
+    // Remove this's map of setTimeout and setInterval IDs[id].
     if (auto *document = Document())
     {
       DOMTimer::RemoveById(*document, id);
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-queuemicrotask
   void LocalDOMWindow::QueueMicrotask(Func<void()> &&callback) noexcept
   {
-    // Queue a microtask to invoke callback; if it throws an exception, report it (C++ callbacks don't).
+    // Queue a microtask to invoke callback with « » and "report".
+    // (C++ callbacks don't throw.)
     html::EventLoop::Current().QueueMicrotask(krys::move(callback));
   }
 

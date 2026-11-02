@@ -94,12 +94,13 @@ namespace krys::boo::tests
     }
   };
 
-  /// @brief Answers whether to leave a page, and records the alerts shown.
+  /// @brief Answers whether to leave a page, and records the alerts shown and print requests.
   struct LeavingChromeClient final : ChromeClient
   {
     bool Leave {true};
     uint32 ConfirmPanels {0};
     List<std::string> Alerts;
+    uint32 PrintRequests {0};
 
     void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
     {
@@ -114,6 +115,11 @@ namespace krys::boo::tests
     void RunJavaScriptAlert(LocalFrame &, const dom::DOMString &message) noexcept override
     {
       Alerts.push_back(Narrow(message));
+    }
+
+    void Print(LocalFrame &) noexcept override
+    {
+      ++PrintRequests;
     }
   };
 
