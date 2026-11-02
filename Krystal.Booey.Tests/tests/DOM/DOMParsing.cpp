@@ -153,6 +153,27 @@ namespace krys::boo::dom::tests
     CHECK(root->FirstElementChild() == p);
   }
 
+  TEST_CASE("Void elements are serialised without end tags or children",
+            "[DOM][Element][DOMParsing][html:elements-2][html:void-elements][html:serializes-as-void]")
+  {
+    MarkupDocument data;
+    auto &div = *data.Div;
+
+    REQUIRE_FALSE(div.InnerHTML(u8"<area><base><br><embed><hr><img><input><link><meta><source><track><wbr>")
+                    .HasException());
+    CHECK(MarkupText(div.InnerHTML())
+          == "<area><base><br><embed><hr><img><input><link><meta><source><track><wbr>");
+
+    // Elements made by the DOM serialise as void even with children: col (which the parser only keeps in a
+    // table) and the obsolete elements that serialise as void.
+    for (auto name : {u8"col", u8"basefont", u8"bgsound", u8"frame", u8"keygen", u8"param"})
+    {
+      auto element = data.Document->CreateElement(DOMStringAtom(name)).ReleaseValue();
+      REQUIRE_FALSE(element->AppendChild(*data.Document->CreateTextNode(u8"text")).HasException());
+      CHECK(MarkupText(element->OuterHTML()) == "<" + MarkupText(name) + ">");
+    }
+  }
+
   TEST_CASE("Element: outerHTML",
             "[DOM][Element][DOMParsing][html:the-outerhtml-property][html:dom-element-outerhtml]")
   {
