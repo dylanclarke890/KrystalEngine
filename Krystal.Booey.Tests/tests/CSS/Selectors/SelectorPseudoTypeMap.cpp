@@ -27,7 +27,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorEnums(traits)", "[CSS][Selectors][SelectorPseudoTypeMap]")
   {
-    STATIC_CHECK(EnumTraits<SelectorPseudoClass>::DistinctValues == 63uz);
+    STATIC_CHECK(EnumTraits<SelectorPseudoClass>::DistinctValues == 64uz);
     STATIC_CHECK(EnumTraits<SelectorPseudoElement>::DistinctValues == 21uz);
     STATIC_CHECK(BitCount<SelectorPseudoClass>() == 6u);
     STATIC_CHECK(BitCount<SelectorPseudoElement>() == 5u);
@@ -43,6 +43,9 @@ namespace krys::boo::css::tests
     CHECK(IsPseudoClass(u8"active-view-transition-type", SelectorPseudoClass::ActiveViewTransitionType));
     CHECK(IsPseudoClass(u8"popover-open", SelectorPseudoClass::PopoverOpen));
     CHECK(IsPseudoClass(u8"volume-locked", SelectorPseudoClass::VolumeLocked));
+
+    // Internal, so the parser takes it only in user agent style sheets.
+    CHECK(IsPseudoClass(u8"-internal-html-document", SelectorPseudoClass::InternalHtmlDocument));
   }
 
   TEST_CASE("FindPseudoClassAndCompatibilityElementName(case-insensitive)",
@@ -82,7 +85,6 @@ namespace krys::boo::css::tests
     CHECK(IsUnknownAfterSingleColon(u8"-webkit-any-link"));
     CHECK(IsUnknownAfterSingleColon(u8"-webkit-autofill"));
     CHECK(IsUnknownAfterSingleColon(u8"-webkit-full-screen"));
-    CHECK(IsUnknownAfterSingleColon(u8"-internal-html-document"));
     CHECK(IsUnknownAfterSingleColon(u8"window-inactive"));
     CHECK(IsUnknownAfterSingleColon(u8"horizontal"));
     CHECK(IsUnknownAfterSingleColon(u8"immersive"));

@@ -172,6 +172,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
+- An unstyled XML document (one with no style sheets, hints or HTML, SVG or MathML elements) is rendered as its text, not as a view of its source or tree.
 - There is no multi-column layout or fragmentation: no column renderers, column rules, fragmented flows or pagination. `collectFragments` makes one fragment, paginated layers paint unfragmented, and out-of-flow boxes, `TextBoxTrimmer`, `RenderView::NodeForHitTest`, the highlight range iterator and repaint containers have no column handling (FIXMEs). Multi-column flows don't lay out `content-visibility` skipped content (FIXME in `RenderBlockFlow.cpp`).
 - Continuations do not exist, so `RenderInline` keeps both its start and end borders, margins and padding and always paints its own outline when a block sits inside it. FIXMEs remain in `RenderInline`, `RenderBlock`, `RenderElement`, `OutlinePainter`, `BoxGeometryUpdater` and the render tree builders.
 - Fieldset legends are not placed in the fieldset's border: layout, preferred widths (`ComputePreferredWidthsForExcludedChildren` returns false), painting and hit testing of the legend and the fieldset's intrinsic border are FIXMEs in `RenderBlock.cpp` and `LayoutIntegrationBoxGeometryUpdater.cpp`.

@@ -96,10 +96,6 @@ namespace krys::boo::html
         {
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::Circle);
         }
-        else if (valueLowerCase == u8"round")
-        {
-          AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::Round);
-        }
         else if (valueLowerCase == u8"square")
         {
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::Square);

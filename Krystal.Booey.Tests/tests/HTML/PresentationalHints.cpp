@@ -109,13 +109,15 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(HintFixture, "Presentational hints: lists",
-                   "[HTML][PresentationalHints][html:attr-ol-type]")
+                   "[HTML][PresentationalHints][html:attr-ol-type][html:lists]")
   {
     CHECK(Hints(u8"<ol id=e type=a></ol>") == "list-style-type: lower-alpha;");
     CHECK(Hints(u8"<ol id=e type=I></ol>") == "list-style-type: upper-roman;");
     CHECK(Hints(u8"<ol id=e type=disc></ol>").empty());
     CHECK(Hints(u8"<ul id=e type=SQUARE></ul>") == "list-style-type: square;");
     CHECK(Hints(u8"<ul id=e type=a></ul>").empty());
+    CHECK(Hints(u8"<ul id=e type=round></ul>").empty());
+    CHECK(Hints(u8"<ul><li id=e type=round></li></ul>").empty());
     CHECK(Hints(u8"<ul><li id=e type=1 value=5></li></ul>")
           == "list-style-type: decimal; counter-set: list-item 5;");
     CHECK(Hints(u8"<ul><li id=e type=Circle value=x></li></ul>") == "list-style-type: circle;");
@@ -165,6 +167,33 @@ namespace krys::boo::html::tests
     CHECK(Is<HTMLFrameSetElement>(Downcast<HTMLElement>(*frameset)));
     CHECK(Text(Downcast<dom::StyledElement>(*frameset).PresentationalHintStyle())
           == "border-color: rgb(0, 255, 0);");
+  }
+
+  TEST_CASE_METHOD(
+    HintFixture, "Presentational hints: <font>",
+    "[HTML][PresentationalHints][html:phrasing-content-3][html:rules-for-parsing-a-legacy-font-size]")
+  {
+    CHECK(Hints(u8"<font id=e color=red face=serif></font>") == "color: rgb(255, 0, 0); font-family: serif;");
+
+    // Absolute sizes, and sizes relative to 3, clamped to 1 to 7.
+    CHECK(Hints(u8"<font id=e size=1></font>") == "font-size: x-small;");
+    CHECK(Hints(u8"<font id=e size=0></font>") == "font-size: x-small;");
+    CHECK(Hints(u8"<font id=e size=' 6'></font>") == "font-size: xx-large;");
+    CHECK(Hints(u8"<font id=e size=9></font>") == "font-size: xxx-large;");
+    CHECK(Hints(u8"<font id=e size=+1></font>") == "font-size: large;");
+    CHECK(Hints(u8"<font id=e size=-1></font>") == "font-size: small;");
+    CHECK(Hints(u8"<font id=e size=-5></font>") == "font-size: x-small;");
+    CHECK(Hints(u8"<font id=e size=2px></font>") == "font-size: small;");
+
+    // No digits, no hint.
+    CHECK(Hints(u8"<font id=e size=x></font>").empty());
+    CHECK(Hints(u8"<font id=e size=+></font>").empty());
+    CHECK(Hints(u8"<font id=e size=' '></font>").empty());
+
+    // Numbers too large for an integer are still larger than 7.
+    CHECK(Hints(u8"<font id=e size=99999999999></font>") == "font-size: xxx-large;");
+    CHECK(Hints(u8"<font id=e size=+99999999999></font>") == "font-size: xxx-large;");
+    CHECK(Hints(u8"<font id=e size=-99999999999></font>") == "font-size: x-small;");
   }
 
   TEST_CASE_METHOD(HintFixture, "Presentational hints: tables",

@@ -1481,7 +1481,9 @@ namespace krys::boo::css
           return dialog && dialog->IsModal();
         }
 
-        case SelectorPseudoClass::PopoverOpen: return element.IsPopoverShowing();
+        case SelectorPseudoClass::PopoverOpen:          return element.IsPopoverShowing();
+
+        case SelectorPseudoClass::InternalHtmlDocument: return Is<dom::HTMLDocument>(element.NodeDocument());
 
         case SelectorPseudoClass::ActiveViewTransition:
         case SelectorPseudoClass::ActiveViewTransitionType:

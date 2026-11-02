@@ -68,6 +68,7 @@ KNOWN_KEY_TYPES = {
         "argument": [str],
         "comment": [str],
         "settings-flag": [str],
+        "user-agent-sheet-only": [bool],
     },
     "pseudo-elements": {
         "argument": [str],
@@ -99,7 +100,11 @@ class InputValidator:
             # Only standard, unprefixed pseudos are supported, but for the internal user agent parts.
             if pseudo_name.startswith("-") and not key_is_true(pseudo_data, "user-agent-sheet-only"):
                 raise Exception(f'"{pseudo_name}" is prefixed; only standard pseudos are supported.')
-            if key_is_true(pseudo_data, "user-agent-sheet-only") and not key_is_true(pseudo_data, "user-agent-part"):
+            if (
+                pseudo_type == "pseudo-elements"
+                and key_is_true(pseudo_data, "user-agent-sheet-only")
+                and not key_is_true(pseudo_data, "user-agent-part")
+            ):
                 raise Exception(f'"{pseudo_name}" is only for user agent sheets but is not a user agent part.')
 
             for key, value in pseudo_data.items():
@@ -250,7 +255,11 @@ def write_default_case(writer: Writer, *, body: list[str]):
 
 
 def write_is_pseudo_class_enabled(writer: Writer, pseudo_classes):
-    flagged = {name: data for name, data in pseudo_classes.items() if "settings-flag" in data}
+    flagged = {
+        name: data
+        for name, data in pseudo_classes.items()
+        if pseudo_element_enablement_condition(data) is not None
+    }
     if not flagged:
         signature = f"inline bool Selector::IsPseudoClassEnabled({PSEUDO_CLASS_TYPE}, const SelectorParserContext &) noexcept"
         with writer.function_block(signature=signature):
@@ -264,7 +273,7 @@ def write_is_pseudo_class_enabled(writer: Writer, pseudo_classes):
             write_case(
                 writer,
                 case=f"{PSEUDO_CLASS_TYPE}::{format_name_for_enum_class(pseudo_name)}",
-                body=[f"return {format_enablement_condition(pseudo_data['settings-flag'])};"],
+                body=[f"return {pseudo_element_enablement_condition(pseudo_data)};"],
             )
 
         write_default_case(writer, body=["return true;"])

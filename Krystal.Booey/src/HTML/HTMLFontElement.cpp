@@ -47,22 +47,26 @@ namespace krys::boo::html
     // https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-font-size
     KRYS_NODISCARD Maybe<int32> ParseFontSize(dom::DOMStringView input) noexcept
     {
-      // Step 1
-      // Step 2
-      // Step 3
+      // 1. Let input be the attribute's value.
+      // 2. Let position be a pointer into input, initially pointing at the start of the string.
       size_t position = 0;
+
+      // 3. Skip ASCII whitespace within input given position.
       while (position < input.size() && text::IsASCIIWhitespace(input[position]))
       {
         ++position;
       }
 
-      // Step 4
+      // 4. If position is past the end of input, there is no presentational hint. Return.
       if (position == input.size())
       {
         return {};
       }
 
-      // Step 5
+      // 5. If the character at position is a U+002B PLUS SIGN character (+), then let mode be relative-plus,
+      //    and advance position to the next character. Otherwise, if the character at position is a U+002D
+      //    HYPHEN-MINUS character (-), then let mode be relative-minus, and advance position to the next
+      //    character. Otherwise, let mode be absolute.
       enum
       {
         RelativePlus,
@@ -91,29 +95,36 @@ namespace krys::boo::html
         }
       }
 
-      // Step 6
+      // 6. Collect a sequence of code points that are ASCII digits from input given position, and let digits
+      // be
+      //    the resulting sequence.
       auto digitsStart = position;
       while (position < input.size() && text::IsASCIIDigit(input[position]))
       {
         ++position;
       }
 
-      // Step 7
+      // 7. If digits is the empty string, there is no presentational hint. Return.
       if (digitsStart == position)
       {
         return {};
       }
 
-      // Step 8
+      // 8. Interpret digits as a base-ten integer. Let value be the resulting number.
+      // (Every number past MaxValue clamps the same way, so larger ones are kept at it rather than
+      // overflowing.)
+      constexpr static int32 MaxValue = 100;
       int32 value = 0;
       const auto *first = reinterpret_cast<const char *>(input.data() + digitsStart);
       const auto *last = reinterpret_cast<const char *>(input.data() + position);
-      if (std::from_chars(first, last, value).ec != std::errc {})
+      if (std::from_chars(first, last, value).ec != std::errc {} || value > MaxValue)
       {
-        value = 0;
+        value = MaxValue;
       }
 
-      // Step 9
+      // 9. If mode is relative-plus, then increment value by 3. If mode is relative-minus, then let value be
+      // the
+      //    result of subtracting value from 3.
       if (mode == RelativePlus)
       {
         value += 3;
@@ -123,13 +134,13 @@ namespace krys::boo::html
         value = 3 - value;
       }
 
-      // Step 10
+      // 10. If value is greater than 7, let it be 7.
       if (value > 7)
       {
         value = 7;
       }
 
-      // Step 11
+      // 11. If value is less than 1, let it be 1.
       if (value < 1)
       {
         value = 1;
@@ -148,11 +159,12 @@ namespace krys::boo::html
       return {};
     }
 
+    // 12. Set the 'font-size' property to the keyword corresponding to the value of value according to the
+    //     following table:
     switch (*number)
     {
       case 1:
       {
-        // FIXME: The spec says that we're supposed to use CSSValueXxSmall here.
         return css::ValueId::XSmall;
       }
       case 2:
