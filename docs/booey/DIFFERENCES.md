@@ -437,6 +437,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `window.open()` navigates an existing browsing context, or asks the client's new-window policy and returns null for a new one (there are no other windows to return).
 - `print()` fires `beforeprint` and `afterprint` around the host's print request, as the specification has it; upstream fires them from its print context. A document waits until after its load event to print, as the specification has it (upstream waits while its loader is loading), and the initial `about:blank` document, which never loads, prints at once.
 - Timers follow upstream's clamping: a timeout is raised to 4 ms only once timers are nested 10 deep (5 for intervals), where the specification clamps beyond a nesting level of 5, and an interval repeats at a fixed rate rather than being set again after each run.
+- Animation frame callbacks are given the frame's timestamp rounded to whole milliseconds, as upstream.
 - DOM timestamps are the host's time since the window's time origin, so they pause and scale with the engine; idle deadlines are real time. Idle periods start when the host asks (`View::Update` gives the rest of its frame's budget, at most 50 ms), not when an event loop idles.
 - `Document::SetURL` takes the fragment directive from every URL it's given (empty when there is none), so a text fragment link within the page works and a later plain fragment isn't sent to the old text; upstream keeps the page's main frame fragment, or the first directive.
 

@@ -39,7 +39,14 @@ namespace krys::boo::dom
   ScriptedAnimationController::CallbackId
     ScriptedAnimationController::RegisterCallback(FrameRequestCallback &&callback) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe
+    // 1. If this is not supported, then throw a "NotSupportedError" DOMException.
+    // (A window is always supported.)
+    // 2. Let target be this's target object.
+    // 3. Increment target's animation frame callback identifier by one, and let handle be the result.
     CallbackId callbackId = ++_nextCallbackId;
+    // 4. Let callbacks be target's map of animation frame callbacks.
+    // 5. Set callbacks[handle] to callback.
     _callbackDataList.push_back({callbackId, krys::move(callback), false});
 
     if (!_suspendCount)
@@ -47,11 +54,16 @@ namespace krys::boo::dom
       ScheduleAnimation();
     }
 
+    // 6. Return handle.
     return callbackId;
   }
 
+  // https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe
   void ScriptedAnimationController::CancelCallback(CallbackId callbackId) noexcept
   {
+    // 1. If this is not supported, then throw a "NotSupportedError" DOMException.
+    // 2. Let callbacks be this's target object's map of animation frame callbacks.
+    // 3. Remove callbacks[handle].
     auto it =
       std::ranges::find_if(_callbackDataList, [callbackId](auto &data) { return data.Id == callbackId; });
     if (it != _callbackDataList.end())
@@ -75,8 +87,10 @@ namespace krys::boo::dom
 
     auto highResNowMs = std::round(timestamp);
 
-    // First, generate a list of callbacks to consider. Callbacks registered from this point on are considered
-    // only for the "next" frame, not this one.
+    // https://html.spec.whatwg.org/#run-the-animation-frame-callbacks
+    // 1. Let callbacks be target's map of animation frame callbacks.
+    // 2. Let callbackHandles be the result of getting the keys of callbacks.
+    // (Callbacks registered from this point on are considered only for the next frame.)
     List<CallbackId> callbackIds;
     callbackIds.reserve(_callbackDataList.size());
     for (auto &data : _callbackDataList)
@@ -88,16 +102,21 @@ namespace krys::boo::dom
     // so take a defensive reference.
     RefPtr<Document> document = ShareRefPtr(_document.get());
 
+    // 3. For each handle in callbackHandles, if handle exists in callbacks:
     for (auto id : callbackIds)
     {
-      // A callback cancelled by an earlier one is gone from the list.
+      // (A callback cancelled by an earlier one is gone from the list.)
       auto it = std::ranges::find_if(_callbackDataList, [id](auto &data) { return data.Id == id; });
       if (it == _callbackDataList.end() || it->FiredOrCancelled)
       {
         continue;
       }
+      // 3a. Let callback be callbacks[handle].
+      // 3b. Remove callbacks[handle].
+      // (It's removed below, as the list is being walked.)
       it->FiredOrCancelled = true;
       auto callback = it->Callback;
+      // 3c. Invoke callback with « now » and "report".
       callback(highResNowMs);
     }
 

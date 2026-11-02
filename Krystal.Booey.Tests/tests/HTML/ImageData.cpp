@@ -8,7 +8,8 @@ namespace krys::boo::tests
   using html::ImageDataPixelFormat;
   using html::PredefinedColorSpace;
 
-  TEST_CASE("ImageData: made from a size", "[HTML][ImageData]")
+  TEST_CASE("ImageData: made from a size", "[HTML][ImageData][html:the-imagedata-interface][html:dom-"
+                                           "imagedata][html:initialize-an-imagedata-object]")
   {
     auto imageData = ImageData::Create(3u, 2u, {});
     REQUIRE_FALSE(imageData.HasException());
@@ -36,7 +37,7 @@ namespace krys::boo::tests
     CHECK(defaulted.Value()->ColorSpace() == PredefinedColorSpace::DisplayP3);
   }
 
-  TEST_CASE("ImageData: made from pixels", "[HTML][ImageData]")
+  TEST_CASE("ImageData: made from pixels", "[HTML][ImageData][html:dom-imagedata-with-data]")
   {
     auto bytes = dom::Uint8ClampedArray::Create(16u);
     bytes->Set(4, 200);

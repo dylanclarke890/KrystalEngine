@@ -8,19 +8,21 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [8.11 Images](https://html.spec.whatwg.org/#images-2)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 #### [8.11.1 The ImageData interface](https://html.spec.whatwg.org/#the-imagedata-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `html::ImageData`'s constructors (`ImageData::Create`); every pixel format has 8 bits a channel and there's no `Float16Array` (see `KNOWN-ISSUES.md`). There's no structured serialization.
 <!-- definitions: concept-imagedata-bitmap-representation initialize-imagedata-source initialize-imagedata-defaultcolorspace dom-imagedata-data dom-imagedata-width dom-imagedata-height dom-imagedata-pixelformat dom-imagedatasettings-pixelformat dom-imagedata-colorspace dom-imagedatapixelformat-rgba-unorm8 dom-imagedatapixelformat-rgba-float16 -->
 
-- [ ] [ImageData.new ImageData(sw, sh, settings)](https://html.spec.whatwg.org/#dom-imagedata) — The new ImageData(sw, sh, settings) constructor steps are:
+- [x] [ImageData.new ImageData(sw, sh, settings)](https://html.spec.whatwg.org/#dom-imagedata) — The new ImageData(sw, sh, settings) constructor steps are:
   - 1. If one or both of sw and sh are zero, then throw an "IndexSizeError" DOMException.
   - 2. Initialize this given sw, sh, and settings.
   - 3. Initialize the image data of this to transparent black.
 
-- [ ] [ImageData.new ImageData(data, sw, sh, settings)](https://html.spec.whatwg.org/#dom-imagedata-with-data) — The new ImageData(data, sw, sh, settings) constructor steps are:
+- [x] [ImageData.new ImageData(data, sw, sh, settings)](https://html.spec.whatwg.org/#dom-imagedata-with-data) — The new ImageData(data, sw, sh, settings) constructor steps are:
   - 1. Let bytesPerPixel be 4 if settings["pixelFormat"] is "rgba-unorm8"; otherwise 8.
   - 2. Let length be the buffer source byte length of data.
   - 3. If length is not a nonzero integral multiple of bytesPerPixel, then throw an "InvalidStateError" DOMException.
@@ -30,7 +32,7 @@ Status: unreviewed
   - 7. If sh was given and its value is not equal to height, then throw an "IndexSizeError" DOMException.
   - 8. Initialize this given sw, sh, settings, and source set to data.
 
-- [ ] [initialize an ImageData object](https://html.spec.whatwg.org/#initialize-an-imagedata-object) — To initialize an ImageData object imageData, given a positive integer number of pixels per row pixelsPerRow, a positive integer number of rows rows, an ImageDataSettings settings, an optional ImageDataArray source, and an optional PredefinedColorSpace defaultColorSpace:
+- [x] [initialize an ImageData object](https://html.spec.whatwg.org/#initialize-an-imagedata-object) — To initialize an ImageData object imageData, given a positive integer number of pixels per row pixelsPerRow, a positive integer number of rows rows, an ImageDataSettings settings, an optional ImageDataArray source, and an optional PredefinedColorSpace defaultColorSpace:
   - 1. If source was given:
     - 1a. If settings["pixelFormat"] equals "rgba-unorm8" and source is not a Uint8ClampedArray, then throw an "InvalidStateError" DOMException.
     - 1b. If settings["pixelFormat"] is "rgba-float16" and source is not a Float16Array, then throw an "InvalidStateError" DOMException.
@@ -46,14 +48,14 @@ Status: unreviewed
   - 7. Otherwise, if defaultColorSpace was given, then initialize the colorSpace attribute of imageData to defaultColorSpace.
   - 8. Otherwise, initialize the colorSpace attribute of imageData to "srgb".
 
-- [ ] [ImageData objects are serializable objects. Their serialization steps, given va…](https://html.spec.whatwg.org/#dom-imagedatasettings-colorspace) — ImageData objects are serializable objects. Their serialization steps, given value and serialized, are:
+- [x] [ImageData objects are serializable objects. Their serialization steps, given va…](https://html.spec.whatwg.org/#dom-imagedatasettings-colorspace) — ImageData objects are serializable objects. Their serialization steps, given value and serialized, are:
   - 1. Set serialized.[[Data]] to the sub-serialization of the value of value's data attribute.
   - 2. Set serialized.[[Width]] to the value of value's width attribute.
   - 3. Set serialized.[[Height]] to the value of value's height attribute.
   - 4. Set serialized.[[ColorSpace]] to the value of value's colorSpace attribute.
   - 5. Set serialized.[[PixelFormat]] to the value of value's pixelFormat attribute.
 
-- [ ] [Their deserialization steps, given serialized, value, and targetRealm,](https://html.spec.whatwg.org/#dom-imagedatasettings-colorspace) — Their deserialization steps, given serialized, value, and targetRealm, are:
+- [x] [Their deserialization steps, given serialized, value, and targetRealm,](https://html.spec.whatwg.org/#dom-imagedatasettings-colorspace) — Their deserialization steps, given serialized, value, and targetRealm, are:
   - 1. Initialize value's data attribute to the sub-deserialization of serialized.[[Data]].
   - 2. Initialize value's width attribute to serialized.[[Width]].
   - 3. Initialize value's height attribute to serialized.[[Height]].
@@ -62,25 +64,25 @@ Status: unreviewed
 
 #### [8.11.2 The ImageBitmap interface](https://html.spec.whatwg.org/#the-imagebitmap-interface)
 
-Status: unreviewed
+Status: n/a (there is no `ImageBitmap` or `createImageBitmap`, see `KNOWN-ISSUES.md`)
 <!-- definitions: concept-imagebitmap-bitmap-data bitmap-task-source dom-imagebitmapoptions-resizewidth dom-imagebitmapoptions-resizeheight dom-imagebitmapoptions-resizequality dom-imagebitmapoptions-imageorientation dom-imageorientation-flipy dom-imagebitmapoptions-colorspaceconversion dom-colorspaceconversion-default dom-colorspaceconversion-none dom-imagebitmapoptions-premultiplyalpha dom-premultiplyalpha-default dom-premultiplyalpha-premultiply dom-premultiplyalpha-none dom-resizequality-pixelated dom-resizequality-low dom-resizequality-medium dom-resizequality-high -->
 
-- [ ] [Their serialization steps, given value and serialized,](https://html.spec.whatwg.org/#concept-imagebitmap-good) — Their serialization steps, given value and serialized, are:
+- [x] [Their serialization steps, given value and serialized,](https://html.spec.whatwg.org/#concept-imagebitmap-good) — Their serialization steps, given value and serialized, are:
   - 1. If value's origin-clean flag is not set, then throw a "DataCloneError" DOMException.
   - 2. Set serialized.[[BitmapData]] to a copy of value's bitmap data.
 
-- [ ] [Their deserialization steps, given serialized, value, and targetRealm,](https://html.spec.whatwg.org/#concept-imagebitmap-good) — Their deserialization steps, given serialized, value, and targetRealm, are:
+- [x] [Their deserialization steps, given serialized, value, and targetRealm,](https://html.spec.whatwg.org/#concept-imagebitmap-good) — Their deserialization steps, given serialized, value, and targetRealm, are:
   - 1. Set value's bitmap data to serialized.[[BitmapData]].
 
-- [ ] [Their transfer steps, given value and dataHolder,](https://html.spec.whatwg.org/#concept-imagebitmap-good) — Their transfer steps, given value and dataHolder, are:
+- [x] [Their transfer steps, given value and dataHolder,](https://html.spec.whatwg.org/#concept-imagebitmap-good) — Their transfer steps, given value and dataHolder, are:
   - 1. If value's origin-clean flag is not set, then throw a "DataCloneError" DOMException.
   - 2. Set dataHolder.[[BitmapData]] to value's bitmap data.
   - 3. Unset value's bitmap data.
 
-- [ ] [Their transfer-receiving steps, given dataHolder and value,](https://html.spec.whatwg.org/#concept-imagebitmap-good) — Their transfer-receiving steps, given dataHolder and value, are:
+- [x] [Their transfer-receiving steps, given dataHolder and value,](https://html.spec.whatwg.org/#concept-imagebitmap-good) — Their transfer-receiving steps, given dataHolder and value, are:
   - 1. Set value's bitmap data to dataHolder.[[BitmapData]].
 
-- [ ] [WindowOrWorkerGlobalScope.createImageBitmap(image, options)](https://html.spec.whatwg.org/#dom-createimagebitmap) — The createImageBitmap(image, options) and createImageBitmap(image, sx, sy, sw, sh, options) methods, when invoked, must run these steps:
+- [x] [WindowOrWorkerGlobalScope.createImageBitmap(image, options)](https://html.spec.whatwg.org/#dom-createimagebitmap) — The createImageBitmap(image, options) and createImageBitmap(image, sx, sy, sw, sh, options) methods, when invoked, must run these steps:
   - 1. If either sw or sh is given and is 0, then return a promise rejected with a RangeError.
   - 2. If either options's resizeWidth or options's resizeHeight is present and is 0, then return a promise rejected with an "InvalidStateError" DOMException.
   - 3. Check the usability of the image argument. If this throws an exception or returns bad, then return a promise rejected with an "InvalidStateError" DOMException.
@@ -115,7 +117,7 @@ Status: unreviewed
     - 6b. Queue a global task, using the bitmap task source, to resolve promise with imageBitmap.
   - 7. Return promise.
 
-- [ ] [crop bitmap data to the source rectangle with formatting](https://html.spec.whatwg.org/#cropped-to-the-source-rectangle-with-formatting) — When the steps above require that the user agent crop bitmap data to the source rectangle with formatting, the user agent must run the following steps:
+- [x] [crop bitmap data to the source rectangle with formatting](https://html.spec.whatwg.org/#cropped-to-the-source-rectangle-with-formatting) — When the steps above require that the user agent crop bitmap data to the source rectangle with formatting, the user agent must run the following steps:
   - 1. Let input be the bitmap data being transformed.
   - 2. If sx, sy, sw and sh are specified, let sourceRectangle be a rectangle whose corners are the four points (sx, sy), (sx+sw, sy), (sx+sw, sy+sh), (sx, sy+sh). Otherwise, let sourceRectangle be a rectangle whose corners are the four points (0, 0), (width of input, 0), (width of input, height of input), (0, height of input).
   - 3. Let outputWidth be determined as follows: If the resizeWidth member of options is specifiedthe value of the resizeWidth member of optionsIf the resizeWidth member of options is not specified, but the resizeHeight member is specifiedthe width of sourceRectangle, times the value of the resizeHeight member of options, divided by the height of sourceRectangle, rounded up to the nearest integerIf neit…
@@ -133,30 +135,31 @@ Status: unreviewed
     - 10c. If val is "none", the output that is not premultiplied by alpha must be left untouched and that is premultiplied by alpha must have its color components divided by alpha.
   - 11. Return output.
 
-- [ ] [ImageBitmap.close()](https://html.spec.whatwg.org/#dom-imagebitmap-close) — The close() method steps are:
+- [x] [ImageBitmap.close()](https://html.spec.whatwg.org/#dom-imagebitmap-close) — The close() method steps are:
   - 1. Set this's [[Detached]] internal slot value to true.
   - 2. Unset this's bitmap data.
 
-- [ ] [ImageBitmap.width](https://html.spec.whatwg.org/#dom-imagebitmap-width) — The width getter steps are:
+- [x] [ImageBitmap.width](https://html.spec.whatwg.org/#dom-imagebitmap-width) — The width getter steps are:
   - 1. If this's [[Detached]] internal slot's value is true, then return 0.
   - 2. Return this's width, in CSS pixels.
 
-- [ ] [ImageBitmap.height](https://html.spec.whatwg.org/#dom-imagebitmap-height) — The height getter steps are:
+- [x] [ImageBitmap.height](https://html.spec.whatwg.org/#dom-imagebitmap-height) — The height getter steps are:
   - 1. If this's [[Detached]] internal slot's value is true, then return 0.
   - 2. Return this's height, in CSS pixels.
 
 ### [8.12 Animation frames](https://html.spec.whatwg.org/#animation-frames)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::RequestAnimationFrame`/`CancelAnimationFrame` and `dom::ScriptedAnimationController`; callbacks get the frame's timestamp in whole milliseconds (see `DIFFERENCES.md`).
 <!-- definitions: list-of-animation-frame-callbacks animation-frame-callback-identifier -->
 
-- [ ] [target object](https://html.spec.whatwg.org/#concept-animationframeprovider-target-object) — Each AnimationFrameProvider object also has a target object that stores the provider's internal state. It is defined as follows:
+- [x] [target object](https://html.spec.whatwg.org/#concept-animationframeprovider-target-object) — Each AnimationFrameProvider object also has a target object that stores the provider's internal state. It is defined as follows:
   - • If the AnimationFrameProvider is a Window: The Window's associated Document
   - • If the AnimationFrameProvider is a DedicatedWorkerGlobalScope: The DedicatedWorkerGlobalScope
 
-- [ ] [supported](https://html.spec.whatwg.org/#concept-animationframeprovider-supported) — An AnimationFrameProvider provider is considered supported if any of the following are true:
+- [x] [supported](https://html.spec.whatwg.org/#concept-animationframeprovider-supported) — An AnimationFrameProvider provider is considered supported if any of the following are true:
 
-- [ ] [AnimationFrameProvider.requestAnimationFrame(callback)](https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe) — The requestAnimationFrame(callback) method steps are:
+- [x] [AnimationFrameProvider.requestAnimationFrame(callback)](https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe) — The requestAnimationFrame(callback) method steps are:
   - 1. If this is not supported, then throw a "NotSupportedError" DOMException.
   - 2. Let target be this's target object.
   - 3. Increment target's animation frame callback identifier by one, and let handle be the result.
@@ -164,12 +167,12 @@ Status: unreviewed
   - 5. Set callbacks[handle] to callback.
   - 6. Return handle.
 
-- [ ] [AnimationFrameProvider.cancelAnimationFrame(handle)](https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe) — The cancelAnimationFrame(handle) method steps are:
+- [x] [AnimationFrameProvider.cancelAnimationFrame(handle)](https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe) — The cancelAnimationFrame(handle) method steps are:
   - 1. If this is not supported, then throw a "NotSupportedError" DOMException.
   - 2. Let callbacks be this's target object's map of animation frame callbacks.
   - 3. Remove callbacks[handle].
 
-- [ ] [run the animation frame callbacks](https://html.spec.whatwg.org/#run-the-animation-frame-callbacks) — To run the animation frame callbacks for a target object target with a timestamp now:
+- [x] [run the animation frame callbacks](https://html.spec.whatwg.org/#run-the-animation-frame-callbacks) — To run the animation frame callbacks for a target object target with a timestamp now:
   - 1. Let callbacks be target's map of animation frame callbacks.
   - 2. Let callbackHandles be the result of getting the keys of callbacks.
   - 3. For each handle in callbackHandles, if handle exists in callbacks:

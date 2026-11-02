@@ -806,7 +806,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window's animation frame callbacks run in the rendering update", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's animation frame callbacks run in the rendering update",
+    "[Page][LocalDOMWindow][html:animation-frames][html:dom-animationframeprovider-requestanimationframe]"
+    "[html:animationframeprovider-cancelanimationframe][html:run-the-animation-frame-callbacks]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();

@@ -103,10 +103,19 @@ namespace krys::boo::html
                                                      Maybe<ImageDataSettings> settings,
                                                      Span<const uint8> optionalBytes) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-imagedata
+    // 1. If one or both of sw and sh are zero, then throw an "IndexSizeError" DOMException.
     if (!sw || !sh)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
     }
+
+    // 2. Initialize this given sw, sh, and settings.
+    // 3. Initialize the image data of this to transparent black.
+    // https://html.spec.whatwg.org/#initialize-an-imagedata-object
+    // 2a.-2c. Initialize the data attribute of imageData to a new Uint8ClampedArray object [...] If the
+    //         storage ArrayBuffer could not be allocated, then rethrow the RangeError thrown by JavaScript.
+    // (Every format has 8 bits a channel; see the FIXME on ImageDataArray.)
 
     constexpr auto maximum = static_cast<uint32>(std::numeric_limits<int32>::max());
     if (sw > maximum || sh > maximum)
@@ -127,6 +136,8 @@ namespace krys::boo::html
       return dom::Exception {dom::ExceptionCode::RangeError, u8"Out of memory"};
     }
 
+    // 3.-8. Initialize the width attribute of imageData to pixelsPerRow. [...] Otherwise, initialize the
+    //       colorSpace attribute of imageData to "srgb".
     auto colorSpace = ImageData::ComputeColorSpace(settings, defaultColorSpace);
     return AdoptRef(*new ImageData(size, krys::move(*array), colorSpace));
   }
@@ -140,6 +151,12 @@ namespace krys::boo::html
   dom::ExceptionOr<Ref<ImageData>> ImageData::Create(ImageDataArray &&array, uint32 sw, Maybe<uint32> sh,
                                                      Maybe<ImageDataSettings> settings) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-imagedata-with-data
+    // 1. Let bytesPerPixel be 4 if settings["pixelFormat"] is "rgba-unorm8"; otherwise 8.
+    // (Every format has 8 bits a channel; see the FIXME on ImageDataArray.)
+    // 2. Let length be the buffer source byte length of data.
+    // 3. If length is not a nonzero integral multiple of bytesPerPixel, then throw an "InvalidStateError"
+    //    DOMException.
     auto length = array.Length();
     if (!length || length % 4)
     {
@@ -147,12 +164,15 @@ namespace krys::boo::html
                              u8"Length is not a non-zero multiple of 4"};
     }
 
+    // 4. Let length be length divided by bytesPerPixel.
+    // 5. If length is not an integral multiple of sw, then throw an "IndexSizeError" DOMException.
     auto pixels = length / 4;
     if (!sw || pixels % sw)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError, u8"Length is not a multiple of sw"};
     }
 
+    // 6. Let height be length divided by sw.
     auto height = pixels / sw;
     if (height > static_cast<size_t>(std::numeric_limits<int32>::max())
         || sw > static_cast<uint32>(std::numeric_limits<int32>::max()))
@@ -160,11 +180,18 @@ namespace krys::boo::html
       return dom::Exception {dom::ExceptionCode::IndexSizeError, u8"Computed height is too big"};
     }
 
+    // 7. If sh was given and its value is not equal to height, then throw an "IndexSizeError" DOMException.
     if (sh && *sh != height)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError, u8"sh value is not equal to height"};
     }
 
+    // 8. Initialize this given sw, sh, settings, and source set to data.
+    // https://html.spec.whatwg.org/#initialize-an-imagedata-object
+    // 1a.-1b. If settings["pixelFormat"] equals "rgba-unorm8" and source is not a Uint8ClampedArray [...],
+    //         then throw an "InvalidStateError" DOMException.
+    // (There's no Float16Array, so a Uint8ClampedArray is taken for every format; see the FIXME on
+    // ImageDataArray.)
     IntSize size(static_cast<int32>(sw), static_cast<int32>(height));
     auto dataSize = ComputeDataSize(size, ComputePixelFormat(settings));
     if (!dataSize || *dataSize != length)
