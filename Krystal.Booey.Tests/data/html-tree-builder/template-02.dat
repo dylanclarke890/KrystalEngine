@@ -1,0 +1,29 @@
+#data
+<template><table><form></table></template><form>
+#errors
+(1,24): unexpected-form-in-table
+(1,51): expected-closing-tag-but-got-eof
+#document
+| <html>
+|   <head>
+|     <template>
+|       content
+|         <table>
+|           <form>
+|   <body>
+|     <form>
+
+#data
+<form><template><table><form>
+#errors
+(1,29): unexpected-form-in-table
+(1,29): eof-in-template
+#document
+| <html>
+|   <head>
+|   <body>
+|     <form>
+|       <template>
+|         content
+|           <table>
+|             <form>

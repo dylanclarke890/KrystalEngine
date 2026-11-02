@@ -19,7 +19,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLElementStack parsing children", "[HTML][HTMLElementStack]")
+  TEST_CASE("HTMLElementStack parsing children", "[HTML][HTMLElementStack][html:the-stack-of-open-elements]")
   {
     auto document = CreateRef<dom::HTMLDocument>();
     auto element = CreateRef<dom::tests::TestElement>(*document);
@@ -57,7 +57,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLDocumentParser finishes every element", "[HTML][HTMLElementStack]")
+  TEST_CASE("HTMLDocumentParser finishes every element",
+            "[HTML][HTMLElementStack][html:the-stack-of-open-elements]")
   {
     auto document = Parse(u8"<style>p { color: red }</style><p>a<b>b");
 
@@ -70,7 +71,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Document quirks mode", "[HTML][Document]")
+  TEST_CASE("Document quirks mode", "[HTML][Document][html:the-initial-insertion-mode]")
   {
     REQUIRE(Parse(u8"<p>")->InQuirksMode());
     REQUIRE(Parse(u8"<!DOCTYPE html><p>")->InNoQuirksMode());

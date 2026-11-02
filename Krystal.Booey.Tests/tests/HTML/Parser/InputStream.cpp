@@ -24,7 +24,7 @@ namespace krys::boo::html::tests
     REQUIRE(stream.NextInputCharacter() == EOFMarker);
   }
 
-  TEST_CASE("InputStream: CR normalizes to LF", "[HTML][InputStream]")
+  TEST_CASE("InputStream: CR normalizes to LF", "[HTML][InputStream][html:preprocessing-the-input-stream]")
   {
     InputStream stream;
     stream.Append(u8"a\rb", IsEOF(true));
@@ -41,7 +41,8 @@ namespace krys::boo::html::tests
     REQUIRE(stream.NextInputCharacter() == U'b');
   }
 
-  TEST_CASE("InputStream: CRLF collapses to single LF", "[HTML][InputStream]")
+  TEST_CASE("InputStream: CRLF collapses to single LF",
+            "[HTML][InputStream][html:preprocessing-the-input-stream]")
   {
     InputStream stream;
     stream.Append(u8"a\r\nb", IsEOF(true));
@@ -58,7 +59,7 @@ namespace krys::boo::html::tests
     REQUIRE(stream.NextInputCharacter() == U'b');
   }
 
-  TEST_CASE("InputStream: LF preserved", "[HTML][InputStream]")
+  TEST_CASE("InputStream: LF preserved", "[HTML][InputStream][html:preprocessing-the-input-stream]")
   {
     InputStream stream;
     stream.Append(u8"a\nb", IsEOF(true));

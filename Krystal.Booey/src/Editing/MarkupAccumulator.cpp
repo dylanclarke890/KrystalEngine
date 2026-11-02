@@ -42,6 +42,12 @@ namespace krys::boo
       return atom;
     }
 
+    const dom::DOMStringAtom &IsAtom() noexcept
+    {
+      static const dom::DOMStringAtom atom(u8"is");
+      return atom;
+    }
+
     KRYS_NODISCARD bool ElementCannotHaveEndTag(const dom::Node &node) noexcept
     {
       auto *element = DynamicDowncast<html::HTMLElement>(node);
@@ -100,8 +106,18 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD utf8_string TagQName(const dom::Element &element) noexcept
+    // https://html.spec.whatwg.org/#html-fragment-serialisation-algorithm
+    KRYS_NODISCARD utf8_string TagQName(const dom::Element &element, bool inXMLFragmentSerialization) noexcept
     {
+      // If current node is an element in the HTML namespace, the MathML namespace, or the SVG namespace, then
+      // let tagname be current node's local name. Otherwise, let tagname be current node's qualified name.
+      auto namespaceURI = element.NamespaceURI().View();
+      if (!inXMLFragmentSerialization
+          && (namespaceURI == infra::Namespaces::HTML || namespaceURI == infra::Namespaces::MathML
+              || namespaceURI == infra::Namespaces::SVG))
+      {
+        return utf8_string(element.LocalName().View());
+      }
       return element.TagQualifiedName().Name();
     }
 
@@ -533,6 +549,10 @@ namespace krys::boo
       {
         _markup.append(u8" shadowrootserializable=\"\"");
       }
+      if (shadowRoot->SlotAssignment() == dom::SlotAssignmentMode::Manual)
+      {
+        _markup.append(u8" shadowrootslotassignment=\"manual\"");
+      }
       if (shadowRoot->Clonable())
       {
         _markup.append(u8" shadowrootclonable=\"\"");
@@ -570,7 +590,7 @@ namespace krys::boo
       return;
     }
     result.append(u8"</");
-    result.append(TagQName(element));
+    result.append(TagQName(element, InXMLFragmentSerialization()));
     result.push_back(u8'>');
   }
 
@@ -698,6 +718,17 @@ namespace krys::boo
       (void)AppendAttribute(result, element, *attribute, namespaces);
     }
 
+    // If current node's is value is not null, and the element does not have an is content attribute in its
+    // attribute list, then append the string " is="", followed by current node's is value escaped as
+    // described below in attribute mode, followed by a U+0022 QUOTATION MARK character (").
+    if (!InXMLFragmentSerialization() && element.IsValue() != dom::DOMStringAtom::Null()
+        && !element.HasAttribute(IsAtom()))
+    {
+      result.append(u8" is=\"");
+      AppendAttributeValue(result, element.IsValue().View());
+      result.push_back(u8'"');
+    }
+
     // Give an opportunity to subclasses to add their own attributes.
     AppendCustomAttributes(result, element, namespaces);
 
@@ -720,7 +751,7 @@ namespace krys::boo
         result.push_back(u8':');
       }
     }
-    result.append(TagQName(element));
+    result.append(TagQName(element, InXMLFragmentSerialization()));
     if (InXMLFragmentSerialization() && namespaces && ShouldAddNamespaceElement(element))
     {
       AppendNamespace(result, element.Prefix(), element.NamespaceURI(), *namespaces,
@@ -876,7 +907,8 @@ namespace krys::boo
         result.append(instruction.Target());
         result.push_back(u8' ');
         result.append(instruction.Data());
-        result.append(u8"?>");
+        // The HTML syntax ends a processing instruction with ">".
+        result.append(InXMLFragmentSerialization() ? u8"?>" : u8">");
         break;
       }
       case dom::NodeType::ELEMENT_NODE: krys_debug_assert(false); break;

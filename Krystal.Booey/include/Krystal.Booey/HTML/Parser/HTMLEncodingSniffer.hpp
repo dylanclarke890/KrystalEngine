@@ -85,7 +85,7 @@ namespace krys::boo::html
           }
 
           return nullptr;
-          // FIXME: Fix this
+          // FIXME: Return the encoding the meta names, once documents decode encodings other than UTF-8.
           // ASCIILiteral canonicalName = codecRegistry.LabelToName(charset);
           // if (canonicalName == u8"UTF-16LE" || canonicalName == u8"UTF-16BE")
           //{

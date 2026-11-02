@@ -9,14 +9,14 @@ namespace krys::boo::html
 
   void HTMLFormattingElementList::PushElement(HTMLStackItem &&item) noexcept
   {
-    // NOTE: The spec's algorithm goes as follows:
-    // If there are already three elements in the list of active formatting elements after the last marker, if
-    // any, or anywhere in the list if there are no markers, that have the same tag name, namespace, and
-    // attributes as element, then remove the earliest such element from the list of active formatting
-    // elements. For these purposes, the attributes must be compared as they were when the elements were
-    // created by the parser; two elements have the same attributes if all their parsed attributes can be
-    // paired such that the two attributes in each pair have identical names, namespaces, and values (the
-    // order of the attributes does not matter)
+    // 1. If there are already three elements in the list of active formatting elements after the last marker,
+    //    if any, or anywhere in the list if there are no markers, that have the same tag name, namespace, and
+    //    attributes as element, then remove the earliest such element from the list of active formatting
+    //    elements. For these purposes, the attributes must be compared as they were on the tokens for which
+    //    the elements were created; two elements have the same attributes if all their parsed attributes can
+    //    be paired such that the two attributes in each pair have identical names, namespaces, and values
+    //    (the order of the attributes does not matter).
+    // (The stack item keeps the token's attributes, so attributes the sanitizer removed still count.)
 
     auto lastMarkerIt = std::find_if(_formattingElements.rbegin(), _formattingElements.rend(),
                                      [](const auto &entry) { return entry.IsMarker(); });
@@ -68,6 +68,7 @@ namespace krys::boo::html
       _formattingElements.erase(identicalFormattingElements.front());
     }
 
+    // 2. Add element to the list of active formatting elements.
     _formattingElements.emplace_back(FormattingListEntry(krys::move(item)));
   }
 
@@ -151,7 +152,7 @@ namespace krys::boo::html
       }
     }
 
-    assert(false && "node not found in formatting list");
+    krys_debug_assert_msg(false, "node not found in formatting list");
     return Bookmark {0uz};
   }
 

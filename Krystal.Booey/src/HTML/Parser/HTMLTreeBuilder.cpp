@@ -176,25 +176,11 @@ namespace krys::boo::html
 
     auto ScriptTag = [&]()
     {
+      // Pop the current node off the stack of open elements.
       _openElementStack.Pop();
 
-      // FIXME: Implement the following steps from the HTML specification:
-      // Let the old insertion point have the same value as the current insertion point. Let the insertion
-      // point be just before the next input character.
-      //
-      // Increment the parser's script nesting level by one. Set the parser pause flag to true.
-      //
-      // If the active speculative HTML parser is null and the user agent supports SVG, then Process the SVG
-      // script element according to the SVG rules. [SVG]
-      //
-      // Even if this causes new characters to be inserted into the tokenizer, the parser will not be executed
-      // reentrantly, since the parser pause flag is true.
-      //
-      // Decrement the parser's script nesting level by one. If the parser's script nesting level is zero,
-      // then set the parser pause flag to false.
-      //
-      // Let the insertion point have the value of the old insertion point. (In other words, restore the
-      // insertion point to its previous value. This value might be the "undefined" value.)
+      // (Skipped: there's no scripting, so there's no insertion point, script nesting level or parser pause
+      // flag, and the SVG script element isn't processed.)
     };
 
     switch (token.Type())
@@ -216,7 +202,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -384,38 +370,50 @@ namespace krys::boo::html
           return;
         }
 
-        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(CurrentNode().LocalName().View(),
-                                                               token.Name().View()))
+        // Any other end tag:
+        // 1. Initialize node to be the current node (the bottommost node of the stack).
+        auto nodeIt = _openElementStack.rbegin();
+
+        // 2. If node's tag name, converted to ASCII lowercase, is not the same as the tag name of the token,
+        //    then this is a parse error.
+        if (!infra::StringAlgorithms::ASCIICaseInsensitiveMatch(nodeIt->Element().LocalName().View(),
+                                                                token.Name().View()))
         {
           ParseError(token);
         }
 
-        for (auto nodeIt = _openElementStack.rbegin(); nodeIt != _openElementStack.rend(); ++nodeIt)
+        while (true)
         {
-          auto &node = *nodeIt;
-
-          if (&node.Element() == &_openElementStack.Top().Element())
+          // 3. Loop: If node is the topmost element in the stack of open elements, then return.
+          if (&nodeIt->Element() == &_openElementStack.Top().Element())
           {
             return;
           }
 
-          if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(node.Element().LocalName().View(),
+          // 4. If node's tag name, converted to ASCII lowercase, is the same as the tag name of the token,
+          //    pop elements from the stack of open elements until node has been popped from the stack, and
+          //    then return.
+          if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(nodeIt->Element().LocalName().View(),
                                                                  token.Name().View()))
           {
-            _openElementStack.PopUntilPopped(node.Element());
+            _openElementStack.PopUntilPopped(nodeIt->Element());
             return;
           }
 
-          if (node.Element().NamespaceURI() != infra::Namespaces::HTML)
+          // 5. Set node to the previous entry in the stack of open elements.
+          ++nodeIt;
+
+          // 6. If node is not an element in the HTML namespace, return to the step labeled loop.
+          if (nodeIt->Element().NamespaceURI() != infra::Namespaces::HTML)
           {
             continue;
           }
 
+          // 7. Otherwise, process the token according to the rules given in the section corresponding to the
+          //    current insertion mode in HTML content.
           ProcessAccordingToRulesForHTMLContent(krys::move(token));
           return;
         }
-
-        break;
       }
     }
   }
@@ -447,13 +445,17 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::ResetInsertionModeAppropriately() noexcept
   {
+    // 1. Let last be false.
     bool last = false;
 
+    // 2. Let node be the last node in the stack of open elements.
     auto *stackElement = &_openElementStack.Bottom();
     auto *node = &stackElement->Element();
 
     while (true)
     {
+      // 3. Loop: If node is the first node in the stack of open elements, then set last to true, and, if the
+      //    parser's fragment context element is non-null, then set node to that element.
       if (node == &_openElementStack.Top().Element())
       {
         last = true;
@@ -469,6 +471,9 @@ namespace krys::boo::html
       {
         switch (stackElement->TagName())
         {
+          // 4. If node is a td or th element and last is false, then switch the insertion mode to "in cell"
+          // and
+          //    return.
           case TagName::td:
           case TagName::th:
           {
@@ -480,11 +485,14 @@ namespace krys::boo::html
 
             break;
           }
+          // 5. If node is a tr element, then switch the insertion mode to "in row" and return.
           case TagName::tr:
           {
             _insertionMode = InsertionMode::InRow;
             return;
           }
+          // 6. If node is a tbody, thead, or tfoot element, then switch the insertion mode to "in table body"
+          //    and return.
           case TagName::tbody:
           case TagName::thead:
           case TagName::tfoot:
@@ -492,26 +500,33 @@ namespace krys::boo::html
             _insertionMode = InsertionMode::InTableBody;
             return;
           }
+          // 7. If node is a caption element, then switch the insertion mode to "in caption" and return.
           case TagName::caption:
           {
             _insertionMode = InsertionMode::InCaption;
             return;
           }
+          // 8. If node is a colgroup element, then switch the insertion mode to "in column group" and return.
           case TagName::colgroup:
           {
             _insertionMode = InsertionMode::InColumnGroup;
             return;
           }
+          // 9. If node is a table element, then switch the insertion mode to "in table" and return.
           case TagName::table:
           {
             _insertionMode = InsertionMode::InTable;
             return;
           }
+          // 10. If node is a template element, then switch the insertion mode to the current template
+          //     insertion mode and return.
           case TagName::template_:
           {
             _insertionMode = CurrentTemplateInsertionMode();
             return;
           }
+          // 11. If node is a head element and last is false, then switch the insertion mode to "in head" and
+          //     return.
           case TagName::head:
           {
             if (!last)
@@ -522,22 +537,30 @@ namespace krys::boo::html
 
             break;
           }
+          // 12. If node is a body element, then switch the insertion mode to "in body" and return.
           case TagName::body:
           {
             _insertionMode = InsertionMode::InBody;
             return;
           }
+          // 13. If node is a frameset element, then switch the insertion mode to "in frameset" and return.
           case TagName::frameset:
           {
             _insertionMode = InsertionMode::InFrameset;
             return;
           }
+          // 14. If node is an html element, run these substeps:
           case TagName::html:
           {
+            // 14a. If the head element pointer is null, switch the insertion mode to "before head" and
+            // return.
             if (_head == nullptr)
             {
               _insertionMode = InsertionMode::BeforeHead;
             }
+            // 14b. Otherwise, the head element pointer is not null, switch the insertion mode to "after head"
+            // and
+            //      return.
             else
             {
               _insertionMode = InsertionMode::AfterHead;
@@ -547,14 +570,17 @@ namespace krys::boo::html
         }
       }
 
+      // 15. If last is true, then switch the insertion mode to "in body" and return.
       if (last)
       {
         _insertionMode = InsertionMode::InBody;
         return;
       }
 
+      // 16. Let node now be the node before node in the stack of open elements.
+      // 17. Return to the step labeled loop.
       stackElement = _openElementStack.EntryBefore(*node);
-      assert(stackElement != nullptr);
+      krys_debug_assert(stackElement != nullptr);
 
       node = &stackElement->Element();
     }
@@ -562,7 +588,7 @@ namespace krys::boo::html
 
   InsertionMode HTMLTreeBuilder::CurrentTemplateInsertionMode() const noexcept
   {
-    assert(!_templateInsertionModes.empty());
+    krys_debug_assert(!_templateInsertionModes.empty());
     return _templateInsertionModes.back();
   }
 
@@ -584,7 +610,7 @@ namespace krys::boo::html
         AppendCommentToDocument(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         auto &docTypeData = *token.DOCTYPEData();
@@ -663,7 +689,7 @@ namespace krys::boo::html
         AppendCommentToDocument(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::Character:
       {
         if (SkipLeadingWhitespace(token))
@@ -728,7 +754,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -793,7 +819,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -880,11 +906,7 @@ namespace krys::boo::html
               script._alreadyStarted = true;
             }
 
-            // NOTE: If the parser was invoked via the document.write() or document.writeln() methods, then
-            // we can optionally set the script element's already started to true. (For example, the user
-            // agent might use this clause to prevent execution of cross-origin scripts inserted via
-            // document.write() under slow network conditions, or when the page has already taken a long time
-            // to load.)
+            // (There's no document.write(), so the script element's already started is never set for it.)
 
             InsertElementAtAdjustedInsertionLocation(script, adjustedInsertionLocation);
             _openElementStack.Push(
@@ -1060,7 +1082,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -1143,6 +1165,7 @@ namespace krys::boo::html
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
 
+    _framesetOk = true;
     _insertionMode = InsertionMode::InBody;
     InBodyMode(krys::move(token));
   }
@@ -1175,7 +1198,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -1195,7 +1218,10 @@ namespace krys::boo::html
               return; // ignore the token
             }
 
-            assert(Is<HTMLHtmlElement>(_openElementStack.Top().Element()));
+            // 1. Let htmlElement be the top element of the stack of open elements.
+            // 2. For each attribute on the token: [...] if htmlElement does not have an attribute whose name
+            //    is attribute's name, then add attribute's name and its corresponding value to htmlElement.
+            krys_debug_assert(Is<HTMLHtmlElement>(_openElementStack.Top().Element()));
             MergeAttributes(_openElementStack.Top().Element(), token.Attributes());
             return;
           }
@@ -1223,9 +1249,13 @@ namespace krys::boo::html
               return; // ignore the token
             }
 
+            // 1. Set the frameset-ok flag to "not ok".
             _framesetOk = false;
 
-            assert(Is<HTMLBodyElement>(_openElementStack[1].Element()));
+            // 2. Let bodyElement be the body element (the second element) on the stack of open elements.
+            // 3. For each attribute on the token: [...] if bodyElement does not have an attribute whose name
+            //    is attribute's name, then add attribute's name and its corresponding value to bodyElement.
+            krys_debug_assert(Is<HTMLBodyElement>(_openElementStack[1].Element()));
             MergeAttributes(_openElementStack[1].Element(), token.Attributes());
             return;
           }
@@ -1581,7 +1611,9 @@ namespace krys::boo::html
           }
           case TagName::input:
           {
-            if (_scriptingMode == ParserScriptingMode::Fragment && Is<HTMLSelectElement>(_context->Element()))
+            // If the parser's fragment context element is a select element (fragment case): parse error;
+            // ignore the token.
+            if (_context.has_value() && Is<HTMLSelectElement>(_context->Element()))
             {
               ParseError(token);
               return; // ignore the token
@@ -1710,7 +1742,9 @@ namespace krys::boo::html
           }
           case TagName::select:
           {
-            if (_scriptingMode == ParserScriptingMode::Fragment && Is<HTMLSelectElement>(_context->Element()))
+            // If the parser's fragment context element is a select element (fragment case): parse error;
+            // ignore the token.
+            if (_context.has_value() && Is<HTMLSelectElement>(_context->Element()))
             {
               ParseError(token);
               return; // ignore the token
@@ -2110,7 +2144,7 @@ namespace krys::boo::html
           {
             ParseError(token);
 
-            // NOTE: act as if this were a "br" start tag with no attributes.
+            // Act as if this were a "br" start tag with no attributes.
             token._attributes.clear();
             ReconstructActiveFormattingElements();
             InsertHTMLElement(krys::move(token));
@@ -2195,11 +2229,10 @@ namespace krys::boo::html
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name().View() == u8"script")
-        {
-          // FIXME: TextMode - HTMLScriptElement end tag handling
-        }
-
+        // An end tag whose tag name is "script":
+        // (Skipped: there's no scripting, so there's no microtask checkpoint, insertion point or script
+        // nesting level, the script isn't prepared and there's never a pending parsing-blocking script. It's
+        // popped like any other end tag.)
         _openElementStack.Pop();
 
         _insertionMode = _originalInsertionMode;
@@ -2240,7 +2273,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -2357,14 +2390,26 @@ namespace krys::boo::html
           }
           case TagName::form:
           {
+            // Parse error.
             ParseError(token);
 
-            if (_openElementStack.ContainsTemplateElement() || _form != nullptr)
+            // If the form element pointer is not null, and the parser is not parsing template contents, then
+            // ignore the token.
+            auto containsTemplateElement = _openElementStack.ContainsTemplateElement();
+            if (_form != nullptr && !containsTemplateElement)
             {
               return; // ignore the token
             }
 
-            _form = InsertHTMLElement(krys::move(token));
+            // Otherwise: Insert an HTML element for the token, and, if the parser is not parsing template
+            // contents, set the form element pointer to point to the element created.
+            auto element = InsertHTMLElement(krys::move(token));
+            if (!containsTemplateElement)
+            {
+              _form = krys::move(element);
+            }
+
+            // Pop that form element off the stack of open elements.
             _openElementStack.Pop();
 
             return;
@@ -2590,7 +2635,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -2955,8 +3000,8 @@ namespace krys::boo::html
           case TagName::thead:
           case TagName::tr:
           {
-            assert(_openElementStack.HasElementInTableScope(TagName::td)
-                   || _openElementStack.HasElementInTableScope(TagName::th));
+            krys_debug_assert(_openElementStack.HasElementInTableScope(TagName::td)
+                              || _openElementStack.HasElementInTableScope(TagName::th));
             CloseTheCell();
             ProcessToken(krys::move(token));
             return;
@@ -3165,7 +3210,7 @@ namespace krys::boo::html
         InsertComment(token.Comment(), InsertionLocation {&_openElementStack.Top().Element(), nullptr});
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3220,7 +3265,7 @@ namespace krys::boo::html
         }
 
         InsertLeadingWhitespace(token);
-        assert(token._data.empty()); // should have been removed or inserted already
+        krys_debug_assert(token._data.empty()); // should have been removed or inserted already
 
         return;
       }
@@ -3229,7 +3274,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3315,7 +3360,7 @@ namespace krys::boo::html
         }
 
         InsertLeadingWhitespace(token);
-        assert(token._data.empty()); // should have been removed or inserted already
+        krys_debug_assert(token._data.empty()); // should have been removed or inserted already
 
         return;
       }
@@ -3324,7 +3369,7 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3377,7 +3422,7 @@ namespace krys::boo::html
         AppendCommentToDocument(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         InBodyMode(krys::move(token));
@@ -3426,7 +3471,7 @@ namespace krys::boo::html
         AppendCommentToDocument(token.Comment());
         return;
       }
-      // NOTE: new ProcessingInstruction token type would go here.
+      // FIXME: Processing instruction tokens, once the tokenizer makes them.
       case HTMLTokenType::DOCTYPE:
       {
         InBodyMode(krys::move(token));
@@ -3472,37 +3517,52 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName)
   {
+    // 1. Initialize node to be the current node (the bottommost node of the stack).
     for (auto nodeIt = _openElementStack.rbegin(); nodeIt != _openElementStack.rend(); ++nodeIt)
     {
       auto &nodeEntry = *nodeIt;
-      // NOTE: this part of the spec ensures misnested end tags are properly closed. We check the local name
-      // instead of the parsed tag name to avoid issues with foreign/unknown elements.
+      // 2. Loop: If node is an HTML element with the same tag name as the token, then:
+      // (The local name is compared rather than the parsed tag name, which is the same for every unknown
+      // element.)
       if (nodeEntry.Namespace() == Namespace::HTML && nodeEntry.Element().LocalName() == token.Name())
       {
+        // 2a. Generate implied end tags, except for HTML elements with the same tag name as the token.
         _openElementStack.GenerateImpliedEndTags(tagName);
 
+        // 2b. If node is not the current node, then this is a parse error.
         if (&nodeEntry != &_openElementStack.Bottom())
         {
           ParseError(token);
         }
 
+        // 2c. Pop all the nodes from the current node up to node, including node, then stop these steps.
         _openElementStack.PopUntilPopped(nodeEntry.Element());
         return;
       }
 
+      // 3. Otherwise, if node is in the special category, then this is a parse error; ignore the token, and
+      //    return.
       if (IsSpecialElement(nodeEntry.TagName(), nodeEntry.Namespace()))
       {
         ParseError(token);
         return; // ignore the token
       }
+
+      // 4. Set node to the previous entry in the stack of open elements.
+      // 5. Return to the step labeled loop.
     }
   }
 
   void HTMLTreeBuilder::StopParsing() noexcept
   {
-    // FIXME: StopParsing - implement required steps.
+    // https://html.spec.whatwg.org/#the-end
+    // 1. (Skipped: there's no speculative HTML parser.)
+    // 2. (Skipped: there's no insertion point.)
+    // 4. Pop all the nodes off the stack of open elements.
     _openElementStack.PopAll();
 
+    // 3., 5.-11. The document finishes parsing (a fragment's parser has nothing more to do): it updates its
+    // readiness to "interactive", fires DOMContentLoaded and goes on to its load event.
     if (!_context.has_value())
     {
       _document.FinishedParsing();
@@ -3515,15 +3575,25 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::InsertCharacters(dom::DOMString &&data) noexcept
   {
+    // 1. Let data be the characters passed to the algorithm, or, if no characters were explicitly specified,
+    //    the character of the character token being processed.
+    // 2. Let (targetParent, referenceChild) be the adjusted insertion location.
     auto [parent, beforeSibling] = AdjustedInsertionLocation();
 
+    // 3. If targetParent is a Document node, then return.
     if (Is<dom::Document>(parent))
     {
       return;
     }
 
+    // 4. Let previousSibling be referenceChild's previous sibling if referenceChild is non-null; otherwise
+    //    targetParent's last child.
     auto *previousSibling = beforeSibling ? beforeSibling->PreviousSibling() : parent->LastChild();
 
+    // 5. If previousSibling is a Text node, then append data to previousSibling's data. Otherwise, let text
+    // be
+    //    the result of creating a text node given targetParent's node document and data, and insert text into
+    //    targetParent before referenceChild.
     if (Is<dom::Text>(previousSibling))
     {
       auto &textNode = Downcast<dom::Text>(*previousSibling);
@@ -3532,7 +3602,7 @@ namespace krys::boo::html
     else
     {
       auto textNode = CreateRef<dom::Text>(parent->NodeDocument(), krys::move(data));
-      // NOTE: We purposely ignore the error here if it happens.
+      // We purposely ignore the error here if it happens.
       (void)dom::MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
     }
   }
@@ -3637,41 +3707,38 @@ namespace krys::boo::html
 
 #pragma region Insertion Algorithms
 
+  // https://html.spec.whatwg.org/#appropriate-place-for-inserting-a-node
   InsertionLocation HTMLTreeBuilder::AppropriatePlaceToInsertNode(dom::ContainerNode *targetOverride) noexcept
   {
-    // SPEC(1): If there was an override target specified, then let target be the override target.
-    // Otherwise, let target be the current node.
+    // 1. Let targetParent be overrideTarget if it is not null; otherwise the current node.
     auto &target = targetOverride ? *targetOverride : CurrentNode();
 
-    // NOTE: early exit if the target is not an HTML element, since we don't need to do any special handling
-    // in that case.
+    // 2. Let referenceChild be null.
+    // (The steps below only apply to HTML elements, so other targets are returned as they are.)
     if (!Is<HTMLElement>(target))
     {
       return {.Parent = &target, .BeforeSibling = nullptr};
     }
 
     auto &htmlTarget = Downcast<HTMLElement>(target);
-    // FIXME: AppropriatePlaceToInsertNode - we have the parsed tag name already, just need a
-    // way to get it from the element.
-    auto tagName = ParseTagName(htmlTarget.LocalName().View());
+    auto tagName = htmlTarget.TagQualifiedName().TagName();
 
-    // SPEC(2): Determine the adjusted insertion location using the first matching steps from the following
-    // list:
     InsertionLocation adjustedInsertionLocation;
 
-    // SPEC(2): If foster parenting is enabled and target is a table, tbody, tfoot, thead, or tr element:
+    // 3. If foster parenting is enabled and targetParent is a table, tbody, tfoot, thead, or tr element:
     if (_fosterParenting
         && (tagName == TagName::table || tagName == TagName::tbody || tagName == TagName::tfoot
             || tagName == TagName::thead || tagName == TagName::tr))
     {
-      // SPEC(2.1): Let last template be the last template element in the stack of open elements, if any.
+      // 3a. Let lastTemplateOrTable be the last template or table element in the stack of open elements if
+      //     there is one; otherwise null.
+      // (The last template and the last table are found, and the later of the two is lastTemplateOrTable.)
       auto lastTemplateIt = _openElementStack.rend();
       auto HasTemplate = [&]()
       {
         return lastTemplateIt != _openElementStack.rend();
       };
 
-      // SPEC(2.2): Let last table be the last table element in the stack of open elements, if any.
       auto lastTableIt = _openElementStack.rend();
       auto HasTable = [&]()
       {
@@ -3703,76 +3770,76 @@ namespace krys::boo::html
         }
       }
 
-      // SPEC(2.3): If there is a last template and either there is no last table, or there is one, but last
-      // template is lower (more recently added) than last table in the stack of open elements, then let
-      // adjusted insertion location be inside last template's template contents, after its last child (if
-      // any), and abort these steps.
+      // 3c. If lastTemplateOrTable is a template element, then set targetParent to lastTemplateOrTable.
+      // 4.-6. If targetParent is not a template element, then return (targetParent, referenceChild). [...] If
+      //       patchInsertionTarget is null, then return (targetParent's template contents, null).
+      // FIXME: Content patching (steps 5, 7 and 8: the template's insertion target and end marker).
       if (HasTemplate() && (!HasTable() || lastTemplateIt < lastTableIt))
       {
         return {.Parent = &Downcast<HTMLTemplateElement>(lastTemplateIt->Element()).TemplateContents()};
       }
 
-      // SPEC(2.4): If there is no last table, then let adjusted insertion location be inside the first
-      // element in the stack of open elements (the html element), after its last child (if any), and abort
-      // these steps. (fragment case)
+      // 3b. If lastTemplateOrTable is null, then return (the first element in the stack of open elements (the
+      //     html element), null).
       if (!HasTable())
       {
         return {.Parent = &_openElementStack.Top().Element()};
       }
 
-      // SPEC(2.5): If last table has a parent node, then let adjusted insertion location be inside last
-      // table's parent node, immediately before last table, and abort these steps.
+      // 3d. Otherwise, if lastTemplateOrTable's parent is not null, then set targetParent to
+      //     lastTemplateOrTable's parent and set referenceChild to lastTemplateOrTable.
+      // (Its parent isn't a template element, as a template's children go in its template contents.)
       if (lastTableIt->Element().ParentNode() != nullptr)
       {
         return {.Parent = lastTableIt->Element().ParentNode(), .BeforeSibling = &lastTableIt->Element()};
       }
 
-      // SPEC(2.6): Let previous element be the element immediately above last table in the stack of open
-      // elements.
+      // 3e. Otherwise, set targetParent to the element immediately above lastTemplateOrTable in the stack of
+      //     open elements.
       auto previousElement = std::next(lastTableIt);
-      assert(previousElement != _openElementStack.rend());
+      krys_debug_assert(previousElement != _openElementStack.rend());
 
-      // SPEC(2.7): Let adjusted insertion location be inside previous element, after its last child (if any).
       adjustedInsertionLocation =
         InsertionLocation {.Parent = &previousElement->Element(), .BeforeSibling = nullptr};
     }
     else
     {
-      // SPEC(2): Otherwise let adjusted insertion location be inside target, after its last child (if any).
       adjustedInsertionLocation = {.Parent = &target, .BeforeSibling = nullptr};
     }
 
-    // SPEC(3): If the adjusted insertion location is inside a template element, let it instead be inside the
-    // template element's template contents, after its last child (if any).
+    // 4. If targetParent is not a template element, then return (targetParent, referenceChild).
+    // 5. Let patchInsertionTarget be targetParent's insertion target.
+    // 6. If patchInsertionTarget is null, then return (targetParent's template contents, null).
+    // FIXME: Content patching (steps 5, 7 and 8).
     if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(adjustedInsertionLocation.Parent))
     {
       adjustedInsertionLocation = {.Parent = &templateElement->TemplateContents(), .BeforeSibling = nullptr};
     }
 
-    // SPEC(4): Return the adjusted insertion location.
     return adjustedInsertionLocation;
   }
 
+  // https://html.spec.whatwg.org/#adjusted-insertion-location
   InsertionLocation
     HTMLTreeBuilder::AdjustedInsertionLocation(Maybe<InsertionLocation> insertionLocation) noexcept
   {
-    // SPEC(1): Let location be insertionLocation if insertionLocation is non-null; otherwise the appropriate
-    // place for inserting a node.
+    // 1. Let location be insertionLocation if insertionLocation is non-null; otherwise the appropriate
+    //    place for inserting a node.
     auto location = insertionLocation ? *insertionLocation : AppropriatePlaceToInsertNode();
 
-    // SPEC(2): Let (targetParent, refChild) be location.
-    // SPEC(3): If the parser's insertion target redirection map[targetParent] does not exist, then return
-    // location.
+    // 2. Let (targetParent, refChild) be location.
+    // 3. If the parser's insertion target redirection map[targetParent] does not exist, then return
+    //    location.
     auto redirect = _insertionTargetRedirectionMap.find(location.Parent);
     if (redirect == _insertionTargetRedirectionMap.end())
     {
       return location;
     }
 
-    // SPEC(4): Assert: refChild is null.
+    // 4. Assert: refChild is null.
     krys_debug_assert(!location.BeforeSibling);
 
-    // SPEC(5): Return the parser's insertion target redirection map[targetParent].
+    // 5. Return the parser's insertion target redirection map[targetParent].
     return redirect->second;
   }
 
@@ -3784,52 +3851,53 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
   void HTMLTreeBuilder::InsertElementAtAdjustedInsertionLocation(dom::Element &element,
                                                                  Maybe<InsertionLocation> location,
                                                                  bool alreadySanitized) noexcept
   {
-    // SPEC(1): Let (targetParent, referenceChild) be the adjusted insertion location given overrideLocation.
+    // 1. Let (targetParent, referenceChild) be the adjusted insertion location given overrideLocation.
     auto [parent, beforeSibling] = AdjustedInsertionLocation(location);
 
-    // SPEC(2): If any of the following are true: element's parent is non-null; element is a host-including
-    // inclusive ancestor of targetParent; or targetParent is a Document node that already has an element
-    // child, then return.
+    // 2. If any of the following are true: element's parent is non-null; element is a host-including
+    //    inclusive ancestor of targetParent; or targetParent is a Document node that already has an element
+    //    child, then return.
     if (element.ParentNode() || dom::TreeQueries::IsHostIncludingInclusiveAncestorOf(element, *parent)
         || (Is<dom::Document>(*parent) && dom::TreeQueries::FirstElementChild(*parent)))
     {
       return;
     }
 
-    // SPEC(3): If alreadySanitized is false and the parser's parser sanitizer configuration is not null:
+    // 3. If alreadySanitized is false and the parser's parser sanitizer configuration is not null:
     if (!alreadySanitized && _sanitizerConfig)
     {
-      // SPEC(3.1): Let action be the result of getting the sanitizer action for an element name given
-      // element's local name, element's namespace, and the parser's parser sanitizer configuration.
+      // 3a. Let action be the result of getting the sanitizer action for an element name given
+      //     element's local name, element's namespace, and the parser's parser sanitizer configuration.
       auto action = SanitizerActionFor(element.LocalName().View(), element.NamespaceURI());
 
-      // SPEC(3.2): For each attribute of element's attribute list: assert: the result of checking if a
-      // sanitizer config allows an attribute [...] is true. NOTE: Attributes are sanitized when the element
-      // is created from the token.
+      // 3b. For each attribute of element's attribute list: assert: the result of checking if a
+      //     sanitizer config allows an attribute [...] is true.
+      //     (Attributes are sanitized when the element is created from the token.)
 
-      // SPEC(3.3): Assert: if targetParent is a Document, then action is not "Replace with children".
+      // 3c. Assert: if targetParent is a Document, then action is not "Replace with children".
       krys_debug_assert(!Is<dom::Document>(*parent) || action != SanitizerAction::ReplaceWithChildren);
 
-      // SPEC(3.4): Switch on action:
+      // 3d. Switch on action:
       switch (action)
       {
-        // SPEC: "Replace with children": set the parser's insertion target redirection map[element] to
+        // "Replace with children": set the parser's insertion target redirection map[element] to
         // (targetParent, referenceChild), and return.
         case SanitizerAction::ReplaceWithChildren:
         {
           RedirectInsertions(element, {.Parent = parent, .BeforeSibling = beforeSibling});
           return;
         }
-        // SPEC: "Remove": return.
+        // "Remove": return.
         case SanitizerAction::Remove:
         {
           return;
         }
-        // SPEC: "Keep": do nothing.
+        // "Keep": do nothing.
         case SanitizerAction::Keep:
         {
           break;
@@ -3837,30 +3905,28 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC(4): Assert: ensure pre-insert validity given element, targetParent, referenceChild, and « » does
-    // not throw.
-    // NOTE: Script can move nodes so that this would throw; insertion is skipped then.
+    // 4. Assert: ensure pre-insert validity given element, targetParent, referenceChild, and « » does
+    //    not throw.
+    //    (Hosts can move nodes so that this would throw; insertion is skipped then.)
     if (auto result = dom::MutationAlgorithms::EnsurePreInsertValidity(element, *parent, beforeSibling);
         result.HasException())
     {
       return;
     }
 
-    // SPEC(3): If the parser was not created as part of the HTML fragment parsing algorithm, then push a new
-    // element queue onto element's relevant agent's custom element reactions stack.
+    // 5. If the parser's fragment context element is null, then push a new element queue onto element's
+    //    relevant agent's custom element reactions stack.
     Maybe<CustomElementReactionStack> reactionStack;
     if (!_context.has_value())
     {
       reactionStack.emplace();
     }
 
-    // SPEC(4): Insert element at insertionLocation.
-    // NOTE: We purposely ignore the error here if it happens.
+    // 6. Insert element into targetParent before referenceChild.
     (void)dom::MutationAlgorithms::Insert(element, *parent, beforeSibling);
 
-    // SPEC(5): If the parser was not created as part of the HTML fragment parsing algorithm, then pop the
-    // element queue from element's relevant agent's custom element reactions stack, and invoke custom element
-    // reactions in that queue.
+    // 7. If the parser's fragment context element is null, then pop the element queue from element's
+    //    relevant agent's custom element reactions stack, and invoke custom element reactions in that queue.
     reactionStack.reset();
   }
 
@@ -3887,84 +3953,85 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#parsing-main-inhead (a start tag whose tag name is "template")
   void HTMLTreeBuilder::InsertTemplateElement(HTMLTokenAtom &&token) noexcept
   {
-    // SPEC: Let templateStartTag be the start tag.
+    // 1. Let templateStartTag be the start tag.
     auto &templateStartTag = token;
 
-    // SPEC: Insert a marker at the end of the list of active formatting elements.
+    // 2. Insert a marker at the end of the list of active formatting elements.
     _activeFormattingElements.PushMarker();
 
-    // SPEC: Set the frameset-ok flag to "not ok".
+    // 3. Set the frameset-ok flag to "not ok".
     _framesetOk = false;
 
-    // SPEC: Switch the insertion mode to "in template".
+    // 4. Switch the insertion mode to "in template".
     _insertionMode = InsertionMode::InTemplate;
 
-    // SPEC: Push "in template" onto the stack of template insertion modes so that it is the new current
-    // template insertion mode.
+    // 5. Push "in template" onto the stack of template insertion modes so that it is the new current
+    //    template insertion mode.
     _templateInsertionModes.push_back(InsertionMode::InTemplate);
 
-    // SPEC: Let declarativeShadowHostElement be the current node.
-    // NOTE: This is not the adjusted current node, so that in the fragment case a top-level template element
-    // never attaches a shadow root to the parser's fragment context element.
+    // 6. Let declarativeShadowHostElement be the current node.
+    //    (This is not the adjusted current node, so that in the fragment case a top-level template element
+    //    never attaches a shadow root to the parser's fragment context element.)
     Ref<dom::Element> declarativeShadowHostElement = ShareRef(CurrentNode());
 
-    // SPEC: Let hostIsRoot be true if declarativeShadowHostElement is the topmost element in the stack of
-    // open elements; otherwise false.
+    // 7. Let hostIsRoot be true if declarativeShadowHostElement is the topmost element in the stack of
+    //    open elements; otherwise false.
     bool hostIsRoot = declarativeShadowHostElement.get() == &_openElementStack.Top().Element();
 
-    // SPEC: Let template be the result of creating an element for the token given templateStartTag, the HTML
-    // namespace, and the target parent of the appropriate place for inserting a node.
+    // 8. Let template be the result of creating an element for the token given templateStartTag, the HTML
+    //    namespace, and the target parent of the appropriate place for inserting a node.
     auto element = CreateElement(templateStartTag.Name(), infra::Namespaces::HTML,
                                  templateStartTag.Attributes(), *AppropriatePlaceToInsertNode().Parent);
     auto &templateElement = Downcast<HTMLTemplateElement>(*element);
 
-    // SPEC: Let insertionLocation be the appropriate place for inserting a node.
-    // NOTE: This is computed after template is created, since creating a customized built-in element can run
-    // script that changes the DOM, and before template is pushed onto the stack of open elements, since
-    // afterwards the appropriate place for inserting a node would be inside template's template contents.
+    // 9. Let insertionLocation be the appropriate place for inserting a node.
+    //    (This is computed after template is created, since creating a customized built-in element can run
+    //    code that changes the DOM, and before template is pushed onto the stack of open elements, since
+    //    afterwards the appropriate place for inserting a node would be inside template's template contents.)
     auto insertionLocation = AppropriatePlaceToInsertNode();
 
-    // SPEC: Push template onto the stack of open elements so that it is the new current node.
+    // 10. Push template onto the stack of open elements so that it is the new current node.
     element->BeginParsingChildren();
     _openElementStack.Push(HTMLStackItem(TagName::template_, Namespace::HTML, *element,
                                          krys::move(templateStartTag.Attributes())));
 
-    // SPEC: Let sanitizerAction be "Keep". If the parser's parser sanitizer configuration is not null, then
-    // set sanitizerAction to the result of getting the sanitizer action for an element name given template's
-    // local name, template's namespace, and the parser's parser sanitizer configuration. SPEC: Switch on
-    // sanitizerAction: "Remove", "Replace with children": return. NOTE: A template element has no children
-    // (its parsed contents are placed in its template contents DocumentFragment), so replacing it with its
-    // children has the same effect as removing it.
+    // 11. Let sanitizerAction be "Keep".
+    // 12. If the parser's parser sanitizer configuration is not null, then set sanitizerAction to the result
+    //     of getting the sanitizer action for an element name given template's local name, template's
+    //     namespace, and the parser's parser sanitizer configuration.
+    // 13. Switch on sanitizerAction: "Remove", "Replace with children": return.
+    //     (A template element has no children (its parsed contents are placed in its template contents
+    //     DocumentFragment), so replacing it with its children has the same effect as removing it.)
     if (SanitizerActionFor(templateElement.LocalName().View(), templateElement.NamespaceURI())
         != SanitizerAction::Keep)
     {
       return;
     }
 
-    // SPEC: "Keep":
-
-    // SPEC: If template's shadowrootmode attribute is not in the None state:
+    // "Keep":
+    // 13a. If template's shadowrootmode attribute is not in the None state:
     auto mode = DeclarativeShadowRootMode(templateElement);
     if (!mode)
     {
-      // SPEC: Otherwise, if template has a for attribute: [...]
+      // 13b. Otherwise, if template has a for attribute: [...]
       // FIXME: Content patching, once there's any.
 
-      // SPEC: Otherwise, insert an element at the adjusted insertion location with template,
-      // insertionLocation, and true.
+      // 13c. Otherwise, insert an element at the adjusted insertion location with template,
+      //      insertionLocation, and true.
       InsertElementAtAdjustedInsertionLocation(templateElement, insertionLocation, true);
       return;
     }
 
-    // SPEC: If any of the following are true: the parser's allow declarative shadow roots is false;
-    // hostIsRoot is true; or the parser's insertion target redirection map[declarativeShadowHostElement]
-    // exists, then insert an element at the adjusted insertion location with template, insertionLocation, and
-    // true, and return. NOTE: The last condition applies when declarativeShadowHostElement is replaced with
-    // its children as part of sanitization. Since that element is never inserted, a shadow root attached to
-    // it would be lost. Instead, template is inserted as a regular template element, where the replaced
-    // element's children are inserted.
+    // 13a.i. If any of the following are true: the parser's allow declarative shadow roots is false;
+    //        hostIsRoot is true; or the parser's insertion target redirection
+    //        map[declarativeShadowHostElement] exists, then insert an element at the adjusted insertion
+    //        location with template, insertionLocation, and true, and return. (The last condition applies
+    //        when declarativeShadowHostElement is replaced with its children as part of sanitization. Since
+    //        that element is never inserted, a shadow root attached to it would be lost. Instead, template is
+    //        inserted as a regular template element, where the replaced element's children are inserted.)
     if (!_document._allowDeclarativeShadowRoots || hostIsRoot
         || _insertionTargetRedirectionMap.contains(declarativeShadowHostElement.get()))
     {
@@ -3972,15 +4039,18 @@ namespace krys::boo::html
       return;
     }
 
-    // SPEC: Let mode be template's shadowrootmode attribute's value.
-    // SPEC: Let delegatesFocus be true if template has a shadowrootdelegatesfocus attribute; otherwise false.
+    // 13a.ii. Let mode be template's shadowrootmode attribute's value.
+    // 13a.iii. Let delegatesFocus be true if template has a shadowrootdelegatesfocus attribute; otherwise
+    // false.
     dom::DelegatesFocus delegatesFocus(templateElement.HasAttribute(u8"shadowrootdelegatesfocus"));
 
-    // SPEC: Let serializable be true if template has a shadowrootserializable attribute; otherwise false.
+    // 13a.iv. Let serializable be true if template has a shadowrootserializable attribute; otherwise false.
     dom::Serialisable serializable(templateElement.HasAttribute(u8"shadowrootserializable"));
 
-    // SPEC: Let slotAssignment be "named". If template's shadowrootslotassignment attribute is in the Manual
-    // state, then set slotAssignment to "manual".
+    // 13a.v. Let slotAssignment be "named".
+    // 13a.vi. If template's shadowrootslotassignment attribute is in the Manual state, then set
+    // slotAssignment
+    //         to "manual".
     auto slotAssignment = dom::SlotAssignmentMode::Named;
     if (auto value = templateElement.GetAttribute(u8"shadowrootslotassignment");
         value && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"manual"))
@@ -3988,27 +4058,27 @@ namespace krys::boo::html
       slotAssignment = dom::SlotAssignmentMode::Manual;
     }
 
-    // SPEC: Let clonable be true if template has a shadowrootclonable attribute; otherwise false.
+    // 13a.vii. Let clonable be true if template has a shadowrootclonable attribute; otherwise false.
     dom::Clonable clonable(templateElement.HasAttribute(u8"shadowrootclonable"));
 
-    // SPEC: If declarativeShadowHostElement is a shadow host, then insert an element at the adjusted
-    // insertion location with template, insertionLocation, and true.
+    // 13a.viii. If declarativeShadowHostElement is a shadow host, then insert an element at the adjusted
+    //           insertion location with template, insertionLocation, and true.
     if (dom::TreeQueries::IsShadowHost(*declarativeShadowHostElement))
     {
       InsertElementAtAdjustedInsertionLocation(templateElement, insertionLocation, true);
       return;
     }
 
-    // SPEC: Let registry be null if template has a shadowrootcustomelementregistry attribute; otherwise
-    // declarativeShadowHostElement's node document's custom element registry.
+    // 13a.ix.1. Let registry be null if template has a shadowrootcustomelementregistry attribute; otherwise
+    //           declarativeShadowHostElement's node document's custom element registry.
     bool keepRegistryNull = templateElement.HasAttribute(u8"shadowrootcustomelementregistry");
     RefPtr<CustomElementRegistry> registry =
       keepRegistryNull ? nullptr : declarativeShadowHostElement->NodeDocument().CustomElementRegistry();
 
-    // SPEC: Attach a shadow root with declarativeShadowHostElement, mode, delegatesFocus, serializable,
-    // slotAssignment, clonable, and registry. If an exception is thrown, then catch it and: insert an element
-    // at the adjusted insertion location with template, insertionLocation, and true; the user agent may
-    // report an error to the developer console; return.
+    // 13a.ix.2. Attach a shadow root with declarativeShadowHostElement, mode, delegatesFocus, serializable,
+    //           slotAssignment, clonable, and registry. If an exception is thrown, then catch it and: insert
+    //           an element at the adjusted insertion location with template, insertionLocation, and true; the
+    //           user agent may report an error to the developer console; return.
     if (auto result = dom::ElementAlgorithms::AttachShadowRoot(*declarativeShadowHostElement, *mode, clonable,
                                                                serializable, delegatesFocus, slotAssignment,
                                                                registry.get());
@@ -4018,21 +4088,21 @@ namespace krys::boo::html
       return;
     }
 
-    // SPEC: Let shadow be declarativeShadowHostElement's shadow root.
+    // 13a.ix.3. Let shadow be declarativeShadowHostElement's shadow root.
     auto *shadow = dom::TreeQueries::GetShadowRoot(*declarativeShadowHostElement);
 
-    // SPEC: Set shadow's available to element internals to true.
+    // 13a.ix.4. Set shadow's available to element internals to true.
     shadow->_availableToElementInternals = true;
 
-    // SPEC: Set shadow's declarative to true.
+    // 13a.ix.5. Set shadow's declarative to true.
     shadow->_declarative = true;
 
-    // SPEC: Set template's template contents to shadow.
+    // 13a.ix.6. Set template's template contents to shadow.
     templateElement.SetTemplateContents(*shadow);
 
-    // SPEC: If template has a shadowrootcustomelementregistry attribute, then set shadow's keep custom
-    // element registry null to true. NOTE: Attributes on template were sanitized when the element was created
-    // from the token.
+    // 13a.ix.7. If template has a shadowrootcustomelementregistry attribute, then set shadow's keep custom
+    //           element registry null to true.
+    //           (Attributes on template were sanitized when the element was created from the token.)
     if (keepRegistryNull)
     {
       shadow->_keepCustomElementRegistryNull = true;
@@ -4049,10 +4119,10 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::MergeAttributes(dom::Element &element, const ParsedAttributeList &attributes) noexcept
   {
-    // SPEC: For each attribute on the token:
+    // For each attribute on the token:
     for (auto &attr : attributes)
     {
-      // SPEC: If the parser's parser sanitizer configuration is not null and the result of checking if a
+      // If the parser's parser sanitizer configuration is not null and the result of checking if a
       // sanitizer config allows an attribute given attribute's name, null, attribute's value, element's local
       // name, element's namespace, and the parser's parser sanitizer configuration is false, then continue.
       if (_sanitizerConfig
@@ -4063,8 +4133,8 @@ namespace krys::boo::html
         continue;
       }
 
-      // SPEC: If element does not have an attribute whose name is attribute's name, then add attribute's name
-      // and its corresponding value to element.
+      // If element does not have an attribute whose name is attribute's name, then add attribute's name and
+      // its corresponding value to element.
       if (!element.HasAttribute(attr.NameView()))
       {
         element.SetAttribute(attr.NameView(), dom::DOMString(attr.ValueView()));
@@ -4076,25 +4146,33 @@ namespace krys::boo::html
                                                           dom::DOMStringAtom namespaceURI,
                                                           bool onlyAddToElementStack) noexcept
   {
+    // 1. Let element be the result of creating an element for the token given token, namespace, and the
+    // target
+    //    parent of the appropriate place for inserting a node.
     auto [parent, beforeSibling] = AppropriatePlaceToInsertNode();
     auto element = CreateElement(token.Name(), namespaceURI, token.Attributes(), *parent);
 
-    // NOTE: the element is about to be pushed onto the stack of open elements, which begins parsing its
+    // The element is about to be pushed onto the stack of open elements, which begins parsing its
     // children; begin before inserting it, so that its insertion steps see that its children are still to
     // come.
     element->BeginParsingChildren();
 
+    // 2. If onlyAddToElementStack is false, then run insert an element at the adjusted insertion location
+    // with
+    //    element.
     if (!onlyAddToElementStack)
     {
       InsertElementAtAdjustedInsertionLocation(*element);
     }
 
+    // 3. Push element onto the stack of open elements so that it is the new current node.
     auto tagName = ParseTagName(token.Name().View());
     auto tagNamespace = ParseNamespace(namespaceURI.View());
     HTMLStackItem stackItem(tagName, tagNamespace, *element, krys::move(token.Attributes()));
 
     _openElementStack.Push(krys::move(stackItem));
 
+    // 4. Return element.
     return element;
   }
 
@@ -4105,17 +4183,22 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position) noexcept
   {
-    // SPEC: If the parser's parser sanitizer configuration is non-null and the parser's parser sanitizer
-    // configuration does not allow comments, then return.
+    // 1. If the parser's parser sanitizer configuration is non-null and the parser's parser sanitizer
+    //    configuration does not allow comments, then return.
     if (_sanitizerConfig && !SanitizerAlgorithms::AllowsComments(*_sanitizerConfig))
     {
       return;
     }
 
+    // 2. Let data be the data given in the comment token being processed.
+    // 3. Let (targetParent, referenceChild) be the adjusted insertion location given insertionLocation.
     auto [parent, beforeSibling] = AdjustedInsertionLocation(position);
+
+    // 4. Let comment be the result of creating a comment node given targetParent's node document and data.
     auto commentNode = CreateRef<dom::Comment>(parent->NodeDocument(), dom::DOMString(data));
 
-    // NOTE: We purposely ignore the error here if it happens.
+    // 5. Insert comment into targetParent before referenceChild.
+    // We purposely ignore the error here if it happens.
     (void)dom::MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
   }
 
@@ -4126,19 +4209,35 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept
   {
+    // 1. Insert an HTML element for the token.
     InsertHTMLElement(krys::move(token));
 
+    // 2. If the algorithm that was invoked is the generic raw text element parsing algorithm, switch the
+    //    tokenizer to the RAWTEXT state; otherwise the algorithm invoked was the generic RCDATA element
+    //    parsing algorithm, switch the tokenizer to the RCDATA state.
     _tokenizer.State(TokenizerState::RAWTEXT);
+
+    // 3. Set the original insertion mode to the current insertion mode.
     _originalInsertionMode = _insertionMode;
+
+    // 4. Then, switch the insertion mode to "text".
     _insertionMode = InsertionMode::Text;
   }
 
   void HTMLTreeBuilder::ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept
   {
+    // 1. Insert an HTML element for the token.
     InsertHTMLElement(krys::move(token));
 
+    // 2. If the algorithm that was invoked is the generic raw text element parsing algorithm, switch the
+    //    tokenizer to the RAWTEXT state; otherwise the algorithm invoked was the generic RCDATA element
+    //    parsing algorithm, switch the tokenizer to the RCDATA state.
     _tokenizer.State(TokenizerState::RCDATA);
+
+    // 3. Set the original insertion mode to the current insertion mode.
     _originalInsertionMode = _insertionMode;
+
+    // 4. Then, switch the insertion mode to "text".
     _insertionMode = InsertionMode::Text;
   }
 
@@ -4146,14 +4245,20 @@ namespace krys::boo::html
                                                    const ParsedAttributeList &attributes,
                                                    dom::ContainerNode &intendedParent) noexcept
   {
+    // https://html.spec.whatwg.org/#create-an-element-for-the-token
+    // 1.-2. (There's no speculative parser.)
+    // 3. Let document be intendedParent's node document.
     auto &document = intendedParent.NodeDocument();
 
-    // SPEC: Let sanitizerAction be "Keep". If sanitizerConfig is not null, then set sanitizerAction to the
-    // result of getting the sanitizer action for an element name given localName, namespace, and
-    // sanitizerConfig.
+    // 4. Let localName be token's tag name.
+    // 5. Let sanitizerConfig be the parser's parser sanitizer configuration.
+    // 6. Let sanitizerAction be "Keep".
+    // 7. If sanitizerConfig is not null, then set sanitizerAction to the result of getting the sanitizer
+    // action for an element name given localName, namespace, and
+    //    sanitizerConfig.
     auto sanitizerAction = SanitizerActionFor(name.View(), namespaceURI);
 
-    // SPEC: Let is be the value of the "is" attribute in token, if such an attribute exists; otherwise null.
+    // 8. Let is be the value of the "is" attribute in token, if such an attribute exists; otherwise null.
     auto is = [&]() -> dom::DOMStringAtom
     {
       auto it = std::ranges::find_if(attributes,
@@ -4163,9 +4268,9 @@ namespace krys::boo::html
                                                 : dom::DOMStringAtom::Null();
     }();
 
-    // SPEC: If is is non-null, sanitizerConfig is non-null, and the result of checking if a sanitizer config
-    // allows an attribute given "is", null, is, localName, namespace, and sanitizerConfig is false, then set
-    // is to null.
+    // 9. If is is non-null, sanitizerConfig is non-null, and the result of checking if a sanitizer config
+    //    allows an attribute given "is", null, is, localName, namespace, and sanitizerConfig is false, then
+    //    set is to null.
     if (is != dom::DOMStringAtom::Null() && _sanitizerConfig
         && !SanitizerAlgorithms::AllowsAttribute(u8"is", dom::DOMStringAtom::Null(), is.View(), name.View(),
                                                  namespaceURI, *_sanitizerConfig))
@@ -4173,42 +4278,47 @@ namespace krys::boo::html
       is = dom::DOMStringAtom::Null();
     }
 
-    // SPEC: Let registry be the result of looking up a custom element registry given intendedParent.
+    // 10. Let registry be the result of looking up a custom element registry given intendedParent.
     RefPtr<CustomElementRegistry> registry =
       ShareRefPtr(CustomElementAlgorithms::LookUpCustomElementRegistry(intendedParent));
 
-    // SPEC: Let creationRegistry be registry if sanitizerAction is "Keep"; otherwise null.
-    // NOTE: Elements that the sanitizer will remove or replace with their children are created with a null
-    // custom element registry, so creating an element finds no custom element definition and no custom
-    // element constructor runs for them.
+    // 11. Let creationRegistry be registry if sanitizerAction is "Keep"; otherwise null.
+    // (Elements that the sanitizer will remove or replace with their children are created with a null custom
+    // element registry, so creating an element finds no custom element definition and no custom element
+    // constructor runs for them.)
     auto creationRegistry = sanitizerAction == SanitizerAction::Keep ? registry : nullptr;
 
-    // SPEC: Let definition be null if sanitizerAction is not "Keep"; otherwise the result of looking up a
-    // custom element definition given registry, namespace, localName, and is.
+    // 12. Let definition be null if sanitizerAction is not "Keep"; otherwise the result of looking up a
+    //     custom element definition given registry, namespace, localName, and is.
+    // (Customized built-in elements aren't supported, so is isn't used.)
     auto *definition =
       sanitizerAction == SanitizerAction::Keep
         ? CustomElementAlgorithms::LookupCustomElementDefinition(registry.get(), namespaceURI, name)
         : nullptr;
 
-    // SPEC: Let willExecuteScript be true if definition is non-null and the parser was not created as part
-    // of the HTML fragment parsing algorithm; otherwise false.
+    // 13. Let willExecuteScript be true if definition is non-null and the parser's fragment context element
+    //     is null; otherwise false.
     bool willExecuteScript = definition != nullptr && !_context.has_value();
 
     Maybe<CustomElementReactionStack> reactionStack;
+    // 14. If willExecuteScript is true:
     if (willExecuteScript)
     {
-      // FIXME: Increment document's throw-on-dynamic-markup-insertion counter, once there's document.write().
-      // SPEC: If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
+      // 14a. Increment document's throw-on-dynamic-markup-insertion counter.
+      // FIXME: The counter, once there's document.write().
+      // 14b. If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
       EventLoop::Current().PerformMicrotaskCheckpoint();
-      // SPEC: Push a new element queue onto document's relevant agent's custom element reactions stack.
+      // 14c. Push a new element queue onto document's relevant agent's custom element reactions stack.
       reactionStack.emplace();
     }
 
+    // 15. Let element be the result of creating an element given document, localName, namespace, prefix, is,
+    //     willExecuteScript, and creationRegistry.
     auto element = dom::ElementFactory::Create(document, {namespaceURI, dom::DOMStringAtom::Null(), name}, is,
                                                willExecuteScript, creationRegistry);
 
-    // SPEC: If sanitizerAction is "Replace with children", then set element's custom element registry to
-    // registry.
+    // 16. If sanitizerAction is "Replace with children", then set element's custom element registry to
+    //     registry.
     if (sanitizerAction == SanitizerAction::ReplaceWithChildren)
     {
       element->SetCustomElementRegistry(krys::move(registry));
@@ -4217,14 +4327,15 @@ namespace krys::boo::html
     {
       input->SetCreatedByParser();
     }
-    // SPEC: For each attribute of token's attributes:
+    // 17. For each attribute of token's attributes:
     for (auto &attr : attributes)
     {
       if (attr.Flags == ParsedAttributeFlags::None)
       {
-        // SPEC: If sanitizerConfig is not null: [...] if the result of checking if a sanitizer config allows
-        // an attribute given attrLocalName, attrNamespace, attribute's value, localName, namespace, and
-        // sanitizerConfig is false, then continue.
+        // 17a. If sanitizerConfig is not null: [...] if the result of checking if a sanitizer config allows
+        // an
+        //     attribute given attrLocalName, attrNamespace, attribute's value, localName, namespace, and
+        //     sanitizerConfig is false, then continue.
         if (_sanitizerConfig
             && !SanitizerAlgorithms::AllowsAttribute(attr.NameView(), dom::DOMStringAtom::Null(),
                                                      attr.ValueView(), name.View(), namespaceURI,
@@ -4233,7 +4344,7 @@ namespace krys::boo::html
           continue;
         }
 
-        // SPEC: Append attribute to element.
+        // 17b. Append attribute to element.
         dom::ElementAlgorithms::SetAttributeValue(*element, attr.NameView(),
                                                   dom::DOMString(attr.ValueView()));
       }
@@ -4260,10 +4371,11 @@ namespace krys::boo::html
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXMLNS))
         {
           namespaceUri = infra::Namespaces::XMLNS;
-          prefix = infra::NamespacePrefixes::XMLNS;
 
+          // xmlns:xlink has the xmlns prefix; xmlns has none.
           if (HasFlag(attr.Flags, ParsedAttributeFlags::HasPrefix))
           {
+            prefix = infra::NamespacePrefixes::XMLNS;
             prefixLength = 6uz; // xmlns + :
           }
         }
@@ -4280,28 +4392,28 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: If willExecuteScript is true: let queue be the result of popping from document's relevant
-    // agent's custom element reactions stack, and invoke custom element reactions in queue.
+    // 18. If willExecuteScript is true: let queue be the result of popping from document's relevant
+    //     agent's custom element reactions stack, invoke custom element reactions in queue, and decrement
+    //     document's throw-on-dynamic-markup-insertion counter.
     reactionStack.reset();
 
-    // FIXME: CreateElement - xmlns attribute parse error
-    // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
-    // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
-    // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
-    //
-    // FIXME: CreateElement - resettable element
-    // If element is a resettable element and not a form-associated custom element, then invoke its reset
-    // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
-    //
-    // FIXME: CreateElement - form-associated element
-    // If element is a form-associated element and not a form-associated custom element, the form element
-    // pointer is not null, the parser is not parsing template contents, the parser's fragment context element
-    // is null, element is either not listed or doesn't have a form attribute, the intendedParent is in the
-    // same tree as the element pointed to by the form element pointer, and the parser's insertion target
-    // redirection map[the element pointed to by the form element pointer] does not exist, then associate
-    // element with the form element pointed to by the form element pointer and set element's parser inserted
-    // flag.
+    // 19. If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
+    //     element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in
+    //     the XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
+    // FIXME: The xmlns attribute parse errors.
+    // 20. If element is a resettable element and not a form-associated custom element, then invoke its reset
+    //     algorithm.
+    // FIXME: Resetting resettable elements.
+    // 21. If element is a form-associated element and not a form-associated custom element, the form element
+    //     pointer is not null, the parser is not parsing template contents, the parser's fragment context
+    //     element is null, element is either not listed or doesn't have a form attribute, the intendedParent
+    //     is in the same tree as the element pointed to by the form element pointer, and the parser's
+    //     insertion target redirection map[the element pointed to by the form element pointer] does not
+    //     exist, then associate element with the form element pointed to by the form element pointer and set
+    //     element's parser inserted flag.
+    // FIXME: Associating the form owner (see FormAssociatedElement::SetFormSetByParser).
 
+    // 22. Return element.
     return element;
   }
 
@@ -4315,23 +4427,23 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
   {
-    // SPEC(1): If there are no entries in the list of active formatting elements, then there is nothing to
-    // reconstruct; stop this algorithm.
+    // 1. If there are no entries in the list of active formatting elements, then there is nothing to
+    //    reconstruct; stop this algorithm.
     if (_activeFormattingElements.IsEmpty())
     {
       return;
     }
 
-    // SPEC(2): If the last (most recently added) entry in the list of active formatting elements is a marker,
-    // or if it is an element that is in the stack of open elements, then there is nothing to reconstruct;
-    // stop this algorithm.
+    // 2. If the last (most recently added) entry in the list of active formatting elements is a marker,
+    //    or if it is an element that is in the stack of open elements, then there is nothing to reconstruct;
+    //    stop this algorithm.
     auto last = _activeFormattingElements.Last();
     if (last->IsMarker() || _openElementStack.Contains(last->Item().Element()))
     {
       return;
     }
 
-    // SPEC(3): Let entry be the last (most recently added) element in the list of active formatting elements.
+    // 3. Let entry be the last (most recently added) element in the list of active formatting elements.
     decltype(last) entry = last;
 
     // Only follows the Create steps of the initial Advance loop if true.
@@ -4340,19 +4452,19 @@ namespace krys::boo::html
     // Rewind
     while (true)
     {
-      // SPEC(4): Rewind: If there are no entries before entry in the list of active formatting elements, then
-      // jump to the step labeled create.
+      // 4. Rewind: If there are no entries before entry in the list of active formatting elements, then
+      //    jump to the step labeled create.
       if (entry == _activeFormattingElements.begin())
       {
         skipInitialAdvance = true;
         break;
       }
 
-      // SPEC(5): Let entry be the entry one earlier than entry in the list of active formatting elements.
+      // 5. Let entry be the entry one earlier than entry in the list of active formatting elements.
       entry = std::prev(entry);
 
-      // SPEC(6): If entry is neither a marker nor an element that is also in the stack of open elements, go
-      // to the step labeled rewind.
+      // 6. If entry is neither a marker nor an element that is also in the stack of open elements, go
+      //    to the step labeled rewind.
       if (!entry->IsMarker() && !_openElementStack.Contains(entry->Item().Element()))
       {
         continue;
@@ -4364,26 +4476,26 @@ namespace krys::boo::html
     // Advance
     while (true)
     {
-      // SPEC(7): Advance: Let entry be the element one later than entry in the list of active formatting
-      // elements.
+      // 7. Advance: Let entry be the element one later than entry in the list of active formatting
+      //    elements.
       if (!skipInitialAdvance || entry->IsMarker())
       {
         entry = std::next(entry);
       }
       skipInitialAdvance = false;
 
-      // SPEC(8): Create: Insert an HTML element for the token for which the element entry was created, to
-      // obtain new element.
+      // 8. Create: Insert an HTML element for the token for which the element entry was created, to
+      //    obtain new element.
       auto &item = entry->Item();
       auto newElement = CreateElement(item);
       InsertElementAtAdjustedInsertionLocation(*newElement);
       _openElementStack.Push({item.TagName(), item.Namespace(), *newElement, item.Attributes()});
 
-      // SPEC(9): Replace the entry for entry in the list with an entry for new element.
+      // 9. Replace the entry for entry in the list with an entry for new element.
       entry->ReplaceItem(_openElementStack.Bottom());
 
-      // SPEC(10): If the entry for new element in the list of active formatting elements is not the last
-      // entry in the list, return to the step labeled advance.
+      // 10. If the entry for new element in the list of active formatting elements is not the last
+      //     entry in the list, return to the step labeled advance.
       if (entry != last)
       {
         continue;
@@ -4395,13 +4507,16 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::ClosePElement(const HTMLTokenAtom &token) noexcept
   {
+    // 1. Generate implied end tags, except for p elements.
     _openElementStack.GenerateImpliedEndTags(TagName::p);
 
+    // 2. If the current node is not a p element, then this is a parse error.
     if (_openElementStack.Bottom().TagName() != TagName::p)
     {
       ParseError(token);
     }
 
+    // 3. Pop elements from the stack of open elements until a p element has been popped from the stack.
     _openElementStack.PopUntilPopped(TagName::p, Namespace::HTML);
   }
 
@@ -4533,7 +4648,7 @@ namespace krys::boo::html
 
   bool HTMLTreeBuilder::IsQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept
   {
-    assert(token.Type() == HTMLTokenType::DOCTYPE);
+    krys_debug_assert(token.Type() == HTMLTokenType::DOCTYPE);
 
     if (token.IsForceQuirks() || token.Name() != u8"html")
     {
@@ -4639,7 +4754,7 @@ namespace krys::boo::html
 
   bool HTMLTreeBuilder::IsLimitedQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept
   {
-    assert(token.Type() == HTMLTokenType::DOCTYPE);
+    krys_debug_assert(token.Type() == HTMLTokenType::DOCTYPE);
 
     auto &data = *token.DOCTYPEData();
 
@@ -4683,12 +4798,12 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::RunAdoptionAgency(HTMLTokenAtom &token) noexcept
   {
-    // SPEC(1): Let subject be token's tag name.
+    // 1. Let subject be token's tag name.
     auto subject = ParseTagName(token.Name().View());
 
-    // SPEC(2): If the current node is an HTML element whose tag name is subject, and the current node is not
-    // in the list of active formatting elements, then pop the current node off the stack of open elements and
-    // return.
+    // 2. If the current node is an HTML element whose tag name is subject, and the current node is not
+    //    in the list of active formatting elements, then pop the current node off the stack of open elements
+    //    and return.
     auto &currentNode = _openElementStack.Bottom();
     if (currentNode.Namespace() == Namespace::HTML && currentNode.TagName() == subject
         && !_activeFormattingElements.Contains(currentNode.Element()))
@@ -4697,26 +4812,27 @@ namespace krys::boo::html
       return;
     }
 
-    // SPEC(3): Let outerLoopCounter be 0.
+    // 3. Let outerLoopCounter be 0.
     size_t outerLoopCounter = 0uz;
 
-    // SPEC(4): While true:
+    // 4. While true:
     while (true)
     {
-      // SPEC(4.1): If outerLoopCounter is greater than or equal to 8, then return.
+      // 4a. If outerLoopCounter is greater than or equal to 8, then return.
       if (outerLoopCounter >= 8uz)
       {
         return;
       }
 
-      // SPEC(4.2): Increment outerLoopCounter by 1.
+      // 4b. Increment outerLoopCounter by 1.
       outerLoopCounter++;
 
-      // SPEC(4.3): Let formattingElement be the last element in the list of active formatting elements that:
+      // 4c. Let formattingElement be the last element in the list of active formatting elements that:
       //     - is between the end of the list and the last marker in the list, if any, or the start of the
-      //       list otherwise
+      //     list otherwise
       //     - has the tag name subject.
-      // If there is no such element, then act as described in the "any other end tag" entry above and return.
+      //     If there is no such element, then act as described in the "any other end tag" entry above and
+      //     return.
       HTMLStackItem *formattingElement =
         _activeFormattingElements.FindFromLastMarker(subject, Namespace::HTML);
 
@@ -4726,12 +4842,12 @@ namespace krys::boo::html
         return;
       }
 
-      // NOTE: This is just for convenience; the stack item will only be destroyed right before the function
+      // This is just for convenience; the stack item will only be destroyed right before the function
       // returns so the reference will remain valid regardless.
       auto &formattingElementNode = formattingElement->Element();
 
-      // SPEC(4.4): If formattingElement is not in the stack of open elements, then this is a parse error;
-      // remove the element from the list, and return.
+      // 4d. If formattingElement is not in the stack of open elements, then this is a parse error;
+      //     remove the element from the list, and return.
       if (!_openElementStack.Contains(formattingElementNode))
       {
         ParseError(token);
@@ -4739,27 +4855,27 @@ namespace krys::boo::html
         return;
       }
 
-      // SPEC(4.5): If formattingElement is in the stack of open elements, but the element is not in scope,
-      // then this is a parse error; return.
+      // 4e. If formattingElement is in the stack of open elements, but the element is not in scope,
+      //     then this is a parse error; return.
       if (!_openElementStack.HasElementInScope(formattingElementNode))
       {
         ParseError(token);
         return;
       }
 
-      // SPEC(4.6): If formattingElement is not the current node, this is a parse error. (But do not return.)
+      // 4f. If formattingElement is not the current node, this is a parse error. (But do not return.)
       if (&_openElementStack.Bottom().Element() != &formattingElementNode)
       {
         ParseError(token);
       }
 
-      // SPEC(4.7): Let furthestBlock be the topmost node in the stack of open elements that is lower in the
-      // stack than formattingElement, and is an element in the special category. There might not be one.
+      // 4g. Let furthestBlock be the topmost node in the stack of open elements that is lower in the
+      //     stack than formattingElement, and is an element in the special category. There might not be one.
       HTMLStackItem *furthestBlock = FurthestSpecialElementBlock(formattingElementNode);
 
-      // SPEC(4.8) - If there is no furthestBlock, then the UA must first pop all the nodes from the bottom of
-      // the stack of open elements, from the current node up to and including formattingElement, then remove
-      // formattingElement from the list of active formatting elements, and finally return.
+      // 4h. If there is no furthestBlock, then the UA must first pop all the nodes from the bottom of
+      //     the stack of open elements, from the current node up to and including formattingElement, then
+      //     remove formattingElement from the list of active formatting elements, and finally return.
       if (furthestBlock == nullptr)
       {
         _openElementStack.PopUntilPopped(formattingElementNode);
@@ -4767,33 +4883,33 @@ namespace krys::boo::html
         return;
       }
 
-      // NOTE: Save a reference to the node now in case the stack item gets destroyed. The node will still be
+      // Save a reference to the node now in case the stack item gets destroyed. The node will still be
       // alive.
       auto &furthestBlockNode = furthestBlock->Element();
 
-      // SPEC(4.9): Let commonAncestor be the element immediately above formattingElement in the stack of open
-      // elements.
+      // 4i. Let commonAncestor be the element immediately above formattingElement in the stack of open
+      //     elements.
       HTMLStackItem *commonAncestor = _openElementStack.EntryBefore(formattingElementNode);
 
-      // SPEC(4.10): Let a bookmark note the position of formattingElement in the list of active formatting
-      // elements relative to the elements on either side of it in the list.
+      // 4j. Let a bookmark note the position of formattingElement in the list of active formatting
+      //     elements relative to the elements on either side of it in the list.
       auto bookmark = _activeFormattingElements.BookmarkFor(formattingElementNode);
 
-      // SPEC(4.11): Let node and lastNode be furthestBlock.
+      // 4k. Let node and lastNode be furthestBlock.
       dom::Element *node = &furthestBlockNode;
       dom::Element *lastNode = node;
 
-      // SPEC: Let pendingRedirects be an empty list.
-      // NOTE: An element that is replaced with its children is not itself in the tree, so its insertion
-      // target redirection map entry has to be updated when this algorithm changes where it would have been
+      // 4l. Let pendingRedirects be an empty list.
+      // (An element that is replaced with its children is not itself in the tree, so its insertion target
+      // redirection map entry has to be updated when this algorithm changes where it would have been
       // inserted. The new location is only known once a later element is not itself replaced with its
-      // children, so such elements are collected in pendingRedirects until then.
+      // children, so such elements are collected in pendingRedirects until then.)
       List<Ref<dom::Element>> pendingRedirects;
 
-      // SPEC: If the parser's parser sanitizer configuration is not null: let action be the result of getting
-      // the sanitizer action for an element name given lastNode's local name, lastNode's namespace, and the
-      // parser's parser sanitizer configuration. If action is not "Keep", then set lastNode to null. If
-      // action is "Replace with children", then append furthestBlock to pendingRedirects.
+      // 4m. If the parser's parser sanitizer configuration is not null: let action be the result of getting
+      //     the sanitizer action for an element name given lastNode's local name, lastNode's namespace, and
+      //     the parser's parser sanitizer configuration. If action is not "Keep", then set lastNode to null.
+      //     If action is "Replace with children", then append furthestBlock to pendingRedirects.
       auto furthestBlockAction =
         SanitizerActionFor(furthestBlockNode.LocalName().View(), furthestBlockNode.NamespaceURI());
       if (furthestBlockAction != SanitizerAction::Keep)
@@ -4805,10 +4921,10 @@ namespace krys::boo::html
         pendingRedirects.push_back(ShareRef(furthestBlockNode));
       }
 
-      // SPEC(4.12): Let innerLoopCounter be 0.
+      // 4n. Let innerLoopCounter be 0.
       size_t innerLoopCounter = 0uz;
 
-      // SPEC: Let bookmarkMoved be false.
+      // 4o. Let bookmarkMoved be false.
       bool bookmarkMoved = false;
 
       auto ElementAbove = [&](dom::Element &node) -> dom::Element *
@@ -4818,37 +4934,38 @@ namespace krys::boo::html
       };
       dom::Element *immediatelyAbove = ElementAbove(*node);
 
-      // SPEC(4.13): While true:
+      // 4p. While true:
       while (true)
       {
-        // SPEC(4.13.1): Increment innerLoopCounter by 1.
+        // 4p.i. Increment innerLoopCounter by 1.
         ++innerLoopCounter;
 
-        // SPEC(4.13.2): Let node be the element immediately above node in the stack of open elements, or if
-        // node is no longer in the stack of open elements (e.g. because it got removed by this algorithm),
-        // the element that was immediately above node in the stack of open elements before node was removed.
+        // 4p.ii. Let node be the element immediately above node in the stack of open elements, or if
+        //        node is no longer in the stack of open elements (e.g. because it got removed by this
+        //        algorithm), the element that was immediately above node in the stack of open elements before
+        //        node was removed.
         node = immediatelyAbove;
         krys_debug_assert(node != nullptr);
 
-        // NOTE: Fetch the next node now in case the stack item gets destroyed.
+        // Fetch the next node now in case the stack item gets destroyed.
         immediatelyAbove = ElementAbove(*node);
 
-        // SPEC(4.13.3): If node is formattingElement, then break.
+        // 4p.iii. If node is formattingElement, then break.
         if (node == &formattingElementNode)
         {
           break;
         }
 
-        // SPEC(4.13.4): If innerLoopCounter is greater than 3 and node is in the list of active formatting
-        // elements, then remove node from the list of active formatting elements.
+        // 4p.iv. If innerLoopCounter is greater than 3 and node is in the list of active formatting
+        //        elements, then remove node from the list of active formatting elements.
         if (innerLoopCounter > 3uz && _activeFormattingElements.Contains(*node))
         {
           _activeFormattingElements.RemoveAndUpdateBookmark(*node, bookmark);
         }
 
-        // SPEC(4.13.5): If node is not in the list of active formatting elements, then remove node from the
-        // stack of open elements and continue.
-        // NOTE: We retrieve the entry for node here in case the previous step removes it.
+        // 4p.v. If node is not in the list of active formatting elements, then remove node from the
+        //       stack of open elements and continue.
+        // We retrieve the entry for node here in case the previous step removes it.
         FormattingListEntry *nodeFormattingEntry = _activeFormattingElements.Find(*node);
         if (nodeFormattingEntry == nullptr)
         {
@@ -4856,31 +4973,35 @@ namespace krys::boo::html
           continue;
         }
 
-        // SPEC(4.13.6): Create an element for the token for which the element node was created, in the HTML
-        // namespace, with commonAncestor as the intended parent; replace the entry for node in the list of
-        // active formatting elements with an entry for the new element, replace the entry for node in the
-        // stack of open elements with an entry for the new element, and set node to the new element.
+        // 4p.vi. Create an element for the token for which the element node was created, in the HTML
+        //        namespace, with commonAncestor as the intended parent; replace the entry for node in the
+        //        list of active formatting elements with an entry for the new element, replace the entry for
+        //        node in the stack of open elements with an entry for the new element, and set node to the
+        //        new element.
         auto newElement = CreateElement(nodeFormattingEntry->Item(), &commonAncestor->Element());
         nodeFormattingEntry->Item().UpdateElement(*newElement);
         _openElementStack.Find(*node)->UpdateElement(*newElement);
         node = newElement.get();
 
-        // SPEC: If bookmarkMoved is false, then move the aforementioned bookmark to be immediately after the
-        // new node in the list of active formatting elements, and set bookmarkMoved to true.
+        // 4p.vii. If bookmarkMoved is false, then move the aforementioned bookmark to be immediately after
+        // the
+        //         new node in the list of active formatting elements, and set bookmarkMoved to true.
         if (!bookmarkMoved)
         {
           _activeFormattingElements.MoveBookmarkAfter(bookmark, *nodeFormattingEntry);
           bookmarkMoved = true;
         }
 
-        // SPEC: Let nodeAction be "Keep". If the parser's parser sanitizer configuration is not null, then
-        // set nodeAction to the result of getting the sanitizer action for an element name given node's local
-        // name, node's namespace, and the parser's parser sanitizer configuration.
+        // 4p.viii.-4p.ix. Let nodeAction be "Keep". If the parser's parser sanitizer configuration is not
+        // null, then
+        //                 set nodeAction to the result of getting the sanitizer action for an element name
+        //                 given node's local name, node's namespace, and the parser's parser sanitizer
+        //                 configuration.
         auto nodeAction = SanitizerActionFor(node->LocalName().View(), node->NamespaceURI());
 
-        // SPEC: If nodeAction is not "Replace with children": for each replacedElement of pendingRedirects:
-        // set the parser's insertion target redirection map[replacedElement] to (node, null); empty
-        // pendingRedirects.
+        // 4p.x. If nodeAction is not "Replace with children": for each replacedElement of pendingRedirects:
+        //       set the parser's insertion target redirection map[replacedElement] to (node, null); empty
+        //       pendingRedirects.
         if (nodeAction != SanitizerAction::ReplaceWithChildren)
         {
           for (auto &replacedElement : pendingRedirects)
@@ -4890,10 +5011,10 @@ namespace krys::boo::html
           pendingRedirects.clear();
         }
 
-        // SPEC: Switch on nodeAction:
+        // 4p.xi. Switch on nodeAction:
         switch (nodeAction)
         {
-          // SPEC: "Keep": if lastNode is non-null, then append lastNode to node. Set lastNode to node.
+          // "Keep": if lastNode is non-null, then append lastNode to node. Set lastNode to node.
           case SanitizerAction::Keep:
           {
             if (lastNode)
@@ -4903,7 +5024,7 @@ namespace krys::boo::html
             lastNode = node;
             break;
           }
-          // SPEC: "Remove": if lastNode is non-null and lastNode's parent is non-null, then remove lastNode.
+          // "Remove": if lastNode is non-null and lastNode's parent is non-null, then remove lastNode.
           // Set lastNode to null.
           case SanitizerAction::Remove:
           {
@@ -4914,7 +5035,7 @@ namespace krys::boo::html
             lastNode = nullptr;
             break;
           }
-          // SPEC: "Replace with children": append node to pendingRedirects.
+          // "Replace with children": append node to pendingRedirects.
           case SanitizerAction::ReplaceWithChildren:
           {
             pendingRedirects.push_back(ShareRef(*node));
@@ -4923,29 +5044,29 @@ namespace krys::boo::html
         }
       }
 
-      // SPEC: Let insertionLocation be the appropriate place for inserting a node given commonAncestor.
+      // 4q. Let insertionLocation be the appropriate place for inserting a node given commonAncestor.
       auto insertionLocation = AppropriatePlaceToInsertNode(&commonAncestor->Element());
 
-      // SPEC: Let (target, refNode) be the adjusted insertion location given insertionLocation.
+      // 4r. Let (target, refNode) be the adjusted insertion location given insertionLocation.
       auto [target, refNode] = AdjustedInsertionLocation(insertionLocation);
 
-      // SPEC: For each replacedElement of pendingRedirects: set the parser's insertion target redirection
-      // map[replacedElement] to (target, refNode).
+      // 4s. For each replacedElement of pendingRedirects: set the parser's insertion target redirection
+      //     map[replacedElement] to (target, refNode).
       for (auto &replacedElement : pendingRedirects)
       {
         RedirectInsertions(*replacedElement, {.Parent = target, .BeforeSibling = refNode});
       }
 
-      // SPEC: If lastNode is non-null and lastNode's parent is non-null, then remove lastNode.
+      // 4t. If lastNode is non-null and lastNode's parent is non-null, then remove lastNode.
       if (lastNode && lastNode->ParentNode())
       {
         (void)dom::MutationAlgorithms::Remove(*lastNode);
       }
 
-      // SPEC: If all of the following are true: lastNode is non-null; lastNode's parent is null; lastNode is
-      // not a host-including inclusive ancestor of target; target is not a Document node, or it does not have
-      // an element child; and refNode is null or its parent is target, then insert lastNode into target
-      // before refNode.
+      // 4u. If all of the following are true: lastNode is non-null; lastNode's parent is null; lastNode is
+      //     not a host-including inclusive ancestor of target; target is not a Document node, or it does not
+      //     have an element child; and refNode is null or its parent is target, then insert lastNode into
+      //     target before refNode.
       if (lastNode && !lastNode->ParentNode()
           && !dom::TreeQueries::IsHostIncludingInclusiveAncestorOf(*lastNode, *target)
           && (!Is<dom::Document>(*target) || !dom::TreeQueries::FirstElementChild(*target))
@@ -4954,8 +5075,8 @@ namespace krys::boo::html
         (void)dom::MutationAlgorithms::Insert(*lastNode, *target, refNode);
       }
 
-      // SPEC: Let newElement be the result of creating an element for the token for which formattingElement
-      // was created, in the HTML namespace, with furthestBlock as the intended parent.
+      // 4v. Let newElement be the result of creating an element for the token for which formattingElement
+      //     was created, in the HTML namespace, with furthestBlock as the intended parent.
       auto newElement = CreateElement(*formattingElement, &furthestBlockNode);
 
       auto newTagName = formattingElement->TagName();
@@ -4966,23 +5087,25 @@ namespace krys::boo::html
       auto newStackItem =
         HTMLStackItem(newTagName, newTagNamespace, *newElement, krys::move(newTagAttributes));
 
-      // SPEC: Remove formattingElement from the list of active formatting elements, and insert newElement
-      // into the list of active formatting elements at the position of the aforementioned bookmark.
+      // 4w. Remove formattingElement from the list of active formatting elements, and insert newElement
+      //     into the list of active formatting elements at the position of the aforementioned bookmark.
       _activeFormattingElements.RemoveAndUpdateBookmark(formattingElementNode, bookmark);
       _activeFormattingElements.InsertAtBookmark(krys::move(newFormattingElementItem), bookmark);
 
-      // SPEC: Remove formattingElement from the stack of open elements, and insert newElement into the stack
-      // of open elements immediately below the position of furthestBlock in that stack.
+      // 4x. Remove formattingElement from the stack of open elements, and insert newElement into the stack
+      //     of open elements immediately below the position of furthestBlock in that stack.
       _openElementStack.Remove(formattingElementNode);
       _openElementStack.InsertBelow(krys::move(newStackItem), furthestBlockNode);
 
-      // SPEC: Let sanitizerAction be "Keep". If the parser's parser sanitizer configuration is not null, then
-      // set sanitizerAction to the result of getting the sanitizer action for an element name given
-      // newElement's local name, newElement's namespace, and the parser's parser sanitizer configuration.
-      // SPEC: Switch on sanitizerAction:
+      // 4y.-4z. Let sanitizerAction be "Keep". If the parser's parser sanitizer configuration is not null,
+      // then
+      //         set sanitizerAction to the result of getting the sanitizer action for an element name given
+      //         newElement's local name, newElement's namespace, and the parser's parser sanitizer
+      //         configuration.
+      // 4aa. Switch on sanitizerAction:
       switch (SanitizerActionFor(newElement->LocalName().View(), newElement->NamespaceURI()))
       {
-        // SPEC: "Replace with children": set the parser's insertion target redirection map[newElement] to the
+        // "Replace with children": set the parser's insertion target redirection map[newElement] to the
         // adjusted insertion location given (furthestBlock, null).
         case SanitizerAction::ReplaceWithChildren:
         {
@@ -4990,7 +5113,7 @@ namespace krys::boo::html
                              AdjustedInsertionLocation(InsertionLocation {.Parent = &furthestBlockNode}));
           break;
         }
-        // SPEC: "Remove": take all of the child nodes of furthestBlock and append them to newElement.
+        // "Remove": take all of the child nodes of furthestBlock and append them to newElement.
         case SanitizerAction::Remove:
         {
           while (auto *child = furthestBlockNode.FirstChild())
@@ -4999,7 +5122,7 @@ namespace krys::boo::html
           }
           break;
         }
-        // SPEC: "Keep": take all of the child nodes of furthestBlock and append them to newElement. Let
+        // "Keep": take all of the child nodes of furthestBlock and append them to newElement. Let
         // (newElementParent, newElementRefNode) be the adjusted insertion location given (furthestBlock,
         // null). Insert newElement into newElementParent before newElementRefNode.
         case SanitizerAction::Keep:
@@ -5015,12 +5138,14 @@ namespace krys::boo::html
         }
       }
 
-      // SPEC: Let belowNode be the element immediately below newElement in the stack of open elements, if
-      // any; otherwise null. While belowNode is non-null and the parser's insertion target redirection
-      // map[belowNode] exists: set the parser's insertion target redirection map[belowNode] to the adjusted
-      // insertion location given (newElement, null); set belowNode to the element immediately below belowNode
-      // in the stack of open elements, if any; otherwise null. NOTE: Elements below furthestBlock in the
-      // stack that were replaced with their children now have newElement between them and furthestBlock.
+      // 4ab. Let belowNode be the element immediately below newElement in the stack of open elements, if
+      //      any; otherwise null.
+      // 4ac. While belowNode is non-null and the parser's insertion target redirection map[belowNode] exists:
+      //      set the parser's insertion target redirection map[belowNode] to the adjusted insertion location
+      //      given (newElement, null); set belowNode to the element immediately below belowNode in the stack
+      //      of open elements, if any; otherwise null.
+      // (Elements below furthestBlock in the stack that were replaced with their children now have newElement
+      // between them and furthestBlock.)
       for (auto *below = _openElementStack.EntryAfter(*newElement);
            below && _insertionTargetRedirectionMap.contains(&below->Element());
            below = _openElementStack.EntryAfter(below->Element()))

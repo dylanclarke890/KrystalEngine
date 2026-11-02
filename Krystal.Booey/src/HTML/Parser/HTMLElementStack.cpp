@@ -8,7 +8,7 @@ namespace krys::boo::html
 
   KRYS_NODISCARD HTMLStackItem &HTMLElementStack::Top() noexcept
   {
-    assert(!_items.empty());
+    krys_debug_assert(!_items.empty());
     return _items.front();
   }
 
@@ -24,19 +24,19 @@ namespace krys::boo::html
 
   KRYS_NODISCARD HTMLStackItem &HTMLElementStack::Bottom() noexcept
   {
-    assert(!_items.empty());
+    krys_debug_assert(!_items.empty());
     return _items.back();
   }
 
   KRYS_NODISCARD const HTMLStackItem &HTMLElementStack::Bottom() const noexcept
   {
-    assert(!_items.empty());
+    krys_debug_assert(!_items.empty());
     return _items.back();
   }
 
   KRYS_NODISCARD HTMLStackItem &HTMLElementStack::operator[](size_t index) noexcept
   {
-    assert(index < _items.size());
+    krys_debug_assert(index < _items.size());
     return _items[index];
   }
 
@@ -46,7 +46,7 @@ namespace krys::boo::html
 
   void HTMLElementStack::Pop() noexcept
   {
-    assert(!_items.empty());
+    krys_debug_assert(!_items.empty());
 
     // FIXME: When the current node is removed from the stack of open elements,
     // process internal resource links given the current node's node document.

@@ -6,10 +6,12 @@
 #include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
 #include "Krystal.Booey/HTML/Parser/InputStream.hpp"
 #include "Krystal.Booey/Types/IsEOF.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include <algorithm>
 #include <ranges>
 
 namespace krys::boo::html
@@ -58,13 +60,13 @@ namespace krys::boo::html
 
     KRYS_NODISCARD HTMLToken &operator*() const noexcept
     {
-      assert(_token != nullptr);
+      krys_debug_assert(_token != nullptr);
       return *_token;
     }
 
     KRYS_NODISCARD HTMLToken *operator->() const noexcept
     {
-      assert(_token != nullptr);
+      krys_debug_assert(_token != nullptr);
       return _token;
     }
   };
@@ -88,6 +90,9 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#character-reference-code
     int64 _characterReferenceCode {0};
+
+    /// @brief The largest character reference code kept: one past the Unicode range.
+    constexpr static int64 MaxCharacterReferenceCode = 0x110000;
 
     /// @see https://html.spec.whatwg.org/#temporary-buffer
     SmallList<char32, 32u> _temporaryBuffer;
@@ -177,7 +182,7 @@ namespace krys::boo::html
 
     void BufferCharacter(char32 character) noexcept
     {
-      assert(character != EOFMarker);
+      krys_debug_assert(character != EOFMarker);
       _token.AppendToCharacters(character);
     }
 
@@ -187,7 +192,7 @@ namespace krys::boo::html
 #if KRYS_DEBUG
       for (auto character : characters)
       {
-        assert(character != EOFMarker);
+        krys_debug_assert(character != EOFMarker);
       }
 #endif
       _token.AppendToCharacters(characters);
@@ -198,7 +203,7 @@ namespace krys::boo::html
 #if KRYS_DEBUG
       for (auto character : characters)
       {
-        assert(character != EOFMarker);
+        krys_debug_assert(character != EOFMarker);
       }
 #endif
       _token.AppendToCharacters(characters);
@@ -257,7 +262,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool CommitToPartialEndTag(char32 character, TokenizerState state) noexcept
     {
-      assert(_input.NextInputCharacter() == character);
+      krys_debug_assert(_input.NextInputCharacter() == character);
       _temporaryBuffer.push_back(character);
       _input.Advance();
 
@@ -274,7 +279,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool CommitToCompleteEndTag() noexcept
     {
-      assert(_input.NextInputCharacter() == U'>');
+      krys_debug_assert(_input.NextInputCharacter() == U'>');
       _temporaryBuffer.push_back(U'>');
 
       _input.Advance();
@@ -317,7 +322,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool EmitTagToken() noexcept
     {
-      assert(_token.Type() == HTMLTokenType::StartTag || _token.Type() == HTMLTokenType::EndTag);
+      krys_debug_assert(_token.Type() == HTMLTokenType::StartTag || _token.Type() == HTMLTokenType::EndTag);
       if (_token.Type() == HTMLTokenType::StartTag)
       {
         _appropriateEndTagName.clear();
@@ -335,7 +340,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool EmitDOCTYPEToken(bool consumeCurrentCharacter) noexcept
     {
-      assert(_token.Type() == HTMLTokenType::DOCTYPE);
+      krys_debug_assert(_token.Type() == HTMLTokenType::DOCTYPE);
       _state = TokenizerState::Data;
 
       if (!consumeCurrentCharacter)
@@ -349,7 +354,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool EmitCommentToken(bool consumeCurrentCharacter) noexcept
     {
-      assert(_token.Type() == HTMLTokenType::Comment);
+      krys_debug_assert(_token.Type() == HTMLTokenType::Comment);
       _state = TokenizerState::Data;
 
       if (!consumeCurrentCharacter)
@@ -731,7 +736,7 @@ namespace krys::boo::html
           if (character == Solidus)
           {
             _temporaryBuffer.clear();
-            assert(_bufferedEndTagName.empty());
+            krys_debug_assert(_bufferedEndTagName.empty());
             ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagOpen);
           }
 
@@ -760,8 +765,8 @@ namespace krys::boo::html
               {
                 return true;
               }
+              SWITCH_TO(BeforeAttributeName);
             }
-            SWITCH_TO(BeforeAttributeName);
           }
           if (character == Solidus)
           {
@@ -771,8 +776,8 @@ namespace krys::boo::html
               {
                 return true;
               }
+              SWITCH_TO(SelfClosingStartTag);
             }
-            SWITCH_TO(SelfClosingStartTag);
           }
           if (character == GreaterThanSign)
           {
@@ -799,7 +804,7 @@ namespace krys::boo::html
           if (character == Solidus)
           {
             _temporaryBuffer.clear();
-            assert(_bufferedEndTagName.empty());
+            krys_debug_assert(_bufferedEndTagName.empty());
             ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagOpen);
           }
 
@@ -828,8 +833,8 @@ namespace krys::boo::html
               {
                 return true;
               }
+              SWITCH_TO(BeforeAttributeName);
             }
-            SWITCH_TO(BeforeAttributeName);
           }
           if (character == Solidus)
           {
@@ -839,8 +844,8 @@ namespace krys::boo::html
               {
                 return true;
               }
+              SWITCH_TO(SelfClosingStartTag);
             }
-            SWITCH_TO(SelfClosingStartTag);
           }
           if (character == GreaterThanSign)
           {
@@ -867,7 +872,7 @@ namespace krys::boo::html
           if (character == Solidus)
           {
             _temporaryBuffer.clear();
-            assert(_bufferedEndTagName.empty());
+            krys_debug_assert(_bufferedEndTagName.empty());
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagOpen);
           }
           if (character == ExclamationMark)
@@ -901,8 +906,8 @@ namespace krys::boo::html
               {
                 return true;
               }
+              SWITCH_TO(BeforeAttributeName);
             }
-            SWITCH_TO(BeforeAttributeName);
           }
           if (character == Solidus)
           {
@@ -912,8 +917,8 @@ namespace krys::boo::html
               {
                 return true;
               }
+              SWITCH_TO(SelfClosingStartTag);
             }
-            SWITCH_TO(SelfClosingStartTag);
           }
           if (character == GreaterThanSign)
           {
@@ -1043,7 +1048,7 @@ namespace krys::boo::html
           if (character == Solidus)
           {
             _temporaryBuffer.clear();
-            assert(_bufferedEndTagName.empty());
+            krys_debug_assert(_bufferedEndTagName.empty());
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagOpen);
           }
           if (krys::text::IsASCIIAlpha(character))
@@ -1078,8 +1083,8 @@ namespace krys::boo::html
               {
                 return true;
               }
+              SWITCH_TO(BeforeAttributeName);
             }
-            SWITCH_TO(BeforeAttributeName);
           }
           if (character == Solidus)
           {
@@ -1089,8 +1094,8 @@ namespace krys::boo::html
               {
                 return true;
               }
+              SWITCH_TO(SelfClosingStartTag);
             }
-            SWITCH_TO(SelfClosingStartTag);
           }
           if (character == GreaterThanSign)
           {
@@ -1226,7 +1231,7 @@ namespace krys::boo::html
           if (character == Solidus)
           {
             _temporaryBuffer.clear();
-            assert(_bufferedEndTagName.empty());
+            krys_debug_assert(_bufferedEndTagName.empty());
             BufferCharacter(Solidus);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeEnd);
           }
@@ -1487,7 +1492,8 @@ namespace krys::boo::html
         BEGIN_STATE(SelfClosingStartTag)
           if (character == GreaterThanSign)
           {
-            // FIXME: Check that checking this token is a start tag is correct.
+            // Set the self-closing flag of the current tag token. (An end tag's flag is only a parse error,
+            // so it's left unset.)
             if (_token.Type() == HTMLTokenType::StartTag)
             {
               _token.SetSelfClosingFlag();
@@ -2412,16 +2418,13 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(HexadecimalCharacterReference)
-          if (krys::text::IsASCIIDigit(character))
-          {
-            _characterReferenceCode *= 16;
-            _characterReferenceCode += static_cast<int64>(character - '0');
-            ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReference);
-          }
           if (krys::text::IsASCIIHexDigit(character))
           {
-            _characterReferenceCode *= 16;
-            _characterReferenceCode += static_cast<int64>(krys::text::ToASCIIHexValue(character));
+            // Anything past 0x10FFFF is outside the Unicode range, so the code stops growing there rather
+            // than overflowing back into it.
+            _characterReferenceCode = std::min<int64>(
+              _characterReferenceCode * 16 + static_cast<int64>(krys::text::ToASCIIHexValue(character)),
+              MaxCharacterReferenceCode);
             ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReference);
           }
           if (character != Semicolon)
@@ -2435,8 +2438,8 @@ namespace krys::boo::html
         BEGIN_STATE(DecimalCharacterReference)
           if (krys::text::IsASCIIDigit(character))
           {
-            _characterReferenceCode *= 10;
-            _characterReferenceCode += static_cast<int64>(character - '0');
+            _characterReferenceCode = std::min<int64>(
+              _characterReferenceCode * 10 + static_cast<int64>(character - '0'), MaxCharacterReferenceCode);
             ADVANCE_PAST_NON_NEWLINE_TO(DecimalCharacterReference);
           }
           if (character != Semicolon)

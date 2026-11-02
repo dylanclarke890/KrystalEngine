@@ -4,8 +4,8 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLTokenType.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include <cassert>
 
 namespace krys::boo::html
 {
@@ -32,7 +32,7 @@ namespace krys::boo::html
       {
         case HTMLTokenType::Uninitialized:
         {
-          assert(false);
+          krys_debug_assert(false);
           return;
         }
         case HTMLTokenType::EndOfFile:
@@ -78,42 +78,42 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsSelfClosing() const noexcept
     {
-      assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
+      krys_debug_assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _isSelfClosing;
     }
 
     void AcknowledgeSelfClosingTag() noexcept
     {
-      assert(_type == HTMLTokenType::StartTag);
+      krys_debug_assert(_type == HTMLTokenType::StartTag);
       _selfClosingTagAcknowledged = true;
     }
 
     KRYS_NODISCARD dom::DOMStringAtom Name() const noexcept
     {
-      assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag
-             || _type == HTMLTokenType::DOCTYPE);
+      krys_debug_assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag
+                        || _type == HTMLTokenType::DOCTYPE);
 
       return _name;
     }
 
     KRYS_NODISCARD ParsedAttributeList &Attributes() noexcept
     {
-      assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
+      krys_debug_assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _attributes;
     }
 
     KRYS_NODISCARD dom::DOMStringView Comment() const noexcept
     {
-      assert(_type == HTMLTokenType::Comment);
-      assert(!_dataReleased);
+      krys_debug_assert(_type == HTMLTokenType::Comment);
+      krys_debug_assert(!_dataReleased);
 
       return _data;
     }
 
     KRYS_NODISCARD dom::DOMString ReleaseComment() noexcept
     {
-      assert(_type == HTMLTokenType::Comment);
-      assert(!_dataReleased);
+      krys_debug_assert(_type == HTMLTokenType::Comment);
+      krys_debug_assert(!_dataReleased);
 
       _dataReleased = true;
       return std::move(_data);
@@ -121,16 +121,16 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView Characters() const noexcept
     {
-      assert(_type == HTMLTokenType::Character);
-      assert(!_dataReleased);
+      krys_debug_assert(_type == HTMLTokenType::Character);
+      krys_debug_assert(!_dataReleased);
 
       return _data;
     }
 
     KRYS_NODISCARD dom::DOMString ReleaseCharacters() noexcept
     {
-      assert(_type == HTMLTokenType::Character);
-      assert(!_dataReleased);
+      krys_debug_assert(_type == HTMLTokenType::Character);
+      krys_debug_assert(!_dataReleased);
 
       _dataReleased = true;
       return std::move(_data);
@@ -138,13 +138,13 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsForceQuirks() const noexcept
     {
-      assert(_type == HTMLTokenType::DOCTYPE);
+      krys_debug_assert(_type == HTMLTokenType::DOCTYPE);
       return _doctypeData && _doctypeData->ForceQuirks;
     }
 
     KRYS_NODISCARD DoctypeData *DOCTYPEData() const noexcept
     {
-      assert(_type == HTMLTokenType::DOCTYPE);
+      krys_debug_assert(_type == HTMLTokenType::DOCTYPE);
       return _doctypeData.get();
     }
   };

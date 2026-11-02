@@ -22,7 +22,8 @@ namespace krys::tests
   using namespace krys::boo;
   using namespace krys::Text;
 
-  TEST_CASE("HTMLEncodingSniffer(Detect)", "[HTML][DOM][Loader][HTMLEncodingSniffer]")
+  TEST_CASE("HTMLEncodingSniffer(Detect)",
+            "[HTML][DOM][Loader][HTMLEncodingSniffer][html:prescan-a-byte-stream-to-determine-its-encoding]")
   {
     CodecRegistry registry;
     registry.Register<BasicCodec<basic_utf8<byte>>>();

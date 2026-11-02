@@ -38,7 +38,8 @@ namespace krys::tests
     REQUIRE(out == U"hello world");
   }
 
-  TEST_CASE("TextResourceDecoder strips UTF-8 BOM", "[HTML][TextResourceDecoder]")
+  TEST_CASE("TextResourceDecoder strips UTF-8 BOM",
+            "[HTML][TextResourceDecoder][html:encoding-sniffing-algorithm]")
   {
     auto registry = MakeRegistry();
     auto decoder = TextResourceDecoder(registry, ContentType::PlainText, "");
@@ -97,7 +98,8 @@ namespace krys::tests
     REQUIRE(out[0] == Unicode::Replacement<char32>);
   }
 
-  TEST_CASE("TextResourceDecoder detects HTML meta charset after buffering", "[HTML][TextResourceDecoder]")
+  TEST_CASE("TextResourceDecoder detects HTML meta charset after buffering",
+            "[HTML][TextResourceDecoder][html:encoding-sniffing-algorithm]")
   {
     auto registry = MakeRegistry();
     auto decoder = TextResourceDecoder(registry, ContentType::HTML, "");

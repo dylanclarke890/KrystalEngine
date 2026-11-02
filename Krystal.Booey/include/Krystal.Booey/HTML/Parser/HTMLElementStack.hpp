@@ -3,8 +3,8 @@
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLStackItem.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include <cassert>
 
 namespace krys::boo::html
 {
@@ -157,7 +157,7 @@ namespace krys::boo::html
         Ref<dom::Element> element = ShareRef(it->Element());
         _items.erase(it);
 
-        // NOTE: an element removed from the middle of the stack is finished too, even though its children
+        // An element removed from the middle of the stack is finished too, even though its children
         // may not all have been parsed.
         element->FinishParsingChildren();
       }
@@ -177,7 +177,7 @@ namespace krys::boo::html
     void InsertBelow(HTMLStackItem &&newItem, const dom::Element &reference) noexcept
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &reference; });
-      assert(it != _items.end());
+      krys_debug_assert(it != _items.end());
       newItem.Element().BeginParsingChildren();
       _items.insert(std::next(it), krys::move(newItem));
     }

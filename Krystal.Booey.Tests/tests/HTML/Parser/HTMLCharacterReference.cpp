@@ -3,7 +3,8 @@
 
 namespace krys::boo::html::tests
 {
-  TEST_CASE("HTMLCharacterReference(SearchNumericCharacterReferences)", "[HTML][CharacterReference]")
+  TEST_CASE("HTMLCharacterReference(SearchNumericCharacterReferences)",
+            "[HTML][CharacterReference][html:numeric-character-reference-end-state]")
   {
     char32 test = 0x84;
     char32 expected = 0x201E; // DOUBLE LOW-9 QUOTATION MARK
@@ -22,7 +23,8 @@ namespace krys::boo::html::tests
     REQUIRE(SearchNumericCharacterReferences(test) == expected);
   }
 
-  TEST_CASE("HTMLCharacterReference(SearchNamedCharacterReferences)", "[HTML][CharacterReference]")
+  TEST_CASE("HTMLCharacterReference(SearchNamedCharacterReferences)",
+            "[HTML][CharacterReference][html:named-character-reference-state]")
   {
     utf32_stringview target = utf32_stringview(U"&LongLeftRightArrow;");
 

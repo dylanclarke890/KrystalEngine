@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/HTML/Parser/HTMLElementStack.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLStackItem.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -21,13 +22,13 @@ namespace krys::boo::html
 
     KRYS_NODISCARD HTMLStackItem &Item() noexcept
     {
-      assert(_item.has_value());
+      krys_debug_assert(_item.has_value());
       return _item.value();
     }
 
     KRYS_NODISCARD const HTMLStackItem &Item() const noexcept
     {
-      assert(_item.has_value());
+      krys_debug_assert(_item.has_value());
       return _item.value();
     }
 

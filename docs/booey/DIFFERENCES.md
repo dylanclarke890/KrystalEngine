@@ -79,10 +79,15 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ## HTML parser
 
+### From the specs
+
+- A `script` end tag in the "text" insertion mode only pops the script and restores the original insertion mode: with no scripting there's no microtask checkpoint, insertion point or script nesting level, the script isn't prepared, and there's never a pending parsing-blocking script, so the parser never pauses or spins the event loop. An SVG `script` end tag in foreign content likewise only pops it, as the SVG script isn't processed.
+
 ### From WebKit
 
 - A `<link>` counts as created by the parser (and so is implicitly render-blocking) when it's inserted before it has finished parsing its children; upstream passes a flag to its constructor.
 - `<?xml-stylesheet?>` loads only CSS sheets: there's no XSLT.
+- Serializing HTML follows the specification where upstream doesn't: HTML, SVG and MathML elements are written with their local names rather than their qualified names, an element's `is` value is written when it has no `is` attribute, a shadow root with manual slot assignment gets `shadowrootslotassignment="manual"`, and a processing instruction ends with `>` rather than `?>`.
 
 ## HTML elements and forms
 

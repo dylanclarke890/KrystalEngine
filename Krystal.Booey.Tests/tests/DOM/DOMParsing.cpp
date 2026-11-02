@@ -1,12 +1,14 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Comment.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/MutationObserver.hpp"
 #include "Krystal.Booey/DOM/MutationRecord.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/XMLDocument.hpp"
@@ -171,6 +173,119 @@ namespace krys::boo::dom::tests
       auto element = data.Document->CreateElement(DOMStringAtom(name)).ReleaseValue();
       REQUIRE_FALSE(element->AppendChild(*data.Document->CreateTextNode(u8"text")).HasException());
       CHECK(MarkupText(element->OuterHTML()) == "<" + MarkupText(name) + ">");
+    }
+  }
+
+  TEST_CASE("The HTML fragment serialization algorithm",
+            "[DOM][Element][DOMParsing][html:serialising-html-fragments][html:html-fragment-serialisation-"
+            "algorithm][html:escapingString][html:attribute's-serialised-name]")
+  {
+    MarkupDocument data;
+    auto &document = *data.Document;
+    auto &div = *data.Div;
+
+    auto make = [&](const char8_t *name)
+    {
+      return document.CreateElement(DOMStringAtom(name)).ReleaseValue();
+    };
+    auto makeNS = [&](DOMStringView namespaceURI, const char8_t *name)
+    {
+      return document.CreateElementNS(DOMStringAtom(namespaceURI), DOMStringAtom(name)).ReleaseValue();
+    };
+
+    SECTION("a void element serialises its children as the empty string")
+    {
+      auto br = make(u8"br");
+      REQUIRE_FALSE(br->AppendChild(*document.CreateTextNode(u8"text")).HasException());
+      CHECK(MarkupText(br->InnerHTML()).empty());
+    }
+
+    SECTION("escapes text and attribute values")
+    {
+      auto span = make(u8"span");
+      REQUIRE_FALSE(span->SetAttribute(DOMStringAtom(u8"title"), u8"&\u00A0\"<>").HasException());
+      REQUIRE_FALSE(span->AppendChild(*document.CreateTextNode(u8"&\u00A0\"<>")).HasException());
+      REQUIRE_FALSE(div.AppendChild(*span).HasException());
+      CHECK(MarkupText(div.InnerHTML())
+            == "<span title=\"&amp;&nbsp;&quot;&lt;&gt;\">&amp;&nbsp;\"&lt;&gt;</span>");
+    }
+
+    SECTION("leaves the text of raw text elements, and of noscript without scripting, as it is")
+    {
+      for (auto name : {u8"style", u8"script", u8"xmp", u8"iframe", u8"noembed", u8"noframes", u8"plaintext"})
+      {
+        auto element = make(name);
+        REQUIRE_FALSE(element->AppendChild(*document.CreateTextNode(u8"<&>")).HasException());
+        CHECK(MarkupText(element->InnerHTML()) == "<&>");
+      }
+
+      auto noscript = make(u8"noscript");
+      REQUIRE_FALSE(noscript->AppendChild(*document.CreateTextNode(u8"<&>")).HasException());
+      CHECK(MarkupText(noscript->InnerHTML()) == "&lt;&amp;&gt;");
+    }
+
+    SECTION("serialises attributes with their serialised names")
+    {
+      auto span = make(u8"span");
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XML), DOMStringAtom(u8"a:lang"), u8"1")
+          .HasException());
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XLink), DOMStringAtom(u8"b:href"), u8"2")
+          .HasException());
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns"), u8"3")
+          .HasException());
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:c"), u8"4")
+          .HasException());
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(u8"urn:x"), DOMStringAtom(u8"d:e"), u8"5").HasException());
+      CHECK(MarkupText(span->OuterHTML())
+            == "<span xml:lang=\"1\" xlink:href=\"2\" xmlns=\"3\" xmlns:c=\"4\" d:e=\"5\"></span>");
+    }
+
+    SECTION("uses the local name of HTML, SVG and MathML elements, and the qualified name of others")
+    {
+      CHECK(MarkupText(makeNS(infra::Namespaces::HTML, u8"a:div")->OuterHTML()) == "<div></div>");
+      CHECK(MarkupText(makeNS(infra::Namespaces::SVG, u8"b:svg")->OuterHTML()) == "<svg></svg>");
+      CHECK(MarkupText(makeNS(infra::Namespaces::MathML, u8"c:math")->OuterHTML()) == "<math></math>");
+      CHECK(MarkupText(makeNS(u8"urn:x", u8"d:e")->OuterHTML()) == "<d:e></d:e>");
+    }
+
+    SECTION("adds an is value that isn't in the attributes")
+    {
+      auto withIs =
+        document.CreateElement(DOMStringAtom(u8"p"), ElementCreationOptions {.Is = DOMStringAtom(u8"x-a")})
+          .ReleaseValue();
+      CHECK(MarkupText(withIs->OuterHTML()) == "<p is=\"x-a\"></p>");
+
+      REQUIRE_FALSE(withIs->SetAttribute(DOMStringAtom(u8"is"), u8"x-b").HasException());
+      CHECK(MarkupText(withIs->OuterHTML()) == "<p is=\"x-b\"></p>");
+    }
+
+    SECTION("serialises comments and processing instructions")
+    {
+      REQUIRE_FALSE(div.AppendChild(*document.CreateComment(u8"c")).HasException());
+      REQUIRE_FALSE(
+        div.AppendChild(*document.CreateProcessingInstruction(u8"t", u8"d").ReleaseValue()).HasException());
+      CHECK(MarkupText(div.InnerHTML()) == "<!--c--><?t d>");
+    }
+
+    SECTION("serialises a shadow root's options, in order")
+    {
+      auto host = make(u8"p");
+      auto shadow = host
+                      ->AttachShadow({.Mode = ShadowRootMode::Closed,
+                                      .DelegatesFocus = DelegatesFocus(true),
+                                      .SlotAssignment = SlotAssignmentMode::Manual,
+                                      .Clonable = Clonable(true),
+                                      .Serialisable = Serialisable(true)})
+                      .ReleaseValue();
+      CHECK(
+        MarkupText(host->GetHTML({.SerializableShadowRoots = true}))
+        == "<template shadowrootmode=\"closed\" shadowrootdelegatesfocus=\"\" shadowrootserializable=\"\" "
+           "shadowrootslotassignment=\"manual\" shadowrootclonable=\"\"></template>");
     }
   }
 

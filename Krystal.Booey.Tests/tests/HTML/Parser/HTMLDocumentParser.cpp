@@ -252,11 +252,25 @@ namespace krys::boo::html::tests
       if (test.FragmentContext.has_value())
       {
         auto document = CreateRef<dom::Document>();
-        TagName fragmentTagName = ParseTagName(*test.FragmentContext);
-        dom::QualifiedName qName =
-          dom::QualifiedName {infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
-                              test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
-        auto element = dom::ElementFactory::Create(*document, qName, dom::DOMStringAtom::Null());
+        // The context is "svg <name>", "math <name>" or an HTML element's name.
+        utf8_stringview context = *test.FragmentContext;
+        RefPtr<dom::Element> element;
+        if (context.starts_with(u8"svg ") || context.starts_with(u8"math "))
+        {
+          auto space = context.find(u8' ');
+          auto namespaceURI =
+            context.starts_with(u8"svg ") ? infra::Namespaces::SVG : infra::Namespaces::MathML;
+          element =
+            document->CreateElementNS(namespaceURI, dom::DOMString(context.substr(space + 1))).ReleaseValue();
+        }
+        else
+        {
+          TagName fragmentTagName = ParseTagName(*test.FragmentContext);
+          dom::QualifiedName qName =
+            dom::QualifiedName {infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
+                                test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
+          element = dom::ElementFactory::Create(*document, qName, dom::DOMStringAtom::Null());
+        }
         auto result = HTMLDocumentParser::ParseFragment(
           *element, utf8_string(test.Input), false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
 
@@ -685,90 +699,140 @@ namespace krys::boo::html::tests
 
 #pragma endregion
 
-#define EXECUTE_HTML_PARSER_TEST_CASE(FileName)                                                              \
-  TEST_CASE("HTMLDocumentParser(" FileName ")", "[HTML][HTMLDocumentParser]")                                \
+namespace krys::boo::html::tests
+{
+  TEST_CASE(
+    "HTMLDocumentParser: adjusted foreign attributes get their namespace and prefix",
+    "[HTML][HTMLDocumentParser][html:adjust-foreign-attributes][html:create-an-element-for-the-token]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto parser = CreateParser(
+      *document,
+      utf8_string(u8"<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' "
+                  u8"xlink:href='#a'></svg>"));
+    (void)parser->PumpTokenizer();
+    auto svg = document->Body()->FirstElementChild();
+    REQUIRE(svg);
+
+    // xmlns has no prefix.
+    auto xmlns = svg->GetAttributeNodeNS(infra::Namespaces::XMLNS, u8"xmlns");
+    REQUIRE(xmlns);
+    CHECK(xmlns->Prefix() == dom::DOMStringAtom::Null());
+    CHECK(svg->GetAttribute(u8"xmlns") == dom::DOMString(u8"http://www.w3.org/2000/svg"));
+
+    // xmlns:xlink and xlink:href keep their prefixes.
+    auto xlink = svg->GetAttributeNodeNS(infra::Namespaces::XMLNS, u8"xlink");
+    REQUIRE(xlink);
+    CHECK(xlink->Prefix() == infra::NamespacePrefixes::XMLNS);
+    auto href = svg->GetAttributeNodeNS(infra::Namespaces::XLink, u8"href");
+    REQUIRE(href);
+    CHECK(href->Prefix() == infra::NamespacePrefixes::XLink);
+  }
+}
+
+#define EXECUTE_HTML_PARSER_TEST_CASE(FileName, Tags)                                                        \
+  TEST_CASE("HTMLDocumentParser(" FileName ")", "[HTML][HTMLDocumentParser]" Tags)                           \
   {                                                                                                          \
     krys::boo::html::tests::RunTest(FileName);                                                               \
   }
 
-EXECUTE_HTML_PARSER_TEST_CASE("adoption-01.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("adoption-02.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("adoption-01.dat", "[html:adoption-agency-algorithm]");
+EXECUTE_HTML_PARSER_TEST_CASE("adoption-02.dat", "[html:adoption-agency-algorithm]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("blocks-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("appropriate-end-tag-01.dat",
+                              "[html:appropriate-end-tag-token][html:rcdata-end-tag-name-state][html:rawtext-"
+                              "end-tag-name-state][html:script-data-end-tag-name-state]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("comments-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("blocks-01.dat", "[html:parsing-main-inbody]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("doctype-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("comments-01.dat", "[html:insert-a-comment]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("entities-01.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("entities-02.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("doctype-01.dat", "[html:the-initial-insertion-mode]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("formatting-elements-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("entities-01.dat",
+                              "[html:character-reference-state][html:named-character-reference-state]");
+EXECUTE_HTML_PARSER_TEST_CASE("entities-02.dat",
+                              "[html:character-reference-state][html:named-character-reference-state]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("foster-parenting-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("foreign-fragment-01.dat",
+                              "[html:parsing-main-inforeign][html:html-fragment-parsing-algorithm]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("html5test-com.dat");
+EXECUTE_HTML_PARSER_TEST_CASE(
+  "formatting-elements-01.dat",
+  "[html:reconstruct-the-active-formatting-elements][html:push-onto-the-list-of-active-formatting-elements]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("inbody-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("foster-parenting-01.dat", "[html:foster-parent]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("inner-html-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("frameset-ok-01.dat", "[html:frameset-ok-flag]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("isindex-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("html5test-com.dat", "");
 
-EXECUTE_HTML_PARSER_TEST_CASE("main-element-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("inbody-01.dat", "[html:parsing-main-inbody]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("math-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE(
+  "inner-html-01.dat", "[html:html-fragment-parsing-algorithm][html:reset-the-insertion-mode-appropriately]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("menuitem-element-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("isindex-01.dat", "");
 
-EXECUTE_HTML_PARSER_TEST_CASE("namespace-sensitivity-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("main-element-01.dat", "");
 
-EXECUTE_HTML_PARSER_TEST_CASE("noscript-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("math-01.dat", "[html:parsing-main-inforeign]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("plain-text-unsafe-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("menuitem-element-01.dat", "");
 
-EXECUTE_HTML_PARSER_TEST_CASE("quirks-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("namespace-sensitivity-01.dat", "");
 
-EXECUTE_HTML_PARSER_TEST_CASE("ruby-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("noscript-01.dat", "[html:parsing-main-inheadnoscript]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("script-data-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("plain-text-unsafe-01.dat", "");
 
-EXECUTE_HTML_PARSER_TEST_CASE("search-element-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("quirks-01.dat", "[html:the-initial-insertion-mode]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("svg-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("ruby-01.dat", "");
 
-EXECUTE_HTML_PARSER_TEST_CASE("tables-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("script-data-01.dat", "[html:script-data-state]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("template-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("search-element-01.dat", "");
 
-EXECUTE_HTML_PARSER_TEST_CASE("tests-01.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-02.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-03.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-04.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-05.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-06.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-07.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-08.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-09.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-11.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-12.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-14.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-15.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-16.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-17.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-18.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-19.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-20.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-21.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-22.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-23.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-24.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-25.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("tests-26.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("select-fragment-01.dat",
+                              "[html:html-fragment-parsing-algorithm][html:parsing-main-inbody]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("tricky-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("svg-01.dat", "[html:parsing-main-inforeign]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("void-in-phrasing-01.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("tables-01.dat", "[html:parsing-main-intable]");
 
-EXECUTE_HTML_PARSER_TEST_CASE("webkit-01.dat");
-EXECUTE_HTML_PARSER_TEST_CASE("webkit-02.dat");
+EXECUTE_HTML_PARSER_TEST_CASE("template-01.dat", "[html:parsing-main-intemplate]");
+EXECUTE_HTML_PARSER_TEST_CASE("template-02.dat", "[html:parsing-main-intemplate][html:parsing-main-intable]");
+
+EXECUTE_HTML_PARSER_TEST_CASE("tests-01.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-02.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-03.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-04.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-05.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-06.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-07.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-08.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-09.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-10.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-11.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-12.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-14.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-15.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-16.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-17.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-18.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-19.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-20.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-21.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-22.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-23.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-24.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-25.dat", "[html:tree-construction]");
+EXECUTE_HTML_PARSER_TEST_CASE("tests-26.dat", "[html:tree-construction]");
+
+EXECUTE_HTML_PARSER_TEST_CASE("tricky-01.dat", "");
+
+EXECUTE_HTML_PARSER_TEST_CASE("void-in-phrasing-01.dat", "");
+
+EXECUTE_HTML_PARSER_TEST_CASE("webkit-01.dat", "");
+EXECUTE_HTML_PARSER_TEST_CASE("webkit-02.dat", "");

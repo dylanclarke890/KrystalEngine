@@ -40,7 +40,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Parse errors aren't reported (no console, FIXME in `HTMLTreeBuilder.cpp`).
-- Unimplemented tree builder steps, all FIXMEs in `HTMLTreeBuilder.cpp`: content patching (a `<template for>` is inserted as a plain template: there are no template insertion targets, and the template element's prepare content patching and find markers aren't implemented), script end tags in "text", the stop-parsing steps, the `xmlns` attribute parse error, the throw-on-dynamic-markup-insertion counter, and resetting resettable elements on creation.
+- Unimplemented tree builder steps, all FIXMEs in `HTMLTreeBuilder.cpp`: content patching (a `<template for>` is inserted as a plain template: there are no template insertion targets, and the template element's prepare content patching and find markers aren't implemented), the `xmlns` attribute parse error, the throw-on-dynamic-markup-insertion counter, and resetting resettable elements on creation.
+- A `<meta charset>` or `http-equiv="Content-Type"` met while parsing doesn't change the encoding (FIXME in `HTMLTreeBuilder.cpp`), and the prescan finds an encoding but doesn't return it (FIXME in `HTMLEncodingSniffer.hpp`), as documents decode UTF-8 only (see Loading).
 - The tokenizer has no processing instruction tokens (`<?target data?>` is still a bogus comment, as before the specification added them), so the parser never creates processing instructions and a sanitizer configuration's processing instruction lists only affect its own methods.
 - The tree builder does not give form-associated elements their parser form owner on creation: `FormAssociatedElement::SetFormSetByParser` exists but nothing calls it (FIXME in `HTMLTreeBuilder.cpp`).
 - There is no `document.open()`, `document.write()`, `document.writeln()` or `document.close()`, so there's no script-created parser and no insertion point.
