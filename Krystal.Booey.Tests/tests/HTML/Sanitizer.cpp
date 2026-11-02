@@ -50,7 +50,11 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Sanitizer: canonicalizing a configuration", "[HTML][Sanitizer]")
+  TEST_CASE("Sanitizer: canonicalizing a configuration",
+            "[HTML][Sanitizer][html:the-sanitizer-interface][html:dom-sanitizer-constructor][html:configure-"
+            "a-sanitizer][html:canonicalize-the-configuration][html:canonicalize-a-sanitizer-list][html:"
+            "canonicalize-a-sanitizer-name][html:canonicalize-a-sanitizer-element][html:canonicalize-a-"
+            "sanitizer-element-with-attributes][html:canonicalize-a-processing-instruction]")
   {
     SECTION("an empty configuration with permissive defaults allows everything")
     {
@@ -108,7 +112,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Sanitizer: invalid configurations throw", "[HTML][Sanitizer]")
+  TEST_CASE("Sanitizer: invalid configurations throw",
+            "[HTML][Sanitizer][html:dom-sanitizerconfig-valid][html:configuration-invariants]")
   {
     auto invalid = [](const SanitizerConfig &config)
     {
@@ -151,7 +156,8 @@ namespace krys::boo::html::tests
     CHECK_FALSE(invalid(bothLocalLists));
   }
 
-  TEST_CASE("Sanitizer: the default configuration", "[HTML][Sanitizer]")
+  TEST_CASE("Sanitizer: the default configuration",
+            "[HTML][Sanitizer][html:sanitization-constants][html:get-a-sanitizer-config-from-options]")
   {
     auto config = Sanitizer::Create()->Get();
     REQUIRE(config.Elements);
@@ -179,7 +185,8 @@ namespace krys::boo::html::tests
     CHECK(Allows(config, u8"cite", u8"", u8"blockquote"));
   }
 
-  TEST_CASE("Sanitizer: get() sorts its lists", "[HTML][Sanitizer]")
+  TEST_CASE("Sanitizer: get() sorts its lists",
+            "[HTML][Sanitizer][html:dom-sanitizer-get][html:compare-sanitizer-items]")
   {
     auto sanitizer =
       Make({.RemoveElements = List<SanitizerElementNamespace> {u8"u", {u8"g", SVG}, u8"b"},
@@ -189,7 +196,13 @@ namespace krys::boo::html::tests
     CHECK(Names(*config.RemoveAttributes) == List<dom::DOMString> {u8"a", u8"z", u8"href"});
   }
 
-  TEST_CASE("Sanitizer: modifying a configuration", "[HTML][Sanitizer]")
+  TEST_CASE("Sanitizer: modifying a configuration",
+            "[HTML][Sanitizer][html:dom-sanitizer-allowelement][html:dom-sanitizer-removeelement][html:dom-"
+            "sanitizer-replaceelementwithchildren][html:dom-sanitizer-allowattribute][html:dom-sanitizer-"
+            "removeattribute][html:dom-sanitizer-setcomments][html:dom-sanitizer-setdataattributes][html:dom-"
+            "sanitizer-setjavascripturls][html:dom-sanitizer-allowprocessinginstruction][html:dom-sanitizer-"
+            "removeprocessinginstruction][html:dom-sanitizer-removeunsafe][html:remove-an-element-from-"
+            "sanitizer-config][html:remove-an-attribute-from-sanitizer-config][html:remove-unsafe]")
   {
     SECTION("with an allow-list")
     {
@@ -275,7 +288,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Sanitizer: attributes with javascript: URLs", "[HTML][Sanitizer]")
+  TEST_CASE("Sanitizer: attributes with javascript: URLs",
+            "[HTML][Sanitizer][html:contains-a-javascript:-url][html:sanitizer-config-allows-an-attribute]["
+            "html:sanitization-algorithms]")
   {
     auto config = Make({})->Get();
     REQUIRE(config.JavascriptURLs == true);

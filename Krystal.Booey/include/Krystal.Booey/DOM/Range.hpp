@@ -124,6 +124,15 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Range (DOM Parsing) - https://html.spec.whatwg.org/#dom-range-createcontextualfragment
+
+    /// @brief @p markup parsed as the children of the start node (or its parent element, or a `body`).
+    /// @see https://html.spec.whatwg.org/#dom-range-createcontextualfragment
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
+      CreateContextualFragment(DOMStringView markup) const noexcept;
+
+#pragma endregion
+
     /// @brief Whether the document's selection is this range, so setting its boundary points sets the
     /// selection.
     KRYS_NODISCARD bool IsAssociatedWithSelection() const noexcept

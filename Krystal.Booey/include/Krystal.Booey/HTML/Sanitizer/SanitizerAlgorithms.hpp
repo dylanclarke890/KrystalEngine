@@ -25,38 +25,38 @@ namespace krys::boo::html
   public:
     /// @brief The configuration a sanitizer configured with @p configuration has: a canonical copy, or a
     /// `TypeError` if it isn't valid.
-    /// @see https://html.spec.whatwg.org/#sanitizer-configure
+    /// @see https://html.spec.whatwg.org/#configure-a-sanitizer
     KRYS_NODISCARD static dom::ExceptionOr<SanitizerConfig> Configure(const SanitizerConfig &configuration,
                                                                       bool permissiveDefaults) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#sanitizer-canonicalize-the-configuration
+    /// @see https://html.spec.whatwg.org/#canonicalize-the-configuration
     static void Canonicalize(SanitizerConfig &configuration, bool permissiveDefaults) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#canonicalize-a-sanitizerelementwithattributes
+    /// @see https://html.spec.whatwg.org/#canonicalize-a-sanitizer-element-with-attributes
     KRYS_NODISCARD static SanitizerElementNamespaceWithAttributes
       Canonicalize(SanitizerElementNamespaceWithAttributes element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#sanitizer-canonicalize-a-sanitizer-element
+    /// @see https://html.spec.whatwg.org/#canonicalize-a-sanitizer-element
     KRYS_NODISCARD static SanitizerElementNamespace Canonicalize(SanitizerElementNamespace element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#sanitizer-canonicalize-a-sanitizer-name
+    /// @see https://html.spec.whatwg.org/#canonicalize-a-sanitizer-name
     KRYS_NODISCARD static SanitizerAttributeNamespace
       Canonicalize(SanitizerAttributeNamespace attribute) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#sanitizerconfig-valid
+    /// @see https://html.spec.whatwg.org/#dom-sanitizerconfig-valid
     KRYS_NODISCARD static bool IsValid(const SanitizerConfig &config) noexcept;
 
     /// @return Whether @p configuration changed.
-    /// @see https://html.spec.whatwg.org/#sanitizer-remove-an-element
+    /// @see https://html.spec.whatwg.org/#remove-an-element-from-sanitizer-config
     static bool RemoveElement(SanitizerConfig &configuration, SanitizerElementNamespace element) noexcept;
 
     /// @return Whether @p configuration changed.
-    /// @see https://html.spec.whatwg.org/#sanitizer-remove-an-attribute
+    /// @see https://html.spec.whatwg.org/#remove-an-attribute-from-sanitizer-config
     static bool RemoveAttribute(SanitizerConfig &configuration,
                                 SanitizerAttributeNamespace attribute) noexcept;
 
     /// @return Whether @p configuration changed.
-    /// @see https://html.spec.whatwg.org/#sanitizer-remove-unsafe
+    /// @see https://html.spec.whatwg.org/#remove-unsafe
     static bool RemoveUnsafe(SanitizerConfig &configuration) noexcept;
 
     /// @brief The configuration markup is sanitized with, given the options' sanitizer member (null if it's
@@ -65,7 +65,7 @@ namespace krys::boo::html
     KRYS_NODISCARD static dom::ExceptionOr<Maybe<SanitizerConfig>>
       GetSanitizerConfigFromOptions(const SanitizerInput *sanitizer, bool safe) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#sanitizer-contains-a-javascript-url
+    /// @see https://html.spec.whatwg.org/#contains-a-javascript:-url
     KRYS_NODISCARD static bool ContainsJavaScriptURL(dom::DOMStringView value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#sanitizer-config-allows-comments
@@ -91,7 +91,7 @@ namespace krys::boo::html
     KRYS_NODISCARD static bool IsCustomDataAttribute(const SanitizerAttributeNamespace &attribute) noexcept;
 
     /// @brief Whether @p a sorts before @p b: by namespace (null first), then by name.
-    /// @see https://html.spec.whatwg.org/#sanitizer-compare-sanitizer-items
+    /// @see https://html.spec.whatwg.org/#compare-sanitizer-items
     KRYS_NODISCARD static bool CompareItems(dom::DOMStringView nameA, dom::DOMStringAtom namespaceA,
                                             dom::DOMStringView nameB, dom::DOMStringAtom namespaceB) noexcept;
   };

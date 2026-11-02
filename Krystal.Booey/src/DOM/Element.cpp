@@ -2391,8 +2391,8 @@ namespace krys::boo::dom
   ExceptionOr<void> Element::SetHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Let target be the target for HTML insertion given this. Filter and set HTML given target, html,
-    // options, and Safe.
+    // 1. Let target be the target for HTML insertion given this.
+    // 2. Filter and set HTML given target, html, options, and Safe.
     return html::HTMLInsertionAlgorithms::FilterAndSetHTML(
       html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), html, &options.Sanitizer,
       html::FragmentParserMode::Safe);
@@ -2401,8 +2401,8 @@ namespace krys::boo::dom
   ExceptionOr<void> Element::AppendHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Let target be the target for HTML insertion given this. Filter and pre-insert HTML given target,
-    // null, html, options, and Safe.
+    // 1. Let target be the target for HTML insertion given this.
+    // 2. Filter and pre-insert HTML given target, null, html, options, and Safe.
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), nullptr, html, &options.Sanitizer,
       html::FragmentParserMode::Safe);
@@ -2411,8 +2411,8 @@ namespace krys::boo::dom
   ExceptionOr<void> Element::PrependHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Let target be the target for HTML insertion given this. Filter and pre-insert HTML given target,
-    // target's first child, html, options, and Safe.
+    // 1. Let target be the target for HTML insertion given this.
+    // 2. Filter and pre-insert HTML given target, target's first child, html, options, and Safe.
     auto &target = html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this);
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       target, target.FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
@@ -2421,8 +2421,11 @@ namespace krys::boo::dom
   ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Let target be the target for HTML insertion given this. Filter and set HTML given target, html,
-    // options, and Unsafe.
+    // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
+    //    algorithm with this's relevant global object, html, options, and "Element setHTMLUnsafe".
+    // (There are no Trusted Types.)
+    // 2. Let target be the target for HTML insertion given this.
+    // 3. Filter and set HTML given target, html, options, and Unsafe.
     return html::HTMLInsertionAlgorithms::FilterAndSetHTML(
       html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), html,
       options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
@@ -2432,8 +2435,11 @@ namespace krys::boo::dom
                                               html::SetHTMLUnsafeOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Let target be the target for HTML insertion given this. Filter and pre-insert HTML given target,
-    // null, html, options, and Unsafe.
+    // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
+    //    algorithm with this's relevant global object, html, options, and "Element appendHTMLUnsafe".
+    // (There are no Trusted Types.)
+    // 2. Let target be the target for HTML insertion given this.
+    // 3. Filter and pre-insert HTML given target, null, html, options, and Unsafe.
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), nullptr, html,
       options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
@@ -2443,8 +2449,11 @@ namespace krys::boo::dom
                                                html::SetHTMLUnsafeOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Let target be the target for HTML insertion given this. Filter and pre-insert HTML given target,
-    // target's first child, html, options, and Unsafe.
+    // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
+    //    algorithm with this's relevant global object, html, options, and "Element prependHTMLUnsafe".
+    // (There are no Trusted Types.)
+    // 2. Let target be the target for HTML insertion given this.
+    // 3. Filter and pre-insert HTML given target, target's first child, html, options, and Unsafe.
     auto &target = html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this);
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       target, target.FirstChild(), html, options.Sanitizer ? &*options.Sanitizer : nullptr,

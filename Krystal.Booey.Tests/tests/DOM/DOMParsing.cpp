@@ -43,7 +43,8 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("Element: innerHTML", "[DOM][Element][DOMParsing]")
+  TEST_CASE("Element: innerHTML", "[DOM][Element][DOMParsing][html:the-innerhtml-property][html:dom-element-"
+                                  "innerhtml][html:fragment-serializing-algorithm-steps]")
   {
     MarkupDocument data;
     auto &div = *data.Div;
@@ -152,7 +153,8 @@ namespace krys::boo::dom::tests
     CHECK(root->FirstElementChild() == p);
   }
 
-  TEST_CASE("Element: outerHTML", "[DOM][Element][DOMParsing]")
+  TEST_CASE("Element: outerHTML",
+            "[DOM][Element][DOMParsing][html:the-outerhtml-property][html:dom-element-outerhtml]")
   {
     MarkupDocument data;
     auto &div = *data.Div;
@@ -203,7 +205,9 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Element: insertAdjacentHTML", "[DOM][Element][DOMParsing]")
+  TEST_CASE(
+    "Element: insertAdjacentHTML",
+    "[DOM][Element][DOMParsing][html:the-insertadjacenthtml()-method][html:dom-element-insertadjacenthtml]")
   {
     MarkupDocument data;
     auto &div = *data.Div;
@@ -270,7 +274,9 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Element and ShadowRoot: setHTMLUnsafe and getHTML", "[DOM][Element][ShadowRoot][DOMParsing]")
+  TEST_CASE("Element and ShadowRoot: setHTMLUnsafe and getHTML",
+            "[DOM][Element][ShadowRoot][DOMParsing][html:html-serialization-methods][html:dom-element-"
+            "gethtml][html:dom-shadowroot-gethtml][html:dom-shadowroot-innerhtml]")
   {
     MarkupDocument data;
     auto &div = *data.Div;

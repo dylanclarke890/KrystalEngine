@@ -28,6 +28,52 @@ namespace krys::boo::dom::tests
     };
   }
 
+  TEST_CASE(
+    "Range.createContextualFragment(): the markup parsed in the context of the start node",
+    "[DOM][Range][html:the-createcontextualfragment()-method][html:dom-range-createcontextualfragment]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+    parser->InputStream().Append(u8"<!DOCTYPE html><table id=t></table><p id=p>text</p>", IsEOF(true));
+    parser->PumpTokenizer();
+    auto range = document->CreateRange();
+
+    SECTION("in a table, table rows are kept, in an implied tbody")
+    {
+      REQUIRE_FALSE(range->SetStart(*document->GetElementById(u8"t"), 0).HasException());
+      auto fragment = range->CreateContextualFragment(u8"<tr><td>cell</td></tr>");
+      REQUIRE_FALSE(fragment.HasException());
+      auto *tbody = DynamicDowncast<Element>(fragment.Value()->FirstChild());
+      REQUIRE(tbody);
+      CHECK(tbody->LocalName() == u8"tbody");
+      REQUIRE(Is<Element>(tbody->FirstChild()));
+      CHECK(Downcast<Element>(*tbody->FirstChild()).LocalName() == u8"tr");
+    }
+
+    SECTION("in text, the context is its parent element")
+    {
+      REQUIRE_FALSE(range->SetStart(*document->GetElementById(u8"p")->FirstChild(), 1).HasException());
+      auto fragment = range->CreateContextualFragment(u8"<tr><td>cell</td></tr>");
+      REQUIRE_FALSE(fragment.HasException());
+      // Outside a table, the row's tags are ignored.
+      CHECK(fragment.Value()->TextContent() == u8"cell");
+      REQUIRE(Is<Text>(fragment.Value()->FirstChild()));
+    }
+
+    SECTION("in the document or the html element, the context is a body")
+    {
+      for (Node *start :
+           {static_cast<Node *>(document.get()), static_cast<Node *>(document->DocumentElement().get())})
+      {
+        REQUIRE_FALSE(range->SetStart(*start, 0).HasException());
+        auto fragment = range->CreateContextualFragment(u8"<b>bold</b>");
+        REQUIRE_FALSE(fragment.HasException());
+        REQUIRE(Is<Element>(fragment.Value()->FirstChild()));
+        CHECK(Downcast<Element>(*fragment.Value()->FirstChild()).LocalName() == u8"b");
+      }
+    }
+  }
+
   TEST_CASE("Range.commonAncestorContainer: the common ancestor of its start and end nodes",
             "[DOM][Range][dom:dom-range-commonancestorcontainer][dom:get-the-common-ancestor]")
   {
@@ -1673,8 +1719,9 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("Range: new Range() is a live range collapsed at the start of the document",
-            "[DOM][Range][dom:interface-range][dom:dom-range-range][dom:concept-live-range][dom:concept-range-root]")
+  TEST_CASE(
+    "Range: new Range() is a live range collapsed at the start of the document",
+    "[DOM][Range][dom:interface-range][dom:dom-range-range][dom:concept-live-range][dom:concept-range-root]")
   {
     ConnectedTestData data;
     auto range = data.Document->CreateRange();

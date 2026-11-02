@@ -71,7 +71,7 @@ namespace krys::boo::dom
   ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Filter and set HTML given this, html, options, and Safe.
+    // Filter and set HTML given this, html, options, and Safe.
     return html::HTMLInsertionAlgorithms::FilterAndSetHTML(*this, html, &options.Sanitizer,
                                                            html::FragmentParserMode::Safe);
   }
@@ -79,7 +79,7 @@ namespace krys::boo::dom
   ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Filter and pre-insert HTML given this, null, html, options, and Safe.
+    // Filter and pre-insert HTML given this, null, html, options, and Safe.
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(*this, nullptr, html, &options.Sanitizer,
                                                                  html::FragmentParserMode::Safe);
   }
@@ -87,7 +87,7 @@ namespace krys::boo::dom
   ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Filter and pre-insert HTML given this, this's first child, html, options, and Safe.
+    // Filter and pre-insert HTML given this, this's first child, html, options, and Safe.
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       *this, FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
   }
@@ -96,7 +96,10 @@ namespace krys::boo::dom
                                               html::SetHTMLUnsafeOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Filter and set HTML given this, html, options, and Unsafe.
+    // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
+    //    algorithm with this's relevant global object, html, options, and "ShadowRoot setHTMLUnsafe".
+    // (There are no Trusted Types.)
+    // 2. Filter and set HTML given this, html, options, and Unsafe.
     return html::HTMLInsertionAlgorithms::FilterAndSetHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
@@ -105,7 +108,10 @@ namespace krys::boo::dom
                                                  html::SetHTMLUnsafeOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Filter and pre-insert HTML given this, null, html, options, and Unsafe.
+    // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
+    //    algorithm with this's relevant global object, html, options, and "ShadowRoot appendHTMLUnsafe".
+    // (There are no Trusted Types.)
+    // 2. Filter and pre-insert HTML given this, null, html, options, and Unsafe.
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       *this, nullptr, html, options.Sanitizer ? &*options.Sanitizer : nullptr,
       html::FragmentParserMode::Unsafe);
@@ -115,7 +121,10 @@ namespace krys::boo::dom
                                                   html::SetHTMLUnsafeOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    // SPEC: Filter and pre-insert HTML given this, this's first child, html, options, and Unsafe.
+    // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
+    //    algorithm with this's relevant global object, html, options, and "ShadowRoot prependHTMLUnsafe".
+    // (There are no Trusted Types.)
+    // 2. Filter and pre-insert HTML given this, this's first child, html, options, and Unsafe.
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       *this, FirstChild(), html, options.Sanitizer ? &*options.Sanitizer : nullptr,
       html::FragmentParserMode::Unsafe);

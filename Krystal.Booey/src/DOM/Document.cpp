@@ -789,33 +789,51 @@ namespace krys::boo::dom
 
   namespace
   {
-    // https://html.spec.whatwg.org/#parse-html-from-a-string, into a new document with declarative shadow
-    // roots and @p context's settings.
+    // The steps parseHTML() and parseHTMLUnsafe() share: a new document with declarative shadow roots and
+    // @p context's settings, into which @p html is parsed.
     KRYS_NODISCARD Ref<Document>
       ParseHTMLIntoNewDocument(Document &context, DOMStringView html,
                                Maybe<html::SanitizerConfig> &&configuration) noexcept
     {
-      // SPEC: Let document be a new Document, whose content type is "text/html" [...].
+      // Let document be a new Document, whose content type is "text/html" and origin is this's relevant
+      // global object's associated Document's origin.
+      // (There are no origins; the document takes the context's settings.)
       auto document = CreateRef<HTMLDocument>();
       document->SetSettings(ShareRef(context.GetSettings()));
 
-      // SPEC: Set document's allow declarative shadow roots to true.
+      // Set document's allow declarative shadow roots to true.
       document->SetAllowDeclarativeShadowRoots(true);
 
-      // SPEC: Parse HTML from a string given document, html, and sanitizerConfig.
+      // Parse HTML from a string given document, html, and sanitizerConfig.
+      // https://html.spec.whatwg.org/#parse-html-from-a-string
+      // 1. Set document's type to "html".
+      // 2. Let parser be a new HTML parser whose allow declarative shadow roots is document's allow
+      //    declarative shadow roots and parser sanitizer configuration is configuration, associated with
+      //    document.
       auto parser = CreateRef<html::HTMLDocumentParser>(*document);
       parser->SanitizerConfiguration(krys::move(configuration));
+      // 3. Place html into the input stream for parser.
       parser->InputStream().Append(DOMString(html), IsEOF(true));
+      // 4. Start parser and let it run until it has consumed all the characters just inserted into the input
+      //    stream.
       parser->PumpTokenizer();
       return document;
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-parsehtmlunsafe
   ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
                                                        html::ParseHTMLUnsafeOptions &&options) noexcept
   {
-    // SPEC: Let sanitizerConfig be the result of getting a sanitizer config from options given
-    // compliantOptions and false.
+    // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
+    //    algorithm with the current global object, html, options, and "Document parseHTMLUnsafe".
+    // (There are no Trusted Types.)
+    // 2. Let document be a new Document, whose content type is "text/html" and origin is this's relevant
+    //    global object's associated Document's origin.
+    // 3. Set document's allow declarative shadow roots to true.
+    // (ParseHTMLIntoNewDocument, below.)
+    // 4. Let sanitizerConfig be the result of getting a sanitizer config from options given compliantOptions
+    //    and false.
     auto sanitizerConfig = html::SanitizerAlgorithms::GetSanitizerConfigFromOptions(
       options.Sanitizer ? &*options.Sanitizer : nullptr, false);
     if (sanitizerConfig.HasException())
@@ -823,25 +841,31 @@ namespace krys::boo::dom
       return sanitizerConfig.ReleaseException();
     }
 
-    // SPEC: Return document.
+    // 5. Parse HTML from a string given document, compliantHTML, and sanitizerConfig.
+    // 6. Return document.
     return ParseHTMLIntoNewDocument(context, markup, sanitizerConfig.ReleaseValue());
   }
 
+  // https://html.spec.whatwg.org/#dom-parsehtml
   ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
                                                  html::SetHTMLOptions &&options) noexcept
   {
-    // SPEC: Let sanitizerConfig be the result of getting a sanitizer config from options given options and
-    // true.
+    // 1. Let document be a new Document, whose content type is "text/html" and origin is this's relevant
+    //    global object's associated Document's origin.
+    // 2. Set document's allow declarative shadow roots to true.
+    // (ParseHTMLIntoNewDocument, below.)
+    // 3. Let sanitizerConfig be the result of getting a sanitizer config from options given options and true.
     auto sanitizerConfig = html::SanitizerAlgorithms::GetSanitizerConfigFromOptions(&options.Sanitizer, true);
     if (sanitizerConfig.HasException())
     {
       return sanitizerConfig.ReleaseException();
     }
 
-    // SPEC: Assert: sanitizerConfig is non-null.
+    // 4. Assert: sanitizerConfig is non-null.
     krys_debug_assert(sanitizerConfig.Value().has_value());
 
-    // SPEC: Return document.
+    // 5. Parse HTML from a string given document, html, and sanitizerConfig.
+    // 6. Return document.
     return ParseHTMLIntoNewDocument(context, html, sanitizerConfig.ReleaseValue());
   }
 

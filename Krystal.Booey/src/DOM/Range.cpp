@@ -11,13 +11,18 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom
@@ -1105,6 +1110,48 @@ namespace krys::boo::dom
 
     // 6. Return string.
     return string;
+  }
+
+#pragma endregion
+
+#pragma region Range (DOM Parsing)
+
+  // https://html.spec.whatwg.org/#dom-range-createcontextualfragment
+  ExceptionOr<Ref<DocumentFragment>> Range::CreateContextualFragment(DOMStringView markup) const noexcept
+  {
+    // 1. Let node be this's start node.
+    Ref<Node> node = ShareRef(*StartContainer());
+
+    // 2. Let (compliantString, compliantOptions) be the result of invoking the get trusted type compliant
+    //    input algorithm with this's relevant global object, string, a new SetHTMLUnsafeOptions dictionary
+    //    whose runScripts member is set to true and whose other members are set to their default values,
+    //    "Range createContextualFragment", node's node document's type, and false.
+    // (There are no Trusted Types, and no scripts to run.)
+
+    // 3. Let element be null.
+    RefPtr<Element> element;
+    // 4. If node implements Element, set element to node.
+    if (auto *nodeElement = DynamicDowncast<Element>(node.get()))
+    {
+      element = ShareRefPtr(nodeElement);
+    }
+    // 5. Otherwise, if node implements Text or Comment, set element to node's parent element.
+    else if (Is<Text>(*node) || Is<Comment>(*node))
+    {
+      element = ShareRefPtr(node->ParentElement());
+    }
+
+    // 6. If element is null or all of the following are true: element's node document is an HTML document;
+    //    element's local name is "html"; and element's namespace is the HTML namespace, then set element to
+    //    the result of creating an element given node's node document, "body", and the HTML namespace.
+    if (!element || (Is<HTMLDocument>(element->NodeDocument()) && Is<html::HTMLHtmlElement>(*element)))
+    {
+      element = ElementFactory::CreateHTMLElement<html::HTMLBodyElement>(node->NodeDocument(), u8"body");
+    }
+
+    // 7. Return the result of invoking the fragment parsing algorithm steps given element, compliantString,
+    //    compliantOptions, and Legacy.
+    return ::krys::boo::CreateContextualFragment(*element, markup);
   }
 
 #pragma endregion

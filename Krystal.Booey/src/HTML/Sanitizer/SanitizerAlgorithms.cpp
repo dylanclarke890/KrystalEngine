@@ -89,16 +89,21 @@ namespace krys::boo::html
       }
     }
 
+    // https://html.spec.whatwg.org/#canonicalize-a-processing-instruction-list
     void CanonicalizeSanitizerList(Maybe<List<SanitizerProcessingInstruction>> &) noexcept
     {
-      // SPEC: To canonicalize a processing instruction given a SanitizerPI pi: if pi is a DOMString, then
-      // return «[ "target" → pi ]»; [...] return «[ "target" → pi["target"] ]». NOTE: A processing
-      // instruction is always already canonical.
+      // https://html.spec.whatwg.org/#canonicalize-a-processing-instruction
+      // 1. If pi is a DOMString, then return «[ "target" → pi ]».
+      // 2. Assert: pi is a dictionary and pi["target"] exists.
+      // 3. Return «[ "target" → pi["target"] ]».
+      // (A SanitizerProcessingInstruction is always a dictionary with a target, so it's canonical already.)
     }
 
+    // https://html.spec.whatwg.org/#canonicalize-a-sanitizer-name
+    // (Names are dictionaries with a namespace already, so only step 3 is left.)
     KRYS_NODISCARD dom::DOMStringAtom CanonicalSanitizerNamespace(dom::DOMStringAtom namespaceURI) noexcept
     {
-      // SPEC: If name["namespace"] is the empty string, then set it to null.
+      // 3. If name["namespace"] is the empty string, then set it to null.
       if (namespaceURI != dom::DOMStringAtom::Null() && namespaceURI.View().empty())
       {
         return dom::DOMStringAtom::Null();
@@ -110,42 +115,42 @@ namespace krys::boo::html
   dom::ExceptionOr<SanitizerConfig> SanitizerAlgorithms::Configure(const SanitizerConfig &configuration,
                                                                    bool permissiveDefaults) noexcept
   {
-    // SPEC: Let freshConfiguration be a clone of configuration.
+    // 1. Let freshConfiguration be a clone of configuration.
     auto freshConfiguration = configuration;
 
-    // SPEC: Canonicalize the configuration freshConfiguration with permissiveDefaults.
+    // 2. Canonicalize the configuration freshConfiguration with permissiveDefaults.
     Canonicalize(freshConfiguration, permissiveDefaults);
 
-    // SPEC: If freshConfiguration is not valid, then throw a TypeError.
+    // 3. If freshConfiguration is not valid, then throw a TypeError.
     if (!IsValid(freshConfiguration))
     {
       return dom::Exception {dom::ExceptionCode::TypeError, u8"The sanitizer configuration isn't valid."};
     }
 
-    // SPEC: Set sanitizer's configuration to freshConfiguration.
+    // 4. Set sanitizer's configuration to freshConfiguration.
     return freshConfiguration;
   }
 
   void SanitizerAlgorithms::Canonicalize(SanitizerConfig &configuration, bool permissiveDefaults) noexcept
   {
-    // SPEC: If neither configuration["elements"] nor configuration["removeElements"] exists, then set
-    // configuration["removeElements"] to an empty list.
+    // 1. If neither configuration["elements"] nor configuration["removeElements"] exists, then set
+    //    configuration["removeElements"] to an empty list.
     if (!configuration.Elements && !configuration.RemoveElements)
     {
       configuration.RemoveElements.emplace();
     }
 
-    // SPEC: If neither configuration["attributes"] nor configuration["removeAttributes"] exists, then set
-    // configuration["removeAttributes"] to an empty list.
+    // 2. If neither configuration["attributes"] nor configuration["removeAttributes"] exists, then set
+    //    configuration["removeAttributes"] to an empty list.
     if (!configuration.Attributes && !configuration.RemoveAttributes)
     {
       configuration.RemoveAttributes.emplace();
     }
 
-    // SPEC: If neither configuration["processingInstructions"] nor
-    // configuration["removeProcessingInstructions"] exists: if permissiveDefaults is true, then set
-    // configuration["removeProcessingInstructions"] to an empty list; otherwise, set
-    // configuration["processingInstructions"] to an empty list.
+    // 3.-3b. If neither configuration["processingInstructions"] nor
+    //        configuration["removeProcessingInstructions"] exists: if permissiveDefaults is true, then set
+    //        configuration["removeProcessingInstructions"] to an empty list; otherwise, set
+    //        configuration["processingInstructions"] to an empty list.
     if (!configuration.ProcessingInstructions && !configuration.RemoveProcessingInstructions)
     {
       if (permissiveDefaults)
@@ -158,46 +163,53 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: If configuration["elements"] exists: [...] append the result of canonicalizing element to
-    // newElements. Set configuration["elements"] to newElements.
+    // 4. If configuration["elements"] exists:
+    // 4a. Let newElements be « ».
+    // 4b. For each element of configuration["elements"], append the result of canonicalizing element to
+    //     newElements.
+    // 4c. Set configuration["elements"] to newElements.
     CanonicalizeSanitizerList(configuration.Elements);
 
-    // SPEC: If configuration["removeElements"] exists, then set configuration["removeElements"] to the result
-    // of canonicalizing configuration["removeElements"].
+    // 5. If configuration["removeElements"] exists, then set configuration["removeElements"] to the result
+    //    of canonicalizing configuration["removeElements"].
     CanonicalizeSanitizerList(configuration.RemoveElements);
 
-    // SPEC: If configuration["attributes"] exists, then set configuration["attributes"] to the result of
-    // canonicalizing configuration["attributes"].
+    // 6. If configuration["attributes"] exists, then set configuration["attributes"] to the result of
+    //    canonicalizing configuration["attributes"].
     CanonicalizeSanitizerList(configuration.Attributes);
 
-    // SPEC: If configuration["removeAttributes"] exists, then set configuration["removeAttributes"] to the
-    // result of canonicalizing configuration["removeAttributes"].
+    // 7. If configuration["removeAttributes"] exists, then set configuration["removeAttributes"] to the
+    //    result of canonicalizing configuration["removeAttributes"].
     CanonicalizeSanitizerList(configuration.RemoveAttributes);
 
-    // SPEC: If configuration["replaceWithChildrenElements"] exists, then set
-    // configuration["replaceWithChildrenElements"] to the result of canonicalizing
-    // configuration["replaceWithChildrenElements"].
+    // 8. If configuration["replaceWithChildrenElements"] exists, then set
+    //    configuration["replaceWithChildrenElements"] to the result of canonicalizing
+    //    configuration["replaceWithChildrenElements"].
     CanonicalizeSanitizerList(configuration.ReplaceWithChildrenElements);
 
-    // SPEC: If configuration["processingInstructions"] exists, then [...] canonicalizing it. If
-    // configuration["removeProcessingInstructions"] exists, then [...] canonicalizing it.
+    // 9. If configuration["processingInstructions"] exists, then set configuration["processingInstructions"]
+    // to
+    //    the result of canonicalizing configuration["processingInstructions"].
+    // 10. If configuration["removeProcessingInstructions"] exists, then set
+    //     configuration["removeProcessingInstructions"] to the result of canonicalizing
+    //     configuration["removeProcessingInstructions"].
     CanonicalizeSanitizerList(configuration.ProcessingInstructions);
     CanonicalizeSanitizerList(configuration.RemoveProcessingInstructions);
 
-    // SPEC: If configuration["comments"] does not exist, then set it to permissiveDefaults.
+    // 11. If configuration["comments"] does not exist, then set it to permissiveDefaults.
     if (!configuration.Comments)
     {
       configuration.Comments = permissiveDefaults;
     }
 
-    // SPEC: If configuration["attributes"] exists and configuration["dataAttributes"] does not exist, then
-    // set it to permissiveDefaults.
+    // 12. If configuration["attributes"] exists and configuration["dataAttributes"] does not exist, then
+    //     set it to permissiveDefaults.
     if (configuration.Attributes && !configuration.DataAttributes)
     {
       configuration.DataAttributes = permissiveDefaults;
     }
 
-    // SPEC: If configuration["javascriptURLs"] does not exist, then set it to permissiveDefaults.
+    // 13. If configuration["javascriptURLs"] does not exist, then set it to permissiveDefaults.
     if (!configuration.JavascriptURLs)
     {
       configuration.JavascriptURLs = permissiveDefaults;
@@ -207,30 +219,31 @@ namespace krys::boo::html
   SanitizerElementNamespaceWithAttributes
     SanitizerAlgorithms::Canonicalize(SanitizerElementNamespaceWithAttributes element) noexcept
   {
-    // SPEC: Let result be the result of canonicalizing element.
+    // 1. Let result be the result of canonicalizing element.
     element.Namespace = CanonicalSanitizerNamespace(element.Namespace);
 
-    // SPEC: If element is a dictionary: if element["attributes"] exists, then set result["attributes"] to the
-    // result of canonicalizing element["attributes"]; if element["removeAttributes"] exists, then set
-    // result["removeAttributes"] to the result of canonicalizing element["removeAttributes"].
+    // 2.-2b. If element is a dictionary: if element["attributes"] exists, then set result["attributes"] to
+    // the
+    //        result of canonicalizing element["attributes"]; if element["removeAttributes"] exists, then set
+    //        result["removeAttributes"] to the result of canonicalizing element["removeAttributes"].
     CanonicalizeSanitizerList(element.Attributes);
     CanonicalizeSanitizerList(element.RemoveAttributes);
 
-    // SPEC: If neither result["attributes"] nor result["removeAttributes"] exists, then set
-    // result["removeAttributes"] to an empty list.
+    // 3. If neither result["attributes"] nor result["removeAttributes"] exists, then set
+    //    result["removeAttributes"] to an empty list.
     if (!element.Attributes && !element.RemoveAttributes)
     {
       element.RemoveAttributes.emplace();
     }
 
-    // SPEC: Return result.
+    // 4. Return result.
     return element;
   }
 
   SanitizerElementNamespace SanitizerAlgorithms::Canonicalize(SanitizerElementNamespace element) noexcept
   {
-    // SPEC: Return the result of canonicalizing element with the HTML namespace as the default namespace.
-    // NOTE: A string element already has the HTML namespace.
+    // Return the result of canonicalizing element with the HTML namespace as the default namespace.
+    // (A string element already has the HTML namespace.)
     element.Namespace = CanonicalSanitizerNamespace(element.Namespace);
     return element;
   }
@@ -244,70 +257,77 @@ namespace krys::boo::html
 
   bool SanitizerAlgorithms::IsValid(const SanitizerConfig &config) noexcept
   {
-    // SPEC: Assert: config["elements"] exists or config["removeElements"] exists.
+    // 1. Assert: config["elements"] exists or config["removeElements"] exists.
     krys_debug_assert(config.Elements || config.RemoveElements);
 
-    // SPEC: If config["elements"] exists and config["removeElements"] exists, then return false.
+    // 2. If config["elements"] exists and config["removeElements"] exists, then return false.
     if (config.Elements && config.RemoveElements)
     {
       return false;
     }
 
-    // SPEC: Assert: Either config["processingInstructions"] exists or config["removeProcessingInstructions"]
-    // exists.
+    // 3. Assert: Either config["processingInstructions"] exists or config["removeProcessingInstructions"]
+    //    exists.
     krys_debug_assert(config.ProcessingInstructions || config.RemoveProcessingInstructions);
 
-    // SPEC: If config["processingInstructions"] exists and config["removeProcessingInstructions"] exists,
-    // then return false.
+    // 4. If config["processingInstructions"] exists and config["removeProcessingInstructions"] exists,
+    //    then return false.
     if (config.ProcessingInstructions && config.RemoveProcessingInstructions)
     {
       return false;
     }
 
-    // SPEC: Assert: Either config["attributes"] exists or config["removeAttributes"] exists.
+    // 5. Assert: Either config["attributes"] exists or config["removeAttributes"] exists.
     krys_debug_assert(config.Attributes || config.RemoveAttributes);
 
-    // SPEC: If config["attributes"] exists and config["removeAttributes"] exists, then return false.
+    // 6. If config["attributes"] exists and config["removeAttributes"] exists, then return false.
     if (config.Attributes && config.RemoveAttributes)
     {
       return false;
     }
 
-    // SPEC: If config["elements"] exists: if config["elements"] has duplicates, then return false. Otherwise:
-    // if config["removeElements"] has duplicates, then return false.
+    // 7. Assert: All SanitizerElementNamespaceWithAttributes, SanitizerElementNamespace,
+    //    SanitizerProcessingInstruction, and SanitizerAttributeNamespace items in config are canonical.
+    // (Configure canonicalizes them first.)
+
+    // 8.-9a. If config["elements"] exists: if config["elements"] has duplicates, then return false.
+    // Otherwise:
+    //        if config["removeElements"] has duplicates, then return false.
     if (config.Elements ? SanitizerListHasDuplicates(*config.Elements)
                         : SanitizerListHasDuplicates(*config.RemoveElements))
     {
       return false;
     }
 
-    // SPEC: If config["replaceWithChildrenElements"] exists and has duplicates, then return false.
+    // 10. If config["replaceWithChildrenElements"] exists and has duplicates, then return false.
     if (config.ReplaceWithChildrenElements && SanitizerListHasDuplicates(*config.ReplaceWithChildrenElements))
     {
       return false;
     }
 
-    // SPEC: If config["processingInstructions"] exists: if it has duplicates, then return false. Otherwise:
-    // if config["removeProcessingInstructions"] has duplicates, then return false.
+    // 11.-12a. If config["processingInstructions"] exists: if it has duplicates, then return false.
+    // Otherwise:
+    //          if config["removeProcessingInstructions"] has duplicates, then return false.
     if (config.ProcessingInstructions ? SanitizerListHasDuplicates(*config.ProcessingInstructions)
                                       : SanitizerListHasDuplicates(*config.RemoveProcessingInstructions))
     {
       return false;
     }
 
-    // SPEC: If config["attributes"] exists: if config["attributes"] has duplicates, then return false.
-    // Otherwise: if config["removeAttributes"] has duplicates, then return false.
+    // 13.-14a. If config["attributes"] exists: if config["attributes"] has duplicates, then return false.
+    //          Otherwise: if config["removeAttributes"] has duplicates, then return false.
     if (config.Attributes ? SanitizerListHasDuplicates(*config.Attributes)
                           : SanitizerListHasDuplicates(*config.RemoveAttributes))
     {
       return false;
     }
 
-    // SPEC: If config["replaceWithChildrenElements"] exists:
+    // 15. If config["replaceWithChildrenElements"] exists:
     if (config.ReplaceWithChildrenElements)
     {
-      // SPEC: For each element of config["replaceWithChildrenElements"]: if the built-in non-replaceable
-      // elements list contains element, then return false.
+      // 15a.-15a.i. For each element of config["replaceWithChildrenElements"]: if the built-in
+      // non-replaceable
+      //             elements list contains element, then return false.
       for (auto &element : *config.ReplaceWithChildrenElements)
       {
         if (std::ranges::any_of(SanitizerConstants::BuiltInNonReplaceableElements(),
@@ -318,10 +338,10 @@ namespace krys::boo::html
         }
       }
 
-      // SPEC: If config["elements"] exists: if the intersection of config["elements"] and
-      // config["replaceWithChildrenElements"] is not empty, then return false. Otherwise: if the intersection
-      // of config["removeElements"] and config["replaceWithChildrenElements"] is not empty, then return
-      // false.
+      // 15b.-15c.i. If config["elements"] exists: if the intersection of config["elements"] and
+      //             config["replaceWithChildrenElements"] is not empty, then return false. Otherwise: if the
+      //             intersection of config["removeElements"] and config["replaceWithChildrenElements"] is not
+      //             empty, then return false.
       if (config.Elements
             ? SanitizerListsIntersect(*config.Elements, *config.ReplaceWithChildrenElements)
             : SanitizerListsIntersect(*config.RemoveElements, *config.ReplaceWithChildrenElements))
@@ -330,40 +350,42 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: If config["attributes"] exists:
+    // 16. If config["attributes"] exists:
     if (config.Attributes)
     {
-      // SPEC: Assert: config["dataAttributes"] exists.
+      // 16a. Assert: config["dataAttributes"] exists.
       krys_debug_assert(config.DataAttributes);
 
-      // SPEC: If config["elements"] exists: for each element of config["elements"]:
+      // 16b.-16b.i. If config["elements"] exists: for each element of config["elements"]:
       if (config.Elements)
       {
         for (auto &element : *config.Elements)
         {
-          // SPEC: If element["attributes"] exists and element["attributes"] has duplicates, then return
-          // false.
+          // 16b.i.1. If element["attributes"] exists and element["attributes"] has duplicates, then return
+          //          false.
           if (element.Attributes && SanitizerListHasDuplicates(*element.Attributes))
           {
             return false;
           }
 
-          // SPEC: If element["removeAttributes"] exists and element["removeAttributes"] has duplicates, then
-          // return false.
+          // 16b.i.2. If element["removeAttributes"] exists and element["removeAttributes"] has duplicates,
+          // then
+          //          return false.
           if (element.RemoveAttributes && SanitizerListHasDuplicates(*element.RemoveAttributes))
           {
             return false;
           }
 
-          // SPEC: If the intersection of config["attributes"] and element["attributes"] with default « » is
-          // not empty, then return false.
+          // 16b.i.3. If the intersection of config["attributes"] and element["attributes"] with default « »
+          // is
+          //          not empty, then return false.
           if (element.Attributes && SanitizerListsIntersect(*config.Attributes, *element.Attributes))
           {
             return false;
           }
 
-          // SPEC: If element["removeAttributes"] with default « » is not a subset of config["attributes"],
-          // then return false.
+          // 16b.i.4. If element["removeAttributes"] with default « » is not a subset of config["attributes"],
+          //          then return false.
           if (element.RemoveAttributes
               && !std::ranges::all_of(*element.RemoveAttributes,
                                       [&](const SanitizerAttributeNamespace &attribute)
@@ -372,8 +394,8 @@ namespace krys::boo::html
             return false;
           }
 
-          // SPEC: If config["dataAttributes"] is true and element["attributes"] contains a custom data
-          // attribute, then return false.
+          // 16b.i.5. If config["dataAttributes"] is true and element["attributes"] contains a custom data
+          //          attribute, then return false.
           if (*config.DataAttributes && element.Attributes
               && std::ranges::any_of(*element.Attributes, IsCustomDataAttribute))
           {
@@ -382,50 +404,53 @@ namespace krys::boo::html
         }
       }
 
-      // SPEC: If config["dataAttributes"] is true and config["attributes"] contains a custom data attribute,
-      // then return false.
+      // 16c. If config["dataAttributes"] is true and config["attributes"] contains a custom data attribute,
+      //      then return false.
       if (*config.DataAttributes && std::ranges::any_of(*config.Attributes, IsCustomDataAttribute))
       {
         return false;
       }
     }
-    // SPEC: Otherwise:
+    // 17. Otherwise:
     else
     {
-      // SPEC: If config["elements"] exists: for each element of config["elements"]:
+      // 17a.-17a.i. If config["elements"] exists: for each element of config["elements"]:
       if (config.Elements)
       {
         for (auto &element : *config.Elements)
         {
-          // SPEC: If element["attributes"] exists and element["removeAttributes"] exists, then return false.
+          // 17a.i.1. If element["attributes"] exists and element["removeAttributes"] exists, then return
+          // false.
           if (element.Attributes && element.RemoveAttributes)
           {
             return false;
           }
 
-          // SPEC: If element["attributes"] exists and element["attributes"] has duplicates, then return
-          // false.
+          // 17a.i.2. If element["attributes"] exists and element["attributes"] has duplicates, then return
+          //          false.
           if (element.Attributes && SanitizerListHasDuplicates(*element.Attributes))
           {
             return false;
           }
 
-          // SPEC: If element["removeAttributes"] exists and element["removeAttributes"] has duplicates, then
-          // return false.
+          // 17a.i.3. If element["removeAttributes"] exists and element["removeAttributes"] has duplicates,
+          // then
+          //          return false.
           if (element.RemoveAttributes && SanitizerListHasDuplicates(*element.RemoveAttributes))
           {
             return false;
           }
 
-          // SPEC: If the intersection of config["removeAttributes"] and element["attributes"] with default «
-          // » is not empty, then return false.
+          // 17a.i.4. If the intersection of config["removeAttributes"] and element["attributes"] with default
+          // «
+          //          » is not empty, then return false.
           if (element.Attributes && SanitizerListsIntersect(*config.RemoveAttributes, *element.Attributes))
           {
             return false;
           }
 
-          // SPEC: If the intersection of config["removeAttributes"] and element["removeAttributes"] with
-          // default « » is not empty, then return false.
+          // 17a.i.5. If the intersection of config["removeAttributes"] and element["removeAttributes"] with
+          //          default « » is not empty, then return false.
           if (element.RemoveAttributes
               && SanitizerListsIntersect(*config.RemoveAttributes, *element.RemoveAttributes))
           {
@@ -434,50 +459,51 @@ namespace krys::boo::html
         }
       }
 
-      // SPEC: If config["dataAttributes"] exists, then return false.
+      // 17b. If config["dataAttributes"] exists, then return false.
       if (config.DataAttributes)
       {
         return false;
       }
     }
 
-    // SPEC: Return true.
+    // 18. Return true.
     return true;
   }
 
   bool SanitizerAlgorithms::RemoveElement(SanitizerConfig &configuration,
                                           SanitizerElementNamespace element) noexcept
   {
-    // SPEC: Assert: configuration is valid.
+    // 1. Assert: configuration is valid.
     krys_debug_assert(IsValid(configuration));
 
-    // SPEC: Set element to the result of canonicalizing element.
+    // 2. Set element to the result of canonicalizing element.
     element = Canonicalize(krys::move(element));
 
-    // SPEC: Let modified be the result of removing element from configuration["replaceWithChildrenElements"].
+    // 3. Let modified be the result of removing element from configuration["replaceWithChildrenElements"].
     bool modified = RemoveFromSanitizerList(configuration.ReplaceWithChildrenElements, element);
 
-    // SPEC: If configuration["elements"] exists:
+    // 4. If configuration["elements"] exists:
     if (configuration.Elements)
     {
-      // SPEC: If configuration["elements"] contains element: remove element from configuration["elements"];
-      // return true.
+      // 4a.-4a.ii. If configuration["elements"] contains element: remove element from
+      // configuration["elements"];
+      //            return true.
       if (RemoveFromSanitizerList(*configuration.Elements, element))
       {
         return true;
       }
 
-      // SPEC: Return modified.
+      // 4b. Return modified.
       return modified;
     }
 
-    // SPEC: Otherwise: if configuration["removeElements"] contains element, then return modified.
+    // 5.-5a. Otherwise: if configuration["removeElements"] contains element, then return modified.
     if (SanitizerListContains(*configuration.RemoveElements, element))
     {
       return modified;
     }
 
-    // SPEC: Append element to configuration["removeElements"]. Return true.
+    // 5b.-5c. Append element to configuration["removeElements"]. Return true.
     configuration.RemoveElements->push_back(krys::move(element));
     return true;
   }
@@ -485,32 +511,34 @@ namespace krys::boo::html
   bool SanitizerAlgorithms::RemoveAttribute(SanitizerConfig &configuration,
                                             SanitizerAttributeNamespace attribute) noexcept
   {
-    // SPEC: Assert: configuration is valid.
+    // 1. Assert: configuration is valid.
     krys_debug_assert(IsValid(configuration));
 
-    // SPEC: Set attribute to the result of canonicalizing attribute.
+    // 2. Set attribute to the result of canonicalizing attribute.
     attribute = Canonicalize(krys::move(attribute));
 
-    // SPEC: If configuration["attributes"] exists:
+    // 3. If configuration["attributes"] exists:
     if (configuration.Attributes)
     {
-      // SPEC: Let modified be the result of removing attribute from configuration["attributes"].
+      // 3a. Let modified be the result of removing attribute from configuration["attributes"].
       bool modified = RemoveFromSanitizerList(*configuration.Attributes, attribute);
 
-      // SPEC: If configuration["elements"] exists: for each element of configuration["elements"]:
+      // 3b.-3b.i. If configuration["elements"] exists: for each element of configuration["elements"]:
       if (configuration.Elements)
       {
         for (auto &element : *configuration.Elements)
         {
-          // SPEC: If element["attributes"] with default « » contains attribute: set modified to true; remove
-          // attribute from element["attributes"].
+          // 3b.i.1.-3b.i.1b. If element["attributes"] with default « » contains attribute: set modified to
+          // true; remove
+          //                  attribute from element["attributes"].
           if (RemoveFromSanitizerList(element.Attributes, attribute))
           {
             modified = true;
           }
 
-          // SPEC: If element["removeAttributes"] with default « » contains attribute: assert: modified is
-          // true; remove attribute from element["removeAttributes"].
+          // 3b.i.2.-3b.i.2b. If element["removeAttributes"] with default « » contains attribute: assert:
+          // modified is
+          //                  true; remove attribute from element["removeAttributes"].
           if (SanitizerListContains(element.RemoveAttributes, attribute))
           {
             krys_debug_assert(modified);
@@ -519,20 +547,20 @@ namespace krys::boo::html
         }
       }
 
-      // SPEC: Return modified.
+      // 3c. Return modified.
       return modified;
     }
 
-    // SPEC: Otherwise: if configuration["removeAttributes"] contains attribute, then return false.
+    // 4.-4a. Otherwise: if configuration["removeAttributes"] contains attribute, then return false.
     if (SanitizerListContains(*configuration.RemoveAttributes, attribute))
     {
       return false;
     }
 
-    // SPEC: If configuration["elements"] exists: for each element in configuration["elements"]: if
-    // element["attributes"] with default « » contains attribute, then remove attribute from
-    // element["attributes"]; if element["removeAttributes"] with default « » contains attribute, then remove
-    // attribute from element["removeAttributes"].
+    // 4b.-4b.i.2. If configuration["elements"] exists: for each element in configuration["elements"]: if
+    //             element["attributes"] with default « » contains attribute, then remove attribute from
+    //             element["attributes"]; if element["removeAttributes"] with default « » contains attribute,
+    //             then remove attribute from element["removeAttributes"].
     if (configuration.Elements)
     {
       for (auto &element : *configuration.Elements)
@@ -542,21 +570,21 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: Append attribute to configuration["removeAttributes"]. Return true.
+    // 4c.-4d. Append attribute to configuration["removeAttributes"]. Return true.
     configuration.RemoveAttributes->push_back(krys::move(attribute));
     return true;
   }
 
   bool SanitizerAlgorithms::RemoveUnsafe(SanitizerConfig &configuration) noexcept
   {
-    // SPEC: Assert: configuration is valid.
+    // 1. Assert: configuration is valid.
     krys_debug_assert(IsValid(configuration));
 
-    // SPEC: Let result be false.
+    // 2. Let result be false.
     bool result = false;
 
-    // SPEC: For each element in built-in safe baseline configuration["removeElements"]: if removing element
-    // from configuration is true, then set result to true.
+    // 3.-3a. For each element in built-in safe baseline configuration["removeElements"]: if removing element
+    //        from configuration is true, then set result to true.
     auto &baseline = SanitizerConstants::BuiltInSafeBaselineConfiguration();
     for (auto &element : *baseline.RemoveElements)
     {
@@ -566,8 +594,8 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: For each attribute in built-in safe baseline configuration["removeAttributes"]: if removing
-    // attribute from configuration is true, then set result to true.
+    // 4.-4a. For each attribute in built-in safe baseline configuration["removeAttributes"]: if removing
+    //        attribute from configuration is true, then set result to true.
     for (auto &attribute : *baseline.RemoveAttributes)
     {
       if (RemoveAttribute(configuration, attribute))
@@ -576,8 +604,8 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: For each attribute that is an event handler content attribute: if removing attribute from
-    // configuration is true, then set result to true.
+    // 5.-5a. For each attribute that is an event handler content attribute: if removing attribute from
+    //        configuration is true, then set result to true.
     for (auto name : SanitizerConstants::EventHandlerContentAttributes())
     {
       if (RemoveAttribute(configuration, dom::DOMString(name)))
@@ -586,35 +614,35 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: If configuration["javascriptURLs"] is true: set result to true; set
-    // configuration["javascriptURLs"] to false.
+    // 6.-6b. If configuration["javascriptURLs"] is true: set result to true; set
+    //        configuration["javascriptURLs"] to false.
     if (*configuration.JavascriptURLs)
     {
       result = true;
       configuration.JavascriptURLs = false;
     }
 
-    // SPEC: Return result.
+    // 7. Return result.
     return result;
   }
 
   dom::ExceptionOr<Maybe<SanitizerConfig>>
     SanitizerAlgorithms::GetSanitizerConfigFromOptions(const SanitizerInput *sanitizer, bool safe) noexcept
   {
-    // SPEC: Let sanitizerInput be null.
-    // SPEC: If options is a TrustedHTMLParserOptions: [...]
-    // NOTE: There are no Trusted Types.
+    // 1. Let sanitizerInput be null.
+    // 2. If options is a TrustedHTMLParserOptions: ...
+    // (There are no Trusted Types.)
 
-    // SPEC: Otherwise, if options["sanitizer"] exists, then set sanitizerInput to options["sanitizer"].
-    // SPEC: Otherwise, if safe is false, then return null.
+    // 3. Otherwise, if options["sanitizer"] exists, then set sanitizerInput to options["sanitizer"].
+    // 4. Otherwise, if safe is false, then return null.
     if (!sanitizer && !safe)
     {
       return Maybe<SanitizerConfig> {};
     }
 
-    // SPEC: Otherwise, set sanitizerInput to "default".
-    // SPEC: If sanitizerInput is a string: set sanitizerInput to the built-in safe default configuration.
-    // SPEC: If sanitizerInput is a Sanitizer, then set sanitizerInput to sanitizerInput's configuration.
+    // 5. Otherwise, set sanitizerInput to "default".
+    // 7.-7b. If sanitizerInput is a string: set sanitizerInput to the built-in safe default configuration.
+    // 8. If sanitizerInput is a Sanitizer, then set sanitizerInput to sanitizerInput's configuration.
     const SanitizerConfig *sanitizerInput = &SanitizerConstants::BuiltInSafeDefaultConfiguration();
     if (sanitizer)
     {
@@ -628,42 +656,42 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: Let sanitizer be a new Sanitizer object. Let permissiveDefaults be true if safe is false; false
-    // otherwise. Configure sanitizer given sanitizerInput and permissiveDefaults.
+    // 10.-12. Let sanitizer be a new Sanitizer object. Let permissiveDefaults be true if safe is false; false
+    //         otherwise. Configure sanitizer given sanitizerInput and permissiveDefaults.
     auto configured = Configure(*sanitizerInput, !safe);
     if (configured.HasException())
     {
       return configured.ReleaseException();
     }
 
-    // SPEC: Let configuration be sanitizer's configuration.
+    // 13. Let configuration be sanitizer's configuration.
     auto configuration = configured.ReleaseValue();
 
-    // SPEC: If safe is true, then remove unsafe from configuration.
+    // 14. If safe is true, then remove unsafe from configuration.
     if (safe)
     {
       RemoveUnsafe(configuration);
     }
 
-    // SPEC: Assert: configuration is valid.
+    // 15. Assert: configuration is valid.
     krys_debug_assert(IsValid(configuration));
 
-    // SPEC: Return configuration.
+    // 16. Return configuration.
     return Maybe<SanitizerConfig> {krys::move(configuration)};
   }
 
   bool SanitizerAlgorithms::ContainsJavaScriptURL(dom::DOMStringView value) noexcept
   {
-    // SPEC: Let url be the result of running the basic URL parser on value.
+    // 1. Let url be the result of running the basic URL parser on value.
     url::URL url(value);
 
-    // SPEC: If url is failure, then return false.
+    // 2. If url is failure, then return false.
     if (!url.IsValid())
     {
       return false;
     }
 
-    // SPEC: Return true if url's scheme is "javascript", and false otherwise.
+    // 3. Return true if url's scheme is "javascript", and false otherwise.
     return url.ProtocolIs(u8"javascript");
   }
 
@@ -675,18 +703,18 @@ namespace krys::boo::html
   bool SanitizerAlgorithms::AllowsProcessingInstructionTarget(dom::DOMStringView piTarget,
                                                               const SanitizerConfig &configuration) noexcept
   {
-    // SPEC: Let pi be «[ "target" → piTarget ]».
+    // 1. Let pi be «[ "target" → piTarget ]».
     SanitizerProcessingInstruction pi {dom::DOMString(piTarget)};
 
-    // SPEC: If configuration["processingInstructions"] exists, then return whether
-    // configuration["processingInstructions"] contains pi.
+    // 2. If configuration["processingInstructions"] exists, then return whether
+    //    configuration["processingInstructions"] contains pi.
     if (configuration.ProcessingInstructions)
     {
       return SanitizerListContains(*configuration.ProcessingInstructions, pi);
     }
 
-    // SPEC: If configuration["removeProcessingInstructions"] exists and contains pi, then return false.
-    // SPEC: Return true.
+    // 3. If configuration["removeProcessingInstructions"] exists and contains pi, then return false.
+    // 4. Return true.
     return !SanitizerListContains(configuration.RemoveProcessingInstructions, pi);
   }
 
@@ -694,18 +722,18 @@ namespace krys::boo::html
                                                             dom::DOMStringAtom namespaceURI,
                                                             const SanitizerConfig &configuration) noexcept
   {
-    // SPEC: Let elementName be «[ "name" → localName, "namespace" → namespace ]».
+    // 1. Let elementName be «[ "name" → localName, "namespace" → namespace ]».
     SanitizerElementNamespace elementName {dom::DOMString(localName), namespaceURI};
 
-    // SPEC: If configuration["replaceWithChildrenElements"] exists and contains elementName, then return
-    // "Replace with children".
+    // 2. If configuration["replaceWithChildrenElements"] exists and contains elementName, then return
+    //    "Replace with children".
     if (SanitizerListContains(configuration.ReplaceWithChildrenElements, elementName))
     {
       return SanitizerAction::ReplaceWithChildren;
     }
 
-    // SPEC: If configuration["elements"] exists: if there is no item in configuration["elements"] whose name
-    // member is localName and whose namespace member is namespace, then return "Remove".
+    // 3.-3a. If configuration["elements"] exists: if there is no item in configuration["elements"] whose name
+    //        member is localName and whose namespace member is namespace, then return "Remove".
     if (configuration.Elements)
     {
       if (!SanitizerListContains(*configuration.Elements, elementName))
@@ -713,13 +741,13 @@ namespace krys::boo::html
         return SanitizerAction::Remove;
       }
     }
-    // SPEC: Otherwise, if configuration["removeElements"] contains elementName, then return "Remove".
+    // 4. Otherwise, if configuration["removeElements"] contains elementName, then return "Remove".
     else if (SanitizerListContains(configuration.RemoveElements, elementName))
     {
       return SanitizerAction::Remove;
     }
 
-    // SPEC: Return "Keep".
+    // 5. Return "Keep".
     return SanitizerAction::Keep;
   }
 
@@ -728,15 +756,15 @@ namespace krys::boo::html
                                             dom::DOMStringAtom elementNamespace,
                                             const SanitizerConfig &configuration) noexcept
   {
-    // SPEC: Let attrName be «[ "name" → localName, "namespace" → namespace ]».
+    // 1. Let attrName be «[ "name" → localName, "namespace" → namespace ]».
     SanitizerAttributeNamespace attrName {dom::DOMString(localName), namespaceURI};
 
-    // SPEC: Let elementName be «[ "name" → elementLocalName, "namespace" → elementNamespace ]».
+    // 2. Let elementName be «[ "name" → elementLocalName, "namespace" → elementNamespace ]».
     SanitizerElementNamespace elementName {dom::DOMString(elementLocalName), elementNamespace};
 
-    // SPEC: Let elementWithLocalAttributes be «[ ]». If configuration["elements"] exists and there is an item
-    // element in configuration["elements"] whose name member is elementLocalName and whose namespace member
-    // is elementNamespace, then set elementWithLocalAttributes to element.
+    // 3.-4. Let elementWithLocalAttributes be «[ ]». If configuration["elements"] exists and there is an item
+    //       element in configuration["elements"] whose name member is elementLocalName and whose namespace
+    //       member is elementNamespace, then set elementWithLocalAttributes to element.
     const SanitizerElementNamespaceWithAttributes *elementWithLocalAttributes = nullptr;
     if (configuration.Elements)
     {
@@ -753,21 +781,21 @@ namespace krys::boo::html
       return elementWithLocalAttributes ? &elementWithLocalAttributes->Attributes : nullptr;
     };
 
-    // SPEC: If elementWithLocalAttributes["removeAttributes"] exists and contains attrName, then return
-    // false.
+    // 5. If elementWithLocalAttributes["removeAttributes"] exists and contains attrName, then return
+    //    false.
     if (elementWithLocalAttributes
         && SanitizerListContains(elementWithLocalAttributes->RemoveAttributes, attrName))
     {
       return false;
     }
 
-    // SPEC: Otherwise, if configuration["attributes"] exists:
+    // 6. Otherwise, if configuration["attributes"] exists:
     if (configuration.Attributes)
     {
-      // SPEC: If configuration["attributes"] does not contain attrName and
-      // elementWithLocalAttributes["attributes"] with default « » does not contain attrName, and if "data-"
-      // is not a code unit prefix of localName or namespace is not null or configuration["dataAttributes"] is
-      // not true, then return false.
+      // 6a. If configuration["attributes"] does not contain attrName and
+      //     elementWithLocalAttributes["attributes"] with default « » does not contain attrName, and if
+      //     "data-" is not a code unit prefix of localName or namespace is not null or
+      //     configuration["dataAttributes"] is not true, then return false.
       if (!SanitizerListContains(*configuration.Attributes, attrName)
           && !(localAttributes() && SanitizerListContains(*localAttributes(), attrName))
           && (!localName.starts_with(u8"data-") || namespaceURI != dom::DOMStringAtom::Null()
@@ -776,39 +804,39 @@ namespace krys::boo::html
         return false;
       }
     }
-    // SPEC: Otherwise:
+    // 7. Otherwise:
     else
     {
-      // SPEC: If elementWithLocalAttributes["attributes"] exists and does not contain attrName, then return
-      // false.
+      // 7a. If elementWithLocalAttributes["attributes"] exists and does not contain attrName, then return
+      //     false.
       if (localAttributes() && *localAttributes() && !SanitizerListContains(**localAttributes(), attrName))
       {
         return false;
       }
 
-      // SPEC: Otherwise, if configuration["removeAttributes"] exists and contains attrName, then return
-      // false.
+      // 7b. Otherwise, if configuration["removeAttributes"] exists and contains attrName, then return
+      //     false.
       if (SanitizerListContains(configuration.RemoveAttributes, attrName))
       {
         return false;
       }
     }
 
-    // SPEC: If configuration["javascriptURLs"] is true, then return true.
+    // 8. If configuration["javascriptURLs"] is true, then return true.
     if (configuration.JavascriptURLs.value_or(false))
     {
       return true;
     }
 
-    // SPEC: If the pair (elementName, attrName) matches an entry in the built-in navigating URL attributes
-    // list, and if value contains a javascript: URL, then return false.
+    // 9. If the pair (elementName, attrName) matches an entry in the built-in navigating URL attributes
+    //    list, and if value contains a javascript: URL, then return false.
     if (SanitizerConstants::IsNavigatingURLAttribute(elementName, attrName) && ContainsJavaScriptURL(value))
     {
       return false;
     }
 
-    // SPEC: If elementNamespace is the MathML namespace, localName is "href", namespace is null or the XLink
-    // namespace, and value contains a javascript: URL, then return false.
+    // 10. If elementNamespace is the MathML namespace, localName is "href", namespace is null or the XLink
+    //     namespace, and value contains a javascript: URL, then return false.
     if (elementNamespace == dom::DOMStringAtom(infra::Namespaces::MathML) && localName == u8"href"
         && (namespaceURI == dom::DOMStringAtom::Null()
             || namespaceURI == dom::DOMStringAtom(infra::Namespaces::XLink))
@@ -817,15 +845,15 @@ namespace krys::boo::html
       return false;
     }
 
-    // SPEC: If the built-in animating URL attributes list contains the pair (elementName, attrName), and
-    // value is "href" or "xlink:href", then return false.
+    // 11. If the built-in animating URL attributes list contains the pair (elementName, attrName), and
+    //     value is "href" or "xlink:href", then return false.
     if (SanitizerConstants::IsAnimatingURLAttribute(elementName, attrName)
         && (value == u8"href" || value == u8"xlink:href"))
     {
       return false;
     }
 
-    // SPEC: Return true.
+    // 12. Return true.
     return true;
   }
 
@@ -842,8 +870,8 @@ namespace krys::boo::html
   bool SanitizerAlgorithms::CompareItems(dom::DOMStringView nameA, dom::DOMStringAtom namespaceA,
                                          dom::DOMStringView nameB, dom::DOMStringAtom namespaceB) noexcept
   {
-    // SPEC: Let namespaceA be itemA["namespace"]. Let namespaceB be itemB["namespace"].
-    // SPEC: If namespaceA is null: if namespaceB is not null, then return true.
+    // 1.-2. Let namespaceA be itemA["namespace"]. Let namespaceB be itemB["namespace"].
+    // 3.-3a. If namespaceA is null: if namespaceB is not null, then return true.
     if (namespaceA == dom::DOMStringAtom::Null())
     {
       if (namespaceB != dom::DOMStringAtom::Null())
@@ -851,8 +879,8 @@ namespace krys::boo::html
         return true;
       }
     }
-    // SPEC: Otherwise: if namespaceB is null, then return false. If namespaceA is code unit less than
-    // namespaceB, then return true. If namespaceA is not namespaceB, then return false.
+    // 4.-4c. Otherwise: if namespaceB is null, then return false. If namespaceA is code unit less than
+    //        namespaceB, then return true. If namespaceA is not namespaceB, then return false.
     else
     {
       if (namespaceB == dom::DOMStringAtom::Null())
@@ -869,7 +897,7 @@ namespace krys::boo::html
       }
     }
 
-    // SPEC: If itemA["name"] is code unit less than itemB["name"], then return true. Return false.
+    // 5.-6. If itemA["name"] is code unit less than itemB["name"], then return true. Return false.
     return infra::StringAlgorithms::CodeUnitLessThan(nameA, nameB);
   }
 }
