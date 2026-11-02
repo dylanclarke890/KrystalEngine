@@ -58,6 +58,10 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-messageevent-origin
     KRYS_NODISCARD const dom::USVString &Origin() const noexcept
     {
+      // 1. If this's origin is an origin, then return the serialization of this's origin.
+      // 2. If this's origin is null, then return the empty string.
+      // 3. Return this's origin.
+      // (The origin is kept serialized, as there are no origins.)
       return _origin;
     }
 

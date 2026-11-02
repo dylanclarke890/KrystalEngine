@@ -29,10 +29,12 @@ namespace krys::boo::html
     return _source.get();
   }
 
+  // https://html.spec.whatwg.org/#dom-messageevent-initmessageevent
   void MessageEvent::InitMessageEvent(dom::DOMStringAtom type, bool bubbles, bool cancelable,
                                       RefPtr<SerializedScriptValue> data, dom::USVString origin,
                                       dom::DOMString lastEventId, LocalDOMWindow *source) noexcept
   {
+    // Initialize the event in a manner analogous to the similarly-named initEvent() method.
     if (_dispatched)
     {
       return;

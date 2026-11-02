@@ -1385,60 +1385,84 @@ namespace krys::boo
   dom::ExceptionOr<void> LocalDOMWindow::PostMessage(RefPtr<html::SerializedScriptValue> &&message,
                                                      utf8_stringview targetOrigin) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-window-postmessage
+    // 1. Let options be «[ "targetOrigin" → targetOrigin, "transfer" → transfer ]».
+    // 2. Run the window post message steps providing this, message, and options.
     WindowPostMessageOptions options;
     options.TargetOrigin = dom::USVString(targetOrigin);
     return PostMessage(krys::move(message), options);
   }
 
+  // https://html.spec.whatwg.org/#dom-window-postmessage-options
+  // https://html.spec.whatwg.org/#window-post-message-steps
   dom::ExceptionOr<void> LocalDOMWindow::PostMessage(RefPtr<html::SerializedScriptValue> &&message,
                                                      const WindowPostMessageOptions &options) noexcept
   {
-    // https://html.spec.whatwg.org/#window-post-message-steps
-    // The incumbent settings object is this window's: messages come from the window itself.
+    // 1. Let targetRealm be targetWindow's realm.
+    // 2. Let incumbentSettings be the incumbent settings object.
+    // (Messages come from the window itself, so it's the incumbent.)
     auto *document = Document();
     if (!document)
     {
       return {};
     }
 
-    // Let targetOrigin be options["targetOrigin"]. If it's "/", set it to the incumbent's origin. Otherwise,
-    // if it isn't "*", parse it; on failure, throw a "SyntaxError"; set it to the parsed URL's origin.
+    // 3. Let targetOrigin be options["targetOrigin"].
     Maybe<dom::USVString> targetOrigin;
     utf8_stringview requested = options.TargetOrigin;
+    // 4. If targetOrigin is a single U+002F SOLIDUS character (/), then set targetOrigin to
+    //    incumbentSettings's origin.
     if (requested == u8"/")
     {
       targetOrigin = Origin();
     }
+    // 5. Otherwise, if targetOrigin is not a single U+002A ASTERISK character (*):
     else if (requested != u8"*")
     {
+      // 5a. Let parsedURL be the result of running the URL parser on targetOrigin.
       url::URL parsedURL(requested);
+      // 5b. If parsedURL is failure, then throw a "SyntaxError" DOMException.
       if (!parsedURL.IsValid())
       {
         return dom::ExceptionCode::SyntaxError;
       }
+      // 5c. Set targetOrigin to parsedURL's origin.
       targetOrigin = html::URLDecomposition::SerializedOrigin(parsedURL);
     }
 
-    // Let origin be the serialization of incumbentSettings's origin, and source be its WindowProxy. Queue a
-    // global task on the posted message task source to fire the message, unless the target's origin differs.
+    // 6. Let transfer be options["transfer"].
+    // 7. Let serializeWithTransferResult be StructuredSerializeWithTransfer(message, transfer).
+    // (There's no structured serialization or transfer: the message is passed as it is.)
     // FIXME: Message ports and transfers, once there are any.
-    auto *globalDocument = Document();
-    if (!globalDocument)
-    {
-      return {};
-    }
+
+    // 8b. Let origin be incumbentSettings's origin.
+    // 8c. Let source be the WindowProxy object corresponding to incumbentSettings's global object.
+    // (Both are taken now, while the incumbent is the one posting.)
+    dom::USVString origin = Origin();
+    RefPtr<LocalDOMWindow> source = ShareRefPtr(this);
+
+    // 8. Queue a global task on the posted message task source given targetWindow to run the following steps:
     html::EventLoop::Current().QueueTask(
-      html::TaskSource::PostedMessage, *globalDocument,
-      [protectedThis = ShareRef(*this), targetOrigin = krys::move(targetOrigin),
-       message = krys::move(message)]() mutable
+      html::TaskSource::PostedMessage, *document,
+      [protectedThis = ShareRef(*this), targetOrigin = krys::move(targetOrigin), origin = krys::move(origin),
+       source = krys::move(source), message = krys::move(message)]() mutable
       {
+        // 8a. If the targetOrigin argument is not a single literal U+002A ASTERISK character (*) and
+        //     targetWindow's associated Document's origin is not same origin with targetOrigin, then return.
         auto *document = protectedThis->Document();
         if (!document || (targetOrigin && *targetOrigin != protectedThis->Origin()))
         {
           return;
         }
-        auto event = html::MessageEvent::Create(krys::move(message), protectedThis->Origin(),
-                                                RefPtr<LocalDOMWindow>(protectedThis));
+        // 8d.-8f. Let deserializeRecord be StructuredDeserializeWithTransfer(serializeWithTransferResult,
+        //         targetRealm). [...] Let newPorts be a new frozen array consisting of all MessagePort
+        //         objects in deserializeRecord.[[TransferredValues]], if any, maintaining their relative
+        //         order.
+        // (There's nothing to deserialize, and no ports.)
+        // 8g. Fire an event named message at targetWindow, using MessageEvent, with its origin initialized to
+        //     origin, the source attribute initialized to source, the data attribute initialized to
+        //     messageClone, and the ports attribute initialized to newPorts.
+        auto event = html::MessageEvent::Create(krys::move(message), krys::move(origin), krys::move(source));
         (void)dom::EventDispatcher::DispatchToTarget(*event, protectedThis.get());
       });
     return {};

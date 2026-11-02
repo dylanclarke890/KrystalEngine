@@ -1098,7 +1098,11 @@ namespace krys::boo::tests
     "A window's global scope",
     "[Page][LocalDOMWindow][html:windoworworkerglobalscope-mixin][html:dom-origin][html:dom-issecurecontext]"
     "[html:dom-crossoriginisolated][html:secure-contexts][html:atob][html:dom-btoa][html:dom-atob]"
-    "[html:runtime-script-errors][html:dom-reporterror][html:report-an-exception]")
+    "[html:runtime-script-errors][html:dom-reporterror][html:report-an-exception][html:the-messageevent-"
+    "interface]"
+    "[html:dom-messageevent-data][html:dom-messageevent-origin][html:dom-messageevent-source]"
+    "[html:posting-messages][html:window-post-message-steps][html:dom-window-postmessage]"
+    "[html:dom-window-postmessage-options][html:posted-message-task-source]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -1192,6 +1196,18 @@ namespace krys::boo::tests
 
       html::EventLoop::Current().RunUntilIdle();
       CHECK(messages == List<std::string> {"first", "null", "same"});
+    }
+
+    SECTION("postMessage() gives the message the origin the window had as it was posted")
+    {
+      fixture.Document->SetURL(url::URL(u8"https://example.com/page.html"));
+      List<std::string> origins;
+      auto listener = window.AddEventListener<html::MessageEvent>(
+        u8"message", [&](html::MessageEvent &event) { origins.push_back(Str(event.Origin())); });
+      REQUIRE_FALSE(window.PostMessage(nullptr, u8"*").HasException());
+      fixture.Document->SetURL(url::URL(u8"https://other.example/page.html"));
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(origins == List<std::string> {"https://example.com"});
     }
   }
 

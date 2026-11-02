@@ -315,7 +315,7 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("Document.createEvent(): the event is initialised with the legacy init methods",
-            "[DOM][Document][Event][dom:dom-document-createevent]")
+            "[DOM][Document][Event][dom:dom-document-createevent][html:dom-messageevent-initmessageevent]")
   {
     auto document = CreateRef<HTMLDocument>();
 

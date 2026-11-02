@@ -8,30 +8,37 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [9.3 Cross-document messaging](https://html.spec.whatwg.org/#web-messaging)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 #### [9.3.1 Introduction](https://html.spec.whatwg.org/#introduction-13)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> No requirements.
 
 #### [9.3.2 Security](https://html.spec.whatwg.org/#security-postmsg)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ##### [9.3.2.1 Authors](https://html.spec.whatwg.org/#authors)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> No requirements on user agents.
 
 ##### [9.3.2.2 User agents](https://html.spec.whatwg.org/#user-agents)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Messages only reach the window that posts them, so there's no other browsing context to protect.
 
 #### [9.3.3 Posting messages](https://html.spec.whatwg.org/#posting-messages)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Fixed: a message's origin and source are the posting window's as it posts, not as the message arrives.
+> `LocalDOMWindow::PostMessage`: only to the window itself, with no structured serialization, transfers or ports (see `DIFFERENCES.md`).
 <!-- definitions: posted-message-task-source -->
 
-- [ ] [window post message steps](https://html.spec.whatwg.org/#window-post-message-steps) — The window post message steps, given a targetWindow, message, and options, are as follows:
+- [x] [window post message steps](https://html.spec.whatwg.org/#window-post-message-steps) — The window post message steps, given a targetWindow, message, and options, are as follows:
   - 1. Let targetRealm be targetWindow's realm.
   - 2. Let incumbentSettings be the incumbent settings object.
   - 3. Let targetOrigin be options["targetOrigin"].
@@ -51,9 +58,9 @@ Status: unreviewed
     - 8f. Let newPorts be a new frozen array consisting of all MessagePort objects in deserializeRecord.[[TransferredValues]], if any, maintaining their relative order.
     - 8g. Fire an event named message at targetWindow, using MessageEvent, with its origin initialized to origin, the source attribute initialized to source, the data attribute initialized to messageClone, and the ports attribute initialized to newPorts.
 
-- [ ] [Window.postMessage(message, options)](https://html.spec.whatwg.org/#dom-window-postmessage-options) — The Window interface's postMessage(message, options) method steps are to run the window post message steps given this, message, and options.
+- [x] [Window.postMessage(message, options)](https://html.spec.whatwg.org/#dom-window-postmessage-options) — The Window interface's postMessage(message, options) method steps are to run the window post message steps given this, message, and options.
 
-- [ ] [Window.postMessage(message, targetOrigin, transfer)](https://html.spec.whatwg.org/#dom-window-postmessage) — The Window interface's postMessage(message, targetOrigin, transfer) method steps are to run the window post message steps given this, message, and «[ "targetOrigin" → targetOrigin, "transfer" → transfer ]».
+- [x] [Window.postMessage(message, targetOrigin, transfer)](https://html.spec.whatwg.org/#dom-window-postmessage) — The Window interface's postMessage(message, targetOrigin, transfer) method steps are to run the window post message steps given this, message, and «[ "targetOrigin" → targetOrigin, "transfer" → transfer ]».
 
 ### [9.4 Channel messaging](https://html.spec.whatwg.org/#channel-messaging)
 
