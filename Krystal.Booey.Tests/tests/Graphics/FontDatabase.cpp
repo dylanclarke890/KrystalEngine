@@ -56,8 +56,8 @@ namespace krys::boo::tests
       REQUIRE(faces.size() == 1u);
       CHECK(faces.front()->FamilyName() == u8"Ahem");
       auto families = database.Families();
-      CHECK(std::ranges::find(families, utf8_string {u8"Ahem"}) != families.end());
-      CHECK(std::ranges::find(families, utf8_string {u8"Liberation Sans"}) != families.end());
+      CHECK(std::ranges::find(families, u8"Ahem") != families.end());
+      CHECK(std::ranges::find(families, u8"Liberation Sans") != families.end());
     }
 
     SECTION("What isn't a font isn't registered")

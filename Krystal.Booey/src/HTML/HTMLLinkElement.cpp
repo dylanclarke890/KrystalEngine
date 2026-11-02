@@ -219,7 +219,7 @@ namespace krys::boo::html
     }
     else if (localName == u8"type")
     {
-      Maybe<dom::DOMString> type = value ? Maybe<dom::DOMString>(dom::DOMString(*value)) : null;
+      Maybe<dom::DOMString> type = value ? Maybe<dom::DOMString>(*value) : null;
       if (type == _type)
       {
         return;
@@ -341,7 +341,7 @@ namespace krys::boo::html
 
       // FIXME: Load stylesheets that are not needed for the rendering immediately with low priority, the
       // nonce, integrity, referrer policy and fetch priority, once there are network loads.
-      CachedResourceRequest request(ResourceRequest(url::URL(_url)),
+      CachedResourceRequest request(ResourceRequest(_url),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       request.SetCharset(krys::move(charset));
       request.SetInitiatorType(LocalName().View());
@@ -683,7 +683,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"href");
   }
 
-  void HTMLLinkElement::Href(dom::USVString &&value) noexcept
+  void HTMLLinkElement::Href(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
   }
@@ -694,7 +694,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"crossorigin"));
   }
 
-  void HTMLLinkElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
+  void HTMLLinkElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
   {
     Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
@@ -704,7 +704,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
   }
 
-  void HTMLLinkElement::Rel(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::Rel(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
   }
@@ -734,7 +734,7 @@ namespace krys::boo::html
     return {};
   }
 
-  void HTMLLinkElement::As(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::As(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"as", krys::move(value));
   }
@@ -758,7 +758,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
   }
 
-  void HTMLLinkElement::Media(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::Media(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
   }
@@ -768,7 +768,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"integrity").value_or(u8"");
   }
 
-  void HTMLLinkElement::Integrity(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::Integrity(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"integrity", krys::move(value));
   }
@@ -778,7 +778,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"hreflang").value_or(u8"");
   }
 
-  void HTMLLinkElement::HrefLang(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::HrefLang(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"hreflang", krys::move(value));
   }
@@ -788,7 +788,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLLinkElement::Type(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::Type(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
@@ -808,7 +808,7 @@ namespace krys::boo::html
     return Reflect<dom::USVString>(*this, u8"imagesrcset");
   }
 
-  void HTMLLinkElement::ImageSrcset(dom::USVString &&value) noexcept
+  void HTMLLinkElement::ImageSrcset(dom::USVString value) noexcept
   {
     return Reflect<dom::USVString>(*this, u8"imagesrcset", krys::move(value));
   }
@@ -818,7 +818,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"imagesizes").value_or(u8"");
   }
 
-  void HTMLLinkElement::ImageSizes(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::ImageSizes(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"imagesizes", krys::move(value));
   }
@@ -829,7 +829,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
-  void HTMLLinkElement::ReferrerPolicy(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::ReferrerPolicy(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
@@ -865,7 +865,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"fetchpriority"));
   }
 
-  void HTMLLinkElement::FetchPriority(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::FetchPriority(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
@@ -879,7 +879,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
   }
 
-  void HTMLLinkElement::Charset(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::Charset(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
   }
@@ -889,7 +889,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"rev").value_or(u8"");
   }
 
-  void HTMLLinkElement::Rev(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::Rev(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"rev", krys::move(value));
   }
@@ -899,7 +899,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLLinkElement::Target(dom::DOMString &&value) noexcept
+  void HTMLLinkElement::Target(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
   }

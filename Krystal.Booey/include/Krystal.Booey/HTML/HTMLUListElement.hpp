@@ -24,7 +24,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-ul-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
 #pragma endregion
 

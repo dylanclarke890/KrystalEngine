@@ -9,14 +9,14 @@
 
 namespace krys::boo::dom
 {
-  Text::Text(Document &document, DOMString &&data, CDATAConstructorTag) noexcept
+  Text::Text(Document &document, DOMString data, CDATAConstructorTag) noexcept
       : CharacterData(document, krys::move(data), dom::NodeType::CDATA_SECTION_NODE)
   {
   }
 
 #pragma region Text
 
-  Text::Text(Document &document, DOMString &&data) noexcept
+  Text::Text(Document &document, DOMString data) noexcept
       : CharacterData(document, krys::move(data), dom::NodeType::TEXT_NODE)
   {
     // Create a text node:

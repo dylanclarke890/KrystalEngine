@@ -2252,7 +2252,7 @@ namespace krys::boo::html
     return AutofillData::Create(*this).IDLExposedValue;
   }
 
-  void HTMLSelectElement::Autocomplete(dom::DOMString &&value) noexcept
+  void HTMLSelectElement::Autocomplete(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
   }
@@ -2277,7 +2277,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLSelectElement::Name(dom::DOMString &&value) noexcept
+  void HTMLSelectElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }

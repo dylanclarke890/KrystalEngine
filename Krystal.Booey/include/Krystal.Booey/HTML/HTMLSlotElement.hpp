@@ -40,7 +40,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-slot-name
-    void Name(dom::DOMString &&name) noexcept;
+    void Name(dom::DOMString name) noexcept;
 
     /// @brief The slot's assigned nodes, or with @p options' `Flatten`, its flattened slottables.
     /// @see https://html.spec.whatwg.org/#dom-slot-assignednodes

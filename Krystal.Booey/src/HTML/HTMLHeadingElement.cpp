@@ -105,7 +105,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLHeadingElement::Align(dom::DOMString &&value) noexcept
+  void HTMLHeadingElement::Align(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }

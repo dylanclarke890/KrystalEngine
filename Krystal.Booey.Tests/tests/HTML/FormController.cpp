@@ -258,7 +258,7 @@ namespace krys::boo::tests
       REQUIRE(element);
       return *element;
     };
-    behaviour(u8"one").SetState(dom::DOMString(u8"saved"));
+    behaviour(u8"one").SetState(u8"saved");
     auto entries = html::DOMFormData::Create();
     entries->Append(u8"x", u8"1");
     entries->Append(u8"y", u8"2");

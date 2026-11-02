@@ -300,7 +300,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"alt").value_or(u8"");
   }
 
-  void HTMLAreaElement::Alt(dom::DOMString &&value) noexcept
+  void HTMLAreaElement::Alt(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
   }
@@ -310,7 +310,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"coords").value_or(u8"");
   }
 
-  void HTMLAreaElement::Coords(dom::DOMString &&value) noexcept
+  void HTMLAreaElement::Coords(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"coords", krys::move(value));
   }
@@ -320,7 +320,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"shape").value_or(u8"");
   }
 
-  void HTMLAreaElement::Shape(dom::DOMString &&value) noexcept
+  void HTMLAreaElement::Shape(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"shape", krys::move(value));
   }
@@ -330,7 +330,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLAreaElement::Target(dom::DOMString &&value) noexcept
+  void HTMLAreaElement::Target(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
   }
@@ -340,7 +340,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"download").value_or(u8"");
   }
 
-  void HTMLAreaElement::Download(dom::DOMString &&value) noexcept
+  void HTMLAreaElement::Download(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"download", krys::move(value));
   }
@@ -350,7 +350,7 @@ namespace krys::boo::html
     return Reflect<dom::USVString>(*this, u8"ping");
   }
 
-  void HTMLAreaElement::Ping(dom::USVString &&value) noexcept
+  void HTMLAreaElement::Ping(dom::USVString value) noexcept
   {
     return Reflect<dom::USVString>(*this, u8"ping", krys::move(value));
   }
@@ -360,7 +360,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
   }
 
-  void HTMLAreaElement::Rel(dom::DOMString &&value) noexcept
+  void HTMLAreaElement::Rel(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
   }
@@ -388,7 +388,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
-  void HTMLAreaElement::ReferrerPolicy(dom::DOMString &&value) noexcept
+  void HTMLAreaElement::ReferrerPolicy(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
@@ -402,7 +402,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"href");
   }
 
-  void HTMLAreaElement::Href(dom::USVString &&value) noexcept
+  void HTMLAreaElement::Href(dom::USVString value) noexcept
   {
     ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
   }

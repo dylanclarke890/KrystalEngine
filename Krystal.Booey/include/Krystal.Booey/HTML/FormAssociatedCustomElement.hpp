@@ -64,7 +64,7 @@ namespace krys::boo::html
                       Maybe<CustomElementFormValue> &&state) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
-    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags, dom::DOMString &&message,
+    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags, dom::DOMString message,
                                        HTMLElement *validationAnchor) noexcept;
 
     KRYS_NODISCARD dom::DOMString ValidationMessage() const noexcept final;

@@ -90,7 +90,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-autocomplete
-    void Autocomplete(dom::DOMString &&value) noexcept;
+    void Autocomplete(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -111,7 +111,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-select-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-required
     KRYS_NODISCARD bool Required() const noexcept;

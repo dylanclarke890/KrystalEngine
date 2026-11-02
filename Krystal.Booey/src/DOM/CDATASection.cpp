@@ -7,7 +7,7 @@
 
 namespace krys::boo::dom
 {
-  CDATASection::CDATASection(Document &document, DOMString &&data) noexcept
+  CDATASection::CDATASection(Document &document, DOMString data) noexcept
       : Text(document, krys::move(data), Text::CDATAConstructorTag {})
   {
     // 1. Let node be the result of creating a node that implements CDATASection, given document.

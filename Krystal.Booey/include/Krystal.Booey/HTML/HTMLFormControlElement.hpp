@@ -125,7 +125,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
     KRYS_NODISCARD dom::DOMString PopoverTargetAction() const noexcept;
     /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
-    void PopoverTargetAction(dom::DOMString &&value) noexcept;
+    void PopoverTargetAction(dom::DOMString value) noexcept;
 
     /// @brief Shows or hides the control's popover target element as its activation, unless the activation
     /// came from inside the popover (@p eventTarget is the event's target).

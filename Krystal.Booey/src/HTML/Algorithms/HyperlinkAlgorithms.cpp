@@ -60,7 +60,7 @@ namespace krys::boo::html
 
   void HyperlinkAlgorithms::SetHref(HTMLElement &element, const url::URL &url) noexcept
   {
-    (void)element.SetAttribute(u8"href", dom::DOMString(url.String()));
+    (void)element.SetAttribute(u8"href", url.String());
   }
 
   dom::DOMStringAtom HyperlinkAlgorithms::EffectiveTarget(const HTMLElement &element) noexcept

@@ -16,7 +16,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  void HTMLEmbedElement::Src(dom::USVString &&value) noexcept
+  void HTMLEmbedElement::Src(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -26,7 +26,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Type(dom::DOMString &&value) noexcept
+  void HTMLEmbedElement::Type(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
@@ -36,7 +36,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Width(dom::DOMString &&value) noexcept
+  void HTMLEmbedElement::Width(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }
@@ -60,7 +60,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Align(dom::DOMString &&value) noexcept
+  void HTMLEmbedElement::Align(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
@@ -70,7 +70,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Name(dom::DOMString &&value) noexcept
+  void HTMLEmbedElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }

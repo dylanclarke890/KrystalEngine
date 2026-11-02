@@ -13,7 +13,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLParamElement::Name(dom::DOMString &&value) noexcept
+  void HTMLParamElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -23,7 +23,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
   }
 
-  void HTMLParamElement::Value(dom::DOMString &&value) noexcept
+  void HTMLParamElement::Value(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
   }
@@ -33,7 +33,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLParamElement::Type(dom::DOMString &&value) noexcept
+  void HTMLParamElement::Type(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
@@ -43,7 +43,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"valuetype").value_or(u8"");
   }
 
-  void HTMLParamElement::ValueType(dom::DOMString &&value) noexcept
+  void HTMLParamElement::ValueType(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"valuetype", krys::move(value));
   }

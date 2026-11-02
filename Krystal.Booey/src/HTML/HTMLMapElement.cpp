@@ -69,7 +69,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLMapElement::Name(dom::DOMString &&value) noexcept
+  void HTMLMapElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }

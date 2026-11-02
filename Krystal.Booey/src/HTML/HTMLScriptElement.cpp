@@ -21,7 +21,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLScriptElement::Type(dom::DOMString &&value) noexcept
+  void HTMLScriptElement::Type(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
@@ -31,7 +31,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  void HTMLScriptElement::Src(dom::USVString &&value) noexcept
+  void HTMLScriptElement::Src(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -125,7 +125,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"crossorigin"));
   }
 
-  void HTMLScriptElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
+  void HTMLScriptElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
   {
     Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
@@ -136,7 +136,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
-  void HTMLScriptElement::ReferrerPolicy(dom::DOMString &&value) noexcept
+  void HTMLScriptElement::ReferrerPolicy(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
@@ -146,7 +146,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"integrity").value_or(u8"");
   }
 
-  void HTMLScriptElement::Integrity(dom::DOMString &&value) noexcept
+  void HTMLScriptElement::Integrity(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"integrity", krys::move(value));
   }
@@ -157,7 +157,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"fetchpriority"));
   }
 
-  void HTMLScriptElement::FetchPriority(dom::DOMString &&value) noexcept
+  void HTMLScriptElement::FetchPriority(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
@@ -170,7 +170,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-script-text
-  void HTMLScriptElement::Text(dom::DOMString &&value) noexcept
+  void HTMLScriptElement::Text(dom::DOMString value) noexcept
   {
     // 1. (Skipped: there are no Trusted Types.)
     // 2. (Skipped: there are no Trusted Types.)
@@ -198,7 +198,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
   }
 
-  void HTMLScriptElement::Charset(dom::DOMString &&value) noexcept
+  void HTMLScriptElement::Charset(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
   }
@@ -208,7 +208,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"event").value_or(u8"");
   }
 
-  void HTMLScriptElement::Event(dom::DOMString &&value) noexcept
+  void HTMLScriptElement::Event(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"event", krys::move(value));
   }
@@ -218,7 +218,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"for").value_or(u8"");
   }
 
-  void HTMLScriptElement::HtmlFor(dom::DOMString &&value) noexcept
+  void HTMLScriptElement::HtmlFor(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"for", krys::move(value));
   }

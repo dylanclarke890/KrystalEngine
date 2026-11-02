@@ -120,7 +120,7 @@ namespace krys::boo::html::tests
       auto &internals = InternalsOf(u8"plain");
       CHECK(internals.Element() == &ById(u8"plain"));
       CHECK(internals.Form().HasException());
-      CHECK(internals.SetFormValue(dom::DOMString(u8"1")).HasException());
+      CHECK(internals.SetFormValue(u8"1").HasException());
       CHECK(internals.WillValidate().HasException());
       CHECK(internals.Labels().HasException());
     }
@@ -188,7 +188,7 @@ namespace krys::boo::html::tests
 
     SECTION("they submit their form values")
     {
-      REQUIRE_FALSE(InternalsOf(u8"a").SetFormValue(dom::DOMString(u8"4")).HasException());
+      REQUIRE_FALSE(InternalsOf(u8"a").SetFormValue(u8"4").HasException());
       auto entries = DOMFormData::Create();
       entries->Append(u8"x", u8"1");
       entries->Append(u8"y", u8"2");
@@ -197,9 +197,9 @@ namespace krys::boo::html::tests
 
       auto submitted = Submitted(u8"f");
       REQUIRE(submitted->Items().size() == 3);
-      CHECK(submitted->Get(u8"rating") == html::DOMFormData::FormDataEntryValue(dom::DOMString(u8"4")));
-      CHECK(submitted->Get(u8"x") == html::DOMFormData::FormDataEntryValue(dom::DOMString(u8"1")));
-      CHECK(submitted->Get(u8"y") == html::DOMFormData::FormDataEntryValue(dom::DOMString(u8"2")));
+      CHECK(submitted->Get(u8"rating") == html::DOMFormData::FormDataEntryValue(u8"4"));
+      CHECK(submitted->Get(u8"x") == html::DOMFormData::FormDataEntryValue(u8"1"));
+      CHECK(submitted->Get(u8"y") == html::DOMFormData::FormDataEntryValue(u8"2"));
       CHECK_FALSE(submitted->Has(u8"z"));
     }
 

@@ -122,7 +122,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"accept-charset").value_or(u8"");
   }
 
-  void HTMLFormElement::AcceptCharset(dom::DOMString &&value) noexcept
+  void HTMLFormElement::AcceptCharset(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"accept-charset", krys::move(value));
   }
@@ -147,7 +147,7 @@ namespace krys::boo::html
     return dom::USVString(krys::move(*attributeValue));
   }
 
-  void HTMLFormElement::Action(dom::USVString &&value) noexcept
+  void HTMLFormElement::Action(dom::USVString value) noexcept
   {
     return ReflectSetter<dom::USVString>(*this, u8"action", krys::move(value));
   }
@@ -158,7 +158,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"autocomplete"));
   }
 
-  void HTMLFormElement::Autocomplete(dom::DOMString &&value) noexcept
+  void HTMLFormElement::Autocomplete(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
   }
@@ -169,7 +169,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"enctype"));
   }
 
-  void HTMLFormElement::EncType(dom::DOMString &&value) noexcept
+  void HTMLFormElement::EncType(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"enctype", krys::move(value));
   }
@@ -181,7 +181,7 @@ namespace krys::boo::html
     return EncType();
   }
 
-  void HTMLFormElement::Encoding(dom::DOMString &&value) noexcept
+  void HTMLFormElement::Encoding(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"enctype", krys::move(value));
   }
@@ -192,7 +192,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"method"));
   }
 
-  void HTMLFormElement::Method(dom::DOMString &&value) noexcept
+  void HTMLFormElement::Method(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"method", krys::move(value));
   }
@@ -202,7 +202,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLFormElement::Name(dom::DOMString &&value) noexcept
+  void HTMLFormElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -222,7 +222,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLFormElement::Target(dom::DOMString &&value) noexcept
+  void HTMLFormElement::Target(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
   }
@@ -232,7 +232,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
   }
 
-  void HTMLFormElement::Rel(dom::DOMString &&value) noexcept
+  void HTMLFormElement::Rel(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
   }

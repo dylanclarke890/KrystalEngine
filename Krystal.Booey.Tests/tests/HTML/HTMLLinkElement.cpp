@@ -18,7 +18,7 @@ namespace krys::boo::html::tests
     REQUIRE(relList.Length() == 2uz);
     REQUIRE(relList.Contains(u8"icon"));
 
-    REQUIRE_FALSE(relList.Remove(dom::DOMString(u8"icon")).HasException());
+    REQUIRE_FALSE(relList.Remove(u8"icon").HasException());
     REQUIRE(link->GetAttribute(u8"rel") == u8"stylesheet");
   }
 
@@ -35,7 +35,7 @@ namespace krys::boo::html::tests
           Pair {u8"sharedworker", u8"sharedworker"}, Pair {u8"", u8""}, Pair {u8"stylesheet", u8""}})
     {
       INFO(reinterpret_cast<const char *>(value));
-      link.As(dom::DOMString(value));
+      link.As(value);
       CHECK(link.As() == expected);
     }
     CHECK(link.GetAttribute(u8"as") == dom::DOMString(u8"stylesheet"));

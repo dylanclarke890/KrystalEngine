@@ -16,31 +16,31 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Behavior() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-behavior
-    void Behavior(dom::DOMString &&value) noexcept;
+    void Behavior(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-bgcolor
     KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-bgcolor
-    void BgColor(dom::DOMString &&value) noexcept;
+    void BgColor(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-direction
     KRYS_NODISCARD dom::DOMString Direction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-direction
-    void Direction(dom::DOMString &&value) noexcept;
+    void Direction(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-height
     KRYS_NODISCARD dom::DOMString Height() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-height
-    void Height(dom::DOMString &&value) noexcept;
+    void Height(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-width
     KRYS_NODISCARD dom::DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-width
-    void Width(dom::DOMString &&value) noexcept;
+    void Width(dom::DOMString value) noexcept;
 
     // FIXME: hspace, vspace, loop, scrollAmount, scrollDelay, trueSpeed, start() and
     // stop(). Marquees don't scroll (the -webkit-marquee properties are dropped).

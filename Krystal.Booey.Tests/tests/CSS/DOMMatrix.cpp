@@ -49,14 +49,11 @@ namespace krys::boo::tests
 
       // A 3D function makes a 3D matrix, even when it's affine.
       auto rotated =
-        DOMMatrix::Create(Variant<dom::DOMString, List<double>>(dom::DOMString(u8"rotateX(0deg)")))
-          .ReleaseValue();
+        DOMMatrix::Create(Variant<dom::DOMString, List<double>>(u8"rotateX(0deg)")).ReleaseValue();
       CHECK_FALSE(rotated->GetIs2D());
 
       // `none` and the empty string are the identity.
-      CHECK(DOMMatrix::Create(Variant<dom::DOMString, List<double>>(dom::DOMString(u8"none")))
-              .ReleaseValue()
-              ->IsIdentity());
+      CHECK(DOMMatrix::Create(Variant<dom::DOMString, List<double>>(u8"none")).ReleaseValue()->IsIdentity());
       CHECK(DOMMatrix::Create(Variant<dom::DOMString, List<double>>(dom::DOMString()))
               .ReleaseValue()
               ->IsIdentity());
@@ -64,9 +61,7 @@ namespace krys::boo::tests
       // Lengths that need a style or a box, and things that aren't transforms, are syntax errors.
       for (auto string : {u8"translate(1em)", u8"translate(50%)", u8"red", u8"scale(2) junk"})
       {
-        CHECK(DOMMatrix::Create(Variant<dom::DOMString, List<double>>(dom::DOMString(string)))
-                .GetException()
-                .Code()
+        CHECK(DOMMatrix::Create(Variant<dom::DOMString, List<double>>(string)).GetException().Code()
               == dom::ExceptionCode::SyntaxError);
       }
     }

@@ -392,7 +392,7 @@ namespace krys::boo::html
       {
         return {};
       }
-      map.emplace(dom::DOMString(*formKey), krys::move(state));
+      map.emplace(*formKey, krys::move(state));
     }
   }
 

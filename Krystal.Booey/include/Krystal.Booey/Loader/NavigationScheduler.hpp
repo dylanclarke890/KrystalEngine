@@ -76,7 +76,7 @@ namespace krys::boo
     /// @brief Schedules going to the Navigation API's entry whose key is @p key, at once; @p
     /// completionHandler hears whether it happened.
     void ScheduleHistoryNavigationByKey(
-      dom::DOMString &&key, Func<void(ScheduleHistoryNavigationResult)> &&completionHandler) noexcept;
+      dom::DOMString key, Func<void(ScheduleHistoryNavigationResult)> &&completionHandler) noexcept;
 
     /// @brief Starts the scheduled navigation's timer, if it can start now (a redirect, once the document has
     /// loaded).

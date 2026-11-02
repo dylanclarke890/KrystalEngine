@@ -30,7 +30,7 @@ namespace krys::boo::dom
   public:
     virtual ~DocumentParser() noexcept;
 
-    virtual void Append(DOMString &&source) noexcept = 0;
+    virtual void Append(DOMString source) noexcept = 0;
     virtual void Finish() noexcept = 0;
 
     // Document() will return null after Detach() is called.

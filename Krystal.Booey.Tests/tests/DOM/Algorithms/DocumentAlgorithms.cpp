@@ -42,7 +42,7 @@ namespace krys::boo::dom::tests
 
     SECTION("a string gives the document's registry and no is value")
     {
-      auto result = DocumentAlgorithms::FlattenElementCreationOptions(DOMString(u8"x-a"), *document);
+      auto result = DocumentAlgorithms::FlattenElementCreationOptions(u8"x-a", *document);
       REQUIRE_FALSE(result.HasException());
       CHECK(result.Value().CustomElementRegistry.get() == global.get());
       CHECK(result.Value().Is == DOMStringAtom::Null());

@@ -20,7 +20,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLSlotElement::Name(dom::DOMString &&name) noexcept
+  void HTMLSlotElement::Name(dom::DOMString name) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(name));
   }

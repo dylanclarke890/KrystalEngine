@@ -132,7 +132,7 @@ namespace krys::boo::html
   List<dom::DOMString> HTMLFormControlsCollection::SupportedPropertyNames() const noexcept
   {
     List<dom::DOMString> names;
-    auto append = [&](Maybe<dom::DOMString> &&name)
+    auto append = [&](Maybe<dom::DOMString> name)
     {
       if (name && !name->empty() && std::ranges::find(names, *name) == names.end())
       {

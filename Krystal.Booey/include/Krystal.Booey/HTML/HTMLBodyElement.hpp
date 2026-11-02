@@ -26,37 +26,37 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-text
-    void Text(dom::DOMString &&value) noexcept;
+    void Text(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-link
     KRYS_NODISCARD dom::DOMString Link() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-link
-    void Link(dom::DOMString &&value) noexcept;
+    void Link(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-vlink
     KRYS_NODISCARD dom::DOMString VLink() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-vlink
-    void VLink(dom::DOMString &&value) noexcept;
+    void VLink(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-alink
     KRYS_NODISCARD dom::DOMString ALink() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-alink
-    void ALink(dom::DOMString &&value) noexcept;
+    void ALink(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-bgcolor
     KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-bgcolor
-    void BgColor(dom::DOMString &&value) noexcept;
+    void BgColor(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-background
     KRYS_NODISCARD dom::DOMString Background() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-background
-    void Background(dom::DOMString &&value) noexcept;
+    void Background(dom::DOMString value) noexcept;
 
 #pragma endregion
 

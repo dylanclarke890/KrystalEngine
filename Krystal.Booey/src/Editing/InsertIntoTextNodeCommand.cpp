@@ -35,7 +35,7 @@ namespace krys::boo
       return;
     }
 
-    (void)_node->InsertData(_offset, utf8_string(_text));
+    (void)_node->InsertData(_offset, _text);
   }
 
   void InsertIntoTextNodeCommand::DoReapply() noexcept
@@ -45,7 +45,7 @@ namespace krys::boo
       return;
     }
 
-    (void)_node->InsertData(_offset, utf8_string(_text));
+    (void)_node->InsertData(_offset, _text);
   }
 
   void InsertIntoTextNodeCommand::DoUnapply() noexcept

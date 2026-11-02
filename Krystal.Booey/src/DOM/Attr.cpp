@@ -4,7 +4,7 @@
 
 namespace krys::boo::dom
 {
-  Attr::Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value) noexcept
+  Attr::Attr(Document &document, const QualifiedName &qualifiedName, DOMString value) noexcept
       : Node(document, NodeType::ATTRIBUTE_NODE, NodeFlags::None), _name {qualifiedName},
         _value {krys::move(value)}
   {
@@ -24,7 +24,7 @@ namespace krys::boo::dom
     return _value;
   }
 
-  void Attr::SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept
+  void Attr::SetExistingAttributeValue(Attr &attribute, DOMString value) noexcept
   {
     // 1. If attribute's element is null, then set attribute's value to value and return.
     // 2. Let element be attribute's element.

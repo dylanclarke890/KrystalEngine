@@ -70,7 +70,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Target(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Target(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
   }
@@ -80,7 +80,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"download").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Download(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Download(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"download", krys::move(value));
   }
@@ -90,7 +90,7 @@ namespace krys::boo::html
     return Reflect<dom::USVString>(*this, u8"ping");
   }
 
-  void HTMLAnchorElement::Ping(dom::USVString &&value) noexcept
+  void HTMLAnchorElement::Ping(dom::USVString value) noexcept
   {
     return Reflect<dom::USVString>(*this, u8"ping", krys::move(value));
   }
@@ -100,7 +100,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Rel(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Rel(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
   }
@@ -138,7 +138,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"hreflang").value_or(u8"");
   }
 
-  void HTMLAnchorElement::HrefLang(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::HrefLang(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"hreflang", krys::move(value));
   }
@@ -148,7 +148,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Type(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Type(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
@@ -158,7 +158,7 @@ namespace krys::boo::html
     return dom::TextAlgorithms::DescendantTextContent(*this);
   }
 
-  dom::ExceptionOr<void> HTMLAnchorElement::Text(dom::DOMString &&value) noexcept
+  dom::ExceptionOr<void> HTMLAnchorElement::Text(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
@@ -170,7 +170,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
-  void HTMLAnchorElement::ReferrerPolicy(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::ReferrerPolicy(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
@@ -184,7 +184,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"href");
   }
 
-  void HTMLAnchorElement::Href(dom::USVString &&value) noexcept
+  void HTMLAnchorElement::Href(dom::USVString value) noexcept
   {
     ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
   }
@@ -214,7 +214,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"coords").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Coords(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Coords(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"coords", krys::move(value));
   }
@@ -224,7 +224,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Charset(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Charset(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
   }
@@ -234,7 +234,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Name(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -244,7 +244,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"rev").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Rev(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Rev(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"rev", krys::move(value));
   }
@@ -254,7 +254,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"shape").value_or(u8"");
   }
 
-  void HTMLAnchorElement::Shape(dom::DOMString &&value) noexcept
+  void HTMLAnchorElement::Shape(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"shape", krys::move(value));
   }

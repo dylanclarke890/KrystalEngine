@@ -78,13 +78,12 @@ namespace krys::boo
     dom::DOMString _uuidIdentifier;
 
   public:
-    explicit HistoryItem(url::URL &&url = {}, dom::DOMString &&title = {},
-                         dom::DOMString &&alternateTitle = {},
+    explicit HistoryItem(url::URL url = {}, dom::DOMString title = {}, dom::DOMString alternateTitle = {},
                          Maybe<BackForwardItemIdentifier> itemID = null) noexcept;
     ~HistoryItem() noexcept;
 
-    KRYS_NODISCARD static Ref<HistoryItem> Create(url::URL &&url = {}, dom::DOMString &&title = {},
-                                                  dom::DOMString &&alternateTitle = {},
+    KRYS_NODISCARD static Ref<HistoryItem> Create(url::URL url = {}, dom::DOMString title = {},
+                                                  dom::DOMString alternateTitle = {},
                                                   Maybe<BackForwardItemIdentifier> itemID = null) noexcept
     {
       return CreateRef<HistoryItem>(krys::move(url), krys::move(title), krys::move(alternateTitle), itemID);
@@ -141,7 +140,7 @@ namespace krys::boo
     {
       return _displayTitle;
     }
-    void SetAlternateTitle(dom::DOMString &&alternateTitle) noexcept
+    void SetAlternateTitle(dom::DOMString alternateTitle) noexcept
     {
       _displayTitle = krys::move(alternateTitle);
     }
@@ -213,7 +212,7 @@ namespace krys::boo
     {
       return _documentState;
     }
-    void SetDocumentState(List<dom::DOMString> &&state) noexcept
+    void SetDocumentState(List<dom::DOMString> state) noexcept
     {
       _documentState = krys::move(state);
     }
@@ -233,7 +232,7 @@ namespace krys::boo
     {
       _originalURL = url;
     }
-    void SetReferrer(dom::DOMString &&referrer) noexcept
+    void SetReferrer(dom::DOMString referrer) noexcept
     {
       _referrer = krys::move(referrer);
     }
@@ -241,7 +240,7 @@ namespace krys::boo
     {
       _target = target;
     }
-    void SetTitle(dom::DOMString &&title) noexcept
+    void SetTitle(dom::DOMString title) noexcept
     {
       _title = krys::move(title);
     }

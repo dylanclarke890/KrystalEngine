@@ -504,17 +504,17 @@ namespace krys::boo::dom
     KRYS_NODISCARD Ref<DocumentFragment> CreateDocumentFragment() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createtextnode
-    KRYS_NODISCARD Ref<Text> CreateTextNode(DOMString &&data) noexcept;
+    KRYS_NODISCARD Ref<Text> CreateTextNode(DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createcdatasection
-    KRYS_NODISCARD ExceptionOr<Ref<CDATASection>> CreateCDATASection(DOMString &&data) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CDATASection>> CreateCDATASection(DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createcomment
-    KRYS_NODISCARD Ref<Comment> CreateComment(DOMString &&data) noexcept;
+    KRYS_NODISCARD Ref<Comment> CreateComment(DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createprocessinginstruction
     KRYS_NODISCARD ExceptionOr<Ref<ProcessingInstruction>>
-      CreateProcessingInstruction(DOMString &&target, DOMString &&data) noexcept;
+      CreateProcessingInstruction(DOMString target, DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-importnode
     KRYS_NODISCARD ExceptionOr<Ref<Node>> ImportNode(Node &node,
@@ -602,13 +602,13 @@ namespace krys::boo::dom
     KRYS_NODISCARD DOMString Title() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#document.title
-    ExceptionOr<void> Title(DOMString &&value) noexcept;
+    ExceptionOr<void> Title(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-dir
     KRYS_NODISCARD DOMString Dir() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-dir
-    void Dir(DOMString &&value) noexcept;
+    void Dir(DOMString value) noexcept;
 
     /// @brief The first body element child of the html element. The body element, which can also be a
     /// frameset element, is `BodyOrFrameset()`.
@@ -654,35 +654,35 @@ namespace krys::boo::dom
     KRYS_NODISCARD DOMString FgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-fgcolor
-    void FgColor(DOMString &&value) noexcept;
+    void FgColor(DOMString value) noexcept;
 
     /// @brief The body element's `link` attribute, or empty if the body element isn't a body.
     /// @see https://html.spec.whatwg.org/#dom-document-linkcolor
     KRYS_NODISCARD DOMString LinkColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-linkcolor
-    void LinkColor(DOMString &&value) noexcept;
+    void LinkColor(DOMString value) noexcept;
 
     /// @brief The body element's `vlink` attribute, or empty if the body element isn't a body.
     /// @see https://html.spec.whatwg.org/#dom-document-vlinkcolor
     KRYS_NODISCARD DOMString VlinkColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-vlinkcolor
-    void VlinkColor(DOMString &&value) noexcept;
+    void VlinkColor(DOMString value) noexcept;
 
     /// @brief The body element's `alink` attribute, or empty if the body element isn't a body.
     /// @see https://html.spec.whatwg.org/#dom-document-alinkcolor
     KRYS_NODISCARD DOMString AlinkColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-alinkcolor
-    void AlinkColor(DOMString &&value) noexcept;
+    void AlinkColor(DOMString value) noexcept;
 
     /// @brief The body element's `bgcolor` attribute, or empty if the body element isn't a body.
     /// @see https://html.spec.whatwg.org/#dom-document-bgcolor
     KRYS_NODISCARD DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-bgcolor
-    void BgColor(DOMString &&value) noexcept;
+    void BgColor(DOMString value) noexcept;
 
     /// @brief The `a` elements with `name` attributes.
     /// @see https://html.spec.whatwg.org/#dom-document-anchors
@@ -791,7 +791,7 @@ namespace krys::boo::dom
     /// @brief Sets the document's URL. An empty URL becomes `about:blank`, and its fragment directive is
     /// consumed.
     /// @see https://html.spec.whatwg.org/#set-the-url
-    void SetURL(url::URL &&url) noexcept;
+    void SetURL(url::URL url) noexcept;
 
     /// @brief The target of the first `base` element with a `target` attribute, or the empty string.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
@@ -1210,7 +1210,7 @@ namespace krys::boo::dom
     void DidRemoveAllPendingStylesheet() noexcept;
 
     /// @brief Queues a task to fire `hashchange` from @p oldURL to @p newURL.
-    void EnqueueHashchangeEvent(dom::USVString &&oldURL, dom::USVString &&newURL) noexcept;
+    void EnqueueHashchangeEvent(dom::USVString oldURL, dom::USVString newURL) noexcept;
 
     /// @brief Whether the document is its frame's (its navigable's active document).
     /// @see https://html.spec.whatwg.org/#fully-active
@@ -1436,7 +1436,7 @@ namespace krys::boo::dom
     {
       return _contentLanguage;
     }
-    void SetContentLanguage(DOMString &&language) noexcept;
+    void SetContentLanguage(DOMString language) noexcept;
 
     /// @brief Whether an element with a `dir` attribute or a `<bdi>` has been made in the document.
     KRYS_NODISCARD bool IsDirAttributeDirty() const noexcept
@@ -1976,11 +1976,11 @@ namespace krys::boo::dom
     }
 
     /// @brief Only to be set from the XML parser.
-    void SetXMLEncoding(DOMString &&encoding) noexcept
+    void SetXMLEncoding(DOMString encoding) noexcept
     {
       _xmlEncoding = krys::move(encoding);
     }
-    ExceptionOr<void> SetXMLVersion(DOMString &&version) noexcept;
+    ExceptionOr<void> SetXMLVersion(DOMString version) noexcept;
     void SetXMLStandalone(bool standalone) noexcept
     {
       _xmlStandalone = standalone ? StandaloneStatus::Standalone : StandaloneStatus::NotStandalone;

@@ -159,7 +159,7 @@ namespace krys::boo::tests
       CHECK(context.GetLineDash().empty());
       context.SetShadowColor(u8"not a colour");
       CHECK(context.ShadowColor() == u8"rgba(0, 0, 0, 0)");
-      context.SetFillStyle(dom::DOMString(u8"nonsense"));
+      context.SetFillStyle(u8"nonsense");
       CHECK(StyleString(context.FillStyle()) == u8"#000000");
     }
 
@@ -180,9 +180,9 @@ namespace krys::boo::tests
 
       context.SetShadowColor(u8"rgb(255 0 0 / 50%)");
       CHECK(context.ShadowColor() == u8"rgba(255, 0, 0, 0.5)");
-      context.SetFillStyle(dom::DOMString(u8"blue"));
+      context.SetFillStyle(u8"blue");
       CHECK(StyleString(context.FillStyle()) == u8"#0000ff");
-      context.SetStrokeStyle(dom::DOMString(u8"rgba(0, 128, 0, 0.25)"));
+      context.SetStrokeStyle(u8"rgba(0, 128, 0, 0.25)");
       CHECK(StyleString(context.StrokeStyle()) == u8"rgba(0, 128, 0, 0.25)");
 
       context.SetImageSmoothingEnabled(false);
@@ -226,12 +226,12 @@ namespace krys::boo::tests
 
     // `currentcolor` is the canvas's inline `color`.
     auto &context = fixture.Context();
-    context.SetFillStyle(dom::DOMString(u8"currentcolor"));
+    context.SetFillStyle(u8"currentcolor");
     CHECK(StyleString(context.FillStyle()) == u8"#0000ff");
 
     // System colours are allowed.
-    context.SetStrokeStyle(dom::DOMString(u8"red"));
-    context.SetStrokeStyle(dom::DOMString(u8"Canvas"));
+    context.SetStrokeStyle(u8"red");
+    context.SetStrokeStyle(u8"Canvas");
     CHECK(StyleString(context.StrokeStyle()) != u8"#ff0000");
   }
 
@@ -248,7 +248,7 @@ namespace krys::boo::tests
     context.SetLineWidth(5);
     context.Translate(10, 0);
     context.Save();
-    context.SetFillStyle(dom::DOMString(u8"red"));
+    context.SetFillStyle(u8"red");
     CHECK(context.StateStack().size() == 3u);
 
     context.Restore();
@@ -416,7 +416,7 @@ namespace krys::boo::tests
     CHECK(std::get<RefPtr<html::CanvasGradient>>(fill) == gradient.get());
 
     // A colour after a gradient is a colour again, even the one it was before.
-    context.SetFillStyle(dom::DOMString(u8"black"));
+    context.SetFillStyle(u8"black");
     CHECK(StyleString(context.FillStyle()) == u8"#000000");
 
     // A conic gradient's angle starts from the x-axis.
@@ -635,7 +635,7 @@ namespace krys::boo::tests
 
     SECTION("read back: without a host, what's drawn reads as transparent black")
     {
-      context.SetFillStyle(dom::DOMString(u8"red"));
+      context.SetFillStyle(u8"red");
       context.FillRect(0, 0, 4, 4);
       auto read = context.GetImageData(1, 1, 2, 2, {});
       REQUIRE_FALSE(read.HasException());

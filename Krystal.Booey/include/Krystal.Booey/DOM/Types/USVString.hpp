@@ -14,11 +14,7 @@ namespace krys::boo::dom
 
     USVString() noexcept = default;
 
-    explicit USVString(DOMString &&string) noexcept : DOMString(krys::move(string))
-    {
-    }
-
-    explicit USVString(const DOMString &string) noexcept : DOMString(string)
+    explicit USVString(DOMString string) noexcept : DOMString(krys::move(string))
     {
     }
 

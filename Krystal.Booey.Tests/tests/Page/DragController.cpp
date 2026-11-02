@@ -272,7 +272,7 @@ namespace krys::boo::tests
         // Drop targets see the types, not the data.
         readInDragOver = Narrow(dataTransfer.GetData(document, u8"text/plain"));
         auto types = dataTransfer.Types(document);
-        dragOverSawType = std::ranges::find(types, dom::DOMString(u8"text/plain")) != types.end();
+        dragOverSawType = std::ranges::find(types, u8"text/plain") != types.end();
       }
       dataTransfer.SetDropEffect(u8"move");
       event.PreventDefault();

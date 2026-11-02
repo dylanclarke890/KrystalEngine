@@ -111,7 +111,7 @@ namespace krys::boo
     }
   }
 
-  void WebAnimation::SetId(dom::DOMString &&id) noexcept
+  void WebAnimation::SetId(dom::DOMString id) noexcept
   {
     _id = krys::move(id);
   }

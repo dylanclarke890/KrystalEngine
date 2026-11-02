@@ -79,7 +79,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Accept() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-accept
-    void Accept(dom::DOMString &&value) noexcept;
+    void Accept(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-alpha
     KRYS_NODISCARD bool Alpha() const noexcept;
@@ -91,13 +91,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Alt() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-alt
-    void Alt(dom::DOMString &&value) noexcept;
+    void Alt(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-autocomplete
     KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-autocomplete
-    void Autocomplete(dom::DOMString &&value) noexcept;
+    void Autocomplete(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-defaultchecked
     KRYS_NODISCARD bool DefaultChecked() const noexcept;
@@ -126,13 +126,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString ColourSpace() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-colorspace
-    void ColourSpace(dom::DOMString &&value) noexcept;
+    void ColourSpace(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-dirname
     KRYS_NODISCARD dom::DOMString DirName() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-dirname
-    void DirName(dom::DOMString &&value) noexcept;
+    void DirName(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -166,19 +166,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString FormAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
-    void FormAction(dom::USVString &&value) noexcept;
+    void FormAction(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formenctype
     KRYS_NODISCARD dom::DOMString FormEnctype() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formenctype
-    void FormEnctype(dom::DOMString &&value) noexcept;
+    void FormEnctype(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formmethod
     KRYS_NODISCARD dom::DOMString FormMethod() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formmethod
-    void FormMethod(dom::DOMString &&value) noexcept;
+    void FormMethod(dom::DOMString value) noexcept;
 
     using HTMLTextFormControlElement::FormNoValidate;
 
@@ -189,7 +189,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString FormTarget() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formtarget
-    void FormTarget(dom::DOMString &&value) noexcept;
+    void FormTarget(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-height
     KRYS_NODISCARD uint32 Height() const noexcept;
@@ -218,7 +218,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Max() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-max
-    void Max(dom::DOMString &&value) noexcept;
+    void Max(dom::DOMString value) noexcept;
 
     using HTMLTextFormControlElement::MaxLength;
 
@@ -229,7 +229,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Min() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-min
-    void Min(dom::DOMString &&value) noexcept;
+    void Min(dom::DOMString value) noexcept;
 
     using HTMLTextFormControlElement::MinLength;
 
@@ -246,19 +246,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-input-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-pattern
     KRYS_NODISCARD dom::DOMString Pattern() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-pattern
-    void Pattern(dom::DOMString &&value) noexcept;
+    void Pattern(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-placeholder
     KRYS_NODISCARD dom::DOMString Placeholder() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-placeholder
-    void Placeholder(dom::DOMString &&value) noexcept;
+    void Placeholder(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-readonly
     KRYS_NODISCARD bool ReadOnly() const noexcept;
@@ -282,13 +282,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-src
-    void Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-step
     KRYS_NODISCARD dom::DOMString Step() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-step
-    void Step(dom::DOMString &&value) noexcept;
+    void Step(dom::DOMString value) noexcept;
 
     /// @brief The type's name: "text" for a missing or unknown type.
     /// @see https://html.spec.whatwg.org/#dom-input-type
@@ -298,7 +298,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#dom-input-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override;
 
@@ -306,14 +306,14 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString DefaultValue() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-defaultvalue
-    void DefaultValue(dom::DOMString &&value) noexcept;
+    void DefaultValue(dom::DOMString value) noexcept;
 
     /// @brief The value, by the type's value mode.
     /// @see https://html.spec.whatwg.org/#dom-input-value
     KRYS_NODISCARD dom::DOMString Value() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-input-value
-    dom::ExceptionOr<void> Value(dom::DOMString &&value) noexcept
+    dom::ExceptionOr<void> Value(dom::DOMString value) noexcept
     {
       return SetValue(value);
     }
@@ -601,13 +601,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-usemap
     KRYS_NODISCARD dom::DOMString UseMap() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-usemap
-    void UseMap(dom::DOMString &&value) noexcept;
+    void UseMap(dom::DOMString value) noexcept;
 
 #pragma endregion
 

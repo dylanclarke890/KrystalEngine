@@ -34,7 +34,7 @@ namespace krys::boo::html::tests
     CHECK(Str(fixture.Get<HTMLAnchorElement>(u8"a").Ping()) == "https://p.test/ a.html");
 
     auto &img = fixture.Get<HTMLImageElement>(u8"none");
-    img.Src(dom::USVString(u8"/root.png"));
+    img.Src(u8"/root.png");
     CHECK(img.GetAttribute(u8"src") == u8"/root.png");
     CHECK(Str(img.Src()) == "https://example.com/root.png");
   }
@@ -57,7 +57,7 @@ namespace krys::boo::html::tests
 
     // The base element's href is completed against the document's fallback base URL, not against itself.
     auto &base = fixture.Get<HTMLBaseElement>(u8"base");
-    base.Href(dom::USVString(u8"relative/"));
+    base.Href(u8"relative/");
     CHECK(Str(base.Href()) == "https://example.com/dir/relative/");
   }
 }

@@ -45,7 +45,7 @@ namespace krys::boo::xml
     _currentNodeStack.clear();
   }
 
-  void XMLDocumentParser::Append(dom::DOMString &&source) noexcept
+  void XMLDocumentParser::Append(dom::DOMString source) noexcept
   {
     if (IsStopped())
     {

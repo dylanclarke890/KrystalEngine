@@ -171,7 +171,7 @@ namespace krys::boo::html::tests
     {
       auto formData = DOMFormData::Create();
       List<BlobPartVariant> parts;
-      parts.emplace_back(utf8_string(u8"bytes"));
+      parts.emplace_back(u8"bytes");
       auto blob = Blob::Create(krys::move(parts), {});
       formData->Append(u8"b", *blob);
       formData->Append(u8"n", *blob, utf8_stringview(u8"named.bin"));

@@ -55,7 +55,7 @@ namespace krys::boo::html
       krys::move(value));
   }
 
-  void HTMLDialogElement::ClosedBy(dom::DOMString &&value) noexcept
+  void HTMLDialogElement::ClosedBy(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     Reflect<dom::DOMString>(*this, u8"closedby", krys::move(value));

@@ -115,7 +115,7 @@ namespace krys::boo::tests
                           u8"<option id=r>D</option></select>");
     auto matches = [&](utf8_stringview id, utf8_stringview selector)
     {
-      return fixture.ById(id).Matches(dom::DOMString(selector)).ReleaseValue();
+      return fixture.ById(id).Matches(selector).ReleaseValue();
     };
 
     for (auto id : {u8"s", u8"g", u8"o", u8"p", u8"h", u8"q"})

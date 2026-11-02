@@ -84,7 +84,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"alt").value_or(u8"");
   }
 
-  void HTMLImageElement::Alt(dom::DOMString &&value) noexcept
+  void HTMLImageElement::Alt(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
   }
@@ -94,7 +94,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  void HTMLImageElement::Src(dom::USVString &&value) noexcept
+  void HTMLImageElement::Src(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -104,7 +104,7 @@ namespace krys::boo::html
     return Reflect<dom::USVString>(*this, u8"srcset");
   }
 
-  void HTMLImageElement::SrcSet(dom::USVString &&value) noexcept
+  void HTMLImageElement::SrcSet(dom::USVString value) noexcept
   {
     return Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
@@ -114,7 +114,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"sizes").value_or(u8"");
   }
 
-  void HTMLImageElement::Sizes(dom::DOMString &&value) noexcept
+  void HTMLImageElement::Sizes(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"sizes", krys::move(value));
   }
@@ -125,7 +125,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"crossorigin"));
   }
 
-  void HTMLImageElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
+  void HTMLImageElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
   {
     Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
@@ -180,7 +180,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"usemap").value_or(u8"");
   }
 
-  void HTMLImageElement::UseMap(dom::DOMString &&value) noexcept
+  void HTMLImageElement::UseMap(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"usemap", krys::move(value));
   }
@@ -347,7 +347,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
-  void HTMLImageElement::ReferrerPolicy(dom::DOMString &&value) noexcept
+  void HTMLImageElement::ReferrerPolicy(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
@@ -358,7 +358,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"decoding"));
   }
 
-  void HTMLImageElement::Decoding(dom::DOMString &&value) noexcept
+  void HTMLImageElement::Decoding(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"decoding", krys::move(value));
   }
@@ -370,7 +370,7 @@ namespace krys::boo::html
       krys::move(value));
   }
 
-  void HTMLImageElement::Loading(dom::DOMString &&value) noexcept
+  void HTMLImageElement::Loading(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"loading", krys::move(value));
   }
@@ -381,7 +381,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"fetchpriority"));
   }
 
-  void HTMLImageElement::FetchPriority(dom::DOMString &&value) noexcept
+  void HTMLImageElement::FetchPriority(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
@@ -395,7 +395,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLImageElement::Name(dom::DOMString &&value) noexcept
+  void HTMLImageElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -405,7 +405,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"lowsrc");
   }
 
-  void HTMLImageElement::LowSrc(dom::USVString &&value) noexcept
+  void HTMLImageElement::LowSrc(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"lowsrc", krys::move(value));
   }
@@ -415,7 +415,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLImageElement::Align(dom::DOMString &&value) noexcept
+  void HTMLImageElement::Align(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
@@ -445,7 +445,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"longdesc");
   }
 
-  void HTMLImageElement::LongDesc(dom::USVString &&value) noexcept
+  void HTMLImageElement::LongDesc(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
   }
@@ -455,7 +455,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"border").value_or(u8"");
   }
 
-  void HTMLImageElement::Border(dom::DOMString &&value) noexcept
+  void HTMLImageElement::Border(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"border", krys::move(value));
   }

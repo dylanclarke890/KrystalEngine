@@ -7,7 +7,7 @@
 
 namespace krys::boo::dom
 {
-  Comment::Comment(Document &document, DOMString &&data) noexcept
+  Comment::Comment(Document &document, DOMString data) noexcept
       : CharacterData(document, krys::move(data), NodeType::COMMENT_NODE)
   {
     // Create a comment node:

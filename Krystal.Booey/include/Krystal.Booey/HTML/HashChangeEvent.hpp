@@ -31,8 +31,7 @@ namespace krys::boo::html
     HashChangeEvent(dom::DOMStringAtom type, const HashChangeEventInit &eventInitDict = {}) noexcept;
 
     /// @brief A trusted `hashchange` event.
-    KRYS_NODISCARD static Ref<HashChangeEvent> Create(dom::USVString &&oldURL,
-                                                      dom::USVString &&newURL) noexcept;
+    KRYS_NODISCARD static Ref<HashChangeEvent> Create(dom::USVString oldURL, dom::USVString newURL) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hashchangeevent-oldurl
     KRYS_NODISCARD const dom::USVString &OldURL() const noexcept

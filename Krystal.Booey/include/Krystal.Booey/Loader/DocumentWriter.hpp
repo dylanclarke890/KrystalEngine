@@ -54,7 +54,7 @@ namespace krys::boo
 
     void SetFrame(LocalFrame &frame) noexcept;
 
-    void SetMIMEType(utf8_string &&mimeType) noexcept
+    void SetMIMEType(utf8_string mimeType) noexcept
     {
       _mimeType = krys::move(mimeType);
     }

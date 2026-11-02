@@ -72,7 +72,7 @@ namespace krys::boo::html
     /// @param validationAnchor Where the validation message points (a shadow-including descendant of the
     /// element); the element if null.
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
-    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, dom::DOMString &&message = {},
+    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, dom::DOMString message = {},
                                        HTMLElement *validationAnchor = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-willvalidate

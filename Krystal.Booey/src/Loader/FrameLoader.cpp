@@ -394,8 +394,8 @@ namespace krys::boo
     else
     {
       // FIXME: Re-posting a POST's body and the referrer, once requests carry them.
-      ResourceRequest request(url::URL(item.URL()));
-      ResourceRequest requestForOriginalURL(url::URL(item.OriginalURL()));
+      ResourceRequest request(item.URL());
+      ResourceRequest requestForOriginalURL(item.OriginalURL());
       NavigationAction action(requestForOriginalURL, loadType, false, nullptr);
       action.SetNavigationAPIType(NavigationNavigationType::Traverse);
 
@@ -1519,7 +1519,7 @@ namespace krys::boo
     }
 
     auto oldURL = document->GetURL();
-    document->SetURL(url::URL(url));
+    document->SetURL(url);
     if (isNewNavigation && !ShouldTreatURLAsSameAsCurrent(url) && !stateObject)
     {
       // NB: Must happen before we openURL and displace the scroll position, since adding the BF item will

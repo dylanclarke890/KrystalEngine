@@ -15,7 +15,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
   }
 
-  void HTMLDataElement::Value(dom::DOMString &&value) noexcept
+  void HTMLDataElement::Value(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
   }

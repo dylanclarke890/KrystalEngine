@@ -423,7 +423,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLTableElement::Align(dom::DOMString &&value) noexcept
+  void HTMLTableElement::Align(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
@@ -433,7 +433,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"border").value_or(u8"");
   }
 
-  void HTMLTableElement::Border(dom::DOMString &&value) noexcept
+  void HTMLTableElement::Border(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"border", krys::move(value));
   }
@@ -443,7 +443,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"frame").value_or(u8"");
   }
 
-  void HTMLTableElement::Frame(dom::DOMString &&value) noexcept
+  void HTMLTableElement::Frame(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"frame", krys::move(value));
   }
@@ -453,7 +453,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"rules").value_or(u8"");
   }
 
-  void HTMLTableElement::Rules(dom::DOMString &&value) noexcept
+  void HTMLTableElement::Rules(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"rules", krys::move(value));
   }
@@ -463,7 +463,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"summary").value_or(u8"");
   }
 
-  void HTMLTableElement::Summary(dom::DOMString &&value) noexcept
+  void HTMLTableElement::Summary(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"summary", krys::move(value));
   }
@@ -473,7 +473,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLTableElement::Width(dom::DOMString &&value) noexcept
+  void HTMLTableElement::Width(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }
@@ -483,7 +483,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
-  void HTMLTableElement::BgColor(dom::DOMString &&value) noexcept
+  void HTMLTableElement::BgColor(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
   }
@@ -493,7 +493,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"cellpadding").value_or(u8"");
   }
 
-  void HTMLTableElement::CellPadding(dom::DOMString &&value) noexcept
+  void HTMLTableElement::CellPadding(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"cellpadding", krys::move(value));
   }
@@ -503,7 +503,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"cellspacing").value_or(u8"");
   }
 
-  void HTMLTableElement::CellSpacing(dom::DOMString &&value) noexcept
+  void HTMLTableElement::CellSpacing(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"cellspacing", krys::move(value));
   }

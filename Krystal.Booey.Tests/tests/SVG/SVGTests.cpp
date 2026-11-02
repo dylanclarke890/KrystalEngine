@@ -41,7 +41,7 @@ namespace krys::boo::svg::tests
 
     // A language matches the first two letters of the user's language.
     auto language = DefaultLanguage().substr(0, 2);
-    REQUIRE_FALSE(element->SetAttribute(u8"systemLanguage", dom::DOMString {language}).HasException());
+    REQUIRE_FALSE(element->SetAttribute(u8"systemLanguage", language).HasException());
     CHECK(element->IsValid());
     REQUIRE_FALSE(
       element->SetAttribute(u8"systemLanguage", dom::DOMString {language} + u8" x-none").HasException());

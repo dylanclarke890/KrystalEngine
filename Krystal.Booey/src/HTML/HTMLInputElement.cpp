@@ -81,7 +81,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"accept").value_or(u8"");
   }
 
-  void HTMLInputElement::Accept(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Accept(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"accept", krys::move(value));
   }
@@ -101,7 +101,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"alt").value_or(u8"");
   }
 
-  void HTMLInputElement::Alt(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Alt(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
   }
@@ -113,7 +113,7 @@ namespace krys::boo::html
     return AutofillData::Create(*this).IDLExposedValue;
   }
 
-  void HTMLInputElement::Autocomplete(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Autocomplete(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
   }
@@ -165,7 +165,7 @@ namespace krys::boo::html
     return u8"limited-srgb";
   }
 
-  void HTMLInputElement::ColourSpace(dom::DOMString &&value) noexcept
+  void HTMLInputElement::ColourSpace(dom::DOMString value) noexcept
   {
     (void)SetAttribute(u8"colorspace", krys::move(value));
   }
@@ -175,7 +175,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"dirname").value_or(u8"");
   }
 
-  void HTMLInputElement::DirName(dom::DOMString &&value) noexcept
+  void HTMLInputElement::DirName(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"dirname", krys::move(value));
   }
@@ -210,7 +210,7 @@ namespace krys::boo::html
     return dom::USVString(krys::move(*attributeValue));
   }
 
-  void HTMLInputElement::FormAction(dom::USVString &&value) noexcept
+  void HTMLInputElement::FormAction(dom::USVString value) noexcept
   {
     return ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
   }
@@ -221,7 +221,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"formenctype"));
   }
 
-  void HTMLInputElement::FormEnctype(dom::DOMString &&value) noexcept
+  void HTMLInputElement::FormEnctype(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"formenctype", krys::move(value));
   }
@@ -232,7 +232,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"formmethod"));
   }
 
-  void HTMLInputElement::FormMethod(dom::DOMString &&value) noexcept
+  void HTMLInputElement::FormMethod(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
   }
@@ -247,7 +247,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"formtarget").value_or(u8"");
   }
 
-  void HTMLInputElement::FormTarget(dom::DOMString &&value) noexcept
+  void HTMLInputElement::FormTarget(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"formtarget", krys::move(value));
   }
@@ -285,7 +285,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"max").value_or(u8"");
   }
 
-  void HTMLInputElement::Max(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Max(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"max", krys::move(value));
   }
@@ -300,7 +300,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"min").value_or(u8"");
   }
 
-  void HTMLInputElement::Min(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Min(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"min", krys::move(value));
   }
@@ -325,7 +325,7 @@ namespace krys::boo::html
     return _name;
   }
 
-  void HTMLInputElement::Name(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -335,7 +335,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"pattern").value_or(u8"");
   }
 
-  void HTMLInputElement::Pattern(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Pattern(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"pattern", krys::move(value));
   }
@@ -353,7 +353,7 @@ namespace krys::boo::html
     return attributeValue;
   }
 
-  void HTMLInputElement::Placeholder(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Placeholder(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"placeholder", krys::move(value));
   }
@@ -401,7 +401,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  void HTMLInputElement::Src(dom::USVString &&value) noexcept
+  void HTMLInputElement::Src(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -411,12 +411,12 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"step").value_or(u8"");
   }
 
-  void HTMLInputElement::Step(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Step(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"step", krys::move(value));
   }
 
-  void HTMLInputElement::Type(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Type(dom::DOMString value) noexcept
   {
     (void)SetAttribute(u8"type", krys::move(value));
   }
@@ -431,7 +431,7 @@ namespace krys::boo::html
     return GetAttribute(u8"value").value_or(dom::DOMString());
   }
 
-  void HTMLInputElement::DefaultValue(dom::DOMString &&value) noexcept
+  void HTMLInputElement::DefaultValue(dom::DOMString value) noexcept
   {
     (void)SetAttribute(u8"value", krys::move(value));
   }
@@ -487,7 +487,7 @@ namespace krys::boo::html
 
     if (valueChanged && eventBehavior == TextFieldEventBehavior::DispatchNoEvent)
     {
-      SetTextAsOfLastFormControlChangeEvent(dom::DOMString(sanitizedValue));
+      SetTextAsOfLastFormControlChangeEvent(sanitizedValue);
     }
 
     // FIXME: The chrome client's didProgrammaticallyClearTextFormControl, with the host's autofill.
@@ -2175,7 +2175,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLInputElement::Align(dom::DOMString &&value) noexcept
+  void HTMLInputElement::Align(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
@@ -2185,7 +2185,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"usemap").value_or(u8"");
   }
 
-  void HTMLInputElement::UseMap(dom::DOMString &&value) noexcept
+  void HTMLInputElement::UseMap(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"usemap", krys::move(value));
   }

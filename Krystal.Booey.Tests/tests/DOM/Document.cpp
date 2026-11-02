@@ -815,18 +815,18 @@ namespace krys::boo::dom::tests
             "[DOM][Document][html:document.title]")
   {
     auto document = Parse(u8"<p>No title</p>");
-    REQUIRE_FALSE(document->Title(DOMString(u8"New")).HasException());
+    REQUIRE_FALSE(document->Title(u8"New").HasException());
     CHECK(document->Title() == u8"New");
     REQUIRE(document->Head()->FirstElementChild());
     CHECK(document->Head()->FirstElementChild()->LocalName() == u8"title");
 
-    REQUIRE_FALSE(document->Title(DOMString(u8"Again")).HasException());
+    REQUIRE_FALSE(document->Title(u8"Again").HasException());
     CHECK(document->Title() == u8"Again");
     CHECK(document->Head()->ChildElementCount() == 1);
 
     // Without a head or a title, nothing is added.
     REQUIRE_FALSE(document->Head()->Remove().HasException());
-    REQUIRE_FALSE(document->Title(DOMString(u8"None")).HasException());
+    REQUIRE_FALSE(document->Title(u8"None").HasException());
     CHECK(document->Title() == u8"");
   }
 
@@ -887,14 +887,14 @@ namespace krys::boo::dom::tests
     auto document = Parse(u8"<html dir=RTL><head></head><body></body></html>");
     CHECK(document->Dir() == u8"rtl");
 
-    document->Dir(DOMString(u8"ltr"));
+    document->Dir(u8"ltr");
     CHECK(document->DocumentElement()->GetAttribute(u8"dir") == DOMString(u8"ltr"));
     CHECK_FALSE(document->Head()->HasAttribute(u8"dir"));
 
     // Without an html element, nothing.
     auto empty = CreateRef<HTMLDocument>();
     CHECK(empty->Dir() == u8"");
-    empty->Dir(DOMString(u8"rtl"));
+    empty->Dir(u8"rtl");
     CHECK(empty->Dir() == u8"");
   }
 
@@ -958,9 +958,9 @@ namespace krys::boo::dom::tests
       CHECK(document->AlinkColor() == u8"lime");
       CHECK(document->BgColor() == u8"white");
 
-      document->BgColor(DOMString(u8"black"));
+      document->BgColor(u8"black");
       CHECK(document->Body()->GetAttribute(u8"bgcolor") == DOMString(u8"black"));
-      document->FgColor(DOMString(u8"gray"));
+      document->FgColor(u8"gray");
       CHECK(document->Body()->GetAttribute(u8"text") == DOMString(u8"gray"));
     }
 
@@ -968,12 +968,12 @@ namespace krys::boo::dom::tests
     {
       auto frameset = Parse(u8"<frameset bgcolor=red></frameset>");
       CHECK(frameset->BgColor() == u8"");
-      frameset->BgColor(DOMString(u8"blue"));
+      frameset->BgColor(u8"blue");
       CHECK(frameset->BodyOrFrameset()->GetAttribute(u8"bgcolor") == DOMString(u8"red"));
 
       auto empty = CreateRef<HTMLDocument>();
       CHECK(empty->LinkColor() == u8"");
-      empty->LinkColor(DOMString(u8"blue"));
+      empty->LinkColor(u8"blue");
       CHECK(empty->LinkColor() == u8"");
     }
   }

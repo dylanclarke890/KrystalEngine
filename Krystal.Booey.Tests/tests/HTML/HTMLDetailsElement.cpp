@@ -237,7 +237,7 @@ namespace krys::boo::html::tests
 
     SECTION("Joining a group with an open element closes the joining one")
     {
-      d.Name(dom::DOMString(u8"faq"));
+      d.Name(u8"faq");
       CHECK_FALSE(d.Open());
       CHECK(a.Open());
     }

@@ -49,6 +49,6 @@ namespace krys::boo
       return;
     }
 
-    (void)_node->InsertData(_offset, utf8_string(_text));
+    (void)_node->InsertData(_offset, _text);
   }
 }

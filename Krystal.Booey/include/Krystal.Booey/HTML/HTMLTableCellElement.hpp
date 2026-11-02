@@ -30,7 +30,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Headers() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-headers
-    void Headers(dom::DOMString &&value) noexcept;
+    void Headers(dom::DOMString value) noexcept;
 
     /// @brief The cell's index in its row's cells, or -1 if its parent isn't a row.
     /// @see https://html.spec.whatwg.org/#dom-tdth-cellindex
@@ -40,13 +40,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Scope() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-scope
-    void Scope(dom::DOMString &&value) noexcept;
+    void Scope(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-abbr
     KRYS_NODISCARD dom::DOMString Abbr() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-abbr
-    void Abbr(dom::DOMString &&value) noexcept;
+    void Abbr(dom::DOMString value) noexcept;
 
 #pragma endregion
 
@@ -56,37 +56,37 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-axis
     KRYS_NODISCARD dom::DOMString Axis() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-axis
-    void Axis(dom::DOMString &&value) noexcept;
+    void Axis(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-height
     KRYS_NODISCARD dom::DOMString Height() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-height
-    void Height(dom::DOMString &&value) noexcept;
+    void Height(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-width
     KRYS_NODISCARD dom::DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-width
-    void Width(dom::DOMString &&value) noexcept;
+    void Width(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-char
     KRYS_NODISCARD dom::DOMString Char() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-char
-    void Char(dom::DOMString &&value) noexcept;
+    void Char(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-charoff
     KRYS_NODISCARD dom::DOMString CharOff() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-charoff
-    void CharOff(dom::DOMString &&value) noexcept;
+    void CharOff(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-nowrap
     KRYS_NODISCARD bool NoWrap() const noexcept;
@@ -98,13 +98,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString VAlign() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-valign
-    void VAlign(dom::DOMString &&value) noexcept;
+    void VAlign(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-bgcolor
     KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-bgcolor
-    void BgColor(dom::DOMString &&value) noexcept;
+    void BgColor(dom::DOMString value) noexcept;
 
 #pragma endregion
 

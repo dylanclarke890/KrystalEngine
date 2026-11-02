@@ -240,7 +240,7 @@ namespace krys::boo
     _length = 0;
   }
 
-  void TextIteratorCopyableText::Set(utf8_string &&string) noexcept
+  void TextIteratorCopyableText::Set(utf8_string string) noexcept
   {
     _singleCharacterLength = 0;
     _string = krys::move(string);
@@ -248,7 +248,7 @@ namespace krys::boo
     _length = static_cast<uint32>(_string.size());
   }
 
-  void TextIteratorCopyableText::Set(utf8_string &&string, uint32 offset, uint32 length) noexcept
+  void TextIteratorCopyableText::Set(utf8_string string, uint32 offset, uint32 length) noexcept
   {
     krys_debug_assert(offset < string.size());
     krys_debug_assert(length);

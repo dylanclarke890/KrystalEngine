@@ -37,7 +37,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Command() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-command
-    void Command(dom::DOMString &&value) noexcept;
+    void Command(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
     KRYS_NODISCARD RefPtr<dom::Element> CommandForElementForBindings() const noexcept;
@@ -55,19 +55,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString FormAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formaction
-    void FormAction(dom::USVString &&value) noexcept;
+    void FormAction(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formenctype
     KRYS_NODISCARD dom::DOMString EncType() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formenctype
-    void EncType(dom::DOMString &&value) noexcept;
+    void EncType(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formmethod
     KRYS_NODISCARD dom::DOMString FormMethod() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formmethod
-    void FormMethod(dom::DOMString &&value) noexcept;
+    void FormMethod(dom::DOMString value) noexcept;
 
     using HTMLFormControlElement::FormNoValidate;
 
@@ -78,25 +78,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString FormTarget() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formtarget
-    void FormTarget(dom::DOMString &&value) noexcept;
+    void FormTarget(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-name
     KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-button-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-value
     KRYS_NODISCARD dom::DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-value
-    void Value(dom::DOMString &&value) noexcept;
+    void Value(dom::DOMString value) noexcept;
 
 #pragma endregion
 

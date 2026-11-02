@@ -8,7 +8,7 @@ namespace krys::boo::html
   {
   }
 
-  Ref<HashChangeEvent> HashChangeEvent::Create(dom::USVString &&oldURL, dom::USVString &&newURL) noexcept
+  Ref<HashChangeEvent> HashChangeEvent::Create(dom::USVString oldURL, dom::USVString newURL) noexcept
   {
     // https://html.spec.whatwg.org/#update-document-for-history-step-application: fire an event named
     // hashchange at document's relevant global object, using HashChangeEvent, with the oldURL attribute

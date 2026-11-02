@@ -9,8 +9,8 @@ namespace krys::boo::html
   {
   }
 
-  Ref<ErrorEvent> ErrorEvent::Create(dom::DOMStringAtom type, dom::DOMString &&message,
-                                     dom::USVString &&filename, uint32 lineno, uint32 colno,
+  Ref<ErrorEvent> ErrorEvent::Create(dom::DOMStringAtom type, dom::DOMString message, dom::USVString filename,
+                                     uint32 lineno, uint32 colno,
                                      RefPtr<SerializedScriptValue> &&error) noexcept
   {
     ErrorEventInit init;
@@ -24,7 +24,7 @@ namespace krys::boo::html
     return event;
   }
 
-  Ref<ErrorEvent> ErrorEvent::Create(dom::DOMString &&message, dom::USVString &&filename, uint32 lineno,
+  Ref<ErrorEvent> ErrorEvent::Create(dom::DOMString message, dom::USVString filename, uint32 lineno,
                                      uint32 colno, RefPtr<SerializedScriptValue> &&error) noexcept
   {
     ErrorEventInit init;

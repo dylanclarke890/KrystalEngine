@@ -61,7 +61,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    ExceptionOr<void> TextContent(DOMString &&value) noexcept final;
+    ExceptionOr<void> TextContent(DOMString value) noexcept final;
 
 #pragma endregion
 

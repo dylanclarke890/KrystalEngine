@@ -19,7 +19,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  void HTMLIFrameElement::Src(dom::USVString &&value) noexcept
+  void HTMLIFrameElement::Src(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -29,7 +29,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"srcdoc").value_or(u8"");
   }
 
-  void HTMLIFrameElement::SrcDoc(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::SrcDoc(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"srcdoc", krys::move(value));
   }
@@ -39,7 +39,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"sizes").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Sizes(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::Sizes(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"sizes", krys::move(value));
   }
@@ -49,7 +49,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Name(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -85,7 +85,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"allow").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Allow(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::Allow(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"allow", krys::move(value));
   }
@@ -105,7 +105,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Width(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::Width(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }
@@ -115,7 +115,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Height(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::Height(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
   }
@@ -126,7 +126,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
-  void HTMLIFrameElement::ReferrerPolicy(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::ReferrerPolicy(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
@@ -137,7 +137,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"loading"));
   }
 
-  void HTMLIFrameElement::Loading(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::Loading(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"loading", krys::move(value));
   }
@@ -151,7 +151,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Align(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::Align(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
@@ -161,7 +161,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"scrolling").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Scrolling(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::Scrolling(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"scrolling", krys::move(value));
   }
@@ -171,7 +171,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"frameborder").value_or(u8"");
   }
 
-  void HTMLIFrameElement::FrameBorder(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::FrameBorder(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"frameborder", krys::move(value));
   }
@@ -181,7 +181,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"longdesc");
   }
 
-  void HTMLIFrameElement::LongDesc(dom::USVString &&value) noexcept
+  void HTMLIFrameElement::LongDesc(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
   }
@@ -191,7 +191,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"marginwidth").value_or(u8"");
   }
 
-  void HTMLIFrameElement::MarginWidth(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::MarginWidth(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"marginwidth", krys::move(value));
   }
@@ -201,7 +201,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"marginheight").value_or(u8"");
   }
 
-  void HTMLIFrameElement::MarginHeight(dom::DOMString &&value) noexcept
+  void HTMLIFrameElement::MarginHeight(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"marginheight", krys::move(value));
   }

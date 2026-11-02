@@ -65,7 +65,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsDirectory() const noexcept;
 
   private:
-    File(Ref<BlobData> &&data, utf8_stringview type, utf8_string &&path, utf8_string &&name) noexcept;
+    File(Ref<BlobData> &&data, utf8_stringview type, utf8_string path, utf8_string name) noexcept;
     File(List<BlobPartVariant> &&blobPartVariants, utf8_stringview filename,
          const PropertyBag &propertyBag) noexcept;
     File(const Blob &blob, utf8_stringview name) noexcept;

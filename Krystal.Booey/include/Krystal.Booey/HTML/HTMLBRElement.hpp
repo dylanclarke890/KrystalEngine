@@ -23,7 +23,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Clear() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-br-compact
-    void Clear(dom::DOMString &&value) noexcept;
+    void Clear(dom::DOMString value) noexcept;
 
 #pragma endregion
 

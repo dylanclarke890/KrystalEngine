@@ -16,7 +16,7 @@ namespace krys::boo
     {
       if (value)
       {
-        (void)element.SetAttribute(attribute, dom::DOMString(*value));
+        (void)element.SetAttribute(attribute, *value);
       }
       else
       {

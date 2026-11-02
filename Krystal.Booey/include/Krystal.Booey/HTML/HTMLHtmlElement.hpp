@@ -18,7 +18,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Version() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-html-version
-    void Version(dom::DOMString &&value) noexcept;
+    void Version(dom::DOMString value) noexcept;
 
 #pragma endregion
   };

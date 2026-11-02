@@ -18,7 +18,7 @@ namespace krys::boo::dom
     /// @brief Creates a comment node in @p document with the data.
     /// @see https://dom.spec.whatwg.org/#dom-comment-comment
     /// @see https://dom.spec.whatwg.org/#create-a-comment-node
-    Comment(Document &document, DOMString &&data = u8"") noexcept;
+    Comment(Document &document, DOMString data = u8"") noexcept;
 
 #pragma endregion
 

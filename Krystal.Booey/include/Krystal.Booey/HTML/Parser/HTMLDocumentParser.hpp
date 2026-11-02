@@ -33,7 +33,7 @@ namespace krys::boo::html
     /// the context).
     /// @see https://html.spec.whatwg.org/#html-fragment-parsing-algorithm
     KRYS_NODISCARD static Ref<dom::DocumentFragment>
-      ParseFragment(dom::ContainerNode &target, utf8_string &&input, bool allowDeclarativeShadowRoots = false,
+      ParseFragment(dom::ContainerNode &target, utf8_string input, bool allowDeclarativeShadowRoots = false,
                     ParserScriptingMode scriptingMode = ParserScriptingMode::Inert,
                     Maybe<SanitizerConfig> &&configuration = null) noexcept;
 

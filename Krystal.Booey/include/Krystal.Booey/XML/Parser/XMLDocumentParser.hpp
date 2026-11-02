@@ -110,7 +110,7 @@ namespace krys::boo::xml
 
     KRYS_NODISCARD static bool SupportsXMLVersion(dom::DOMStringView) noexcept;
 
-    void Append(dom::DOMString &&source) noexcept final;
+    void Append(dom::DOMString source) noexcept final;
     void Finish() noexcept final;
     void StopParsing() noexcept final;
     void Detach() noexcept final;

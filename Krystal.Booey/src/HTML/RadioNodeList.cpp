@@ -65,7 +65,7 @@ namespace krys::boo::html
       {
         // 3. If element is an element with no value attribute, return the string "on".
         // 4. Otherwise, return the value of element's value attribute.
-        return input->GetAttribute(u8"value").value_or(dom::DOMString(u8"on"));
+        return input->GetAttribute(u8"value").value_or(u8"on");
       }
     }
 

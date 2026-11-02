@@ -19,13 +19,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Cite() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-mod-cite
-    void Cite(dom::USVString &&value) noexcept;
+    void Cite(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-mod-datetime
     KRYS_NODISCARD dom::DOMString DateTime() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-mod-datetime
-    void DateTime(dom::DOMString &&value) noexcept;
+    void DateTime(dom::DOMString value) noexcept;
 
 #pragma endregion
   };

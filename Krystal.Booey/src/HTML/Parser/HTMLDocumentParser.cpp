@@ -17,7 +17,7 @@ namespace krys::boo::html
   }
 
   Ref<dom::DocumentFragment>
-    HTMLDocumentParser::ParseFragment(dom::ContainerNode &target, utf8_string &&input,
+    HTMLDocumentParser::ParseFragment(dom::ContainerNode &target, utf8_string input,
                                       bool allowDeclarativeShadowRoots, ParserScriptingMode scriptingMode,
                                       Maybe<SanitizerConfig> &&configuration) noexcept
   {

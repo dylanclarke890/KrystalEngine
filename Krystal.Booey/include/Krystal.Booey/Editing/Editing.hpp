@@ -228,7 +228,7 @@ namespace krys::boo
   KRYS_NODISCARD Ref<dom::Element> CreateDefaultParagraphElement(dom::Document &document) noexcept;
   KRYS_NODISCARD Ref<dom::Element> CreateTabSpanElement(dom::Document &document) noexcept;
   KRYS_NODISCARD Ref<dom::Element> CreateTabSpanElement(dom::Document &document,
-                                                        utf8_string &&tabText) noexcept;
+                                                        utf8_string tabText) noexcept;
   /// @brief A copy of @p element, with its attributes, without its children.
   KRYS_NODISCARD Ref<dom::Element> CloneElementWithoutChildren(dom::Element &element) noexcept;
   /// @brief Gives @p target the attributes of @p source.

@@ -18,25 +18,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-meta-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-meta-httpequiv
     KRYS_NODISCARD dom::DOMString HttpEquiv() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-meta-httpequiv
-    void HttpEquiv(dom::DOMString &&value) noexcept;
+    void HttpEquiv(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-meta-content
     KRYS_NODISCARD dom::DOMString Content() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-meta-content
-    void Content(dom::DOMString &&value) noexcept;
+    void Content(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-meta-media
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-meta-media
-    void Media(dom::DOMString &&value) noexcept;
+    void Media(dom::DOMString value) noexcept;
 
 #pragma endregion
 
@@ -46,7 +46,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Scheme() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-meta-scheme
-    void Scheme(dom::DOMString &&value) noexcept;
+    void Scheme(dom::DOMString value) noexcept;
 
 #pragma endregion
 

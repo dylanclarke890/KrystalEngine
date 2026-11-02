@@ -15,7 +15,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"datetime").value_or(u8"");
   }
 
-  void HTMLTimeElement::DateTime(dom::DOMString &&value) noexcept
+  void HTMLTimeElement::DateTime(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"datetime", krys::move(value));
   }

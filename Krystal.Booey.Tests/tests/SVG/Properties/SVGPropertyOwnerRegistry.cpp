@@ -145,7 +145,7 @@ namespace krys::boo::svg::tests
                     ->SetMeetOrSlice(SVGPreserveAspectRatioValue::SVG_MEETORSLICE_SLICE)
                     .HasException());
     REQUIRE_FALSE(element->ViewBox->BaseVal()->SetWidth(10).HasException());
-    REQUIRE_FALSE(element->String->SetBaseVal(dom::DOMString {u8"out"}).HasException());
+    REQUIRE_FALSE(element->String->SetBaseVal(u8"out").HasException());
     REQUIRE_FALSE(element->Transform->BaseVal()
                     ->AppendItem(SVGTransform::Create(SVGTransformValue::TranslateTransformValue({1, 2})))
                     .HasException());
@@ -153,9 +153,9 @@ namespace krys::boo::svg::tests
     REQUIRE_FALSE(
       element->ViewTransform->AppendItem(SVGTransform::Create(SVGTransformValue::ScaleTransformValue({2, 2})))
         .HasException());
-    REQUIRE_FALSE(element->SystemLanguage().AppendItem(dom::DOMString {u8"en"}).HasException());
-    REQUIRE_FALSE(element->ClassNameAnimated().SetBaseVal(dom::DOMString {u8"c"}).HasException());
-    REQUIRE_FALSE(element->HrefAnimated().SetBaseVal(dom::DOMString {u8"#d"}).HasException());
+    REQUIRE_FALSE(element->SystemLanguage().AppendItem(u8"en").HasException());
+    REQUIRE_FALSE(element->ClassNameAnimated().SetBaseVal(u8"c").HasException());
+    REQUIRE_FALSE(element->HrefAnimated().SetBaseVal(u8"#d").HasException());
 
     CHECK(element->GetAttribute(u8"preserveAlpha") == dom::DOMString(u8"true"));
     CHECK(element->GetAttribute(u8"numOctaves") == dom::DOMString(u8"3"));

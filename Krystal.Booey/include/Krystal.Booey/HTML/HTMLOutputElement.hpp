@@ -31,7 +31,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-output-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept
@@ -43,13 +43,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString DefaultValue() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-defaultvalue
-    void DefaultValue(dom::DOMString &&value) noexcept;
+    void DefaultValue(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-value
     KRYS_NODISCARD dom::DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-value
-    void Value(dom::DOMString &&value) noexcept;
+    void Value(dom::DOMString value) noexcept;
 
 #pragma endregion
 

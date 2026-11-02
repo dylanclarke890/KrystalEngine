@@ -64,7 +64,7 @@ namespace krys::boo
 
     utf8_string prefixText = text1->Data();
 
-    (void)_text2->InsertData(0, utf8_string(prefixText));
+    (void)_text2->InsertData(0, prefixText);
 
     (void)dom::mixins::ChildNode::Remove(*text1);
   }

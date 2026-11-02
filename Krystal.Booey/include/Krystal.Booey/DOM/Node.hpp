@@ -152,7 +152,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
-    virtual ExceptionOr<void> NodeValue(DOMString &&value) noexcept
+    virtual ExceptionOr<void> NodeValue(DOMString value) noexcept
     {
       (void)value; // still want it in the signature
       return {};
@@ -170,7 +170,7 @@ namespace krys::boo::dom
     /// interfaces.
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     /// @see https://dom.spec.whatwg.org/#set-text-content
-    virtual ExceptionOr<void> TextContent(DOMString &&value) noexcept
+    virtual ExceptionOr<void> TextContent(DOMString value) noexcept
     {
       (void)value; // still want it in the signature
       return {};

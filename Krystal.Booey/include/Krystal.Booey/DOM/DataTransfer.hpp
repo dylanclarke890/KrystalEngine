@@ -73,7 +73,7 @@ namespace krys::boo::dom
     RefPtr<DragImageLoader> _dragImageLoader;
 
     DataTransfer(StoreMode mode, UniquePtr<Pasteboard> &&pasteboard, Type type = Type::CopyAndPaste,
-                 DOMString &&effectAllowed = u8"uninitialized") noexcept;
+                 DOMString effectAllowed = u8"uninitialized") noexcept;
 
   public:
     ~DataTransfer() noexcept;

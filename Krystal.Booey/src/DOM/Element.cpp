@@ -1786,7 +1786,7 @@ namespace krys::boo::dom
     return qualifiedName;
   }
 
-  void Element::Id(DOMString &&id) noexcept
+  void Element::Id(DOMString id) noexcept
   {
     html::CEReactionsScope ceReactions;
     ElementAlgorithms::SetAttributeValue(*this, u8"id", krys::move(id));
@@ -1868,7 +1868,7 @@ namespace krys::boo::dom
     return id;
   }
 
-  void Element::ClassName(DOMString &&className) noexcept
+  void Element::ClassName(DOMString className) noexcept
   {
     html::CEReactionsScope ceReactions;
     ElementAlgorithms::SetAttributeValue(*this, u8"class", krys::move(className));
@@ -1909,7 +1909,7 @@ namespace krys::boo::dom
     return *rareData.Dataset();
   }
 
-  void Element::Slot(DOMString &&slot) noexcept
+  void Element::Slot(DOMString slot) noexcept
   {
     html::CEReactionsScope ceReactions;
     ElementAlgorithms::SetAttributeValue(*this, u8"slot", krys::move(slot));
@@ -1971,7 +1971,7 @@ namespace krys::boo::dom
     return attr->Value();
   }
 
-  ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMString &&value) noexcept
+  ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError"
@@ -2015,7 +2015,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> Element::SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
-                                            DOMString &&value) noexcept
+                                            DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
@@ -2300,7 +2300,7 @@ namespace krys::boo::dom
     return result.Value() ? &element : nullptr;
   }
 
-  ExceptionOr<void> Element::InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept
+  ExceptionOr<void> Element::InsertAdjacentText(InsertAdjacentWhere where, DOMString data) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let text be the result of creating a text node given this's node document and data.
@@ -2355,7 +2355,7 @@ namespace krys::boo::dom
         return {};
       }
       Ref<Text> protectedNext = ShareRef(*next);
-      if (auto result = node.AppendData(DOMString(protectedNext->Data())); result.HasException())
+      if (auto result = node.AppendData(protectedNext->Data()); result.HasException())
       {
         return result.ReleaseException();
       }
@@ -2669,7 +2669,7 @@ namespace krys::boo::dom
     return TextAlgorithms::DescendantTextContent(*this);
   }
 
-  ExceptionOr<void> Element::TextContent(DOMString &&value) noexcept
+  ExceptionOr<void> Element::TextContent(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     return NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
@@ -2808,7 +2808,7 @@ namespace krys::boo::dom
 
 #pragma region Lazy Attributes
 
-  void Element::SetSynchronizedLazyAttribute(DOMStringAtom localName, DOMString &&value) noexcept
+  void Element::SetSynchronizedLazyAttribute(DOMStringAtom localName, DOMString value) noexcept
   {
     auto it = std::ranges::find_if(
       _attributes, [&](const Ref<Attr> &attr)
@@ -2826,7 +2826,7 @@ namespace krys::boo::dom
     _attributes.push_back(krys::move(attr));
   }
 
-  void Element::SetSynchronizedLazyAttribute(const QualifiedName &name, DOMString &&value) noexcept
+  void Element::SetSynchronizedLazyAttribute(const QualifiedName &name, DOMString value) noexcept
   {
     auto it = std::ranges::find_if(
       _attributes, [&](const Ref<Attr> &attr)

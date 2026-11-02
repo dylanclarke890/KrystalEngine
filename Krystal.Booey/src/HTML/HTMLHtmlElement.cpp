@@ -15,7 +15,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"version").value_or(u8"");
   }
 
-  void HTMLHtmlElement::Version(dom::DOMString &&value) noexcept
+  void HTMLHtmlElement::Version(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"version", krys::move(value));
   }

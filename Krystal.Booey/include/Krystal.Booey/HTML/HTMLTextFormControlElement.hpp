@@ -190,7 +190,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool WasEverChangedByUserEdit() const noexcept;
 
     /// @brief Replaces the inner text with @p value (with a `<br>` after a trailing line break).
-    void SetInnerTextValue(dom::DOMString &&value) noexcept;
+    void SetInnerTextValue(dom::DOMString value) noexcept;
 
     /// @brief The inner text: its text, with a line break for each `<br>` but a trailing one.
     KRYS_NODISCARD dom::DOMString InnerTextValue() const noexcept;
@@ -213,7 +213,7 @@ namespace krys::boo::html
     /// @brief The length of @p text in UTF-16 code units, as script measures strings.
     KRYS_NODISCARD static size_t LengthForAPIValue(dom::DOMStringView text) noexcept;
 
-    void SetTextAsOfLastFormControlChangeEvent(dom::DOMString &&text) noexcept
+    void SetTextAsOfLastFormControlChangeEvent(dom::DOMString text) noexcept
     {
       _textAsOfLastFormControlChangeEvent = krys::move(text);
     }

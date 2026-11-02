@@ -92,55 +92,55 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-border
     KRYS_NODISCARD dom::DOMString Border() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-border
-    void Border(dom::DOMString &&value) noexcept;
+    void Border(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-frame
     KRYS_NODISCARD dom::DOMString Frame() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-frame
-    void Frame(dom::DOMString &&value) noexcept;
+    void Frame(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-rules
     KRYS_NODISCARD dom::DOMString Rules() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-rules
-    void Rules(dom::DOMString &&value) noexcept;
+    void Rules(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-summary
     KRYS_NODISCARD dom::DOMString Summary() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-summary
-    void Summary(dom::DOMString &&value) noexcept;
+    void Summary(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-width
     KRYS_NODISCARD dom::DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-width
-    void Width(dom::DOMString &&value) noexcept;
+    void Width(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-bgcolor
     KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-bgcolor
-    void BgColor(dom::DOMString &&value) noexcept;
+    void BgColor(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-cellpadding
     KRYS_NODISCARD dom::DOMString CellPadding() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-cellpadding
-    void CellPadding(dom::DOMString &&value) noexcept;
+    void CellPadding(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-cellspacing
     KRYS_NODISCARD dom::DOMString CellSpacing() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-cellspacing
-    void CellSpacing(dom::DOMString &&value) noexcept;
+    void CellSpacing(dom::DOMString value) noexcept;
 
 #pragma endregion
 

@@ -36,7 +36,7 @@ namespace krys::boo
     }
 
     /// @brief @p text with each byte that isn't part of well-formed UTF-8 replaced by U+FFFD.
-    KRYS_NODISCARD utf8_string ReplaceInvalidUTF8(utf8_string &&text) noexcept
+    KRYS_NODISCARD utf8_string ReplaceInvalidUTF8(utf8_string text) noexcept
     {
       if (text::IsValidUTF8(text))
       {

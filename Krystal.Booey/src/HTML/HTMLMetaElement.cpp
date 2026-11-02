@@ -26,7 +26,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLMetaElement::Name(dom::DOMString &&value) noexcept
+  void HTMLMetaElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -36,7 +36,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"http-equiv").value_or(u8"");
   }
 
-  void HTMLMetaElement::HttpEquiv(dom::DOMString &&value) noexcept
+  void HTMLMetaElement::HttpEquiv(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"http-equiv", krys::move(value));
   }
@@ -46,7 +46,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"content").value_or(u8"");
   }
 
-  void HTMLMetaElement::Content(dom::DOMString &&value) noexcept
+  void HTMLMetaElement::Content(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"content", krys::move(value));
   }
@@ -56,7 +56,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
   }
 
-  void HTMLMetaElement::Media(dom::DOMString &&value) noexcept
+  void HTMLMetaElement::Media(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
   }
@@ -70,7 +70,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"scheme").value_or(u8"");
   }
 
-  void HTMLMetaElement::Scheme(dom::DOMString &&value) noexcept
+  void HTMLMetaElement::Scheme(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"scheme", krys::move(value));
   }

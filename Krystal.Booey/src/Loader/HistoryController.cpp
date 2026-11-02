@@ -408,7 +408,7 @@ namespace krys::boo
     _previousItem = std::exchange(_currentItem, RefPtr<HistoryItem>(krys::move(item)));
   }
 
-  void HistoryController::SetCurrentItemTitle(dom::DOMString &&title) noexcept
+  void HistoryController::SetCurrentItemTitle(dom::DOMString title) noexcept
   {
     if (RefPtr<HistoryItem> currentItem = _currentItem)
     {

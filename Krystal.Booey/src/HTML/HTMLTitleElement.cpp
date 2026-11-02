@@ -17,7 +17,7 @@ namespace krys::boo::html
     return dom::TextAlgorithms::ChildTextContent(*this);
   }
 
-  dom::ExceptionOr<void> HTMLTitleElement::Text(dom::DOMString &&value) noexcept
+  dom::ExceptionOr<void> HTMLTitleElement::Text(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);

@@ -171,7 +171,7 @@ namespace krys::boo::svg
     return dom::DOMString(u8"anonymous");
   }
 
-  void SVGImageElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
+  void SVGImageElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
   {
     if (value)
     {

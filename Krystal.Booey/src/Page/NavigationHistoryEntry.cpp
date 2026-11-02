@@ -13,9 +13,9 @@
 namespace krys::boo
 {
   NavigationHistoryEntry::NavigationHistoryEntry(Navigation &navigation, Ref<HistoryItem> &&historyItem,
-                                                 dom::USVString &&urlString, dom::DOMString &&key,
+                                                 dom::USVString urlString, dom::DOMString key,
                                                  RefPtr<html::SerializedScriptValue> &&state,
-                                                 dom::DOMString &&id) noexcept
+                                                 dom::DOMString id) noexcept
       : _navigation(CreateWeakPtr(&navigation)), _urlString(krys::move(urlString)), _key(krys::move(key)),
         _id(krys::move(id)), _state(krys::move(state)), _associatedHistoryItem(krys::move(historyItem))
   {
@@ -46,8 +46,8 @@ namespace krys::boo
       state = other._state;
     }
     return CreateRef<NavigationHistoryEntry>(navigation, krys::move(historyItem),
-                                             dom::USVString(other._urlString), dom::DOMString(other._key),
-                                             krys::move(state), dom::DOMString(other._id));
+                                             dom::USVString(other._urlString), other._key, krys::move(state),
+                                             other._id);
   }
 
   bool NavigationHistoryEntry::IsDocumentFullyActive() const noexcept

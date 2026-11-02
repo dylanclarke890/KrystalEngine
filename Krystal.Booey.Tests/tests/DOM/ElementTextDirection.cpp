@@ -190,7 +190,7 @@ namespace krys::boo::dom::tests
 
     SECTION("changing the data")
     {
-      REQUIRE_FALSE(text.Data(utf8_string(Shalom)).HasException());
+      REQUIRE_FALSE(text.Data(Shalom).HasException());
       CHECK(Dir(d) == "rtl");
       CHECK(Dir(p) == "rtl");
       REQUIRE_FALSE(text.InsertData(0, u8"x").HasException());
@@ -226,7 +226,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(text.Data(u8"").HasException());
       CHECK(Dir(d) == "ltr");
       auto image = document->CreateElement(u8"img").ReleaseValue();
-      REQUIRE_FALSE(image->SetAttribute(u8"alt", utf8_string(Shalom)).HasException());
+      REQUIRE_FALSE(image->SetAttribute(u8"alt", Shalom).HasException());
       REQUIRE_FALSE(d.InsertBefore(*image, &s).HasException());
       CHECK(Dir(d) == "ltr");
     }
@@ -267,11 +267,11 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(i.SetValue(u8"123").HasException());
       CHECK(ComputeAutoDirectionality(i) == TextDirection::LTR);
       CHECK(Dir(i) == "ltr");
-      REQUIRE_FALSE(t.SetValue(utf8_string(Salam)).HasException());
+      REQUIRE_FALSE(t.SetValue(Salam).HasException());
       CHECK(Dir(t) == "rtl");
       // The value attribute, while the value isn't dirty.
       auto &empty = Downcast<html::HTMLInputElement>(ById(*document, u8"empty"));
-      REQUIRE_FALSE(empty.SetAttribute(u8"value", utf8_string(Salam)).HasException());
+      REQUIRE_FALSE(empty.SetAttribute(u8"value", Salam).HasException());
       CHECK(Dir(empty) == "rtl");
     }
 

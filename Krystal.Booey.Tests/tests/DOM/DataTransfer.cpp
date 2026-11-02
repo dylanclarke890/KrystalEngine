@@ -184,8 +184,7 @@ namespace krys::boo::tests
 
     SECTION("Files are added as file items, and listed with the files")
     {
-      auto file =
-        File::Create({BlobPartVariant(utf8_string(u8"contents"))}, u8"notes.txt", {{u8"text/plain"}});
+      auto file = File::Create({BlobPartVariant(u8"contents")}, u8"notes.txt", {{u8"text/plain"}});
       auto &files = dataTransfer->Files(document);
       CHECK(files.Length() == 0);
 

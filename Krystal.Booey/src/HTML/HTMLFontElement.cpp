@@ -17,7 +17,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"color").value_or(u8"");
   }
 
-  void HTMLFontElement::Color(dom::DOMString &&value) noexcept
+  void HTMLFontElement::Color(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"color", krys::move(value));
   }
@@ -27,7 +27,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"face").value_or(u8"");
   }
 
-  void HTMLFontElement::Face(dom::DOMString &&value) noexcept
+  void HTMLFontElement::Face(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"face", krys::move(value));
   }
@@ -37,7 +37,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"size").value_or(u8"");
   }
 
-  void HTMLFontElement::Size(dom::DOMString &&value) noexcept
+  void HTMLFontElement::Size(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"size", krys::move(value));
   }

@@ -40,7 +40,7 @@ namespace krys::boo::tests
         {
           ids += u8" ";
         }
-        ids += item->GetAttribute(u8"id").value_or(dom::DOMString(u8"?"));
+        ids += item->GetAttribute(u8"id").value_or(u8"?");
       }
       return ids;
     }

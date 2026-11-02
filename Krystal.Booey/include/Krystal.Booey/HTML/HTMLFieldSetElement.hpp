@@ -37,7 +37,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-fieldset-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-fieldset-type
     KRYS_NODISCARD dom::DOMStringAtom Type() const noexcept

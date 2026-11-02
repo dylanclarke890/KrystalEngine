@@ -36,7 +36,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Label() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-optgroup-label
-    void Label(dom::DOMString &&value) noexcept;
+    void Label(dom::DOMString value) noexcept;
 
 #pragma endregion
 

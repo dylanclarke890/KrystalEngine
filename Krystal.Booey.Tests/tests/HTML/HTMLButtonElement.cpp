@@ -172,9 +172,9 @@ namespace krys::boo::html::tests
       CHECK(NarrowOrNull(button.GetAttribute(u8"commandfor")) == "");
       CHECK(button.CommandForElement().get() == &popover);
       CHECK(button.CommandForElementForBindings().get() == &popover);
-      (void)button.SetAttribute(dom::DOMStringAtom(u8"commandfor"), dom::DOMString(u8"nope"));
+      (void)button.SetAttribute(dom::DOMStringAtom(u8"commandfor"), u8"nope");
       CHECK_FALSE(button.CommandForElement());
-      (void)button.SetAttribute(dom::DOMStringAtom(u8"commandfor"), dom::DOMString(u8"p"));
+      (void)button.SetAttribute(dom::DOMStringAtom(u8"commandfor"), u8"p");
       CHECK(button.CommandForElement().get() == &popover);
       button.CommandForElementForBindings(nullptr);
       CHECK_FALSE(button.HasAttribute(u8"commandfor"));

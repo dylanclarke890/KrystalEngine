@@ -102,7 +102,7 @@ namespace krys::ui
     if (auto &customData = selectionData.CustomData())
     {
       auto span = customData->GetSpan();
-      content.Data.emplace_back(utf8_string(boo::PasteboardCustomData::BooeyType()),
+      content.Data.emplace_back(boo::PasteboardCustomData::BooeyType(),
                                 List<uint8>(span.begin(), span.end()));
     }
     (void)pal::SetClipboardContent(content);

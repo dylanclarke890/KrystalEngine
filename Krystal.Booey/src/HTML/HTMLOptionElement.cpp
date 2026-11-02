@@ -36,7 +36,7 @@ namespace krys::boo::html
   }
 
   dom::ExceptionOr<Ref<HTMLOptionElement>>
-    HTMLOptionElement::CreateForLegacyFactoryFunction(dom::Document &document, dom::DOMString &&text,
+    HTMLOptionElement::CreateForLegacyFactoryFunction(dom::Document &document, dom::DOMString text,
                                                       Maybe<dom::DOMString> value, bool defaultSelected,
                                                       bool selected) noexcept
   {
@@ -124,7 +124,7 @@ namespace krys::boo::html
     return OptionLabel();
   }
 
-  void HTMLOptionElement::Label(dom::DOMString &&value) noexcept
+  void HTMLOptionElement::Label(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
   }
@@ -184,7 +184,7 @@ namespace krys::boo::html
     return CollectOptionInnerTextCollapsingWhitespace();
   }
 
-  void HTMLOptionElement::Value(dom::DOMString &&value) noexcept
+  void HTMLOptionElement::Value(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
   }
@@ -194,7 +194,7 @@ namespace krys::boo::html
     return CollectOptionInnerTextCollapsingWhitespace();
   }
 
-  void HTMLOptionElement::Text(dom::DOMString &&value) noexcept
+  void HTMLOptionElement::Text(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     Ref<HTMLOptionElement> protectedThis = ShareRef(*this);

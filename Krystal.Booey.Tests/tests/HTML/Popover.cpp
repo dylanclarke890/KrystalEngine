@@ -115,17 +115,17 @@ namespace krys::boo::html::tests
     {
       CHECK(NarrowOrNull(plain.Popover()) == "null");
       CHECK(NarrowOrNull(popover.Popover()) == "auto");
-      popover.Popover(dom::DOMString(u8"HINT"));
+      popover.Popover(u8"HINT");
       CHECK(NarrowOrNull(popover.Popover()) == "hint");
       CHECK(popover.GetPopoverState() == dom::PopoverState::Hint);
-      popover.Popover(dom::DOMString(u8"nope"));
+      popover.Popover(u8"nope");
       CHECK(NarrowOrNull(popover.Popover()) == "manual");
       CHECK(popover.GetPopoverState() == dom::PopoverState::Manual);
       popover.Popover(null);
       CHECK_FALSE(popover.HasAttribute(u8"popover"));
       CHECK(popover.GetPopoverState() == dom::PopoverState::None);
       CHECK_FALSE(popover.GetPopoverData());
-      popover.Popover(dom::DOMString(u8"auto"));
+      popover.Popover(u8"auto");
     }
 
     SECTION("Only connected popovers show")
@@ -194,7 +194,7 @@ namespace krys::boo::html::tests
 
     SECTION("Changing its state or removing it hides it")
     {
-      popover.Popover(dom::DOMString(u8"manual"));
+      popover.Popover(u8"manual");
       CHECK_FALSE(popover.IsPopoverShowing());
       CHECK(popover.GetPopoverState() == dom::PopoverState::Manual);
       CHECK(log.Take() == List<std::string> {"p:beforetoggle:open>closed", "p:toggle:open>closed"});
@@ -430,7 +430,7 @@ namespace krys::boo::html::tests
       after.PopoverTargetElementForBindings(&popover);
       CHECK(NarrowOrNull(after.GetAttribute(u8"popovertarget")) == "");
       CHECK(after.PopoverTargetElement().get() == &popover);
-      (void)after.SetAttribute(dom::DOMStringAtom(u8"popovertarget"), dom::DOMString(u8"nope"));
+      (void)after.SetAttribute(dom::DOMStringAtom(u8"popovertarget"), u8"nope");
       CHECK_FALSE(after.PopoverTargetElement());
       after.PopoverTargetElementForBindings(nullptr);
       CHECK_FALSE(after.HasAttribute(u8"popovertarget"));

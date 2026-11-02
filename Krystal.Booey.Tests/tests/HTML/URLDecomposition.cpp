@@ -131,7 +131,7 @@ namespace krys::boo::html::tests
     area.Hash(u8"z");
     CHECK(Str(area.GetAttribute(u8"href").value_or(dom::DOMString())) == "https://example.com/p#z");
 
-    a.Href(dom::USVString(u8"rel/ative"));
+    a.Href(u8"rel/ative");
     CHECK(href() == "rel/ative");
     CHECK(Str(a.Href()) == "https://example.com/dir/rel/ative");
   }

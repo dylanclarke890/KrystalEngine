@@ -30,19 +30,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-src
-    void Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-width
     KRYS_NODISCARD dom::DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-width
-    void Width(dom::DOMString &&value) noexcept;
+    void Width(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-height
     KRYS_NODISCARD dom::DOMString Height() const noexcept;
@@ -60,13 +60,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-name
     KRYS_NODISCARD dom::DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
 #pragma endregion
 

@@ -36,13 +36,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString HtmlFor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-htmlfor
-    void HtmlFor(dom::DOMString &&value) noexcept;
+    void HtmlFor(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootmode
     KRYS_NODISCARD dom::DOMString ShadowRootMode() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootmode
-    void ShadowRootMode(dom::DOMString &&value) noexcept;
+    void ShadowRootMode(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootdelegatesfocus
     KRYS_NODISCARD bool ShadowRootDelegatesFocus() const noexcept;
@@ -54,7 +54,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString ShadowRootSlotAssignment() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootslotassignment
-    void ShadowRootSlotAssignment(dom::DOMString &&value) noexcept;
+    void ShadowRootSlotAssignment(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootclonable
     KRYS_NODISCARD bool ShadowRootClonable() const noexcept;
@@ -72,7 +72,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString ShadowRootCustomElementRegistry() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootcustomelementregistry
-    void ShadowRootCustomElementRegistry(dom::DOMString &&value) noexcept;
+    void ShadowRootCustomElementRegistry(dom::DOMString value) noexcept;
 
 #pragma endregion
 

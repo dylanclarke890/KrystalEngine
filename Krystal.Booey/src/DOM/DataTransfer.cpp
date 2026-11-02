@@ -223,7 +223,7 @@ namespace krys::boo::dom
   }
 
   DataTransfer::DataTransfer(StoreMode mode, UniquePtr<Pasteboard> &&pasteboard, Type type,
-                             DOMString &&effectAllowed) noexcept
+                             DOMString effectAllowed) noexcept
       : _storeMode(mode), _pasteboard(krys::move(pasteboard)), _type(type), _dropEffect(u8"uninitialized"),
         _effectAllowed(krys::move(effectAllowed))
   {

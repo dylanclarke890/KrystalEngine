@@ -33,7 +33,7 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-option
     static dom::ExceptionOr<Ref<HTMLOptionElement>>
-      CreateForLegacyFactoryFunction(dom::Document &document, dom::DOMString &&text,
+      CreateForLegacyFactoryFunction(dom::Document &document, dom::DOMString text,
                                      Maybe<dom::DOMString> value, bool defaultSelected,
                                      bool selected) noexcept;
 
@@ -70,7 +70,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Label() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-label
-    void Label(dom::DOMString &&value) noexcept;
+    void Label(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-defaultselected
     KRYS_NODISCARD bool DefaultSelected() const noexcept;
@@ -89,13 +89,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-value
-    void Value(dom::DOMString &&value) noexcept;
+    void Value(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-text
     KRYS_NODISCARD dom::DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-text
-    void Text(dom::DOMString &&value) noexcept;
+    void Text(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-index
     KRYS_NODISCARD int32 Index() const noexcept;

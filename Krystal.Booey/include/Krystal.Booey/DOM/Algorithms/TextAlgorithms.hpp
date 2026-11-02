@@ -21,7 +21,7 @@ namespace krys::boo::dom
   public:
     /// @see https://dom.spec.whatwg.org/#concept-cd-replace
     KRYS_NODISCARD static ExceptionOr<void> Replace(CharacterData &node, size_t offset, size_t count,
-                                                    DOMString &&data,
+                                                    DOMString data,
                                                     bool piAttributesAlreadyUpdated = false) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-cd-substring

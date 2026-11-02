@@ -63,7 +63,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-returnvalue
-    void ReturnValue(dom::DOMString &&value) noexcept
+    void ReturnValue(dom::DOMString value) noexcept
     {
       _returnValue = krys::move(value);
     }
@@ -72,7 +72,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString ClosedBy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-closedby
-    void ClosedBy(dom::DOMString &&value) noexcept;
+    void ClosedBy(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-show
     dom::ExceptionOr<void> Show() noexcept;

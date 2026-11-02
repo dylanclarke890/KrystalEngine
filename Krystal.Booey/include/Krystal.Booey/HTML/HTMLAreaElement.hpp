@@ -83,43 +83,43 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Alt() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-alt
-    void Alt(dom::DOMString &&value) noexcept;
+    void Alt(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-coords
     KRYS_NODISCARD dom::DOMString Coords() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-coords
-    void Coords(dom::DOMString &&value) noexcept;
+    void Coords(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-shape
     KRYS_NODISCARD dom::DOMString Shape() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-shape
-    void Shape(dom::DOMString &&value) noexcept;
+    void Shape(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-target
     KRYS_NODISCARD dom::DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-target
-    void Target(dom::DOMString &&value) noexcept;
+    void Target(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-download
     KRYS_NODISCARD dom::DOMString Download() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-download
-    void Download(dom::DOMString &&value) noexcept;
+    void Download(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-ping
     KRYS_NODISCARD dom::USVString Ping() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-ping
-    void Ping(dom::USVString &&value) noexcept;
+    void Ping(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rel
     KRYS_NODISCARD dom::DOMString Rel() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rel
-    void Rel(dom::DOMString &&value) noexcept;
+    void Rel(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rellist
     KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
@@ -128,7 +128,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-referrerpolicy
-    void ReferrerPolicy(dom::DOMString &&value) noexcept;
+    void ReferrerPolicy(dom::DOMString value) noexcept;
 
 #pragma endregion
 
@@ -138,7 +138,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
-    void Href(dom::USVString &&value) noexcept;
+    void Href(dom::USVString value) noexcept;
 
     /// @brief The `href` stringifier.
     /// @see https://html.spec.whatwg.org/#dom-hyperlink-href

@@ -23,25 +23,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Kind() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-kind
-    void Kind(dom::DOMString &&value) noexcept;
+    void Kind(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-src
-    void Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-srclang
     KRYS_NODISCARD dom::DOMString SrcLang() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-srclang
-    void SrcLang(dom::DOMString &&value) noexcept;
+    void SrcLang(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-label
     KRYS_NODISCARD dom::DOMString Label() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-label
-    void Label(dom::DOMString &&value) noexcept;
+    void Label(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-default
     KRYS_NODISCARD bool Default() const noexcept;

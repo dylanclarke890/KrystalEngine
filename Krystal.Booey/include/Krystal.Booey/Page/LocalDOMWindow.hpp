@@ -187,7 +187,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-name
-    void SetName(dom::DOMString &&name) noexcept;
+    void SetName(dom::DOMString name) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-window-customelements
     KRYS_NODISCARD html::CustomElementRegistry &CustomElements() noexcept
@@ -221,7 +221,7 @@ namespace krys::boo
     }
 
     /// @see https://html.spec.whatwg.org/#dom-window-status
-    void SetStatus(dom::DOMString &&status) noexcept
+    void SetStatus(dom::DOMString status) noexcept
     {
       _status = krys::move(status);
     }

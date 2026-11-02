@@ -21,7 +21,7 @@ namespace krys::boo::html
     SourceLocation _currentLocation;
 
   public:
-    void Append(utf8_string &&chunk, IsEOF isEOF = IsEOF(false)) noexcept
+    void Append(utf8_string chunk, IsEOF isEOF = IsEOF(false)) noexcept
     {
       krys_debug_assert(_data.empty() || _data.back() != EOFMarker);
 
@@ -38,7 +38,7 @@ namespace krys::boo::html
       }
     }
 
-    void Insert(utf8_string &&chunk) noexcept
+    void Insert(utf8_string chunk) noexcept
     {
       krys_debug_assert(_insertionPosition != utf32_string::npos);
 

@@ -43,25 +43,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-char
     KRYS_NODISCARD dom::DOMString Char() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-char
-    void Char(dom::DOMString &&value) noexcept;
+    void Char(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-charoff
     KRYS_NODISCARD dom::DOMString CharOff() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-charoff
-    void CharOff(dom::DOMString &&value) noexcept;
+    void CharOff(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-valign
     KRYS_NODISCARD dom::DOMString VAlign() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-valign
-    void VAlign(dom::DOMString &&value) noexcept;
+    void VAlign(dom::DOMString value) noexcept;
 
 #pragma endregion
 

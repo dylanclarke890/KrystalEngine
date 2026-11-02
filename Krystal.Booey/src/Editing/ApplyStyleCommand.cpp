@@ -1989,15 +1989,15 @@ namespace krys::boo
         auto fontElement = CreateFontElement(GetDocument());
         if (styleChange.ApplyFontColor())
         {
-          (void)fontElement->SetAttribute(colorAttr, dom::DOMString(styleChange.FontColor()));
+          (void)fontElement->SetAttribute(colorAttr, styleChange.FontColor());
         }
         if (styleChange.ApplyFontFace())
         {
-          (void)fontElement->SetAttribute(faceAttr, dom::DOMString(styleChange.FontFace()));
+          (void)fontElement->SetAttribute(faceAttr, styleChange.FontFace());
         }
         if (styleChange.ApplyFontSize())
         {
-          (void)fontElement->SetAttribute(sizeAttr, dom::DOMString(styleChange.FontSize()));
+          (void)fontElement->SetAttribute(sizeAttr, styleChange.FontSize());
         }
         SurroundNodeRangeWithElement(*startNode, *endNode, krys::move(fontElement));
       }

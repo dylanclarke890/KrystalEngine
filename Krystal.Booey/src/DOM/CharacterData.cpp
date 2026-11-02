@@ -11,7 +11,7 @@
 
 namespace krys::boo::dom
 {
-  CharacterData::CharacterData(Document &document, DOMString &&data, dom::NodeType type,
+  CharacterData::CharacterData(Document &document, DOMString data, dom::NodeType type,
                                NodeFlags flags) noexcept
       : Node(document, type, flags | NodeFlags::IsCharacterData), _data {krys::move(data)}
   {
@@ -19,7 +19,7 @@ namespace krys::boo::dom
 
 #pragma region CharacterData
 
-  ExceptionOr<void> CharacterData::Data(DOMString &&data) noexcept
+  ExceptionOr<void> CharacterData::Data(DOMString data) noexcept
   {
     return TextAlgorithms::Replace(*this, 0uz, Length(), krys::move(data));
   }
@@ -29,12 +29,12 @@ namespace krys::boo::dom
     return TextAlgorithms::Substring(*this, offset, count);
   }
 
-  ExceptionOr<void> CharacterData::AppendData(DOMString &&data) noexcept
+  ExceptionOr<void> CharacterData::AppendData(DOMString data) noexcept
   {
     return TextAlgorithms::Replace(*this, _data.size(), 0uz, krys::move(data));
   }
 
-  ExceptionOr<void> CharacterData::InsertData(size_t offset, DOMString &&data) noexcept
+  ExceptionOr<void> CharacterData::InsertData(size_t offset, DOMString data) noexcept
   {
     return TextAlgorithms::Replace(*this, offset, 0uz, krys::move(data));
   }
@@ -44,7 +44,7 @@ namespace krys::boo::dom
     return TextAlgorithms::Replace(*this, offset, count, u8"");
   }
 
-  ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, DOMString &&data) noexcept
+  ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, DOMString data) noexcept
   {
     return TextAlgorithms::Replace(*this, offset, count, krys::move(data));
   }

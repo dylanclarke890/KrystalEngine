@@ -19,7 +19,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  void HTMLSourceElement::Src(dom::USVString &&value) noexcept
+  void HTMLSourceElement::Src(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -29,7 +29,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLSourceElement::Type(dom::DOMString &&value) noexcept
+  void HTMLSourceElement::Type(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
@@ -39,7 +39,7 @@ namespace krys::boo::html
     return Reflect<dom::USVString>(*this, u8"srcset");
   }
 
-  void HTMLSourceElement::SrcSet(dom::USVString &&value) noexcept
+  void HTMLSourceElement::SrcSet(dom::USVString value) noexcept
   {
     return Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
@@ -49,7 +49,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"sizes").value_or(u8"");
   }
 
-  void HTMLSourceElement::Sizes(dom::DOMString &&value) noexcept
+  void HTMLSourceElement::Sizes(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"sizes", krys::move(value));
   }
@@ -59,7 +59,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
   }
 
-  void HTMLSourceElement::Media(dom::DOMString &&value) noexcept
+  void HTMLSourceElement::Media(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
   }

@@ -30,31 +30,31 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Data() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-data
-    void Data(dom::USVString &&value) noexcept;
+    void Data(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-name
     KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-object-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-width
     KRYS_NODISCARD dom::DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-width
-    void Width(dom::DOMString &&value) noexcept;
+    void Width(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-height
     KRYS_NODISCARD dom::DOMString Height() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-height
-    void Height(dom::DOMString &&value) noexcept;
+    void Height(dom::DOMString value) noexcept;
 
     // FIXME: The rest of the interface:
     // readonly attribute Document? contentDocument;
@@ -88,19 +88,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-archive
     KRYS_NODISCARD dom::DOMString Archive() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-archive
-    void Archive(dom::DOMString &&value) noexcept;
+    void Archive(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-code
     KRYS_NODISCARD dom::DOMString Code() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-code
-    void Code(dom::DOMString &&value) noexcept;
+    void Code(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-declare
     KRYS_NODISCARD bool Declare() const noexcept;
@@ -118,7 +118,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Standby() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-standby
-    void Standby(dom::DOMString &&value) noexcept;
+    void Standby(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-vspace
     KRYS_NODISCARD uint32 VSpace() const noexcept;
@@ -130,25 +130,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString CodeBase() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-codebase
-    void CodeBase(dom::DOMString &&value) noexcept;
+    void CodeBase(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-codetype
     KRYS_NODISCARD dom::DOMString CodeType() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-codetype
-    void CodeType(dom::DOMString &&value) noexcept;
+    void CodeType(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-usemap
     KRYS_NODISCARD dom::DOMString UseMap() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-usemap
-    void UseMap(dom::DOMString &&value) noexcept;
+    void UseMap(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-border
     KRYS_NODISCARD dom::DOMString Border() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-border
-    void Border(dom::DOMString &&value) noexcept;
+    void Border(dom::DOMString value) noexcept;
 
 #pragma endregion
 

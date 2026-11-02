@@ -42,7 +42,7 @@ namespace krys::boo::dom
     return TextAlgorithms::DescendantTextContent(*this);
   }
 
-  ExceptionOr<void> DocumentFragment::TextContent(DOMString &&value) noexcept
+  ExceptionOr<void> DocumentFragment::TextContent(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     return NodeAlgorithms::StringReplaceAll(krys::move(value), *this);

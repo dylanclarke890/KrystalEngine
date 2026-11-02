@@ -161,7 +161,7 @@ namespace krys::boo::html::tests
     auto &element = Downcast<HTMLElement>(*div);
     REQUIRE_FALSE(div->AppendChild(*document->CreateElement(u8"b").ReleaseValue()).HasException());
 
-    element.InnerText(dom::DOMString(u8"a\r\nb\n\nc\r"));
+    element.InnerText(u8"a\r\nb\n\nc\r");
     List<std::string> children;
     for (auto *child = div->FirstChild(); child; child = child->NextSibling())
     {
@@ -190,8 +190,8 @@ namespace krys::boo::html::tests
 
     // Without a parent, it throws.
     auto orphan = document->CreateElement(u8"span").ReleaseValue();
-    CHECK(check(Downcast<HTMLElement>(*orphan).OuterText(dom::DOMString(u8"x")),
-                dom::ExceptionCode::NoModificationAllowedError));
+    CHECK(
+      check(Downcast<HTMLElement>(*orphan).OuterText(u8"x"), dom::ExceptionCode::NoModificationAllowedError));
 
     auto p = document->CreateElement(u8"p").ReleaseValue();
     auto span = document->CreateElement(u8"span").ReleaseValue();
@@ -199,7 +199,7 @@ namespace krys::boo::html::tests
     REQUIRE_FALSE(p->AppendChild(*span).HasException());
     REQUIRE_FALSE(p->AppendChild(*document->CreateTextNode(u8"z")).HasException());
 
-    REQUIRE_FALSE(Downcast<HTMLElement>(*span).OuterText(dom::DOMString(u8"1\n2")).HasException());
+    REQUIRE_FALSE(Downcast<HTMLElement>(*span).OuterText(u8"1\n2").HasException());
     REQUIRE(p->ChildNodes()->Length() == 3);
     CHECK(Downcast<dom::Text>(*p->FirstChild()).Data() == u8"x1");
     CHECK(Downcast<dom::Element>(*p->FirstChild()->NextSibling()).LocalName() == u8"br");
@@ -219,10 +219,10 @@ namespace krys::boo::html::tests
     auto div = document->CreateElement(u8"div").ReleaseValue();
     auto &element = Downcast<HTMLElement>(*div);
     CHECK(element.Dir() == u8"");
-    element.Dir(dom::DOMString(u8"RTL"));
+    element.Dir(u8"RTL");
     CHECK(element.Dir() == u8"rtl");
     CHECK(element.GetAttribute(u8"dir") == dom::DOMString(u8"RTL"));
-    element.Dir(dom::DOMString(u8"up"));
+    element.Dir(u8"up");
     CHECK(element.Dir() == u8"");
   }
 
@@ -373,16 +373,16 @@ namespace krys::boo::html::tests
     auto &element = Downcast<HTMLElement>(*div);
 
     CHECK(element.InputMode() == u8"");
-    element.InputMode(dom::DOMString(u8"NUMERIC"));
+    element.InputMode(u8"NUMERIC");
     CHECK(div->GetAttribute(u8"inputmode") == dom::DOMString(u8"NUMERIC"));
     CHECK(element.InputMode() == u8"numeric");
-    element.InputMode(dom::DOMString(u8"digits"));
+    element.InputMode(u8"digits");
     CHECK(element.InputMode() == u8"");
 
     CHECK(element.EnterKeyHint() == u8"");
-    element.EnterKeyHint(dom::DOMString(u8"Send"));
+    element.EnterKeyHint(u8"Send");
     CHECK(element.EnterKeyHint() == u8"send");
-    element.EnterKeyHint(dom::DOMString(u8"return"));
+    element.EnterKeyHint(u8"return");
     CHECK(element.EnterKeyHint() == u8"");
   }
 

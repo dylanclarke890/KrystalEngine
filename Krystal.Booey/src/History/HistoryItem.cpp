@@ -37,7 +37,7 @@ namespace krys::boo
     return ++next;
   }
 
-  HistoryItem::HistoryItem(url::URL &&url, dom::DOMString &&title, dom::DOMString &&alternateTitle,
+  HistoryItem::HistoryItem(url::URL url, dom::DOMString title, dom::DOMString alternateTitle,
                            Maybe<BackForwardItemIdentifier> itemID) noexcept
       : _url(url), _originalURL(krys::move(url)), _title(krys::move(title)),
         _displayTitle(krys::move(alternateTitle)),

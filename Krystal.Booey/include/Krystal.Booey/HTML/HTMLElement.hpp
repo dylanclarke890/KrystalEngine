@@ -58,13 +58,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Title() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-title
-    void Title(dom::DOMString &&value) noexcept;
+    void Title(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-lang
     KRYS_NODISCARD dom::DOMString Lang() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-lang
-    void Lang(dom::DOMString &&value) noexcept;
+    void Lang(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-translate
     KRYS_NODISCARD bool Translate() const noexcept;
@@ -82,13 +82,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Dir() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dir
-    void Dir(dom::DOMString &&value) noexcept;
+    void Dir(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
     KRYS_NODISCARD BoolOr<dom::DOMString> Hidden() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
-    void Hidden(dom::DOMString &&value) noexcept;
+    void Hidden(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
     void Hidden(bool value) noexcept;
@@ -112,7 +112,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString AccessKey() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-accesskey
-    void AccessKey(dom::DOMString &&value) noexcept;
+    void AccessKey(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-accesskeylabel
     KRYS_NODISCARD dom::DOMString AccessKeyLabel() const noexcept;
@@ -141,13 +141,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString WritingSuggestions() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-writingsuggestions
-    void WritingSuggestions(dom::DOMString &&value) noexcept;
+    void WritingSuggestions(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-autocapitalize
     KRYS_NODISCARD dom::DOMString Autocapitalize() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-autocapitalize
-    void Autocapitalize(dom::DOMString &&value) noexcept;
+    void Autocapitalize(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-autocorrect
     KRYS_NODISCARD bool Autocorrect() const noexcept;
@@ -159,13 +159,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString InputMode() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-inputmode
-    void InputMode(dom::DOMString &&value) noexcept;
+    void InputMode(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-enterkeyhint
     KRYS_NODISCARD dom::DOMString EnterKeyHint() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-enterkeyhint
-    void EnterKeyHint(dom::DOMString &&value) noexcept;
+    void EnterKeyHint(dom::DOMString value) noexcept;
 
     /// @brief The element's rendered text: its text as laid out, with line breaks and tabs for its boxes, or
     /// its descendant text content if it isn't being rendered.
@@ -177,7 +177,7 @@ namespace krys::boo::html
     /// @brief Replaces the element's children with @p value's text, with a `<br>` for each line break.
     /// @see https://html.spec.whatwg.org/#dom-innertext
     /// @see https://html.spec.whatwg.org/#set-the-inner-text-steps
-    void InnerText(dom::DOMString &&value) noexcept;
+    void InnerText(dom::DOMString value) noexcept;
 
     /// @brief The same as `InnerText()`.
     /// @see https://html.spec.whatwg.org/#dom-outertext
@@ -186,7 +186,7 @@ namespace krys::boo::html
     /// @brief Replaces the element itself with @p value's text, with a `<br>` for each line break, merged
     /// with the text around it; `NoModificationAllowedError` if the element has no parent.
     /// @see https://html.spec.whatwg.org/#dom-outertext
-    dom::ExceptionOr<void> OuterText(dom::DOMString &&value) noexcept;
+    dom::ExceptionOr<void> OuterText(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-attachinternals
     KRYS_NODISCARD dom::ExceptionOr<Ref<ElementInternals>> AttachInternals() noexcept;
@@ -213,7 +213,7 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<dom::DOMString> Popover() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popover
-    void Popover(Maybe<dom::DOMString> &&value) noexcept;
+    void Popover(Maybe<dom::DOMString> value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-headingoffset
     KRYS_NODISCARD uint32 HeadingOffset() const noexcept;
@@ -391,7 +391,8 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#html-element-insertion-steps
     void OnInsert() noexcept override
     {
-      // 1. If insertedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
+      // 1. If insertedNode is an element whose namespace is the HTML namespace, and this standard defines
+      // HTML
       //    element insertion steps for insertedNode's local name, then run the corresponding HTML element
       //    insertion steps given insertedNode.
       // (Elements with insertion steps override this, and the autofocus insertion steps run for all of them.)
@@ -415,8 +416,8 @@ namespace krys::boo::html
 
       // 1. Let document be removedNode's node document.
       // 2. If document's focused area is removedNode, then set document's focused area to document's
-      //    viewport, and set document's relevant global object's navigation API's focus changed during ongoing
-      //    navigation to false.
+      //    viewport, and set document's relevant global object's navigation API's focus changed during
+      //    ongoing navigation to false.
       // (Done before the removal, in Document::NodeWillBeRemoved.)
 
       // 3. If removedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
@@ -424,7 +425,8 @@ namespace krys::boo::html
       //    removing steps given removedNode, isSubtreeRoot, and oldAncestor.
       // (Elements with removing steps override this.)
 
-      // 4. If removedNode is a form-associated element with a non-null form owner and removedNode and its form
+      // 4. If removedNode is a form-associated element with a non-null form owner and removedNode and its
+      // form
       //    owner are no longer in the same tree, then reset the form owner of removedNode.
       // (In FormAssociatedElement::ElementRemovedFromAncestor.)
 

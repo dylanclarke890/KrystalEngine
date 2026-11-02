@@ -1242,7 +1242,7 @@ namespace krys::boo
     }
   }
 
-  Ref<dom::Element> CreateTabSpanElement(dom::Document &document, utf8_string &&tabText) noexcept
+  Ref<dom::Element> CreateTabSpanElement(dom::Document &document, utf8_string tabText) noexcept
   {
     return CreateTabSpanElement(document, *document.CreateTextNode(krys::move(tabText)));
   }

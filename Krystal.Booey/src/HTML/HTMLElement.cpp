@@ -81,7 +81,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"title").value_or(u8"");
   }
 
-  void HTMLElement::Title(dom::DOMString &&value) noexcept
+  void HTMLElement::Title(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     Reflect<dom::DOMString>(*this, u8"title", krys::move(value));
@@ -92,7 +92,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"lang").value_or(u8"");
   }
 
-  void HTMLElement::Lang(dom::DOMString &&value) noexcept
+  void HTMLElement::Lang(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     Reflect<dom::DOMString>(*this, u8"lang", krys::move(value));
@@ -149,7 +149,7 @@ namespace krys::boo::html
       krys::move(value));
   }
 
-  void HTMLElement::Dir(dom::DOMString &&value) noexcept
+  void HTMLElement::Dir(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     Reflect<dom::DOMString>(*this, u8"dir", krys::move(value));
@@ -182,7 +182,7 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#dom-hidden
   // (The setter's steps are split between the overloads by the given value's type; a null value is the
   // empty string's overload.)
-  void HTMLElement::Hidden(dom::DOMString &&value) noexcept
+  void HTMLElement::Hidden(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     // 1. If the given value is a string that is an ASCII case-insensitive match for "until-found", then set
@@ -331,7 +331,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"accesskey").value_or(u8"");
   }
 
-  void HTMLElement::AccessKey(dom::DOMString &&value) noexcept
+  void HTMLElement::AccessKey(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     Reflect<dom::DOMString>(*this, u8"accesskey", krys::move(value));
@@ -522,7 +522,7 @@ namespace krys::boo::html
     return u8"true";
   }
 
-  void HTMLElement::WritingSuggestions(dom::DOMString &&value) noexcept
+  void HTMLElement::WritingSuggestions(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     ReflectSetter(*this, u8"writingsuggestions", krys::move(value));
@@ -547,7 +547,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElement::Autocapitalize(dom::DOMString &&value) noexcept
+  void HTMLElement::Autocapitalize(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     ReflectSetter(*this, u8"autocapitalize", krys::move(value));
@@ -580,7 +580,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-inputmode
-  void HTMLElement::InputMode(dom::DOMString &&value) noexcept
+  void HTMLElement::InputMode(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"inputmode", krys::move(value));
@@ -596,7 +596,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-enterkeyhint
-  void HTMLElement::EnterKeyHint(dom::DOMString &&value) noexcept
+  void HTMLElement::EnterKeyHint(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"enterkeyhint", krys::move(value));
@@ -671,7 +671,7 @@ namespace krys::boo::html
       }
 
       // 3. Replace data with node, node's data's length, 0, and next's data.
-      (void)node.ReplaceData(node.Length(), 0, dom::DOMString(next->Data()));
+      (void)node.ReplaceData(node.Length(), 0, next->Data());
 
       // 4. Remove next.
       (void)next->Remove();
@@ -714,7 +714,7 @@ namespace krys::boo::html
     return PlainText(dom::MakeRangeSelectingNodeContents(self));
   }
 
-  void HTMLElement::InnerText(dom::DOMString &&value) noexcept
+  void HTMLElement::InnerText(dom::DOMString value) noexcept
   {
     // The innerText setter steps are to run set the inner text steps with this and the given value.
     CEReactionsScope ceReactions;
@@ -738,7 +738,7 @@ namespace krys::boo::html
     return InnerText();
   }
 
-  dom::ExceptionOr<void> HTMLElement::OuterText(dom::DOMString &&value) noexcept
+  dom::ExceptionOr<void> HTMLElement::OuterText(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -910,7 +910,7 @@ namespace krys::boo::html
       krys::move(value));
   }
 
-  void HTMLElement::Popover(Maybe<dom::DOMString> &&value) noexcept
+  void HTMLElement::Popover(Maybe<dom::DOMString> value) noexcept
   {
     CEReactionsScope ceReactions;
     Reflect<Maybe<dom::DOMString>>(*this, u8"popover", krys::move(value));
@@ -1573,7 +1573,7 @@ namespace krys::boo::html
     auto computePopoverState = [](Maybe<dom::DOMStringView> value)
     {
       auto state = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(
-        value ? Maybe<dom::DOMString>(dom::DOMString(*value)) : null);
+        value ? Maybe<dom::DOMString>(*value) : null);
       if (!state)
       {
         return dom::PopoverState::None;

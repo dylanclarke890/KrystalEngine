@@ -78,19 +78,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-href
-    void Href(dom::USVString &&value) noexcept;
+    void Href(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-crossorigin
     KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-crossorigin
-    void CrossOrigin(Maybe<dom::DOMString> &&value) noexcept;
+    void CrossOrigin(Maybe<dom::DOMString> value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rel
     KRYS_NODISCARD dom::DOMString Rel() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rel
-    void Rel(dom::DOMString &&value) noexcept;
+    void Rel(dom::DOMString value) noexcept;
 
     /// @brief The `as` attribute's potential destination keyword, in its canonical case, or the empty string.
     /// @see https://html.spec.whatwg.org/#dom-link-as
@@ -98,7 +98,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString As() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-as
-    void As(dom::DOMString &&value) noexcept;
+    void As(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rellist
     KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
@@ -107,25 +107,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-media
-    void Media(dom::DOMString &&value) noexcept;
+    void Media(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-integrity
     KRYS_NODISCARD dom::DOMString Integrity() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-integrity
-    void Integrity(dom::DOMString &&value) noexcept;
+    void Integrity(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-hreflang
     KRYS_NODISCARD dom::DOMString HrefLang() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-hreflang
-    void HrefLang(dom::DOMString &&value) noexcept;
+    void HrefLang(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-sizes
     KRYS_NODISCARD dom::DOMTokenList &Sizes() noexcept;
@@ -134,19 +134,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString ImageSrcset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesrcset
-    void ImageSrcset(dom::USVString &&value) noexcept;
+    void ImageSrcset(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesizes
     KRYS_NODISCARD dom::DOMString ImageSizes() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesizes
-    void ImageSizes(dom::DOMString &&value) noexcept;
+    void ImageSizes(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-referrerpolicy
     KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-referrerpolicy
-    void ReferrerPolicy(dom::DOMString &&value) noexcept;
+    void ReferrerPolicy(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-blocking
     KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
@@ -161,7 +161,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString FetchPriority() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-fetchpriority
-    void FetchPriority(dom::DOMString &&value) noexcept;
+    void FetchPriority(dom::DOMString value) noexcept;
 
 #pragma endregion
 
@@ -171,19 +171,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Charset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-charset
-    void Charset(dom::DOMString &&value) noexcept;
+    void Charset(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rev
     KRYS_NODISCARD dom::DOMString Rev() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rev
-    void Rev(dom::DOMString &&value) noexcept;
+    void Rev(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-target
     KRYS_NODISCARD dom::DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-target
-    void Target(dom::DOMString &&value) noexcept;
+    void Target(dom::DOMString value) noexcept;
 
 #pragma endregion
 

@@ -140,7 +140,7 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
     inline void SetContentAttribute(HTMLElement &element, dom::DOMStringAtom name,
-                                    dom::DOMString &&value) noexcept
+                                    dom::DOMString value) noexcept
     {
       dom::ElementAlgorithms::SetAttributeValue(element, name, krys::move(value));
     }
@@ -173,7 +173,7 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
     inline void SetContentAttribute(ElementInternals &internals, dom::DOMStringAtom name,
-                                    dom::DOMString &&value) noexcept
+                                    dom::DOMString value) noexcept
     {
       // FIXME: The internals' ARIA attributes, with accessibility.
       (void)internals;
@@ -211,7 +211,7 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
-    void ReflectDOMString(Target &target, dom::DOMStringAtom name, Maybe<dom::DOMString> &&value) noexcept
+    void ReflectDOMString(Target &target, dom::DOMStringAtom name, Maybe<dom::DOMString> value) noexcept
     {
       // 1. If the given value is null, then run this's delete the content attribute.
       if (!value.has_value())
@@ -227,7 +227,7 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'DOMString' type.
     template <ReflectTarget Target>
-    void ReflectDOMString(Target &target, dom::DOMStringAtom name, dom::DOMString &&value) noexcept
+    void ReflectDOMString(Target &target, dom::DOMStringAtom name, dom::DOMString value) noexcept
     {
       // The setter steps are to run this's set the content attribute with the given value.
       SetContentAttribute(target, name, krys::move(value));
@@ -273,10 +273,10 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'dom::USVString' type.
     template <TreatedAsURL AsUrl, ReflectTarget Target>
-    void ReflectUSVString(Target &target, dom::DOMStringAtom name, dom::USVString &&value) noexcept
+    void ReflectUSVString(Target &target, dom::DOMStringAtom name, dom::USVString value) noexcept
     {
       // The setter steps are to run this's set the content attribute with the given value.
-      SetContentAttribute(target, name, static_cast<dom::DOMString &&>(value));
+      SetContentAttribute(target, name, krys::move(value));
     }
 
 #pragma endregion

@@ -496,12 +496,12 @@ namespace krys::boo::dom
     return CreateRef<DocumentFragment>(*this);
   }
 
-  Ref<Text> Document::CreateTextNode(DOMString &&data) noexcept
+  Ref<Text> Document::CreateTextNode(DOMString data) noexcept
   {
     return CreateRef<Text>(*this, krys::move(data));
   }
 
-  ExceptionOr<Ref<CDATASection>> Document::CreateCDATASection(DOMString &&data) noexcept
+  ExceptionOr<Ref<CDATASection>> Document::CreateCDATASection(DOMString data) noexcept
   {
     // 1. If this is an HTML document, then throw a "NotSupportedError" DOMException.
     if (Is<HTMLDocument>(*this))
@@ -519,13 +519,13 @@ namespace krys::boo::dom
     return CreateRef<CDATASection>(*this, krys::move(data));
   }
 
-  Ref<Comment> Document::CreateComment(DOMString &&data) noexcept
+  Ref<Comment> Document::CreateComment(DOMString data) noexcept
   {
     return CreateRef<Comment>(*this, krys::move(data));
   }
 
-  ExceptionOr<Ref<ProcessingInstruction>> Document::CreateProcessingInstruction(DOMString &&target,
-                                                                                DOMString &&data) noexcept
+  ExceptionOr<Ref<ProcessingInstruction>> Document::CreateProcessingInstruction(DOMString target,
+                                                                                DOMString data) noexcept
   {
     return ProcessingInstruction::Create(*this, krys::move(target), krys::move(data));
   }
@@ -920,7 +920,7 @@ namespace krys::boo::dom
     }
   }
 
-  ExceptionOr<void> Document::Title(DOMString &&value) noexcept
+  ExceptionOr<void> Document::Title(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     auto documentElement = DocumentElement();
@@ -999,7 +999,7 @@ namespace krys::boo::dom
     return html->Dir();
   }
 
-  void Document::Dir(DOMString &&value) noexcept
+  void Document::Dir(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     auto html = html::DOMTreeAccessors::GetHtmlElement(*this);
@@ -1171,7 +1171,7 @@ namespace krys::boo::dom
       return body->GetAttribute(DOMStringAtom(name)).value_or(DOMString());
     }
 
-    void SetBodyColorAttribute(Document &document, DOMStringView name, DOMString &&value) noexcept
+    void SetBodyColorAttribute(Document &document, DOMStringView name, DOMString value) noexcept
     {
       if (auto *body = DynamicDowncast<html::HTMLBodyElement>(document.BodyOrFrameset()))
       {
@@ -1185,7 +1185,7 @@ namespace krys::boo::dom
     return BodyColorAttribute(*this, u8"text");
   }
 
-  void Document::FgColor(DOMString &&value) noexcept
+  void Document::FgColor(DOMString value) noexcept
   {
     SetBodyColorAttribute(*this, u8"text", krys::move(value));
   }
@@ -1195,7 +1195,7 @@ namespace krys::boo::dom
     return BodyColorAttribute(*this, u8"link");
   }
 
-  void Document::LinkColor(DOMString &&value) noexcept
+  void Document::LinkColor(DOMString value) noexcept
   {
     SetBodyColorAttribute(*this, u8"link", krys::move(value));
   }
@@ -1205,7 +1205,7 @@ namespace krys::boo::dom
     return BodyColorAttribute(*this, u8"vlink");
   }
 
-  void Document::VlinkColor(DOMString &&value) noexcept
+  void Document::VlinkColor(DOMString value) noexcept
   {
     SetBodyColorAttribute(*this, u8"vlink", krys::move(value));
   }
@@ -1215,7 +1215,7 @@ namespace krys::boo::dom
     return BodyColorAttribute(*this, u8"alink");
   }
 
-  void Document::AlinkColor(DOMString &&value) noexcept
+  void Document::AlinkColor(DOMString value) noexcept
   {
     SetBodyColorAttribute(*this, u8"alink", krys::move(value));
   }
@@ -1225,7 +1225,7 @@ namespace krys::boo::dom
     return BodyColorAttribute(*this, u8"bgcolor");
   }
 
-  void Document::BgColor(DOMString &&value) noexcept
+  void Document::BgColor(DOMString value) noexcept
   {
     SetBodyColorAttribute(*this, u8"bgcolor", krys::move(value));
   }
@@ -1354,7 +1354,7 @@ namespace krys::boo::dom
 
 #pragma region URLs
 
-  void Document::SetURL(url::URL &&url) noexcept
+  void Document::SetURL(url::URL url) noexcept
   {
     url::URL newURL = url.IsEmpty() ? url::AboutBlankURL() : krys::move(url);
 
@@ -2428,7 +2428,7 @@ namespace krys::boo::dom
       SetHasSkippedResizeObservations(false);
       if (RefPtr<LocalDOMWindow> window = ShareRefPtr(Window()))
       {
-        window->ReportError(DOMString(u8"ResizeObserver loop completed with undelivered notifications."));
+        window->ReportError(u8"ResizeObserver loop completed with undelivered notifications.");
       }
       // Starting a new schedule the next round of notify.
       ScheduleRenderingUpdate({RenderingUpdateStep::ResizeObservations});
@@ -3095,7 +3095,7 @@ namespace krys::boo::dom
                                          });
   }
 
-  void Document::EnqueueHashchangeEvent(USVString &&oldURL, USVString &&newURL) noexcept
+  void Document::EnqueueHashchangeEvent(USVString oldURL, USVString newURL) noexcept
   {
     // FIXME: popstate event and hashchange event are supposed to fire in a single task.
     QueueTaskToDispatchEventOnWindow(html::TaskSource::DOMManipulation,
@@ -3134,7 +3134,7 @@ namespace krys::boo::dom
       return;
     }
 
-    SetURL(url::URL(url));
+    SetURL(url);
     // FIXME: The outgoing referrer and the document loader's request URL.
   }
 
@@ -3606,7 +3606,7 @@ namespace krys::boo::dom
     }
   }
 
-  ExceptionOr<void> Document::SetXMLVersion(DOMString &&version) noexcept
+  ExceptionOr<void> Document::SetXMLVersion(DOMString version) noexcept
   {
     if (!xml::XMLDocumentParser::SupportsXMLVersion(version))
     {
@@ -3859,7 +3859,7 @@ namespace krys::boo::dom
     // obsolete and ignored, as are X-UA-Compatible and Content-Type (the parser reads the charset).
   }
 
-  void Document::SetContentLanguage(DOMString &&language) noexcept
+  void Document::SetContentLanguage(DOMString language) noexcept
   {
     if (_contentLanguage == language)
     {

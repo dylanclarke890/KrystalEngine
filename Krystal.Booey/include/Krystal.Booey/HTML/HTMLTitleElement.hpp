@@ -18,7 +18,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-title-text
-    dom::ExceptionOr<void> Text(dom::DOMString &&value) noexcept;
+    dom::ExceptionOr<void> Text(dom::DOMString value) noexcept;
 
 #pragma endregion
   };

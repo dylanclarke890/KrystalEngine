@@ -42,7 +42,7 @@ namespace krys::boo::html::tests
     CHECK(none->Href() == u8"https://example.com/dir/page.html");
     CHECK(AsBase(none->NextElementSibling())->Href() == u8"https://[x");
 
-    base->Href(dom::USVString(u8"other/"));
+    base->Href(u8"other/");
     CHECK(base->GetAttribute(u8"href") == dom::DOMString(u8"other/"));
   }
 
@@ -54,7 +54,7 @@ namespace krys::boo::html::tests
 
     auto *base = AsBase(document->Head()->FirstElementChild());
     CHECK(base->Target() == u8"");
-    base->Target(dom::DOMString(u8"frame"));
+    base->Target(u8"frame");
     CHECK(base->Target() == u8"frame");
     CHECK(document->BaseTarget() == u8"frame");
   }

@@ -36,9 +36,9 @@ namespace krys::boo
     bool _hasDispatchedDisposeEvent {false};
 
   public:
-    NavigationHistoryEntry(Navigation &navigation, Ref<HistoryItem> &&historyItem, dom::USVString &&urlString,
-                           dom::DOMString &&key, RefPtr<html::SerializedScriptValue> &&state,
-                           dom::DOMString &&id) noexcept;
+    NavigationHistoryEntry(Navigation &navigation, Ref<HistoryItem> &&historyItem, dom::USVString urlString,
+                           dom::DOMString key, RefPtr<html::SerializedScriptValue> &&state,
+                           dom::DOMString id) noexcept;
     ~NavigationHistoryEntry() noexcept override;
 
     /// @brief An entry for @p historyItem.

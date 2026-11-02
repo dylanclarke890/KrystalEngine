@@ -15,7 +15,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"cite");
   }
 
-  void HTMLQuoteElement::Cite(dom::USVString &&value) noexcept
+  void HTMLQuoteElement::Cite(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
   }

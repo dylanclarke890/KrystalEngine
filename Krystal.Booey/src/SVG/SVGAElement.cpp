@@ -159,7 +159,7 @@ namespace krys::boo::svg
     }
 
     Ref<dom::Document> document = ShareRef(NodeDocument());
-    auto completedURL = document->CompleteURL(utf8_string(url));
+    auto completedURL = document->CompleteURL(url);
 
     auto target = Target();
     if (target.View().empty()

@@ -39,7 +39,7 @@ namespace krys::boo::svg
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::TypeAttr().LocalName());
   }
 
-  void SVGStyleElement::Type(dom::DOMString &&value) noexcept
+  void SVGStyleElement::Type(dom::DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::TypeAttr().LocalName(), krys::move(value));
   }
@@ -49,7 +49,7 @@ namespace krys::boo::svg
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::MediaAttr().LocalName());
   }
 
-  void SVGStyleElement::Media(dom::DOMString &&value) noexcept
+  void SVGStyleElement::Media(dom::DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::MediaAttr().LocalName(), krys::move(value));
   }
@@ -59,7 +59,7 @@ namespace krys::boo::svg
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::TitleAttr().LocalName());
   }
 
-  void SVGStyleElement::Title(dom::DOMString &&value) noexcept
+  void SVGStyleElement::Title(dom::DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::TitleAttr().LocalName(), krys::move(value));
   }

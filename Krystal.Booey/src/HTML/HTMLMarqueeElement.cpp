@@ -14,7 +14,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"behavior").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::Behavior(dom::DOMString &&value) noexcept
+  void HTMLMarqueeElement::Behavior(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"behavior", krys::move(value));
   }
@@ -24,7 +24,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::BgColor(dom::DOMString &&value) noexcept
+  void HTMLMarqueeElement::BgColor(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
   }
@@ -34,7 +34,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"direction").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::Direction(dom::DOMString &&value) noexcept
+  void HTMLMarqueeElement::Direction(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"direction", krys::move(value));
   }
@@ -44,7 +44,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::Height(dom::DOMString &&value) noexcept
+  void HTMLMarqueeElement::Height(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
   }
@@ -54,7 +54,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::Width(dom::DOMString &&value) noexcept
+  void HTMLMarqueeElement::Width(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }

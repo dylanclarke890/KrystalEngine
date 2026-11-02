@@ -46,7 +46,7 @@ namespace krys::boo::html
 
     /// @brief A trusted `message` event.
     KRYS_NODISCARD static Ref<MessageEvent> Create(RefPtr<SerializedScriptValue> &&data,
-                                                   dom::USVString &&origin,
+                                                   dom::USVString origin,
                                                    RefPtr<LocalDOMWindow> &&source) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-messageevent-data

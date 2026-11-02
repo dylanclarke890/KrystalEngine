@@ -36,15 +36,15 @@ namespace krys::boo::svg
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__media
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
-    void Media(dom::DOMString &&value) noexcept;
+    void Media(dom::DOMString value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__title
     KRYS_NODISCARD dom::DOMString Title() const noexcept;
-    void Title(dom::DOMString &&value) noexcept;
+    void Title(dom::DOMString value) noexcept;
 
     bool SheetLoaded() noexcept final
     {

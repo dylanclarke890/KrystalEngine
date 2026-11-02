@@ -30,7 +30,7 @@
 
 namespace krys::boo::dom
 {
-  ExceptionOr<void> NodeAlgorithms::StringReplaceAll(DOMString &&string, ContainerNode &parent) noexcept
+  ExceptionOr<void> NodeAlgorithms::StringReplaceAll(DOMString string, ContainerNode &parent) noexcept
   {
     // 1. Let node be null.
     RefPtr<Text> node;
@@ -188,7 +188,7 @@ namespace krys::boo::dom
       for (auto &attr : element->_attributes)
       {
         // 2e.i. Let copyAttribute be the result of cloning a single node given attribute, document, and null.
-        auto attrCopy = AdoptRef<Attr>(*new Attr(document, attr->_name, DOMString(attr->Value())));
+        auto attrCopy = AdoptRef<Attr>(*new Attr(document, attr->_name, attr->Value()));
 
         // 2e.ii. Append copyAttribute to copy.
         ElementAlgorithms::AppendAttribute(*attrCopy, Downcast<Element>(*copy));
@@ -231,7 +231,7 @@ namespace krys::boo::dom
       docCopy._contentType = doc._contentType;
       docCopy._encoding = doc._encoding;
       docCopy.SetQuirksMode(doc._quirksMode);
-      docCopy.SetURL(url::URL(doc._url));
+      docCopy.SetURL(doc._url);
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
       docCopy.SetSettings(ShareRef(doc.GetSettings()));
 
@@ -260,30 +260,30 @@ namespace krys::boo::dom
     else if (Is<Attr>(node))
     {
       auto &attr = Downcast<const Attr>(node);
-      copy = AdoptRef<Attr>(*new Attr(document, attr._name, DOMString(attr.Value())));
+      copy = AdoptRef<Attr>(*new Attr(document, attr._name, attr.Value()));
     }
     // Text: Set copy's data to that of node.
     else if (auto *cdataSection = DynamicDowncast<CDATASection>(node))
     {
-      copy = CreateRef<CDATASection>(document, DOMString(cdataSection->Data()));
+      copy = CreateRef<CDATASection>(document, cdataSection->Data());
     }
     else if (Is<Text>(node))
     {
       auto &text = Downcast<const Text>(node);
-      copy = CreateRef<Text>(document, DOMString(text.Data()));
+      copy = CreateRef<Text>(document, text.Data());
     }
     // Comment: Set copy's data to that of node.
     else if (Is<Comment>(node))
     {
       auto &comment = Downcast<const Comment>(node);
-      copy = CreateRef<Comment>(document, DOMString(comment.Data()));
+      copy = CreateRef<Comment>(document, comment.Data());
     }
     // ProcessingInstruction: Set copy's target and data to those of node.
     else if (Is<ProcessingInstruction>(node))
     {
       auto &instruction = Downcast<const ProcessingInstruction>(node);
       copy = AdoptRef<ProcessingInstruction>(
-        *new ProcessingInstruction(document, DOMString(instruction.Target()), DOMString(instruction.Data())));
+        *new ProcessingInstruction(document, instruction.Target(), instruction.Data()));
     }
 
     // DocumentFragment (otherwise): Do nothing.

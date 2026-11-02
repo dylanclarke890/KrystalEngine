@@ -397,7 +397,7 @@ namespace krys::boo::html
     auto selectionEndValue = shouldClamp ? ComputeSelectionEnd() : 0;
 
     _value = normalizedValue;
-    SetInnerTextValue(dom::DOMString(_value));
+    SetInnerTextValue(_value);
     SetLastChangeWasNotUserEdit();
     UpdatePlaceholderVisibility();
     InvalidateStyleForSubtree();
@@ -449,7 +449,7 @@ namespace krys::boo::html
     return dom::TextAlgorithms::ChildTextContent(*this);
   }
 
-  void HTMLTextAreaElement::DefaultValue(dom::DOMString &&defaultValue) noexcept
+  void HTMLTextAreaElement::DefaultValue(dom::DOMString defaultValue) noexcept
   {
     (void)TextContent(krys::move(defaultValue));
   }
@@ -542,7 +542,7 @@ namespace krys::boo::html
     return AutofillData::Create(*this).IDLExposedValue;
   }
 
-  void HTMLTextAreaElement::Autocomplete(dom::DOMString &&value) noexcept
+  void HTMLTextAreaElement::Autocomplete(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
   }
@@ -562,7 +562,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"dirname").value_or(u8"");
   }
 
-  void HTMLTextAreaElement::DirName(dom::DOMString &&value) noexcept
+  void HTMLTextAreaElement::DirName(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"dirname", krys::move(value));
   }
@@ -592,7 +592,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLTextAreaElement::Name(dom::DOMString &&value) noexcept
+  void HTMLTextAreaElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -602,7 +602,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"placeholder").value_or(u8"");
   }
 
-  void HTMLTextAreaElement::Placeholder(dom::DOMString &&value) noexcept
+  void HTMLTextAreaElement::Placeholder(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"placeholder", krys::move(value));
   }
@@ -642,7 +642,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"wrap").value_or(u8"");
   }
 
-  void HTMLTextAreaElement::Wrap(dom::DOMString &&value) noexcept
+  void HTMLTextAreaElement::Wrap(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"wrap", krys::move(value));
   }

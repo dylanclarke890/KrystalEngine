@@ -25,7 +25,7 @@ namespace krys::boo::dom
     DOMString _data;
 
   protected:
-    CharacterData(Document &document, DOMString &&data, dom::NodeType type,
+    CharacterData(Document &document, DOMString data, dom::NodeType type,
                   NodeFlags flags = NodeFlags::None) noexcept;
 
   public:
@@ -38,7 +38,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-data
-    ExceptionOr<void> Data(DOMString &&data) noexcept;
+    ExceptionOr<void> Data(DOMString data) noexcept;
 
     /// @brief Whether the data is empty or only ASCII whitespace.
     KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace() const noexcept
@@ -56,16 +56,16 @@ namespace krys::boo::dom
     KRYS_NODISCARD ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-appenddata
-    ExceptionOr<void> AppendData(DOMString &&data) noexcept;
+    ExceptionOr<void> AppendData(DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-insertdata
-    ExceptionOr<void> InsertData(size_t offset, DOMString &&data) noexcept;
+    ExceptionOr<void> InsertData(size_t offset, DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-deletedata
     ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-replacedata
-    ExceptionOr<void> ReplaceData(size_t offset, size_t count, DOMString &&data) noexcept;
+    ExceptionOr<void> ReplaceData(size_t offset, size_t count, DOMString data) noexcept;
 
 #pragma endregion
 
@@ -78,7 +78,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
-    ExceptionOr<void> NodeValue(DOMString &&value) noexcept final
+    ExceptionOr<void> NodeValue(DOMString value) noexcept final
     {
       return Data(krys::move(value));
     }
@@ -90,7 +90,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    ExceptionOr<void> TextContent(DOMString &&value) noexcept final
+    ExceptionOr<void> TextContent(DOMString value) noexcept final
     {
       return Data(krys::move(value));
     }

@@ -208,11 +208,11 @@ namespace krys::boo::html::Tests
       tokenizer.State(test.InitialState);
       if (test.AppendEOF)
       {
-        inputStream.Append(utf8_string(test.Html), IsEOF(true));
+        inputStream.Append(test.Html, IsEOF(true));
       }
       else
       {
-        inputStream.Append(utf8_string(test.Html), IsEOF(false));
+        inputStream.Append(test.Html, IsEOF(false));
       }
 
       dom::DOMString tokens;

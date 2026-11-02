@@ -396,7 +396,7 @@ namespace krys::boo::html
 #pragma region Character Insertion
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
-    void InsertCharacters(dom::DOMString &&data) noexcept;
+    void InsertCharacters(dom::DOMString data) noexcept;
 
     /// @brief Removes null characters in a character token and returns whether any characters remain.
     bool RemoveNulls(HTMLTokenAtom &token) noexcept;

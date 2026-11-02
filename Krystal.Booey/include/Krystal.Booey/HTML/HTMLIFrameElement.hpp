@@ -38,25 +38,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-src
-    void Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-srcdoc
     KRYS_NODISCARD dom::DOMString SrcDoc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-srcdoc
-    void SrcDoc(dom::DOMString &&value) noexcept;
+    void SrcDoc(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-sizes
     KRYS_NODISCARD dom::DOMString Sizes() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-sizes
-    void Sizes(dom::DOMString &&value) noexcept;
+    void Sizes(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-name
     KRYS_NODISCARD dom::DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see  https://html.spec.whatwg.org/#dom-iframe-sandbox
     KRYS_NODISCARD dom::DOMTokenList &Sandbox() noexcept;
@@ -65,7 +65,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Allow() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-allow
-    void Allow(dom::DOMString &&value) noexcept;
+    void Allow(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-allowfullscreen
     KRYS_NODISCARD bool AllowFullscreen() const noexcept;
@@ -77,25 +77,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-width
-    void Width(dom::DOMString &&value) noexcept;
+    void Width(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-height
     KRYS_NODISCARD dom::DOMString Height() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-height
-    void Height(dom::DOMString &&value) noexcept;
+    void Height(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-referrerpolicy
     KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-referrerpolicy
-    void ReferrerPolicy(dom::DOMString &&value) noexcept;
+    void ReferrerPolicy(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-loading
     KRYS_NODISCARD dom::DOMString Loading() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-loading
-    void Loading(dom::DOMString &&value) noexcept;
+    void Loading(dom::DOMString value) noexcept;
 
     // FIXME: Implement the contentDocument, contentWindow and getSVGDocument()
     // methods/attributes.
@@ -111,37 +111,37 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-scrolling
     KRYS_NODISCARD dom::DOMString Scrolling() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-scrolling
-    void Scrolling(dom::DOMString &&value) noexcept;
+    void Scrolling(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-frameborder
     KRYS_NODISCARD dom::DOMString FrameBorder() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-frameborder
-    void FrameBorder(dom::DOMString &&value) noexcept;
+    void FrameBorder(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
     KRYS_NODISCARD dom::USVString LongDesc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
-    void LongDesc(dom::USVString &&value) noexcept;
+    void LongDesc(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginwidth
     KRYS_NODISCARD dom::DOMString MarginWidth() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginwidth
-    void MarginWidth(dom::DOMString &&value) noexcept;
+    void MarginWidth(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginheight
     KRYS_NODISCARD dom::DOMString MarginHeight() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginheight
-    void MarginHeight(dom::DOMString &&value) noexcept;
+    void MarginHeight(dom::DOMString value) noexcept;
 
 #pragma endregion
 

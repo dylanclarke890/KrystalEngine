@@ -69,7 +69,7 @@ namespace krys::boo::html::tests
     REQUIRE_FALSE(script.AppendChild(*document.CreateTextNode(u8"c")).HasException());
     CHECK(Narrow(script.Text()) == "ac");
 
-    script.Text(dom::DOMString(u8"replaced"));
+    script.Text(u8"replaced");
     REQUIRE(script.FirstChild());
     CHECK(script.FirstChild() == script.LastChild());
     CHECK(Is<dom::Text>(*script.FirstChild()));

@@ -62,24 +62,24 @@ namespace krys::boo::html::tests
     auto &templateElement = Downcast<HTMLTemplateElement>(*element);
 
     CHECK(templateElement.ShadowRootMode().empty());
-    templateElement.ShadowRootMode(dom::DOMString(u8"OPEN"));
+    templateElement.ShadowRootMode(u8"OPEN");
     CHECK(templateElement.ShadowRootMode() == u8"open");
-    templateElement.ShadowRootMode(dom::DOMString(u8"closed"));
+    templateElement.ShadowRootMode(u8"closed");
     CHECK(templateElement.ShadowRootMode() == u8"closed");
-    templateElement.ShadowRootMode(dom::DOMString(u8"nope"));
+    templateElement.ShadowRootMode(u8"nope");
     CHECK(templateElement.ShadowRootMode().empty());
     CHECK(templateElement.GetAttribute(u8"shadowrootmode") == u8"nope");
 
     CHECK(templateElement.ShadowRootSlotAssignment() == u8"named");
-    templateElement.ShadowRootSlotAssignment(dom::DOMString(u8"Manual"));
+    templateElement.ShadowRootSlotAssignment(u8"Manual");
     CHECK(templateElement.ShadowRootSlotAssignment() == u8"manual");
-    templateElement.ShadowRootSlotAssignment(dom::DOMString(u8"nope"));
+    templateElement.ShadowRootSlotAssignment(u8"nope");
     CHECK(templateElement.ShadowRootSlotAssignment() == u8"named");
 
     // shadowRootCustomElementRegistry and htmlFor reflect any value.
-    templateElement.ShadowRootCustomElementRegistry(dom::DOMString(u8"x"));
+    templateElement.ShadowRootCustomElementRegistry(u8"x");
     CHECK(templateElement.ShadowRootCustomElementRegistry() == u8"x");
-    templateElement.HtmlFor(dom::DOMString(u8"marker"));
+    templateElement.HtmlFor(u8"marker");
     CHECK(templateElement.GetAttribute(u8"for") == u8"marker");
     CHECK(templateElement.HtmlFor() == u8"marker");
   }

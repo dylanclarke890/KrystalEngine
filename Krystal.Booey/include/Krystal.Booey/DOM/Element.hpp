@@ -198,13 +198,13 @@ namespace krys::boo::dom
     /// @brief Reflects the `id` attribute, as `className` and `slot` reflect theirs.
     /// @see https://dom.spec.whatwg.org/#dom-element-id
     /// @see https://dom.spec.whatwg.org/#concept-reflect
-    void Id(DOMString &&id) noexcept;
+    void Id(DOMString id) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-id
     KRYS_NODISCARD DOMString Id() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-classname
-    void ClassName(DOMString &&className) noexcept;
+    void ClassName(DOMString className) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-classname
     KRYS_NODISCARD DOMString ClassName() const noexcept;
@@ -220,7 +220,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD DatasetDOMStringMap &Dataset() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-slot
-    void Slot(DOMString &&slot) noexcept;
+    void Slot(DOMString slot) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-slot
     KRYS_NODISCARD DOMString Slot() const noexcept;
@@ -242,11 +242,11 @@ namespace krys::boo::dom
                                                    DOMStringAtom localName) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattribute
-    ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMString &&value) noexcept;
+    ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattributens
     ExceptionOr<void> SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
-                                     DOMString &&value) noexcept;
+                                     DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-removeattribute
     void RemoveAttribute(DOMStringAtom qualifiedName) noexcept;
@@ -340,7 +340,7 @@ namespace krys::boo::dom
     ExceptionOr<Element *> InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
-    ExceptionOr<void> InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept;
+    ExceptionOr<void> InsertAdjacentText(InsertAdjacentWhere where, DOMString data) noexcept;
 
 #pragma endregion
 
@@ -510,7 +510,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    ExceptionOr<void> TextContent(DOMString &&value) noexcept final;
+    ExceptionOr<void> TextContent(DOMString value) noexcept final;
 
 #pragma endregion
 
@@ -1518,11 +1518,11 @@ namespace krys::boo::dom
   protected:
     /// @brief Sets an attribute in the null namespace to `value` without running the attribute change steps
     /// or queueing a mutation record, for lazily synchronised attributes.
-    void SetSynchronizedLazyAttribute(DOMStringAtom localName, DOMString &&value) noexcept;
+    void SetSynchronizedLazyAttribute(DOMStringAtom localName, DOMString value) noexcept;
 
     /// @brief Sets the attribute @p name (matched by its namespace and local name) to `value` without running
     /// the attribute change steps or queueing a mutation record, for lazily synchronised attributes.
-    void SetSynchronizedLazyAttribute(const QualifiedName &name, DOMString &&value) noexcept;
+    void SetSynchronizedLazyAttribute(const QualifiedName &name, DOMString value) noexcept;
 
 #pragma region Parser Hooks
 

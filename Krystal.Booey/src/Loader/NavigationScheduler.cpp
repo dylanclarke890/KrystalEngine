@@ -109,7 +109,7 @@ namespace krys::boo
         bool refresh = url::EqualIgnoringFragmentIdentifier(frame.Document()->GetURL(), _url);
         bool lockBackForwardList = Delay() <= 1;
         frame.Loader().ClientRedirected(lockBackForwardList);
-        FrameLoadRequest request(ShareRef(*_initiatingDocument), ResourceRequest(url::URL(_url)),
+        FrameLoadRequest request(ShareRef(*_initiatingDocument), ResourceRequest(_url),
                                  dom::DOMStringAtom(u8"_self"));
         request.SetNavigationHistoryBehavior(refresh               ? NavigationHistoryBehavior::Reload
                                              : lockBackForwardList ? NavigationHistoryBehavior::Replace
@@ -140,7 +140,7 @@ namespace krys::boo
       void Fire(LocalFrame &frame) noexcept override
       {
         frame.Loader().ClientRedirected(_historyBehavior == NavigationHistoryBehavior::Replace);
-        FrameLoadRequest request(ShareRef(*_initiatingDocument), ResourceRequest(url::URL(_url)),
+        FrameLoadRequest request(ShareRef(*_initiatingDocument), ResourceRequest(_url),
                                  dom::DOMStringAtom(u8"_self"));
         request.SetNavigationHistoryBehavior(_historyBehavior);
         frame.Loader().ChangeLocation(krys::move(request));
@@ -159,7 +159,7 @@ namespace krys::boo
       void Fire(LocalFrame &frame) noexcept override
       {
         // A reload: the document's subresources are revalidated, and its history item is updated.
-        FrameLoadRequest request(ShareRef(*_initiatingDocument), ResourceRequest(url::URL(_url)),
+        FrameLoadRequest request(ShareRef(*_initiatingDocument), ResourceRequest(_url),
                                  dom::DOMStringAtom(u8"_self"));
         request.SetNavigationHistoryBehavior(NavigationHistoryBehavior::Reload);
         frame.Loader().LoadFrameRequest(krys::move(request), nullptr, nullptr);
@@ -220,7 +220,7 @@ namespace krys::boo
 
     public:
       ScheduledHistoryNavigationByKey(
-        dom::DOMString &&key, Func<void(ScheduleHistoryNavigationResult)> &&completionHandler) noexcept
+        dom::DOMString key, Func<void(ScheduleHistoryNavigationResult)> &&completionHandler) noexcept
           : ScheduledNavigation(0, false, true), _key(krys::move(key)),
             _completionHandler(krys::move(completionHandler))
       {
@@ -359,7 +359,7 @@ namespace krys::boo
     if (url.HasFragmentIdentifier() && document
         && url::EqualIgnoringFragmentIdentifier(document->GetURL(), url))
     {
-      FrameLoadRequest request(ShareRef(initiatingDocument), ResourceRequest(url::URL(url)),
+      FrameLoadRequest request(ShareRef(initiatingDocument), ResourceRequest(url),
                                dom::DOMStringAtom(u8"_self"));
       request.SetNavigationHistoryBehavior(historyHandling);
       _frame.Loader().ChangeLocation(krys::move(request));
@@ -390,7 +390,7 @@ namespace krys::boo
   }
 
   void NavigationScheduler::ScheduleHistoryNavigationByKey(
-    dom::DOMString &&key, Func<void(ScheduleHistoryNavigationResult)> &&completionHandler) noexcept
+    dom::DOMString key, Func<void(ScheduleHistoryNavigationResult)> &&completionHandler) noexcept
   {
     if (!_frame.GetPage())
     {

@@ -31,7 +31,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"label").value_or(u8"");
   }
 
-  void HTMLOptGroupElement::Label(dom::DOMString &&value) noexcept
+  void HTMLOptGroupElement::Label(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
   }

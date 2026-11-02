@@ -182,7 +182,7 @@ namespace krys::boo::dom
                                                 attribute.NamespaceURI());
   }
 
-  void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString &&value) noexcept
+  void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString value) noexcept
   {
     attribute._ownerElement->SynchronizeAllAttributes();
     DOMString oldValue;
@@ -350,7 +350,7 @@ namespace krys::boo::dom
     return oldAttr;
   }
 
-  void ElementAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName, DOMString &&value,
+  void ElementAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName, DOMString value,
                                             DOMStringAtom prefix, DOMStringAtom namespaceURI) noexcept
   {
     // 1. Let attribute be the result of getting an attribute given namespace, localName, and element.

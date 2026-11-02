@@ -36,7 +36,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-media
-    void Media(dom::DOMString &&value) noexcept;
+    void Media(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-blocking
     KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
@@ -49,7 +49,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
 #pragma endregion
 

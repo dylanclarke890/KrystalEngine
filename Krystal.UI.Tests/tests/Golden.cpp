@@ -777,12 +777,12 @@ namespace krys::ui::tests
                         auto context = canvas->GetContext2d();
                         REQUIRE(context);
 
-                        context->SetFillStyle(DOMString(u8"#336699"));
+                        context->SetFillStyle(u8"#336699");
                         context->FillRect(10, 10, 60, 40);
-                        context->SetFillStyle(DOMString(u8"rgba(238, 119, 51, 0.6)"));
+                        context->SetFillStyle(u8"rgba(238, 119, 51, 0.6)");
                         context->FillRect(40, 30, 60, 40);
                         context->SetLineWidth(4);
-                        context->SetStrokeStyle(DOMString(u8"#224422"));
+                        context->SetStrokeStyle(u8"#224422");
                         context->StrokeRect(10, 90, 90, 40);
 
                         auto linear = context->CreateLinearGradient(120, 0, 220, 0).ReleaseValue();
@@ -806,7 +806,7 @@ namespace krys::ui::tests
                         context->Clip();
                         context->SetLineWidth(8);
                         context->SetLineJoin(boo::html::CanvasLineJoin::Round);
-                        context->SetStrokeStyle(DOMString(u8"#880088"));
+                        context->SetStrokeStyle(u8"#880088");
                         view.UpdateRendering();
 
                         context->BeginPath();
@@ -819,13 +819,13 @@ namespace krys::ui::tests
                         context->SetLineWidth(6);
                         context->SetLineCap(boo::html::CanvasLineCap::Round);
                         context->SetLineDash({12, 10});
-                        context->SetStrokeStyle(DOMString(u8"#cc3333"));
+                        context->SetStrokeStyle(u8"#cc3333");
                         context->BeginPath();
                         context->MoveTo(240, 110);
                         context->LineTo(330, 110);
                         context->Stroke();
                         context->SetGlobalAlpha(0.5f);
-                        context->SetFillStyle(DOMString(u8"#000000"));
+                        context->SetFillStyle(u8"#000000");
                         context->BeginPath();
                         std::ignore =
                           context->RoundRect(240, 125, 90, 45, boo::html::CanvasPath::RadiusVariant(12.0));
@@ -864,9 +864,9 @@ namespace krys::ui::tests
         REQUIRE_FALSE(context->DrawImage(ShareRefPtr(photo), 70, 10, 96, 64).HasException());
         REQUIRE_FALSE(context->DrawImage(ShareRefPtr(photo), 12, 8, 24, 16, 180, 10, 48, 32).HasException());
 
-        tile->SetFillStyle(DOMString(u8"#336699"));
+        tile->SetFillStyle(u8"#336699");
         tile->FillRect(0, 0, 16, 16);
-        tile->SetFillStyle(DOMString(u8"#ee7733"));
+        tile->SetFillStyle(u8"#ee7733");
         tile->FillRect(0, 0, 8, 8);
         tile->FillRect(8, 8, 8, 8);
         auto pattern = context->CreatePattern(ShareRefPtr(tileCanvas), u8"repeat");
@@ -875,7 +875,7 @@ namespace krys::ui::tests
         context->SetFillStyle(Ref<boo::html::CanvasPattern>(pattern.Value()));
         context->FillRect(240, 10, 90, 64);
 
-        tile->SetFillStyle(DOMString(u8"#22aa55"));
+        tile->SetFillStyle(u8"#22aa55");
         tile->FillRect(0, 0, 16, 16);
         REQUIRE_FALSE(context->DrawImage(ShareRefPtr(tileCanvas), 10, 90, 32, 32).HasException());
         REQUIRE_FALSE(context->DrawImage(ShareRefPtr(canvas), 70, 10, 96, 64, 60, 90, 48, 32).HasException());
@@ -919,10 +919,10 @@ namespace krys::ui::tests
                         REQUIRE(context);
 
                         context->SetFont(u8"40px Ahem");
-                        context->SetFillStyle(DOMString(u8"#336699"));
+                        context->SetFillStyle(u8"#336699");
                         context->FillText(u8"Fill", 10, 50);
                         context->SetLineWidth(2);
-                        context->SetStrokeStyle(DOMString(u8"#cc3333"));
+                        context->SetStrokeStyle(u8"#cc3333");
                         context->StrokeText(u8"Line", 10, 100);
 
                         auto gradient = context->CreateLinearGradient(190, 0, 330, 0).ReleaseValue();
@@ -932,7 +932,7 @@ namespace krys::ui::tests
                         context->SetFont(u8"30px Ahem");
                         context->FillText(u8"Grad", 200, 45);
 
-                        context->SetFillStyle(DOMString(u8"#118833"));
+                        context->SetFillStyle(u8"#118833");
                         context->SetFont(u8"20px Ahem");
                         context->SetTextAlign(boo::html::CanvasTextAlign::Center);
                         context->SetTextBaseline(boo::html::CanvasTextBaseline::Middle);
@@ -940,14 +940,14 @@ namespace krys::ui::tests
 
                         context->SetTextAlign(boo::html::CanvasTextAlign::Start);
                         context->SetTextBaseline(boo::html::CanvasTextBaseline::Alphabetic);
-                        context->SetFillStyle(DOMString(u8"#884488"));
+                        context->SetFillStyle(u8"#884488");
                         context->FillText(u8"Squeeze", 10, 150, 70.0);
                         context->SetLetterSpacing(u8"6px");
                         context->FillText(u8"ab", 100, 150);
                         context->SetLetterSpacing(u8"0px");
 
                         context->SetDirection(boo::html::CanvasDirection::Rtl);
-                        context->SetFillStyle(DOMString(u8"#ee7733"));
+                        context->SetFillStyle(u8"#ee7733");
                         context->FillText(u8"abc", 330, 170);
                         view.UpdateRendering();
                       });
@@ -967,11 +967,11 @@ namespace krys::ui::tests
                         REQUIRE(context);
 
                         context->SetFilterString(u8"blur(4px)");
-                        context->SetFillStyle(DOMString(u8"#336699"));
+                        context->SetFillStyle(u8"#336699");
                         context->FillRect(20, 20, 80, 60);
 
                         context->SetFilterString(u8"drop-shadow(6px 6px 3px rgba(0, 0, 0, 0.6))");
-                        context->SetFillStyle(DOMString(u8"#ee7733"));
+                        context->SetFillStyle(u8"#ee7733");
                         context->BeginPath();
                         std::ignore = context->Arc(160, 50, 30, 0, 2 * std::numbers::pi_v<float>);
                         context->Fill();
@@ -984,18 +984,18 @@ namespace krys::ui::tests
                         context->FillRect(220, 20, 100, 60);
 
                         context->SetFilterString(u8"opacity(0.5)");
-                        context->SetFillStyle(DOMString(u8"#118833"));
+                        context->SetFillStyle(u8"#118833");
                         context->FillRect(20, 110, 80, 50);
                         context->SetFilterString(u8"hue-rotate(180deg)");
-                        context->SetFillStyle(DOMString(u8"#cc3333"));
+                        context->SetFillStyle(u8"#cc3333");
                         context->FillRect(120, 110, 80, 50);
 
                         context->SetFilterString(u8"blur(1px) drop-shadow(3px 3px 0 #224422)");
                         context->SetLineWidth(6);
-                        context->SetStrokeStyle(DOMString(u8"#884488"));
+                        context->SetStrokeStyle(u8"#884488");
                         context->StrokeRect(230, 110, 80, 50);
                         context->SetFilterString(u8"none");
-                        context->SetFillStyle(DOMString(u8"#222222"));
+                        context->SetFillStyle(u8"#222222");
                         context->FillRect(260, 128, 20, 14);
                         view.UpdateRendering();
                       });

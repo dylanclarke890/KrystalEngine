@@ -19,13 +19,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
-    void Href(dom::USVString &&value) noexcept;
+    void Href(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-target
     KRYS_NODISCARD dom::DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-target
-    void Target(dom::DOMString &&value) noexcept;
+    void Target(dom::DOMString value) noexcept;
 
 #pragma endregion
 

@@ -32,7 +32,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"kind"));
   }
 
-  void HTMLTrackElement::Kind(dom::DOMString &&value) noexcept
+  void HTMLTrackElement::Kind(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"kind", krys::move(value));
   }
@@ -42,7 +42,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  void HTMLTrackElement::Src(dom::USVString &&value) noexcept
+  void HTMLTrackElement::Src(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -52,7 +52,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"srclang").value_or(u8"");
   }
 
-  void HTMLTrackElement::SrcLang(dom::DOMString &&value) noexcept
+  void HTMLTrackElement::SrcLang(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"srclang", krys::move(value));
   }
@@ -62,7 +62,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"label").value_or(u8"");
   }
 
-  void HTMLTrackElement::Label(dom::DOMString &&value) noexcept
+  void HTMLTrackElement::Label(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
   }

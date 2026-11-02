@@ -43,7 +43,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-autocomplete
-    void Autocomplete(dom::DOMString &&value) noexcept;
+    void Autocomplete(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-cols
     KRYS_NODISCARD uint32 Cols() const noexcept;
@@ -55,7 +55,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString DirName() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-dirname
-    void DirName(dom::DOMString &&value) noexcept;
+    void DirName(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -77,13 +77,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-placeholder
     KRYS_NODISCARD dom::DOMString Placeholder() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-placeholder
-    void Placeholder(dom::DOMString &&value) noexcept;
+    void Placeholder(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-readonly
     KRYS_NODISCARD bool ReadOnly() const noexcept;
@@ -107,7 +107,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Wrap() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-wrap
-    void Wrap(dom::DOMString &&value) noexcept;
+    void Wrap(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept
@@ -120,7 +120,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString DefaultValue() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-defaultvalue
-    void DefaultValue(dom::DOMString &&value) noexcept;
+    void DefaultValue(dom::DOMString value) noexcept;
 
     /// @brief The raw value.
     /// @see https://html.spec.whatwg.org/#dom-textarea-value

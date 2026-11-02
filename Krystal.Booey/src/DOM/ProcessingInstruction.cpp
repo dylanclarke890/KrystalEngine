@@ -14,8 +14,7 @@
 
 namespace krys::boo::dom
 {
-  ProcessingInstruction::ProcessingInstruction(Document &document, DOMString &&target,
-                                               DOMString &&data) noexcept
+  ProcessingInstruction::ProcessingInstruction(Document &document, DOMString target, DOMString data) noexcept
       : CharacterData(document, krys::move(data), NodeType::PROCESSING_INSTRUCTION_NODE),
         _target(krys::move(target))
   {
@@ -26,8 +25,8 @@ namespace krys::boo::dom
     UpdateAttributesFromData();
   }
 
-  ExceptionOr<Ref<ProcessingInstruction>>
-    ProcessingInstruction::Create(Document &document, DOMString &&target, DOMString &&data) noexcept
+  ExceptionOr<Ref<ProcessingInstruction>> ProcessingInstruction::Create(Document &document, DOMString target,
+                                                                        DOMString data) noexcept
   {
     // Create a processing instruction node:
     // 1. Let pi be the result of creating a node that implements ProcessingInstruction, given document.
@@ -73,7 +72,7 @@ namespace krys::boo::dom
     return it->Value;
   }
 
-  ExceptionOr<void> ProcessingInstruction::SetAttribute(DOMStringView name, DOMString &&value) noexcept
+  ExceptionOr<void> ProcessingInstruction::SetAttribute(DOMStringView name, DOMString value) noexcept
   {
     // 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
     if (!NameValidation::IsValidAttributeLocalName(name))

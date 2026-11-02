@@ -12,7 +12,7 @@ namespace krys::boo::html
 
   MessageEvent::~MessageEvent() noexcept = default;
 
-  Ref<MessageEvent> MessageEvent::Create(RefPtr<SerializedScriptValue> &&data, dom::USVString &&origin,
+  Ref<MessageEvent> MessageEvent::Create(RefPtr<SerializedScriptValue> &&data, dom::USVString origin,
                                          RefPtr<LocalDOMWindow> &&source) noexcept
   {
     MessageEventInit init;

@@ -172,10 +172,10 @@ namespace krys::boo::dom::tests
 
     auto element = document->CreateElement(DOMStringAtom(u8"param")).ReleaseValue();
     auto &param = Downcast<html::HTMLParamElement>(Downcast<html::HTMLElement>(*element));
-    param.Name(DOMString(u8"n"));
-    param.Value(DOMString(u8"v"));
-    param.Type(DOMString(u8"t"));
-    param.ValueType(DOMString(u8"ref"));
+    param.Name(u8"n");
+    param.Value(u8"v");
+    param.Type(u8"t");
+    param.ValueType(u8"ref");
     CHECK(param.GetAttribute(u8"name") == DOMString(u8"n"));
     CHECK(param.GetAttribute(u8"value") == DOMString(u8"v"));
     CHECK(param.GetAttribute(u8"type") == DOMString(u8"t"));

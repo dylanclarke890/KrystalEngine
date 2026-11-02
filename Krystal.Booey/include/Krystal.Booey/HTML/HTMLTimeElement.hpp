@@ -18,7 +18,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString DateTime() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-time-datetime
-    void DateTime(dom::DOMString &&value) noexcept;
+    void DateTime(dom::DOMString value) noexcept;
 
 #pragma endregion
   };

@@ -42,11 +42,11 @@ namespace krys::boo::html
 
     /// @brief A trusted, cancelable `error` event.
     /// @brief A trusted error event of type @p type (`navigateerror`), which can't be canceled.
-    KRYS_NODISCARD static Ref<ErrorEvent> Create(dom::DOMStringAtom type, dom::DOMString &&message,
-                                                 dom::USVString &&filename, uint32 lineno, uint32 colno,
+    KRYS_NODISCARD static Ref<ErrorEvent> Create(dom::DOMStringAtom type, dom::DOMString message,
+                                                 dom::USVString filename, uint32 lineno, uint32 colno,
                                                  RefPtr<SerializedScriptValue> &&error) noexcept;
 
-    KRYS_NODISCARD static Ref<ErrorEvent> Create(dom::DOMString &&message, dom::USVString &&filename,
+    KRYS_NODISCARD static Ref<ErrorEvent> Create(dom::DOMString message, dom::USVString filename,
                                                  uint32 lineno, uint32 colno,
                                                  RefPtr<SerializedScriptValue> &&error) noexcept;
 

@@ -427,11 +427,11 @@ namespace krys::boo::html
 #pragma region CanvasFillStrokeStyles
 
     KRYS_NODISCARD StyleVariant StrokeStyle() const noexcept;
-    void SetStrokeStyle(dom::DOMString &&) noexcept;
+    void SetStrokeStyle(dom::DOMString) noexcept;
     void SetStrokeStyle(Ref<CanvasGradient> &&) noexcept;
     void SetStrokeStyle(Ref<CanvasPattern> &&) noexcept;
     KRYS_NODISCARD StyleVariant FillStyle() const noexcept;
-    void SetFillStyle(dom::DOMString &&) noexcept;
+    void SetFillStyle(dom::DOMString) noexcept;
     void SetFillStyle(Ref<CanvasGradient> &&) noexcept;
     void SetFillStyle(Ref<CanvasPattern> &&) noexcept;
 
@@ -681,8 +681,8 @@ namespace krys::boo::html
 
     void UnwindStateStack() noexcept;
     void RealizeSavesLoop() noexcept;
-    void SetStrokeColorImpl(Color &&color, dom::DOMString &&unparsedColor = {}) noexcept;
-    void SetFillColorImpl(Color &&color, dom::DOMString &&unparsedColor = {}) noexcept;
+    void SetStrokeColorImpl(Color &&color, dom::DOMString unparsedColor = {}) noexcept;
+    void SetFillColorImpl(Color &&color, dom::DOMString unparsedColor = {}) noexcept;
 
     void BeginCompositeLayer() noexcept;
     void EndCompositeLayer() noexcept;

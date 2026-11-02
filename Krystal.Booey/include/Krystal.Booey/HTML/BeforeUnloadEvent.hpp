@@ -27,7 +27,7 @@ namespace krys::boo::html
     {
       return _returnValue;
     }
-    void SetReturnValue(dom::DOMString &&value) noexcept
+    void SetReturnValue(dom::DOMString value) noexcept
     {
       _returnValue = krys::move(value);
     }

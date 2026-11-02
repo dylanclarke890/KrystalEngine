@@ -15,8 +15,8 @@
 
 namespace krys::boo::dom
 {
-  ExceptionOr<void> TextAlgorithms::Replace(CharacterData &node, size_t offset, size_t count,
-                                            DOMString &&data, bool piAttributesAlreadyUpdated) noexcept
+  ExceptionOr<void> TextAlgorithms::Replace(CharacterData &node, size_t offset, size_t count, DOMString data,
+                                            bool piAttributesAlreadyUpdated) noexcept
   {
     // 1. Let length be node's length.
     auto length = node.Length();

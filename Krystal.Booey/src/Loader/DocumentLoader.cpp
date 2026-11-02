@@ -88,10 +88,9 @@ namespace krys::boo
       auto &content = _substituteData->Content();
       auto data = SharedBuffer::Create(
         Span<const uint8>(reinterpret_cast<const uint8 *>(content.data()), content.size()));
-      finish(
-        LoadedResource {.Response = ResourceResponse(DocumentURL(), utf8_string(_substituteData->MimeType()),
-                                                     static_cast<int64>(content.size()), u8"UTF-8"),
-                        .Data = krys::move(data)});
+      finish(LoadedResource {.Response = ResourceResponse(DocumentURL(), _substituteData->MimeType(),
+                                                          static_cast<int64>(content.size()), u8"UTF-8"),
+                             .Data = krys::move(data)});
       return;
     }
 
@@ -191,7 +190,7 @@ namespace krys::boo
     }
     _committed = true;
 
-    _writer.SetMIMEType(utf8_string(_response.MimeType()));
+    _writer.SetMIMEType(_response.MimeType());
     if (!_writer.Begin(DocumentURL()))
     {
       _isLoadingMainResource = false;

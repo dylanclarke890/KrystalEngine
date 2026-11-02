@@ -1302,7 +1302,7 @@ namespace krys::boo
         {
           if (!tabText.empty())
           {
-            (void)paragraph.AppendChild(*CreateTabSpanElement(document, utf8_string(tabText)));
+            (void)paragraph.AppendChild(*CreateTabSpanElement(document, tabText));
             tabText.clear();
           }
           auto textNode =
@@ -1318,7 +1318,7 @@ namespace krys::boo
         }
         else if (!tabText.empty())
         {
-          (void)paragraph.AppendChild(*CreateTabSpanElement(document, utf8_string(tabText)));
+          (void)paragraph.AppendChild(*CreateTabSpanElement(document, tabText));
         }
 
         first = false;

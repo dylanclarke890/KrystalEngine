@@ -17,6 +17,7 @@ Composed of multiple modules, each with its own `CMakeLists.txt` and `include/<M
 
 - Use the engine types rather than std: `uint32`/`int64`/`byte`, `List`, `HashMap`, `Queue`, `Span`, `UniquePtr`, `Func`, `Maybe`, `Expected`.
 - Prefer `Krystal.Core/TypeTraits.hpp` and `Krystal.Core/Concepts.hpp` over including `<type_traits>` or `<concepts>` directly. Add common type traits/concepts there.
+- Take sink parameters (values the function moves into a member or passes on, such as a `DOMString` setter's value) by value, not by `&&`: callers can then pass an lvalue (copied) or an rvalue (moved) without building temporaries, and call sites pass literals and variables directly. Keep `&&` for move-only types and forwarding references, and take parameters the function only reads as a view or `const &`. Don't pair a by-value overload with a `const &` one (it's ambiguous).
 
 ## Attributes and specifiers
 

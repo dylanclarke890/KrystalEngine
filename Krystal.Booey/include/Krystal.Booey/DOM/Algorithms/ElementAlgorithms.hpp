@@ -34,7 +34,7 @@ namespace krys::boo::dom
                                        Maybe<DOMStringView> newValue) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change
-    static void ChangeAttribute(Attr &attribute, DOMString &&value) noexcept;
+    static void ChangeAttribute(Attr &attribute, DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-append
     static void AppendAttribute(Attr &attribute, Element &element) noexcept;
@@ -62,7 +62,7 @@ namespace krys::boo::dom
     static ExceptionOr<RefPtr<Attr>> SetAttribute(Attr &attr, Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-set-value
-    static void SetAttributeValue(Element &element, DOMStringAtom localName, DOMString &&value,
+    static void SetAttributeValue(Element &element, DOMStringAtom localName, DOMString value,
                                   DOMStringAtom prefix = DOMStringAtom::Null(),
                                   DOMStringAtom namespaceURI = DOMStringAtom::Null()) noexcept;
 

@@ -35,7 +35,7 @@ namespace krys::boo
     {
       return _url;
     }
-    void SetURL(url::URL &&url) noexcept
+    void SetURL(url::URL url) noexcept
     {
       _url = krys::move(url);
     }

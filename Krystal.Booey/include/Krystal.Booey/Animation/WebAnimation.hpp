@@ -153,7 +153,7 @@ namespace krys::boo
     {
       return _id;
     }
-    void SetId(dom::DOMString &&id) noexcept;
+    void SetId(dom::DOMString id) noexcept;
 
     KRYS_NODISCARD AnimationEffect *BindingsEffect() const noexcept
     {

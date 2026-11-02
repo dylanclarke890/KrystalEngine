@@ -385,7 +385,7 @@ namespace krys::boo
     // 9. Reload document's node navigable with navigationAPIState set to serializedState and apiMethodTracker
     //    set to apiMethodTracker.
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
-    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(url::URL(document->GetURL())),
+    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(document->GetURL()),
                                       dom::DOMStringAtom(u8"_self"));
     frameLoadRequest.SetNavigationHistoryBehavior(NavigationHistoryBehavior::Reload);
     frameLoadRequest.SetIsFromNavigationAPI(true);
@@ -968,7 +968,7 @@ namespace krys::boo
 
   Navigation::DispatchResult Navigation::InnerDispatchNavigateEvent(
     NavigationNavigationType navigationType, Ref<NavigationDestination> &&destination,
-    Maybe<dom::DOMString> &&downloadRequestFilename, const FormSubmission *formSubmission,
+    Maybe<dom::DOMString> downloadRequestFilename, const FormSubmission *formSubmission,
     html::SerializedScriptValue *classicHistoryAPIState, dom::Element *sourceElement) noexcept
   {
     if (HasEntriesAndEventsDisabled())

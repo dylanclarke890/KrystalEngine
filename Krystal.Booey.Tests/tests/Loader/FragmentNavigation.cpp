@@ -236,7 +236,7 @@ namespace krys::boo::tests
 
       auto paragraph = fixture.Document->CreateElement(u8"p").ReleaseValue();
       (void)paragraph->SetAttribute(u8"id", u8"late");
-      (void)paragraph->TextContent(dom::DOMString(u8"A late arrival"));
+      (void)paragraph->TextContent(u8"A late arrival");
       REQUIRE_FALSE(fixture.ById(u8"section").ParentNode()->AppendChild(*paragraph).HasException());
       (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
 
@@ -254,7 +254,7 @@ namespace krys::boo::tests
         loop.Run(loop.Now() + 500ms);
       }
       auto paragraph = fixture.Document->CreateElement(u8"p").ReleaseValue();
-      (void)paragraph->TextContent(dom::DOMString(u8"never"));
+      (void)paragraph->TextContent(u8"never");
       REQUIRE_FALSE(fixture.ById(u8"section").ParentNode()->AppendChild(*paragraph).HasException());
       (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
       loop.Run(loop.Now() + 600ms);

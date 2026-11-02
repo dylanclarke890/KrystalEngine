@@ -74,7 +74,7 @@ namespace krys::boo::css::tests
       u8"<p id=para dir=ltr>T</p></form>");
     auto matches = [&](utf8_stringview id, utf8_stringview selector)
     {
-      return fixture.ById(id).Matches(dom::DOMString(selector)).ReleaseValue();
+      return fixture.ById(id).Matches(selector).ReleaseValue();
     };
 
     CHECK(matches(u8"link", u8":link"));

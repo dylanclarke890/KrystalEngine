@@ -82,7 +82,7 @@ namespace krys::boo
       }
 
       auto container = CreateHTMLElement(GetDocument(), u8"div");
-      (void)container->SetAttribute(dom::DOMStringAtom(u8"dir"), dom::DOMString(u8"auto"));
+      (void)container->SetAttribute(dom::DOMStringAtom(u8"dir"), u8"auto");
       (void)container->AppendChild(*lineBreak);
       return container;
     }();

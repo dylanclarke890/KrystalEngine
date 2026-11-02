@@ -3581,7 +3581,7 @@ namespace krys::boo::html
 
 #pragma region Character Insertion
 
-  void HTMLTreeBuilder::InsertCharacters(dom::DOMString &&data) noexcept
+  void HTMLTreeBuilder::InsertCharacters(dom::DOMString data) noexcept
   {
     // 1. Let data be the characters passed to the algorithm, or, if no characters were explicitly specified,
     //    the character of the character token being processed.

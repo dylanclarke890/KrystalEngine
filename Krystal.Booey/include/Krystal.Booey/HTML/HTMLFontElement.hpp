@@ -18,19 +18,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Color() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-color
-    void Color(dom::DOMString &&value) noexcept;
+    void Color(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-face
     KRYS_NODISCARD dom::DOMString Face() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-face
-    void Face(dom::DOMString &&value) noexcept;
+    void Face(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-size
     KRYS_NODISCARD dom::DOMString Size() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-size
-    void Size(dom::DOMString &&value) noexcept;
+    void Size(dom::DOMString value) noexcept;
 
     /// @brief The `font-size` keyword for a legacy font size (`1` to `7`, or relative with `+` or `-`).
     /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-font-size

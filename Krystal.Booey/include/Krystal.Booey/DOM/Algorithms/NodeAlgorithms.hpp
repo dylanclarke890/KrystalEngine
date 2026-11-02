@@ -23,7 +23,7 @@ namespace krys::boo::dom
   {
   public:
     /// @see https://dom.spec.whatwg.org/#string-replace-all
-    KRYS_NODISCARD static ExceptionOr<void> StringReplaceAll(DOMString &&string,
+    KRYS_NODISCARD static ExceptionOr<void> StringReplaceAll(DOMString string,
                                                              ContainerNode &parent) noexcept;
 
     /// @param document The copy's node document; null for @p node's.

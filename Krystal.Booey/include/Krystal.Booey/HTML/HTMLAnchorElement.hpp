@@ -36,25 +36,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-target
-    void Target(dom::DOMString &&value) noexcept;
+    void Target(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-download
     KRYS_NODISCARD dom::DOMString Download() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-download
-    void Download(dom::DOMString &&value) noexcept;
+    void Download(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-ping
     KRYS_NODISCARD dom::USVString Ping() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-ping
-    void Ping(dom::USVString &&value) noexcept;
+    void Ping(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rel
     KRYS_NODISCARD dom::DOMString Rel() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rel
-    void Rel(dom::DOMString &&value) noexcept;
+    void Rel(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rellist
     KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
@@ -63,25 +63,25 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString HrefLang() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-hreflang
-    void HrefLang(dom::DOMString &&value) noexcept;
+    void HrefLang(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-text
     KRYS_NODISCARD dom::DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-text
-    dom::ExceptionOr<void> Text(dom::DOMString &&value) noexcept;
+    dom::ExceptionOr<void> Text(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-referrerpolicy
     KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-referrerpolicy
-    void ReferrerPolicy(dom::DOMString &&value) noexcept;
+    void ReferrerPolicy(dom::DOMString value) noexcept;
 
 #pragma endregion
 
@@ -91,7 +91,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
-    void Href(dom::USVString &&value) noexcept;
+    void Href(dom::USVString value) noexcept;
 
     /// @brief The `href` stringifier.
     /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
@@ -105,31 +105,31 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Coords() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-coords
-    void Coords(dom::DOMString &&value) noexcept;
+    void Coords(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-charset
     KRYS_NODISCARD dom::DOMString Charset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-charset
-    void Charset(dom::DOMString &&value) noexcept;
+    void Charset(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-name
     KRYS_NODISCARD dom::DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rev
     KRYS_NODISCARD dom::DOMString Rev() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rev
-    void Rev(dom::DOMString &&value) noexcept;
+    void Rev(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-shape
     KRYS_NODISCARD dom::DOMString Shape() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-shape
-    void Shape(dom::DOMString &&value) noexcept;
+    void Shape(dom::DOMString value) noexcept;
 
 #pragma endregion
 

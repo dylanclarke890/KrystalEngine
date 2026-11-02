@@ -52,7 +52,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"poster");
   }
 
-  void HTMLVideoElement::Poster(dom::USVString &&value) noexcept
+  void HTMLVideoElement::Poster(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"poster", krys::move(value));
   }

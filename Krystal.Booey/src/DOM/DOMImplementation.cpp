@@ -226,7 +226,7 @@ namespace krys::boo::dom
     auto document = create();
     if (!url.IsNull())
     {
-      document->SetURL(url::URL(url));
+      document->SetURL(url);
     }
     return document;
   }

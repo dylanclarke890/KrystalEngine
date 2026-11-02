@@ -844,7 +844,7 @@ namespace krys::boo::html
     return _wasEverChangedByUserEdit;
   }
 
-  void HTMLTextFormControlElement::SetInnerTextValue(dom::DOMString &&value) noexcept
+  void HTMLTextFormControlElement::SetInnerTextValue(dom::DOMString value) noexcept
   {
     auto innerText = InnerTextElementCreatingShadowSubtreeIfNeeded();
     if (!innerText)

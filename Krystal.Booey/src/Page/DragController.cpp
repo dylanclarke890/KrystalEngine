@@ -92,7 +92,7 @@ namespace krys::boo
           {
             Ref<dom::Document> document = ShareRef(context.Start.Container->NodeDocument());
             auto anchor = CreateHTMLElement(*document, u8"a");
-            dom::ElementAlgorithms::SetAttributeValue(*anchor, u8"href", dom::DOMString(url));
+            dom::ElementAlgorithms::SetAttributeValue(*anchor, u8"href", url);
             if (title.empty())
             {
               // Try the plain text first because the URL might be normalized or escaped.

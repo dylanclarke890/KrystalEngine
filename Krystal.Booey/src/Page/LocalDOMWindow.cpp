@@ -183,7 +183,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-name
-  void LocalDOMWindow::SetName(dom::DOMString &&name) noexcept
+  void LocalDOMWindow::SetName(dom::DOMString name) noexcept
   {
     // 1. If this's navigable is null, then return.
     auto *frame = Frame();
@@ -1269,7 +1269,7 @@ namespace krys::boo
     //     attributes initialized according to errorInfo.
     // FIXME: The script's location (filename, line and column), once there's scripting.
     _errorReportingMode = true;
-    Ref<dom::Event> event = html::ErrorEvent::Create(dom::DOMString(message), {}, 0, 0, krys::move(error));
+    Ref<dom::Event> event = html::ErrorEvent::Create(message, {}, 0, 0, krys::move(error));
     Ref<LocalDOMWindow> protectedThis = ShareRef(*this);
     bool notHandled = dom::EventDispatcher::DispatchToTarget(*event, this);
     // 6c. Set global's in error reporting mode to false.

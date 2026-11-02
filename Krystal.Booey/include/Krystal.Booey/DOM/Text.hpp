@@ -44,7 +44,7 @@ namespace krys::boo::dom
     {
     };
 
-    Text(Document &document, DOMString &&data, CDATAConstructorTag) noexcept;
+    Text(Document &document, DOMString data, CDATAConstructorTag) noexcept;
 
   public:
     KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
@@ -57,7 +57,7 @@ namespace krys::boo::dom
     /// @brief Creates a text node in @p document with the data.
     /// @see https://dom.spec.whatwg.org/#dom-text-text
     /// @see https://dom.spec.whatwg.org/#create-a-text-node
-    Text(Document &document, DOMString &&data = u8"") noexcept;
+    Text(Document &document, DOMString data = u8"") noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-text-splittext
     KRYS_NODISCARD ExceptionOr<Ref<Text>> SplitText(size_t offset) noexcept;

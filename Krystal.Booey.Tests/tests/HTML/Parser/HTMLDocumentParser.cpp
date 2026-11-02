@@ -272,7 +272,7 @@ namespace krys::boo::html::tests
           element = dom::ElementFactory::Create(*document, qName, dom::DOMStringAtom::Null());
         }
         auto result = HTMLDocumentParser::ParseFragment(
-          *element, utf8_string(test.Input), false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
+          *element, test.Input, false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
 
         output = u8"#document\n";
         for (dom::Node &child : dom::ChildNodeRange(*result))

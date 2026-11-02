@@ -35,7 +35,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-map-name
-    void Name(dom::DOMString &&value) noexcept;
+    void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-map-areas
     KRYS_NODISCARD Ref<dom::HTMLCollection> Areas() noexcept;

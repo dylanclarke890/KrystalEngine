@@ -25,7 +25,7 @@ namespace krys::boo::dom
       return _text;
     }
 
-    void SetText(DOMString &&text) noexcept
+    void SetText(DOMString text) noexcept
     {
       _text = krys::move(text);
     }

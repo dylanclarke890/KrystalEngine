@@ -34,7 +34,7 @@ namespace krys::boo::dom
     _tokensNeedUpdating = false;
   }
 
-  void DOMTokenList::Value(DOMString &&value) noexcept
+  void DOMTokenList::Value(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     ElementAlgorithms::SetAttributeValue(*_element, _attributeName, krys::move(value));

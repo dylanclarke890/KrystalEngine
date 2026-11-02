@@ -279,7 +279,7 @@ namespace krys::boo
     NavigationResult PerformTraversal(dom::DOMStringView key, Options &&options) noexcept;
     DispatchResult InnerDispatchNavigateEvent(NavigationNavigationType navigationType,
                                               Ref<NavigationDestination> &&destination,
-                                              Maybe<dom::DOMString> &&downloadRequestFilename,
+                                              Maybe<dom::DOMString> downloadRequestFilename,
                                               const FormSubmission *formSubmission = nullptr,
                                               html::SerializedScriptValue *classicHistoryAPIState = nullptr,
                                               dom::Element *sourceElement = nullptr) noexcept;

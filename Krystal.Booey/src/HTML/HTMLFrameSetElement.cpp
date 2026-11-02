@@ -14,7 +14,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"cols").value_or(u8"");
   }
 
-  void HTMLFrameSetElement::Cols(dom::DOMString &&value) noexcept
+  void HTMLFrameSetElement::Cols(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"cols", krys::move(value));
   }
@@ -24,7 +24,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"rows").value_or(u8"");
   }
 
-  void HTMLFrameSetElement::Rows(dom::DOMString &&value) noexcept
+  void HTMLFrameSetElement::Rows(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"rows", krys::move(value));
   }

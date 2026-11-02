@@ -28,31 +28,31 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-char
     KRYS_NODISCARD dom::DOMString Char() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-char
-    void Char(dom::DOMString &&value) noexcept;
+    void Char(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-charoff
     KRYS_NODISCARD dom::DOMString CharOff() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-charoff
-    void CharOff(dom::DOMString &&value) noexcept;
+    void CharOff(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-valign
     KRYS_NODISCARD dom::DOMString VAlign() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-valign
-    void VAlign(dom::DOMString &&value) noexcept;
+    void VAlign(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-width
     KRYS_NODISCARD dom::DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-width
-    void Width(dom::DOMString &&value) noexcept;
+    void Width(dom::DOMString value) noexcept;
 
 #pragma endregion
 

@@ -75,7 +75,7 @@ namespace krys::boo
       return _currentItem.get();
     }
     void SetCurrentItem(Ref<HistoryItem> &&item) noexcept;
-    void SetCurrentItemTitle(dom::DOMString &&title) noexcept;
+    void SetCurrentItemTitle(dom::DOMString title) noexcept;
     /// @brief Whether the next location change replaces the current item: the only one, for `about:blank`.
     KRYS_NODISCARD bool CurrentItemShouldBeReplaced() const noexcept;
     void ReplaceCurrentItem(RefPtr<HistoryItem> &&item) noexcept;

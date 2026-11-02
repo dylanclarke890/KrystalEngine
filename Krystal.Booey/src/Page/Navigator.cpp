@@ -153,8 +153,7 @@ namespace krys::boo
     // 7. Assert: the result of Is url potentially trustworthy? given urlRecord is "Potentially Trustworthy".
     // (Members restricted to secure contexts are available in every context, so it may not be.)
     // 8. Return (scheme, urlRecord).
-    return Pair<dom::DOMString, dom::DOMString>(dom::DOMString(normalizedScheme),
-                                                dom::DOMString(urlRecord.String()));
+    return Pair<dom::DOMString, dom::DOMString>(normalizedScheme, dom::DOMString(urlRecord.String()));
   }
 
   // https://html.spec.whatwg.org/#dom-navigator-registerprotocolhandler

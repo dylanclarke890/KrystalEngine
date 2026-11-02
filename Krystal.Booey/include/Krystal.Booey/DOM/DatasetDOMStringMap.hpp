@@ -39,7 +39,7 @@ namespace krys::boo::dom
     /// @p name has a `-` before an ASCII lowercase letter, an `InvalidCharacterError` if the attribute name
     /// isn't valid.
     /// @see https://html.spec.whatwg.org/#dom-domstringmap-setitem
-    ExceptionOr<void> SetNamedItem(DOMStringView name, DOMString &&value) noexcept;
+    ExceptionOr<void> SetNamedItem(DOMStringView name, DOMString value) noexcept;
 
     /// @brief Removes the `data-*` attribute with the property name @p name.
     /// @see https://html.spec.whatwg.org/#dom-domstringmap-removeitem

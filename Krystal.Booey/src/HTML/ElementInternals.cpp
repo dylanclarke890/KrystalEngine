@@ -62,7 +62,7 @@ namespace krys::boo::html
     return dom::Exception {dom::ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<void> ElementInternals::SetValidity(ValidityStateFlags flags, dom::DOMString &&message,
+  dom::ExceptionOr<void> ElementInternals::SetValidity(ValidityStateFlags flags, dom::DOMString message,
                                                        HTMLElement *validationAnchor) noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())

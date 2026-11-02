@@ -100,7 +100,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLTableSectionElement::Align(dom::DOMString &&value) noexcept
+  void HTMLTableSectionElement::Align(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
@@ -110,7 +110,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
   }
 
-  void HTMLTableSectionElement::Char(dom::DOMString &&value) noexcept
+  void HTMLTableSectionElement::Char(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
   }
@@ -120,7 +120,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
   }
 
-  void HTMLTableSectionElement::CharOff(dom::DOMString &&value) noexcept
+  void HTMLTableSectionElement::CharOff(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
   }
@@ -130,7 +130,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
   }
 
-  void HTMLTableSectionElement::VAlign(dom::DOMString &&value) noexcept
+  void HTMLTableSectionElement::VAlign(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
   }

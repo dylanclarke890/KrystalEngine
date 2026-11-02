@@ -234,7 +234,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLFieldSetElement::Name(dom::DOMString &&value) noexcept
+  void HTMLFieldSetElement::Name(dom::DOMString value) noexcept
   {
     return Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }

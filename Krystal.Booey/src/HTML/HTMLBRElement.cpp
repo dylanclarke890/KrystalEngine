@@ -29,7 +29,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"clear").value_or(u8"");
   }
 
-  void HTMLBRElement::Clear(dom::DOMString &&value) noexcept
+  void HTMLBRElement::Clear(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"clear", krys::move(value));
   }

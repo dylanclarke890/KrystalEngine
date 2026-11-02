@@ -139,7 +139,7 @@ namespace krys::boo::dom
     return null;
   }
 
-  ExceptionOr<void> DatasetDOMStringMap::SetNamedItem(DOMStringView name, DOMString &&value) noexcept
+  ExceptionOr<void> DatasetDOMStringMap::SetNamedItem(DOMStringView name, DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
 

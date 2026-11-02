@@ -15,7 +15,7 @@ namespace krys::boo::html
     return ReflectURL<dom::USVString>(*this, u8"cite");
   }
 
-  void HTMLModElement::Cite(dom::USVString &&value) noexcept
+  void HTMLModElement::Cite(dom::USVString value) noexcept
   {
     return ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
   }
@@ -25,7 +25,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"datetime").value_or(u8"");
   }
 
-  void HTMLModElement::DateTime(dom::DOMString &&value) noexcept
+  void HTMLModElement::DateTime(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"datetime", krys::move(value));
   }

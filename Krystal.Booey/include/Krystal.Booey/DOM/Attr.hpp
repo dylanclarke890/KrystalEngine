@@ -38,7 +38,7 @@ namespace krys::boo::dom
   protected:
     /// @brief Creates an attribute with the qualified name and value, and no element.
     /// @see https://dom.spec.whatwg.org/#create-an-attribute
-    Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value = {}) noexcept;
+    Attr(Document &document, const QualifiedName &qualifiedName, DOMString value = {}) noexcept;
 
   public:
 #pragma region Attr - https://dom.spec.whatwg.org/#attr
@@ -78,7 +78,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD const DOMString &Value() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-value
-    void Value(DOMString &&value) noexcept
+    void Value(DOMString value) noexcept
     {
       html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
@@ -113,7 +113,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
-    ExceptionOr<void> NodeValue(DOMString &&value) noexcept final
+    ExceptionOr<void> NodeValue(DOMString value) noexcept final
     {
       html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
@@ -127,7 +127,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    ExceptionOr<void> TextContent(DOMString &&value) noexcept final
+    ExceptionOr<void> TextContent(DOMString value) noexcept final
     {
       html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
@@ -138,7 +138,7 @@ namespace krys::boo::dom
 
   private:
     /// @see https://dom.spec.whatwg.org/#set-an-existing-attribute-value
-    static void SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept;
+    static void SetExistingAttributeValue(Attr &attribute, DOMString value) noexcept;
   };
 }
 

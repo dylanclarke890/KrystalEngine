@@ -125,7 +125,7 @@ namespace krys::boo::html::tests
 
     SECTION("Closing sets the return value if given, and fires close")
     {
-      dialog.Close(dom::DOMString(u8"done"));
+      dialog.Close(u8"done");
       CHECK_FALSE(dialog.Open());
       CHECK(Narrow(dialog.ReturnValue()) == "done");
       CHECK_FALSE(document.OpenDialogs().contains(ShareRef(dialog)));
@@ -287,8 +287,8 @@ namespace krys::boo::html::tests
     auto &dialog = fixture.Get<HTMLDialogElement>(u8"d");
     DialogEventLog log(dialog);
 
-    dialog.Close(dom::DOMString(u8"x"));
-    dialog.RequestClose(dom::DOMString(u8"y"));
+    dialog.Close(u8"x");
+    dialog.RequestClose(u8"y");
     CHECK(Narrow(dialog.ReturnValue()).empty());
     CHECK(log.Take().empty());
   }
@@ -350,10 +350,10 @@ namespace krys::boo::html::tests
       REQUIRE_FALSE(dialog.ShowModal().HasException());
       (void)log.Take();
       log.PreventCancel = true;
-      dialog.RequestClose(dom::DOMString(u8"r"));
+      dialog.RequestClose(u8"r");
       CHECK(dialog.Open());
       log.PreventCancel = false;
-      dialog.RequestClose(dom::DOMString(u8"r"));
+      dialog.RequestClose(u8"r");
       CHECK_FALSE(dialog.Open());
       CHECK(Narrow(dialog.ReturnValue()) == "r");
       CHECK(log.Take()

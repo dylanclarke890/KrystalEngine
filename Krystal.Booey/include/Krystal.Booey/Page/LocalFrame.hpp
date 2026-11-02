@@ -104,7 +104,7 @@ namespace krys::boo
       return _specifiedName;
     }
 
-    void SetSpecifiedName(dom::DOMString &&name) noexcept
+    void SetSpecifiedName(dom::DOMString name) noexcept
     {
       _specifiedName = krys::move(name);
     }

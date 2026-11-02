@@ -27,13 +27,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-src
-    void Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-nomodule
     KRYS_NODISCARD bool NoModule() const noexcept;
@@ -60,31 +60,31 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-crossorigin
-    void CrossOrigin(Maybe<dom::DOMString> &&value) noexcept;
+    void CrossOrigin(Maybe<dom::DOMString> value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-referrerpolicy
     KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-referrerpolicy
-    void ReferrerPolicy(dom::DOMString &&value) noexcept;
+    void ReferrerPolicy(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-integrity
     KRYS_NODISCARD dom::DOMString Integrity() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-integrity
-    void Integrity(dom::DOMString &&value) noexcept;
+    void Integrity(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-fetchpriority
     KRYS_NODISCARD dom::DOMString FetchPriority() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-fetchpriority
-    void FetchPriority(dom::DOMString &&value) noexcept;
+    void FetchPriority(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-text
     KRYS_NODISCARD dom::DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-text
-    void Text(dom::DOMString &&value) noexcept;
+    void Text(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-supports
     KRYS_NODISCARD static bool Supports(dom::DOMStringView type) noexcept;
@@ -97,19 +97,19 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Charset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-charset
-    void Charset(dom::DOMString &&value) noexcept;
+    void Charset(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-event
     KRYS_NODISCARD dom::DOMString Event() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-event
-    void Event(dom::DOMString &&value) noexcept;
+    void Event(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-htmlfor
     KRYS_NODISCARD dom::DOMString HtmlFor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-htmlfor
-    void HtmlFor(dom::DOMString &&value) noexcept;
+    void HtmlFor(dom::DOMString value) noexcept;
 
 #pragma endregion
 

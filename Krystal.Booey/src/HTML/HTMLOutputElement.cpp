@@ -53,7 +53,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLOutputElement::Name(dom::DOMString &&value) noexcept
+  void HTMLOutputElement::Name(dom::DOMString value) noexcept
   {
     Reflect(*this, u8"name", krys::move(value));
   }
@@ -66,7 +66,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-output-value
-  void HTMLOutputElement::Value(dom::DOMString &&value) noexcept
+  void HTMLOutputElement::Value(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -86,7 +86,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-output-defaultvalue
-  void HTMLOutputElement::DefaultValue(dom::DOMString &&value) noexcept
+  void HTMLOutputElement::DefaultValue(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
 

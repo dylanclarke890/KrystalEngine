@@ -42,7 +42,7 @@ namespace krys::boo
 
   public:
     PasteboardCustomData() noexcept = default;
-    PasteboardCustomData(utf8_string &&origin, List<Entry> &&data) noexcept
+    PasteboardCustomData(utf8_string origin, List<Entry> &&data) noexcept
         : _origin(krys::move(origin)), _data(krys::move(data))
     {
     }

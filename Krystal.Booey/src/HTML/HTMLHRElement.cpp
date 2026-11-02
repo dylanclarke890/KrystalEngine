@@ -19,7 +19,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLHRElement::Align(dom::DOMString &&value) noexcept
+  void HTMLHRElement::Align(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
@@ -29,7 +29,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"color").value_or(u8"");
   }
 
-  void HTMLHRElement::Color(dom::DOMString &&value) noexcept
+  void HTMLHRElement::Color(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"color", krys::move(value));
   }
@@ -49,7 +49,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"size").value_or(u8"");
   }
 
-  void HTMLHRElement::Size(dom::DOMString &&value) noexcept
+  void HTMLHRElement::Size(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"size", krys::move(value));
   }
@@ -59,7 +59,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLHRElement::Width(dom::DOMString &&value) noexcept
+  void HTMLHRElement::Width(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }

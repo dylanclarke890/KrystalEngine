@@ -44,7 +44,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"for").value_or(u8"");
   }
 
-  void HTMLLabelElement::HtmlFor(dom::DOMString &&value) noexcept
+  void HTMLLabelElement::HtmlFor(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"for", krys::move(value));
   }

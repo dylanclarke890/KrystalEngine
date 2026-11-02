@@ -30,31 +30,31 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-src
-    void Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-type
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-srcset
     KRYS_NODISCARD dom::USVString SrcSet() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-srcset
-    void SrcSet(dom::USVString &&value) noexcept;
+    void SrcSet(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-sizes
     KRYS_NODISCARD dom::DOMString Sizes() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-sizes
-    void Sizes(dom::DOMString &&value) noexcept;
+    void Sizes(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-media
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-media
-    void Media(dom::DOMString &&value) noexcept;
+    void Media(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-width
     KRYS_NODISCARD uint32 Width() const noexcept;

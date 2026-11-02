@@ -82,15 +82,15 @@ namespace krys::boo::tests
       (void)field.SetValue(u8"xyz");
       CHECK(Narrow(field.InnerTextElement()->TextContent().value_or(u8"")) == "xyz");
 
-      (void)field.SetAttribute(u8"placeholder", dom::DOMString(u8"Full name"));
+      (void)field.SetAttribute(u8"placeholder", u8"Full name");
       CHECK(Narrow(field.PlaceholderElement()->TextContent().value_or(u8"")) == "Full name");
       field.RemoveAttribute(u8"placeholder");
       CHECK_FALSE(field.PlaceholderElement());
 
-      field.Type(dom::DOMString(u8"checkbox"));
+      field.Type(u8"checkbox");
       CHECK_FALSE(field.InnerTextElement());
       CHECK_FALSE(field.UserAgentShadowRoot()->HasChildNodes());
-      field.Type(dom::DOMString(u8"text"));
+      field.Type(u8"text");
       CHECK(field.InnerTextElement());
     }
 

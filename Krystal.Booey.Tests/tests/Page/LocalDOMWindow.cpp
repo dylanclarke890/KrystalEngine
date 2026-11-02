@@ -464,7 +464,7 @@ namespace krys::boo::tests
     CHECK(window.Scrollbars().Visible());
     CHECK(window.Statusbar().Visible());
     CHECK(window.Toolbar().Visible());
-    window.SetStatus(dom::DOMString(u8"Loading"));
+    window.SetStatus(u8"Loading");
     CHECK(window.Status() == u8"Loading");
   }
 
@@ -1051,7 +1051,7 @@ namespace krys::boo::tests
     CHECK(navigations[1].URL == "https://example.com/dir/page.html#here");
 
     // With noopener, an existing browsing context is returned only for _self, _parent and _top.
-    window.SetName(dom::DOMString(u8"main"));
+    window.SetName(u8"main");
     auto named = window.Open(u8"#named", dom::DOMStringAtom(u8"main"), u8"noopener");
     REQUIRE_FALSE(named.HasException());
     CHECK(named.Value() == nullptr);

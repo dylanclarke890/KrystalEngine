@@ -24,13 +24,13 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Cols() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-frameset-cols
-    void Cols(dom::DOMString &&value) noexcept;
+    void Cols(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-frameset-rows
     KRYS_NODISCARD dom::DOMString Rows() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-frameset-rows
-    void Rows(dom::DOMString &&value) noexcept;
+    void Rows(dom::DOMString value) noexcept;
 
   protected:
     KRYS_NODISCARD bool

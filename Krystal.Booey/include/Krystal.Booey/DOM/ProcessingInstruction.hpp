@@ -44,7 +44,7 @@ namespace krys::boo::dom
 
   protected:
     /// @brief Initializes a processing instruction whose target and data are known to be valid.
-    ProcessingInstruction(Document &document, DOMString &&target, DOMString &&data) noexcept;
+    ProcessingInstruction(Document &document, DOMString target, DOMString data) noexcept;
 
   public:
     ~ProcessingInstruction() noexcept override;
@@ -55,8 +55,8 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#create-a-processing-instruction-node
     /// @see https://dom.spec.whatwg.org/#processinginstruction-initialize
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-processinginstruction
-    KRYS_NODISCARD static ExceptionOr<Ref<ProcessingInstruction>>
-      Create(Document &document, DOMString &&target, DOMString &&data) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<ProcessingInstruction>> Create(Document &document, DOMString target,
+                                                                         DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-target
     KRYS_NODISCARD const DOMString &Target() const noexcept
@@ -78,7 +78,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD Maybe<DOMString> GetAttribute(DOMStringView name) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-setattribute
-    ExceptionOr<void> SetAttribute(DOMStringView name, DOMString &&value) noexcept;
+    ExceptionOr<void> SetAttribute(DOMStringView name, DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-removeattribute
     void RemoveAttribute(DOMStringView name) noexcept;

@@ -385,8 +385,7 @@ namespace krys::boo::html
     c->Restore();
   }
 
-  void CanvasRenderingContext2DBase::SetStrokeColorImpl(Color &&color,
-                                                        dom::DOMString &&unparsedColor) noexcept
+  void CanvasRenderingContext2DBase::SetStrokeColorImpl(Color &&color, dom::DOMString unparsedColor) noexcept
   {
     krys_debug_assert(color.IsValid());
     if (GetState().StrokeStyle.GetColor() == color)
@@ -404,7 +403,7 @@ namespace krys::boo::html
     state.UnparsedStrokeColor = krys::move(unparsedColor);
   }
 
-  void CanvasRenderingContext2DBase::SetFillColorImpl(Color &&color, dom::DOMString &&unparsedColor) noexcept
+  void CanvasRenderingContext2DBase::SetFillColorImpl(Color &&color, dom::DOMString unparsedColor) noexcept
   {
     krys_debug_assert(color.IsValid());
     if (GetState().FillStyle.GetColor() == color)
@@ -1536,7 +1535,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-strokestyle
-  void CanvasRenderingContext2DBase::SetStrokeStyle(dom::DOMString &&colorString) noexcept
+  void CanvasRenderingContext2DBase::SetStrokeStyle(dom::DOMString colorString) noexcept
   {
     if (colorString == GetState().UnparsedStrokeColor)
     {
@@ -1593,7 +1592,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-fillstyle
-  void CanvasRenderingContext2DBase::SetFillStyle(dom::DOMString &&colorString) noexcept
+  void CanvasRenderingContext2DBase::SetFillStyle(dom::DOMString colorString) noexcept
   {
     if (colorString == GetState().UnparsedFillColor)
     {

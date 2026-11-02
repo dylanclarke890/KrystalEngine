@@ -101,7 +101,7 @@ layer at (0,0) size 200x100
 
     // crossOrigin reflects the CORS setting.
     CHECK_FALSE(image.CrossOrigin());
-    image.CrossOrigin(dom::DOMString(u8"bogus"));
+    image.CrossOrigin(u8"bogus");
     CHECK(image.CrossOrigin() == dom::DOMString(u8"anonymous"));
     (void)image.SetAttribute(u8"crossorigin", u8"USE-CREDENTIALS");
     CHECK(image.CrossOrigin() == dom::DOMString(u8"use-credentials"));

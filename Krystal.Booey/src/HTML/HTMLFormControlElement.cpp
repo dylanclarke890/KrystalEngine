@@ -277,7 +277,7 @@ namespace krys::boo::html
       dom::DOMString>(krys::move(value));
   }
 
-  void HTMLFormControlElement::PopoverTargetAction(dom::DOMString &&value) noexcept
+  void HTMLFormControlElement::PopoverTargetAction(dom::DOMString value) noexcept
   {
     CEReactionsScope ceReactions;
     Reflect<dom::DOMString>(*this, u8"popovertargetaction", krys::move(value));

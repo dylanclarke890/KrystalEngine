@@ -51,31 +51,31 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-align
-    void Align(dom::DOMString &&value) noexcept;
+    void Align(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-char
     KRYS_NODISCARD dom::DOMString Char() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-char
-    void Char(dom::DOMString &&value) noexcept;
+    void Char(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-charoff
     KRYS_NODISCARD dom::DOMString CharOff() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-charoff
-    void CharOff(dom::DOMString &&value) noexcept;
+    void CharOff(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-valign
     KRYS_NODISCARD dom::DOMString VAlign() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-valign
-    void VAlign(dom::DOMString &&value) noexcept;
+    void VAlign(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-bgcolor
     KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-bgcolor
-    void BgColor(dom::DOMString &&value) noexcept;
+    void BgColor(dom::DOMString value) noexcept;
 
 #pragma endregion
   };

@@ -15,7 +15,7 @@ namespace krys::boo::dom
   public:
     /// @brief Creates a CDATA section node in @p document with the data.
     /// @see https://dom.spec.whatwg.org/#create-a-cdata-section-node
-    CDATASection(Document &document, DOMString &&data = u8"") noexcept;
+    CDATASection(Document &document, DOMString data = u8"") noexcept;
 
 #pragma region Node - https://dom.spec.whatwg.org/#node
 

@@ -34,7 +34,7 @@ namespace krys::boo::html
     return dom::USVString(urlRecord.String());
   }
 
-  void HTMLBaseElement::Href(dom::USVString &&value) noexcept
+  void HTMLBaseElement::Href(dom::USVString value) noexcept
   {
     return ReflectSetter<dom::USVString>(*this, u8"href", krys::move(value));
   }
@@ -44,7 +44,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLBaseElement::Target(dom::DOMString &&value) noexcept
+  void HTMLBaseElement::Target(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
   }

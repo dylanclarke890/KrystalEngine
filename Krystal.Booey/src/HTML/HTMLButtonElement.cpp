@@ -390,7 +390,7 @@ namespace krys::boo::html
     return {};
   }
 
-  void HTMLButtonElement::Command(dom::DOMString &&value) noexcept
+  void HTMLButtonElement::Command(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"command", krys::move(value));
   }
@@ -437,7 +437,7 @@ namespace krys::boo::html
     return dom::USVString(krys::move(*attributeValue));
   }
 
-  void HTMLButtonElement::FormAction(dom::USVString &&value) noexcept
+  void HTMLButtonElement::FormAction(dom::USVString value) noexcept
   {
     return ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
   }
@@ -448,7 +448,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"formenctype"));
   }
 
-  void HTMLButtonElement::EncType(dom::DOMString &&value) noexcept
+  void HTMLButtonElement::EncType(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"formenctype", krys::move(value));
   }
@@ -459,7 +459,7 @@ namespace krys::boo::html
       Reflect<dom::DOMString>(*this, u8"formmethod"));
   }
 
-  void HTMLButtonElement::FormMethod(dom::DOMString &&value) noexcept
+  void HTMLButtonElement::FormMethod(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
   }
@@ -474,7 +474,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"formtarget").value_or(u8"");
   }
 
-  void HTMLButtonElement::FormTarget(dom::DOMString &&value) noexcept
+  void HTMLButtonElement::FormTarget(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"formtarget", krys::move(value));
   }
@@ -484,7 +484,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLButtonElement::Name(dom::DOMString &&value) noexcept
+  void HTMLButtonElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
@@ -500,7 +500,7 @@ namespace krys::boo::html
     return FormControlType();
   }
 
-  void HTMLButtonElement::Type(dom::DOMString &&value) noexcept
+  void HTMLButtonElement::Type(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
@@ -510,7 +510,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
   }
 
-  void HTMLButtonElement::Value(dom::DOMString &&value) noexcept
+  void HTMLButtonElement::Value(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
   }

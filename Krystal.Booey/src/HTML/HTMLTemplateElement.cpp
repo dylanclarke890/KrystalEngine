@@ -67,7 +67,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"for").value_or(u8"");
   }
 
-  void HTMLTemplateElement::HtmlFor(dom::DOMString &&value) noexcept
+  void HTMLTemplateElement::HtmlFor(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"for", krys::move(value));
   }
@@ -119,7 +119,7 @@ namespace krys::boo::html
       dom::DOMString>(Reflect<dom::DOMString>(*this, u8"shadowrootmode"));
   }
 
-  void HTMLTemplateElement::ShadowRootMode(dom::DOMString &&value) noexcept
+  void HTMLTemplateElement::ShadowRootMode(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"shadowrootmode", krys::move(value));
   }
@@ -140,7 +140,7 @@ namespace krys::boo::html
       dom::DOMString>(Reflect<dom::DOMString>(*this, u8"shadowrootslotassignment"));
   }
 
-  void HTMLTemplateElement::ShadowRootSlotAssignment(dom::DOMString &&value) noexcept
+  void HTMLTemplateElement::ShadowRootSlotAssignment(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"shadowrootslotassignment", krys::move(value));
   }
@@ -170,7 +170,7 @@ namespace krys::boo::html
     return Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry").value_or(u8"");
   }
 
-  void HTMLTemplateElement::ShadowRootCustomElementRegistry(dom::DOMString &&value) noexcept
+  void HTMLTemplateElement::ShadowRootCustomElementRegistry(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry", krys::move(value));
   }

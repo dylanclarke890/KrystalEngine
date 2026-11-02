@@ -138,8 +138,7 @@ namespace krys::boo::html
 
   public:
     template <OneOf<dom::DOMString, Maybe<dom::DOMString>> TContentAttributeValue>
-    KRYS_NODISCARD static TContentAttributeValue
-      ResolveCanonicalKeyword(Maybe<dom::DOMString> &&value) noexcept
+    KRYS_NODISCARD static TContentAttributeValue ResolveCanonicalKeyword(Maybe<dom::DOMString> value) noexcept
     {
       auto state = ResolveState(value);
       if constexpr (CanReturnNullResolvedState<Traits>)
@@ -173,7 +172,7 @@ namespace krys::boo::html
       {
         return canonicalKeyword == dom::DOMStringAtom::Null()
                  ? Maybe<dom::DOMString>()
-                 : Maybe<dom::DOMString>(dom::DOMString(canonicalKeyword.View()));
+                 : Maybe<dom::DOMString>(canonicalKeyword.View());
       }
       else if constexpr (SameType<TContentAttributeValue, dom::DOMString>)
       {

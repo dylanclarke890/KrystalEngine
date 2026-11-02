@@ -38,7 +38,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString HtmlFor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-label-htmlfor
-    void HtmlFor(dom::DOMString &&value) noexcept;
+    void HtmlFor(dom::DOMString value) noexcept;
 
 #pragma endregion
 

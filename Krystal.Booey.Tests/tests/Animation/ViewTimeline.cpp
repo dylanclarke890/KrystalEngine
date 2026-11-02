@@ -43,9 +43,8 @@ namespace krys::boo::tests
     KRYS_NODISCARD Ref<ViewTimeline> CreateTimeline(AnimationPageFixture &fixture,
                                                     ViewTimelineInsetValue &&inset = dom::DOMString(u8"auto"))
     {
-      auto result =
-        ViewTimeline::Create(*fixture.Document, {.Subject = ShareRefPtr(&fixture.ById(u8"subject")),
-                                                 .Inset = krys::move(inset)});
+      auto result = ViewTimeline::Create(
+        *fixture.Document, {.Subject = ShareRefPtr(&fixture.ById(u8"subject")), .Inset = krys::move(inset)});
       REQUIRE(result.HasValue());
       return result.ReleaseValue();
     }
@@ -106,7 +105,7 @@ namespace krys::boo::tests
 
     SECTION("as text")
     {
-      auto timeline = CreateTimeline(fixture, dom::DOMString(u8"10px 20px"));
+      auto timeline = CreateTimeline(fixture, u8"10px 20px");
       CHECK(Px(*timeline->StartOffset()) == 120);
       CHECK(Px(*timeline->EndOffset()) == 240);
       timeline->DetachFromDocument();
@@ -126,17 +125,17 @@ namespace krys::boo::tests
     {
       auto expectTypeError = [&](ViewTimelineInsetValue &&inset)
       {
-        auto result = ViewTimeline::Create(
-          *fixture.Document,
-          {.Subject = ShareRefPtr(&fixture.ById(u8"subject")), .Inset = krys::move(inset)});
+        auto result =
+          ViewTimeline::Create(*fixture.Document, {.Subject = ShareRefPtr(&fixture.ById(u8"subject")),
+                                                   .Inset = krys::move(inset)});
         REQUIRE(result.HasException());
         CHECK(result.GetException().Code() == dom::ExceptionCode::TypeError);
       };
       expectTypeError(dom::DOMString());
-      expectTypeError(dom::DOMString(u8"lemon"));
+      expectTypeError(u8"lemon");
       expectTypeError(List<ViewTimelineIndividualInset> {});
-      expectTypeError(List<ViewTimelineIndividualInset> {dom::DOMString(u8"auto"), dom::DOMString(u8"auto"),
-                                                         dom::DOMString(u8"auto")});
+      expectTypeError(
+        List<ViewTimelineIndividualInset> {dom::DOMString(u8"auto"), u8"auto", dom::DOMString(u8"auto")});
       expectTypeError(List<ViewTimelineIndividualInset> {dom::DOMString(u8"none")});
     }
   }
@@ -174,8 +173,8 @@ namespace krys::boo::tests
     SECTION("an attachment range in a named range")
     {
       // Over the entry range, the keyframes' range starts after it.
-      animation->SetBindingsRangeStart(dom::DOMString(u8"entry"));
-      animation->SetBindingsRangeEnd(dom::DOMString(u8"entry"));
+      animation->SetBindingsRangeStart(u8"entry");
+      animation->SetBindingsRangeEnd(u8"entry");
       CHECK(animation->Range().Start.GetName() == style::SingleAnimationRangeName::Entry);
       auto [start, end] = timeline->IntervalForAttachmentRange(animation->Range());
       CHECK(Percentage(start) == Catch::Approx(0));

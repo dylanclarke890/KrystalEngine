@@ -17,7 +17,7 @@ namespace krys::boo::dom
     StopLoadingAndClearFonts();
   }
 
-  CachedFont *DocumentFontLoader::GetCachedFont(url::URL &&url, bool isSVG,
+  CachedFont *DocumentFontLoader::GetCachedFont(url::URL url, bool isSVG,
                                                 bool isInitiatingElementInUserAgentShadowTree,
                                                 LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept
   {

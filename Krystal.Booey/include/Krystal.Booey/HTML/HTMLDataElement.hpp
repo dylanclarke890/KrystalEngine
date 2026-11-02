@@ -18,7 +18,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-data-value
-    void Value(dom::DOMString &&value) noexcept;
+    void Value(dom::DOMString value) noexcept;
 
 #pragma endregion
   };

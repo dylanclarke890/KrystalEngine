@@ -290,7 +290,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-value
-    void Value(DOMString &&value) noexcept;
+    void Value(DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#interface-domtokenlist (its iterable<DOMString>)
     KRYS_NODISCARD iterator begin() noexcept

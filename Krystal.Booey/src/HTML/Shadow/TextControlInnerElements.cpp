@@ -285,7 +285,7 @@ namespace krys::boo::html
     auto element = CreateRef<SearchFieldCancelButtonElement>(document);
     element->SetUserAgentPart(css::UserAgentParts::WebkitSearchCancelButton());
     // FIXME: The accessibility label (aria-label), with accessibility.
-    (void)element->SetAttribute(u8"role", dom::DOMString(u8"button"));
+    (void)element->SetAttribute(u8"role", u8"button");
     return element;
   }
 
