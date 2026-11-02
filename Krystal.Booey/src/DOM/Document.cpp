@@ -1155,6 +1155,95 @@ namespace krys::boo::dom
                                     { return IsHTMLElementOfType<html::HTMLScriptElement>(element); });
   }
 
+#pragma region Obsolete members
+
+  namespace
+  {
+    // The obsolete colour attributes reflect the body element's attributes when it's a body, and are empty
+    // and can't be set when there's no body element or it's a frameset.
+    KRYS_NODISCARD DOMString BodyColorAttribute(const Document &document, DOMStringView name) noexcept
+    {
+      auto *body = DynamicDowncast<html::HTMLBodyElement>(document.BodyOrFrameset());
+      if (!body)
+      {
+        return {};
+      }
+      return body->GetAttribute(DOMStringAtom(name)).value_or(DOMString());
+    }
+
+    void SetBodyColorAttribute(Document &document, DOMStringView name, DOMString &&value) noexcept
+    {
+      if (auto *body = DynamicDowncast<html::HTMLBodyElement>(document.BodyOrFrameset()))
+      {
+        (void)body->SetAttribute(DOMStringAtom(name), krys::move(value));
+      }
+    }
+  }
+
+  DOMString Document::FgColor() const noexcept
+  {
+    return BodyColorAttribute(*this, u8"text");
+  }
+
+  void Document::FgColor(DOMString &&value) noexcept
+  {
+    SetBodyColorAttribute(*this, u8"text", krys::move(value));
+  }
+
+  DOMString Document::LinkColor() const noexcept
+  {
+    return BodyColorAttribute(*this, u8"link");
+  }
+
+  void Document::LinkColor(DOMString &&value) noexcept
+  {
+    SetBodyColorAttribute(*this, u8"link", krys::move(value));
+  }
+
+  DOMString Document::VlinkColor() const noexcept
+  {
+    return BodyColorAttribute(*this, u8"vlink");
+  }
+
+  void Document::VlinkColor(DOMString &&value) noexcept
+  {
+    SetBodyColorAttribute(*this, u8"vlink", krys::move(value));
+  }
+
+  DOMString Document::AlinkColor() const noexcept
+  {
+    return BodyColorAttribute(*this, u8"alink");
+  }
+
+  void Document::AlinkColor(DOMString &&value) noexcept
+  {
+    SetBodyColorAttribute(*this, u8"alink", krys::move(value));
+  }
+
+  DOMString Document::BgColor() const noexcept
+  {
+    return BodyColorAttribute(*this, u8"bgcolor");
+  }
+
+  void Document::BgColor(DOMString &&value) noexcept
+  {
+    SetBodyColorAttribute(*this, u8"bgcolor", krys::move(value));
+  }
+
+  Ref<HTMLCollection> Document::Anchors() noexcept
+  {
+    return CachedDocumentCollection(
+      _anchors, *this, [](const Element &element)
+      { return IsHTMLElementOfType<html::HTMLAnchorElement>(element) && element.HasAttribute(u8"name"); });
+  }
+
+  Ref<HTMLCollection> Document::Applets() noexcept
+  {
+    return CachedDocumentCollection(_applets, *this, [](const Element &) { return false; });
+  }
+
+#pragma endregion
+
   Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
   {
     return CreateRef<LiveNodeList>(*this,

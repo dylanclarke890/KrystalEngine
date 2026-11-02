@@ -20,6 +20,7 @@ namespace krys::boo::html
     DataList,
     Details,
     Dialog,
+    Directory,
     Div,
     DList,
     Embed,
@@ -52,6 +53,7 @@ namespace krys::boo::html
     Option,
     Output,
     Paragraph,
+    Param,
     Picture,
     Pre,
     Progress,
@@ -82,4 +84,4 @@ namespace krys::boo::html
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 73u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 75u);

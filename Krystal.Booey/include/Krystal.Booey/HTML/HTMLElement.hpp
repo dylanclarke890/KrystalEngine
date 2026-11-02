@@ -388,62 +388,68 @@ namespace krys::boo::html
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
 
+    /// @see https://html.spec.whatwg.org/#html-element-insertion-steps
     void OnInsert() noexcept override
     {
+      // 1. If insertedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
+      //    element insertion steps for insertedNode's local name, then run the corresponding HTML element
+      //    insertion steps given insertedNode.
+      // (Elements with insertion steps override this, and the autofocus insertion steps run for all of them.)
       FocusAlgorithms::AutofocusInsertionSteps(*this);
 
-      // FIXME: Implement the insertion steps for an HTMLElement.
-      // If insertedNode is a form-associated element or the ancestor of a form-associated element:
-      // - If the form-associated element's parser inserted flag is set, then return.
-      // - Reset the form owner of the form-associated element.
-      //
-      // If insertedNode is an Element that is not on the stack of open elements of an HTML parser, then
-      // process internal resource links given insertedNode's node document.
+      // 2. If insertedNode is a form-associated element or the ancestor of a form-associated element: if the
+      //    form-associated element's parser inserted flag is set, then return; reset the form owner of the
+      //    form-associated element.
+      // (Each form-associated element resets its own form owner when inserted, in FormAssociatedElement.)
+
+      // 3. If insertedNode is an Element that is not on the stack of open elements of an HTML parser, then
+      //    process internal resource links given insertedNode's node document.
+      // (Skipped: internal resource links aren't processed; see KNOWN-ISSUES.md.)
     }
 
+    /// @see https://html.spec.whatwg.org/#html-element-removing-steps
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;
-      // FIXME: Implement the removal steps for an HTMLElement.
 
-      // Let document be removedNode's node document.
+      // 1. Let document be removedNode's node document.
+      // 2. If document's focused area is removedNode, then set document's focused area to document's
+      //    viewport, and set document's relevant global object's navigation API's focus changed during ongoing
+      //    navigation to false.
+      // (Done before the removal, in Document::NodeWillBeRemoved.)
 
-      // If document's focused area is removedNode, then set document's focused area to document's viewport,
-      // and set document's relevant global object's navigation API's focus changed during ongoing navigation
-      // to false.
-      //
-      // This does not perform the unfocusing steps, focusing steps, or focus update steps, and thus no blur
-      // or change events are fired.
-      //
-      // If removedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
-      // element removing steps for removedNode's local name, then run the corresponding HTML element removing
-      // steps given removedNode, isSubtreeRoot, and oldAncestor.
-      //
-      // If removedNode is a form-associated element with a non-null form owner and removedNode and its form
-      // owner are no longer in the same tree, then reset the form owner of removedNode.
-      //
+      // 3. If removedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
+      //    element removing steps for removedNode's local name, then run the corresponding HTML element
+      //    removing steps given removedNode, isSubtreeRoot, and oldAncestor.
+      // (Elements with removing steps override this.)
 
-      // If removedNode's popover attribute is not in the No Popover state, then run the hide popover
-      // algorithm given removedNode, false, false, false, and null.
+      // 4. If removedNode is a form-associated element with a non-null form owner and removedNode and its form
+      //    owner are no longer in the same tree, then reset the form owner of removedNode.
+      // (In FormAssociatedElement::ElementRemovedFromAncestor.)
+
+      // 5. If removedNode's popover attribute is not in the No Popover state, then run the hide popover
+      //    algorithm given removedNode, false, false, false, and null.
       if (GetPopoverData())
       {
         (void)HidePopoverInternal(dom::FocusPreviousElement::No, dom::FireEvents::No, false, nullptr);
       }
     }
 
+    /// @see https://html.spec.whatwg.org/#html-element-moving-steps
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;
-      // FIXME: Implement the move steps for an HTMLElement.
 
-      // If movedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
-      // element moving steps for movedNode's local name, then run the corresponding HTML element moving steps
-      // given movedNode, isSubtreeRoot, and oldAncestor.
+      // 1. If movedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
+      //    element moving steps for movedNode's local name, then run the corresponding HTML element moving
+      //    steps given movedNode, isSubtreeRoot, and oldAncestor.
+      // (Elements with moving steps override this.)
 
-      // If movedNode is a form-associated element with a non-null form owner and movedNode and its form owner
-      // are no longer in the same tree, then reset the form owner of movedNode.
+      // 2. If movedNode is a form-associated element with a non-null form owner and movedNode and its form
+      //    owner are no longer in the same tree, then reset the form owner of movedNode.
+      // (Each form-associated element's override treats a move as a removal and an insertion.)
     }
 
 #pragma endregion
@@ -623,6 +629,11 @@ namespace krys::boo::html
       return _interface == HTMLElementInterface::Dialog;
     }
 
+    KRYS_NODISCARD bool IsHTMLDirectoryElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Directory;
+    }
+
     KRYS_NODISCARD bool IsHTMLDivElement() const noexcept
     {
       return _interface == HTMLElementInterface::Div;
@@ -761,6 +772,11 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsHTMLParagraphElement() const noexcept
     {
       return _interface == HTMLElementInterface::Paragraph;
+    }
+
+    KRYS_NODISCARD bool IsHTMLParamElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Param;
     }
 
     KRYS_NODISCARD bool IsHTMLPictureElement() const noexcept

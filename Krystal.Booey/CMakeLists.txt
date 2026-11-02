@@ -4020,6 +4020,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLDataListElement.hpp
       include/Krystal.Booey/HTML/HTMLDetailsElement.hpp
       include/Krystal.Booey/HTML/HTMLDialogElement.hpp
+      include/Krystal.Booey/HTML/HTMLDirectoryElement.hpp
       include/Krystal.Booey/HTML/HTMLDivElement.hpp
       include/Krystal.Booey/HTML/HTMLDListElement.hpp
       include/Krystal.Booey/HTML/HTMLElement.hpp
@@ -4053,6 +4054,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLOptionElement.hpp
       include/Krystal.Booey/HTML/HTMLOutputElement.hpp
       include/Krystal.Booey/HTML/HTMLParagraphElement.hpp
+      include/Krystal.Booey/HTML/HTMLParamElement.hpp
       include/Krystal.Booey/HTML/HTMLPictureElement.hpp
       include/Krystal.Booey/HTML/HTMLPlugInElement.hpp
       include/Krystal.Booey/HTML/HTMLPreElement.hpp
@@ -4557,6 +4559,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLDataListElement.cpp
     src/HTML/HTMLDetailsElement.cpp
     src/HTML/HTMLDialogElement.cpp
+    src/HTML/HTMLDirectoryElement.cpp
     src/HTML/HTMLDivElement.cpp
     src/HTML/HTMLDListElement.cpp
     src/HTML/HTMLElement.cpp
@@ -4590,6 +4593,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLOptionElement.cpp
     src/HTML/HTMLOutputElement.cpp
     src/HTML/HTMLParagraphElement.cpp
+    src/HTML/HTMLParamElement.cpp
     src/HTML/HTMLPictureElement.cpp
     src/HTML/HTMLPlugInElement.cpp
     src/HTML/HTMLPreElement.cpp

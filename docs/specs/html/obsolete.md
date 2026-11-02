@@ -8,7 +8,7 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [16 Obsolete features](https://html.spec.whatwg.org/#obsolete)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
 
 ### [16.1 Obsolete but conforming features](https://html.spec.whatwg.org/#obsolete-but-conforming-features)
 
@@ -25,36 +25,39 @@ Status: n/a (author conformance)
 
 ### [16.3 Requirements for implementations](https://html.spec.whatwg.org/#requirements-for-implementations)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> Every obsolete element interface and IDL attribute is present but `HTMLFrameElement` (no frame tree) and the marquee members below; `ch` and `chOff` are `Char()` and `CharOff()`.
+> Fixed: `dir` and `param` were `HTMLUnknownElement`s rather than `HTMLDirectoryElement` and `HTMLParamElement`.
 
 #### [16.3.1 The marquee element](https://html.spec.whatwg.org/#the-marquee-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> `HTMLMarqueeElement` has the reflected string attributes and its presentational hints, but no `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` or `stop()`, and marquees don't scroll (FIXME, see `KNOWN-ISSUES.md`).
 <!-- definitions: concept-marquee-on concept-marquee-off attr-marquee-behavior attr-marquee-direction attr-marquee-truespeed attr-marquee-loop marquee-current-loop-index -->
 
-- [ ] [HTMLMarqueeElement.start()](https://html.spec.whatwg.org/#dom-marquee-start) — When the start() method is called, the marquee element must be turned on.
+- [x] [HTMLMarqueeElement.start()](https://html.spec.whatwg.org/#dom-marquee-start) — When the start() method is called, the marquee element must be turned on.
 
-- [ ] [HTMLMarqueeElement.stop()](https://html.spec.whatwg.org/#dom-marquee-stop) — When the stop() method is called, the marquee element must be turned off.
+- [x] [HTMLMarqueeElement.stop()](https://html.spec.whatwg.org/#dom-marquee-stop) — When the stop() method is called, the marquee element must be turned off.
 
-- [ ] [marquee scroll interval](https://html.spec.whatwg.org/#marquee-scroll-interval) — A marquee element has a marquee scroll interval, which is obtained as follows:
+- [x] [marquee scroll interval](https://html.spec.whatwg.org/#marquee-scroll-interval) — A marquee element has a marquee scroll interval, which is obtained as follows:
   - 1. If the element has a scrolldelay attribute, and parsing its value using the rules for parsing non-negative integers does not return an error, then let delay be the parsed value. Otherwise, let delay be 85.
   - 2. If the element does not have a truespeed attribute, and the delay value is less than 60, then let delay be 60 instead.
   - 3. The marquee scroll interval is delay, interpreted in milliseconds.
 
-- [ ] [marquee scroll distance](https://html.spec.whatwg.org/#marquee-scroll-distance) — A marquee element has a marquee scroll distance, which, if the element has a scrollamount attribute, and parsing its value using the rules for parsing non-negative integers does not return an error, is the parsed value interpreted in CSS pixels, and otherwise is 6 CSS pixels.
+- [x] [marquee scroll distance](https://html.spec.whatwg.org/#marquee-scroll-distance) — A marquee element has a marquee scroll distance, which, if the element has a scrollamount attribute, and parsing its value using the rules for parsing non-negative integers does not return an error, is the parsed value interpreted in CSS pixels, and otherwise is 6 CSS pixels.
 
-- [ ] [marquee loop count](https://html.spec.whatwg.org/#marquee-loop-count) — A marquee element has a marquee loop count, which, if the element has a loop attribute, and parsing its value using the rules for parsing integers does not return an error or a number less than 1, is the parsed value, and otherwise is −1.
+- [x] [marquee loop count](https://html.spec.whatwg.org/#marquee-loop-count) — A marquee element has a marquee loop count, which, if the element has a loop attribute, and parsing its value using the rules for parsing integers does not return an error or a number less than 1, is the parsed value, and otherwise is −1.
 
-- [ ] [HTMLMarqueeElement.loop](https://html.spec.whatwg.org/#dom-marquee-loop) — The loop IDL attribute, on getting, must return the element's marquee loop count; and on setting, if the new value is different than the element's marquee loop count and either greater than zero or equal to −1, must set the element's loop content attribute (adding it if necessary) to the valid integer that represents the new value. (Other values are ignored.)
+- [x] [HTMLMarqueeElement.loop](https://html.spec.whatwg.org/#dom-marquee-loop) — The loop IDL attribute, on getting, must return the element's marquee loop count; and on setting, if the new value is different than the element's marquee loop count and either greater than zero or equal to −1, must set the element's loop content attribute (adding it if necessary) to the valid integer that represents the new value. (Other values are ignored.)
 
-- [ ] [increment the marquee current loop index](https://html.spec.whatwg.org/#increment-the-marquee-current-loop-index) — The rendering layer will occasionally increment the marquee current loop index, which must cause the following steps to be run:
+- [x] [increment the marquee current loop index](https://html.spec.whatwg.org/#increment-the-marquee-current-loop-index) — The rendering layer will occasionally increment the marquee current loop index, which must cause the following steps to be run:
   - 1. If the marquee loop count is −1, then return.
   - 2. Increment the marquee current loop index by one.
   - 3. If the marquee current loop index is now greater than or equal to the element's marquee loop count, turn off the marquee element.
 
 #### [16.3.2 Frames](https://html.spec.whatwg.org/#frames)
 
-Status: unreviewed
+Status: n/a (no frame tree; `<frame>` is an `HTMLUnknownElement`)
 <!-- definitions: frameset process-frame-initial-insertion -->
 
 - [x] [The frame HTML element post-connection steps, given insertedNode,](https://html.spec.whatwg.org/#frame) — The frame HTML element post-connection steps, given insertedNode, are:
@@ -80,19 +83,21 @@ Status: unreviewed
 
 #### [16.3.3 Other elements, attributes and APIs](https://html.spec.whatwg.org/#other-elements,-attributes-and-apis)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> `Document`'s obsolete members, `LocalDOMWindow::CaptureEvents`/`ReleaseEvents` and `External`. `document.all` is n/a, as `HTMLAllCollection` is (see 2.6.4.1).
+> Fixed: `Document` had no `fgColor`, `linkColor`, `vlinkColor`, `alinkColor`, `bgColor`, `anchors`, `applets`, `clear()`, `captureEvents()` or `releaseEvents()`.
 <!-- definitions: dom-document-captureevents dom-document-releaseevents dom-window-releaseevents dom-external-issearchproviderinstalled -->
 
-- [ ] [Document.anchors](https://html.spec.whatwg.org/#dom-document-anchors) — The anchors attribute must return an HTMLCollection rooted at the Document node, whose filter matches only a elements with name attributes.
+- [x] [Document.anchors](https://html.spec.whatwg.org/#dom-document-anchors) — The anchors attribute must return an HTMLCollection rooted at the Document node, whose filter matches only a elements with name attributes.
 
-- [ ] [Document.applets](https://html.spec.whatwg.org/#dom-document-applets) — The applets attribute must return an HTMLCollection rooted at the Document node, whose filter matches nothing. (It exists for historical reasons.)
+- [x] [Document.applets](https://html.spec.whatwg.org/#dom-document-applets) — The applets attribute must return an HTMLCollection rooted at the Document node, whose filter matches nothing. (It exists for historical reasons.)
 
-- [ ] [Document.clear()](https://html.spec.whatwg.org/#dom-document-clear) — The clear(), captureEvents(), and releaseEvents() methods must do nothing.
+- [x] [Document.clear()](https://html.spec.whatwg.org/#dom-document-clear) — The clear(), captureEvents(), and releaseEvents() methods must do nothing.
 
-- [ ] [Document.all](https://html.spec.whatwg.org/#dom-document-all) — The all attribute must return an HTMLAllCollection rooted at the Document node, whose filter matches all elements.
+- [x] [Document.all](https://html.spec.whatwg.org/#dom-document-all) — The all attribute must return an HTMLAllCollection rooted at the Document node, whose filter matches all elements.
 
-- [ ] [Window.captureEvents()](https://html.spec.whatwg.org/#dom-window-captureevents) — The captureEvents() and releaseEvents() methods must do nothing.
+- [x] [Window.captureEvents()](https://html.spec.whatwg.org/#dom-window-captureevents) — The captureEvents() and releaseEvents() methods must do nothing.
 
-- [ ] [Window.external](https://html.spec.whatwg.org/#dom-external) — The external attribute of the Window interface must return an instance of the External interface:
+- [x] [Window.external](https://html.spec.whatwg.org/#dom-external) — The external attribute of the Window interface must return an instance of the External interface:
 
-- [ ] [External.AddSearchProvider()](https://html.spec.whatwg.org/#dom-external-addsearchprovider) — The AddSearchProvider() and IsSearchProviderInstalled() methods must do nothing.
+- [x] [External.AddSearchProvider()](https://html.spec.whatwg.org/#dom-external-addsearchprovider) — The AddSearchProvider() and IsSearchProviderInstalled() methods must do nothing.

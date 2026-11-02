@@ -3,8 +3,10 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLDirectoryElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLParamElement.hpp"
 #include "Krystal.Booey/HTML/HTMLPreElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -152,5 +154,32 @@ namespace krys::boo::dom::tests
     CHECK(ElementIs<html::HTMLPreElement, html::HTMLElement>(*create(u8"listing")));
     CHECK(ElementIs<html::HTMLPreElement, html::HTMLElement>(*create(u8"xmp")));
     CHECK(ElementIs<html::HTMLDivElement, html::HTMLElement>(*create(u8"div")));
+
+    // Obsolete elements that keep their own interfaces.
+    CHECK(ElementIs<html::HTMLDirectoryElement, html::HTMLElement>(*create(u8"dir")));
+    CHECK(ElementIs<html::HTMLParamElement, html::HTMLElement>(*create(u8"param")));
+  }
+
+  TEST_CASE("The obsolete dir and param elements reflect their attributes",
+            "[DOM][ElementFactory][html:other-elements,-attributes-and-apis]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto dir = document->CreateElement(DOMStringAtom(u8"dir")).ReleaseValue();
+    auto &directory = Downcast<html::HTMLDirectoryElement>(Downcast<html::HTMLElement>(*dir));
+    CHECK_FALSE(directory.Compact());
+    directory.Compact(true);
+    CHECK(directory.HasAttribute(u8"compact"));
+
+    auto element = document->CreateElement(DOMStringAtom(u8"param")).ReleaseValue();
+    auto &param = Downcast<html::HTMLParamElement>(Downcast<html::HTMLElement>(*element));
+    param.Name(DOMString(u8"n"));
+    param.Value(DOMString(u8"v"));
+    param.Type(DOMString(u8"t"));
+    param.ValueType(DOMString(u8"ref"));
+    CHECK(param.GetAttribute(u8"name") == DOMString(u8"n"));
+    CHECK(param.GetAttribute(u8"value") == DOMString(u8"v"));
+    CHECK(param.GetAttribute(u8"type") == DOMString(u8"t"));
+    CHECK(param.GetAttribute(u8"valuetype") == DOMString(u8"ref"));
+    CHECK(param.ValueType() == u8"ref");
   }
 }

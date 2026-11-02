@@ -8,22 +8,23 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [2 Common infrastructure](https://html.spec.whatwg.org/#infrastructure)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
 
 ### [2.1 Terminology](https://html.spec.whatwg.org/#terminology)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
 
 #### [2.1.1 Parallelism](https://html.spec.whatwg.org/#parallelism)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> There are no parallel queues: Booey is single-threaded (see `DIFFERENCES.md`).
 <!-- definitions: immediately parallel-queue algorithm-queue -->
 
-- [ ] [in parallel](https://html.spec.whatwg.org/#in-parallel) — To run steps in parallel means those steps are to be run, one after another, at the same time as other logic in the standard (e.g., at the same time as the event loop). This standard does not define the precise mechanism by which this is achieved, be it time-sharing cooperative multitasking, fibers, threads, processes, using different hyperthreads, cores, CPUs, machines, etc. By contrast, an operation that is to run immediately must interrupt the currently running task, run itself, and then resume the previously running task.
+- [x] [in parallel](https://html.spec.whatwg.org/#in-parallel) — To run steps in parallel means those steps are to be run, one after another, at the same time as other logic in the standard (e.g., at the same time as the event loop). This standard does not define the precise mechanism by which this is achieved, be it time-sharing cooperative multitasking, fibers, threads, processes, using different hyperthreads, cores, CPUs, machines, etc. By contrast, an operation that is to run immediately must interrupt the currently running task, run itself, and then resume the previously running task.
 
-- [ ] [enqueue steps (parallel queue)](https://html.spec.whatwg.org/#enqueue-the-following-steps) — To enqueue steps to a parallel queue, enqueue the algorithm steps to the parallel queue's algorithm queue.
+- [x] [enqueue steps (parallel queue)](https://html.spec.whatwg.org/#enqueue-the-following-steps) — To enqueue steps to a parallel queue, enqueue the algorithm steps to the parallel queue's algorithm queue.
 
-- [ ] [start a new parallel queue](https://html.spec.whatwg.org/#starting-a-new-parallel-queue) — To start a new parallel queue, run the following steps:
+- [x] [start a new parallel queue](https://html.spec.whatwg.org/#starting-a-new-parallel-queue) — To start a new parallel queue, run the following steps:
   - 1. Let parallelQueue be a new parallel queue.
   - 2. Run the following steps in parallel:
     - 2a. While true:
@@ -34,49 +35,52 @@ Status: unreviewed
 
 #### [2.1.2 Resources](https://html.spec.whatwg.org/#resources)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> Critical subresources are the requests the document's load event waits for (see *Loading* in `OVERVIEW.md`).
 <!-- definitions: critical-subresources -->
 
 #### [2.1.3 XML compatibility](https://html.spec.whatwg.org/#xml)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> HTML elements are elements in the HTML namespace, whatever their document (`HTMLElementFactory`).
 <!-- definitions: html-elements element-type -->
 
 #### [2.1.4 DOM trees](https://html.spec.whatwg.org/#dom-trees)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> `HTMLElement::OnInsert`, `OnRemove` and `OnMove`, which elements with their own steps override; form owners are reset in `FormAssociatedElement` and focus moves to the viewport in `Document::NodeWillBeRemoved`. Internal resource links aren't processed (see `KNOWN-ISSUES.md`).
 <!-- definitions: ignore html-element-insertion-steps html-element-post-connection-steps html-element-removing-steps remove-an-element-from-a-document becomes-disconnected becomes-browsing-context-connected becomes-browsing-context-disconnected -->
 
-- [ ] [The insertion steps for the HTML Standard, given insertedNode, are defined as t…](https://html.spec.whatwg.org/#html-element-moving-steps) — The insertion steps for the HTML Standard, given insertedNode, are defined as the following:
+- [x] [The insertion steps for the HTML Standard, given insertedNode, are defined as t…](https://html.spec.whatwg.org/#html-element-moving-steps) — The insertion steps for the HTML Standard, given insertedNode, are defined as the following:
   - 1. If insertedNode is an element whose namespace is the HTML namespace, and this standard defines HTML element insertion steps for insertedNode's local name, then run the corresponding HTML element insertion steps given insertedNode.
   - 2. If insertedNode is a form-associated element or the ancestor of a form-associated element:
     - 2a. If the form-associated element's parser inserted flag is set, then return.
     - 2b. Reset the form owner of the form-associated element.
   - 3. If insertedNode is an Element that is not on the stack of open elements of an HTML parser, then process internal resource links given insertedNode's node document.
 
-- [ ] [The post-connection steps for the HTML Standard, given insertedNode, are define…](https://html.spec.whatwg.org/#html-element-moving-steps) — The post-connection steps for the HTML Standard, given insertedNode, are defined as the following:
+- [x] [The post-connection steps for the HTML Standard, given insertedNode, are define…](https://html.spec.whatwg.org/#html-element-moving-steps) — The post-connection steps for the HTML Standard, given insertedNode, are defined as the following:
   - 1. If insertedNode is an element whose namespace is the HTML namespace, and this standard defines HTML element post-connection steps for insertedNode's local name, then run the corresponding HTML element post-connection steps given insertedNode.
 
-- [ ] [The removing steps for the HTML Standard, given removedNode, isSubtreeRoot, and…](https://html.spec.whatwg.org/#html-element-moving-steps) — The removing steps for the HTML Standard, given removedNode, isSubtreeRoot, and oldAncestor, are defined as the following:
+- [x] [The removing steps for the HTML Standard, given removedNode, isSubtreeRoot, and…](https://html.spec.whatwg.org/#html-element-moving-steps) — The removing steps for the HTML Standard, given removedNode, isSubtreeRoot, and oldAncestor, are defined as the following:
   - 1. Let document be removedNode's node document.
   - 2. If document's focused area is removedNode, then set document's focused area to document's viewport, and set document's relevant global object's navigation API's focus changed during ongoing navigation to false.
   - 3. If removedNode is an element whose namespace is the HTML namespace, and this standard defines HTML element removing steps for removedNode's local name, then run the corresponding HTML element removing steps given removedNode, isSubtreeRoot, and oldAncestor.
   - 4. If removedNode is a form-associated element with a non-null form owner and removedNode and its form owner are no longer in the same tree, then reset the form owner of removedNode.
   - 5. If removedNode's popover attribute is not in the No Popover state, then run the hide popover algorithm given removedNode, false, false, false, and null.
 
-- [ ] [The moving steps for the HTML Standard, given movedNode, isSubtreeRoot, and old…](https://html.spec.whatwg.org/#html-element-moving-steps) — The moving steps for the HTML Standard, given movedNode, isSubtreeRoot, and oldAncestor, are defined as the following:
+- [x] [The moving steps for the HTML Standard, given movedNode, isSubtreeRoot, and old…](https://html.spec.whatwg.org/#html-element-moving-steps) — The moving steps for the HTML Standard, given movedNode, isSubtreeRoot, and oldAncestor, are defined as the following:
   - 1. If movedNode is an element whose namespace is the HTML namespace, and this standard defines HTML element moving steps for movedNode's local name, then run the corresponding HTML element moving steps given movedNode, isSubtreeRoot, and oldAncestor.
   - 2. If movedNode is a form-associated element with a non-null form owner and movedNode and its form owner are no longer in the same tree, then reset the form owner of movedNode.
 
-- [ ] [node is inserted into a document](https://html.spec.whatwg.org/#insert-an-element-into-a-document) — A node is inserted into a document when the insertion steps are invoked with it as the argument and it is now in a document tree. Analogously, a node is removed from a document when the removing steps are invoked with it as the argument and it is now no longer in a document tree.
+- [x] [node is inserted into a document](https://html.spec.whatwg.org/#insert-an-element-into-a-document) — A node is inserted into a document when the insertion steps are invoked with it as the argument and it is now in a document tree. Analogously, a node is removed from a document when the removing steps are invoked with it as the argument and it is now no longer in a document tree.
 
-- [ ] [becomes connected](https://html.spec.whatwg.org/#becomes-connected) — A node becomes connected when the insertion steps are invoked with it as the argument and it is now connected. Analogously, a node becomes disconnected when the removing steps are invoked with it as the argument and it is now no longer connected.
+- [x] [becomes connected](https://html.spec.whatwg.org/#becomes-connected) — A node becomes connected when the insertion steps are invoked with it as the argument and it is now connected. Analogously, a node becomes disconnected when the removing steps are invoked with it as the argument and it is now no longer connected.
 
-- [ ] [browsing-context connected](https://html.spec.whatwg.org/#browsing-context-connected) — A node is browsing-context connected when it is connected and its shadow-including root's browsing context is non-null. A node becomes browsing-context connected when the insertion steps are invoked with it as the argument and it is now browsing-context connected. A node becomes browsing-context disconnected either when the removing steps are invoked with it as the argument and it is now no longer browsing-context connected, or when its shadow-including root's browsing context becomes null.
+- [x] [browsing-context connected](https://html.spec.whatwg.org/#browsing-context-connected) — A node is browsing-context connected when it is connected and its shadow-including root's browsing context is non-null. A node becomes browsing-context connected when the insertion steps are invoked with it as the argument and it is now browsing-context connected. A node becomes browsing-context disconnected either when the removing steps are invoked with it as the argument and it is now no longer browsing-context connected, or when its shadow-including root's browsing context becomes null.
 
 #### [2.1.5 Scripting](https://html.spec.whatwg.org/#scripting-2)
 
-Status: unreviewed
+Status: n/a (no scripting)
 <!-- definitions: live -->
 
 #### [2.1.6 Plugins](https://html.spec.whatwg.org/#plugins)
@@ -86,7 +90,8 @@ Status: n/a (no plugins)
 
 #### [2.1.7 Character encodings](https://html.spec.whatwg.org/#encoding-terminology)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> Documents are UTF-8 only (see `KNOWN-ISSUES.md`); the encoding names and labels are Krystal.Core's `EncodingRegistry`.
 <!-- definitions: encoding encoding-name encoding-label -->
 
 #### [2.1.8 Conformance classes](https://html.spec.whatwg.org/#conformance-classes)

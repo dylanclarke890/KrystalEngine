@@ -21,6 +21,7 @@
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/HTMLDirectoryElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -53,6 +54,7 @@
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOutputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLParagraphElement.hpp"
+#include "Krystal.Booey/HTML/HTMLParamElement.hpp"
 #include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
 #include "Krystal.Booey/HTML/HTMLPreElement.hpp"
 #include "Krystal.Booey/HTML/HTMLProgressElement.hpp"
@@ -203,6 +205,10 @@ namespace krys::boo::html
       {
         return CreateRefPtr<HTMLDialogElement>(document);
       }
+      case TagName::dir:
+      {
+        return CreateRefPtr<HTMLDirectoryElement>(document);
+      }
       case TagName::br:
       {
         return CreateRefPtr<HTMLBRElement>(document);
@@ -327,6 +333,10 @@ namespace krys::boo::html
       case TagName::p:
       {
         return CreateRefPtr<HTMLParagraphElement>(document);
+      }
+      case TagName::param:
+      {
+        return CreateRefPtr<HTMLParamElement>(document);
       }
       case TagName::picture:
       {

@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#htmlulistelement
+  /// @see https://html.spec.whatwg.org/#htmlmenuelement
   class HTMLMenuElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMenuElement);

@@ -367,6 +367,8 @@ namespace krys::boo::dom
     WeakPtr<HTMLCollection> _links;
     WeakPtr<HTMLCollection> _forms;
     WeakPtr<HTMLCollection> _scripts;
+    WeakPtr<HTMLCollection> _anchors;
+    WeakPtr<HTMLCollection> _applets;
     // The root of the render tree: a document has one while it's shown in a frame with a view.
     RenderPtr<boo::RenderView> _renderView;
     bool _renderTreeBeingDestroyed {false};
@@ -644,6 +646,71 @@ namespace krys::boo::dom
 
     /// @see https://html.spec.whatwg.org/#dom-document-scripts
     KRYS_NODISCARD Ref<HTMLCollection> Scripts() noexcept;
+
+#pragma region Document Obsolete members - https://html.spec.whatwg.org/#Document-partial
+
+    /// @brief The body element's `text` attribute, or empty if the body element isn't a body.
+    /// @see https://html.spec.whatwg.org/#dom-document-fgcolor
+    KRYS_NODISCARD DOMString FgColor() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-fgcolor
+    void FgColor(DOMString &&value) noexcept;
+
+    /// @brief The body element's `link` attribute, or empty if the body element isn't a body.
+    /// @see https://html.spec.whatwg.org/#dom-document-linkcolor
+    KRYS_NODISCARD DOMString LinkColor() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-linkcolor
+    void LinkColor(DOMString &&value) noexcept;
+
+    /// @brief The body element's `vlink` attribute, or empty if the body element isn't a body.
+    /// @see https://html.spec.whatwg.org/#dom-document-vlinkcolor
+    KRYS_NODISCARD DOMString VlinkColor() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-vlinkcolor
+    void VlinkColor(DOMString &&value) noexcept;
+
+    /// @brief The body element's `alink` attribute, or empty if the body element isn't a body.
+    /// @see https://html.spec.whatwg.org/#dom-document-alinkcolor
+    KRYS_NODISCARD DOMString AlinkColor() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-alinkcolor
+    void AlinkColor(DOMString &&value) noexcept;
+
+    /// @brief The body element's `bgcolor` attribute, or empty if the body element isn't a body.
+    /// @see https://html.spec.whatwg.org/#dom-document-bgcolor
+    KRYS_NODISCARD DOMString BgColor() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-bgcolor
+    void BgColor(DOMString &&value) noexcept;
+
+    /// @brief The `a` elements with `name` attributes.
+    /// @see https://html.spec.whatwg.org/#dom-document-anchors
+    KRYS_NODISCARD Ref<HTMLCollection> Anchors() noexcept;
+
+    /// @brief An empty collection, for historical reasons.
+    /// @see https://html.spec.whatwg.org/#dom-document-applets
+    KRYS_NODISCARD Ref<HTMLCollection> Applets() noexcept;
+
+    /// @brief Does nothing.
+    /// @see https://html.spec.whatwg.org/#dom-document-clear
+    void Clear() const noexcept
+    {
+    }
+
+    /// @brief Does nothing.
+    /// @see https://html.spec.whatwg.org/#dom-document-captureevents
+    void CaptureEvents() const noexcept
+    {
+    }
+
+    /// @brief Does nothing.
+    /// @see https://html.spec.whatwg.org/#dom-document-releaseevents
+    void ReleaseEvents() const noexcept
+    {
+    }
+
+#pragma endregion
 
     /// @brief The HTML elements whose `name` attribute is @p elementName, live, in tree order.
     /// @see https://html.spec.whatwg.org/#dom-document-getelementsbyname

@@ -929,6 +929,55 @@ namespace krys::boo::dom::tests
     CHECK(images->Length() == 2);
   }
 
+  TEST_CASE("Document's obsolete members",
+            "[DOM][Document][html:other-elements,-attributes-and-apis][html:dom-document-anchors]"
+            "[html:dom-document-applets][html:dom-document-clear][html:dom-document-fgcolor]")
+  {
+    SECTION("anchors are the a elements with names, and applets is empty")
+    {
+      auto document =
+        Parse(u8"<a name=x></a><a href=y></a><a name=z href=z></a><img name=w><applet></applet>");
+      auto anchors = document->Anchors();
+      CHECK(anchors->Length() == 2);
+      CHECK(&*document->Anchors() == &*anchors);
+      CHECK(document->Applets()->Length() == 0);
+      CHECK(&*document->Applets() == &*document->Applets());
+
+      document->Clear();
+      document->CaptureEvents();
+      document->ReleaseEvents();
+      CHECK(document->Anchors()->Length() == 2);
+    }
+
+    SECTION("the colours reflect the body's attributes")
+    {
+      auto document = Parse(u8"<body text=red link=blue vlink=purple alink=lime bgcolor=white>");
+      CHECK(document->FgColor() == u8"red");
+      CHECK(document->LinkColor() == u8"blue");
+      CHECK(document->VlinkColor() == u8"purple");
+      CHECK(document->AlinkColor() == u8"lime");
+      CHECK(document->BgColor() == u8"white");
+
+      document->BgColor(DOMString(u8"black"));
+      CHECK(document->Body()->GetAttribute(u8"bgcolor") == DOMString(u8"black"));
+      document->FgColor(DOMString(u8"gray"));
+      CHECK(document->Body()->GetAttribute(u8"text") == DOMString(u8"gray"));
+    }
+
+    SECTION("without a body, or with a frameset, the colours are empty and can't be set")
+    {
+      auto frameset = Parse(u8"<frameset bgcolor=red></frameset>");
+      CHECK(frameset->BgColor() == u8"");
+      frameset->BgColor(DOMString(u8"blue"));
+      CHECK(frameset->BodyOrFrameset()->GetAttribute(u8"bgcolor") == DOMString(u8"red"));
+
+      auto empty = CreateRef<HTMLDocument>();
+      CHECK(empty->LinkColor() == u8"");
+      empty->LinkColor(DOMString(u8"blue"));
+      CHECK(empty->LinkColor() == u8"");
+    }
+  }
+
   TEST_CASE("Document.getElementsByName(): the HTML elements with that name, live, in tree order",
             "[DOM][Document][html:dom-document-getelementsbyname]")
   {
