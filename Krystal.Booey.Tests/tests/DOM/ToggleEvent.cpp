@@ -20,7 +20,11 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "ToggleEvent and CommandEvent", "[DOM][ToggleEvent]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "ToggleEvent and CommandEvent",
+    "[DOM][ToggleEvent][html:the-toggleevent-interface][html:dom-toggleevent-oldstate]"
+    "[html:dom-toggleevent-newstate][html:dom-toggleevent-source][html:toggle-task-tracker]"
+    "[html:the-commandevent-interface][html:dom-commandevent-command][html:dom-commandevent-source]")
   {
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><div id=host></div><button id=button></button>)html"};
     auto &host = fixture.ById(u8"host");

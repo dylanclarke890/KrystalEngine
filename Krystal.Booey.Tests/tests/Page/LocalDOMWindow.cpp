@@ -892,7 +892,13 @@ namespace krys::boo::tests
     CHECK(fixture.Chrome->Dialogs.size() == 5);
   }
 
-  TEST_CASE("A window's user activation", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's user activation",
+            "[Page][LocalDOMWindow][html:user-activation-data-model]"
+            "[html:activation-expiry][html:activation-notification]"
+            "[html:activation-triggering-input-event][html:consume-user-activation]"
+            "[html:consume-history-action-user-activation]"
+            "[html:dom-navigator-useractivation][html:dom-useractivation-hasbeenactive]"
+            "[html:dom-useractivation-isactive]")
   {
     WindowFixture fixture(
       u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style><div></div>");
@@ -902,6 +908,10 @@ namespace krys::boo::tests
     CHECK_FALSE(window.HasStickyActivation());
     CHECK_FALSE(window.HasTransientActivation());
     CHECK_FALSE(window.HasHistoryActionActivation());
+    auto &userActivation = window.GetNavigator().GetUserActivation();
+    CHECK(&userActivation == &window.GetNavigator().GetUserActivation());
+    CHECK_FALSE(userActivation.HasBeenActive());
+    CHECK_FALSE(userActivation.IsActive());
 
     SECTION("a press activates the window, transiently for 5s")
     {
@@ -912,11 +922,16 @@ namespace krys::boo::tests
       CHECK(window.HasTransientActivation());
       CHECK(window.HasHistoryActionActivation());
 
+      CHECK(userActivation.HasBeenActive());
+      CHECK(userActivation.IsActive());
+
       Advance(4s);
       CHECK(window.HasTransientActivation());
       Advance(1s);
       CHECK_FALSE(window.HasTransientActivation());
       CHECK(window.HasStickyActivation());
+      CHECK_FALSE(userActivation.IsActive());
+      CHECK(userActivation.HasBeenActive());
     }
 
     SECTION("a key press activates it, but not Escape")

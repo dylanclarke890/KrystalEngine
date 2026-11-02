@@ -211,6 +211,8 @@ namespace krys::boo
     return frame ? static_cast<int32>(frame->GetMediaEnvironment().MaxTouchPoints) : 0;
   }
 
+  // https://html.spec.whatwg.org/#dom-navigator-useractivation
+  // (The window's associated UserActivation is made when it's first asked for.)
   UserActivation &Navigator::GetUserActivation() const noexcept
   {
     if (!_userActivation)

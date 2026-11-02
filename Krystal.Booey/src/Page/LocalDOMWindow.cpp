@@ -1062,11 +1062,19 @@ namespace krys::boo
     return static_cast<LocalDOMWindow *>(nullptr);
   }
 
+  // https://html.spec.whatwg.org/#activation-notification
   void LocalDOMWindow::NotifyActivated() noexcept
   {
-    // Set the last activation timestamp of the window to the current high resolution time. There are no
-    // ancestor or descendant frames to notify.
+    // 1. Assert: document is fully active.
+    // 2. Let windows be « document's relevant global object ».
+    // 3. Extend windows with the active window of each of document's ancestor navigables.
+    // 4. Extend windows with the active window of each of document's descendant navigables, filtered to
+    //    include only those navigables whose active document's origin is same origin with document's origin.
+    // (There are no ancestor or descendant frames, so windows is this window.)
+    // 5. For each window in windows:
+    // 5.1. Set window's last activation timestamp to the current high resolution time.
     _lastActivationTimestamp = NowTimestamp();
+    // 5.2. Notify the close watcher manager about user activation given window.
     GetCloseWatcherManager().NotifyAboutUserActivation();
   }
 
@@ -1093,14 +1101,22 @@ namespace krys::boo
     return _lastHistoryActionActivationTimestamp != _lastActivationTimestamp;
   }
 
+  // https://html.spec.whatwg.org/#consume-user-activation
   bool LocalDOMWindow::ConsumeTransientActivation() noexcept
   {
+    // (Without transient activation, consuming changes nothing observable, so it returns early to report it.)
     if (!HasTransientActivation())
     {
       return false;
     }
-    // For each window in the frame tree (this one), if its last activation timestamp is not positive
-    // infinity, set it to negative infinity.
+    // 1. If W's navigable is null, then return.
+    // 2. Let top be W's navigable's top-level traversable.
+    // 3. Let navigables be the inclusive descendant navigables of top's active document.
+    // 4. Let windows be the list of Window objects constructed by taking the active window of each item in
+    //    navigables.
+    // (There are no other frames, so windows is this window.)
+    // 5. For each window in windows, if window's last activation timestamp is not positive infinity, then set
+    //    window's last activation timestamp to negative infinity.
     if (_lastActivationTimestamp != std::numeric_limits<dom::DOMHighResTimeStamp>::infinity())
     {
       _lastActivationTimestamp = -std::numeric_limits<dom::DOMHighResTimeStamp>::infinity();
@@ -1108,12 +1124,21 @@ namespace krys::boo
     return true;
   }
 
+  // https://html.spec.whatwg.org/#consume-history-action-user-activation
   bool LocalDOMWindow::ConsumeHistoryActionUserActivation() noexcept
   {
     if (!HasHistoryActionActivation())
     {
       return false;
     }
+    // 1. If W's navigable is null, then return.
+    // 2. Let top be W's navigable's top-level traversable.
+    // 3. Let navigables be the inclusive descendant navigables of top's active document.
+    // 4. Let windows be the list of Window objects constructed by taking the active window of each item in
+    //    navigables.
+    // (There are no other frames, so windows is this window.)
+    // 5. For each window in windows, set window's last history-action activation timestamp to window's last
+    //    activation timestamp.
     _lastHistoryActionActivationTimestamp = _lastActivationTimestamp;
     return true;
   }

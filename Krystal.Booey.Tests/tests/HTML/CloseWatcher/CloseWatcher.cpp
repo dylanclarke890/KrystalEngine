@@ -50,8 +50,12 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "CloseWatcher: closing and destroying",
-                   "[HTML][CloseWatcher][dom:abortcontroller-api-integration]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "CloseWatcher: closing and destroying",
+    "[HTML][CloseWatcher][dom:abortcontroller-api-integration][html:the-closewatcher-interface]"
+    "[html:dom-closewatcher][html:dom-closewatcher-requestclose][html:dom-closewatcher-close]"
+    "[html:dom-closewatcher-destroy][html:close-watcher-request-close][html:close-watcher-close]"
+    "[html:close-watcher-destroy][html:close-watcher-active]")
   {
     NavigationFixture fixture(u8"<p>");
     auto &document = *fixture.Document;
@@ -125,8 +129,11 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "CloseWatcher: user activation and groups",
-                   "[HTML][CloseWatcher]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "CloseWatcher: user activation and groups",
+    "[HTML][CloseWatcher][html:close-watcher-infrastructure][html:establish-a-close-watcher]"
+    "[html:notify-the-close-watcher-manager-about-user-activation][html:process-close-watchers]"
+    "[html:close-request-steps]")
   {
     NavigationFixture fixture(u8"<p>");
     auto &document = *fixture.Document;

@@ -117,6 +117,14 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-accesskeylabel
     KRYS_NODISCARD dom::DOMString AccessKeyLabel() const noexcept;
 
+    /// @brief The state of the `contenteditable` attribute: `true`, `plaintext-only`, `false` or `inherit`.
+    /// @note `isContentEditable` is `Node::IsContentEditable`.
+    /// @see https://html.spec.whatwg.org/#dom-contenteditable
+    KRYS_NODISCARD dom::DOMString ContentEditable() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-contenteditable
+    dom::ExceptionOr<void> ContentEditable(dom::DOMStringView value) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-draggable
     KRYS_NODISCARD bool Draggable() const noexcept;
 
@@ -146,6 +154,18 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-autocorrect
     void Autocorrect(bool value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-inputmode
+    KRYS_NODISCARD dom::DOMString InputMode() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-inputmode
+    void InputMode(dom::DOMString &&value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-enterkeyhint
+    KRYS_NODISCARD dom::DOMString EnterKeyHint() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-enterkeyhint
+    void EnterKeyHint(dom::DOMString &&value) noexcept;
 
     /// @brief The element's rendered text: its text as laid out, with line breaks and tabs for its boxes, or
     /// its descendant text content if it isn't being rendered.

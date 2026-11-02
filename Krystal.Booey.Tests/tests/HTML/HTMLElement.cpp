@@ -1,10 +1,13 @@
 ﻿#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include <limits>
 
 namespace krys::boo::html::tests
 {
@@ -221,5 +224,202 @@ namespace krys::boo::html::tests
     CHECK(element.GetAttribute(u8"dir") == dom::DOMString(u8"RTL"));
     element.Dir(dom::DOMString(u8"up"));
     CHECK(element.Dir() == u8"");
+  }
+
+  TEST_CASE("HTMLElement.click(): an untrusted click, unless disabled or already being clicked",
+            "[HTML][HTMLElement][html:dom-click][html:click-in-progress-flag]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto button = document->CreateElement(u8"button").ReleaseValue();
+    auto &element = Downcast<HTMLElement>(*button);
+
+    int clicks = 0;
+    bool trusted = true;
+    auto listener = button->AddEventListener(u8"click",
+                                             [&](dom::Event &event)
+                                             {
+                                               ++clicks;
+                                               trusted = event.IsTrusted();
+                                               // A click while one is in progress does nothing.
+                                               element.Click();
+                                             });
+    element.Click();
+    CHECK(clicks == 1);
+    CHECK_FALSE(trusted);
+
+    REQUIRE_FALSE(button->SetAttribute(u8"disabled", u8"").HasException());
+    element.Click();
+    CHECK(clicks == 1);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLElement.contentEditable: the attribute's state",
+                   "[HTML][HTMLElement][html:attr-contenteditable][html:attr-contenteditable-inherit-state]"
+                   "[html:dom-contenteditable][html:dom-iscontenteditable]")
+  {
+    style::tests::ResolverFixture fixture {u8"<!DOCTYPE html><div id=d><span id=s></span></div>"};
+    dom::Element *div = &fixture.ById(u8"d");
+    dom::Element *span = &fixture.ById(u8"s");
+    auto &element = Downcast<HTMLElement>(*div);
+
+    CHECK(element.ContentEditable() == u8"inherit");
+    CHECK_FALSE(element.IsContentEditable());
+
+    // The empty value is the True state, and an invalid one inherits.
+    REQUIRE_FALSE(div->SetAttribute(u8"contenteditable", u8"").HasException());
+    CHECK(element.ContentEditable() == u8"true");
+    CHECK(element.IsContentEditable());
+    CHECK(span->IsContentEditable());
+    REQUIRE_FALSE(div->SetAttribute(u8"contenteditable", u8"PlainText-Only").HasException());
+    CHECK(element.ContentEditable() == u8"plaintext-only");
+    REQUIRE_FALSE(div->SetAttribute(u8"contenteditable", u8"maybe").HasException());
+    CHECK(element.ContentEditable() == u8"inherit");
+    CHECK_FALSE(element.IsContentEditable());
+
+    // The setter takes the keywords in any case, and throws for anything else.
+    REQUIRE_FALSE(element.ContentEditable(u8"TRUE").HasException());
+    CHECK(div->GetAttribute(u8"contenteditable") == dom::DOMString(u8"true"));
+    CHECK(span->IsContentEditable());
+    REQUIRE_FALSE(Downcast<HTMLElement>(*span).ContentEditable(u8"false").HasException());
+    CHECK_FALSE(span->IsContentEditable());
+    REQUIRE_FALSE(element.ContentEditable(u8"Plaintext-Only").HasException());
+    CHECK(div->GetAttribute(u8"contenteditable") == dom::DOMString(u8"plaintext-only"));
+    auto result = element.ContentEditable(u8"yes");
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Code() == dom::ExceptionCode::SyntaxError);
+    REQUIRE_FALSE(element.ContentEditable(u8"inherit").HasException());
+    CHECK_FALSE(div->HasAttribute(u8"contenteditable"));
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "HTMLElement: spellcheck, writingSuggestions, autocapitalize and autocorrect",
+    "[HTML][HTMLElement][html:dom-spellcheck][html:concept-spellcheck-default]"
+    "[html:attr-spellcheck-default-state][html:dom-writingsuggestions][html:attr-writingsuggestions]"
+    "[html:attr-writingsuggestions-default-state][html:computed-writing-suggestions-value]"
+    "[html:dom-autocapitalize][html:own-autocapitalization-hint][html:autocapitalization-hint]"
+    "[html:dom-autocorrect][html:attr-autocorrect][html:used-autocorrection-state]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto form = document->CreateElement(u8"form").ReleaseValue();
+    auto input = document->CreateElement(u8"input").ReleaseValue();
+    auto div = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*form).HasException());
+    REQUIRE_FALSE(form->AppendChild(*input).HasException());
+    REQUIRE_FALSE(form->AppendChild(*div).HasException());
+    auto &formElement = Downcast<HTMLElement>(*form);
+    auto &inputElement = Downcast<HTMLElement>(*input);
+    auto &divElement = Downcast<HTMLElement>(*div);
+
+    SECTION("spellcheck inherits from the parent element, and is true at the root")
+    {
+      CHECK(divElement.SpellCheck());
+      REQUIRE_FALSE(form->SetAttribute(u8"spellcheck", u8"false").HasException());
+      CHECK_FALSE(divElement.SpellCheck());
+      // An invalid value is the Default state, so it inherits too.
+      REQUIRE_FALSE(div->SetAttribute(u8"spellcheck", u8" true").HasException());
+      CHECK_FALSE(divElement.SpellCheck());
+      REQUIRE_FALSE(div->SetAttribute(u8"spellcheck", u8"").HasException());
+      CHECK(divElement.SpellCheck());
+      divElement.SpellCheck(false);
+      CHECK(div->GetAttribute(u8"spellcheck") == dom::DOMString(u8"false"));
+    }
+
+    SECTION("writingSuggestions is false only below a false state")
+    {
+      CHECK(divElement.WritingSuggestions() == u8"true");
+      REQUIRE_FALSE(form->SetAttribute(u8"writingsuggestions", u8"false").HasException());
+      CHECK(divElement.WritingSuggestions() == u8"false");
+      // An invalid value is the True state.
+      REQUIRE_FALSE(div->SetAttribute(u8"writingsuggestions", u8"maybe").HasException());
+      CHECK(divElement.WritingSuggestions() == u8"true");
+    }
+
+    SECTION("autocapitalize comes from the form owner of the controls")
+    {
+      CHECK(inputElement.Autocapitalize() == u8"");
+      REQUIRE_FALSE(form->SetAttribute(u8"autocapitalize", u8"WORDS").HasException());
+      CHECK(formElement.Autocapitalize() == u8"words");
+      CHECK(inputElement.Autocapitalize() == u8"words");
+      // Not from an ancestor that isn't the form owner.
+      CHECK(divElement.Autocapitalize() == u8"");
+      REQUIRE_FALSE(input->SetAttribute(u8"autocapitalize", u8"off").HasException());
+      CHECK(inputElement.Autocapitalize() == u8"none");
+      REQUIRE_FALSE(input->SetAttribute(u8"autocapitalize", u8"bogus").HasException());
+      CHECK(inputElement.Autocapitalize() == u8"sentences");
+      // An empty value falls back to the form owner.
+      REQUIRE_FALSE(input->SetAttribute(u8"autocapitalize", u8"").HasException());
+      CHECK(inputElement.Autocapitalize() == u8"words");
+    }
+
+    SECTION("autocorrect is off for URL, email and password inputs, and comes from the form owner")
+    {
+      CHECK(inputElement.Autocorrect());
+      REQUIRE_FALSE(form->SetAttribute(u8"autocorrect", u8"off").HasException());
+      CHECK_FALSE(inputElement.Autocorrect());
+      CHECK(divElement.Autocorrect());
+      inputElement.Autocorrect(true);
+      CHECK(input->GetAttribute(u8"autocorrect") == dom::DOMString(u8"on"));
+      CHECK(inputElement.Autocorrect());
+      REQUIRE_FALSE(input->SetAttribute(u8"type", u8"email").HasException());
+      CHECK_FALSE(inputElement.Autocorrect());
+    }
+  }
+
+  TEST_CASE("HTMLElement: inputMode and enterKeyHint, limited to known values",
+            "[HTML][HTMLElement][html:dom-inputmode][html:attr-inputmode][html:dom-enterkeyhint]"
+            "[html:attr-enterkeyhint]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto div = document->CreateElement(u8"div").ReleaseValue();
+    auto &element = Downcast<HTMLElement>(*div);
+
+    CHECK(element.InputMode() == u8"");
+    element.InputMode(dom::DOMString(u8"NUMERIC"));
+    CHECK(div->GetAttribute(u8"inputmode") == dom::DOMString(u8"NUMERIC"));
+    CHECK(element.InputMode() == u8"numeric");
+    element.InputMode(dom::DOMString(u8"digits"));
+    CHECK(element.InputMode() == u8"");
+
+    CHECK(element.EnterKeyHint() == u8"");
+    element.EnterKeyHint(dom::DOMString(u8"Send"));
+    CHECK(element.EnterKeyHint() == u8"send");
+    element.EnterKeyHint(dom::DOMString(u8"return"));
+    CHECK(element.EnterKeyHint() == u8"");
+  }
+
+  TEST_CASE("HTMLElement.hidden: true, false or until-found",
+            "[HTML][HTMLElement][html:dom-hidden][html:attr-hidden]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto div = document->CreateElement(u8"div").ReleaseValue();
+    auto &element = Downcast<HTMLElement>(*div);
+    using Result = BoolOr<dom::DOMString>;
+
+    CHECK(element.Hidden() == Result(false));
+    REQUIRE_FALSE(element.SetAttribute(u8"hidden", u8"whatever").HasException());
+    CHECK(element.Hidden() == Result(true));
+    REQUIRE_FALSE(element.SetAttribute(u8"hidden", u8"UNTIL-found").HasException());
+    CHECK(element.Hidden() == Result(dom::DOMString(u8"until-found")));
+
+    // Strings other than until-found and the empty string hide it.
+    element.Hidden(dom::DOMString(u8"Until-Found"));
+    CHECK(element.GetAttribute(u8"hidden") == dom::DOMString(u8"until-found"));
+    element.Hidden(dom::DOMString(u8"false"));
+    CHECK(element.GetAttribute(u8"hidden") == dom::DOMString(u8""));
+    element.Hidden(dom::DOMString());
+    CHECK_FALSE(element.HasAttribute(u8"hidden"));
+
+    element.Hidden(true);
+    CHECK(element.HasAttribute(u8"hidden"));
+    element.Hidden(false);
+    CHECK_FALSE(element.HasAttribute(u8"hidden"));
+
+    // 0 and NaN remove it; any other number hides it.
+    element.Hidden(2.0);
+    CHECK(element.GetAttribute(u8"hidden") == dom::DOMString(u8""));
+    element.Hidden(std::numeric_limits<double>::quiet_NaN());
+    CHECK_FALSE(element.HasAttribute(u8"hidden"));
+    element.Hidden(-1.0);
+    element.Hidden(0.0);
+    CHECK_FALSE(element.HasAttribute(u8"hidden"));
   }
 }

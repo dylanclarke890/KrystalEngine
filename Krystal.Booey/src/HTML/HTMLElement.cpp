@@ -31,9 +31,12 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/ElementInternals.hpp"
+#include "Krystal.Booey/HTML/FormAssociatedElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -44,6 +47,7 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include <initializer_list>
 
 namespace krys::boo::html
 {
@@ -151,16 +155,21 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"dir", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#dom-hidden
   BoolOr<dom::DOMString> HTMLElement::Hidden() const noexcept
   {
     auto value = Reflect<dom::DOMString>(*this, u8"hidden");
 
+    // 1. If the hidden attribute is in the Hidden Until Found state, then return "until-found".
     auto state = EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value);
     if (state == AttributeState::UntilFound)
     {
       return u8"until-found";
     }
 
+    // 2. If the hidden attribute is set, then return true.
+    // 3. Return false.
+    // (Any other value, and the missing value, is in the Hidden state.)
     return state == AttributeState::Hidden;
   }
 
@@ -170,47 +179,61 @@ namespace krys::boo::html
     return value && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"until-found");
   }
 
+  // https://html.spec.whatwg.org/#dom-hidden
+  // (The setter's steps are split between the overloads by the given value's type; a null value is the
+  // empty string's overload.)
   void HTMLElement::Hidden(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
+    // 1. If the given value is a string that is an ASCII case-insensitive match for "until-found", then set
+    //    the hidden attribute to "until-found".
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"until-found"))
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"until-found");
     }
+    // 3. Otherwise, if the given value is the empty string, then remove the hidden attribute.
     else if (value.empty())
     {
       dom::ElementAlgorithms::RemoveAttributeByName(u8"hidden", *this);
     }
+    // 7. Otherwise, set the hidden attribute to the empty string.
     else
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"");
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-hidden
   void HTMLElement::Hidden(bool value) noexcept
   {
     CEReactionsScope ceReactions;
+    // 7. Otherwise, set the hidden attribute to the empty string.
     if (value)
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"");
     }
+    // 2. Otherwise, if the given value is false, then remove the hidden attribute.
     else
     {
       dom::ElementAlgorithms::RemoveAttributeByName(u8"hidden", *this);
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-hidden
   void HTMLElement::Hidden(double value) noexcept
   {
     CEReactionsScope ceReactions;
+    // 5. Otherwise, if the given value is 0, then remove the hidden attribute.
     if (value == 0)
     {
       dom::ElementAlgorithms::RemoveAttributeByName(u8"hidden", *this);
     }
+    // 6. Otherwise, if the given value is NaN, then remove the hidden attribute.
     else if (std::isnan(value))
     {
       dom::ElementAlgorithms::RemoveAttributeByName(u8"hidden", *this);
     }
+    // 7. Otherwise, set the hidden attribute to the empty string.
     else
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"");
@@ -289,6 +312,13 @@ namespace krys::boo::html
     return labels;
   }
 
+  // https://html.spec.whatwg.org/#dom-click
+  // 1. If this element is a form control that is disabled, then return.
+  // 2. If this element's click in progress flag is set, then return.
+  // 3. Set this element's click in progress flag.
+  // 4. Fire a synthetic pointer event named click at this element, with the not trusted flag set.
+  // 5. Unset this element's click in progress flag.
+  // (SimulateClick does each, with a set of the elements being clicked for the flags.)
   void HTMLElement::Click() noexcept
   {
     (void)dom::SimulateClick(*this, nullptr, dom::SimulatedClickMouseEventOptions::SendNoEvents,
@@ -350,39 +380,146 @@ namespace krys::boo::html
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"draggable", value ? u8"true" : u8"false");
   }
 
-  bool HTMLElement::SpellCheck() const noexcept
+  namespace
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"spellcheck");
-    switch (EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(value))
+    /// @brief The form owner of @p element if it's an autocapitalize-and-autocorrect inheriting element.
+    /// @see https://html.spec.whatwg.org/#category-autocapitalize
+    KRYS_NODISCARD HTMLFormElement *AutocapitalizeAndAutocorrectFormOwner(const HTMLElement &element) noexcept
     {
-      case AttributeState::True:  return true;
-      case AttributeState::False: return false;
-      case AttributeState::Default:
+      switch (element.TagQualifiedName().TagName())
       {
-        // FIXME: Implement default behavior for SpellCheck() getter.
-        // The spellcheck IDL attribute, on getting, must return true if the element's spellcheck content
-        // attribute is in the True state, or if the element's spellcheck content attribute is in the Default
-        // state and the element's default behavior is true-by-default, or if the element's spellcheck content
-        // attribute is in the Default state and the element's default behavior is inherit-by-default and the
-        // element's parent element's spellcheck IDL attribute would return true; otherwise, if none of those
-        // conditions applies, then the attribute must instead return false.
-        return false;
+        case TagName::button:
+        case TagName::fieldset:
+        case TagName::input:
+        case TagName::output:
+        case TagName::select:
+        case TagName::textarea: break;
+        default:                return nullptr;
       }
+      auto *formAssociated = const_cast<HTMLElement &>(element).AsFormAssociatedElement();
+      return formAssociated ? formAssociated->Form() : nullptr;
     }
 
-    return false;
+    /// @see https://html.spec.whatwg.org/#own-autocapitalization-hint
+    KRYS_NODISCARD AttributeState OwnAutocapitalizationHint(const HTMLElement &element) noexcept
+    {
+      // 1. If the autocapitalize content attribute is present on element, and its value is not the empty
+      //    string, return the state of the attribute.
+      auto value = element.GetAttribute(u8"autocapitalize");
+      if (value && !value->empty())
+      {
+        return EnumeratedAttribute<"autocapitalize", HTMLElement>::ResolveState(value);
+      }
+      // 2. If element is an autocapitalize-and-autocorrect inheriting element and has a non-null form owner,
+      //    return the own autocapitalization hint of element's form owner.
+      if (auto *form = AutocapitalizeAndAutocorrectFormOwner(element))
+      {
+        return OwnAutocapitalizationHint(*form);
+      }
+      // 3. Return Default.
+      return AttributeState::Default;
+    }
+
+    /// @see https://html.spec.whatwg.org/#used-autocorrection-state
+    KRYS_NODISCARD AttributeState UsedAutocorrectionState(const HTMLElement &element) noexcept
+    {
+      // 1. If element is an input element whose type attribute is in one of the URL, Email, or Password
+      //    states, then return Off.
+      if (auto *input = DynamicDowncast<HTMLInputElement>(element);
+          input && (input->IsURLField() || input->IsEmailField() || input->IsPasswordField()))
+      {
+        return AttributeState::Off;
+      }
+      // 2. If the autocorrect content attribute is present on element, then return the state of the
+      //    attribute.
+      if (auto value = element.GetAttribute(u8"autocorrect"))
+      {
+        return EnumeratedAttribute<"autocorrect", HTMLElement>::ResolveState(value);
+      }
+      // 3. If element is an autocapitalize-and-autocorrect inheriting element and has a non-null form owner,
+      //    then return the state of element's form owner's autocorrect attribute.
+      if (auto *form = AutocapitalizeAndAutocorrectFormOwner(element))
+      {
+        return EnumeratedAttribute<"autocorrect", HTMLElement>::ResolveState(
+          form->GetAttribute(u8"autocorrect"));
+      }
+      // 4. Return On.
+      return AttributeState::On;
+    }
+
+    /// @brief The keyword of @p name's state if it's one of @p keywords, or the empty string: an attribute
+    /// reflected limited to only known values, whose keywords are each their own state.
+    /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
+    KRYS_NODISCARD dom::DOMString KnownKeyword(const HTMLElement &element, dom::DOMStringAtom name,
+                                               std::initializer_list<const char8_t *> keywords) noexcept
+    {
+      if (auto value = element.GetAttribute(name))
+      {
+        for (auto *keyword : keywords)
+        {
+          if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, keyword))
+          {
+            return keyword;
+          }
+        }
+      }
+      return {};
+    }
   }
 
+  // https://html.spec.whatwg.org/#dom-spellcheck
+  bool HTMLElement::SpellCheck() const noexcept
+  {
+    // The spellcheck IDL attribute, on getting, must return true if the element's spellcheck content
+    // attribute is in the True state, or if the element's spellcheck content attribute is in the Default
+    // state and the element's default behavior is true-by-default, or if the element's spellcheck content
+    // attribute is in the Default state and the element's default behavior is inherit-by-default and the
+    // element's parent element's spellcheck IDL attribute would return true; otherwise, if none of those
+    // conditions applies, then the attribute must instead return false. (Every element's default behavior is
+    // inherit-by-default, but true-by-default without a parent element.)
+    for (const dom::Element *element = this; element; element = element->ParentElement())
+    {
+      switch (
+        EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(element->GetAttribute(u8"spellcheck")))
+      {
+        case AttributeState::True:  return true;
+        case AttributeState::False: return false;
+        default:                    break;
+      }
+    }
+    return true;
+  }
+
+  // https://html.spec.whatwg.org/#dom-spellcheck
   void HTMLElement::SpellCheck(bool value) noexcept
   {
+    CEReactionsScope ceReactions;
+    // On setting, if the new value is true, then the element's spellcheck content attribute must be set to
+    // "true", otherwise it must be set to "false".
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"spellcheck", value ? u8"true" : u8"false");
   }
 
+  // https://html.spec.whatwg.org/#dom-writingsuggestions
   dom::DOMString HTMLElement::WritingSuggestions() const noexcept
   {
-    // FIXME: Implement WritingSuggestions() method.
     // Return this's computed writing suggestions value.
-    return {};
+    // https://html.spec.whatwg.org/#computed-writing-suggestions-value
+    for (const dom::Element *element = this; element; element = element->ParentElement())
+    {
+      switch (EnumeratedAttribute<"writingsuggestions", HTMLElement>::ResolveState(
+        element->GetAttribute(u8"writingsuggestions")))
+      {
+        // 1. If element's writingsuggestions content attribute is in the False state, return "false".
+        case AttributeState::False:   return u8"false";
+        // 2. If element's writingsuggestions content attribute is in the Default state, element has a parent
+        //    element, and the computed writing suggestions value of element's parent element is "false", then
+        //    return "false".
+        case AttributeState::Default: break;
+        // 3. Return "true".
+        default:                      return u8"true";
+      }
+    }
+    return u8"true";
   }
 
   void HTMLElement::WritingSuggestions(dom::DOMString &&value) noexcept
@@ -391,15 +528,23 @@ namespace krys::boo::html
     ReflectSetter(*this, u8"writingsuggestions", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#dom-autocapitalize
   dom::DOMString HTMLElement::Autocapitalize() const noexcept
   {
-    // FIXME: Implement Autocapitalize() method.
-    // Let state be the own autocapitalization hint of this.
-    // If state is Default, then return the empty string.
-    // If state is None, then return "none".
-    // If state is Sentences, then return "sentences".
-    // Return the keyword value corresponding to state.
-    return {};
+    // 1. Let state be the own autocapitalization hint of this.
+    switch (OwnAutocapitalizationHint(*this))
+    {
+      // 2. If state is Default, then return the empty string.
+      case AttributeState::Default:    return {};
+      // 3. If state is None, then return "none".
+      case AttributeState::None:       return u8"none";
+      // 4. If state is Sentences, then return "sentences".
+      case AttributeState::Sentences:  return u8"sentences";
+      // 5. Return the keyword value corresponding to state.
+      case AttributeState::Words:      return u8"words";
+      case AttributeState::Characters: return u8"characters";
+      default:                         return {};
+    }
   }
 
   void HTMLElement::Autocapitalize(dom::DOMString &&value) noexcept
@@ -408,18 +553,53 @@ namespace krys::boo::html
     ReflectSetter(*this, u8"autocapitalize", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#dom-autocorrect
   bool HTMLElement::Autocorrect() const noexcept
   {
-    // FIXME: Implement Autocorrect() method.
     // The autocorrect getter steps are: return true if the element's used autocorrection state is On and
-    // false if the element's used autocorrection state is Off
-    return false;
+    // false if the element's used autocorrection state is Off.
+    return UsedAutocorrectionState(*this) == AttributeState::On;
   }
 
+  // https://html.spec.whatwg.org/#dom-autocorrect
   void HTMLElement::Autocorrect(bool value) noexcept
   {
     CEReactionsScope ceReactions;
+    // The setter steps are: if the given value is true, then the element's autocorrect attribute must be set
+    // to "on"; otherwise it must be set to "off".
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"autocorrect", value ? u8"on" : u8"off");
+  }
+
+  // https://html.spec.whatwg.org/#dom-inputmode
+  // The inputMode IDL attribute must reflect the inputmode content attribute, limited to only known values.
+  dom::DOMString HTMLElement::InputMode() const noexcept
+  {
+    return KnownKeyword(
+      *this, u8"inputmode",
+      {u8"none", u8"text", u8"tel", u8"url", u8"email", u8"numeric", u8"decimal", u8"search"});
+  }
+
+  // https://html.spec.whatwg.org/#dom-inputmode
+  void HTMLElement::InputMode(dom::DOMString &&value) noexcept
+  {
+    CEReactionsScope ceReactions;
+    dom::ElementAlgorithms::SetAttributeValue(*this, u8"inputmode", krys::move(value));
+  }
+
+  // https://html.spec.whatwg.org/#dom-enterkeyhint
+  // The enterKeyHint IDL attribute must reflect the enterkeyhint content attribute, limited to only known
+  // values.
+  dom::DOMString HTMLElement::EnterKeyHint() const noexcept
+  {
+    return KnownKeyword(*this, u8"enterkeyhint",
+                        {u8"enter", u8"done", u8"go", u8"next", u8"previous", u8"search", u8"send"});
+  }
+
+  // https://html.spec.whatwg.org/#dom-enterkeyhint
+  void HTMLElement::EnterKeyHint(dom::DOMString &&value) noexcept
+  {
+    CEReactionsScope ceReactions;
+    dom::ElementAlgorithms::SetAttributeValue(*this, u8"enterkeyhint", krys::move(value));
   }
 
   namespace
@@ -1293,6 +1473,50 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  // https://html.spec.whatwg.org/#dom-contenteditable
+  dom::DOMString HTMLElement::ContentEditable() const noexcept
+  {
+    // The contentEditable IDL attribute, on getting, must return the string "true" if the content attribute
+    // is set to the True state, "plaintext-only" if the content attribute is set to the Plaintext-Only state,
+    // "false" if the content attribute is set to the False state, and "inherit" otherwise.
+    auto value = GetAttribute(u8"contenteditable");
+    switch (value ? GetContentEditableType(*value) : ContentEditableType::Inherit)
+    {
+      case ContentEditableType::True:          return u8"true";
+      case ContentEditableType::PlaintextOnly: return u8"plaintext-only";
+      case ContentEditableType::False:         return u8"false";
+      case ContentEditableType::Inherit:       break;
+    }
+    return u8"inherit";
+  }
+
+  // https://html.spec.whatwg.org/#dom-contenteditable
+  dom::ExceptionOr<void> HTMLElement::ContentEditable(dom::DOMStringView value) noexcept
+  {
+    CEReactionsScope ceReactions;
+    // On setting, if the new value is an ASCII case-insensitive match for the string "inherit", then the
+    // content attribute must be removed, if the new value is an ASCII case-insensitive match for the string
+    // "true", then the content attribute must be set to the string "true", if the new value is an ASCII
+    // case-insensitive match for the string "plaintext-only", then the content attribute must be set to the
+    // string "plaintext-only", if the new value is an ASCII case-insensitive match for the string "false",
+    // then the content attribute must be set to the string "false", and otherwise the attribute setter must
+    // throw a "SyntaxError" DOMException.
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"inherit"))
+    {
+      dom::ElementAlgorithms::RemoveAttributeByName(u8"contenteditable", *this);
+      return {};
+    }
+    for (auto keyword : {u8"true", u8"plaintext-only", u8"false"})
+    {
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, keyword))
+      {
+        dom::ElementAlgorithms::SetAttributeValue(*this, u8"contenteditable", keyword);
+        return {};
+      }
+    }
+    return dom::Exception {dom::ExceptionCode::SyntaxError};
+  }
 
   dom::Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const dom::Node &node) noexcept
   {

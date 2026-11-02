@@ -21,7 +21,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `Element` doesn't run the rest of `didMoveToNewDocument` (FIXME in `Element.cpp`): nodes aren't told they have moved. Observer data does move (`Element::OnAdopt`), but a canvas moved to another document doesn't move its context's preparation (FIXME in `HTMLCanvasElement.hpp`), and lazy-image moves are untested.
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
 - Failed custom element constructions and upgrades, exceptions thrown by listeners and parse errors are not reported anywhere (no console; FIXMEs in `CustomElementInterface.cpp`).
-- `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `document.open()`/`write()`, the `ElementContentEditable` members `contentEditable`, `enterKeyHint` and `inputMode`, `nonce`).
+- `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `document.open()`/`write()`, `nonce`).
 - `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`. Form-associated custom elements' state is restored only in the restore mode, never `FormStateRestoreMode::Autocomplete` (no autofill).
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
 - The backup custom element queue is global rather than one per agent.
@@ -314,6 +314,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
+- `document.designMode` is not implemented, so a document can't be made editable as a whole (FIXMEs in `HTMLElement::EditabilityFromContentEditableAttr`).
 - `execCommand()` and `queryCommandState()`/`queryCommandValue()` are not implemented; `Document` only declares the IDL in a comment. `EditorCommand` has 86 selection, navigation, delete, insert, clipboard and undo/redo commands but no state or value for them.
 - Formatting commands are absent: bold, italic and the rest of the `styleWithCSS`/`-webkit-font-size-delta` family, lists, indent and outdent, format block, links, remove format. Tab spans, mail blockquotes and `quoteFragmentForPasting` are absent with them. The `MakeTextWritingDirection*` commands apply styles but report no state.
 - Paste does not render the fragment in a staging document to take its text as rendered and drop invisible content (`ReplacementFragment`); it does not remove event handler attributes or `javascript:` URLs from pasted markup (FIXMEs in `ReplaceSelectionCommand.cpp`). `MarkupAccumulator` does not resolve URL attributes against the base URL, and the markup sanitiser's staging page has no dark appearance.
@@ -354,7 +355,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Pan scrolling (middle-button autoscroll) and its icon are absent; selection autoscroll works.
 - Drag and drop: colour drags and drops, plugin documents and image overlays are absent. Touch and pen drags are not done (pointer events cancel as upstream when a drag starts), and dropped URLs load as user-input requests without an external URL policy.
 - Dragging out of a page to other applications is not supported: `DoDragDrop` is a modal loop that would block the frames, so a drag that starts in a page stays in it.
-- Sequential focus navigation does not handle frames, popovers as scope owners or moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions, nested navigables or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
+- Sequential focus navigation does not handle frames or moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions, nested navigables or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
 - Spatial navigation is upstream's only (the focus candidate search, off by default through `Settings::SpatialNavigationEnabled`); the CSS Spatial Navigation draft (`navbeforefocus`, `navnotarget`, `spatialNavigationSearch()`, `focusableAreas()`, `spatial-navigation-*`) is not implemented.
 - Keyboard: caps lock handling in text fields, Escape hiding validation messages and leaving fullscreen, the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs. The default keyboard handler doesn't handle Backspace (history navigation; FIXME).
 - Touch: documents without touch event listeners aren't skipped (`hasTouchEventHandlers` is a FIXME), and touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.

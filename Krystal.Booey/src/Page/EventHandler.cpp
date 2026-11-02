@@ -64,16 +64,27 @@ namespace krys::boo
 
     /// @brief The element key events go to in @p document: its focused element, or its body.
     // FIXME: A fullscreen video and a plugin document's plugin, once there are any.
+    // https://html.spec.whatwg.org/#focus-processing-model
+    // (The target node of a routed key event.)
     KRYS_NODISCARD dom::Element *EventTargetElementForDocument(dom::Document *document) noexcept
     {
       if (!document)
       {
         return nullptr;
       }
+      // 3. Let target node be target area's DOM anchor.
       dom::Element *element = document->FocusedElement();
+      // 4. If target node is a Document that has a body element, then let target node be the body element of
+      //    that Document.
       if (!element && Is<dom::HTMLDocument>(*document))
       {
         element = document->BodyOrFrameset();
+      }
+      // Otherwise, if target node is a Document object that has a non-null document element, then let
+      // target node be that document element.
+      if (!element)
+      {
+        element = document->DocumentElement().get();
       }
       return element;
     }

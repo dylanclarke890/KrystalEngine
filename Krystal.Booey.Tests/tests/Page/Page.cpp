@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
@@ -182,7 +183,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: autofocus", "[Page][RenderingUpdate][Focus]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "Page: autofocus",
+    "[Page][RenderingUpdate][Focus][html:the-autofocus-attribute][html:autofocus-processed-flag]"
+    "[html:flush-autofocus-candidates]")
   {
     SECTION("the first focusable candidate is focused in the rendering update")
     {
@@ -200,6 +204,22 @@ namespace krys::boo::tests
       REQUIRE_FALSE(late->SetAttribute(u8"tabindex", u8"0").HasException());
       REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*late).HasException());
       CHECK(fixture.Document->AutofocusCandidates().empty());
+    }
+
+    SECTION("a candidate that isn't a focusable area focuses its focusable area")
+    {
+      // A shadow host that delegates focus: its focus delegate.
+      PageFixture fixture {u8"<!DOCTYPE html><body>"};
+      auto &document = *fixture.Document;
+      auto host = document.CreateElement(u8"div").ReleaseValue();
+      auto shadow = host->AttachShadow({.DelegatesFocus = dom::DelegatesFocus(true)}).ReleaseValue();
+      auto inner = document.CreateElement(u8"input").ReleaseValue();
+      REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+      REQUIRE_FALSE(host->SetAttribute(u8"autofocus", u8"").HasException());
+      REQUIRE_FALSE(document.Body()->AppendChild(*host).HasException());
+      fixture.TestPage->UpdateRendering();
+      CHECK(document.FocusedElement() == inner.get());
+      CHECK(document.AutofocusProcessed());
     }
 
     SECTION("an element focused first wins")

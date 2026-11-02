@@ -142,7 +142,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Element: CSSOM View scrolling", "[DOM][Element][CSSOMView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Element: CSSOM View scrolling",
+                   "[DOM][Element][CSSOMView][html:dom-focus][html:dom-focusoptions-preventscroll]")
   {
     ResolverFixture fixture {layout::tests::AhemDocument(Style, Body)};
     auto &s = fixture.ById(u8"s");
@@ -243,6 +244,14 @@ namespace krys::boo::dom::tests
       html::EventLoop::Current().RunUntilIdle();
       CHECK(s.ScrollTop() == 130);
       CHECK(s.ScrollLeft() == 80);
+
+      // Focusing an element that can't be focused leaves the focused element where it is.
+      s.ScrollTo(0, 0);
+      Downcast<html::HTMLElement>(s).Focus();
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(fixture.Document->FocusedElement() == &target);
+      CHECK(s.ScrollTop() == 0);
+      CHECK(s.ScrollLeft() == 0);
     }
   }
   TEST_CASE_METHOD(css::tests::ValueFixture, "Element: CSSOM View scrolling right to left",

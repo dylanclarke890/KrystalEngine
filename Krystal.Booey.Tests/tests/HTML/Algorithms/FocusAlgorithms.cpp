@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <string>
@@ -59,7 +60,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: tabindex and focusable areas", "[HTML][Focus]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: tabindex and focusable areas",
+                   "[HTML][Focus][html:attr-tabindex][html:tabindex-value][html:dom-tabindex]"
+                   "[html:focusable-area][html:focusable]")
   {
     ResolverFixture fixture {
       u8R"(<!DOCTYPE html><style>.none { display: none } .hidden { visibility: hidden }</style>
@@ -128,7 +131,41 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: focus() and blur()", "[HTML][Focus]")
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "FocusAlgorithms: a modal dialog makes the rest inert, escaping its ancestors'",
+                   "[HTML][Focus][html:inert][html:blocked-by-a-modal-dialog]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><body><button id=outside></button>
+        <div inert><dialog id=dialog><button id=inDialog></button><div inert><button id=inertInDialog></button></div></dialog></div>
+      </body>)"};
+    auto &document = *fixture.Document;
+    auto &dialog = Downcast<HTMLDialogElement>(fixture.ById(u8"dialog"));
+    CHECK(FocusAlgorithms::IsInert(fixture.ById(u8"inDialog")));
+    CHECK_FALSE(FocusAlgorithms::IsInert(fixture.ById(u8"outside")));
+
+    REQUIRE_FALSE(dialog.ShowModal().HasException());
+    document.UpdateStyleIfNeeded();
+    CHECK(document.ActiveModalDialog() == &dialog);
+    CHECK(FocusAlgorithms::IsInert(fixture.ById(u8"outside")));
+    CHECK(FocusAlgorithms::IsInert(*document.Body()));
+    CHECK_FALSE(FocusAlgorithms::IsInert(dialog));
+    CHECK_FALSE(FocusAlgorithms::IsInert(fixture.ById(u8"inDialog")));
+    CHECK(FocusAlgorithms::IsInert(fixture.ById(u8"inertInDialog")));
+    CHECK(FocusAlgorithms::IsFocusableArea(fixture.ById(u8"inDialog")));
+    CHECK_FALSE(fixture.ById(u8"inDialog").GetRenderStyle()->EffectiveInert());
+    CHECK(fixture.ById(u8"outside").GetRenderStyle()->EffectiveInert());
+
+    // The dialog's own inert attribute does make it inert.
+    REQUIRE_FALSE(dialog.SetAttribute(u8"inert", u8"").HasException());
+    CHECK(FocusAlgorithms::IsInert(fixture.ById(u8"inDialog")));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: focus() and blur()",
+                   "[HTML][Focus][html:dom-focus][html:dom-blur][html:focusing-steps][html:unfocusing-steps]"
+                   "[html:focus-update-steps][html:fire-a-focus-event][html:focus-chain]"
+                   "[html:currently-focused-area-of-a-top-level-traversable]"
+                   "[html:focused-area-of-the-document][html:dom-documentorshadowroot-activeelement]"
+                   "[html:dom-document-hasfocus][html:has-focus-steps][html:system-focus]")
   {
     ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
       :focus { color: rgb(0, 0, 255) }
@@ -215,7 +252,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: focus visibility and clicks", "[HTML][Focus]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: focus visibility and clicks",
+                   "[HTML][Focus][html:click-focusable][html:dom-focusoptions-focusvisible]")
   {
     ResolverFixture fixture {u8R"(<!DOCTYPE html><body><button id=a><span id=inner></span></button>
       <button id=b></button><input id=i><p id=p></p></body>)"};
@@ -253,7 +291,8 @@ namespace krys::boo::html::tests
     CHECK_FALSE(document.FocusedElement());
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: shadow trees", "[HTML][Focus]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: shadow trees",
+                   "[HTML][Focus][html:get-the-focusable-area][html:focus-delegate][html:autofocus-delegate]")
   {
     ResolverFixture fixture {
       u8R"(<!DOCTYPE html><style>:focus { color: rgb(0, 0, 255) }</style><body><div id=host></div></body>)"};
@@ -290,7 +329,13 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: sequential focus navigation", "[HTML][Focus]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: sequential focus navigation",
+                   "[HTML][Focus][html:sequential-focus-navigation-order]"
+                   "[html:sequential-focus-navigation-starting-point][html:selection-mechanism-sequential]"
+                   "[html:sequential-navigation-search-algorithm][html:sequentially-focusable]"
+                   "[html:focus-navigation-scope-owner][html:associated-focus-navigation-owner]"
+                   "[html:tabindex-ordered-focus-navigation-scope]"
+                   "[html:flattened-tabindex-ordered-focus-navigation-scope]")
   {
     ResolverFixture fixture {
       u8R"(<!DOCTYPE html><body><button id=a></button><div id=b tabindex=2></div><a id=c href=x></a>)"

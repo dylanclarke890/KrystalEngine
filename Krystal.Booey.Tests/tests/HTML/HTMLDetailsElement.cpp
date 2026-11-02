@@ -274,7 +274,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDetailsElement: revealing", "[HTML][HTMLDetailsElement]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDetailsElement: revealing",
+                   "[HTML][HTMLDetailsElement][html:ancestor-revealing-algorithm]")
   {
     NavigationFixture fixture(
       u8"<details id=d><summary>Q</summary><p id=answer>The answer is here</p></details>"

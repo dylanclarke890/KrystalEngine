@@ -336,7 +336,7 @@ namespace krys::boo::html
     static inline KeywordStateMappingArray<2> StateMappings = {TrueStateMapping(), FalseStateMapping()};
 
     constexpr static AttributeState MissingValueDefault = AttributeState::Default;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Default;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::True;
     constexpr static AttributeState EmptyValueDefault = AttributeState::True;
   };
 

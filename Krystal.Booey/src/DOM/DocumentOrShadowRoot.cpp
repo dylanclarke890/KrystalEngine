@@ -327,9 +327,10 @@ namespace krys::boo::dom
     return ShareRefPtr(DynamicDowncast<Element>(*retargeted));
   }
 
+  // https://html.spec.whatwg.org/#dom-documentorshadowroot-activeelement
   RefPtr<Element> DocumentOrShadowRoot::ActiveElement() const noexcept
   {
-    // Let candidate be this's node document's focused area's DOM anchor.
+    // 1. Let candidate be this's node document's focused area's DOM anchor.
     auto &document = _rootNode.NodeDocument();
     Node *candidate = document.FocusedElement();
     if (!candidate)
@@ -337,32 +338,32 @@ namespace krys::boo::dom
       candidate = &document;
     }
 
-    // Set candidate to the result of retargeting candidate against this.
+    // 2. Set candidate to the result of retargeting candidate against this.
     auto *retargeted = DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(candidate, _rootNode));
     if (!retargeted)
     {
       return nullptr;
     }
 
-    // If candidate's root is not this, then return null.
+    // 3. If candidate's root is not this, then return null.
     if (&TreeQueries::Root(*retargeted) != &_rootNode)
     {
       return nullptr;
     }
 
-    // If candidate is not a Document object, then return candidate.
+    // 4. If candidate is not a Document object, then return candidate.
     if (!Is<Document>(*retargeted))
     {
       return ShareRefPtr(Downcast<Element>(retargeted));
     }
 
-    // If candidate has a body element, then return that body element.
+    // 5. If candidate has a body element, then return that body element.
     if (auto body = document.Body())
     {
       return body;
     }
 
-    // If candidate's document element is non-null, then return that document element.
+    // 6. If candidate's document element is non-null, then return that document element.
     return document.DocumentElement();
   }
 

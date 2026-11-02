@@ -349,7 +349,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Popover: invokers", "[HTML][Popover]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Popover: invokers",
+                   "[HTML][Popover][html:focus-navigation-scope-owner]"
+                   "[html:associated-focus-navigation-owner]")
   {
     NavigationFixture fixture(
       u8"<button id=t popovertarget=p>T</button><button id=after>A</button>"
