@@ -444,6 +444,16 @@ namespace krys::boo::html
     SelectedIndex(-1);
   }
 
+  void HTMLSelectElement::DisabledStateChanged() noexcept
+  {
+    HTMLFormControlElement::DisabledStateChanged();
+
+    // The options and optgroups in a disabled select are actually disabled, which :disabled and :enabled
+    // match.
+    // FIXME: Use PseudoClassChangeInvalidation instead for :has() support and more efficiency.
+    InvalidateStyleForSubtree();
+  }
+
   void HTMLSelectElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                                              Maybe<dom::DOMStringView> value,
                                              dom::DOMStringAtom namespaceURI) noexcept

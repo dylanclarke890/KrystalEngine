@@ -8,49 +8,56 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [4.14 Common idioms without dedicated elements](https://html.spec.whatwg.org/#common-idioms)
 
-Status: unreviewed
+Status: n/a (authoring advice)
 
 #### [4.14.1 Breadcrumb navigation](https://html.spec.whatwg.org/#rel-up)
 
-Status: unreviewed
+Status: n/a (authoring advice)
 
 #### [4.14.2 Tag clouds](https://html.spec.whatwg.org/#tag-clouds)
 
-Status: unreviewed
+Status: n/a (authoring advice)
 
 #### [4.14.3 Conversations](https://html.spec.whatwg.org/#conversations)
 
-Status: unreviewed
+Status: n/a (authoring advice)
 
 #### [4.14.4 Footnotes](https://html.spec.whatwg.org/#footnotes)
 
-Status: unreviewed
+Status: n/a (authoring advice)
 
 ### [4.15 Disabled elements](https://html.spec.whatwg.org/#disabled-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement::IsActuallyDisabled`; a disabled fieldset is `HTMLFieldSetElement`'s and a disabled form control `HTMLFormControlElement::IsDisabledFormControl`.
+> Fixed: options and optgroups in a disabled select weren't actually disabled (see `DIFFERENCES.md`).
 
-- [ ] [actually disabled](https://html.spec.whatwg.org/#concept-element-disabled) — An element is said to be actually disabled if it is one of the following:
+- [x] [actually disabled](https://html.spec.whatwg.org/#concept-element-disabled) — An element is said to be actually disabled if it is one of the following:
 
 ### [4.16 Matching HTML elements using selectors and CSS](https://html.spec.whatwg.org/#selectors)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Selector matching is `SelectorChecker`; HTML's elements are matched as in the specification, with namespaces and the document's quirks mode.
 
 #### [4.16.1 Case-sensitivity of the CSS 'attr()' function](https://html.spec.whatwg.org/#case-sensitivity-of-the-css-'attr%28%29'-function)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `ConsumeAttr` lowercases the name in HTML documents, whatever the element (see `DIFFERENCES.md`).
 
 #### [4.16.2 Case-sensitivity of selectors](https://html.spec.whatwg.org/#case-sensitivity-of-selectors)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLDocument::IsCaseSensitiveAttribute` lists the attributes whose values match ASCII case-insensitively; `SelectorChecker`'s attribute matching uses it for HTML elements in HTML documents.
 
 #### [4.16.3 Pseudo-classes](https://html.spec.whatwg.org/#pseudo-classes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The pseudo-classes are in `SelectorChecker` and `SelectorCheckerTestFunctions`; actively pointed at and the focus are the element's active and focused states (labels pass on their hover and active states, a focused shadow root's host matches `:focus`).
+> `:heading`, `:heading()` and `:open` aren't supported, and `:autofill` and the media pseudo-classes match nothing (see `KNOWN-ISSUES.md`); `:optional` matches inputs `required` doesn't apply to (see `DIFFERENCES.md`).
 <!-- definitions: selector-defined selector-link selector-visited selector-active concept-selector-active selector-hover concept-selector-hover selector-focus selector-target selector-popover-open selector-enabled selector-disabled selector-checked selector-indeterminate selector-default selector-placeholder-shown selector-valid selector-invalid selector-user-valid selector-user-invalid selector-in-range selector-out-of-range selector-required selector-optional selector-autofill selector-webkit-autofill selector-read-only selector-read-write selector-modal selector-ltr selector-rtl selector-custom selector-heading selector-heading-functional selector-playing selector-paused selector-seeking selector-buffering selector-stalled selector-muted selector-volume-locked selector-open -->
 
-- [ ] [in a formal activation state](https://html.spec.whatwg.org/#in-a-formal-activation-state) — An element is said to be in a formal activation state between the time the user begins to indicate an intent to trigger the element's activation behavior and either the time the user stops indicating an intent to trigger the element's activation behavior, or the time the element's activation behavior has finished running, which ever comes first.
+- [x] [in a formal activation state](https://html.spec.whatwg.org/#in-a-formal-activation-state) — An element is said to be in a formal activation state between the time the user begins to indicate an intent to trigger the element's activation behavior and either the time the user stops indicating an intent to trigger the element's activation behavior, or the time the element's activation behavior has finished running, which ever comes first.
 
-- [ ] [being actively pointed at](https://html.spec.whatwg.org/#being-actively-pointed-at) — An element is said to be being actively pointed at while the user indicates the element using a pointing device while that pointing device is in the "down" state (e.g. for a mouse, between the time the mouse button is pressed and the time it is released; for a finger in a multitouch environment, while the finger is touching the display surface).
+- [x] [being actively pointed at](https://html.spec.whatwg.org/#being-actively-pointed-at) — An element is said to be being actively pointed at while the user indicates the element using a pointing device while that pointing device is in the "down" state (e.g. for a mouse, between the time the mouse button is pressed and the time it is released; for a finger in a multitouch environment, while the finger is touching the display surface).
 
-- [ ] [element has the focus](https://html.spec.whatwg.org/#element-has-the-focus) — For the purposes of the CSS :focus pseudo-class, an element has the focus when:
+- [x] [element has the focus](https://html.spec.whatwg.org/#element-has-the-focus) — For the purposes of the CSS :focus pseudo-class, an element has the focus when:

@@ -35,6 +35,7 @@
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/LabelsNodeList.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Dimensions.hpp"
@@ -237,9 +238,33 @@ namespace krys::boo::html
            || IsHTMLOptGroupElement() || IsHTMLOptionElement() || IsHTMLFieldSetElement();
   }
 
+  // https://html.spec.whatwg.org/#concept-element-disabled
   bool HTMLElement::IsActuallyDisabled() const noexcept
   {
-    return CanBeActuallyDisabled() && IsDisabledFormControl();
+    // An element is said to be actually disabled if it is one of the following: a button, input, select or
+    // textarea element that is disabled; an optgroup element that has a disabled attribute or whose nearest
+    // ancestor select is disabled; an option element that is disabled or whose nearest ancestor select is
+    // disabled; a fieldset element that is a disabled fieldset (HTMLFieldSetElement's); a form-associated
+    // custom element that is disabled.
+    if (!CanBeActuallyDisabled())
+    {
+      return false;
+    }
+    if (IsDisabledFormControl())
+    {
+      return true;
+    }
+    if (IsHTMLOptGroupElement() || IsHTMLOptionElement())
+    {
+      for (auto *ancestor = ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+      {
+        if (auto *select = DynamicDowncast<HTMLSelectElement>(*ancestor))
+        {
+          return select->IsDisabledFormControl();
+        }
+      }
+    }
+    return false;
   }
 
   bool HTMLElement::MatchesReadWritePseudoClass() const noexcept

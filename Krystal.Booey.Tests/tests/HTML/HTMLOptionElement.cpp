@@ -104,4 +104,34 @@ namespace krys::boo::tests
     CHECK_FALSE(b.OwnerSelectElement());
     CHECK(b.Index() == 0);
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "HTMLOptionElement: options and optgroups in a disabled select are actually disabled",
+                   "[HTML][HTMLOptionElement][html:concept-element-disabled]")
+  {
+    EditorFixture fixture(u8"<select id=s disabled><optgroup id=g><option id=o>A</option></optgroup>"
+                          u8"<option id=p>B</option></select>"
+                          u8"<select id=t><optgroup id=h disabled><option id=q>C</option></optgroup>"
+                          u8"<option id=r>D</option></select>");
+    auto matches = [&](utf8_stringview id, utf8_stringview selector)
+    {
+      return fixture.ById(id).Matches(dom::DOMString(selector)).ReleaseValue();
+    };
+
+    for (auto id : {u8"s", u8"g", u8"o", u8"p", u8"h", u8"q"})
+    {
+      CHECK(matches(id, u8":disabled"));
+      CHECK_FALSE(matches(id, u8":enabled"));
+    }
+    CHECK(matches(u8"r", u8":enabled"));
+
+    // Enabling the select enables them, though the option is still disabled for selection by its optgroup.
+    fixture.ById(u8"s").RemoveAttribute(u8"disabled");
+    CHECK(matches(u8"o", u8":enabled"));
+    CHECK(matches(u8"g", u8":enabled"));
+    REQUIRE_FALSE(fixture.ById(u8"t").SetAttribute(u8"disabled", u8"").HasException());
+    CHECK(matches(u8"r", u8":disabled"));
+    CHECK_FALSE(OptionById(fixture, u8"r").IsDisabledFormControl());
+  }
+
 }
