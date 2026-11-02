@@ -220,7 +220,8 @@ namespace krys::boo::html::tests
     CHECK(attr(u8"empty") == "https://h.test:5/a%20b?a%20b#a%20b");
   }
 
-  TEST_CASE("URLDecomposition::SerializedOrigin", "[HTML][URLDecomposition]")
+  TEST_CASE("URLDecomposition::SerializedOrigin",
+            "[HTML][URLDecomposition][html:ascii-serialisation-of-an-origin][html:concept-origin]")
   {
     auto origin = [](utf8_stringview url)
     {

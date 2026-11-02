@@ -8,23 +8,26 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [7 Loading web pages](https://html.spec.whatwg.org/#browsers)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 ### [7.1 Supporting concepts](https://html.spec.whatwg.org/#loading-web-pages-supporting-concepts)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 #### [7.1.1 Origins](https://html.spec.whatwg.org/#origin)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Only the serialization of a URL's origin exists (`URLDecomposition::SerializedOrigin`, with a `file:` URL's origin `file://`); origins, their effective domains and the same origin checks don't (see `KNOWN-ISSUES.md`).
 <!-- definitions: concept-origin concept-origin-opaque concept-origin-tuple concept-origin-scheme concept-origin-host concept-origin-port concept-origin-domain -->
 
-- [ ] [effective domain](https://html.spec.whatwg.org/#concept-origin-effective-domain) — The effective domain of an origin origin is computed as follows:
+- [x] [effective domain](https://html.spec.whatwg.org/#concept-origin-effective-domain) — The effective domain of an origin origin is computed as follows:
   - 1. If origin is an opaque origin, then return null.
   - 2. If origin's domain is non-null, then return origin's domain.
   - 3. Return origin's host.
 
-- [ ] [serialization of an origin](https://html.spec.whatwg.org/#ascii-serialisation-of-an-origin) — The serialization of an origin is the string obtained by applying the following algorithm to the given origin origin:
+- [x] [serialization of an origin](https://html.spec.whatwg.org/#ascii-serialisation-of-an-origin) — The serialization of an origin is the string obtained by applying the following algorithm to the given origin origin:
   - 1. If origin is an opaque origin, then return "null".
   - 2. Otherwise, let result be origin's scheme.
   - 3. Append "://" to result.
@@ -32,12 +35,12 @@ Status: unreviewed
   - 5. If origin's port is non-null, append a U+003A COLON character (:), and origin's port, serialized, to result.
   - 6. Return result.
 
-- [ ] [same origin](https://html.spec.whatwg.org/#same-origin) — Two origins, A and B, are said to be same origin if the following algorithm returns true:
+- [x] [same origin](https://html.spec.whatwg.org/#same-origin) — Two origins, A and B, are said to be same origin if the following algorithm returns true:
   - 1. If A and B are the same opaque origin, then return true.
   - 2. If A and B are both tuple origins, their schemes and ports are identical, and their hosts are equal, then return true.
   - 3. Return false.
 
-- [ ] [same origin-domain](https://html.spec.whatwg.org/#same-origin-domain) — Two origins, A and B, are said to be same origin-domain if the following algorithm returns true:
+- [x] [same origin-domain](https://html.spec.whatwg.org/#same-origin-domain) — Two origins, A and B, are said to be same origin-domain if the following algorithm returns true:
   - 1. If A and B are the same opaque origin, then return true.
   - 2. If A and B are both tuple origins:
     - 2a. If A and B's schemes are identical, and their domains are identical and non-null, then return true.
@@ -84,14 +87,15 @@ Status: n/a (no origins)
 
 ##### [7.1.1.2 Relaxing the same-origin restriction](https://html.spec.whatwg.org/#relaxing-the-same-origin-restriction)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `document.domain` isn't implemented (see `KNOWN-ISSUES.md`).
 
-- [ ] [Document.domain](https://html.spec.whatwg.org/#dom-document-domain) — The domain getter steps are:
+- [x] [Document.domain](https://html.spec.whatwg.org/#dom-document-domain) — The domain getter steps are:
   - 1. Let effectiveDomain be this's origin's effective domain.
   - 2. If effectiveDomain is null, then return the empty string.
   - 3. Return effectiveDomain, serialized.
 
-- [ ] [The domain setter steps](https://html.spec.whatwg.org/#dom-document-domain) — The domain setter steps are:
+- [x] [The domain setter steps](https://html.spec.whatwg.org/#dom-document-domain) — The domain setter steps are:
   - 1. If this's browsing context is null, then throw a "SecurityError" DOMException.
   - 2. If this's active sandboxing flag set has its sandboxed document.domain browsing context flag set, then throw a "SecurityError" DOMException.
   - 3. Let effectiveDomain be this's origin's effective domain.
@@ -100,7 +104,7 @@ Status: unreviewed
   - 6. If the surrounding agent's agent cluster's is origin-keyed is true, then return.
   - 7. Set this's origin's domain to the result of parsing the given value.
 
-- [ ] [is a registrable domain suffix of or is equal to](https://html.spec.whatwg.org/#is-a-registrable-domain-suffix-of-or-is-equal-to) — To determine if a scalar value string hostSuffixString is a registrable domain suffix of or is equal to a host originalHost:
+- [x] [is a registrable domain suffix of or is equal to](https://html.spec.whatwg.org/#is-a-registrable-domain-suffix-of-or-is-equal-to) — To determine if a scalar value string hostSuffixString is a registrable domain suffix of or is equal to a host originalHost:
   - 1. If hostSuffixString is the empty string, then return false.
   - 2. Let hostSuffix be the result of parsing hostSuffixString.
   - 3. If hostSuffix is failure, then return false.
@@ -137,10 +141,11 @@ Status: n/a (no origins)
 
 #### [7.1.2 Origin-keyed agent clusters](https://html.spec.whatwg.org/#origin-keyed-agent-clusters)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `LocalDOMWindow::OriginAgentCluster` is false, as no document is origin-keyed.
 <!-- definitions: origin-agent-cluster -->
 
-- [ ] [Window.originAgentCluster](https://html.spec.whatwg.org/#dom-originagentcluster) — The originAgentCluster getter steps are to return the surrounding agent's agent cluster's is origin-keyed.
+- [x] [Window.originAgentCluster](https://html.spec.whatwg.org/#dom-originagentcluster) — The originAgentCluster getter steps are to return the surrounding agent's agent cluster's is origin-keyed.
 
 #### [7.1.3 Cross-origin opener policies](https://html.spec.whatwg.org/#cross-origin-opener-policies)
 

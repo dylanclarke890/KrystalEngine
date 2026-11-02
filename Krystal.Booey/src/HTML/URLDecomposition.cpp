@@ -20,12 +20,19 @@ namespace krys::boo::html
       return dom::USVString(u8"null");
     }
 
+    // https://html.spec.whatwg.org/#ascii-serialisation-of-an-origin
     if (url.ProtocolIs(u8"ftp") || url.ProtocolIs(u8"http") || url.ProtocolIs(u8"https")
         || url.ProtocolIs(u8"ws") || url.ProtocolIs(u8"wss"))
     {
+      // 2. Let result be origin's scheme.
       dom::USVString result(url.Protocol());
+      // 3. Append "://" to result.
       result += u8"://";
+      // 4. Append origin's host, serialized, to result.
+      // 5. If origin's port is non-null, append a U+003A COLON character (:), and origin's port, serialized,
+      //    to result.
       result += url.HostAndPort();
+      // 6. Return result.
       return result;
     }
 
@@ -35,7 +42,7 @@ namespace krys::boo::html
       return dom::USVString(u8"file://");
     }
 
-    // An opaque origin.
+    // 1. If origin is an opaque origin, then return "null".
     return dom::USVString(u8"null");
   }
 
