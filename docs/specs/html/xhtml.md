@@ -8,7 +8,8 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [14 The XML syntax](https://html.spec.whatwg.org/#the-xhtml-syntax)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> `XMLDocumentParser` (on libxml2) and `MarkupAccumulator`'s XML syntax.
 
 ### [14.1 Writing documents in the XML syntax](https://html.spec.whatwg.org/#writing-xhtml-documents)
 
@@ -16,10 +17,11 @@ Status: n/a (author conformance)
 
 ### [14.2 Parsing XML documents](https://html.spec.whatwg.org/#parsing-xhtml-documents)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> `XMLDocumentParser`; the XHTML public identifiers give HTML's named character references (`ExternalSubsetHandler`, `GetXHTMLEntity`). There's no scripting, so the parser never runs scripts and the parsing-blocking steps don't apply.
 <!-- definitions: xml-parser xml-scripting-support-enabled feed-the-parser -->
 
-- [ ] [When an XML parser with XML scripting support enabled creates a script element,…](https://html.spec.whatwg.org/#xml-scripting-support-disabled) — When an XML parser with XML scripting support enabled creates a script element, it must have its parser document set and its force async set to false. If the parser was created as part of the XML fragment parsing algorithm, then the element's already started must be set to true. When the element's…
+- [x] [When an XML parser with XML scripting support enabled creates a script element,…](https://html.spec.whatwg.org/#xml-scripting-support-disabled) — When an XML parser with XML scripting support enabled creates a script element, it must have its parser document set and its force async set to false. If the parser was created as part of the XML fragment parsing algorithm, then the element's already started must be set to true. When the element's…
   - 1. Block this instance of the XML parser, such that the event loop will not run tasks that invoke it.
   - 2. Spin the event loop until the parser's Document has no style sheet that is blocking scripts and the pending parsing-blocking script's ready to be parser-executed is true.
   - 3. Unblock this instance of the XML parser, such that tasks that invoke it can again be run.
@@ -28,19 +30,23 @@ Status: unreviewed
 
 ### [14.3 Serializing XML fragments](https://html.spec.whatwg.org/#serialising-xhtml-fragments)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> `MarkupAccumulator` with the XML syntax; a template serializes its contents. The error cases don't throw an InvalidStateError (FIXME, see `KNOWN-ISSUES.md`).
+> Fixed: an element's children in no namespace didn't declare the empty default namespace when the element had one.
 
-- [ ] [XML fragment serialization algorithm](https://html.spec.whatwg.org/#xml-fragment-serialisation-algorithm) — The XML fragment serialization algorithm for a Document or Element node either returns a fragment of XML that represents that node or throws an exception.
+- [x] [XML fragment serialization algorithm](https://html.spec.whatwg.org/#xml-fragment-serialisation-algorithm) — The XML fragment serialization algorithm for a Document or Element node either returns a fragment of XML that represents that node or throws an exception.
 
-- [ ] [relevant child nodes](https://html.spec.whatwg.org/#relevant-child-nodes) — A node's relevant child nodes are those that apply given the following rules:
+- [x] [relevant child nodes](https://html.spec.whatwg.org/#relevant-child-nodes) — A node's relevant child nodes are those that apply given the following rules:
   - • For template elements: The relevant child nodes are the child nodes of the template element's template contents, if any.
   - • For all other nodes: The relevant child nodes are the child nodes of node itself, if any.
 
 ### [14.4 Parsing XML fragments](https://html.spec.whatwg.org/#parsing-xhtml-fragments)
 
-Status: unreviewed
+Status: reviewed (2026-11-02)
+> `XMLDocumentParser::ParseDocumentFragment`, which declares the namespaces in scope on the context element rather than parsing its start and end tags.
+> Fixed: an ancestor's declaration of a prefix hid the context element's own, and a script's or style's markup was inserted as text rather than parsed.
 
-- [ ] [XML fragment parsing algorithm](https://html.spec.whatwg.org/#xml-fragment-parsing-algorithm) — The XML fragment parsing algorithm given an Element or DocumentFragment node target and a string input, runs the following steps. They return a DocumentFragment.
+- [x] [XML fragment parsing algorithm](https://html.spec.whatwg.org/#xml-fragment-parsing-algorithm) — The XML fragment parsing algorithm given an Element or DocumentFragment node target and a string input, runs the following steps. They return a DocumentFragment.
   - 1. Let context be target if target is an Element; otherwise target's host.
   - 2. Assert: context is non-null.
   - 3. Create a new XML parser.

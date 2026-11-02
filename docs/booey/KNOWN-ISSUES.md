@@ -46,6 +46,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - The tree builder does not give form-associated elements their parser form owner on creation: `FormAssociatedElement::SetFormSetByParser` exists but nothing calls it (FIXME in `HTMLTreeBuilder.cpp`).
 - There is no `document.open()`, `document.write()`, `document.writeln()` or `document.close()`, so there's no script-created parser and no insertion point.
 - There is no `DOMParser` (`Document.parseHTMLUnsafe()` and `Document.parseHTML()` parse HTML into a new document) and no `XMLSerializer`.
+- Serializing XML (`innerHTML` and `outerHTML` in an XML document) doesn't check the specification's error cases, so a comment containing `--`, a processing instruction containing `?>` and the rest are written as markup that isn't well-formed rather than throwing an `InvalidStateError` (FIXMEs in `MarkupAccumulator.cpp`). Test: `The XML fragment serialization algorithm refuses a DOM that isn't well-formed` (`[!shouldfail]`, `tests/DOM/DOMParsing.cpp`).
 
 ## HTML elements and forms
 

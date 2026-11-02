@@ -195,10 +195,11 @@ namespace krys::boo::xml
         }
         for (auto &attribute : element->AttributeList())
         {
+          // A declaration nearer the context element hides an ancestor's for the same prefix.
           if (attribute->Prefix() == infra::NamespacePrefixes::XMLNS)
           {
-            result.PrefixNamespaces.insert_or_assign(attribute->LocalName(),
-                                                     dom::DOMStringAtom(attribute->Value()));
+            result.PrefixNamespaces.try_emplace(attribute->LocalName(),
+                                                dom::DOMStringAtom(attribute->Value()));
           }
         }
       }
@@ -215,17 +216,9 @@ namespace krys::boo::xml
       return true;
     }
 
-    // FIXME: We need to implement the HTML5 XML Fragment parsing algorithm:
-    // http://www.whatwg.org/specs/web-apps/current-work/multipage/the-xhtml-syntax.html#xml-fragment-parsing-algorithm
-    // For now we have a hack for script/style innerHTML support:
-    if (contextElement
-        && (contextElement->LocalName() == u8"script" || contextElement->LocalName() == u8"style"))
-    {
-      auto text = CreateRef<dom::Text>(fragment.NodeDocument(), dom::DOMString(chunk));
-      (void)dom::MutationAlgorithms::Append(*text, fragment);
-      return true;
-    }
-
+    // https://html.spec.whatwg.org/#xml-fragment-parsing-algorithm
+    // (The parser declares the namespaces in scope on the context element rather than parsing it, and
+    // checks well-formedness as it parses the input into the fragment.)
     auto namespaces = FindXMLParsingNamespaces(contextElement);
     auto parser = XMLDocumentParser::Create(fragment, krys::move(namespaces.PrefixNamespaces),
                                             namespaces.DefaultNamespace);

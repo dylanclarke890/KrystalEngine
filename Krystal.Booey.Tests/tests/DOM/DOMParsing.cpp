@@ -136,7 +136,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Element: innerHTML in an XML document", "[DOM][Element][DOMParsing]")
+  TEST_CASE("Element: innerHTML in an XML document",
+            "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
   {
     auto document = CreateRef<XMLDocument>();
     auto root = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"div"))
@@ -153,6 +154,110 @@ namespace krys::boo::dom::tests
     REQUIRE(result.HasException());
     CHECK(result.GetException().Code() == ExceptionCode::SyntaxError);
     CHECK(root->FirstElementChild() == p);
+  }
+
+  TEST_CASE("The XML fragment parsing algorithm declares the namespaces in scope on the context",
+            "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
+  {
+    auto document = CreateRef<XMLDocument>();
+    auto root =
+      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+    REQUIRE_FALSE(
+      root->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:p"), u8"urn:outer")
+        .HasException());
+    auto context =
+      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"context")).ReleaseValue();
+    REQUIRE_FALSE(root->AppendChild(*context).HasException());
+
+    SECTION("the default namespace and an ancestor's prefix")
+    {
+      REQUIRE_FALSE(context->InnerHTML(u8"<a/><p:b/>").HasException());
+      auto a = context->FirstElementChild();
+      REQUIRE(a);
+      CHECK(a->NamespaceURI() == u8"urn:root");
+      auto b = a->NextElementSibling();
+      REQUIRE(b);
+      CHECK(b->NamespaceURI() == u8"urn:outer");
+    }
+
+    SECTION("a prefix declared nearer the context wins")
+    {
+      REQUIRE_FALSE(
+        context
+          ->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:p"), u8"urn:inner")
+          .HasException());
+      REQUIRE_FALSE(context->InnerHTML(u8"<p:b/>").HasException());
+      auto b = context->FirstElementChild();
+      REQUIRE(b);
+      CHECK(b->NamespaceURI() == u8"urn:inner");
+    }
+  }
+
+  TEST_CASE(
+    "The XML fragment serialization algorithm",
+    "[DOM][Element][DOMParsing][html:xml-fragment-serialisation-algorithm][html:relevant-child-nodes]")
+  {
+    auto document = CreateRef<XMLDocument>();
+    auto root =
+      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+
+    SECTION("declares the empty default namespace for elements in no namespace")
+    {
+      auto child = document->CreateElementNS(DOMStringAtom::Null(), DOMStringAtom(u8"c")).ReleaseValue();
+      REQUIRE_FALSE(root->AppendChild(*child).HasException());
+      CHECK(MarkupText(root->InnerHTML()) == "<c xmlns=\"\"/>");
+    }
+
+    SECTION("serialises a template's contents")
+    {
+      auto templateElement =
+        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"template"))
+          .ReleaseValue();
+      REQUIRE_FALSE(root->AppendChild(*templateElement).HasException());
+      REQUIRE_FALSE(templateElement->InnerHTML(u8"<b/>").HasException());
+      CHECK(templateElement->FirstChild() == nullptr);
+      CHECK(MarkupText(templateElement->InnerHTML()) == "<b xmlns=\"http://www.w3.org/1999/xhtml\"></b>");
+    }
+  }
+
+  TEST_CASE("The XML fragment serialization algorithm refuses a DOM that isn't well-formed",
+            "[DOM][Element][DOMParsing][html:xml-fragment-serialisation-algorithm][!shouldfail]")
+  {
+    // FIXME: Serializing XML doesn't check for the error cases, so it writes markup that isn't well-formed
+    // where it should throw an InvalidStateError. See KNOWN-ISSUES.md.
+    auto document = CreateRef<XMLDocument>();
+    auto root =
+      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+    REQUIRE_FALSE(root->AppendChild(*document->CreateComment(u8"a--b")).HasException());
+    CHECK(MarkupText(root->InnerHTML()).find("a--b") == std::string::npos);
+  }
+
+  TEST_CASE("The XML fragment parsing algorithm parses a script's or style's markup like any other",
+            "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
+  {
+    auto document = CreateRef<XMLDocument>();
+    auto root = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"div"))
+                  .ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+
+    for (auto name : {u8"script", u8"style"})
+    {
+      auto element =
+        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(name)).ReleaseValue();
+      REQUIRE_FALSE(root->AppendChild(*element).HasException());
+
+      REQUIRE_FALSE(element->InnerHTML(u8"<b/>").HasException());
+      auto b = element->FirstElementChild();
+      REQUIRE(b);
+      CHECK(b->LocalName() == u8"b");
+
+      auto result = element->InnerHTML(u8"a < b");
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == ExceptionCode::SyntaxError);
+    }
   }
 
   TEST_CASE("Void elements are serialised without end tags or children",

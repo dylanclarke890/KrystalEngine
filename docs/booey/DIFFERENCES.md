@@ -87,6 +87,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 - A `<link>` counts as created by the parser (and so is implicitly render-blocking) when it's inserted before it has finished parsing its children; upstream passes a flag to its constructor.
 - `<?xml-stylesheet?>` loads only CSS sheets: there's no XSLT.
+- Parsing an XML fragment (`innerHTML` in an XML document) follows the specification where upstream doesn't: a script's or style's markup is parsed like any other (upstream inserts it as text), and a namespace prefix declared on the context element hides an ancestor's declaration of it. Serializing an element's children declares the empty default namespace for those in no namespace when the element has a default namespace in scope.
 - Serializing HTML follows the specification where upstream doesn't: HTML, SVG and MathML elements are written with their local names rather than their qualified names, an element's `is` value is written when it has no `is` attribute, a shadow root with manual slot assignment gets `shadowrootslotassignment="manual"`, and a processing instruction ends with `>` rather than `?>`.
 
 ## HTML elements and forms

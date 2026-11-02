@@ -82,7 +82,8 @@ namespace krys::boo::tests
     CHECK(Downcast<dom::CDATASection>(*desc->LastChild()).Data() == u8" <raw> ");
   }
 
-  TEST_CASE("An XML document keeps its declaration and doctype", "[XML][XMLDocumentParser]")
+  TEST_CASE("An XML document keeps its declaration and doctype",
+            "[XML][XMLDocumentParser][html:parsing-xhtml-documents]")
   {
     LoadFixture fixture;
     LoadDocument(fixture,
@@ -151,7 +152,8 @@ namespace krys::boo::tests
     CHECK(IsSVG<svg::SVGSvgElement>(Downcast<dom::Element>(*body->LastChild())));
   }
 
-  TEST_CASE("An XHTML document has HTML elements and HTML's named entities", "[XML][XMLDocumentParser]")
+  TEST_CASE("An XHTML document has HTML elements and HTML's named entities",
+            "[XML][XMLDocumentParser][html:parsing-xhtml-documents]")
   {
     LoadFixture fixture;
     LoadDocument(
@@ -169,7 +171,8 @@ namespace krys::boo::tests
     CHECK(paragraph->TextContent() == u8"a b&c");
   }
 
-  TEST_CASE("An undefined entity in an XML document is an error", "[XML][XMLDocumentParser]")
+  TEST_CASE("An undefined entity in an XML document is an error",
+            "[XML][XMLDocumentParser][html:parsing-xhtml-documents]")
   {
     LoadFixture fixture;
     LoadDocument(fixture, u8"<root>a&nbsp;b</root>", u8"application/xml");

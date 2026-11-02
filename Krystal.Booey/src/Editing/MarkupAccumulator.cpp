@@ -366,6 +366,19 @@ namespace krys::boo
       Namespaces namespaceHash;
       namespaceHash.insert_or_assign(XMLAtom(), dom::DOMStringAtom(infra::Namespaces::XML));
       namespaceHash.insert_or_assign(dom::DOMStringAtom(infra::Namespaces::XML), XMLAtom());
+
+      // An element's children are serialized in the default namespace in scope on it, so that children in no
+      // namespace declare the empty default namespace.
+      if (auto *element = DynamicDowncast<dom::Element>(targetNode);
+          element && root != SerializedNodes::SubtreeIncludingNode)
+      {
+        auto defaultNamespace = element->LookupNamespaceURI(dom::DOMStringAtom::Null());
+        if (!defaultNamespace.View().empty())
+        {
+          namespaceHash.insert_or_assign(EmptyAtom(), defaultNamespace);
+        }
+      }
+
       namespaceStack.push_back(krys::move(namespaceHash));
     }
     else
