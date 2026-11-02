@@ -1337,6 +1337,14 @@ namespace krys::boo
                                          const FormSubmission *formSubmission,
                                          dom::DOMStringView frameName) noexcept
   {
+    // https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable
+    // 8. If chosen is null, then a new top-level traversable is being requested: ... If the user agent has
+    //    been configured such that in this instance it will create a new top-level traversable:
+    // 8a. Consume user activation of currentNavigable's active window.
+    if (auto *window = _frame.Document() ? _frame.Document()->Window() : nullptr)
+    {
+      (void)window->ConsumeTransientActivation();
+    }
     auto policy = _client->DispatchDecidePolicyForNewWindowAction(action, request, formSubmission, frameName);
     // FIXME: Opening the new browsing context (continueLoadAfterNewWindowPolicy): there are no windows, so
     // the host opens one itself and answers `Ignore`.
@@ -1346,18 +1354,34 @@ namespace krys::boo
   LocalFrame *FrameLoader::FindFrameForNavigation(dom::DOMStringView name) const noexcept
   {
     // https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable
+    // 1. Let chosen be null.
+    // 2. Let windowType be "existing or none".
+    // 3. Let sandboxingFlagSet be currentNavigable's active document's active sandboxing flag set.
+    // 4. If name is the empty string or an ASCII case-insensitive match for "_self", then set chosen to
+    //    currentNavigable.
+    // 5. Otherwise, if name is an ASCII case-insensitive match for "_parent", set chosen to
+    // currentNavigable's
+    //    parent, if any, and currentNavigable otherwise.
+    // 6. Otherwise, if name is an ASCII case-insensitive match for "_top", set chosen to currentNavigable's
+    //    traversable navigable.
+    // (The frame has no parent, and is its traversable navigable.)
     if (name.empty() || text::IsASCIICaselessEqual(name, utf8_stringview(u8"_self"))
         || text::IsASCIICaselessEqual(name, utf8_stringview(u8"_parent"))
         || text::IsASCIICaselessEqual(name, utf8_stringview(u8"_top")))
     {
       return &_frame;
     }
-    // A navigable whose target name is name: the frame itself, as there's no frame tree.
+    // 7. Otherwise, if name is not an ASCII case-insensitive match for "_blank", then set chosen to the
+    // result
+    //    of finding a navigable by target name given name and currentNavigable.
+    // https://html.spec.whatwg.org/#find-a-navigable-by-target-name
+    // (The frame is the only navigable to search, and there are no other top-level browsing contexts.)
     if (!text::IsASCIICaselessEqual(name, utf8_stringview(u8"_blank")) && name == _frame.SpecifiedName())
     {
       return &_frame;
     }
-    // `_blank`, and names no frame has.
+    // 8. If chosen is null, then a new top-level traversable is being requested.
+    // (CheckNewWindowPolicy asks the host for one.)
     return nullptr;
   }
 

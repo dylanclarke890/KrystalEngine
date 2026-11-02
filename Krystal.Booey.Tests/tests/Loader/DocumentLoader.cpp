@@ -28,7 +28,10 @@
 
 namespace krys::boo::tests
 {
-  TEST_CASE("A frame starts with its initial empty document", "[Loader][DocumentLoader]")
+  TEST_CASE("A frame starts with its initial empty document",
+            "[Loader][DocumentLoader][html:creating-a-new-browsing-context]"
+            "[html:creating-a-new-top-level-browsing-context][html:creating-a-new-top-level-traversable]"
+            "[html:initialize-the-navigable][html:fully-active][html:node-navigable][html:nav-document]")
   {
     LoadFixture fixture;
     auto &loader = fixture.Frame().Loader();
@@ -37,6 +40,17 @@ namespace krys::boo::tests
     CHECK(fixture.Document().GetURL().String() == u8"about:blank");
     CHECK(fixture.Document().Window() != nullptr);
     CHECK(fixture.Document().DocumentElement() != nullptr);
+    // An HTML document in quirks mode, with a head and a body, that's completely loaded and fully active.
+    CHECK(fixture.Document().ContentType() == u8"text/html");
+    CHECK(fixture.Document().InQuirksMode());
+    CHECK(fixture.Document().Head());
+    CHECK(fixture.Document().Body());
+    CHECK(fixture.Document().ReadyState() == html::DocumentReadyState::Complete);
+    // It gets no load event.
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(fixture.Events.empty());
+    CHECK(fixture.Document().IsFullyActive());
+    CHECK(fixture.Document().Frame() == &fixture.Frame());
     CHECK_FALSE(loader.IsLoading());
     REQUIRE(loader.GetDocumentLoader());
     CHECK(loader.GetDocumentLoader()->IsCommitted());

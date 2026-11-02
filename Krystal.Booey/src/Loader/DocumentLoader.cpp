@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/DocumentLoader.hpp"
+#include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
@@ -213,5 +215,13 @@ namespace krys::boo
       return;
     }
     _writer.End();
+
+    // https://html.spec.whatwg.org/#creating-a-new-browsing-context
+    // 26. Completely finish loading document.
+    // (The document is never parsed, so its readiness is "complete", and it gets no load event.)
+    if (RefPtr<dom::Document> document = ShareRefPtr(_frame ? _frame->Document() : nullptr))
+    {
+      dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Complete);
+    }
   }
 }

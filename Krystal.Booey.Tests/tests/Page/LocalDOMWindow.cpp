@@ -997,8 +997,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window opens windows through the host",
-            "[Page][LocalDOMWindow][html:dom-open][html:window-open-steps][html:dom-name]")
+  TEST_CASE(
+    "A window opens windows through the host",
+    "[Page][LocalDOMWindow][html:dom-open][html:window-open-steps][html:dom-name]"
+    "[html:the-rules-for-choosing-a-navigable][html:find-a-navigable-by-target-name][html:nav-target]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -1024,9 +1026,11 @@ namespace krys::boo::tests
     CHECK(navigations[0].Action.GetWindowFeatures()->Width == 300.f);
     CHECK(navigations[0].Action.GetWindowFeatures()->WantsPopup());
     CHECK(navigations[0].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
+    // Opening a window consumes the activation.
+    CHECK_FALSE(window.HasTransientActivation());
+    CHECK(window.HasStickyActivation());
 
     // An existing browsing context is navigated, without activation.
-    (void)window.ConsumeTransientActivation();
     auto self = window.Open(u8"#here", dom::DOMStringAtom(u8"_self"));
     REQUIRE_FALSE(self.HasException());
     CHECK(self.Value() == &window);

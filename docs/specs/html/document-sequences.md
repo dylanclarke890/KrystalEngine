@@ -8,26 +8,28 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [7.3 Infrastructure for sequences of documents](https://html.spec.whatwg.org/#infrastructure-for-sequences-of-documents)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sections below.
 
 #### [7.3.1 Navigables](https://html.spec.whatwg.org/#navigables)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> A `LocalFrame` is the navigable: its document is the active document (`Document::Frame` is the node navigable), its window the active window and `SpecifiedName` the target name. Session history entries are `HistoryItem`s, kept by the page's `BackForwardController`, rather than the navigable's.
 <!-- definitions: navigable nav-id nav-parent nav-current-history-entry nav-active-history-entry is-closing delaying-load-events-mode allowed-to-perform-a-navigation-or-history-update -->
 
-- [ ] [active document (navigable)](https://html.spec.whatwg.org/#nav-document) — A navigable's active document is its active session history entry's document.
+- [x] [active document (navigable)](https://html.spec.whatwg.org/#nav-document) — A navigable's active document is its active session history entry's document.
 
-- [ ] [active browsing context (navigable)](https://html.spec.whatwg.org/#nav-bc) — A navigable's active browsing context is its active document's browsing context. If this navigable is a traversable navigable, then its active browsing context will be a top-level browsing context.
+- [x] [active browsing context (navigable)](https://html.spec.whatwg.org/#nav-bc) — A navigable's active browsing context is its active document's browsing context. If this navigable is a traversable navigable, then its active browsing context will be a top-level browsing context.
 
-- [ ] [active WindowProxy](https://html.spec.whatwg.org/#nav-wp) — A navigable's active WindowProxy is its active browsing context's associated WindowProxy.
+- [x] [active WindowProxy](https://html.spec.whatwg.org/#nav-wp) — A navigable's active WindowProxy is its active browsing context's associated WindowProxy.
 
-- [ ] [active window (navigable)](https://html.spec.whatwg.org/#nav-window) — A navigable's active window is its active WindowProxy's [[Window]].
+- [x] [active window (navigable)](https://html.spec.whatwg.org/#nav-window) — A navigable's active window is its active WindowProxy's [[Window]].
 
-- [ ] [target name](https://html.spec.whatwg.org/#nav-target) — A navigable's target name is its active session history entry's document state's navigable target name.
+- [x] [target name](https://html.spec.whatwg.org/#nav-target) — A navigable's target name is its active session history entry's document state's navigable target name.
 
-- [ ] [node navigable](https://html.spec.whatwg.org/#node-navigable) — To get the node navigable of a node node, return the navigable whose active document is node's node document, or null if there is no such navigable.
+- [x] [node navigable](https://html.spec.whatwg.org/#node-navigable) — To get the node navigable of a node node, return the navigable whose active document is node's node document, or null if there is no such navigable.
 
-- [ ] [initialize the navigable](https://html.spec.whatwg.org/#initialize-the-navigable) — To initialize the navigable navigable navigable, given a document state documentState and an optional navigable-or-null parent (default null):
+- [x] [initialize the navigable](https://html.spec.whatwg.org/#initialize-the-navigable) — To initialize the navigable navigable navigable, given a document state documentState and an optional navigable-or-null parent (default null):
   - 1. Assert: documentState's document is non-null.
   - 2. Let entry be a new session history entry, with URLdocumentState's document's URLdocument statedocumentState
   - 3. Set navigable's current session history entry to entry.
@@ -37,27 +39,29 @@ Status: unreviewed
 
 ##### [7.3.1.1 Traversable navigables](https://html.spec.whatwg.org/#traversable-navigables)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The `Page` is the traversable navigable, with its main frame its only navigable; its session history is the back/forward list, and there's no session history traversal queue (traversals are `NavigationScheduler` tasks).
 <!-- definitions: traversable-navigable tn-current-session-history-step tn-session-history-entries tn-session-history-traversal-queue tn-running-nested-apply-history-step system-visibility-state is-created-by-web-content -->
 
-- [ ] [traversable navigable (navigable)](https://html.spec.whatwg.org/#nav-traversable) — To get the traversable navigable of a navigable inputNavigable:
+- [x] [traversable navigable (navigable)](https://html.spec.whatwg.org/#nav-traversable) — To get the traversable navigable of a navigable inputNavigable:
   - 1. Let navigable be inputNavigable.
   - 2. While navigable is not a traversable navigable, set navigable to navigable's parent.
   - 3. Return navigable.
 
 ##### [7.3.1.2 Top-level traversables](https://html.spec.whatwg.org/#top-level-traversables)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The host creates each top-level traversable as a `Page`; `FrameLoader::Init` gives its frame the initial about:blank document. There's no set of them, as pages don't know of each other.
 <!-- definitions: top-level-traversable-set -->
 
-- [ ] [top-level traversable](https://html.spec.whatwg.org/#top-level-traversable) — A top-level traversable is a traversable navigable with a null parent.
+- [x] [top-level traversable](https://html.spec.whatwg.org/#top-level-traversable) — A top-level traversable is a traversable navigable with a null parent.
 
-- [ ] [top-level traversable (navigable)](https://html.spec.whatwg.org/#nav-top) — To get the top-level traversable of a navigable inputNavigable:
+- [x] [top-level traversable (navigable)](https://html.spec.whatwg.org/#nav-top) — To get the top-level traversable of a navigable inputNavigable:
   - 1. Let navigable be inputNavigable.
   - 2. While navigable's parent is not null, set navigable to navigable's parent.
   - 3. Return navigable.
 
-- [ ] [create a new top-level traversable](https://html.spec.whatwg.org/#creating-a-new-top-level-traversable) — To create a new top-level traversable given a browsing context-or-null opener, a string targetName, and an optional navigable openerNavigableForWebDriver:
+- [x] [create a new top-level traversable](https://html.spec.whatwg.org/#creating-a-new-top-level-traversable) — To create a new top-level traversable given a browsing context-or-null opener, a string targetName, and an optional navigable openerNavigableForWebDriver:
   - 1. Let document be null.
   - 2. If opener is null, then set document to the second return value of creating a new top-level browsing context and document.
   - 3. Otherwise, set document to the second return value of creating a new auxiliary browsing context and document given opener.
@@ -72,7 +76,7 @@ Status: unreviewed
   - 12. Invoke WebDriver BiDi navigable created with traversable and openerNavigableForWebDriver.
   - 13. Return traversable.
 
-- [ ] [create a fresh top-level traversable](https://html.spec.whatwg.org/#create-a-fresh-top-level-traversable) — To create a fresh top-level traversable given a URL initialNavigationURL and an optional POST resource-or-null initialNavigationPostResource (default null):
+- [x] [create a fresh top-level traversable](https://html.spec.whatwg.org/#create-a-fresh-top-level-traversable) — To create a fresh top-level traversable given a URL initialNavigationURL and an optional POST resource-or-null initialNavigationPostResource (default null):
   - 1. Let traversable be the result of creating a new top-level traversable given null and the empty string.
   - 2. Navigate traversable to initialNavigationURL using traversable's active document, with documentResource set to initialNavigationPostResource.
   - 3. Return traversable.
@@ -128,14 +132,15 @@ Status: n/a (no frame tree)
 
 ##### [7.3.1.4 Jake diagrams](https://html.spec.whatwg.org/#jake-diagrams)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> No requirements.
 <!-- definitions: jake-diagram -->
 
 ##### [7.3.1.5 Related navigable collections](https://html.spec.whatwg.org/#related-navigable-collections)
 
-Status: unreviewed
+Status: n/a (no frame tree)
 
-- [ ] [ancestor navigables (Document)](https://html.spec.whatwg.org/#ancestor-navigables) — The ancestor navigables of a Document document are given by these steps:
+- [x] [ancestor navigables (Document)](https://html.spec.whatwg.org/#ancestor-navigables) — The ancestor navigables of a Document document are given by these steps:
   - 1. Let navigable be document's node navigable's parent.
   - 2. Let ancestors be an empty list.
   - 3. While navigable is not null:
@@ -143,12 +148,12 @@ Status: unreviewed
     - 3b. Set navigable to navigable's parent.
   - 4. Return ancestors.
 
-- [ ] [inclusive ancestor navigables (Document)](https://html.spec.whatwg.org/#inclusive-ancestor-navigables) — The inclusive ancestor navigables of a Document document are given by these steps:
+- [x] [inclusive ancestor navigables (Document)](https://html.spec.whatwg.org/#inclusive-ancestor-navigables) — The inclusive ancestor navigables of a Document document are given by these steps:
   - 1. Let navigables be document's ancestor navigables.
   - 2. Append document's node navigable to navigables.
   - 3. Return navigables.
 
-- [ ] [descendant navigables (Document)](https://html.spec.whatwg.org/#descendant-navigables) — The descendant navigables of a Document document are given by these steps:
+- [x] [descendant navigables (Document)](https://html.spec.whatwg.org/#descendant-navigables) — The descendant navigables of a Document document are given by these steps:
   - 1. Let navigables be new list.
   - 2. Let navigableContainers be a list of all shadow-including descendants of document that are navigable containers, in shadow-including tree order.
   - 3. For each navigableContainer of navigableContainers:
@@ -156,12 +161,12 @@ Status: unreviewed
     - 3b. Extend navigables with navigableContainer's content navigable's active document's inclusive descendant navigables.
   - 4. Return navigables.
 
-- [ ] [inclusive descendant navigables (Document)](https://html.spec.whatwg.org/#inclusive-descendant-navigables) — The inclusive descendant navigables of a Document document are given by these steps:
+- [x] [inclusive descendant navigables (Document)](https://html.spec.whatwg.org/#inclusive-descendant-navigables) — The inclusive descendant navigables of a Document document are given by these steps:
   - 1. Let navigables be « document's node navigable ».
   - 2. Extend navigables with document's descendant navigables.
   - 3. Return navigables.
 
-- [ ] [document-tree child navigables](https://html.spec.whatwg.org/#document-tree-child-navigables) — The document-tree child navigables of a Document document are given by these steps:
+- [x] [document-tree child navigables](https://html.spec.whatwg.org/#document-tree-child-navigables) — The document-tree child navigables of a Document document are given by these steps:
   - 1. If document's node navigable is null, then return the empty list.
   - 2. Let navigables be new list.
   - 3. Let navigableContainers be a list of all descendants of document that are navigable containers, in tree order.
@@ -172,9 +177,10 @@ Status: unreviewed
 
 ##### [7.3.1.6 Navigable destruction](https://html.spec.whatwg.org/#garbage-collection-and-browsing-contexts)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `window.close()` asks the page to stay (beforeunload) before setting is closing, then the host closes the window in a task; destroying the page destroys its documents. Child navigables are n/a, as there's no frame tree.
 
-- [ ] [destroy a child navigable](https://html.spec.whatwg.org/#destroy-a-child-navigable) — To destroy a child navigable given a navigable container container:
+- [x] [destroy a child navigable](https://html.spec.whatwg.org/#destroy-a-child-navigable) — To destroy a child navigable given a navigable container container:
   - 1. Let navigable be container's content navigable.
   - 2. If navigable is null, then return.
   - 3. Set container's content navigable to null.
@@ -187,7 +193,7 @@ Status: unreviewed
     - 9a. Update for navigable creation/destruction given traversable.
   - 10. Invoke WebDriver BiDi navigable destroyed with navigable.
 
-- [ ] [destroy](https://html.spec.whatwg.org/#destroy-a-top-level-traversable) — To destroy a top-level traversable traversable:
+- [x] [destroy](https://html.spec.whatwg.org/#destroy-a-top-level-traversable) — To destroy a top-level traversable traversable:
   - 1. Let browsingContext be traversable's active browsing context.
   - 2. For each historyEntry in traversable's session history entries :
     - 2a. Let document be historyEntry's document.
@@ -197,11 +203,11 @@ Status: unreviewed
   - 5. Remove traversable from the user agent's top-level traversable set.
   - 6. Invoke WebDriver BiDi navigable destroyed with traversable.
 
-- [ ] [close (top-level traversable)](https://html.spec.whatwg.org/#close-a-top-level-traversable) — To close a top-level traversable traversable:
+- [x] [close (top-level traversable)](https://html.spec.whatwg.org/#close-a-top-level-traversable) — To close a top-level traversable traversable:
   - 1. If traversable's is closing is true, then return.
   - 2. Definitely close traversable.
 
-- [ ] [definitely close](https://html.spec.whatwg.org/#definitely-close-a-top-level-traversable) — To definitely close a top-level traversable traversable:
+- [x] [definitely close](https://html.spec.whatwg.org/#definitely-close-a-top-level-traversable) — To definitely close a top-level traversable traversable:
   - 1. Let toUnload be traversable's active document's inclusive descendant navigables.
   - 2. If the result of checking if unloading is canceled for toUnload is not "continue", then return.
   - 3. Append the following session history traversal steps to traversable:
@@ -210,13 +216,15 @@ Status: unreviewed
 
 ##### [7.3.1.7 Navigable target names](https://html.spec.whatwg.org/#navigable-target-names)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Fixed: asking the host for a new window consumes the window's transient activation (`FrameLoader::CheckNewWindowPolicy`, step 8a).
+> `FrameLoader::FindFrameForNavigation`: the frame is the only navigable to find by target name. Valid target names are an authoring requirement.
 
-- [ ] [valid navigable target name](https://html.spec.whatwg.org/#valid-navigable-target-name) — A valid navigable target name is any string with at least one character that does not contain both an ASCII tab or newline and a U+003C (<), and it does not start with a U+005F (_). (Names starting with a U+005F (_) are reserved for special keywords.)
+- [x] [valid navigable target name](https://html.spec.whatwg.org/#valid-navigable-target-name) — A valid navigable target name is any string with at least one character that does not contain both an ASCII tab or newline and a U+003C (<), and it does not start with a U+005F (_). (Names starting with a U+005F (_) are reserved for special keywords.)
 
-- [ ] [valid navigable target name or keyword](https://html.spec.whatwg.org/#valid-navigable-target-name-or-keyword) — A valid navigable target name or keyword is any string that is either a valid navigable target name or that is an ASCII case-insensitive match for one of: _blank, _self, _parent, or _top.
+- [x] [valid navigable target name or keyword](https://html.spec.whatwg.org/#valid-navigable-target-name-or-keyword) — A valid navigable target name or keyword is any string that is either a valid navigable target name or that is an ASCII case-insensitive match for one of: _blank, _self, _parent, or _top.
 
-- [ ] [find a navigable by target name](https://html.spec.whatwg.org/#find-a-navigable-by-target-name) — To find a navigable by target name given a string name and a navigable currentNavigable:
+- [x] [find a navigable by target name](https://html.spec.whatwg.org/#find-a-navigable-by-target-name) — To find a navigable by target name given a string name and a navigable currentNavigable:
   - 1. Let currentDocument be currentNavigable's active document.
   - 2. Let sourceSnapshotParams be the result of snapshotting source snapshot params given currentDocument.
   - 3. Let subtreesToSearch be an implementation-defined choice of one of the following: « currentNavigable's traversable navigable, currentNavigable »; the inclusive ancestor navigables of currentDocument
@@ -236,7 +244,7 @@ Status: unreviewed
       - 7c.iii. If navigable's target name is name, then return navigable.
   - 8. Return null.
 
-- [ ] [The rules for choosing a navigable](https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable) — The rules for choosing a navigable, given a string name, a navigable currentNavigable, and a boolean noopener are as follows:
+- [x] [The rules for choosing a navigable](https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable) — The rules for choosing a navigable, given a string name, a navigable currentNavigable, and a boolean noopener are as follows:
   - 1. Let chosen be null.
   - 2. Let windowType be "existing or none".
   - 3. Let sandboxingFlagSet be currentNavigable's active document's active sandboxing flag set.
@@ -264,20 +272,23 @@ Status: unreviewed
 
 #### [7.3.2 Browsing contexts](https://html.spec.whatwg.org/#windows)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> There are no browsing contexts apart from navigables: a frame's window and document are its browsing context's, and there are no auxiliary browsing contexts, openers or popups (see `DIFFERENCES.md`).
 <!-- definitions: browsing-context active-document opener-browsing-context opener-origin-at-creation is-popup is-auxiliary browsing-context-initial-url virtual-browsing-context-group-id concept-document-bc -->
 
-- [ ] [active window](https://html.spec.whatwg.org/#active-window) — A browsing context's active window is its WindowProxy object's [[Window]] internal slot value.
+- [x] [active window](https://html.spec.whatwg.org/#active-window) — A browsing context's active window is its WindowProxy object's [[Window]] internal slot value.
 
-- [ ] [top-level traversable (browsing context)](https://html.spec.whatwg.org/#bc-traversable) — A browsing context's top-level traversable is its active document's node navigable's top-level traversable.
+- [x] [top-level traversable (browsing context)](https://html.spec.whatwg.org/#bc-traversable) — A browsing context's top-level traversable is its active document's node navigable's top-level traversable.
 
-- [ ] [auxiliary browsing context](https://html.spec.whatwg.org/#auxiliary-browsing-context) — A browsing context whose is auxiliary is true is known as an auxiliary browsing context. Auxiliary browsing contexts are always top-level browsing contexts.
+- [x] [auxiliary browsing context](https://html.spec.whatwg.org/#auxiliary-browsing-context) — A browsing context whose is auxiliary is true is known as an auxiliary browsing context. Auxiliary browsing contexts are always top-level browsing contexts.
 
 ##### [7.3.2.1 Creating browsing contexts](https://html.spec.whatwg.org/#creating-browsing-contexts)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Fixed: the initial about:blank document is completely loaded at once, its readiness "complete" (it had stayed "interactive").
+> `FrameLoader::Init` and `DocumentLoader::CommitInitialEmptyDocument` make the frame's initial about:blank document: an HTML document in quirks mode with `html`, `head` and `body`. Origins, sandboxing and policy containers are absent (see `KNOWN-ISSUES.md`).
 
-- [ ] [create a new browsing context and document](https://html.spec.whatwg.org/#creating-a-new-browsing-context) — To create a new browsing context and document, given null or a Document object creator, null or an element embedder, and a browsing context group group:
+- [x] [create a new browsing context and document](https://html.spec.whatwg.org/#creating-a-new-browsing-context) — To create a new browsing context and document, given null or a Document object creator, null or an element embedder, and a browsing context group group:
   - 1. Let browsingContext be a new browsing context.
   - 2. Let unsafeContextCreationTime be the unsafe shared current time.
   - 3. Let creatorOrigin be null.
@@ -313,11 +324,11 @@ Status: unreviewed
   - 24. Completely finish loading document.
   - 25. Return browsingContext and document.
 
-- [ ] [create a new top-level browsing context and document](https://html.spec.whatwg.org/#creating-a-new-top-level-browsing-context) — To create a new top-level browsing context and document:
+- [x] [create a new top-level browsing context and document](https://html.spec.whatwg.org/#creating-a-new-top-level-browsing-context) — To create a new top-level browsing context and document:
   - 1. Let group and document be the result of creating a new browsing context group and document.
   - 2. Return group's browsing context set[0] and document.
 
-- [ ] [create a new auxiliary browsing context and document](https://html.spec.whatwg.org/#creating-a-new-auxiliary-browsing-context) — To create a new auxiliary browsing context and document, given a browsing context opener:
+- [x] [create a new auxiliary browsing context and document](https://html.spec.whatwg.org/#creating-a-new-auxiliary-browsing-context) — To create a new auxiliary browsing context and document, given a browsing context opener:
   - 1. Let openerTopLevelBrowsingContext be opener's top-level traversable's active browsing context.
   - 2. Let group be openerTopLevelBrowsingContext's group.
   - 3. Assert: group is non-null, as navigating invokes this directly.
@@ -329,7 +340,7 @@ Status: unreviewed
   - 9. Set browsingContext's opener origin at creation to opener's active document's origin.
   - 10. Return browsingContext and document.
 
-- [ ] [determine the origin](https://html.spec.whatwg.org/#determining-the-origin) — To determine the origin, given a URL url, a sandboxing flag set sandboxFlags, and an origin-or-null sourceOrigin:
+- [x] [determine the origin](https://html.spec.whatwg.org/#determining-the-origin) — To determine the origin, given a URL url, a sandboxing flag set sandboxFlags, and an origin-or-null sourceOrigin:
   - 1. If sandboxFlags has its sandboxed origin browsing context flag set, then return a new opaque origin.
   - 2. If url is null, then return a new opaque origin.
   - 3. If url is about:srcdoc:
@@ -389,6 +400,7 @@ Status: n/a (no browsing context groups)
 
 #### [7.3.3 Fully active documents](https://html.spec.whatwg.org/#fully-active-documents)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Document::IsFullyActive`: the frame's active document, as every frame is top-level.
 
-- [ ] [fully active (Document)](https://html.spec.whatwg.org/#fully-active) — A Document d is said to be fully active when d is the active document of a navigable navigable, and either navigable is a top-level traversable or navigable's container document is fully active.
+- [x] [fully active (Document)](https://html.spec.whatwg.org/#fully-active) — A Document d is said to be fully active when d is the active document of a navigable navigable, and either navigable is a top-level traversable or navigable's container document is fully active.
