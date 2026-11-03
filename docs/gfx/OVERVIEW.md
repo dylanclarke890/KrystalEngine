@@ -16,7 +16,7 @@ Graphics is three layers. Krystal.Gfx holds the render hardware interface (the R
 
 ## Render2D
 
-Render2D (`Krystal.Gfx/Render2D/`, namespace `krys::gfx`) is a 2D renderer whose API mirrors upstream's `GraphicsContext` primitives rather than CSS, so Booey's painters express everything as these calls. Game HUD or debug overlay code can use it directly.
+Render2D (`Krystal.Gfx/Render2D/`, namespace `krys::gfx`) is a 2D renderer whose API mirrors `boo::GraphicsContext`'s primitives rather than CSS, so Booey's painters express everything as these calls. Game HUD or debug overlay code can use it directly.
 
 **API.**
 - `Renderer2D::Begin(commands, Render2DTarget)` and `End()`. A `Render2DTarget` is a swapchain or a texture (unorm format, optional clear colour); the default format is `RGBA8Unorm`. `GetCommandBuffer()` and `GetDevice()` let a frame record other renderers' passes into the same command buffer first, so a frame can draw textures other renderers rendered into during the frame; each such renderer records at its own `End`, before the passes that draw the texture.
@@ -39,7 +39,7 @@ Render2D (`Krystal.Gfx/Render2D/`, namespace `krys::gfx`) is a 2D renderer whose
 - Other shape clips (rects under any transform, rounded rects, and their clip-outs) are evaluated exactly in the shader, each under its own transform, and nested clips multiply. Each batch binds its clip chain as a uniform block (slot 1; the scissor is the chain's bounds).
 - Path clips sample the path's coverage mask (texture unit 1, the white texture when unused). A second nested path clip multiplies all the chain's path clips on the CPU into a per-frame transient mask (`MaskAtlas::UploadTransient`).
 
-**Layers** (`BeginLayer`/`EndLayer`, upstream's transparency layers) serve `opacity`, `mix-blend-mode`, `isolation`, filters and image-buffer clips.
+**Layers** (`BeginLayer`/`EndLayer`, the graphics context's transparency layers) serve `opacity`, `mix-blend-mode`, `isolation`, filters and image-buffer clips.
 - A layer's draws go to an offscreen texture sized to what was drawn within the clip (rounded up to 64 px). The textures are pooled and reused across frames, not within one, and destroyed after 120 unused frames. The layer composites as one premultiplied image at its opacity, blend mode and composite operator.
 - Passes are recorded children first, the target last, each offsetting its viewport and scissor by the layer's position so instances, scissors and clips stay in target pixels. A layer that shows nothing gets no texture or pass. Layer composites keep the parent's scissor but no shape or path clips, because the draws were already clipped.
 - `LayerFilter2D` is a colour matrix (applied in the composite's fragment shader on un-premultiplied texels), a Gaussian blur, a drop shadow, or `LuminanceToAlpha` (premultiplied luminance to alpha, as Skia's luma filter). A blur grows the layer by three standard deviations within the clip it began with and blurs in two passes through a scratch texture (`Render2D.Blur`, a Gaussian sampled at every texel up to 256 px out). A drop shadow blurs the layer's alpha into a second texture composited in the shadow's colour and offset before the layer. `EdgeMode2D` (`None`, or `Duplicate`, which reads the nearest edge texel past the clip) is used by backdrop blurs. Blur can only read what is inside the clip, which drives `AbsoluteFilterRepaintRect`.
@@ -71,7 +71,7 @@ Krystal.UI depends on Booey, Gfx and PAL. `ui::View` (`Krystal.UI/View.hpp`) is 
 ### Display lists, layers and compositing
 
 - Booey paints into display lists and a graphics layer tree. The `ChromeClient`'s graphics layer factory makes `GraphicsLayerTextureMapper`s, which `TextureMapperLayer` composites. The view keeps the painted page in textures and repaints only damage. `TextureMapper::RenderImageBuffer` renders a layer's image-buffer contents ahead of the frame's passes, and `TextureMapper::DrawTexture` draws a texture it doesn't own, with its alpha.
-- `ui::GraphicsContextRender2D` is the `boo::GraphicsContext` that replays display lists through Render2D. It is modelled on upstream's Skia backend: mostly one Render2D call per item.
+- `ui::GraphicsContextRender2D` is the `boo::GraphicsContext` that replays display lists through Render2D. It makes mostly one Render2D call per item.
   - It saves the renderer's state on construction and restores it on destruction; resetting the clip brings back the renderer's clip at construction. Each draw first brings the renderer's blend mode, shadows-ignore-transforms and drop shadow up to the context's state.
   - Colours become `Paint2D`s multiplied by the context's alpha; `Gradient` maps field for field to `Gradient2D`; `Path` becomes `Path2D` from its segments. `Render2DConversions` converts colours, rects, transforms, fill rules, caps and joins, rounded rects, paths and gradients; `ToPath2D` follows Skia's path (arcs and ellipses as Render2D's arcs, `arcTo` as canvas draws it, continuous rounded rects as plain ones).
   - Stroke thickness, caps, joins, dashes and miter limit (default 4, as Skia) become `StrokeStyle`; they are kept in a stack beside the context's, as in Skia's backend. Dash arrays that are odd are repeated and invalid ones dropped.
@@ -85,7 +85,7 @@ Krystal.UI depends on Booey, Gfx and PAL. `ui::View` (`Krystal.UI/View.hpp`) is 
 - **Pattern fills.** A fill or stroke with an image pattern renders the tile image buffer (or uploads its native image) to a texture painted as `ImagePattern2D`: the whole texture is one tile, placed by the pattern space transform, as Skia's shader does.
 - **Filters.** `FilterGraph2DBuilder` is Booey's accelerated filter backend. It turns each effect into graph nodes (merges into over composites, drop shadows into their parts, `FEImage` into a source drawn into an image buffer) appended to a `FilterGraph2D`; `GraphicsContextRender2D::DrawFilteredImageBuffer` and `ImageBufferTextures::Filters` apply them with `FilterRenderer2D`.
 - **Fonts.** `FontFaceCache` maps a Booey `Font` to a `FontFace2D`, one per FreeType face and synthetic bold or oblique combination, shared by every size. `View::AddFontDirectory` registers font files (`.ttf`, `.otf`, `.ttc`, `.otc`) for every page.
-- **Theme.** Controls use upstream's Adwaita theme (`RenderThemeAdwaita`, `ThemeAdwaita`, `ControlFactoryAdwaita`, `themeAdwaita.css`) behind `RenderTheme`'s interface, so another theme can replace it. System colours are semantic, so default black text records its colour in paint dumps. The selection and default focus ring use Adwaita's accent colour.
+- **Theme.** Controls use the Adwaita theme (`RenderThemeAdwaita`, `ThemeAdwaita`, `ControlFactoryAdwaita`, `themeAdwaita.css`) behind `RenderTheme`'s interface, so another theme can replace it. System colours are semantic, so default black text records its colour in paint dumps. The selection and default focus ring use Adwaita's accent colour.
 
 ### Input
 
@@ -99,13 +99,13 @@ Krystal.UI depends on Booey, Gfx and PAL. `ui::View` (`Krystal.UI/View.hpp`) is 
 
 ### Text input
 
-Input methods follow GTK's model, the only upstream host whose model fits Krystal.PAL: `SetComposition`, `ConfirmComposition`, `InsertText`, `AcceptsTextInput`, `TextInputRect` (for the host's candidate window) and `SetCompositionDiscardedHandler`. Characters without a key press are typed as a `keypress` carrying them alone, as Windows' `WM_CHAR` is upstream. The page confirms its composition on a mouse, pen or touch press and on window focus loss, and asks the host to drop the input method's.
+Input methods follow GTK's model: `SetComposition`, `ConfirmComposition`, `InsertText`, `AcceptsTextInput`, `TextInputRect` (for the host's candidate window) and `SetCompositionDiscardedHandler`. Characters without a key press are typed as a `keypress` carrying them alone. The page confirms its composition on a mouse, pen or touch press and on window focus loss, and asks the host to drop the input method's.
 
 ### Drag and drop
 
 - The host runs the drag. `DragClient` keeps the drag's `SelectionData` and what the source allows. Mouse moves become `DragEnteredOrUpdated`/`DragExited`, release becomes `PerformDragOperation`, then `DragEnded`/`DragSourceEndedAt`. Escape and focus loss cancel, Ctrl copies, and the cursor is OLE's for the operation.
 - Krystal.PAL captures the mouse while a button is held, so a drag follows the mouse out of the window and a release there cancels it. The window's OLE drop target is registered only while the host has `OnDrag`; the shell's drop target helper shows the source's drag image over the window.
-- Krystal.UI draws the drag image over the page and any overlay at three-quarters opacity: Booey fades selections' and images' images (`DragImageAlpha`) and the host draws the page's own images and links' labels at the same alpha. Links' drag labels follow the old Windows port: a grey rounded rectangle with bold link text over its URL in the system small caption font, each cut to 200 px.
+- Krystal.UI draws the drag image over the page and any overlay at three-quarters opacity: Booey fades selections' and images' images (`DragImageAlpha`) and the host draws the page's own images and links' labels at the same alpha. Links' drag labels are a grey rounded rectangle with bold link text over its URL in the system small caption font, each cut to 200 px.
 - The editor passes pads, drags (and the answers back to the window), text and composition events to the page view, and gives Escape to a drag rather than quitting.
 
 ### Clipboard
@@ -114,7 +114,7 @@ The host supplies `PasteboardStrategy` (`typesSafeForDOMToReadAndWrite`, `writeC
 
 ### Overlays
 
-A menu list's popup (`<select>`), the date and time pickers and the colour picker are shown by the host, as upstream asks the chrome client (`PopupMenu`, `DateTimeChooser`, `ColorChooser`); the defaults make none. Krystal.UI implements each as an `Overlay`: an internal `View` placed in the owner's viewport whose generated HTML lists the items.
+A menu list's popup (`<select>`), the date and time pickers and the colour picker are shown by the host through the chrome client (`PopupMenu`, `DateTimeChooser`, `ColorChooser`); the defaults make none. Krystal.UI implements each as an `Overlay`: an internal `View` placed in the owner's viewport whose generated HTML lists the items.
 - `PopupMenuOverlay`: label styles, disabled items, separators, highlight; placed below or above the control within the viewport; scrolls past 20 items.
 - `DateTimeChooserOverlay`: a month's calendar, weeks for week inputs, a year's months for month inputs, min and max, arrow and Page Up/Down keys and the wheel.
 - `ColorChooserOverlay`: a palette of 40 colours with the input's suggestions first.
@@ -132,7 +132,7 @@ While one is open it is painted over the page (and recorded) and takes the keys 
 ## Testing
 
 - **Goldens** are the quality bar for Render2D and Krystal.UI. Scenes (also written as HTML) are rendered offscreen, read back with `ReadTexture`, and compared two ways: with Render2D's own reviewed PNGs (tight tolerance, catching regressions) and with Chrome's rendering of the same HTML (looser tolerance, measuring fidelity). Krystal.Gfx.Tests holds the Render2D scenes (`Scene::ChromeReportOnly` marks report-only Chrome comparisons); page goldens are in `Krystal.UI.Tests/tests/Golden.cpp` and render through `View`. The harness runs the event loop before painting so resources and fonts are loaded. Test devices take a transient memory size because pages draw in many small batches. `KRYS_UPDATE_GOLDENS=1` rewrites goldens; fresh output goes to `build/Krystal.UI.Tests/golden-output`.
-- **Chrome comparison policy.** Chrome stands in for WebKit as the fidelity reference, but browsers don't agree pixel for pixel, so comparisons use a per-channel tolerance and a small share of pixels allowed past it; text is only reported. References are captured by `tools/golden/capture_chrome.py` (headless Chrome at device pixel ratio 1; `--golden DIR`). With `tools/golden/cdp.py` it also records `?rects` client rects (`<name>.chrome-rects.txt`), `?record` selection steps (`chrome-editing.txt`) and scripted input actions through the DevTools protocol (`chrome-input.txt`). Headless Chrome lays out at least 500 px wide, so scenes fix their width and put `direction: rtl` on a wrapper, not `<body>`. Chrome draws popups in separate windows, so popup goldens (including `bidi-select-popup`, `bidi-date-picker`, `bidi-color-picker`) are Booey's alone.
+- **Chrome comparison policy.** Chrome is the fidelity reference, but browsers don't agree pixel for pixel, so comparisons use a per-channel tolerance and a small share of pixels allowed past it; text is only reported. References are captured by `tools/golden/capture_chrome.py` (headless Chrome at device pixel ratio 1; `--golden DIR`). With `tools/golden/cdp.py` it also records `?rects` client rects (`<name>.chrome-rects.txt`), `?record` selection steps (`chrome-editing.txt`) and scripted input actions through the DevTools protocol (`chrome-input.txt`). Headless Chrome lays out at least 500 px wide, so scenes fix their width and put `direction: rtl` on a wrapper, not `<body>`. Chrome draws popups in separate windows, so popup goldens (including `bidi-select-popup`, `bidi-date-picker`, `bidi-color-picker`) are Booey's alone.
 - Goldens differ slightly on battery power (the `filters` golden by about 26 pixels); small GPU differences are not regressions.
 - A failing golden test tagged `[!shouldfail]` marks a known bug (see Known issues).
 
@@ -175,6 +175,8 @@ Krystal.UI and the host:
 - Drags from other applications: the host reads a drag's data once as it enters. The legacy `FileName`/`FileNameW` formats, virtual file descriptors (browser-dragged images and links), pages' custom data and smart pasting are not read. Drags out of a page to other applications are not supported. A drag carrying files is never offered a move. Krystal.PAL's OLE side is not driven by tests.
 - No host-supplied file picker for `<input type=file>`, and no autofill (FIXME in `EditorClient.hpp`).
 - `FileLoaderStrategy` reads files on the main thread (FIXME).
+- The host answers a drag a frame late: the source hears the host's answer at its next move and at the drop. Entering answers no operation. A release where the last answer was no operation comes as a leave, not a drop. Over the editor's header, or with another view shown, a drag is off the page. Drag positions are not offset by the drag offset. `setDragImage()` after the drag started does not change the image.
+- Layers are composited on the main thread through `TextureMapperLayer`, with no compositor thread or async scrolling. That is worth doing only once something can keep the main thread busy.
 - The date and time chooser uses fixed English names and first day of the week (FIXME for the locale's); colour inputs' `alpha` and `colorspace` and user activation for pickers are not handled. Typing to choose in an open popup is not supported, and the popup's own scrollbar look differs.
 - Controls: devolvable widgets (FIXMEs in `RenderTheme.cpp`), checkmarks for `appearance: base`, customizable `<select>` (`appearance: base-select` parses but draws as `auto`), file inputs, datalists and tick marks, the validation message bubble, media controls, Apple Pay and attachment parts, and search-field icons.
 
@@ -187,19 +189,9 @@ Krystal.UI and the host:
 - Date and time fields: partly filled dates report bad input.
 - The date inputs' locale comes from `lang` when `Settings::LangAttributeAwareFormControlUIEnabled` is on, else the user interface's; `Locale`/`LocaleICU` use ICU.
 
-### From WebKit
-
-- Booey's painters are upstream's, but they draw through Render2D, whose rendering model is its own: a GPU instance batcher with analytic shapes and CPU coverage masks, not Skia or Core Graphics. Differences in antialiasing and shadow blurs follow from that.
-- Text is read from the clipboard as `CF_UNICODETEXT` else `CF_TEXT` in the system code page (upstream read Latin-1); markup is Firefox's `text/html` else the HTML format's fragment.
-- The host answers a drag a frame late: the source hears the host's answer at its next move and at the drop, as WebKit2's UI process uses the last operation. Entering answers no operation. A release where the last answer was no operation comes as a leave, not a drop. Over the editor's header, or with another view shown, a drag is off the page. Drag positions are not offset by the drag offset. `setDragImage()` after the drag started does not change the image.
-- Input methods are driven GTK-style rather than as Windows' WebKit port does.
-- The control theme is Adwaita (a GTK look), not a native Windows one.
-- Week inputs have a week field (Chrome's layout, beyond upstream); date inputs focus through the HTML focus model (the user agent shadow root delegates focus), so fields are focused, clicked and tabbed between and a disabled input's fields are not focusable.
-- Layers are composited on the main thread through `TextureMapperLayer`; upstream's coordinated graphics commit layers at flush into a scene a compositor thread owns (`ThreadedCompositor`, async scrolling). That is worth doing only once something can keep the main thread busy.
-- There is no scripting, so handlers are C++ functions: no string handlers, no `setTimeout` extra arguments (lambda captures stand in), no realms.
-
 ### From Chrome
 
+- Painting goes through Render2D, whose rendering model is its own: a GPU instance batcher with analytic shapes and CPU coverage masks, not Skia. Differences in antialiasing and shadow blurs follow from that.
 - Backdrop blur edges are duplicated rather than mirrored, so goldens differ along the glass's edges.
 - Text-control and number-field layouts differ slightly from Chrome's (report-only goldens).
 - The control theme is Adwaita rather than Chrome's. Popups are drawn by the page's own overlays; Chrome's are separate windows. Matching Chrome is the long-term aim, with the theme staying behind `RenderTheme`'s interface so a Chrome-like theme (Blink's `LayoutThemeDefault` and `NativeThemeBase`) can replace it.
