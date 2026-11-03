@@ -6,13 +6,13 @@
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
 #include "Krystal.Booey/Style/MatchResult.hpp"
 #include "Krystal.Booey/Style/PageRuleCollector.hpp"
@@ -32,7 +32,7 @@ namespace krys::boo::style::tests
     KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
     {
       auto document = CreateRef<dom::HTMLDocument>();
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
       (void)parser->PumpTokenizer();
       document->StyleScope().FlushPendingUpdate();

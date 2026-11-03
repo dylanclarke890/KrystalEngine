@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Animation/StyleOriginatedAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/DOM/Nodes/Node.hpp"
 
 namespace krys::boo
 {

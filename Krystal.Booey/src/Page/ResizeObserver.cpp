@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Page/ResizeObserver.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Page/ResizeObserverEntry.hpp"
 #include <algorithm>
 

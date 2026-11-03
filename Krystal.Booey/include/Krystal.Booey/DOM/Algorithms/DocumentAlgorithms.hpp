@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/ElementCreationOptions.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
+#include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo::dom
@@ -31,7 +31,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-node-adopt
     KRYS_NODISCARD static ExceptionOr<void> AdoptNode(Node &node, Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/dom.html#update-the-current-document-readiness
+    /// @see https://html.spec.whatwg.org/#update-the-current-document-readiness
     static void UpdateCurrentDocumentReadiness(Document &document,
                                                html::DocumentReadyState readiness) noexcept;
 

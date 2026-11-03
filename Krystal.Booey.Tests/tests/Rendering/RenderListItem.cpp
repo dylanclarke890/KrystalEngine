@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/HTML/HTMLLIElement.hpp"
-#include "Krystal.Booey/HTML/HTMLOListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLIElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOListElement.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
@@ -137,5 +137,34 @@ namespace krys::boo::tests
       auto &l3 = Downcast<html::HTMLElement>(fixture.ById(u8"l3"));
       CHECK(Downcast<html::HTMLLIElement>(l3).Value() == 10);
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderListItem: list owners and ordinal values",
+                   "[Rendering][RenderListItem][html:list-owner][html:ordinal-value][html:concept-ol-start]"
+                   "[html:attr-ol-start][html:attr-ol-reversed][html:attr-li-value]")
+  {
+    ResolverFixture fixture {
+      u8R"(<!DOCTYPE html><menu><li id=m1>a<div><li id=m2>b</div></menu><div id=owner><span style="display: contents"><li id=c1>a</span><li id=c2>b</div><ol start=x><li id=x1>a</ol><ol reversed start=x><li id=y1>a<li id=y2>b</ol><ol reversed start=-4><li id=z1>a<li id=z2>b</ol><ol><li id=v1 value=7>a<li id=v2>b<li id=v3 value=x>c</ol>)"};
+    fixture.Document->UpdateStyleIfNeeded();
+
+    // A menu owns the list items in its descendants, as ol and ul do.
+    CHECK(Item(fixture, u8"m1").Value() == 1);
+    CHECK(Item(fixture, u8"m2").Value() == 2);
+
+    // An ancestor without a box doesn't own list items; the closest one with a box does.
+    CHECK(Item(fixture, u8"c1").Value() == 1);
+    CHECK(Item(fixture, u8"c2").Value() == 2);
+
+    // An invalid start is ignored, falling back to the item count when reversed.
+    CHECK(Item(fixture, u8"x1").Value() == 1);
+    CHECK(Item(fixture, u8"y1").Value() == 2);
+    CHECK(Item(fixture, u8"y2").Value() == 1);
+    CHECK(Item(fixture, u8"z1").Value() == -4);
+    CHECK(Item(fixture, u8"z2").Value() == -5);
+
+    // A valid value sets the item's ordinal value, and the numbering continues from it.
+    CHECK(Item(fixture, u8"v1").Value() == 7);
+    CHECK(Item(fixture, u8"v2").Value() == 8);
+    CHECK(Item(fixture, u8"v3").Value() == 9);
   }
 }

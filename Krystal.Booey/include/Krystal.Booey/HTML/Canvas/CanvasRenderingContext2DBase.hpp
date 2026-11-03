@@ -28,7 +28,7 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasTextBaseline.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasTextRendering.hpp"
 #include "Krystal.Booey/HTML/Canvas/ImageSmoothingQuality.hpp"
-#include "Krystal.Booey/HTML/ImageDataSettings.hpp"
+#include "Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -253,6 +253,13 @@ namespace krys::boo::html
   public:
     ~CanvasRenderingContext2DBase() noexcept override;
 
+    /// @brief Whether the context has been lost; never, as there are no context loss events.
+    /// @see https://html.spec.whatwg.org/#dom-context-2d-iscontextlost
+    KRYS_NODISCARD constexpr bool IsContextLost() const noexcept
+    {
+      return false;
+    }
+
     KRYS_NODISCARD const CanvasRenderingContext2DSettings &GetContextAttributes() const noexcept
     {
       return _settings;
@@ -361,6 +368,8 @@ namespace krys::boo::html
 #pragma region CanvasState
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-save
+    /// @brief Pushes a copy of the current drawing state onto the drawing state stack (once something
+    /// changes it).
     void Save() noexcept
     {
       ++_unrealizedSaveCount;
@@ -418,11 +427,11 @@ namespace krys::boo::html
 #pragma region CanvasFillStrokeStyles
 
     KRYS_NODISCARD StyleVariant StrokeStyle() const noexcept;
-    void SetStrokeStyle(dom::DOMString &&) noexcept;
+    void SetStrokeStyle(dom::DOMString) noexcept;
     void SetStrokeStyle(Ref<CanvasGradient> &&) noexcept;
     void SetStrokeStyle(Ref<CanvasPattern> &&) noexcept;
     KRYS_NODISCARD StyleVariant FillStyle() const noexcept;
-    void SetFillStyle(dom::DOMString &&) noexcept;
+    void SetFillStyle(dom::DOMString) noexcept;
     void SetFillStyle(Ref<CanvasGradient> &&) noexcept;
     void SetFillStyle(Ref<CanvasPattern> &&) noexcept;
 
@@ -454,9 +463,9 @@ namespace krys::boo::html
                                                                     Maybe<ImageDataSettings>) const noexcept;
     KRYS_NODISCARD dom::ExceptionOr<Ref<ImageData>> GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
                                                                  Maybe<ImageDataSettings>) const noexcept;
-    void PutImageData(ImageData &, int32 dx, int32 dy) noexcept;
-    void PutImageData(ImageData &, int32 dx, int32 dy, int32 dirtyX, int32 dirtyY, int32 dirtyWidth,
-                      int32 dirtyHeight) noexcept;
+    dom::ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy) noexcept;
+    dom::ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy, int32 dirtyX, int32 dirtyY,
+                                        int32 dirtyWidth, int32 dirtyHeight) noexcept;
 
 #pragma endregion
 
@@ -672,8 +681,8 @@ namespace krys::boo::html
 
     void UnwindStateStack() noexcept;
     void RealizeSavesLoop() noexcept;
-    void SetStrokeColorImpl(Color &&color, dom::DOMString &&unparsedColor = {}) noexcept;
-    void SetFillColorImpl(Color &&color, dom::DOMString &&unparsedColor = {}) noexcept;
+    void SetStrokeColorImpl(Color &&color, dom::DOMString unparsedColor = {}) noexcept;
+    void SetFillColorImpl(Color &&color, dom::DOMString unparsedColor = {}) noexcept;
 
     void BeginCompositeLayer() noexcept;
     void EndCompositeLayer() noexcept;

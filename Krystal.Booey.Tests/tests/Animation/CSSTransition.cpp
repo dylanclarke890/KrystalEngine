@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Animation/CSSTransitionEvent.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 
 namespace krys::boo::tests

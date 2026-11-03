@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Transform.hpp"
-#include "Krystal.Booey/DOM/DOMPoint.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMPoint.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"

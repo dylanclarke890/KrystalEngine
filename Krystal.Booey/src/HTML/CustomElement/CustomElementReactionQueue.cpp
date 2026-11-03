@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -196,22 +196,28 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
+  // https://html.spec.whatwg.org/#concept-try-upgrade
   void CustomElementReactionQueue::TryToUpgradeElement(dom::Element &element) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
     krys_debug_assert(element.IsCustomElementUpgradeCandidate());
+
+    // 1. Let definition be the result of looking up a custom element definition given element's custom
+    // element
+    //    registry, element's namespace, element's local name, and element's is value.
     auto registry = element.CustomElementRegistry();
     if (registry == nullptr)
     {
       return;
     }
-
     auto *elementInterface = registry->FindInterface(element.TagQualifiedName());
+
+    // 2. If definition is not null, then enqueue a custom element upgrade reaction given element and
+    //    definition.
     if (elementInterface == nullptr)
     {
       return;
     }
-
     element.EnqueueToUpgrade(*elementInterface);
   }
 
@@ -395,15 +401,24 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#enqueue-an-element-on-the-appropriate-element-queue
   void CustomElementReactionQueue::EnqueueElementOnAppropriateElementQueue(dom::Element &element) noexcept
   {
     krys_debug_assert(element.ReactionQueue() != nullptr);
+
+    // 1. Let reactionsStack be element's relevant agent's custom element reactions stack.
+    // 2. If reactionsStack is empty:
+    // 2a. Add element to reactionsStack's backup element queue.
+    // 2b. If reactionsStack's processing the backup element queue flag is set, then return.
+    // 2c. Set reactionsStack's processing the backup element queue flag.
+    // 2d. Queue a microtask to perform the following steps: [...]
     if (CustomElementReactionStack::s_currentProcessingStack == nullptr)
     {
       BackupElementQueueForEnqueue().Add(element);
       return;
     }
 
+    // 3. Otherwise, add element to element's relevant agent's current element queue.
     CustomElementReactionStack::s_currentProcessingStack->_queue.Add(element);
   }
 

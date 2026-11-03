@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/EventInit.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
@@ -76,10 +75,10 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#navigateevent
   class NavigateEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
+  public:
+    /// @brief The dictionary its constructor takes.
     using dictionary_type = NavigateEventInit;
 
-  public:
     /// @see https://html.spec.whatwg.org/#navigationfocusreset
     enum class NavigationFocusReset : bool
     {

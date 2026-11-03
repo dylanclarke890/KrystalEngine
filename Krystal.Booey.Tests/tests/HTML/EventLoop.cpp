@@ -4,7 +4,8 @@
 
 namespace krys::boo::html::tests
 {
-  TEST_CASE("EventLoop", "[HTML][EventLoop]")
+  TEST_CASE("EventLoop", "[HTML][EventLoop][html:event-loops][html:queue-a-task][html:queue-a-microtask]"
+                         "[html:perform-a-microtask-checkpoint][html:event-loop-processing-model]")
   {
     EventLoop loop;
     List<int> order;

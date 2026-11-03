@@ -1,18 +1,18 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/EventTarget.hpp"
-#include "Krystal.Booey/DOM/Internals/Event/EventListener.hpp"
-#include "Krystal.Booey/DOM/Node.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -21,10 +21,13 @@ namespace krys::boo::dom
     EventTargetAlgorithms::FlattenOptions(const EventListenerOptionsOrBool &optionsOrBool) noexcept
   {
     EventListenerOptions options;
+
+    // 1. If options is a boolean, then return options.
     if (std::holds_alternative<bool>(optionsOrBool))
     {
       options.Capture = std::get<bool>(optionsOrBool);
     }
+    // 2. Return options["capture"].
     else
     {
       options = std::get<EventListenerOptions>(optionsOrBool);
@@ -36,22 +39,38 @@ namespace krys::boo::dom
   AddEventListenerOptions
     EventTargetAlgorithms::FlattenMoreOptions(const AddEventListenerOptionsOrBool &optionsOrBool) noexcept
   {
+    // 2. Let once be false.
+    // 3. Let passive and signal be null.
+    // (The defaults of AddEventListenerOptions.)
     AddEventListenerOptions options;
+
+    // 1. Let capture be the result of flattening options.
     if (std::holds_alternative<bool>(optionsOrBool))
     {
       options.Capture = std::get<bool>(optionsOrBool);
     }
+    // 4. If options is a dictionary:
+    //   4a. Set once to options["once"].
+    //   4b. If options["passive"] exists, then set passive to options["passive"].
+    //   4c. If options["signal"] exists, then set signal to options["signal"].
     else
     {
       options = std::get<AddEventListenerOptions>(optionsOrBool);
     }
 
+    // 5. Return capture, passive, once, and signal.
     return options;
   }
 
   bool EventTargetAlgorithms::DefaultPassiveValue(const DOMStringAtom &type,
                                                   const EventTarget &eventTarget) noexcept
   {
+    // 1. Return true if all of the following are true:
+    //   - type is one of "touchstart", "touchmove", "wheel", or "mousewheel".
+    //   - eventTarget is a Window object, or is a node whose node document is eventTarget, or is a node whose
+    //   node document's document element is eventTarget, or is a node whose node document's body element is
+    //   eventTarget.
+    // 2. Return false.
     if (type != EventNames::TouchStart && type != EventNames::TouchMove && type != EventNames::Wheel
         && type != EventNames::MouseWheel)
     {
@@ -75,7 +94,7 @@ namespace krys::boo::dom
         return true;
       }
 
-      if (node->NodeDocument().Body().get() == &eventTarget)
+      if (node->NodeDocument().BodyOrFrameset() == &eventTarget)
       {
         return true;
       }
@@ -86,25 +105,33 @@ namespace krys::boo::dom
 
   bool EventTargetAlgorithms::AddEventListener(EventTarget &eventTarget, EventListener &listener) noexcept
   {
-    // SPEC-VIOLATION(DOM, SERVICE-WORKERS): service workers currently not supported.
-    // "If eventTarget is a ServiceWorkerGlobalScope object, its service worker’s script resource’s has ever
-    // been evaluated flag is set, and listener’s type matches the type attribute value of any of the service
-    // worker events, then report a warning to the console that this might not give the expected results."
+    // 1. If eventTarget is a ServiceWorkerGlobalScope object, its service worker's script resource's has ever
+    // been evaluated flag is set, and listener's type matches the type attribute value of any of the service
+    // worker events, then report a warning to the console that this might not give the expected results.
+    // (Skipped: no service workers.)
 
+    // 2. If listener's signal is non-null and is aborted, then return.
     if (listener.Signal() != nullptr && listener.Signal()->Aborted())
     {
       return false;
     }
 
+    // 3. If listener's callback is null, then return.
     if (listener.Callback() == nullptr)
     {
       return false;
     }
 
+    // 4. If listener's passive is null, then set it to the default passive value given listener's type and
+    // eventTarget.
     if (!listener.Passive().has_value())
     {
       listener._passive = DefaultPassiveValue(listener.Type(), eventTarget);
     }
+
+    // 5. If eventTarget's event listener list does not contain an event listener whose type is listener's
+    // type, callback is listener's callback, and capture is listener's capture, then append listener to
+    // eventTarget's event listener list.
 
     auto AlreadyExists = [&](const Ref<EventListener> &l)
     {
@@ -120,6 +147,7 @@ namespace krys::boo::dom
     eventTarget._eventListenerList.push_back(ShareRef(listener));
     eventTarget.DidAddEventListener(listener);
 
+    // 6. If listener's signal is non-null, then add the following abort steps to it:
     if (listener.Signal() != nullptr)
     {
       AbortAlgorithms::Add(
@@ -128,6 +156,7 @@ namespace krys::boo::dom
           auto strongListener = weakListener.lock();
           auto strongTarget = weakTarget.lock();
 
+          // 6a. Remove an event listener with eventTarget and listener.
           if (strongListener && strongTarget)
           {
             RemoveEventListener(*strongTarget, *strongListener);
@@ -141,11 +170,11 @@ namespace krys::boo::dom
 
   void EventTargetAlgorithms::RemoveEventListener(EventTarget &eventTarget, EventListener &listener) noexcept
   {
-    // SPEC-VIOLATION(DOM, SERVICE-WORKERS): service workers currently not supported.
-    // "If eventTarget is a ServiceWorkerGlobalScope object and its service worker’s set of event types to
-    // handle contains listener’s type, then report a warning to the console that this might not give the
-    // expected results."
+    // 1. If eventTarget is a ServiceWorkerGlobalScope object and its service worker's set of event types to
+    // handle contains listener's type, then report a warning to the console that this might not give the
+    // expected results. (Skipped: no service workers.)
 
+    // 2. Set listener's removed to true and remove listener from eventTarget's event listener list.
     listener._removed = true;
     const auto &existing = std::ranges::find_if(
       eventTarget._eventListenerList, [&](const Ref<EventListener> &l) { return l.get() == &listener; });
@@ -178,12 +207,16 @@ namespace krys::boo::dom
         return nullptr;
       }
 
+      // 1. If one of the following is true
+      //    - A is not a node;
+      //    - A's root is not a shadow root;
+      //    - B is a node and A's root is a shadow-including inclusive ancestor of B
+      //    then return A.
       if (!Is<Node>(current))
       {
         return current;
       }
 
-      // Return A if its root is not a shadow root, or is a shadow-including inclusive ancestor of B.
       auto *currentNode = Downcast<Node>(current);
       auto &currentRoot = TreeQueries::Root(*currentNode);
       if (!Is<ShadowRoot>(currentRoot))
@@ -196,6 +229,7 @@ namespace krys::boo::dom
         return current;
       }
 
+      // 2. Set A to A's root's host.
       auto *host = Downcast<ShadowRoot>(&currentRoot)->Host();
       current = host;
     }

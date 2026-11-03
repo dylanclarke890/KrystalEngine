@@ -1,16 +1,17 @@
 ﻿#include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/BeforeUnloadEvent.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/PageTransitionEvent.hpp"
+#include "Krystal.Booey/HTML/Events/BeforeUnloadEvent.hpp"
+#include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
@@ -18,6 +19,7 @@
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
+#include "Krystal.Booey/Page/History.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -27,7 +29,10 @@
 
 namespace krys::boo::tests
 {
-  TEST_CASE("A frame starts with its initial empty document", "[Loader][DocumentLoader]")
+  TEST_CASE("A frame starts with its initial empty document",
+            "[Loader][DocumentLoader][html:creating-a-new-browsing-context]"
+            "[html:creating-a-new-top-level-browsing-context][html:creating-a-new-top-level-traversable]"
+            "[html:initialize-the-navigable][html:fully-active][html:node-navigable][html:nav-document]")
   {
     LoadFixture fixture;
     auto &loader = fixture.Frame().Loader();
@@ -36,9 +41,60 @@ namespace krys::boo::tests
     CHECK(fixture.Document().GetURL().String() == u8"about:blank");
     CHECK(fixture.Document().Window() != nullptr);
     CHECK(fixture.Document().DocumentElement() != nullptr);
+    // An HTML document in quirks mode, with a head and a body, that's completely loaded and fully active.
+    CHECK(fixture.Document().ContentType() == u8"text/html");
+    CHECK(fixture.Document().InQuirksMode());
+    CHECK(fixture.Document().Head());
+    CHECK(fixture.Document().Body());
+    CHECK(fixture.Document().ReadyState() == html::DocumentReadyState::Complete);
+    // It gets no load event.
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(fixture.Events.empty());
+    CHECK(fixture.Document().IsFullyActive());
+    CHECK(fixture.Document().Frame() == &fixture.Frame());
     CHECK_FALSE(loader.IsLoading());
     REQUIRE(loader.GetDocumentLoader());
     CHECK(loader.GetDocumentLoader()->IsCommitted());
+  }
+
+  TEST_CASE("A document loaded from about:blank has html, head and body elements",
+            "[Loader][DocumentLoader][html:navigate-html][html:populate-with-html/head/body]"
+            "[html:initialise-the-document-object]")
+  {
+    LoadFixture fixture;
+    fixture.LoadMarkup(u8"<!DOCTYPE html><p>First</p>", u8"https://example.com/first.html");
+    html::EventLoop::Current().RunUntilIdle();
+    auto *firstWindow = fixture.Document().Window();
+
+    fixture.LoadURL(u8"about:blank");
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(fixture.Document().GetURL().String() == u8"about:blank");
+    CHECK_FALSE(fixture.Frame().Loader().IsDisplayingInitialEmptyDocument());
+    REQUIRE(fixture.Document().DocumentElement());
+    CHECK(fixture.Document().Head());
+    CHECK(fixture.Document().Body());
+    CHECK_FALSE(fixture.Document().Body()->HasChildNodes());
+    // A new document gets a new window.
+    CHECK(fixture.Document().Window() != firstWindow);
+  }
+
+  TEST_CASE("A text document's content is the text of a pre element",
+            "[Loader][DocumentLoader][html:read-text][html:navigate-text]")
+  {
+    auto mimeType = GENERATE(u8"text/plain", u8"text/css", u8"application/json", u8"application/ld+json",
+                             u8"text/javascript");
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/notes", u8"<b>bold</b>\n& more", mimeType);
+    fixture.LoadURL(u8"https://example.com/notes");
+    html::EventLoop::Current().RunUntilIdle();
+
+    auto body = fixture.Document().Body();
+    REQUIRE(body);
+    auto *pre = dynamic_cast<html::HTMLElement *>(body->FirstChild());
+    REQUIRE(pre);
+    CHECK(pre->LocalName() == u8"pre");
+    CHECK(pre->TextContent() == u8"<b>bold</b>\n& more");
+    CHECK(fixture.Document().ContentType() == dom::DOMString(mimeType));
   }
 
   TEST_CASE("A document loads on a later task, and commits", "[Loader][DocumentLoader]")
@@ -240,6 +296,8 @@ namespace krys::boo::tests
                                                                 [this](html::PageTransitionEvent &event)
                                                                 {
                                                                   CHECK_FALSE(event.Persisted());
+                                                                  CHECK(event.Bubbles());
+                                                                  CHECK(event.Cancelable());
                                                                   Events.push_back("pageshow");
                                                                 }));
           // load doesn't reach the window from the document's own listeners, and DOMContentLoaded does.
@@ -250,7 +308,9 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("The end of parsing and the load event", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "The end of parsing and the load event",
+    "[Loader][DocumentLoader][html:the-pagetransitionevent-interface][html:fire-a-page-transition-event]")
   {
     LoadFixture fixture;
     EndRecorder recorder;
@@ -305,7 +365,13 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Leaving a document: beforeunload, pagehide and unload", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "Leaving a document: beforeunload, pagehide and unload",
+    "[Loader][DocumentLoader][html:the-beforeunloadevent-interface][html:dom-beforeunloadevent-returnvalue]"
+    "[html:the-pagetransitionevent-interface][html:dom-pagetransitionevent-persisted]"
+    "[html:fire-a-page-transition-event][html:checking-if-unloading-is-canceled][html:steps-to-fire-"
+    "beforeunload]"
+    "[html:navigate]")
   {
     LoadFixture fixture;
     fixture.LoadMarkup(u8"<!DOCTYPE html><body><p>First</p></body>", u8"https://example.com/first.html");
@@ -315,6 +381,12 @@ namespace krys::boo::tests
 
     List<std::string> events;
     bool stay = false;
+    // Navigating from the events does nothing.
+    auto tryToNavigate = [&]
+    {
+      REQUIRE_FALSE(window->GetLocation().Assign(u8"https://example.com/elsewhere.html").HasException());
+      CHECK_FALSE(fixture.Frame().GetNavigationScheduler().LocationChangePending());
+    };
     auto beforeUnload =
       window->AddEventListener<html::BeforeUnloadEvent>(u8"beforeunload",
                                                         [&](html::BeforeUnloadEvent &event)
@@ -328,12 +400,16 @@ namespace krys::boo::tests
                                                           }
                                                           // No dialogs while unloading.
                                                           window->Alert(u8"Leaving");
+                                                          tryToNavigate();
                                                         });
     auto pageHide = window->AddEventListener<html::PageTransitionEvent>(u8"pagehide",
                                                                         [&](html::PageTransitionEvent &event)
                                                                         {
                                                                           CHECK_FALSE(event.Persisted());
+                                                                          CHECK(event.Bubbles());
+                                                                          CHECK(event.Cancelable());
                                                                           events.push_back("pagehide");
+                                                                          tryToNavigate();
                                                                         });
     auto unload = window->AddEventListener(u8"unload",
                                            [&](dom::Event &event)
@@ -341,6 +417,7 @@ namespace krys::boo::tests
                                              CHECK(event.Target().get() == first.get());
                                              events.push_back("unload");
                                              window->Alert(u8"Gone");
+                                             tryToNavigate();
                                            });
 
     SECTION("a document is unloaded as the next one commits")
@@ -349,6 +426,7 @@ namespace krys::boo::tests
       CHECK(events == List<std::string> {"beforeunload"});
       html::EventLoop::Current().RunUntilIdle();
       CHECK(events == List<std::string> {"beforeunload", "pagehide", "unload"});
+      CHECK(fixture.Document().GetURL().String() == u8"https://example.com/second.html");
       CHECK_FALSE(first->PageShowing());
       CHECK(fixture.Chrome->Alerts.empty());
       CHECK(fixture.Chrome->ConfirmPanels == 0);
@@ -409,7 +487,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Meta refresh redirects once the document has loaded", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "Meta refresh redirects once the document has loaded",
+    "[Loader][DocumentLoader][html:will-declaratively-refresh][html:shared-declarative-refresh-steps]")
   {
     LoadFixture fixture;
     fixture.Strategy.AddText(u8"https://example.com/next.html", u8"<!DOCTYPE html><p id=next>Next</p>",
@@ -437,6 +517,16 @@ namespace krys::boo::tests
       CHECK(fixture.Document().GetElementById(u8"next"));
     }
 
+    SECTION("a javascript: URL is ignored, so a later refresh still counts")
+    {
+      fixture.LoadMarkup(u8"<!DOCTYPE html><meta http-equiv=refresh content='0; url=javascript:void(0)'>"
+                         u8"<meta http-equiv=refresh content='0; url=next.html'>",
+                         u8"https://example.com/page.html");
+      html::EventLoop::Current().RunUntilIdle();
+      AdvanceTime(0s);
+      CHECK(fixture.Document().GetElementById(u8"next"));
+    }
+
     SECTION("a new document cancels the old one's")
     {
       fixture.LoadMarkup(u8"<!DOCTYPE html><meta http-equiv=refresh content='1; url=next.html'>",
@@ -449,7 +539,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("The content-language and default-style pragmas", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "The content-language and default-style pragmas",
+    "[Loader][DocumentLoader][html:pragma-set-default-language][html:attr-meta-http-equiv-default-style]")
   {
     LoadFixture fixture;
     fixture.LoadMarkup(
@@ -472,7 +564,43 @@ namespace krys::boo::tests
     CHECK(paragraph->Matches(u8":lang(de)").Value());
   }
 
-  TEST_CASE("A window's Location", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "Window.print(): a document still loading prints once it has loaded",
+    "[Loader][DocumentLoader][html:dom-print][html:print-when-loaded][html:printing-steps][html:the-end]")
+  {
+    LoadFixture fixture;
+    List<std::string> events;
+    List<dom::EventListenerHandle> handles;
+    fixture.Client->OnClearWindowObject = [&]
+    {
+      auto *window = fixture.Document().Window();
+      handles.push_back(window->AddEventListener(u8"load", [&](dom::Event &) { events.push_back("load"); }));
+      handles.push_back(
+        window->AddEventListener(u8"beforeprint", [&](dom::Event &) { events.push_back("beforeprint"); }));
+      handles.push_back(
+        window->AddEventListener(u8"afterprint", [&](dom::Event &) { events.push_back("afterprint"); }));
+      window->Print();
+    };
+
+    fixture.LoadMarkup(u8"<!DOCTYPE html><p>Page</p>", u8"https://example.com/page.html");
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(events == List<std::string> {"load", "beforeprint", "afterprint"});
+    CHECK(fixture.Chrome->PrintRequests == 1);
+
+    SECTION("once it has loaded, it prints at once")
+    {
+      fixture.Document().Window()->Print();
+      CHECK(fixture.Chrome->PrintRequests == 2);
+    }
+  }
+
+  TEST_CASE(
+    "A window's Location",
+    "[Loader][DocumentLoader][html:the-location-interface][html:dom-location][html:dom-document-location]"
+    "[html:location-object-navigate][html:dom-location-href][html:dom-location-origin]"
+    "[html:dom-location-protocol][html:dom-location-host][html:dom-location-pathname]"
+    "[html:dom-location-search][html:dom-location-hash][html:dom-location-assign]"
+    "[html:dom-location-replace][html:dom-location-reload][html:dom-location-ancestororigins]")
   {
     LoadFixture fixture;
     fixture.Strategy.AddText(u8"https://example.com/dir/next.html", u8"<!DOCTYPE html><p id=next>Next</p>",
@@ -499,6 +627,25 @@ namespace krys::boo::tests
       location.Hash(u8"here");
       CHECK(fixture.Document().GetURL().String() == u8"https://example.com/dir/page.html?q=1#here");
       CHECK(&fixture.Document() == before.get());
+    }
+
+    SECTION("setting the hash to the fragment it has does nothing, and the empty string is an empty fragment")
+    {
+      auto length = window.GetHistory().Length().ReleaseValue();
+      location.Hash(u8"#top");
+      CHECK(window.GetHistory().Length().ReleaseValue() == length);
+      location.Hash(u8"");
+      CHECK(fixture.Document().GetURL().String() == u8"https://example.com/dir/page.html?q=1#");
+    }
+
+    SECTION(
+      "setting the protocol navigates only to an HTTP(S) scheme, and throws for one that isn't a scheme")
+    {
+      REQUIRE_FALSE(location.Protocol(u8"ftp").HasException());
+      CHECK_FALSE(fixture.Frame().GetNavigationScheduler().LocationChangePending());
+      CHECK(location.Protocol(u8"1http").HasException());
+      REQUIRE_FALSE(location.Protocol(u8"http:").HasException());
+      CHECK(fixture.Frame().GetNavigationScheduler().LocationChangePending());
     }
 
     SECTION("assign() navigates on a later task")

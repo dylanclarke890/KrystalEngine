@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/XML/XMLErrors.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include <cstring>
 
@@ -32,14 +32,14 @@ namespace krys::boo::xml
       (void)dom::MutationAlgorithms::Append(child, parent);
     }
 
-    void AppendText(dom::ContainerNode &parent, dom::DOMString &&text) noexcept
+    void AppendText(dom::ContainerNode &parent, dom::DOMString text) noexcept
     {
       auto textNode = CreateRef<dom::Text>(parent.NodeDocument(), krys::move(text));
       AppendChild(parent, *textNode);
     }
 
     KRYS_NODISCARD Ref<dom::Element> CreateXHTMLParserErrorHeader(dom::Document &document,
-                                                                  dom::DOMString &&errorMessages) noexcept
+                                                                  dom::DOMString errorMessages) noexcept
     {
       auto reportElement = CreateHTMLElement(document, u8"parsererror",
                                              u8"display: block; white-space: pre; border: 2px solid #c77; "

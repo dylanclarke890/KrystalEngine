@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/History/HistoryItem.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include <chrono>
@@ -37,7 +37,7 @@ namespace krys::boo
     return ++next;
   }
 
-  HistoryItem::HistoryItem(url::URL &&url, dom::DOMString &&title, dom::DOMString &&alternateTitle,
+  HistoryItem::HistoryItem(url::URL url, dom::DOMString title, dom::DOMString alternateTitle,
                            Maybe<BackForwardItemIdentifier> itemID) noexcept
       : _url(url), _originalURL(krys::move(url)), _title(krys::move(title)),
         _displayTitle(krys::move(alternateTitle)),

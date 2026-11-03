@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
@@ -279,7 +279,7 @@ namespace krys::boo
     NavigationResult PerformTraversal(dom::DOMStringView key, Options &&options) noexcept;
     DispatchResult InnerDispatchNavigateEvent(NavigationNavigationType navigationType,
                                               Ref<NavigationDestination> &&destination,
-                                              Maybe<dom::DOMString> &&downloadRequestFilename,
+                                              Maybe<dom::DOMString> downloadRequestFilename,
                                               const FormSubmission *formSubmission = nullptr,
                                               html::SerializedScriptValue *classicHistoryAPIState = nullptr,
                                               dom::Element *sourceElement = nullptr) noexcept;

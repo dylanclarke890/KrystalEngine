@@ -1,12 +1,12 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Comment.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/Comment.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/Sanitizer.hpp"
 #include <string>
 
@@ -53,7 +53,10 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("setHTML sanitizes with the default configuration", "[DOM][Element][DOMParsing][Sanitizer]")
+  TEST_CASE("setHTML sanitizes with the default configuration",
+            "[DOM][Element][DOMParsing][Sanitizer][html:dom-element-sethtml][html:set-and-filter-html][html:"
+            "parse-html-for-insertion][html:fragment-parsing-algorithm-steps][html:get-the-sanitizer-action-"
+            "for-an-element-name][html:sanitizer-config-allows-comments]")
   {
     InsertionDocument data;
     auto &div = *data.Div;
@@ -119,7 +122,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("setHTML with a configuration", "[DOM][Element][DOMParsing][Sanitizer]")
+  TEST_CASE("setHTML with a configuration", "[DOM][Element][DOMParsing][Sanitizer][html:html-parsing-methods]"
+                                            "[html:sanitizer-config-allows-processing-instruction-target]")
   {
     InsertionDocument data;
     auto &div = *data.Div;
@@ -228,7 +232,7 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("setHTMLUnsafe keeps everything unless given a sanitizer",
-            "[DOM][Element][DOMParsing][Sanitizer]")
+            "[DOM][Element][DOMParsing][Sanitizer][html:dom-element-sethtmlunsafe]")
   {
     InsertionDocument data;
     auto &div = *data.Div;
@@ -248,7 +252,16 @@ namespace krys::boo::dom::tests
     CHECK(data.Markup() == "<b>1</b>");
   }
 
-  TEST_CASE("The HTML insertion methods", "[DOM][Element][DOMParsing]")
+  TEST_CASE("The HTML insertion methods",
+            "[DOM][Element][DOMParsing][html:html-insertion-methods][html:dom-element-appendhtml][html:dom-"
+            "element-prependhtml][html:dom-shadowroot-sethtml][html:dom-shadowroot-appendhtml][html:dom-"
+            "shadowroot-prependhtml][html:dom-nondocumenttypechildnode-beforehtml][html:dom-"
+            "nondocumenttypechildnode-afterhtml][html:dom-nondocumenttypechildnode-replacewithhtml][html:dom-"
+            "element-appendhtmlunsafe][html:dom-element-prependhtmlunsafe][html:dom-shadowroot-sethtmlunsafe]"
+            "[html:dom-shadowroot-appendhtmlunsafe][html:dom-shadowroot-prependhtmlunsafe][html:dom-"
+            "nondocumenttypechildnode-beforehtmlunsafe][html:dom-nondocumenttypechildnode-afterhtmlunsafe]["
+            "html:dom-nondocumenttypechildnode-replacewithhtmlunsafe][html:target-for-html-insertion][html:"
+            "parent-for-html-insertion][html:filter-and-pre-insert-html][html:filter-and-replace-with-html]")
   {
     InsertionDocument data;
     auto &div = *data.Div;
@@ -336,7 +349,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("parseHTML and parseHTMLUnsafe", "[DOM][Document][DOMParsing][Sanitizer]")
+  TEST_CASE("parseHTML and parseHTMLUnsafe", "[DOM][Document][DOMParsing][Sanitizer][html:dom-parsehtml]["
+                                             "html:dom-parsehtmlunsafe][html:parse-html-from-a-string]")
   {
     InsertionDocument data;
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Callbacks/AbortAlgorithmCallback.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -9,7 +9,6 @@
 namespace krys::boo::dom
 {
   class AbortController;
-  class AbortSignal;
 
   /// @brief Implementations of the AbortController and AbortSignal algorithms.
   /// @see https://dom.spec.whatwg.org/#abortcontroller

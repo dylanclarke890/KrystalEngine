@@ -1,90 +1,97 @@
 ﻿#include "Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp"
-#include "Krystal.Booey/Constants/TagNames.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
-#include "Krystal.Booey/HTML/HTMLAudioElement.hpp"
-#include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
-#include "Krystal.Booey/HTML/HTMLBDIElement.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
-#include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDataElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDivElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDListElement.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFontElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
-#include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
-#include "Krystal.Booey/HTML/HTMLHeadingElement.hpp"
-#include "Krystal.Booey/HTML/HTMLHRElement.hpp"
-#include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
-#include "Krystal.Booey/HTML/HTMLIFrameElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/HTMLLabelElement.hpp"
-#include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
-#include "Krystal.Booey/HTML/HTMLLIElement.hpp"
-#include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
-#include "Krystal.Booey/HTML/HTMLMapElement.hpp"
-#include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
-#include "Krystal.Booey/HTML/HTMLMediaElement.hpp"
-#include "Krystal.Booey/HTML/HTMLMenuElement.hpp"
-#include "Krystal.Booey/HTML/HTMLMetaElement.hpp"
-#include "Krystal.Booey/HTML/HTMLMeterElement.hpp"
-#include "Krystal.Booey/HTML/HTMLModElement.hpp"
-#include "Krystal.Booey/HTML/HTMLObjectElement.hpp"
-#include "Krystal.Booey/HTML/HTMLOListElement.hpp"
-#include "Krystal.Booey/HTML/HTMLOptGroupElement.hpp"
-#include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
-#include "Krystal.Booey/HTML/HTMLOutputElement.hpp"
-#include "Krystal.Booey/HTML/HTMLParagraphElement.hpp"
-#include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
-#include "Krystal.Booey/HTML/HTMLPreElement.hpp"
-#include "Krystal.Booey/HTML/HTMLProgressElement.hpp"
-#include "Krystal.Booey/HTML/HTMLQuoteElement.hpp"
-#include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSelectedContentElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSourceElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSpanElement.hpp"
-#include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTableCaptionElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTableColElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTableRowElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTableSectionElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTimeElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTrackElement.hpp"
-#include "Krystal.Booey/HTML/HTMLUListElement.hpp"
-#include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
-#include "Krystal.Booey/HTML/HTMLVideoElement.hpp"
-#include "Krystal.Booey/HTML/HTMLWBRElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAudioElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBaseElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBDIElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDirectoryElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLEmbedElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFontElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFrameSetElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLIFrameElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLIElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMarqueeElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMediaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMenuElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMetaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLModElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLObjectElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOutputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLParagraphElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLParamElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLPictureElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLPreElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLQuoteElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLScriptElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectedContentElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSourceElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSpanElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableCaptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableCellElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableColElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableRowElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTimeElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTitleElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTrackElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLUListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLUnknownElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLVideoElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp"
 
 namespace krys::boo::html
 {
   RefPtr<HTMLElement> HTMLElementFactory::TryCreate(dom::Document &document, TagName elementName) noexcept
   {
+    // 4. Otherwise, if this specification defines an interface appropriate for the element type corresponding
+    //    to the local name name, then return that interface.
+    // 5. If other applicable specifications define an appropriate interface for name, then return the
+    //    interface they define.
+    // (Steps 1 to 3 are the obsolete elements at the end; 6 and 7 are the caller's, for names with no
+    // interface here.)
     switch (elementName)
     {
       case TagName::abbr:
@@ -196,6 +203,10 @@ namespace krys::boo::html
       case TagName::dialog:
       {
         return CreateRefPtr<HTMLDialogElement>(document);
+      }
+      case TagName::dir:
+      {
+        return CreateRefPtr<HTMLDirectoryElement>(document);
       }
       case TagName::br:
       {
@@ -322,6 +333,10 @@ namespace krys::boo::html
       {
         return CreateRefPtr<HTMLParagraphElement>(document);
       }
+      case TagName::param:
+      {
+        return CreateRefPtr<HTMLParamElement>(document);
+      }
       case TagName::picture:
       {
         return CreateRefPtr<HTMLPictureElement>(document);
@@ -414,6 +429,8 @@ namespace krys::boo::html
         return CreateRefPtr<HTMLVideoElement>(document);
       }
 #pragma region Obsolete elements
+      // 1. If name is applet, bgsound, blink, isindex, keygen, multicol, nextid, or spacer, then return
+      //    HTMLUnknownElement.
       case TagName::applet:
       case TagName::bgsound:
       case TagName::blink:
@@ -425,6 +442,8 @@ namespace krys::boo::html
       {
         return CreateRefPtr<HTMLUnknownElement>(document);
       }
+      // 2. If name is acronym, basefont, big, center, nobr, noembed, noframes, plaintext, rb, rtc, strike, or
+      //    tt, then return HTMLElement.
       case TagName::acronym:
       case TagName::basefont:
       case TagName::big:
@@ -440,6 +459,7 @@ namespace krys::boo::html
       {
         return CreateRefPtr<HTMLElement>(document);
       }
+      // 3. If name is listing or xmp, then return HTMLPreElement.
       case TagName::listing:
       case TagName::xmp:
       {

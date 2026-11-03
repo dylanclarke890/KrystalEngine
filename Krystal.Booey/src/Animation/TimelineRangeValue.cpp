@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Animation/TimelineRangeValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 #include "Krystal.Core/Visitor.hpp"
 

@@ -9,7 +9,7 @@
 #include "Krystal.Booey/Graphics/GraphicsLayerKeyframeValueList.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"

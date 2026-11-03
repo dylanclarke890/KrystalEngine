@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
@@ -285,7 +285,7 @@ namespace krys::boo::html
     auto element = CreateRef<SearchFieldCancelButtonElement>(document);
     element->SetUserAgentPart(css::UserAgentParts::WebkitSearchCancelButton());
     // FIXME: The accessibility label (aria-label), with accessibility.
-    (void)element->SetAttribute(u8"role", dom::DOMString(u8"button"));
+    (void)element->SetAttribute(u8"role", u8"button");
     return element;
   }
 

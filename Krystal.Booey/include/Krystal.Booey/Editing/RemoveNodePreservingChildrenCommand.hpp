@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 
 namespace krys::boo

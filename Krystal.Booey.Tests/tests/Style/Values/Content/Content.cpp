@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Content/Content.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
 #include "Krystal.Booey/Style/Values/Content/Quotes.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"

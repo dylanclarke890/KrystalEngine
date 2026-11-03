@@ -3,7 +3,7 @@
 
 namespace krys::boo::html::tests
 {
-  TEST_CASE("ParseRefresh", "[HTML][MicroParsers]")
+  TEST_CASE("ParseRefresh", "[HTML][MicroParsers][html:shared-declarative-refresh-steps]")
   {
     auto parse = [](dom::DOMStringView input)
     {

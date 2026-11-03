@@ -223,7 +223,8 @@ namespace krys::boo
 
     constexpr std::array<int, 12> DaysInMonth {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-    // 'month' is 0-based.
+    /// @brief The number of days in @p month (0-based) of @p year.
+    /// @see https://html.spec.whatwg.org/#number-of-days-in-month-month-of-year-year
     KRYS_NODISCARD int MaxDayOfMonth(int year, int month) noexcept
     {
       if (month != 1) // February?
@@ -442,16 +443,20 @@ namespace krys::boo
                                                                       : MaximumWeekNumber - 1;
   }
 
-  // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#months
+  // Steps 1 and 2 of parsing a month component, and of parsing a week string (steps 3 and 4).
   bool DateComponents::ParseYear(DateParsingBuffer &buffer) noexcept
   {
+    // 1. Collect a sequence of code points that are ASCII digits from input given position. If the collected
+    //    sequence is not at least four characters long, then fail. Otherwise, interpret the resulting
+    //    sequence as a base-ten integer. Let year be that number.
     unsigned digitsLength = CountDigits(buffer);
-    // Needs at least 4 digits according to the standard.
     if (digitsLength < 4)
     {
       return false;
     }
 
+    // 2. If year is not a number greater than zero, then fail.
+    // Nor may it be later than the latest year of a script Date.
     auto year = ParseIntWithinLimits(buffer, digitsLength, MinimumYear(), MaximumYear());
     if (!year)
     {
@@ -464,26 +469,55 @@ namespace krys::boo
 
   Maybe<DateComponents> DateComponents::FromParsingMonth(utf8_stringview source) noexcept
   {
+    // 1. Let input be the string being parsed.
+    // 2. Let position be a pointer into input, initially pointing at the start of the string.
+    // 3. Parse a month component to obtain year and month. If this returns nothing, then fail.
+    // 4. If position is not beyond the end of input, then fail.
+    // 5. Return year and month.
     return CreateFromString(source, [](auto &buffer, auto &date) { return date.ParseMonth(buffer); });
   }
 
   Maybe<DateComponents> DateComponents::FromParsingDate(utf8_stringview source) noexcept
   {
+    // 1. Let input be the string being parsed.
+    // 2. Let position be a pointer into input, initially pointing at the start of the string.
+    // 3. Parse a date component to obtain year, month, and day. If this returns nothing, then fail.
+    // 4. If position is not beyond the end of input, then fail.
+    // 5. Let date be the date with year year, month month, and day day.
+    // 6. Return date.
     return CreateFromString(source, [](auto &buffer, auto &date) { return date.ParseDate(buffer); });
   }
 
   Maybe<DateComponents> DateComponents::FromParsingWeek(utf8_stringview source) noexcept
   {
+    // 1. Let input be the string being parsed.
+    // 2. Let position be a pointer into input, initially pointing at the start of the string.
+    // 3.-9. (ParseWeek.)
+    // 10. If position is not beyond the end of input, then fail.
+    // 11. Return the week-year number year and the week number week.
     return CreateFromString(source, [](auto &buffer, auto &date) { return date.ParseWeek(buffer); });
   }
 
   Maybe<DateComponents> DateComponents::FromParsingTime(utf8_stringview source) noexcept
   {
+    // 1. Let input be the string being parsed.
+    // 2. Let position be a pointer into input, initially pointing at the start of the string.
+    // 3. Parse a time component to obtain hour, minute, and second. If this returns nothing, then fail.
+    // 4. If position is not beyond the end of input, then fail.
+    // 5. Let time be the time with hour hour, minute minute, and second second.
+    // 6. Return time.
     return CreateFromString(source, [](auto &buffer, auto &date) { return date.ParseTime(buffer); });
   }
 
   Maybe<DateComponents> DateComponents::FromParsingDateTimeLocal(utf8_stringview source) noexcept
   {
+    // 1. Let input be the string being parsed.
+    // 2. Let position be a pointer into input, initially pointing at the start of the string.
+    // 3.-5. (ParseDateTimeLocal.)
+    // 6. If position is not beyond the end of input, then fail.
+    // 7. Let date be the date with year year, month month, and day day.
+    // 8. Let time be the time with hour hour, minute minute, and second second.
+    // 9. Return date and time.
     return CreateFromString(source, [](auto &buffer, auto &date) { return date.ParseDateTimeLocal(buffer); });
   }
 
@@ -678,19 +712,32 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#months
+  // A month component's digits must be followed by something other than a digit, which every caller checks
+  // for (a separator or the end of the input), so ParseIntWithinLimits() reading exactly two digits is
+  // equivalent to collecting the digits and checking that there are two.
+
   bool DateComponents::ParseMonth(DateParsingBuffer &buffer) noexcept
   {
+    // 1. Collect a sequence of code points that are ASCII digits from input given position. If the collected
+    //    sequence is not at least four characters long, then fail. Otherwise, interpret the resulting
+    //    sequence as a base-ten integer. Let year be that number.
+    // 2. If year is not a number greater than zero, then fail.
     if (!ParseYear(buffer))
     {
       return false;
     }
 
+    // 3. If position is beyond the end of input or if the character at position is not a U+002D HYPHEN-MINUS
+    //    character, then fail. Otherwise, move position forwards one character.
     if (!SkipExactly(buffer, u8'-'))
     {
       return false;
     }
 
+    // 4. Collect a sequence of code points that are ASCII digits from input given position. If the collected
+    //    sequence is not exactly two characters long, then fail. Otherwise, interpret the resulting sequence
+    //    as a base-ten integer. Let month be that number.
+    // 5. If month is not a number in the range 1 ≤ month ≤ 12, then fail.
     auto month = ParseIntWithinLimits(buffer, 2, 1, 12);
     if (!month)
     {
@@ -703,25 +750,35 @@ namespace krys::boo
       return false;
     }
 
+    // 6. Return year and month.
     _month = *month;
     _type = DateComponentsType::Month;
     return true;
   }
 
-  // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#dates
   bool DateComponents::ParseDate(DateParsingBuffer &buffer) noexcept
   {
+    // 1. Parse a month component to obtain year and month. If this returns nothing, then fail.
     if (!ParseMonth(buffer))
     {
       return false;
     }
 
+    // 2. Let maxday be the number of days in month month of year year.
+    int maxDay = MaxDayOfMonth(_year, _month);
+
+    // 3. If position is beyond the end of input or if the character at position is not a U+002D HYPHEN-MINUS
+    //    character, then fail. Otherwise, move position forwards one character.
     if (!SkipExactly(buffer, u8'-'))
     {
       return false;
     }
 
-    auto day = ParseIntWithinLimits(buffer, 2, 1, MaxDayOfMonth(_year, _month));
+    // 4. Collect a sequence of code points that are ASCII digits from input given position. If the collected
+    //    sequence is not exactly two characters long, then fail. Otherwise, interpret the resulting sequence
+    //    as a base-ten integer. Let day be that number.
+    // 5. If day is not a number in the range 1 ≤ day ≤ maxday, then fail.
+    auto day = ParseIntWithinLimits(buffer, 2, 1, maxDay);
     if (!day)
     {
       return false;
@@ -732,28 +789,43 @@ namespace krys::boo
       return false;
     }
 
+    // 6. Return year, month, and day.
     _monthDay = *day;
     _type = DateComponentsType::Date;
     return true;
   }
 
-  // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#weeks
+  // Steps 3 to 9 of parsing a week string.
   bool DateComponents::ParseWeek(DateParsingBuffer &buffer) noexcept
   {
+    // 3. Collect a sequence of code points that are ASCII digits from input given position. If the collected
+    //    sequence is not at least four characters long, then fail. Otherwise, interpret the resulting
+    //    sequence as a base-ten integer. Let year be that number.
+    // 4. If year is not a number greater than zero, then fail.
     if (!ParseYear(buffer))
     {
       return false;
     }
 
+    // 5. If position is beyond the end of input or if the character at position is not a U+002D HYPHEN-MINUS
+    //    character, then fail. Otherwise, move position forwards one character.
     if (!SkipExactly(buffer, u8'-'))
     {
       return false;
     }
+
+    // 6. If position is beyond the end of input or if the character at position is not a U+0057 LATIN CAPITAL
+    //    LETTER W character (W), then fail. Otherwise, move position forwards one character.
     if (!SkipExactly(buffer, u8'W'))
     {
       return false;
     }
 
+    // 7. Collect a sequence of code points that are ASCII digits from input given position. If the collected
+    //    sequence is not exactly two characters long, then fail. Otherwise, interpret the resulting sequence
+    //    as a base-ten integer. Let week be that number.
+    // 8. Let maxweek be the week number of the last day of year year.
+    // 9. If week is not a number in the range 1 ≤ week ≤ maxweek, then fail.
     auto week = ParseIntWithinLimits(buffer, 2, MinimumWeekNumber, MaxWeekNumberInYear());
     if (!week)
     {
@@ -770,41 +842,62 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#times
   bool DateComponents::ParseTime(DateParsingBuffer &buffer) noexcept
   {
+    // 1. Collect a sequence of code points that are ASCII digits from input given position. If the collected
+    //    sequence is not exactly two characters long, then fail. Otherwise, interpret the resulting sequence
+    //    as a base-ten integer. Let hour be that number.
+    // 2. If hour is not a number in the range 0 ≤ hour ≤ 23, then fail.
     auto hour = ParseIntWithinLimits(buffer, 2, 0, 23);
     if (!hour)
     {
       return false;
     }
 
+    // 3. If position is beyond the end of input or if the character at position is not a U+003A COLON
+    //    character, then fail. Otherwise, move position forwards one character.
     if (!SkipExactly(buffer, u8':'))
     {
       return false;
     }
 
+    // 4. Collect a sequence of code points that are ASCII digits from input given position. If the collected
+    //    sequence is not exactly two characters long, then fail. Otherwise, interpret the resulting sequence
+    //    as a base-ten integer. Let minute be that number.
+    // 5. If minute is not a number in the range 0 ≤ minute ≤ 59, then fail.
     auto minute = ParseIntWithinLimits(buffer, 2, 0, 59);
     if (!minute)
     {
       return false;
     }
 
-    // Optional second part.
-    // Do not return with false because the part is optional.
+    // 6. Let second be 0.
     Maybe<int> second;
     Maybe<int> millisecond;
 
+    // 7. If position is not beyond the end of input and the character at position is U+003A (:):
+    // A colon not followed by a second is left for the caller, whose check for the end of the input fails.
     auto temporaryBuffer = buffer;
     if (SkipExactly(temporaryBuffer, u8':'))
     {
+      // 7a. Advance position to the next character in input.
+      // 7b. If position is beyond the end of input, or at the last character in input, or if the next two
+      //     characters in input starting at position are not both ASCII digits, then fail.
+      // 7d. If second is not a number in the range 0 ≤ second < 60, then fail.
       second = ParseIntWithinLimits(temporaryBuffer, 2, 0, 59);
       if (second)
       {
         // Only after successfully parsing and validating 'second', do we increment the real buffer.
         buffer.Position = temporaryBuffer.Position;
 
-        // Optional fractional second part.
+        // 7c. Collect a sequence of code points that are either ASCII digits or U+002E FULL STOP characters
+        //     from input given position. If the collected sequence is three characters long, or if it is
+        //     longer than three characters long and the third character is not a U+002E FULL STOP character,
+        //     or if it has more than one U+002E FULL STOP character, then fail. Otherwise, interpret the
+        //     resulting sequence as a base-ten number (possibly with a fractional part). Set second to that
+        //     number.
+        // Seconds are kept to the millisecond, so more than three digits after the full stop fail, and a full
+        // stop without digits is left for the caller.
         if (SkipExactly(temporaryBuffer, u8'.'))
         {
           unsigned digitsLength = CountDigits(temporaryBuffer);
@@ -839,6 +932,7 @@ namespace krys::boo
       }
     }
 
+    // 8. Return hour, minute, and second.
     _hour = *hour;
     _minute = *minute;
     _second = second.value_or(0);
@@ -847,20 +941,24 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#local-dates-and-times
+  // Steps 3 to 5 of parsing a local date and time string.
   bool DateComponents::ParseDateTimeLocal(DateParsingBuffer &buffer) noexcept
   {
+    // 3. Parse a date component to obtain year, month, and day. If this returns nothing, then fail.
     if (!ParseDate(buffer))
     {
       return false;
     }
 
-    // Both 'T' and a space are allowed as the separator (see https://github.com/whatwg/html/issues/2276).
+    // 4. If position is beyond the end of input or if the character at position is neither a U+0054 LATIN
+    //    CAPITAL LETTER T character (T) nor a U+0020 SPACE character, then fail. Otherwise, move position
+    //    forwards one character.
     if (!SkipExactly(buffer, u8'T') && !SkipExactly(buffer, u8' '))
     {
       return false;
     }
 
+    // 5. Parse a time component to obtain hour, minute, and second. If this returns nothing, then fail.
     if (!ParseTime(buffer))
     {
       return false;

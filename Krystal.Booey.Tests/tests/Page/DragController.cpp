@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
-#include "Krystal.Booey/DOM/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/DragEvent.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/Events/DragEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/DragClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -241,7 +241,8 @@ namespace krys::boo::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "DragController: dragging a draggable element",
-                   "[Page][DragController]")
+                   "[Page][DragController][html:drag-and-drop-processing-model][html:fire-a-dnd-event]"
+                   "[html:dom-dragevent-datatransfer]")
   {
     DragFixture fixture(u8"<div id=src draggable=true>source</div><div id=dst>target</div>");
     auto &document = *fixture.Document;
@@ -271,7 +272,7 @@ namespace krys::boo::tests
         // Drop targets see the types, not the data.
         readInDragOver = Narrow(dataTransfer.GetData(document, u8"text/plain"));
         auto types = dataTransfer.Types(document);
-        dragOverSawType = std::ranges::find(types, dom::DOMString(u8"text/plain")) != types.end();
+        dragOverSawType = std::ranges::find(types, u8"text/plain") != types.end();
       }
       dataTransfer.SetDropEffect(u8"move");
       event.PreventDefault();

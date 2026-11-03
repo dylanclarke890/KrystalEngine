@@ -4,11 +4,11 @@
 #include "Krystal.Booey/Animation/AnimationEventBase.hpp"
 #include "Krystal.Booey/Animation/CSSAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/CSSTransitionEvent.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -30,7 +30,7 @@ namespace krys::boo::tests
       frame.CreateView({200, 100});
       Document = CreateRef<dom::HTMLDocument>();
       frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-      auto parser = CreateRef<html::HTMLDocumentParser>(*Document);
+      auto parser = CreateRef<html::DocumentParser>(*Document);
       parser->InputStream().Append(krys::move(markup), IsEOF(true));
       parser->PumpTokenizer();
       Document->StyleScope().FlushPendingUpdate();

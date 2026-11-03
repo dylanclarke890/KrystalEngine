@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 
 namespace krys::boo::html
 {

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Attributes.hpp"

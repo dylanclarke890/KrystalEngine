@@ -43,7 +43,7 @@ namespace krys::boo::svg::tests
 
     auto &string = element->String;
     CHECK(string->BaseVal().empty());
-    REQUIRE_FALSE(string->SetBaseVal(dom::DOMString {u8"#target"}).HasException());
+    REQUIRE_FALSE(string->SetBaseVal(u8"#target").HasException());
     CHECK(string->Synchronize() == dom::DOMString(u8"#target"));
 
     // Detached from its element, a change goes nowhere.

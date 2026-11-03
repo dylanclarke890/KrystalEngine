@@ -1,0 +1,51 @@
+﻿#pragma once
+
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Core/Enum.hpp"
+
+namespace krys::boo::html
+{
+  /// @see https://html.spec.whatwg.org/#canplaytyperesult
+  enum class CanPlayTypeResult : uint8
+  {
+    None,
+    Probably,
+    Maybe,
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::CanPlayTypeResult, 3uz);
+
+namespace krys::boo::html
+{
+  /// @see https://html.spec.whatwg.org/#htmlmediaelement
+  class HTMLMediaElement : public HTMLElement
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMediaElement);
+
+  protected:
+    HTMLMediaElement(dom::Document &document, HTMLElementInterface interface) noexcept;
+
+  public:
+    KRYS_NODISCARD bool CanStartSelection() const noexcept override
+    {
+      return false;
+    }
+
+    HTMLMediaElement(dom::Document &document) noexcept;
+
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      return true;
+    }
+
+    // FIXME: Implement the media element API.
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLMediaElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  {
+    return target.IsHTMLMediaElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

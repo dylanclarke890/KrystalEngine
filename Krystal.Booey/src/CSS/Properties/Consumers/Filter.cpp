@@ -18,7 +18,7 @@
 #include "Krystal.Booey/CSS/Values/FilterEffects/FilterFunctionDescriptor.hpp"
 #include "Krystal.Booey/CSS/Values/FilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 

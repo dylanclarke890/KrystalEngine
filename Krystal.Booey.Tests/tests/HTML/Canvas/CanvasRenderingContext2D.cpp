@@ -17,11 +17,11 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
 #include "Krystal.Booey/HTML/Canvas/Path2D.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/ImageData.hpp"
-#include "Krystal.Booey/HTML/TextMetrics.hpp"
+#include "Krystal.Booey/HTML/Canvas/TextMetrics.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
 #include <cmath>
@@ -78,7 +78,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: made by the canvas", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: made by the canvas",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:2d-context-creation-algorithm]"
+            "[html:dom-context-2d-canvas][html:canvas-setting-init-bitmap]"
+            "[html:dom-context-2d-canvas-getcontextattributes]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas></canvas><canvas id=other></canvas>");
     auto &canvas = fixture.Canvas();
@@ -110,7 +113,13 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("CanvasRenderingContext2D: the state's defaults and setters",
-            "[HTML][Canvas][CanvasRenderingContext2D]")
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-linewidth]"
+            "[html:dom-context-2d-miterlimit][html:dom-context-2d-setlinedash]"
+            "[html:dom-context-2d-getlinedash][html:dom-context-2d-linedashoffset]"
+            "[html:dom-context-2d-globalalpha][html:dom-context-2d-globalcompositeoperation]"
+            "[html:dom-context-2d-shadowcolor][html:dom-context-2d-imagesmoothingenabled]"
+            "[html:dom-context-2d-imagesmoothingquality][html:dom-context-2d-textalign]"
+            "[html:dom-context-2d-textbaseline][html:dom-context-2d-direction]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas></canvas>");
     auto &context = fixture.Context();
@@ -150,7 +159,7 @@ namespace krys::boo::tests
       CHECK(context.GetLineDash().empty());
       context.SetShadowColor(u8"not a colour");
       CHECK(context.ShadowColor() == u8"rgba(0, 0, 0, 0)");
-      context.SetFillStyle(dom::DOMString(u8"nonsense"));
+      context.SetFillStyle(u8"nonsense");
       CHECK(StyleString(context.FillStyle()) == u8"#000000");
     }
 
@@ -171,9 +180,9 @@ namespace krys::boo::tests
 
       context.SetShadowColor(u8"rgb(255 0 0 / 50%)");
       CHECK(context.ShadowColor() == u8"rgba(255, 0, 0, 0.5)");
-      context.SetFillStyle(dom::DOMString(u8"blue"));
+      context.SetFillStyle(u8"blue");
       CHECK(StyleString(context.FillStyle()) == u8"#0000ff");
-      context.SetStrokeStyle(dom::DOMString(u8"rgba(0, 128, 0, 0.25)"));
+      context.SetStrokeStyle(u8"rgba(0, 128, 0, 0.25)");
       CHECK(StyleString(context.StrokeStyle()) == u8"rgba(0, 128, 0, 0.25)");
 
       context.SetImageSmoothingEnabled(false);
@@ -208,23 +217,29 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: colours for the canvas", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: colours for the canvas",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-fillstyle]"
+            "[html:dom-context-2d-strokestyle]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas style='color: rgb(0, 0, 255)'></canvas>"
                             u8"<canvas id=plain style='color: lime'></canvas>");
 
     // `currentcolor` is the canvas's inline `color`.
     auto &context = fixture.Context();
-    context.SetFillStyle(dom::DOMString(u8"currentcolor"));
+    context.SetFillStyle(u8"currentcolor");
     CHECK(StyleString(context.FillStyle()) == u8"#0000ff");
 
     // System colours are allowed.
-    context.SetStrokeStyle(dom::DOMString(u8"red"));
-    context.SetStrokeStyle(dom::DOMString(u8"Canvas"));
+    context.SetStrokeStyle(u8"red");
+    context.SetStrokeStyle(u8"Canvas");
     CHECK(StyleString(context.StrokeStyle()) != u8"#ff0000");
   }
 
-  TEST_CASE("CanvasRenderingContext2D: saving and restoring", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: saving and restoring",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-save]"
+            "[html:dom-context-2d-restore][html:dom-context-2d-reset]"
+            "[html:reset-the-rendering-context-to-its-default-state]"
+            "[html:dom-context-2d-iscontextlost]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas></canvas>");
     auto &context = fixture.Context();
@@ -233,7 +248,7 @@ namespace krys::boo::tests
     context.SetLineWidth(5);
     context.Translate(10, 0);
     context.Save();
-    context.SetFillStyle(dom::DOMString(u8"red"));
+    context.SetFillStyle(u8"red");
     CHECK(context.StateStack().size() == 3u);
 
     context.Restore();
@@ -270,6 +285,16 @@ namespace krys::boo::tests
       CHECK(context.LineWidth() == 1);
       CHECK(context.StateStack().size() == 1u);
       CHECK_FALSE(context.IsPointInPath(5, 5));
+      CHECK_FALSE(context.IsContextLost());
+    }
+
+    SECTION("resetting from a transform that can't be inverted takes paths again")
+    {
+      context.Scale(0, 0);
+      context.Rect(0, 0, 10, 10);
+      context.Reset();
+      context.Rect(0, 0, 10, 10);
+      CHECK(context.IsPointInPath(5, 5));
     }
 
     SECTION("resizing the canvas resets it")
@@ -281,7 +306,12 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: transforms", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: transforms",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-scale]"
+            "[html:dom-context-2d-rotate][html:dom-context-2d-translate]"
+            "[html:dom-context-2d-transform][html:dom-context-2d-gettransform]"
+            "[html:dom-context-2d-settransform][html:dom-context-2d-settransform-matrix]"
+            "[html:dom-context-2d-resettransform]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas></canvas>");
     auto &context = fixture.Context();
@@ -317,7 +347,11 @@ namespace krys::boo::tests
     CHECK(context.IsPointInPath(5, 5));
   }
 
-  TEST_CASE("CanvasRenderingContext2D: hit testing paths", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: hit testing paths",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-ispointinpath]"
+            "[html:dom-context-2d-ispointinpath-path][html:is-point-in-path-steps]"
+            "[html:dom-context-2d-ispointinstroke][html:dom-context-2d-ispointinstroke-path]"
+            "[html:is-point-in-stroke-steps]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas></canvas>");
     auto &context = fixture.Context();
@@ -350,20 +384,28 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: gradients and patterns", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: gradients and patterns",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-canvasgradient-addcolorstop]"
+            "[html:dom-context-2d-createlineargradient][html:dom-context-2d-createradialgradient]"
+            "[html:dom-context-2d-createconicgradient][html:dom-context-2d-createpattern]"
+            "[html:dom-canvaspattern-settransform]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas></canvas>");
     auto &context = fixture.Context();
 
     CHECK(context.CreateLinearGradient(0, 0, std::nanf(""), 0).GetException().Code()
-          == dom::ExceptionCode::NotSupportedError);
+          == dom::ExceptionCode::TypeError);
     CHECK(context.CreateRadialGradient(0, 0, -1, 0, 0, 1).GetException().Code()
           == dom::ExceptionCode::IndexSizeError);
     CHECK(context.CreateConicGradient(std::numeric_limits<float>::infinity(), 0, 0).GetException().Code()
-          == dom::ExceptionCode::NotSupportedError);
+          == dom::ExceptionCode::TypeError);
+    CHECK(context.CreateRadialGradient(0, 0, 1, 0, std::nanf(""), 1).GetException().Code()
+          == dom::ExceptionCode::TypeError);
 
     auto gradient = context.CreateLinearGradient(0, 0, 100, 0).ReleaseValue();
     CHECK(gradient->AddColorStop(1.5, u8"red").GetException().Code() == dom::ExceptionCode::IndexSizeError);
+    CHECK(gradient->AddColorStop(std::nan(""), u8"red").GetException().Code()
+          == dom::ExceptionCode::TypeError);
     CHECK(gradient->AddColorStop(0.5, u8"nonsense").GetException().Code() == dom::ExceptionCode::SyntaxError);
     CHECK_FALSE(gradient->AddColorStop(0, u8"red").HasException());
     CHECK_FALSE(gradient->AddColorStop(1, u8"blue").HasException());
@@ -374,7 +416,7 @@ namespace krys::boo::tests
     CHECK(std::get<RefPtr<html::CanvasGradient>>(fill) == gradient.get());
 
     // A colour after a gradient is a colour again, even the one it was before.
-    context.SetFillStyle(dom::DOMString(u8"black"));
+    context.SetFillStyle(u8"black");
     CHECK(StyleString(context.FillStyle()) == u8"#000000");
 
     // A conic gradient's angle starts from the x-axis.
@@ -399,6 +441,9 @@ namespace krys::boo::tests
       REQUIRE_FALSE(pattern->SetTransform({.M11 = 2}).HasException());
       CHECK(pattern->GetPattern().PatternSpaceTransform().A() == 2);
       CHECK(pattern->SetTransform({.B = 1, .M12 = 0}).HasException());
+      // A non-finite matrix is ignored.
+      REQUIRE_FALSE(pattern->SetTransform({.M22 = std::numeric_limits<double>::infinity()}).HasException());
+      CHECK(pattern->GetPattern().PatternSpaceTransform().A() == 2);
 
       context.SetStrokeStyle(Ref<html::CanvasPattern>(pattern));
       CHECK(std::holds_alternative<RefPtr<html::CanvasPattern>>(context.StrokeStyle()));
@@ -406,7 +451,12 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("CanvasRenderingContext2D: drawing records into the canvas's buffer",
-            "[HTML][Canvas][CanvasRenderingContext2D]")
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-fillrect]"
+            "[html:dom-context-2d-strokerect][html:dom-context-2d-clearrect]"
+            "[html:dom-context-2d-beginpath][html:dom-context-2d-fill][html:dom-context-2d-fill-path]"
+            "[html:fill-steps][html:dom-context-2d-stroke][html:dom-context-2d-stroke-path]"
+            "[html:stroke-steps][html:dom-context-2d-clip][html:dom-context-2d-clip-path]"
+            "[html:clip-steps][html:intended-path]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas width=100 height=50></canvas>");
     auto &context = fixture.Context();
@@ -425,6 +475,14 @@ namespace krys::boo::tests
       context.FillRect(0, 0, 0, 0);
       context.FillRect(std::nan(""), 0, 10, 10);
       CHECK(Count(fixture.Drawn(), "fill-rect") == 1u);
+
+      // Not even with copy, which would clear the canvas first.
+      context.SetGlobalCompositeOperation(u8"copy");
+      context.FillRect(0, 0, 0, 10);
+      context.FillRect(0, 0, 10, 0);
+      auto names = fixture.Drawn();
+      CHECK(Count(names, "fill-rect") == 1u);
+      CHECK(Count(names, "clear-rect") == 0u);
     }
 
     SECTION("clearing draws without shadows, alpha or compositing")
@@ -547,7 +605,11 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: image data", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: image data",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-createimagedata]"
+            "[html:dom-context-2d-createimagedata-imagedata][html:dom-context-2d-getimagedata]"
+            "[html:dom-context-2d-putimagedata-short][html:dom-context-2d-putimagedata]"
+            "[html:dom-context2d-putimagedata-common]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas width=4 height=4></canvas>");
     auto &context = fixture.Context();
@@ -562,11 +624,18 @@ namespace krys::boo::tests
 
       auto like = context.CreateImageData(*made.Value());
       CHECK(like.Value()->Size() == IntSize(3, 2));
+
+      // One made like another takes the context's colour space, not the other's.
+      auto p3 = context.CreateImageData(
+        2, 2, html::ImageDataSettings {.ColorSpace = html::PredefinedColorSpace::DisplayP3});
+      REQUIRE_FALSE(p3.HasException());
+      REQUIRE(p3.Value()->ColorSpace() == html::PredefinedColorSpace::DisplayP3);
+      CHECK(context.CreateImageData(*p3.Value()).Value()->ColorSpace() == html::PredefinedColorSpace::SRGB);
     }
 
     SECTION("read back: without a host, what's drawn reads as transparent black")
     {
-      context.SetFillStyle(dom::DOMString(u8"red"));
+      context.SetFillStyle(u8"red");
       context.FillRect(0, 0, 4, 4);
       auto read = context.GetImageData(1, 1, 2, 2, {});
       REQUIRE_FALSE(read.HasException());
@@ -586,14 +655,14 @@ namespace krys::boo::tests
       context.SetShadowColor(u8"black");
       context.SetShadowBlur(3);
       auto data = context.CreateImageData(2, 2, {});
-      context.PutImageData(*data.Value(), 1, 1);
+      REQUIRE_FALSE(context.PutImageData(*data.Value(), 1, 1).HasException());
       auto drawn = fixture.Drawn();
       CHECK(Count(drawn, "draw-native-image") == 1u);
       CHECK(Count(drawn, "set-ctm") == 1u);
 
       // Outside the canvas, or with an empty dirty rectangle, nothing's drawn.
-      context.PutImageData(*data.Value(), 10, 10);
-      context.PutImageData(*data.Value(), 0, 0, 0, 0, 0, 0);
+      REQUIRE_FALSE(context.PutImageData(*data.Value(), 10, 10).HasException());
+      REQUIRE_FALSE(context.PutImageData(*data.Value(), 0, 0, 0, 0, 0, 0).HasException());
       CHECK(Count(fixture.Drawn(), "draw-native-image") == 1u);
     }
 
@@ -605,7 +674,7 @@ namespace krys::boo::tests
       bytes->Set(1, 100);
       bytes->Set(2, 50);
       bytes->Set(3, 128);
-      context.PutImageData(*data.Value(), 0, 0);
+      REQUIRE_FALSE(context.PutImageData(*data.Value(), 0, 0).HasException());
 
       // As if premultiplied and back.
       auto read = context.GetImageData(0, 0, 4, 4, {});
@@ -618,20 +687,22 @@ namespace krys::boo::tests
       // The kept pixels are read once.
       CHECK(context.GetImageData(0, 0, 4, 4, {}).Value()->Data().AsUint8ClampedArray()->Item(3) == 0);
 
-      context.PutImageData(*data.Value(), 0, 0);
+      REQUIRE_FALSE(context.PutImageData(*data.Value(), 0, 0).HasException());
       context.FillRect(0, 0, 1, 1);
       CHECK(context.GetImageData(0, 0, 4, 4, {}).Value()->Data().AsUint8ClampedArray()->Item(3) == 0);
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: drawing images", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: drawing images",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-drawimage]"
+            "[html:check-the-usability-of-the-image-argument]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
     Canvas2DFixture fixture(
       u8"<canvas id=canvas width=10 height=10></canvas><canvas id=other width=4 height=4>"
       u8"</canvas><canvas id=empty width=0 height=4></canvas><img id=img src='file:///a.png'>"
-      u8"<img id=pending>");
+      u8"<img id=pending><img id=broken src='file:///missing.png'>");
     RunNetworkingTasks();
     auto &context = fixture.Context();
     auto &image = Downcast<html::HTMLImageElement>(fixture.ById(u8"img"));
@@ -651,6 +722,14 @@ namespace krys::boo::tests
         context.DrawImage(ShareRefPtr(&image), 0, 0, 1, 1, 0, 0, std::nanf(""), 4).HasException());
       REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&pending), 0, 0).HasException());
       CHECK(Count(fixture.Drawn(), "draw-native-image") == 3u);
+    }
+
+    SECTION("an image that failed to load is broken, unless the arguments aren't finite")
+    {
+      auto &broken = Downcast<html::HTMLImageElement>(fixture.ById(u8"broken"));
+      CHECK(context.DrawImage(ShareRefPtr(&broken), 0, 0).GetException().Code()
+            == dom::ExceptionCode::InvalidStateError);
+      REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&broken), std::nanf(""), 0, 1, 1).HasException());
     }
 
     SECTION("compositing modes that touch the whole canvas draw through a buffer, and copy clears first")
@@ -677,6 +756,11 @@ namespace krys::boo::tests
       auto &empty = fixture.Canvas(u8"empty");
       CHECK(context.DrawImage(ShareRefPtr(&empty), 0, 0).GetException().Code()
             == dom::ExceptionCode::InvalidStateError);
+
+      // Non-finite arguments return first.
+      REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&empty), 0, std::nanf("")).HasException());
+      REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&other), std::nanf(""), 0).HasException());
+      CHECK(Count(fixture.Drawn(), "draw-image-buffer") == 1u);
     }
 
     SECTION("patterns")
@@ -745,7 +829,12 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: text drawing styles", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: text drawing styles",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-font]"
+            "[html:dom-context-2d-lang][html:dom-context-2d-letterspacing]"
+            "[html:dom-context-2d-wordspacing][html:dom-context-2d-fontkerning]"
+            "[html:dom-context-2d-fontstretch][html:dom-context-2d-fontvariantcaps]"
+            "[html:dom-context-2d-textrendering]")
   {
     layout::tests::RegisterAhem();
     Canvas2DFixture fixture(u8"<canvas id=canvas width=200 height=100></canvas>");
@@ -869,7 +958,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: measuring text", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: measuring text",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-measuretext]"
+            "[html:text-preparation-algorithm]")
   {
     layout::tests::RegisterAhem();
     Canvas2DFixture fixture(u8"<canvas id=canvas width=200 height=100></canvas>");
@@ -910,7 +1001,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: drawing text", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: drawing text",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-filltext]"
+            "[html:text-preparation-algorithm]")
   {
     layout::tests::RegisterAhem();
     Canvas2DFixture fixture(u8"<canvas id=canvas width=200 height=100></canvas>");
@@ -993,7 +1086,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: the filter", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: the filter",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-filter]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas width=100 height=50></canvas>");
     auto &context = fixture.Context();
@@ -1084,7 +1178,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("CanvasRenderingContext2D: focus rings", "[HTML][Canvas][CanvasRenderingContext2D]")
+  TEST_CASE("CanvasRenderingContext2D: focus rings",
+            "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-drawfocusifneeded]"
+            "[html:dom-context-2d-drawfocusifneeded-path-element][html:draw-focus-if-needed]")
   {
     Canvas2DFixture fixture(u8"<canvas id=canvas width=100 height=50><button id=button>Go</button>"
                             u8"<button id=other>No</button></canvas><button id=outside>Out</button>");
@@ -1125,4 +1221,5 @@ namespace krys::boo::tests
       CHECK(Count(fixture.Drawn(), "draw-focus-ring-path") == 1u);
     }
   }
+
 }

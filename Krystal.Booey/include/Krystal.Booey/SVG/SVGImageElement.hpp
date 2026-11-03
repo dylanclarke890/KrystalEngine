@@ -58,7 +58,7 @@ namespace krys::boo::svg
     /// @see https://svgwg.org/svg2-draft/embedded.html#__svg__SVGImageElement__crossOrigin
     KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
     /// @see https://svgwg.org/svg2-draft/embedded.html#__svg__SVGImageElement__crossOrigin
-    void CrossOrigin(Maybe<dom::DOMString> &&value) noexcept;
+    void CrossOrigin(Maybe<dom::DOMString> value) noexcept;
 
     KRYS_NODISCARD SVGAnimatedLength &XAnimated() noexcept
     {

@@ -2,13 +2,13 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/CharacterData.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/PositionIterator.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Ranges/PositionIterator.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/HTMLInterchange.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
@@ -17,14 +17,14 @@
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDListElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/HTMLOListElement.hpp"
-#include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
-#include "Krystal.Booey/HTML/HTMLUListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLPictureElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLUListElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
@@ -1242,7 +1242,7 @@ namespace krys::boo
     }
   }
 
-  Ref<dom::Element> CreateTabSpanElement(dom::Document &document, utf8_string &&tabText) noexcept
+  Ref<dom::Element> CreateTabSpanElement(dom::Document &document, utf8_string tabText) noexcept
   {
     return CreateTabSpanElement(document, *document.CreateTextNode(krys::move(tabText)));
   }

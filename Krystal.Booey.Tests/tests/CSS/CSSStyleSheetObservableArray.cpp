@@ -2,12 +2,12 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/CSSOMTestUtils.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
 namespace krys::boo::css::tests
@@ -17,7 +17,7 @@ namespace krys::boo::css::tests
     KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
     {
       auto document = CreateRef<dom::HTMLDocument>();
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
       (void)parser->PumpTokenizer();
       return document;

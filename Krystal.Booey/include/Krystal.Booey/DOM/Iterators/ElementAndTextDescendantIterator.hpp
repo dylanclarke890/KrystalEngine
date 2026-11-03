@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"

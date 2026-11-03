@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/CharacterData.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Range.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -15,9 +15,10 @@
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/SimpleCaretAnimator.hpp"
@@ -1839,8 +1840,8 @@ namespace krys::boo
     }
 
     auto type = dom::DOMStringAtom(EventNames::SelectStart);
-    return dom::EventDispatcher::FireEvent<dom::Event>(type, *selectStartTarget, [&](dom::Event &event)
-                                                       { event.InitEvent(type, true, true); });
+    return dom::EventDispatcher::FireEvent<dom::Event>(type, *selectStartTarget,
+                                                       dom::EventInit {.Bubbles = true, .Cancelable = true});
   }
 
   void FrameSelection::SetStart(const VisiblePosition &position, UserTriggered trigger) noexcept
@@ -1982,7 +1983,7 @@ namespace krys::boo
     {
       auto type = dom::DOMStringAtom(EventNames::SelectStart);
       bool notCanceled = dom::EventDispatcher::FireEvent<dom::Event>(
-        type, *selectStartTarget, [&](dom::Event &event) { event.InitEvent(type, true, true); });
+        type, *selectStartTarget, dom::EventInit {.Bubbles = true, .Cancelable = true});
       if (!notCanceled)
       {
         return;

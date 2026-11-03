@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerFilters.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Page/Page.hpp"

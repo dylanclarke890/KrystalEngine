@@ -1,13 +1,14 @@
 ﻿#include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
-#include "Krystal.Booey/DOM/DOMImplementation.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
@@ -35,7 +36,7 @@ namespace krys::boo
     }
 
     /// @brief @p text with each byte that isn't part of well-formed UTF-8 replaced by U+FFFD.
-    KRYS_NODISCARD utf8_string ReplaceInvalidUTF8(utf8_string &&text) noexcept
+    KRYS_NODISCARD utf8_string ReplaceInvalidUTF8(utf8_string text) noexcept
     {
       if (text::IsValidUTF8(text))
       {
@@ -47,6 +48,50 @@ namespace krys::boo
         builder.Append(*it);
       }
       return krys::move(builder).ToString();
+    }
+  }
+
+  namespace
+  {
+    /// @brief Whether a response of the MIME type @p mimeType (an essence) is loaded as a text document: a
+    /// JavaScript MIME type, a JSON MIME type that isn't an XML MIME type, `text/css`, `text/plain` or
+    /// `text/vtt`.
+    /// @see https://html.spec.whatwg.org/#navigate-text
+    KRYS_NODISCARD bool IsTextDocumentMIMEType(utf8_stringview mimeType) noexcept
+    {
+      // https://mimesniff.spec.whatwg.org/#javascript-mime-type
+      static constexpr utf8_stringview TextTypes[] = {u8"application/ecmascript",
+                                                      u8"application/javascript",
+                                                      u8"application/x-ecmascript",
+                                                      u8"application/x-javascript",
+                                                      u8"text/ecmascript",
+                                                      u8"text/javascript",
+                                                      u8"text/javascript1.0",
+                                                      u8"text/javascript1.1",
+                                                      u8"text/javascript1.2",
+                                                      u8"text/javascript1.3",
+                                                      u8"text/javascript1.4",
+                                                      u8"text/javascript1.5",
+                                                      u8"text/jscript",
+                                                      u8"text/livescript",
+                                                      u8"text/x-ecmascript",
+                                                      u8"text/x-javascript",
+                                                      u8"application/json",
+                                                      u8"text/json",
+                                                      u8"text/css",
+                                                      u8"text/plain",
+                                                      u8"text/vtt"};
+      for (auto type : TextTypes)
+      {
+        if (text::IsASCIICaselessEqual(mimeType, type))
+        {
+          return true;
+        }
+      }
+      // https://mimesniff.spec.whatwg.org/#json-mime-type: a subtype that ends in "+json".
+      auto slash = mimeType.find(u8'/');
+      return slash != utf8_stringview::npos && mimeType.size() - slash > 5
+             && text::IsASCIICaselessEqual(mimeType.substr(mimeType.size() - 5), utf8_stringview(u8"+json"));
     }
   }
 
@@ -107,7 +152,11 @@ namespace krys::boo
     dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Loading);
     if (auto *htmlDocument = DynamicDowncast<dom::HTMLDocument>(document.get()))
     {
-      _parser = CreateRef<html::HTMLDocumentParser>(*htmlDocument);
+      _parser = CreateRef<html::DocumentParser>(*htmlDocument);
+      if (IsTextDocumentMIMEType(_mimeType))
+      {
+        _parser->StartPlainText();
+      }
     }
     else
     {
@@ -186,7 +235,7 @@ namespace krys::boo
     }
     else
     {
-      RefPtr<html::HTMLDocumentParser> parser = krys::move(_parser);
+      RefPtr<html::DocumentParser> parser = krys::move(_parser);
       if (!parser)
       {
         return;

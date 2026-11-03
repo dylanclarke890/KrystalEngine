@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Editing/InsertIntoTextNodeCommand.hpp"
-#include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 
@@ -35,7 +35,7 @@ namespace krys::boo
       return;
     }
 
-    (void)_node->InsertData(_offset, utf8_string(_text));
+    (void)_node->InsertData(_offset, _text);
   }
 
   void InsertIntoTextNodeCommand::DoReapply() noexcept
@@ -45,7 +45,7 @@ namespace krys::boo
       return;
     }
 
-    (void)_node->InsertData(_offset, utf8_string(_text));
+    (void)_node->InsertData(_offset, _text);
   }
 
   void InsertIntoTextNodeCommand::DoUnapply() noexcept

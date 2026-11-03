@@ -2,12 +2,12 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -43,7 +43,7 @@ namespace krys::boo::tests
       Frame->SetSubresourceCachePolicy(cachePolicy);
       Frame->CreateView(ViewSize);
       Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-      auto parser = CreateRef<html::HTMLDocumentParser>(*Document);
+      auto parser = CreateRef<html::DocumentParser>(*Document);
       parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF(true));
       (void)parser->PumpTokenizer();
       Document->StyleScope().FlushPendingUpdate();

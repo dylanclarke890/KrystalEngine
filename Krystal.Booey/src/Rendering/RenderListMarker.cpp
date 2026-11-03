@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyle.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"

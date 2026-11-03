@@ -1,14 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
+#include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/History/BackForwardClient.hpp"
-#include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
+#include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DragClient.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
-#include "Krystal.Booey/Storage/StorageArea.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -95,7 +94,6 @@ namespace krys::boo
     bool _isVisible {true};
     bool _scriptedAnimationsSuspended {false};
     /// @brief The page's session storage (its top-level traversable's), by origin.
-    HashMap<dom::DOMString, Ref<StorageArea>> _sessionStorageAreas;
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
 
     Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
@@ -237,10 +235,6 @@ namespace krys::boo
     {
       _isClosing = true;
     }
-
-    /// @brief The session storage area of @p origin in this page, made on first use.
-    /// @see https://html.spec.whatwg.org/#obtain-a-session-storage-bottle-map
-    KRYS_NODISCARD Ref<StorageArea> SessionStorageArea(dom::DOMStringView origin) noexcept;
 
     /// @brief The host's network became reachable (@p isOnLine) or not: `online` or `offline` fires at each
     /// of the page's windows.

@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/IdChangeInvalidation.hpp"

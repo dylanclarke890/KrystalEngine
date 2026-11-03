@@ -17,6 +17,20 @@ namespace krys::boo::css::mq
     return all;
   }
 
+  /// @brief The `print` media type.
+  KRYS_NODISCARD inline const CSSOMStringAtom &PrintAtom() noexcept
+  {
+    static const CSSOMStringAtom print {u8"print"};
+    return print;
+  }
+
+  /// @brief The `screen` media type.
+  KRYS_NODISCARD inline const CSSOMStringAtom &ScreenAtom() noexcept
+  {
+    static const CSSOMStringAtom screen {u8"screen"};
+    return screen;
+  }
+
   /// @brief A media query: an optional `not`/`only` prefix, a media type and an optional condition.
   struct MediaQuery
   {

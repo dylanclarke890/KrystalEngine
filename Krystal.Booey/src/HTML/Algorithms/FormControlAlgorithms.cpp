@@ -1,89 +1,121 @@
 ﻿#include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSelectedContentElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectedContentElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::html
 {
 #pragma region HTMLSelectedContentElement
 
-  HTMLSelectedContentElement *
-    FormControlAlgorithms::GetEnabledSelectedContent(HTMLSelectElement &select) noexcept
+  void FormControlAlgorithms::UpdateDescendantSelectedContents(HTMLSelectElement &select) noexcept
   {
-    // SPEC(1): If select has the multiple attribute, then return null.
+    // 1. If select has the multiple attribute, then return.
     if (select.HasAttribute(u8"multiple"))
     {
-      return nullptr;
+      return;
     }
 
-    // SPEC(2): Let selectedcontent be the first selectedcontent element descendant of select in tree order if
-    // any such element exists; otherwise return null.
-    auto range = dom::DescendantRange(select);
-    auto selectedcontentIt =
-      First(range, [](auto &&node)
-            { return Is<HTMLElement>(node) && Is<HTMLSelectedContentElement>(Downcast<HTMLElement>(node)); });
-    if (selectedcontentIt == range.end())
+    // 2. Let descendantSelectedcontents be a list of select's descendants, in tree order, that are
+    //    selectedcontent elements whose disabled is false.
+    List<Ref<HTMLSelectedContentElement>> descendantSelectedcontents;
+    for (auto &descendant : dom::DescendantRange(select))
     {
-      return nullptr;
+      if (auto *selectedcontent = DynamicDowncast<HTMLSelectedContentElement>(descendant);
+          selectedcontent && !selectedcontent->Disabled())
+      {
+        descendantSelectedcontents.push_back(ShareRef(*selectedcontent));
+      }
     }
-    auto &selectedcontent = Downcast<HTMLSelectedContentElement>(*selectedcontentIt);
 
-    // SPEC(3): If selectedcontent's disabled is true, then return null.
+    // 3. For each selectedcontent of descendantSelectedcontents: update a selectedcontent given select and
+    //    selectedcontent.
+    for (auto &selectedcontent : descendantSelectedcontents)
+    {
+      UpdateSelectedContent(select, *selectedcontent);
+    }
+  }
+
+  void FormControlAlgorithms::UpdateSelectedContent(HTMLSelectElement &select,
+                                                    HTMLSelectedContentElement &selectedcontent) noexcept
+  {
+    // 1. If selectedcontent's disabled is true, then return.
     if (selectedcontent.Disabled())
     {
-      return nullptr;
+      return;
     }
 
-    // SPEC(4): Return selectedcontent.
-    return &selectedcontent;
+    // 2. Let option be the first option in select's list of options whose selectedness is true, if any such
+    //    option exists; otherwise null.
+    int32 selectedIndex = select.SelectedIndex();
+    RefPtr<HTMLOptionElement> option =
+      ShareRefPtr(selectedIndex >= 0 ? select.Item(static_cast<uint32>(selectedIndex)) : nullptr);
+
+    // 3. If option is null, then clear a selectedcontent given selectedcontent.
+    if (!option)
+    {
+      ClearSelectedContent(selectedcontent);
+      return;
+    }
+
+    // 4. Otherwise, clone an option into a selectedcontent given option and selectedcontent.
+    CloneOptionIntoSelectedContent(*option, selectedcontent);
   }
 
   void FormControlAlgorithms::CloneOptionIntoSelectedContent(
     HTMLOptionElement &option, HTMLSelectedContentElement &selectedcontent) noexcept
   {
-    // SPEC(1): Let documentFragment be a new DocumentFragment whose node document is option's node document.
+    // 1. Let documentFragment be the result of creating a document fragment given option's node document.
     auto documentFragment = CreateRef<dom::DocumentFragment>(option.NodeDocument());
 
-    // SPEC(2):For each child of option's children:
+    // 2. For each child of option's children:
     for (auto &child : dom::ChildNodeRange(option))
     {
-      // SPEC(2.1): Let childClone be the result of running clone given child with subtree set to true.
+      // 2a. Let childClone be the result of running clone given child with subtree set to true.
       auto childClone = dom::NodeAlgorithms::CloneNode(child, nullptr, true);
 
-      // SPEC(2.2): Append childClone to documentFragment.
-      documentFragment->AppendChild(*childClone.Value());
+      // 2b. Append childClone to documentFragment.
+      (void)documentFragment->AppendChild(*childClone.Value());
     }
 
-    // SPEC(3): Replace all with documentFragment within selectedcontent.
+    // 3. Replace all with documentFragment within selectedcontent.
     (void)dom::MutationAlgorithms::ReplaceAll(documentFragment.get(), selectedcontent);
+  }
+
+  void FormControlAlgorithms::ClearSelectedContent(HTMLSelectedContentElement &selectedcontent) noexcept
+  {
+    // 1. Replace all with null within selectedcontent.
+    (void)dom::MutationAlgorithms::ReplaceAll(nullptr, selectedcontent);
+  }
+
+  void FormControlAlgorithms::QueueUpdateDescendantSelectedContents(HTMLSelectElement &select) noexcept
+  {
+    EventLoop::Current().QueueMicrotask([select = ShareRef(select)]
+                                        { UpdateDescendantSelectedContents(*select); });
   }
 
 #pragma endregion
 
 #pragma region HTMLOptionElement
 
-  void FormControlAlgorithms::MaybeCloneOptionIntoSelectedContent(HTMLOptionElement &option) noexcept
+  void FormControlAlgorithms::UpdateDescendantSelectedContentsForOption(HTMLOptionElement &option) noexcept
   {
-    // SPEC(1): Let select be option's option element nearest ancestor select.
-    auto *select = option.OwnerSelectElement();
+    // 1. Let select be option's cached nearest ancestor select element.
+    RefPtr<HTMLSelectElement> select = ShareRefPtr(option.OwnerSelectElement());
 
-    // SPEC(2): If all of the following conditions are true:
-    // - select is not null;
-    // - option's selectedness is true; and
-    // - select's enabled selectedcontent is not null,
-    // then run clone an option into a selectedcontent given option and select's enabled selectedcontent.
-    if (select != nullptr && option.Selected())
+    // 2. If select is null or option's selectedness is false, then return.
+    if (!select || !option.Selected())
     {
-      auto *selectedcontent = GetEnabledSelectedContent(*select);
-      if (selectedcontent != nullptr)
-      {
-        CloneOptionIntoSelectedContent(option, *selectedcontent);
-      }
+      return;
     }
+
+    // 3. Update a select's descendant selectedcontent elements given select.
+    UpdateDescendantSelectedContents(*select);
   }
 
 #pragma endregion

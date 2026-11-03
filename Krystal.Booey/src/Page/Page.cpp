@@ -1,7 +1,8 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
@@ -17,6 +18,7 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Navigation.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -292,12 +294,20 @@ namespace krys::boo
                       [](dom::Document &document)
                       {
                         // If the focused area of the document is not a focusable area, run the focusing steps
-                        // for the document's viewport.
+                        // for the document's viewport, and set the document's relevant global object's
+                        // navigation API's focus changed during ongoing navigation to false.
                         if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement()))
                         {
                           if (!html::FocusAlgorithms::IsFocusableArea(*focusedElement))
                           {
                             html::FocusAlgorithms::FocusingSteps(document);
+                            if (auto *window = document.Window())
+                            {
+                              if (auto *navigation = window->NavigationIfExists())
+                              {
+                                navigation->SetFocusChanged(FocusDidChange::No);
+                              }
+                            }
                           }
                         }
                       });
@@ -338,21 +348,6 @@ namespace krys::boo
 
     // There's no drawing area to finalize the update after painting, so the update finalizes itself.
     FinalizeRenderingUpdate();
-  }
-
-  Ref<StorageArea> Page::SessionStorageArea(dom::DOMStringView origin) noexcept
-  {
-    dom::DOMString key(origin);
-    auto it = _sessionStorageAreas.find(key);
-    if (it != _sessionStorageAreas.end())
-    {
-      return it->second;
-    }
-    // Session storage has no quota beyond the local storage's, as upstream.
-    Ref<StorageArea> area =
-      MemoryStorageArea::Create(StorageType::Session, MemoryStorageArea::DefaultLocalStorageQuota);
-    _sessionStorageAreas.emplace(krys::move(key), area);
-    return area;
   }
 
   void Page::NetworkStateChanged(bool isOnLine) noexcept
@@ -552,16 +547,10 @@ namespace krys::boo
     ForEachRenderableDocument(perDocumentFunction);
   }
 
-  KRYS_NODISCARD static const css::CSSOMStringAtom &ScreenAtom() noexcept
-  {
-    static MainThreadNeverDestroyed<css::CSSOMStringAtom> screen {u8"screen"};
-    return screen;
-  }
-
   bool Page::UseDarkAppearance() const noexcept
   {
     auto *view = MainFrame().View();
-    if (!view || view->MediaType() != ScreenAtom())
+    if (!view || view->MediaType() != css::mq::ScreenAtom())
     {
       return false;
     }

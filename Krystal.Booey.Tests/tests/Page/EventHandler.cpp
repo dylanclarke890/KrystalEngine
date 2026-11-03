@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/FocusEvent.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
+#include "Krystal.Booey/DOM/Events/FocusEvent.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -367,7 +367,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: keys", "[Page][EventHandler]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: keys",
+                   "[Page][EventHandler][html:focus-processing-model][html:fire-a-focus-event]")
   {
     MouseFixture fixture {u8"<div id=box tabindex=0 style=height:20px></div><div id=other tabindex=0></div>"};
     Ref<dom::EventListenerCallback> recorder = CreateRef<KeyRecorder>(fixture.Records);
@@ -384,6 +385,13 @@ namespace krys::boo::tests
       CHECK_FALSE(handler.KeyEvent(KeyEvent(Type::KeyDown, u8"a", u8"a", 'A')));
       CHECK_FALSE(handler.KeyEvent(KeyEvent(Type::KeyUp, u8"a", u8"", 'A')));
       CHECK(fixture.Take() == Strings {"keydown:body/a/65/0", "keypress:body/a/97/97", "keyup:body/a/65/0"});
+    }
+
+    SECTION("without a body, keys go to the document element")
+    {
+      REQUIRE_FALSE(fixture.Document->Body()->Remove().HasException());
+      (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"ArrowLeft", u8"", 0x25));
+      CHECK(fixture.Take() == Strings {"keydown:html/ArrowLeft/37/0"});
     }
 
     SECTION("a key that types nothing has no keypress")

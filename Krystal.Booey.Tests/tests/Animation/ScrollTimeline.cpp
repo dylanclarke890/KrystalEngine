@@ -119,8 +119,8 @@ namespace krys::boo::tests
                    "[Animation][ScrollTimeline]")
   {
     AnimationPageFixture fixture {ScrollerMarkup};
-    auto timeline = ScrollTimeline::Create(*fixture.Document,
-                                           {.Source = ShareRefPtr(&fixture.ById(u8"scroller"))});
+    auto timeline =
+      ScrollTimeline::Create(*fixture.Document, {.Source = ShareRefPtr(&fixture.ById(u8"scroller"))});
 
     KeyframeAnimationOptions options;
     options.Timeline = ShareRefPtr<AnimationTimeline>(timeline.get());
@@ -140,7 +140,7 @@ namespace krys::boo::tests
     SECTION("an attachment range")
     {
       // Over the first half of the scroll range: 50px of 200px is halfway through it.
-      animation->SetBindingsRangeEnd(dom::DOMString(u8"100px"));
+      animation->SetBindingsRangeEnd(u8"100px");
       CHECK_FALSE(animation->Range().End.IsNormal());
       ScrollTo(fixture, 50);
       CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.5f));

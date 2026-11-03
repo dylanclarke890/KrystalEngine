@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo

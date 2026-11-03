@@ -6,12 +6,12 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Filter.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Booey/HTML/Canvas/Path2D.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
-#include "Krystal.Booey/HTML/TextMetrics.hpp"
+#include "Krystal.Booey/HTML/Canvas/TextMetrics.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -132,8 +132,11 @@ namespace krys::boo::html
     DrawFocusIfNeededInternal(path.GetPath(), element);
   }
 
+  // https://html.spec.whatwg.org/#draw-focus-if-needed
   void CanvasRenderingContext2D::DrawFocusIfNeededInternal(const Path &path, dom::Element &element) noexcept
   {
+    // 1. If element is not focused or is not a descendant of context's canvas element, then return.
+    // (Nor is an empty path drawn.)
     auto *context = EffectiveDrawingContext();
     auto &canvas = Canvas();
     if (!element.Focused() || !HasInvertibleTransform() || path.IsEmpty() || !element.IsDescendantOf(canvas)
@@ -141,12 +144,17 @@ namespace krys::boo::html
     {
       return;
     }
+
+    // 2. Draw a focus ring of the appropriate style along path, following platform conventions.
+    // 3. Inform the user that the focus is at the location given by the intended path. (Skipped: there's no
+    //    accessibility.)
     context->DrawFocusRing(path, 1,
                            RenderTheme::Singleton().FocusRingColor(
                              element.NodeDocument().StyleColorOptions(canvas.ComputedStyle())));
     DidDrawEntireCanvas();
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-font
   void CanvasRenderingContext2D::SetFont(dom::DOMStringView newFont) noexcept
   {
     Canvas().NodeDocument().UpdateStyleIfNeeded();
@@ -251,6 +259,7 @@ namespace krys::boo::html
                                                                        : CanvasDirection::Ltr;
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-filltext
   void CanvasRenderingContext2D::FillText(dom::DOMStringView text, double x, double y,
                                           Maybe<double> maxWidth) noexcept
   {
@@ -263,6 +272,8 @@ namespace krys::boo::html
     DrawTextInternal(text, x, y, false, maxWidth);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-measuretext
+  // (Runs the text preparation algorithm and returns a TextMetrics object with the glyphs' measurements.)
   Ref<TextMetrics> CanvasRenderingContext2D::MeasureText(dom::DOMStringView text) noexcept
   {
     Canvas().NodeDocument().UpdateStyleIfNeeded();
@@ -295,11 +306,18 @@ namespace krys::boo::html
   {
     Canvas().NodeDocument().UpdateStyleIfNeeded();
 
+    // 1. If any of the arguments are infinite or NaN, then return.
+    // (Nor with a maximum width that isn't positive, which the text preparation algorithm makes no glyphs
+    // for.)
     if (!CanDrawText(x, y, fill, maxWidth))
     {
       return;
     }
 
+    // 2. Run the text preparation algorithm, passing it text, the object implementing the CanvasText
+    //    interface, and, if the maxWidth argument was provided, that argument. Let glyphs be the result.
+    // 3. Move all the shapes in glyphs to the right by x CSS pixels and down by y CSS pixels.
+    // 4. Paint the shapes given in glyphs, as transformed by the current transformation matrix [...]
     auto normalizedText = NormalizeSpaces(text);
     const RenderStyle *computedStyle;
     auto direction = ToTextDirection(GetState().Direction, &computedStyle);

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/TreeResolutionState.hpp"

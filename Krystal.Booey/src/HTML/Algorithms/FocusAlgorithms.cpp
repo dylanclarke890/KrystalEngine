@@ -3,20 +3,20 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/FocusEvent.hpp"
-#include "Krystal.Booey/DOM/PopoverData.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Events/FocusEvent.hpp"
+#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
@@ -190,6 +190,10 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#tabindex-value
+  // The tabindex value of an element is the value of its tabindex attribute, parsed using the rules for
+  // parsing integers. If parsing fails or the attribute is not specified, then the tabindex value is null. (A
+  // value outside the long range is null too, as the tabIndex getter needs.)
   Maybe<int32> FocusAlgorithms::TabIndexValue(const dom::Element &element) noexcept
   {
     auto attribute = element.GetAttribute(u8"tabindex");
@@ -206,6 +210,7 @@ namespace krys::boo::html
     return static_cast<int32>(result.Value);
   }
 
+  // https://html.spec.whatwg.org/#inert
   bool FocusAlgorithms::IsInert(const dom::Node &node) noexcept
   {
     auto *element = DynamicDowncast<dom::Element>(node);
@@ -213,10 +218,12 @@ namespace krys::boo::html
     {
       element = node.ParentElementInComposedTree();
     }
-    // While the document is blocked by a modal dialog, every connected node but the dialog and its flat tree
-    // descendants is inert.
+    // https://html.spec.whatwg.org/#blocked-by-a-modal-dialog
+    // While document is so blocked, every node that is connected to document, with the exception of the
+    // subject element and its flat tree descendants, must become inert. subject can additionally become inert
+    // via the inert attribute, but only if specified on subject itself (i.e., subject escapes inertness of
+    // ancestors); subject's flat tree descendants can become inert in a similar fashion.
     auto *modalDialog = node.IsConnected() ? node.NodeDocument().ActiveModalDialog() : nullptr;
-    bool isInModalDialog = false;
     for (; element; element = element->ParentElementInComposedTree())
     {
       if (Is<HTMLElement>(*element) && element->HasAttribute(u8"inert"))
@@ -225,26 +232,33 @@ namespace krys::boo::html
       }
       if (element == modalDialog)
       {
-        isInModalDialog = true;
+        return false;
       }
     }
-    return modalDialog && !isInModalDialog;
+    return modalDialog;
   }
 
+  // https://html.spec.whatwg.org/#focusable-area
   bool FocusAlgorithms::IsFocusableArea(const dom::Element &element) noexcept
   {
     if (!element.IsConnected())
     {
       return false;
     }
+    // Elements that meet all the following criteria:
+    // - the element's tabindex value is non-null, or the element is determined by the user agent to be
+    //   focusable;
     if (!TabIndexValue(element) && !IsFocusableByDefault(element))
     {
       return false;
     }
+    // - the element is either not a shadow host, or has a shadow root whose delegates focus is false;
     if (IsShadowHostThatDelegatesFocus(element))
     {
       return false;
     }
+    // - the element is not actually disabled;
+    // (Nor are the user agent provided subwidgets of a control that is.)
     if (css::MatchesDisabledPseudoClass(element))
     {
       return false;
@@ -253,10 +267,13 @@ namespace krys::boo::html
     {
       return false;
     }
+    // - the element is not inert;
     if (IsInert(element))
     {
       return false;
     }
+    // - the element is either being rendered, delegating its rendering to its children, or being used as
+    //   relevant canvas fallback content.
     // The shapes of an `area` element are focusable areas while the image that uses its image map is being
     // rendered (the area itself never is).
     if (auto *area = DynamicDowncast<HTMLAreaElement>(element))
@@ -272,10 +289,16 @@ namespace krys::boo::html
     return IsBeingRendered(element);
   }
 
+  // https://html.spec.whatwg.org/#get-the-focusable-area
   dom::Node *FocusAlgorithms::GetFocusableArea(dom::Element &focusTarget,
                                                dom::FocusTrigger focusTrigger) noexcept
   {
-    // An `area` element stands for its shapes, as the focusable areas of its image.
+    // If focus target is an area element with one or more shapes that are focusable areas: return the shape
+    // corresponding to the first img element in tree order that uses the image map to which the area element
+    // belongs.
+    // (The area element is itself the focusable area, as IsFocusableArea has it.)
+    // If focus target is an element with one or more scrollable regions that are focusable areas: return the
+    // element's first scrollable region, according to a pre-order, depth-first traversal of the flat tree.
     // FIXME: The scrollable regions of elements.
 
     // If focus target is the document element of its Document: return the Document's viewport.
@@ -284,42 +307,58 @@ namespace krys::boo::html
       return &focusTarget.NodeDocument();
     }
 
+    // If focus target is a navigable: return the navigable's active document.
+    // If focus target is a navigable container with a non-null content navigable: return the navigable
+    // container's content navigable's active document.
     // FIXME: Navigables and navigable containers with a content navigable, once there are navigables.
 
+    // If focus target is a shadow host whose shadow root's delegates focus is true:
     if (IsShadowHostThatDelegatesFocus(focusTarget))
     {
+      // 1. Let focusedElement be the currently focused area of a top-level traversable's DOM anchor.
+      // 2. If focus target is a shadow-including inclusive ancestor of focusedElement, then return
+      //    focusedElement.
       auto *focusedArea = CurrentlyFocusedArea(focusTarget.NodeDocument());
       if (focusedArea && Is<dom::Element>(*focusedArea)
           && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(focusTarget, *focusedArea))
       {
         return focusedArea;
       }
+      // 3. Return the focus delegate for focus target given focus trigger.
       return FocusDelegate(focusTarget, focusTrigger);
     }
 
+    // Otherwise: return null.
     return nullptr;
   }
 
+  // https://html.spec.whatwg.org/#focus-delegate
   dom::Node *FocusAlgorithms::FocusDelegate(dom::Element &focusTarget,
                                             dom::FocusTrigger focusTrigger) noexcept
   {
+    // 1. If focusTarget is a shadow host and its shadow root's delegates focus is false, then return null.
     auto *shadowRoot = dom::TreeQueries::GetShadowRoot(focusTarget);
     if (shadowRoot && !shadowRoot->DelegatesFocus())
     {
       return nullptr;
     }
 
+    // 2. Let whereToLook be focusTarget.
     dom::ContainerNode *whereToLook = &focusTarget;
+    // 3. If whereToLook is a shadow host, then set whereToLook to whereToLook's shadow root.
     if (shadowRoot)
     {
       whereToLook = shadowRoot;
     }
 
+    // 4. Let autofocusDelegate be the autofocus delegate for whereToLook given focusTrigger.
+    // 5. If autofocusDelegate is not null, then return autofocusDelegate.
     if (auto *autofocusDelegate = AutofocusDelegate(*whereToLook, focusTrigger))
     {
       return autofocusDelegate;
     }
 
+    // 6. For each descendant of whereToLook's descendants, in tree order:
     for (auto *node = dom::TreeQueries::Next(*whereToLook, whereToLook); node;
          node = dom::TreeQueries::Next(*node, whereToLook))
     {
@@ -328,60 +367,84 @@ namespace krys::boo::html
       {
         continue;
       }
-      // A dialog takes its first sequentially focusable descendant, anything else its first focusable area.
+      // 6.1. Let focusableArea be null.
       dom::Node *focusableArea = nullptr;
+      // 6.2. If focusTarget is a dialog element and descendant is sequentially focusable, then set
+      //      focusableArea to descendant.
+      // 6.3. Otherwise, if focusTarget is not a dialog and descendant is a focusable area, set focusableArea
+      //      to descendant.
       if (IsHTMLElement(focusTarget, TagName::dialog) ? IsSequentiallyFocusable(*descendant)
                                                       : IsFocusableArea(*descendant))
       {
         focusableArea = descendant;
       }
+      // 6.4. Otherwise, set focusableArea to the result of getting the focusable area for descendant given
+      //      focusTrigger.
       else
       {
         focusableArea = GetFocusableArea(*descendant, focusTrigger);
       }
+      // 6.5. If focusableArea is not null, then return focusableArea.
       if (focusableArea)
       {
         return focusableArea;
       }
     }
 
+    // 7. Return null.
     return nullptr;
   }
 
+  // https://html.spec.whatwg.org/#autofocus-delegate
   dom::Node *FocusAlgorithms::AutofocusDelegate(dom::ContainerNode &focusTarget,
                                                 dom::FocusTrigger focusTrigger) noexcept
   {
+    // 1. For each descendant descendant of focus target, in tree order:
     for (auto *node = dom::TreeQueries::Next(focusTarget, &focusTarget); node;
          node = dom::TreeQueries::Next(*node, &focusTarget))
     {
+      // 1.1. If descendant does not have an autofocus content attribute, then continue.
       auto *descendant = DynamicDowncast<dom::Element>(*node);
       if (!descendant || !descendant->HasAttribute(u8"autofocus"))
       {
         continue;
       }
+      // 1.2. Let focusable area be descendant, if descendant is a focusable area; otherwise let focusable
+      //      area be the result of getting the focusable area for descendant given focus trigger.
       dom::Node *focusableArea =
         IsFocusableArea(*descendant) ? descendant : GetFocusableArea(*descendant, focusTrigger);
+      // 1.3. If focusable area is null, then continue.
       if (!focusableArea)
       {
         continue;
       }
+      // 1.4. If focusable area is not click focusable and focus trigger is "click", then continue.
       if (!IsClickFocusable(*focusableArea) && focusTrigger == dom::FocusTrigger::Click)
       {
         continue;
       }
+      // 1.5. Return focusable area.
       return focusableArea;
     }
+    // 2. Return null.
     return nullptr;
   }
 
+  // https://html.spec.whatwg.org/#currently-focused-area-of-a-top-level-traversable
   dom::Node *FocusAlgorithms::CurrentlyFocusedArea(dom::Document &document) noexcept
   {
+    // 1. If traversable does not have system focus, then return null.
     // FIXME: Nested navigables, once there are any; a document is its own top-level traversable's active
     // document.
     if (!document.IsFocusedAndActive())
     {
       return nullptr;
     }
+    // 2. Let candidate be traversable's active document.
+    // 3. While candidate's focused area is a navigable container with a non-null content navigable: set
+    //    candidate to the active document of that navigable container's content navigable.
+    // 4. If candidate's focused area is non-null, set candidate to candidate's focused area.
+    // 5. Return candidate.
     if (auto *focusedElement = document.FocusedElement())
     {
       return focusedElement;
@@ -389,21 +452,37 @@ namespace krys::boo::html
     return &document;
   }
 
+  // https://html.spec.whatwg.org/#focus-chain
   FocusAlgorithms::FocusChain FocusAlgorithms::GetFocusChain(dom::Node &subject) noexcept
   {
-    // FIXME: Parent navigables, once there are any.
+    // 1. Let output be an empty list.
     FocusChain output;
+    // 2. Let currentObject be subject.
+    // 3. While true:
+    // 3.1. Append currentObject to output.
     output.push_back(ShareRef(subject));
+    // 3.2. If currentObject is an area element's shape, then append that area element to output.
+    //      Otherwise, if currentObject's DOM anchor is an element that is not currentObject itself, then
+    //      append currentObject's DOM anchor to output.
+    // (Focusable areas are their own DOM anchors.)
+    // 3.3. If currentObject is a focusable area, then set currentObject to currentObject's DOM anchor's node
+    //      document. Otherwise, if currentObject is a Document whose node navigable's parent is non-null,
+    //      then set currentObject to currentObject's node navigable's parent. Otherwise, break.
+    // FIXME: Parent navigables, once there are any.
     if (!Is<dom::Document>(subject))
     {
       output.push_back(ShareRef<dom::Node>(subject.NodeDocument()));
     }
+    // 4. Return output.
     return output;
   }
 
+  // https://html.spec.whatwg.org/#focusing-steps
   void FocusAlgorithms::FocusingSteps(dom::Node &newFocusTarget, dom::Node *fallbackTarget,
                                       const dom::FocusOptions &options) noexcept
   {
+    // 1. If new focus target is not a focusable area, then set new focus target to the result of getting the
+    //    focusable area for new focus target, given focus trigger if it was passed.
     dom::Node *target = &newFocusTarget;
     if (!IsFocusableAreaNode(*target))
     {
@@ -411,39 +490,57 @@ namespace krys::boo::html
       target = element ? GetFocusableArea(*element, options.Trigger) : nullptr;
     }
 
+    // 2. If new focus target is null:
     if (!target)
     {
+      // 2.1. If no fallback target was specified, then return.
       if (!fallbackTarget)
       {
         return;
       }
+      // 2.2. Otherwise, set new focus target to the fallback target.
       target = fallbackTarget;
     }
 
+    // 3. If new focus target is a navigable container with non-null content navigable, then set new focus
+    //    target to the content navigable's active document.
     // FIXME: Navigable containers with a content navigable, once there are navigables.
 
+    // 4. If new focus target is a focusable area and its DOM anchor is inert, then return.
+    // (A document's viewport isn't inert.)
     if (Is<dom::Element>(*target) && IsInert(*target))
     {
       return;
     }
 
+    // 5. If new focus target is the currently focused area of a top-level traversable, then return.
     auto &document = target->NodeDocument();
     if (target == CurrentlyFocusedArea(document))
     {
       return;
     }
 
+    // 6. Let old chain be the current focus chain of the top-level traversable in which new focus target
+    // finds
+    //    itself.
     auto *currentlyFocusedArea = CurrentlyFocusedArea(document);
     auto oldChain = currentlyFocusedArea ? GetFocusChain(*currentlyFocusedArea) : FocusChain {};
+    // 7. Let new chain be the focus chain of new focus target.
     auto newChain = GetFocusChain(*target);
+    // 8. Run the focus update steps with old chain, new chain, and new focus target respectively.
     FocusUpdateSteps(krys::move(oldChain), krys::move(newChain), target, options);
   }
 
+  // https://html.spec.whatwg.org/#unfocusing-steps
   void FocusAlgorithms::UnfocusingSteps(dom::Element &oldFocusTarget) noexcept
   {
     auto &document = oldFocusTarget.NodeDocument();
     dom::Node *target = &oldFocusTarget;
 
+    // 1. If old focus target is a shadow host whose shadow root's delegates focus is true, and old focus
+    //    target's shadow root is a shadow-including inclusive ancestor of the currently focused area of a
+    //    top-level traversable's DOM anchor, then set old focus target to that currently focused area of a
+    //    top-level traversable.
     auto *currentlyFocusedArea = CurrentlyFocusedArea(document);
     if (IsShadowHostThatDelegatesFocus(oldFocusTarget) && currentlyFocusedArea
         && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(
@@ -452,40 +549,56 @@ namespace krys::boo::html
       target = currentlyFocusedArea;
     }
 
+    // 2. If old focus target is inert, then return.
     if (IsInert(*target))
     {
       return;
     }
 
-    // FIXME: The shapes of `area` elements and scrollable regions.
+    // 3. If old focus target is an area element and one of its shapes is the currently focused area of a
+    //    top-level traversable, or, if old focus target is an element with one or more scrollable regions,
+    //    and one of them is the currently focused area of a top-level traversable, then let old focus target
+    //    be that currently focused area of a top-level traversable.
+    // (The area element is its own shape.)
+    // FIXME: Scrollable regions.
 
+    // 4. Let old chain be the current focus chain of the top-level traversable in which old focus target
+    //    finds itself.
     auto oldChain = currentlyFocusedArea ? GetFocusChain(*currentlyFocusedArea) : FocusChain {};
+    // 5. If old focus target is not one of the entries in old chain, then return.
     if (std::ranges::none_of(oldChain, [&](const Ref<dom::Node> &entry) { return entry.get() == target; }))
     {
       return;
     }
 
+    // 6. If old focus target is not a focusable area, then return.
     if (!IsFocusableAreaNode(*target))
     {
       return;
     }
 
+    // 7. Let topDocument be old chain's last entry.
     auto &topDocument = Downcast<dom::Document>(*oldChain.back());
+    // 8. If topDocument's node navigable has system focus, then run the focusing steps for topDocument's
+    //    viewport.
     if (topDocument.IsFocusedAndActive())
     {
       FocusingSteps(topDocument);
     }
+    // Otherwise, apply any relevant platform-specific conventions for removing system focus from
+    // topDocument's node navigable, and run the focus update steps given old chain, an empty list, and null.
     else
     {
       FocusUpdateSteps(krys::move(oldChain), {}, nullptr);
     }
   }
 
+  // https://html.spec.whatwg.org/#focus-update-steps
   void FocusAlgorithms::FocusUpdateSteps(FocusChain oldChain, FocusChain newChain, dom::Node *newFocusTarget,
                                          const dom::FocusOptions &options) noexcept
   {
-    // If the last entry in old chain and the last entry in new chain are the same, pop the last entry from
-    // old chain and the last entry from new chain and redo this step.
+    // 1. If the last entry in old chain and the last entry in new chain are the same, pop the last entry from
+    //    old chain and the last entry from new chain and redo this step.
     while (!oldChain.empty() && !newChain.empty() && oldChain.back().get() == newChain.back().get())
     {
       oldChain.pop_back();
@@ -503,19 +616,33 @@ namespace krys::boo::html
       }
     }
 
+    // 2. For each entry entry in old chain, in order, run these substeps:
     for (size_t i = 0; i < oldChain.size(); ++i)
     {
       auto &entry = oldChain[i];
-      // Dispatch a change event for form control elements that have been edited.
+      // 2.1. If entry is an input element, and the change event applies to the element, and the element does
+      //      not have a defined activation behavior, and the user has changed the element's value or its list
+      //      of selected files while the control was focused without committing that change (such that it is
+      //      different to what it was when the control was first focused):
+      //      1. Set entry's user validity to true.
+      //      2. Fire an event named change at the element, with the bubbles attribute initialized to true.
+      // (A textarea, or a control in a user agent shadow tree, commits its change here too.)
       if (auto *formControlElement = DynamicDowncast<HTMLFormControlElement>(*entry);
           formControlElement && formControlElement->WasChangedSinceLastFormControlChangeEvent())
       {
         formControlElement->DispatchFormControlChangeEvent();
       }
 
+      // 2.2. If entry is an element, let blur event target be entry. If entry is a Document object, let blur
+      //      event target be that Document object's relevant global object. Otherwise, let blur event target
+      //      be null.
       // FIXME: Fire blur at a document's Window.
       RefPtr<dom::Element> blurEventTarget = ShareRefPtr(DynamicDowncast<dom::Element>(*entry));
 
+      // 2.3. If entry is the last entry in old chain, and entry is an Element, and the last entry in new
+      // chain
+      //      is also an Element, then let related blur target be the last entry in new chain. Otherwise, let
+      //      related blur target be null.
       dom::EventTarget *relatedBlurTarget = nullptr;
       if (i == oldChain.size() - 1 && blurEventTarget && !newChain.empty()
           && Is<dom::Element>(*newChain.back()))
@@ -523,6 +650,8 @@ namespace krys::boo::html
         relatedBlurTarget = newChain.back().get();
       }
 
+      // 2.4. If blur event target is not null, fire a focus event named blur at blur event target, with
+      //      related blur target as the related target.
       if (blurEventTarget)
       {
         blurEventTarget->DispatchBlurEvent(relatedBlurTarget);
@@ -530,13 +659,17 @@ namespace krys::boo::html
       }
     }
 
-    // FIXME: Apply platform-specific conventions for focusing the new focus target (selecting a text
-    // control's contents).
+    // 3. Apply any relevant platform-specific conventions for focusing new focus target. (For example, some
+    //    platforms select the contents of a text control when that control is focused.)
+    // (Focusing a text control selects its contents, as Element::FindTargetAndUpdateFocusAppearance does
+    // after the focusing steps.)
     (void)newFocusTarget;
 
+    // 4. For each entry entry in new chain, in reverse order, run these substeps:
     for (size_t i = newChain.size(); i-- > 0;)
     {
       auto &entry = newChain[i];
+      // 4.1. If entry is a focusable area, and the focused area of the document is not entry:
       if (IsFocusableAreaNode(*entry))
       {
         auto &document = entry->NodeDocument();
@@ -545,14 +678,25 @@ namespace krys::boo::html
                                                       : static_cast<dom::Node *>(&document);
         if (focusedArea != entry.get())
         {
-          // FIXME: Set the navigation API's focus changed during ongoing navigation.
+          // 4.1.1. Set document's relevant global object's navigation API's focus changed during ongoing
+          //        navigation to true.
+          // 4.1.2. Designate entry as the focused area of the document.
+          // (DesignateFocusedArea does both.)
           DesignateFocusedArea(document, element, options.Visibility);
         }
       }
 
+      // 4.2. If entry is an element, let focus event target be entry. If entry is a Document object, let
+      // focus
+      //      event target be that Document object's relevant global object. Otherwise, let focus event target
+      //      be null.
       // FIXME: Fire focus at a document's Window.
       auto *focusEventTarget = DynamicDowncast<dom::Element>(*entry);
 
+      // 4.3. If entry is the last entry in new chain, and entry is an Element, and the last entry in old
+      // chain
+      //      is also an Element, then let related focus target be the last entry in old chain. Otherwise, let
+      //      related focus target be null.
       dom::EventTarget *relatedFocusTarget = nullptr;
       if (i == newChain.size() - 1 && focusEventTarget && !oldChain.empty()
           && Is<dom::Element>(*oldChain.back()))
@@ -560,6 +704,8 @@ namespace krys::boo::html
         relatedFocusTarget = oldChain.back().get();
       }
 
+      // 4.4. If focus event target is not null, fire a focus event named focus at focus event target, with
+      //      related focus target as the related target.
       if (focusEventTarget)
       {
         focusEventTarget->DispatchFocusEvent(relatedFocusTarget, options);
@@ -572,38 +718,47 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#fire-a-focus-event
   void FocusAlgorithms::FireFocusEvent(dom::DOMStringAtom e, dom::Element &target,
                                        dom::EventTarget *relatedTarget) noexcept
   {
-    auto initialize = [&](dom::FocusEvent &event)
-    {
-      event._relatedTarget = ShareRefPtr(relatedTarget);
-      event._composed = true;
-      // FIXME: The view (the Window).
-    };
-    (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(e, target, initialize);
+    // 1. Let view be target if target is a Window object; otherwise target's node document's relevant global
+    //    object.
+    // FIXME: The view (the Window).
+    // 2. Fire an event named e at target, using FocusEvent, with the relatedTarget attribute initialized to
+    //    relatedTarget, the view attribute initialized to view, and the composed flag set.
+    dom::FocusEventInit attributes;
+    attributes.RelatedTarget = ShareRefPtr(relatedTarget);
+    attributes.Composed = true;
+    (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(e, target, attributes);
 
     // The bubbling `focusin` and `focusout` events follow `focus` and `blur`.
     // https://w3c.github.io/uievents/#events-focusevent-event-order
     auto bubblingType = e.View() == u8"focus" ? u8"focusin" : e.View() == u8"blur" ? u8"focusout" : nullptr;
     if (bubblingType)
     {
+      attributes.Bubbles = true;
       (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(dom::DOMStringAtom(bubblingType), target,
-                                                             [&](dom::FocusEvent &event)
-                                                             {
-                                                               initialize(event);
-                                                               event._bubbles = true;
-                                                             });
+                                                             attributes);
     }
   }
 
+  // https://html.spec.whatwg.org/#has-focus-steps
   bool FocusAlgorithms::HasFocusSteps(const dom::Document &target) noexcept
   {
+    // 1. If target's node navigable's top-level traversable does not have system focus, then return false.
+    // 2. Let candidate be target's node navigable's top-level traversable's active document.
+    // 3. While true:
+    // 3.1. If candidate is target, then return true.
+    // 3.2. If the focused area of candidate is a navigable container with a non-null content navigable, then
+    //      set candidate to the active document of that navigable container's content navigable.
+    // 3.3. Otherwise, return false.
     // FIXME: Nested navigables, once there are any; a document is its top-level traversable's active
     // document.
     return target.IsFocusedAndActive();
   }
 
+  // https://html.spec.whatwg.org/#the-autofocus-attribute
   void FocusAlgorithms::AutofocusInsertionSteps(dom::Element &element) noexcept
   {
     if (!element.HasAttribute(u8"autofocus"))
@@ -630,8 +785,12 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: 4. The sandboxed automatic features browsing context flag, and 5. the ancestor navigables'
-    // origins, once there are sandboxes and frames.
+    // 4. If target's active sandboxing flag set has the sandboxed automatic features browsing context flag,
+    //    then return.
+    // FIXME: Sandboxing flags, once there are frames to sandbox.
+
+    // 5. If the allow focus steps given target return false, then return.
+    // (Focus is always allowed; see Focus in HTMLOrSVGOrMathMLElement.)
 
     // 6. Let topDocument be target's node navigable's top-level traversable's active document.
     // FIXME: The main frame's document, once there are frames.
@@ -650,6 +809,7 @@ namespace krys::boo::html
     topDocument.ScheduleRenderingUpdate({RenderingUpdateStep::FlushAutofocusCandidates});
   }
 
+  // https://html.spec.whatwg.org/#flush-autofocus-candidates
   void FocusAlgorithms::FlushAutofocusCandidates(dom::Document &topDocument) noexcept
   {
     // 1. If topDocument's autofocus processed flag is true, then return.
@@ -704,21 +864,27 @@ namespace krys::boo::html
       // 6. Remove element from candidates.
       candidates.erase(candidates.begin());
 
-      // 7. If any of doc's inclusive ancestor documents has a non-null target element, continue. Without
-      // nested navigables doc is topDocument, whose target element step 4 checked.
+      // 7. Let inclusiveAncestorDocuments be a list consisting of the active document of doc's inclusive
+      //    ancestor navigables.
+      // 8. If any Document in inclusiveAncestorDocuments has non-null target element, then continue.
+      // (Without nested navigables doc is topDocument, whose target element step 4 checked.)
 
-      // 8. Let target be element.
-      // 9. If target is not a focusable area, then set target to the result of getting the focusable area for
-      // target.
-      // FIXME: Getting the focusable area of an element that isn't one, as upstream doesn't yet.
-      // 10. If target is not null, then: empty candidates, set topDocument's autofocus processed flag to
-      // true, and run the focusing steps for target.
+      // 9. Let target be element.
+      // 10. If target is not a focusable area, then set target to the result of getting the focusable area
+      // for
+      //     target.
       element->NodeDocument().UpdateStyleIfNeeded();
-      if (IsFocusableArea(*element))
+      dom::Node *target = IsFocusableArea(*element) ? element.get() : GetFocusableArea(*element);
+
+      // 11. If target is not null:
+      if (target)
       {
+        // 11.1. Empty candidates.
         candidates.clear();
+        // 11.2. Set topDocument's autofocus processed flag to true.
         topDocument.SetAutofocusProcessed();
-        FocusingSteps(*element);
+        // 11.3. Run the focusing steps for target.
+        FocusingSteps(*target);
         return;
       }
     }
@@ -754,6 +920,9 @@ namespace krys::boo::html
     return nullptr;
   }
 
+  // https://html.spec.whatwg.org/#focus-navigation-scope-owner
+  // A node is a focus navigation scope owner if it is a Document, a shadow host, a slot, or an element which
+  // is the popover trigger of an element in the popover showing state.
   bool FocusAlgorithms::IsFocusNavigationScopeOwner(const dom::Node &node) noexcept
   {
     if (Is<dom::Document>(node))
@@ -781,31 +950,37 @@ namespace krys::boo::html
     return Is<HTMLSlotElement>(*element);
   }
 
+  // https://html.spec.whatwg.org/#associated-focus-navigation-owner
   dom::Node *FocusAlgorithms::AssociatedFocusNavigationOwner(const dom::Element &element) noexcept
   {
+    // 1. If element's parent is null, then return null.
     auto *parent = element.ParentNode();
     if (!parent)
     {
       return nullptr;
     }
+    // 2. If element's parent is a shadow host, then return element's assigned slot.
     if (dom::TreeQueries::IsShadowHost(*parent))
     {
       return dom::SlotAlgorithms::GetAssignedSlot(element);
     }
+    // 3. If element's parent is a shadow root, then return the parent's host.
     if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(*parent))
     {
       return shadowRoot->Host();
     }
+    // 4. If element's parent is the document element, then return the parent's node document.
     if (parent == dom::TreeQueries::DocumentElement(element.NodeDocument()))
     {
       return &element.NodeDocument();
     }
-    // The document element itself (the specification doesn't say), or an element outside a document.
+    // (The document element itself, which the specification leaves out, is in the document's scope.)
     if (Is<dom::Document>(*parent))
     {
       return parent;
     }
-    // A showing popover is in its trigger's scope.
+    // 5. If element is in the popover showing state and has a popover trigger set, then return element's
+    //    popover trigger.
     if (auto *popover = DynamicDowncast<HTMLElement>(element); popover && popover->IsPopoverShowing())
     {
       if (auto *trigger = popover->GetPopoverData()->Invoker())
@@ -813,15 +988,22 @@ namespace krys::boo::html
         return trigger;
       }
     }
+    // 6. Return element's parent's associated focus navigation owner.
     auto *parentElement = DynamicDowncast<dom::Element>(*parent);
     return parentElement ? AssociatedFocusNavigationOwner(*parentElement) : nullptr;
   }
 
+  // https://html.spec.whatwg.org/#sequentially-focusable
+  // (The user agent determines every area in its document's sequential focus navigation order sequentially
+  // focusable.)
   bool FocusAlgorithms::IsSequentiallyFocusable(const dom::Element &element) noexcept
   {
     return IsFocusableArea(element) && TabIndexValue(element).value_or(0) >= 0;
   }
 
+  // https://html.spec.whatwg.org/#sequential-focus-navigation-order
+  // https://html.spec.whatwg.org/#tabindex-ordered-focus-navigation-scope
+  // https://html.spec.whatwg.org/#flattened-tabindex-ordered-focus-navigation-scope
   List<dom::Element *> FocusAlgorithms::SequentialFocusNavigationOrder(dom::Document &document) noexcept
   {
     // Each focus navigation scope's elements, in shadow-including tree order.
@@ -867,8 +1049,14 @@ namespace krys::boo::html
       std::ranges::stable_sort(ordered, [&](const dom::Element *a, const dom::Element *b)
                                { return orderingKey(*a) < orderingKey(*b); });
 
-      // Flattened: a scope owner is followed by its own flattened scope, or replaced by it if it isn't a
-      // focusable area.
+      // Flattened:
+      // 1. Let result be a clone of owner's tabindex-ordered focus navigation scope.
+      // 2. For each item of result:
+      // 2.1. If item is not a focus navigation scope owner, then continue.
+      // 2.2. If item is not a focusable area, then replace item with all of the items in item's flattened
+      //      tabindex-ordered focus navigation scope.
+      // 2.3. Otherwise, insert the contents of item's flattened tabindex-ordered focus navigation scope after
+      //      item.
       for (auto *item : ordered)
       {
         if (!IsFocusNavigationScopeOwner(*item) || IsFocusableArea(*item))
@@ -885,18 +1073,26 @@ namespace krys::boo::html
     return result;
   }
 
+  // https://html.spec.whatwg.org/#selection-mechanism-sequential
   bool FocusAlgorithms::SequentialNavigation(dom::Document &document, dom::FocusDirection direction) noexcept
   {
     krys_debug_assert(direction == dom::FocusDirection::Forward
                       || direction == dom::FocusDirection::Backward);
+    // 3. Let direction be "forward" if the user requested the next control, and "backward" if the user
+    //    requested the previous control.
     bool forward = direction == dom::FocusDirection::Forward;
 
     // Focusability depends on style.
     document.UpdateStyleIfNeeded();
     auto order = SequentialFocusNavigationOrder(document);
 
-    // The starting point is the focused area (the document standing for its viewport), or the sequential
-    // focus navigation starting point if it's inside it.
+    // 1. Let starting point be the currently focused area of a top-level traversable, if the user requested
+    // to
+    //    move focus sequentially from there, or else the top-level traversable itself, if the user instead
+    //    requested to move focus from outside the top-level traversable.
+    // 2. If there is a sequential focus navigation starting point defined and it is inside starting point,
+    //    then let starting point be the sequential focus navigation starting point instead.
+    // (The document stands for the traversable, and the focused area is its focused element or viewport.)
     using Position = dom::SequentialFocusNavigationStartingPointPosition;
     dom::Node *startingPoint = document.FocusedElement();
     if (!startingPoint)
@@ -912,12 +1108,19 @@ namespace krys::boo::html
       position = document._sequentialFocusNavigationStartingPointPosition;
     }
 
-    // The sequential navigation search algorithm.
+    // 4. Loop: Let selection mechanism be "sequential" if starting point is a navigable or if starting point
+    //    is in its Document's sequential focus navigation order. Otherwise, starting point is not in its
+    //    Document's sequential focus navigation order; let selection mechanism be "DOM".
+    // 5. Let candidate be the result of running the sequential navigation search algorithm with starting
+    //    point, direction, and selection mechanism.
+    // https://html.spec.whatwg.org/#sequential-navigation-search-algorithm
+    // (A suitable sequentially focusable area is one in the order, whose areas aren't inert.)
     dom::Element *candidate = nullptr;
     auto inOrder = std::ranges::find(order, startingPoint);
     if (startingPoint == &document && position == Position::At)
     {
-      // The navigable: its first or last area.
+      // starting point is a navigable: the first or last suitable sequentially focusable area in starting
+      // point's active document.
       if (!order.empty())
       {
         candidate = forward ? order.front() : order.back();
@@ -925,7 +1128,8 @@ namespace krys::boo::html
     }
     else if (position == Position::At && inOrder != order.end())
     {
-      // Sequential: the area after or before the starting point in the order.
+      // selection mechanism is "sequential": the first suitable sequentially focusable area after starting
+      // point, or the last before it, in starting point's Document's sequential focus navigation order.
       if (forward && std::next(inOrder) != order.end())
       {
         candidate = *std::next(inOrder);
@@ -937,7 +1141,8 @@ namespace krys::boo::html
     }
     else
     {
-      // DOM: the nearest suitable area after or before the starting point in shadow-including tree order.
+      // selection mechanism is "DOM": the suitable sequentially focusable area that appears nearest after
+      // starting point, or before it, in starting point's Document, in shadow-including tree order.
       List<dom::Node *> nodes;
       for (dom::Node *node = &document; node; node = dom::TreeQueries::NextShadowIncluding(*node))
       {
@@ -984,11 +1189,20 @@ namespace krys::boo::html
       }
     }
 
+    // 7. Otherwise, unset the sequential focus navigation starting point.
     if (!candidate)
     {
       document._sequentialFocusNavigationStartingPoint = nullptr;
-      // There are no user agent controls to move the focus to, so it wraps around to the first or last area,
-      // as from the viewport.
+      // 8. If starting point is a top-level traversable, or a focusable area in the top-level traversable,
+      // the
+      //    user agent should transfer focus to its own controls appropriately (if any), honouring direction,
+      //    and then return. If the user agent has no sequentially focusable controls, then the user agent may
+      //    instead restart these steps with the starting point being the top-level traversable itself.
+      // (There are no user agent controls, so it restarts from the traversable: the first or last area.)
+      // 9. Otherwise, starting point is a focusable area in a child navigable. Set starting point to that
+      // child
+      //    navigable's parent and return to the step labeled loop.
+      // FIXME: Child navigables, once there are any.
       if (order.empty())
       {
         return false;
@@ -996,6 +1210,7 @@ namespace krys::boo::html
       candidate = forward ? order.front() : order.back();
     }
 
+    // 6. If candidate is not null, then run the focusing steps for candidate and return.
     FocusingSteps(*candidate, nullptr, {.Direction = direction, .Visibility = dom::FocusVisibility::Visible});
     // What navigation focuses is shown focused (scrolled into view, or with a caret in it), as `focus()`
     // shows it.
@@ -1248,8 +1463,9 @@ namespace krys::boo::html
     // The focused element gets `blur` before the window, and `focus` after it.
     auto fire = [](dom::DOMStringAtom type, dom::Element &target)
     {
-      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(type, target, [](dom::FocusEvent &event)
-                                                             { event._composed = true; });
+      dom::FocusEventInit attributes;
+      attributes.Composed = true;
+      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(type, target, attributes);
     };
     RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
     if (!focused && focusedElement)

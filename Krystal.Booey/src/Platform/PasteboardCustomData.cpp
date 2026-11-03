@@ -132,7 +132,7 @@ namespace krys::boo
 
   void PasteboardCustomData::WriteString(utf8_stringview type, utf8_stringview value) noexcept
   {
-    AddOrMoveEntryToEnd(type).Data = Maybe<utf8_string>(utf8_string(value));
+    AddOrMoveEntryToEnd(type).Data = Maybe<utf8_string>(value);
   }
 
   void PasteboardCustomData::WriteData(utf8_stringview type, Ref<SharedBuffer> &&data) noexcept

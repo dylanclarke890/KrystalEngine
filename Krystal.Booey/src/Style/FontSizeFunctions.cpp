@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

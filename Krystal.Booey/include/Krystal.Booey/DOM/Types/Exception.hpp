@@ -68,7 +68,7 @@ namespace krys::boo::dom
     utf8_string _message;
 
   public:
-    explicit Exception(ExceptionCode code, utf8_string &&message = {}) noexcept
+    explicit Exception(ExceptionCode code, utf8_string message = {}) noexcept
         : _code {code}, _message {krys::move(message)}
     {
     }

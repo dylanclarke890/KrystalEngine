@@ -39,7 +39,7 @@ namespace krys::boo
     return {DefaultLanguage()};
   }
 
-  void OverrideUserPreferredLanguages(List<utf8_string> &&languages) noexcept
+  void OverrideUserPreferredLanguages(List<utf8_string> languages) noexcept
   {
     PreferredLanguagesOverride() = krys::move(languages);
     LanguageDidChange();

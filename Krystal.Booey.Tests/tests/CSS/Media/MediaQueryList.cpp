@@ -4,9 +4,9 @@
 #include "Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -18,7 +18,7 @@ namespace krys::boo::css::tests
     KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
     {
       auto document = CreateRef<dom::HTMLDocument>();
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
       (void)parser->PumpTokenizer();
       return document;

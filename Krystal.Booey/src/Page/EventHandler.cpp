@@ -1,19 +1,19 @@
 ﻿#include "Krystal.Booey/Page/EventHandler.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DragEvent.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/PointerEvent.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/DOM/TextEvent.hpp"
-#include "Krystal.Booey/DOM/TouchEvent.hpp"
-#include "Krystal.Booey/DOM/WheelEvent.hpp"
+#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/Events/DragEvent.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
+#include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
+#include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -23,9 +23,9 @@
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
 #include "Krystal.Booey/Page/DragController.hpp"
 #include "Krystal.Booey/Page/DragState.hpp"
@@ -64,16 +64,27 @@ namespace krys::boo
 
     /// @brief The element key events go to in @p document: its focused element, or its body.
     // FIXME: A fullscreen video and a plugin document's plugin, once there are any.
+    // https://html.spec.whatwg.org/#focus-processing-model
+    // (The target node of a routed key event.)
     KRYS_NODISCARD dom::Element *EventTargetElementForDocument(dom::Document *document) noexcept
     {
       if (!document)
       {
         return nullptr;
       }
+      // 3. Let target node be target area's DOM anchor.
       dom::Element *element = document->FocusedElement();
+      // 4. If target node is a Document that has a body element, then let target node be the body element of
+      //    that Document.
       if (!element && Is<dom::HTMLDocument>(*document))
       {
         element = document->BodyOrFrameset();
+      }
+      // Otherwise, if target node is a Document object that has a non-null document element, then let
+      // target node be that document element.
+      if (!element)
+      {
+        element = document->DocumentElement().get();
       }
       return element;
     }
@@ -2031,8 +2042,8 @@ namespace krys::boo
       }
 
       auto type = dom::DOMStringAtom(EventNames::SelectStart);
-      return dom::EventDispatcher::FireEvent<dom::Event>(type, *node, [&](dom::Event &event)
-                                                         { event.InitEvent(type, true, true); });
+      return dom::EventDispatcher::FireEvent<dom::Event>(
+        type, *node, dom::EventInit {.Bubbles = true, .Cancelable = true});
     }
 
     // FIXME: Image overlays (ImageOverlay::isInsideOverlay) and nodes that select on mouse down

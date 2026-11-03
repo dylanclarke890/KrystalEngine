@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp"
-#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -284,22 +284,22 @@ namespace krys::boo::html
       {
         SanitizerConfig config;
 
-        // SPEC: processingInstructions: « »
+        // processingInstructions: « »
         config.ProcessingInstructions.emplace();
 
-        // SPEC: attributes: a list consisting of: [...]
+        // attributes: a list consisting of: [...]
         config.Attributes.emplace();
         for (auto name : DefaultGlobalAttributes)
         {
           config.Attributes->emplace_back(dom::DOMString(name));
         }
 
-        // SPEC: comments: false; dataAttributes: false; javascriptURLs: false.
+        // comments: false; dataAttributes: false; javascriptURLs: false.
         config.Comments = false;
         config.DataAttributes = false;
         config.JavascriptURLs = false;
 
-        // SPEC: elements: all HTML elements normatively categorized as Default within their individual
+        // elements: all HTML elements normatively categorized as Default within their individual
         // definitions, alongside the MathML and SVG elements listed in the table below.
         config.Elements.emplace();
         for (auto &element : DefaultHTMLElements)
@@ -324,7 +324,7 @@ namespace krys::boo::html
     static NeverDestroyed<SanitizerConfig> configuration {
       []
       {
-        // SPEC: Its removeElements list consists of all HTML elements normatively marked as Unsafe within
+        // Its removeElements list consists of all HTML elements normatively marked as Unsafe within
         // their individual definitions, along with the obsolete frame element, and the SVG script and SVG use
         // elements, and its removeAttributes list is empty.
         SanitizerConfig config;
@@ -362,7 +362,7 @@ namespace krys::boo::html
     using infra::Namespaces::HTML;
     using infra::Namespaces::SVG;
 
-    // SPEC: The built-in navigating URL attributes list corresponds to all HTML elements marked with
+    // The built-in navigating URL attributes list corresponds to all HTML elements marked with
     // navigating URL attributes in their normative definitions, as well as the element-attribute pairs
     // represented in the following table.
     return IsSanitizerPair(element, attribute, u8"a", HTML, u8"href", none)

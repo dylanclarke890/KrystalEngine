@@ -20,6 +20,7 @@ namespace krys::boo::css
   /// @brief Evaluates a `sizes` attribute: the length of its first entry whose media condition matches, or
   /// `100vw`.
   /// @see https://html.spec.whatwg.org/#sizes-attributes
+  /// @see https://html.spec.whatwg.org/#parse-a-sizes-attribute
   class SizesAttributeParser
   {
   private:

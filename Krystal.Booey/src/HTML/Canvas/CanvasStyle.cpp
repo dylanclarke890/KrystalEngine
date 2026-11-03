@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorInlines.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 
 namespace krys::boo::html
 {

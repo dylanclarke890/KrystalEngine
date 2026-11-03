@@ -1,16 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/EventInit.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Modules/Gamepad/Gamepad.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo::dom
-{
-  class EventFactory;
-}
 
 namespace krys::boo
 {
@@ -27,13 +21,13 @@ namespace krys::boo
   /// @see https://w3c.github.io/gamepad/#gamepadevent-interface
   class GamepadEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = GamepadEventInit;
-
   private:
     RefPtr<boo::Gamepad> _gamepad;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = GamepadEventInit;
+
     /// @see https://w3c.github.io/gamepad/#dom-gamepadevent-constructor
     GamepadEvent(dom::DOMStringAtom type, const GamepadEventInit &eventInitDict = {}) noexcept;
 

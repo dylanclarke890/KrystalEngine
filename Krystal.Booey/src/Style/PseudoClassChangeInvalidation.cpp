@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/Style/InvalidationFunctions.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

@@ -316,6 +316,16 @@ namespace krys::boo::css::tests
     CHECK(!Supports(u8""));
   }
 
+  TEST_CASE("SelectorParser(internal pseudo-classes)", "[CSS][Selectors][SelectorParser]")
+  {
+    // Only user agent style sheets can name them.
+    CHECK(Parse(u8"form:-internal-html-document") == u8"<invalid>");
+
+    SelectorParserContext userAgent;
+    userAgent.Mode = ParserMode::UASheet;
+    CHECK(Parse(u8"form:-internal-html-document", userAgent) == u8"form:-internal-html-document");
+  }
+
   TEST_CASE("SelectorParser::ParsePseudoElement", "[CSS][Selectors][SelectorParser]")
   {
     using Identifier = style::PseudoElementIdentifier;

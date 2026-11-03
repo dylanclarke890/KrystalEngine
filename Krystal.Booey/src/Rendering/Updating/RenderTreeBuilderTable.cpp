@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCaption.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"

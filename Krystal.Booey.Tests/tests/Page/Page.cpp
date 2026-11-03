@@ -3,18 +3,19 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -49,7 +50,7 @@ namespace krys::boo::tests
         frame.CreateView({200, 100});
         Document = CreateRef<dom::HTMLDocument>();
         frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-        auto parser = CreateRef<html::HTMLDocumentParser>(*Document);
+        auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(krys::move(markup), IsEOF(true));
         parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
@@ -182,7 +183,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: autofocus", "[Page][RenderingUpdate][Focus]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "Page: autofocus",
+    "[Page][RenderingUpdate][Focus][html:the-autofocus-attribute][html:autofocus-processed-flag]"
+    "[html:flush-autofocus-candidates]")
   {
     SECTION("the first focusable candidate is focused in the rendering update")
     {
@@ -202,13 +206,29 @@ namespace krys::boo::tests
       CHECK(fixture.Document->AutofocusCandidates().empty());
     }
 
+    SECTION("a candidate that isn't a focusable area focuses its focusable area")
+    {
+      // A shadow host that delegates focus: its focus delegate.
+      PageFixture fixture {u8"<!DOCTYPE html><body>"};
+      auto &document = *fixture.Document;
+      auto host = document.CreateElement(u8"div").ReleaseValue();
+      auto shadow = host->AttachShadow({.DelegatesFocus = dom::DelegatesFocus(true)}).ReleaseValue();
+      auto inner = document.CreateElement(u8"input").ReleaseValue();
+      REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+      REQUIRE_FALSE(host->SetAttribute(u8"autofocus", u8"").HasException());
+      REQUIRE_FALSE(document.Body()->AppendChild(*host).HasException());
+      fixture.TestPage->UpdateRendering();
+      CHECK(document.FocusedElement() == inner.get());
+      CHECK(document.AutofocusProcessed());
+    }
+
     SECTION("an element focused first wins")
     {
       auto page = Page::Create();
       page->MainFrame().CreateView({200, 100});
       auto document = CreateRef<dom::HTMLDocument>();
       page->MainFrame().SetDocument(ShareRefPtr<dom::Document>(document.get()));
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(
         u8"<!DOCTYPE html><div id=auto autofocus tabindex=0></div><div id=other tabindex=0></div>",
         IsEOF(true));
@@ -228,7 +248,7 @@ namespace krys::boo::tests
       page->MainFrame().CreateView({200, 100});
       auto document = CreateRef<dom::HTMLDocument>();
       page->MainFrame().SetDocument(ShareRefPtr<dom::Document>(document.get()));
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(
         u8"<!DOCTYPE html><div id=auto autofocus tabindex=0></div><div id=target></div>", IsEOF(true));
       parser->PumpTokenizer();
@@ -245,7 +265,7 @@ namespace krys::boo::tests
     SECTION("only in a document shown in a frame")
     {
       auto document = CreateRef<dom::HTMLDocument>();
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(u8"<!DOCTYPE html><div autofocus tabindex=0></div>", IsEOF(true));
       parser->PumpTokenizer();
       CHECK(document->AutofocusCandidates().empty());

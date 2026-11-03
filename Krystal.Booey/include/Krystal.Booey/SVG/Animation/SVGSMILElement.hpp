@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/EventSender.hpp"
+#include "Krystal.Booey/DOM/Events/EventSender.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTime.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Core/Types/List.hpp"

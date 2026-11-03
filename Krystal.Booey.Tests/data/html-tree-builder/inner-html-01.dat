@@ -793,7 +793,6 @@ select
 #document-fragment
 select
 #document
-| <input>
 | <option>
 
 #data

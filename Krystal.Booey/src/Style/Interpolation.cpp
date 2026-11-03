@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Interpolation.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties+SettersInlines.hpp"

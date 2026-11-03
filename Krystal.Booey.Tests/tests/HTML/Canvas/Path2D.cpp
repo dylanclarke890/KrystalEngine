@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/Path2D.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include <cmath>
+#include <limits>
 #include <numbers>
 
 namespace krys::boo::tests
@@ -9,7 +11,11 @@ namespace krys::boo::tests
   using html::CanvasPath;
   using html::Path2D;
 
-  TEST_CASE("Path2D: lines, curves and rectangles", "[HTML][Canvas][Path2D]")
+  TEST_CASE("Path2D: lines, curves and rectangles",
+            "[HTML][Canvas][Path2D][html:dom-context-2d-moveto][html:ensure-there-is-a-subpath]"
+            "[html:dom-context-2d-closepath][html:dom-context-2d-lineto]"
+            "[html:dom-context-2d-quadraticcurveto][html:dom-context-2d-beziercurveto]"
+            "[html:dom-context-2d-rect]")
   {
     auto path = Path2D::Create();
     CHECK(path->GetPath().IsEmpty());
@@ -42,7 +48,10 @@ namespace krys::boo::tests
     CHECK(curve->GetPath().CurrentPoint() == FloatPoint(40, 10));
   }
 
-  TEST_CASE("Path2D: arcs and ellipses", "[HTML][Canvas][Path2D]")
+  TEST_CASE("Path2D: arcs and ellipses",
+            "[HTML][Canvas][Path2D][html:dom-context-2d-arcto][html:dom-context-2d-arc]"
+            "[html:dom-context-2d-ellipse][html:ellipse-method-steps]"
+            "[html:determine-the-point-on-an-ellipse-steps]")
   {
     SECTION("arc")
     {
@@ -93,7 +102,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Path2D: rounded rectangles", "[HTML][Canvas][Path2D]")
+  TEST_CASE("Path2D: rounded rectangles", "[HTML][Canvas][Path2D][html:dom-context-2d-roundrect]")
   {
     auto path = Path2D::Create();
     REQUIRE_FALSE(path->RoundRect(0, 0, 100, 50, CanvasPath::RadiusVariant(10.0)).HasException());
@@ -130,7 +139,8 @@ namespace krys::boo::tests
     CHECK(flipped->GetPath().Contains({50, 25}));
   }
 
-  TEST_CASE("Path2D: SVG path data and adding paths", "[HTML][Canvas][Path2D]")
+  TEST_CASE("Path2D: SVG path data and adding paths",
+            "[HTML][Canvas][Path2D][html:dom-path2d][html:dom-path2d-addpath]")
   {
     auto triangle = Path2D::Create(u8"M 0 0 L 10 0 L 10 10 Z");
     CHECK(triangle->GetPath().FastBoundingRect() == FloatRect(0, 0, 10, 10));
@@ -150,5 +160,38 @@ namespace krys::boo::tests
 
     CHECK(combined->AddPath(*triangle, {.A = 1, .M11 = 2}).GetException().Code()
           == dom::ExceptionCode::TypeError);
+  }
+
+  TEST_CASE("Path2D: SVG path data and added paths end with a new subpath at their last point",
+            "[HTML][Canvas][Path2D][html:dom-path2d][html:dom-path2d-addpath]")
+  {
+    // A line after the open triangle starts a new subpath, so it doesn't make the triangle a square.
+    auto fromData = Path2D::Create(u8"M 0 0 L 10 0 L 10 10");
+    fromData->LineTo(0, 10);
+    CHECK(fromData->GetPath().Contains({8, 2}));
+    CHECK_FALSE(fromData->GetPath().Contains({2, 8}));
+
+    auto open = Path2D::Create();
+    open->MoveTo(0, 0);
+    open->LineTo(10, 0);
+    open->LineTo(10, 10);
+    auto added = Path2D::Create();
+    REQUIRE_FALSE(added->AddPath(*open, {.E = 100}).HasException());
+    CHECK(added->GetPath().CurrentPoint() == FloatPoint(110, 10));
+    added->LineTo(100, 10);
+    CHECK(added->GetPath().Contains({108, 2}));
+    CHECK_FALSE(added->GetPath().Contains({102, 8}));
+  }
+
+  TEST_CASE("Path2D: adding an empty path, or with a matrix that isn't finite, does nothing",
+            "[HTML][Canvas][Path2D][html:dom-path2d-addpath]")
+  {
+    auto square = Path2D::Create(u8"M 0 0 h 10 v 10 h -10 Z");
+    auto path = Path2D::Create();
+    REQUIRE_FALSE(path->AddPath(*Path2D::Create()).HasException());
+    CHECK(path->GetPath().IsEmpty());
+    REQUIRE_FALSE(path->AddPath(*square, {.M41 = std::numeric_limits<double>::infinity()}).HasException());
+    REQUIRE_FALSE(path->AddPath(*square, {.M11 = std::nan("")}).HasException());
+    CHECK(path->GetPath().IsEmpty());
   }
 }

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/StyledElement.hpp"
-#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
+#include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Booey/MathML/Enums/MathMLElementInterface.hpp"
 

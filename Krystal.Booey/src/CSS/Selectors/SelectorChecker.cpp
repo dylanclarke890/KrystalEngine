@@ -4,15 +4,15 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/RuleFeature.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/SelectorMatchingState.hpp"
@@ -1428,6 +1428,8 @@ namespace krys::boo::css
             return !context.IsNegation;
           }
 
+          // FIXME: A virtual scoping root (a document fragment or shadow root) should act as the parent of
+          // its top-level elements, so that `:scope > p` matches them; no element is ever equal to one.
           const dom::Node *contextualReferenceNode =
             !checkingContext.Scope ? dom::TreeQueries::DocumentElement(element.NodeDocument())
                                    : static_cast<const dom::Node *>(checkingContext.Scope.get());
@@ -1479,7 +1481,9 @@ namespace krys::boo::css
           return dialog && dialog->IsModal();
         }
 
-        case SelectorPseudoClass::PopoverOpen: return element.IsPopoverShowing();
+        case SelectorPseudoClass::PopoverOpen:          return element.IsPopoverShowing();
+
+        case SelectorPseudoClass::InternalHtmlDocument: return Is<dom::HTMLDocument>(element.NodeDocument());
 
         case SelectorPseudoClass::ActiveViewTransition:
         case SelectorPseudoClass::ActiveViewTransitionType:

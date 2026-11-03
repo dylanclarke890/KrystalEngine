@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasStyle.hpp"
+#include <cmath>
 
 namespace krys::boo::html
 {
@@ -42,19 +43,32 @@ namespace krys::boo::html
 
   CanvasGradient::~CanvasGradient() noexcept = default;
 
+  // https://html.spec.whatwg.org/#dom-canvasgradient-addcolorstop
   dom::ExceptionOr<void> CanvasGradient::AddColorStop(double value, dom::DOMStringView colorString) noexcept
   {
-    if (!(value >= 0 && value <= 1))
+    // (The offset is a double, so a non-finite one is a TypeError.)
+    if (!std::isfinite(value))
+    {
+      return dom::Exception {dom::ExceptionCode::TypeError};
+    }
+
+    // 1. If the offset is less than 0 or greater than 1, then throw an "IndexSizeError" DOMException.
+    if (value < 0 || value > 1)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
     }
 
+    // 2. Let parsed color be the result of parsing color.
+    // 3. If parsed color is failure, throw a "SyntaxError" DOMException.
     auto color = ParseColor(colorString);
     if (!color.IsValid())
     {
       return dom::Exception {dom::ExceptionCode::SyntaxError};
     }
 
+    // 4. Place a new stop on the gradient, at offset offset relative to the whole gradient, and whose color
+    // is
+    //    parsed color.
     _gradient->AddColorStop({static_cast<float>(value), krys::move(color)});
     return {};
   }

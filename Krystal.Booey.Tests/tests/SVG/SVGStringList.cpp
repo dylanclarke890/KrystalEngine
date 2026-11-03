@@ -21,17 +21,17 @@ namespace krys::boo::svg::tests
     REQUIRE(list->NumberOfItems() == 1);
     CHECK(list->Items()[0].empty());
 
-    auto appended = list->AppendItem(dom::DOMString {u8"z"});
+    auto appended = list->AppendItem(u8"z");
     REQUIRE_FALSE(appended.HasException());
     CHECK(appended.Value() == u8"z");
     REQUIRE(owner.Committed.size() == 1);
     CHECK(owner.Committed[0] == list.get());
 
-    auto inserted = list->InsertItemBefore(dom::DOMString {u8"w"}, 0);
+    auto inserted = list->InsertItemBefore(u8"w", 0);
     REQUIRE_FALSE(inserted.HasException());
     CHECK(list->ValueAsString() == u8"w  z");
 
-    REQUIRE_FALSE(list->SetItem(1, dom::DOMString {u8"v"}).HasException());
+    REQUIRE_FALSE(list->SetItem(1, u8"v").HasException());
     CHECK(list->ValueAsString() == u8"w v z");
 
     auto removed = list->RemoveItem(0);

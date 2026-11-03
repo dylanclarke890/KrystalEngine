@@ -112,7 +112,7 @@ namespace krys::boo::tests
     SECTION("Families")
     {
       auto families = cache.SystemFontFamilies();
-      CHECK(std::ranges::find(families, utf8_string {u8"Ahem"}) != families.end());
+      CHECK(std::ranges::find(families, u8"Ahem") != families.end());
       CHECK(cache.UseBackslashAsYenSignForFamily(StringAtom {u8"MS Gothic"}));
       CHECK_FALSE(cache.UseBackslashAsYenSignForFamily(Ahem));
     }

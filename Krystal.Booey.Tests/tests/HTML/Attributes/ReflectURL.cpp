@@ -1,21 +1,21 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
-#include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
-#include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
-#include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBaseElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLScriptElement.hpp"
 
 namespace krys::boo::html::tests
 {
   using boo::tests::NavigationFixture;
   using boo::tests::Str;
 
-  TEST_CASE("Reflection: USVString attributes", "[HTML][Reflection]")
+  TEST_CASE("ReflectURL: USVString attributes", "[HTML][Attributes][html:treated-as-a-url]")
   {
     NavigationFixture fixture(u8R"(<img id=img src=" pic.png " srcset="a.png 1x, b.png 2x"><img id=none>
       <img id=bad src="http://[bad"><link id=link href="style.css"><script id=script src="s.js"></script>
@@ -34,12 +34,13 @@ namespace krys::boo::html::tests
     CHECK(Str(fixture.Get<HTMLAnchorElement>(u8"a").Ping()) == "https://p.test/ a.html");
 
     auto &img = fixture.Get<HTMLImageElement>(u8"none");
-    img.Src(dom::USVString(u8"/root.png"));
+    img.Src(u8"/root.png");
     CHECK(img.GetAttribute(u8"src") == u8"/root.png");
     CHECK(Str(img.Src()) == "https://example.com/root.png");
   }
 
-  TEST_CASE("Reflection: action, formAction and the base element's href", "[HTML][Reflection]")
+  TEST_CASE("ReflectURL: action, formAction and the base element's href",
+            "[HTML][Attributes][html:treated-as-a-url]")
   {
     NavigationFixture fixture(u8R"(<base id=base href="https://base.test/b/"><form id=empty action=""></form>
       <form id=noaction></form><form id=f action="go"><button id=b>B</button><input id=i type=submit>
@@ -56,7 +57,7 @@ namespace krys::boo::html::tests
 
     // The base element's href is completed against the document's fallback base URL, not against itself.
     auto &base = fixture.Get<HTMLBaseElement>(u8"base");
-    base.Href(dom::USVString(u8"relative/"));
+    base.Href(u8"relative/");
     CHECK(Str(base.Href()) == "https://example.com/dir/relative/");
   }
 }

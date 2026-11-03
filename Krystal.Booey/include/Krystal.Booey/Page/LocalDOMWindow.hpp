@@ -1,16 +1,16 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/DOM/EventTarget.hpp"
-#include "Krystal.Booey/DOM/IdleCallbackController.hpp"
-#include "Krystal.Booey/DOM/ScriptedAnimationController.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Scheduling/IdleCallbackController.hpp"
+#include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -54,7 +54,6 @@ namespace krys::boo
   class LocalFrame;
   class Page;
   class Screen;
-  class Storage;
   class VisualViewport;
 
   /// @note There are no transfers: there are no message ports.
@@ -90,12 +89,10 @@ namespace krys::boo
     mutable RefPtr<boo::History> _history;
     mutable RefPtr<boo::Navigation> _navigation;
     mutable RefPtr<html::CloseWatcherManager> _closeWatcherManager;
-    RefPtr<Storage> _sessionStorage;
-    RefPtr<Storage> _localStorage;
     mutable RefPtr<Screen> _screen;
     mutable RefPtr<VisualViewport> _visualViewport;
     dom::DOMString _status;
-    /// @see https://html.spec.whatwg.org/#window-current-event
+    /// @see https://dom.spec.whatwg.org/#window-current-event
     RefPtr<dom::Event> _currentEvent;
     /// @brief The host's time as the window was made, which timestamps count from.
     /// @see https://w3c.github.io/hr-time/#dfn-get-time-origin-timestamp
@@ -110,6 +107,9 @@ namespace krys::boo
     dom::DOMHighResTimeStamp _lastHistoryActionActivationTimestamp;
     /// @see https://html.spec.whatwg.org/#concept-error-reporting-mode
     bool _errorReportingMode {false};
+    /// @brief Whether `print()` was called before the document loaded, so it prints once it has.
+    /// @see https://html.spec.whatwg.org/#print-when-loaded
+    bool _shouldPrintWhenFinishedLoading {false};
     /// @brief How many listeners for gamepad events the window has: it's registered with the gamepad
     /// manager while it has any.
     uint32 _gamepadEventListenerCount {0};
@@ -187,7 +187,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-name
-    void SetName(dom::DOMString &&name) noexcept;
+    void SetName(dom::DOMString name) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-window-customelements
     KRYS_NODISCARD html::CustomElementRegistry &CustomElements() noexcept
@@ -221,7 +221,7 @@ namespace krys::boo
     }
 
     /// @see https://html.spec.whatwg.org/#dom-window-status
-    void SetStatus(dom::DOMString &&status) noexcept
+    void SetStatus(dom::DOMString status) noexcept
     {
       _status = krys::move(status);
     }
@@ -489,9 +489,13 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<dom::DOMString> Prompt(const dom::DOMString &message = {},
                                                 const dom::DOMString &defaultValue = {}) noexcept;
 
-    /// @brief Fires `beforeprint`, asks the host to print the page, then fires `afterprint`.
+    /// @brief Fires `beforeprint`, asks the host to print the page, then fires `afterprint`; waits for the
+    /// document to load first if it hasn't yet.
     /// @see https://html.spec.whatwg.org/#dom-print
     void Print() noexcept;
+
+    /// @brief The document has loaded: prints it if `print()` asked to while it was loading.
+    void FinishedLoading() noexcept;
 
 #pragma endregion
 
@@ -571,11 +575,6 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-atob
     KRYS_NODISCARD dom::ExceptionOr<dom::DOMString> Atob(dom::DOMStringView data) const noexcept;
 
-    /// @brief A clone of @p value (its `Clone()`).
-    /// @see https://html.spec.whatwg.org/#dom-structuredclone
-    KRYS_NODISCARD RefPtr<html::SerializedScriptValue>
-      StructuredClone(html::SerializedScriptValue *value) const noexcept;
-
 #pragma endregion
 
 #pragma region Posting messages - https://html.spec.whatwg.org/#posting-messages
@@ -590,23 +589,6 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-window-postmessage-options
     dom::ExceptionOr<void> PostMessage(RefPtr<html::SerializedScriptValue> &&message,
                                        const WindowPostMessageOptions &options = {}) noexcept;
-
-#pragma endregion
-
-#pragma region Storage - https://html.spec.whatwg.org/#webstorage
-
-    /// @brief The page's session storage for the document's origin.
-    /// @return `SecurityError` if the origin is opaque.
-    /// @see https://html.spec.whatwg.org/#dom-sessionstorage
-    dom::ExceptionOr<Storage *> SessionStorage() noexcept;
-
-    /// @brief The origin's local storage, through the host's storage provider.
-    /// @return `SecurityError` if the origin is opaque.
-    /// @see https://html.spec.whatwg.org/#dom-localstorage
-    dom::ExceptionOr<Storage *> LocalStorage() noexcept;
-
-    KRYS_NODISCARD Storage *OptionalSessionStorage() const noexcept;
-    KRYS_NODISCARD Storage *OptionalLocalStorage() const noexcept;
 
 #pragma endregion
 
@@ -704,6 +686,9 @@ namespace krys::boo
 
     /// @brief Whether @p element is a named object of the window with the name @p name.
     KRYS_NODISCARD static bool IsNamedObject(const dom::Element &element, dom::DOMStringView name) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#printing-steps
+    void RunPrintingSteps(LocalFrame &frame) noexcept;
   };
 }
 

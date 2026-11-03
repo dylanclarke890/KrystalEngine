@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 
@@ -63,13 +62,16 @@ namespace krys::boo::dom
 
   bool NameValidation::IsValidElementLocalName(DOMStringView name) noexcept
   {
+    // 1. If name's length is 0, then return false.
     if (name.empty())
     {
       return false;
     }
 
+    // 2. If name's 0th code point is an ASCII alpha:
     if (krys::text::IsASCIIAlpha(name[0]))
     {
+      // 2a. If name contains ASCII whitespace, U+0000 NULL, U+002F (/), or U+003E (>), then return false.
       for (const auto &ch : name)
       {
         if (krys::text::IsASCIIWhitespace(ch) || ch == '\0' || ch == '/' || ch == '>')
@@ -78,6 +80,7 @@ namespace krys::boo::dom
         }
       }
 
+      // 2b. Return true.
       return true;
     }
 
@@ -85,27 +88,27 @@ namespace krys::boo::dom
     auto decodeResult = krys::text::Decode<krys::text::UTF8>(name);
     krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
 
+    // 3. If name's 0th code point is not U+003A (:), U+005F (_), or in the range U+0080 to U+10FFFF,
+    // inclusive, then return false.
     auto &utf32 = decodeResult.Output;
     auto first = utf32[0];
-    if (first != ':' && first != '_' && !(first >= 0x0080 && first <= 0x10FFF))
+    if (first != ':' && first != '_' && !(first >= 0x0080 && first <= 0x10FFFF))
     {
       return false;
     }
 
-    if (utf32.size() == 1uz)
-    {
-      return true;
-    }
-
+    // 4. If name's subsequent code points, if any, are not ASCII alphas, ASCII digits, U+002D (-), U+002E
+    // (.), U+003A (:), U+005F (_), or in the range U+0080 to U+10FFFF, inclusive, then return false.
     for (auto ch : utf32_stringview {utf32.begin() + 1uz, utf32.end()})
     {
       if (!krys::text::IsASCIIAlpha(ch) && !krys::text::IsASCIIDigit(ch) && ch != '-' && ch != '.'
-          && ch != ':' && ch != '_' && !(ch >= 0x0080 && ch <= 0x10FFF))
+          && ch != ':' && ch != '_' && !(ch >= 0x0080 && ch <= 0x10FFFF))
       {
         return false;
       }
     }
 
+    // 5. Return true.
     return true;
   }
 
@@ -121,62 +124,86 @@ namespace krys::boo::dom
 
     return true;
   }
+
   ExceptionOr<QualifiedName> NameValidation::ValidateAndExtract(DOMStringAtom namespaceURI,
                                                                 DOMStringAtom qualifiedName,
                                                                 ValidateAndExtractContext context) noexcept
   {
+    // 1. If namespace is the empty string, then set it to null.
     if (namespaceURI == DOMStringAtom::Empty())
     {
       namespaceURI = DOMStringAtom::Null();
     }
 
+    // 2. Let prefix be null.
     DOMStringAtom prefix = DOMStringAtom::Null();
 
+    // 3. Let localName be qualifiedName.
     DOMStringAtom localName = qualifiedName;
-    if (localName.View().contains(':'))
-    {
-      auto splitResult = infra::StringAlgorithms::StrictlySplit(localName.View(), ':');
-      prefix = splitResult[0];
-      localName = splitResult[1];
 
+    // 4. If qualifiedName contains a U+003A (:):
+    if (auto colon = qualifiedName.View().find(u8':'); colon != DOMStringView::npos)
+    {
+      // 4a. Set prefix to the part of qualifiedName before the first U+003A (:).
+      prefix = DOMStringAtom(qualifiedName.View().substr(0, colon));
+
+      // 4b. Set localName to the part of qualifiedName after the first U+003A (:).
+      localName = DOMStringAtom(qualifiedName.View().substr(colon + 1));
+
+      // 4c. If prefix is not a valid namespace prefix, then throw an "InvalidCharacterError" DOMException.
       if (!IsValidNamespacePrefix(prefix.View()))
       {
         return ExceptionCode::InvalidCharacterError;
       }
     }
 
-    assert(prefix == DOMStringAtom::Null() || IsValidNamespacePrefix(prefix.View()));
+    // 5. Assert: prefix is either null or a valid namespace prefix.
+    krys_debug_assert(prefix == DOMStringAtom::Null() || IsValidNamespacePrefix(prefix.View()));
 
-    if (context == ValidateAndExtractContext::Attribute)
+    // 6. If context is "attribute" and localName is not a valid attribute local name, then throw an
+    // "InvalidCharacterError" DOMException.
+    if (context == ValidateAndExtractContext::Attribute && !IsValidAttributeLocalName(localName.View()))
     {
-      if (!IsValidAttributeLocalName(localName.View()))
-      {
-        return ExceptionCode::InvalidCharacterError;
-      }
-    }
-    else if (context == ValidateAndExtractContext::Element)
-    {
-      if (!IsValidElementLocalName(localName.View()))
-      {
-        return ExceptionCode::InvalidCharacterError;
-      }
+      return ExceptionCode::InvalidCharacterError;
     }
 
+    // 7. If context is "element" and localName is not a valid element local name, then throw an
+    // "InvalidCharacterError" DOMException.
+    if (context == ValidateAndExtractContext::Element && !IsValidElementLocalName(localName.View()))
+    {
+      return ExceptionCode::InvalidCharacterError;
+    }
+
+    // 8. If prefix is non-null and namespace is null, then throw a "NamespaceError" DOMException.
     if (prefix != DOMStringAtom::Null() && namespaceURI == DOMStringAtom::Null())
     {
       return ExceptionCode::NamespaceError;
     }
 
+    // 9. If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError"
+    // DOMException.
     if (prefix == infra::NamespacePrefixes::XML && namespaceURI != infra::Namespaces::XML)
     {
       return ExceptionCode::NamespaceError;
     }
 
-    if (prefix == infra::NamespacePrefixes::XMLNS && namespaceURI != infra::Namespaces::XMLNS)
+    // 10. If either qualifiedName or prefix is "xmlns" and namespace is not the XMLNS namespace, then throw a
+    // "NamespaceError" DOMException.
+    bool namedXMLNS =
+      qualifiedName == infra::NamespacePrefixes::XMLNS || prefix == infra::NamespacePrefixes::XMLNS;
+    if (namedXMLNS && namespaceURI != infra::Namespaces::XMLNS)
     {
       return ExceptionCode::NamespaceError;
     }
 
+    // 11. If namespace is the XMLNS namespace and neither qualifiedName nor prefix is "xmlns", then throw a
+    // "NamespaceError" DOMException.
+    if (namespaceURI == infra::Namespaces::XMLNS && !namedXMLNS)
+    {
+      return ExceptionCode::NamespaceError;
+    }
+
+    // 12. Return (namespace, prefix, localName).
     return QualifiedName {namespaceURI, prefix, localName};
   }
 

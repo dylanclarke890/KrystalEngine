@@ -14,32 +14,37 @@
 
 namespace krys::boo::html
 {
+  // https://html.spec.whatwg.org/#dom-context-2d-closepath
   void CanvasPath::ClosePath() noexcept
   {
+    // The closePath() method, when invoked, must do nothing if the object's path has no subpaths.
+    // Otherwise, it must mark the last subpath as closed, create a new subpath whose first point is the same
+    // as the previous subpath's first point, and finally add this new subpath to the path.
     if (_path.IsEmpty())
     {
       return;
     }
-
-    // The closePath() method, when invoked, must do nothing if the object's path has no subpaths.
-    // Otherwise, it must mark the last subpath as closed, create a new subpath whose first point
-    // is the same as the previous subpath's first point, and finally add this new subpath to the path.
     if (_path.HasSubpaths())
     {
       _path.CloseSubpath();
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-moveto
   void CanvasPath::MoveTo(float x, float y) noexcept
   {
+    // 1. If either of the arguments are infinite or NaN, then return.
     if (!std::isfinite(x) || !std::isfinite(y))
     {
       return;
     }
+    // (Nor while the transform can't be inverted.)
     if (!HasInvertibleTransform()) KRYS_UNLIKELY
     {
       return;
     }
+
+    // 2. Create a new subpath with the specified point as its first (and only) point.
     _path.MoveTo(FloatPoint(x, y));
   }
 
@@ -48,8 +53,10 @@ namespace krys::boo::html
     LineTo(point.X(), point.Y());
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-lineto
   void CanvasPath::LineTo(float x, float y) noexcept
   {
+    // 1. If either of the arguments are infinite or NaN, then return.
     if (!std::isfinite(x) || !std::isfinite(y))
     {
       return;
@@ -59,19 +66,26 @@ namespace krys::boo::html
       return;
     }
 
+    // 2. If the object's path has no subpaths, then ensure there is a subpath for (x, y).
     FloatPoint p1 = FloatPoint(x, y);
     if (_path.IsEmpty())
     {
       _path.MoveTo(p1);
     }
+    // 3. Otherwise, connect the last point in the subpath to the given point (x, y) using a straight line,
+    // and
+    //    then add the given point (x, y) to the subpath.
+    // (A line to the last point is left out, as stroking prunes it.)
     else if (p1 != _path.CurrentPoint())
     {
       _path.AddLineTo(p1);
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-quadraticcurveto
   void CanvasPath::QuadraticCurveTo(float cpx, float cpy, float x, float y) noexcept
   {
+    // 1. If any of the arguments are infinite or NaN, then return.
     if (!std::isfinite(cpx) || !std::isfinite(cpy) || !std::isfinite(x) || !std::isfinite(y))
     {
       return;
@@ -80,10 +94,16 @@ namespace krys::boo::html
     {
       return;
     }
+
+    // 2. Ensure there is a subpath for (cpx, cpy).
     if (_path.IsEmpty())
     {
       _path.MoveTo(FloatPoint(cpx, cpy));
     }
+
+    // 3. Connect the last point in the subpath to the given point (x, y) using a quadratic Bézier curve with
+    //    control point (cpx, cpy).
+    // 4. Add the given point (x, y) to the subpath.
 
     FloatPoint p1 = FloatPoint(x, y);
     FloatPoint cp = FloatPoint(cpx, cpy);
@@ -93,8 +113,10 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-beziercurveto
   void CanvasPath::BezierCurveTo(float cp1x, float cp1y, float cp2x, float cp2y, float x, float y) noexcept
   {
+    // 1. If any of the arguments are infinite or NaN, then return.
     if (!std::isfinite(cp1x) || !std::isfinite(cp1y) || !std::isfinite(cp2x) || !std::isfinite(cp2y)
         || !std::isfinite(x) || !std::isfinite(y))
     {
@@ -104,10 +126,16 @@ namespace krys::boo::html
     {
       return;
     }
+
+    // 2. Ensure there is a subpath for (cp1x, cp1y).
     if (_path.IsEmpty())
     {
       _path.MoveTo(FloatPoint(cp1x, cp1y));
     }
+
+    // 3. Connect the last point in the subpath to the given point (x, y) using a cubic Bézier curve with
+    //    control points (cp1x, cp1y) and (cp2x, cp2y).
+    // 4. Add the point (x, y) to the subpath.
 
     FloatPoint p1 = FloatPoint(x, y);
     FloatPoint cp1 = FloatPoint(cp1x, cp1y);
@@ -118,14 +146,18 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-arcto
   dom::ExceptionOr<void> CanvasPath::ArcTo(float x1, float y1, float x2, float y2, float r) noexcept
   {
+    // 1. If any of the arguments are infinite or NaN, then return.
     if (!std::isfinite(x1) || !std::isfinite(y1) || !std::isfinite(x2) || !std::isfinite(y2)
         || !std::isfinite(r))
     {
       return {};
     }
 
+    // 3. If radius is negative, then throw an "IndexSizeError" DOMException.
+    // (Before step 2, so a negative radius leaves the path as it was.)
     if (r < 0)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
@@ -139,14 +171,27 @@ namespace krys::boo::html
     FloatPoint p1 = FloatPoint(x1, y1);
     FloatPoint p2 = FloatPoint(x2, y2);
 
+    // 2. Ensure there is a subpath for (x1, y1).
+    // 4. Let the point (x0, y0) be the last point in the subpath, transformed by the inverse of the current
+    //    transformation matrix.
+    // (The path is kept in the current transform's space.)
     if (_path.IsEmpty())
     {
       _path.MoveTo(p1);
     }
+    // 5. If the point (x0, y0) is equal to the point (x1, y1), or if the point (x1, y1) is equal to the point
+    //    (x2, y2), or if radius is zero, then add the point (x1, y1) to the subpath, and connect that point
+    //    to the previous point (x0, y0) by a straight line.
     else if (p1 == _path.CurrentPoint() || p1 == p2 || !r)
     {
       LineTo(x1, y1);
     }
+    // 6. Otherwise, if the points (x0, y0), (x1, y1), and (x2, y2) all lie on a single straight line, then
+    // add
+    //    the point (x1, y1) to the subpath, and connect that point to the previous point (x0, y0) by a
+    //    straight line.
+    // 7. Otherwise, let The Arc be the shortest arc [...]
+    // (Both are Path::AddArcTo's.)
     else
     {
       _path.AddArcTo(p1, p2, r);
@@ -181,6 +226,8 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-arc
+  // (The ellipse method steps with radius as both radii and no rotation.)
   dom::ExceptionOr<void> CanvasPath::Arc(float x, float y, float radius, float startAngle, float endAngle,
                                          bool anticlockwise) noexcept
   {
@@ -214,6 +261,7 @@ namespace krys::boo::html
     return {};
   }
 
+  // https://html.spec.whatwg.org/#ellipse-method-steps
   dom::ExceptionOr<void> CanvasPath::Ellipse(float x, float y, float radiusX, float radiusY, float rotation,
                                              float startAngle, float endAngle, bool anticlockwise) noexcept
   {
@@ -277,6 +325,7 @@ namespace krys::boo::html
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-rect
   void CanvasPath::Rect(float x, float y, float width, float height) noexcept
   {
     if (!HasInvertibleTransform()) KRYS_UNLIKELY
@@ -284,17 +333,23 @@ namespace krys::boo::html
       return;
     }
 
+    // 1. If any of the arguments are infinite or NaN, then return.
     if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(width) || !std::isfinite(height))
     {
       return;
     }
 
+    // (A rectangle with no area is its new subpath, as stroking prunes the rest.)
     if (!width && !height)
     {
       _path.MoveTo(FloatPoint(x, y));
       return;
     }
 
+    // 2. Create a new subpath containing just the four points (x, y), (x+w, y), (x+w, y+h), (x, y+h), in that
+    //    order, with those four points connected by straight lines.
+    // 3. Mark the subpath as closed.
+    // 4. Create a new subpath with the point (x, y) as the only point in the subpath.
     _path.AddRect(FloatRect(x, y, width, height));
   }
 
@@ -307,8 +362,7 @@ namespace krys::boo::html
   dom::ExceptionOr<void> CanvasPath::RoundRect(float x, float y, float width, float height,
                                                Span<const RadiusVariant> radii) noexcept
   {
-    // Based on Nov 5th 2021 version of
-    // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-roundrect
+    // https://html.spec.whatwg.org/#dom-context-2d-roundrect
     // 1. If any of x, y, w, or h are infinite or NaN, then return.
 
     if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(width) || !std::isfinite(height))
@@ -316,7 +370,9 @@ namespace krys::boo::html
       return {};
     }
 
-    // 2. If radii is not a list of size one, two, three, or four, then throw a RangeError.
+    // 2. If radii is an unrestricted double or DOMPointInit, then set radii to « radii ».
+    // (A single radius is a span of one.)
+    // 3. If radii is not a list of size one, two, three, or four, then throw a RangeError.
     if (radii.size() > 4 || radii.empty())
     {
       StringBuilder message;
@@ -325,53 +381,53 @@ namespace krys::boo::html
       return dom::Exception {dom::ExceptionCode::RangeError, krys::move(message).ToString()};
     }
 
-    // 3. Let normalizedRadii be an empty list.
+    // 4. Let normalizedRadii be an empty list.
     SmallList<FloatPoint, 4> normalizedRadii;
 
-    // 4. For each radius of radii:
+    // 5. For each radius of radii:
     for (const auto &radius : radii)
     {
       auto shouldReturnSilently = false;
       auto exception = SwitchOn(
         radius,
-        // 4.1 If radius is a DOMPointInit:
+        // 5a. If radius is a DOMPointInit:
         [&normalizedRadii, &shouldReturnSilently](const dom::DOMPointInit &point) -> dom::ExceptionOr<void>
         {
-          // 4.1.1 If radius["x"] or radius["y"] is infinite or NaN, then return.
+          // 5a.i. If radius["x"] or radius["y"] is infinite or NaN, then return.
           if (!std::isfinite(point.X) || !std::isfinite(point.Y))
           {
             shouldReturnSilently = true;
             return {};
           }
 
-          // 4.1.2 If radius["x"] or radius["y"] is negative, then throw a RangeError.
+          // 5a.ii. If radius["x"] or radius["y"] is negative, then throw a RangeError.
           if (point.X < 0 || point.Y < 0)
           {
             return dom::Exception {dom::ExceptionCode::RangeError,
                                    u8"radius point coordinates must be positive"};
           }
 
-          // 4.1.3 Otherwise, append radius to normalizedRadii.
+          // 5a.iii. Otherwise, append radius to normalizedRadii.
           normalizedRadii.push_back({static_cast<float>(point.X), static_cast<float>(point.Y)});
           return {};
         },
-        // 4.2 If radius is a unrestricted double:
+        // 5b. If radius is a unrestricted double:
         [&normalizedRadii, &shouldReturnSilently](double radiusValue) -> dom::ExceptionOr<void>
         {
-          // 4.2.1 If radius is infinite or NaN, then return.
+          // 5b.i. If radius is infinite or NaN, then return.
           if (!std::isfinite(radiusValue))
           {
             shouldReturnSilently = true;
             return {};
           }
 
-          // 4.2.2 If radius is negative, then throw a RangeError.
+          // 5b.ii. If radius is negative, then throw a RangeError.
           if (radiusValue < 0)
           {
             return dom::Exception {dom::ExceptionCode::RangeError, u8"radius value must be positive"};
           }
 
-          // 4.2.3 Otherwise append «[ "x" → radius, "y" → radius ]» to normalizedRadii.
+          // 5b.iii. Otherwise, append «[ "x" → radius, "y" → radius ]» to normalizedRadii.
           normalizedRadii.push_back({static_cast<float>(radiusValue), static_cast<float>(radiusValue)});
           return {};
         });
@@ -389,13 +445,13 @@ namespace krys::boo::html
       return {};
     }
 
-    // 5. Let upperLeft, upperRight, lowerRight, and lowerLeft be null.
+    // 6. Let upperLeft, upperRight, lowerRight, and lowerLeft be null.
     FloatPoint upperLeft, upperRight, lowerRight, lowerLeft;
 
     switch (normalizedRadii.size())
     {
       case 4:
-        // 6. If normalizedRadii's size is 4, then set upperLeft to normalizedRadii[0], set upperRight to
+        // 7. If normalizedRadii's size is 4, then set upperLeft to normalizedRadii[0], set upperRight to
         // normalizedRadii[1], set lowerRight to normalizedRadii[2], and set lowerLeft to normalizedRadii[3].
         upperLeft = normalizedRadii[0];
         upperRight = normalizedRadii[1];
@@ -403,7 +459,7 @@ namespace krys::boo::html
         lowerLeft = normalizedRadii[3];
         break;
       case 3:
-        // 7. If normalizedRadii's size is 3, then set upperLeft to normalizedRadii[0], set upperRight and
+        // 8. If normalizedRadii's size is 3, then set upperLeft to normalizedRadii[0], set upperRight and
         // lowerLeft to normalizedRadii[1], and set lowerRight to normalizedRadii[2].
         upperLeft = normalizedRadii[0];
         upperRight = normalizedRadii[1];
@@ -411,7 +467,7 @@ namespace krys::boo::html
         lowerLeft = normalizedRadii[1];
         break;
       case 2:
-        // 8. If normalizedRadii's size is 2, then set upperLeft and lowerRight to normalizedRadii[0] and set
+        // 9. If normalizedRadii's size is 2, then set upperLeft and lowerRight to normalizedRadii[0] and set
         // upperRight and lowerLeft to normalizedRadii[1].
         upperLeft = normalizedRadii[0];
         upperRight = normalizedRadii[1];
@@ -419,7 +475,7 @@ namespace krys::boo::html
         lowerLeft = normalizedRadii[1];
         break;
       case 1:
-        // 9. If normalizedRadii's size is 1, then set upperLeft, upperRight, lowerRight, and lowerLeft to
+        // 10. If normalizedRadii's size is 1, then set upperLeft, upperRight, lowerRight, and lowerLeft to
         // normalizedRadii[0].
         upperLeft = normalizedRadii[0];
         upperRight = normalizedRadii[0];
@@ -449,25 +505,24 @@ namespace krys::boo::html
       std::swap(upperRight, lowerRight);
     }
 
-    // 10. Corner curves must not overlap. Scale all radii to prevent this:
-
-    // 10.1    Let top be upperLeft["x"] + upperRight["x"].
+    // 11. Corner curves must not overlap. Scale all radii to prevent this:
+    // 11a. Let top be upperLeft["x"] + upperRight["x"].
     auto top = upperLeft.X() + upperRight.X();
 
-    // 10.2    Let right be upperRight["y"] + lowerRight["y"].
+    // 11b. Let right be upperRight["y"] + lowerRight["y"].
     auto right = upperRight.Y() + lowerRight.Y();
 
-    // 10.3    Let bottom be lowerRight["x"] + lowerLeft["x"].
+    // 11c. Let bottom be lowerRight["x"] + lowerLeft["x"].
     auto bottom = lowerRight.X() + lowerLeft.X();
 
-    // 10.4    Let left be upperLeft["y"] + lowerLeft["y"].
+    // 11d. Let left be upperLeft["y"] + lowerLeft["y"].
     auto left = upperLeft.Y() + lowerLeft.Y();
 
-    // 10.5    Let scale be the minimum value of the ratios w / top, h / right, w / bottom, h / left.
+    // 11e. Let scale be the minimum value of the ratios w / top, h / right, w / bottom, h / left.
     auto scale = std::min({width / top, height / right, width / bottom, height / left});
 
-    // 10.6    If scale is less than 1, then set the x and y members of upperLeft, upperRight, lowerLeft, and
-    // lowerRight to their current values multiplied by scale.
+    // 11f. If scale is less than 1, then set the x and y members of upperLeft, upperRight, lowerLeft, and
+    //      lowerRight to their current values multiplied by scale.
     if (scale < 1)
     {
       upperLeft.Scale(scale);
@@ -476,10 +531,10 @@ namespace krys::boo::html
       lowerRight.Scale(scale);
     }
 
-    // 11. Create a new subpath:
+    // 12. Create a new subpath:
     _path.MoveTo({x + upperLeft.X(), y});
 
-    // The 11.x clockwise substeps are handled by Path::AddRoundedRect directly.
+    // (Its clockwise substeps are Path::AddRoundedRect's.)
     if (clockwise)
     {
       _path.AddRoundedRect(FloatRoundedRect {
@@ -530,10 +585,10 @@ namespace krys::boo::html
       _path.AddLineTo({x + upperLeft.X(), y});
     }
 
-    // 12. Mark the subpath as closed.
+    // 13. Mark the subpath as closed.
     _path.CloseSubpath();
 
-    // 13. Create a new subpath with the point (x, y) as the only point in the subpath.
+    // 14. Create a new subpath with the point (x, y) as the only point in the subpath.
     _path.MoveTo({x, y});
 
     return {};

@@ -16,12 +16,13 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/css-animations-1/#interface-animationevent
   class CSSAnimationEvent final : public StyleOriginatedAnimationEvent
   {
-    using dictionary_type = CSSAnimationEventInit;
-
   private:
     css::CSSOMString _animationName;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = CSSAnimationEventInit;
+
     CSSAnimationEvent(dom::DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime,
                       double elapsedTime,
                       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,

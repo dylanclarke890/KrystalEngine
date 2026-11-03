@@ -42,7 +42,7 @@ namespace krys::boo
     return AdoptRef(*new File(existingFile, name));
   }
 
-  File::File(Ref<BlobData> &&data, utf8_stringview type, utf8_string &&path, utf8_string &&name) noexcept
+  File::File(Ref<BlobData> &&data, utf8_stringview type, utf8_string path, utf8_string name) noexcept
       : Blob(krys::move(data), type, std::nullopt, 0), _path(krys::move(path)), _name(krys::move(name))
   {
   }

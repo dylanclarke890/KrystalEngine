@@ -84,7 +84,7 @@ namespace krys::boo
     bool _didCallImplicitClose {true};
     /// @brief Whether the document's unload events were fired.
     bool _wasUnloadEventEmitted {false};
-    /// @brief Whether the document's beforeunload or unload events are being dispatched.
+    /// @brief Whether the document's beforeunload, pagehide or unload events are being dispatched.
     bool _pageDismissalEventBeingDispatched {false};
     /// @brief Whether the next load replaces the current history item: a scheduled navigation that does.
     bool _quickRedirectComing {false};
@@ -235,6 +235,14 @@ namespace krys::boo
     /// @return Whether the document may be left.
     /// @see https://html.spec.whatwg.org/#checking-if-unloading-is-canceled
     KRYS_NODISCARD bool ShouldClose() noexcept;
+
+    /// @brief Whether the frame may navigate: not while its document's `beforeunload`, `pagehide` or `unload`
+    /// is being dispatched.
+    /// @see https://html.spec.whatwg.org/#navigate (step 9)
+    KRYS_NODISCARD bool IsNavigationAllowed() const noexcept
+    {
+      return !_pageDismissalEventBeingDispatched;
+    }
 
     /// @brief Navigates to @p url, as following a link does.
     /// @param passedTarget The browsing context to navigate (`_self` and the others, or a name); empty for

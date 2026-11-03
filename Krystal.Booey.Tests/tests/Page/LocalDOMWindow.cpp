@@ -1,25 +1,24 @@
 ﻿#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/CSSStyleDeclaration.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/HTMLCollection.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/IdleDeadline.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Scheduling/IdleDeadline.hpp"
+#include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/ErrorEvent.hpp"
-#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/MessageEvent.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Events/ErrorEvent.hpp"
+#include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/BarProp.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
@@ -37,8 +36,6 @@
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Plugins/DOMMimeTypeArray.hpp"
 #include "Krystal.Booey/Plugins/DOMPluginArray.hpp"
-#include "Krystal.Booey/Storage/Storage.hpp"
-#include "Krystal.Booey/Storage/StorageEvent.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
 namespace krys::boo::tests
@@ -146,7 +143,7 @@ namespace krys::boo::tests
         frame.CreateView({200, 100});
         Document = CreateRef<dom::HTMLDocument>();
         frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-        auto parser = CreateRef<html::HTMLDocumentParser>(*Document);
+        auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(krys::move(markup), IsEOF(true));
         parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
@@ -291,6 +288,7 @@ namespace krys::boo::tests
       CHECK_FALSE(windowHeard);
     }
 
+    // The legacy target override flag of dispatch.
     SECTION("load at the window with the legacy target override targets the document")
     {
       bool windowHeard = false;
@@ -301,22 +299,24 @@ namespace krys::boo::tests
                                                   CHECK(event.CurrentTarget().get() == &window);
                                                   CHECK(event.Target().get() == fixture.Document.get());
                                                 });
-      (void)dom::EventDispatcher::FireEvent<dom::Event>(dom::DOMStringAtom(EventNames::Load), window, nullptr,
+      (void)dom::EventDispatcher::FireEvent<dom::Event>(dom::DOMStringAtom(EventNames::Load), window, {},
                                                         true);
       CHECK(windowHeard);
     }
 
-    SECTION("a document without a browsing context doesn't reach its window")
+    SECTION("a document without a browsing context doesn't reach its window, nor run its own listeners")
     {
+      // Its window's document isn't fully active, so inner invoke skips the listeners.
       fixture.TestPage->MainFrame().SetDocument(nullptr);
       order.clear();
       auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Click), true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &button);
-      CHECK(order == List<std::string> {"document capture", "document"});
+      CHECK(order.empty());
     }
   }
 
-  TEST_CASE("A window's current event is the event its listeners handle", "[Page][LocalDOMWindow]")
+  TEST_CASE("Window.event: the window's current event, the event its listeners handle",
+            "[Page][LocalDOMWindow][dom:dom-window-event][dom:window-current-event]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><div id=host></div><p id=text>Text</p>");
     auto &window = fixture.Window();
@@ -355,6 +355,28 @@ namespace krys::boo::tests
       CHECK(inShadow == nullptr);
       CHECK(inWindow != nullptr);
     }
+
+    SECTION("and an event dispatched from a listener is current only while its own listeners run")
+    {
+      auto nested = dom::Event::Create(dom::DOMStringAtom(u8"nested"), false, false);
+      dom::Event *inNested = nullptr;
+      dom::Event *afterNested = nullptr;
+      auto nestedListener = fixture.ById(u8"text").AddEventListener(u8"nested", [&](dom::Event &)
+                                                                    { inNested = window.CurrentEvent(); });
+      auto outerListener =
+        fixture.ById(u8"host").AddEventListener(u8"click",
+                                                [&](dom::Event &)
+                                                {
+                                                  (void)fixture.ById(u8"text").DispatchEvent(*nested);
+                                                  afterNested = window.CurrentEvent();
+                                                });
+
+      fixture.ById(u8"host").DispatchSimulatedClick(nullptr);
+      CHECK(inNested == nested.get());
+      CHECK(afterNested != nullptr);
+      CHECK(afterNested != nested.get());
+      CHECK(window.CurrentEvent() == nullptr);
+    }
   }
 
   TEST_CASE("resize fires at the window when the viewport resizes", "[Page][LocalDOMWindow]")
@@ -389,7 +411,8 @@ namespace krys::boo::tests
     CHECK(resizes == 2);
   }
 
-  TEST_CASE("A window asks its host to focus and close it", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window asks its host to focus and close it",
+            "[Page][LocalDOMWindow][html:dom-window-close][html:dom-window-closed]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -412,7 +435,42 @@ namespace krys::boo::tests
     CHECK(fixture.CloseRequests == 1);
   }
 
-  TEST_CASE("A window's named objects", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's related windows and browser interface elements",
+            "[Page][LocalDOMWindow][html:the-window-object][html:dom-window][html:dom-self][html:dom-frames]"
+            "[html:dom-document-defaultview][html:concept-document-window][html:dom-length][html:dom-top]"
+            "[html:dom-parent][html:dom-opener][html:dom-frameelement][html:browser-interface-elements]"
+            "[html:dom-barprop-visible][html:dom-window-status]")
+  {
+    WindowFixture fixture;
+    auto &window = fixture.Window();
+
+    CHECK(&window.Window() == &window);
+    CHECK(&window.Self() == &window);
+    CHECK(&window.Frames() == &window);
+    CHECK(fixture.Document->DefaultView() == &window);
+    CHECK(window.Document() == fixture.Document.get());
+
+    // A frame is the only one in its tree.
+    CHECK(window.Length() == 0);
+    CHECK(window.Top() == &window);
+    CHECK(window.Parent() == &window);
+    CHECK(window.Opener() == nullptr);
+    CHECK(window.FrameElement() == nullptr);
+
+    // The bars are all visible, and the status does nothing but keep its value.
+    CHECK(window.Locationbar().Visible());
+    CHECK(window.Menubar().Visible());
+    CHECK(window.Personalbar().Visible());
+    CHECK(window.Scrollbars().Visible());
+    CHECK(window.Statusbar().Visible());
+    CHECK(window.Toolbar().Visible());
+    window.SetStatus(u8"Loading");
+    CHECK(window.Status() == u8"Loading");
+  }
+
+  TEST_CASE("A window's named objects",
+            "[Page][LocalDOMWindow][html:named-access-on-the-window-object][html:dom-window-nameditem-filter]"
+            "[html:document-tree-child-navigable-target-name-property-set]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html>"
                           u8"<img name=picture>"
@@ -454,24 +512,6 @@ namespace krys::boo::tests
 
     CHECK(window.SupportedPropertyNames()
           == List<dom::DOMString> {u8"picture", u8"twice", u8"order", u8"orderform"});
-  }
-
-  TEST_CASE("The window, the document, its element and its body are passive for wheel and touch listeners",
-            "[Page][LocalDOMWindow]")
-  {
-    WindowFixture fixture(u8"<!DOCTYPE html><body><div id=box></div></body>");
-    auto &window = fixture.Window();
-    auto wheel = dom::DOMStringAtom(EventNames::Wheel);
-
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, window));
-    CHECK(
-      dom::EventTargetAlgorithms::DefaultPassiveValue(dom::DOMStringAtom(EventNames::TouchStart), window));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->DocumentElement()));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->Body()));
-    CHECK_FALSE(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, fixture.ById(u8"box")));
-    CHECK_FALSE(
-      dom::EventTargetAlgorithms::DefaultPassiveValue(dom::DOMStringAtom(EventNames::Click), window));
   }
 
   TEST_CASE("A window's viewport, scrolling and zoom", "[Page][LocalDOMWindow]")
@@ -663,7 +703,12 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window's timers", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's timers",
+    "[Page][LocalDOMWindow][html:timers][html:dom-settimeout][html:dom-setinterval][html:dom-cleartimeout]"
+    "[html:dom-clearinterval][html:timer-initialisation-steps][html:run-steps-after-a-timeout]"
+    "[html:timer-nesting-level][html:map-of-settimeout-and-setinterval-ids][html:microtask-queuing]"
+    "[html:dom-queuemicrotask]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -759,7 +804,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window's animation frame callbacks run in the rendering update", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's animation frame callbacks run in the rendering update",
+    "[Page][LocalDOMWindow][html:animation-frames][html:dom-animationframeprovider-requestanimationframe]"
+    "[html:animationframeprovider-cancelanimationframe][html:run-the-animation-frame-callbacks]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -849,21 +897,17 @@ namespace krys::boo::tests
     struct TestValue final : html::SerializedScriptValue
     {
       std::string Text;
-      bool IsClone {false};
 
-      explicit TestValue(std::string text, bool isClone = false) noexcept
-          : Text(krys::move(text)), IsClone(isClone)
+      explicit TestValue(std::string text) noexcept : Text(krys::move(text))
       {
-      }
-
-      KRYS_NODISCARD Ref<html::SerializedScriptValue> Clone() noexcept override
-      {
-        return CreateRef<TestValue>(Text, true);
       }
     };
   }
 
-  TEST_CASE("A window's user prompts go to the host", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's user prompts go to the host",
+    "[Page][LocalDOMWindow][html:simple-dialogs][html:dom-alert][html:dom-alert-noargs][html:dom-confirm]"
+    "[html:dom-prompt][html:cannot-show-simple-dialogs][html:printing][html:dom-print]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -883,7 +927,10 @@ namespace krys::boo::tests
     List<std::string> events;
     auto before = window.AddEventListener(u8"beforeprint", [&](dom::Event &) { events.push_back("before"); });
     auto after = window.AddEventListener(u8"afterprint", [&](dom::Event &) { events.push_back("after"); });
+    // The document was parsed rather than loaded, so it prints once it finishes loading.
     window.Print();
+    CHECK(fixture.Chrome->PrintRequests == 0);
+    fixture.Document->ImplicitClose();
     CHECK(fixture.Chrome->PrintRequests == 1);
     CHECK(events == List<std::string> {"before", "after"});
 
@@ -893,7 +940,13 @@ namespace krys::boo::tests
     CHECK(fixture.Chrome->Dialogs.size() == 5);
   }
 
-  TEST_CASE("A window's user activation", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's user activation",
+            "[Page][LocalDOMWindow][html:user-activation-data-model]"
+            "[html:activation-expiry][html:activation-notification]"
+            "[html:activation-triggering-input-event][html:consume-user-activation]"
+            "[html:consume-history-action-user-activation]"
+            "[html:dom-navigator-useractivation][html:dom-useractivation-hasbeenactive]"
+            "[html:dom-useractivation-isactive]")
   {
     WindowFixture fixture(
       u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style><div></div>");
@@ -903,6 +956,10 @@ namespace krys::boo::tests
     CHECK_FALSE(window.HasStickyActivation());
     CHECK_FALSE(window.HasTransientActivation());
     CHECK_FALSE(window.HasHistoryActionActivation());
+    auto &userActivation = window.GetNavigator().GetUserActivation();
+    CHECK(&userActivation == &window.GetNavigator().GetUserActivation());
+    CHECK_FALSE(userActivation.HasBeenActive());
+    CHECK_FALSE(userActivation.IsActive());
 
     SECTION("a press activates the window, transiently for 5s")
     {
@@ -913,11 +970,16 @@ namespace krys::boo::tests
       CHECK(window.HasTransientActivation());
       CHECK(window.HasHistoryActionActivation());
 
+      CHECK(userActivation.HasBeenActive());
+      CHECK(userActivation.IsActive());
+
       Advance(4s);
       CHECK(window.HasTransientActivation());
       Advance(1s);
       CHECK_FALSE(window.HasTransientActivation());
       CHECK(window.HasStickyActivation());
+      CHECK_FALSE(userActivation.IsActive());
+      CHECK(userActivation.HasBeenActive());
     }
 
     SECTION("a key press activates it, but not Escape")
@@ -947,7 +1009,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window opens windows through the host", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window opens windows through the host",
+    "[Page][LocalDOMWindow][html:dom-open][html:window-open-steps][html:dom-name]"
+    "[html:the-rules-for-choosing-a-navigable][html:find-a-navigable-by-target-name][html:nav-target]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -973,9 +1038,11 @@ namespace krys::boo::tests
     CHECK(navigations[0].Action.GetWindowFeatures()->Width == 300.f);
     CHECK(navigations[0].Action.GetWindowFeatures()->WantsPopup());
     CHECK(navigations[0].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
+    // Opening a window consumes the activation.
+    CHECK_FALSE(window.HasTransientActivation());
+    CHECK(window.HasStickyActivation());
 
     // An existing browsing context is navigated, without activation.
-    (void)window.ConsumeTransientActivation();
     auto self = window.Open(u8"#here", dom::DOMStringAtom(u8"_self"));
     REQUIRE_FALSE(self.HasException());
     CHECK(self.Value() == &window);
@@ -983,12 +1050,26 @@ namespace krys::boo::tests
     CHECK_FALSE(navigations[1].IsNewWindow);
     CHECK(navigations[1].URL == "https://example.com/dir/page.html#here");
 
+    // With noopener, an existing browsing context is returned only for _self, _parent and _top.
+    window.SetName(u8"main");
+    auto named = window.Open(u8"#named", dom::DOMStringAtom(u8"main"), u8"noopener");
+    REQUIRE_FALSE(named.HasException());
+    CHECK(named.Value() == nullptr);
+    CHECK(navigations.size() == 3);
+    auto selfNoOpener = window.Open(u8"", dom::DOMStringAtom(u8"_SELF"), u8"noopener");
+    REQUIRE_FALSE(selfNoOpener.HasException());
+    CHECK(selfNoOpener.Value() == &window);
+
     // A URL that can't be parsed is a SyntaxError.
     auto invalid = window.Open(u8"https://exa mple.com/", dom::DOMStringAtom(u8"_self"));
     CHECK(invalid.HasException());
   }
 
-  TEST_CASE("Window features", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "Window features",
+    "[Page][LocalDOMWindow][html:concept-window-open-features-tokenize][html:popup-window-is-requested]"
+    "[html:concept-window-open-features-parse-boolean][html:feature-separator]"
+    "[html:get-noopener-for-window-open]")
   {
     auto features = ParseWindowFeatures(u8" left = 10 , top=20,width=300 height=200, popup");
     CHECK(features.X == 10.f);
@@ -1011,7 +1092,15 @@ namespace krys::boo::tests
     CHECK(ParseWindowFeatures(u8"popup=no").Popup == false);
   }
 
-  TEST_CASE("A window's global scope", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's global scope",
+    "[Page][LocalDOMWindow][html:windoworworkerglobalscope-mixin][html:dom-origin][html:dom-issecurecontext]"
+    "[html:dom-crossoriginisolated][html:secure-contexts][html:atob][html:dom-btoa][html:dom-atob]"
+    "[html:runtime-script-errors][html:dom-reporterror][html:report-an-exception][html:the-messageevent-"
+    "interface]"
+    "[html:dom-messageevent-data][html:dom-messageevent-origin][html:dom-messageevent-source]"
+    "[html:posting-messages][html:window-post-message-steps][html:dom-window-postmessage]"
+    "[html:dom-window-postmessage-options][html:posted-message-task-source]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -1079,16 +1168,6 @@ namespace krys::boo::tests
       CHECK(fixture.Chrome->ConsoleMessages == List<std::string> {"error:Unhandled"});
     }
 
-    SECTION("structuredClone() clones the value")
-    {
-      auto value = CreateRef<TestValue>("value");
-      auto clone = window.StructuredClone(value.get());
-      REQUIRE(clone);
-      CHECK(clone.get() != value.get());
-      CHECK(static_cast<TestValue &>(*clone).IsClone);
-      CHECK(window.StructuredClone(nullptr) == nullptr);
-    }
-
     SECTION("postMessage() queues a message from the window")
     {
       fixture.Document->SetURL(url::URL(u8"https://example.com/page.html"));
@@ -1116,9 +1195,35 @@ namespace krys::boo::tests
       html::EventLoop::Current().RunUntilIdle();
       CHECK(messages == List<std::string> {"first", "null", "same"});
     }
+
+    SECTION("postMessage() gives the message the origin the window had as it was posted")
+    {
+      fixture.Document->SetURL(url::URL(u8"https://example.com/page.html"));
+      List<std::string> origins;
+      auto listener = window.AddEventListener<html::MessageEvent>(
+        u8"message", [&](html::MessageEvent &event) { origins.push_back(Str(event.Origin())); });
+      REQUIRE_FALSE(window.PostMessage(nullptr, u8"*").HasException());
+      fixture.Document->SetURL(url::URL(u8"https://other.example/page.html"));
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(origins == List<std::string> {"https://example.com"});
+    }
   }
 
-  TEST_CASE("A window's navigator", "[Page][LocalDOMWindow]")
+  TEST_CASE(
+    "A window's navigator",
+    "[Page][LocalDOMWindow][html:the-navigator-object][html:dom-navigator][html:dom-clientinformation]"
+    "[html:client-identification][html:dom-navigator-appcodename][html:dom-navigator-appname]"
+    "[html:dom-navigator-appversion][html:dom-navigator-platform][html:dom-navigator-product]"
+    "[html:dom-navigator-productsub][html:dom-navigator-useragent][html:dom-navigator-vendor]"
+    "[html:dom-navigator-vendorsub][html:dom-navigator-taintenabled][html:language-preferences]"
+    "[html:dom-navigator-language][html:dom-navigator-languages][html:navigator.online]"
+    "[html:dom-navigator-online][html:custom-handlers][html:dom-navigator-registerprotocolhandler]"
+    "[html:dom-navigator-unregisterprotocolhandler][html:normalize-protocol-handler-parameters]"
+    "[html:safelisted-scheme][html:cookies][html:dom-navigator-cookieenabled][html:pdf-viewing-support]"
+    "[html:dom-navigator-plugins][html:dom-navigator-mimetypes][html:dom-navigator-javaenabled]"
+    "[html:dom-navigator-pdfviewerenabled][html:dom-pluginarray-length][html:dom-pluginarray-nameditem]"
+    "[html:dom-mimetypearray-length][html:navigator.hardwareconcurrency][html:dom-navigator-"
+    "hardwareconcurrency]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -1208,111 +1313,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Storage maps keep their order and quota", "[Page][LocalDOMWindow][Storage]")
-  {
-    StorageMap map(20);
-    Maybe<dom::DOMString> oldValue;
-    CHECK(map.SetItem(u8"b", u8"one", oldValue));
-    CHECK_FALSE(oldValue);
-    CHECK(map.SetItem(u8"a", u8"two", oldValue));
-    CHECK(map.Key(0) == dom::DOMString(u8"b"));
-    CHECK(map.Key(1) == dom::DOMString(u8"a"));
-    CHECK_FALSE(map.Key(2));
-    // Sizes are UTF-16 bytes: b + one + a + two is 16 bytes, so 4 more fit.
-    CHECK(map.SetItem(u8"b", u8"three", oldValue));
-    CHECK(oldValue == dom::DOMString(u8"one"));
-    CHECK_FALSE(map.SetItem(u8"c", u8"x", oldValue));
-    CHECK(map.GetItem(u8"b") == dom::DOMString(u8"three"));
-    CHECK(map.RemoveItem(u8"b") == dom::DOMString(u8"three"));
-    CHECK(map.Length() == 1);
-    CHECK(StorageMap::SizeInBytes(u8"\U0001F600") == 4);
-  }
-
-  TEST_CASE("A window's session and local storage", "[Page][LocalDOMWindow][Storage]")
-  {
-    WindowFixture first;
-    WindowFixture second;
-    first.Document->SetURL(url::URL(u8"https://example.com/one.html"));
-    second.Document->SetURL(url::URL(u8"https://example.com/two.html"));
-
-    auto local = first.Window().LocalStorage();
-    REQUIRE_FALSE(local.HasException());
-    auto &storage = *local.Value();
-    CHECK(first.Window().LocalStorage().Value() == &storage);
-    CHECK(first.Window().OptionalLocalStorage() == &storage);
-    REQUIRE_FALSE(storage.Clear().HasException());
-
-    REQUIRE_FALSE(storage.SetItem(u8"score", u8"10").HasException());
-    CHECK(storage.GetItem(u8"score") == dom::DOMString(u8"10"));
-    CHECK(storage.Length() == 1);
-    CHECK(storage.Key(0) == dom::DOMString(u8"score"));
-    CHECK(storage.SupportedPropertyNames() == List<dom::DOMString> {u8"score"});
-
-    SECTION("local storage is shared by an origin's windows, which hear of changes")
-    {
-      auto &other = *second.Window().LocalStorage().Value();
-      CHECK(other.GetItem(u8"score") == dom::DOMString(u8"10"));
-
-      List<std::string> heard;
-      auto otherListener = second.Window().AddEventListener<StorageEvent>(
-        u8"storage",
-        [&](StorageEvent &event)
-        {
-          CHECK(event.IsTrusted());
-          CHECK(event.StorageArea() == &other);
-          CHECK(event.URL() == u8"https://example.com/one.html");
-          heard.push_back((event.Key() ? Str(*event.Key()) : "null") + ":"
-                          + (event.OldValue() ? Str(*event.OldValue()) : "null") + ":"
-                          + (event.NewValue() ? Str(*event.NewValue()) : "null"));
-        });
-      // The window that made the change isn't told.
-      bool sourceHeard = false;
-      auto sourceListener =
-        first.Window().AddEventListener(u8"storage", [&](dom::Event &) { sourceHeard = true; });
-
-      REQUIRE_FALSE(storage.SetItem(u8"score", u8"20").HasException());
-      // Setting the same value changes nothing.
-      REQUIRE_FALSE(storage.SetItem(u8"score", u8"20").HasException());
-      REQUIRE_FALSE(storage.RemoveItem(u8"score").HasException());
-      REQUIRE_FALSE(storage.RemoveItem(u8"missing").HasException());
-      REQUIRE_FALSE(storage.SetItem(u8"level", u8"3").HasException());
-      REQUIRE_FALSE(storage.Clear().HasException());
-      REQUIRE_FALSE(storage.Clear().HasException());
-      CHECK(heard.empty());
-
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(heard == List<std::string> {"score:10:20", "score:20:null", "level:null:3", "null:null:null"});
-      CHECK_FALSE(sourceHeard);
-    }
-
-    SECTION("session storage is the page's")
-    {
-      auto &session = *first.Window().SessionStorage().Value();
-      REQUIRE_FALSE(session.SetItem(u8"tab", u8"inventory").HasException());
-      CHECK(second.Window().SessionStorage().Value()->GetItem(u8"tab") == null);
-      CHECK(&session.Area() != &storage.Area());
-    }
-
-    SECTION("the quota")
-    {
-      dom::DOMString big(2 * 1'024 * 1'024, u8'x');
-      REQUIRE_FALSE(storage.SetItem(u8"big", big).HasException());
-      auto exceeded = storage.SetItem(u8"bigger", big);
-      REQUIRE(exceeded.HasException());
-      CHECK(exceeded.GetException().Code() == dom::ExceptionCode::QuotaExceededError);
-      REQUIRE_FALSE(storage.Clear().HasException());
-    }
-
-    SECTION("opaque origins have no storage")
-    {
-      WindowFixture opaque;
-      opaque.Document->SetURL(url::URL(u8"data:text/html,hi"));
-      CHECK(opaque.Window().LocalStorage().HasException());
-      CHECK(opaque.Window().SessionStorage().HasException());
-    }
-  }
-
-  TEST_CASE("Event handler attributes", "[Page][LocalDOMWindow][EventHandlers]")
+  TEST_CASE("Event handler attributes",
+            "[Page][LocalDOMWindow][EventHandlers][html:event-handler-attributes]"
+            "[html:the-event-handler-processing-algorithm][html:event-handler-idl-attributes]"
+            "[html:window-reflecting-body-element-event-handler-set]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><body><button id=button>Go</button></body>");
     auto &window = fixture.Window();

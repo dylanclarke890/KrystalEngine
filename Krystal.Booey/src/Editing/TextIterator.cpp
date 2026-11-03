@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Position.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -240,7 +240,7 @@ namespace krys::boo
     _length = 0;
   }
 
-  void TextIteratorCopyableText::Set(utf8_string &&string) noexcept
+  void TextIteratorCopyableText::Set(utf8_string string) noexcept
   {
     _singleCharacterLength = 0;
     _string = krys::move(string);
@@ -248,7 +248,7 @@ namespace krys::boo
     _length = static_cast<uint32>(_string.size());
   }
 
-  void TextIteratorCopyableText::Set(utf8_string &&string, uint32 offset, uint32 length) noexcept
+  void TextIteratorCopyableText::Set(utf8_string string, uint32 offset, uint32 length) noexcept
   {
     krys_debug_assert(offset < string.size());
     krys_debug_assert(length);

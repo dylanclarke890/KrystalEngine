@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -31,7 +31,7 @@ namespace krys::boo::html
 
   /// @brief The algorithms of the HTML insertion methods (`setHTML()`, `appendHTML()`, `prependHTML()`,
   /// `beforeHTML()`, `afterHTML()`, `replaceWithHTML()` and their Unsafe counterparts).
-  /// @see https://html.spec.whatwg.org/#html-parsing-and-insertion-methods
+  /// @see https://html.spec.whatwg.org/#html-parsing-methods
   class HTMLInsertionAlgorithms
   {
   public:
@@ -47,7 +47,7 @@ namespace krys::boo::html
 
     /// @brief Replaces @p target's children with @p html parsed in its context.
     /// @param sanitizer The options' sanitizer member, or null if it's missing.
-    /// @see https://html.spec.whatwg.org/#filter-and-set-html
+    /// @see https://html.spec.whatwg.org/#set-and-filter-html
     static dom::ExceptionOr<void> FilterAndSetHTML(dom::ContainerNode &target, dom::DOMStringView html,
                                                    const SanitizerInput *sanitizer,
                                                    FragmentParserMode mode) noexcept;

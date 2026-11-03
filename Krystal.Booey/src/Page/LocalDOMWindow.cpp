@@ -1,21 +1,22 @@
 ﻿#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/CSSComputedStyleDeclaration.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/ErrorEvent.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/MessageEvent.hpp"
-#include "Krystal.Booey/HTML/URLDecomposition.hpp"
+#include "Krystal.Booey/HTML/Events/ErrorEvent.hpp"
+#include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
+#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadManager.hpp"
@@ -37,7 +38,6 @@
 #include "Krystal.Booey/Page/WindowFeatures.hpp"
 #include "Krystal.Booey/Platform/Language.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Storage/Storage.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Base64.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
@@ -126,58 +126,6 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<Storage *> LocalDOMWindow::SessionStorage() noexcept
-  {
-    // If this's associated Document's session storage holder is non-null, then return it.
-    if (_sessionStorage)
-    {
-      return _sessionStorage.get();
-    }
-
-    // Let map be the result of running obtain a session storage bottle map; if map is failure (an opaque
-    // origin, or no browsing session), then throw a "SecurityError" DOMException.
-    auto *document = Document();
-    auto *page = GetPage();
-    auto origin = Origin();
-    if (!document || !page || origin == u8"null")
-    {
-      return dom::ExceptionCode::SecurityError;
-    }
-
-    _sessionStorage = Storage::Create(*this, page->SessionStorageArea(origin));
-    return _sessionStorage.get();
-  }
-
-  dom::ExceptionOr<Storage *> LocalDOMWindow::LocalStorage() noexcept
-  {
-    if (_localStorage)
-    {
-      return _localStorage.get();
-    }
-
-    auto *document = Document();
-    auto origin = Origin();
-    if (!document || !Frame() || origin == u8"null")
-    {
-      return dom::ExceptionCode::SecurityError;
-    }
-
-    auto *provider = PlatformStrategies::Singleton().GetStorageProvider();
-    StorageProvider &storageProvider = provider ? *provider : MemoryStorageProvider::Singleton();
-    _localStorage = Storage::Create(*this, storageProvider.LocalStorageArea(origin));
-    return _localStorage.get();
-  }
-
-  Storage *LocalDOMWindow::OptionalSessionStorage() const noexcept
-  {
-    return _sessionStorage.get();
-  }
-
-  Storage *LocalDOMWindow::OptionalLocalStorage() const noexcept
-  {
-    return _localStorage.get();
-  }
-
   Ref<LocalDOMWindow> LocalDOMWindow::Create(dom::Document &document) noexcept
   {
     return AdoptRef(*new LocalDOMWindow(document));
@@ -221,28 +169,30 @@ namespace krys::boo
     return *_customElementRegistry;
   }
 
+  // https://html.spec.whatwg.org/#dom-name
   dom::DOMString LocalDOMWindow::Name() const noexcept
   {
-    // If this's navigable is null, then return the empty string.
+    // 1. If this's navigable is null, then return the empty string.
     auto *frame = Frame();
     if (!frame)
     {
       return {};
     }
-    // Return this's navigable's target name.
+    // 2. Return this's navigable's target name.
     return frame->SpecifiedName();
   }
 
-  void LocalDOMWindow::SetName(dom::DOMString &&name) noexcept
+  // https://html.spec.whatwg.org/#dom-name
+  void LocalDOMWindow::SetName(dom::DOMString name) noexcept
   {
-    // If this's navigable is null, then return.
+    // 1. If this's navigable is null, then return.
     auto *frame = Frame();
     if (!frame)
     {
       return;
     }
-    // Set this's navigable's active session history entry's document state's navigable target name to the
-    // given value.
+    // 2. Set this's navigable's active session history entry's document state's navigable target name to the
+    //    given value.
     frame->SetSpecifiedName(krys::move(name));
   }
 
@@ -300,27 +250,37 @@ namespace krys::boo
     return *_toolbar;
   }
 
+  // https://html.spec.whatwg.org/#dom-window-close
   void LocalDOMWindow::Close() noexcept
   {
-    // Let thisTraversable be this's navigable; if it isn't a top-level traversable (a frame is), or its is
-    // closing is true, then return.
+    // 1. Let thisTraversable be this's navigable.
+    // 2. If thisTraversable is not a top-level traversable, then return.
+    // 3. If thisTraversable's is closing is true, then return.
+    // (The frame is the page's top-level traversable.)
     RefPtr<Page> page = ShareRefPtr(GetPage());
     if (!page || page->IsClosing())
     {
       return;
     }
 
+    // 4. Let browsingContext be thisTraversable's active browsing context.
+    // 5. Let sourceSnapshotParams be the result of snapshotting source snapshot params given
+    // thisTraversable's
+    //    active document.
+    // 6. If all the following are true: thisTraversable is script-closable; the incumbent global object's
+    //    browsing context is familiar with browsingContext; and the incumbent global object's navigable is
+    //    allowed by sandboxing to navigate thisTraversable, given sourceSnapshotParams, then:
     // FIXME: Only if the page is script-closable (opened by script, or with one session history entry); a
     // warning on the console otherwise.
 
-    // The page may ask to stay.
+    // (The page may ask to stay, through beforeunload, as definitely closing would prompt.)
     if (auto *frame = Frame(); frame && !frame->Loader().ShouldClose())
     {
       return;
     }
 
-    // Set thisTraversable's is closing to true, and queue a task on the DOM manipulation task source to
-    // definitely close thisTraversable.
+    // 6a. Set thisTraversable's is closing to true.
+    // 6b. Queue a task on the DOM manipulation task source to definitely close thisTraversable.
     page->SetIsClosing();
     html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
                                          [weakPage = CreateWeakPtr(page.get())]
@@ -344,13 +304,15 @@ namespace krys::boo
     return page && page->IsClosing();
   }
 
+  // https://html.spec.whatwg.org/#dom-window-stop
   void LocalDOMWindow::Stop() noexcept
   {
-    // If this's navigable is null, then return.
+    // 1. If this's navigable is null, then return.
     if (!Frame())
     {
       return;
     }
+    // 2. Stop loading this's navigable.
     // FIXME: Stop loading this's navigable.
   }
 
@@ -369,16 +331,23 @@ namespace krys::boo
     page->GetChromeClient().Focus();
   }
 
+  // https://html.spec.whatwg.org/#dom-top
   LocalDOMWindow *LocalDOMWindow::Top() noexcept
   {
-    // If this's navigable is null, then return null. Return this's navigable's top-level traversable's active
-    // WindowProxy: a frame is the only one in its tree.
+    // 1. If this's navigable is null, then return null.
+    // 2. Return this's navigable's top-level traversable's active WindowProxy.
+    // (A frame is the only one in its tree.)
     return Frame() ? this : nullptr;
   }
 
+  // https://html.spec.whatwg.org/#dom-parent
   LocalDOMWindow *LocalDOMWindow::Parent() noexcept
   {
-    // If this's navigable is null, then return null. A frame has no parent, so return its active WindowProxy.
+    // 1. Let navigable be this's navigable.
+    // 2. If navigable is null, then return null.
+    // 3. If navigable's parent is not null, then set navigable to navigable's parent.
+    // 4. Return navigable's active WindowProxy.
+    // (A frame has no parent.)
     return Frame() ? this : nullptr;
   }
 
@@ -891,34 +860,20 @@ namespace krys::boo
 
   namespace
   {
-    /// @see https://infra.spec.whatwg.org/#normalize-newlines
-    KRYS_NODISCARD dom::DOMString NormalizeNewlines(const dom::DOMString &message) noexcept
-    {
-      dom::DOMString result;
-      result.reserve(message.size());
-      for (size_t i = 0; i < message.size(); ++i)
-      {
-        if (message[i] == u8'\r')
-        {
-          result += u8'\n';
-          if (i + 1 < message.size() && message[i + 1] == u8'\n')
-          {
-            ++i;
-          }
-          continue;
-        }
-        result += message[i];
-      }
-      return result;
-    }
-
     /// @brief Whether the user agent can't show @p window's simple dialogs now.
     /// @see https://html.spec.whatwg.org/#cannot-show-simple-dialogs
     KRYS_NODISCARD bool CannotShowSimpleDialogs(const LocalDOMWindow &window) noexcept
     {
-      // If the document's unload counter is greater than 0 (beforeunload, pagehide or unload is being
-      // dispatched), return true.
+      // 1. If the active sandboxing flag set of window's associated Document has the sandboxed modals flag
+      //    set, then return true.
       // FIXME: The sandboxed modals flag, once there's sandboxing.
+      // 2. If window's relevant agent's event loop's termination nesting level is nonzero, then optionally
+      //    return true.
+      // (There's no script to terminate.)
+      // 3. Optionally, return true.
+      // (A window without a page can't show them, nor can a document whose unload counter is greater than
+      // 0, as beforeunload, pagehide or unload is being dispatched.)
+      // 4. Return false.
       auto *document = window.Document();
       return !window.Frame() || !window.GetPage() || !document || document->UnloadCounter() > 0;
     }
@@ -950,67 +905,154 @@ namespace krys::boo
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-alert
   void LocalDOMWindow::Alert(const dom::DOMString &message) noexcept
   {
-    // If we cannot show simple dialogs for this, then return.
+    // 1. If we cannot show simple dialogs for this, then return.
     if (CannotShowSimpleDialogs(*this))
     {
       return;
     }
 
-    // Set message to the result of normalizing newlines given message, and show it to the user.
+    // 2. If the method was invoked with no arguments, then let message be the empty string; otherwise, let
+    //    message be the method's first argument.
+    // 3. Set message to the result of normalizing newlines given message.
+    // 4. Set message to the result of optionally truncating message.
+    // (The host may truncate it.)
+    // 5. Let userPromptHandler be WebDriver BiDi user prompt opened with this, "alert", and message.
+    // (There's no WebDriver, so userPromptHandler is "none".)
+    // 6. If userPromptHandler is "none":
+    // 6a. Show message to the user, treating U+000A LF as a line break.
+    // 6b. Optionally, pause while waiting for the user to acknowledge the message.
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
-    GetPage()->GetChromeClient().RunJavaScriptAlert(*Frame(), NormalizeNewlines(message));
+    GetPage()->GetChromeClient().RunJavaScriptAlert(*Frame(),
+                                                    infra::StringAlgorithms::NormalizeNewlines(message));
+    // 7. Invoke WebDriver BiDi user prompt closed with this, "alert", and true.
   }
 
+  // https://html.spec.whatwg.org/#dom-confirm
   bool LocalDOMWindow::Confirm(const dom::DOMString &message) noexcept
   {
+    // 1. If we cannot show simple dialogs for this, then return false.
     if (CannotShowSimpleDialogs(*this))
     {
       return false;
     }
 
+    // 2. Set message to the result of normalizing newlines given message.
+    // 3. Set message to the result of optionally truncating message.
+    // 4. Show message to the user, treating U+000A LF as a line break, and ask the user to respond with a
+    //    positive or negative response.
+    // 5. Let userPromptHandler be WebDriver BiDi user prompt opened with this, "confirm", and message.
+    // 6. Let accepted be false.
+    // 7. If userPromptHandler is "none":
+    // 7a. Pause until the user responds either positively or negatively.
+    // 7b. If the user responded positively, then set accepted to true.
+    // 8. If userPromptHandler is "accept", then set accepted to true.
+    // 9. Invoke WebDriver BiDi user prompt closed with this, "confirm", and accepted.
+    // 10. Return accepted.
+    // (The host shows the message, may truncate it, and answers; there's no WebDriver.)
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
-    return GetPage()->GetChromeClient().RunJavaScriptConfirm(*Frame(), NormalizeNewlines(message));
+    return GetPage()->GetChromeClient().RunJavaScriptConfirm(
+      *Frame(), infra::StringAlgorithms::NormalizeNewlines(message));
   }
 
+  // https://html.spec.whatwg.org/#dom-prompt
   Maybe<dom::DOMString> LocalDOMWindow::Prompt(const dom::DOMString &message,
                                                const dom::DOMString &defaultValue) noexcept
   {
+    // 1. If we cannot show simple dialogs for this, then return null.
     if (CannotShowSimpleDialogs(*this))
     {
       return null;
     }
 
+    // 2. Set message to the result of normalizing newlines given message.
+    // 3. Set message to the result of optionally truncating message.
+    // 4. Set default to the result of optionally truncating default.
+    // 5. Show message to the user, treating U+000A LF as a line break, and ask the user to either respond
+    //    with a string value or abort. The response must be defaulted to the value given by default.
+    // 6. Let userPromptHandler be WebDriver BiDi user prompt opened with this, "prompt", and message.
+    // 7. Let result be null.
+    // 8. If userPromptHandler is "none":
+    // 8a. Pause while waiting for the user's response.
+    // 8b. If the user did not abort, then set result to the string that the user responded with.
+    // 9. Otherwise, if userPromptHandler is "accept", then set result to the empty string.
+    // 10. Invoke WebDriver BiDi user prompt closed with this, "prompt", false if result is null or true
+    //     otherwise, and result.
+    // 11. Return result.
+    // (The host shows the message, may truncate it and the default, and answers; there's no WebDriver.)
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
-    return GetPage()->GetChromeClient().RunJavaScriptPrompt(*Frame(), NormalizeNewlines(message),
-                                                            defaultValue);
+    return GetPage()->GetChromeClient().RunJavaScriptPrompt(
+      *Frame(), infra::StringAlgorithms::NormalizeNewlines(message), defaultValue);
   }
 
+  // https://html.spec.whatwg.org/#dom-print
   void LocalDOMWindow::Print() noexcept
   {
-    // https://html.spec.whatwg.org/#printing-steps
+    // 1. Let document be this's associated Document.
+    RefPtr<dom::Document> document = ShareRefPtr(Document());
+    // 2. If document is not fully active, then return.
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
-    if (!frame || !GetPage())
+    if (!frame || !GetPage() || !document || !document->IsFullyActive())
     {
       return;
     }
 
-    // Not while the document is unloading.
-    if (Document()->UnloadCounter() > 0)
+    // 3. If document's unload counter is greater than 0, then return.
+    if (document->UnloadCounter() > 0)
     {
       return;
     }
 
-    // FIXME: Printing once the document has loaded (shouldPrintWhenFinishedLoading).
+    // 4. If document is ready for post-load tasks, then run the printing steps for document.
+    // (The initial about:blank document is never loaded, so it's ready straight away.)
+    if (document->LoadEventFinished() || frame->Loader().IsDisplayingInitialEmptyDocument())
+    {
+      _shouldPrintWhenFinishedLoading = false;
+      RunPrintingSteps(*frame);
+      return;
+    }
+    // 5. Otherwise, set document's print when loaded flag.
+    _shouldPrintWhenFinishedLoading = true;
+  }
+
+  void LocalDOMWindow::FinishedLoading() noexcept
+  {
+    // https://html.spec.whatwg.org/#the-end
+    // 10. If the Document's print when loaded flag is set, then run the printing steps.
+    if (!_shouldPrintWhenFinishedLoading)
+    {
+      return;
+    }
+    _shouldPrintWhenFinishedLoading = false;
+    if (RefPtr<LocalFrame> frame = ShareRefPtr(Frame()); frame && GetPage())
+    {
+      RunPrintingSteps(*frame);
+    }
+  }
+
+  // https://html.spec.whatwg.org/#printing-steps
+  void LocalDOMWindow::RunPrintingSteps(LocalFrame &frame) noexcept
+  {
+    // 1. The user agent may display a message to the user or return (or both).
+    // 2. If the active sandboxing flag set of document has the sandboxed modals flag set, then return.
+    // FIXME: The sandboxed modals flag, once there's sandboxing.
+    // 3. The user agent must fire an event named beforeprint at the relevant global object of document, as
+    //    well as any child navigable in it.
+    // (There are no child navigables.)
     (void)dom::EventDispatcher::FireEvent(dom::DOMStringAtom(EventNames::BeforePrint), *this);
+    // 4. The user agent should offer the user the opportunity to obtain a physical form (or the
+    //    representation of a physical form) of document.
     if (auto *page = GetPage())
     {
-      page->GetChromeClient().Print(*frame);
+      page->GetChromeClient().Print(frame);
     }
+    // 5. The user agent must fire an event named afterprint at the relevant global object of document, as
+    //    well as any child navigables in it.
     (void)dom::EventDispatcher::FireEvent(dom::DOMStringAtom(EventNames::AfterPrint), *this);
   }
 
@@ -1019,16 +1061,21 @@ namespace krys::boo
                                                           dom::DOMStringView featuresString) noexcept
   {
     // https://html.spec.whatwg.org/#window-open-steps
+    // 1. If the event loop's termination nesting level is nonzero, then return null.
+    // (There's no script to terminate; a window that isn't shown in a frame has no navigable.)
     if (!IsCurrentlyDisplayedInFrame())
     {
       return static_cast<LocalDOMWindow *>(nullptr);
     }
 
+    // 2. Let sourceDocument be the entry global object's associated Document.
     RefPtr<dom::Document> document = ShareRefPtr(Document());
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
 
-    // If url is not the empty string, then parse it relative to the entry settings object; on failure, throw
-    // a "SyntaxError" DOMException.
+    // 3. Let urlRecord be null.
+    // 4. If url is not the empty string:
+    // 4a. Set urlRecord to the result of encoding-parsing a URL given url, relative to sourceDocument.
+    // 4b. If urlRecord is failure, then throw a "SyntaxError" DOMException.
     url::URL urlRecord;
     if (!urlString.empty())
     {
@@ -1039,36 +1086,61 @@ namespace krys::boo
       }
     }
 
-    // If target is the empty string, then set target to "_blank".
+    // 5. If target is the empty string, then set target to "_blank".
     if (target.View().empty())
     {
       target = dom::DOMStringAtom(u8"_blank");
     }
 
+    // 6. Let tokenizedFeatures be the result of tokenizing features.
+    // 7.-10. (WindowFeatures parses noopener and noreferrer, and leaves them out of the popup check.)
     auto features = ParseWindowFeatures(featuresString);
+    // 13. Let targetNavigable and windowType be the result of applying the rules for choosing a navigable
+    //     given target, sourceDocument's node navigable, and noopener.
     auto *targetFrame = frame->Loader().FindFrameForNavigation(target.View());
 
-    // A new window needs transient activation: popups are blocked otherwise.
+    // 14. If targetNavigable is null, then return null.
+    // (A new window needs transient activation: popups are blocked otherwise.)
     if (!targetFrame && !HasTransientActivation())
     {
       return static_cast<LocalDOMWindow *>(nullptr);
     }
 
+    // 11. Let referrerPolicy be the empty string.
+    // 12. If noreferrer is true, then set noopener to true and set referrerPolicy to "no-referrer".
     auto referrerPolicy =
       features.WantsNoReferrer() ? ReferrerPolicy::NoReferrer : ReferrerPolicy::EmptyString;
 
+    // 16. Otherwise:
     if (targetFrame)
     {
-      // An existing browsing context: navigate it, unless there's no URL.
+      // 16a. If urlRecord is not null, then navigate targetNavigable to urlRecord using sourceDocument, with
+      //      referrerPolicy set to referrerPolicy and exceptionsEnabled set to true.
       if (!urlRecord.IsNull())
       {
         frame->Loader().ChangeLocation(urlRecord, dom::DOMStringAtom(u8"_self"), nullptr, referrerPolicy,
                                        null, dom::DOMStringAtom::Null());
       }
+      // 16b. If noopener is false, then set targetNavigable's active browsing context's opener browsing
+      //      context to sourceDocument's browsing context.
+      // (There are no other browsing contexts to be the opener.)
+      // 18. If noopener is true and target is not an ASCII case-insensitive match for "_self", "_parent", or
+      //     "_top", then return null.
+      if (features.WantsNoOpener() && !text::IsASCIICaselessEqual(target.View(), utf8_stringview(u8"_self"))
+          && !text::IsASCIICaselessEqual(target.View(), utf8_stringview(u8"_parent"))
+          && !text::IsASCIICaselessEqual(target.View(), utf8_stringview(u8"_top")))
+      {
+        return static_cast<LocalDOMWindow *>(nullptr);
+      }
+      // 19. Return targetNavigable's active WindowProxy.
       return this;
     }
 
-    // A new browsing context: the host opens it, asked by the client's new window policy.
+    // 15. If windowType is either "new and unrestricted" or "new with no opener": the host opens it, asked by
+    //     the client's new window policy, with the features (the popup check and the browsing context
+    //     features) and about:blank if there's no URL.
+    // 17. If windowType is "new with no opener", then return null.
+    // (The new window is never returned, as there are no other windows.)
     FrameLoadRequest request(ShareRef(*document),
                              ResourceRequest(urlRecord.IsNull() ? url::URL(u8"about:blank") : urlRecord),
                              target);
@@ -1080,11 +1152,19 @@ namespace krys::boo
     return static_cast<LocalDOMWindow *>(nullptr);
   }
 
+  // https://html.spec.whatwg.org/#activation-notification
   void LocalDOMWindow::NotifyActivated() noexcept
   {
-    // Set the last activation timestamp of the window to the current high resolution time. There are no
-    // ancestor or descendant frames to notify.
+    // 1. Assert: document is fully active.
+    // 2. Let windows be « document's relevant global object ».
+    // 3. Extend windows with the active window of each of document's ancestor navigables.
+    // 4. Extend windows with the active window of each of document's descendant navigables, filtered to
+    //    include only those navigables whose active document's origin is same origin with document's origin.
+    // (There are no ancestor or descendant frames, so windows is this window.)
+    // 5. For each window in windows:
+    // 5.1. Set window's last activation timestamp to the current high resolution time.
     _lastActivationTimestamp = NowTimestamp();
+    // 5.2. Notify the close watcher manager about user activation given window.
     GetCloseWatcherManager().NotifyAboutUserActivation();
   }
 
@@ -1111,14 +1191,22 @@ namespace krys::boo
     return _lastHistoryActionActivationTimestamp != _lastActivationTimestamp;
   }
 
+  // https://html.spec.whatwg.org/#consume-user-activation
   bool LocalDOMWindow::ConsumeTransientActivation() noexcept
   {
+    // (Without transient activation, consuming changes nothing observable, so it returns early to report it.)
     if (!HasTransientActivation())
     {
       return false;
     }
-    // For each window in the frame tree (this one), if its last activation timestamp is not positive
-    // infinity, set it to negative infinity.
+    // 1. If W's navigable is null, then return.
+    // 2. Let top be W's navigable's top-level traversable.
+    // 3. Let navigables be the inclusive descendant navigables of top's active document.
+    // 4. Let windows be the list of Window objects constructed by taking the active window of each item in
+    //    navigables.
+    // (There are no other frames, so windows is this window.)
+    // 5. For each window in windows, if window's last activation timestamp is not positive infinity, then set
+    //    window's last activation timestamp to negative infinity.
     if (_lastActivationTimestamp != std::numeric_limits<dom::DOMHighResTimeStamp>::infinity())
     {
       _lastActivationTimestamp = -std::numeric_limits<dom::DOMHighResTimeStamp>::infinity();
@@ -1126,12 +1214,21 @@ namespace krys::boo
     return true;
   }
 
+  // https://html.spec.whatwg.org/#consume-history-action-user-activation
   bool LocalDOMWindow::ConsumeHistoryActionUserActivation() noexcept
   {
     if (!HasHistoryActionActivation())
     {
       return false;
     }
+    // 1. If W's navigable is null, then return.
+    // 2. Let top be W's navigable's top-level traversable.
+    // 3. Let navigables be the inclusive descendant navigables of top's active document.
+    // 4. Let windows be the list of Window objects constructed by taking the active window of each item in
+    //    navigables.
+    // (There are no other frames, so windows is this window.)
+    // 5. For each window in windows, set window's last history-action activation timestamp to window's last
+    //    activation timestamp.
     _lastHistoryActionActivationTimestamp = _lastActivationTimestamp;
     return true;
   }
@@ -1151,23 +1248,36 @@ namespace krys::boo
   void LocalDOMWindow::ReportError(const dom::DOMString &message,
                                    RefPtr<html::SerializedScriptValue> &&error) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-reporterror: report an exception e for this.
     // https://html.spec.whatwg.org/#report-an-exception
-    // If target is in error reporting mode, then return.
+    // 1. Let notHandled be true.
+    // 2. Let errorInfo be the result of extracting error information from exception.
+    // (The message and the value; there's no script location.)
+    // 3. Let script be a script found in an implementation-defined way, or null.
+    // 4. If script is a classic script and script's muted errors is true, then ...
+    // 5. If omitError is true, then set errorInfo[error] to null.
+    // (There are no scripts.)
+    // 6. If global is not in error reporting mode:
     if (_errorReportingMode)
     {
       return;
     }
 
-    // Set target's error reporting mode to true, and fire an event named error at target, using ErrorEvent,
-    // with the cancelable attribute initialized to true.
+    // 6a. Set global's in error reporting mode to true.
+    // 6b. If global implements EventTarget, then set notHandled to the result of firing an event named error
+    //     at global, using ErrorEvent, with the cancelable attribute initialized to true, and additional
+    //     attributes initialized according to errorInfo.
     // FIXME: The script's location (filename, line and column), once there's scripting.
     _errorReportingMode = true;
-    Ref<dom::Event> event = html::ErrorEvent::Create(dom::DOMString(message), {}, 0, 0, krys::move(error));
+    Ref<dom::Event> event = html::ErrorEvent::Create(message, {}, 0, 0, krys::move(error));
     Ref<LocalDOMWindow> protectedThis = ShareRef(*this);
     bool notHandled = dom::EventDispatcher::DispatchToTarget(*event, this);
+    // 6c. Set global's in error reporting mode to false.
     _errorReportingMode = false;
 
-    // If notHandled is true, then report the exception to the developer console.
+    // 7. If notHandled is true:
+    // 7a. Set errorInfo[error] to null.
+    // 7c. Otherwise, the user agent may report exception to a developer console.
     if (notHandled)
     {
       if (auto *page = GetPage())
@@ -1219,115 +1329,147 @@ namespace krys::boo
     return dom::DOMString(builder.ToString());
   }
 
-  RefPtr<html::SerializedScriptValue>
-    LocalDOMWindow::StructuredClone(html::SerializedScriptValue *value) const noexcept
-  {
-    return value ? RefPtr<html::SerializedScriptValue>(value->Clone()) : nullptr;
-  }
-
   dom::ExceptionOr<void> LocalDOMWindow::PostMessage(RefPtr<html::SerializedScriptValue> &&message,
                                                      utf8_stringview targetOrigin) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-window-postmessage
+    // 1. Let options be «[ "targetOrigin" → targetOrigin, "transfer" → transfer ]».
+    // 2. Run the window post message steps providing this, message, and options.
     WindowPostMessageOptions options;
     options.TargetOrigin = dom::USVString(targetOrigin);
     return PostMessage(krys::move(message), options);
   }
 
+  // https://html.spec.whatwg.org/#dom-window-postmessage-options
+  // https://html.spec.whatwg.org/#window-post-message-steps
   dom::ExceptionOr<void> LocalDOMWindow::PostMessage(RefPtr<html::SerializedScriptValue> &&message,
                                                      const WindowPostMessageOptions &options) noexcept
   {
-    // https://html.spec.whatwg.org/#window-post-message-steps
-    // The incumbent settings object is this window's: messages come from the window itself.
+    // 1. Let targetRealm be targetWindow's realm.
+    // 2. Let incumbentSettings be the incumbent settings object.
+    // (Messages come from the window itself, so it's the incumbent.)
     auto *document = Document();
     if (!document)
     {
       return {};
     }
 
-    // Let targetOrigin be options["targetOrigin"]. If it's "/", set it to the incumbent's origin. Otherwise,
-    // if it isn't "*", parse it; on failure, throw a "SyntaxError"; set it to the parsed URL's origin.
+    // 3. Let targetOrigin be options["targetOrigin"].
     Maybe<dom::USVString> targetOrigin;
     utf8_stringview requested = options.TargetOrigin;
+    // 4. If targetOrigin is a single U+002F SOLIDUS character (/), then set targetOrigin to
+    //    incumbentSettings's origin.
     if (requested == u8"/")
     {
       targetOrigin = Origin();
     }
+    // 5. Otherwise, if targetOrigin is not a single U+002A ASTERISK character (*):
     else if (requested != u8"*")
     {
+      // 5a. Let parsedURL be the result of running the URL parser on targetOrigin.
       url::URL parsedURL(requested);
+      // 5b. If parsedURL is failure, then throw a "SyntaxError" DOMException.
       if (!parsedURL.IsValid())
       {
         return dom::ExceptionCode::SyntaxError;
       }
+      // 5c. Set targetOrigin to parsedURL's origin.
       targetOrigin = html::URLDecomposition::SerializedOrigin(parsedURL);
     }
 
-    // Let origin be the serialization of incumbentSettings's origin, and source be its WindowProxy. Queue a
-    // global task on the posted message task source to fire the message, unless the target's origin differs.
+    // 6. Let transfer be options["transfer"].
+    // 7. Let serializeWithTransferResult be StructuredSerializeWithTransfer(message, transfer).
+    // (There's no structured serialization or transfer: the message is passed as it is.)
     // FIXME: Message ports and transfers, once there are any.
-    auto *globalDocument = Document();
-    if (!globalDocument)
-    {
-      return {};
-    }
+
+    // 8b. Let origin be incumbentSettings's origin.
+    // 8c. Let source be the WindowProxy object corresponding to incumbentSettings's global object.
+    // (Both are taken now, while the incumbent is the one posting.)
+    dom::USVString origin = Origin();
+    RefPtr<LocalDOMWindow> source = ShareRefPtr(this);
+
+    // 8. Queue a global task on the posted message task source given targetWindow to run the following steps:
     html::EventLoop::Current().QueueTask(
-      html::TaskSource::PostedMessage, *globalDocument,
-      [protectedThis = ShareRef(*this), targetOrigin = krys::move(targetOrigin),
-       message = krys::move(message)]() mutable
+      html::TaskSource::PostedMessage, *document,
+      [protectedThis = ShareRef(*this), targetOrigin = krys::move(targetOrigin), origin = krys::move(origin),
+       source = krys::move(source), message = krys::move(message)]() mutable
       {
+        // 8a. If the targetOrigin argument is not a single literal U+002A ASTERISK character (*) and
+        //     targetWindow's associated Document's origin is not same origin with targetOrigin, then return.
         auto *document = protectedThis->Document();
         if (!document || (targetOrigin && *targetOrigin != protectedThis->Origin()))
         {
           return;
         }
-        auto event = html::MessageEvent::Create(krys::move(message), protectedThis->Origin(),
-                                                RefPtr<LocalDOMWindow>(protectedThis));
+        // 8d.-8f. Let deserializeRecord be StructuredDeserializeWithTransfer(serializeWithTransferResult,
+        //         targetRealm). [...] Let newPorts be a new frozen array consisting of all MessagePort
+        //         objects in deserializeRecord.[[TransferredValues]], if any, maintaining their relative
+        //         order.
+        // (There's nothing to deserialize, and no ports.)
+        // 8g. Fire an event named message at targetWindow, using MessageEvent, with its origin initialized to
+        //     origin, the source attribute initialized to source, the data attribute initialized to
+        //     messageClone, and the ports attribute initialized to newPorts.
+        auto event = html::MessageEvent::Create(krys::move(message), krys::move(origin), krys::move(source));
         (void)dom::EventDispatcher::DispatchToTarget(*event, protectedThis.get());
       });
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-settimeout
   int32 LocalDOMWindow::SetTimeout(Func<void()> &&handler, int32 timeout) noexcept
   {
+    // Return the result of running the timer initialization steps given this, handler, timeout, arguments,
+    // and false.
     auto *document = Document();
     if (!document)
     {
       return 0;
     }
+    // 5. If timeout is less than 0, then set timeout to 0.
     return DOMTimer::Install(*document, krys::move(handler), std::chrono::milliseconds(std::max(timeout, 0)),
                              DOMTimer::Type::SingleShot);
   }
 
+  // https://html.spec.whatwg.org/#dom-cleartimeout
   void LocalDOMWindow::ClearTimeout(int32 id) noexcept
   {
+    // Remove this's map of setTimeout and setInterval IDs[id].
     if (auto *document = Document())
     {
       DOMTimer::RemoveById(*document, id);
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-setinterval
   int32 LocalDOMWindow::SetInterval(Func<void()> &&handler, int32 timeout) noexcept
   {
+    // Return the result of running the timer initialization steps given this, handler, timeout, arguments,
+    // and true.
     auto *document = Document();
     if (!document)
     {
       return 0;
     }
+    // 5. If timeout is less than 0, then set timeout to 0.
     return DOMTimer::Install(*document, krys::move(handler), std::chrono::milliseconds(std::max(timeout, 0)),
                              DOMTimer::Type::Repeating);
   }
 
+  // https://html.spec.whatwg.org/#dom-clearinterval
   void LocalDOMWindow::ClearInterval(int32 id) noexcept
   {
+    // Remove this's map of setTimeout and setInterval IDs[id].
     if (auto *document = Document())
     {
       DOMTimer::RemoveById(*document, id);
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-queuemicrotask
   void LocalDOMWindow::QueueMicrotask(Func<void()> &&callback) noexcept
   {
-    // Queue a microtask to invoke callback; if it throws an exception, report it (C++ callbacks don't).
+    // Queue a microtask to invoke callback with « » and "report".
+    // (C++ callbacks don't throw.)
     html::EventLoop::Current().QueueMicrotask(krys::move(callback));
   }
 

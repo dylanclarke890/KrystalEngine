@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/DOMPointInit.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/SVG/SVGGraphicsElement.hpp"
 
 namespace krys::boo::svg

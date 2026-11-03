@@ -1,23 +1,24 @@
 ﻿#include "Krystal.Booey/Page/Navigation.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/AbortController.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortController.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/History/HistoryItem.hpp"
-#include "Krystal.Booey/HTML/DOMFormData.hpp"
-#include "Krystal.Booey/HTML/ErrorEvent.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
-#include "Krystal.Booey/HTML/URLDecomposition.hpp"
+#include "Krystal.Booey/HTML/Events/ErrorEvent.hpp"
+#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
+#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/HistoryController.hpp"
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
+#include "Krystal.Booey/Page/History.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/NavigationCurrentEntryChangeEvent.hpp"
@@ -73,31 +74,6 @@ namespace krys::boo
     {
       return dom::Exception {dom::ExceptionCode::AbortError, u8"Navigation aborted"};
     }
-
-    // https://html.spec.whatwg.org/multipage/nav-history-apis.html#can-have-its-url-rewritten
-    KRYS_NODISCARD bool DocumentCanHaveURLRewritten(const dom::Document &document,
-                                                    const url::URL &targetURL) noexcept
-    {
-      const auto &documentURL = document.GetURL();
-      if (!IsSameOrigin(documentURL, targetURL))
-      {
-        return false;
-      }
-
-      if (targetURL.ProtocolIsInHTTPFamily())
-      {
-        return true;
-      }
-
-      // Differences in query and fragment are allowed for file: URLs.
-      if (targetURL.ProtocolIsFile())
-      {
-        return documentURL.ViewWithoutQueryOrFragmentIdentifier()
-               == targetURL.ViewWithoutQueryOrFragmentIdentifier();
-      }
-
-      return url::EqualIgnoringFragmentIdentifier(documentURL, targetURL);
-    }
   }
 
   bool Navigation::RateLimiter::NavigationAllowed() noexcept
@@ -132,39 +108,55 @@ namespace krys::boo
     return window ? window->Frame() : nullptr;
   }
 
+  // https://html.spec.whatwg.org/#has-entries-and-events-disabled
   bool Navigation::HasEntriesAndEventsDisabled() const noexcept
   {
+    // 1. Let document be navigation's relevant global object's associated Document.
+    // 2. If document is not fully active, then return true.
     auto *window = _window.get();
     auto *document = window ? window->Document() : nullptr;
     if (!document || !document->IsFullyActive())
     {
       return true;
     }
+    // 3. If document's is initial about:blank is true, then return true.
     if (document->Frame()->Loader().IsDisplayingInitialEmptyDocument())
     {
       return true;
     }
+    // 4. If document's origin is opaque, then return true.
     // FIXME: Windows of opaque origins, once there are origins.
+    // 5. Return false.
     return false;
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-cangoback
   bool Navigation::CanGoBack() const noexcept
   {
+    // 1. If this has entries and events disabled, then return false.
     if (HasEntriesAndEventsDisabled())
     {
       return false;
     }
+    // 2. Assert: this's current entry index is not −1.
     krys_debug_assert(_currentEntryIndex);
+    // 3. If this's current entry index is 0, then return false.
+    // 4. Return true.
     return _currentEntryIndex && *_currentEntryIndex;
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-cangoforward
   bool Navigation::CanGoForward() const noexcept
   {
+    // 1. If this has entries and events disabled, then return false.
     if (HasEntriesAndEventsDisabled())
     {
       return false;
     }
+    // 2. Assert: this's current entry index is not −1.
     krys_debug_assert(_currentEntryIndex);
+    // 3. If this's current entry index is equal to this's entry list's size − 1, then return false.
+    // 4. Return true.
     return _currentEntryIndex && *_currentEntryIndex != _entries.size() - 1;
   }
 
@@ -298,18 +290,25 @@ namespace krys::boo
     _activation = NavigationActivation::Create(*type, ShareRef(*CurrentEntry()), krys::move(previousEntry));
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-entries
   const List<Ref<NavigationHistoryEntry>> &Navigation::Entries() const noexcept
   {
+    // 1. If this has entries and events disabled, then return the empty list.
     static const List<Ref<NavigationHistoryEntry>> emptyEntries;
     if (HasEntriesAndEventsDisabled())
     {
       return emptyEntries;
     }
+    // 2. Return this's entry list.
     return _entries;
   }
 
+  // https://html.spec.whatwg.org/#navigation-current-entry
   NavigationHistoryEntry *Navigation::CurrentEntry() const noexcept
   {
+    // 1. If navigation has entries and events disabled, then return null.
+    // 2. Assert: navigation's current entry index is not −1.
+    // 3. Return navigation's entry list[navigation's current entry index].
     if (!HasEntriesAndEventsDisabled() && _currentEntryIndex)
     {
       return _entries[*_currentEntryIndex].get();
@@ -350,14 +349,27 @@ namespace krys::boo
     return {apiMethodTracker.CommittedPromise, apiMethodTracker.FinishedPromise};
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-reload
   NavigationResult Navigation::Reload(ReloadOptions &&options) noexcept
   {
+    // 1. Let document be this's relevant global object's associated Document.
+    // 2. Let serializedState be StructuredSerializeForStorage(undefined).
+    // 3. If options["state"] exists, then set serializedState to
+    // StructuredSerializeForStorage(options["state"]).
     auto state = krys::move(options.State);
+    // 4. Otherwise:
+    // 4a. Let current be the current entry of this.
+    // 4b. If current is not null, then set serializedState to current's session history entry's navigation
+    //     API state.
     if (!state && CurrentEntry())
     {
       state = ShareRefPtr(CurrentEntry()->AssociatedHistoryItem().NavigationAPIStateObject());
     }
 
+    // 5. If document is not fully active, then return an early error result for an "InvalidStateError"
+    //    DOMException.
+    // 6. If document's unload counter is greater than 0, then return an early error result for an
+    //    "InvalidStateError" DOMException.
     auto *window = _window.get();
     auto *document = window ? window->Document() : nullptr;
     if (!document || !document->IsFullyActive() || document->UnloadCounter())
@@ -365,18 +377,25 @@ namespace krys::boo
       return CreateErrorResult(dom::ExceptionCode::InvalidStateError, u8"Invalid state");
     }
 
+    // 7. Let info be options["info"], if it exists; otherwise, undefined.
+    // 8. Let apiMethodTracker be the result of setting up a navigate/reload API method tracker for this given
+    //    info and serializedState.
     auto apiMethodTracker = MaybeSetUpcomingNonTraversalTracker(krys::move(options.Info), krys::move(state));
 
+    // 9. Reload document's node navigable with navigationAPIState set to serializedState and apiMethodTracker
+    //    set to apiMethodTracker.
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
-    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(url::URL(document->GetURL())),
+    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(document->GetURL()),
                                       dom::DOMStringAtom(u8"_self"));
     frameLoadRequest.SetNavigationHistoryBehavior(NavigationHistoryBehavior::Reload);
     frameLoadRequest.SetIsFromNavigationAPI(true);
     frame->Loader().ChangeLocation(krys::move(frameLoadRequest));
 
+    // 10. Return a navigation API method tracker-derived result for apiMethodTracker.
     return ApiMethodTrackerDerivedResult(*apiMethodTracker);
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-navigate
   NavigationResult Navigation::Navigate(dom::DOMStringView url, NavigateOptions &&options) noexcept
   {
     auto *window = _window.get();
@@ -386,22 +405,30 @@ namespace krys::boo
       return CreateErrorResult(dom::ExceptionCode::InvalidStateError, u8"Invalid state");
     }
 
+    // 1. Let urlRecord be the result of parsing a URL given url, relative to this's relevant settings object.
     auto newURL = document->CompleteURL(url);
-    const auto &currentURL = document->GetURL();
 
+    // 2. If urlRecord is failure, then return an early error result for a "SyntaxError" DOMException.
     if (!newURL.IsValid())
     {
       return CreateErrorResult(dom::ExceptionCode::SyntaxError, u8"Invalid URL");
     }
 
-    // Reject all JavaScript URLs in Navigation API.
+    // 3. If urlRecord's scheme is "javascript", then return an early error result for a "NotSupportedError"
+    //    DOMException.
     if (newURL.ProtocolIsJavaScript())
     {
       return CreateErrorResult(dom::ExceptionCode::NotSupportedError,
                                u8"Navigation API does not support javascript: URLs.");
     }
 
-    if (options.History == HistoryBehavior::Push && IsAboutBlank(currentURL))
+    // 4. Let document be this's relevant global object's associated Document.
+    // 5. If options["history"] is "push", and the navigation must be a replace given urlRecord and document,
+    //    then return an early error result for a "NotSupportedError" DOMException.
+    // (The navigation must be a replace if url's scheme is "javascript", which is rejected above, or document
+    // is initial about:blank.)
+    if (options.History == HistoryBehavior::Push && document->Frame()
+        && document->Frame()->Loader().IsDisplayingInitialEmptyDocument())
     {
       return CreateErrorResult(
         dom::ExceptionCode::NotSupportedError,
@@ -409,14 +436,27 @@ namespace krys::boo
         u8"possible while on an about:blank document.");
     }
 
+    // 6. Let state be options["state"], if it exists; otherwise, undefined.
+    // 7. Let serializedState be StructuredSerializeForStorage(state).
+    // 8. If document is not fully active, then return an early error result for an "InvalidStateError"
+    //    DOMException.
+    // 9. If document's unload counter is greater than 0, then return an early error result for an
+    //    "InvalidStateError" DOMException.
     if (!document->IsFullyActive() || document->UnloadCounter())
     {
       return CreateErrorResult(dom::ExceptionCode::InvalidStateError, u8"Invalid state");
     }
 
+    // 10. Let info be options["info"], if it exists; otherwise, undefined.
+    // 11. Let apiMethodTracker be the result of setting up a navigate/reload API method tracker for this
+    // given
+    //     info and serializedState.
     auto apiMethodTracker =
       MaybeSetUpcomingNonTraversalTracker(krys::move(options.Info), krys::move(options.State));
 
+    // 12. Navigate document's node navigable to urlRecord using document, with historyHandling set to
+    //     options["history"], navigationAPIState set to serializedState, and apiMethodTracker set to
+    //     apiMethodTracker.
     RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
     FrameLoadRequest request(ShareRef(*document), ResourceRequest(krys::move(newURL)),
                              dom::DOMStringAtom(u8"_self"));
@@ -433,11 +473,18 @@ namespace krys::boo
       apiMethodTracker->FinishedPromise->Reject(AbortError());
     }
 
+    // 13. Return a navigation API method tracker-derived result for apiMethodTracker.
     return ApiMethodTrackerDerivedResult(*apiMethodTracker);
   }
 
+  // https://html.spec.whatwg.org/#performing-a-navigation-api-traversal
   NavigationResult Navigation::PerformTraversal(dom::DOMStringView key, Options &&options) noexcept
   {
+    // 1. Let document be navigation's relevant global object's associated Document.
+    // 2. If document is not fully active, then return an early error result for an "InvalidStateError"
+    //    DOMException.
+    // 3. If document's unload counter is greater than 0, then return an early error result for an
+    //    "InvalidStateError" DOMException.
     auto *window = _window.get();
     auto *document = window ? window->Document() : nullptr;
     if (!document || !document->IsFullyActive() || document->UnloadCounter())
@@ -445,11 +492,15 @@ namespace krys::boo
       return CreateErrorResult(dom::ExceptionCode::InvalidStateError, u8"Invalid state");
     }
 
+    // (Back(), Forward() and TraverseTo() check the key is an entry's.)
     if (!EntryIndexOfKey(key))
     {
       return CreateErrorResult(AbortError());
     }
 
+    // 4. Let current be the current entry of navigation.
+    // 5. If key equals current's session history entry's navigation API key, then return «[ "committed" → a
+    //    promise resolved with current, "finished" → a promise resolved with current ]».
     RefPtr<NavigationHistoryEntry> current = ShareRefPtr(CurrentEntry());
     if (current->Key() == key)
     {
@@ -459,16 +510,25 @@ namespace krys::boo
       return result;
     }
 
+    // 6. If navigation's upcoming traverse API method trackers[key] exists, then return a navigation API
+    //    method tracker-derived result for navigation's upcoming traverse API method trackers[key].
     if (auto existing = _upcomingTraverseMethodTrackers.find(dom::DOMString(key));
         existing != _upcomingTraverseMethodTrackers.end())
     {
       return ApiMethodTrackerDerivedResult(*existing->second);
     }
 
+    // 7. Let info be options["info"], if it exists; otherwise, undefined.
+    // 8. Let apiMethodTracker be the result of adding an upcoming traverse API method tracker for navigation
+    //    given key and info.
     auto apiMethodTracker = AddUpcomingTraverseAPIMethodTracker(key, krys::move(options.Info));
 
-    // FIXME: 11. Let sourceSnapshotParams be the result of snapshotting source snapshot params given
-    // document.
+    // 9. Let navigable be document's node navigable.
+    // 10. Let traversable be navigable's traversable navigable.
+    // 11. Let sourceSnapshotParams be the result of snapshotting source snapshot params given document.
+    // FIXME: Snapshot the source snapshot params.
+    // 12. Append the following session history traversal steps to traversable:
+    // (The traversal is scheduled, and rejects the promises with an "AbortError" if it doesn't happen.)
     Frame()->GetNavigationScheduler().ScheduleHistoryNavigationByKey(
       dom::DOMString(key),
       [apiMethodTracker](ScheduleHistoryNavigationResult result)
@@ -480,6 +540,7 @@ namespace krys::boo
         }
       });
 
+    // 13. Return a navigation API method tracker-derived result for apiMethodTracker.
     return ApiMethodTrackerDerivedResult(*apiMethodTracker);
   }
 
@@ -505,45 +566,74 @@ namespace krys::boo
     return index ? _entries[*index].get() : nullptr;
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-traverseto
   NavigationResult Navigation::TraverseTo(dom::DOMStringView key, Options &&options) noexcept
   {
+    // 1. If this's current entry index is −1, then return an early error result for an "InvalidStateError"
+    //    DOMException.
+    // 2. If this's entry list does not contain a NavigationHistoryEntry whose session history entry's
+    //    navigation API key equals key, then return an early error result for an "InvalidStateError"
+    //    DOMException.
     if (!EntryIndexOfKey(key))
     {
       return CreateErrorResult(dom::ExceptionCode::InvalidStateError, u8"Invalid key");
     }
+    // 3. Return the result of performing a navigation API traversal given this, key, and options.
     return PerformTraversal(key, krys::move(options));
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-back
   NavigationResult Navigation::Back(Options &&options) noexcept
   {
+    // 1. If this's current entry index is −1 or 0, then return an early error result for an
+    //    "InvalidStateError" DOMException.
     if (!CanGoBack())
     {
       return CreateErrorResult(dom::ExceptionCode::InvalidStateError, u8"Cannot go back");
     }
+    // 2. Let key be this's entry list[this's current entry index − 1]'s session history entry's navigation
+    // API
+    //    key.
     Ref<NavigationHistoryEntry> previousEntry = _entries[*_currentEntryIndex - 1];
+    // 3. Return the result of performing a navigation API traversal given this, key, and options.
     return PerformTraversal(previousEntry->Key(), krys::move(options));
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-forward
   NavigationResult Navigation::Forward(Options &&options) noexcept
   {
+    // 1. If this's current entry index is −1 or is equal to this's entry list's size − 1, then return an
+    // early
+    //    error result for an "InvalidStateError" DOMException.
     if (!CanGoForward())
     {
       return CreateErrorResult(dom::ExceptionCode::InvalidStateError, u8"Cannot go forward");
     }
+    // 2. Let key be this's entry list[this's current entry index + 1]'s session history entry's navigation
+    // API
+    //    key.
     Ref<NavigationHistoryEntry> nextEntry = _entries[*_currentEntryIndex + 1];
+    // 3. Return the result of performing a navigation API traversal given this, key, and options.
     return PerformTraversal(nextEntry->Key(), krys::move(options));
   }
 
+  // https://html.spec.whatwg.org/#dom-navigation-updatecurrententry
   dom::ExceptionOr<void> Navigation::UpdateCurrentEntry(UpdateCurrentEntryOptions &&options) noexcept
   {
+    // 1. Let current be the current entry of this.
+    // 2. If current is null, then throw an "InvalidStateError" DOMException.
     RefPtr<NavigationHistoryEntry> current = ShareRefPtr(CurrentEntry());
     if (!current)
     {
       return dom::Exception {dom::ExceptionCode::InvalidStateError};
     }
 
+    // 3. Let serializedState be StructuredSerializeForStorage(options["state"]), rethrowing any exceptions.
+    // 4. Set current's session history entry's navigation API state to serializedState.
     current->SetState(krys::move(options.State));
 
+    // 5. Fire an event named currententrychange at this using NavigationCurrentEntryChangeEvent, with its
+    //    navigationType attribute initialized to null and its from initialized to current.
     auto currentEntryChangeEvent = NavigationCurrentEntryChangeEvent::Create(null, *current);
     (void)dom::EventDispatcher::DispatchToTarget(*currentEntryChangeEvent, this);
     return {};
@@ -878,7 +968,7 @@ namespace krys::boo
 
   Navigation::DispatchResult Navigation::InnerDispatchNavigateEvent(
     NavigationNavigationType navigationType, Ref<NavigationDestination> &&destination,
-    Maybe<dom::DOMString> &&downloadRequestFilename, const FormSubmission *formSubmission,
+    Maybe<dom::DOMString> downloadRequestFilename, const FormSubmission *formSubmission,
     html::SerializedScriptValue *classicHistoryAPIState, dom::Element *sourceElement) noexcept
   {
     if (HasEntriesAndEventsDisabled())
@@ -927,13 +1017,13 @@ namespace krys::boo
     bool isSameDocument = destination->SameDocument();
     bool isTraversal = navigationType == NavigationNavigationType::Traverse;
     bool canIntercept =
-      DocumentCanHaveURLRewritten(*document, destination->URL()) && (!isTraversal || isSameDocument);
+      CanHaveURLRewritten(*document, destination->URL()) && (!isTraversal || isSameDocument);
     // FIXME: And user involvement is not browser-ui or navigation's relevant global object has transient
     // activation.
     bool canBeCanceled = !isTraversal || isSameDocument;
     const auto &documentURL = document->GetURL();
     const auto &destinationURL = destination->URL();
-    bool hashChange = !classicHistoryAPIState
+    bool hashChange = !classicHistoryAPIState && isSameDocument
                       && url::EqualIgnoringFragmentIdentifier(documentURL, destinationURL)
                       && (documentURL.HasFragmentIdentifier() != destinationURL.HasFragmentIdentifier()
                           || documentURL.FragmentIdentifier() != destinationURL.FragmentIdentifier());
@@ -1017,7 +1107,8 @@ namespace krys::boo
 
       RefPtr<NavigationHistoryEntry> fromNavigationHistoryEntry = ShareRefPtr(CurrentEntry());
       krys_debug_assert(fromNavigationHistoryEntry);
-      _transition = NavigationTransition::Create(navigationType, ShareRef(*fromNavigationHistoryEntry));
+      _transition = NavigationTransition::Create(navigationType, ShareRef(*fromNavigationHistoryEntry),
+                                                 Ref<NavigationDestination>(destination));
 
       if (navigationType == NavigationNavigationType::Traverse)
       {
@@ -1049,6 +1140,11 @@ namespace krys::boo
                                  : NavigationHistoryBehavior::Push;
         Frame()->Loader().UpdateURLAndHistory(destination->URL(), ShareRefPtr(classicHistoryAPIState),
                                               historyHandling);
+      }
+      // The navigation is committed, so resolve the transition's committed promise.
+      if (_transition)
+      {
+        _transition->ResolveCommittedPromise();
       }
     }
 

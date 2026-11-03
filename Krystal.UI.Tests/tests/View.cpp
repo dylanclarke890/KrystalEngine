@@ -2,32 +2,32 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
-#include "Krystal.Booey/DOM/CommandEvent.hpp"
-#include "Krystal.Booey/DOM/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/NodeList.hpp"
-#include "Krystal.Booey/DOM/PointerEvent.hpp"
-#include "Krystal.Booey/DOM/TouchEvent.hpp"
+#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
-#include "Krystal.Booey/HTML/DOMFormData.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
-#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/NavigateEvent.hpp"
@@ -49,7 +49,6 @@
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
-#include "Krystal.UI/FileStorageProvider.hpp"
 #include "Krystal.UI/Input.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
 #include <filesystem>
@@ -2748,35 +2747,6 @@ namespace krys::ui::tests
 
     view.SetUserAgent(u8"KrystalGame/1.0");
     CHECK(window.GetNavigator().UserAgent() == u8"KrystalGame/1.0");
-  }
-
-  TEST_CASE("View: local storage kept in files", "[UI]")
-  {
-    auto directory = std::filesystem::temp_directory_path() / "KrystalStorageTest";
-    std::filesystem::remove_all(directory);
-
-    {
-      FileStorageProvider provider(directory);
-      auto area = provider.LocalStorageArea(u8"https://example.com");
-      Maybe<boo::dom::DOMString> oldValue;
-      REQUIRE(area->SetItem(u8"name", u8"Ada \u00e9", oldValue));
-      REQUIRE(area->SetItem(u8"level", u8"3", oldValue));
-      CHECK(provider.PathForOrigin(u8"https://example.com").filename() == "https___example_com.storage");
-      CHECK(std::filesystem::exists(provider.PathForOrigin(u8"https://example.com")));
-    }
-
-    // Another provider reads the items back, in order.
-    FileStorageProvider provider(directory);
-    auto area = provider.LocalStorageArea(u8"https://example.com");
-    CHECK(area->Length() == 2);
-    CHECK(area->Key(0) == boo::dom::DOMString(u8"name"));
-    CHECK(area->Item(u8"name") == boo::dom::DOMString(u8"Ada \u00e9"));
-    CHECK(area->Item(u8"level") == boo::dom::DOMString(u8"3"));
-    (void)area->RemoveItem(u8"level");
-
-    FileStorageProvider again(directory);
-    CHECK(again.LocalStorageArea(u8"https://example.com")->Length() == 1);
-    std::filesystem::remove_all(directory);
   }
 
   TEST_CASE("View: loads pages on a later task, and tells the host", "[UI]")

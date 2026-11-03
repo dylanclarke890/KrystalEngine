@@ -1,22 +1,21 @@
 ﻿#include "Krystal.Booey/Editing/Markup.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/Core/UnicodeHelpers.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/Comment.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/DocumentType.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Position.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
-#include "Krystal.Booey/DOM/StyledElement.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Comment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
@@ -24,11 +23,11 @@
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -37,7 +36,7 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include <algorithm>
 #include <ranges>
 
@@ -578,7 +577,7 @@ namespace krys::boo
       }
       if (_shouldPreserveMSOList)
       {
-        auto style = element.GetAttribute(dom::DOMStringAtom(Attributes::Style)).value_or(dom::DOMString());
+        auto style = element.GetAttribute(dom::DOMStringAtom(u8"style")).value_or(dom::DOMString());
         utf8_stringview view(style);
         return view.starts_with(u8"mso-list:") || view.find(u8";mso-list:") != utf8_stringview::npos
                || view.find(u8"\nmso-list:") != utf8_stringview::npos;
@@ -625,7 +624,7 @@ namespace krys::boo
       {
         // We'll handle the style attribute separately, below.
         if (attribute->NamespaceURI().View().empty()
-            && attribute->LocalName() == dom::DOMStringAtom(Attributes::Style) && shouldOverrideStyleAttr)
+            && attribute->LocalName() == dom::DOMStringAtom(u8"style") && shouldOverrideStyleAttr)
         {
           continue;
         }
@@ -1302,7 +1301,7 @@ namespace krys::boo
         {
           if (!tabText.empty())
           {
-            (void)paragraph.AppendChild(*CreateTabSpanElement(document, utf8_string(tabText)));
+            (void)paragraph.AppendChild(*CreateTabSpanElement(document, tabText));
             tabText.clear();
           }
           auto textNode =
@@ -1318,7 +1317,7 @@ namespace krys::boo
         }
         else if (!tabText.empty())
         {
-          (void)paragraph.AppendChild(*CreateTabSpanElement(document, utf8_string(tabText)));
+          (void)paragraph.AppendChild(*CreateTabSpanElement(document, tabText));
         }
 
         first = false;
@@ -1374,8 +1373,8 @@ namespace krys::boo
       ParseHTMLIntoFragment(utf8_stringview markup, dom::Element &contextElement,
                             bool allowDeclarativeShadowRoots = false) noexcept
     {
-      return html::HTMLDocumentParser::ParseFragment(contextElement, utf8_string(markup),
-                                                     allowDeclarativeShadowRoots);
+      return html::DocumentParser::ParseFragment(contextElement, utf8_string(markup),
+                                                 allowDeclarativeShadowRoots);
     }
 
     // FIXME: The template document for contexts that are templates.
@@ -1685,8 +1684,7 @@ namespace krys::boo
     auto createHTMLBRElement = [&document]()
     {
       auto element = CreateHTMLElement(document, u8"br");
-      (void)element->SetAttribute(dom::DOMStringAtom(Attributes::Class),
-                                  dom::DOMString(AppleInterchangeNewline));
+      (void)element->SetAttribute(dom::DOMStringAtom(u8"class"), dom::DOMString(AppleInterchangeNewline));
       return element;
     };
 

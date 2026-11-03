@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/PseudoElement.hpp"
-#include "Krystal.Booey/HTML/HTMLOListElement.hpp"
-#include "Krystal.Booey/HTML/HTMLUListElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLUListElement.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -27,6 +27,7 @@ namespace krys::boo
     }
 
     // Returns the enclosing list with respect to the DOM order.
+    // See https://html.spec.whatwg.org/#list-owner.
     KRYS_NODISCARD dom::Element *EnclosingList(const RenderListItem &listItem) noexcept
     {
       auto *element = listItem.GetElement();
@@ -215,6 +216,7 @@ namespace krys::boo
     return itemCount;
   }
 
+  // See https://html.spec.whatwg.org/#ordinal-value.
   void RenderListItem::UpdateValueNow() const noexcept
   {
     auto *list = EnclosingList(*this);

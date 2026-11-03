@@ -1,11 +1,11 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/HighlightRegistry.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HashChangeEvent.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
@@ -66,7 +66,10 @@ namespace krys::boo::tests
     CHECK(document.FindAnchor(u8"missing") == nullptr);
   }
 
-  TEST_CASE("Fragment navigation", "[Loader][FragmentNavigation]")
+  TEST_CASE(
+    "Fragment navigation",
+    "[Loader][FragmentNavigation][html:the-hashchangeevent-interface][html:dom-hashchangeevent-oldurl]"
+    "[html:dom-hashchangeevent-newurl]")
   {
     FragmentFixture fixture;
     List<std::pair<std::string, std::string>> hashChanges;
@@ -185,7 +188,7 @@ namespace krys::boo::tests
     document->SetURL(url::URL(u8"https://example.com/page.html#section"));
     frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
 
-    auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+    auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(u8"<!DOCTYPE html>" + utf8_string(Page), IsEOF(true));
     (void)parser->PumpTokenizer();
     html::EventLoop::Current().RunUntilIdle();
@@ -233,7 +236,7 @@ namespace krys::boo::tests
 
       auto paragraph = fixture.Document->CreateElement(u8"p").ReleaseValue();
       (void)paragraph->SetAttribute(u8"id", u8"late");
-      (void)paragraph->TextContent(dom::DOMString(u8"A late arrival"));
+      (void)paragraph->TextContent(u8"A late arrival");
       REQUIRE_FALSE(fixture.ById(u8"section").ParentNode()->AppendChild(*paragraph).HasException());
       (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
 
@@ -251,7 +254,7 @@ namespace krys::boo::tests
         loop.Run(loop.Now() + 500ms);
       }
       auto paragraph = fixture.Document->CreateElement(u8"p").ReleaseValue();
-      (void)paragraph->TextContent(dom::DOMString(u8"never"));
+      (void)paragraph->TextContent(u8"never");
       REQUIRE_FALSE(fixture.ById(u8"section").ParentNode()->AppendChild(*paragraph).HasException());
       (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
       loop.Run(loop.Now() + 600ms);

@@ -4,10 +4,10 @@
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -164,7 +164,7 @@ namespace krys::boo::tests
     frame.CreateView({200, 100});
     auto document = CreateRef<dom::HTMLDocument>();
     frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
-    auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+    auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(
       u8"<!DOCTYPE html><div style='height: 10px; background: url(file:///images/update.png)'></div>",
       IsEOF(true));

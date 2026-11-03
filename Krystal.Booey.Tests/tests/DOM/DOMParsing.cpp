@@ -1,17 +1,19 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/MutationRecord.hpp"
-#include "Krystal.Booey/DOM/NodeList.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/DOM/XMLDocument.hpp"
+#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/MutationRecord.hpp"
+#include "Krystal.Booey/DOM/Nodes/Comment.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include <string>
 
@@ -43,7 +45,8 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("Element: innerHTML", "[DOM][Element][DOMParsing]")
+  TEST_CASE("Element: innerHTML", "[DOM][Element][DOMParsing][html:the-innerhtml-property][html:dom-element-"
+                                  "innerhtml][html:fragment-serializing-algorithm-steps]")
   {
     MarkupDocument data;
     auto &div = *data.Div;
@@ -133,7 +136,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Element: innerHTML in an XML document", "[DOM][Element][DOMParsing]")
+  TEST_CASE("Element: innerHTML in an XML document",
+            "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
   {
     auto document = CreateRef<XMLDocument>();
     auto root = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"div"))
@@ -152,7 +156,246 @@ namespace krys::boo::dom::tests
     CHECK(root->FirstElementChild() == p);
   }
 
-  TEST_CASE("Element: outerHTML", "[DOM][Element][DOMParsing]")
+  TEST_CASE("The XML fragment parsing algorithm declares the namespaces in scope on the context",
+            "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
+  {
+    auto document = CreateRef<XMLDocument>();
+    auto root =
+      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+    REQUIRE_FALSE(
+      root->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:p"), u8"urn:outer")
+        .HasException());
+    auto context =
+      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"context")).ReleaseValue();
+    REQUIRE_FALSE(root->AppendChild(*context).HasException());
+
+    SECTION("the default namespace and an ancestor's prefix")
+    {
+      REQUIRE_FALSE(context->InnerHTML(u8"<a/><p:b/>").HasException());
+      auto a = context->FirstElementChild();
+      REQUIRE(a);
+      CHECK(a->NamespaceURI() == u8"urn:root");
+      auto b = a->NextElementSibling();
+      REQUIRE(b);
+      CHECK(b->NamespaceURI() == u8"urn:outer");
+    }
+
+    SECTION("a prefix declared nearer the context wins")
+    {
+      REQUIRE_FALSE(
+        context
+          ->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:p"), u8"urn:inner")
+          .HasException());
+      REQUIRE_FALSE(context->InnerHTML(u8"<p:b/>").HasException());
+      auto b = context->FirstElementChild();
+      REQUIRE(b);
+      CHECK(b->NamespaceURI() == u8"urn:inner");
+    }
+  }
+
+  TEST_CASE(
+    "The XML fragment serialization algorithm",
+    "[DOM][Element][DOMParsing][html:xml-fragment-serialisation-algorithm][html:relevant-child-nodes]")
+  {
+    auto document = CreateRef<XMLDocument>();
+    auto root =
+      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+
+    SECTION("declares the empty default namespace for elements in no namespace")
+    {
+      auto child = document->CreateElementNS(DOMStringAtom::Null(), DOMStringAtom(u8"c")).ReleaseValue();
+      REQUIRE_FALSE(root->AppendChild(*child).HasException());
+      CHECK(MarkupText(root->InnerHTML()) == "<c xmlns=\"\"/>");
+    }
+
+    SECTION("serialises a template's contents")
+    {
+      auto templateElement =
+        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"template"))
+          .ReleaseValue();
+      REQUIRE_FALSE(root->AppendChild(*templateElement).HasException());
+      REQUIRE_FALSE(templateElement->InnerHTML(u8"<b/>").HasException());
+      CHECK(templateElement->FirstChild() == nullptr);
+      CHECK(MarkupText(templateElement->InnerHTML()) == "<b xmlns=\"http://www.w3.org/1999/xhtml\"></b>");
+    }
+  }
+
+  TEST_CASE("The XML fragment serialization algorithm refuses a DOM that isn't well-formed",
+            "[DOM][Element][DOMParsing][html:xml-fragment-serialisation-algorithm][!shouldfail]")
+  {
+    // FIXME: Serializing XML doesn't check for the error cases, so it writes markup that isn't well-formed
+    // where it should throw an InvalidStateError. See KNOWN-ISSUES.md.
+    auto document = CreateRef<XMLDocument>();
+    auto root =
+      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+    REQUIRE_FALSE(root->AppendChild(*document->CreateComment(u8"a--b")).HasException());
+    CHECK(MarkupText(root->InnerHTML()).find("a--b") == std::string::npos);
+  }
+
+  TEST_CASE("The XML fragment parsing algorithm parses a script's or style's markup like any other",
+            "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
+  {
+    auto document = CreateRef<XMLDocument>();
+    auto root = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"div"))
+                  .ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+
+    for (auto name : {u8"script", u8"style"})
+    {
+      auto element =
+        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(name)).ReleaseValue();
+      REQUIRE_FALSE(root->AppendChild(*element).HasException());
+
+      REQUIRE_FALSE(element->InnerHTML(u8"<b/>").HasException());
+      auto b = element->FirstElementChild();
+      REQUIRE(b);
+      CHECK(b->LocalName() == u8"b");
+
+      auto result = element->InnerHTML(u8"a < b");
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == ExceptionCode::SyntaxError);
+    }
+  }
+
+  TEST_CASE("Void elements are serialised without end tags or children",
+            "[DOM][Element][DOMParsing][html:elements-2][html:void-elements][html:serializes-as-void]")
+  {
+    MarkupDocument data;
+    auto &div = *data.Div;
+
+    REQUIRE_FALSE(div.InnerHTML(u8"<area><base><br><embed><hr><img><input><link><meta><source><track><wbr>")
+                    .HasException());
+    CHECK(MarkupText(div.InnerHTML())
+          == "<area><base><br><embed><hr><img><input><link><meta><source><track><wbr>");
+
+    // Elements made by the DOM serialise as void even with children: col (which the parser only keeps in a
+    // table) and the obsolete elements that serialise as void.
+    for (auto name : {u8"col", u8"basefont", u8"bgsound", u8"frame", u8"keygen", u8"param"})
+    {
+      auto element = data.Document->CreateElement(DOMStringAtom(name)).ReleaseValue();
+      REQUIRE_FALSE(element->AppendChild(*data.Document->CreateTextNode(u8"text")).HasException());
+      CHECK(MarkupText(element->OuterHTML()) == "<" + MarkupText(name) + ">");
+    }
+  }
+
+  TEST_CASE("The HTML fragment serialization algorithm",
+            "[DOM][Element][DOMParsing][html:serialising-html-fragments][html:html-fragment-serialisation-"
+            "algorithm][html:escapingString][html:attribute's-serialised-name]")
+  {
+    MarkupDocument data;
+    auto &document = *data.Document;
+    auto &div = *data.Div;
+
+    auto make = [&](const char8_t *name)
+    {
+      return document.CreateElement(DOMStringAtom(name)).ReleaseValue();
+    };
+    auto makeNS = [&](DOMStringView namespaceURI, const char8_t *name)
+    {
+      return document.CreateElementNS(DOMStringAtom(namespaceURI), DOMStringAtom(name)).ReleaseValue();
+    };
+
+    SECTION("a void element serialises its children as the empty string")
+    {
+      auto br = make(u8"br");
+      REQUIRE_FALSE(br->AppendChild(*document.CreateTextNode(u8"text")).HasException());
+      CHECK(MarkupText(br->InnerHTML()).empty());
+    }
+
+    SECTION("escapes text and attribute values")
+    {
+      auto span = make(u8"span");
+      REQUIRE_FALSE(span->SetAttribute(DOMStringAtom(u8"title"), u8"&\u00A0\"<>").HasException());
+      REQUIRE_FALSE(span->AppendChild(*document.CreateTextNode(u8"&\u00A0\"<>")).HasException());
+      REQUIRE_FALSE(div.AppendChild(*span).HasException());
+      CHECK(MarkupText(div.InnerHTML())
+            == "<span title=\"&amp;&nbsp;&quot;&lt;&gt;\">&amp;&nbsp;\"&lt;&gt;</span>");
+    }
+
+    SECTION("leaves the text of raw text elements, and of noscript without scripting, as it is")
+    {
+      for (auto name : {u8"style", u8"script", u8"xmp", u8"iframe", u8"noembed", u8"noframes", u8"plaintext"})
+      {
+        auto element = make(name);
+        REQUIRE_FALSE(element->AppendChild(*document.CreateTextNode(u8"<&>")).HasException());
+        CHECK(MarkupText(element->InnerHTML()) == "<&>");
+      }
+
+      auto noscript = make(u8"noscript");
+      REQUIRE_FALSE(noscript->AppendChild(*document.CreateTextNode(u8"<&>")).HasException());
+      CHECK(MarkupText(noscript->InnerHTML()) == "&lt;&amp;&gt;");
+    }
+
+    SECTION("serialises attributes with their serialised names")
+    {
+      auto span = make(u8"span");
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XML), DOMStringAtom(u8"a:lang"), u8"1")
+          .HasException());
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XLink), DOMStringAtom(u8"b:href"), u8"2")
+          .HasException());
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns"), u8"3")
+          .HasException());
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:c"), u8"4")
+          .HasException());
+      REQUIRE_FALSE(
+        span->SetAttributeNS(DOMStringAtom(u8"urn:x"), DOMStringAtom(u8"d:e"), u8"5").HasException());
+      CHECK(MarkupText(span->OuterHTML())
+            == "<span xml:lang=\"1\" xlink:href=\"2\" xmlns=\"3\" xmlns:c=\"4\" d:e=\"5\"></span>");
+    }
+
+    SECTION("uses the local name of HTML, SVG and MathML elements, and the qualified name of others")
+    {
+      CHECK(MarkupText(makeNS(infra::Namespaces::HTML, u8"a:div")->OuterHTML()) == "<div></div>");
+      CHECK(MarkupText(makeNS(infra::Namespaces::SVG, u8"b:svg")->OuterHTML()) == "<svg></svg>");
+      CHECK(MarkupText(makeNS(infra::Namespaces::MathML, u8"c:math")->OuterHTML()) == "<math></math>");
+      CHECK(MarkupText(makeNS(u8"urn:x", u8"d:e")->OuterHTML()) == "<d:e></d:e>");
+    }
+
+    SECTION("adds an is value that isn't in the attributes")
+    {
+      auto withIs =
+        document.CreateElement(DOMStringAtom(u8"p"), ElementCreationOptions {.Is = DOMStringAtom(u8"x-a")})
+          .ReleaseValue();
+      CHECK(MarkupText(withIs->OuterHTML()) == "<p is=\"x-a\"></p>");
+
+      REQUIRE_FALSE(withIs->SetAttribute(DOMStringAtom(u8"is"), u8"x-b").HasException());
+      CHECK(MarkupText(withIs->OuterHTML()) == "<p is=\"x-b\"></p>");
+    }
+
+    SECTION("serialises comments and processing instructions")
+    {
+      REQUIRE_FALSE(div.AppendChild(*document.CreateComment(u8"c")).HasException());
+      REQUIRE_FALSE(
+        div.AppendChild(*document.CreateProcessingInstruction(u8"t", u8"d").ReleaseValue()).HasException());
+      CHECK(MarkupText(div.InnerHTML()) == "<!--c--><?t d>");
+    }
+
+    SECTION("serialises a shadow root's options, in order")
+    {
+      auto host = make(u8"p");
+      auto shadow = host
+                      ->AttachShadow({.Mode = ShadowRootMode::Closed,
+                                      .DelegatesFocus = DelegatesFocus(true),
+                                      .SlotAssignment = SlotAssignmentMode::Manual,
+                                      .Clonable = Clonable(true),
+                                      .Serialisable = Serialisable(true)})
+                      .ReleaseValue();
+      CHECK(
+        MarkupText(host->GetHTML({.SerializableShadowRoots = true}))
+        == "<template shadowrootmode=\"closed\" shadowrootdelegatesfocus=\"\" shadowrootserializable=\"\" "
+           "shadowrootslotassignment=\"manual\" shadowrootclonable=\"\"></template>");
+    }
+  }
+
+  TEST_CASE("Element: outerHTML",
+            "[DOM][Element][DOMParsing][html:the-outerhtml-property][html:dom-element-outerhtml]")
   {
     MarkupDocument data;
     auto &div = *data.Div;
@@ -203,7 +446,9 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Element: insertAdjacentHTML", "[DOM][Element][DOMParsing]")
+  TEST_CASE(
+    "Element: insertAdjacentHTML",
+    "[DOM][Element][DOMParsing][html:the-insertadjacenthtml()-method][html:dom-element-insertadjacenthtml]")
   {
     MarkupDocument data;
     auto &div = *data.Div;
@@ -270,7 +515,9 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Element and ShadowRoot: setHTMLUnsafe and getHTML", "[DOM][Element][ShadowRoot][DOMParsing]")
+  TEST_CASE("Element and ShadowRoot: setHTMLUnsafe and getHTML",
+            "[DOM][Element][ShadowRoot][DOMParsing][html:html-serialization-methods][html:dom-element-"
+            "gethtml][html:dom-shadowroot-gethtml][html:dom-shadowroot-innerhtml]")
   {
     MarkupDocument data;
     auto &div = *data.Div;

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
-#include "Krystal.Booey/HTML/URLDecomposition.hpp"
+#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -65,6 +65,27 @@ namespace krys::boo
     {
       return Href();
     }
+
+    /// @see https://html.spec.whatwg.org/#dom-location-protocol
+    KRYS_NODISCARD dom::USVString Protocol() const noexcept
+    {
+      return URLDecomposition::Protocol();
+    }
+
+    /// @brief Navigates to the URL with the scheme @p value, if it's an HTTP(S) scheme.
+    /// @return `SyntaxError` if @p value isn't a scheme.
+    /// @see https://html.spec.whatwg.org/#dom-location-protocol
+    dom::ExceptionOr<void> Protocol(dom::DOMStringView value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-location-hash
+    KRYS_NODISCARD dom::USVString Hash() const noexcept
+    {
+      return URLDecomposition::Hash();
+    }
+
+    /// @brief Navigates to the URL with the fragment @p value, unless it's the fragment already.
+    /// @see https://html.spec.whatwg.org/#dom-location-hash
+    void Hash(dom::DOMStringView value) noexcept;
 
   private:
     KRYS_NODISCARD url::URL FullURL() const noexcept override;

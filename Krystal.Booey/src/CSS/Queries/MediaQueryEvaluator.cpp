@@ -1,16 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
 namespace krys::boo::css::mq
 {
-  KRYS_NODISCARD static const CSSOMStringAtom &PrintAtom() noexcept
-  {
-    static const CSSOMStringAtom print {u8"print"};
-    return print;
-  }
-
   MediaQueryEvaluator::MediaQueryEvaluator(const CSSOMStringAtom &mediaType, const dom::Document &document,
                                            const RenderStyle *rootElementStyle) noexcept
       : GenericMediaQueryEvaluator(), _mediaType(mediaType),

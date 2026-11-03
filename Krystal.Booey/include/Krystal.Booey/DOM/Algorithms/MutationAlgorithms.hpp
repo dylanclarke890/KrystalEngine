@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
 
 namespace krys::boo::dom
@@ -9,6 +10,8 @@ namespace krys::boo::dom
   class ContainerNode;
   class Node;
 
+  /// @see https://dom.spec.whatwg.org/#insert-suppressobservers
+  /// @see https://dom.spec.whatwg.org/#remove-suppressobservers
   struct SuppressObservers : public StronglyTypedBool<SuppressObservers>
   {
     using Base::Base;
@@ -19,8 +22,9 @@ namespace krys::boo::dom
   {
   public:
     /// @see https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity
-    KRYS_NODISCARD static ExceptionOr<void> EnsurePreInsertValidity(Node &node, ContainerNode &parent,
-                                                                    Node *refChild) noexcept;
+    KRYS_NODISCARD static ExceptionOr<void>
+      EnsurePreInsertValidity(Node &node, ContainerNode &parent, Node *child,
+                              Span<Node *const> childrenToExclude = {}) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-pre-insert
     KRYS_NODISCARD static ExceptionOr<Node &> PreInsert(Node &node, ContainerNode &parent,

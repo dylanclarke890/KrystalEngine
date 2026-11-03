@@ -19,7 +19,7 @@ namespace krys::boo
     SubstituteData() noexcept = default;
 
     /// @param responseURL The document's URL; the request's if null.
-    SubstituteData(utf8_string &&content, utf8_string &&mimeType, url::URL &&responseURL) noexcept
+    SubstituteData(utf8_string content, utf8_string mimeType, url::URL responseURL) noexcept
         : _content(krys::move(content)), _mimeType(krys::move(mimeType)),
           _responseURL(krys::move(responseURL))
     {

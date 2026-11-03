@@ -16,7 +16,7 @@ namespace krys::boo::css::tests
   }
 
   TEST_CASE("SizesAttributeParser: the first entry whose condition matches",
-            "[CSS][Parser][SizesAttributeParser]")
+            "[CSS][Parser][SizesAttributeParser][html:parse-a-sizes-attribute][html:valid-source-size-list]")
   {
     CHECK(Length(u8"") == 400);
     CHECK(Length(u8"50vw") == 200);
@@ -28,7 +28,8 @@ namespace krys::boo::css::tests
     CHECK(Length(u8"(min-width: 300px) 5em, 250px") == 80);
   }
 
-  TEST_CASE("SizesAttributeParser: invalid entries are skipped", "[CSS][Parser][SizesAttributeParser]")
+  TEST_CASE("SizesAttributeParser: invalid entries are skipped",
+            "[CSS][Parser][SizesAttributeParser][html:parse-a-sizes-attribute]")
   {
     CHECK(Length(u8"-10px, 30px") == 30);
     CHECK(Length(u8"10%, 30px") == 30);

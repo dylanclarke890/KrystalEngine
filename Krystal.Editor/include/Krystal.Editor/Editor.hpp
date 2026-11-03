@@ -4,15 +4,15 @@
   #define KRYS_ENABLE_PROFILING
 #endif
 
-#include "Krystal.Booey/DOM/CommandEvent.hpp"
-#include "Krystal.Booey/DOM/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
-#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/NavigateEvent.hpp"
 #include "Krystal.Booey/Page/Navigation.hpp"

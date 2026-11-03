@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/AddEventListenerOptions.hpp"
-#include "Krystal.Booey/DOM/Dicts/EventListenerOptions.hpp"
+#include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 

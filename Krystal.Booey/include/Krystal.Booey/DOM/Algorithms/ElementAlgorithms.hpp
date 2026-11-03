@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -12,6 +11,9 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  enum class InsertAdjacentWhere : uint8;
+  enum class ShadowRootMode : uint8;
+  enum class SlotAssignmentMode : uint8;
   class Element;
   class Attr;
   class Node;
@@ -34,7 +36,7 @@ namespace krys::boo::dom
                                        Maybe<DOMStringView> newValue) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change
-    static void ChangeAttribute(Attr &attribute, DOMString &&value) noexcept;
+    static void ChangeAttribute(Attr &attribute, DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-append
     static void AppendAttribute(Attr &attribute, Element &element) noexcept;
@@ -62,7 +64,7 @@ namespace krys::boo::dom
     static ExceptionOr<RefPtr<Attr>> SetAttribute(Attr &attr, Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-set-value
-    static void SetAttributeValue(Element &element, DOMStringAtom localName, DOMString &&value,
+    static void SetAttributeValue(Element &element, DOMStringAtom localName, DOMString value,
                                   DOMStringAtom prefix = DOMStringAtom::Null(),
                                   DOMStringAtom namespaceURI = DOMStringAtom::Null()) noexcept;
 
@@ -85,9 +87,9 @@ namespace krys::boo::dom
 
     /// @brief Helper method for creating a new DOMTokenList bound to an element and attribute, optionally
     /// with a function to filter new values to only supported values.
-    KRYS_NODISCARD static UniquePtr<DOMTokenList> CreateDOMTokenList(
-      Element &element, DOMStringAtom attributeName,
-      IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
+    KRYS_NODISCARD static UniquePtr<DOMTokenList>
+      CreateDOMTokenList(Element &element, DOMStringAtom attributeName,
+                         IsSupportedTokenFunction &&isSupportedToken = {}) noexcept;
 
   private:
     static void AddShadowRoot(Element &element, const Ref<ShadowRoot> &shadow) noexcept;

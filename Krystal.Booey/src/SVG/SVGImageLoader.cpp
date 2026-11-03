@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGImageLoader.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
 

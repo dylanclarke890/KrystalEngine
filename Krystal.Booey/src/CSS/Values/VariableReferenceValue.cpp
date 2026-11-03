@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Builder.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"

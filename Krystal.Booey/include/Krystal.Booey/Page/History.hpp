@@ -10,6 +10,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::boo::dom
+{
+  class Document;
+}
+
 namespace krys::boo::url
 {
   class URL;
@@ -104,4 +109,9 @@ namespace krys::boo
                                                           NavigationHistoryBehavior historyBehavior) noexcept;
     KRYS_NODISCARD html::SerializedScriptValue *StateInternal() const noexcept;
   };
+
+  /// @brief Whether @p document's URL may become @p targetURL without a navigation: one that differs only
+  /// in its path, query or fragment (HTTP(S)), query or fragment (`file:`), or fragment (any other scheme).
+  /// @see https://html.spec.whatwg.org/#can-have-its-url-rewritten
+  KRYS_NODISCARD bool CanHaveURLRewritten(const dom::Document &document, const url::URL &targetURL) noexcept;
 }

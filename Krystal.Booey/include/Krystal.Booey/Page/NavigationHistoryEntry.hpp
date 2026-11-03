@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/History/HistoryItem.hpp"
@@ -36,9 +36,9 @@ namespace krys::boo
     bool _hasDispatchedDisposeEvent {false};
 
   public:
-    NavigationHistoryEntry(Navigation &navigation, Ref<HistoryItem> &&historyItem, dom::USVString &&urlString,
-                           dom::DOMString &&key, RefPtr<html::SerializedScriptValue> &&state,
-                           dom::DOMString &&id) noexcept;
+    NavigationHistoryEntry(Navigation &navigation, Ref<HistoryItem> &&historyItem, dom::USVString urlString,
+                           dom::DOMString key, RefPtr<html::SerializedScriptValue> &&state,
+                           dom::DOMString id) noexcept;
     ~NavigationHistoryEntry() noexcept override;
 
     /// @brief An entry for @p historyItem.
@@ -48,7 +48,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<NavigationHistoryEntry> Create(Navigation &navigation,
                                                              const NavigationHistoryEntry &other) noexcept;
 
-    /// @brief The entry's URL; null if its document isn't fully active.
+    /// @brief The entry's URL; empty if its document isn't fully active.
     /// @see https://html.spec.whatwg.org/#dom-navigationhistoryentry-url
     KRYS_NODISCARD Maybe<dom::USVString> URL() const noexcept;
     /// @see https://html.spec.whatwg.org/#dom-navigationhistoryentry-key

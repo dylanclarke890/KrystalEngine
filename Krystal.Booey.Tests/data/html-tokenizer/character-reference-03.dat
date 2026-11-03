@@ -108,3 +108,12 @@ control character
 Character()
 #errors
 1:5 ControlCharacterReference
+
+#name
+character reference too large for 64 bits
+#data
+&#18446744073709551681;
+#tokens
+Character(�)
+#errors
+1:23 CharacterReferenceOutsideUnicodeRange

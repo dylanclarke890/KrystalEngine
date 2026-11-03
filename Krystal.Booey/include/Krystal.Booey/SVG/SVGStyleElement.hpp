@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/InlineStyleSheetOwner.hpp"
+#include "Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 
 namespace krys::boo::css
@@ -17,7 +17,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGStyleElement);
 
   private:
-    dom::InlineStyleSheetOwner _styleSheetOwner;
+    html::InlineStyleSheetOwner _styleSheetOwner;
 
   public:
     explicit SVGStyleElement(dom::Document &document) noexcept;
@@ -36,15 +36,15 @@ namespace krys::boo::svg
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
-    void Type(dom::DOMString &&value) noexcept;
+    void Type(dom::DOMString value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__media
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
-    void Media(dom::DOMString &&value) noexcept;
+    void Media(dom::DOMString value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__title
     KRYS_NODISCARD dom::DOMString Title() const noexcept;
-    void Title(dom::DOMString &&value) noexcept;
+    void Title(dom::DOMString value) noexcept;
 
     bool SheetLoaded() noexcept final
     {

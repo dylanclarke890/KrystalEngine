@@ -12,7 +12,7 @@ namespace krys::boo
   KRYS_NODISCARD List<utf8_string> UserPreferredLanguages() noexcept;
 
   /// @brief Sets the user's preferred languages (empty for the system's), and tells the observers.
-  void OverrideUserPreferredLanguages(List<utf8_string> &&languages) noexcept;
+  void OverrideUserPreferredLanguages(List<utf8_string> languages) noexcept;
 
   /// @brief The languages the host set; empty if it set none.
   KRYS_NODISCARD const List<utf8_string> &UserPreferredLanguagesOverride() noexcept;

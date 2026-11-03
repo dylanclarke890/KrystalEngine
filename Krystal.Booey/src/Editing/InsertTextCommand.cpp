@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/InsertTextCommand.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"

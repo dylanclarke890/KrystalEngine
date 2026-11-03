@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/CDATASection.hpp"
-#include "Krystal.Booey/DOM/CharacterData.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DocumentType.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Node.hpp"
-#include "Krystal.Booey/DOM/PseudoElement.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/CDATASection.hpp"
+#include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -155,20 +155,28 @@ namespace krys::boo::dom
 
   bool TreeQueries::IsHostIncludingInclusiveAncestorOf(const Node &a, const Node &b) noexcept
   {
+    // A is an inclusive ancestor of B,
     if (IsInclusiveAncestor(a, b))
     {
       return true;
     }
 
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(Root(b)))
+    // or B's root has a non-null host and A is a host-including inclusive ancestor of B's root's host.
+    // (A shadow root's host, or a template's contents' template element.)
+    if (auto *fragment = DynamicDowncast<DocumentFragment>(Root(b)))
     {
-      if (auto *host = shadowRoot->Host())
+      if (auto *host = fragment->Host())
       {
         return IsHostIncludingInclusiveAncestorOf(a, *host);
       }
     }
 
     return false;
+  }
+
+  bool TreeQueries::IsExclusiveDocumentFragmentNode(const Node &node) noexcept
+  {
+    return Is<DocumentFragment>(node) && !Is<ShadowRoot>(node);
   }
 
 #pragma endregion
@@ -515,14 +523,15 @@ namespace krys::boo::dom
 
   Node *TreeQueries::Previous(const Node &current, const Node *stayWithin) noexcept
   {
-    if (Node *previous = current.PreviousSibling())
-    {
-      return DeepLastChild(*previous);
-    }
-
+    // Nothing within stayWithin comes before it, so its previous sibling's descendants are out of bounds.
     if (&current == stayWithin)
     {
       return nullptr;
+    }
+
+    if (Node *previous = current.PreviousSibling())
+    {
+      return DeepLastChild(*previous);
     }
 
     return current.ParentNode();

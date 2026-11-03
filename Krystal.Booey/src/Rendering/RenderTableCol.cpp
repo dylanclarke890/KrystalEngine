@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTableCol.hpp"
-#include "Krystal.Booey/HTML/HTMLTableColElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableColElement.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"

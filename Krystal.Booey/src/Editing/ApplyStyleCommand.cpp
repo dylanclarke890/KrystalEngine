@@ -1,21 +1,20 @@
 ﻿#include "Krystal.Booey/Editing/ApplyStyleCommand.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/HTMLInterchange.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFontElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSpanElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFontElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSpanElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -42,11 +41,11 @@ namespace krys::boo
       }
 
       uint32 matchedAttributes = 0;
-      if (element.GetAttribute(dom::DOMStringAtom(Attributes::Class)) == dom::DOMString(AppleStyleSpanClass))
+      if (element.GetAttribute(dom::DOMStringAtom(u8"class")) == dom::DOMString(AppleStyleSpanClass))
       {
         matchedAttributes++;
       }
-      if (element.HasAttribute(dom::DOMStringAtom(Attributes::Style))
+      if (element.HasAttribute(dom::DOMStringAtom(u8"style"))
           && (shouldStyleAttributeBeEmpty == AllowNonEmptyStyleAttribute || !element.InlineStyle()
               || element.InlineStyle()->empty()))
       {
@@ -179,7 +178,7 @@ namespace krys::boo
   bool IsLegacyAppleStyleSpan(const dom::Node *node) noexcept
   {
     return IsHTMLElementOfType(node, html::TagName::span)
-           && Downcast<dom::Element>(*node).GetAttribute(dom::DOMStringAtom(Attributes::Class))
+           && Downcast<dom::Element>(*node).GetAttribute(dom::DOMStringAtom(u8"class"))
                 == dom::DOMString(AppleStyleSpanClass);
   }
 
@@ -598,12 +597,12 @@ namespace krys::boo
       {
         inlineStyle->SetProperty(PropertyId::FontSize,
                                  css::PrimitiveValue::Create(desiredFontSize, css::UnitType::px));
-        SetNodeAttribute(*element, dom::DOMStringAtom(Attributes::Style),
+        SetNodeAttribute(*element, dom::DOMStringAtom(u8"style"),
                          inlineStyle->AsText(css::DefaultSerialisationContext()));
       }
       if (inlineStyle->empty())
       {
-        RemoveNodeAttribute(*element, dom::DOMStringAtom(Attributes::Style));
+        RemoveNodeAttribute(*element, dom::DOMStringAtom(u8"style"));
         if (IsSpanWithoutAttributesOrUnstyledStyleSpan(*element))
         {
           unstyledSpans.push_back(Ref<dom::Element>(element));
@@ -749,18 +748,18 @@ namespace krys::boo
       // and all matching style rules in order to determine how to best set the unicode-bidi property to
       // 'normal'. For now, it assumes that if the 'dir' attribute is present, then removing it will suffice,
       // and otherwise it sets the property in the inline style declaration.
-      if (element->HasAttribute(dom::DOMStringAtom(Attributes::Dir)))
+      if (element->HasAttribute(dom::DOMStringAtom(u8"dir")))
       {
         // FIXME: If this is a BDO element, we should probably just remove it if it has no
         // other attributes, like we (should) do with B and I elements.
-        RemoveNodeAttribute(*element, dom::DOMStringAtom(Attributes::Dir));
+        RemoveNodeAttribute(*element, dom::DOMStringAtom(u8"dir"));
       }
       else
       {
         auto inlineStyle = CopyStyleOrCreateEmpty(element->InlineStyle());
         (void)inlineStyle->SetProperty(PropertyId::UnicodeBidi, ValueId::Normal);
         (void)inlineStyle->RemoveProperty(PropertyId::Direction);
-        SetNodeAttribute(*element, dom::DOMStringAtom(Attributes::Style),
+        SetNodeAttribute(*element, dom::DOMStringAtom(u8"style"),
                          inlineStyle->AsText(css::DefaultSerialisationContext()));
         if (IsSpanWithoutAttributesOrUnstyledStyleSpan(*element))
         {
@@ -1036,7 +1035,7 @@ namespace krys::boo
           {
             (void)inlineStyle->MergeAndOverrideOnConflict(*otherStyle);
           }
-          SetNodeAttribute(*element, dom::DOMStringAtom(Attributes::Style),
+          SetNodeAttribute(*element, dom::DOMStringAtom(u8"style"),
                            inlineStyle->AsText(css::DefaultSerialisationContext()));
           next = ShareRefPtr(TreeQueries::NextSkippingChildren(*element));
           continue;
@@ -1312,11 +1311,11 @@ namespace krys::boo
 
     if (newInlineStyle->empty())
     {
-      RemoveNodeAttribute(element, dom::DOMStringAtom(Attributes::Style));
+      RemoveNodeAttribute(element, dom::DOMStringAtom(u8"style"));
     }
     else
     {
-      SetNodeAttribute(element, dom::DOMStringAtom(Attributes::Style),
+      SetNodeAttribute(element, dom::DOMStringAtom(u8"style"),
                        newInlineStyle->AsText(css::DefaultSerialisationContext()));
     }
 
@@ -1385,7 +1384,7 @@ namespace krys::boo
     {
       if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(node))
       {
-        SetNodeAttribute(*htmlElement, dom::DOMStringAtom(Attributes::Style),
+        SetNodeAttribute(*htmlElement, dom::DOMStringAtom(u8"style"),
                          newInlineStyle->Style()->AsText(css::DefaultSerialisationContext()));
         return;
       }
@@ -1459,7 +1458,7 @@ namespace krys::boo
           for (auto &element : elementsToPushDown)
           {
             auto wrapper = CloneElementWithoutChildren(*element);
-            wrapper->RemoveAttribute(dom::DOMStringAtom(Attributes::Style));
+            wrapper->RemoveAttribute(dom::DOMStringAtom(u8"style"));
             SurroundNodeRangeWithElement(*child, *child, krys::move(wrapper));
           }
         }
@@ -1882,9 +1881,9 @@ namespace krys::boo
     // Do not check for legacy styles here. Those styles, like <B> and <I>, only apply for inline content.
     krys_debug_assert(styleChange.CssStyle());
     SetNodeAttribute(
-      block, dom::DOMStringAtom(Attributes::Style),
+      block, dom::DOMStringAtom(u8"style"),
       JoinWithSpace(styleChange.CssStyle()->AsText(css::DefaultSerialisationContext()),
-                    block.GetAttribute(dom::DOMStringAtom(Attributes::Style)).value_or(dom::DOMString())));
+                    block.GetAttribute(dom::DOMStringAtom(u8"style")).value_or(dom::DOMString())));
   }
 
   void ApplyStyleCommand::AddInlineStyleIfNeeded(EditingStyle *style, dom::Node &start, dom::Node &end,
@@ -1989,15 +1988,15 @@ namespace krys::boo
         auto fontElement = CreateFontElement(GetDocument());
         if (styleChange.ApplyFontColor())
         {
-          (void)fontElement->SetAttribute(colorAttr, dom::DOMString(styleChange.FontColor()));
+          (void)fontElement->SetAttribute(colorAttr, styleChange.FontColor());
         }
         if (styleChange.ApplyFontFace())
         {
-          (void)fontElement->SetAttribute(faceAttr, dom::DOMString(styleChange.FontFace()));
+          (void)fontElement->SetAttribute(faceAttr, styleChange.FontFace());
         }
         if (styleChange.ApplyFontSize())
         {
-          (void)fontElement->SetAttribute(sizeAttr, dom::DOMString(styleChange.FontSize()));
+          (void)fontElement->SetAttribute(sizeAttr, styleChange.FontSize());
         }
         SurroundNodeRangeWithElement(*startNode, *endNode, krys::move(fontElement));
       }
@@ -2011,19 +2010,19 @@ namespace krys::boo
         {
           auto inlineStyle = EditingStyle::Create(existingStyle);
           inlineStyle->OverrideWithStyle(*styleToMerge);
-          SetNodeAttribute(*styleContainer, dom::DOMStringAtom(Attributes::Style),
+          SetNodeAttribute(*styleContainer, dom::DOMStringAtom(u8"style"),
                            inlineStyle->Style()->AsText(css::DefaultSerialisationContext()));
         }
         else
         {
-          SetNodeAttribute(*styleContainer, dom::DOMStringAtom(Attributes::Style),
+          SetNodeAttribute(*styleContainer, dom::DOMStringAtom(u8"style"),
                            styleToMerge->AsText(css::DefaultSerialisationContext()));
         }
       }
       else
       {
         auto styleElement = CreateStyleSpanElement(GetDocument());
-        (void)styleElement->SetAttribute(dom::DOMStringAtom(Attributes::Style),
+        (void)styleElement->SetAttribute(dom::DOMStringAtom(u8"style"),
                                          styleToMerge->AsText(css::DefaultSerialisationContext()));
         SurroundNodeRangeWithElement(*startNode, *endNode, krys::move(styleElement));
       }

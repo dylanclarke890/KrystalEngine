@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/MatchResultCache.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

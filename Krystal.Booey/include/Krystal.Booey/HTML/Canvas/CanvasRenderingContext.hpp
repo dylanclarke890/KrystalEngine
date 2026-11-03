@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/CanvasBase.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasBase.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"

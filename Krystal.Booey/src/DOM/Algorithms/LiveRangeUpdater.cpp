@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/CharacterData.hpp"
-#include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include <cassert>
 
 namespace krys::boo::dom
@@ -32,9 +32,12 @@ namespace krys::boo::dom
 
   void LiveRangeUpdater::PreRemove(const Node &node) noexcept
   {
+    // 1. Let parent be node's parent.
     auto *parent = node.ParentNode();
-    assert(parent != nullptr);
+    // 2. Assert: parent is non-null.
+    krys_debug_assert(parent != nullptr);
 
+    // 3. Let index be node's index.
     auto index = TreeQueries::Index(node);
 
     for (auto &range : node.NodeDocument().LiveRanges())
@@ -45,27 +48,29 @@ namespace krys::boo::dom
       auto originalStartOffset = range->StartOffset();
       auto originalEndOffset = range->EndOffset();
 
-      if (auto *startContainer = DynamicDowncast<ContainerNode>(*originalStartContainer))
+      // 4. For each live range whose start node is an inclusive descendant of node, set its start to (parent,
+      //    index).
+      if (TreeQueries::IsInclusiveDescendant(*originalStartContainer, node))
       {
-        if (TreeQueries::IsInclusiveDescendant(*startContainer, node))
-        {
-          range->_start = BoundaryPoint {ShareRef(*parent), index};
-        }
+        range->_start = BoundaryPoint {ShareRef(*parent), index};
       }
 
-      if (auto *endContainer = DynamicDowncast<ContainerNode>(*originalEndContainer))
+      // 5. For each live range whose end node is an inclusive descendant of node, set its end to (parent,
+      //    index).
+      if (TreeQueries::IsInclusiveDescendant(*originalEndContainer, node))
       {
-        if (TreeQueries::IsInclusiveDescendant(*endContainer, node))
-        {
-          range->_end = BoundaryPoint {ShareRef(*parent), index};
-        }
+        range->_end = BoundaryPoint {ShareRef(*parent), index};
       }
 
+      // 6. For each live range whose start node is parent and start offset is greater than index, decrease
+      //    its start offset by 1.
       if (originalStartContainer == parent && originalStartOffset > index)
       {
         range->_start.Offset -= 1;
       }
 
+      // 7. For each live range whose end node is parent and end offset is greater than index, decrease its
+      //    end offset by 1.
       if (originalEndContainer == parent && originalEndOffset > index)
       {
         range->_end.Offset -= 1;
@@ -86,10 +91,14 @@ namespace krys::boo::dom
 
       if (originalStartContainer == &characterData)
       {
+        // 8. For each live range whose start node is node and start offset is greater than offset but less
+        //    than or equal to offset + count: set its start offset to offset.
         if (originalStartOffset > offset && originalStartOffset <= offset + count)
         {
           range->_start.Offset = offset;
         }
+        // 10. For each live range whose start node is node and start offset is greater than offset + count:
+        //     increase its start offset by data's length and decrease it by count.
         else if (originalStartOffset > offset + count)
         {
           range->_start.Offset += newDataSize;
@@ -99,10 +108,15 @@ namespace krys::boo::dom
 
       if (originalEndContainer == &characterData)
       {
+        // 9. For each live range whose end node is node and end offset is greater than offset but less than
+        // or
+        //    equal to offset + count: set its end offset to offset.
         if (originalEndOffset > offset && originalEndOffset <= offset + count)
         {
           range->_end.Offset = offset;
         }
+        // 11. For each live range whose end node is node and end offset is greater than offset + count:
+        //     increase its end offset by data's length and decrease it by count.
         else if (originalEndOffset > offset + count)
         {
           range->_end.Offset += newDataSize;
@@ -151,7 +165,7 @@ namespace krys::boo::dom
   {
     auto childIndex = TreeQueries::Index(movedBefore);
     auto *newParent = movedBefore.ParentNode();
-    assert(newParent != nullptr);
+    krys_debug_assert(newParent != nullptr);
 
     for (auto range : movedBefore.NodeDocument().LiveRanges())
     {
@@ -176,7 +190,7 @@ namespace krys::boo::dom
   void LiveRangeUpdater::InsertedBeforeNode(Node &insertedBefore, size_t nodesInserted) noexcept
   {
     auto *newParent = insertedBefore.ParentNode();
-    assert(newParent != nullptr);
+    krys_debug_assert(newParent != nullptr);
 
     auto childIndex = TreeQueries::Index(insertedBefore);
     for (auto &range : newParent->NodeDocument().LiveRanges())
@@ -211,21 +225,29 @@ namespace krys::boo::dom
       auto originalStartOffset = range->StartOffset();
       auto originalEndOffset = range->EndOffset();
 
+      // 7b. For each live range whose start node is node and start offset is greater than offset, set its
+      //     start node to newNode and decrease its start offset by offset.
       if (originalStartContainer == &original && originalStartOffset > offset)
       {
         range->_start = BoundaryPoint {ShareRef(newNode), originalStartOffset - offset};
       }
 
+      // 7c. For each live range whose end node is node and end offset is greater than offset, set its end
+      //     node to newNode and decrease its end offset by offset.
       if (originalEndContainer == &original && originalEndOffset > offset)
       {
         range->_end = BoundaryPoint {ShareRef(newNode), originalEndOffset - offset};
       }
 
+      // 7d. For each live range whose start node is parent and start offset is equal to the index of node
+      //     plus 1, increase its start offset by 1.
       if (originalStartContainer == original.ParentNode() && originalStartOffset == index + 1uz)
       {
         range->_start.Offset += 1;
       }
 
+      // 7e. For each live range whose end node is parent and end offset is equal to the index of node plus
+      //     1, increase its end offset by 1.
       if (originalEndContainer == original.ParentNode() && originalEndOffset == index + 1uz)
       {
         range->_end.Offset += 1;

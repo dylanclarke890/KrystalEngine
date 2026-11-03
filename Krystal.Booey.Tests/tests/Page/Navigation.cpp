@@ -2,10 +2,10 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"
-#include "Krystal.Booey/HTML/ErrorEvent.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Events/ErrorEvent.hpp"
 #include "Krystal.Booey/Page/History.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Location.hpp"
@@ -139,7 +139,20 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("The Navigation API's entries", "[Page][Navigation]")
+  TEST_CASE(
+    "The Navigation API's entries",
+    "[Page][Navigation][html:navigation-interface][html:dom-navigation][html:navigation-api-core]"
+    "[html:navigation-current-entry][html:has-entries-and-events-disabled]"
+    "[html:getting-the-navigation-api-entry-index]"
+    "[html:initialize-the-navigation-api-entries-for-a-new-document]"
+    "[html:update-the-navigation-api-entries-for-a-same-document-navigation]"
+    "[html:the-navigationhistoryentry-interface][html:dom-navigationhistoryentry-url]"
+    "[html:dom-navigationhistoryentry-key][html:dom-navigationhistoryentry-id]"
+    "[html:dom-navigationhistoryentry-index][html:dom-navigationhistoryentry-samedocument]"
+    "[html:dom-navigationhistoryentry-getstate][html:dom-navigation-entries]"
+    "[html:dom-navigation-currententry][html:dom-navigation-updatecurrententry]"
+    "[html:dom-navigation-cangoback][html:dom-navigation-cangoforward][html:navigation-activation-interface]"
+    "[html:the-navigationcurrententrychangeevent-interface]")
   {
     NavigationFixture fixture;
     auto *navigation = &fixture.GetNavigation();
@@ -160,8 +173,16 @@ namespace krys::boo::tests
 
     // The next document of the origin takes the entries over.
     auto keyA = entryA->Key();
+    Ref<NavigationHistoryEntry> oldEntryA = ShareRef(*entryA);
     fixture.Visit(PageB);
     navigation = &fixture.GetNavigation();
+    // An entry of a document that isn't fully active has no URL, key, ID, index or state.
+    CHECK(oldEntryA->URL() == dom::USVString());
+    CHECK(oldEntryA->Key().empty());
+    CHECK(oldEntryA->Id().empty());
+    CHECK(oldEntryA->Index() == -1);
+    CHECK_FALSE(oldEntryA->SameDocument());
+    CHECK_FALSE(oldEntryA->GetState());
     REQUIRE(navigation->Entries().size() == 2);
     CHECK(navigation->Entries()[0]->Key() == keyA);
     CHECK_FALSE(navigation->Entries()[0]->SameDocument());
@@ -204,7 +225,11 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("navigate fires for each navigation, and can cancel it", "[Page][Navigation]")
+  TEST_CASE("navigate fires for each navigation, and can cancel it",
+            "[Page][Navigation][html:navigation-api-initiating-navigations][html:dom-navigation-reload]"
+            "[html:navigate-event-firing][html:fire-a-push/replace/reload-navigate-event]"
+            "[html:inner-navigate-event-firing-algorithm][html:dom-navigateevent-navigationtype]"
+            "[html:abort-the-ongoing-navigation]")
   {
     NavigationFixture fixture;
     RefPtr<dom::Document> document = ShareRefPtr(&fixture.Document());
@@ -250,7 +275,14 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Intercepted navigations commit without a load", "[Page][Navigation]")
+  TEST_CASE("Intercepted navigations commit without a load",
+            "[Page][Navigation][html:the-navigateevent-interface][html:dom-navigateevent-intercept]"
+            "[html:navigateevent-perform-shared-checks][html:ongoing-navigation-tracking]"
+            "[html:dom-navigation-transition][html:dom-navigationtransition-navigationtype]"
+            "[html:dom-navigationtransition-from][html:dom-navigationtransition-to]"
+            "[html:dom-navigationtransition-committed][html:dom-navigationtransition-finished]"
+            "[html:navigateevent-finish][html:potentially-reset-the-focus]"
+            "[html:inner-navigate-event-firing-algorithm][html:the-navigationdestination-interface]")
   {
     NavigationFixture fixture;
     RefPtr<dom::Document> document = ShareRefPtr(&fixture.Document());
@@ -275,6 +307,10 @@ namespace krys::boo::tests
     auto &navigation = fixture.GetNavigation();
     REQUIRE(navigation.Transition());
     CHECK(navigation.Transition()->From().URL() == PageA);
+    CHECK(navigation.Transition()->To().URL().String() == u8"https://example.com/view");
+    CHECK(navigation.Transition()->NavigationType() == NavigationNavigationType::Push);
+    CHECK(navigation.Transition()->Committed().GetStatus() == NavigationPromise::Status::Fulfilled);
+    CHECK(navigation.Transition()->Finished().GetStatus() == NavigationPromise::Status::Pending);
     CHECK(NameOf(navigation.CurrentEntry()->GetState()) == "state");
     CHECK(fixture.Log
           == List<std::string> {"navigate push https://example.com/view interceptable cancelable",
@@ -313,7 +349,49 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Traversing to another document", "[Page][Navigation]")
+  TEST_CASE("The focus fixup doesn't stop a finished navigation resetting the focus",
+            "[Page][Navigation][html:update-the-rendering][html:potentially-reset-the-focus]")
+  {
+    NavigationFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/form.html",
+                             u8"<!DOCTYPE html><input id=first><input id=auto autofocus>", u8"text/html");
+    fixture.Visit(u8"https://example.com/form.html");
+    fixture.TestPage->UpdateRendering();
+    RefPtr<dom::Document> document = ShareRefPtr(&fixture.Document());
+    auto *first = Downcast<html::HTMLElement>(document->GetElementById(u8"first").get());
+    auto *autofocused = document->GetElementById(u8"auto").get();
+
+    Func<void(dom::ExceptionOr<void>)> finish;
+    fixture.OnNavigate = [&](NavigateEvent &event)
+    {
+      NavigateEvent::NavigationInterceptOptions options;
+      options.Handler = [&](Func<void(dom::ExceptionOr<void>)> &&completion)
+      {
+        finish = krys::move(completion);
+      };
+      REQUIRE_FALSE(event.Intercept(*document, krys::move(options)).HasException());
+    };
+    (void)fixture.GetNavigation().Navigate(u8"#next");
+    fixture.Run();
+    REQUIRE(finish);
+
+    // The focus moves while the navigation is ongoing, then the fixup takes it back to the viewport.
+    first->Focus();
+    REQUIRE(document->FocusedElement() == first);
+    REQUIRE_FALSE(first->SetAttribute(dom::DOMStringAtom(u8"disabled"), dom::DOMString()).HasException());
+    fixture.TestPage->UpdateRendering();
+    REQUIRE(document->FocusedElement() == nullptr);
+
+    // So the navigation's finish resets the focus.
+    finish({});
+    fixture.Run();
+    CHECK(document->FocusedElement() == autofocused);
+  }
+
+  TEST_CASE(
+    "Traversing to another document",
+    "[Page][Navigation][html:fire-a-traverse-navigate-event][html:performing-a-navigation-api-traversal]"
+    "[html:dom-navigation-back][html:update-the-navigation-api-entries-for-reactivation]")
   {
     bool cached = GENERATE(true, false);
     BackForwardCache::Singleton().SetMaxSize(cached ? 1 : 0);
@@ -353,7 +431,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("A file's navigations can be intercepted when only its query or fragment changes",
-            "[Page][Navigation]")
+            "[Page][Navigation][html:can-have-its-url-rewritten][html:dom-navigation-navigate]")
   {
     NavigationFixture fixture;
     fixture.Strategy.AddText(u8"file:///pages/index.html", u8"<!DOCTYPE html><p>File", u8"text/html");
@@ -370,7 +448,27 @@ namespace krys::boo::tests
     CHECK(canIntercept == List<bool> {true, false});
   }
 
-  TEST_CASE("The Navigation API's methods' errors", "[Page][Navigation]")
+  TEST_CASE("A navigation can be intercepted only to a URL the document's could be rewritten to",
+            "[Page][Navigation][html:can-have-its-url-rewritten]")
+  {
+    NavigationFixture fixture;
+    List<bool> canIntercept;
+    fixture.OnNavigate = [&](NavigateEvent &event)
+    {
+      canIntercept.push_back(event.CanIntercept());
+      event.PreventDefault();
+    };
+    (void)fixture.GetNavigation().Navigate(u8"/other/page.html?q");
+    (void)fixture.GetNavigation().Navigate(u8"https://user@example.com/a.html");
+    (void)fixture.GetNavigation().Navigate(u8"https://example.com:8080/a.html");
+    fixture.Run();
+    CHECK(canIntercept == List<bool> {true, false, false});
+  }
+
+  TEST_CASE("The Navigation API's methods' errors",
+            "[Page][Navigation][html:dom-navigation-navigate][html:navigation-api-early-error-result]"
+            "[html:dom-navigation-traverseto][html:dom-navigation-back][html:dom-navigation-forward]"
+            "[html:performing-a-navigation-api-traversal]")
   {
     NavigationFixture fixture;
     auto &navigation = fixture.GetNavigation();

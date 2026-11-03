@@ -2,13 +2,13 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 
 namespace krys::boo::html::tests
@@ -101,7 +101,7 @@ namespace krys::boo::html::tests
 
     void Parse(utf8_string &&markup) noexcept
     {
-      auto parser = CreateRef<HTMLDocumentParser>(*Document);
+      auto parser = CreateRef<DocumentParser>(*Document);
       parser->InputStream().Append(u8"<!DOCTYPE html><body>" + krys::move(markup), IsEOF(true));
       (void)parser->PumpTokenizer();
     }

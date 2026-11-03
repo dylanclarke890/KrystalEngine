@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DOMRectReadOnly.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/Page/ResizeObserver.hpp"

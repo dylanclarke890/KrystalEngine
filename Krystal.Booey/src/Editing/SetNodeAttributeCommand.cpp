@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Editing/SetNodeAttributeCommand.hpp"
-#include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 
@@ -16,7 +16,7 @@ namespace krys::boo
     {
       if (value)
       {
-        (void)element.SetAttribute(attribute, dom::DOMString(*value));
+        (void)element.SetAttribute(attribute, *value);
       }
       else
       {

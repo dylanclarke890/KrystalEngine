@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 

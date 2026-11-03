@@ -121,15 +121,15 @@ namespace krys::boo::tests
       CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(1.5, {})})) == dom::ExceptionCode::TypeError);
       CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(nullptr, {}, u8"bounce")}))
             == dom::ExceptionCode::TypeError);
-      CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(dom::DOMString(u8"lemon"), {})}))
+      CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(u8"lemon", {})}))
             == dom::ExceptionCode::TypeError);
     }
 
     SECTION("string offsets")
     {
       auto effect = Valid(fixture.Effect(List<InputKeyframe> {
-        Keyframe(dom::DOMString(u8"0.5"), {{u8"opacity", u8"0"}}),
-        Keyframe(dom::DOMString(u8"cover 20%"), {{u8"opacity", u8"1"}}),
+        Keyframe(u8"0.5", {{u8"opacity", u8"0"}}),
+        Keyframe(u8"cover 20%", {{u8"opacity", u8"1"}}),
       }));
       auto keyframes = effect->GetKeyframes();
       REQUIRE(keyframes.size() == 2);

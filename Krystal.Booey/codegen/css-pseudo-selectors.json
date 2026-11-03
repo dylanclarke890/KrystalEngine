@@ -24,16 +24,20 @@
                 "Mutually exclusive with the user-agent-part field."
             ],
             "user-agent-sheet-only": [
-                "For pseudo-elements only. Whether the pseudo-element is parsed only in user agent style sheets.",
-                "For the internal parts of user agent shadow trees, which pages can't style."
+                "Whether the pseudo is parsed only in user agent style sheets.",
+                "For the internal parts of user agent shadow trees, which pages can't style, and internal pseudo-classes."
             ]
         },
         "notes": [
             "Only standard pseudo-classes and pseudo-elements are listed; prefixed, non-standard and legacy alias names are not supported.",
-            "The exceptions are the internal user agent parts, which only user agent style sheets can name."
+            "The exceptions are the internal user agent parts and pseudo-classes, which only user agent style sheets can name."
         ]
     },
     "pseudo-classes": {
+        "-internal-html-document": {
+            "comment": "Matches elements in HTML documents, for the user agent rules that apply only there.",
+            "user-agent-sheet-only": true
+        },
         "active": {},
         "active-view-transition": {
         },

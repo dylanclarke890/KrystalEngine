@@ -9,7 +9,7 @@
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include <algorithm>
 #include <iterator>
 

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Loader/HistoryController.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
@@ -408,7 +408,7 @@ namespace krys::boo
     _previousItem = std::exchange(_currentItem, RefPtr<HistoryItem>(krys::move(item)));
   }
 
-  void HistoryController::SetCurrentItemTitle(dom::DOMString &&title) noexcept
+  void HistoryController::SetCurrentItemTitle(dom::DOMString title) noexcept
   {
     if (RefPtr<HistoryItem> currentItem = _currentItem)
     {

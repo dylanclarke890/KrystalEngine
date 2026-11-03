@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/CharacterRange.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
@@ -105,8 +105,8 @@ namespace krys::boo
 
     void AppendToString(utf8_string &builder) const noexcept;
     void Reset() noexcept;
-    void Set(utf8_string &&string) noexcept;
-    void Set(utf8_string &&string, uint32 offset, uint32 length) noexcept;
+    void Set(utf8_string string) noexcept;
+    void Set(utf8_string string, uint32 offset, uint32 length) noexcept;
     void Set(char32 singleCharacter) noexcept;
   };
 

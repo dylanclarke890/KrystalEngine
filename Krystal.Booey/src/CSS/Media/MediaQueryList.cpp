@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
@@ -84,12 +84,11 @@ namespace krys::boo::css
     krys_debug_assert(eventMode == MediaQueryMatcher::EventMode::DispatchNow);
 
     // https://drafts.csswg.org/cssom-view/#evaluate-media-queries-and-report-changes
+    MediaQueryListEventInit attributes;
+    attributes.Media = Media();
+    attributes.Matches = Matches();
     dom::EventDispatcher::FireEvent<MediaQueryListEvent>(CSSOMStringAtom(EventNames::Change), *this,
-                                                         [&](MediaQueryListEvent &event)
-                                                         {
-                                                           event._media = Media();
-                                                           event._matches = Matches();
-                                                         });
+                                                         attributes);
     _needsNotification = false;
   }
 

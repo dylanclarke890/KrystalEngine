@@ -1,0 +1,83 @@
+#data
+<script type="data"></scrip/></script>
+#errors
+#document
+| <html>
+|   <head>
+|     <script>
+|       type="data"
+|       "</scrip/>"
+|   <body>
+
+#data
+<script type="data"></scrip ></script>
+#errors
+#document
+| <html>
+|   <head>
+|     <script>
+|       type="data"
+|       "</scrip >"
+|   <body>
+
+#data
+<script type="data"><!--</scrip </script>
+#errors
+#document
+| <html>
+|   <head>
+|     <script>
+|       type="data"
+|       "<!--</scrip "
+|   <body>
+
+#data
+<script type="data"><!--</scrip/</script>
+#errors
+#document
+| <html>
+|   <head>
+|     <script>
+|       type="data"
+|       "<!--</scrip/"
+|   <body>
+
+#data
+<title></tit ></title>
+#errors
+#document
+| <html>
+|   <head>
+|     <title>
+|       "</tit >"
+|   <body>
+
+#data
+<title></tit/></title>
+#errors
+#document
+| <html>
+|   <head>
+|     <title>
+|       "</tit/>"
+|   <body>
+
+#data
+<style></sty ></style>
+#errors
+#document
+| <html>
+|   <head>
+|     <style>
+|       "</sty >"
+|   <body>
+
+#data
+<style></sty/></style>
+#errors
+#document
+| <html>
+|   <head>
+|     <style>
+|       "</sty/>"
+|   <body>

@@ -1,30 +1,33 @@
 ﻿#include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include <string>
 
 namespace krys::boo::html::mixins
 {
+  // https://html.spec.whatwg.org/#dom-tabindex
   int32 HTMLOrSVGOrMathMLElement::TabIndex(const dom::Element &element) noexcept
   {
-    // Let attribute be this's tabindex attribute. If attribute is not null, and its value parses as an
-    // integer within the long range, return it.
+    // 1. Let attribute be this's tabindex attribute.
+    // 2. If attribute is not null:
+    // 2.1. Let parsedValue be the result of integer parsing attribute's value.
+    // 2.2. If parsedValue is not an error and is within the long range, then return parsedValue.
     if (auto value = FocusAlgorithms::TabIndexValue(element))
     {
       return *value;
     }
 
-    // Return 0 if this is an a, area, button, frame, iframe, input, object, select, textarea, or SVG a
-    // element, or MathML a element, or is a summary element that is a summary for its parent details;
-    // otherwise −1.
+    // 3. Return 0 if this is an a, area, button, frame, iframe, input, object, select, textarea, or SVG a
+    //    element, or MathML a element, or is a summary element that is a summary for its parent details;
+    //    otherwise −1.
     auto localName = element.LocalName().View();
     auto namespaceURI = element.NamespaceURI().View();
     if (Is<HTMLElement>(element))
@@ -81,16 +84,20 @@ namespace krys::boo::html::mixins
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-focus
   void HTMLOrSVGOrMathMLElement::Focus(dom::Element &element, const dom::FocusOptions &options) noexcept
   {
-    // FIXME: The allow focus steps (the focus-without-user-activation feature and transient activation), once
-    // there are permissions policies and user activation; until then focus is always allowed.
+    // 1. If the allow focus steps given this's node document return false, then return.
+    // https://html.spec.whatwg.org/#allow-focus-steps
+    // (The "focus-without-user-activation" feature's default allowlist is *, and without frames or
+    // permissions policies every document is allowed to use it, so focus is always allowed.)
 
     // Focusability depends on style.
     element.NodeDocument().UpdateStyleIfNeeded();
 
-    // Whether to indicate focus: as the options say, or (by the engine's heuristic) unless the user's latest
-    // focus change was a click.
+    // 3. If options["focusVisible"] is true, or does not exist but in an implementation-defined way the user
+    //    agent determines it would be best to do so, then indicate focus.
+    // (The heuristic indicates it unless the user's latest focus change was a click.)
     auto withVisibility = options;
     withVisibility.Trigger = dom::FocusTrigger::Bindings;
     if (options.FocusVisible)
@@ -107,9 +114,16 @@ namespace krys::boo::html::mixins
       withVisibility.Visibility = dom::FocusVisibility::Visible;
     }
 
+    // 2. Run the focusing steps for this.
+    RefPtr<dom::Element> previouslyFocused = ShareRefPtr(element.NodeDocument().FocusedElement());
     FocusAlgorithms::FocusingSteps(element, nullptr, withVisibility);
 
-    if (RefPtr<dom::Element> focused = ShareRefPtr(element.NodeDocument().FocusedElement()))
+    // 4. If options["preventScroll"] is false, then scroll a target into view given this, "auto", "center",
+    //    and "center".
+    // (What got the focus is shown focused: scrolled into view, or with its contents selected. That's this
+    // or its focus delegate; nothing is shown if this couldn't be focused.)
+    if (RefPtr<dom::Element> focused = ShareRefPtr(element.NodeDocument().FocusedElement());
+        focused && (focused == &element || focused != previouslyFocused))
     {
       focused->FindTargetAndUpdateFocusAppearance(options.SelectionRestoration,
                                                   options.PreventScroll ? SelectionRevealMode::DoNotReveal
@@ -117,6 +131,8 @@ namespace krys::boo::html::mixins
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-blur
+  // The user agent should run the unfocusing steps given this.
   void HTMLOrSVGOrMathMLElement::Blur(dom::Element &element) noexcept
   {
     FocusAlgorithms::UnfocusingSteps(element);

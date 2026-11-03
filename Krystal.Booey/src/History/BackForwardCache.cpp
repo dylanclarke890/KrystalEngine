@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/History/BackForwardCache.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/History/CachedPage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"

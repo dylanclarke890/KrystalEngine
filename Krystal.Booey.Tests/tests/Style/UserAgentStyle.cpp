@@ -1,12 +1,14 @@
 ﻿#include "Krystal.Booey/Style/UserAgentStyle.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -179,5 +181,34 @@ namespace krys::boo::style::tests
       RequireFullyParsed(css::ViewTransitionsUserAgentStyleSheet, UserAgentStyle::ViewTransitionsStyleSheet);
       REQUIRE(Resolver::UserAgentKeyframes().contains(css::CSSOMStringAtom(u8"-ua-view-transition-fade-in")));
     }
+  }
+
+  TEST_CASE("UserAgentStyle: a form that's a child of a table part isn't rendered",
+            "[Style][UserAgentStyle][html:tables-2]")
+  {
+    ResolverFixture fixture(
+      u8"<!DOCTYPE html><table><form id=a></form><tr><td><form id=b></form></td></tr></table>", WithView::No);
+    auto &tableForm = fixture.ById(u8"a");
+    REQUIRE(tableForm.ParentElement()->LocalName() == u8"table");
+    CHECK(fixture.Resolve(tableForm).Style->Display() == DisplayType::None);
+    CHECK(fixture.Resolve(fixture.ById(u8"b")).Style->Display() == DisplayType::Block);
+
+    // Only in HTML documents: an XML document's tables can hold forms.
+    auto document = CreateRef<dom::XMLDocument>();
+    auto table =
+      document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom(u8"table"))
+        .ReleaseValue();
+    auto form =
+      document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom(u8"form"))
+        .ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*table).HasException());
+    REQUIRE_FALSE(table->AppendChild(*form).HasException());
+    auto &resolver = document->StyleScope().GetResolver();
+    auto tableStyle = resolver.StyleForElement(*table, {document->InitialContainingBlockStyle()}).Style;
+    auto formStyle =
+      resolver
+        .StyleForElement(*form, {.ParentStyle = tableStyle.get(), .DocumentElementStyle = tableStyle.get()})
+        .Style;
+    CHECK(formStyle->Display() == DisplayType::Block);
   }
 }

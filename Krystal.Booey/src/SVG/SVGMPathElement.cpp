@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/SVGMPathElement.hpp"
-#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGAnimateMotionElement.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"

@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/SVG/SVGAElement.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
-#include "Krystal.Booey/DOM/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
-#include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
@@ -159,7 +159,7 @@ namespace krys::boo::svg
     }
 
     Ref<dom::Document> document = ShareRef(NodeDocument());
-    auto completedURL = document->CompleteURL(utf8_string(url));
+    auto completedURL = document->CompleteURL(url);
 
     auto target = Target();
     if (target.View().empty()

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderImage.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
@@ -7,9 +7,9 @@
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/ImagePaintingOptions.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/HTMLMapElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/Rendering/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
@@ -592,6 +592,7 @@ namespace krys::boo
           auto &fontMetrics = fontCascade.MetricsOfPrimaryFont();
           auto isHorizontal = GetWritingMode().IsHorizontal();
           // FIXME: The display string modified by the document's encoding.
+          // FIXME: With dir=auto, the directionality of the alt attribute: its first strong character's.
           auto textRun = RenderBlock::ConstructTextRun(
             _altText, style, ExpansionBehavior::DefaultBehavior(),
             {TextRunFlag::RespectDirection, TextRunFlag::RespectDirectionOverride});

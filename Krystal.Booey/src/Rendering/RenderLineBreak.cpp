@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
-#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/HTML/HTMLWBRElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 

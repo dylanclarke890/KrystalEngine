@@ -1,18 +1,18 @@
 ﻿#include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/CharacterData.hpp"
-#include "Krystal.Booey/DOM/ClipboardEvent.hpp"
-#include "Krystal.Booey/DOM/CompositionEvent.hpp"
-#include "Krystal.Booey/DOM/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/InputEvent.hpp"
-#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/DOM/TextEvent.hpp"
+#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/Events/ClipboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/CompositionEvent.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/InputEvent.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/DeleteSelectionCommand.hpp"
@@ -29,12 +29,12 @@
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/HTMLObjectElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLEmbedElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLObjectElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
@@ -1125,7 +1125,7 @@ namespace krys::boo
         return;
       }
 
-      (void)element->SetAttribute(dom::DOMStringAtom(u8"dir"), dom::DOMString(directionValue));
+      (void)element->SetAttribute(dom::DOMStringAtom(u8"dir"), directionValue);
       DispatchInputEvent(*element, writingDirectionInputTypeName, dom::IsInputMethodComposing::No,
                          dom::DOMString(directionValue));
       (void)_document.UpdateStyleIfNeeded();

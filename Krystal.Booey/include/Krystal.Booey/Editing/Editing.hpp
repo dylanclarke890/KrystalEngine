@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/WritingMode.hpp"
-#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/HTML/Enums/TagName.hpp"
+#include "Krystal.Booey/HTML/Types/TagName.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
@@ -228,7 +228,7 @@ namespace krys::boo
   KRYS_NODISCARD Ref<dom::Element> CreateDefaultParagraphElement(dom::Document &document) noexcept;
   KRYS_NODISCARD Ref<dom::Element> CreateTabSpanElement(dom::Document &document) noexcept;
   KRYS_NODISCARD Ref<dom::Element> CreateTabSpanElement(dom::Document &document,
-                                                        utf8_string &&tabText) noexcept;
+                                                        utf8_string tabText) noexcept;
   /// @brief A copy of @p element, with its attributes, without its children.
   KRYS_NODISCARD Ref<dom::Element> CloneElementWithoutChildren(dom::Element &element) noexcept;
   /// @brief Gives @p target the attributes of @p source.

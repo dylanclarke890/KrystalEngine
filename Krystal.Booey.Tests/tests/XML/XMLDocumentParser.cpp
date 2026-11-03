@@ -1,21 +1,21 @@
-﻿#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+﻿#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/CDATASection.hpp"
-#include "Krystal.Booey/DOM/Comment.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/DocumentType.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/DOM/XHTMLDocument.hpp"
-#include "Krystal.Booey/DOM/XMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/CDATASection.hpp"
+#include "Krystal.Booey/DOM/Nodes/Comment.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/XHTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
@@ -82,7 +82,8 @@ namespace krys::boo::tests
     CHECK(Downcast<dom::CDATASection>(*desc->LastChild()).Data() == u8" <raw> ");
   }
 
-  TEST_CASE("An XML document keeps its declaration and doctype", "[XML][XMLDocumentParser]")
+  TEST_CASE("An XML document keeps its declaration and doctype",
+            "[XML][XMLDocumentParser][html:parsing-xhtml-documents]")
   {
     LoadFixture fixture;
     LoadDocument(fixture,
@@ -151,7 +152,8 @@ namespace krys::boo::tests
     CHECK(IsSVG<svg::SVGSvgElement>(Downcast<dom::Element>(*body->LastChild())));
   }
 
-  TEST_CASE("An XHTML document has HTML elements and HTML's named entities", "[XML][XMLDocumentParser]")
+  TEST_CASE("An XHTML document has HTML elements and HTML's named entities",
+            "[XML][XMLDocumentParser][html:parsing-xhtml-documents]")
   {
     LoadFixture fixture;
     LoadDocument(
@@ -169,7 +171,8 @@ namespace krys::boo::tests
     CHECK(paragraph->TextContent() == u8"a b&c");
   }
 
-  TEST_CASE("An undefined entity in an XML document is an error", "[XML][XMLDocumentParser]")
+  TEST_CASE("An undefined entity in an XML document is an error",
+            "[XML][XMLDocumentParser][html:parsing-xhtml-documents]")
   {
     LoadFixture fixture;
     LoadDocument(fixture, u8"<root>a&nbsp;b</root>", u8"application/xml");
@@ -256,17 +259,5 @@ namespace krys::boo::tests
     REQUIRE(IsSVG<svg::SVGSvgElement>(*root));
     auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(*root));
     CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 10, 5));
-  }
-
-  TEST_CASE("Processing instructions' pseudo-attributes are parsed as XML attributes",
-            "[XML][XMLDocumentParser]")
-  {
-    auto attributes = xml::ParseAttributes(u8"href=\"a.css\" type='text/css' x:y=\"z\"");
-    REQUIRE(attributes);
-    CHECK(attributes->at(u8"href") == u8"a.css");
-    CHECK(attributes->at(u8"type") == u8"text/css");
-    CHECK(attributes->size() == 3);
-
-    CHECK_FALSE(xml::ParseAttributes(u8"href=unquoted"));
   }
 }

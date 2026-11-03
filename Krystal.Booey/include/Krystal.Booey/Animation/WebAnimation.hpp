@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Animation/TimelineRangeValue.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTime.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
@@ -153,7 +153,7 @@ namespace krys::boo
     {
       return _id;
     }
-    void SetId(dom::DOMString &&id) noexcept;
+    void SetId(dom::DOMString id) noexcept;
 
     KRYS_NODISCARD AnimationEffect *BindingsEffect() const noexcept
     {

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/MoveSelectionCommand.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/DeleteSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/ReplaceSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/NavigationCurrentEntryChangeEvent.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 
 namespace krys::boo
 {

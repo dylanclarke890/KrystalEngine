@@ -11,7 +11,7 @@ namespace krys::boo::html
   /// @brief An element name in a sanitizer configuration. A string is an element in the HTML namespace.
   /// @note The IDL's `(DOMString or SanitizerElementNamespace)` is this dictionary, made from a string as
   /// canonicalizing one would.
-  /// @see https://html.spec.whatwg.org/#dictdef-sanitizerelementnamespace
+  /// @see https://html.spec.whatwg.org/#sanitizerelementnamespace
   struct SanitizerElementNamespace
   {
     dom::DOMString Name;
@@ -36,7 +36,7 @@ namespace krys::boo::html
   };
 
   /// @brief An attribute name in a sanitizer configuration. A string is an attribute in no namespace.
-  /// @see https://html.spec.whatwg.org/#dictdef-sanitizerattributenamespace
+  /// @see https://html.spec.whatwg.org/#sanitizerattributenamespace
   struct SanitizerAttributeNamespace
   {
     dom::DOMString Name;
@@ -58,7 +58,7 @@ namespace krys::boo::html
   };
 
   /// @brief An element allowed by a sanitizer configuration, with the attributes allowed or removed on it.
-  /// @see https://html.spec.whatwg.org/#dictdef-sanitizerelementnamespacewithattributes
+  /// @see https://html.spec.whatwg.org/#sanitizerelementnamespacewithattributes
   struct SanitizerElementNamespaceWithAttributes : SanitizerElementNamespace
   {
     Maybe<List<SanitizerAttributeNamespace>> Attributes;
@@ -80,7 +80,7 @@ namespace krys::boo::html
   };
 
   /// @brief A processing instruction target in a sanitizer configuration.
-  /// @see https://html.spec.whatwg.org/#dictdef-sanitizerprocessinginstruction
+  /// @see https://html.spec.whatwg.org/#sanitizerprocessinginstruction
   struct SanitizerProcessingInstruction
   {
     dom::DOMString Target;
@@ -98,7 +98,7 @@ namespace krys::boo::html
 
   /// @brief Which elements, attributes, comments and processing instructions sanitizing keeps. A member that
   /// isn't given is null.
-  /// @see https://html.spec.whatwg.org/#dictdef-sanitizerconfig
+  /// @see https://html.spec.whatwg.org/#sanitizerconfig
   struct SanitizerConfig
   {
     Maybe<List<SanitizerElementNamespaceWithAttributes>> Elements;
@@ -113,7 +113,7 @@ namespace krys::boo::html
     Maybe<bool> JavascriptURLs;
   };
 
-  /// @see https://html.spec.whatwg.org/#enumdef-sanitizerpresets
+  /// @see https://html.spec.whatwg.org/#sanitizerpresets
   enum class SanitizerPresets : uint8
   {
     Default,

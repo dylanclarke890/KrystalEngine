@@ -6,7 +6,7 @@
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Media/MediaList.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

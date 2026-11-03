@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 
 namespace krys::boo::html

@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesEvaluateCalc.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/FontSizeFunctions.hpp"

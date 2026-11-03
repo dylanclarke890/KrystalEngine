@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/AttributeChangeInvalidation.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Style/InvalidationFunctions.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 

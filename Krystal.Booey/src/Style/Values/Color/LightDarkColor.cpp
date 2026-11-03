@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Color/LightDarkColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/LightDarkColor.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 

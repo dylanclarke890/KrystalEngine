@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Loader/FormSubmission.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/HTML/DOMFormData.hpp"
-#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
+#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Platform/Network/FormData.hpp"
@@ -227,7 +227,7 @@ namespace krys::boo
       }
       else
       {
-        formData = FormData::Create(*entryList, attributes.GetMethod() == Method::Get
+        formData = FormData::Create(*entryList, copiedAttributes.GetMethod() == Method::Get
                                                   ? FormData::EncodingType::FormURLEncoded
                                                   : FormData::ParseEncodingType(encodingType));
         if (copiedAttributes.GetMethod() == Method::Post && isMailtoForm)

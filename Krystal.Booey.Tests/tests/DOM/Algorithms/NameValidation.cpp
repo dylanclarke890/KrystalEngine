@@ -3,7 +3,13 @@
 
 namespace krys::boo::dom::tests
 {
-  TEST_CASE("NameValidation::IsValidNamespacePrefix", "[HTML][NameValidation]")
+  namespace
+  {
+    constexpr DOMStringView XHTML_NS = u8"http://www.w3.org/1999/xhtml";
+  }
+
+  TEST_CASE("Valid namespace prefix: non-empty, without ASCII whitespace, NULL, '/' or '>'",
+            "[HTML][NameValidation][dom:valid-namespace-prefix]")
   {
     SECTION("Empty string is invalid")
     {
@@ -38,7 +44,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("NameValidation::IsValidAttributeLocalName", "[HTML][NameValidation]")
+  TEST_CASE("Valid attribute local name: non-empty, without ASCII whitespace, NULL, '/', '=' or '>'",
+            "[HTML][NameValidation][dom:valid-attribute-local-name]")
   {
     SECTION("Empty string is invalid")
     {
@@ -78,7 +85,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("NameValidation::IsValidElementLocalName", "[HTML][NameValidation]")
+  TEST_CASE("Valid element local name: an ASCII alpha start is lenient, others follow the name production",
+            "[HTML][NameValidation][dom:valid-element-local-name]")
   {
     SECTION("Empty string is invalid")
     {
@@ -154,9 +162,28 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(NameValidation::IsValidElementLocalName(u8"foo/bar"));
       REQUIRE_FALSE(NameValidation::IsValidElementLocalName(u8"foo>bar"));
     }
+
+    SECTION("Code points up to U+10FFFF are allowed, first and after")
+    {
+      REQUIRE(NameValidation::IsValidElementLocalName(u8"\U0001F600"));
+      REQUIRE(NameValidation::IsValidElementLocalName(u8"_\U0001F600"));
+      REQUIRE(NameValidation::IsValidElementLocalName(u8"\U0010FFFFx"));
+    }
+
+    SECTION("Without an ASCII alpha start, other ASCII punctuation is invalid")
+    {
+      REQUIRE_FALSE(NameValidation::IsValidElementLocalName(u8"-foo"));
+      REQUIRE_FALSE(NameValidation::IsValidElementLocalName(u8"_foo!"));
+    }
+
+    SECTION("With an ASCII alpha start, other ASCII punctuation is valid")
+    {
+      REQUIRE(NameValidation::IsValidElementLocalName(u8"foo!bar"));
+    }
   }
 
-  TEST_CASE("NameValidation::IsValidDocTypeName", "[HTML][NameValidation]")
+  TEST_CASE("Valid doctype name: without ASCII whitespace, NULL or '>', and possibly empty",
+            "[HTML][NameValidation][dom:valid-doctype-name]")
   {
     SECTION("String with ASCII whitespace is invalid")
     {
@@ -186,7 +213,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("NameValidation::ValidateAndExtract", "[HTML][NameValidation]")
+  TEST_CASE("Validate and extract: splits a qualified name and checks it against its namespace",
+            "[HTML][NameValidation][dom:validate-and-extract]")
   {
     SECTION("Contains ':' and has invalid prefix")
     {
@@ -295,6 +323,56 @@ namespace krys::boo::dom::tests
       REQUIRE(result.Value().NamespaceURI().View() == u8"http://www.w3.org/2000/xmlns/");
       REQUIRE(result.Value().NamespacePrefix().View() == u8"xmlns");
       REQUIRE(result.Value().LocalName().View() == u8"foo");
+    }
+
+    SECTION("An empty namespace is null")
+    {
+      auto result = NameValidation::ValidateAndExtract(u8"", u8"foo", ValidateAndExtractContext::Element);
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result.Value().NamespaceURI() == DOMStringAtom::Null());
+      REQUIRE(result.Value().NamespacePrefix() == DOMStringAtom::Null());
+      REQUIRE(result.Value().LocalName().View() == u8"foo");
+    }
+
+    SECTION("Only the first ':' separates the prefix")
+    {
+      for (auto context : {ValidateAndExtractContext::Attribute, ValidateAndExtractContext::Element})
+      {
+        auto result = NameValidation::ValidateAndExtract(XHTML_NS, u8"a:b:c", context);
+        REQUIRE_FALSE(result.HasException());
+        REQUIRE(result.Value().NamespacePrefix().View() == u8"a");
+        REQUIRE(result.Value().LocalName().View() == u8"b:c");
+      }
+    }
+
+    SECTION("A qualified name of xmlns needs the XMLNS namespace")
+    {
+      auto result = NameValidation::ValidateAndExtract(u8"", u8"xmlns", ValidateAndExtractContext::Attribute);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::NamespaceError);
+
+      result = NameValidation::ValidateAndExtract(XHTML_NS, u8"xmlns", ValidateAndExtractContext::Element);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::NamespaceError);
+
+      result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/2000/xmlns/", u8"xmlns",
+                                                  ValidateAndExtractContext::Attribute);
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result.Value().NamespacePrefix() == DOMStringAtom::Null());
+      REQUIRE(result.Value().LocalName().View() == u8"xmlns");
+    }
+
+    SECTION("The XMLNS namespace needs a qualified name or prefix of xmlns")
+    {
+      auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/2000/xmlns/", u8"foo",
+                                                       ValidateAndExtractContext::Attribute);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::NamespaceError);
+
+      result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/2000/xmlns/", u8"bar:xmlns",
+                                                  ValidateAndExtractContext::Element);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::NamespaceError);
     }
   }
 

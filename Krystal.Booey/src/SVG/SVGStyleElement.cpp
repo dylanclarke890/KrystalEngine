@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
@@ -39,7 +39,7 @@ namespace krys::boo::svg
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::TypeAttr().LocalName());
   }
 
-  void SVGStyleElement::Type(dom::DOMString &&value) noexcept
+  void SVGStyleElement::Type(dom::DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::TypeAttr().LocalName(), krys::move(value));
   }
@@ -49,7 +49,7 @@ namespace krys::boo::svg
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::MediaAttr().LocalName());
   }
 
-  void SVGStyleElement::Media(dom::DOMString &&value) noexcept
+  void SVGStyleElement::Media(dom::DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::MediaAttr().LocalName(), krys::move(value));
   }
@@ -59,7 +59,7 @@ namespace krys::boo::svg
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::TitleAttr().LocalName());
   }
 
-  void SVGStyleElement::Title(dom::DOMString &&value) noexcept
+  void SVGStyleElement::Title(dom::DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::TitleAttr().LocalName(), krys::move(value));
   }

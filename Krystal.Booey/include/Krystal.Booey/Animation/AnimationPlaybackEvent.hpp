@@ -15,13 +15,14 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/web-animations-1/#animationplaybackevent
   class AnimationPlaybackEvent final : public AnimationEventBase
   {
-    using dictionary_type = AnimationPlaybackEventInit;
-
   private:
     Maybe<WebAnimationTime> _timelineTime;
     Maybe<WebAnimationTime> _currentTime;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = AnimationPlaybackEventInit;
+
     AnimationPlaybackEvent(dom::DOMStringAtom type, WebAnimation *animation,
                            Maybe<WebAnimationTime> scheduledTime, Maybe<WebAnimationTime> timelineTime,
                            Maybe<WebAnimationTime> currentTime) noexcept;

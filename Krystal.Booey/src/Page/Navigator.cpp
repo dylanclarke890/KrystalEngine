@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Page/Navigator.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/HTML/URLDecomposition.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
 #include "Krystal.Booey/Modules/Gamepad/Gamepad.hpp"
@@ -74,14 +74,23 @@ namespace krys::boo
     return _userAgent;
   }
 
+  // https://html.spec.whatwg.org/#dom-navigator-language
   dom::DOMString Navigator::Language() const noexcept
   {
+    // 1.-2. (There's no WebDriver BiDi emulated language.)
+    // 3. Return a valid BCP 47 language tag representing either a plausible language or the user's most
+    //    preferred language.
     auto languages = UserPreferredLanguages();
     return languages.empty() ? dom::DOMString(u8"en-US") : dom::DOMString(languages.front());
   }
 
+  // https://html.spec.whatwg.org/#dom-navigator-languages
   List<dom::DOMString> Navigator::Languages() const noexcept
   {
+    // 1.-2. (There's no WebDriver BiDi emulated language.)
+    // 3. Return a frozen array of valid BCP 47 language tags representing either one or more plausible
+    //    languages, or the user's preferred languages, ordered by preference with the most preferred language
+    //    first.
     // We intentionally expose only the primary language for privacy reasons.
     return {Language()};
   }
@@ -92,6 +101,7 @@ namespace krys::boo
     return !loaderStrategy || loaderStrategy->IsOnLine();
   }
 
+  // https://html.spec.whatwg.org/#normalize-protocol-handler-parameters
   dom::ExceptionOr<Pair<dom::DOMString, dom::DOMString>>
     Navigator::NormalizeProtocolHandlerParameters(dom::DOMStringView scheme,
                                                   utf8_stringview url) const noexcept
@@ -103,11 +113,11 @@ namespace krys::boo
       return dom::ExceptionCode::InvalidStateError;
     }
 
-    // Set scheme to scheme, converted to ASCII lowercase.
+    // 1. Set scheme to scheme, converted to ASCII lowercase.
     utf8_string normalizedScheme = text::ToASCIILower(utf8_stringview(scheme));
 
-    // If scheme is neither a safelisted scheme nor a string starting with "web+" followed by one or more
-    // ASCII lower alphas, then throw a "SecurityError" DOMException.
+    // 2. If scheme is neither a safelisted scheme nor a string starting with "web+" followed by one or more
+    //    ASCII lower alphas, then throw a "SecurityError" DOMException.
     bool isSafelisted =
       std::ranges::find(SafelistedSchemes, utf8_stringview(normalizedScheme)) != SafelistedSchemes.end();
     bool isWebScheme = normalizedScheme.starts_with(u8"web+") && normalizedScheme.size() > 4
@@ -118,42 +128,48 @@ namespace krys::boo
       return dom::ExceptionCode::SecurityError;
     }
 
-    // If url does not contain "%s", then throw a "SyntaxError" DOMException.
+    // 3. If url does not contain "%s", then throw a "SyntaxError" DOMException.
     if (url.find(u8"%s") == utf8_stringview::npos)
     {
       return dom::ExceptionCode::SyntaxError;
     }
 
-    // Let urlRecord be the result of encoding-parsing a URL given url, relative to environment; if failure,
-    // throw a "SyntaxError" DOMException.
+    // 4. Let urlRecord be the result of encoding-parsing a URL given url, relative to environment.
+    // 5. If urlRecord is failure, then throw a "SyntaxError" DOMException.
     auto urlRecord = document->CompleteURL(url);
     if (!urlRecord.IsValid())
     {
       return dom::ExceptionCode::SyntaxError;
     }
 
-    // If urlRecord's scheme is not an HTTP(S) scheme or urlRecord's origin is not same origin with
-    // environment's origin, then throw a "SecurityError" DOMException.
+    // 6. If urlRecord's scheme is not an HTTP(S) scheme or urlRecord's origin is not same origin with
+    //    environment's origin, then throw a "SecurityError" DOMException.
     if (!(urlRecord.ProtocolIs(u8"http") || urlRecord.ProtocolIs(u8"https"))
         || html::URLDecomposition::SerializedOrigin(urlRecord) != window->Origin())
     {
       return dom::ExceptionCode::SecurityError;
     }
 
-    return Pair<dom::DOMString, dom::DOMString>(dom::DOMString(normalizedScheme),
-                                                dom::DOMString(urlRecord.String()));
+    // 7. Assert: the result of Is url potentially trustworthy? given urlRecord is "Potentially Trustworthy".
+    // (Members restricted to secure contexts are available in every context, so it may not be.)
+    // 8. Return (scheme, urlRecord).
+    return Pair<dom::DOMString, dom::DOMString>(normalizedScheme, dom::DOMString(urlRecord.String()));
   }
 
+  // https://html.spec.whatwg.org/#dom-navigator-registerprotocolhandler
   dom::ExceptionOr<void> Navigator::RegisterProtocolHandler(dom::DOMStringView scheme,
                                                             utf8_stringview url) noexcept
   {
+    // 1. Let (normalizedScheme, normalizedURLString) be the result of running normalize protocol handler
+    //    parameters with scheme, url, and this's relevant settings object.
     auto normalized = NormalizeProtocolHandlerParameters(scheme, url);
     if (normalized.HasException())
     {
       return normalized.ReleaseException();
     }
 
-    // In parallel: register a protocol handler (the user agent may ignore it).
+    // 2. In parallel: register a protocol handler for normalizedScheme and normalizedURLString.
+    // (The host registers it, or ignores it, and uses it.)
     if (auto *frame = Frame(); frame && frame->GetPage())
     {
       auto &[normalizedScheme, normalizedURL] = normalized.Value();
@@ -162,9 +178,12 @@ namespace krys::boo
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-navigator-unregisterprotocolhandler
   dom::ExceptionOr<void> Navigator::UnregisterProtocolHandler(dom::DOMStringView scheme,
                                                               utf8_stringview url) noexcept
   {
+    // 1. Let (normalizedScheme, normalizedURLString) be the result of running normalize protocol handler
+    //    parameters with scheme, url, and this's relevant settings object.
     auto normalized = NormalizeProtocolHandlerParameters(scheme, url);
     if (normalized.HasException())
     {
@@ -174,6 +193,7 @@ namespace krys::boo
     if (auto *frame = Frame(); frame && frame->GetPage())
     {
       auto &[normalizedScheme, normalizedURL] = normalized.Value();
+      // 2. In parallel: unregister the handler described by normalizedScheme and normalizedURLString.
       frame->GetPage()->GetChromeClient().UnregisterProtocolHandler(normalizedScheme, normalizedURL);
     }
     return {};
@@ -197,8 +217,11 @@ namespace krys::boo
     return *_mimeTypes;
   }
 
+  // https://html.spec.whatwg.org/#dom-navigator-hardwareconcurrency
   uint64 Navigator::HardwareConcurrency() const noexcept
   {
+    // Return a number between 1 and the number of logical processors potentially available to the user agent.
+    // (4 below 8 processors, 8 from 8, to limit fingerprinting.)
     // Enforce a maximum for the number of cores reported to mitigate fingerprinting for the minority of
     // machines with large numbers of cores.
     static uint64 numberOfCores = std::thread::hardware_concurrency() < 8 ? 4 : 8;
@@ -211,6 +234,8 @@ namespace krys::boo
     return frame ? static_cast<int32>(frame->GetMediaEnvironment().MaxTouchPoints) : 0;
   }
 
+  // https://html.spec.whatwg.org/#dom-navigator-useractivation
+  // (The window's associated UserActivation is made when it's first asked for.)
   UserActivation &Navigator::GetUserActivation() const noexcept
   {
     if (!_userActivation)

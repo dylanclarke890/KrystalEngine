@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/Editing/BreakBlockquoteCommand.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include <string>
@@ -82,7 +82,7 @@ namespace krys::boo
       }
 
       auto container = CreateHTMLElement(GetDocument(), u8"div");
-      (void)container->SetAttribute(dom::DOMStringAtom(u8"dir"), dom::DOMString(u8"auto"));
+      (void)container->SetAttribute(dom::DOMStringAtom(u8"dir"), u8"auto");
       (void)container->AppendChild(*lineBreak);
       return container;
     }();

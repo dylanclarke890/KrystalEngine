@@ -70,9 +70,9 @@ namespace krys::boo::tests
       auto inner = Blob::Create(Bytes("inner"), u8"text/plain");
       List<BlobPartVariant> parts;
       parts.emplace_back(Bytes("ab"));
-      parts.emplace_back(utf8_string(u8"cd"));
+      parts.emplace_back(u8"cd");
       parts.emplace_back(RefPtr<Blob>(inner));
-      parts.emplace_back(utf8_string(u8"é"));
+      parts.emplace_back(u8"é");
       auto blob = Blob::Create(krys::move(parts), {.Type = u8"Text/Plain;Charset=UTF-8"});
       CHECK(Text(*blob) == "abcdinner\xC3\xA9");
       CHECK(blob->Size() == 11);
@@ -93,14 +93,14 @@ namespace krys::boo::tests
     SECTION("Native line endings")
     {
       List<BlobPartVariant> parts;
-      parts.emplace_back(utf8_string(u8"a\nb\r\nc\rd"));
+      parts.emplace_back(u8"a\nb\r\nc\rd");
       parts.emplace_back(Bytes("e\nf"));
       auto blob = Blob::Create(krys::move(parts), {.Endings = EndingType::Native});
       // On Windows, CRLF; bytes are left alone.
       CHECK(Text(*blob) == "a\r\nb\r\nc\r\nde\nf");
 
       List<BlobPartVariant> transparent;
-      transparent.emplace_back(utf8_string(u8"a\nb"));
+      transparent.emplace_back(u8"a\nb");
       CHECK(Text(*Blob::Create(krys::move(transparent), {})) == "a\nb");
     }
 
@@ -109,7 +109,7 @@ namespace krys::boo::tests
       List<BlobPartVariant> parts;
       parts.emplace_back(Bytes("0123"));
       parts.emplace_back(RefPtr<Blob>(Blob::Create(Bytes("4567"), {})));
-      parts.emplace_back(utf8_string(u8"89"));
+      parts.emplace_back(u8"89");
       auto blob = Blob::Create(krys::move(parts), {.Type = u8"text/plain"});
 
       // Across items.
@@ -203,7 +203,7 @@ namespace krys::boo::tests
     SECTION("From parts")
     {
       List<BlobPartVariant> parts;
-      parts.emplace_back(utf8_string(u8"made"));
+      parts.emplace_back(u8"made");
       auto file = File::Create(krys::move(parts), u8"made.txt", {{.Type = u8"text/plain"}, 1'234});
       CHECK(file->Name() == u8"made.txt");
       CHECK(file->Path().empty());

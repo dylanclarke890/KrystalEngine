@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/FormattingContextBoxIterator.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"

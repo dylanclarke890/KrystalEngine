@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Platform/ThreadTimers.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -115,8 +115,21 @@ namespace krys::boo::html
     return false;
   }
 
+  // https://html.spec.whatwg.org/#run-steps-after-a-timeout
   void EventLoop::ScheduleTask(MonotonicTime::duration timeout, TaskSource source, Steps &&steps) noexcept
   {
+    // 1.-3. Let timerKey be a new unique internal value. [...] Set global's map of active timers[timerKey] to
+    //       startTime plus milliseconds.
+    // (There's no map of active timers, as nothing reads it.)
+    // 4. Run the following steps in parallel:
+    // 4a. If global is a Window object, wait until global's associated Document has been fully active for a
+    //     further milliseconds milliseconds (not necessarily consecutively).
+    // (This waits for the host's time to pass; a document's own timers are suspended with it.)
+    // 4b. Wait until any invocations of this algorithm that had the same global and orderingIdentifier, that
+    //     started before this one, and whose milliseconds is less than or equal to this one's, have
+    //     completed.
+    // (Timers due at the same time fire in the order they were started.)
+    // 4d. Perform completionSteps.
     auto timer = CreateUnique<Timer>([this, source, steps = krys::move(steps)]() mutable
                                      { QueueTask(source, krys::move(steps)); });
     timer->StartOneShot(timeout);

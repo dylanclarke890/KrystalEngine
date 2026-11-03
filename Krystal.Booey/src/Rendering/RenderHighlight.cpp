@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderHighlight.hpp"
-#include "Krystal.Booey/DOM/Highlight.hpp"
+#include "Krystal.Booey/DOM/Highlights/Highlight.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include <limits>
 
