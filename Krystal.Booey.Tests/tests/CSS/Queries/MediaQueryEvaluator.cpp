@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

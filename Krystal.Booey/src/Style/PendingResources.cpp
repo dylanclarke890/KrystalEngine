@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Style/PendingResources.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"

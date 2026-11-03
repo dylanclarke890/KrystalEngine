@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUListElement.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"

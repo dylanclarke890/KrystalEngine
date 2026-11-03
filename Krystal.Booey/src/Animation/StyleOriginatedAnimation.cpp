@@ -5,8 +5,8 @@
 #include "Krystal.Booey/Animation/StyleOriginatedAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 
 namespace krys::boo

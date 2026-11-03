@@ -39,7 +39,7 @@ Status: reviewed (2026-10-30)
 ### [1.3. Selectors](https://dom.spec.whatwg.org/#selectors)
 
 Status: reviewed (2026-10-30)
-> Code: steps 1 and 2 in `Document::SelectorQueryForString` (shared with `matches()` and `closest()`, which parse the same way), step 3 in `SelectorDataList::Execute` behind `SelectorQuery::QueryAll`/`QueryFirst`. Tests: `tests/DOM/SelectorQuery.cpp`.
+> Code: steps 1 and 2 in `Document::SelectorQueryForString` (shared with `matches()` and `closest()`, which parse the same way), step 3 in `SelectorDataList::Execute` behind `SelectorQuery::QueryAll`/`QueryFirst`. Tests: `tests/DOM/Algorithms/SelectorQuery.cpp`.
 > Known issue: `:scope` with a fragment or shadow root as the scoping root. Difference: a document's `:scope` is its document element.
 
 - [x] [scope-match a selectors string](https://dom.spec.whatwg.org/#scope-match-a-selectors-string) — To scope-match a selectors string given a string selectors against a node node:
@@ -441,12 +441,12 @@ Status: reviewed (2026-10-30)
 ## [3. Aborting ongoing activities](https://dom.spec.whatwg.org/#aborting-ongoing-activities)
 
 Status: reviewed (2026-10-31)
-> The example API is tested in `tests/DOM/AbortSignal.cpp`. Without promises, an API reacts to the abort event and the signal's reason, and `ThrowIfAborted` throws the reason as a C++ exception.
+> The example API is tested in `tests/DOM/Abort/AbortSignal.cpp`. Without promises, an API reacts to the abort event and the signal's reason, and `ThrowIfAborted` throws the reason as a C++ exception.
 
 ### [3.1. Interface AbortController](https://dom.spec.whatwg.org/#interface-abortcontroller)
 
 Status: reviewed (2026-10-30)
-> Code: `AbortController`, with signal abort on a controller in `AbortAlgorithms::SignalAbort`. Tests: `tests/DOM/AbortController.cpp`.
+> Code: `AbortController`, with signal abort on a controller in `AbortAlgorithms::SignalAbort`. Tests: `tests/DOM/Abort/AbortController.cpp`.
 <!-- definitions: abortcontroller-signal -->
 
 - [x] [AbortController.new AbortController()](https://dom.spec.whatwg.org/#dom-abortcontroller-abortcontroller) — The new AbortController() constructor steps are:
@@ -462,7 +462,7 @@ Status: reviewed (2026-10-30)
 ### [3.2. Interface AbortSignal](https://dom.spec.whatwg.org/#interface-AbortSignal)
 
 Status: reviewed (2026-10-30)
-> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/DOM/AbortSignal.cpp` and `tests/DOM/Algorithms/AbortAlgorithms.cpp`.
+> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/DOM/Abort/AbortSignal.cpp` and `tests/DOM/Algorithms/AbortAlgorithms.cpp`.
 <!-- definitions: abortsignal-abort-reason abortsignal-abort-algorithms abortsignal-dependent abortsignal-source-signals abortsignal-dependent-signals dom-abortsignal-onabort abortsignal-onabort eventdef-abortsignal-abort abortsignal-aborted -->
 
 - [x] [AbortSignal.abort(reason)](https://dom.spec.whatwg.org/#dom-abortsignal-abort) — The static abort(reason) method steps are:
@@ -524,7 +524,7 @@ Status: reviewed (2026-10-30)
 #### [3.2.1. Garbage collection](https://dom.spec.whatwg.org/#abort-signal-garbage-collection)
 
 Status: reviewed (2026-10-31)
-> Kept with references (`DIFFERENCES.md`): each source holds its dependents weakly, and strongly while one isn't aborted and has `abort` listeners (handlers included) or abort algorithms (`AbortSignal::UpdateHeldBySources`). A source that's freed lets go of its dependents. Tests: `tests/DOM/AbortSignal.cpp`.
+> Kept with references (`DIFFERENCES.md`): each source holds its dependents weakly, and strongly while one isn't aborted and has `abort` listeners (handlers included) or abort algorithms (`AbortSignal::UpdateHeldBySources`). A source that's freed lets go of its dependents. Tests: `tests/DOM/Abort/AbortSignal.cpp`.
 
 ### [3.3. Using AbortController and AbortSignal objects in APIs](https://dom.spec.whatwg.org/#abortcontroller-api-integration)
 
@@ -538,7 +538,7 @@ Status: n/a (heading only)
 ### [4.1. Introduction to "The DOM"](https://dom.spec.whatwg.org/#introduction-to-the-dom)
 
 Status: reviewed (2026-10-31)
-> Informative. The example document parses to the tree shown. Test: `tests/DOM/Node.cpp`.
+> Informative. The example document parses to the tree shown. Test: `tests/DOM/Nodes/Node.cpp`.
 
 ### [4.2. Node tree](https://dom.spec.whatwg.org/#node-trees)
 
@@ -560,7 +560,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.2. Shadow tree](https://dom.spec.whatwg.org/#shadow-trees)
 
 Status: reviewed (2026-10-31)
-> In a shadow tree and connected are node flags kept up to date on insertion and removal (`Node::IsInShadowTree`, `Node::IsConnected`; `TreeQueries::IsInShadowTree` forwards). The light tree has no code of its own: it's the host's tree. Tests: `tests/DOM/Algorithms/TreeQueries.cpp`, `tests/DOM/Node.cpp`.
+> In a shadow tree and connected are node flags kept up to date on insertion and removal (`Node::IsInShadowTree`, `Node::IsConnected`; `TreeQueries::IsInShadowTree` forwards). The light tree has no code of its own: it's the host's tree. Tests: `tests/DOM/Algorithms/TreeQueries.cpp`, `tests/DOM/Nodes/Node.cpp`.
 <!-- definitions: concept-shadow-tree concept-light-tree connected -->
 
 ##### [4.2.2.1. Slots](https://dom.spec.whatwg.org/#shadow-tree-slots)
@@ -581,7 +581,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.2. Slottables](https://dom.spec.whatwg.org/#light-tree-slotables)
 
 Status: reviewed (2026-10-31)
-> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/DOM/Element.cpp`, `tests/HTML/HTMLSlotElement.cpp`.
+> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/DOM/Nodes/Element.cpp`, `tests/HTML/HTMLSlotElement.cpp`.
 <!-- definitions: concept-slotable slotable-assigned-slot slotable-assigned slottable-manual-slot-assignment -->
 
 - [x] [Use these attribute change steps to update a slottable’s name](https://dom.spec.whatwg.org/#slotable-name) — Use these attribute change steps to update a slottable’s name:
@@ -661,7 +661,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.3. Mutation algorithms](https://dom.spec.whatwg.org/#mutation-algorithms)
 
 Status: reviewed (2026-10-31)
-> Code: `MutationAlgorithms`. The hooks other specifications define (insertion, post-connection, children changed, moving and removing steps) are dispatched from `ExtensibilityHooks`. Inserting or moving into a manual shadow root's host assigns a slot (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/MutationAlgorithms.cpp`, `tests/DOM/NodeIterator.cpp`.
+> Code: `MutationAlgorithms`. The hooks other specifications define (insertion, post-connection, children changed, moving and removing steps) are dispatched from `ExtensibilityHooks`. Inserting or moving into a manual shadow root's host assigns a slot (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/MutationAlgorithms.cpp`, `tests/DOM/Traversal/NodeIterator.cpp`.
 <!-- definitions: insert-suppressobservers remove-suppressobservers -->
 
 - [x] [ensure pre-insert validity](https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity) — To ensure pre-insert validity given a node node, a node parent, null or a node child, and a list of nodes childrenToExclude:
@@ -2090,7 +2090,7 @@ Status: reviewed (2026-10-31)
 ### [5.1. Introduction to "DOM Ranges"](https://dom.spec.whatwg.org/#introduction-to-dom-ranges)
 
 Status: reviewed (2026-10-31)
-> Non-normative. Its example is a test in `tests/DOM/Range.cpp`; live ranges are updated by insert, remove, `normalize()`, replace data and split (reviewed in 4.2.3, 4.4, 4.10 and 4.11), static ranges are not.
+> Non-normative. Its example is a test in `tests/DOM/Ranges/Range.cpp`; live ranges are updated by insert, remove, `normalize()`, replace data and split (reviewed in 4.2.3, 4.4, 4.10 and 4.11), static ranges are not.
 
 ### [5.2. Boundary points](https://dom.spec.whatwg.org/#boundary-points)
 
@@ -2140,7 +2140,7 @@ Status: reviewed (2026-10-31)
 ### [5.5. Interface Range](https://dom.spec.whatwg.org/#interface-range)
 
 Status: reviewed (2026-10-31)
-> Live ranges, their root, contained/partially contained and the select, extract, clone and insert algorithms are in `DOM/Range.hpp`/`.cpp`; the live range pre-remove steps are `LiveRangeUpdater::PreRemove`; `new Range()` is `Document::CreateRange`.
+> Live ranges, their root, contained/partially contained and the select, extract, clone and insert algorithms are in `DOM/Ranges/Range.hpp`/`.cpp`; the live range pre-remove steps are `LiveRangeUpdater::PreRemove`; `new Range()` is `Document::CreateRange`.
 <!-- definitions: concept-live-range concept-range-root contained partially-contained -->
 
 - [x] [live range pre-remove steps](https://dom.spec.whatwg.org/#live-range-pre-remove-steps) — The live range pre-remove steps given a node node, are:
@@ -2395,7 +2395,7 @@ Status: reviewed (2026-10-31)
 ## [6. Traversal](https://dom.spec.whatwg.org/#traversal)
 
 Status: reviewed (2026-10-31)
-> NodeIterator and TreeWalker share `TraversalBase` (`DOM/Internals/TraversalBase.hpp`), which holds the root, whatToShow, filter and is active; filtering is `IteratorAlgorithms::FilterNode`. Without script, a filter is a `NodeFilter` subclass, and its results are the `FilterResult` enumeration.
+> NodeIterator and TreeWalker share `TraversalBase` (`DOM/Traversal/TraversalBase.hpp`), which holds the root, whatToShow, filter and is active; filtering is `IteratorAlgorithms::FilterNode`. Without script, a filter is a `NodeFilter` subclass, and its results are the `FilterResult` enumeration.
 <!-- definitions: concept-traversal-active concept-traversal-root concept-traversal-whattoshow concept-traversal-filter -->
 
 - [x] [filter](https://dom.spec.whatwg.org/#concept-node-filter) — To filter a node node within a NodeIterator or TreeWalker object traverser:
@@ -2411,7 +2411,7 @@ Status: reviewed (2026-10-31)
 ### [6.1. Interface NodeIterator](https://dom.spec.whatwg.org/#interface-nodeiterator)
 
 Status: reviewed (2026-10-31)
-> NodeIterator is `DOM/NodeIterator.hpp`; its reference and candidate reference are `NodePointer`s. The pre-remove steps, adjust a node pointer and traverse are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `TraversalBase`'s. Its iterator collection is walked with `TreeQueries::Next` and `Previous` within its root.
+> NodeIterator is `DOM/Traversal/NodeIterator.hpp`; its reference and candidate reference are `NodePointer`s. The pre-remove steps, adjust a node pointer and traverse are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `TraversalBase`'s. Its iterator collection is walked with `TreeQueries::Next` and `Previous` within its root.
 <!-- definitions: iterator-collection node-pointer node-pointer-node node-pointer-pointer-before nodeiterator-reference nodeiterator-candidate-reference -->
 
 - [x] [NodeIterator pre-remove steps](https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps) — The NodeIterator pre-remove steps given a NodeIterator object nodeIterator and node toBeRemovedNode, are:
@@ -2468,7 +2468,7 @@ Status: reviewed (2026-10-31)
 ### [6.2. Interface TreeWalker](https://dom.spec.whatwg.org/#interface-treewalker)
 
 Status: reviewed (2026-10-31)
-> TreeWalker is `DOM/TreeWalker.hpp`, with its current as `_currentNode`; traverse children and traverse siblings are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `TraversalBase`'s.
+> TreeWalker is `DOM/Traversal/TreeWalker.hpp`, with its current as `_currentNode`; traverse children and traverse siblings are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `TraversalBase`'s.
 <!-- definitions: treewalker-current -->
 
 - [x] [TreeWalker.root](https://dom.spec.whatwg.org/#dom-treewalker-root) — The root getter steps are to return this’s root.
@@ -2568,7 +2568,7 @@ Status: reviewed (2026-10-31)
 ### [6.3. Interface NodeFilter](https://dom.spec.whatwg.org/#interface-nodefilter)
 
 Status: reviewed (2026-10-31)
-> NodeFilter is `DOM/NodeFilter.hpp`, a C++ subclass with `AcceptNode`; its constants are the `FilterResult` (`DOM/NodeFilter.hpp`) and `WhatToShow` (`DOM/NodeFilter.hpp`) enumerations, the legacy `SHOW_ENTITY_REFERENCE`, `SHOW_ENTITY` and `SHOW_NOTATION` included.
+> NodeFilter is `DOM/Traversal/NodeFilter.hpp`, a C++ subclass with `AcceptNode`; its constants are the `FilterResult` (`DOM/Traversal/NodeFilter.hpp`) and `WhatToShow` (`DOM/Traversal/NodeFilter.hpp`) enumerations, the legacy `SHOW_ENTITY_REFERENCE`, `SHOW_ENTITY` and `SHOW_NOTATION` included.
 <!-- definitions: dom-nodefilter-filter_accept dom-nodefilter-filter_reject dom-nodefilter-filter_skip dom-nodefilter-show_all dom-nodefilter-show_element dom-nodefilter-show_attribute dom-nodefilter-show_text dom-nodefilter-show_cdata_section dom-nodefilter-show_processing_instruction dom-nodefilter-show_comment dom-nodefilter-show_document dom-nodefilter-show_document_type dom-nodefilter-show_document_fragment -->
 
 ## [7. Sets](https://dom.spec.whatwg.org/#sets)
@@ -2579,7 +2579,7 @@ Status: reviewed (2026-10-31)
 ### [7.1. Interface DOMTokenList](https://dom.spec.whatwg.org/#interface-domtokenlist)
 
 Status: reviewed (2026-10-31)
-> DOMTokenList is `DOM/DOMTokenList.hpp`. Its token set is parsed from the attribute when next read after the attribute changes (`AssociatedAttributeValueChanged`, called from the owner's attribute change steps). An element's supported tokens are the `IsSupportedTokenFunction` given to `ElementAlgorithms::CreateDOMTokenList`, empty when its attribute defines none.
+> DOMTokenList is `DOM/Collections/DOMTokenList.hpp`. Its token set is parsed from the attribute when next read after the attribute changes (`AssociatedAttributeValueChanged`, called from the owner's attribute change steps). An element's supported tokens are the `IsSupportedTokenFunction` given to `ElementAlgorithms::CreateDOMTokenList`, empty when its attribute defines none.
 <!-- definitions: concept-dtl-tokens domtokenlist-element domtokenlist-attribute-name concept-supported-tokens -->
 
 - [x] [validation steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-domtokenlist-validation) — A DOMTokenList object set’s validation steps for a given token are:

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderQuote.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 

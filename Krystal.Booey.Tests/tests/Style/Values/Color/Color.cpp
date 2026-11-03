@@ -8,7 +8,7 @@
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"

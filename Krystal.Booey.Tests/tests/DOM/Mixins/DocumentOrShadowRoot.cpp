@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 
 namespace krys::boo::dom::tests

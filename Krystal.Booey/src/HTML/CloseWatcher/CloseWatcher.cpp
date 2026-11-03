@@ -2,8 +2,8 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 

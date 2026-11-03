@@ -8,7 +8,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"

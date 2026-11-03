@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"

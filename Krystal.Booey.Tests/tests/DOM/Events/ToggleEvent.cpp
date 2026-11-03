@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 
 namespace krys::boo::dom::tests

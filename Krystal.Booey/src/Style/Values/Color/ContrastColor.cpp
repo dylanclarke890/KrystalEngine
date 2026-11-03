@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Color/ContrastColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ContrastColorResolver.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 

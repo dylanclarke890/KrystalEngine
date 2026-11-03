@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/SVGTSpanElement.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTSpan.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGAElement.hpp"

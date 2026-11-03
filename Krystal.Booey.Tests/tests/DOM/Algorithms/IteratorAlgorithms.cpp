@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/IteratorAlgorithms.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Comment.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/NodeFilter.hpp"
-#include "Krystal.Booey/DOM/NodeIterator.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/DOM/TreeWalker.hpp"
+#include "Krystal.Booey/DOM/Nodes/Comment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Traversal/NodeFilter.hpp"
+#include "Krystal.Booey/DOM/Traversal/NodeIterator.hpp"
+#include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
 
 namespace krys::boo::dom::tests
 {

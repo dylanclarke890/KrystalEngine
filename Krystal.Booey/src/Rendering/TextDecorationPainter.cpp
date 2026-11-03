@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/TextDecorationPainter.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"

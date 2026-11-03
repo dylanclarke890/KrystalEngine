@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLProgressElement.hpp"
 
 namespace krys::boo::layout::tests

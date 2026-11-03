@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 
 namespace krys::boo

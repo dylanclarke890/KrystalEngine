@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/MathML/MathMLElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"

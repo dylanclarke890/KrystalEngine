@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/CharacterData.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 
 namespace krys::boo::dom::mixins
 {

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/InlineStyleSheetOwner.hpp"
+#include "Krystal.Booey/HTML/InlineStyleSheetOwner.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 
 namespace krys::boo::css
@@ -17,7 +17,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGStyleElement);
 
   private:
-    dom::InlineStyleSheetOwner _styleSheetOwner;
+    html::InlineStyleSheetOwner _styleSheetOwner;
 
   public:
     explicit SVGStyleElement(dom::Document &document) noexcept;

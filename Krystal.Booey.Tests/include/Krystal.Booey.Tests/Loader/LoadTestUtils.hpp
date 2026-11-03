@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"

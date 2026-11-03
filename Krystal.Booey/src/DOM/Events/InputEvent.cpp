@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Events/InputEvent.hpp"
-#include "Krystal.Booey/DOM/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 
 namespace krys::boo::dom
 {

@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"

@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Platform/DragData.hpp"

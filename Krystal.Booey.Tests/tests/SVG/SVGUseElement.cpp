@@ -5,7 +5,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/SVG/SVGGElement.hpp"

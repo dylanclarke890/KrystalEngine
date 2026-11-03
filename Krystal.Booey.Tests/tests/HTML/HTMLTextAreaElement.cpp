@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 
 namespace krys::boo::html::tests

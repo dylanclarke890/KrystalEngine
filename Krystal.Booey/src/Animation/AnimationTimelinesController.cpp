@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Page.hpp"

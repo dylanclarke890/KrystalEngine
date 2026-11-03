@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 
 namespace krys::boo::style::tests
 {

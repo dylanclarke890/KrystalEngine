@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/ImageInputType.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"

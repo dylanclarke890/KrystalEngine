@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"

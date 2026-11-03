@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/FocusOptions.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"

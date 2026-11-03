@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/FormListedElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/IdTargetObserver.hpp"
-#include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
+#include "Krystal.Booey/DOM/Internals/IdTargetObserver.hpp"
+#include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 

@@ -2,14 +2,14 @@
 #include "Krystal.Booey/CSS/CSSStyleSheetObservableArray.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
-#include "Krystal.Booey/DOM/PseudoElement.hpp"
-#include "Krystal.Booey/DOM/RadioButtonGroups.hpp"
+#include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/RadioButtonGroups.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -278,7 +278,7 @@ namespace krys::boo::dom
                                              RefPtr<html::CustomElementRegistry> &&registry) noexcept
       : _rootNode(rootNode), _customElementRegistry(krys::move(registry)),
         _idTargetObserverRegistry(CreateUnique<dom::IdTargetObserverRegistry>()),
-        _radioButtonGroups(CreateUnique<dom::RadioButtonGroups>())
+        _radioButtonGroups(CreateUnique<html::RadioButtonGroups>())
   {
   }
 

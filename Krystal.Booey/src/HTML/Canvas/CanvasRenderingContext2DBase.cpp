@@ -9,7 +9,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/Graphics/DashArray.hpp"

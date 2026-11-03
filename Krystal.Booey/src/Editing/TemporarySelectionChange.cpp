@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Editing/TemporarySelectionChange.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include <utility>

@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/FontFeatureValues.hpp"
@@ -179,7 +179,8 @@ namespace krys::boo::css
       fontFace->SetSizeAdjust(*sizeAdjust);
     }
 
-    CSSFontFace::AppendSources(*fontFace, *srcList, _document.get(), isInitiatingElementInUserAgentShadowTree);
+    CSSFontFace::AppendSources(*fontFace, *srcList, _document.get(),
+                               isInitiatingElementInUserAgentShadowTree);
 
     if (RefPtr<CSSFontFace> existingFace = ShareRefPtr(_cssFontFaceSet->LookUpByCSSConnection(fontFaceRule)))
     {

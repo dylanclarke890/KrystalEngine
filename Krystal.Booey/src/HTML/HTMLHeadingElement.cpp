@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLHeadingElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include <algorithm>

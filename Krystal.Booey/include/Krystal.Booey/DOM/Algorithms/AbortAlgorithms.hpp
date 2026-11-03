@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/AbortController.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortController.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Events/CustomEvent.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 
 namespace krys::boo::dom::tests
 {

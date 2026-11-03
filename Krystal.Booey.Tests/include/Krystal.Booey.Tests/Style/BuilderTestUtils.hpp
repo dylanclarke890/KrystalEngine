@@ -6,7 +6,7 @@
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Builder.hpp"

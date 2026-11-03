@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 
 namespace krys::boo::html::tests
 {

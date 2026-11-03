@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Modules/Gamepad/GamepadHapticActuator.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Modules/Gamepad/Gamepad.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadEffectParameters.hpp"

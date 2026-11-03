@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"

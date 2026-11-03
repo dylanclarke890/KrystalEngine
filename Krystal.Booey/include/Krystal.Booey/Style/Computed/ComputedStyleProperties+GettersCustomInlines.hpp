@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Core/StyleAppearance.hpp"
 #include "Krystal.Booey/Core/UnicodeBidi.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/PositionTryOrder.hpp"

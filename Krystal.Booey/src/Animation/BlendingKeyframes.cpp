@@ -8,7 +8,7 @@
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Interpolation.hpp"

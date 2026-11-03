@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/SVGURIReference.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
 namespace krys::boo::svg::tests
 {

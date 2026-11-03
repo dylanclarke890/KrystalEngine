@@ -8,7 +8,7 @@
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Core/Maths/Base.hpp"

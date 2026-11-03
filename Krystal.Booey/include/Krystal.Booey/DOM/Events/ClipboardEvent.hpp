@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

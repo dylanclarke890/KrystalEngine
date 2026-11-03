@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"

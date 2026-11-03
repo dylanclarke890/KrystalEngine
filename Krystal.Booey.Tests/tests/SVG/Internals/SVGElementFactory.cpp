@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/SVG/SVGAElement.hpp"

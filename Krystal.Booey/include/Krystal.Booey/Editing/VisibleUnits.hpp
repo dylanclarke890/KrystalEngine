@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"
-#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Core/Attributes.hpp"

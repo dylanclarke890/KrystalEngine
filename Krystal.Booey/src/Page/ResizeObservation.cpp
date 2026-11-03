@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/ResizeObservation.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"

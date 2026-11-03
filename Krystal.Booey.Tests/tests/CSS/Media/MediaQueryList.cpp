@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

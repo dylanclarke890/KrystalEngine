@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/PointerLockOptions.hpp"
+#include "Krystal.Booey/DOM/Nodes/PointerLockOptions.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/Exception.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"

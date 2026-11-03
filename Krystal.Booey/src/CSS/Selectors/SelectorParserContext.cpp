@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo::css

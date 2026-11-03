@@ -2,7 +2,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/Location.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"

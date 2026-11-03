@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"

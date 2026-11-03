@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Platform/DragImage.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"

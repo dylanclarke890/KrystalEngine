@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/FileAPI/File.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"

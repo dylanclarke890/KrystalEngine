@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 

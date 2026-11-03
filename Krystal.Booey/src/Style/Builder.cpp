@@ -10,7 +10,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCustomPropertyData.hpp"

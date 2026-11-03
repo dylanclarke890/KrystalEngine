@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"

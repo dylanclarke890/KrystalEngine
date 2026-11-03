@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLSourceElement.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLPictureElement.hpp"

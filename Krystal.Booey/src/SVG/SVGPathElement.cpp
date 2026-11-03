@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/PathValue.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGPath.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"

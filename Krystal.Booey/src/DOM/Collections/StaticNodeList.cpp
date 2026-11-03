@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Collections/StaticNodeList.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
-#include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 

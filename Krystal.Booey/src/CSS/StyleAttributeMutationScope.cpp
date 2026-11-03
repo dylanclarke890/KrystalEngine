@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/StyleAttributeMutationScope.hpp"
 #include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Assert.hpp"
 

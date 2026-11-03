@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 

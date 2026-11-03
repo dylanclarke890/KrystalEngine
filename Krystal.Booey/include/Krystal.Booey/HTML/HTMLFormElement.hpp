@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/RadioButtonGroups.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/RadioButtonGroups.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -32,7 +32,7 @@ namespace krys::boo::html
     WeakPtr<dom::HTMLCollection> _elements;
     FormSubmission::Attributes _attributes;
     HashMap<dom::DOMStringAtom, WeakPtr<HTMLElement>> _pastNamesMap;
-    dom::RadioButtonGroups _radioButtonGroups;
+    html::RadioButtonGroups _radioButtonGroups;
     mutable WeakPtr<HTMLFormControlElement> _defaultButton;
     List<WeakPtr<HTMLElement>> _listedElements;
     List<WeakPtr<HTMLElement>> _invalidFormControls;
@@ -190,7 +190,7 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLFormControlElement *DefaultButton() const noexcept;
     void ResetDefaultButton() noexcept;
 
-    KRYS_NODISCARD dom::RadioButtonGroups &RadioButtonGroups() noexcept
+    KRYS_NODISCARD html::RadioButtonGroups &RadioButtonGroups() noexcept
     {
       return _radioButtonGroups;
     }

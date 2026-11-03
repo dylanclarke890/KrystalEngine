@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"

@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/FocusEvent.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

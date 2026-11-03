@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/MutationObservers/MutationRecord.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 
 namespace krys::boo::dom::tests

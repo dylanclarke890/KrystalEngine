@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/History.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/History/HistoryItem.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"

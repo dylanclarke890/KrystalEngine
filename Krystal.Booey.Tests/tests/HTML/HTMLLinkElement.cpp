@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 
 namespace krys::boo::html::tests

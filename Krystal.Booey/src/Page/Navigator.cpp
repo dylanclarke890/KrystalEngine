@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/Navigator.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/URLDecomposition.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"

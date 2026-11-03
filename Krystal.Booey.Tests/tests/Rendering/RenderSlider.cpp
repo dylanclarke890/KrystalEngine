@@ -4,7 +4,7 @@
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"

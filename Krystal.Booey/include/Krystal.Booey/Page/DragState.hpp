@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Page/DragActions.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

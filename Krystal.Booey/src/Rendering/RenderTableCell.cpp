@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/MathML/MathMLElement.hpp"

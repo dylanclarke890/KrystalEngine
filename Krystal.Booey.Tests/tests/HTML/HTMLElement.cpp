@@ -4,8 +4,8 @@
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include <limits>
 

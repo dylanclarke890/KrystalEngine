@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/LayoutOptions.hpp"
+#include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/History/BackForwardClient.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"

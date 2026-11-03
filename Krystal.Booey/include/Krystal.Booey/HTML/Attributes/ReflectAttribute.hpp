@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/ElementInternals.hpp"

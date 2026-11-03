@@ -13,6 +13,7 @@
 
 namespace krys::boo::html
 {
+  class RadioButtonGroups;
   class CustomElementAlgorithms;
   class CustomElementRegistry;
 }
@@ -44,7 +45,6 @@ namespace krys::boo::dom
   class DocumentAlgorithms;
   class Element;
   class IdTargetObserverRegistry;
-  class RadioButtonGroups;
   class NodeAlgorithms;
   struct SVGResourcesMap;
 
@@ -70,7 +70,7 @@ namespace krys::boo::dom
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
     UniquePtr<css::CSSStyleSheetObservableArray> _adoptedStyleSheets;
     UniquePtr<dom::IdTargetObserverRegistry> _idTargetObserverRegistry;
-    UniquePtr<dom::RadioButtonGroups> _radioButtonGroups;
+    UniquePtr<html::RadioButtonGroups> _radioButtonGroups;
     mutable UniquePtr<SVGResourcesMap> _svgResourcesMap;
 
   protected:
@@ -161,7 +161,7 @@ namespace krys::boo::dom
     }
 
     /// @brief The groups of the radio buttons in this tree that have no form owner.
-    KRYS_NODISCARD dom::RadioButtonGroups &RadioButtonGroups() const noexcept
+    KRYS_NODISCARD html::RadioButtonGroups &RadioButtonGroups() const noexcept
     {
       return *_radioButtonGroups;
     }

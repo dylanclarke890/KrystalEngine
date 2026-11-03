@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ContrastColorResolver.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"

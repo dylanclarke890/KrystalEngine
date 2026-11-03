@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
-#include "Krystal.Booey/DOM/TouchList.hpp"
+#include "Krystal.Booey/DOM/Events/TouchList.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"

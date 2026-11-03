@@ -2,12 +2,11 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/RadioButtonGroups.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Autofill.hpp"
@@ -17,6 +16,7 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
+#include "Krystal.Booey/HTML/RadioButtonGroups.hpp"
 #include "Krystal.Booey/HTML/RadioInputType.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/HTML/TextInputType.hpp"
@@ -1559,7 +1559,7 @@ namespace krys::boo::html
     return checkedRadio;
   }
 
-  dom::RadioButtonGroups *HTMLInputElement::RadioButtonGroups() const noexcept
+  RadioButtonGroups *HTMLInputElement::RadioButtonGroups() const noexcept
   {
     if (!IsRadioButton())
     {

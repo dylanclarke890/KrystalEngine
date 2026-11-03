@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
-#include "Krystal.Booey/DOM/StaticRange.hpp"
+#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"

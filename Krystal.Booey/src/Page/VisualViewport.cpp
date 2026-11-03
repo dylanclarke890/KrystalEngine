@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/VisualViewport.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"

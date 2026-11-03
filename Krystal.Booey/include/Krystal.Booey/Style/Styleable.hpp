@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Values/Animations/Animations.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

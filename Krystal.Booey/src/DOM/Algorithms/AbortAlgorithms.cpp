@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/AbortController.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortController.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 
 namespace krys::boo::dom

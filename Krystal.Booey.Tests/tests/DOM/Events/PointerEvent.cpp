@@ -3,8 +3,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include <numbers>

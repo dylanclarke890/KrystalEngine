@@ -9,13 +9,10 @@ namespace krys::boo
   class FileList;
 }
 
-namespace krys::boo::dom
-{
-  class RadioButtonGroups;
-}
-
 namespace krys::boo::html
 {
+  class RadioButtonGroups;
+
   /// @brief The state of a checkbox or radio button before a click toggled it, to restore if the click is
   /// canceled.
   struct InputElementClickState
@@ -485,7 +482,7 @@ namespace krys::boo::html
 
     /// @brief The groups this radio button is in: its form's, or its tree's; null if it isn't a radio button
     /// or is in neither.
-    KRYS_NODISCARD dom::RadioButtonGroups *RadioButtonGroups() const noexcept;
+    KRYS_NODISCARD html::RadioButtonGroups *RadioButtonGroups() const noexcept;
 
     // Functions for InputType classes.
     void SetValueInternal(dom::DOMStringView sanitizedValue, TextFieldEventBehavior eventBehavior) noexcept;

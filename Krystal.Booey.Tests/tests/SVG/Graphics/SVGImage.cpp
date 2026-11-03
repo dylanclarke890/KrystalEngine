@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/FormController.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"

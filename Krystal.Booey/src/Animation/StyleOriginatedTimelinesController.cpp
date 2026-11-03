@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Animation/ScrollTimeline.hpp"
 #include "Krystal.Booey/Animation/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -512,8 +512,8 @@ namespace krys::boo
     // https://drafts.csswg.org/scroll-animations-1/#timeline-scope
     // This property declares the scope of the specified timeline names to extend across this element’s
     // subtree. This allows a named timeline (such as a named scroll progress timeline or named view progress
-    // timeline) to be referenced by elements outside the timeline-defining element’s subtree—​for example,
-    // by siblings, cousins, or ancestors.
+    // timeline) to be referenced by elements outside the timeline-defining element’s subtree—​for
+    // example, by siblings, cousins, or ancestors.
     switch (scope.Type)
     {
       case style::NameScope::Type::None:

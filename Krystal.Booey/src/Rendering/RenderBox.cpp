@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBox.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"

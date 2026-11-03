@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
 namespace krys::boo::dom
 {

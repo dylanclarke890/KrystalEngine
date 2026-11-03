@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 
 namespace krys::boo::dom

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/DOM/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadHapticEffectType.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

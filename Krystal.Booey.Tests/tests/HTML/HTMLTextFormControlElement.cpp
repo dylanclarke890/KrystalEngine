@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"

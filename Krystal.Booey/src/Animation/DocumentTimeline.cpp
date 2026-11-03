@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"

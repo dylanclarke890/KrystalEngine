@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/History/CachedFrame.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

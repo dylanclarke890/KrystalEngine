@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"

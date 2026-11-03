@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/Line/BreakingContext.hpp"
 
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 
 namespace krys::boo

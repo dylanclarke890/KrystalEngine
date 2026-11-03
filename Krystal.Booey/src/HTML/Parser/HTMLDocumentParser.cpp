@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 

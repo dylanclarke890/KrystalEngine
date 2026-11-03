@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTrackElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 
 namespace krys::boo::html::tests
 {

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/AutoTableLayout.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"

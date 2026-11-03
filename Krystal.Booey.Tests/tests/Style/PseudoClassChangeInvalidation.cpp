@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

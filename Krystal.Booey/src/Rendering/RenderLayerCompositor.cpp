@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

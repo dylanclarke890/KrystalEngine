@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/MathVariant.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

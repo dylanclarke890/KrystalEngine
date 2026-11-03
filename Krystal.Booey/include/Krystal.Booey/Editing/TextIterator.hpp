@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/CharacterRange.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"

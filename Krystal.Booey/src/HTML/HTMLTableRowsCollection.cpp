@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableRowsCollection.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"

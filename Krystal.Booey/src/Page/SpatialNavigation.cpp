@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/SpatialNavigation.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

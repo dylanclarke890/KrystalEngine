@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/DOMMatrix.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/DOMPoint.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMPoint.hpp"
 #include <cmath>
 
 namespace krys::boo::tests

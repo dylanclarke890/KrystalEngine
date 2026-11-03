@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/MatchResultCache.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/MatchResult.hpp"
 #include "Krystal.Core/Assert.hpp"

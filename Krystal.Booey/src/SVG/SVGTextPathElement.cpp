@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGTextPathElement.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"

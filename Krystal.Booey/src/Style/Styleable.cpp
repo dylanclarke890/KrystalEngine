@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
-#include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"

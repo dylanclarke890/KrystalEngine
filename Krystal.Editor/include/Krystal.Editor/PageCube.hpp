@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Core/Macros.hpp"

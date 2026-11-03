@@ -4,8 +4,8 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCustomPropertyData.hpp"
 

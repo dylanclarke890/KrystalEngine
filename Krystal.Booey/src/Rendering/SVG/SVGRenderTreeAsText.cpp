@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"

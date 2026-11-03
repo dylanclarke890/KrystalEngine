@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTablePartElement.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"

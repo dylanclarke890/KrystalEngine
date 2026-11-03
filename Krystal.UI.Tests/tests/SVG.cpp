@@ -1,7 +1,7 @@
 ﻿#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/DOM/DOMRect.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"

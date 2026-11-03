@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationFormattingContextLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"

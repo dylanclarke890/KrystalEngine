@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"

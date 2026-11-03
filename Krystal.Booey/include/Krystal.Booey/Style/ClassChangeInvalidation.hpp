@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

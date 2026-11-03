@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBDIElement.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 
 namespace krys::boo::html
 {

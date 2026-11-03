@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/ColorInputType.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"

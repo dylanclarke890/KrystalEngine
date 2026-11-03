@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DocumentParser.hpp"
+#include "Krystal.Booey/DOM/Parsing/DocumentParser.hpp"
 #include "Krystal.Booey/Types/SourceLocation.hpp"
 #include "Krystal.Booey/XML/XMLErrors.hpp"
 #include "Krystal.Core/Attributes.hpp"

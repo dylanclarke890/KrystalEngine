@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/MathML/MathMLOperatorElement.hpp"

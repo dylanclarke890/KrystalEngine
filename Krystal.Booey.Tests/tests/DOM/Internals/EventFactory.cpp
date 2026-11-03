@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Internals/EventFactory.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"

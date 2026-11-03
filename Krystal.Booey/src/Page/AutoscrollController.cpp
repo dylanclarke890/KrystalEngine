@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/AutoscrollController.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"

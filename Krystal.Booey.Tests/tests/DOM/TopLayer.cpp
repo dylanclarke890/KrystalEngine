@@ -2,7 +2,7 @@
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"

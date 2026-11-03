@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"

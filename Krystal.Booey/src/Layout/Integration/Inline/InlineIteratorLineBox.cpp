@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
-#include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"

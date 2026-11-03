@@ -3,10 +3,10 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/RadioButtonGroups.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/RadioButtonGroups.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 

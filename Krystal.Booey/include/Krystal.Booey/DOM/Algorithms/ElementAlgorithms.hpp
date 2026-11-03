@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 

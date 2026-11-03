@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"

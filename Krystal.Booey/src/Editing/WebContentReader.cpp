@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/WebContentReader.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/URL/URL.hpp"

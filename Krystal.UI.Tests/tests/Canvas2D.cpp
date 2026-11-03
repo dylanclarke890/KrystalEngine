@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/ImageFrame.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"

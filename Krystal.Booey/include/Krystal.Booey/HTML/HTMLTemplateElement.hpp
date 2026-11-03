@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::html

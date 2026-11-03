@@ -2,8 +2,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 
 namespace krys::boo::html::tests
 {

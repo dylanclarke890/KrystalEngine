@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/XMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 
 namespace krys::boo::html::tests
 {

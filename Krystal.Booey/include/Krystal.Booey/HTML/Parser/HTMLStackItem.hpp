@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Enums/Namespace.hpp"
 #include "Krystal.Booey/HTML/Enums/TagName.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTokenAtom.hpp"

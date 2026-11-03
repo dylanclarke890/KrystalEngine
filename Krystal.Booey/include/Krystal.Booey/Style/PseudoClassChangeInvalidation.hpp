@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Booey/Style/Validity.hpp"
 #include "Krystal.Core/Attributes.hpp"

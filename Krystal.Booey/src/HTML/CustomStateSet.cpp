@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/CustomStateSet.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo::html

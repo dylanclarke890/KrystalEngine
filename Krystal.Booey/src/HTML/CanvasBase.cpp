@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/CanvasBase.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"

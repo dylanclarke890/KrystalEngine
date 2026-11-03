@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Editing/TextInsertionBaseCommand.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 

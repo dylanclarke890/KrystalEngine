@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
-#include "Krystal.Booey/DOM/XMLDocument.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 
 namespace krys::boo::svg

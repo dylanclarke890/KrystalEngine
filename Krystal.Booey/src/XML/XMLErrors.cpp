@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/XML/XMLErrors.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include <cstring>
 

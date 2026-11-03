@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html

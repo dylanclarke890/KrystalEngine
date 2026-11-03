@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::html::tests

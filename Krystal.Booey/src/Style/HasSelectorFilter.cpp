@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/RuleFeature.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

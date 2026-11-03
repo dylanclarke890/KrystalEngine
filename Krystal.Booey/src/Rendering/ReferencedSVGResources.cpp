@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

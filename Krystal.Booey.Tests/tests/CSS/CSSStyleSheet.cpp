@@ -8,8 +8,8 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Media/MediaList.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Style/StyleSheetContentsCache.hpp"
 
 namespace krys::boo::css::tests

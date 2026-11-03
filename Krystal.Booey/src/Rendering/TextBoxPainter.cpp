@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/TextBoxPainter.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/CompositionHighlight.hpp"
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"

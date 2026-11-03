@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Range.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Ranges/Range.hpp"
 
 namespace krys::boo::dom::tests
 {

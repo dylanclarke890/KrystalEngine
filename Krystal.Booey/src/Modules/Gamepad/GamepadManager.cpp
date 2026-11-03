@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Modules/Gamepad/GamepadManager.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Modules/Gamepad/Gamepad.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadEvent.hpp"
 #include "Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp"

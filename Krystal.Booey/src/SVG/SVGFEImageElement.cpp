@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/SVGFEImageElement.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEImage.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"

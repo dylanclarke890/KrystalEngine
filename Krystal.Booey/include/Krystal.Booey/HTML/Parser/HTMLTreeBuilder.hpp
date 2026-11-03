@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Constants/TagNames.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Enums/InsertionMode.hpp"
 #include "Krystal.Booey/HTML/Enums/ParserScriptingMode.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"

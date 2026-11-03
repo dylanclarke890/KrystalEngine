@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Platform/ThreadTimers.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"

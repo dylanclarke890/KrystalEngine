@@ -1,6 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"

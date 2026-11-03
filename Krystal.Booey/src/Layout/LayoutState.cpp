@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Layout/LayoutState.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Block/BlockFormattingState.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentCache.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"

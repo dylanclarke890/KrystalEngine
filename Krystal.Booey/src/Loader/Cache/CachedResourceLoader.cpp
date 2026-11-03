@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"

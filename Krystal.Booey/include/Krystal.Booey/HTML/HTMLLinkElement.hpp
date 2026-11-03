@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Events/EventSender.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"

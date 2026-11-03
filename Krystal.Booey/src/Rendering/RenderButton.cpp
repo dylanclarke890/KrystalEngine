@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderButton.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"

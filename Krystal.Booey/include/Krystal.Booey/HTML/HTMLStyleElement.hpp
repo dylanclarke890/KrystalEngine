@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/InlineStyleSheetOwner.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/InlineStyleSheetOwner.hpp"
 
 namespace krys::boo::css
 {
@@ -17,7 +17,7 @@ namespace krys::boo::html
 
   private:
     UniquePtr<dom::DOMTokenList> _blocking;
-    dom::InlineStyleSheetOwner _styleSheetOwner;
+    InlineStyleSheetOwner _styleSheetOwner;
     bool _loadedSheet {false};
 
   public:

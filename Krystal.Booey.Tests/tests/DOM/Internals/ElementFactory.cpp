@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLDirectoryElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDivElement.hpp"

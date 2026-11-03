@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/WritingMode.hpp"
-#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"

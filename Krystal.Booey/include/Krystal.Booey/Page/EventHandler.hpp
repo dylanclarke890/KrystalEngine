@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
-#include "Krystal.Booey/DOM/FocusOptions.hpp"
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
+#include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/TextGranularity.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTableSection.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"

@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
-#include "Krystal.Booey/DOM/Comment.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
 #include "Krystal.Booey/DOM/MutationObservers/MutationRecord.hpp"
-#include "Krystal.Booey/DOM/Range.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/DOM/XMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/CDATASection.hpp"
+#include "Krystal.Booey/DOM/Nodes/Comment.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
+#include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include <limits>
 
 namespace krys::boo::dom::tests

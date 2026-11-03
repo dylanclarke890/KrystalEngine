@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::css::tests

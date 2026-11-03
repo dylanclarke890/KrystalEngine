@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
-#include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"

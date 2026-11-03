@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 
 namespace krys::boo::dom

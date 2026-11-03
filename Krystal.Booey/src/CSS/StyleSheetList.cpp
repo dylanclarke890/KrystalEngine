@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/StyleSheet.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 

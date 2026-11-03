@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderMenuList.hpp"
 #include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/Core/UnicodeHelpers.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/HTML/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptGroupElement.hpp"

@@ -7,7 +7,7 @@
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/HTMLMapElement.hpp"

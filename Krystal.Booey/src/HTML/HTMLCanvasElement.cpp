@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/FileAPI/Blob.hpp"
 #include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"

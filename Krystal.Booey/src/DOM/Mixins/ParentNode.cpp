@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/SelectorQuery.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 
 namespace krys::boo::dom::mixins
 {

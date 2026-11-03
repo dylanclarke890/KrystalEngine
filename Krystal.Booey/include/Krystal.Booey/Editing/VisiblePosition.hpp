@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/WritingMode.hpp"
-#include "Krystal.Booey/DOM/Position.hpp"
-#include "Krystal.Booey/DOM/SimpleRange.hpp"
+#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Editing/TextAffinity.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"

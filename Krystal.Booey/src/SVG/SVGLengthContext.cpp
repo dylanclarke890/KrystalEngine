@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"

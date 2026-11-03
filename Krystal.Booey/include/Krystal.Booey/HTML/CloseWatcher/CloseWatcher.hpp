@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"

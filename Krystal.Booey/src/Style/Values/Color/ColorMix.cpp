@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Color/ColorMix.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorMixResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/LazyLoadImageObserver.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/Page/IntersectionObserverEntry.hpp"
 

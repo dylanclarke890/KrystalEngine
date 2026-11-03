@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Loader/HistoryController.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
