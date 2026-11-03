@@ -1,3 +1,0 @@
-partial interface Window {
-  [NewObject] CSSStyleProperties getComputedStyle(Element elt, optional CSSOMString? pseudoElt);
-};

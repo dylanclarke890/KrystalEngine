@@ -1,4 +1,0 @@
-[Exposed=Window]
-interface CSSStyleProperties : CSSStyleDeclaration {
-  [CEReactions] attribute [LegacyNullToEmptyString] CSSOMString cssFloat;
-};
