@@ -28,7 +28,7 @@ Status: reviewed (2026-11-01)
 ###### [4.8.4.2.1 Srcset attributes](https://html.spec.whatwg.org/#srcset-attributes)
 
 Status: reviewed (2026-11-01)
-> `ParseImageCandidatesFromSrcsetAttribute` (`HTMLSrcsetParser.cpp`) reads image candidate strings; their validity is author conformance.
+> `ParseImageCandidatesFromSrcsetAttribute` (`SrcsetParser.cpp`) reads image candidate strings; their validity is author conformance.
 <!-- definitions: srcset-attribute width-descriptor width-descriptor-value pixel-density-descriptor pixel-density-descriptor-value -->
 
 - [x] [image candidate string](https://html.spec.whatwg.org/#image-candidate-string) — An image candidate string consists of the following components, in order, with the further restrictions described below this list:
@@ -222,7 +222,7 @@ Status: reviewed (2026-11-01)
 ###### [4.8.4.3.7 Selecting an image source](https://html.spec.whatwg.org/#selecting-an-image-source)
 
 Status: reviewed (2026-11-01)
-> `HTMLImageElement::SelectImageSource`, and `PickBestImageCandidate` in `HTMLSrcsetParser.cpp`: the lowest density at least the device scale factor, else the highest.
+> `HTMLImageElement::SelectImageSource`, and `PickBestImageCandidate` in `SrcsetParser.cpp`: the lowest density at least the device scale factor, else the highest.
 
 - [x] [select an image source](https://html.spec.whatwg.org/#select-an-image-source) — To select an image source given an img element el:
   - 1. Update the source set for el.
@@ -341,7 +341,7 @@ Status: reviewed (2026-11-01)
 ###### [4.8.4.3.12 Normalizing the source densities](https://html.spec.whatwg.org/#normalizing-the-source-densities)
 
 Status: reviewed (2026-11-01)
-> `PickBestImageCandidate` in `HTMLSrcsetParser.cpp`.
+> `PickBestImageCandidate` in `SrcsetParser.cpp`.
 
 - [x] [normalize the source densities](https://html.spec.whatwg.org/#normalise-the-source-densities) — When asked to normalize the source densities of a source set source set, the user agent must do the following:
   - 1. Let source size be source set's source size.

@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -12,7 +12,7 @@ namespace krys::boo::html::tests
     {
       auto document = CreateRef<dom::HTMLDocument>();
       document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
-      auto parser = CreateRef<HTMLDocumentParser>(*document);
+      auto parser = CreateRef<DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
       (void)parser->PumpTokenizer();
       return document;

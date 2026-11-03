@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/TestParserUtils.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
@@ -12,8 +12,8 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLTreeBuilder.hpp"
+#include "Krystal.Booey/HTML/Parser/Tokenizer.hpp"
+#include "Krystal.Booey/HTML/Parser/TreeBuilder.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGElementFactory.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -238,9 +238,9 @@ namespace krys::boo::html::tests
       return tests;
     }
 
-    static Ref<HTMLDocumentParser> CreateParser(dom::HTMLDocument &document, utf8_string &&input) noexcept
+    static Ref<DocumentParser> CreateParser(dom::HTMLDocument &document, utf8_string &&input) noexcept
     {
-      auto parser = CreateRef<HTMLDocumentParser>(document);
+      auto parser = CreateRef<DocumentParser>(document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
       return parser;
     }
@@ -271,8 +271,8 @@ namespace krys::boo::html::tests
                                 test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
           element = dom::ElementFactory::Create(*document, qName, dom::DOMStringAtom::Null());
         }
-        auto result = HTMLDocumentParser::ParseFragment(
-          *element, test.Input, false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
+        auto result = DocumentParser::ParseFragment(*element, test.Input, false,
+                                                    test.ScriptingMode.value_or(ParserScriptingMode::Inert));
 
         output = u8"#document\n";
         for (dom::Node &child : dom::ChildNodeRange(*result))
@@ -701,9 +701,8 @@ namespace krys::boo::html::tests
 
 namespace krys::boo::html::tests
 {
-  TEST_CASE(
-    "HTMLDocumentParser: adjusted foreign attributes get their namespace and prefix",
-    "[HTML][HTMLDocumentParser][html:adjust-foreign-attributes][html:create-an-element-for-the-token]")
+  TEST_CASE("DocumentParser: adjusted foreign attributes get their namespace and prefix",
+            "[HTML][DocumentParser][html:adjust-foreign-attributes][html:create-an-element-for-the-token]")
   {
     auto document = CreateRef<dom::HTMLDocument>();
     auto parser = CreateParser(
@@ -731,7 +730,7 @@ namespace krys::boo::html::tests
 }
 
 #define EXECUTE_HTML_PARSER_TEST_CASE(FileName, Tags)                                                        \
-  TEST_CASE("HTMLDocumentParser(" FileName ")", "[HTML][HTMLDocumentParser]" Tags)                           \
+  TEST_CASE("DocumentParser(" FileName ")", "[HTML][DocumentParser]" Tags)                                   \
   {                                                                                                          \
     krys::boo::html::tests::RunTest(FileName);                                                               \
   }

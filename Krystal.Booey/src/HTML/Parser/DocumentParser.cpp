@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
@@ -9,17 +9,17 @@
 
 namespace krys::boo::html
 {
-  HTMLDocumentParser::HTMLDocumentParser(dom::HTMLDocument &document) noexcept
+  DocumentParser::DocumentParser(dom::HTMLDocument &document) noexcept
       : _document(document), _input(),
         _tokenizer(_input, [&]() { return _treeBuilder.IsCDATASectionAllowedInCurrentContext(); }),
         _treeBuilder(document, _tokenizer, _fragmentParsingContext)
   {
   }
 
-  Ref<dom::DocumentFragment>
-    HTMLDocumentParser::ParseFragment(dom::ContainerNode &target, utf8_string input,
-                                      bool allowDeclarativeShadowRoots, ParserScriptingMode scriptingMode,
-                                      Maybe<SanitizerConfig> &&configuration) noexcept
+  Ref<dom::DocumentFragment> DocumentParser::ParseFragment(dom::ContainerNode &target, utf8_string input,
+                                                           bool allowDeclarativeShadowRoots,
+                                                           ParserScriptingMode scriptingMode,
+                                                           Maybe<SanitizerConfig> &&configuration) noexcept
   {
     // 1. Assert: scriptingMode is either Inert or Fragment.
     krys_debug_assert(scriptingMode == ParserScriptingMode::Inert
@@ -72,7 +72,7 @@ namespace krys::boo::html
       document->_allowDeclarativeShadowRoots = true;
     }
 
-    auto parser = CreateRef<HTMLDocumentParser>(*document);
+    auto parser = CreateRef<DocumentParser>(*document);
     bool sanitizing = configuration.has_value();
     parser->SanitizerConfiguration(krys::move(configuration));
     parser->ScriptingMode(scriptingMode);
@@ -152,7 +152,7 @@ namespace krys::boo::html
     (void)dom::MutationAlgorithms::Append(*root, *document);
 
     // 13. Set up the HTML parser's stack of open elements so that it contains just the single element root.
-    parser->OpenElementStack().Push(HTMLStackItem(TagName::html, Namespace::HTML, *root, {}));
+    parser->GetOpenElementStack().Push(StackItem(TagName::html, Namespace::HTML, *root, {}));
 
     // 14. Let fragment be the result of creating a document fragment given document if configuration is
     //     non-null; otherwise target's node document.
@@ -223,7 +223,7 @@ namespace krys::boo::html
     return fragment;
   }
 
-  void HTMLDocumentParser::StartPlainText() noexcept
+  void DocumentParser::StartPlainText() noexcept
   {
     // https://html.spec.whatwg.org/#navigate-text
     // 3. ... Before any script execution occurs, the user agent must wait for scripts may run for the
@@ -231,17 +231,17 @@ namespace krys::boo::html
     //    agent must act as if the tree builder had emitted a start tag token with tag name "pre" followed by
     //    a single U+000A LINE FEED (LF) character, and switch the HTML parser's tokenizer to the PLAINTEXT
     //    state.
-    HTMLToken token;
+    Token token;
     token.BeginStartTag(U'p');
     token.AppendToName(U'r');
     token.AppendToName(U'e');
-    _treeBuilder.ProcessToken(HTMLTokenAtom(token));
+    _treeBuilder.ProcessToken(TokenAtom(token));
     token.AppendToCharacters(U'\n');
-    _treeBuilder.ProcessToken(HTMLTokenAtom(token));
+    _treeBuilder.ProcessToken(TokenAtom(token));
     _tokenizer.State(TokenizerState::PLAINTEXT);
   }
 
-  void HTMLDocumentParser::PumpTokenizer() noexcept
+  void DocumentParser::PumpTokenizer() noexcept
   {
     while (!IsStopped())
     {
@@ -251,7 +251,7 @@ namespace krys::boo::html
         return;
       }
 
-      HTMLTokenAtom tokenAtom(*token);
+      TokenAtom tokenAtom(*token);
       _treeBuilder.ProcessToken(krys::move(tokenAtom));
     }
 

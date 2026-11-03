@@ -27,7 +27,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -1373,8 +1373,8 @@ namespace krys::boo
       ParseHTMLIntoFragment(utf8_stringview markup, dom::Element &contextElement,
                             bool allowDeclarativeShadowRoots = false) noexcept
     {
-      return html::HTMLDocumentParser::ParseFragment(contextElement, utf8_string(markup),
-                                                     allowDeclarativeShadowRoots);
+      return html::DocumentParser::ParseFragment(contextElement, utf8_string(markup),
+                                                 allowDeclarativeShadowRoots);
     }
 
     // FIXME: The template document for contexts that are templates.

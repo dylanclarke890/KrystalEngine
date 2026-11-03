@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
@@ -188,7 +188,7 @@ namespace krys::boo::tests
     document->SetURL(url::URL(u8"https://example.com/page.html#section"));
     frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
 
-    auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+    auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(u8"<!DOCTYPE html>" + utf8_string(Page), IsEOF(true));
     (void)parser->PumpTokenizer();
     html::EventLoop::Current().RunUntilIdle();

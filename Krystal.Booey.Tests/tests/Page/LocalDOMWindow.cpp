@@ -18,7 +18,7 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Events/ErrorEvent.hpp"
 #include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/BarProp.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
@@ -143,7 +143,7 @@ namespace krys::boo::tests
         frame.CreateView({200, 100});
         Document = CreateRef<dom::HTMLDocument>();
         frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-        auto parser = CreateRef<html::HTMLDocumentParser>(*Document);
+        auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(krys::move(markup), IsEOF(true));
         parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();

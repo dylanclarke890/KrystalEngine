@@ -10,7 +10,7 @@ namespace krys::boo::html
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLScriptElement);
 
-    friend class HTMLTreeBuilder;
+    friend class TreeBuilder;
 
   private:
     UniquePtr<dom::DOMTokenList> _blocking;

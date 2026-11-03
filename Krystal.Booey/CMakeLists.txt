@@ -2037,18 +2037,18 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/MicroParsers/Refresh.hpp
   include/Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp
   include/Krystal.Booey/HTML/Mixins/URLDecomposition.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLElementStack.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLFormattingElementList.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLSrcsetParser.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLStackItem.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLToken.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLTokenAtom.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp
-  include/Krystal.Booey/HTML/Parser/HTMLTreeBuilder.hpp
+  include/Krystal.Booey/HTML/Parser/CharacterReference.hpp
+  include/Krystal.Booey/HTML/Parser/DocumentParser.hpp
+  include/Krystal.Booey/HTML/Parser/FormattingElementList.hpp
   include/Krystal.Booey/HTML/Parser/InputStream.hpp
+  include/Krystal.Booey/HTML/Parser/OpenElementStack.hpp
+  include/Krystal.Booey/HTML/Parser/ParserIdioms.hpp
+  include/Krystal.Booey/HTML/Parser/SrcsetParser.hpp
+  include/Krystal.Booey/HTML/Parser/StackItem.hpp
+  include/Krystal.Booey/HTML/Parser/Token.hpp
+  include/Krystal.Booey/HTML/Parser/TokenAtom.hpp
+  include/Krystal.Booey/HTML/Parser/Tokenizer.hpp
+  include/Krystal.Booey/HTML/Parser/TreeBuilder.hpp
   include/Krystal.Booey/HTML/Sanitizer/Sanitizer.hpp
   include/Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp
@@ -2236,12 +2236,12 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/MicroParsers/Refresh.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
   src/HTML/Mixins/URLDecomposition.cpp
-  src/HTML/Parser/HTMLDocumentParser.cpp
-  src/HTML/Parser/HTMLElementStack.cpp
-  src/HTML/Parser/HTMLFormattingElementList.cpp
-  src/HTML/Parser/HTMLParserIdioms.cpp
-  src/HTML/Parser/HTMLSrcsetParser.cpp
-  src/HTML/Parser/HTMLTreeBuilder.cpp
+  src/HTML/Parser/DocumentParser.cpp
+  src/HTML/Parser/FormattingElementList.cpp
+  src/HTML/Parser/OpenElementStack.cpp
+  src/HTML/Parser/ParserIdioms.cpp
+  src/HTML/Parser/SrcsetParser.cpp
+  src/HTML/Parser/TreeBuilder.cpp
   src/HTML/Sanitizer/Sanitizer.cpp
   src/HTML/Sanitizer/SanitizerAlgorithms.cpp
   src/HTML/Sanitizer/SanitizerConstants.cpp

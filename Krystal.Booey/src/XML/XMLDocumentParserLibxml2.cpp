@@ -15,7 +15,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp"
+#include "Krystal.Booey/HTML/Parser/CharacterReference.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
@@ -765,7 +765,7 @@ namespace krys::boo::xml
       auto &entries = html::NamedCharacterReferences;
       auto it = std::ranges::lower_bound(entries, stringview(reference), std::less {},
                                          &html::NamedCharacterReferenceEntry::Name);
-      if (it == entries.end() || it->Name != reference)
+      if (it == std::ranges::end(entries) || it->Name != reference)
       {
         return {};
       }

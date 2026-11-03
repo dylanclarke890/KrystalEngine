@@ -1,9 +1,9 @@
-﻿#include "Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/CharacterReference.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::html::tests
 {
-  TEST_CASE("HTMLCharacterReference(SearchNumericCharacterReferences)",
+  TEST_CASE("CharacterReference(SearchNumericCharacterReferences)",
             "[HTML][CharacterReference][html:numeric-character-reference-end-state]")
   {
     char32 test = 0x84;
@@ -23,7 +23,7 @@ namespace krys::boo::html::tests
     REQUIRE(SearchNumericCharacterReferences(test) == expected);
   }
 
-  TEST_CASE("HTMLCharacterReference(SearchNamedCharacterReferences)",
+  TEST_CASE("CharacterReference(SearchNamedCharacterReferences)",
             "[HTML][CharacterReference][html:named-character-reference-state]")
   {
     utf32_stringview target = utf32_stringview(U"&LongLeftRightArrow;");
@@ -43,11 +43,11 @@ namespace krys::boo::html::tests
     REQUIRE(entries.size() == 0uz);
   }
 
-  TEST_CASE("HTMLCharacterReference(NamedCharacterReferences)",
+  TEST_CASE("CharacterReference(NamedCharacterReferences)",
             "[HTML][CharacterReference][html:named-character-references]")
   {
     // Every name in the specification's table, sorted for searching.
-    REQUIRE(NamedCharacterReferences.size() == 2'231uz);
+    REQUIRE(std::size(NamedCharacterReferences) == 2'231uz);
     CHECK(std::ranges::is_sorted(NamedCharacterReferences, {}, &NamedCharacterReferenceEntry::Name));
 
     auto find = [](utf32_stringview name)

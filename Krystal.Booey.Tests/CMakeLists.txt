@@ -67,9 +67,9 @@ target_precompile_headers(Krystal.Booey.Tests
 
     <Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp>
     <Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp>
-    <Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp>
-    <Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp>
-    <Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp>
+    <Krystal.Booey/HTML/Parser/DocumentParser.hpp>
+    <Krystal.Booey/HTML/Parser/CharacterReference.hpp>
+    <Krystal.Booey/HTML/Parser/Tokenizer.hpp>
     <Krystal.Booey/CSS/Values/ValuePool.hpp>
 
     <Krystal.Booey.Tests/Style/ResolverTestUtils.hpp>
@@ -507,7 +507,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/FragmentDirective/FragmentDirectiveRangeFinder.cpp
 		tests/DOM/Highlights/Highlight.cpp
 		tests/Loader/FrameLoader.cpp
-		tests/HTML/Parser/HTMLSrcsetParser.cpp
+		tests/HTML/Parser/SrcsetParser.cpp
 		tests/CSS/Parser/SizesAttributeParser.cpp
 		tests/HTML/Elements/HTMLAnchorElement.cpp
 		tests/HTML/Elements/HTMLBaseElement.cpp
@@ -743,9 +743,9 @@ target_sources(Krystal.Booey.Tests
 		tests/MathML/Internals/MathMLElementFactory.cpp
 		tests/MathML/MathMLOperatorElement.cpp
 		tests/MathML/MathMLPresentationElement.cpp
-		tests/HTML/Parser/HTMLCharacterReference.cpp
-		tests/HTML/Parser/HTMLDocumentParser.cpp
-		tests/HTML/Parser/HTMLElementStack.cpp
+		tests/HTML/Parser/CharacterReference.cpp
+		tests/HTML/Parser/DocumentParser.cpp
+		tests/HTML/Parser/OpenElementStack.cpp
 		tests/HTML/Parser/InputStream.cpp
 		tests/HTML/Parser/Tokenizer.cpp
 

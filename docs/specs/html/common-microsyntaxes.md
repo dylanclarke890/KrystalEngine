@@ -90,7 +90,7 @@ Status: reviewed (2026-11-01)
 ##### [2.3.4.3 Floating-point numbers](https://html.spec.whatwg.org/#floating-point-numbers)
 
 Status: reviewed (2026-11-01)
-> `Numbers::ParseFloatingPoint`, rewritten to the steps: it keeps the digits and rounds the exact value once in conversion (`std::from_chars`). `IsValidFloatingPointNumber` and `ParseValidFloatingPoint`; the best representation is `SerializeForNumberType(double)` (`HTML/Parser/HTMLParserIdioms`).
+> `Numbers::ParseFloatingPoint`, rewritten to the steps: it keeps the digits and rounds the exact value once in conversion (`std::from_chars`). `IsValidFloatingPointNumber` and `ParseValidFloatingPoint`; the best representation is `SerializeForNumberType(double)` (`HTML/Parser/ParserIdioms`).
 > Fixed: `+-1` and `--1` parsed, values too small for a double were errors rather than zero, negative zero was returned, and `1.e5` was valid. The number input types' own parsers are upstream's (DIFFERENCES.md).
 
 - [x] [valid floating-point number](https://html.spec.whatwg.org/#valid-floating-point-number) — A string is a valid floating-point number if it consists of:

@@ -1,6 +1,6 @@
-﻿#include "Krystal.Booey.Tests/TestParserUtils.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/Tokenizer.hpp"
+#include "Krystal.Booey.Tests/TestParserUtils.hpp"
+#include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/MagicEnum.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -9,11 +9,11 @@ namespace krys::boo::html::Tests
 {
   namespace
   {
-    void SerialiseHTMLToken(HTMLToken &token, dom::DOMString &output) noexcept
+    void SerialiseHTMLToken(Token &token, dom::DOMString &output) noexcept
     {
       switch (token.Type())
       {
-        case HTMLTokenType::DOCTYPE:
+        case TokenType::DOCTYPE:
         {
           auto doctype = token.ReleaseDOCTYPEData();
           output += u8"DOCTYPE(";
@@ -28,24 +28,24 @@ namespace krys::boo::html::Tests
           output += u8")\n";
           break;
         }
-        case HTMLTokenType::Character:
+        case TokenType::Character:
         {
           output += u8"Character(";
           output += dom::DOMStringView(token.Data());
           output += u8")\n";
           break;
         }
-        case HTMLTokenType::Comment:
+        case TokenType::Comment:
         {
           output += u8"Comment(";
           output += dom::DOMStringView(token.Data());
           output += u8")\n";
           break;
         }
-        case HTMLTokenType::StartTag:
-        case HTMLTokenType::EndTag:
+        case TokenType::StartTag:
+        case TokenType::EndTag:
         {
-          if (token.Type() == HTMLTokenType::StartTag)
+          if (token.Type() == TokenType::StartTag)
           {
             output += u8"StartTag(";
           }
@@ -65,7 +65,7 @@ namespace krys::boo::html::Tests
             output += u8"\"";
           }
 
-          if (token.Type() == HTMLTokenType::StartTag)
+          if (token.Type() == TokenType::StartTag)
           {
             output += u8", SelfClosing=";
             output += token.IsSelfClosing() ? u8"true" : u8"false";
@@ -74,7 +74,7 @@ namespace krys::boo::html::Tests
           output += u8")\n";
           break;
         }
-        case HTMLTokenType::EndOfFile:
+        case TokenType::EndOfFile:
         {
           output += u8"EndOfFile\n";
           break;
@@ -91,7 +91,7 @@ namespace krys::boo::html::Tests
       TokenizerState ExpectedState {TokenizerState::Data};
       bool AppendEOF {false};
       bool CDATASectionAllowed {false};
-      List<HTMLTokenizerError> Errors {};
+      List<TokenizerError> Errors {};
     };
 
     KRYS_NODISCARD List<HTMLTokenizerTest> ParseHTMLTokenizerTests(std::istream &stream) noexcept
@@ -174,7 +174,7 @@ namespace krys::boo::html::Tests
 
             text.remove_prefix(1uz); // skip ' '
 
-            auto error = magic_enum::enum_cast<HTMLParseError>(text, magic_enum::case_insensitive);
+            auto error = magic_enum::enum_cast<ParseError>(text, magic_enum::case_insensitive);
             if (error.has_value())
             {
               currentTest.Errors.push_back({
@@ -202,7 +202,7 @@ namespace krys::boo::html::Tests
     void ExecuteHTMLTokenizerTest(const HTMLTokenizerTest &test, size_t number, size_t total) noexcept
     {
       InputStream inputStream;
-      HTMLTokenizer tokenizer(inputStream, [allowed = test.CDATASectionAllowed]() { return allowed; });
+      Tokenizer tokenizer(inputStream, [allowed = test.CDATASectionAllowed]() { return allowed; });
       tokenizer.State(test.InitialState);
       if (test.AppendEOF)
       {
@@ -281,7 +281,7 @@ namespace krys::boo::html::Tests
   }
 
 #define EXECUTE_HTML_TOKENIZER_TEST_CASE(FileName, Tags)                                                     \
-  TEST_CASE("HTMLTokenizer(" FileName ")", "[HTML][HTMLTokenizer]" Tags)                                     \
+  TEST_CASE("Tokenizer(" FileName ")", "[HTML][Tokenizer]" Tags)                                             \
   {                                                                                                          \
     RunTest(FileName);                                                                                       \
   }

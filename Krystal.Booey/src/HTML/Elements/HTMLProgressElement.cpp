@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
+#include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/ProgressShadowElement.hpp"
 #include "Krystal.Booey/Rendering/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/HTML/Parser/HTMLTreeBuilder.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/TreeBuilder.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -23,7 +23,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
+#include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -31,18 +31,17 @@
 
 namespace krys::boo::html
 {
-  HTMLTreeBuilder::HTMLTreeBuilder(dom::Document &document, HTMLTokenizer &tokenizer,
-                                   Maybe<HTMLStackItem> &context) noexcept
+  TreeBuilder::TreeBuilder(dom::Document &document, Tokenizer &tokenizer, Maybe<StackItem> &context) noexcept
       : _document(document), _tokenizer(tokenizer), _context(context)
   {
   }
 
-  void HTMLTreeBuilder::ProcessToken(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::ProcessToken(TokenAtom &&token) noexcept
   {
     if (_ignoreNextNewline)
     {
       _ignoreNextNewline = false;
-      if (token.Type() == HTMLTokenType::Character && !token.Characters().empty()
+      if (token.Type() == TokenType::Character && !token.Characters().empty()
           && token.Characters().front() == u8'\n')
       {
         token._data = token._data.substr(1uz);
@@ -63,12 +62,12 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::PushTemplateInsertionMode(InsertionMode mode) noexcept
+  void TreeBuilder::PushTemplateInsertionMode(InsertionMode mode) noexcept
   {
     _templateInsertionModes.push_back(mode);
   }
 
-  bool HTMLTreeBuilder::ShouldProcessAccordingToRulesForHTMLContent(const HTMLTokenAtom &token) noexcept
+  bool TreeBuilder::ShouldProcessAccordingToRulesForHTMLContent(const TokenAtom &token) noexcept
   {
     if (_openElementStack.IsEmpty())
     {
@@ -83,7 +82,7 @@ namespace krys::boo::html
 
     if (IsMathMLTextIntegrationPoint(adjustedCurrentNode))
     {
-      if (token.Type() == HTMLTokenType::StartTag)
+      if (token.Type() == TokenType::StartTag)
       {
         auto tagName = token.Name();
         if (tagName != u8"mglyph" && tagName != u8"malignmark")
@@ -91,26 +90,26 @@ namespace krys::boo::html
           return true;
         }
       }
-      else if (token.Type() == HTMLTokenType::Character)
+      else if (token.Type() == TokenType::Character)
       {
         return true;
       }
     }
 
     if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::MathML
-        && adjustedCurrentNode.LocalName() == u8"annotation-xml" && token.Type() == HTMLTokenType::StartTag
+        && adjustedCurrentNode.LocalName() == u8"annotation-xml" && token.Type() == TokenType::StartTag
         && token.Name() == u8"svg")
     {
       return true;
     }
 
     if (IsHTMLIntegrationPoint(adjustedCurrentNode)
-        && (token.Type() == HTMLTokenType::StartTag || token.Type() == HTMLTokenType::Character))
+        && (token.Type() == TokenType::StartTag || token.Type() == TokenType::Character))
     {
       return true;
     }
 
-    if (token.Type() == HTMLTokenType::EndOfFile)
+    if (token.Type() == TokenType::EndOfFile)
     {
       return true;
     }
@@ -118,7 +117,7 @@ namespace krys::boo::html
     return false;
   }
 
-  void HTMLTreeBuilder::ProcessAccordingToRulesForHTMLContent(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::ProcessAccordingToRulesForHTMLContent(TokenAtom &&token) noexcept
   {
     switch (_insertionMode)
     {
@@ -146,7 +145,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::ProcessAccordingToRulesForForeignContent(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::ProcessAccordingToRulesForForeignContent(TokenAtom &&token) noexcept
   {
     auto InvalidTag = [&]()
     {
@@ -185,7 +184,7 @@ namespace krys::boo::html
 
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (!InsertLeadingWhitespaceAndNulls(token))
         {
@@ -197,18 +196,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -356,7 +355,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"br" || token.Name() == u8"p")
         {
@@ -418,12 +417,12 @@ namespace krys::boo::html
     }
   }
 
-  dom::Element &HTMLTreeBuilder::CurrentNode() noexcept
+  dom::Element &TreeBuilder::CurrentNode() noexcept
   {
     return _openElementStack.Bottom().Element();
   }
 
-  dom::Element &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
+  dom::Element &TreeBuilder::AdjustedCurrentNode() noexcept
   {
     if (_context.has_value() && _openElementStack.Size() == 1uz)
     {
@@ -435,7 +434,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::ParseError(const HTMLTokenAtom &token) noexcept
+  void TreeBuilder::ParseError(const TokenAtom &token) noexcept
   {
     // FIXME: Implement parse error handling/logging.
     (void)token;
@@ -443,7 +442,7 @@ namespace krys::boo::html
 
 #pragma region InsertionMode Algorithms
 
-  void HTMLTreeBuilder::ResetInsertionModeAppropriately() noexcept
+  void TreeBuilder::ResetInsertionModeAppropriately() noexcept
   {
     // 1. Let last be false.
     bool last = false;
@@ -586,17 +585,17 @@ namespace krys::boo::html
     }
   }
 
-  InsertionMode HTMLTreeBuilder::CurrentTemplateInsertionMode() const noexcept
+  InsertionMode TreeBuilder::CurrentTemplateInsertionMode() const noexcept
   {
     krys_debug_assert(!_templateInsertionModes.empty());
     return _templateInsertionModes.back();
   }
 
-  void HTMLTreeBuilder::InitialMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InitialMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (SkipLeadingWhitespace(token))
         {
@@ -605,13 +604,13 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         AppendCommentToDocument(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         auto &docTypeData = *token.DOCTYPEData();
 
@@ -675,22 +674,22 @@ namespace krys::boo::html
     BeforeHTMLMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::BeforeHTMLMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::BeforeHTMLMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         AppendCommentToDocument(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (SkipLeadingWhitespace(token))
         {
@@ -699,7 +698,7 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         if (token.Name() == u8"html")
         {
@@ -713,7 +712,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"head" || token.Name() == u8"body" || token.Name() == u8"html"
             || token.Name() == u8"br")
@@ -736,11 +735,11 @@ namespace krys::boo::html
     BeforeHeadMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::BeforeHeadMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::BeforeHeadMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (SkipLeadingWhitespace(token))
         {
@@ -749,18 +748,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         if (token.Name() == u8"html")
         {
@@ -778,7 +777,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"head" || token.Name() == u8"body" || token.Name() == u8"html"
             || token.Name() == u8"br")
@@ -801,11 +800,11 @@ namespace krys::boo::html
     InHeadMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InHeadMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InHeadMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (InsertLeadingWhitespace(token))
         {
@@ -814,18 +813,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -931,7 +930,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -986,16 +985,16 @@ namespace krys::boo::html
     AfterHeadMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InHeadNoscriptMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InHeadNoscriptMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (InsertLeadingWhitespace(token))
         {
@@ -1004,12 +1003,12 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InHeadMode(krys::move(token));
         return;
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -1039,7 +1038,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"noscript")
         {
@@ -1064,11 +1063,11 @@ namespace krys::boo::html
     InHeadMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::AfterHeadMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::AfterHeadMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (InsertLeadingWhitespace(token))
         {
@@ -1077,18 +1076,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -1148,7 +1147,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"template")
         {
@@ -1177,11 +1176,11 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InBodyMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InBodyMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (!RemoveNulls(token))
         {
@@ -1200,18 +1199,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -1527,7 +1526,7 @@ namespace krys::boo::html
 
             auto &a = _openElementStack.Bottom();
             _activeFormattingElements.PushElement(
-              HTMLStackItem(a.TagName(), a.Namespace(), a.Element(), a.Attributes()));
+              StackItem(a.TagName(), a.Namespace(), a.Element(), a.Attributes()));
 
             return;
           }
@@ -1549,9 +1548,8 @@ namespace krys::boo::html
 
             auto &fmtOpenItem = _openElementStack.Bottom();
             ParsedAttributeList fmtAttrsCopy = fmtOpenItem.Attributes();
-            _activeFormattingElements.PushElement(
-              HTMLStackItem(fmtOpenItem.TagName(), fmtOpenItem.Namespace(), fmtOpenItem.Element(),
-                            krys::move(fmtAttrsCopy)));
+            _activeFormattingElements.PushElement(StackItem(fmtOpenItem.TagName(), fmtOpenItem.Namespace(),
+                                                            fmtOpenItem.Element(), krys::move(fmtAttrsCopy)));
 
             return;
           }
@@ -1570,9 +1568,9 @@ namespace krys::boo::html
 
             auto &nobrOpenItem = _openElementStack.Bottom();
             ParsedAttributeList nobrAttrsCopy = nobrOpenItem.Attributes();
-            _activeFormattingElements.PushElement(
-              HTMLStackItem(nobrOpenItem.TagName(), nobrOpenItem.Namespace(), nobrOpenItem.Element(),
-                            krys::move(nobrAttrsCopy)));
+            _activeFormattingElements.PushElement(StackItem(nobrOpenItem.TagName(), nobrOpenItem.Namespace(),
+                                                            nobrOpenItem.Element(),
+                                                            krys::move(nobrAttrsCopy)));
 
             return;
           }
@@ -1903,7 +1901,7 @@ namespace krys::boo::html
           }
         }
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2190,7 +2188,7 @@ namespace krys::boo::html
           }
         }
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         if (!_templateInsertionModes.empty())
         {
@@ -2209,16 +2207,16 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::TextMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::TextMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         InsertCharacters(token.ReleaseCharacters());
         return;
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         ParseError(token);
 
@@ -2234,7 +2232,7 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         // An end tag whose tag name is "script":
         // (Skipped: there's no scripting, so there's no microtask checkpoint, insertion point or script
@@ -2248,11 +2246,11 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::InTableMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InTableMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         switch (_openElementStack.Bottom().TagName())
         {
@@ -2275,18 +2273,18 @@ namespace krys::boo::html
 
         break; // fall through to "anything else"
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2424,7 +2422,7 @@ namespace krys::boo::html
         }
         break; // fall through to "anything else"
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2465,7 +2463,7 @@ namespace krys::boo::html
         }
         break; // fall through to "anything else"
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         InBodyMode(krys::move(token));
         return;
@@ -2479,9 +2477,9 @@ namespace krys::boo::html
     _fosterParenting = false;
   }
 
-  void HTMLTreeBuilder::InTableTextMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InTableTextMode(TokenAtom &&token) noexcept
   {
-    if (token.Type() == HTMLTokenType::Character)
+    if (token.Type() == TokenType::Character)
     {
       if (!RemoveNulls(token))
       {
@@ -2533,7 +2531,7 @@ namespace krys::boo::html
     ProcessToken(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InCaptionMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InCaptionMode(TokenAtom &&token) noexcept
   {
     auto CloseCaption = [&]() -> bool
     {
@@ -2558,7 +2556,7 @@ namespace krys::boo::html
 
     switch (token.Type())
     {
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2583,7 +2581,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2624,11 +2622,11 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InColumnGroupMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InColumnGroupMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (InsertLeadingWhitespace(token))
         {
@@ -2637,18 +2635,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2673,7 +2671,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2704,7 +2702,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         InBodyMode(krys::move(token));
         return;
@@ -2723,11 +2721,11 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InTableBodyMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InTableBodyMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2784,7 +2782,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2843,11 +2841,11 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InRowMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InRowMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2889,7 +2887,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -2966,7 +2964,7 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InCellMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InCellMode(TokenAtom &&token) noexcept
   {
     auto CloseTheCell = [&]()
     {
@@ -2992,7 +2990,7 @@ namespace krys::boo::html
 
     switch (token.Type())
     {
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -3016,7 +3014,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -3077,18 +3075,18 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InTemplateMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InTemplateMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
-      case HTMLTokenType::Comment:
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::Character:
+      case TokenType::Comment:
+      case TokenType::DOCTYPE:
       {
         InBodyMode(krys::move(token));
         return;
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -3164,7 +3162,7 @@ namespace krys::boo::html
           }
         }
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"template")
         {
@@ -3175,7 +3173,7 @@ namespace krys::boo::html
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         if (!_openElementStack.ContainsTemplateElement())
         {
@@ -3197,11 +3195,11 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::AfterBodyMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::AfterBodyMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         ReconstructActiveFormattingElements();
 
@@ -3212,18 +3210,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment(), InsertionLocation {&_openElementStack.Top().Element(), nullptr});
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         if (token.Name() == u8"html")
         {
@@ -3232,7 +3230,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"html")
         {
@@ -3247,7 +3245,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         StopParsing();
         return;
@@ -3260,11 +3258,11 @@ namespace krys::boo::html
     ProcessToken(krys::move(token));
   }
 
-  void HTMLTreeBuilder::InFramesetMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InFramesetMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (!RemoveNonWhitespace(token))
         {
@@ -3276,18 +3274,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -3318,7 +3316,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"frameset")
         {
@@ -3340,7 +3338,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         if (&_openElementStack.Bottom() != &_openElementStack.Top())
         {
@@ -3355,11 +3353,11 @@ namespace krys::boo::html
     ParseError(token);
   }
 
-  void HTMLTreeBuilder::AfterFramesetMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::AfterFramesetMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         if (!RemoveNonWhitespace(token))
         {
@@ -3371,18 +3369,18 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         InsertComment(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         ParseError(token);
         return; // ignore the token
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -3400,7 +3398,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndTag:
+      case TokenType::EndTag:
       {
         if (token.Name() == u8"html")
         {
@@ -3410,7 +3408,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         StopParsing();
         return;
@@ -3420,22 +3418,22 @@ namespace krys::boo::html
     ParseError(token);
   }
 
-  void HTMLTreeBuilder::AfterAfterBodyMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::AfterAfterBodyMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         AppendCommentToDocument(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         InBodyMode(krys::move(token));
         return;
       }
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         ReconstructActiveFormattingElements();
 
@@ -3446,7 +3444,7 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         if (token.Name() == u8"html")
         {
@@ -3456,7 +3454,7 @@ namespace krys::boo::html
 
         break;
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         StopParsing();
         return;
@@ -3469,22 +3467,22 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void HTMLTreeBuilder::AfterAfterFramesetMode(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::AfterAfterFramesetMode(TokenAtom &&token) noexcept
   {
     switch (token.Type())
     {
-      case HTMLTokenType::Comment:
+      case TokenType::Comment:
       {
         AppendCommentToDocument(token.Comment());
         return;
       }
       // FIXME: Processing instruction tokens, once the tokenizer makes them.
-      case HTMLTokenType::DOCTYPE:
+      case TokenType::DOCTYPE:
       {
         InBodyMode(krys::move(token));
         return;
       }
-      case HTMLTokenType::Character:
+      case TokenType::Character:
       {
         ReconstructActiveFormattingElements();
         if (InsertLeadingWhitespace(token))
@@ -3494,7 +3492,7 @@ namespace krys::boo::html
 
         return;
       }
-      case HTMLTokenType::StartTag:
+      case TokenType::StartTag:
       {
         auto tagName = ParseTagName(token.Name().View());
         switch (tagName)
@@ -3512,7 +3510,7 @@ namespace krys::boo::html
         }
         break;
       }
-      case HTMLTokenType::EndOfFile:
+      case TokenType::EndOfFile:
       {
         StopParsing();
         return;
@@ -3522,7 +3520,7 @@ namespace krys::boo::html
     ParseError(token);
   }
 
-  void HTMLTreeBuilder::InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName)
+  void TreeBuilder::InBodyGenericEndTag(const TokenAtom &token, TagName tagName)
   {
     // 1. Initialize node to be the current node (the bottommost node of the stack).
     for (auto nodeIt = _openElementStack.rbegin(); nodeIt != _openElementStack.rend(); ++nodeIt)
@@ -3560,7 +3558,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::StopParsing() noexcept
+  void TreeBuilder::StopParsing() noexcept
   {
     // https://html.spec.whatwg.org/#the-end
     // 1. (Skipped: there's no speculative HTML parser.)
@@ -3580,7 +3578,7 @@ namespace krys::boo::html
 
 #pragma region Character Insertion
 
-  void HTMLTreeBuilder::InsertCharacters(dom::DOMString data) noexcept
+  void TreeBuilder::InsertCharacters(dom::DOMString data) noexcept
   {
     // 1. Let data be the characters passed to the algorithm, or, if no characters were explicitly specified,
     //    the character of the character token being processed.
@@ -3614,9 +3612,9 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLTreeBuilder::RemoveNulls(HTMLTokenAtom &token) noexcept
+  bool TreeBuilder::RemoveNulls(TokenAtom &token) noexcept
   {
-    krys_debug_assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == TokenType::Character);
 
     auto removed = std::erase_if(token._data, [](char8 ch) { return ch == '\0'; });
     if (removed > 0uz)
@@ -3627,9 +3625,9 @@ namespace krys::boo::html
     return !token.Characters().empty();
   }
 
-  bool HTMLTreeBuilder::RemoveNonWhitespace(HTMLTokenAtom &token) noexcept
+  bool TreeBuilder::RemoveNonWhitespace(TokenAtom &token) noexcept
   {
-    krys_debug_assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == TokenType::Character);
 
     auto removed =
       std::erase_if(token._data, [](char8 ch) { return !infra::StringAlgorithms::IsASCIIWhitespace(ch); });
@@ -3641,9 +3639,9 @@ namespace krys::boo::html
     return !token.Characters().empty();
   }
 
-  bool HTMLTreeBuilder::SkipLeadingWhitespace(HTMLTokenAtom &token) noexcept
+  bool TreeBuilder::SkipLeadingWhitespace(TokenAtom &token) noexcept
   {
-    krys_debug_assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == TokenType::Character);
 
     auto begin = token.Characters().begin();
     auto position = begin;
@@ -3653,9 +3651,9 @@ namespace krys::boo::html
     return !token.Characters().empty();
   }
 
-  bool HTMLTreeBuilder::InsertLeadingWhitespace(HTMLTokenAtom &token) noexcept
+  bool TreeBuilder::InsertLeadingWhitespace(TokenAtom &token) noexcept
   {
-    krys_debug_assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == TokenType::Character);
 
     auto begin = token.Characters().begin();
     auto position = begin;
@@ -3670,9 +3668,9 @@ namespace krys::boo::html
     return !token.Characters().empty();
   }
 
-  bool HTMLTreeBuilder::InsertLeadingWhitespaceAndNulls(HTMLTokenAtom &token) noexcept
+  bool TreeBuilder::InsertLeadingWhitespaceAndNulls(TokenAtom &token) noexcept
   {
-    krys_debug_assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == TokenType::Character);
 
     constexpr static dom::DOMStringView Replacement = u8"\uFFFD";
 
@@ -3715,7 +3713,7 @@ namespace krys::boo::html
 #pragma region Insertion Algorithms
 
   // https://html.spec.whatwg.org/#appropriate-place-for-inserting-a-node
-  InsertionLocation HTMLTreeBuilder::AppropriatePlaceToInsertNode(dom::ContainerNode *targetOverride) noexcept
+  InsertionLocation TreeBuilder::AppropriatePlaceToInsertNode(dom::ContainerNode *targetOverride) noexcept
   {
     // 1. Let targetParent be overrideTarget if it is not null; otherwise the current node.
     auto &target = targetOverride ? *targetOverride : CurrentNode();
@@ -3828,7 +3826,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#adjusted-insertion-location
   InsertionLocation
-    HTMLTreeBuilder::AdjustedInsertionLocation(Maybe<InsertionLocation> insertionLocation) noexcept
+    TreeBuilder::AdjustedInsertionLocation(Maybe<InsertionLocation> insertionLocation) noexcept
   {
     // 1. Let location be insertionLocation if insertionLocation is non-null; otherwise the appropriate
     //    place for inserting a node.
@@ -3850,7 +3848,7 @@ namespace krys::boo::html
     return redirect->second;
   }
 
-  void HTMLTreeBuilder::RedirectInsertions(dom::Element &element, InsertionLocation location) noexcept
+  void TreeBuilder::RedirectInsertions(dom::Element &element, InsertionLocation location) noexcept
   {
     if (_insertionTargetRedirectionMap.insert_or_assign(&element, location).second)
     {
@@ -3859,9 +3857,9 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
-  void HTMLTreeBuilder::InsertElementAtAdjustedInsertionLocation(dom::Element &element,
-                                                                 Maybe<InsertionLocation> location,
-                                                                 bool alreadySanitized) noexcept
+  void TreeBuilder::InsertElementAtAdjustedInsertionLocation(dom::Element &element,
+                                                             Maybe<InsertionLocation> location,
+                                                             bool alreadySanitized) noexcept
   {
     // 1. Let (targetParent, referenceChild) be the adjusted insertion location given overrideLocation.
     auto [parent, beforeSibling] = AdjustedInsertionLocation(location);
@@ -3961,7 +3959,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#parsing-main-inhead (a start tag whose tag name is "template")
-  void HTMLTreeBuilder::InsertTemplateElement(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::InsertTemplateElement(TokenAtom &&token) noexcept
   {
     // 1. Let templateStartTag be the start tag.
     auto &templateStartTag = token;
@@ -4002,8 +4000,8 @@ namespace krys::boo::html
 
     // 10. Push template onto the stack of open elements so that it is the new current node.
     element->BeginParsingChildren();
-    _openElementStack.Push(HTMLStackItem(TagName::template_, Namespace::HTML, *element,
-                                         krys::move(templateStartTag.Attributes())));
+    _openElementStack.Push(
+      StackItem(TagName::template_, Namespace::HTML, *element, krys::move(templateStartTag.Attributes())));
 
     // 11. Let sanitizerAction be "Keep".
     // 12. If the parser's parser sanitizer configuration is not null, then set sanitizerAction to the result
@@ -4116,15 +4114,15 @@ namespace krys::boo::html
     }
   }
 
-  SanitizerAction HTMLTreeBuilder::SanitizerActionFor(dom::DOMStringView localName,
-                                                      dom::DOMStringAtom namespaceURI) const noexcept
+  SanitizerAction TreeBuilder::SanitizerActionFor(dom::DOMStringView localName,
+                                                  dom::DOMStringAtom namespaceURI) const noexcept
   {
     return _sanitizerConfig
              ? SanitizerAlgorithms::ActionForElementName(localName, namespaceURI, *_sanitizerConfig)
              : SanitizerAction::Keep;
   }
 
-  void HTMLTreeBuilder::MergeAttributes(dom::Element &element, const ParsedAttributeList &attributes) noexcept
+  void TreeBuilder::MergeAttributes(dom::Element &element, const ParsedAttributeList &attributes) noexcept
   {
     // For each attribute on the token:
     for (auto &attr : attributes)
@@ -4149,9 +4147,8 @@ namespace krys::boo::html
     }
   }
 
-  Ref<dom::Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token,
-                                                          dom::DOMStringAtom namespaceURI,
-                                                          bool onlyAddToElementStack) noexcept
+  Ref<dom::Element> TreeBuilder::InsertForeignElement(TokenAtom &&token, dom::DOMStringAtom namespaceURI,
+                                                      bool onlyAddToElementStack) noexcept
   {
     // 1. Let element be the result of creating an element for the token given token, namespace, and the
     // target
@@ -4175,7 +4172,7 @@ namespace krys::boo::html
     // 3. Push element onto the stack of open elements so that it is the new current node.
     auto tagName = ParseTagName(token.Name().View());
     auto tagNamespace = ParseNamespace(namespaceURI.View());
-    HTMLStackItem stackItem(tagName, tagNamespace, *element, krys::move(token.Attributes()));
+    StackItem stackItem(tagName, tagNamespace, *element, krys::move(token.Attributes()));
 
     _openElementStack.Push(krys::move(stackItem));
 
@@ -4183,12 +4180,12 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<dom::Element> HTMLTreeBuilder::InsertHTMLElement(HTMLTokenAtom &&token) noexcept
+  Ref<dom::Element> TreeBuilder::InsertHTMLElement(TokenAtom &&token) noexcept
   {
     return InsertForeignElement(krys::move(token), infra::Namespaces::HTML, false);
   }
 
-  void HTMLTreeBuilder::InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position) noexcept
+  void TreeBuilder::InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position) noexcept
   {
     // 1. If the parser's parser sanitizer configuration is non-null and the parser's parser sanitizer
     //    configuration does not allow comments, then return.
@@ -4209,12 +4206,12 @@ namespace krys::boo::html
     (void)dom::MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
   }
 
-  void HTMLTreeBuilder::AppendCommentToDocument(dom::DOMStringView data) noexcept
+  void TreeBuilder::AppendCommentToDocument(dom::DOMStringView data) noexcept
   {
     InsertComment(data, InsertionLocation {&_document, nullptr});
   }
 
-  void HTMLTreeBuilder::ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::ParseGenericRawTextElement(TokenAtom &&token) noexcept
   {
     // 1. Insert an HTML element for the token.
     InsertHTMLElement(krys::move(token));
@@ -4231,7 +4228,7 @@ namespace krys::boo::html
     _insertionMode = InsertionMode::Text;
   }
 
-  void HTMLTreeBuilder::ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept
+  void TreeBuilder::ParseGenericRCDATATextElement(TokenAtom &&token) noexcept
   {
     // 1. Insert an HTML element for the token.
     InsertHTMLElement(krys::move(token));
@@ -4248,9 +4245,9 @@ namespace krys::boo::html
     _insertionMode = InsertionMode::Text;
   }
 
-  Ref<dom::Element> HTMLTreeBuilder::CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
-                                                   const ParsedAttributeList &attributes,
-                                                   dom::ContainerNode &intendedParent) noexcept
+  Ref<dom::Element> TreeBuilder::CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
+                                               const ParsedAttributeList &attributes,
+                                               dom::ContainerNode &intendedParent) noexcept
   {
     // https://html.spec.whatwg.org/#create-an-element-for-the-token
     // 1.-2. (There's no speculative parser.)
@@ -4424,15 +4421,15 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<dom::Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item,
-                                                   dom::ContainerNode *intendedParent) noexcept
+  Ref<dom::Element> TreeBuilder::CreateElement(const StackItem &item,
+                                               dom::ContainerNode *intendedParent) noexcept
   {
     auto &node = item.Element();
     auto &parent = intendedParent != nullptr ? *intendedParent : *node.ParentNode();
     return CreateElement(node.LocalName(), node.NamespaceURI(), item.Attributes(), parent);
   }
 
-  void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
+  void TreeBuilder::ReconstructActiveFormattingElements() noexcept
   {
     // 1. If there are no entries in the list of active formatting elements, then there is nothing to
     //    reconstruct; stop this algorithm.
@@ -4512,7 +4509,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::ClosePElement(const HTMLTokenAtom &token) noexcept
+  void TreeBuilder::ClosePElement(const TokenAtom &token) noexcept
   {
     // 1. Generate implied end tags, except for p elements.
     _openElementStack.GenerateImpliedEndTags(TagName::p);
@@ -4531,7 +4528,7 @@ namespace krys::boo::html
 
 #pragma region Adjust Attribute Algorithms
 
-  void HTMLTreeBuilder::AdjustForeignAttributes(HTMLTokenAtom &token) noexcept
+  void TreeBuilder::AdjustForeignAttributes(TokenAtom &token) noexcept
   {
     constexpr static Array<Pair<dom::DOMStringView, ParsedAttributeFlags>, 11uz> attributesToAdjust = {
       Pair {u8"xlink:actuate", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
@@ -4560,7 +4557,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::AdjustSVGAttributes(HTMLTokenAtom &token) noexcept
+  void TreeBuilder::AdjustSVGAttributes(TokenAtom &token) noexcept
   {
     constexpr static Array<Array<dom::DOMStringView, 2uz>, 58uz> attributesToAdjust = {
       Array<dom::DOMStringView, 2> {u8"attributename", u8"attributeName"},
@@ -4636,7 +4633,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTreeBuilder::AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept
+  void TreeBuilder::AdjustMathMLAttributes(TokenAtom &token) noexcept
   {
     auto &attributes = token.Attributes();
 
@@ -4653,9 +4650,9 @@ namespace krys::boo::html
 
 #pragma region Quirks Mode Algorithms
 
-  bool HTMLTreeBuilder::IsQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept
+  bool TreeBuilder::IsQuirksModeDOCTYPE(const TokenAtom &token) const noexcept
   {
-    krys_debug_assert(token.Type() == HTMLTokenType::DOCTYPE);
+    krys_debug_assert(token.Type() == TokenType::DOCTYPE);
 
     if (token.IsForceQuirks() || token.Name() != u8"html")
     {
@@ -4759,9 +4756,9 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLTreeBuilder::IsLimitedQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept
+  bool TreeBuilder::IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) const noexcept
   {
-    krys_debug_assert(token.Type() == HTMLTokenType::DOCTYPE);
+    krys_debug_assert(token.Type() == TokenType::DOCTYPE);
 
     auto &data = *token.DOCTYPEData();
 
@@ -4803,7 +4800,7 @@ namespace krys::boo::html
 
 #pragma region Adoption Agency Algorithms
 
-  void HTMLTreeBuilder::RunAdoptionAgency(HTMLTokenAtom &token) noexcept
+  void TreeBuilder::RunAdoptionAgency(TokenAtom &token) noexcept
   {
     // 1. Let subject be token's tag name.
     auto subject = ParseTagName(token.Name().View());
@@ -4840,8 +4837,7 @@ namespace krys::boo::html
       //     - has the tag name subject.
       //     If there is no such element, then act as described in the "any other end tag" entry above and
       //     return.
-      HTMLStackItem *formattingElement =
-        _activeFormattingElements.FindFromLastMarker(subject, Namespace::HTML);
+      StackItem *formattingElement = _activeFormattingElements.FindFromLastMarker(subject, Namespace::HTML);
 
       if (formattingElement == nullptr)
       {
@@ -4878,7 +4874,7 @@ namespace krys::boo::html
 
       // 4g. Let furthestBlock be the topmost node in the stack of open elements that is lower in the
       //     stack than formattingElement, and is an element in the special category. There might not be one.
-      HTMLStackItem *furthestBlock = FurthestSpecialElementBlock(formattingElementNode);
+      StackItem *furthestBlock = FurthestSpecialElementBlock(formattingElementNode);
 
       // 4h. If there is no furthestBlock, then the UA must first pop all the nodes from the bottom of
       //     the stack of open elements, from the current node up to and including formattingElement, then
@@ -4896,7 +4892,7 @@ namespace krys::boo::html
 
       // 4i. Let commonAncestor be the element immediately above formattingElement in the stack of open
       //     elements.
-      HTMLStackItem *commonAncestor = _openElementStack.EntryBefore(formattingElementNode);
+      StackItem *commonAncestor = _openElementStack.EntryBefore(formattingElementNode);
 
       // 4j. Let a bookmark note the position of formattingElement in the list of active formatting
       //     elements relative to the elements on either side of it in the list.
@@ -4936,7 +4932,7 @@ namespace krys::boo::html
 
       auto ElementAbove = [&](dom::Element &node) -> dom::Element *
       {
-        HTMLStackItem *entry = _openElementStack.EntryBefore(node);
+        StackItem *entry = _openElementStack.EntryBefore(node);
         return entry != nullptr ? &entry->Element() : nullptr;
       };
       dom::Element *immediatelyAbove = ElementAbove(*node);
@@ -5089,10 +5085,8 @@ namespace krys::boo::html
       auto newTagName = formattingElement->TagName();
       auto newTagNamespace = formattingElement->Namespace();
       auto newTagAttributes = ParsedAttributeList(formattingElement->Attributes());
-      auto newFormattingElementItem =
-        HTMLStackItem(newTagName, newTagNamespace, *newElement, newTagAttributes);
-      auto newStackItem =
-        HTMLStackItem(newTagName, newTagNamespace, *newElement, krys::move(newTagAttributes));
+      auto newFormattingElementItem = StackItem(newTagName, newTagNamespace, *newElement, newTagAttributes);
+      auto newStackItem = StackItem(newTagName, newTagNamespace, *newElement, krys::move(newTagAttributes));
 
       // 4w. Remove formattingElement from the list of active formatting elements, and insert newElement
       //     into the list of active formatting elements at the position of the aforementioned bookmark.
@@ -5163,7 +5157,7 @@ namespace krys::boo::html
     }
   }
 
-  HTMLStackItem *HTMLTreeBuilder::FurthestSpecialElementBlock(const dom::Element &formattingElement) noexcept
+  StackItem *TreeBuilder::FurthestSpecialElementBlock(const dom::Element &formattingElement) noexcept
   {
     // Get the index of the formatting element in the open element stack.
     size_t formattingIndex = std::distance(
@@ -5188,7 +5182,7 @@ namespace krys::boo::html
 
 #pragma region IntegrationPoint Algorithms
 
-  bool HTMLTreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept
+  bool TreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept
   {
     if (element.NamespaceURI() == infra::Namespaces::MathML)
     {
@@ -5209,7 +5203,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLTreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) const noexcept
+  bool TreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) const noexcept
   {
     if (element.NamespaceURI() == infra::Namespaces::MathML)
     {

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/Parser/HTMLElementStack.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLStackItem.hpp"
+#include "Krystal.Booey/HTML/Parser/OpenElementStack.hpp"
+#include "Krystal.Booey/HTML/Parser/StackItem.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -11,22 +11,22 @@ namespace krys::boo::html
   class FormattingListEntry
   {
   private:
-    Maybe<HTMLStackItem> _item;
+    Maybe<StackItem> _item;
 
   public:
     FormattingListEntry() noexcept = default;
 
-    FormattingListEntry(HTMLStackItem &&item) noexcept : _item(krys::move(item))
+    FormattingListEntry(StackItem &&item) noexcept : _item(krys::move(item))
     {
     }
 
-    KRYS_NODISCARD HTMLStackItem &Item() noexcept
+    KRYS_NODISCARD StackItem &Item() noexcept
     {
       krys_debug_assert(_item.has_value());
       return _item.value();
     }
 
-    KRYS_NODISCARD const HTMLStackItem &Item() const noexcept
+    KRYS_NODISCARD const StackItem &Item() const noexcept
     {
       krys_debug_assert(_item.has_value());
       return _item.value();
@@ -42,14 +42,14 @@ namespace krys::boo::html
       return _item.has_value();
     }
 
-    void ReplaceItem(HTMLStackItem newItem) noexcept
+    void ReplaceItem(StackItem newItem) noexcept
     {
       _item = krys::move(newItem);
     }
   };
 
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-list-of-active-formatting-elements
-  class HTMLFormattingElementList
+  class FormattingElementList
   {
   private:
     List<FormattingListEntry> _formattingElements;
@@ -61,11 +61,11 @@ namespace krys::boo::html
 
     /// @brief Pushes an element onto the list of active formatting elements.
     /// @see https://html.spec.whatwg.org/push-onto-the-list-of-active-formatting-elements
-    void PushElement(HTMLStackItem &&item) noexcept;
+    void PushElement(StackItem &&item) noexcept;
 
     /// @brief Searches from the end of the list back to the last marker for an element with the given tag
     /// name. Returns a pointer to that stack item, or null if none is found.
-    KRYS_NODISCARD HTMLStackItem *FindFromLastMarker(TagName tagName, Namespace tagNamespace) noexcept;
+    KRYS_NODISCARD StackItem *FindFromLastMarker(TagName tagName, Namespace tagNamespace) noexcept;
 
     /// @brief Returns a pointer to the formatting entry whose node matches the given node, or nullptr if it
     /// wasn't found.
@@ -128,7 +128,7 @@ namespace krys::boo::html
     void RemoveAndUpdateBookmark(const dom::Element &node, Bookmark &bookmark) noexcept;
 
     /// @brief Inserts newItem at the bookmark position.
-    void InsertAtBookmark(HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept;
+    void InsertAtBookmark(StackItem &&newItem, const Bookmark &bookmark) noexcept;
 
 #pragma endregion
   };

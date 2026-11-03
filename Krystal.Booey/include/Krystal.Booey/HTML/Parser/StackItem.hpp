@@ -2,13 +2,13 @@
 
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLTokenAtom.hpp"
+#include "Krystal.Booey/HTML/Parser/TokenAtom.hpp"
 #include "Krystal.Booey/HTML/Types/Namespace.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
 
 namespace krys::boo::html
 {
-  class HTMLStackItem
+  class StackItem
   {
   private:
     TagName _name {TagName::Unknown};
@@ -17,17 +17,17 @@ namespace krys::boo::html
     ParsedAttributeList _attributes;
 
   public:
-    HTMLStackItem() noexcept = default;
+    StackItem() noexcept = default;
 
-    HTMLStackItem(TagName tagName, Namespace tagNamespace, dom::Element &element,
-                  ParsedAttributeList &&attributes) noexcept
+    StackItem(TagName tagName, Namespace tagNamespace, dom::Element &element,
+              ParsedAttributeList &&attributes) noexcept
         : _name(tagName), _namespace(tagNamespace), _element(ShareRef(element)),
           _attributes(krys::move(attributes))
     {
     }
 
-    HTMLStackItem(TagName tagName, Namespace tagNamespace, dom::Element &element,
-                  const ParsedAttributeList &attributes) noexcept
+    StackItem(TagName tagName, Namespace tagNamespace, dom::Element &element,
+              const ParsedAttributeList &attributes) noexcept
         : _name(tagName), _namespace(tagNamespace), _element(ShareRef(element)), _attributes(attributes)
     {
     }

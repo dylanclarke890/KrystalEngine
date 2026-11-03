@@ -78,9 +78,9 @@ namespace krys::boo::html
   class CustomStateSet;
   class HTMLButtonElement;
   class HTMLElement;
-  class HTMLElementStack;
+  class OpenElementStack;
   class HTMLSlotElement;
-  class HTMLTreeBuilder;
+  class TreeBuilder;
 }
 
 namespace krys::boo::xml
@@ -157,14 +157,14 @@ namespace krys::boo::dom
     friend class ExtensibilityHooks;
     friend class SlotAlgorithms;
     friend class HTMLCollectionAlgorithms;
-    friend class HTMLStackItem;
+    friend class StackItem;
     friend class Node;
     friend class NodeAlgorithms;
     friend class NamedNodeMap;
     friend class TreeQueries;
 
-    friend class html::HTMLElementStack;
-    friend class html::HTMLTreeBuilder;
+    friend class html::OpenElementStack;
+    friend class html::TreeBuilder;
     friend class xml::XMLDocumentParser;
 
     friend class ::krys::boo::RenderTreeUpdater;

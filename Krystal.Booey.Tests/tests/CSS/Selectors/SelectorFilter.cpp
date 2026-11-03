@@ -6,7 +6,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Style/HasSelectorFilter.hpp"
 #include "Krystal.Booey/Style/RuleFeature.hpp"
 #include "Krystal.Booey/Style/SelectorMatchingState.hpp"
@@ -18,7 +18,7 @@ namespace krys::boo::css::tests
     KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
     {
       auto document = CreateRef<dom::HTMLDocument>();
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
       (void)parser->PumpTokenizer();
       return document;

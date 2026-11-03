@@ -10,7 +10,7 @@
 
 namespace krys::boo::html
 {
-  class HTMLDocumentParser;
+  class DocumentParser;
 }
 
 namespace krys::boo::xml
@@ -40,7 +40,7 @@ namespace krys::boo
 
   private:
     WeakPtr<LocalFrame> _frame;
-    RefPtr<html::HTMLDocumentParser> _parser;
+    RefPtr<html::DocumentParser> _parser;
     RefPtr<xml::XMLDocumentParser> _xmlParser;
     utf8_string _mimeType;
     State _state {State::NotStarted};

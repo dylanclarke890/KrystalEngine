@@ -17,7 +17,7 @@ namespace krys::boo::css
 namespace krys::boo::html
 {
   class CustomElementRegistry;
-  class HTMLTreeBuilder;
+  class TreeBuilder;
 }
 
 namespace krys::boo::dom
@@ -81,7 +81,7 @@ namespace krys::boo::dom
     friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
     friend class NodeAlgorithms;
-    friend class html::HTMLTreeBuilder;
+    friend class html::TreeBuilder;
 
   private:
     /// @brief Open, closed, or the user agent's own (treated as closed).

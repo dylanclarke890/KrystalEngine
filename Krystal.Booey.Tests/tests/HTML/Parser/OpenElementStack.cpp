@@ -1,9 +1,9 @@
-﻿#include "Krystal.Booey/HTML/Parser/HTMLElementStack.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/OpenElementStack.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -12,20 +12,20 @@ namespace krys::boo::html::tests
     Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
     {
       auto document = CreateRef<dom::HTMLDocument>();
-      auto parser = CreateRef<HTMLDocumentParser>(*document);
+      auto parser = CreateRef<DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
       (void)parser->PumpTokenizer();
       return document;
     }
   }
 
-  TEST_CASE("HTMLElementStack parsing children", "[HTML][HTMLElementStack][html:the-stack-of-open-elements]")
+  TEST_CASE("OpenElementStack parsing children", "[HTML][OpenElementStack][html:the-stack-of-open-elements]")
   {
     auto document = CreateRef<dom::HTMLDocument>();
     auto element = CreateRef<dom::tests::TestElement>(*document);
     REQUIRE(element->IsFinishedParsingChildren());
 
-    HTMLElementStack stack;
+    OpenElementStack stack;
 
     SECTION("Pushing begins and popping finishes")
     {
@@ -57,8 +57,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLDocumentParser finishes every element",
-            "[HTML][HTMLElementStack][html:the-stack-of-open-elements]")
+  TEST_CASE("DocumentParser finishes every element",
+            "[HTML][OpenElementStack][html:the-stack-of-open-elements]")
   {
     auto document = Parse(u8"<style>p { color: red }</style><p>a<b>b");
 

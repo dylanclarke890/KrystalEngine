@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
@@ -41,8 +41,8 @@ namespace krys::boo::html
       // 7. Let allowDeclarativeShadowRoots be false if mode is Legacy; otherwise true.
       // 8. Return the result of the HTML fragment parsing algorithm given target, markup,
       //    allowDeclarativeShadowRoots, scriptingMode, and sanitizerConfig.
-      return HTMLDocumentParser::ParseFragment(target, utf8_string(markup), true, ParserScriptingMode::Inert,
-                                               sanitizerConfig.ReleaseValue());
+      return DocumentParser::ParseFragment(target, utf8_string(markup), true, ParserScriptingMode::Inert,
+                                           sanitizerConfig.ReleaseValue());
     }
   }
 

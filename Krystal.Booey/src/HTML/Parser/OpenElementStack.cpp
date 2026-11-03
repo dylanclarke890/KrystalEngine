@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/HTML/Parser/HTMLElementStack.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/OpenElementStack.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 
@@ -6,13 +6,13 @@ namespace krys::boo::html
 {
 #pragma region Accessors
 
-  KRYS_NODISCARD HTMLStackItem &HTMLElementStack::Top() noexcept
+  KRYS_NODISCARD StackItem &OpenElementStack::Top() noexcept
   {
     krys_debug_assert(!_items.empty());
     return _items.front();
   }
 
-  HTMLStackItem *HTMLElementStack::OneBelowTop() noexcept
+  StackItem *OpenElementStack::OneBelowTop() noexcept
   {
     if (_items.size() < 2uz)
     {
@@ -22,19 +22,19 @@ namespace krys::boo::html
     return &_items[1uz];
   }
 
-  KRYS_NODISCARD HTMLStackItem &HTMLElementStack::Bottom() noexcept
+  KRYS_NODISCARD StackItem &OpenElementStack::Bottom() noexcept
   {
     krys_debug_assert(!_items.empty());
     return _items.back();
   }
 
-  KRYS_NODISCARD const HTMLStackItem &HTMLElementStack::Bottom() const noexcept
+  KRYS_NODISCARD const StackItem &OpenElementStack::Bottom() const noexcept
   {
     krys_debug_assert(!_items.empty());
     return _items.back();
   }
 
-  KRYS_NODISCARD HTMLStackItem &HTMLElementStack::operator[](size_t index) noexcept
+  KRYS_NODISCARD StackItem &OpenElementStack::operator[](size_t index) noexcept
   {
     krys_debug_assert(index < _items.size());
     return _items[index];
@@ -44,7 +44,7 @@ namespace krys::boo::html
 
 #pragma region Pop
 
-  void HTMLElementStack::Pop() noexcept
+  void OpenElementStack::Pop() noexcept
   {
     krys_debug_assert(!_items.empty());
 
@@ -64,7 +64,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntil(const dom::Element &node) noexcept
+  void OpenElementStack::PopUntil(const dom::Element &node) noexcept
   {
     while (&Bottom().Element() != &node)
     {
@@ -72,7 +72,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntil(TagName tagName, Namespace tagNamespace) noexcept
+  void OpenElementStack::PopUntil(TagName tagName, Namespace tagNamespace) noexcept
   {
     while (!(Bottom().Namespace() == tagNamespace && Bottom().TagName() == tagName))
     {
@@ -80,7 +80,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntilPopped(const dom::Element &node) noexcept
+  void OpenElementStack::PopUntilPopped(const dom::Element &node) noexcept
   {
     while (true)
     {
@@ -94,7 +94,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntilPopped(TagName tagName, Namespace tagNamespace) noexcept
+  void OpenElementStack::PopUntilPopped(TagName tagName, Namespace tagNamespace) noexcept
   {
     while (true)
     {
@@ -108,7 +108,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntilTableContext() noexcept
+  void OpenElementStack::PopUntilTableContext() noexcept
   {
     while (true)
     {
@@ -130,7 +130,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntilTableBodyContext() noexcept
+  void OpenElementStack::PopUntilTableBodyContext() noexcept
   {
     while (true)
     {
@@ -155,7 +155,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntilTableRowContext() noexcept
+  void OpenElementStack::PopUntilTableRowContext() noexcept
   {
     while (true)
     {
@@ -178,7 +178,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopAll() noexcept
+  void OpenElementStack::PopAll() noexcept
   {
     while (!_items.empty())
     {
@@ -186,7 +186,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::GenerateImpliedEndTags(Maybe<TagName> except) noexcept
+  void OpenElementStack::GenerateImpliedEndTags(Maybe<TagName> except) noexcept
   {
     while (true)
     {
@@ -224,7 +224,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::GenerateImpliedEndTagsThoroughly() noexcept
+  void OpenElementStack::GenerateImpliedEndTagsThoroughly() noexcept
   {
     while (true)
     {
@@ -269,7 +269,7 @@ namespace krys::boo::html
 
 #pragma region InScope
 
-  bool HTMLElementStack::IsScopeMarker(const HTMLStackItem &item) const noexcept
+  bool OpenElementStack::IsScopeMarker(const StackItem &item) const noexcept
   {
     switch (item.Namespace())
     {
@@ -330,7 +330,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLElementStack::IsListItemScopeMarker(const HTMLStackItem &item) const noexcept
+  bool OpenElementStack::IsListItemScopeMarker(const StackItem &item) const noexcept
   {
     if (IsScopeMarker(item))
     {
@@ -345,7 +345,7 @@ namespace krys::boo::html
     return item.TagName() == TagName::ol || item.TagName() == TagName::ul;
   }
 
-  bool HTMLElementStack::IsButtonScopeMarker(const HTMLStackItem &item) const noexcept
+  bool OpenElementStack::IsButtonScopeMarker(const StackItem &item) const noexcept
   {
     if (IsScopeMarker(item))
     {
@@ -355,7 +355,7 @@ namespace krys::boo::html
     return item.Namespace() == Namespace::HTML && item.TagName() == TagName::button;
   }
 
-  bool HTMLElementStack::IsTableScopeMarker(const HTMLStackItem &item) const noexcept
+  bool OpenElementStack::IsTableScopeMarker(const StackItem &item) const noexcept
   {
     if (item.Namespace() != Namespace::HTML)
     {
@@ -366,7 +366,7 @@ namespace krys::boo::html
            || item.TagName() == TagName::html;
   }
 
-  bool HTMLElementStack::IsTableBodyScopeMarker(const HTMLStackItem &item) const noexcept
+  bool OpenElementStack::IsTableBodyScopeMarker(const StackItem &item) const noexcept
   {
     if (item.Namespace() != Namespace::HTML)
     {
@@ -378,7 +378,7 @@ namespace krys::boo::html
            || item.TagName() == TagName::html;
   }
 
-  bool HTMLElementStack::IsTableRowScopeMarker(const HTMLStackItem &item) const noexcept
+  bool OpenElementStack::IsTableRowScopeMarker(const StackItem &item) const noexcept
   {
     if (item.Namespace() != Namespace::HTML)
     {
@@ -389,7 +389,7 @@ namespace krys::boo::html
            || item.TagName() == TagName::html;
   }
 
-  bool HTMLElementStack::HasElementInScope(TagName targetNode) const noexcept
+  bool OpenElementStack::HasElementInScope(TagName targetNode) const noexcept
   {
     auto it = _items.rbegin();
     while (it != _items.rend())
@@ -413,7 +413,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLElementStack::HasElementInScope(const dom::Element &element) const noexcept
+  bool OpenElementStack::HasElementInScope(const dom::Element &element) const noexcept
   {
     auto it = _items.rbegin();
     while (it != _items.rend())
@@ -437,7 +437,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLElementStack::HasElementInListItemScope(TagName targetNode) const noexcept
+  bool OpenElementStack::HasElementInListItemScope(TagName targetNode) const noexcept
   {
     auto it = _items.rbegin();
     while (it != _items.rend())
@@ -461,7 +461,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLElementStack::HasElementInButtonScope(TagName targetNode) const noexcept
+  bool OpenElementStack::HasElementInButtonScope(TagName targetNode) const noexcept
   {
     auto it = _items.rbegin();
     while (it != _items.rend())
@@ -485,7 +485,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLElementStack::HasElementInTableScope(TagName targetNode) const noexcept
+  bool OpenElementStack::HasElementInTableScope(TagName targetNode) const noexcept
   {
     auto it = _items.rbegin();
     while (it != _items.rend())
@@ -511,7 +511,7 @@ namespace krys::boo::html
 
 #pragma endregion
 
-  bool HTMLElementStack::Contains(const dom::Element &node) const noexcept
+  bool OpenElementStack::Contains(const dom::Element &node) const noexcept
   {
     return std::ranges::any_of(_items, [&](const auto &item) { return &item.Element() == &node; });
   }

@@ -39,7 +39,7 @@
 #include "Krystal.Booey/HTML/Events/BeforeUnloadEvent.hpp"
 #include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -53,7 +53,7 @@ namespace krys::boo::dom::tests
     {
       auto document = CreateRef<HTMLDocument>();
       document->SetURL(url::URL(url));
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
       (void)parser->PumpTokenizer();
       return document;

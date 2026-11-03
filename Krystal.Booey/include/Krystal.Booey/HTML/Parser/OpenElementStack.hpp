@@ -2,42 +2,42 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLStackItem.hpp"
+#include "Krystal.Booey/HTML/Parser/StackItem.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#stack-of-open-elements
-  class HTMLElementStack
+  class OpenElementStack
   {
   private:
-    List<HTMLStackItem> _items;
+    List<StackItem> _items;
 
   public:
 #pragma region Accessors
 
     /// @brief Get the first stack item added to the stack.
-    KRYS_NODISCARD HTMLStackItem &Top() noexcept;
+    KRYS_NODISCARD StackItem &Top() noexcept;
 
     /// @brief Get the stack item immediately below the top of the stack, or null if there is no such item.
-    KRYS_NODISCARD HTMLStackItem *OneBelowTop() noexcept;
+    KRYS_NODISCARD StackItem *OneBelowTop() noexcept;
 
     /// @brief Get the most recently added element (the current element).
-    KRYS_NODISCARD HTMLStackItem &Bottom() noexcept;
+    KRYS_NODISCARD StackItem &Bottom() noexcept;
 
     /// @brief Get the most recently added element (the current element).
-    KRYS_NODISCARD const HTMLStackItem &Bottom() const noexcept;
+    KRYS_NODISCARD const StackItem &Bottom() const noexcept;
 
     /// @brief Get the stack item at the given index.
-    KRYS_NODISCARD HTMLStackItem &operator[](size_t index) noexcept;
+    KRYS_NODISCARD StackItem &operator[](size_t index) noexcept;
 
 #pragma endregion
 
 #pragma region Push
 
     /// @brief Add an element to the top of the stack.
-    void Push(HTMLStackItem &&item) noexcept
+    void Push(StackItem &&item) noexcept
     {
       item.Element().BeginParsingChildren();
       _items.push_back(krys::move(item));
@@ -82,17 +82,17 @@ namespace krys::boo::html
 
 #pragma region InScope
   private:
-    KRYS_NODISCARD bool IsScopeMarker(const HTMLStackItem &item) const noexcept;
+    KRYS_NODISCARD bool IsScopeMarker(const StackItem &item) const noexcept;
 
-    KRYS_NODISCARD bool IsListItemScopeMarker(const HTMLStackItem &item) const noexcept;
+    KRYS_NODISCARD bool IsListItemScopeMarker(const StackItem &item) const noexcept;
 
-    KRYS_NODISCARD bool IsButtonScopeMarker(const HTMLStackItem &item) const noexcept;
+    KRYS_NODISCARD bool IsButtonScopeMarker(const StackItem &item) const noexcept;
 
-    KRYS_NODISCARD bool IsTableScopeMarker(const HTMLStackItem &item) const noexcept;
+    KRYS_NODISCARD bool IsTableScopeMarker(const StackItem &item) const noexcept;
 
-    KRYS_NODISCARD bool IsTableBodyScopeMarker(const HTMLStackItem &item) const noexcept;
+    KRYS_NODISCARD bool IsTableBodyScopeMarker(const StackItem &item) const noexcept;
 
-    KRYS_NODISCARD bool IsTableRowScopeMarker(const HTMLStackItem &item) const noexcept;
+    KRYS_NODISCARD bool IsTableRowScopeMarker(const StackItem &item) const noexcept;
 
   public:
     KRYS_NODISCARD bool HasElementInScope(TagName targetNode) const noexcept;
@@ -166,7 +166,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool Contains(const dom::Element &node) const noexcept;
 
     /// @brief Returns a pointer to the stack entry whose node matches the given node, or null.
-    KRYS_NODISCARD HTMLStackItem *Find(const dom::ContainerNode &node) noexcept
+    KRYS_NODISCARD StackItem *Find(const dom::ContainerNode &node) noexcept
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &node; });
       return it != _items.end() ? &*it : nullptr;
@@ -174,7 +174,7 @@ namespace krys::boo::html
 
     /// @brief Inserts the new element into the stack of open elements immediately below the position of
     /// reference.
-    void InsertBelow(HTMLStackItem &&newItem, const dom::Element &reference) noexcept
+    void InsertBelow(StackItem &&newItem, const dom::Element &reference) noexcept
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &reference; });
       krys_debug_assert(it != _items.end());
@@ -186,7 +186,7 @@ namespace krys::boo::html
     /// entry exists and is an element entry. Otherwise, returns null.
     /// @note This should always return a non-null entry for the situations in which it's used in the HTML
     /// tree builder algorithms.
-    KRYS_NODISCARD HTMLStackItem *EntryBefore(dom::Element &node) noexcept
+    KRYS_NODISCARD StackItem *EntryBefore(dom::Element &node) noexcept
     {
       for (auto it = _items.rbegin(); it != _items.rend(); ++it)
       {
@@ -210,7 +210,7 @@ namespace krys::boo::html
     /// entry exists and is an element entry. Otherwise, returns null.
     /// @note This should always return a non-null entry for the situations in which it's used in the HTML
     /// tree builder algorithms.
-    KRYS_NODISCARD const HTMLStackItem *EntryBefore(dom::Element &node) const noexcept
+    KRYS_NODISCARD const StackItem *EntryBefore(dom::Element &node) const noexcept
     {
       for (auto it = _items.rbegin(); it != _items.rend(); ++it)
       {
@@ -230,7 +230,7 @@ namespace krys::boo::html
     }
 
     /// @brief The entry for the element immediately below @p node in the stack (pushed after it), or null.
-    KRYS_NODISCARD HTMLStackItem *EntryAfter(dom::Element &node) noexcept
+    KRYS_NODISCARD StackItem *EntryAfter(dom::Element &node) noexcept
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &node; });
       if (it == _items.end() || std::next(it) == _items.end())

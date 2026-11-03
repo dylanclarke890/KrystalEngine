@@ -89,7 +89,7 @@ Status: reviewed (2026-11-01)
 #### [7.5.4 Loading text documents](https://html.spec.whatwg.org/#read-text)
 
 Status: reviewed (2026-11-01)
-> Fixed: a text document (a JavaScript, JSON, `text/css`, `text/plain` or `text/vtt` response) is an HTML document of its type whose parser starts with a `pre` element in the PLAINTEXT state (`HTMLDocumentParser::StartPlainText`); it had been parsed as HTML.
+> Fixed: a text document (a JavaScript, JSON, `text/css`, `text/plain` or `text/vtt` response) is an HTML document of its type whose parser starts with a `pre` element in the PLAINTEXT state (`DocumentParser::StartPlainText`); it had been parsed as HTML.
 
 - [x] [load a text document](https://html.spec.whatwg.org/#navigate-text) — To load a text document, given a navigation params navigationParams and a string type:
   - 1. Let document be the result of creating and initializing a Document object given "html", type, and navigationParams.

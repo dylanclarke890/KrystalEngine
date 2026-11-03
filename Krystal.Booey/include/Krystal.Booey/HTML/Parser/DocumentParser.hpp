@@ -2,23 +2,23 @@
 
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLElementStack.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLTokenAtom.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLTreeBuilder.hpp"
 #include "Krystal.Booey/HTML/Parser/InputStream.hpp"
+#include "Krystal.Booey/HTML/Parser/OpenElementStack.hpp"
+#include "Krystal.Booey/HTML/Parser/Token.hpp"
+#include "Krystal.Booey/HTML/Parser/TokenAtom.hpp"
+#include "Krystal.Booey/HTML/Parser/Tokenizer.hpp"
+#include "Krystal.Booey/HTML/Parser/TreeBuilder.hpp"
 #include "Krystal.Core/Macros.hpp"
 
 namespace krys::boo::html
 {
-  class HTMLDocumentParser : public RefCounted<HTMLDocumentParser>
+  class DocumentParser : public RefCounted<DocumentParser>
   {
     dom::HTMLDocument &_document;
     InputStream _input;
-    HTMLTokenizer _tokenizer;
-    HTMLTreeBuilder _treeBuilder;
-    Maybe<HTMLStackItem> _fragmentParsingContext;
+    Tokenizer _tokenizer;
+    TreeBuilder _treeBuilder;
+    Maybe<StackItem> _fragmentParsingContext;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#script-nesting-level
     uint32 _scriptNestingLevel {0u};
@@ -27,7 +27,7 @@ namespace krys::boo::html
     bool _paused {false};
 
   public:
-    HTMLDocumentParser(dom::HTMLDocument &document) noexcept;
+    DocumentParser(dom::HTMLDocument &document) noexcept;
 
     /// @brief Parses @p input as the children of @p target, an element or a shadow root (whose host is then
     /// the context).
@@ -80,9 +80,9 @@ namespace krys::boo::html
       _treeBuilder.FormElement(form);
     }
 
-    KRYS_NODISCARD HTMLElementStack &OpenElementStack() noexcept
+    KRYS_NODISCARD OpenElementStack &GetOpenElementStack() noexcept
     {
-      return _treeBuilder.OpenElementStack();
+      return _treeBuilder.GetOpenElementStack();
     }
 
     void ResetInsertionModeAppropriately() noexcept

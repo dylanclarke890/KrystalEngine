@@ -9,4 +9,4 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 ### [13.5 Named character references](https://html.spec.whatwg.org/#named-character-references)
 
 Status: reviewed (2026-11-02)
-> `NamedCharacterReferences` in `HTMLCharacterReference.hpp`: all 2,231 names with their code points, checked against the specification's JSON, sorted at startup for searching.
+> `NamedCharacterReferences` in `CharacterReference.hpp`: all 2,231 names with their code points, checked against the specification's JSON, kept sorted for searching (a `static_assert` checks the order).

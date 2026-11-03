@@ -1,10 +1,10 @@
-﻿#include "Krystal.Booey/HTML/Parser/HTMLSrcsetParser.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/SrcsetParser.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::html::tests
 {
-  TEST_CASE("HTMLSrcsetParser: parses candidates and their descriptors",
-            "[HTML][Parser][HTMLSrcsetParser][html:parse-a-srcset-attribute][html:image-candidate-string]")
+  TEST_CASE("SrcsetParser: parses candidates and their descriptors",
+            "[HTML][Parser][SrcsetParser][html:parse-a-srcset-attribute][html:image-candidate-string]")
   {
     SECTION("Densities and widths")
     {
@@ -46,8 +46,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLSrcsetParser: picks the candidate that fits the device scale factor",
-            "[HTML][Parser][HTMLSrcsetParser][html:create-a-source-set][html:normalise-the-source-densities]"
+  TEST_CASE("SrcsetParser: picks the candidate that fits the device scale factor",
+            "[HTML][Parser][SrcsetParser][html:create-a-source-set][html:normalise-the-source-densities]"
             "[html:select-an-image-source-from-a-source-set]")
   {
     SECTION("No srcset uses src")

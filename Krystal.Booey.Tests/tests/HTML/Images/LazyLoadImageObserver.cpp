@@ -29,7 +29,7 @@ namespace krys::boo::tests
         auto &frame = TestPage->MainFrame();
         frame.CreateView(ViewSize);
         frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-        auto parser = CreateRef<html::HTMLDocumentParser>(*Document);
+        auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF(true));
         (void)parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();

@@ -33,7 +33,7 @@ namespace krys::boo::dom::tests
     "[DOM][Range][html:the-createcontextualfragment()-method][html:dom-range-createcontextualfragment]")
   {
     auto document = CreateRef<HTMLDocument>();
-    auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+    auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(u8"<!DOCTYPE html><table id=t></table><p id=p>text</p>", IsEOF(true));
     parser->PumpTokenizer();
     auto range = document->CreateRange();

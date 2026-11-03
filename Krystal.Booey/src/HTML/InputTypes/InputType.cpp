@@ -30,7 +30,7 @@
 #include "Krystal.Booey/HTML/InputTypes/TimeInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/URLInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/WeekInputType.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
+#include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"

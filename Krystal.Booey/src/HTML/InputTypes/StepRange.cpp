@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
+#include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
 #include <cfloat>

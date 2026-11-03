@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::dom::tests
@@ -95,7 +95,7 @@ namespace krys::boo::dom::tests
   {
     RefPtr<HTMLDocument> document = CreateRef<HTMLDocument>();
     {
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(u8"<!DOCTYPE html><title>T</title><p id=a>One<p>Two <b>three</b>",
                                    IsEOF(true));
       (void)parser->PumpTokenizer();
@@ -118,7 +118,7 @@ namespace krys::boo::dom::tests
     CAPTURE(markup);
     RefPtr<HTMLDocument> document = CreateRef<HTMLDocument>();
     {
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(utf8_string(markup.begin(), markup.end()), IsEOF(true));
       (void)parser->PumpTokenizer();
     }

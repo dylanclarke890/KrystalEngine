@@ -120,13 +120,13 @@ namespace krys::boo::html
   class HTMLBaseElement;
   class HTMLDialogElement;
   class HTMLBodyElement;
-  class HTMLDocumentParser;
+  class DocumentParser;
   class HTMLElement;
   class HTMLHeadElement;
   class HTMLHtmlElement;
   class HTMLInputElement;
   class HTMLTitleElement;
-  class HTMLTreeBuilder;
+  class TreeBuilder;
   class LazyLoadImageObserver;
   class RenderBlocking;
   class SerializedScriptValue;
@@ -271,8 +271,8 @@ namespace krys::boo::dom
     friend class html::CustomElementAlgorithms;
     friend class html::FocusAlgorithms;
     friend class html::HTMLBaseElement;
-    friend class html::HTMLDocumentParser;
-    friend class html::HTMLTreeBuilder;
+    friend class html::DocumentParser;
+    friend class html::TreeBuilder;
     friend class html::RenderBlocking;
 
     friend class ::krys::boo::RenderTreeUpdater;

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -152,7 +152,7 @@ namespace krys::boo
     dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Loading);
     if (auto *htmlDocument = DynamicDowncast<dom::HTMLDocument>(document.get()))
     {
-      _parser = CreateRef<html::HTMLDocumentParser>(*htmlDocument);
+      _parser = CreateRef<html::DocumentParser>(*htmlDocument);
       if (IsTextDocumentMIMEType(_mimeType))
       {
         _parser->StartPlainText();
@@ -235,7 +235,7 @@ namespace krys::boo
     }
     else
     {
-      RefPtr<html::HTMLDocumentParser> parser = krys::move(_parser);
+      RefPtr<html::DocumentParser> parser = krys::move(_parser);
       if (!parser)
       {
         return;

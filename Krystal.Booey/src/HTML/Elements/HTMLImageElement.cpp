@@ -13,7 +13,7 @@
 #include "Krystal.Booey/HTML/Images/HTMLImageLoader.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLSrcsetParser.hpp"
+#include "Krystal.Booey/HTML/Parser/SrcsetParser.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

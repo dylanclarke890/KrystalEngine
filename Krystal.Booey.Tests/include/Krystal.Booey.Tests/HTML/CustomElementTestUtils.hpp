@@ -8,7 +8,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 
 namespace krys::boo::html::tests
@@ -101,7 +101,7 @@ namespace krys::boo::html::tests
 
     void Parse(utf8_string &&markup) noexcept
     {
-      auto parser = CreateRef<HTMLDocumentParser>(*Document);
+      auto parser = CreateRef<DocumentParser>(*Document);
       parser->InputStream().Append(u8"<!DOCTYPE html><body>" + krys::move(markup), IsEOF(true));
       (void)parser->PumpTokenizer();
     }

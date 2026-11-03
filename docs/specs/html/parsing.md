@@ -9,7 +9,7 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 ### [13.2 Parsing HTML documents](https://html.spec.whatwg.org/#parsing)
 
 Status: reviewed (2026-11-02)
-> `HTMLDocumentParser`, which owns the `InputStream`, `HTMLTokenizer` and `HTMLTreeBuilder`.
+> `DocumentParser`, which owns the `InputStream`, `Tokenizer` and `TreeBuilder`.
 <!-- definitions: html-parser -->
 
 #### [13.2.1 Overview of the parsing model](https://html.spec.whatwg.org/#overview-of-the-parsing-model)
@@ -20,7 +20,7 @@ Status: n/a (overview)
 #### [13.2.2 Parse errors](https://html.spec.whatwg.org/#parse-errors)
 
 Status: reviewed (2026-11-02)
-> `HTMLParseError` names the tokenizer's errors; parse errors aren't reported (see `KNOWN-ISSUES.md`).
+> `ParseError` names the tokenizer's errors; parse errors aren't reported (see `KNOWN-ISSUES.md`).
 
 #### [13.2.3 The input byte stream](https://html.spec.whatwg.org/#the-input-byte-stream)
 
@@ -151,7 +151,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.4.1 The insertion mode](https://html.spec.whatwg.org/#the-insertion-mode)
 
 Status: reviewed (2026-11-02)
-> `InsertionMode`, the template insertion modes and `ResetInsertionModeAppropriately` in `HTMLTreeBuilder`.
+> `InsertionMode`, the template insertion modes and `ResetInsertionModeAppropriately` in `TreeBuilder`.
 <!-- definitions: insertion-mode original-insertion-mode stack-of-template-insertion-modes current-template-insertion-mode -->
 
 - [x] [using the rules for](https://html.spec.whatwg.org/#using-the-rules-for) — Several of these modes, namely "in head", "in body", and "in table", are special, in that the other modes defer to them at various times. When the algorithm below says that the user agent is to do something "using the rules for the m insertion mode", where m is one of these modes, the user agent must use the rules described under the m insertion mode's section, but must leave the insertion mode unchanged unless the rules in m themselves switch the insertion mode to a new value.
@@ -180,7 +180,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.4.2 The stack of open elements](https://html.spec.whatwg.org/#the-stack-of-open-elements)
 
 Status: reviewed (2026-11-02)
-> `HTMLElementStack`, with its scopes and `HTMLStackItem`.
+> `OpenElementStack`, with its scopes and `StackItem`.
 <!-- definitions: stack-of-open-elements special formatting ordinary -->
 
 - [x] [current node](https://html.spec.whatwg.org/#current-node) — The current node is the bottommost node in this stack of open elements.
@@ -204,7 +204,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.4.3 The list of active formatting elements](https://html.spec.whatwg.org/#the-list-of-active-formatting-elements)
 
 Status: reviewed (2026-11-02)
-> `HTMLFormattingElementList`; reconstruction is `HTMLTreeBuilder::ReconstructActiveFormattingElements`.
+> `FormattingElementList`; reconstruction is `TreeBuilder::ReconstructActiveFormattingElements`.
 <!-- definitions: list-of-active-formatting-elements concept-parser-marker -->
 
 - [x] [push onto the list of active formatting elements](https://html.spec.whatwg.org/#push-onto-the-list-of-active-formatting-elements) — When the steps below require the UA to push onto the list of active formatting elements an element element, the UA must perform the following steps:
@@ -232,7 +232,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.4.4 The element pointers](https://html.spec.whatwg.org/#the-element-pointers)
 
 Status: reviewed (2026-11-02)
-> `_head` and `_form` in `HTMLTreeBuilder`.
+> `_head` and `_form` in `TreeBuilder`.
 <!-- definitions: head-element-pointer form-element-pointer parsing-template-contents -->
 
 ##### [13.2.4.5 Other parsing state flags](https://html.spec.whatwg.org/#other-parsing-state-flags)
@@ -244,7 +244,7 @@ Status: reviewed (2026-11-02)
 #### [13.2.5 Tokenization](https://html.spec.whatwg.org/#tokenization)
 
 Status: reviewed (2026-11-02)
-> `HTMLTokenizer`, one state per spec state, tested state by state (`tests/HTML/Parser/Tokenizer.cpp`).
+> `Tokenizer`, one state per spec state, tested state by state (`tests/HTML/Parser/Tokenizer.cpp`).
 > Fixed: a near-miss end tag in RCDATA, RAWTEXT or script data followed by whitespace or a solidus (`</scrip `) asserted, as the state switched before checking for an appropriate end tag; and a numeric character reference too large for 64 bits overflowed back into the Unicode range.
 <!-- definitions: reconsume temporary-buffer return-state force-quirks-flag self-closing-flag -->
 
@@ -614,7 +614,7 @@ Status: reviewed (2026-11-02)
 #### [13.2.6 Tree construction](https://html.spec.whatwg.org/#tree-construction)
 
 Status: reviewed (2026-11-02)
-> `HTMLTreeBuilder::ProcessToken` is the dispatcher.
+> `TreeBuilder::ProcessToken` is the dispatcher.
 
 - [x] [tree construction dispatcher](https://html.spec.whatwg.org/#tree-construction-dispatcher) — As each token is emitted from the tokenizer, the user agent must follow the appropriate steps from the following list, known as the tree construction dispatcher:
   - • If the stack of open elements is empty / If the adjusted current node is an element in the HTML namespace / If the adjusted current node is a MathML text integration point and the token is a start tag whose tag name is neither "mglyph" nor "malignmark" / If the adjusted current node is a MathML text integration point and the token is a character token / If the adjusted current node is a MathML an…
@@ -755,7 +755,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.6.3 Closing elements that have implied end tags](https://html.spec.whatwg.org/#closing-elements-that-have-implied-end-tags)
 
 Status: reviewed (2026-11-02)
-> `HTMLElementStack::GenerateImpliedEndTags` and its thoroughly variant.
+> `OpenElementStack::GenerateImpliedEndTags` and its thoroughly variant.
 
 - [x] [generate implied end tags](https://html.spec.whatwg.org/#generate-implied-end-tags) — When the steps below require the UA to generate implied end tags, then, while the current node is a dd element, a dt element, an li element, an optgroup element, an option element, a p element, an rb element, an rp element, an rt element, or an rtc element, the UA must pop the current node off the stack of open elements.
 
@@ -1153,7 +1153,7 @@ Status: reviewed (2026-11-02)
 #### [13.2.7 The end](https://html.spec.whatwg.org/#the-end)
 
 Status: reviewed (2026-11-02)
-> `HTMLTreeBuilder::StopParsing` pops the stack and `Document::FinishedParsing` runs the rest; `DOMContentLoaded` fires synchronously (see `DIFFERENCES.md`).
+> `TreeBuilder::StopParsing` pops the stack and `Document::FinishedParsing` runs the rest; `DOMContentLoaded` fires synchronously (see `DIFFERENCES.md`).
 <!-- definitions: delay-the-load-event ready-for-post-load-tasks -->
 
 - [x] [stops parsing](https://html.spec.whatwg.org/#stop-parsing) — Once the user agent stops parsing the document, the user agent must run the following steps:
@@ -1307,7 +1307,7 @@ Status: reviewed (2026-11-02)
 ### [13.4 Parsing HTML fragments](https://html.spec.whatwg.org/#parsing-html-fragments)
 
 Status: reviewed (2026-11-02)
-> `HTMLDocumentParser::ParseFragment`.
+> `DocumentParser::ParseFragment`.
 <!-- definitions: concept-frag-parse-context -->
 
 - [x] [HTML fragment parsing algorithm](https://html.spec.whatwg.org/#html-fragment-parsing-algorithm) — The HTML fragment parsing algorithm, given an Element or DocumentFragment target, a string input, an optional boolean allowDeclarativeShadowRoots (default false), an optional parser scripting mode scriptingMode (default Inert), and an optional SanitizerConfig or null configuration (default null), i…

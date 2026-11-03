@@ -1,13 +1,13 @@
-﻿#include "Krystal.Booey/HTML/Parser/HTMLFormattingElementList.hpp"
+﻿#include "Krystal.Booey/HTML/Parser/FormattingElementList.hpp"
 
 namespace krys::boo::html
 {
-  void HTMLFormattingElementList::PushMarker() noexcept
+  void FormattingElementList::PushMarker() noexcept
   {
     _formattingElements.emplace_back(FormattingListEntry {});
   }
 
-  void HTMLFormattingElementList::PushElement(HTMLStackItem &&item) noexcept
+  void FormattingElementList::PushElement(StackItem &&item) noexcept
   {
     // 1. If there are already three elements in the list of active formatting elements after the last marker,
     //    if any, or anywhere in the list if there are no markers, that have the same tag name, namespace, and
@@ -72,8 +72,7 @@ namespace krys::boo::html
     _formattingElements.emplace_back(FormattingListEntry(krys::move(item)));
   }
 
-  HTMLStackItem *HTMLFormattingElementList::FindFromLastMarker(TagName tagName,
-                                                               Namespace tagNamespace) noexcept
+  StackItem *FormattingElementList::FindFromLastMarker(TagName tagName, Namespace tagNamespace) noexcept
   {
     for (auto it = _formattingElements.rbegin(); it != _formattingElements.rend(); ++it)
     {
@@ -92,13 +91,13 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  bool HTMLFormattingElementList::Contains(const dom::Element &node) const noexcept
+  bool FormattingElementList::Contains(const dom::Element &node) const noexcept
   {
     return std::ranges::any_of(_formattingElements, [&](const FormattingListEntry &entry)
                                { return entry.IsFormattingElement() && &entry.Item().Element() == &node; });
   }
 
-  FormattingListEntry *HTMLFormattingElementList::Find(const dom::Element &node) noexcept
+  FormattingListEntry *FormattingElementList::Find(const dom::Element &node) noexcept
   {
     auto it =
       std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
@@ -107,7 +106,7 @@ namespace krys::boo::html
     return it != _formattingElements.end() ? &*it : nullptr;
   }
 
-  void HTMLFormattingElementList::Remove(const dom::Element &node) noexcept
+  void FormattingElementList::Remove(const dom::Element &node) noexcept
   {
     auto it =
       std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
@@ -119,7 +118,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLFormattingElementList::ClearUpToLastMarker() noexcept
+  void FormattingElementList::ClearUpToLastMarker() noexcept
   {
     while (true)
     {
@@ -140,8 +139,7 @@ namespace krys::boo::html
 
 #pragma region Bookmark
 
-  HTMLFormattingElementList::Bookmark
-    HTMLFormattingElementList::BookmarkFor(const dom::Element &node) noexcept
+  FormattingElementList::Bookmark FormattingElementList::BookmarkFor(const dom::Element &node) noexcept
   {
     for (size_t i = 0uz; i < _formattingElements.size(); ++i)
     {
@@ -156,8 +154,7 @@ namespace krys::boo::html
     return Bookmark {0uz};
   }
 
-  void HTMLFormattingElementList::MoveBookmarkAfter(Bookmark &bookmark,
-                                                    const FormattingListEntry &entry) noexcept
+  void FormattingElementList::MoveBookmarkAfter(Bookmark &bookmark, const FormattingListEntry &entry) noexcept
   {
     for (size_t i = 0uz; i < _formattingElements.size(); ++i)
     {
@@ -169,8 +166,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLFormattingElementList::RemoveAndUpdateBookmark(const dom::Element &node,
-                                                          Bookmark &bookmark) noexcept
+  void FormattingElementList::RemoveAndUpdateBookmark(const dom::Element &node, Bookmark &bookmark) noexcept
   {
     auto it =
       std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
@@ -191,7 +187,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLFormattingElementList::InsertAtBookmark(HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept
+  void FormattingElementList::InsertAtBookmark(StackItem &&newItem, const Bookmark &bookmark) noexcept
   {
     auto insertIt = _formattingElements.begin() + static_cast<ptrdiff_t>(bookmark.index);
     _formattingElements.insert(insertIt, FormattingListEntry(krys::move(newItem)));

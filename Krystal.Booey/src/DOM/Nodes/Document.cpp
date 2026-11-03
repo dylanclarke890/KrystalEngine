@@ -104,7 +104,7 @@
 #include "Krystal.Booey/HTML/Forms/FormController.hpp"
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Refresh.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -803,7 +803,7 @@ namespace krys::boo::dom
       // 2. Let parser be a new HTML parser whose allow declarative shadow roots is document's allow
       //    declarative shadow roots and parser sanitizer configuration is configuration, associated with
       //    document.
-      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      auto parser = CreateRef<html::DocumentParser>(*document);
       parser->SanitizerConfiguration(krys::move(configuration));
       // 3. Place html into the input stream for parser.
       parser->InputStream().Append(DOMString(html), IsEOF(true));

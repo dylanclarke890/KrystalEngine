@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
+#include "Krystal.Booey/HTML/Parser/CharacterReference.hpp"
 #include "Krystal.Booey/HTML/Parser/InputStream.hpp"
+#include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Booey/Types/IsEOF.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
@@ -16,7 +16,7 @@
 
 namespace krys::boo::html
 {
-  enum class HTMLParseError : uint8
+  enum class ParseError : uint8
   {
     UnexpectedNullCharacter,
     UnexpectedQuestionMarkInsteadOfTagName,
@@ -148,19 +148,19 @@ namespace krys::boo::html
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLParseError, 43uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParseError, 43uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TokenizerState, 80u)
 
 namespace krys::boo::html
 {
   class NextTokenPtr
   {
-    friend class HTMLTokenizer;
+    friend class Tokenizer;
 
   private:
-    HTMLToken *_token {nullptr};
+    Token *_token {nullptr};
 
-    explicit NextTokenPtr(HTMLToken *token) noexcept : _token(token)
+    explicit NextTokenPtr(Token *token) noexcept : _token(token)
     {
     }
 
@@ -195,31 +195,31 @@ namespace krys::boo::html
       return _token != nullptr;
     }
 
-    KRYS_NODISCARD HTMLToken &operator*() const noexcept
+    KRYS_NODISCARD Token &operator*() const noexcept
     {
       krys_debug_assert(_token != nullptr);
       return *_token;
     }
 
-    KRYS_NODISCARD HTMLToken *operator->() const noexcept
+    KRYS_NODISCARD Token *operator->() const noexcept
     {
       krys_debug_assert(_token != nullptr);
       return _token;
     }
   };
 
-  struct HTMLTokenizerError
+  struct TokenizerError
   {
-    HTMLParseError Error;
+    ParseError Error;
     SourceLocation Location {};
   };
 
-  class HTMLTokenizer
+  class Tokenizer
   {
   private:
     TokenizerState _state : BitCount<TokenizerState>() {TokenizerState::Data};
     TokenizerState _characterReferenceReturnState : BitCount<TokenizerState>() {TokenizerState::Data};
-    HTMLToken _token;
+    Token _token;
     InputStream &_input;
     SmallList<char32, 32u> _appropriateEndTagName;
     SmallList<char32, 32u> _bufferedEndTagName;
@@ -238,10 +238,10 @@ namespace krys::boo::html
     Span<const NamedCharacterReferenceEntry> _namedCharacterReferenceMatchEntries;
     const NamedCharacterReferenceEntry *_longestCharacterReferenceMatch {nullptr};
 
-    List<HTMLTokenizerError> _parseErrors;
+    List<TokenizerError> _parseErrors;
 
   public:
-    HTMLTokenizer(InputStream &input, Func<bool()> &&isCDATASectionAllowed) noexcept
+    Tokenizer(InputStream &input, Func<bool()> &&isCDATASectionAllowed) noexcept
         : _input(input), _isCDATASectionAllowed(krys::move(isCDATASectionAllowed))
     {
     }
@@ -261,7 +261,7 @@ namespace krys::boo::html
       _state = state;
     }
 
-    KRYS_NODISCARD const List<HTMLTokenizerError> &ParseErrors() const noexcept
+    KRYS_NODISCARD const List<TokenizerError> &ParseErrors() const noexcept
     {
       return _parseErrors;
     }
@@ -293,7 +293,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool HasBufferedCharacterToken() const noexcept
     {
-      return _token.Type() == HTMLTokenType::Character;
+      return _token.Type() == TokenType::Character;
     }
 
     bool IsInEndTagBufferingState() const
@@ -359,14 +359,14 @@ namespace krys::boo::html
       if (std::distance(attributes.begin(), it) < static_cast<std::ptrdiff_t>(attributes.size() - 1uz))
       {
         // Duplicate attribute found; remove the last one.
-        ParserError(HTMLParseError::DuplicateAttribute);
+        ParserError(ParseError::DuplicateAttribute);
         attributes.pop_back();
       }
 
       _token.EndAttribute();
     }
 
-    void ParserError(HTMLParseError error) noexcept
+    void ParserError(ParseError error) noexcept
     {
       _parseErrors.push_back({
         .Error = error,
@@ -459,8 +459,8 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool EmitTagToken() noexcept
     {
-      krys_debug_assert(_token.Type() == HTMLTokenType::StartTag || _token.Type() == HTMLTokenType::EndTag);
-      if (_token.Type() == HTMLTokenType::StartTag)
+      krys_debug_assert(_token.Type() == TokenType::StartTag || _token.Type() == TokenType::EndTag);
+      if (_token.Type() == TokenType::StartTag)
       {
         _appropriateEndTagName.clear();
         for (auto ch : _token.Name())
@@ -477,7 +477,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool EmitDOCTYPEToken(bool consumeCurrentCharacter) noexcept
     {
-      krys_debug_assert(_token.Type() == HTMLTokenType::DOCTYPE);
+      krys_debug_assert(_token.Type() == TokenType::DOCTYPE);
       _state = TokenizerState::Data;
 
       if (!consumeCurrentCharacter)
@@ -491,7 +491,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool EmitCommentToken(bool consumeCurrentCharacter) noexcept
     {
-      krys_debug_assert(_token.Type() == HTMLTokenType::Comment);
+      krys_debug_assert(_token.Type() == TokenType::Comment);
       _state = TokenizerState::Data;
 
       if (!consumeCurrentCharacter)
@@ -689,7 +689,7 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Null); // parser error but we still emit the null as per the spec.
             ADVANCE_PAST_NON_NEWLINE_TO(Data);
           }
@@ -714,7 +714,7 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(RCDATA);
           }
@@ -734,7 +734,7 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXT);
           }
@@ -754,7 +754,7 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
           }
@@ -770,7 +770,7 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(PLAINTEXT);
           }
@@ -795,18 +795,18 @@ namespace krys::boo::html
           }
           if (character == QuestionMark)
           {
-            ParserError(HTMLParseError::UnexpectedQuestionMarkInsteadOfTagName);
+            ParserError(ParseError::UnexpectedQuestionMarkInsteadOfTagName);
             _token.BeginComment();
             RECONSUME_IN(BogusComment);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFBeforeTagName);
+            ParserError(ParseError::EOFBeforeTagName);
             BufferCharacter(LessThanSign);
             RECONSUME_IN(Data);
           }
 
-          ParserError(HTMLParseError::InvalidFirstCharacterOfTagName);
+          ParserError(ParseError::InvalidFirstCharacterOfTagName);
           BufferCharacter(LessThanSign);
           RECONSUME_IN(Data);
         END_STATE()
@@ -819,17 +819,17 @@ namespace krys::boo::html
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::MissingEndTagName);
+            ParserError(ParseError::MissingEndTagName);
             ADVANCE_PAST_NON_NEWLINE_TO(Data); // We don't emit the greater than sign, as per the spec.
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFBeforeTagName);
+            ParserError(ParseError::EOFBeforeTagName);
             BufferCharacters(Array {LessThanSign, Solidus});
             RECONSUME_IN(Data);
           }
 
-          ParserError(HTMLParseError::InvalidFirstCharacterOfTagName);
+          ParserError(ParseError::InvalidFirstCharacterOfTagName);
           _token.BeginComment();
           RECONSUME_IN(BogusComment);
         END_STATE()
@@ -855,12 +855,12 @@ namespace krys::boo::html
           if (character == Null)
           {
             _token.AppendToName(Replacement);
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             ADVANCE_PAST_NON_NEWLINE_TO(TagName);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInTag);
+            ParserError(ParseError::EOFInTag);
             RECONSUME_IN(Data);
           }
 
@@ -1110,13 +1110,13 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInScriptHTMLCommentLikeText);
+            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
             RECONSUME_IN(Data);
           }
 
@@ -1136,13 +1136,13 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInScriptHTMLCommentLikeText);
+            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
             RECONSUME_IN(Data);
           }
 
@@ -1167,13 +1167,13 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInScriptHTMLCommentLikeText);
+            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
             RECONSUME_IN(Data);
           }
 
@@ -1291,13 +1291,13 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInScriptHTMLCommentLikeText);
+            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
             RECONSUME_IN(Data);
           }
 
@@ -1318,13 +1318,13 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInScriptHTMLCommentLikeText);
+            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
             RECONSUME_IN(Data);
           }
 
@@ -1350,13 +1350,13 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInScriptHTMLCommentLikeText);
+            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
             RECONSUME_IN(Data);
           }
 
@@ -1410,7 +1410,7 @@ namespace krys::boo::html
           }
           if (character == EqualSign)
           {
-            ParserError(HTMLParseError::UnexpectedEqualsSignBeforeAttributeName);
+            ParserError(ParseError::UnexpectedEqualsSignBeforeAttributeName);
             _token.BeginAttribute();
             _token.AppendToCurrentAttributeName(EqualSign);
             ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
@@ -1437,13 +1437,13 @@ namespace krys::boo::html
           }
           if (character == Null)
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeName(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
           }
           if (character == QuotationMark || character == Apostrophe || character == LessThanSign)
           {
-            ParserError(HTMLParseError::UnexpectedCharacterInAttributeName);
+            ParserError(ParseError::UnexpectedCharacterInAttributeName);
             // Treat it as per 'anything else' case below.
           }
 
@@ -1471,7 +1471,7 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInTag);
+            ParserError(ParseError::EOFInTag);
             RECONSUME_IN(Data);
           }
 
@@ -1496,7 +1496,7 @@ namespace krys::boo::html
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::MissingAttributeValue);
+            ParserError(ParseError::MissingAttributeValue);
             EndAttribute();
             return EmitTagToken();
           }
@@ -1516,13 +1516,13 @@ namespace krys::boo::html
           }
           if (character == Null)
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeValue(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueDoubleQuoted);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInTag);
+            ParserError(ParseError::EOFInTag);
             EndAttribute();
             RECONSUME_IN(Data);
           }
@@ -1543,13 +1543,13 @@ namespace krys::boo::html
           }
           if (character == Null)
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeValue(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueSingleQuoted);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInTag);
+            ParserError(ParseError::EOFInTag);
             EndAttribute();
             RECONSUME_IN(Data);
           }
@@ -1576,20 +1576,20 @@ namespace krys::boo::html
           }
           if (character == Null)
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeValue(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
           }
           if (character == QuotationMark || character == Apostrophe || character == LessThanSign
               || character == EqualSign || character == GraveAccent)
           {
-            ParserError(HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
+            ParserError(ParseError::UnexpectedCharacterInUnquotedAttributeValue);
             _token.AppendToCurrentAttributeValue(character);
             ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInTag);
+            ParserError(ParseError::EOFInTag);
             EndAttribute();
             RECONSUME_IN(Data);
           }
@@ -1616,12 +1616,12 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInTag);
+            ParserError(ParseError::EOFInTag);
             EndAttribute();
             RECONSUME_IN(Data);
           }
 
-          ParserError(HTMLParseError::MissingWhitespaceBetweenAttributes);
+          ParserError(ParseError::MissingWhitespaceBetweenAttributes);
           EndAttribute();
           RECONSUME_IN(BeforeAttributeName);
         END_STATE()
@@ -1631,7 +1631,7 @@ namespace krys::boo::html
           {
             // Set the self-closing flag of the current tag token. (An end tag's flag is only a parse error,
             // so it's left unset.)
-            if (_token.Type() == HTMLTokenType::StartTag)
+            if (_token.Type() == TokenType::StartTag)
             {
               _token.SetSelfClosingFlag();
             }
@@ -1639,11 +1639,11 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInTag);
+            ParserError(ParseError::EOFInTag);
             RECONSUME_IN(Data);
           }
 
-          ParserError(HTMLParseError::UnexpectedSolidusInTag);
+          ParserError(ParseError::UnexpectedSolidusInTag);
 
           if (_token.CurrentAttribute() != nullptr)
           {
@@ -1663,7 +1663,7 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToComment(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(BogusComment);
           }
@@ -1709,7 +1709,7 @@ namespace krys::boo::html
               }
               else
               {
-                ParserError(HTMLParseError::CDATAInHTMLContent);
+                ParserError(ParseError::CDATAInHTMLContent);
                 _token.BeginComment();
                 _token.AppendToComment("[CDATA[");
                 SWITCH_TO(BogusComment);
@@ -1721,7 +1721,7 @@ namespace krys::boo::html
             }
           }
 
-          ParserError(HTMLParseError::IncorrectlyOpenedComment);
+          ParserError(ParseError::IncorrectlyOpenedComment);
           _token.BeginComment();
           RECONSUME_IN(BogusComment);
         END_STATE()
@@ -1733,7 +1733,7 @@ namespace krys::boo::html
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::AbruptClosingOfEmptyComment);
+            ParserError(ParseError::AbruptClosingOfEmptyComment);
             return EmitCommentToken(true);
           }
 
@@ -1747,12 +1747,12 @@ namespace krys::boo::html
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::AbruptClosingOfEmptyComment);
+            ParserError(ParseError::AbruptClosingOfEmptyComment);
             return EmitCommentToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInComment);
+            ParserError(ParseError::EOFInComment);
             return EmitCommentToken(false);
           }
 
@@ -1772,13 +1772,13 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToComment(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(Comment);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInComment);
+            ParserError(ParseError::EOFInComment);
             return EmitCommentToken(false);
           }
 
@@ -1825,7 +1825,7 @@ namespace krys::boo::html
             RECONSUME_IN(CommentEnd);
           }
 
-          ParserError(HTMLParseError::NestedComment);
+          ParserError(ParseError::NestedComment);
           RECONSUME_IN(CommentEnd);
         END_STATE()
 
@@ -1836,7 +1836,7 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInComment);
+            ParserError(ParseError::EOFInComment);
             return EmitCommentToken(false);
           }
 
@@ -1860,7 +1860,7 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInComment);
+            ParserError(ParseError::EOFInComment);
             return EmitCommentToken(false);
           }
 
@@ -1876,12 +1876,12 @@ namespace krys::boo::html
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::IncorrectlyClosedComment);
+            ParserError(ParseError::IncorrectlyClosedComment);
             return EmitCommentToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInComment);
+            ParserError(ParseError::EOFInComment);
             return EmitCommentToken(false);
           }
 
@@ -1900,13 +1900,13 @@ namespace krys::boo::html
           }
           if (character == EndOfFile)
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.BeginDOCTYPE();
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::MissingWhitespaceBeforeDOCTYPEName);
+          ParserError(ParseError::MissingWhitespaceBeforeDOCTYPEName);
           RECONSUME_IN(BeforeDOCTYPEName);
         END_STATE()
 
@@ -1923,21 +1923,21 @@ namespace krys::boo::html
           }
           if (character == Null)
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.BeginDOCTYPE();
             _token.AppendToName(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::MissingDOCTYPEName);
+            ParserError(ParseError::MissingDOCTYPEName);
             _token.BeginDOCTYPE();
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.BeginDOCTYPE();
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
@@ -1964,13 +1964,13 @@ namespace krys::boo::html
           }
           if (character == Null)
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToName(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
@@ -1990,7 +1990,7 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
@@ -2019,7 +2019,7 @@ namespace krys::boo::html
             }
           }
 
-          ParserError(HTMLParseError::InvalidCharacterSequenceAfterDOCTYPEName);
+          ParserError(ParseError::InvalidCharacterSequenceAfterDOCTYPEName);
           _token.SetDOCTYPEForceQuirks();
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
@@ -2031,30 +2031,30 @@ namespace krys::boo::html
           }
           if (character == QuotationMark)
           {
-            ParserError(HTMLParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
+            ParserError(ParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
             _token.SetPublicIdentifierToEmptyString();
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
           }
           if (character == Apostrophe)
           {
-            ParserError(HTMLParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
+            ParserError(ParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
             _token.SetPublicIdentifierToEmptyString();
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::MissingDOCTYPEPublicIdentifier);
+            ParserError(ParseError::MissingDOCTYPEPublicIdentifier);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
+          ParserError(ParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
           _token.SetDOCTYPEForceQuirks();
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
@@ -2076,18 +2076,18 @@ namespace krys::boo::html
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::MissingDOCTYPEPublicIdentifier);
+            ParserError(ParseError::MissingDOCTYPEPublicIdentifier);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
+          ParserError(ParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
           _token.SetDOCTYPEForceQuirks();
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
@@ -2099,19 +2099,19 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToPublicIdentifier(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::AbruptDOCTYPEPublicIdentifier);
+            ParserError(ParseError::AbruptDOCTYPEPublicIdentifier);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
@@ -2127,19 +2127,19 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToPublicIdentifier(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::AbruptDOCTYPEPublicIdentifier);
+            ParserError(ParseError::AbruptDOCTYPEPublicIdentifier);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
@@ -2159,24 +2159,24 @@ namespace krys::boo::html
           }
           if (character == QuotationMark)
           {
-            ParserError(HTMLParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
+            ParserError(ParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
             _token.SetSystemIdentifierToEmptyString();
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
           }
           if (character == Apostrophe)
           {
-            ParserError(HTMLParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
+            ParserError(ParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
             _token.SetSystemIdentifierToEmptyString();
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+          ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
           _token.SetDOCTYPEForceQuirks();
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
@@ -2202,12 +2202,12 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+          ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
           _token.SetDOCTYPEForceQuirks();
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
@@ -2219,30 +2219,30 @@ namespace krys::boo::html
           }
           if (character == QuotationMark)
           {
-            ParserError(HTMLParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
+            ParserError(ParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
             _token.SetSystemIdentifierToEmptyString();
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
           }
           if (character == Apostrophe)
           {
-            ParserError(HTMLParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
+            ParserError(ParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
             _token.SetSystemIdentifierToEmptyString();
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::MissingDOCTYPESystemIdentifier);
+            ParserError(ParseError::MissingDOCTYPESystemIdentifier);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+          ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
           _token.SetDOCTYPEForceQuirks();
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
@@ -2264,18 +2264,18 @@ namespace krys::boo::html
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::MissingDOCTYPESystemIdentifier);
+            ParserError(ParseError::MissingDOCTYPESystemIdentifier);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+          ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
           _token.SetDOCTYPEForceQuirks();
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
@@ -2287,19 +2287,19 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToSystemIdentifier(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::AbruptDOCTYPESystemIdentifier);
+            ParserError(ParseError::AbruptDOCTYPESystemIdentifier);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
@@ -2315,19 +2315,19 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             _token.AppendToSystemIdentifier(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
           }
           if (character == GreaterThanSign)
           {
-            ParserError(HTMLParseError::AbruptDOCTYPESystemIdentifier);
+            ParserError(ParseError::AbruptDOCTYPESystemIdentifier);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
@@ -2347,12 +2347,12 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInDOCTYPE);
+            ParserError(ParseError::EOFInDOCTYPE);
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier);
+          ParserError(ParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier);
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
 
@@ -2363,7 +2363,7 @@ namespace krys::boo::html
           }
           if (character == Null) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::UnexpectedNullCharacter);
+            ParserError(ParseError::UnexpectedNullCharacter);
             ADVANCE_PAST_NON_NEWLINE_TO(BogusDOCTYPE);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
@@ -2381,7 +2381,7 @@ namespace krys::boo::html
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            ParserError(HTMLParseError::EOFInCDATA);
+            ParserError(ParseError::EOFInCDATA);
             RECONSUME_IN(Data);
           }
 
@@ -2487,7 +2487,7 @@ namespace krys::boo::html
 
             if (match.Name.back() != Semicolon)
             {
-              ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
+              ParserError(ParseError::MissingSemicolonAfterCharacterReference);
             }
 
             RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
@@ -2514,7 +2514,7 @@ namespace krys::boo::html
           }
           if (character == Semicolon)
           {
-            ParserError(HTMLParseError::UnknownNamedCharacterReference);
+            ParserError(ParseError::UnknownNamedCharacterReference);
             RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
           }
 
@@ -2538,7 +2538,7 @@ namespace krys::boo::html
             RECONSUME_IN(HexadecimalCharacterReference);
           }
 
-          ParserError(HTMLParseError::AbsenceOfDigitsInNumericCharacterReference);
+          ParserError(ParseError::AbsenceOfDigitsInNumericCharacterReference);
           FlushCodePointsConsumedAsACharacterReference();
           RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
         END_STATE()
@@ -2549,7 +2549,7 @@ namespace krys::boo::html
             RECONSUME_IN(DecimalCharacterReference);
           }
 
-          ParserError(HTMLParseError::AbsenceOfDigitsInNumericCharacterReference);
+          ParserError(ParseError::AbsenceOfDigitsInNumericCharacterReference);
           FlushCodePointsConsumedAsACharacterReference();
           RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
         END_STATE()
@@ -2566,7 +2566,7 @@ namespace krys::boo::html
           }
           if (character != Semicolon)
           {
-            ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
+            ParserError(ParseError::MissingSemicolonAfterCharacterReference);
           }
 
           RECONSUME_IN(NumericCharacterReferenceEnd);
@@ -2581,7 +2581,7 @@ namespace krys::boo::html
           }
           if (character != Semicolon)
           {
-            ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
+            ParserError(ParseError::MissingSemicolonAfterCharacterReference);
           }
 
           RECONSUME_IN(NumericCharacterReferenceEnd);
@@ -2590,27 +2590,27 @@ namespace krys::boo::html
         BEGIN_STATE(NumericCharacterReferenceEnd)
           if (_characterReferenceCode == Null)
           {
-            ParserError(HTMLParseError::NullCharacterReference);
+            ParserError(ParseError::NullCharacterReference);
             _characterReferenceCode = Replacement;
           }
           else if (_characterReferenceCode > 0x10FFFF)
           {
-            ParserError(HTMLParseError::CharacterReferenceOutsideUnicodeRange);
+            ParserError(ParseError::CharacterReferenceOutsideUnicodeRange);
             _characterReferenceCode = Replacement;
           }
           else if (krys::text::IsSurrogate(static_cast<char32>(_characterReferenceCode)))
           {
-            ParserError(HTMLParseError::SurrogateCharacterReference);
+            ParserError(ParseError::SurrogateCharacterReference);
             _characterReferenceCode = Replacement;
           }
           else if (krys::text::IsNonUnicodeCharacter(static_cast<char32>(_characterReferenceCode)))
           {
-            ParserError(HTMLParseError::NonCharacterCharacterReference);
+            ParserError(ParseError::NonCharacterCharacterReference);
           }
           else if (_characterReferenceCode == '\x0D'
                    || krys::text::IsASCIINonWhitespaceControl(static_cast<char32>(_characterReferenceCode)))
           {
-            ParserError(HTMLParseError::ControlCharacterReference);
+            ParserError(ParseError::ControlCharacterReference);
           }
           else
           {
