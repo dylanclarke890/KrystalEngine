@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/History/HistoryItem.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"
-#include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
+#include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
 #include <chrono>
 #include <format>
 #include <random>

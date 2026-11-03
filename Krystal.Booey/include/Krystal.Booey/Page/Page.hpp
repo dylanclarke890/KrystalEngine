@@ -6,7 +6,7 @@
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
-#include "Krystal.Booey/Page/DragClient.hpp"
+#include "Krystal.Booey/Page/Drag/DragClient.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"

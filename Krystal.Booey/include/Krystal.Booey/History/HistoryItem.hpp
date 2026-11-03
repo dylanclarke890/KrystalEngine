@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
+#include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"

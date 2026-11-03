@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadButton.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadEffectParameters.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadEvent.hpp"

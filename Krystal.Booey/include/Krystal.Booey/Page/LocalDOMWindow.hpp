@@ -11,7 +11,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
-#include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
+#include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

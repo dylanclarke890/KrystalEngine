@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Navigation.hpp"
+#include "Krystal.Booey/Page/Navigation/Navigation.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/SpatialNavigation.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"

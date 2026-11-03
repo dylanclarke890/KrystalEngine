@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"

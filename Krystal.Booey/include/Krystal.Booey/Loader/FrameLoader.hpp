@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Loader/FetchOptions.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
-#include "Krystal.Booey/Page/NavigationNavigationType.hpp"
+#include "Krystal.Booey/Page/Navigation/NavigationNavigationType.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Func.hpp"

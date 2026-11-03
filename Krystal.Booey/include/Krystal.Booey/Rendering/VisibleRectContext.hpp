@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Page/IntersectionObserverMarginBox.hpp"
+#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"

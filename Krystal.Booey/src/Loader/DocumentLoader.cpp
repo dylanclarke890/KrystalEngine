@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

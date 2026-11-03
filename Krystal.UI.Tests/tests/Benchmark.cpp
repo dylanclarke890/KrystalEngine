@@ -1,6 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"

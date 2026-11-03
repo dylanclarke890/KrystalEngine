@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Scheduling/IdleCallbackController.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Scheduling/IdleDeadline.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include <chrono>
 

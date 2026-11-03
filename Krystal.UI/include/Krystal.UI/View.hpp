@@ -10,7 +10,7 @@
 #include "Krystal.Booey/History/BackForwardList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/Page/ConsoleTypes.hpp"
-#include "Krystal.Booey/Page/DragActions.hpp"
+#include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"

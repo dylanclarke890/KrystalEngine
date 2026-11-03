@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Booey/Page/DragActions.hpp"
+#include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Platform/DragImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"

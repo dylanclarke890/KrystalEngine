@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Platform/CaretAnimator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 
 namespace krys::boo

@@ -1965,7 +1965,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Elements/HTMLUnknownElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLVideoElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp
-  include/Krystal.Booey/HTML/EventLoop.hpp
+  include/Krystal.Booey/HTML/EventLoop/EventLoop.hpp
   include/Krystal.Booey/HTML/Events/BeforeUnloadEvent.hpp
   include/Krystal.Booey/HTML/Events/ErrorEvent.hpp
   include/Krystal.Booey/HTML/Events/HashChangeEvent.hpp
@@ -2046,7 +2046,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp
   include/Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp
-  include/Krystal.Booey/HTML/SerializedScriptValue.hpp
+  include/Krystal.Booey/HTML/Types/SerializedScriptValue.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp
@@ -2056,7 +2056,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp
   include/Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp
   include/Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp
-  include/Krystal.Booey/HTML/TaskSource.hpp
+  include/Krystal.Booey/HTML/EventLoop/TaskSource.hpp
   include/Krystal.Booey/HTML/Types/DocumentReadyState.hpp
   include/Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp
   include/Krystal.Booey/HTML/Types/Namespace.hpp
@@ -2177,7 +2177,7 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Elements/HTMLUnknownElement.cpp
   src/HTML/Elements/HTMLVideoElement.cpp
   src/HTML/Elements/HTMLWBRElement.cpp
-  src/HTML/EventLoop.cpp
+  src/HTML/EventLoop/EventLoop.cpp
   src/HTML/Events/BeforeUnloadEvent.cpp
   src/HTML/Events/ErrorEvent.cpp
   src/HTML/Events/HashChangeEvent.cpp
@@ -2537,20 +2537,20 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/ConsoleTypes.hpp
   include/Krystal.Booey/Page/DOMSelection.hpp
   include/Krystal.Booey/Page/DOMTimer.hpp
-  include/Krystal.Booey/Page/DragActions.hpp
-  include/Krystal.Booey/Page/DragClient.hpp
-  include/Krystal.Booey/Page/DragController.hpp
-  include/Krystal.Booey/Page/DragItem.hpp
-  include/Krystal.Booey/Page/DragState.hpp
+  include/Krystal.Booey/Page/Drag/DragActions.hpp
+  include/Krystal.Booey/Page/Drag/DragClient.hpp
+  include/Krystal.Booey/Page/Drag/DragController.hpp
+  include/Krystal.Booey/Page/Drag/DragItem.hpp
+  include/Krystal.Booey/Page/Drag/DragState.hpp
   include/Krystal.Booey/Page/EditorClient.hpp
   include/Krystal.Booey/Page/EventHandler.hpp
   include/Krystal.Booey/Page/External.hpp
   include/Krystal.Booey/Page/FrameSnapshotting.hpp
   include/Krystal.Booey/Page/History.hpp
-  include/Krystal.Booey/Page/IntersectionObserver.hpp
-  include/Krystal.Booey/Page/IntersectionObserverCallback.hpp
-  include/Krystal.Booey/Page/IntersectionObserverEntry.hpp
-  include/Krystal.Booey/Page/IntersectionObserverMarginBox.hpp
+  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp
+  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverCallback.hpp
+  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp
+  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverMarginBox.hpp
   include/Krystal.Booey/Page/LocalDOMWindow.hpp
   include/Krystal.Booey/Page/LocalFrame.hpp
   include/Krystal.Booey/Page/LocalFrameView.hpp
@@ -2558,26 +2558,26 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/Location.hpp
   include/Krystal.Booey/Page/MouseEventTypes.hpp
   include/Krystal.Booey/Page/MouseEventWithHitTestResults.hpp
-  include/Krystal.Booey/Page/NavigateEvent.hpp
-  include/Krystal.Booey/Page/Navigation.hpp
-  include/Krystal.Booey/Page/NavigationActivation.hpp
-  include/Krystal.Booey/Page/NavigationCurrentEntryChangeEvent.hpp
-  include/Krystal.Booey/Page/NavigationDestination.hpp
-  include/Krystal.Booey/Page/NavigationHistoryEntry.hpp
-  include/Krystal.Booey/Page/NavigationNavigationType.hpp
-  include/Krystal.Booey/Page/NavigationPromise.hpp
-  include/Krystal.Booey/Page/NavigationTransition.hpp
+  include/Krystal.Booey/Page/Navigation/NavigateEvent.hpp
+  include/Krystal.Booey/Page/Navigation/Navigation.hpp
+  include/Krystal.Booey/Page/Navigation/NavigationActivation.hpp
+  include/Krystal.Booey/Page/Navigation/NavigationCurrentEntryChangeEvent.hpp
+  include/Krystal.Booey/Page/Navigation/NavigationDestination.hpp
+  include/Krystal.Booey/Page/Navigation/NavigationHistoryEntry.hpp
+  include/Krystal.Booey/Page/Navigation/NavigationNavigationType.hpp
+  include/Krystal.Booey/Page/Navigation/NavigationPromise.hpp
+  include/Krystal.Booey/Page/Navigation/NavigationTransition.hpp
   include/Krystal.Booey/Page/Navigator.hpp
   include/Krystal.Booey/Page/Page.hpp
   include/Krystal.Booey/Page/PointerCaptureController.hpp
   include/Krystal.Booey/Page/PointerLockController.hpp
-  include/Krystal.Booey/Page/ResizeObservation.hpp
-  include/Krystal.Booey/Page/ResizeObserver.hpp
-  include/Krystal.Booey/Page/ResizeObserverBoxOptions.hpp
-  include/Krystal.Booey/Page/ResizeObserverCallback.hpp
-  include/Krystal.Booey/Page/ResizeObserverEntry.hpp
-  include/Krystal.Booey/Page/ResizeObserverOptions.hpp
-  include/Krystal.Booey/Page/ResizeObserverSize.hpp
+  include/Krystal.Booey/Page/ResizeObserver/ResizeObservation.hpp
+  include/Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp
+  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverBoxOptions.hpp
+  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverCallback.hpp
+  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverEntry.hpp
+  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverOptions.hpp
+  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp
   include/Krystal.Booey/Page/Screen.hpp
   include/Krystal.Booey/Page/ScrollBehavior.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
@@ -2593,28 +2593,28 @@ set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/AutoscrollController.cpp
   src/Page/DOMSelection.cpp
   src/Page/DOMTimer.cpp
-  src/Page/DragController.cpp
+  src/Page/Drag/DragController.cpp
   src/Page/EventHandler.cpp
   src/Page/FrameSnapshotting.cpp
   src/Page/History.cpp
-  src/Page/IntersectionObserver.cpp
-  src/Page/IntersectionObserverEntry.cpp
+  src/Page/IntersectionObserver/IntersectionObserver.cpp
+  src/Page/IntersectionObserver/IntersectionObserverEntry.cpp
   src/Page/LocalDOMWindow.cpp
   src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
   src/Page/Location.cpp
-  src/Page/NavigateEvent.cpp
-  src/Page/Navigation.cpp
-  src/Page/NavigationCurrentEntryChangeEvent.cpp
-  src/Page/NavigationHistoryEntry.cpp
-  src/Page/NavigationPromise.cpp
+  src/Page/Navigation/NavigateEvent.cpp
+  src/Page/Navigation/Navigation.cpp
+  src/Page/Navigation/NavigationCurrentEntryChangeEvent.cpp
+  src/Page/Navigation/NavigationHistoryEntry.cpp
+  src/Page/Navigation/NavigationPromise.cpp
   src/Page/Navigator.cpp
   src/Page/Page.cpp
   src/Page/PointerCaptureController.cpp
   src/Page/PointerLockController.cpp
-  src/Page/ResizeObservation.cpp
-  src/Page/ResizeObserver.cpp
+  src/Page/ResizeObserver/ResizeObservation.cpp
+  src/Page/ResizeObserver/ResizeObserver.cpp
   src/Page/Screen.cpp
   src/Page/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp

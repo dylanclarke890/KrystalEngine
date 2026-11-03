@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Platform/Timer.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Platform/ThreadTimers.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"

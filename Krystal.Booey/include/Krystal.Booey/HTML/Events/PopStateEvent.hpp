@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
+#include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

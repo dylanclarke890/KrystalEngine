@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
-#include "Krystal.Booey/Page/IntersectionObserverEntry.hpp"
+#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp"
 
 namespace krys::boo::html
 {

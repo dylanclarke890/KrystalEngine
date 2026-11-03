@@ -22,7 +22,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGScriptElement.hpp"

@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Graphics/GraphicsLayerFilterAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 

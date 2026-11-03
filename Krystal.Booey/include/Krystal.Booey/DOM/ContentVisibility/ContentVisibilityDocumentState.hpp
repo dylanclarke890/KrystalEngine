@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
-#include "Krystal.Booey/Page/IntersectionObserver.hpp"
+#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"

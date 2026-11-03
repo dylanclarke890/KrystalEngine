@@ -427,11 +427,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/PointerCaptureController.cpp
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp
-		tests/Page/DragController.cpp
+		tests/Page/Drag/DragController.cpp
 		tests/Graphics/StringTruncator.cpp
 		tests/Platform/DragImage.cpp
-		tests/Page/IntersectionObserver.cpp
-		tests/Page/ResizeObserver.cpp
+		tests/Page/IntersectionObserver/IntersectionObserver.cpp
+		tests/Page/ResizeObserver/ResizeObserver.cpp
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
@@ -445,7 +445,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/DocumentSuspension.cpp
 		tests/History/BackForwardCache.cpp
 		tests/Page/History.cpp
-		tests/Page/Navigation.cpp
+		tests/Page/Navigation/Navigation.cpp
 		tests/HTML/MicroParsers/Refresh.cpp
 		tests/Rendering/BackgroundPainter.cpp
 		tests/Rendering/CSSFilterRenderer.cpp
@@ -717,7 +717,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/CustomElement/CustomElementRegistry.cpp
 		tests/HTML/CloseWatcher/CloseWatcher.cpp
 		tests/HTML/CustomElement/ElementInternals.cpp
-		tests/HTML/EventLoop.cpp
+		tests/HTML/EventLoop/EventLoop.cpp
 		tests/HTML/Sanitizer/Sanitizer.cpp
 		tests/HTML/Popover.cpp
 		tests/HTML/Collections/RadioNodeList.cpp

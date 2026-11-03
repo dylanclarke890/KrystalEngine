@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
-#include "Krystal.Booey/Page/NavigationNavigationType.hpp"
+#include "Krystal.Booey/Page/Navigation/NavigationNavigationType.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom

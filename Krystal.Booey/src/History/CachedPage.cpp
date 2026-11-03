@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/History/CachedPage.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/HistoryController.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Navigation.hpp"
+#include "Krystal.Booey/Page/Navigation/Navigation.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 
 namespace krys::boo
