@@ -217,8 +217,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::FormEnctype() const noexcept
   {
-    return EnumeratedAttribute<"formenctype", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"formenctype"));
+    return ReflectEnumerated<"formenctype">(*this);
   }
 
   void HTMLInputElement::FormEnctype(dom::DOMString value) noexcept
@@ -228,8 +227,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::FormMethod() const noexcept
   {
-    return EnumeratedAttribute<"formmethod", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"formmethod"));
+    return ReflectEnumerated<"formmethod">(*this);
   }
 
   void HTMLInputElement::FormMethod(dom::DOMString value) noexcept

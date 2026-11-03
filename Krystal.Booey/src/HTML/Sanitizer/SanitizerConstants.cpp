@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp"
-#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"

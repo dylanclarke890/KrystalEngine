@@ -5,12 +5,6 @@
 
 namespace krys::boo::css::mq
 {
-  KRYS_NODISCARD static const CSSOMStringAtom &PrintAtom() noexcept
-  {
-    static const CSSOMStringAtom print {u8"print"};
-    return print;
-  }
-
   MediaQueryEvaluator::MediaQueryEvaluator(const CSSOMStringAtom &mediaType, const dom::Document &document,
                                            const RenderStyle *rootElementStyle) noexcept
       : GenericMediaQueryEvaluator(), _mediaType(mediaType),

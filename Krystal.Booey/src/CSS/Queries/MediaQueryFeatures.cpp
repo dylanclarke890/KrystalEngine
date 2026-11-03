@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -175,18 +176,6 @@ namespace krys::boo::css::mq::Features
     auto *view = context.Document->View();
     krys_assert_msg(view, "media features are only evaluated for a document with a view");
     return *view;
-  }
-
-  KRYS_NODISCARD static const CSSOMStringAtom &ScreenAtom() noexcept
-  {
-    static const CSSOMStringAtom screen {u8"screen"};
-    return screen;
-  }
-
-  KRYS_NODISCARD static const CSSOMStringAtom &PrintAtom() noexcept
-  {
-    static const CSSOMStringAtom print {u8"print"};
-    return print;
   }
 
   KRYS_NODISCARD static float DeviceScaleFactor(const FeatureEvaluationContext &context) noexcept

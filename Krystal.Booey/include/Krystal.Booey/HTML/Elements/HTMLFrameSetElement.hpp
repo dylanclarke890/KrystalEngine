@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
 
 namespace krys::boo::html
 {

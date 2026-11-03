@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
@@ -12,6 +13,7 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/NTTPMaybe.hpp"
+#include "Krystal.Core/Types/NTTPString.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include <charconv>
 #include <limits>
@@ -196,7 +198,7 @@ namespace krys::boo::html
     /// @brief Helper for getting reflected content attributes for 'DOMString/DOMString?' types: steps 1, 2,
     /// 5 and 6 of the `DOMString` getter, and 1, 2 and 5 of the `DOMString?` one, with null for the empty
     /// string (the caller's `value_or`). Enumerated attributes limited to only known values (steps 3 and 4)
-    /// are `EnumeratedAttribute::ResolveCanonicalKeyword`.
+    /// are `ReflectEnumerated`.
     /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
     template <ReflectTarget Target>
     KRYS_NODISCARD Maybe<dom::DOMString> ReflectDOMString(const Target &target,
@@ -772,6 +774,45 @@ namespace krys::boo::html
       static_assert(DependentFalse<TValue>,
                     "Unknown type for [Reflect][ReflectDefault][ReflectRange] (getter)");
     }
+  }
+
+#pragma endregion
+
+#pragma region ReflectEnumerated
+
+  /// @brief Represents the `[Reflect]` IDL attribute (getter) for an enumerated attribute limited to only
+  /// known values, whose keywords and defaults are `EnumeratedAttributeTraits<AttributeName, TElement>`.
+  /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
+  template <NTTPString AttributeName, DerivedFrom<HTMLElement> TElement = HTMLElement,
+            ReflectTypeDOMString TValue = dom::DOMString, ReflectTarget Target>
+  KRYS_NODISCARD TValue ReflectEnumerated(const Target &target) noexcept
+  {
+    static const dom::DOMStringAtom name(
+      dom::DOMStringView(reinterpret_cast<const char8 *>(AttributeName.Data), AttributeName.Size - 1));
+
+    // Steps 1 to 4 of the `DOMString` getter:
+    // 1. Let element be the result of running this's get the element.
+    // 2. Let contentAttributeValue be the result of running this's get the content attribute.
+    // 3. Let attributeDefinition be the attribute definition of element's content attribute whose namespace
+    //    is null and local name is the reflected content attribute name.
+    // 4. If attributeDefinition indicates it is an enumerated attribute and the reflected IDL attribute is
+    //    defined to be limited to only known values:
+    // 4a. If contentAttributeValue does not correspond to any state of attributeDefinition (e.g., it is null
+    //     and there is no missing value default), or if it is in a state of attributeDefinition with no
+    //     associated keyword value, then return the empty string.
+    // 4b. Return the canonical keyword for the state of attributeDefinition that contentAttributeValue
+    //     corresponds to.
+    // And of the `DOMString?` getter (whose steps 1 to 3 are the same):
+    // 4. If attributeDefinition indicates it is an enumerated attribute:
+    // 4a. Assert: the reflected IDL attribute is limited to only known values.
+    // 4b. Assert: contentAttributeValue corresponds to a state of attributeDefinition. (A state without a
+    //     keyword, such as the No Popover state, is no state here.)
+    // 4c. If contentAttributeValue corresponds to a state of attributeDefinition with no associated keyword
+    //     value, then return null.
+    // 4d. Return the canonical keyword for the state of attributeDefinition that contentAttributeValue
+    //     corresponds to.
+    return EnumeratedAttribute<AttributeName, TElement>::template ResolveCanonicalKeyword<TValue>(
+      detail::ReflectDOMString(target, name));
   }
 
 #pragma endregion

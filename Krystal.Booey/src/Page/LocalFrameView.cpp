@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/FragmentDirective/FragmentDirectiveParser.hpp"
@@ -49,14 +50,8 @@
 
 namespace krys::boo
 {
-  KRYS_NODISCARD static const css::CSSOMStringAtom &ScreenAtom() noexcept
-  {
-    static MainThreadNeverDestroyed<css::CSSOMStringAtom> screen {u8"screen"};
-    return screen;
-  }
-
   LocalFrameView::LocalFrameView(LocalFrame &frame) noexcept
-      : _frame(WeakPtr<LocalFrame>::WithRef(frame)), _mediaType(ScreenAtom()), _layoutContext(*this),
+      : _frame(WeakPtr<LocalFrame>::WithRef(frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
         _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired),
         _scrollToTextFragmentRetryTimer(*this, &LocalFrameView::ScrollToTextFragmentRetryTimerFired)
   {

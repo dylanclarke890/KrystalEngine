@@ -15,15 +15,6 @@
 
 namespace krys::boo::css
 {
-  namespace
-  {
-    KRYS_NODISCARD const CSSOMStringAtom &ScreenAtom() noexcept
-    {
-      static const CSSOMStringAtom screen {u8"screen"};
-      return screen;
-    }
-  }
-
   float SizesAttributeParser::ComputeLength(double value, LengthUnit unit,
                                             const dom::Document &document) noexcept
   {
@@ -102,7 +93,7 @@ namespace krys::boo::css
       return false;
     }
     auto &style = renderer->Style();
-    return mq::MediaQueryEvaluator {ScreenAtom(), *_document, &style}.Evaluate(mediaCondition);
+    return mq::MediaQueryEvaluator {mq::ScreenAtom(), *_document, &style}.Evaluate(mediaCondition);
   }
 
   bool SizesAttributeParser::Parse(TokenRange range, const ParserContext &context) noexcept
@@ -156,7 +147,7 @@ namespace krys::boo::css
         continue;
       }
       bool matches = MediaConditionMatches(*mediaCondition);
-      mq::MediaQueryEvaluator evaluator {ScreenAtom()};
+      mq::MediaQueryEvaluator evaluator {mq::ScreenAtom()};
       if (evaluator.CollectDynamicDependencies(*mediaCondition) != mq::MediaQueryDynamicDependency::None)
       {
         _dynamicMediaQueryResults.push_back({mq::MediaQueryList {*mediaCondition}, matches});

@@ -22,6 +22,7 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/TextDirectionState.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -116,11 +117,11 @@ namespace krys::boo::html
       {
         auto state = EnumeratedAttribute<"translate", HTMLElement>::ResolveState(
           Reflect<dom::DOMString>(*htmlElement, u8"translate"));
-        if (state == AttributeState::Yes)
+        if (state == TranslateAttributeState::Yes)
         {
           return true;
         }
-        if (state == AttributeState::No)
+        if (state == TranslateAttributeState::No)
         {
           return false;
         }
@@ -144,9 +145,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::Dir() const noexcept
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"dir");
-    return EnumeratedAttribute<"dir", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      krys::move(value));
+    return ReflectEnumerated<"dir">(*this);
   }
 
   void HTMLElement::Dir(dom::DOMString value) noexcept
@@ -162,7 +161,7 @@ namespace krys::boo::html
 
     // 1. If the hidden attribute is in the Hidden Until Found state, then return "until-found".
     auto state = EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value);
-    if (state == AttributeState::UntilFound)
+    if (state == HiddenAttributeState::UntilFound)
     {
       return u8"until-found";
     }
@@ -170,13 +169,13 @@ namespace krys::boo::html
     // 2. If the hidden attribute is set, then return true.
     // 3. Return false.
     // (Any other value, and the missing value, is in the Hidden state.)
-    return state == AttributeState::Hidden;
+    return state == HiddenAttributeState::Hidden;
   }
 
   bool HTMLElement::IsHiddenUntilFound() const noexcept
   {
-    auto value = GetAttribute(u8"hidden");
-    return value && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"until-found");
+    return EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(GetAttribute(u8"hidden"))
+           == HiddenAttributeState::UntilFound;
   }
 
   // https://html.spec.whatwg.org/#dom-hidden
@@ -359,9 +358,9 @@ namespace krys::boo::html
     auto value = Reflect<dom::DOMString>(*this, u8"draggable");
     switch (EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
     {
-      case AttributeState::True:  return true;
-      case AttributeState::False: return false;
-      case AttributeState::Auto:
+      case DraggableAttributeState::True:  return true;
+      case DraggableAttributeState::False: return false;
+      case DraggableAttributeState::Auto:
       {
         // If the element is an img element, an object element that represents an image, or an a element with
         // an href content attribute, the draggable IDL attribute must return true; otherwise, the draggable
@@ -401,7 +400,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#own-autocapitalization-hint
-    KRYS_NODISCARD AttributeState OwnAutocapitalizationHint(const HTMLElement &element) noexcept
+    KRYS_NODISCARD AutocapitalizeAttributeState OwnAutocapitalizationHint(const HTMLElement &element) noexcept
     {
       // 1. If the autocapitalize content attribute is present on element, and its value is not the empty
       //    string, return the state of the attribute.
@@ -417,18 +416,18 @@ namespace krys::boo::html
         return OwnAutocapitalizationHint(*form);
       }
       // 3. Return Default.
-      return AttributeState::Default;
+      return AutocapitalizeAttributeState::Default;
     }
 
     /// @see https://html.spec.whatwg.org/#used-autocorrection-state
-    KRYS_NODISCARD AttributeState UsedAutocorrectionState(const HTMLElement &element) noexcept
+    KRYS_NODISCARD AutocorrectAttributeState UsedAutocorrectionState(const HTMLElement &element) noexcept
     {
       // 1. If element is an input element whose type attribute is in one of the URL, Email, or Password
       //    states, then return Off.
       if (auto *input = DynamicDowncast<HTMLInputElement>(element);
           input && (input->IsURLField() || input->IsEmailField() || input->IsPasswordField()))
       {
-        return AttributeState::Off;
+        return AutocorrectAttributeState::Off;
       }
       // 2. If the autocorrect content attribute is present on element, then return the state of the
       //    attribute.
@@ -444,26 +443,7 @@ namespace krys::boo::html
           form->GetAttribute(u8"autocorrect"));
       }
       // 4. Return On.
-      return AttributeState::On;
-    }
-
-    /// @brief The keyword of @p name's state if it's one of @p keywords, or the empty string: an attribute
-    /// reflected limited to only known values, whose keywords are each their own state.
-    /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
-    KRYS_NODISCARD dom::DOMString KnownKeyword(const HTMLElement &element, dom::DOMStringAtom name,
-                                               std::initializer_list<const char8_t *> keywords) noexcept
-    {
-      if (auto value = element.GetAttribute(name))
-      {
-        for (auto *keyword : keywords)
-        {
-          if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, keyword))
-          {
-            return keyword;
-          }
-        }
-      }
-      return {};
+      return AutocorrectAttributeState::On;
     }
   }
 
@@ -482,9 +462,9 @@ namespace krys::boo::html
       switch (
         EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(element->GetAttribute(u8"spellcheck")))
       {
-        case AttributeState::True:  return true;
-        case AttributeState::False: return false;
-        default:                    break;
+        case SpellcheckAttributeState::True:    return true;
+        case SpellcheckAttributeState::False:   return false;
+        case SpellcheckAttributeState::Default: break;
       }
     }
     return true;
@@ -510,13 +490,13 @@ namespace krys::boo::html
         element->GetAttribute(u8"writingsuggestions")))
       {
         // 1. If element's writingsuggestions content attribute is in the False state, return "false".
-        case AttributeState::False:   return u8"false";
+        case WritingSuggestionsAttributeState::False:   return u8"false";
         // 2. If element's writingsuggestions content attribute is in the Default state, element has a parent
         //    element, and the computed writing suggestions value of element's parent element is "false", then
         //    return "false".
-        case AttributeState::Default: break;
+        case WritingSuggestionsAttributeState::Default: break;
         // 3. Return "true".
-        default:                      return u8"true";
+        case WritingSuggestionsAttributeState::True:    return u8"true";
       }
     }
     return u8"true";
@@ -535,16 +515,16 @@ namespace krys::boo::html
     switch (OwnAutocapitalizationHint(*this))
     {
       // 2. If state is Default, then return the empty string.
-      case AttributeState::Default:    return {};
+      case AutocapitalizeAttributeState::Default:    return {};
       // 3. If state is None, then return "none".
-      case AttributeState::None:       return u8"none";
+      case AutocapitalizeAttributeState::None:       return u8"none";
       // 4. If state is Sentences, then return "sentences".
-      case AttributeState::Sentences:  return u8"sentences";
+      case AutocapitalizeAttributeState::Sentences:  return u8"sentences";
       // 5. Return the keyword value corresponding to state.
-      case AttributeState::Words:      return u8"words";
-      case AttributeState::Characters: return u8"characters";
-      default:                         return {};
+      case AutocapitalizeAttributeState::Words:      return u8"words";
+      case AutocapitalizeAttributeState::Characters: return u8"characters";
     }
+    krys_unreachable();
   }
 
   void HTMLElement::Autocapitalize(dom::DOMString value) noexcept
@@ -558,7 +538,7 @@ namespace krys::boo::html
   {
     // The autocorrect getter steps are: return true if the element's used autocorrection state is On and
     // false if the element's used autocorrection state is Off.
-    return UsedAutocorrectionState(*this) == AttributeState::On;
+    return UsedAutocorrectionState(*this) == AutocorrectAttributeState::On;
   }
 
   // https://html.spec.whatwg.org/#dom-autocorrect
@@ -574,9 +554,7 @@ namespace krys::boo::html
   // The inputMode IDL attribute must reflect the inputmode content attribute, limited to only known values.
   dom::DOMString HTMLElement::InputMode() const noexcept
   {
-    return KnownKeyword(
-      *this, u8"inputmode",
-      {u8"none", u8"text", u8"tel", u8"url", u8"email", u8"numeric", u8"decimal", u8"search"});
+    return ReflectEnumerated<"inputmode">(*this);
   }
 
   // https://html.spec.whatwg.org/#dom-inputmode
@@ -591,8 +569,7 @@ namespace krys::boo::html
   // values.
   dom::DOMString HTMLElement::EnterKeyHint() const noexcept
   {
-    return KnownKeyword(*this, u8"enterkeyhint",
-                        {u8"enter", u8"done", u8"go", u8"next", u8"previous", u8"search", u8"send"});
+    return ReflectEnumerated<"enterkeyhint">(*this);
   }
 
   // https://html.spec.whatwg.org/#dom-enterkeyhint
@@ -905,9 +882,7 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLElement::Popover() const noexcept
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"popover");
-    return EnumeratedAttribute<"popover", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
-      krys::move(value));
+    return ReflectEnumerated<"popover", HTMLElement, Maybe<dom::DOMString>>(*this);
   }
 
   void HTMLElement::Popover(Maybe<dom::DOMString> value) noexcept
@@ -951,33 +926,6 @@ namespace krys::boo::html
       }
       return css::ValueId::Isolate;
     }
-
-    enum class ContentEditableType : uint8
-    {
-      Inherit,
-      True,
-      False,
-      PlaintextOnly
-    };
-
-    KRYS_NODISCARD ContentEditableType GetContentEditableType(dom::DOMStringView value) noexcept
-    {
-      if (value.empty() || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"true"))
-      {
-        return ContentEditableType::True;
-      }
-      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"false"))
-      {
-        return ContentEditableType::False;
-      }
-      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"plaintext-only"))
-      {
-        return ContentEditableType::PlaintextOnly;
-      }
-
-      return ContentEditableType::Inherit;
-    }
-
   }
 
 #pragma region Popovers
@@ -1570,23 +1518,7 @@ namespace krys::boo::html
   // (Run for the popover attribute only; the popover data is made and cleared with it.)
   void HTMLElement::PopoverAttributeChanged(Maybe<dom::DOMStringView> value) noexcept
   {
-    auto computePopoverState = [](Maybe<dom::DOMStringView> value)
-    {
-      auto state = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(
-        value ? Maybe<dom::DOMString>(*value) : null);
-      if (!state)
-      {
-        return dom::PopoverState::None;
-      }
-      switch (*state)
-      {
-        case AttributeState::Auto: return dom::PopoverState::Auto;
-        case AttributeState::Hint: return dom::PopoverState::Hint;
-        default:                   return dom::PopoverState::Manual;
-      }
-    };
-
-    auto newPopoverState = computePopoverState(value);
+    auto newPopoverState = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(value);
     if (newPopoverState == GetPopoverState())
     {
       return;
@@ -1600,8 +1532,8 @@ namespace krys::boo::html
     if (IsPopoverShowing())
     {
       (void)HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, nullptr);
-      auto currentValue = GetAttribute(dom::DOMStringAtom(u8"popover"));
-      newPopoverState = computePopoverState(currentValue ? Maybe<dom::DOMStringView>(*currentValue) : null);
+      newPopoverState = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(
+        GetAttribute(dom::DOMStringAtom(u8"popover")));
     }
 
     if (newPopoverState == dom::PopoverState::None)
@@ -1641,15 +1573,15 @@ namespace krys::boo::html
     // The contentEditable IDL attribute, on getting, must return the string "true" if the content attribute
     // is set to the True state, "plaintext-only" if the content attribute is set to the Plaintext-Only state,
     // "false" if the content attribute is set to the False state, and "inherit" otherwise.
-    auto value = GetAttribute(u8"contenteditable");
-    switch (value ? GetContentEditableType(*value) : ContentEditableType::Inherit)
+    switch (
+      EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(GetAttribute(u8"contenteditable")))
     {
-      case ContentEditableType::True:          return u8"true";
-      case ContentEditableType::PlaintextOnly: return u8"plaintext-only";
-      case ContentEditableType::False:         return u8"false";
-      case ContentEditableType::Inherit:       break;
+      case ContentEditableAttributeState::True:          return u8"true";
+      case ContentEditableAttributeState::PlaintextOnly: return u8"plaintext-only";
+      case ContentEditableAttributeState::False:         return u8"false";
+      case ContentEditableAttributeState::Inherit:       return u8"inherit";
     }
-    return u8"inherit";
+    krys_unreachable();
   }
 
   // https://html.spec.whatwg.org/#dom-contenteditable
@@ -1693,17 +1625,13 @@ namespace krys::boo::html
       {
         continue;
       }
-      auto value = element->GetAttribute(u8"contenteditable");
-      if (!value)
+      switch (EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(
+        element->GetAttribute(u8"contenteditable")))
       {
-        continue;
-      }
-      switch (GetContentEditableType(*value))
-      {
-        case ContentEditableType::True:          return dom::Node::Editability::CanEditRichly;
-        case ContentEditableType::PlaintextOnly: return dom::Node::Editability::CanEditPlainText;
-        case ContentEditableType::False:         return dom::Node::Editability::ReadOnly;
-        case ContentEditableType::Inherit:       break;
+        case ContentEditableAttributeState::True:          return dom::Node::Editability::CanEditRichly;
+        case ContentEditableAttributeState::PlaintextOnly: return dom::Node::Editability::CanEditPlainText;
+        case ContentEditableAttributeState::False:         return dom::Node::Editability::ReadOnly;
+        case ContentEditableAttributeState::Inherit:       break;
       }
     }
 
@@ -1808,21 +1736,22 @@ namespace krys::boo::html
     else if (localName == u8"contenteditable")
     {
       auto userModifyValue = css::ValueId::ReadWrite;
-      switch (GetContentEditableType(value))
+      auto state = EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(value);
+      switch (state)
       {
-        case ContentEditableType::Inherit:
+        case ContentEditableAttributeState::Inherit:
         {
           return;
         }
-        case ContentEditableType::False:
+        case ContentEditableAttributeState::False:
         {
           userModifyValue = css::ValueId::ReadOnly;
           break;
         }
-        case ContentEditableType::PlaintextOnly:
-        case ContentEditableType::True:
+        case ContentEditableAttributeState::PlaintextOnly:
+        case ContentEditableAttributeState::True:
         {
-          if (GetContentEditableType(value) == ContentEditableType::PlaintextOnly)
+          if (state == ContentEditableAttributeState::PlaintextOnly)
           {
             userModifyValue = css::ValueId::ReadWritePlaintextOnly;
           }
@@ -1838,7 +1767,7 @@ namespace krys::boo::html
     else if (localName == u8"hidden")
     {
       // The hiddenUntilFoundEnabled setting is on by default.
-      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"until-found"))
+      if (EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value) == HiddenAttributeState::UntilFound)
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::ContentVisibility, css::ValueId::Hidden);
       }
@@ -1849,31 +1778,43 @@ namespace krys::boo::html
     }
     else if (localName == u8"draggable")
     {
-      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"true"))
+      switch (EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
       {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::Element);
-      }
-      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"false"))
-      {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::None);
+        case DraggableAttributeState::True:
+        {
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::Element);
+          break;
+        }
+        case DraggableAttributeState::False:
+        {
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::None);
+          break;
+        }
+        case DraggableAttributeState::Auto: break;
       }
     }
     else if (localName == u8"dir")
     {
-      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"auto"))
+      switch (dom::ParseTextDirectionState(value))
       {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::UnicodeBidi,
-                                             UnicodeBidiAttributeForDirAuto(*this));
-      }
-      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"rtl")
-               || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"ltr"))
-      {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, css::CSSOMString(value));
-        auto tagName = TagQualifiedName().TagName();
-        if (tagName != TagName::bdi && tagName != TagName::bdo && tagName != TagName::output)
+        case dom::TextDirectionState::Auto:
         {
-          AddPropertyToPresentationalHintStyle(style, css::PropertyId::UnicodeBidi, css::ValueId::Isolate);
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::UnicodeBidi,
+                                               UnicodeBidiAttributeForDirAuto(*this));
+          break;
         }
+        case dom::TextDirectionState::LTR:
+        case dom::TextDirectionState::RTL:
+        {
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, css::CSSOMString(value));
+          auto tagName = TagQualifiedName().TagName();
+          if (tagName != TagName::bdi && tagName != TagName::bdo && tagName != TagName::output)
+          {
+            AddPropertyToPresentationalHintStyle(style, css::PropertyId::UnicodeBidi, css::ValueId::Isolate);
+          }
+          break;
+        }
+        case dom::TextDirectionState::Undefined: break;
       }
     }
     else if (localName == u8"lang")

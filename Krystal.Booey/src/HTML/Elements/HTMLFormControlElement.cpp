@@ -19,13 +19,12 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"popovertargetaction", HTMLFormControlElement>
   {
-    static inline KeywordStateMappingArray<3> StateMappings = {
-      KeywordStateMapping {u8"toggle", AttributeState::Toggle},
-      KeywordStateMapping {u8"show", AttributeState::Show},
-      KeywordStateMapping {u8"hide", AttributeState::Hide}};
+    using State = PopoverTargetActionAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {
+      {u8"toggle", State::Toggle}, {u8"show", State::Show}, {u8"hide", State::Hide}};
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::Toggle;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Toggle;
+    constexpr static State MissingValueDefault = State::Toggle;
+    constexpr static State InvalidValueDefault = State::Toggle;
   };
 
   HTMLFormControlElement::HTMLFormControlElement(dom::Document &document, HTMLElementInterface interface,
@@ -272,9 +271,7 @@ namespace krys::boo::html
   // known values.
   dom::DOMString HTMLFormControlElement::PopoverTargetAction() const noexcept
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"popovertargetaction");
-    return EnumeratedAttribute<"popovertargetaction", HTMLFormControlElement>::ResolveCanonicalKeyword<
-      dom::DOMString>(krys::move(value));
+    return ReflectEnumerated<"popovertargetaction", HTMLFormControlElement>(*this);
   }
 
   void HTMLFormControlElement::PopoverTargetAction(dom::DOMString value) noexcept
@@ -308,13 +305,13 @@ namespace krys::boo::html
       GetAttribute(dom::DOMStringAtom(u8"popovertargetaction")));
     // 4. If node's popovertargetaction attribute is in the show state and popover's popover visibility state
     //    is showing, then return.
-    if (action == AttributeState::Show && popover->IsPopoverShowing())
+    if (action == PopoverTargetActionAttributeState::Show && popover->IsPopoverShowing())
     {
       return;
     }
     // 5. If node's popovertargetaction attribute is in the hide state and popover's popover visibility state
     //    is hidden, then return.
-    if (action == AttributeState::Hide && !popover->IsPopoverShowing())
+    if (action == PopoverTargetActionAttributeState::Hide && !popover->IsPopoverShowing())
     {
       return;
     }

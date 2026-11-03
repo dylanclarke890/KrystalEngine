@@ -4,7 +4,6 @@
 #include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
@@ -444,8 +443,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLButtonElement::EncType() const noexcept
   {
-    return EnumeratedAttribute<"formenctype", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"formenctype"));
+    return ReflectEnumerated<"formenctype">(*this);
   }
 
   void HTMLButtonElement::EncType(dom::DOMString value) noexcept
@@ -455,8 +453,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLButtonElement::FormMethod() const noexcept
   {
-    return EnumeratedAttribute<"formmethod", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"formmethod"));
+    return ReflectEnumerated<"formmethod">(*this);
   }
 
   void HTMLButtonElement::FormMethod(dom::DOMString value) noexcept

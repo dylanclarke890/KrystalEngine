@@ -39,14 +39,15 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"scope", HTMLTableCellElement>
   {
-    static inline KeywordStateMappingArray<4> StateMappings = {
-      KeywordStateMapping {u8"row", AttributeState::Row}, KeywordStateMapping {u8"col", AttributeState::Col},
-      KeywordStateMapping {u8"rowgroup", AttributeState::RowGroup},
-      KeywordStateMapping {u8"colgroup", AttributeState::ColGroup}};
+    using State = ScopeAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {{u8"row", State::Row},
+                                                                      {u8"col", State::Col},
+                                                                      {u8"rowgroup", State::RowGroup},
+                                                                      {u8"colgroup", State::ColGroup}};
 
     // The Auto state has no keyword.
-    constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+    constexpr static State MissingValueDefault = State::Auto;
+    constexpr static State InvalidValueDefault = State::Auto;
   };
 
   uint32 HTMLTableCellElement::ColSpan() const noexcept
@@ -81,8 +82,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTableCellElement::Scope() const noexcept
   {
-    return EnumeratedAttribute<"scope", HTMLTableCellElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"scope"));
+    return ReflectEnumerated<"scope", HTMLTableCellElement>(*this);
   }
 
   void HTMLTableCellElement::Scope(dom::DOMString value) noexcept

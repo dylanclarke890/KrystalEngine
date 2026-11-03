@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/TextDirectionState.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -1082,22 +1083,13 @@ namespace krys::boo::html
         {
           continue;
         }
-        auto value = element->GetAttribute(u8"dir");
-        if (!value)
+        switch (dom::ElementTextDirectionState(*element))
         {
-          continue;
-        }
-        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"rtl"))
-        {
-          return TextDirection::RTL;
-        }
-        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"ltr"))
-        {
-          return TextDirection::LTR;
-        }
-        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"auto"))
-        {
-          return dom::ComputeAutoDirectionality(*element).value_or(TextDirection::LTR);
+          case dom::TextDirectionState::RTL: return TextDirection::RTL;
+          case dom::TextDirectionState::LTR: return TextDirection::LTR;
+          case dom::TextDirectionState::Auto:
+            return dom::ComputeAutoDirectionality(*element).value_or(TextDirection::LTR);
+          case dom::TextDirectionState::Undefined: break;
         }
       }
       return TextDirection::LTR;

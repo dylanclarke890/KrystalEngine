@@ -2,7 +2,6 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -121,8 +120,7 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLScriptElement::CrossOrigin() const noexcept
   {
-    return EnumeratedAttribute<"crossorigin", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
-      Reflect<dom::DOMString>(*this, u8"crossorigin"));
+    return ReflectEnumerated<"crossorigin", HTMLElement, Maybe<dom::DOMString>>(*this);
   }
 
   void HTMLScriptElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
@@ -132,8 +130,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLScriptElement::ReferrerPolicy() const noexcept
   {
-    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
+    return ReflectEnumerated<"referrerpolicy">(*this);
   }
 
   void HTMLScriptElement::ReferrerPolicy(dom::DOMString value) noexcept
@@ -153,8 +150,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLScriptElement::FetchPriority() const noexcept
   {
-    return EnumeratedAttribute<"fetchpriority", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"fetchpriority"));
+    return ReflectEnumerated<"fetchpriority">(*this);
   }
 
   void HTMLScriptElement::FetchPriority(dom::DOMString value) noexcept

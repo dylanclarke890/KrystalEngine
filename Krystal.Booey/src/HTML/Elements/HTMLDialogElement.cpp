@@ -19,13 +19,12 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"closedby", HTMLDialogElement>
   {
-    static inline KeywordStateMappingArray<3> StateMappings = {
-      KeywordStateMapping {u8"any", AttributeState::Any},
-      KeywordStateMapping {u8"closerequest", AttributeState::CloseRequest},
-      KeywordStateMapping {u8"none", AttributeState::None}};
+    using State = ClosedByAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {
+      {u8"any", State::Any}, {u8"closerequest", State::CloseRequest}, {u8"none", State::None}};
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+    constexpr static State MissingValueDefault = State::Auto;
+    constexpr static State InvalidValueDefault = State::Auto;
   };
 
   HTMLDialogElement::HTMLDialogElement(dom::Document &document) noexcept
@@ -50,9 +49,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLDialogElement::ClosedBy() const noexcept
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"closedby");
-    return EnumeratedAttribute<"closedby", HTMLDialogElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      krys::move(value));
+    return ReflectEnumerated<"closedby", HTMLDialogElement>(*this);
   }
 
   void HTMLDialogElement::ClosedBy(dom::DOMString value) noexcept
@@ -145,13 +142,12 @@ namespace krys::boo::html
     auto value = Reflect<dom::DOMString>(*this, u8"closedby");
     switch (EnumeratedAttribute<"closedby", HTMLDialogElement>::ResolveState(value))
     {
-      case AttributeState::Any:          return ClosedByState::Any;
-      case AttributeState::CloseRequest: return ClosedByState::CloseRequest;
-      case AttributeState::None:         return ClosedByState::None;
-      default:
-        // The auto state: close requests close a modal dialog.
-        return IsModal() ? ClosedByState::CloseRequest : ClosedByState::None;
+      case ClosedByAttributeState::Any:          return ClosedByState::Any;
+      case ClosedByAttributeState::CloseRequest: return ClosedByState::CloseRequest;
+      case ClosedByAttributeState::None:         return ClosedByState::None;
+      case ClosedByAttributeState::Auto:         return IsModal() ? ClosedByState::CloseRequest : ClosedByState::None;
     }
+    krys_unreachable();
   }
 
   // https://html.spec.whatwg.org/#show-a-modal-dialog

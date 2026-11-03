@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+﻿#include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFrameSetElement.hpp"

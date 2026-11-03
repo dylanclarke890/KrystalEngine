@@ -14,32 +14,38 @@ namespace krys::boo::html::tests
             "[HTML][Attributes][html:empty-value-default][html:enumerated-attribute]")
   {
     using Hidden = EnumeratedAttribute<"hidden", HTMLElement>;
-    CHECK(Hidden::ResolveState(null) == AttributeState::NotHidden);
-    CHECK(Hidden::ResolveState(u8"hidden") == AttributeState::Hidden);
+    CHECK(Hidden::ResolveState(null) == HiddenAttributeState::NotHidden);
+    CHECK(Hidden::ResolveState(u8"hidden") == HiddenAttributeState::Hidden);
     // Keywords match ASCII case-insensitively.
-    CHECK(Hidden::ResolveState(u8"UNTIL-Found") == AttributeState::UntilFound);
-    CHECK(Hidden::ResolveState(u8"") == AttributeState::Hidden);
-    CHECK(Hidden::ResolveState(u8"bogus") == AttributeState::Hidden);
+    CHECK(Hidden::ResolveState(u8"UNTIL-Found") == HiddenAttributeState::UntilFound);
+    CHECK(Hidden::ResolveState(u8"") == HiddenAttributeState::Hidden);
+    CHECK(Hidden::ResolveState(u8"bogus") == HiddenAttributeState::Hidden);
 
     // An attribute without a missing value default is in no state when it's missing, and one without an
     // invalid value default is in no state when its value is invalid.
+    using Dir = EnumeratedAttribute<"dir", HTMLElement>;
+    CHECK(Dir::ResolveState(null) == null);
+    CHECK(Dir::ResolveState(u8"bogus") == null);
+    CHECK(Dir::ResolveState(u8"RTL") == dom::TextDirectionState::RTL);
+
+    // A missing value default can be a state without a keyword.
     using Popover = EnumeratedAttribute<"popover", HTMLElement>;
-    CHECK(Popover::ResolveState(null) == null);
-    CHECK(Popover::ResolveState(u8"") == AttributeState::Auto);
-    CHECK(Popover::ResolveState(u8"bogus") == AttributeState::Manual);
+    CHECK(Popover::ResolveState(null) == dom::PopoverState::None);
+    CHECK(Popover::ResolveState(u8"") == dom::PopoverState::Auto);
+    CHECK(Popover::ResolveState(u8"bogus") == dom::PopoverState::Manual);
 
     // The empty value default applies when the empty string isn't a keyword.
     using CrossOrigin = EnumeratedAttribute<"crossorigin", HTMLElement>;
-    CHECK(CrossOrigin::ResolveState(null) == AttributeState::NoCORS);
-    CHECK(CrossOrigin::ResolveState(u8"") == AttributeState::Anonymous);
-    CHECK(CrossOrigin::ResolveState(u8"Use-Credentials") == AttributeState::UseCredentials);
-    CHECK(CrossOrigin::ResolveState(u8"bogus") == AttributeState::Anonymous);
+    CHECK(CrossOrigin::ResolveState(null) == CrossOriginAttributeState::NoCORS);
+    CHECK(CrossOrigin::ResolveState(u8"") == CrossOriginAttributeState::Anonymous);
+    CHECK(CrossOrigin::ResolveState(u8"Use-Credentials") == CrossOriginAttributeState::UseCredentials);
+    CHECK(CrossOrigin::ResolveState(u8"bogus") == CrossOriginAttributeState::Anonymous);
 
     // A keyword wins over the empty value default.
     using Translate = EnumeratedAttribute<"translate", HTMLElement>;
-    CHECK(Translate::ResolveState(u8"NO") == AttributeState::No);
-    CHECK(Translate::ResolveState(u8"") == AttributeState::Yes);
-    CHECK(Translate::ResolveState(u8"maybe") == AttributeState::Inherit);
+    CHECK(Translate::ResolveState(u8"NO") == TranslateAttributeState::No);
+    CHECK(Translate::ResolveState(u8"") == TranslateAttributeState::Yes);
+    CHECK(Translate::ResolveState(u8"maybe") == TranslateAttributeState::Inherit);
   }
 
   TEST_CASE("EnumeratedAttribute::ResolveCanonicalKeyword: the canonical keyword of the attribute's state",

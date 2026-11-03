@@ -12,26 +12,28 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"shadowrootmode", HTMLTemplateElement>
   {
-    static inline KeywordStateMappingArray<2> StateMappings = {
-      KeywordStateMapping {u8"open", AttributeState::Open},
-      KeywordStateMapping {u8"closed", AttributeState::Closed},
+    using State = ShadowRootModeAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {
+      {u8"open", State::Open},
+      {u8"closed", State::Closed},
     };
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::None;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::None;
+    constexpr static State MissingValueDefault = State::None;
+    constexpr static State InvalidValueDefault = State::None;
   };
 
   /// @see https://html.spec.whatwg.org/#attr-template-shadowrootslotassignment
   template <>
   struct EnumeratedAttributeTraits<"shadowrootslotassignment", HTMLTemplateElement>
   {
-    static inline KeywordStateMappingArray<2> StateMappings = {
-      KeywordStateMapping {u8"named", AttributeState::Named},
-      KeywordStateMapping {u8"manual", AttributeState::Manual},
+    using State = ShadowRootSlotAssignmentAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {
+      {u8"named", State::Named},
+      {u8"manual", State::Manual},
     };
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::Named;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Named;
+    constexpr static State MissingValueDefault = State::Named;
+    constexpr static State InvalidValueDefault = State::Named;
   };
 
   // FIXME: Implement the HTMLTemplateElement constructor in a spec compliant way.
@@ -115,8 +117,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTemplateElement::ShadowRootMode() const noexcept
   {
-    return EnumeratedAttribute<"shadowrootmode", HTMLTemplateElement>::ResolveCanonicalKeyword<
-      dom::DOMString>(Reflect<dom::DOMString>(*this, u8"shadowrootmode"));
+    return ReflectEnumerated<"shadowrootmode", HTMLTemplateElement>(*this);
   }
 
   void HTMLTemplateElement::ShadowRootMode(dom::DOMString value) noexcept
@@ -136,8 +137,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTemplateElement::ShadowRootSlotAssignment() const noexcept
   {
-    return EnumeratedAttribute<"shadowrootslotassignment", HTMLTemplateElement>::ResolveCanonicalKeyword<
-      dom::DOMString>(Reflect<dom::DOMString>(*this, u8"shadowrootslotassignment"));
+    return ReflectEnumerated<"shadowrootslotassignment", HTMLTemplateElement>(*this);
   }
 
   void HTMLTemplateElement::ShadowRootSlotAssignment(dom::DOMString value) noexcept

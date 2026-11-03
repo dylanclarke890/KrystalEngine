@@ -29,13 +29,12 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"decoding", HTMLImageElement>
   {
-    static inline KeywordStateMappingArray<3> StateMappings = {
-      KeywordStateMapping {u8"sync", AttributeState::Sync},
-      KeywordStateMapping {u8"async", AttributeState::Async},
-      KeywordStateMapping {u8"auto", AttributeState::Auto}};
+    using State = DecodingAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {
+      {u8"sync", State::Sync}, {u8"async", State::Async}, {u8"auto", State::Auto}};
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+    constexpr static State MissingValueDefault = State::Auto;
+    constexpr static State InvalidValueDefault = State::Auto;
   };
 
   namespace
@@ -50,18 +49,6 @@ namespace krys::boo::html
       }
       return infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
         typeAttribute.substr(0, semicolonIndex));
-    }
-
-    KRYS_NODISCARD const css::CSSOMStringAtom &ScreenAtom() noexcept
-    {
-      static const css::CSSOMStringAtom screen {u8"screen"};
-      return screen;
-    }
-
-    KRYS_NODISCARD const css::CSSOMStringAtom &PrintAtom() noexcept
-    {
-      static const css::CSSOMStringAtom print {u8"print"};
-      return print;
     }
 
     KRYS_NODISCARD uint32 ClampedAttributeLength(uint64 value) noexcept
@@ -121,8 +108,7 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLImageElement::CrossOrigin() const noexcept
   {
-    return EnumeratedAttribute<"crossorigin", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
-      Reflect<dom::DOMString>(*this, u8"crossorigin"));
+    return ReflectEnumerated<"crossorigin", HTMLElement, Maybe<dom::DOMString>>(*this);
   }
 
   void HTMLImageElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
@@ -343,8 +329,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::ReferrerPolicy() const noexcept
   {
-    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
+    return ReflectEnumerated<"referrerpolicy">(*this);
   }
 
   void HTMLImageElement::ReferrerPolicy(dom::DOMString value) noexcept
@@ -354,8 +339,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::Decoding() const noexcept
   {
-    return EnumeratedAttribute<"decoding", HTMLImageElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"decoding"));
+    return ReflectEnumerated<"decoding", HTMLImageElement>(*this);
   }
 
   void HTMLImageElement::Decoding(dom::DOMString value) noexcept
@@ -365,9 +349,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::Loading() const noexcept
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"loading");
-    return EnumeratedAttribute<"loading", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      krys::move(value));
+    return ReflectEnumerated<"loading">(*this);
   }
 
   void HTMLImageElement::Loading(dom::DOMString value) noexcept
@@ -377,8 +359,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::FetchPriority() const noexcept
   {
-    return EnumeratedAttribute<"fetchpriority", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"fetchpriority"));
+    return ReflectEnumerated<"fetchpriority">(*this);
   }
 
   void HTMLImageElement::FetchPriority(dom::DOMString value) noexcept
@@ -656,8 +637,9 @@ namespace krys::boo::html
 
       auto &document = NodeDocument();
       auto documentElement = document.DocumentElement();
-      css::mq::MediaQueryEvaluator evaluator(document.Printing() ? PrintAtom() : ScreenAtom(), document,
-                                             documentElement ? documentElement->ComputedStyle() : nullptr);
+      css::mq::MediaQueryEvaluator evaluator(
+        document.Printing() ? css::mq::PrintAtom() : css::mq::ScreenAtom(), document,
+        documentElement ? documentElement->ComputedStyle() : nullptr);
       auto &queries = source->ParsedMediaAttribute(document);
 
       // 5f. If child has a media attribute, and its value does not match the environment, continue to the

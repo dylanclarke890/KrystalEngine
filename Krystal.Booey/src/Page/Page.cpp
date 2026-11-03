@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"
@@ -546,16 +547,10 @@ namespace krys::boo
     ForEachRenderableDocument(perDocumentFunction);
   }
 
-  KRYS_NODISCARD static const css::CSSOMStringAtom &ScreenAtom() noexcept
-  {
-    static MainThreadNeverDestroyed<css::CSSOMStringAtom> screen {u8"screen"};
-    return screen;
-  }
-
   bool Page::UseDarkAppearance() const noexcept
   {
     auto *view = MainFrame().View();
-    if (!view || view->MediaType() != ScreenAtom())
+    if (!view || view->MediaType() != css::mq::ScreenAtom())
     {
       return false;
     }

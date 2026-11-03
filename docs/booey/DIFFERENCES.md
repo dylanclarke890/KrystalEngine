@@ -119,6 +119,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From WebKit
 
+- Enumerated attributes are read through their definitions: each attribute's keywords, missing, invalid and empty value defaults, and canonical keywords are its `EnumeratedAttributeTraits`, with a states enum of its own, and `EnumeratedAttribute::ResolveState` gives its state. IDL attributes limited to only known values reflect it with `ReflectEnumerated`. Upstream matches keywords wherever it reads an attribute, including `contentEditableType`, `isHiddenUntilFound`, `parseTextDirectionState`, `directionForFormData` and the `contenteditable`, `hidden`, `draggable` and `dir` presentational hints; the states they find are the same.
 - A `ul` or `li` with `type=round` gets no list style: upstream maps it to a non-standard `round` style.
 - `<meta name>` is only the standard `color-scheme` for the page's colour scheme; upstream also takes the legacy `supported-color-schemes`. A meta refresh to a `javascript:` URL is ignored, as the specification says, so a later refresh still counts; upstream schedules it.
 - A pragma (`<meta http-equiv>`) runs again when the element's `http-equiv` or `content` changes, as upstream and Chrome; the specification runs it only when the element is inserted.

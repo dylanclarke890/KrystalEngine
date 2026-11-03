@@ -30,39 +30,42 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"autocomplete", HTMLFormElement>
   {
-    static inline KeywordStateMappingArray<2> StateMappings = {
-      KeywordStateMapping {u8"on", AttributeState::On}, KeywordStateMapping {u8"off", AttributeState::Off}};
+    using State = AutocompleteAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {{u8"on", State::On},
+                                                                      {u8"off", State::Off}};
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::On;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::On;
+    constexpr static State MissingValueDefault = State::On;
+    constexpr static State InvalidValueDefault = State::On;
   };
 
   /// @see https://html.spec.whatwg.org/#attr-fs-method
   template <>
   struct EnumeratedAttributeTraits<"method", HTMLFormElement>
   {
-    static inline KeywordStateMappingArray<3> StateMappings = {
-      KeywordStateMapping {u8"get", AttributeState::Get},
-      KeywordStateMapping {u8"post", AttributeState::Post},
-      KeywordStateMapping {u8"dialog", AttributeState::Dialog},
+    using State = MethodAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {
+      {u8"get", State::Get},
+      {u8"post", State::Post},
+      {u8"dialog", State::Dialog},
     };
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::Get;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Get;
+    constexpr static State MissingValueDefault = State::Get;
+    constexpr static State InvalidValueDefault = State::Get;
   };
 
   /// @see https://html.spec.whatwg.org/#attr-fs-enctype
   template <>
   struct EnumeratedAttributeTraits<"enctype", HTMLFormElement>
   {
-    static inline KeywordStateMappingArray<3> StateMappings = {
-      KeywordStateMapping {u8"application/x-www-form-urlencoded", AttributeState::URLEncoded},
-      KeywordStateMapping {u8"multipart/form-data", AttributeState::FormData},
-      KeywordStateMapping {u8"text/plain", AttributeState::TextPlain},
+    using State = EnctypeAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {
+      {u8"application/x-www-form-urlencoded", State::URLEncoded},
+      {u8"multipart/form-data", State::FormData},
+      {u8"text/plain", State::TextPlain},
     };
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::URLEncoded;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::URLEncoded;
+    constexpr static State MissingValueDefault = State::URLEncoded;
+    constexpr static State InvalidValueDefault = State::URLEncoded;
   };
 
   namespace
@@ -154,8 +157,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLFormElement::Autocomplete() const noexcept
   {
-    return EnumeratedAttribute<"autocomplete", HTMLFormElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"autocomplete"));
+    return ReflectEnumerated<"autocomplete", HTMLFormElement>(*this);
   }
 
   void HTMLFormElement::Autocomplete(dom::DOMString value) noexcept
@@ -165,8 +167,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLFormElement::EncType() const noexcept
   {
-    return EnumeratedAttribute<"enctype", HTMLFormElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"enctype"));
+    return ReflectEnumerated<"enctype", HTMLFormElement>(*this);
   }
 
   void HTMLFormElement::EncType(dom::DOMString value) noexcept
@@ -188,8 +189,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLFormElement::Method() const noexcept
   {
-    return EnumeratedAttribute<"method", HTMLFormElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"method"));
+    return ReflectEnumerated<"method", HTMLFormElement>(*this);
   }
 
   void HTMLFormElement::Method(dom::DOMString value) noexcept

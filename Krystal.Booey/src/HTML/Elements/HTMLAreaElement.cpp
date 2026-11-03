@@ -7,7 +7,6 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
@@ -384,8 +383,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLAreaElement::ReferrerPolicy() const noexcept
   {
-    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
+    return ReflectEnumerated<"referrerpolicy">(*this);
   }
 
   void HTMLAreaElement::ReferrerPolicy(dom::DOMString value) noexcept

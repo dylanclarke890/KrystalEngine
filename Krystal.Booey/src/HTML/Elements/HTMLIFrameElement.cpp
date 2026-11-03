@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLIFrameElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
@@ -122,8 +121,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLIFrameElement::ReferrerPolicy() const noexcept
   {
-    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
+    return ReflectEnumerated<"referrerpolicy">(*this);
   }
 
   void HTMLIFrameElement::ReferrerPolicy(dom::DOMString value) noexcept
@@ -133,8 +131,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLIFrameElement::Loading() const noexcept
   {
-    return EnumeratedAttribute<"loading", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"loading"));
+    return ReflectEnumerated<"loading">(*this);
   }
 
   void HTMLIFrameElement::Loading(dom::DOMString value) noexcept

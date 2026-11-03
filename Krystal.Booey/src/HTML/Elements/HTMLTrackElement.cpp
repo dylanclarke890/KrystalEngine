@@ -8,15 +8,15 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"kind", HTMLTrackElement>
   {
-    static inline KeywordStateMappingArray<5> StateMappings = {
-      KeywordStateMapping {u8"subtitles", AttributeState::Subtitles},
-      KeywordStateMapping {u8"captions", AttributeState::Captions},
-      KeywordStateMapping {u8"descriptions", AttributeState::Descriptions},
-      KeywordStateMapping {u8"chapters", AttributeState::Chapters},
-      KeywordStateMapping {u8"metadata", AttributeState::Metadata}};
+    using State = KindAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {{u8"subtitles", State::Subtitles},
+                                                                      {u8"captions", State::Captions},
+                                                                      {u8"descriptions", State::Descriptions},
+                                                                      {u8"chapters", State::Chapters},
+                                                                      {u8"metadata", State::Metadata}};
 
-    constexpr static AttributeState MissingValueDefault = AttributeState::Subtitles;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Metadata;
+    constexpr static State MissingValueDefault = State::Subtitles;
+    constexpr static State InvalidValueDefault = State::Metadata;
   };
 
   HTMLTrackElement::HTMLTrackElement(dom::Document &document) noexcept
@@ -28,8 +28,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTrackElement::Kind() const noexcept
   {
-    return EnumeratedAttribute<"kind", HTMLTrackElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"kind"));
+    return ReflectEnumerated<"kind", HTMLTrackElement>(*this);
   }
 
   void HTMLTrackElement::Kind(dom::DOMString value) noexcept

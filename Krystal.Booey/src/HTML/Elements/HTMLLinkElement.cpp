@@ -24,6 +24,40 @@
 
 namespace krys::boo::html
 {
+  /// @brief A link's `as`: a keyword for each potential destination ("fetch", or a destination other than the
+  /// empty string), with no missing or invalid value default.
+  /// @see https://html.spec.whatwg.org/#attr-link-as
+  template <>
+  struct EnumeratedAttributeTraits<"as", HTMLLinkElement>
+  {
+    using State = AsAttributeState;
+    static inline const KeywordStateMapping<State> StateMappings[] = {
+      {u8"fetch", State::Fetch},
+      {u8"audio", State::Audio},
+      {u8"audioworklet", State::AudioWorklet},
+      {u8"document", State::Document},
+      {u8"embed", State::Embed},
+      {u8"font", State::Font},
+      {u8"frame", State::Frame},
+      {u8"iframe", State::IFrame},
+      {u8"image", State::Image},
+      {u8"json", State::JSON},
+      {u8"manifest", State::Manifest},
+      {u8"object", State::Object},
+      {u8"paintworklet", State::PaintWorklet},
+      {u8"report", State::Report},
+      {u8"script", State::Script},
+      {u8"serviceworker", State::ServiceWorker},
+      {u8"sharedworker", State::SharedWorker},
+      {u8"style", State::Style},
+      {u8"track", State::Track},
+      {u8"video", State::Video},
+      {u8"webidentity", State::WebIdentity},
+      {u8"worker", State::Worker},
+      {u8"xslt", State::XSLT},
+    };
+  };
+
   namespace
   {
     KRYS_NODISCARD LinkEventSender &LinkLoadEventSenderSingleton() noexcept
@@ -690,8 +724,7 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLLinkElement::CrossOrigin() const noexcept
   {
-    return EnumeratedAttribute<"crossorigin", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
-      Reflect<dom::DOMString>(*this, u8"crossorigin"));
+    return ReflectEnumerated<"crossorigin", HTMLElement, Maybe<dom::DOMString>>(*this);
   }
 
   void HTMLLinkElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
@@ -711,27 +744,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::As() const noexcept
   {
-    // The as IDL attribute must reflect the as content attribute, limited to only known values: a keyword for
-    // each potential destination ("fetch", or a destination other than the empty string), with no missing or
-    // invalid value default.
-    constexpr dom::DOMStringView potentialDestinations[] = {
-      u8"fetch",        u8"audio",  u8"audioworklet", u8"document",      u8"embed",        u8"font",
-      u8"frame",        u8"iframe", u8"image",        u8"json",          u8"manifest",     u8"object",
-      u8"paintworklet", u8"report", u8"script",       u8"serviceworker", u8"sharedworker", u8"style",
-      u8"track",        u8"video",  u8"webidentity",  u8"worker",        u8"xslt"};
-    auto value = GetAttribute(u8"as");
-    if (!value)
-    {
-      return {};
-    }
-    for (auto keyword : potentialDestinations)
-    {
-      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, keyword))
-      {
-        return dom::DOMString(keyword);
-      }
-    }
-    return {};
+    // The as IDL attribute must reflect the as content attribute, limited to only known values.
+    return ReflectEnumerated<"as", HTMLLinkElement>(*this);
   }
 
   void HTMLLinkElement::As(dom::DOMString value) noexcept
@@ -825,8 +839,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::ReferrerPolicy() const noexcept
   {
-    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
+    return ReflectEnumerated<"referrerpolicy">(*this);
   }
 
   void HTMLLinkElement::ReferrerPolicy(dom::DOMString value) noexcept
@@ -861,8 +874,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::FetchPriority() const noexcept
   {
-    return EnumeratedAttribute<"fetchpriority", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflect<dom::DOMString>(*this, u8"fetchpriority"));
+    return ReflectEnumerated<"fetchpriority">(*this);
   }
 
   void HTMLLinkElement::FetchPriority(dom::DOMString value) noexcept
