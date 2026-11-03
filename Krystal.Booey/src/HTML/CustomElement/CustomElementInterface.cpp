@@ -3,8 +3,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
-#include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMaybeFormAssociatedCustomElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::html

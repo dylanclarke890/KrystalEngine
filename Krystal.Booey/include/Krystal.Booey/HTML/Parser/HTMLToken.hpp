@@ -1,16 +1,42 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/HTML/Enums/HTMLTokenType.hpp"
-#include "Krystal.Booey/HTML/Enums/ParsedAttributeFlags.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo::html
+{
+  enum class HTMLTokenType : uint8
+  {
+    Uninitialized,
+    DOCTYPE,
+    StartTag,
+    EndTag,
+    Comment,
+    Character,
+    EndOfFile,
+  };
+
+  /// @see A general-purpose enum for all attribute states defined by the HTML spec. May split this out later.
+  enum class ParsedAttributeFlags : uint8
+  {
+    None = 0,
+    HasPrefix = 1 << 1,
+    IsXMLNS = 1 << 2,
+    IsXML = 1 << 3,
+    IsXLink = 1 << 4,
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLTokenType, 7uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::html::ParsedAttributeFlags, 5uz);
 
 namespace krys::boo::html
 {

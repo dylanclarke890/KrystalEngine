@@ -1,6 +1,4 @@
 ﻿#include "Krystal.Booey.Tests/TestParserUtils.hpp"
-#include "Krystal.Booey/HTML/Enums/HTMLParseError.hpp"
-#include "Krystal.Booey/HTML/Enums/TokenizerState.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
 #include "Krystal.Core/MagicEnum.hpp"

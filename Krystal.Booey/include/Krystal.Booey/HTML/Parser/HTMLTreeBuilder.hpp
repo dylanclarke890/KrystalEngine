@@ -4,10 +4,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/Enums/InsertionMode.hpp"
-#include "Krystal.Booey/HTML/Enums/ParserScriptingMode.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
-#include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLElementStack.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLFormattingElementList.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLStackItem.hpp"
@@ -15,9 +13,50 @@
 #include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo::html
+{
+  enum class InsertionMode : uint8
+  {
+    Initial,
+    BeforeHTML,
+    BeforeHead,
+    InHead,
+    InHeadNoscript,
+    AfterHead,
+    InBody,
+    Text,
+    InTable,
+    InTableText,
+    InCaption,
+    InColumnGroup,
+    InTableBody,
+    InRow,
+    InCell,
+    InTemplate,
+    AfterBody,
+    InFrameset,
+    AfterFrameset,
+    AfterAfterBody,
+    AfterAfterFrameset
+  };
+
+  /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-scripting-mode
+  enum class ParserScriptingMode : uint8
+  {
+    Normal,
+    Disabled,
+    Inert,
+    Fragment
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::InsertionMode, 21u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParserScriptingMode, 4u)
 
 namespace krys::boo::html
 {

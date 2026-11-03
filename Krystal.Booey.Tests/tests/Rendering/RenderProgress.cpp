@@ -4,7 +4,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/HTMLProgressElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
 
 namespace krys::boo::layout::tests
 {

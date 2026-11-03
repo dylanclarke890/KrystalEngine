@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/HTML/HTMLLIElement.hpp"
-#include "Krystal.Booey/HTML/HTMLOListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLIElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOListElement.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 

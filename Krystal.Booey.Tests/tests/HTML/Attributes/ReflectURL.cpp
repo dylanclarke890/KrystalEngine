@@ -1,14 +1,14 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
-#include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
-#include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
-#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
-#include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBaseElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLScriptElement.hpp"
 
 namespace krys::boo::html::tests
 {

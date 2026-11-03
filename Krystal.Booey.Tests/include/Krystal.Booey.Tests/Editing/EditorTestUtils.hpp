@@ -11,7 +11,7 @@
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/Editing/UndoStep.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"

@@ -21,7 +21,7 @@
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"

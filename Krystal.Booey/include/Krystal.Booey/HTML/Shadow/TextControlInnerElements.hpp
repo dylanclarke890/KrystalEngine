@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLDivElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 
 namespace krys::boo
 {

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderMeter.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/HTML/HTMLMeterElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 
 namespace krys::boo

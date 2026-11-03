@@ -6,7 +6,7 @@
 #include "Krystal.Booey/History/CachedPage.hpp"
 #include "Krystal.Booey/History/HistoryItem.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/PageTransitionEvent.hpp"
+#include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
 #include "Krystal.Booey/Loader/HistoryController.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"

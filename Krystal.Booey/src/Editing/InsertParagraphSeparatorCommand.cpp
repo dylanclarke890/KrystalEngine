@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/InsertLineBreakCommand.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"

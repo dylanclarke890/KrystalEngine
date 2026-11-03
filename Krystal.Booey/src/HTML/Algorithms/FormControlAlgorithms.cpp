@@ -3,10 +3,10 @@
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectedContentElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSelectedContentElement.hpp"
-#include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::html

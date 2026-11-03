@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Editing/InsertParagraphSeparatorCommand.hpp"
 #include "Krystal.Booey/Editing/InsertTextCommand.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLStackItem.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/List.hpp"

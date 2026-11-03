@@ -7,7 +7,7 @@
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::dom

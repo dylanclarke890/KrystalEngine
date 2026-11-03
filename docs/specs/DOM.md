@@ -566,7 +566,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.1. Slots](https://dom.spec.whatwg.org/#shadow-tree-slots)
 
 Status: reviewed (2026-10-31)
-> Slots are `HTMLSlotElement`. A slot's name isn't stored: `HTMLSlotElement::Name()` reads the `name` attribute in no namespace, which gives the same value the attribute change steps would set. The default slot has no code of its own: find a slot takes the first slot named the empty string. Assigned nodes are `HTMLSlotElement::AssignedNodes()`. Tests: `tests/HTML/HTMLSlotElement.cpp`.
+> Slots are `HTMLSlotElement`. A slot's name isn't stored: `HTMLSlotElement::Name()` reads the `name` attribute in no namespace, which gives the same value the attribute change steps would set. The default slot has no code of its own: find a slot takes the first slot named the empty string. Assigned nodes are `HTMLSlotElement::AssignedNodes()`. Tests: `tests/HTML/Elements/HTMLSlotElement.cpp`.
 <!-- definitions: concept-slot slot-assigned-nodes -->
 
 - [x] [Use these attribute change steps to update a slot’s name](https://dom.spec.whatwg.org/#slot-name) — Use these attribute change steps to update a slot’s name:
@@ -581,7 +581,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.2. Slottables](https://dom.spec.whatwg.org/#light-tree-slotables)
 
 Status: reviewed (2026-10-31)
-> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/DOM/Nodes/Element.cpp`, `tests/HTML/HTMLSlotElement.cpp`.
+> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/DOM/Nodes/Element.cpp`, `tests/HTML/Elements/HTMLSlotElement.cpp`.
 <!-- definitions: concept-slotable slotable-assigned-slot slotable-assigned slottable-manual-slot-assignment -->
 
 - [x] [Use these attribute change steps to update a slottable’s name](https://dom.spec.whatwg.org/#slotable-name) — Use these attribute change steps to update a slottable’s name:
@@ -597,7 +597,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.3. Finding slots and slottables](https://dom.spec.whatwg.org/#finding-slots-and-slotables)
 
 Status: reviewed (2026-10-31)
-> Code: `SlotAlgorithms::FindSlot`, `FindSlottables` and `FindFlattenedSlottables`. A `<details>` element's user agent shadow root assigns by HTML's rendering rules (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/HTML/HTMLSlotElement.cpp`.
+> Code: `SlotAlgorithms::FindSlot`, `FindSlottables` and `FindFlattenedSlottables`. A `<details>` element's user agent shadow root assigns by HTML's rendering rules (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/HTML/Elements/HTMLSlotElement.cpp`.
 
 - [x] [find a slot](https://dom.spec.whatwg.org/#find-a-slot) — To find a slot for a given slottable slottable and an optional boolean open (default false):
   - 1. If slottable’s parent is null, then return null.

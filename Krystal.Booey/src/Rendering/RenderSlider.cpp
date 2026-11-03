@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderSlider.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo

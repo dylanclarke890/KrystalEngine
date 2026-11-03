@@ -66,7 +66,7 @@ target_precompile_headers(Krystal.Booey.Tests
     <Krystal.Booey/DOM/Types/USVString.hpp>
 
     <Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp>
-    <Krystal.Booey/HTML/HTMLSlotElement.hpp>
+    <Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp>
     <Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp>
     <Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp>
     <Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp>
@@ -226,7 +226,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/FontFaceSrcValue.cpp
 		tests/CSS/Values/Images/Gradient.cpp
 		tests/CSS/Values/Grid/GridTemplateAreas.cpp
-		tests/CSS/Values/NumericTypesSerialisation.cpp
+		tests/CSS/Values/Primitives/NumericTypesSerialisation.cpp
 		tests/CSS/Values/Primitives/NumericRaw.cpp
 		tests/CSS/Values/Primitives/PrimitiveNumeric.cpp
 		tests/CSS/Values/Primitives/Position.cpp
@@ -437,7 +437,10 @@ target_sources(Krystal.Booey.Tests
 		tests/Loader/DocumentLoader.cpp
 		tests/Loader/HistoryController.cpp
 		tests/History/BackForwardList.cpp
-		tests/HTML/FormController.cpp
+		tests/HTML/Forms/Autofill.cpp
+		tests/HTML/Forms/FormController.cpp
+		tests/HTML/Forms/FormListedElement.cpp
+		tests/HTML/Forms/ValidatedFormListedElement.cpp
 		tests/DOM/DocumentColorScheme.cpp
 		tests/DOM/DocumentSuspension.cpp
 		tests/History/BackForwardCache.cpp
@@ -506,12 +509,47 @@ target_sources(Krystal.Booey.Tests
 		tests/Loader/FrameLoader.cpp
 		tests/HTML/Parser/HTMLSrcsetParser.cpp
 		tests/CSS/Parser/SizesAttributeParser.cpp
-		tests/HTML/HTMLImageElement.cpp
-		tests/HTML/HTMLCanvasElement.cpp
+		tests/HTML/Elements/HTMLAnchorElement.cpp
+		tests/HTML/Elements/HTMLBaseElement.cpp
+		tests/HTML/Elements/HTMLButtonElement.cpp
+		tests/HTML/Elements/HTMLCanvasElement.cpp
+		tests/HTML/Elements/HTMLDataListElement.cpp
+		tests/HTML/Elements/HTMLDetailsElement.cpp
+		tests/HTML/Elements/HTMLDialogElement.cpp
+		tests/HTML/Elements/HTMLElement.cpp
+		tests/HTML/Elements/HTMLFieldSetElement.cpp
+		tests/HTML/Elements/HTMLFormElement.cpp
+		tests/HTML/Elements/HTMLHeadingElement.cpp
+		tests/HTML/Elements/HTMLIFrameElement.cpp
+		tests/HTML/Elements/HTMLImageElement.cpp
+		tests/HTML/Elements/HTMLInputElement.cpp
+		tests/HTML/Elements/HTMLLabelElement.cpp
+		tests/HTML/Elements/HTMLLinkElement.cpp
+		tests/HTML/Elements/HTMLMapElement.cpp
+		tests/HTML/Elements/HTMLMeterElement.cpp
+		tests/HTML/Elements/HTMLModElement.cpp
+		tests/HTML/Elements/HTMLOptGroupElement.cpp
+		tests/HTML/Elements/HTMLOptionElement.cpp
+		tests/HTML/Elements/HTMLOutputElement.cpp
+		tests/HTML/Elements/HTMLProgressElement.cpp
+		tests/HTML/Elements/HTMLQuoteElement.cpp
+		tests/HTML/Elements/HTMLScriptElement.cpp
+		tests/HTML/Elements/HTMLSelectedContentElement.cpp
+		tests/HTML/Elements/HTMLSelectElement.cpp
+		tests/HTML/Elements/HTMLSlotElement.cpp
+		tests/HTML/Elements/HTMLStyleElement.cpp
+		tests/HTML/Elements/HTMLTableCellElement.cpp
+		tests/HTML/Elements/HTMLTableElement.cpp
+		tests/HTML/Elements/HTMLTableRowElement.cpp
+		tests/HTML/Elements/HTMLTableSectionElement.cpp
+		tests/HTML/Elements/HTMLTemplateElement.cpp
+		tests/HTML/Elements/HTMLTextAreaElement.cpp
+		tests/HTML/Elements/HTMLTextFormControlElement.cpp
+		tests/HTML/Elements/HTMLTrackElement.cpp
 		tests/HTML/Canvas/CanvasRenderingContext2D.cpp
-		tests/HTML/ImageData.cpp
+		tests/HTML/ImageData/ImageData.cpp
 		tests/HTML/Canvas/Path2D.cpp
-		tests/HTML/LazyLoadImageObserver.cpp
+		tests/HTML/Images/LazyLoadImageObserver.cpp
 		tests/DOM/ContentVisibility/ContentVisibilityDocumentState.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
@@ -673,59 +711,21 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Attributes/EnumeratedAttributes.cpp
 		tests/HTML/Attributes/ReflectAttribute.cpp
 		tests/HTML/Attributes/ReflectURL.cpp
-		tests/HTML/BaseDateAndTimeInputType.cpp
+		tests/HTML/InputTypes/BaseDateAndTimeInputType.cpp
+		tests/HTML/InputTypes/ColorInputType.cpp
+		tests/HTML/InputTypes/FileInputType.cpp
 		tests/HTML/CustomElement/CustomElementRegistry.cpp
 		tests/HTML/CloseWatcher/CloseWatcher.cpp
-		tests/HTML/ElementInternals.cpp
-		tests/HTML/ColorInputType.cpp
+		tests/HTML/CustomElement/ElementInternals.cpp
 		tests/HTML/EventLoop.cpp
-		tests/HTML/FormListedElement.cpp
-		tests/HTML/HTMLAnchorElement.cpp
-		tests/HTML/HTMLBaseElement.cpp
-		tests/HTML/Sanitizer.cpp
-		tests/HTML/HTMLButtonElement.cpp
-		tests/HTML/HTMLDetailsElement.cpp
-		tests/HTML/HTMLDialogElement.cpp
-		tests/HTML/HTMLElement.cpp
-		tests/HTML/HTMLFormElement.cpp
-		tests/HTML/HTMLHeadingElement.cpp
-		tests/HTML/HTMLLabelElement.cpp
-		tests/HTML/HTMLIFrameElement.cpp
-		tests/HTML/HTMLModElement.cpp
-		tests/HTML/HTMLQuoteElement.cpp
-		tests/HTML/HTMLTrackElement.cpp
-		tests/HTML/HTMLInputElement.cpp
-		tests/HTML/FileInputType.cpp
+		tests/HTML/Sanitizer/Sanitizer.cpp
 		tests/HTML/Popover.cpp
-		tests/HTML/RadioNodeList.cpp
-		tests/HTML/HTMLMapElement.cpp
-		tests/HTML/HTMLMeterElement.cpp
-		tests/HTML/Autofill.cpp
-		tests/HTML/HTMLDataListElement.cpp
-		tests/HTML/HTMLOptGroupElement.cpp
-		tests/HTML/HTMLOptionElement.cpp
-		tests/HTML/HTMLFieldSetElement.cpp
-		tests/HTML/HTMLOutputElement.cpp
-		tests/HTML/HTMLProgressElement.cpp
-		tests/HTML/HTMLSelectElement.cpp
-		tests/HTML/HTMLSelectedContentElement.cpp
-		tests/HTML/HTMLScriptElement.cpp
-		tests/HTML/HTMLSlotElement.cpp
-		tests/HTML/HTMLTableCellElement.cpp
-		tests/HTML/HTMLTableElement.cpp
-		tests/HTML/HTMLTableRowElement.cpp
-		tests/HTML/HTMLTableSectionElement.cpp
-		tests/HTML/HTMLTemplateElement.cpp
-		tests/HTML/HTMLTextAreaElement.cpp
-		tests/HTML/HTMLTextFormControlElement.cpp
+		tests/HTML/Collections/RadioNodeList.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
-		tests/HTML/HTMLLinkElement.cpp
-		tests/HTML/URLDecomposition.cpp
-		tests/HTML/HTMLStyleElement.cpp
+		tests/HTML/Mixins/URLDecomposition.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
-		tests/HTML/PresentationalHints.cpp
-		tests/HTML/ValidatedFormListedElement.cpp
+		tests/HTML/Internals/PresentationalHints.cpp
 		tests/MathML/MathMLElement.cpp
 		tests/Graphics/OpenType/OpenTypeMathData.cpp
 		tests/Rendering/MathML/MathVariant.cpp
@@ -795,5 +795,5 @@ target_sources(Krystal.Booey.Tests
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 		tests/XML/PseudoAttributes.cpp
-		tests/XML/XMLDocumentParser.cpp
+		tests/XML/Parser/XMLDocumentParser.cpp
 )

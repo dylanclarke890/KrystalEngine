@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLDivElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 
 namespace krys::boo::html

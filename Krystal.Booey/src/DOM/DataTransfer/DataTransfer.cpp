@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Editing/PasteboardFileListReader.hpp"
 #include "Krystal.Booey/Editing/WebContentReader.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
-#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

@@ -4,8 +4,8 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/Parsing/ParserContentPolicy.hpp"
-#include "Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 

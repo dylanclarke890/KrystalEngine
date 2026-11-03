@@ -1,14 +1,60 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/EncodingRegistry.hpp"
-#include "Krystal.Booey/HTML/Enums/ContentType.hpp"
-#include "Krystal.Booey/HTML/Enums/EncodingSource.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLEncodingSniffer.hpp"
 #include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/ICodec.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
+
+namespace krys::boo::html
+{
+  enum class ContentType : uint8
+  {
+    /// @brief Checks only for BOM.
+    PlainText,
+    HTML,
+    CSS
+  };
+
+  KRYS_NODISCARD inline ContentType DetermineContentType(const string &mimeType) noexcept
+  {
+    string lowerMimeType = krys::text::ToASCIILower(mimeType);
+
+    if (lowerMimeType == "text/css")
+    {
+      return ContentType::CSS;
+    }
+
+    if (lowerMimeType == "text/html")
+    {
+      return ContentType::HTML;
+    }
+
+    return ContentType::PlainText;
+  }
+
+  enum class EncodingSource : uint8
+  {
+    /// @brief Default encoding.
+    Default,
+
+    /// @brief Encoding specified via BOM.
+    BOM,
+
+    /// @brief Encoding specified via HTTP transport layer.
+    Transport,
+
+    /// @brief Encoding specified via &lt;meta&gt; tag in HTML.
+    MetaTag,
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ContentType, 3u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::EncodingSource, 4u)
 
 namespace krys::boo::html
 {

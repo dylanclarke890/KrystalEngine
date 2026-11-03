@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/InlineStyleSheetOwner.hpp"
+#include "Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 
 namespace krys::boo::css

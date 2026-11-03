@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/Rendering/AutoTableLayout.hpp"
 #include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
 #include "Krystal.Booey/Rendering/BorderPainter.hpp"

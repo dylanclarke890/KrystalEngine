@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
-#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"

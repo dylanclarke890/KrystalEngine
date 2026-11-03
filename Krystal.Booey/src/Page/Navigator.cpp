@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/URLDecomposition.hpp"
+#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
 #include "Krystal.Booey/Modules/Gamepad/Gamepad.hpp"

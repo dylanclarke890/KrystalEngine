@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/History/BackForwardClient.hpp"
-#include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
+#include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DragClient.hpp"

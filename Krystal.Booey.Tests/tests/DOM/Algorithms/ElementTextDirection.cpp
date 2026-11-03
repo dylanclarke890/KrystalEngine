@@ -4,9 +4,9 @@
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/HTML/HTMLBDIElement.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBDIElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 
 namespace krys::boo::dom::tests
 {

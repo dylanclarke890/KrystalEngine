@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/CustomStateSet.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/ResizeObserver.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"

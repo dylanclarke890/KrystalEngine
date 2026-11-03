@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"

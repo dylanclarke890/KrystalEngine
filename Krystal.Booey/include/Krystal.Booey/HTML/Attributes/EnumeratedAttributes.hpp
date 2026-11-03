@@ -1,13 +1,87 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/HTML/Enums/AttributeState.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/NTTPString.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+
+namespace krys::boo::html
+{
+  /// @see A general-purpose enum for all attribute states defined by the HTML spec. May split this out later.
+  enum class AttributeState : uint8
+  {
+    // General-purpose states
+    Undefined,
+    Auto,
+    Inherit,
+    Default,
+    True,
+    False,
+    None,
+    Yes,
+    No,
+    On,
+    Off,
+
+    // Specific states for certain attributes
+    LTR,
+    RTL,
+    Hidden,
+    NotHidden,
+    UntilFound,
+    Sentences,
+    Words,
+    Characters,
+    High,
+    Low,
+    NoCORS,
+    Anonymous,
+    UseCredentials,
+    Any,
+    CloseRequest,
+    Manual,
+    Hint,
+    Toggle,
+    Show,
+    Hide,
+    Lazy,
+    Eager,
+    NoReferrer,
+    NoReferrerWhenDowngrade,
+    SameOrigin,
+    Origin,
+    StrictOrigin,
+    OriginWhenCrossOrigin,
+    StrictOriginWhenCrossOrigin,
+    UnsafeURL,
+    Sync,
+    Async,
+    Subtitles,
+    Captions,
+    Descriptions,
+    Chapters,
+    Metadata,
+    Row,
+    Col,
+    RowGroup,
+    ColGroup,
+    Get,
+    Post,
+    Dialog,
+    URLEncoded,
+    FormData,
+    TextPlain,
+    Open,
+    Closed,
+    Named,
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 61uz);
 
 namespace krys::boo::html
 {

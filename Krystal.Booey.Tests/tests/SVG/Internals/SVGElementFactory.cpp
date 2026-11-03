@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/SVG/SVGAElement.hpp"
 #include "Krystal.Booey/SVG/SVGAnimateElement.hpp"

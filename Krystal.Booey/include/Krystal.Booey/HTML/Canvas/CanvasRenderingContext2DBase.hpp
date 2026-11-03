@@ -28,7 +28,7 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasTextBaseline.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasTextRendering.hpp"
 #include "Krystal.Booey/HTML/Canvas/ImageSmoothingQuality.hpp"
-#include "Krystal.Booey/HTML/ImageDataSettings.hpp"
+#include "Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"

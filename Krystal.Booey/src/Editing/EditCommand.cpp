@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 
 namespace krys::boo
 {

@@ -1095,8 +1095,14 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/FragmentDirective/FragmentDirectiveUtilities.hpp
   include/Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp
   include/Krystal.Booey/Editing/TemporarySelectionChange.hpp
-  include/Krystal.Booey/HTML/HashChangeEvent.hpp
-  include/Krystal.Booey/HTML/URLDecomposition.hpp
+  include/Krystal.Booey/HTML/Events/BeforeUnloadEvent.hpp
+  include/Krystal.Booey/HTML/Events/ErrorEvent.hpp
+  include/Krystal.Booey/HTML/Events/HashChangeEvent.hpp
+  include/Krystal.Booey/HTML/Events/MessageEvent.hpp
+  include/Krystal.Booey/HTML/Events/PageTransitionEvent.hpp
+  include/Krystal.Booey/HTML/Events/PopStateEvent.hpp
+  include/Krystal.Booey/HTML/Events/SubmitEvent.hpp
+  include/Krystal.Booey/HTML/Mixins/URLDecomposition.hpp
   include/Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp
   include/Krystal.Booey/Style/MatchedDeclarationsCache.hpp
   include/Krystal.Booey/Style/MatchResultCache.hpp
@@ -1692,7 +1698,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Parser/SizesAttributeParser.hpp
   include/Krystal.Booey/CSS/Parser/SizesCalcParser.hpp
   include/Krystal.Booey/Loader/ImageLoader.hpp
-  include/Krystal.Booey/HTML/HTMLImageLoader.hpp
+  include/Krystal.Booey/HTML/Images/HTMLImageLoader.hpp
+  include/Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp
   include/Krystal.Booey/Rendering/RenderImageResource.hpp
   include/Krystal.Booey/Rendering/RenderImageResourceStyleImage.hpp
   include/Krystal.Booey/Rendering/RenderImage.hpp
@@ -1889,58 +1896,59 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/DateComponents.hpp
   include/Krystal.Booey/DOM/Internals/IdTargetObserver.hpp
   include/Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp
-  include/Krystal.Booey/HTML/RadioButtonGroups.hpp
+  include/Krystal.Booey/HTML/Forms/Autofill.hpp
+  include/Krystal.Booey/HTML/Forms/DOMFormData.hpp
+  include/Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp
+  include/Krystal.Booey/HTML/Forms/FormController.hpp
+  include/Krystal.Booey/HTML/Forms/FormListedElement.hpp
+  include/Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp
+  include/Krystal.Booey/HTML/Forms/TypeAhead.hpp
+  include/Krystal.Booey/HTML/Forms/ValidatedFormListedElement.hpp
   include/Krystal.Booey/DOM/Events/SimulatedClick.hpp
-  include/Krystal.Booey/HTML/Autofill.hpp
-  include/Krystal.Booey/HTML/BaseButtonInputType.hpp
-  include/Krystal.Booey/HTML/BaseCheckableInputType.hpp
-  include/Krystal.Booey/HTML/BaseClickableWithKeyInputType.hpp
-  include/Krystal.Booey/HTML/BaseDateAndTimeInputType.hpp
-  include/Krystal.Booey/HTML/BaseTextInputType.hpp
-  include/Krystal.Booey/HTML/ButtonInputType.hpp
-  include/Krystal.Booey/HTML/CheckboxInputType.hpp
-  include/Krystal.Booey/HTML/ColorInputType.hpp
-  include/Krystal.Booey/HTML/DOMFormData.hpp
-  include/Krystal.Booey/HTML/DateInputType.hpp
-  include/Krystal.Booey/HTML/DateTimeLocalInputType.hpp
-  include/Krystal.Booey/HTML/EmailInputType.hpp
-  include/Krystal.Booey/HTML/FileInputType.hpp
-  include/Krystal.Booey/HTML/FormAssociatedElement.hpp
-  include/Krystal.Booey/HTML/FormListedElement.hpp
-  include/Krystal.Booey/HTML/HTMLFormControlElement.hpp
-  include/Krystal.Booey/HTML/HTMLFormControlsCollection.hpp
-  include/Krystal.Booey/HTML/HTMLOptionsCollection.hpp
-  include/Krystal.Booey/HTML/HTMLTextFormControlElement.hpp
-  include/Krystal.Booey/HTML/HiddenInputType.hpp
-  include/Krystal.Booey/HTML/ImageInputType.hpp
-  include/Krystal.Booey/HTML/InputType.hpp
-  include/Krystal.Booey/HTML/InputTypeNames.hpp
-  include/Krystal.Booey/HTML/LabelsNodeList.hpp
-  include/Krystal.Booey/HTML/MonthInputType.hpp
-  include/Krystal.Booey/HTML/NumberInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/BaseButtonInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/BaseCheckableInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/BaseDateAndTimeInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/BaseTextInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/ButtonInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/CheckboxInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/ColorInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/DateInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/DateTimeFieldsState.hpp
+  include/Krystal.Booey/HTML/InputTypes/DateTimeLocalInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/EmailInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/FileInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/HiddenInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/ImageInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/InputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/InputTypeNames.hpp
+  include/Krystal.Booey/HTML/InputTypes/MonthInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/NumberInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/PasswordInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/RadioInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/RangeInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/ResetInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/SearchInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/StepRange.hpp
+  include/Krystal.Booey/HTML/InputTypes/SubmitInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/TelephoneInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/TextFieldInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/TextInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/TimeInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/URLInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/WeekInputType.hpp
+  include/Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp
+  include/Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp
+  include/Krystal.Booey/HTML/Collections/HTMLFormControlsCollection.hpp
+  include/Krystal.Booey/HTML/Collections/HTMLOptionsCollection.hpp
+  include/Krystal.Booey/HTML/Collections/LabelsNodeList.hpp
+  include/Krystal.Booey/HTML/Collections/RadioNodeList.hpp
   include/Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp
-  include/Krystal.Booey/HTML/PasswordInputType.hpp
-  include/Krystal.Booey/HTML/RadioInputType.hpp
-  include/Krystal.Booey/HTML/RadioNodeList.hpp
-  include/Krystal.Booey/HTML/RangeInputType.hpp
-  include/Krystal.Booey/HTML/ResetInputType.hpp
-  include/Krystal.Booey/HTML/SearchInputType.hpp
-  include/Krystal.Booey/HTML/StepRange.hpp
-  include/Krystal.Booey/HTML/SubmitEvent.hpp
-  include/Krystal.Booey/HTML/SubmitInputType.hpp
-  include/Krystal.Booey/HTML/TelephoneInputType.hpp
-  include/Krystal.Booey/HTML/TextFieldInputType.hpp
   include/Krystal.Booey/HTML/Shadow/ProgressShadowElement.hpp
   include/Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp
   include/Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp
   include/Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp
-  include/Krystal.Booey/HTML/TextInputType.hpp
-  include/Krystal.Booey/HTML/TimeInputType.hpp
-  include/Krystal.Booey/HTML/TypeAhead.hpp
-  include/Krystal.Booey/HTML/URLInputType.hpp
-  include/Krystal.Booey/HTML/ValidatedFormListedElement.hpp
-  include/Krystal.Booey/HTML/ValidityStateFlags.hpp
-  include/Krystal.Booey/HTML/WeekInputType.hpp
+  include/Krystal.Booey/HTML/CustomElement/ValidityStateFlags.hpp
   include/Krystal.Booey/Loader/FormSubmission.hpp
   include/Krystal.Booey/Loader/FrameLoader.hpp
   include/Krystal.Booey/Loader/FrameLoaderTypes.hpp
@@ -1960,7 +1968,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Core/DateTimeFormat.hpp
   include/Krystal.Booey/Core/LocaleICU.hpp
   include/Krystal.Booey/Core/PlatformLocale.hpp
-  include/Krystal.Booey/HTML/DateTimeFieldsState.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp
@@ -1982,8 +1989,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/Scheduling/IdleDeadline.hpp
   include/Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp
   include/Krystal.Booey/Page/DOMTimer.hpp
-  include/Krystal.Booey/HTML/ErrorEvent.hpp
-  include/Krystal.Booey/HTML/MessageEvent.hpp
   include/Krystal.Booey/HTML/SerializedScriptValue.hpp
   include/Krystal.Booey/Page/ConsoleTypes.hpp
   include/Krystal.Booey/Page/WindowFeatures.hpp
@@ -1998,8 +2003,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Loader/DocumentLoader.hpp
   include/Krystal.Booey/Loader/DocumentWriter.hpp
   include/Krystal.Booey/Loader/SubstituteData.hpp
-  include/Krystal.Booey/HTML/PageTransitionEvent.hpp
-  include/Krystal.Booey/HTML/BeforeUnloadEvent.hpp
   include/Krystal.Booey/HTML/MicroParsers/Refresh.hpp
   include/Krystal.Booey/Loader/NavigationScheduler.hpp
   include/Krystal.Booey/Page/Location.hpp
@@ -2008,11 +2011,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/History/BackForwardList.hpp
   include/Krystal.Booey/History/BackForwardController.hpp
   include/Krystal.Booey/Loader/HistoryController.hpp
-  include/Krystal.Booey/HTML/FormController.hpp
   include/Krystal.Booey/History/CachedFrame.hpp
   include/Krystal.Booey/History/CachedPage.hpp
   include/Krystal.Booey/History/BackForwardCache.hpp
-  include/Krystal.Booey/HTML/PopStateEvent.hpp
   include/Krystal.Booey/Page/History.hpp
   include/Krystal.Booey/Page/NavigationNavigationType.hpp
   include/Krystal.Booey/Page/NavigationPromise.hpp
@@ -2043,7 +2044,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Page/IntersectionObserverEntry.hpp
   include/Krystal.Booey/Page/IntersectionObserverMarginBox.hpp
   # Lazy images (B5c)
-  include/Krystal.Booey/HTML/LazyLoadImageObserver.hpp
   # Content visibility (B5d)
   include/Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp
   include/Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp
@@ -3066,8 +3066,14 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/DOM/FragmentDirective/FragmentDirectiveUtilities.cpp
   src/DOM/Algorithms/FindRevealAlgorithms.cpp
   src/Editing/TemporarySelectionChange.cpp
-  src/HTML/HashChangeEvent.cpp
-  src/HTML/URLDecomposition.cpp
+  src/HTML/Events/BeforeUnloadEvent.cpp
+  src/HTML/Events/ErrorEvent.cpp
+  src/HTML/Events/HashChangeEvent.cpp
+  src/HTML/Events/MessageEvent.cpp
+  src/HTML/Events/PageTransitionEvent.cpp
+  src/HTML/Events/PopStateEvent.cpp
+  src/HTML/Events/SubmitEvent.cpp
+  src/HTML/Mixins/URLDecomposition.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
 
   # Frame view and viewport
@@ -3239,7 +3245,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Parser/SizesAttributeParser.cpp
   src/CSS/Parser/SizesCalcParser.cpp
   src/Loader/ImageLoader.cpp
-  src/HTML/HTMLImageLoader.cpp
+  src/HTML/Images/HTMLImageLoader.cpp
+  src/HTML/Images/LazyLoadImageObserver.cpp
   src/Rendering/RenderImageResource.cpp
   src/Rendering/RenderImageResourceStyleImage.cpp
   src/Rendering/RenderImage.cpp
@@ -3381,52 +3388,52 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Platform/DateComponents.cpp
   src/DOM/Internals/IdTargetObserver.cpp
   src/DOM/Internals/IdTargetObserverRegistry.cpp
-  src/HTML/RadioButtonGroups.cpp
+  src/HTML/Forms/Autofill.cpp
+  src/HTML/Forms/DOMFormData.cpp
+  src/HTML/Forms/FormAssociatedElement.cpp
+  src/HTML/Forms/FormController.cpp
+  src/HTML/Forms/FormListedElement.cpp
+  src/HTML/Forms/RadioButtonGroups.cpp
+  src/HTML/Forms/TypeAhead.cpp
+  src/HTML/Forms/ValidatedFormListedElement.cpp
   src/DOM/Events/SimulatedClick.cpp
-  src/HTML/Autofill.cpp
-  src/HTML/BaseButtonInputType.cpp
-  src/HTML/BaseCheckableInputType.cpp
-  src/HTML/BaseClickableWithKeyInputType.cpp
-  src/HTML/BaseDateAndTimeInputType.cpp
-  src/HTML/BaseTextInputType.cpp
-  src/HTML/CheckboxInputType.cpp
-  src/HTML/ColorInputType.cpp
-  src/HTML/DOMFormData.cpp
-  src/HTML/DateInputType.cpp
-  src/HTML/DateTimeLocalInputType.cpp
-  src/HTML/EmailInputType.cpp
-  src/HTML/FileInputType.cpp
-  src/HTML/FormAssociatedElement.cpp
-  src/HTML/FormListedElement.cpp
-  src/HTML/HTMLFormControlElement.cpp
-  src/HTML/HTMLFormControlsCollection.cpp
-  src/HTML/HTMLOptionsCollection.cpp
-  src/HTML/HTMLTextFormControlElement.cpp
-  src/HTML/HiddenInputType.cpp
-  src/HTML/ImageInputType.cpp
-  src/HTML/InputType.cpp
-  src/HTML/LabelsNodeList.cpp
-  src/HTML/MonthInputType.cpp
-  src/HTML/NumberInputType.cpp
+  src/HTML/InputTypes/BaseButtonInputType.cpp
+  src/HTML/InputTypes/BaseCheckableInputType.cpp
+  src/HTML/InputTypes/BaseClickableWithKeyInputType.cpp
+  src/HTML/InputTypes/BaseDateAndTimeInputType.cpp
+  src/HTML/InputTypes/BaseTextInputType.cpp
+  src/HTML/InputTypes/CheckboxInputType.cpp
+  src/HTML/InputTypes/ColorInputType.cpp
+  src/HTML/InputTypes/DateInputType.cpp
+  src/HTML/InputTypes/DateTimeLocalInputType.cpp
+  src/HTML/InputTypes/EmailInputType.cpp
+  src/HTML/InputTypes/FileInputType.cpp
+  src/HTML/InputTypes/HiddenInputType.cpp
+  src/HTML/InputTypes/ImageInputType.cpp
+  src/HTML/InputTypes/InputType.cpp
+  src/HTML/InputTypes/MonthInputType.cpp
+  src/HTML/InputTypes/NumberInputType.cpp
+  src/HTML/InputTypes/RadioInputType.cpp
+  src/HTML/InputTypes/RangeInputType.cpp
+  src/HTML/InputTypes/ResetInputType.cpp
+  src/HTML/InputTypes/SearchInputType.cpp
+  src/HTML/InputTypes/StepRange.cpp
+  src/HTML/InputTypes/SubmitInputType.cpp
+  src/HTML/InputTypes/TextFieldInputType.cpp
+  src/HTML/InputTypes/TimeInputType.cpp
+  src/HTML/InputTypes/URLInputType.cpp
+  src/HTML/InputTypes/WeekInputType.cpp
+  src/HTML/Elements/HTMLFormControlElement.cpp
+  src/HTML/Elements/HTMLTextFormControlElement.cpp
+  src/HTML/Collections/HTMLFormControlsCollection.cpp
+  src/HTML/Collections/HTMLOptionsCollection.cpp
+  src/HTML/Collections/LabelsNodeList.cpp
+  src/HTML/Collections/RadioNodeList.cpp
   src/HTML/Parser/HTMLParserIdioms.cpp
-  src/HTML/RadioInputType.cpp
-  src/HTML/RadioNodeList.cpp
-  src/HTML/RangeInputType.cpp
-  src/HTML/ResetInputType.cpp
-  src/HTML/SearchInputType.cpp
-  src/HTML/StepRange.cpp
-  src/HTML/SubmitEvent.cpp
-  src/HTML/SubmitInputType.cpp
-  src/HTML/TextFieldInputType.cpp
   src/HTML/Shadow/ProgressShadowElement.cpp
   src/HTML/Shadow/SliderThumbElement.cpp
   src/HTML/Shadow/SpinButtonElement.cpp
   src/HTML/Shadow/TextControlInnerElements.cpp
-  src/HTML/TimeInputType.cpp
-  src/HTML/TypeAhead.cpp
-  src/HTML/URLInputType.cpp
-  src/HTML/ValidatedFormListedElement.cpp
-  src/HTML/WeekInputType.cpp
   src/Loader/FormSubmission.cpp
   src/Loader/FrameLoader.cpp
   src/Loader/FrameLoadRequest.cpp
@@ -3457,8 +3464,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/DOM/Scheduling/IdleDeadline.cpp
   src/DOM/Scheduling/ScriptedAnimationController.cpp
   src/Page/DOMTimer.cpp
-  src/HTML/ErrorEvent.cpp
-  src/HTML/MessageEvent.cpp
   src/Page/WindowFeatures.cpp
   src/Page/Navigator.cpp
   src/Platform/Language.cpp
@@ -3467,8 +3472,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Loading documents (B3b)
   src/Loader/DocumentLoader.cpp
   src/Loader/DocumentWriter.cpp
-  src/HTML/PageTransitionEvent.cpp
-  src/HTML/BeforeUnloadEvent.cpp
   src/HTML/MicroParsers/Refresh.cpp
   src/HTML/MicroParsers/Numbers.cpp
   src/Loader/NavigationScheduler.cpp
@@ -3477,11 +3480,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/History/BackForwardList.cpp
   src/History/BackForwardController.cpp
   src/Loader/HistoryController.cpp
-  src/HTML/FormController.cpp
   src/History/CachedFrame.cpp
   src/History/CachedPage.cpp
   src/History/BackForwardCache.cpp
-  src/HTML/PopStateEvent.cpp
   src/Page/History.cpp
   src/Page/NavigationPromise.cpp
   src/Page/NavigationHistoryEntry.cpp
@@ -3499,7 +3500,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Page/IntersectionObserver.cpp
   src/Page/IntersectionObserverEntry.cpp
   # Lazy images (B5c)
-  src/HTML/LazyLoadImageObserver.cpp
   # Content visibility (B5d)
   src/DOM/ContentVisibility/ContentVisibilityDocumentState.cpp
   src/Core/BidiContext.cpp
@@ -3612,7 +3612,7 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/DOM/Types/ExceptionOr.hpp
     include/Krystal.Booey/DOM/Types/USVString.hpp
     include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
-    include/Krystal.Booey/HTML/HTMLSlotElement.hpp
+    include/Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp
     include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
 
     include/Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp
@@ -3812,7 +3812,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp
       include/Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp
       include/Krystal.Booey/DOM/Iterators/ElementAndTextDescendantIterator.hpp
-      include/Krystal.Booey/HTML/InlineStyleSheetOwner.hpp
+      include/Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp
       include/Krystal.Booey/DOM/Internals/LayoutOptions.hpp
       include/Krystal.Booey/DOM/Internals/ElementFactory.hpp
       include/Krystal.Booey/DOM/Internals/EventFactory.hpp
@@ -3891,50 +3891,101 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp
       include/Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp
       include/Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp
-      include/Krystal.Booey/HTML/Attributes/States/CORSSettingsState.hpp
       include/Krystal.Booey/HTML/CustomElement/CustomElement.hpp
       include/Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp
       include/Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp
       include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
       include/Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp
       include/Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp
-      include/Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp
-      include/Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp
-      include/Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp
-      include/Krystal.Booey/HTML/Dicts/AssignedNodesOptions.hpp
-      include/Krystal.Booey/HTML/CustomElementFormValue.hpp
-      include/Krystal.Booey/HTML/CustomStateSet.hpp
-      include/Krystal.Booey/HTML/ElementInternals.hpp
-      include/Krystal.Booey/HTML/FormAssociatedCustomElement.hpp
+      include/Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp
+      include/Krystal.Booey/HTML/CustomElement/CustomElementFormValue.hpp
+      include/Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp
+      include/Krystal.Booey/HTML/CustomElement/ElementInternals.hpp
+      include/Krystal.Booey/HTML/CustomElement/FormAssociatedCustomElement.hpp
       include/Krystal.Booey/HTML/EventLoop.hpp
-      include/Krystal.Booey/HTML/Enums/AttributeState.hpp
-      include/Krystal.Booey/HTML/Enums/CanPlayTypeResult.hpp
-      include/Krystal.Booey/HTML/Enums/ContentType.hpp
-      include/Krystal.Booey/HTML/Enums/DocumentReadyState.hpp
-      include/Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp
-      include/Krystal.Booey/HTML/Enums/EncodingSource.hpp
-      include/Krystal.Booey/HTML/Enums/HTMLElementFlags.hpp
-      include/Krystal.Booey/HTML/Enums/HTMLElementInterface.hpp
-      include/Krystal.Booey/HTML/Enums/HTMLParseError.hpp
-      include/Krystal.Booey/HTML/Enums/HTMLTokenType.hpp
-      include/Krystal.Booey/HTML/Enums/InsertionMode.hpp
-      include/Krystal.Booey/HTML/Enums/Namespace.hpp
-      include/Krystal.Booey/HTML/Enums/ParsedAttributeFlags.hpp
-      include/Krystal.Booey/HTML/Enums/ParserScriptingMode.hpp
-      include/Krystal.Booey/HTML/Enums/TagName.hpp
-      include/Krystal.Booey/HTML/Enums/TaskSource.hpp
-      include/Krystal.Booey/HTML/Enums/TokenizerState.hpp
-      include/Krystal.Booey/HTML/Enums/TrackReadyState.hpp
-      include/Krystal.Booey/HTML/HTMLAnchorElement.hpp
-      include/Krystal.Booey/HTML/HTMLAreaElement.hpp
-      include/Krystal.Booey/HTML/HTMLAudioElement.hpp
-      include/Krystal.Booey/HTML/HTMLBaseElement.hpp
-      include/Krystal.Booey/HTML/HTMLBDIElement.hpp
-      include/Krystal.Booey/HTML/HTMLBodyElement.hpp
-      include/Krystal.Booey/HTML/HTMLBRElement.hpp
-      include/Krystal.Booey/HTML/HTMLWBRElement.hpp
-      include/Krystal.Booey/HTML/HTMLButtonElement.hpp
-      include/Krystal.Booey/HTML/CanvasBase.hpp
+      include/Krystal.Booey/HTML/Types/DocumentReadyState.hpp
+      include/Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp
+      include/Krystal.Booey/HTML/Types/Namespace.hpp
+      include/Krystal.Booey/HTML/Types/TagName.hpp
+      include/Krystal.Booey/HTML/TaskSource.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLAudioElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLBaseElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLBDIElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLBRElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLDataElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLDirectoryElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLDivElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLDListElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLEmbedElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLFontElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLFormElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLFrameSetElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLHRElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLIFrameElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLImageElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLInputElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLLIElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLMapElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLMarqueeElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLMaybeFormAssociatedCustomElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLMediaElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLMenuElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLMetaElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLModElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLObjectElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLOListElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLOutputElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLParagraphElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLParamElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLPictureElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLPlugInElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLPreElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLQuoteElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLScriptElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLSelectedContentElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLSourceElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLSpanElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTableCaptionElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTableCellElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTableColElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTableElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTablePartElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTableRowElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTimeElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTitleElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLTrackElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLUListElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLUnknownElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLVideoElement.hpp
+      include/Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasBase.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp
       include/Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp
       include/Krystal.Booey/HTML/Canvas/EngineTexture.hpp
@@ -3961,80 +4012,12 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Canvas/CanvasStyle.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp
-      include/Krystal.Booey/HTML/ImageDataPixelFormat.hpp
-      include/Krystal.Booey/HTML/ImageDataSettings.hpp
-      include/Krystal.Booey/HTML/ImageDataArray.hpp
-      include/Krystal.Booey/HTML/ImageData.hpp
-      include/Krystal.Booey/HTML/TextMetrics.hpp
-      include/Krystal.Booey/HTML/HTMLCanvasElement.hpp
-      include/Krystal.Booey/HTML/HTMLDataElement.hpp
-      include/Krystal.Booey/HTML/HTMLDataListElement.hpp
-      include/Krystal.Booey/HTML/HTMLDetailsElement.hpp
-      include/Krystal.Booey/HTML/HTMLDialogElement.hpp
-      include/Krystal.Booey/HTML/HTMLDirectoryElement.hpp
-      include/Krystal.Booey/HTML/HTMLDivElement.hpp
-      include/Krystal.Booey/HTML/HTMLDListElement.hpp
-      include/Krystal.Booey/HTML/HTMLElement.hpp
-      include/Krystal.Booey/HTML/HTMLEmbedElement.hpp
-      include/Krystal.Booey/HTML/HTMLFontElement.hpp
-      include/Krystal.Booey/HTML/HTMLFrameSetElement.hpp
-      include/Krystal.Booey/HTML/HTMLFieldSetElement.hpp
-      include/Krystal.Booey/HTML/HTMLFormElement.hpp
-      include/Krystal.Booey/HTML/HTMLHeadElement.hpp
-      include/Krystal.Booey/HTML/HTMLHeadingElement.hpp
-      include/Krystal.Booey/HTML/HTMLHRElement.hpp
-      include/Krystal.Booey/HTML/HTMLHtmlElement.hpp
-      include/Krystal.Booey/HTML/HTMLIFrameElement.hpp
-      include/Krystal.Booey/HTML/HTMLImageElement.hpp
-      include/Krystal.Booey/HTML/HTMLInputElement.hpp
-      include/Krystal.Booey/HTML/HTMLLabelElement.hpp
-      include/Krystal.Booey/HTML/HTMLLegendElement.hpp
-      include/Krystal.Booey/HTML/HTMLLIElement.hpp
-      include/Krystal.Booey/HTML/HTMLLinkElement.hpp
-      include/Krystal.Booey/HTML/HTMLMapElement.hpp
-      include/Krystal.Booey/HTML/HTMLMarqueeElement.hpp
-      include/Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp
-      include/Krystal.Booey/HTML/HTMLMediaElement.hpp
-      include/Krystal.Booey/HTML/HTMLMenuElement.hpp
-      include/Krystal.Booey/HTML/HTMLMetaElement.hpp
-      include/Krystal.Booey/HTML/HTMLMeterElement.hpp
-      include/Krystal.Booey/HTML/HTMLModElement.hpp
-      include/Krystal.Booey/HTML/HTMLObjectElement.hpp
-      include/Krystal.Booey/HTML/HTMLOListElement.hpp
-      include/Krystal.Booey/HTML/HTMLOptGroupElement.hpp
-      include/Krystal.Booey/HTML/HTMLOptionElement.hpp
-      include/Krystal.Booey/HTML/HTMLOutputElement.hpp
-      include/Krystal.Booey/HTML/HTMLParagraphElement.hpp
-      include/Krystal.Booey/HTML/HTMLParamElement.hpp
-      include/Krystal.Booey/HTML/HTMLPictureElement.hpp
-      include/Krystal.Booey/HTML/HTMLPlugInElement.hpp
-      include/Krystal.Booey/HTML/HTMLPreElement.hpp
-      include/Krystal.Booey/HTML/HTMLProgressElement.hpp
-      include/Krystal.Booey/HTML/HTMLQuoteElement.hpp
-      include/Krystal.Booey/HTML/HTMLScriptElement.hpp
-      include/Krystal.Booey/HTML/HTMLSelectedContentElement.hpp
-      include/Krystal.Booey/HTML/HTMLSelectElement.hpp
-      include/Krystal.Booey/HTML/HTMLSlotElement.hpp
-      include/Krystal.Booey/HTML/HTMLSourceElement.hpp
-      include/Krystal.Booey/HTML/HTMLSpanElement.hpp
-      include/Krystal.Booey/HTML/HTMLStyleElement.hpp
-      include/Krystal.Booey/HTML/HTMLSummaryElement.hpp
-      include/Krystal.Booey/HTML/HTMLTableCaptionElement.hpp
-      include/Krystal.Booey/HTML/HTMLTableCellElement.hpp
-      include/Krystal.Booey/HTML/HTMLTableColElement.hpp
-      include/Krystal.Booey/HTML/HTMLTableElement.hpp
-      include/Krystal.Booey/HTML/HTMLTablePartElement.hpp
-      include/Krystal.Booey/HTML/HTMLTableRowElement.hpp
-      include/Krystal.Booey/HTML/HTMLTableSectionElement.hpp
-      include/Krystal.Booey/HTML/HTMLTableRowsCollection.hpp
-      include/Krystal.Booey/HTML/HTMLTemplateElement.hpp
-      include/Krystal.Booey/HTML/HTMLTextAreaElement.hpp
-      include/Krystal.Booey/HTML/HTMLTimeElement.hpp
-      include/Krystal.Booey/HTML/HTMLTitleElement.hpp
-      include/Krystal.Booey/HTML/HTMLTrackElement.hpp
-      include/Krystal.Booey/HTML/HTMLUListElement.hpp
-      include/Krystal.Booey/HTML/HTMLUnknownElement.hpp
-      include/Krystal.Booey/HTML/HTMLVideoElement.hpp
+      include/Krystal.Booey/HTML/ImageData/ImageData.hpp
+      include/Krystal.Booey/HTML/ImageData/ImageDataArray.hpp
+      include/Krystal.Booey/HTML/ImageData/ImageDataPixelFormat.hpp
+      include/Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp
+      include/Krystal.Booey/HTML/Canvas/TextMetrics.hpp
+      include/Krystal.Booey/HTML/Collections/HTMLTableRowsCollection.hpp
       include/Krystal.Booey/HTML/Internals/AttributeDefinition.hpp
       include/Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp
       include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
@@ -4416,7 +4399,7 @@ target_sources(Krystal.Booey
     src/DOM/Collections/StaticHTMLCollection.cpp
     src/DOM/Collections/StaticNodeList.cpp
     src/DOM/Algorithms/ElementTextDirection.cpp
-    src/HTML/InlineStyleSheetOwner.cpp
+    src/HTML/Internals/InlineStyleSheetOwner.cpp
     src/DOM/Internals/ElementFactory.cpp
     src/DOM/MutationObservers/AttributesMutationRecord.cpp
     src/DOM/MutationObservers/CharacterDataMutationRecord.cpp
@@ -4475,20 +4458,88 @@ target_sources(Krystal.Booey
     src/HTML/CustomElement/CustomElementRegistry.cpp
     src/HTML/CloseWatcher/CloseWatcher.cpp
     src/HTML/CloseWatcher/CloseWatcherManager.cpp
-    src/HTML/CustomStateSet.cpp
-    src/HTML/ElementInternals.cpp
+    src/HTML/CustomElement/CustomStateSet.cpp
+    src/HTML/CustomElement/ElementInternals.cpp
     src/HTML/EventLoop.cpp
-    src/HTML/FormAssociatedCustomElement.cpp
-    src/HTML/HTMLAnchorElement.cpp
-    src/HTML/HTMLAreaElement.cpp
-    src/HTML/HTMLAudioElement.cpp
-    src/HTML/HTMLBaseElement.cpp
-    src/HTML/HTMLBDIElement.cpp
-    src/HTML/HTMLBodyElement.cpp
-    src/HTML/HTMLBRElement.cpp
-    src/HTML/HTMLWBRElement.cpp
-    src/HTML/HTMLButtonElement.cpp
-    src/HTML/CanvasBase.cpp
+    src/HTML/CustomElement/FormAssociatedCustomElement.cpp
+    src/HTML/Elements/HTMLAnchorElement.cpp
+    src/HTML/Elements/HTMLAreaElement.cpp
+    src/HTML/Elements/HTMLAudioElement.cpp
+    src/HTML/Elements/HTMLBaseElement.cpp
+    src/HTML/Elements/HTMLBDIElement.cpp
+    src/HTML/Elements/HTMLBodyElement.cpp
+    src/HTML/Elements/HTMLBRElement.cpp
+    src/HTML/Elements/HTMLButtonElement.cpp
+    src/HTML/Elements/HTMLCanvasElement.cpp
+    src/HTML/Elements/HTMLDataElement.cpp
+    src/HTML/Elements/HTMLDataListElement.cpp
+    src/HTML/Elements/HTMLDetailsElement.cpp
+    src/HTML/Elements/HTMLDialogElement.cpp
+    src/HTML/Elements/HTMLDirectoryElement.cpp
+    src/HTML/Elements/HTMLDivElement.cpp
+    src/HTML/Elements/HTMLDListElement.cpp
+    src/HTML/Elements/HTMLElement.cpp
+    src/HTML/Elements/HTMLEmbedElement.cpp
+    src/HTML/Elements/HTMLFieldSetElement.cpp
+    src/HTML/Elements/HTMLFontElement.cpp
+    src/HTML/Elements/HTMLFormElement.cpp
+    src/HTML/Elements/HTMLFrameSetElement.cpp
+    src/HTML/Elements/HTMLHeadElement.cpp
+    src/HTML/Elements/HTMLHeadingElement.cpp
+    src/HTML/Elements/HTMLHRElement.cpp
+    src/HTML/Elements/HTMLHtmlElement.cpp
+    src/HTML/Elements/HTMLIFrameElement.cpp
+    src/HTML/Elements/HTMLImageElement.cpp
+    src/HTML/Elements/HTMLInputElement.cpp
+    src/HTML/Elements/HTMLLabelElement.cpp
+    src/HTML/Elements/HTMLLegendElement.cpp
+    src/HTML/Elements/HTMLLIElement.cpp
+    src/HTML/Elements/HTMLLinkElement.cpp
+    src/HTML/Elements/HTMLMapElement.cpp
+    src/HTML/Elements/HTMLMarqueeElement.cpp
+    src/HTML/Elements/HTMLMaybeFormAssociatedCustomElement.cpp
+    src/HTML/Elements/HTMLMediaElement.cpp
+    src/HTML/Elements/HTMLMenuElement.cpp
+    src/HTML/Elements/HTMLMetaElement.cpp
+    src/HTML/Elements/HTMLMeterElement.cpp
+    src/HTML/Elements/HTMLModElement.cpp
+    src/HTML/Elements/HTMLObjectElement.cpp
+    src/HTML/Elements/HTMLOListElement.cpp
+    src/HTML/Elements/HTMLOptGroupElement.cpp
+    src/HTML/Elements/HTMLOptionElement.cpp
+    src/HTML/Elements/HTMLOutputElement.cpp
+    src/HTML/Elements/HTMLParagraphElement.cpp
+    src/HTML/Elements/HTMLParamElement.cpp
+    src/HTML/Elements/HTMLPictureElement.cpp
+    src/HTML/Elements/HTMLPlugInElement.cpp
+    src/HTML/Elements/HTMLPreElement.cpp
+    src/HTML/Elements/HTMLProgressElement.cpp
+    src/HTML/Elements/HTMLQuoteElement.cpp
+    src/HTML/Elements/HTMLScriptElement.cpp
+    src/HTML/Elements/HTMLSelectedContentElement.cpp
+    src/HTML/Elements/HTMLSelectElement.cpp
+    src/HTML/Elements/HTMLSlotElement.cpp
+    src/HTML/Elements/HTMLSourceElement.cpp
+    src/HTML/Elements/HTMLSpanElement.cpp
+    src/HTML/Elements/HTMLStyleElement.cpp
+    src/HTML/Elements/HTMLSummaryElement.cpp
+    src/HTML/Elements/HTMLTableCaptionElement.cpp
+    src/HTML/Elements/HTMLTableCellElement.cpp
+    src/HTML/Elements/HTMLTableColElement.cpp
+    src/HTML/Elements/HTMLTableElement.cpp
+    src/HTML/Elements/HTMLTablePartElement.cpp
+    src/HTML/Elements/HTMLTableRowElement.cpp
+    src/HTML/Elements/HTMLTableSectionElement.cpp
+    src/HTML/Elements/HTMLTemplateElement.cpp
+    src/HTML/Elements/HTMLTextAreaElement.cpp
+    src/HTML/Elements/HTMLTimeElement.cpp
+    src/HTML/Elements/HTMLTitleElement.cpp
+    src/HTML/Elements/HTMLTrackElement.cpp
+    src/HTML/Elements/HTMLUListElement.cpp
+    src/HTML/Elements/HTMLUnknownElement.cpp
+    src/HTML/Elements/HTMLVideoElement.cpp
+    src/HTML/Elements/HTMLWBRElement.cpp
+    src/HTML/Canvas/CanvasBase.cpp
     src/HTML/Canvas/CanvasRenderingContext.cpp
     src/HTML/Canvas/GPUBasedCanvasRenderingContext.cpp
     src/HTML/Canvas/EngineTextureRenderingContext.cpp
@@ -4502,76 +4553,8 @@ target_sources(Krystal.Booey
     src/HTML/Canvas/CanvasFilterContextSwitcher.cpp
     src/HTML/Canvas/CanvasRenderingContext2DBase.cpp
     src/HTML/Canvas/CanvasRenderingContext2D.cpp
-    src/HTML/ImageData.cpp
-    src/HTML/HTMLCanvasElement.cpp
-    src/HTML/HTMLDataElement.cpp
-    src/HTML/HTMLDataListElement.cpp
-    src/HTML/HTMLDetailsElement.cpp
-    src/HTML/HTMLDialogElement.cpp
-    src/HTML/HTMLDirectoryElement.cpp
-    src/HTML/HTMLDivElement.cpp
-    src/HTML/HTMLDListElement.cpp
-    src/HTML/HTMLElement.cpp
-    src/HTML/HTMLEmbedElement.cpp
-    src/HTML/HTMLFontElement.cpp
-    src/HTML/HTMLFrameSetElement.cpp
-    src/HTML/HTMLFieldSetElement.cpp
-    src/HTML/HTMLFormElement.cpp
-    src/HTML/HTMLHeadElement.cpp
-    src/HTML/HTMLHeadingElement.cpp
-    src/HTML/HTMLHRElement.cpp
-    src/HTML/HTMLHtmlElement.cpp
-    src/HTML/HTMLIFrameElement.cpp
-    src/HTML/HTMLImageElement.cpp
-    src/HTML/HTMLInputElement.cpp
-    src/HTML/HTMLLabelElement.cpp
-    src/HTML/HTMLLegendElement.cpp
-    src/HTML/HTMLLIElement.cpp
-    src/HTML/HTMLLinkElement.cpp
-    src/HTML/HTMLMapElement.cpp
-    src/HTML/HTMLMarqueeElement.cpp
-    src/HTML/HTMLMaybeFormAssociatedCustomElement.cpp
-    src/HTML/HTMLMediaElement.cpp
-    src/HTML/HTMLMenuElement.cpp
-    src/HTML/HTMLMetaElement.cpp
-    src/HTML/HTMLMeterElement.cpp
-    src/HTML/HTMLModElement.cpp
-    src/HTML/HTMLObjectElement.cpp
-    src/HTML/HTMLOListElement.cpp
-    src/HTML/HTMLOptGroupElement.cpp
-    src/HTML/HTMLOptionElement.cpp
-    src/HTML/HTMLOutputElement.cpp
-    src/HTML/HTMLParagraphElement.cpp
-    src/HTML/HTMLParamElement.cpp
-    src/HTML/HTMLPictureElement.cpp
-    src/HTML/HTMLPlugInElement.cpp
-    src/HTML/HTMLPreElement.cpp
-    src/HTML/HTMLProgressElement.cpp
-    src/HTML/HTMLQuoteElement.cpp
-    src/HTML/HTMLScriptElement.cpp
-    src/HTML/HTMLSelectedContentElement.cpp
-    src/HTML/HTMLSelectElement.cpp
-    src/HTML/HTMLSlotElement.cpp
-    src/HTML/HTMLSourceElement.cpp
-    src/HTML/HTMLSpanElement.cpp
-    src/HTML/HTMLStyleElement.cpp
-    src/HTML/HTMLSummaryElement.cpp
-    src/HTML/HTMLTableCaptionElement.cpp
-    src/HTML/HTMLTableCellElement.cpp
-    src/HTML/HTMLTableColElement.cpp
-    src/HTML/HTMLTableElement.cpp
-    src/HTML/HTMLTablePartElement.cpp
-    src/HTML/HTMLTableRowElement.cpp
-    src/HTML/HTMLTableSectionElement.cpp
-    src/HTML/HTMLTableRowsCollection.cpp
-    src/HTML/HTMLTemplateElement.cpp
-    src/HTML/HTMLTextAreaElement.cpp
-    src/HTML/HTMLTimeElement.cpp
-    src/HTML/HTMLTitleElement.cpp
-    src/HTML/HTMLTrackElement.cpp
-    src/HTML/HTMLUListElement.cpp
-    src/HTML/HTMLUnknownElement.cpp
-    src/HTML/HTMLVideoElement.cpp
+    src/HTML/ImageData/ImageData.cpp
+    src/HTML/Collections/HTMLTableRowsCollection.cpp
     src/HTML/Internals/HTMLElementFactory.cpp
     src/HTML/Parser/HTMLDocumentParser.cpp
     src/HTML/Parser/HTMLElementStack.cpp

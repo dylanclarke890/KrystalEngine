@@ -12,7 +12,7 @@
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/UndoStep.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
-#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"

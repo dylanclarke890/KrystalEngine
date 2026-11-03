@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/HTML/Enums/TagName.hpp"
+#include "Krystal.Booey/HTML/Types/TagName.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"

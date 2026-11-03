@@ -1,0 +1,160 @@
+﻿#include "Krystal.Booey/HTML/Elements/HTMLOListElement.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Rendering/RenderListItem.hpp"
+
+namespace krys::boo::html
+{
+  HTMLOListElement::HTMLOListElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::OList)
+  {
+  }
+
+  void HTMLOListElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                            Maybe<dom::DOMStringView> value,
+                                            dom::DOMStringAtom namespaceURI) noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null())
+    {
+      if (localName == u8"start")
+      {
+        auto oldStart = StartValue();
+        _start = null;
+        if (value)
+        {
+          if (auto parsed = Numbers::ParseInteger(*value);
+              parsed.Success() && parsed.Value >= std::numeric_limits<int32>::min()
+              && parsed.Value <= std::numeric_limits<int32>::max())
+          {
+            _start = static_cast<int32>(parsed.Value);
+          }
+        }
+        if (oldStart != StartValue())
+        {
+          RenderListItem::UpdateItemValuesForOrderedList(*this);
+        }
+      }
+      else if (localName == u8"reversed")
+      {
+        bool reversed = value.has_value();
+        if (reversed != _isReversed)
+        {
+          _isReversed = reversed;
+          RenderListItem::UpdateItemValuesForOrderedList(*this);
+        }
+      }
+    }
+
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+  }
+
+  uint32 HTMLOListElement::ItemCount() const noexcept
+  {
+    if (!_itemCount)
+    {
+      _itemCount = RenderListItem::ItemCountForOrderedList(*this);
+    }
+    return *_itemCount;
+  }
+
+#pragma region HTMLOListElement
+
+  bool HTMLOListElement::Reversed() const noexcept
+  {
+    return Reflect<bool>(*this, u8"reversed");
+  }
+
+  void HTMLOListElement::Reversed(bool value) noexcept
+  {
+    Reflect<bool>(*this, u8"reversed", krys::move(value));
+  }
+
+  int32 HTMLOListElement::Start() const noexcept
+  {
+    return Reflect<int32, ReflectDefault<int32>(1)>(*this, u8"start");
+  }
+
+  void HTMLOListElement::Start(int32 value) noexcept
+  {
+    Reflect<int32>(*this, u8"start", krys::move(value));
+  }
+
+  dom::DOMString HTMLOListElement::Type() const noexcept
+  {
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+  }
+
+  void HTMLOListElement::Type(dom::DOMString value) noexcept
+  {
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region HTMLOListElement Obsolete members
+
+  bool HTMLOListElement::Compact() const noexcept
+  {
+    return Reflect<bool>(*this, u8"compact");
+  }
+
+  void HTMLOListElement::Compact(bool value) noexcept
+  {
+    Reflect<bool>(*this, u8"compact", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLOListElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"type"))
+    {
+      return true;
+    }
+    return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLOListElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                dom::DOMStringAtom namespaceURI,
+                                                                dom::DOMStringView value,
+                                                                css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"type")
+    {
+      if (value == u8"a")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::LowerAlpha);
+      }
+      else if (value == u8"A")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::UpperAlpha);
+      }
+      else if (value == u8"i")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::LowerRoman);
+      }
+      else if (value == u8"I")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::UpperRoman);
+      }
+      else if (value == u8"1")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::Decimal);
+      }
+      return;
+    }
+    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+  }
+
+#pragma endregion
+}

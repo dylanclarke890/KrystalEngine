@@ -10,9 +10,9 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
-#include "Krystal.Booey/HTML/CustomStateSet.hpp"
-#include "Krystal.Booey/HTML/ElementInternals.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
+#include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include <algorithm>
 #include <charconv>

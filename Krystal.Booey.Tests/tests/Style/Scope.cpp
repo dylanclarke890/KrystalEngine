@@ -5,9 +5,9 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 
 namespace krys::boo::style::tests

@@ -15,7 +15,7 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
-#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 
 namespace krys::boo::dom::tests
 {

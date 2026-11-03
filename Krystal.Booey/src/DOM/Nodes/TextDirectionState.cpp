@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/TextDirectionState.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/HTMLBDIElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBDIElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::dom

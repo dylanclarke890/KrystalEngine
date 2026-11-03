@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include <string>
 
 namespace krys::boo::html::tests
