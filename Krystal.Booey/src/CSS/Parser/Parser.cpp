@@ -31,7 +31,7 @@
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/ColorValue.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"

@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"

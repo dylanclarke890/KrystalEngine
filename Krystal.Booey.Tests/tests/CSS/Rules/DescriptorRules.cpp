@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 
 namespace krys::boo::css::tests
 {

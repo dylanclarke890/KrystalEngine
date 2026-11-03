@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
-#include "Krystal.Booey/CSS/CSSStyleDeclaration.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"

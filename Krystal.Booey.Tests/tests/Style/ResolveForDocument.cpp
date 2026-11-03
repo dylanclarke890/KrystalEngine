@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 
 namespace krys::boo::style::tests

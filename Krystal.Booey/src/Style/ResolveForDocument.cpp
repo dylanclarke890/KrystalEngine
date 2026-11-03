@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/ResolveForDocument.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"

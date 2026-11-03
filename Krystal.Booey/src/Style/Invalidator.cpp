@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"

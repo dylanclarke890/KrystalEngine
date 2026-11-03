@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheetObservableArray.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheetObservableArray.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"

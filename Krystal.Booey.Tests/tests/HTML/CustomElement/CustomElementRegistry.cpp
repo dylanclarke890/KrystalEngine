@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"

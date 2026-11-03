@@ -126,11 +126,11 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSOM/CSSSupportsRule.cpp
 		tests/CSS/CSSOM/CSSViewTransitionRule.cpp
 		tests/CSS/Counter/CounterStyle.cpp
-		tests/CSS/CSSComputedStyleDeclaration.cpp
-		tests/CSS/CSSStyleProperties.cpp
-		tests/CSS/CSSStyleSheet.cpp
-		tests/CSS/DOMMatrix.cpp
-		tests/CSS/CSSStyleSheetObservableArray.cpp
+		tests/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
+		tests/CSS/CSSOM/CSSStyleProperties.cpp
+		tests/CSS/StyleSheets/CSSStyleSheet.cpp
+		tests/CSS/DOMMatrix/DOMMatrix.cpp
+		tests/CSS/StyleSheets/CSSStyleSheetObservableArray.cpp
 		tests/CSS/Descriptors/PropertySetCSSDescriptors.cpp
 		tests/CSS/Media/MediaList.cpp
 		tests/CSS/Media/MediaQueryList.cpp
@@ -303,8 +303,8 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Selectors/SelectorParser.cpp
 		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
 		tests/CSS/Selectors/UserAgentParts.cpp
-		tests/CSS/PrimitiveValueMappings.cpp
-		tests/CSS/StyleSheetContents.cpp
+		tests/CSS/Values/PrimitiveValueMappings.cpp
+		tests/CSS/StyleSheets/StyleSheetContents.cpp
 
 		# Graphics
 		tests/Graphics/WOFFFileFormat.cpp
@@ -390,7 +390,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Animation/StyleOriginatedTimelinesController.cpp
 		tests/Animation/ViewTimeline.cpp
 		tests/Animation/WebAnimation.cpp
-		tests/CSS/CSSFontSelector.cpp
+		tests/CSS/Font/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp
 		tests/Graphics/FontDatabase.cpp
 		tests/Graphics/TextRunIterator.cpp

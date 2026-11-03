@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix.hpp"
-#include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
+#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"

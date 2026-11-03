@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 
 namespace krys::boo::css

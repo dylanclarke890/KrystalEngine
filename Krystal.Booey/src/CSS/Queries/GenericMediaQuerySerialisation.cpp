@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp"
-#include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 

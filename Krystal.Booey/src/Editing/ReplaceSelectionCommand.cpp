@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Editing/ReplaceSelectionCommand.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"

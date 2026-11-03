@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Queries/ContainerQueryParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::tests

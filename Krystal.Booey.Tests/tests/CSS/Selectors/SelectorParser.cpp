@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/TestParserUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 
 namespace krys::boo::css::tests
 {

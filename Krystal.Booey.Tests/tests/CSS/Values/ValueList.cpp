@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 

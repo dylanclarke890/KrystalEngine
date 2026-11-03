@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
 
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"

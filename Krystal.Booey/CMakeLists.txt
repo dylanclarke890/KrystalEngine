@@ -352,12 +352,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Calc/TreeSimplification.hpp
   include/Krystal.Booey/CSS/Calc/TreeTraversal.hpp
   include/Krystal.Booey/CSS/Calc/Value.hpp
-  include/Krystal.Booey/CSS/ComputedStyleDependencies.hpp
+  include/Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyle.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyleDescriptors.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp
-  include/Krystal.Booey/CSS/CSSComputedStyleDeclaration.hpp
-  include/Krystal.Booey/CSS/CSSFontSelector.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp
+  include/Krystal.Booey/CSS/Font/CSSFontSelector.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSContainerRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp
@@ -385,25 +385,25 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp
-  include/Krystal.Booey/CSS/CSSStyleDeclaration.hpp
-  include/Krystal.Booey/CSS/CSSStyleProperties.hpp
-  include/Krystal.Booey/CSS/CSSStyleSheet.hpp
-  include/Krystal.Booey/CSS/CSSStyleSheetObservableArray.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp
+  include/Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp
+  include/Krystal.Booey/CSS/StyleSheets/CSSStyleSheetObservableArray.hpp
   include/Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp
   include/Krystal.Booey/CSS/Descriptors/CSSFunctionDescriptors.hpp
   include/Krystal.Booey/CSS/Descriptors/CSSPageDescriptors.hpp
   include/Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp
   include/Krystal.Booey/CSS/Descriptors/PropertySetCSSDescriptors.hpp
-  include/Krystal.Booey/CSS/DOMMatrix.hpp
-  include/Krystal.Booey/CSS/DOMMatrix2DInit.hpp
-  include/Krystal.Booey/CSS/DOMMatrixInit.hpp
-  include/Krystal.Booey/CSS/DOMMatrixReadOnly.hpp
+  include/Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp
+  include/Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp
+  include/Krystal.Booey/CSS/DOMMatrix/DOMMatrixInit.hpp
+  include/Krystal.Booey/CSS/DOMMatrix/DOMMatrixReadOnly.hpp
   include/Krystal.Booey/CSS/Font/FontFace.hpp
   include/Krystal.Booey/CSS/Font/FontFaceSet.hpp
   include/Krystal.Booey/CSS/Font/FontFaceSource.hpp
   include/Krystal.Booey/CSS/Font/SegmentedFontFace.hpp
-  include/Krystal.Booey/CSS/FontSelectionValueInlines.hpp
-  include/Krystal.Booey/CSS/Markup.hpp
+  include/Krystal.Booey/CSS/Font/FontSelectionValueInlines.hpp
+  include/Krystal.Booey/CSS/CSSOM/Markup.hpp
   include/Krystal.Booey/CSS/Media/MediaList.hpp
   include/Krystal.Booey/CSS/Media/MediaQueryList.hpp
   include/Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp
@@ -429,7 +429,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Parser/TokenSerialisationMode.hpp
   include/Krystal.Booey/CSS/Parser/TokenType.hpp
   include/Krystal.Booey/CSS/Parser/VariableParser.hpp
-  include/Krystal.Booey/CSS/PrimitiveValueMappings.hpp
+  include/Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Align.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp
@@ -545,11 +545,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Selectors/SelectorParser.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp
-  include/Krystal.Booey/CSS/StyleAttributeMutationScope.hpp
-  include/Krystal.Booey/CSS/StyleSheet.hpp
-  include/Krystal.Booey/CSS/StyleSheetContents.hpp
-  include/Krystal.Booey/CSS/StyleSheetList.hpp
-  include/Krystal.Booey/CSS/ToLengthConversionData.hpp
+  include/Krystal.Booey/CSS/CSSOM/StyleAttributeMutationScope.hpp
+  include/Krystal.Booey/CSS/StyleSheets/StyleSheet.hpp
+  include/Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp
+  include/Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp
+  include/Krystal.Booey/CSS/Values/ToLengthConversionData.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp
@@ -731,7 +731,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/VariableData.hpp
   include/Krystal.Booey/CSS/Values/VariableReferenceValue.hpp
   include/Krystal.Booey/CSS/Values/ViewValue.hpp
-  include/Krystal.Booey/CSS/WebKitFontFamilyNames.hpp
+  include/Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -746,12 +746,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Calc/Value.cpp
   src/CSS/Calc/ValueEvaluation.cpp
   src/CSS/Calc/ValueParsing.cpp
-  src/CSS/ComputedStyleDependencies.cpp
+  src/CSS/Values/ComputedStyleDependencies.cpp
   src/CSS/Counter/CounterStyle.cpp
   src/CSS/Counter/CounterStyleDescriptors.cpp
   src/CSS/Counter/CounterStyleRegistry.cpp
-  src/CSS/CSSComputedStyleDeclaration.cpp
-  src/CSS/CSSFontSelector.cpp
+  src/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
+  src/CSS/Font/CSSFontSelector.cpp
   src/CSS/CSSOM/CSSConditionRule.cpp
   src/CSS/CSSOM/CSSContainerRule.cpp
   src/CSS/CSSOM/CSSCounterStyleRule.cpp
@@ -779,22 +779,22 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/CSSOM/CSSStyleRule.cpp
   src/CSS/CSSOM/CSSSupportsRule.cpp
   src/CSS/CSSOM/CSSViewTransitionRule.cpp
-  src/CSS/CSSStyleDeclaration.cpp
-  src/CSS/CSSStyleProperties.cpp
-  src/CSS/CSSStyleSheet.cpp
-  src/CSS/CSSStyleSheetObservableArray.cpp
+  src/CSS/CSSOM/CSSStyleDeclaration.cpp
+  src/CSS/CSSOM/CSSStyleProperties.cpp
+  src/CSS/StyleSheets/CSSStyleSheet.cpp
+  src/CSS/StyleSheets/CSSStyleSheetObservableArray.cpp
   src/CSS/Descriptors/CSSFontFaceDescriptors.cpp
   src/CSS/Descriptors/CSSFunctionDescriptors.cpp
   src/CSS/Descriptors/CSSPageDescriptors.cpp
   src/CSS/Descriptors/CSSPositionTryDescriptors.cpp
   src/CSS/Descriptors/PropertySetCSSDescriptors.cpp
-  src/CSS/DOMMatrix.cpp
-  src/CSS/DOMMatrixReadOnly.cpp
+  src/CSS/DOMMatrix/DOMMatrix.cpp
+  src/CSS/DOMMatrix/DOMMatrixReadOnly.cpp
   src/CSS/Font/FontFace.cpp
   src/CSS/Font/FontFaceSet.cpp
   src/CSS/Font/FontFaceSource.cpp
   src/CSS/Font/SegmentedFontFace.cpp
-  src/CSS/Markup.cpp
+  src/CSS/CSSOM/Markup.cpp
   src/CSS/Media/MediaList.cpp
   src/CSS/Media/MediaQueryList.cpp
   src/CSS/Media/MediaQueryListEvent.cpp
@@ -889,10 +889,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Selectors/SelectorList.cpp
   src/CSS/Selectors/SelectorParser.cpp
   src/CSS/Selectors/SelectorParserContext.cpp
-  src/CSS/StyleAttributeMutationScope.cpp
-  src/CSS/StyleSheetContents.cpp
-  src/CSS/StyleSheetList.cpp
-  src/CSS/ToLengthConversionData.cpp
+  src/CSS/CSSOM/StyleAttributeMutationScope.cpp
+  src/CSS/StyleSheets/StyleSheetContents.cpp
+  src/CSS/StyleSheets/StyleSheetList.cpp
+  src/CSS/Values/ToLengthConversionData.cpp
   src/CSS/TypedOM/CSSKeywordValue.cpp
   src/CSS/TypedOM/CSSNumericValue.cpp
   src/CSS/TypedOM/CSSStyleValue.cpp
@@ -1007,7 +1007,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/VariableData.cpp
   src/CSS/Values/VariableReferenceValue.cpp
   src/CSS/Values/ViewValue.cpp
-  src/CSS/WebKitFontFamilyNames.cpp
+  src/CSS/Font/WebKitFontFamilyNames.cpp
 )
 
 set(KRYSTAL_BOOEY_DOM_HEADERS

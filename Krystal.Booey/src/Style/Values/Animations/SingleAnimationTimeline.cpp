@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Animations/SingleAnimationTimeline.hpp"
 
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ScrollValue.hpp"
 #include "Krystal.Booey/CSS/Values/ViewValue.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"

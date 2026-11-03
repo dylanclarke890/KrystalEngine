@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Symbol.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"

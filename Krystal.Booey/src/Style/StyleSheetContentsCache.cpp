@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Style/StyleSheetContentsCache.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"

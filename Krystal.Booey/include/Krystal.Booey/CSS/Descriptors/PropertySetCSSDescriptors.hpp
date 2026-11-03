@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/CSSStyleDeclaration.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"

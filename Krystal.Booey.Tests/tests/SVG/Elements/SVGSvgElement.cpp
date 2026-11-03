@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey.Tests/SVG/TestSVGElement.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix2DInit.hpp"
+#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"

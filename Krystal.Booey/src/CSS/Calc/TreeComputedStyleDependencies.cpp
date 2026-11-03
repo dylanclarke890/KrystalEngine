@@ -1,7 +1,7 @@
 #include "Krystal.Booey/CSS/Calc/TreeComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Calc/TreeTraversal.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 

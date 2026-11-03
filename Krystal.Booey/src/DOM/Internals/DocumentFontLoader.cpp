@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Internals/DocumentFontLoader.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"

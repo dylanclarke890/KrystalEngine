@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/CSS/CSSComputedStyleDeclaration.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"

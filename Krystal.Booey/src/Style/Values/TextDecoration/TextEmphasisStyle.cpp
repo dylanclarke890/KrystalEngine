@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/Core/WritingMode.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Style/MatchedDeclarationsCache.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

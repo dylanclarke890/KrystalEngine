@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"

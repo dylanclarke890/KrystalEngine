@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleDescriptors.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 
 namespace krys::boo::css

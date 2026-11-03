@@ -1,6 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/Style/Values/Box/Margin.hpp"
 #include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"
 #include "Krystal.Booey/Style/Values/Box/Padding.hpp"

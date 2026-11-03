@@ -4,10 +4,10 @@
 #include "Krystal.Booey.Tests/CSS/StylePropertiesTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
-#include "Krystal.Booey/CSS/CSSStyleDeclaration.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 

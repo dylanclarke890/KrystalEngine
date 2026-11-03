@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/TextSpacing.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Graphics/SystemFontDatabase.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"

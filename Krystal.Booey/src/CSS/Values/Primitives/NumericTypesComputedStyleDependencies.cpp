@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include <algorithm>
 
 namespace krys::boo::css

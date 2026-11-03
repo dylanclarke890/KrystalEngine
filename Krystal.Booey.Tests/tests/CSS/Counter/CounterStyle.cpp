@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/Style/UserAgentStyle.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

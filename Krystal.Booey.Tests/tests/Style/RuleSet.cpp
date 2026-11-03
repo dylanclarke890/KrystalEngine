@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/Style/RuleSetBuilder.hpp"
 #include <string>
 

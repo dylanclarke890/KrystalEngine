@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"

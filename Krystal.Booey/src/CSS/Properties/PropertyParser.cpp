@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
@@ -31,6 +30,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"

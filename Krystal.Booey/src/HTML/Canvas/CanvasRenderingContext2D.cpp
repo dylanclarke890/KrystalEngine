@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/Core/UnicodeBidi.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Filter.hpp"

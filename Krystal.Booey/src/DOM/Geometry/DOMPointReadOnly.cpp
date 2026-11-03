@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
-#include "Krystal.Booey/CSS/DOMMatrixReadOnly.hpp"
+#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrixReadOnly.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMPoint.hpp"
 
 namespace krys::boo::dom

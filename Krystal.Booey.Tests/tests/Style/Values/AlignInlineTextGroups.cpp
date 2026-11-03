@@ -1,6 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignContent.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignItems.hpp"

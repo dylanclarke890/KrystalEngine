@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/FontSelectionValueInlines.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Font/FontSelectionValueInlines.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"
@@ -11,6 +10,7 @@
 #include "Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"

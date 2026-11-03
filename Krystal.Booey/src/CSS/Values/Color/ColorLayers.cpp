@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/Color/ColorLayers.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
