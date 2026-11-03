@@ -25,19 +25,19 @@ Status: reviewed (2026-11-02)
 #### [13.2.3 The input byte stream](https://html.spec.whatwg.org/#the-input-byte-stream)
 
 Status: reviewed (2026-11-02)
-> Documents decode UTF-8 only (`TextResourceDecoder`, see `KNOWN-ISSUES.md`).
+> Documents decode UTF-8 only (`DocumentWriter`, see `KNOWN-ISSUES.md`).
 <!-- definitions: concept-encoding-confidence -->
 
 ##### [13.2.3.1 Parsing with a known character encoding](https://html.spec.whatwg.org/#parsing-with-a-known-character-encoding)
 
 Status: reviewed (2026-11-02)
-> Documents decode UTF-8 only (`TextResourceDecoder`, see `KNOWN-ISSUES.md`).
+> Documents decode UTF-8 only (`DocumentWriter`, see `KNOWN-ISSUES.md`).
 <!-- definitions: a-known-definite-encoding -->
 
 ##### [13.2.3.2 Determining the character encoding](https://html.spec.whatwg.org/#determining-the-character-encoding)
 
 Status: reviewed (2026-11-02)
-> `TextResourceDecoder` strips a BOM and buffers for the meta prescan (`HTMLEncodingSniffer`), whose result isn't used (FIXME, see `KNOWN-ISSUES.md`).
+> `DocumentWriter` removes a UTF-8 BOM and decodes UTF-8 only; there's no prescan (see `KNOWN-ISSUES.md`).
 <!-- definitions: prescan-end-condition -->
 
 - [x] [encoding sniffing algorithm](https://html.spec.whatwg.org/#encoding-sniffing-algorithm) — User agents must use the following algorithm, called the encoding sniffing algorithm, to determine the character encoding to use when decoding a document in the first pass. This algorithm takes as input any out-of-band metadata available to the user agent (e.g. the Content-Type metadata of the docu…
@@ -120,7 +120,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.3.3 Character encodings](https://html.spec.whatwg.org/#character-encodings)
 
 Status: reviewed (2026-11-02)
-> Documents decode UTF-8 only (`TextResourceDecoder`, see `KNOWN-ISSUES.md`).
+> Documents decode UTF-8 only (`DocumentWriter`, see `KNOWN-ISSUES.md`).
 <!-- definitions: utf-8 iso-8859-2 iso-8859-7 iso-8859-8 windows-874 windows-1250 windows-1251 windows-1252 windows-1254 windows-1255 windows-1256 windows-1257 windows-1258 gbk big5 iso-2022-jp shift_jis euc-kr utf-16be utf-16le utf-16-encoding x-user-defined -->
 
 ##### [13.2.3.4 Changing the encoding while parsing](https://html.spec.whatwg.org/#changing-the-encoding-while-parsing)
