@@ -4298,17 +4298,17 @@ set(KRYSTAL_BOOEY_URL_SOURCES
 )
 
 set(KRYSTAL_BOOEY_XML_HEADERS
-  include/Krystal.Booey/XML/Parser/XMLDocumentParser.hpp
-  include/Krystal.Booey/XML/Parser/XMLDocumentParserScope.hpp
   include/Krystal.Booey/XML/PseudoAttributes.hpp
+  include/Krystal.Booey/XML/XMLDocumentParser.hpp
+  include/Krystal.Booey/XML/XMLDocumentParserScope.hpp
   include/Krystal.Booey/XML/XMLErrors.hpp
 )
 
 set(KRYSTAL_BOOEY_XML_SOURCES
-  src/XML/Parser/XMLDocumentParser.cpp
-  src/XML/Parser/XMLDocumentParserLibxml2.cpp
-  src/XML/Parser/XMLDocumentParserScope.cpp
   src/XML/PseudoAttributes.cpp
+  src/XML/XMLDocumentParser.cpp
+  src/XML/XMLDocumentParserLibxml2.cpp
+  src/XML/XMLDocumentParserScope.cpp
   src/XML/XMLErrors.cpp
 )
 

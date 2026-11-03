@@ -1,6 +1,6 @@
-﻿#include "Krystal.Booey/XML/Parser/XMLDocumentParserScope.hpp"
+﻿#include "Krystal.Booey/XML/XMLDocumentParserScope.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
-#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include <libxml/parser.h>
 
 namespace krys::boo::xml

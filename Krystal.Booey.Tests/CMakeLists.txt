@@ -795,5 +795,5 @@ target_sources(Krystal.Booey.Tests
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 		tests/XML/PseudoAttributes.cpp
-		tests/XML/Parser/XMLDocumentParser.cpp
+		tests/XML/XMLDocumentParser.cpp
 )

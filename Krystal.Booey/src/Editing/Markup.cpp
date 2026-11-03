@@ -37,7 +37,7 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include <algorithm>
 #include <ranges>
 

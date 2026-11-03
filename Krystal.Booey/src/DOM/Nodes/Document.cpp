@@ -158,7 +158,7 @@
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGTitleElement.hpp"
-#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"

@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
-#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"

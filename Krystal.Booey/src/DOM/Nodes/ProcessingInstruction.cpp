@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 
 namespace krys::boo::dom
 {

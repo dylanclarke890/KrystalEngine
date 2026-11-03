@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
