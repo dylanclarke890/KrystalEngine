@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Serialisation/Archives/Adapters/RapidJsonStreamAdapters.hpp"
@@ -275,7 +276,7 @@ namespace krys::Serialisation
     JsonArchiveReader(io::IStreamReader &stream) noexcept : _stream(stream)
     {
       _document.ParseStream(_stream);
-      assert(!_document.HasParseError() && "Document parsing failed");
+      krys_debug_assert_msg(!_document.HasParseError(), "Document parsing failed");
 
       if (_document.IsArray())
       {

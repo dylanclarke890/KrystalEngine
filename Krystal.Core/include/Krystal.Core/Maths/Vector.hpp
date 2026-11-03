@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include <cassert>
 #include <cmath>
 #include <compare>
 #include <type_traits>
@@ -107,13 +107,13 @@ namespace krys
 
     KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
     {
-      assert(index == 0);
+      krys_debug_assert(index == 0);
       return x;
     }
 
     KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
-      assert(index == 0);
+      krys_debug_assert(index == 0);
       return x;
     }
 
@@ -144,7 +144,7 @@ namespace krys
 
     KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
     {
-      assert(index >= 0 && index < Length);
+      krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
         return x;
       else
@@ -153,7 +153,7 @@ namespace krys
 
     KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
-      assert(index >= 0 && index < Length);
+      krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
         return x;
       else
@@ -198,7 +198,7 @@ namespace krys
 
     KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
     {
-      assert(index >= 0 && index < Length);
+      krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
         return x;
       else if (index == 1)
@@ -209,7 +209,7 @@ namespace krys
 
     KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
-      assert(index >= 0 && index < Length);
+      krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
         return x;
       else if (index == 1)
@@ -259,7 +259,7 @@ namespace krys
 
     KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
     {
-      assert(index >= 0 && index < Length);
+      krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
         return x;
       else if (index == 1)
@@ -272,7 +272,7 @@ namespace krys
 
     KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
-      assert(index >= 0 && index < Length);
+      krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
         return x;
       else if (index == 1)

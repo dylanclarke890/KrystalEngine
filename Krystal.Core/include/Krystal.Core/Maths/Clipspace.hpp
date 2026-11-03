@@ -1,12 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Maths/Conventions.hpp"
 #include "Krystal.Core/Maths/Maths.hpp"
 #include "Krystal.Core/Maths/Matrix.hpp"
 
-#include <cassert>
 #include <cmath>
 #include <limits>
 
@@ -313,7 +313,7 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr Matrix4x4<T> Perspective_RH_ZO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
-    assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
+    krys_debug_assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
 
     const T tanHalfFovy = std::tan(fovy / T(2));
 
@@ -329,7 +329,7 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr Matrix4x4<T> Perspective_RH_NO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
-    assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
+    krys_debug_assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
 
     const T tanHalfFovy = std::tan(fovy / T(2));
 
@@ -345,7 +345,7 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr Matrix4x4<T> Perspective_LH_ZO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
-    assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
+    krys_debug_assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
 
     const T tanHalfFovy = std::tan(fovy / T(2));
 
@@ -361,7 +361,7 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr Matrix4x4<T> Perspective_LH_NO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
-    assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
+    krys_debug_assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
 
     const T tanHalfFovy = std::tan(fovy / T(2));
 
@@ -455,9 +455,9 @@ namespace krys
   KRYS_NODISCARD constexpr Matrix4x4<T> PerspectiveFov_RH_ZO(T fov, T width, T height, T zNear,
                                                              T zFar) noexcept
   {
-    assert(width > Zero<T>());
-    assert(height > Zero<T>());
-    assert(fov > Zero<T>());
+    krys_debug_assert(width > Zero<T>());
+    krys_debug_assert(height > Zero<T>());
+    krys_debug_assert(fov > Zero<T>());
 
     const T rad = fov;
     const T h = std::cos(T(0.5) * rad) / std::sin(T(0.5) * rad);
@@ -478,9 +478,9 @@ namespace krys
   KRYS_NODISCARD constexpr Matrix4x4<T> PerspectiveFov_RH_NO(T fov, T width, T height, T zNear,
                                                              T zFar) noexcept
   {
-    assert(width > Zero<T>());
-    assert(height > Zero<T>());
-    assert(fov > Zero<T>());
+    krys_debug_assert(width > Zero<T>());
+    krys_debug_assert(height > Zero<T>());
+    krys_debug_assert(fov > Zero<T>());
 
     const T rad = fov;
     const T h = std::cos(Half<T>() * rad) / std::sin(Half<T>() * rad);
@@ -501,9 +501,9 @@ namespace krys
   KRYS_NODISCARD constexpr Matrix4x4<T> PerspectiveFov_LH_ZO(T fov, T width, T height, T zNear,
                                                              T zFar) noexcept
   {
-    assert(width > Zero<T>());
-    assert(height > Zero<T>());
-    assert(fov > Zero<T>());
+    krys_debug_assert(width > Zero<T>());
+    krys_debug_assert(height > Zero<T>());
+    krys_debug_assert(fov > Zero<T>());
 
     const T rad = fov;
     const T h = std::cos(T(0.5) * rad) / std::sin(T(0.5) * rad);
@@ -524,9 +524,9 @@ namespace krys
   KRYS_NODISCARD constexpr Matrix4x4<T> PerspectiveFov_LH_NO(T fov, T width, T height, T zNear,
                                                              T zFar) noexcept
   {
-    assert(width > Zero<T>());
-    assert(height > Zero<T>());
-    assert(fov > Zero<T>());
+    krys_debug_assert(width > Zero<T>());
+    krys_debug_assert(height > Zero<T>());
+    krys_debug_assert(fov > Zero<T>());
 
     const T rad = fov;
     const T h = std::cos(T(0.5) * rad) / std::sin(T(0.5) * rad);

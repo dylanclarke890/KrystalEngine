@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include <charconv>
@@ -372,7 +373,7 @@ namespace krys::boo::css
           continue;
         }
 
-        assert(StartsWithValidEscape(current, next));
+        krys_debug_assert(StartsWithValidEscape(current, next));
         codePoints.push_back(ConsumeEscapedCodePoint());
         continue;
       }
@@ -691,14 +692,14 @@ namespace krys::boo::css
     double value;
     KRYS_MAYBE_UNUSED auto [nptr, nec] =
       std::from_chars(numberPart.data(), numberPart.data() + numberPart.size(), value);
-    assert(nec == std::errc());
+    krys_debug_assert(nec == std::errc());
 
     if (!exponentPart.empty())
     {
       int64 exponent;
       KRYS_MAYBE_UNUSED auto [eptr, eec] =
         std::from_chars(exponentPart.data(), exponentPart.data() + exponentPart.size(), exponent);
-      assert(eec == std::errc());
+      krys_debug_assert(eec == std::errc());
 
       value *= std::pow(10.0, static_cast<double>(exponent));
     }
@@ -708,14 +709,14 @@ namespace krys::boo::css
 
   Token Tokenizer::ConsumeUnicodeRangeToken() noexcept
   {
-    assert(StartsWithUnicodeRange(_inputStream.NextInputCharacter(), _inputStream.Peek(1uz),
-                                  _inputStream.Peek(2uz)));
+    krys_debug_assert(StartsWithUnicodeRange(_inputStream.NextInputCharacter(), _inputStream.Peek(1uz),
+                                             _inputStream.Peek(2uz)));
 
     auto ConvertHexStrToInt = [](const string &str) noexcept -> int32
     {
       int32 value = 0;
       KRYS_MAYBE_UNUSED auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, 16);
-      assert(ec == std::errc());
+      krys_debug_assert(ec == std::errc());
       return value;
     };
 
@@ -825,7 +826,8 @@ namespace krys::boo::css
 
   Token Tokenizer::BlockStart(TokenType type) noexcept
   {
-    assert(type == TokenType::OpenSquare || type == TokenType::OpenParen || type == TokenType::OpenCurly);
+    krys_debug_assert(type == TokenType::OpenSquare || type == TokenType::OpenParen
+                      || type == TokenType::OpenCurly);
 
     _blockStack.push_back(type);
     return Token(type, BlockTokenType::Start);
@@ -841,7 +843,8 @@ namespace krys::boo::css
 
   Token Tokenizer::BlockEnd(TokenType type) noexcept
   {
-    assert(type == TokenType::CloseSquare || type == TokenType::CloseParen || type == TokenType::CloseCurly);
+    krys_debug_assert(type == TokenType::CloseSquare || type == TokenType::CloseParen
+                      || type == TokenType::CloseCurly);
 
     auto startType = [](TokenType endType)
     {

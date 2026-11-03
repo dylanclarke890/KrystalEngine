@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Editor/Application.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.Core/Maths/Random.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
@@ -6,7 +7,6 @@
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.PAL/Input.hpp"
 #include "Krystal.PAL/Platform.hpp"
-#include <cassert>
 #include <thread>
 #include <utility>
 
@@ -108,9 +108,9 @@ namespace krys
 
   void Application::CreateServices(int argc, char **argv, const ApplicationSettings &settings)
   {
-    assert(settings.PhysicsFramerate > 0);
-    assert(settings.RenderFramerate > 0);
-    assert(settings.MaxPhysicsUpdatesPerFrame > 0);
+    krys_debug_assert(settings.PhysicsFramerate > 0);
+    krys_debug_assert(settings.RenderFramerate > 0);
+    krys_debug_assert(settings.MaxPhysicsUpdatesPerFrame > 0);
 
     _context->Settings = settings;
     _context->CommandLineArgs.resize(argc);

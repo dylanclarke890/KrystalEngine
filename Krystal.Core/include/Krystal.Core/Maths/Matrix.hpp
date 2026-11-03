@@ -1,12 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include <cassert>
 #include <type_traits>
 
 #pragma region Helper Macros
@@ -83,12 +83,12 @@ private:                                                                        
   constexpr auto operator<=>(const Matrix &) const noexcept = default;                                       \
   KRYS_NODISCARD constexpr ColumnType &operator[](int column) noexcept                                       \
   {                                                                                                          \
-    assert(column >= 0 && column < Columns);                                                                 \
+    krys_debug_assert(column >= 0 && column < Columns);                                                      \
     return _data[column];                                                                                    \
   }                                                                                                          \
   KRYS_NODISCARD constexpr ColumnType const &operator[](int column) const noexcept                           \
   {                                                                                                          \
-    assert(column >= 0 && column < Columns);                                                                 \
+    krys_debug_assert(column >= 0 && column < Columns);                                                      \
     return _data[column];                                                                                    \
   }                                                                                                          \
   MATRIX_OPERATOR_ASSIGNMENT(+)                                                                              \

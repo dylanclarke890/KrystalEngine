@@ -1,12 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include "Krystal.Core/Types/WeakPtrImpl.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
-#include <cassert>
 
 namespace krys::detail
 {

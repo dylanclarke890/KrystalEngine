@@ -116,7 +116,7 @@ namespace krys::log
 
   ILogger *GetGlobalLogger() noexcept
   {
-    assert(GlobalLogger != nullptr && "Global logger is not set!");
+    krys_debug_assert_msg(GlobalLogger != nullptr, "Global logger is not set!");
     return GlobalLogger;
   }
 }
