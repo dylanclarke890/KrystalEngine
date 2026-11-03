@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"

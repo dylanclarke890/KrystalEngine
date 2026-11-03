@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"

@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Constants/TagNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"

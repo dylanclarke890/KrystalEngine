@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"

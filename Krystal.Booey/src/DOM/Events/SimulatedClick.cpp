@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"

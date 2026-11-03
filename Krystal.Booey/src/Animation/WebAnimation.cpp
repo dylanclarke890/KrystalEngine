@@ -7,8 +7,6 @@
 #include "Krystal.Booey/Animation/ScrollTimeline.hpp"
 #include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
@@ -16,6 +14,7 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
@@ -2086,7 +2085,7 @@ namespace krys::boo
         return existingInlineStyle->MutableCopy();
       }
       auto styleDeclaration = css::MutableStyleProperties::Create();
-      if (auto styleAttribute = styledElement->GetAttribute(dom::DOMStringAtom(Attributes::Style)))
+      if (auto styleAttribute = styledElement->GetAttribute(dom::DOMStringAtom(u8"style")))
       {
         (void)styleDeclaration->ParseDeclaration(*styleAttribute, parserContext);
       }
@@ -2209,7 +2208,7 @@ namespace krys::boo
     if (didMutate)
     {
       (void)styledElement->SetAttribute(
-        dom::DOMStringAtom(Attributes::Style),
+        dom::DOMStringAtom(u8"style"),
         dom::DOMString(inlineStyle->AsTextAtom(css::DefaultSerialisationContext()).View()));
     }
 

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Events/SubmitEvent.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
 namespace krys::boo::html

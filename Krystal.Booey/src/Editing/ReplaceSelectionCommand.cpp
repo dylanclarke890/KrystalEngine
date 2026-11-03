@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/Editing/ReplaceSelectionCommand.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
@@ -42,8 +41,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasClass(const dom::Node &node, utf8_stringview className) noexcept
     {
       auto *element = DynamicDowncast<dom::Element>(node);
-      return element
-             && element->GetAttribute(dom::DOMStringAtom(Attributes::Class)) == dom::DOMString(className);
+      return element && element->GetAttribute(dom::DOMStringAtom(u8"class")) == dom::DOMString(className);
     }
 
     KRYS_NODISCARD bool IsInterchangeNewlineNode(const dom::Node &node) noexcept
@@ -248,8 +246,7 @@ namespace krys::boo
 
       // We can skip over elements whose class attribute is
       // one of our internal classes.
-      auto classAttribute =
-        element->GetAttribute(dom::DOMStringAtom(Attributes::Class)).value_or(dom::DOMString());
+      auto classAttribute = element->GetAttribute(dom::DOMStringAtom(u8"class")).value_or(dom::DOMString());
       utf8_stringview classAttributeValue = classAttribute;
       if (classAttributeValue == AppleTabSpanClass || classAttributeValue == AppleConvertedSpace
           || classAttributeValue == ApplePasteAsQuotation)
@@ -893,13 +890,13 @@ namespace krys::boo
           RemoveNodePreservingChildren(*element);
           continue;
         }
-        RemoveNodeAttribute(*element, dom::DOMStringAtom(Attributes::Style));
+        RemoveNodeAttribute(*element, dom::DOMStringAtom(u8"style"));
       }
       // FIXME: It seems wrong to rely only on the difference of properties set, and not on which properties
       // are set.
       else if (newInlineStyle->Style()->PropertyCount() != inlineStyle->PropertyCount())
       {
-        SetNodeAttribute(*element, dom::DOMStringAtom(Attributes::Style),
+        SetNodeAttribute(*element, dom::DOMStringAtom(u8"style"),
                          newInlineStyle->Style()->AsText(css::DefaultSerialisationContext()));
       }
 
@@ -1151,7 +1148,7 @@ namespace krys::boo
       // FIXME: This string comparison is a naive way of comparing two styles.
       // We should be taking the diff and check that the diff is empty.
       if (styleText
-          != wrappingStyleSpan.GetAttribute(dom::DOMStringAtom(Attributes::Style)).value_or(dom::DOMString()))
+          != wrappingStyleSpan.GetAttribute(dom::DOMStringAtom(u8"style")).value_or(dom::DOMString()))
       {
         return false;
       }
@@ -1229,7 +1226,7 @@ namespace krys::boo
     }
     else
     {
-      SetNodeAttribute(*wrappingStyleSpan, dom::DOMStringAtom(Attributes::Style),
+      SetNodeAttribute(*wrappingStyleSpan, dom::DOMStringAtom(u8"style"),
                        style->Style()->AsText(css::DefaultSerialisationContext()));
     }
   }
@@ -1803,7 +1800,7 @@ namespace krys::boo
     if (auto mailBlockquote = EnclosingNodeOfType(PositionAtStartOfInsertedContent().DeepEquivalent(),
                                                   IsMailPasteAsQuotationNode))
     {
-      RemoveNodeAttribute(Downcast<dom::Element>(*mailBlockquote), dom::DOMStringAtom(Attributes::Class));
+      RemoveNodeAttribute(Downcast<dom::Element>(*mailBlockquote), dom::DOMStringAtom(u8"class"));
     }
 
     if (ShouldPerformSmartReplace())

@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
@@ -119,7 +118,7 @@ namespace krys::boo::html
 
     // https://dom.spec.whatwg.org/#slot-name
     // 1. If element is a slot, localName is name, and namespace is null:
-    if (localName != Attributes::Name || namespaceURI != dom::DOMStringAtom::Null())
+    if (localName != u8"name" || namespaceURI != dom::DOMStringAtom::Null())
     {
       return;
     }

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Forms/ValidatedFormListedElement.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"

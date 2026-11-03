@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
@@ -52,13 +51,13 @@ namespace krys::boo::dom
 
         if (name.NamespaceURI() == DOMStringAtom::Null())
         {
-          if (name.LocalName().View() == Attributes::Class)
+          if (name.LocalName().View() == u8"class")
           {
             auto oldClasses = element.ClassNames();
             auto newClasses = element.ClassNamesForValue(newValue);
             _classInvalidation.emplace(element, oldClasses, newClasses);
           }
-          else if (name.LocalName().View() == Attributes::Id)
+          else if (name.LocalName().View() == u8"id")
           {
             DOMStringAtom oldId(element.IdForStyleResolution());
             auto newIdValue = newValue.value_or(DOMStringView());

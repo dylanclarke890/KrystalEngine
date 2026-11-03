@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"

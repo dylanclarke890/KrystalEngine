@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"

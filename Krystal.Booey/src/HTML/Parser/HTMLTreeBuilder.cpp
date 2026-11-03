@@ -358,13 +358,13 @@ namespace krys::boo::html
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == TagNames::HTML::br || token.Name() == TagNames::HTML::p)
+        if (token.Name() == u8"br" || token.Name() == u8"p")
         {
           InvalidTag();
           return;
         }
 
-        if (token.Name() == TagNames::HTML::script && Is<svg::SVGScriptElement>(CurrentNode()))
+        if (token.Name() == u8"script" && Is<svg::SVGScriptElement>(CurrentNode()))
         {
           ScriptTag();
           return;
@@ -616,7 +616,7 @@ namespace krys::boo::html
         auto &docTypeData = *token.DOCTYPEData();
 
         auto name = dom::DOMString(token.Name().View());
-        if (name != TagNames::HTML::html)
+        if (name != u8"html")
         {
           ParseError(token);
         }
@@ -701,7 +701,7 @@ namespace krys::boo::html
       }
       case HTMLTokenType::StartTag:
       {
-        if (token.Name() == TagNames::HTML::html)
+        if (token.Name() == u8"html")
         {
           auto html = CreateElement(token.Name(), infra::Namespaces::HTML, token.Attributes(), _document);
           _document.AppendChild(*html);
@@ -715,8 +715,8 @@ namespace krys::boo::html
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == TagNames::HTML::head || token.Name() == TagNames::HTML::body
-            || token.Name() == TagNames::HTML::html || token.Name() == TagNames::HTML::br)
+        if (token.Name() == u8"head" || token.Name() == u8"body" || token.Name() == u8"html"
+            || token.Name() == u8"br")
         {
           break;
         }
@@ -762,14 +762,14 @@ namespace krys::boo::html
       }
       case HTMLTokenType::StartTag:
       {
-        if (token.Name() == TagNames::HTML::html)
+        if (token.Name() == u8"html")
         {
           // Process the token using the rules for the "in body" insertion mode.
           InBodyMode(krys::move(token));
           return;
         }
 
-        if (token.Name() == TagNames::HTML::head)
+        if (token.Name() == u8"head")
         {
           _head = InsertHTMLElement(krys::move(token));
           _insertionMode = InsertionMode::InHead;
@@ -780,8 +780,8 @@ namespace krys::boo::html
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == TagNames::HTML::head || token.Name() == TagNames::HTML::body
-            || token.Name() == TagNames::HTML::html || token.Name() == TagNames::HTML::br)
+        if (token.Name() == u8"head" || token.Name() == u8"body" || token.Name() == u8"html"
+            || token.Name() == u8"br")
         {
           break;
         }
@@ -791,9 +791,9 @@ namespace krys::boo::html
       }
     }
 
-    _head = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), TagNames::HTML::head,
-                                    TagName::head, Namespace::HTML));
+    _head = dom::ElementFactory::Create(_document, dom::QualifiedName(infra::Namespaces::HTML,
+                                                                      dom::DOMStringAtom::Null(), u8"head",
+                                                                      TagName::head, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
 
@@ -1041,14 +1041,14 @@ namespace krys::boo::html
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == TagNames::HTML::noscript)
+        if (token.Name() == u8"noscript")
         {
           _openElementStack.Pop();
           _insertionMode = InsertionMode::InHead;
           return;
         }
 
-        if (token.Name() == TagNames::HTML::br)
+        if (token.Name() == u8"br")
         {
           break;
         }
@@ -1150,14 +1150,13 @@ namespace krys::boo::html
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == TagNames::HTML::template_)
+        if (token.Name() == u8"template")
         {
           InHeadMode(krys::move(token));
           return;
         }
 
-        if (token.Name() == TagNames::HTML::body || token.Name() == TagNames::HTML::html
-            || token.Name() == TagNames::HTML::br)
+        if (token.Name() == u8"body" || token.Name() == u8"html" || token.Name() == u8"br")
         {
           break;
         }
@@ -1168,7 +1167,7 @@ namespace krys::boo::html
     }
 
     auto body = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), TagNames::HTML::body,
+      _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"body",
                                     TagName::body, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
@@ -2040,8 +2039,8 @@ namespace krys::boo::html
             {
               ParseError(token);
               auto pElement = dom::ElementFactory::Create(
-                _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                              TagNames::HTML::p, TagName::p, Namespace::HTML));
+                _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"p",
+                                              TagName::p, Namespace::HTML));
               InsertElementAtAdjustedInsertionLocation(*pElement);
               _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
             }
@@ -2314,8 +2313,8 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableContext();
 
             auto colgroup = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                            TagNames::HTML::colgroup, TagName::colgroup, Namespace::HTML));
+              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"colgroup",
+                                            TagName::colgroup, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*colgroup);
             _openElementStack.Push({TagName::colgroup, Namespace::HTML, *colgroup, {}});
 
@@ -2341,8 +2340,8 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableContext();
 
             auto tbody = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                            TagNames::HTML::tbody, TagName::tbody, Namespace::HTML));
+              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"tbody",
+                                            TagName::tbody, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tbody);
             _openElementStack.Push({TagName::tbody, Namespace::HTML, *tbody, {}});
 
@@ -2749,8 +2748,8 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableBodyContext();
 
             auto tr = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                            TagNames::HTML::tr, TagName::tr, Namespace::HTML));
+              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"tr",
+                                            TagName::tr, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tr);
             _openElementStack.Push({TagName::tr, Namespace::HTML, *tr, {}});
 

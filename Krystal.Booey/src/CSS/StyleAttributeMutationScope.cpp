@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/StyleAttributeMutationScope.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
@@ -32,7 +31,7 @@ namespace krys::boo::css
     }
 
     bool shouldReadOldValue =
-      dom::MutationObserverAlgorithms::IsAttributeOldValueRequested(*_element, Attributes::Style);
+      dom::MutationObserverAlgorithms::IsAttributeOldValueRequested(*_element, u8"style");
 
     if (_element->IsDefinedCustomElement()) KRYS_UNLIKELY
     {
@@ -46,7 +45,7 @@ namespace krys::boo::css
 
     if (shouldReadOldValue)
     {
-      _oldValue = _element->GetAttribute(Attributes::Style);
+      _oldValue = _element->GetAttribute(u8"style");
     }
   }
 
@@ -66,15 +65,14 @@ namespace krys::boo::css
     }
 
     dom::MutationObserverAlgorithms::QueueMutationRecord(
-      dom::MutationRecordType::Attributes, _element, Attributes::Style, dom::DOMStringAtom::Null(),
+      dom::MutationRecordType::Attributes, _element, u8"style", dom::DOMStringAtom::Null(),
       _oldValue ? dom::DOMStringAtom(*_oldValue) : dom::DOMStringAtom::Null(), {}, {}, nullptr, nullptr);
 
     if (_isCustomElement)
     {
-      auto newValue = _element->GetAttribute(Attributes::Style);
+      auto newValue = _element->GetAttribute(u8"style");
       html::CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(
-        *_element,
-        dom::QualifiedName(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(), Attributes::Style),
+        *_element, dom::QualifiedName(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(), u8"style"),
         _oldValue ? dom::DOMStringAtom(*_oldValue) : dom::DOMStringAtom::Null(),
         newValue ? dom::DOMStringAtom(*newValue) : dom::DOMStringAtom::Null());
     }

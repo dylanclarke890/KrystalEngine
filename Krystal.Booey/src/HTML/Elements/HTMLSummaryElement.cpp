@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/SVG/SVGAElement.hpp"

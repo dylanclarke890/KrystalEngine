@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
@@ -1490,7 +1491,7 @@ namespace krys::boo::html
     init.OldState = stringForState(oldState);
     init.NewState = stringForState(newState);
     init.Source = ShareRefPtr<dom::Element>(source);
-    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(u8"beforetoggle"), init, cancelable);
+    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(EventNames::BeforeToggle), init, cancelable);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     return !event->DefaultPrevented();
   }

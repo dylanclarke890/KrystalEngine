@@ -1,7 +1,7 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/CompositionEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"

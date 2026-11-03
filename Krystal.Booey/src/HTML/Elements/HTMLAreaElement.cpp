@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"

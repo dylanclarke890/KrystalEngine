@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp"
-#include "Krystal.Booey/Constants/TagNames.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"

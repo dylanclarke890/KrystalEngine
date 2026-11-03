@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 

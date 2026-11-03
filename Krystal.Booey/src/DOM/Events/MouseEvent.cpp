@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 
 namespace krys::boo::html
 {

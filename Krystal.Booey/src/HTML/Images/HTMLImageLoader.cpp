@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Images/HTMLImageLoader.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
 namespace krys::boo::html

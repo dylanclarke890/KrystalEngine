@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
@@ -8,6 +7,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"

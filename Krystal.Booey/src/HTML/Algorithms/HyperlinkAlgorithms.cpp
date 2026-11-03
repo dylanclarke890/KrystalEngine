@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"

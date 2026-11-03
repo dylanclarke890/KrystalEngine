@@ -3,8 +3,6 @@
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
@@ -19,6 +17,7 @@
 #include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
@@ -2878,7 +2877,7 @@ namespace krys::boo::dom
     //    ID.
     // 2. Otherwise, if localName is id, namespace is null, then set element's ID to value.
     // The ID is read from the attribute (an empty one is no ID), so only the ID's observers need telling.
-    if (localName == Attributes::Id)
+    if (localName == u8"id")
     {
       if (oldValue != value && (IsConnected() || IsInShadowTree()))
       {
@@ -2893,7 +2892,7 @@ namespace krys::boo::dom
         }
       }
     }
-    else if (localName == Attributes::Class)
+    else if (localName == u8"class")
     {
       if (_domTokenList)
       {
@@ -2902,7 +2901,7 @@ namespace krys::boo::dom
     }
     // https://dom.spec.whatwg.org/#slotable-name
     // 1. If localName is slot and namespace is null:
-    else if (localName == Attributes::Slot)
+    else if (localName == u8"slot")
     {
       // 1a. If value is oldValue, then return.
       if (value == oldValue)
@@ -2942,7 +2941,7 @@ namespace krys::boo::dom
       // 1g. Run assign a slot for element.
       SlotAlgorithms::AssignSlot(*this);
     }
-    else if (localName == Attributes::Dir)
+    else if (localName == u8"dir")
     {
       TextDirectionStateChanged(*this, ParseTextDirectionState(value));
     }
@@ -3361,8 +3360,7 @@ namespace krys::boo::dom
     }
     for (auto *node = &root; node; node = TreeQueries::Next(*node, &root))
     {
-      if (auto *element = DynamicDowncast<Element>(*node);
-          element && element->GetAttribute(Attributes::Id) == id)
+      if (auto *element = DynamicDowncast<Element>(*node); element && element->GetAttribute(u8"id") == id)
       {
         return ShareRefPtr(element);
       }

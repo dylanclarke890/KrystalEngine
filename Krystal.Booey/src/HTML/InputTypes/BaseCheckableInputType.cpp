@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/BaseCheckableInputType.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"

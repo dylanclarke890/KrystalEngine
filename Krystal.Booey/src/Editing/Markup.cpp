@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/Editing/Markup.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/Core/UnicodeHelpers.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
@@ -578,7 +577,7 @@ namespace krys::boo
       }
       if (_shouldPreserveMSOList)
       {
-        auto style = element.GetAttribute(dom::DOMStringAtom(Attributes::Style)).value_or(dom::DOMString());
+        auto style = element.GetAttribute(dom::DOMStringAtom(u8"style")).value_or(dom::DOMString());
         utf8_stringview view(style);
         return view.starts_with(u8"mso-list:") || view.find(u8";mso-list:") != utf8_stringview::npos
                || view.find(u8"\nmso-list:") != utf8_stringview::npos;
@@ -625,7 +624,7 @@ namespace krys::boo
       {
         // We'll handle the style attribute separately, below.
         if (attribute->NamespaceURI().View().empty()
-            && attribute->LocalName() == dom::DOMStringAtom(Attributes::Style) && shouldOverrideStyleAttr)
+            && attribute->LocalName() == dom::DOMStringAtom(u8"style") && shouldOverrideStyleAttr)
         {
           continue;
         }
@@ -1685,8 +1684,7 @@ namespace krys::boo
     auto createHTMLBRElement = [&document]()
     {
       auto element = CreateHTMLElement(document, u8"br");
-      (void)element->SetAttribute(dom::DOMStringAtom(Attributes::Class),
-                                  dom::DOMString(AppleInterchangeNewline));
+      (void)element->SetAttribute(dom::DOMStringAtom(u8"class"), dom::DOMString(AppleInterchangeNewline));
       return element;
     };
 

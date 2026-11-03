@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 
 namespace krys::boo::dom

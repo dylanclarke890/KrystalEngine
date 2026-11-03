@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 
 namespace krys::boo::html

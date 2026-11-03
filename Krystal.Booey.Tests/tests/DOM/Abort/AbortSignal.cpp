@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortController.hpp"
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Types/Exception.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 

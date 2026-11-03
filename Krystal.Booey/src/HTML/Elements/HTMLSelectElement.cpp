@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 
 namespace krys::boo::dom::tests
 {

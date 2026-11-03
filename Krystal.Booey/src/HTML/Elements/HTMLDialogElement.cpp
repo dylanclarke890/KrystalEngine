@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
-#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -561,7 +561,7 @@ namespace krys::boo::html
     init.OldState = stringForState(oldState);
     init.NewState = stringForState(newState);
     init.Source = ShareRefPtr(source);
-    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(u8"beforetoggle"), init, cancelable);
+    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(EventNames::BeforeToggle), init, cancelable);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     return !event->DefaultPrevented();
   }

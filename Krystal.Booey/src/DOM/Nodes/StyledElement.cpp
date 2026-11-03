@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
@@ -44,8 +43,7 @@ namespace krys::boo::dom
     ClearNodeFlag(NodeFlags::StyleAttributeIsDirty);
     if (const auto *inlineStyle = InlineStyle())
     {
-      SetSynchronizedLazyAttribute(Attributes::Style,
-                                   inlineStyle->AsText(css::DefaultSerialisationContext()));
+      SetSynchronizedLazyAttribute(u8"style", inlineStyle->AsText(css::DefaultSerialisationContext()));
     }
   }
 
@@ -55,11 +53,11 @@ namespace krys::boo::dom
     {
       ClearNodeFlag(NodeFlags::StyleAttributeIsDirty);
       auto newValue = inlineStyle->AsText(css::DefaultSerialisationContext());
-      auto oldValue = GetAttribute(Attributes::Style);
+      auto oldValue = GetAttribute(u8"style");
       style::AttributeChangeInvalidation styleInvalidation(
-        *this, QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), DOMStringAtom(Attributes::Style)},
+        *this, QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), DOMStringAtom(u8"style")},
         oldValue ? Maybe<DOMStringView>(*oldValue) : null, newValue);
-      SetSynchronizedLazyAttribute(Attributes::Style, krys::move(newValue));
+      SetSynchronizedLazyAttribute(u8"style", krys::move(newValue));
     }
   }
 
@@ -87,7 +85,7 @@ namespace krys::boo::dom
     Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (oldValue != value)
     {
-      if (localName == Attributes::Style && namespaceURI == DOMStringAtom::Null())
+      if (localName == u8"style" && namespaceURI == DOMStringAtom::Null())
       {
         StyleAttributeChanged(value);
       }

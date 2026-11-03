@@ -282,12 +282,6 @@ set(KRYSTAL_BOOEY_ANIMATION_SOURCES
   src/Animation/WebAnimationUtilities.cpp
 )
 
-set(KRYSTAL_BOOEY_CONSTANTS_HEADERS
-  include/Krystal.Booey/Constants/Attributes.hpp
-  include/Krystal.Booey/Constants/EventNames.hpp
-  include/Krystal.Booey/Constants/TagNames.hpp
-)
-
 set(KRYSTAL_BOOEY_CORE_HEADERS
   include/Krystal.Booey/Core/BidiContext.hpp
   include/Krystal.Booey/Core/BidiResolver.hpp
@@ -1069,6 +1063,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/Event.hpp
   include/Krystal.Booey/DOM/Events/EventListener.hpp
   include/Krystal.Booey/DOM/Events/EventListenerHandle.hpp
+  include/Krystal.Booey/DOM/Events/EventNames.hpp
   include/Krystal.Booey/DOM/Events/EventPathItem.hpp
   include/Krystal.Booey/DOM/Events/EventSender.hpp
   include/Krystal.Booey/DOM/Events/EventTarget.hpp
@@ -4372,7 +4367,6 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_GENERATED_HEADERS}
       ${KRYSTAL_BOOEY_BUNDLED_FONTS_HEADERS}
       ${KRYSTAL_BOOEY_ANIMATION_HEADERS}
-      ${KRYSTAL_BOOEY_CONSTANTS_HEADERS}
       ${KRYSTAL_BOOEY_CORE_HEADERS}
       ${KRYSTAL_BOOEY_CSS_HEADERS}
       ${KRYSTAL_BOOEY_DOM_HEADERS}

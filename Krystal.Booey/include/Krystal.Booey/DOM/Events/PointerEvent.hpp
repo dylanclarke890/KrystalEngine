@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEventTypeNames.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
