@@ -536,23 +536,15 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Rules/Rule.hpp
   include/Krystal.Booey/CSS/Rules/RuleType.hpp
   include/Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp
-  include/Krystal.Booey/CSS/Selectors/Enums/SelectorMatch.hpp
-  include/Krystal.Booey/CSS/Selectors/Enums/SelectorPagePseudoClass.hpp
-  include/Krystal.Booey/CSS/Selectors/Enums/SelectorRelation.hpp
   include/Krystal.Booey/CSS/Selectors/MutableSelector.hpp
   include/Krystal.Booey/CSS/Selectors/Selector.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorChecker.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorFilter.hpp
-  include/Krystal.Booey/CSS/Selectors/SelectorFlag.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorList.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorParser.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp
-  include/Krystal.Booey/CSS/Selectors/Types/DisallowPseudoElements.hpp
-  include/Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp
-  include/Krystal.Booey/CSS/Selectors/Types/IsForgivingSelectorList.hpp
-  include/Krystal.Booey/CSS/Selectors/Types/MatchLowercase.hpp
   include/Krystal.Booey/CSS/StyleAttributeMutationScope.hpp
   include/Krystal.Booey/CSS/StyleSheet.hpp
   include/Krystal.Booey/CSS/StyleSheetContents.hpp

@@ -1,8 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp"
-#include "Krystal.Booey/CSS/Selectors/Types/MatchLowercase.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
