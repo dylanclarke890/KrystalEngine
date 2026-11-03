@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
 #include "Krystal.Booey/SVG/SVGTests.hpp"
 #include "Krystal.Core/Macros.hpp"

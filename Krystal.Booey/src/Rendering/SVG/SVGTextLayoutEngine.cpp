@@ -5,10 +5,10 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutEngineBaseline.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutEngineSpacing.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGGeometryElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGTextContentElement.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 
 namespace krys::boo

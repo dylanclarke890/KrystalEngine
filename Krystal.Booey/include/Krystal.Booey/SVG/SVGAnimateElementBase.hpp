@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/SVG/SVGAnimationElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGAnimationElement.hpp"
 
 namespace krys::boo::svg
 {

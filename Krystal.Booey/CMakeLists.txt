@@ -2481,43 +2481,42 @@ set(KRYSTAL_BOOEY_LOADER_SOURCES
 )
 
 set(KRYSTAL_BOOEY_MATHML_HEADERS
-  include/Krystal.Booey/MathML/Enums/MathMLElementInterface.hpp
   include/Krystal.Booey/MathML/Internals/MathMLElementFactory.hpp
-  include/Krystal.Booey/MathML/MathMLElement.hpp
-  include/Krystal.Booey/MathML/MathMLFractionElement.hpp
-  include/Krystal.Booey/MathML/MathMLMathElement.hpp
-  include/Krystal.Booey/MathML/MathMLMencloseElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLFractionElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLMathElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLMencloseElement.hpp
   include/Krystal.Booey/MathML/MathMLNames.hpp
   include/Krystal.Booey/MathML/MathMLOperatorDictionary.hpp
-  include/Krystal.Booey/MathML/MathMLOperatorElement.hpp
-  include/Krystal.Booey/MathML/MathMLPaddedElement.hpp
-  include/Krystal.Booey/MathML/MathMLPresentationElement.hpp
-  include/Krystal.Booey/MathML/MathMLRootElement.hpp
-  include/Krystal.Booey/MathML/MathMLRowElement.hpp
-  include/Krystal.Booey/MathML/MathMLScriptsElement.hpp
-  include/Krystal.Booey/MathML/MathMLSpaceElement.hpp
-  include/Krystal.Booey/MathML/MathMLTokenElement.hpp
-  include/Krystal.Booey/MathML/MathMLUnderOverElement.hpp
-  include/Krystal.Booey/MathML/MathMLUnknownElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLOperatorElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLPaddedElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLPresentationElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLRootElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLRowElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLScriptsElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLSpaceElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLTokenElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLUnderOverElement.hpp
+  include/Krystal.Booey/MathML/Elements/MathMLUnknownElement.hpp
 )
 
 set(KRYSTAL_BOOEY_MATHML_SOURCES
   src/MathML/Internals/MathMLElementFactory.cpp
-  src/MathML/MathMLElement.cpp
-  src/MathML/MathMLFractionElement.cpp
-  src/MathML/MathMLMathElement.cpp
-  src/MathML/MathMLMencloseElement.cpp
+  src/MathML/Elements/MathMLElement.cpp
+  src/MathML/Elements/MathMLFractionElement.cpp
+  src/MathML/Elements/MathMLMathElement.cpp
+  src/MathML/Elements/MathMLMencloseElement.cpp
   src/MathML/MathMLNames.cpp
   src/MathML/MathMLOperatorDictionary.cpp
-  src/MathML/MathMLOperatorElement.cpp
-  src/MathML/MathMLPaddedElement.cpp
-  src/MathML/MathMLPresentationElement.cpp
-  src/MathML/MathMLRootElement.cpp
-  src/MathML/MathMLRowElement.cpp
-  src/MathML/MathMLScriptsElement.cpp
-  src/MathML/MathMLSpaceElement.cpp
-  src/MathML/MathMLTokenElement.cpp
-  src/MathML/MathMLUnderOverElement.cpp
+  src/MathML/Elements/MathMLOperatorElement.cpp
+  src/MathML/Elements/MathMLPaddedElement.cpp
+  src/MathML/Elements/MathMLPresentationElement.cpp
+  src/MathML/Elements/MathMLRootElement.cpp
+  src/MathML/Elements/MathMLRowElement.cpp
+  src/MathML/Elements/MathMLScriptsElement.cpp
+  src/MathML/Elements/MathMLSpaceElement.cpp
+  src/MathML/Elements/MathMLTokenElement.cpp
+  src/MathML/Elements/MathMLUnderOverElement.cpp
 )
 
 set(KRYSTAL_BOOEY_MODULES_HEADERS
@@ -3954,8 +3953,6 @@ set(KRYSTAL_BOOEY_SVG_HEADERS
   include/Krystal.Booey/SVG/Animation/SMILTime.hpp
   include/Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp
   include/Krystal.Booey/SVG/Animation/SVGSMILElement.hpp
-  include/Krystal.Booey/SVG/Enums/SVGElementFlags.hpp
-  include/Krystal.Booey/SVG/Enums/SVGElementInterface.hpp
   include/Krystal.Booey/SVG/GradientAttributes.hpp
   include/Krystal.Booey/SVG/Graphics/Filters/SVGFilterEffectGraph.hpp
   include/Krystal.Booey/SVG/Graphics/Filters/SVGFilterExpression.hpp
@@ -4036,116 +4033,116 @@ set(KRYSTAL_BOOEY_SVG_HEADERS
   include/Krystal.Booey/SVG/Properties/SVGValuePropertyListAnimator.hpp
   include/Krystal.Booey/SVG/Properties/SVGValuePropertyListAnimatorImpl.hpp
   include/Krystal.Booey/SVG/RadialGradientAttributes.hpp
-  include/Krystal.Booey/SVG/SVGAElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGAElement.hpp
   include/Krystal.Booey/SVG/SVGAngle.hpp
   include/Krystal.Booey/SVG/SVGAngleValue.hpp
-  include/Krystal.Booey/SVG/SVGAnimateElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGAnimateElement.hpp
   include/Krystal.Booey/SVG/SVGAnimateElementBase.hpp
-  include/Krystal.Booey/SVG/SVGAnimateMotionElement.hpp
-  include/Krystal.Booey/SVG/SVGAnimateTransformElement.hpp
-  include/Krystal.Booey/SVG/SVGAnimationElement.hpp
-  include/Krystal.Booey/SVG/SVGCircleElement.hpp
-  include/Krystal.Booey/SVG/SVGClipPathElement.hpp
-  include/Krystal.Booey/SVG/SVGComponentTransferFunctionElement.hpp
-  include/Krystal.Booey/SVG/SVGDefsElement.hpp
-  include/Krystal.Booey/SVG/SVGDescElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGAnimateMotionElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGAnimateTransformElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGAnimationElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGCircleElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGClipPathElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGComponentTransferFunctionElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGDefsElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGDescElement.hpp
   include/Krystal.Booey/SVG/SVGDocument.hpp
   include/Krystal.Booey/SVG/SVGDocumentExtensions.hpp
-  include/Krystal.Booey/SVG/SVGElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGElement.hpp
   include/Krystal.Booey/SVG/SVGElementRareData.hpp
-  include/Krystal.Booey/SVG/SVGEllipseElement.hpp
-  include/Krystal.Booey/SVG/SVGFEBlendElement.hpp
-  include/Krystal.Booey/SVG/SVGFEColorMatrixElement.hpp
-  include/Krystal.Booey/SVG/SVGFEComponentTransferElement.hpp
-  include/Krystal.Booey/SVG/SVGFECompositeElement.hpp
-  include/Krystal.Booey/SVG/SVGFEConvolveMatrixElement.hpp
-  include/Krystal.Booey/SVG/SVGFEDiffuseLightingElement.hpp
-  include/Krystal.Booey/SVG/SVGFEDisplacementMapElement.hpp
-  include/Krystal.Booey/SVG/SVGFEDistantLightElement.hpp
-  include/Krystal.Booey/SVG/SVGFEDropShadowElement.hpp
-  include/Krystal.Booey/SVG/SVGFEFloodElement.hpp
-  include/Krystal.Booey/SVG/SVGFEFuncAElement.hpp
-  include/Krystal.Booey/SVG/SVGFEFuncBElement.hpp
-  include/Krystal.Booey/SVG/SVGFEFuncGElement.hpp
-  include/Krystal.Booey/SVG/SVGFEFuncRElement.hpp
-  include/Krystal.Booey/SVG/SVGFEGaussianBlurElement.hpp
-  include/Krystal.Booey/SVG/SVGFEImageElement.hpp
-  include/Krystal.Booey/SVG/SVGFELightElement.hpp
-  include/Krystal.Booey/SVG/SVGFEMergeElement.hpp
-  include/Krystal.Booey/SVG/SVGFEMergeNodeElement.hpp
-  include/Krystal.Booey/SVG/SVGFEMorphologyElement.hpp
-  include/Krystal.Booey/SVG/SVGFEOffsetElement.hpp
-  include/Krystal.Booey/SVG/SVGFEPointLightElement.hpp
-  include/Krystal.Booey/SVG/SVGFESpecularLightingElement.hpp
-  include/Krystal.Booey/SVG/SVGFESpotLightElement.hpp
-  include/Krystal.Booey/SVG/SVGFETileElement.hpp
-  include/Krystal.Booey/SVG/SVGFETurbulenceElement.hpp
-  include/Krystal.Booey/SVG/SVGFilterElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGEllipseElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEBlendElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEColorMatrixElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEComponentTransferElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFECompositeElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEConvolveMatrixElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEDiffuseLightingElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEDisplacementMapElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEDistantLightElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEDropShadowElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEFloodElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEFuncAElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEFuncBElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEFuncGElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEFuncRElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEGaussianBlurElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEImageElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFELightElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEMergeElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEMergeNodeElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEMorphologyElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEOffsetElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFEPointLightElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFESpecularLightingElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFESpotLightElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFETileElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFETurbulenceElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGFilterElement.hpp
   include/Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp
   include/Krystal.Booey/SVG/SVGFitToViewBox.hpp
-  include/Krystal.Booey/SVG/SVGForeignObjectElement.hpp
-  include/Krystal.Booey/SVG/SVGGElement.hpp
-  include/Krystal.Booey/SVG/SVGGeometryElement.hpp
-  include/Krystal.Booey/SVG/SVGGradientElement.hpp
-  include/Krystal.Booey/SVG/SVGGraphicsElement.hpp
-  include/Krystal.Booey/SVG/SVGImageElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGForeignObjectElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGGElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGGradientElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGImageElement.hpp
   include/Krystal.Booey/SVG/SVGImageLoader.hpp
   include/Krystal.Booey/SVG/SVGLength.hpp
   include/Krystal.Booey/SVG/SVGLengthContext.hpp
   include/Krystal.Booey/SVG/SVGLengthList.hpp
   include/Krystal.Booey/SVG/SVGLengthValue.hpp
-  include/Krystal.Booey/SVG/SVGLinearGradientElement.hpp
-  include/Krystal.Booey/SVG/SVGLineElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGLinearGradientElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGLineElement.hpp
   include/Krystal.Booey/SVG/SVGLocatable.hpp
-  include/Krystal.Booey/SVG/SVGMarkerElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGMarkerElement.hpp
   include/Krystal.Booey/SVG/SVGMarkerTypes.hpp
-  include/Krystal.Booey/SVG/SVGMaskElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGMaskElement.hpp
   include/Krystal.Booey/SVG/SVGMatrix.hpp
-  include/Krystal.Booey/SVG/SVGMetadataElement.hpp
-  include/Krystal.Booey/SVG/SVGMPathElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGMetadataElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGMPathElement.hpp
   include/Krystal.Booey/SVG/SVGNames.hpp
   include/Krystal.Booey/SVG/SVGNumber.hpp
   include/Krystal.Booey/SVG/SVGNumberList.hpp
   include/Krystal.Booey/SVG/SVGParsingError.hpp
-  include/Krystal.Booey/SVG/SVGPathElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGPathElement.hpp
   include/Krystal.Booey/SVG/SVGPathSegList.hpp
-  include/Krystal.Booey/SVG/SVGPatternElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGPatternElement.hpp
   include/Krystal.Booey/SVG/SVGPoint.hpp
   include/Krystal.Booey/SVG/SVGPointList.hpp
-  include/Krystal.Booey/SVG/SVGPolyElement.hpp
-  include/Krystal.Booey/SVG/SVGPolygonElement.hpp
-  include/Krystal.Booey/SVG/SVGPolylineElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGPolyElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGPolygonElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGPolylineElement.hpp
   include/Krystal.Booey/SVG/SVGPreserveAspectRatio.hpp
   include/Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp
-  include/Krystal.Booey/SVG/SVGRadialGradientElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGRadialGradientElement.hpp
   include/Krystal.Booey/SVG/SVGRect.hpp
-  include/Krystal.Booey/SVG/SVGRectElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGRectElement.hpp
   include/Krystal.Booey/SVG/SVGResourceElementClient.hpp
-  include/Krystal.Booey/SVG/SVGScriptElement.hpp
-  include/Krystal.Booey/SVG/SVGSetElement.hpp
-  include/Krystal.Booey/SVG/SVGStopElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGScriptElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGSetElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGStopElement.hpp
   include/Krystal.Booey/SVG/SVGStringList.hpp
-  include/Krystal.Booey/SVG/SVGStyleElement.hpp
-  include/Krystal.Booey/SVG/SVGSvgElement.hpp
-  include/Krystal.Booey/SVG/SVGSwitchElement.hpp
-  include/Krystal.Booey/SVG/SVGSymbolElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGStyleElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGSvgElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGSwitchElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGSymbolElement.hpp
   include/Krystal.Booey/SVG/SVGTests.hpp
-  include/Krystal.Booey/SVG/SVGTextContentElement.hpp
-  include/Krystal.Booey/SVG/SVGTextElement.hpp
-  include/Krystal.Booey/SVG/SVGTextPathElement.hpp
-  include/Krystal.Booey/SVG/SVGTextPositioningElement.hpp
-  include/Krystal.Booey/SVG/SVGTitleElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGTextElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGTextPositioningElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGTitleElement.hpp
   include/Krystal.Booey/SVG/SVGTransform.hpp
   include/Krystal.Booey/SVG/SVGTransformable.hpp
   include/Krystal.Booey/SVG/SVGTransformDistance.hpp
   include/Krystal.Booey/SVG/SVGTransformList.hpp
   include/Krystal.Booey/SVG/SVGTransformValue.hpp
-  include/Krystal.Booey/SVG/SVGTSpanElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGTSpanElement.hpp
   include/Krystal.Booey/SVG/SVGUnitTypes.hpp
-  include/Krystal.Booey/SVG/SVGUnknownElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGUnknownElement.hpp
   include/Krystal.Booey/SVG/SVGURIReference.hpp
-  include/Krystal.Booey/SVG/SVGUseElement.hpp
-  include/Krystal.Booey/SVG/SVGViewElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGUseElement.hpp
+  include/Krystal.Booey/SVG/Elements/SVGViewElement.hpp
   include/Krystal.Booey/SVG/SVGViewSpec.hpp
   include/Krystal.Booey/SVG/SVGZoomAndPan.hpp
   include/Krystal.Booey/SVG/SVGZoomAndPanType.hpp
@@ -4177,96 +4174,96 @@ set(KRYSTAL_BOOEY_SVG_SOURCES
   src/SVG/Properties/SVGAnimationAdditiveValueFunctionImpl.cpp
   src/SVG/Properties/SVGAttributeAnimator.cpp
   src/SVG/Properties/SVGPropertyTraits.cpp
-  src/SVG/SVGAElement.cpp
+  src/SVG/Elements/SVGAElement.cpp
   src/SVG/SVGAngleValue.cpp
   src/SVG/SVGAnimateElementBase.cpp
-  src/SVG/SVGAnimateMotionElement.cpp
-  src/SVG/SVGAnimateTransformElement.cpp
-  src/SVG/SVGAnimationElement.cpp
-  src/SVG/SVGCircleElement.cpp
-  src/SVG/SVGClipPathElement.cpp
-  src/SVG/SVGComponentTransferFunctionElement.cpp
-  src/SVG/SVGDefsElement.cpp
-  src/SVG/SVGDescElement.cpp
+  src/SVG/Elements/SVGAnimateMotionElement.cpp
+  src/SVG/Elements/SVGAnimateTransformElement.cpp
+  src/SVG/Elements/SVGAnimationElement.cpp
+  src/SVG/Elements/SVGCircleElement.cpp
+  src/SVG/Elements/SVGClipPathElement.cpp
+  src/SVG/Elements/SVGComponentTransferFunctionElement.cpp
+  src/SVG/Elements/SVGDefsElement.cpp
+  src/SVG/Elements/SVGDescElement.cpp
   src/SVG/SVGDocumentExtensions.cpp
-  src/SVG/SVGElement.cpp
-  src/SVG/SVGEllipseElement.cpp
-  src/SVG/SVGFEBlendElement.cpp
-  src/SVG/SVGFEColorMatrixElement.cpp
-  src/SVG/SVGFEComponentTransferElement.cpp
-  src/SVG/SVGFECompositeElement.cpp
-  src/SVG/SVGFEConvolveMatrixElement.cpp
-  src/SVG/SVGFEDiffuseLightingElement.cpp
-  src/SVG/SVGFEDisplacementMapElement.cpp
-  src/SVG/SVGFEDistantLightElement.cpp
-  src/SVG/SVGFEDropShadowElement.cpp
-  src/SVG/SVGFEFloodElement.cpp
-  src/SVG/SVGFEGaussianBlurElement.cpp
-  src/SVG/SVGFEImageElement.cpp
-  src/SVG/SVGFELightElement.cpp
-  src/SVG/SVGFEMergeElement.cpp
-  src/SVG/SVGFEMergeNodeElement.cpp
-  src/SVG/SVGFEMorphologyElement.cpp
-  src/SVG/SVGFEOffsetElement.cpp
-  src/SVG/SVGFEPointLightElement.cpp
-  src/SVG/SVGFESpecularLightingElement.cpp
-  src/SVG/SVGFESpotLightElement.cpp
-  src/SVG/SVGFETileElement.cpp
-  src/SVG/SVGFETurbulenceElement.cpp
-  src/SVG/SVGFilterElement.cpp
+  src/SVG/Elements/SVGElement.cpp
+  src/SVG/Elements/SVGEllipseElement.cpp
+  src/SVG/Elements/SVGFEBlendElement.cpp
+  src/SVG/Elements/SVGFEColorMatrixElement.cpp
+  src/SVG/Elements/SVGFEComponentTransferElement.cpp
+  src/SVG/Elements/SVGFECompositeElement.cpp
+  src/SVG/Elements/SVGFEConvolveMatrixElement.cpp
+  src/SVG/Elements/SVGFEDiffuseLightingElement.cpp
+  src/SVG/Elements/SVGFEDisplacementMapElement.cpp
+  src/SVG/Elements/SVGFEDistantLightElement.cpp
+  src/SVG/Elements/SVGFEDropShadowElement.cpp
+  src/SVG/Elements/SVGFEFloodElement.cpp
+  src/SVG/Elements/SVGFEGaussianBlurElement.cpp
+  src/SVG/Elements/SVGFEImageElement.cpp
+  src/SVG/Elements/SVGFELightElement.cpp
+  src/SVG/Elements/SVGFEMergeElement.cpp
+  src/SVG/Elements/SVGFEMergeNodeElement.cpp
+  src/SVG/Elements/SVGFEMorphologyElement.cpp
+  src/SVG/Elements/SVGFEOffsetElement.cpp
+  src/SVG/Elements/SVGFEPointLightElement.cpp
+  src/SVG/Elements/SVGFESpecularLightingElement.cpp
+  src/SVG/Elements/SVGFESpotLightElement.cpp
+  src/SVG/Elements/SVGFETileElement.cpp
+  src/SVG/Elements/SVGFETurbulenceElement.cpp
+  src/SVG/Elements/SVGFilterElement.cpp
   src/SVG/SVGFilterPrimitiveStandardAttributes.cpp
   src/SVG/SVGFitToViewBox.cpp
-  src/SVG/SVGForeignObjectElement.cpp
-  src/SVG/SVGGElement.cpp
-  src/SVG/SVGGeometryElement.cpp
-  src/SVG/SVGGradientElement.cpp
-  src/SVG/SVGGraphicsElement.cpp
-  src/SVG/SVGImageElement.cpp
+  src/SVG/Elements/SVGForeignObjectElement.cpp
+  src/SVG/Elements/SVGGElement.cpp
+  src/SVG/Elements/SVGGeometryElement.cpp
+  src/SVG/Elements/SVGGradientElement.cpp
+  src/SVG/Elements/SVGGraphicsElement.cpp
+  src/SVG/Elements/SVGImageElement.cpp
   src/SVG/SVGImageLoader.cpp
   src/SVG/SVGLength.cpp
   src/SVG/SVGLengthContext.cpp
   src/SVG/SVGLengthList.cpp
   src/SVG/SVGLengthValue.cpp
-  src/SVG/SVGLinearGradientElement.cpp
-  src/SVG/SVGLineElement.cpp
+  src/SVG/Elements/SVGLinearGradientElement.cpp
+  src/SVG/Elements/SVGLineElement.cpp
   src/SVG/SVGLocatable.cpp
-  src/SVG/SVGMarkerElement.cpp
-  src/SVG/SVGMaskElement.cpp
-  src/SVG/SVGMetadataElement.cpp
-  src/SVG/SVGMPathElement.cpp
+  src/SVG/Elements/SVGMarkerElement.cpp
+  src/SVG/Elements/SVGMaskElement.cpp
+  src/SVG/Elements/SVGMetadataElement.cpp
+  src/SVG/Elements/SVGMPathElement.cpp
   src/SVG/SVGNames.cpp
   src/SVG/SVGNumberList.cpp
-  src/SVG/SVGPathElement.cpp
-  src/SVG/SVGPatternElement.cpp
+  src/SVG/Elements/SVGPathElement.cpp
+  src/SVG/Elements/SVGPatternElement.cpp
   src/SVG/SVGPointList.cpp
-  src/SVG/SVGPolyElement.cpp
-  src/SVG/SVGPolygonElement.cpp
-  src/SVG/SVGPolylineElement.cpp
+  src/SVG/Elements/SVGPolyElement.cpp
+  src/SVG/Elements/SVGPolygonElement.cpp
+  src/SVG/Elements/SVGPolylineElement.cpp
   src/SVG/SVGPreserveAspectRatioValue.cpp
-  src/SVG/SVGRadialGradientElement.cpp
-  src/SVG/SVGRectElement.cpp
-  src/SVG/SVGScriptElement.cpp
-  src/SVG/SVGStopElement.cpp
+  src/SVG/Elements/SVGRadialGradientElement.cpp
+  src/SVG/Elements/SVGRectElement.cpp
+  src/SVG/Elements/SVGScriptElement.cpp
+  src/SVG/Elements/SVGStopElement.cpp
   src/SVG/SVGStringList.cpp
-  src/SVG/SVGStyleElement.cpp
-  src/SVG/SVGSvgElement.cpp
-  src/SVG/SVGSwitchElement.cpp
-  src/SVG/SVGSymbolElement.cpp
+  src/SVG/Elements/SVGStyleElement.cpp
+  src/SVG/Elements/SVGSvgElement.cpp
+  src/SVG/Elements/SVGSwitchElement.cpp
+  src/SVG/Elements/SVGSymbolElement.cpp
   src/SVG/SVGTests.cpp
-  src/SVG/SVGTextContentElement.cpp
-  src/SVG/SVGTextElement.cpp
-  src/SVG/SVGTextPathElement.cpp
-  src/SVG/SVGTextPositioningElement.cpp
-  src/SVG/SVGTitleElement.cpp
+  src/SVG/Elements/SVGTextContentElement.cpp
+  src/SVG/Elements/SVGTextElement.cpp
+  src/SVG/Elements/SVGTextPathElement.cpp
+  src/SVG/Elements/SVGTextPositioningElement.cpp
+  src/SVG/Elements/SVGTitleElement.cpp
   src/SVG/SVGTransformable.cpp
   src/SVG/SVGTransformDistance.cpp
   src/SVG/SVGTransformList.cpp
   src/SVG/SVGTransformValue.cpp
-  src/SVG/SVGTSpanElement.cpp
-  src/SVG/SVGUnknownElement.cpp
+  src/SVG/Elements/SVGTSpanElement.cpp
+  src/SVG/Elements/SVGUnknownElement.cpp
   src/SVG/SVGURIReference.cpp
-  src/SVG/SVGUseElement.cpp
-  src/SVG/SVGViewElement.cpp
+  src/SVG/Elements/SVGUseElement.cpp
+  src/SVG/Elements/SVGViewElement.cpp
   src/SVG/SVGViewSpec.cpp
   src/SVG/SVGZoomAndPan.cpp
 )

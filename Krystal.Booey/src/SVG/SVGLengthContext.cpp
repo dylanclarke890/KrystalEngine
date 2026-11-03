@@ -17,8 +17,8 @@
 #include "Krystal.Booey/Style/Values/SVG/SVGStrokeDasharray.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGStrokeDashoffset.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include <cmath>
 #include <numbers>

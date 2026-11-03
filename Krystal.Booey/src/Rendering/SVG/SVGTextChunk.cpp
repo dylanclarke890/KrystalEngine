@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGTextChunk.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGTextContentElement.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include <algorithm>
 #include <ranges>

@@ -9,7 +9,7 @@
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
-#include "Krystal.Booey/SVG/SVGImageElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Core/Text/Base64.hpp"
 #include "Krystal.UI.Tests/RepaintFixture.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"

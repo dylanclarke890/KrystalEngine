@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/MathML/MathMLElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Core/Attributes.hpp"

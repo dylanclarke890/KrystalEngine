@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEOffset.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
-#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

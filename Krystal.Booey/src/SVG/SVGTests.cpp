@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/SVGTests.hpp"
 #include "Krystal.Booey/Core/PlatformLocale.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGStringList.hpp"
 

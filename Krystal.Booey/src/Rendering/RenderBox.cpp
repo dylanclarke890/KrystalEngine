@@ -59,7 +59,7 @@
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
-#include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGClipPathElement.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <cmath>
 

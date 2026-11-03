@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceRadialGradient.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGRadialGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGRadialGradientElement.hpp"
 
 namespace krys::boo
 {

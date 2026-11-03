@@ -25,8 +25,8 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
-#include "Krystal.Booey/SVG/SVGGeometryElement.hpp"
-#include "Krystal.Booey/SVG/SVGGraphicsElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 
 namespace krys::boo

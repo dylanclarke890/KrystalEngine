@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
-#include "Krystal.Booey/SVG/SVGAElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGAElement.hpp"
 
 namespace krys::boo::html
 {

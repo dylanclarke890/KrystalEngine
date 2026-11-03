@@ -12,9 +12,9 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
-#include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGClipPathElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Booey/SVG/SVGUseElement.hpp"
 
 namespace krys::boo
 {

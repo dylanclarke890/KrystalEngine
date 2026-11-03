@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
-#include "Krystal.Booey/MathML/MathMLTokenElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLTokenElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::tests

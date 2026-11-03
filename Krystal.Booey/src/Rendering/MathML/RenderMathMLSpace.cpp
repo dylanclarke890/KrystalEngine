@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLSpace.hpp"
-#include "Krystal.Booey/MathML/MathMLSpaceElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLSpaceElement.hpp"
 #include <algorithm>
 
 namespace krys::boo

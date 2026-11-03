@@ -14,9 +14,9 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGForeignObjectElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageClients.hpp"
-#include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 
 namespace krys::boo::svg
 {

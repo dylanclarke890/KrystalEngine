@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/SVGViewSpec.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
 #include "Krystal.Core/Text/ParsingUtilities.hpp"

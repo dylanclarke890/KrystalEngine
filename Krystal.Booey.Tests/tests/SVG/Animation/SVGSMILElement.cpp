@@ -3,9 +3,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/SVG/AnimationTestUtils.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
-#include "Krystal.Booey/SVG/SVGAnimationElement.hpp"
-#include "Krystal.Booey/SVG/SVGRectElement.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGAnimationElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGRectElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::svg::tests

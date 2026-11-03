@@ -3,8 +3,8 @@
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGMaskElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGMaskElement.hpp"
 
 namespace krys::boo
 {

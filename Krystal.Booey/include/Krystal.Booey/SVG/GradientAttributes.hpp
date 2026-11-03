@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Graphics/GradientColorStops.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/SVG/SVGGradientElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 
 namespace krys::boo::svg

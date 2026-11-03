@@ -14,7 +14,7 @@
 #include "Krystal.Booey/Style/MatchResult.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
 namespace krys::boo::style::tests
 {

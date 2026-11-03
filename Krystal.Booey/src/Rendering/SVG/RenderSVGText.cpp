@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutEngine.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGTextElement.hpp"
-#include "Krystal.Booey/SVG/SVGTextPathElement.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include <algorithm>
 #include <tuple>

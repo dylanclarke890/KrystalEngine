@@ -10,10 +10,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLPreElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/MathML/MathMLElement.hpp"
-#include "Krystal.Booey/MathML/MathMLUnknownElement.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGUnknownElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLUnknownElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGUnknownElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::dom::tests

@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
-#include "Krystal.Booey/SVG/SVGStyleElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGStyleElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include <algorithm>

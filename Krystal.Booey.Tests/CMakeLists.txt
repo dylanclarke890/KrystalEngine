@@ -726,7 +726,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/MicroParsers/Dimensions.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/Internals/PresentationalHints.cpp
-		tests/MathML/MathMLElement.cpp
+		tests/MathML/Elements/MathMLElement.cpp
 		tests/Graphics/OpenType/OpenTypeMathData.cpp
 		tests/Rendering/MathML/MathVariant.cpp
 		tests/Rendering/MathML/RenderMathMLBlock.cpp
@@ -741,8 +741,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/MathML/RenderMathMLToken.cpp
 		tests/Rendering/MathML/RenderMathMLUnderOver.cpp
 		tests/MathML/Internals/MathMLElementFactory.cpp
-		tests/MathML/MathMLOperatorElement.cpp
-		tests/MathML/MathMLPresentationElement.cpp
+		tests/MathML/Elements/MathMLOperatorElement.cpp
+		tests/MathML/Elements/MathMLPresentationElement.cpp
 		tests/HTML/Parser/CharacterReference.cpp
 		tests/HTML/Parser/DocumentParser.cpp
 		tests/HTML/Parser/OpenElementStack.cpp
@@ -761,35 +761,35 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/Properties/SVGPropertyOwnerRegistry.cpp
 		tests/SVG/Properties/SVGPropertyTraits.cpp
 		tests/SVG/SVGAngleValue.cpp
-		tests/SVG/SVGAnimateMotionElement.cpp
-		tests/SVG/SVGAnimateTransformElement.cpp
-		tests/SVG/SVGAnimationElement.cpp
-		tests/SVG/SVGElement.cpp
+		tests/SVG/Elements/SVGAnimateMotionElement.cpp
+		tests/SVG/Elements/SVGAnimateTransformElement.cpp
+		tests/SVG/Elements/SVGAnimationElement.cpp
+		tests/SVG/Elements/SVGElement.cpp
 		tests/SVG/SVGLength.cpp
 		tests/SVG/SVGLengthList.cpp
 		tests/SVG/SVGLengthValue.cpp
-		tests/SVG/SVGMarkerElement.cpp
+		tests/SVG/Elements/SVGMarkerElement.cpp
 		tests/SVG/SVGNumberList.cpp
 		tests/SVG/SVGPointList.cpp
 		tests/SVG/SVGPreserveAspectRatioValue.cpp
 		tests/SVG/SVGStringList.cpp
-		tests/SVG/SVGAElement.cpp
-		tests/SVG/SVGForeignObjectElement.cpp
-		tests/SVG/SVGGeometryElement.cpp
-		tests/SVG/SVGImageElement.cpp
-		tests/SVG/SVGPathElement.cpp
-		tests/SVG/SVGStyleElement.cpp
-		tests/SVG/SVGSvgElement.cpp
-		tests/SVG/SVGTextContentElement.cpp
-		tests/SVG/SVGViewElement.cpp
+		tests/SVG/Elements/SVGAElement.cpp
+		tests/SVG/Elements/SVGForeignObjectElement.cpp
+		tests/SVG/Elements/SVGGeometryElement.cpp
+		tests/SVG/Elements/SVGImageElement.cpp
+		tests/SVG/Elements/SVGPathElement.cpp
+		tests/SVG/Elements/SVGStyleElement.cpp
+		tests/SVG/Elements/SVGSvgElement.cpp
+		tests/SVG/Elements/SVGTextContentElement.cpp
+		tests/SVG/Elements/SVGViewElement.cpp
 		tests/SVG/SVGTests.cpp
 		tests/SVG/SVGTransformList.cpp
 		tests/SVG/SVGURIReference.cpp
 		tests/SVG/Graphics/SVGImage.cpp
 		tests/SVG/Graphics/Filters/SVGFilterRenderer.cpp
 		tests/SVG/SVGFilterPrimitiveStandardAttributes.cpp
-		tests/SVG/SVGUseElement.cpp
-		tests/SVG/SVGGradientElement.cpp
+		tests/SVG/Elements/SVGUseElement.cpp
+		tests/SVG/Elements/SVGGradientElement.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 		tests/XML/PseudoAttributes.cpp

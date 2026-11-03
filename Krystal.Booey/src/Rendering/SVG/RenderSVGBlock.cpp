@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
-#include "Krystal.Booey/SVG/SVGGraphicsElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 
 namespace krys::boo
 {

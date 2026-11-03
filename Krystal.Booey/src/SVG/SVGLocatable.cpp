@@ -2,11 +2,11 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
-#include "Krystal.Booey/SVG/SVGImageElement.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
-#include "Krystal.Booey/SVG/SVGSymbolElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGForeignObjectElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSymbolElement.hpp"
 
 namespace krys::boo::svg
 {

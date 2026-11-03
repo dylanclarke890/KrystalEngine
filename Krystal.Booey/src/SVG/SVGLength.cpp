@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGLength.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 
 namespace krys::boo::svg

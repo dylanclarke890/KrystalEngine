@@ -3,8 +3,8 @@
 #include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/Style/Extractor.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <utility>
 

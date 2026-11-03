@@ -17,9 +17,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/SVG/SVGCircleElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGCircleElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 
 namespace krys::boo::tests
 {

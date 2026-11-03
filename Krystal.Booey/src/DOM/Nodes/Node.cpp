@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
-#include "Krystal.Booey/SVG/SVGUseElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include <tuple>
 
 namespace krys::boo::dom
