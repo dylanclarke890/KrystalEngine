@@ -5,7 +5,6 @@
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/IdleCallbackController.hpp"
-#include "Krystal.Booey/DOM/Internals/RareData/DocumentRareData.hpp"
 #include "Krystal.Booey/DOM/LayoutOptions.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/NodeIterator.hpp"
@@ -262,7 +261,6 @@ namespace krys::boo::dom
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 
     friend class DocumentAlgorithms;
-    friend class DocumentRareData;
     friend class DOMImplementation;
     friend class HTMLCollectionAlgorithms;
     friend class LiveRangeUpdater;
@@ -288,7 +286,6 @@ namespace krys::boo::dom
     };
 
   private:
-    UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
     /// @see https://dom.spec.whatwg.org/#concept-document-content-type
     DOMString _contentType {u8"application/xml"};

@@ -13,6 +13,7 @@
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
@@ -20,6 +21,7 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -45,6 +47,9 @@ namespace krys::boo::dom
 
   Node::~Node() noexcept
   {
+    // Before releasing the document, which what the rare data holds may refer to.
+    _nodeRareData = nullptr;
+
     // Last, since it may delete the document.
     if (!IsDocumentNode())
     {
@@ -175,7 +180,8 @@ namespace krys::boo::dom
   {
     if (_nodeRareData == nullptr)
     {
-      _nodeRareData = CreateUnique<NodeRareData>();
+      _nodeRareData = IsElementNode() ? UniquePtr<NodeRareData> {CreateUnique<ElementRareData>()}
+                                      : CreateUnique<NodeRareData>();
     }
     return *_nodeRareData;
   }

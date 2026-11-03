@@ -3814,11 +3814,8 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/MutationObservers/RegisteredObserver.hpp
       include/Krystal.Booey/DOM/MutationObservers/TransientRegisteredObserver.hpp
       include/Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp
-      include/Krystal.Booey/DOM/Internals/RareData/DocumentFragmentRareData.hpp
-      include/Krystal.Booey/DOM/Internals/RareData/DocumentRareData.hpp
-      include/Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp
-      include/Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp
-      include/Krystal.Booey/DOM/Internals/RareData/ParentNodeRareData.hpp
+      include/Krystal.Booey/DOM/Internals/ElementRareData.hpp
+      include/Krystal.Booey/DOM/Internals/NodeRareData.hpp
       include/Krystal.Booey/DOM/Internals/TraversalBase.hpp
       include/Krystal.Booey/DOM/Mixins/ChildNode.hpp
       include/Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp
@@ -4417,9 +4414,8 @@ target_sources(Krystal.Booey
     src/DOM/MutationObservers/EmptyNodeMutationRecord.cpp
     src/DOM/MutationObservers/MutationObserver.cpp
     src/DOM/Internals/QualifiedNameCache.cpp
-    src/DOM/Internals/RareData/ElementRareData.cpp
-    src/DOM/Internals/RareData/NodeRareData.cpp
-    src/DOM/Internals/RareData/ParentNodeRareData.cpp
+    src/DOM/Internals/ElementRareData.cpp
+    src/DOM/Internals/NodeRareData.cpp
     src/DOM/Iterators/ComposedTreeIterator.cpp
     src/DOM/Mixins/ChildNode.cpp
     src/DOM/Mixins/DocumentOrShadowRoot.cpp

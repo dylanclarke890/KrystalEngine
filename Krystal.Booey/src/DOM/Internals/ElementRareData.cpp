@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
+﻿#include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/DOM/DatasetDOMStringMap.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"

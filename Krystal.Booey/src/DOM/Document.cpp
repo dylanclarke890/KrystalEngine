@@ -1270,11 +1270,7 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Document::Children() noexcept
   {
-    if (!_documentRareData)
-    {
-      _documentRareData = CreateUnique<DocumentRareData>();
-    }
-    return _documentRareData->Children(*this);
+    return EnsureNodeRareData().Children(*this);
   }
 
   RefPtr<const Element> Document::FirstElementChild() const noexcept

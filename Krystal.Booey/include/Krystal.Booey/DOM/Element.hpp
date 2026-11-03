@@ -181,7 +181,6 @@ namespace krys::boo::dom
     RefPtr<ShadowRoot> _shadowRoot;
     /// @see https://dom.spec.whatwg.org/#element-custom-element-registry
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
-    UniquePtr<ElementRareData> _elementRareData;
     /// @brief The associated `NamedNodeMap`, created on first use.
     UniquePtr<NamedNodeMap> _namedNodeMap;
     /// @brief The `classList`, created on first use.
@@ -1540,6 +1539,9 @@ namespace krys::boo::dom
 #pragma endregion
 
   private:
+    /// @brief The element's rare data, if it has any.
+    KRYS_NODISCARD ElementRareData *GetElementRareData() const noexcept;
+
     KRYS_NODISCARD ElementRareData &EnsureElementRareData() noexcept;
 
     void SetCustomElementState(CustomElementState state) noexcept;

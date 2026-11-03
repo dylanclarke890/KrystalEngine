@@ -10,13 +10,18 @@
 
 namespace krys::boo::dom
 {
+  class ContainerNode;
+  class HTMLCollection;
   class Node;
   class NodeList;
 
+  /// @brief The data a node needs only some of the time, made when it's first needed; an element's is an
+  /// `ElementRareData`.
   class NodeRareData
   {
   private:
     WeakPtr<NodeList> _childNodeList;
+    WeakPtr<HTMLCollection> _children;
     WeakPtr<NodeList> _labelsNodeList;
 
     /// @see https://dom.spec.whatwg.org/#registered-observer-list
@@ -28,7 +33,11 @@ namespace krys::boo::dom
     List<Ref<TransientRegisteredObserver>> _transientRegisteredObservers;
 
   public:
+    virtual ~NodeRareData() noexcept;
+
     KRYS_NODISCARD Ref<NodeList> ChildNodes(Node &node) noexcept;
+
+    KRYS_NODISCARD Ref<HTMLCollection> Children(ContainerNode &parent) noexcept;
 
     /// @brief The node's labels list, if it has made one; held weakly, as the list holds the node.
     KRYS_NODISCARD WeakPtr<NodeList> &LabelsNodeList() noexcept;

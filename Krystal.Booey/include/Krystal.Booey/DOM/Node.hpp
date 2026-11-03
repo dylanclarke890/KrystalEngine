@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
-#include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
+#include "Krystal.Booey/DOM/Internals/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
@@ -706,7 +706,13 @@ namespace krys::boo::dom
 #pragma endregion
 
   protected:
-    /// @brief The node's rare data, created if it has none.
+    /// @brief The node's rare data, if it has any; an element's is an `ElementRareData`.
+    KRYS_NODISCARD NodeRareData *RareData() const noexcept
+    {
+      return _nodeRareData.get();
+    }
+
+    /// @brief The node's rare data, created if it has none; an element's is an `ElementRareData`.
     KRYS_NODISCARD NodeRareData &EnsureNodeRareData() noexcept;
 
 #pragma region Registered Observers

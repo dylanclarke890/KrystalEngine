@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Internals/RareData/DocumentFragmentRareData.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -18,10 +17,6 @@ namespace krys::boo::dom
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DocumentFragment);
 
     friend class Document;
-    friend class DocumentFragmentRareData;
-
-  private:
-    UniquePtr<DocumentFragmentRareData> _documentFragmentRareData;
 
   protected:
     /// @see https://dom.spec.whatwg.org/#concept-documentfragment-host

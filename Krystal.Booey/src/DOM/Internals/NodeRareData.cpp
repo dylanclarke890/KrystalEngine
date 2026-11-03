@@ -1,6 +1,8 @@
-﻿#include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
+﻿#include "Krystal.Booey/DOM/Internals/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -14,6 +16,8 @@
 
 namespace krys::boo::dom
 {
+  NodeRareData::~NodeRareData() noexcept = default;
+
   Ref<NodeList> NodeRareData::ChildNodes(Node &node) noexcept
   {
     if (auto childNodes = _childNodeList.lock())
@@ -25,6 +29,20 @@ namespace krys::boo::dom
     _childNodeList = CreateWeakPtr<NodeList>(childNodes.get());
 
     return childNodes;
+  }
+
+  Ref<HTMLCollection> NodeRareData::Children(ContainerNode &parent) noexcept
+  {
+    if (auto children = _children.lock())
+    {
+      return ShareRef(*children.get());
+    }
+
+    auto children =
+      CreateRef<LiveHTMLCollection>(parent, [&](const Element &n) { return n.ParentNode() == &parent; });
+    _children = CreateWeakPtr(children.get());
+
+    return children;
   }
 
   WeakPtr<NodeList> &NodeRareData::LabelsNodeList() noexcept

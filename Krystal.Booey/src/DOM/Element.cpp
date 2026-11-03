@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
-#include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
@@ -126,13 +126,14 @@ namespace krys::boo::dom
     }
   }
 
+  ElementRareData *Element::GetElementRareData() const noexcept
+  {
+    return static_cast<ElementRareData *>(RareData());
+  }
+
   ElementRareData &Element::EnsureElementRareData() noexcept
   {
-    if (!_elementRareData)
-    {
-      _elementRareData = CreateUnique<ElementRareData>();
-    }
-    return *_elementRareData;
+    return static_cast<ElementRareData &>(EnsureNodeRareData());
   }
 
 #pragma region Custom elements
@@ -147,20 +148,20 @@ namespace krys::boo::dom
 
   html::CustomElement *Element::GetCustomElement() const noexcept
   {
-    if (!_elementRareData || !IsDefinedCustomElement())
+    if (!GetElementRareData() || !IsDefinedCustomElement())
     {
       return nullptr;
     }
-    return _elementRareData->CustomElement();
+    return GetElementRareData()->CustomElement();
   }
 
   html::CustomElementReactionQueue *Element::ReactionQueue() const noexcept
   {
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return nullptr;
     }
-    return _elementRareData->CustomElementReactionQueue();
+    return GetElementRareData()->CustomElementReactionQueue();
   }
 
   void Element::SetIsDefinedCustomElement(html::CustomElementInterface &elementInterface) noexcept
@@ -196,11 +197,11 @@ namespace krys::boo::dom
   void Element::ClearReactionQueueFromFailedCustomElement() noexcept
   {
     krys_debug_assert(_customElementState == CustomElementState::Failed);
-    if (_elementRareData)
+    if (GetElementRareData())
     {
       // Clear the queue instead of deleting it since this function can be called inside
       // CustomElementReactionQueue::InvokeAll during upgrades.
-      if (auto *queue = _elementRareData->CustomElementReactionQueue())
+      if (auto *queue = GetElementRareData()->CustomElementReactionQueue())
       {
         queue->Clear();
       }
@@ -289,9 +290,9 @@ namespace krys::boo::dom
 
   bool Element::HasCustomState(DOMStringAtom state) const noexcept
   {
-    if (_elementRareData)
+    if (GetElementRareData())
     {
-      auto *customStates = _elementRareData->CustomStateSet();
+      auto *customStates = GetElementRareData()->CustomStateSet();
       return customStates && customStates->Has(state);
     }
     return false;
@@ -323,9 +324,9 @@ namespace krys::boo::dom
 
   const RenderStyle *Element::ExistingComputedStyle() const noexcept
   {
-    if (_elementRareData)
+    if (GetElementRareData())
     {
-      if (auto *style = _elementRareData->ComputedStyle())
+      if (auto *style = GetElementRareData()->ComputedStyle())
       {
         return style;
       }
@@ -333,7 +334,7 @@ namespace krys::boo::dom
 
     if (HasDisplayNone())
     {
-      return _elementRareData->DisplayContentsOrNoneStyle();
+      return GetElementRareData()->DisplayContentsOrNoneStyle();
     }
 
     return RenderOrDisplayContentsStyle();
@@ -362,7 +363,7 @@ namespace krys::boo::dom
 
     if (HasDisplayContents())
     {
-      return _elementRareData->DisplayContentsOrNoneStyle();
+      return GetElementRareData()->DisplayContentsOrNoneStyle();
     }
 
     return GetRenderStyle();
@@ -554,23 +555,23 @@ namespace krys::boo::dom
 
   void Element::ResetComputedStyle() noexcept
   {
-    if (!_elementRareData || !_elementRareData->ComputedStyle())
+    if (!GetElementRareData() || !GetElementRareData()->ComputedStyle())
     {
       return;
     }
 
     // FIXME: willResetComputedStyle for elements with custom style resolve callbacks.
-    _elementRareData->SetComputedStyle(nullptr);
+    GetElementRareData()->SetComputedStyle(nullptr);
     for (auto *descendant = TreeQueries::Next(*this, this); descendant;
          descendant = TreeQueries::Next(*descendant, this))
     {
       auto *child = DynamicDowncast<Element>(*descendant);
-      if (!child || !child->_elementRareData || !child->_elementRareData->ComputedStyle()
+      if (!child || !child->GetElementRareData() || !child->GetElementRareData()->ComputedStyle()
           || child->HasDisplayContents() || child->HasDisplayNone())
       {
         continue;
       }
-      child->_elementRareData->SetComputedStyle(nullptr);
+      child->GetElementRareData()->SetComputedStyle(nullptr);
     }
   }
 
@@ -578,11 +579,11 @@ namespace krys::boo::dom
   {
     ClearStyleFlags(NodeStyleFlags::StyleAffectedByEmpty);
     ClearStyleFlags(NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return;
     }
-    _elementRareData->SetChildIndex(0);
+    GetElementRareData()->SetChildIndex(0);
   }
 
   void Element::ResetChildStyleRelations() noexcept
@@ -603,21 +604,21 @@ namespace krys::boo::dom
 
   bool Element::HasDisplayContents() const noexcept
   {
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return false;
     }
-    auto *style = _elementRareData->DisplayContentsOrNoneStyle();
+    auto *style = GetElementRareData()->DisplayContentsOrNoneStyle();
     return style && style->Display() == DisplayType::Contents;
   }
 
   bool Element::HasDisplayNone() const noexcept
   {
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return false;
     }
-    auto *style = _elementRareData->DisplayContentsOrNoneStyle();
+    auto *style = GetElementRareData()->DisplayContentsOrNoneStyle();
     return style && style->Display() == DisplayType::None;
   }
 
@@ -635,11 +636,11 @@ namespace krys::boo::dom
 
   void Element::ClearDisplayContentsOrNoneStyle() noexcept
   {
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return;
     }
-    _elementRareData->SetDisplayContentsOrNoneStyle(nullptr);
+    GetElementRareData()->SetDisplayContentsOrNoneStyle(nullptr);
   }
 
   RenderPtr<RenderElement> Element::CreateElementRenderer(RenderStyle &&style) noexcept
@@ -776,22 +777,22 @@ namespace krys::boo::dom
 
   PseudoElement *Element::BeforePseudoElement() const noexcept
   {
-    return _elementRareData ? _elementRareData->BeforePseudoElement() : nullptr;
+    return GetElementRareData() ? GetElementRareData()->BeforePseudoElement() : nullptr;
   }
 
   PseudoElement *Element::AfterPseudoElement() const noexcept
   {
-    return _elementRareData ? _elementRareData->AfterPseudoElement() : nullptr;
+    return GetElementRareData() ? GetElementRareData()->AfterPseudoElement() : nullptr;
   }
 
   IntPoint Element::SavedLayerScrollPosition() const noexcept
   {
-    return _elementRareData ? _elementRareData->SavedLayerScrollPosition() : IntPoint();
+    return GetElementRareData() ? GetElementRareData()->SavedLayerScrollPosition() : IntPoint();
   }
 
   void Element::SetSavedLayerScrollPosition(const IntPoint &position) noexcept
   {
-    if (position.IsZero() && !_elementRareData)
+    if (position.IsZero() && !GetElementRareData())
     {
       return;
     }
@@ -831,22 +832,22 @@ namespace krys::boo::dom
 
   void Element::ClearBeforePseudoElement() noexcept
   {
-    if (!_elementRareData || !_elementRareData->BeforePseudoElement())
+    if (!GetElementRareData() || !GetElementRareData()->BeforePseudoElement())
     {
       return;
     }
-    DisconnectPseudoElement(_elementRareData->BeforePseudoElement());
-    _elementRareData->SetBeforePseudoElement(nullptr);
+    DisconnectPseudoElement(GetElementRareData()->BeforePseudoElement());
+    GetElementRareData()->SetBeforePseudoElement(nullptr);
   }
 
   void Element::ClearAfterPseudoElement() noexcept
   {
-    if (!_elementRareData || !_elementRareData->AfterPseudoElement())
+    if (!GetElementRareData() || !GetElementRareData()->AfterPseudoElement())
     {
       return;
     }
-    DisconnectPseudoElement(_elementRareData->AfterPseudoElement());
-    _elementRareData->SetAfterPseudoElement(nullptr);
+    DisconnectPseudoElement(GetElementRareData()->AfterPseudoElement());
+    GetElementRareData()->SetAfterPseudoElement(nullptr);
   }
 
   namespace
@@ -1445,7 +1446,7 @@ namespace krys::boo::dom
 
   uint32 Element::ChildIndex() const noexcept
   {
-    return _elementRareData ? _elementRareData->ChildIndex() : 0;
+    return GetElementRareData() ? GetElementRareData()->ChildIndex() : 0;
   }
 
   void Element::SetChildIndex(uint32 index) noexcept
@@ -1544,13 +1545,13 @@ namespace krys::boo::dom
 
   bool Element::MayHaveKeyframeEffects() const noexcept
   {
-    return _elementRareData && _elementRareData->HasAnimationRareData();
+    return GetElementRareData() && GetElementRareData()->HasAnimationRareData();
   }
 
   ElementAnimationRareData *Element::AnimationRareData(
     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
   {
-    return _elementRareData ? _elementRareData->AnimationRareData(pseudoElementIdentifier) : nullptr;
+    return GetElementRareData() ? GetElementRareData()->AnimationRareData(pseudoElementIdentifier) : nullptr;
   }
 
   ElementAnimationRareData &Element::EnsureAnimationRareData(
@@ -1761,11 +1762,11 @@ namespace krys::boo::dom
 
   bool Element::HasRandomCachingKeyMap() const noexcept
   {
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return false;
     }
-    return _elementRareData->HasRandomCachingKeyMap();
+    return GetElementRareData()->HasRandomCachingKeyMap();
   }
 
 #pragma region Element
@@ -2866,9 +2867,9 @@ namespace krys::boo::dom
       return;
     }
 
-    if (_elementRareData && IsElementReflectionAttribute(localName))
+    if (GetElementRareData() && IsElementReflectionAttribute(localName))
     {
-      _elementRareData->GetExplicitlySetAttrElementsMap().erase(localName);
+      GetElementRareData()->GetExplicitlySetAttrElementsMap().erase(localName);
     }
 
     // https://dom.spec.whatwg.org/#concept-id
@@ -2946,7 +2947,7 @@ namespace krys::boo::dom
     }
     else if (localName.View() == u8"part")
     {
-      if (auto *partList = _elementRareData ? _elementRareData->PartList() : nullptr)
+      if (auto *partList = GetElementRareData() ? GetElementRareData()->PartList() : nullptr)
       {
         partList->AssociatedAttributeValueChanged();
       }
@@ -3075,7 +3076,7 @@ namespace krys::boo::dom
 
   PopoverData *Element::GetPopoverData() const noexcept
   {
-    return _elementRareData ? _elementRareData->GetPopoverData() : nullptr;
+    return GetElementRareData() ? GetElementRareData()->GetPopoverData() : nullptr;
   }
 
   PopoverData &Element::EnsurePopoverData() noexcept
@@ -3090,9 +3091,9 @@ namespace krys::boo::dom
 
   void Element::ClearPopoverData() noexcept
   {
-    if (_elementRareData)
+    if (GetElementRareData())
     {
-      _elementRareData->SetPopoverData(nullptr);
+      GetElementRareData()->SetPopoverData(nullptr);
     }
   }
 
@@ -3110,7 +3111,7 @@ namespace krys::boo::dom
 
   Element *Element::InvokedPopover() const noexcept
   {
-    return _elementRareData ? _elementRareData->InvokedPopover() : nullptr;
+    return GetElementRareData() ? GetElementRareData()->InvokedPopover() : nullptr;
   }
 
   void Element::SetInvokedPopover(Element *element) noexcept
@@ -3221,7 +3222,7 @@ namespace krys::boo::dom
 
   IntersectionObserverData *Element::IntersectionObserverDataIfExists() const noexcept
   {
-    return _elementRareData ? _elementRareData->GetIntersectionObserverData() : nullptr;
+    return GetElementRareData() ? GetElementRareData()->GetIntersectionObserverData() : nullptr;
   }
 
   void Element::DisconnectFromResizeObservers() noexcept
@@ -3254,7 +3255,7 @@ namespace krys::boo::dom
 
   ResizeObserverData *Element::ResizeObserverDataIfExists() const noexcept
   {
-    return _elementRareData ? _elementRareData->GetResizeObserverData() : nullptr;
+    return GetElementRareData() ? GetElementRareData()->GetResizeObserverData() : nullptr;
   }
 
   // https://drafts.csswg.org/css-contain/#relevant-to-the-user
@@ -3269,11 +3270,11 @@ namespace krys::boo::dom
 
   Maybe<EnumSet<ContentRelevancy>> Element::GetContentRelevancy() const noexcept
   {
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return null;
     }
-    return _elementRareData->GetContentRelevancy();
+    return GetElementRareData()->GetContentRelevancy();
   }
 
   void Element::SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept
@@ -3283,12 +3284,12 @@ namespace krys::boo::dom
 
   Maybe<LayoutUnit> Element::LastRememberedLogicalWidth() const noexcept
   {
-    return _elementRareData ? _elementRareData->LastRememberedLogicalWidth() : null;
+    return GetElementRareData() ? GetElementRareData()->LastRememberedLogicalWidth() : null;
   }
 
   Maybe<LayoutUnit> Element::LastRememberedLogicalHeight() const noexcept
   {
-    return _elementRareData ? _elementRareData->LastRememberedLogicalHeight() : null;
+    return GetElementRareData() ? GetElementRareData()->LastRememberedLogicalHeight() : null;
   }
 
   void Element::SetLastRememberedLogicalWidth(LayoutUnit width) noexcept
@@ -3299,11 +3300,11 @@ namespace krys::boo::dom
 
   void Element::ClearLastRememberedLogicalWidth() noexcept
   {
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return;
     }
-    _elementRareData->ClearLastRememberedLogicalWidth();
+    GetElementRareData()->ClearLastRememberedLogicalWidth();
   }
 
   void Element::SetLastRememberedLogicalHeight(LayoutUnit height) noexcept
@@ -3314,11 +3315,11 @@ namespace krys::boo::dom
 
   void Element::ClearLastRememberedLogicalHeight() noexcept
   {
-    if (!_elementRareData)
+    if (!GetElementRareData())
     {
       return;
     }
-    _elementRareData->ClearLastRememberedLogicalHeight();
+    GetElementRareData()->ClearLastRememberedLogicalHeight();
   }
 
 #pragma endregion
@@ -3327,9 +3328,9 @@ namespace krys::boo::dom
 
   RefPtr<Element> Element::ElementForAttributeInternal(DOMStringAtom attributeName) const noexcept
   {
-    if (_elementRareData)
+    if (GetElementRareData())
     {
-      auto &map = _elementRareData->GetExplicitlySetAttrElementsMap();
+      auto &map = GetElementRareData()->GetExplicitlySetAttrElementsMap();
       if (auto it = map.find(attributeName); it != map.end())
       {
         auto *explicitlySetElement = it->second.get();
@@ -3374,9 +3375,9 @@ namespace krys::boo::dom
 
     if (!element)
     {
-      if (_elementRareData)
+      if (GetElementRareData())
       {
-        _elementRareData->GetExplicitlySetAttrElementsMap().erase(attributeName);
+        GetElementRareData()->GetExplicitlySetAttrElementsMap().erase(attributeName);
       }
       RemoveAttribute(attributeName);
       return;

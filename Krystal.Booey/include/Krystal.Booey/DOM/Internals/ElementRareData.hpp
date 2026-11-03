@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/DOM/ContentRelevancy.hpp"
-#include "Krystal.Booey/DOM/Internals/RareData/ParentNodeRareData.hpp"
+#include "Krystal.Booey/DOM/Internals/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
@@ -41,7 +41,7 @@ namespace krys::boo::dom
   /// @see https://html.spec.whatwg.org/#explicitly-set-attr-element
   using ExplicitlySetAttrElementsMap = HashMap<DOMStringAtom, WeakPtr<Element>>;
 
-  class ElementRareData : public ParentNodeRareData
+  class ElementRareData : public NodeRareData
   {
     struct PseudoElementIdentifierHash
     {
@@ -80,7 +80,7 @@ namespace krys::boo::dom
 
   public:
     ElementRareData() noexcept;
-    ~ElementRareData() noexcept;
+    ~ElementRareData() noexcept override;
 
     KRYS_NODISCARD html::CustomElementReactionQueue *CustomElementReactionQueue() const noexcept
     {
