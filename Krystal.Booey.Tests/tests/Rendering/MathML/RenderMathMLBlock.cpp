@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLMath.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp"
+#include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::tests

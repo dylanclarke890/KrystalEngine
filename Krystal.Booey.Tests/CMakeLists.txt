@@ -71,6 +71,8 @@ target_precompile_headers(Krystal.Booey.Tests
     <Krystal.Booey/HTML/Parser/CharacterReference.hpp>
     <Krystal.Booey/HTML/Parser/Tokenizer.hpp>
     <Krystal.Booey/CSS/Values/ValuePool.hpp>
+	<Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp>
+	<Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp>
 
     <Krystal.Booey.Tests/Style/ResolverTestUtils.hpp>
 )
@@ -406,6 +408,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderHTMLCanvas.cpp
 		tests/Rendering/ImageQualityController.cpp
 		tests/Rendering/HitTestResult.cpp
+		tests/Rendering/PaintTestUtils.cpp
 		tests/DOM/Events/CustomEvent.cpp
 		tests/DOM/Events/Event.cpp
 		tests/DOM/Events/EventListenerHandle.cpp
@@ -476,6 +479,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Shapes/ShapeOutsideInfo.cpp
 		tests/Rendering/RenderListItem.cpp
 		tests/Rendering/RenderListMarker.cpp
+		tests/Layout/LayoutTestUtils.cpp
 		tests/Layout/LayoutState.cpp
 		tests/Layout/LayoutTree/LayoutBoxGeometry.cpp
 		tests/Layout/Floats/FloatingContext.cpp
