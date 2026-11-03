@@ -285,7 +285,6 @@ set(KRYSTAL_BOOEY_ANIMATION_SOURCES
 set(KRYSTAL_BOOEY_CONSTANTS_HEADERS
   include/Krystal.Booey/Constants/Attributes.hpp
   include/Krystal.Booey/Constants/EventNames.hpp
-  include/Krystal.Booey/Constants/MIMETypes.hpp
   include/Krystal.Booey/Constants/TagNames.hpp
 )
 
@@ -2073,7 +2072,6 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/TaskSource.hpp
   include/Krystal.Booey/HTML/Types/DocumentReadyState.hpp
   include/Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp
-  include/Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp
   include/Krystal.Booey/HTML/Types/Namespace.hpp
   include/Krystal.Booey/HTML/Types/TagName.hpp
 )
@@ -2656,7 +2654,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Gamepad/GamepadConstants.hpp
   include/Krystal.Booey/Platform/Gamepad/GamepadProvider.hpp
   include/Krystal.Booey/Platform/Gamepad/GamepadProviderClient.hpp
-  include/Krystal.Booey/Platform/Gamepad/KnownGamepads.hpp
   include/Krystal.Booey/Platform/Gamepad/PlatformGamepad.hpp
   include/Krystal.Booey/Platform/GraphicsClient.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp
@@ -3612,7 +3609,6 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Values/Shapes/PathOperationWrappers.hpp
   include/Krystal.Booey/Style/Values/Shapes/PolygonFunction.hpp
   include/Krystal.Booey/Style/Values/Shapes/RectFunction.hpp
-  include/Krystal.Booey/Style/Values/Shapes/ShapeForward.hpp
   include/Krystal.Booey/Style/Values/Shapes/ShapeFunction.hpp
   include/Krystal.Booey/Style/Values/Shapes/ShapeImageThreshold.hpp
   include/Krystal.Booey/Style/Values/Shapes/ShapeMargin.hpp
