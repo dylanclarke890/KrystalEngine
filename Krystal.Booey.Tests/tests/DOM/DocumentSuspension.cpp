@@ -92,17 +92,16 @@ namespace krys::boo::tests
   {
     SuspensionFixture fixture;
     auto &document = fixture.Document();
-    auto &window = fixture.Window();
     List<std::string> fired;
-    (void)window.SetTimeout([&] { fired.push_back("timeout"); }, 100);
-    (void)window.SetInterval([&] { fired.push_back("interval"); }, 40);
+    auto timeout = document.StartTimer(100ms, [&] { fired.push_back("timeout"); });
+    auto interval = document.StartRepeatingTimer(40ms, [&] { fired.push_back("interval"); });
 
     Advance(50ms);
     CHECK(fired == List<std::string> {"interval"});
 
     document.Suspend(Reason);
     // A timer installed while the document is suspended waits too.
-    (void)window.SetTimeout([&] { fired.push_back("installed"); }, 10);
+    auto installed = document.StartTimer(10ms, [&] { fired.push_back("installed"); });
     Advance(200ms);
     CHECK(fired == List<std::string> {"interval"});
 

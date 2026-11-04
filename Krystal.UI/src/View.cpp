@@ -569,7 +569,6 @@ namespace krys::ui
 
   bool View::Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget) noexcept
   {
-    auto start = MonotonicTime::Now();
     boo::html::EventLoop::Current().Run(now, budget);
 
     // The fling moves on with the host's time, before the rendering update shows it.
@@ -594,13 +593,6 @@ namespace krys::ui
       _needsPaint = true;
       updated = true;
     }
-
-    // The rest of the frame's budget is idle, up to 50ms (the idle period's limit).
-    // https://w3c.github.io/requestidlecallback/#start-an-idle-period-algorithm
-    constexpr auto maximumIdlePeriod = std::chrono::milliseconds(50);
-    auto deadline = budget ? start + std::min<MonotonicTime::duration>(*budget, maximumIdlePeriod)
-                           : MonotonicTime::Now() + maximumIdlePeriod;
-    _page->OpportunisticallyRunIdleCallbacks(deadline);
     return updated;
   }
 

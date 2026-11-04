@@ -1099,8 +1099,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Ranges/Range.hpp
   include/Krystal.Booey/DOM/Ranges/SimpleRange.hpp
   include/Krystal.Booey/DOM/Ranges/StaticRange.hpp
-  include/Krystal.Booey/DOM/Scheduling/IdleCallbackController.hpp
-  include/Krystal.Booey/DOM/Scheduling/IdleDeadline.hpp
+  include/Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp
   include/Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp
   include/Krystal.Booey/DOM/Traversal/NodeFilter.hpp
   include/Krystal.Booey/DOM/Traversal/NodeIterator.hpp
@@ -1230,8 +1229,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Ranges/Range.cpp
   src/DOM/Ranges/SimpleRange.cpp
   src/DOM/Ranges/StaticRange.cpp
-  src/DOM/Scheduling/IdleCallbackController.cpp
-  src/DOM/Scheduling/IdleDeadline.cpp
+  src/DOM/Scheduling/DocumentTimer.cpp
   src/DOM/Scheduling/ScriptedAnimationController.cpp
   src/DOM/Traversal/NodeIterator.cpp
   src/DOM/Traversal/TreeWalker.cpp
@@ -2436,7 +2434,6 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/AutoscrollController.hpp
   include/Krystal.Booey/Page/ChromeClient.hpp
   include/Krystal.Booey/Page/DOMSelection.hpp
-  include/Krystal.Booey/Page/DOMTimer.hpp
   include/Krystal.Booey/Page/Drag/DragActions.hpp
   include/Krystal.Booey/Page/Drag/DragClient.hpp
   include/Krystal.Booey/Page/Drag/DragController.hpp
@@ -2476,7 +2473,6 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
 set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/AutoscrollController.cpp
   src/Page/DOMSelection.cpp
-  src/Page/DOMTimer.cpp
   src/Page/Drag/DragController.cpp
   src/Page/EventHandler.cpp
   src/Page/FrameSnapshotting.cpp

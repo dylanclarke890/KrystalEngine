@@ -163,7 +163,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - View transitions' animations are absent, so view transition names take no part in composite order comparisons (FIXME in `WebAnimationUtilities.cpp`) and group pseudo-elements' size and transform animations don't exist.
 - `TreeResolver` skips the back/forward cache and printing checks on the animated-update path, and has a FIXME to push after-change style into the parent stack.
 - Image animations pause out of view and resume (`RenderView::AddRendererWithPausedImageAnimations`), and there is no per-element or page animation control (`RenderElement::AllowsAnimation` is always true; FIXME).
-- The per-timer throttle in `DOMTimer` for timers that make no visible changes is a FIXME.
 - Extent computation for animated motion path (`offset-*`) properties is missing (FIXME in `KeyframeEffect.cpp`).
 - `onbegin`, `onend` and `onrepeat` attributes on SMIL elements don't exist.
 - Quirks that prevent acceleration (`shouldPreventKeyframeEffectAcceleration`) aren't implemented (FIXME).
@@ -391,7 +390,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Prerendering, speculation rules, `javascript:` URLs, `pagereveal`/`pageswap` and view transitions are not implemented. Icons, manifests and alternate style sheet sets chosen by script are not loaded.
 - No DOM `URL` interface or `URLSearchParams` (`url::URL` is internal), so WPT `setters_tests.json` is not run.
 - There is no global history or visited link store, so `:visited` matches only links with an empty `href` and `VisitedLinkState` has nothing to ask. There are no deferred loads, multipart loads or unreachable URLs.
-- `Window`: timers are not throttled or aligned, and animation frames are not throttled below the page's rate.
+- Document timers are not throttled or aligned, and animation frames are not throttled below the page's rate.
 - Fragment navigation does not reset scroll anchoring (there is none) and has no text indicator for a text fragment (FIXME in `LocalFrameView.cpp`).
 - `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents, fullscreen and view transitions steps of the update are FIXMEs, and `Document` has no post-layout task timer.
 

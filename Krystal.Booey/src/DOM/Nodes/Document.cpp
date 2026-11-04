@@ -3087,31 +3087,23 @@ namespace krys::boo::dom
     return _frame && _frame->Document() == this;
   }
 
-  int32 Document::CircularSequentialID() noexcept
+  DocumentTimerHandle Document::StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept
   {
-    ++_circularSequentialID;
-    if (_circularSequentialID <= 0)
-    {
-      _circularSequentialID = 1;
-    }
-    return _circularSequentialID;
+    auto &timer = _timers.emplace_back(AdoptRef(*new DocumentTimer(*this, krys::move(action), delay, false)));
+    return DocumentTimerHandle(*timer);
   }
 
-  bool Document::AddTimeout(int32 timeoutId, DOMTimer &timer) noexcept
+  DocumentTimerHandle Document::StartRepeatingTimer(MonotonicTime::duration interval,
+                                                    Func<void()> action) noexcept
   {
-    return _timeouts.emplace(timeoutId, ShareRef(timer)).second;
+    auto &timer =
+      _timers.emplace_back(AdoptRef(*new DocumentTimer(*this, krys::move(action), interval, true)));
+    return DocumentTimerHandle(*timer);
   }
 
-  RefPtr<DOMTimer> Document::TakeTimeout(int32 timeoutId) noexcept
+  void Document::RemoveTimer(DocumentTimer &timer) noexcept
   {
-    auto it = _timeouts.find(timeoutId);
-    if (it == _timeouts.end())
-    {
-      return nullptr;
-    }
-    RefPtr<DOMTimer> timer = it->second;
-    _timeouts.erase(it);
-    return timer;
+    std::erase_if(_timers, [&](const Ref<DocumentTimer> &each) { return each.get() == &timer; });
   }
 
   int32 Document::RequestAnimationFrame(FrameRequestCallback &&callback) noexcept
@@ -3159,29 +3151,6 @@ namespace krys::boo::dom
     {
       _scriptedAnimationController->ServiceRequestAnimationFrameCallbacks(_domWindow->FrozenNowTimestamp());
     }
-  }
-
-  int32 Document::RequestIdleCallback(IdleRequestCallback &&callback,
-                                      MonotonicTime::duration timeout) noexcept
-  {
-    if (!_idleCallbackController)
-    {
-      _idleCallbackController = CreateUnique<IdleCallbackController>(*this);
-    }
-    return _idleCallbackController->QueueIdleCallback(krys::move(callback), timeout);
-  }
-
-  void Document::CancelIdleCallback(int32 id) noexcept
-  {
-    if (_idleCallbackController)
-    {
-      _idleCallbackController->RemoveIdleCallback(id);
-    }
-  }
-
-  bool Document::HasPendingIdleCallback() const noexcept
-  {
-    return _idleCallbackController && _idleCallbackController->HasPendingIdleCallback();
   }
 
   void Document::Suspend(ReasonForSuspension reason) noexcept
@@ -3299,7 +3268,7 @@ namespace krys::boo::dom
 
     _activeDOMObjectsAreSuspended = true;
     _reasonForSuspendingActiveDOMObjects = reason;
-    for (auto &[id, timer] : _timeouts)
+    for (auto &timer : _timers)
     {
       timer->Suspend();
     }
@@ -3313,7 +3282,7 @@ namespace krys::boo::dom
     }
 
     _activeDOMObjectsAreSuspended = false;
-    for (auto &[id, timer] : _timeouts)
+    for (auto &timer : _timers)
     {
       timer->Resume();
     }
@@ -3324,13 +3293,12 @@ namespace krys::boo::dom
     _activeDOMObjectsAreStopped = true;
 
     // Stopping a timer releases its action, which may hold the document's nodes.
-    auto timeouts = std::exchange(_timeouts, {});
-    for (auto &[id, timer] : timeouts)
+    auto timers = std::exchange(_timers, {});
+    for (auto &timer : timers)
     {
       timer->Stop();
     }
     _scriptedAnimationController = nullptr;
-    _idleCallbackController = nullptr;
 
     // Its close watchers are destroyed.
     if (auto *closeWatcherManager = _domWindow ? _domWindow->CloseWatcherManagerIfExists() : nullptr)

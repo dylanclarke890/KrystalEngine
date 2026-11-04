@@ -651,6 +651,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Ranges/Range.cpp
 		tests/DOM/Ranges/SimpleRange.cpp
 		tests/DOM/Ranges/StaticRange.cpp
+		tests/DOM/Scheduling/DocumentTimer.cpp
 		tests/DOM/Nodes/Attr.cpp
 		tests/DOM/Nodes/CDATASection.cpp
 		tests/DOM/Nodes/CharacterData.cpp

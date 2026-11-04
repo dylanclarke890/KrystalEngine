@@ -8,7 +8,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
-- There are no parallel queues or threads: steps the specification runs in parallel run on the event loop's thread, waiting on timers or the host's loader strategy where they wait, or synchronously where they don't (such as `toBlob()`'s serialisation), and queue their tasks back as the specification's would.
+- There are no parallel queues or threads: steps the specification runs in parallel run on the event loop's thread, waiting on timers or the host's loader strategy where they wait, or synchronously where they don't, and queue their tasks back as the specification's would.
 - With no garbage collector, `AbortSignal`'s garbage collection rule is kept with references: a source holds a dependent signal strongly while that signal has `abort` listeners or abort algorithms, and weakly otherwise, and an aborted signal lets go of its sources and dependents. `AbortSignal.timeout()`'s task keeps its signal alive whether or not it has listeners.
 - Callbacks are C++ `Func`s rather than callback interfaces, so there's no `this` value and no exceptions to report: `ResizeObserver` and `IntersectionObserver` take the entries and the observer. Promises are replaced the same way: `CustomElementRegistry::WhenDefined` takes a callback and `Element::RequestPointerLock` returns its result through one. Animation `ready`/`finished` are `AnimationPromise`s and Navigation API results are `NavigationPromise`s, settled once, with their callbacks run as microtasks.
 - `CustomEvent`'s `detail` is typed by the host rather than `any`: `CustomEvent<T>` holds a `Maybe<T>`, empty for null.
@@ -210,13 +210,13 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
-- `toDataURL` and `toBlob` encode the pixels read back from the buffer (PNG, JPEG and WebP, with libpng, libjpeg-turbo and libwebp). A quality outside 0 to 1, or none, encodes at the encoders' best (100); Chrome's default JPEG quality is 0.92.
+- `toDataURL` encodes the pixels read back from the buffer (PNG, JPEG and WebP, with libpng, libjpeg-turbo and libwebp). A quality outside 0 to 1, or none, encodes at the encoders' best (100); Chrome's default JPEG quality is 0.92.
 - A filter needs the canvas's computed style (`SetFilterStringWithoutUpdatingStyle`).
 - While the current transform can't be inverted, the transform methods, the path methods and drawing do nothing, as in Chrome; the specification multiplies the matrix and adds the points regardless, so `scale(0, 1)` then `scale(1, 2)` leaves the vertical scale at 1 here, where the specification's is 2.
 - `letterSpacing` and `wordSpacing` reject the units whose resolution the specification leaves undefined (`lh`, `rlh`, the viewport units and the container query units; whatwg/html#10893).
 - The text preparation algorithm replaces vertical tabs with spaces too; the specification replaces only ASCII whitespace.
 - `arcTo()` with a negative radius throws before it ensures there's a subpath, so the path is unchanged, and `createPattern()` checks its repetition before the image's usability, so an unusable image with a bad repetition throws rather than returning null.
-- `toBlob()` serialises the bitmap before it queues the callback's task, rather than in parallel.
+- There's no `toBlob()`: `toDataURL()` encodes the pixels synchronously.
 - A canvas always gets a `RenderHTMLCanvas` and is always replaced, so its fallback content is never rendered; the specification renders the fallback content when scripting is disabled, which it always is here.
 
 ### From Chrome
@@ -254,8 +254,9 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - A `ResizeObserver` loop that leaves notifications undelivered reports no error, as there's no script error reporting.
 - There's no Gamepad API: the host reads pads itself (Krystal.UI's `View::GamepadInput` drives focus navigation with them).
 - A document's visibility state is its page's (hidden without one), so `visibilityState` changes as soon as the host shows or hides the page and `visibilitychange` follows in a task (`Document::VisibilityStateChanged`); the specification sets the state in that task. There is no `VisibilityStateEntry`, as there's no performance timeline.
-- Timers clamp differently: a timeout is raised to 4 ms only once timers are nested 10 deep (5 for intervals), where the specification clamps beyond a nesting level of 5, and an interval repeats at a fixed rate rather than being set again after each run.
+- There's no `setTimeout()` or `setInterval()`: C++ code starts document timers (`Document::StartTimer` and `StartRepeatingTimer`), whose handle stops the timer when it's destroyed. They run as tasks on the timer task source and wait while the document is suspended, but have no IDs or nesting clamp, and a repeating timer fires at a fixed rate.
 - Animation frame callbacks are given the frame's timestamp rounded to whole milliseconds.
-- DOM timestamps are the host's time since the window's time origin, so they pause and scale with the engine; idle deadlines are real time. Idle periods start when the host asks (`View::Update` gives the rest of its frame's budget, at most 50 ms), not when an event loop idles.
+- DOM timestamps are the host's time since the window's time origin, so they pause and scale with the engine.
+- There's no `requestIdleCallback()`: the host runs its own idle work between frames.
 - `Document::SetURL` takes the fragment directive from every URL it's given (empty when there is none), so a text fragment link within the page works and a later plain fragment isn't sent to the old text.
 - `url::URL` has no encoding override, so queries are always UTF-8 percent-encoded. IDNA uses `uidna_nameToASCII_UTF8` from vcpkg's ICU (Unicode 17), so `tests/URL/WPT.cpp` expects the `IdnaTestV2.json` cases with U+32931 and U+32B9A to be valid where the data expects a V7 failure, because Unicode 17 assigned those code points.

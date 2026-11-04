@@ -280,24 +280,6 @@ namespace krys::boo
     FinalizeRenderingUpdate();
   }
 
-  void Page::OpportunisticallyRunIdleCallbacks(MonotonicTime::duration deadline) noexcept
-  {
-    if (MonotonicTime::Now() >= deadline)
-    {
-      return;
-    }
-
-    ForEachDocument(
-      [deadline](dom::Document &document)
-      {
-        if (auto *controller = document.GetIdleCallbackController();
-            controller && controller->HasPendingIdleCallback())
-        {
-          controller->StartIdlePeriod(deadline);
-        }
-      });
-  }
-
   void Page::FinalizeRenderingUpdate() noexcept
   {
     // FIXME: Images with asynchronous decodes, once there are any.

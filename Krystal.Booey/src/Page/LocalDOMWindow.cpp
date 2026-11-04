@@ -13,7 +13,6 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
-#include "Krystal.Booey/Page/DOMTimer.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -503,56 +502,6 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/#dom-settimeout
-  int32 LocalDOMWindow::SetTimeout(Func<void()> &&handler, int32 timeout) noexcept
-  {
-    // Return the result of running the timer initialization steps given this, handler, timeout, arguments,
-    // and false.
-    auto *document = Document();
-    if (!document)
-    {
-      return 0;
-    }
-    // 5. If timeout is less than 0, then set timeout to 0.
-    return DOMTimer::Install(*document, krys::move(handler), std::chrono::milliseconds(std::max(timeout, 0)),
-                             DOMTimer::Type::SingleShot);
-  }
-
-  // https://html.spec.whatwg.org/#dom-cleartimeout
-  void LocalDOMWindow::ClearTimeout(int32 id) noexcept
-  {
-    // Remove this's map of setTimeout and setInterval IDs[id].
-    if (auto *document = Document())
-    {
-      DOMTimer::RemoveById(*document, id);
-    }
-  }
-
-  // https://html.spec.whatwg.org/#dom-setinterval
-  int32 LocalDOMWindow::SetInterval(Func<void()> &&handler, int32 timeout) noexcept
-  {
-    // Return the result of running the timer initialization steps given this, handler, timeout, arguments,
-    // and true.
-    auto *document = Document();
-    if (!document)
-    {
-      return 0;
-    }
-    // 5. If timeout is less than 0, then set timeout to 0.
-    return DOMTimer::Install(*document, krys::move(handler), std::chrono::milliseconds(std::max(timeout, 0)),
-                             DOMTimer::Type::Repeating);
-  }
-
-  // https://html.spec.whatwg.org/#dom-clearinterval
-  void LocalDOMWindow::ClearInterval(int32 id) noexcept
-  {
-    // Remove this's map of setTimeout and setInterval IDs[id].
-    if (auto *document = Document())
-    {
-      DOMTimer::RemoveById(*document, id);
-    }
-  }
-
   // https://html.spec.whatwg.org/#dom-queuemicrotask
   void LocalDOMWindow::QueueMicrotask(Func<void()> &&callback) noexcept
   {
@@ -572,23 +521,6 @@ namespace krys::boo
     if (auto *document = Document())
     {
       document->CancelAnimationFrame(handle);
-    }
-  }
-
-  int32 LocalDOMWindow::RequestIdleCallback(dom::IdleRequestCallback &&callback,
-                                            const dom::IdleRequestOptions &options) noexcept
-  {
-    auto *document = Document();
-    return document
-             ? document->RequestIdleCallback(krys::move(callback), std::chrono::milliseconds(options.Timeout))
-             : 0;
-  }
-
-  void LocalDOMWindow::CancelIdleCallback(int32 handle) noexcept
-  {
-    if (auto *document = Document())
-    {
-      document->CancelIdleCallback(handle);
     }
   }
 

@@ -8,7 +8,7 @@
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
-#include "Krystal.Booey/DOM/Scheduling/IdleCallbackController.hpp"
+#include "Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp"
 #include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
@@ -25,7 +25,6 @@
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
-#include "Krystal.Booey/Page/DOMTimer.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
@@ -404,14 +403,9 @@ namespace krys::boo::dom
     uint32 _unloadCounter {0};
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
     DOMString _contentLanguage;
-    /// @brief The document's timers (`setTimeout()`, `setInterval()`), by ID.
-    /// @see https://html.spec.whatwg.org/#map-of-settimeout-and-setinterval-ids
-    HashMap<int32, Ref<DOMTimer>> _timeouts;
-    int32 _circularSequentialID {0};
-    /// @see https://html.spec.whatwg.org/#timer-nesting-level
-    int32 _timerNestingLevel {0};
+    /// @brief The document's active timers.
+    List<Ref<DocumentTimer>> _timers;
     UniquePtr<ScriptedAnimationController> _scriptedAnimationController;
-    UniquePtr<IdleCallbackController> _idleCallbackController;
     DocumentLoadTimingInfo _loadTiming;
     // The [SameObject] collections of the DOM tree accessors, while something holds them.
     WeakPtr<HTMLCollection> _images;
@@ -1477,22 +1471,14 @@ namespace krys::boo::dom
       --_unloadCounter;
     }
 
-    /// @brief The next ID for a timer: positive, wrapping around.
-    KRYS_NODISCARD int32 CircularSequentialID() noexcept;
-    /// @brief Adds @p timer as the timer @p timeoutId.
-    /// @return False, adding nothing, if there's a timer @p timeoutId already.
-    bool AddTimeout(int32 timeoutId, DOMTimer &timer) noexcept;
-    /// @brief Removes the timer @p timeoutId, if there is one, and returns it.
-    RefPtr<DOMTimer> TakeTimeout(int32 timeoutId) noexcept;
-    /// @brief How deeply nested the timer whose action is running is; 0 outside a timer.
-    KRYS_NODISCARD int32 TimerNestingLevel() const noexcept
-    {
-      return _timerNestingLevel;
-    }
-    void SetTimerNestingLevel(int32 level) noexcept
-    {
-      _timerNestingLevel = level;
-    }
+    /// @brief Starts a timer that runs @p action once, after @p delay, as a task on the timer task source.
+    /// @return The timer's handle, which stops it when it's destroyed.
+    DocumentTimerHandle StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept;
+    /// @brief Starts a timer that runs @p action every @p interval, as a task on the timer task source.
+    /// @return The timer's handle, which stops it when it's destroyed.
+    DocumentTimerHandle StartRepeatingTimer(MonotonicTime::duration interval, Func<void()> action) noexcept;
+    /// @brief Drops @p timer, which stopped.
+    void RemoveTimer(DocumentTimer &timer) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe
     int32 RequestAnimationFrame(FrameRequestCallback &&callback) noexcept;
@@ -1506,17 +1492,7 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#run-the-animation-frame-callbacks
     void ServiceRequestAnimationFrameCallbacks() noexcept;
 
-    /// @see https://w3c.github.io/requestidlecallback/#the-requestidlecallback-method
-    int32 RequestIdleCallback(IdleRequestCallback &&callback, MonotonicTime::duration timeout) noexcept;
-    /// @see https://w3c.github.io/requestidlecallback/#the-cancelidlecallback-method
-    void CancelIdleCallback(int32 id) noexcept;
-    KRYS_NODISCARD bool HasPendingIdleCallback() const noexcept;
-    KRYS_NODISCARD IdleCallbackController *GetIdleCallbackController() const noexcept
-    {
-      return _idleCallbackController.get();
-    }
-
-    /// @brief Stops the document's timers and drops its animation frame and idle callbacks and its tasks:
+    /// @brief Stops the document's timers and drops its animation frame callbacks and its tasks:
     /// it's leaving its frame.
     void StopActiveDOMObjects() noexcept;
 

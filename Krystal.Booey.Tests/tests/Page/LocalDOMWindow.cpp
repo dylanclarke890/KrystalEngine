@@ -9,7 +9,6 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Scheduling/IdleDeadline.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -416,105 +415,18 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE(
-    "A window's timers",
-    "[Page][LocalDOMWindow][html:timers][html:dom-settimeout][html:dom-setinterval][html:dom-cleartimeout]"
-    "[html:dom-clearinterval][html:timer-initialisation-steps][html:run-steps-after-a-timeout]"
-    "[html:timer-nesting-level][html:map-of-settimeout-and-setinterval-ids][html:microtask-queuing]"
-    "[html:dom-queuemicrotask]")
+  TEST_CASE("A window's microtasks run before the next task",
+            "[Page][LocalDOMWindow][html:microtask-queuing][html:dom-queuemicrotask]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
     html::EventLoop::Current().RunUntilIdle();
 
     List<std::string> order;
-
-    SECTION("timeouts run as tasks after their delay, in order")
-    {
-      auto late = window.SetTimeout([&] { order.push_back("late"); }, 20);
-      auto early = window.SetTimeout([&] { order.push_back("early"); }, 10);
-      auto now = window.SetTimeout([&] { order.push_back("now"); }, -5);
-      CHECK(late > 0);
-      CHECK(early > 0);
-      CHECK(now > 0);
-      CHECK(late != early);
-      CHECK(order.empty());
-
-      Advance(0ms);
-      CHECK(order == List<std::string> {"now"});
-      Advance(10ms);
-      CHECK(order == List<std::string> {"now", "early"});
-      Advance(10ms);
-      CHECK(order == List<std::string> {"now", "early", "late"});
-    }
-
-    SECTION("a cleared timeout doesn't run")
-    {
-      auto id = window.SetTimeout([&] { order.push_back("cleared"); }, 5);
-      window.ClearTimeout(id);
-      window.ClearTimeout(0);
-      window.ClearTimeout(12'345);
-      Advance(10ms);
-      CHECK(order.empty());
-    }
-
-    SECTION("intervals repeat until cleared, even from their own handler")
-    {
-      int32 id = 0;
-      int32 count = 0;
-      id = window.SetInterval(
-        [&]
-        {
-          if (++count == 3)
-          {
-            window.ClearInterval(id);
-          }
-        },
-        10);
-      for (int32 i = 0; i < 6; ++i)
-      {
-        Advance(10ms);
-      }
-      CHECK(count == 3);
-    }
-
-    SECTION("deeply nested timeouts are clamped to 4ms")
-    {
-      int32 runs = 0;
-      Func<void()> nest;
-      nest = [&]
-      {
-        ++runs;
-        (void)window.SetTimeout(Func<void()>(nest), 0);
-      };
-      (void)window.SetTimeout(Func<void()>(nest), 0);
-
-      // Ten levels run at once; the eleventh waits for the minimum interval.
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(runs == 10);
-      Advance(4ms);
-      CHECK(runs == 11);
-      Advance(4ms);
-      CHECK(runs == 12);
-      fixture.TestPage->MainFrame().SetDocument(nullptr);
-    }
-
-    SECTION("microtasks run before the next task")
-    {
-      window.SetTimeout([&] { order.push_back("task"); }, 0);
-      window.QueueMicrotask([&] { order.push_back("microtask"); });
-      Advance(0ms);
-      CHECK(order == List<std::string> {"microtask", "task"});
-    }
-
-    SECTION("a document leaving its frame stops its timers")
-    {
-      (void)window.SetTimeout([&] { order.push_back("timeout"); }, 5);
-      (void)window.SetInterval([&] { order.push_back("interval"); }, 5);
-      fixture.TestPage->MainFrame().SetDocument(nullptr);
-      Advance(10ms);
-      CHECK(order.empty());
-    }
+    auto timer = fixture.Document->StartTimer(0ms, [&] { order.push_back("task"); });
+    window.QueueMicrotask([&] { order.push_back("microtask"); });
+    Advance(0ms);
+    CHECK(order == List<std::string> {"microtask", "task"});
   }
 
   TEST_CASE(
@@ -554,54 +466,6 @@ namespace krys::boo::tests
     page.UpdateRendering();
     CHECK(nested == 1);
     CHECK(timestamps.size() == 2);
-  }
-
-  TEST_CASE("A window's idle callbacks run in idle periods, or after their timeout", "[Page][LocalDOMWindow]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-    auto &page = *fixture.TestPage;
-
-    double remaining = -1;
-    bool timedOut = true;
-    int32 calls = 0;
-    (void)window.RequestIdleCallback(
-      [&](dom::IdleDeadline &deadline)
-      {
-        ++calls;
-        remaining = deadline.TimeRemaining();
-        timedOut = deadline.DidTimeoutValue();
-      });
-    auto cancelled = window.RequestIdleCallback([&](dom::IdleDeadline &) { calls += 100; });
-    window.CancelIdleCallback(cancelled);
-
-    // An idle period that's already over runs nothing.
-    page.OpportunisticallyRunIdleCallbacks(MonotonicTime::Now());
-    CHECK(calls == 0);
-
-    page.OpportunisticallyRunIdleCallbacks(MonotonicTime::Now() + 1s);
-    CHECK(calls == 1);
-    CHECK(remaining > 0);
-    CHECK(remaining <= 1'000);
-    CHECK_FALSE(timedOut);
-
-    SECTION("a timeout calls it without an idle period")
-    {
-      (void)window.RequestIdleCallback(
-        [&](dom::IdleDeadline &deadline)
-        {
-          ++calls;
-          remaining = deadline.TimeRemaining();
-          timedOut = deadline.DidTimeoutValue();
-        },
-        {50});
-      Advance(40ms);
-      CHECK(calls == 1);
-      Advance(10ms);
-      CHECK(calls == 2);
-      CHECK(timedOut);
-      CHECK(remaining == 0);
-    }
   }
 
   TEST_CASE("A window's user activation",

@@ -384,10 +384,9 @@ namespace krys::ui
 
     /// @brief Runs a frame of the page at the host's time @p now: Booey's event loop (the timers that are
     /// due, such as style and layout, then the queued tasks, each followed by a microtask checkpoint), then
-    /// the page's rendering update if something scheduled one, then the page's idle callbacks for what's left
-    /// of @p budget (at most 50ms). Call it once a frame, before painting, with a time that only moves
-    /// forwards (the engine may pause or scale it).
-    /// @param budget How long (in real time) tasks and idle callbacks may run this frame, if limited.
+    /// the page's rendering update if something scheduled one. Call it once a frame, before painting, with a
+    /// time that only moves forwards (the engine may pause or scale it).
+    /// @param budget How long (in real time) tasks may run this frame, if limited.
     /// @return Whether the rendering update ran: the page may look different, so a host that keeps its last
     /// frame paints again.
     bool Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget = null) noexcept;

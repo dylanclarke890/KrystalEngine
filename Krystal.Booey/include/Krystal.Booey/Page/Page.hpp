@@ -197,12 +197,6 @@ namespace krys::boo
     // there are those.
     void DidChangeMainDocument(dom::Document *newDocument) noexcept;
 
-    /// @brief Starts an idle period in each of the page's documents that has idle callbacks, which runs them
-    /// until @p deadline (in real time). The host calls this after a rendering update, with the time it can
-    /// spare before its next frame.
-    /// @see https://w3c.github.io/requestidlecallback/#start-an-idle-period-algorithm
-    void OpportunisticallyRunIdleCallbacks(MonotonicTime::duration deadline) noexcept;
-
     /// @brief Asks for a rendering update at the next rendering opportunity, which runs (at least) the
     /// @p requestedSteps.
     void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps = {}) noexcept;

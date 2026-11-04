@@ -41,11 +41,13 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
   enclosing-frame attachment and the `IncludingSubframes` names.) The frame tree is the main frame only. `<iframe>`, `<frame>`, `<object>` and `<embed>`
   stay as elements with reflected attributes but load no nested document (check whether `<object>`/`<embed>`
   image or SVG rendering needs a frame). Delete the "frames other than the main frame"/subframe FIXMEs.
-- [ ] **5. Timers, blobs.** (The gamepads went in step 2.)
-  - Replace `DOMTimer` (`setTimeout`/`setInterval`, `Document::_timeouts`, the nesting clamp) with a C++
-    document timer that fires as a document task, so it pauses while the document is suspended.
-  - Remove `DOM/Scheduling/IdleCallbackController`.
-  - Remove `HTMLCanvasElement::ToBlob` (and its tests) and `BlobPropertyBag`.
+- [x] **5. Timers, blobs.** (The gamepads went in step 2.)
+  - Replaced `DOMTimer` (`setTimeout`/`setInterval`, `Document::_timeouts`, the nesting clamp) with
+    `dom::DocumentTimer` (`Document::StartTimer`/`StartRepeatingTimer`, returning a `DocumentTimerHandle`),
+    which fires as a document task, so it pauses while the document is suspended.
+  - Removed `DOM/Scheduling/IdleCallbackController` (and `Page::OpportunisticallyRunIdleCallbacks`).
+  - Removed `HTMLCanvasElement::ToBlob` (and its tests). `BlobPropertyBag` stays: it's the kept `Blob` and
+    `File` constructors' options.
 - [ ] **6. DOM and Editing leftovers.**
   - Remove `DOM/FragmentDirective/` and `TextIterator`'s `FoldQuoteMarks`.
   - Remove `Internals/VisitedLinkState`, `Style/ForVisitedLink`, `StyleVisitedLinkColorData` and the visited

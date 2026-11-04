@@ -3,7 +3,6 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
-#include "Krystal.Booey/DOM/Scheduling/IdleCallbackController.hpp"
 #include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
@@ -244,27 +243,8 @@ namespace krys::boo
     /// @brief Calls @p function with each window that exists.
     static void ForEachWindow(const Func<void(LocalDOMWindow &)> &function) noexcept;
 
-#pragma region Timers - https://html.spec.whatwg.org/#timers
-
-    /// @brief Runs @p handler after @p timeout milliseconds (0 if negative), as a task.
-    /// @return The timer's ID, positive; 0 if the window has no document.
-    /// @see https://html.spec.whatwg.org/#dom-settimeout
-    int32 SetTimeout(Func<void()> &&handler, int32 timeout = 0) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#dom-cleartimeout
-    void ClearTimeout(int32 id) noexcept;
-
-    /// @brief Runs @p handler every @p timeout milliseconds, as a task, until cleared.
-    /// @see https://html.spec.whatwg.org/#dom-setinterval
-    int32 SetInterval(Func<void()> &&handler, int32 timeout = 0) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#dom-clearinterval
-    void ClearInterval(int32 id) noexcept;
-
     /// @see https://html.spec.whatwg.org/#dom-queuemicrotask
     void QueueMicrotask(Func<void()> &&callback) noexcept;
-
-#pragma endregion
 
 #pragma region Animation frames - https://html.spec.whatwg.org/#animation-frames
 
@@ -275,18 +255,6 @@ namespace krys::boo
 
     /// @see https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe
     void CancelAnimationFrame(int32 handle) noexcept;
-
-#pragma endregion
-
-#pragma region Idle callbacks - https://w3c.github.io/requestidlecallback/#the-requestidlecallback-method
-
-    /// @brief Calls @p callback in an idle period after a rendering update, or after @p options' timeout.
-    /// @see https://w3c.github.io/requestidlecallback/#the-requestidlecallback-method
-    int32 RequestIdleCallback(dom::IdleRequestCallback &&callback,
-                              const dom::IdleRequestOptions &options = {}) noexcept;
-
-    /// @see https://w3c.github.io/requestidlecallback/#the-cancelidlecallback-method
-    void CancelIdleCallback(int32 handle) noexcept;
 
 #pragma endregion
 
