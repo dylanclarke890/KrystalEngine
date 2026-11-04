@@ -64,7 +64,6 @@ namespace krys::boo::style
 
     // MARK: - Non-property initial values.
 
-    KRYS_NODISCARD static inline PageSize InitialPageSize() noexcept;
     KRYS_NODISCARD constexpr static ZIndex InitialUsedZIndex() noexcept;
 
   private:

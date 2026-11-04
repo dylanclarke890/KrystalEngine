@@ -40,7 +40,6 @@ namespace krys::boo::css
       ParsePseudoClassSelector(CSSOMStringView name, const SelectorParserContext &context) noexcept;
     KRYS_NODISCARD static UniquePtr<MutableSelector>
       ParsePseudoElementSelector(CSSOMStringView name, const SelectorParserContext &context) noexcept;
-    KRYS_NODISCARD static UniquePtr<MutableSelector> ParsePagePseudoSelector(CSSOMStringView name) noexcept;
 
     KRYS_NODISCARD UniquePtr<Selector> ReleaseSelector() noexcept
     {
@@ -91,11 +90,6 @@ namespace krys::boo::css
     void SetRelation(SelectorRelation relation) noexcept
     {
       _selector->SetRelation(relation);
-    }
-
-    void SetForPage() noexcept
-    {
-      _selector->SetForPage();
     }
 
     KRYS_NODISCARD SelectorMatch Match() const noexcept

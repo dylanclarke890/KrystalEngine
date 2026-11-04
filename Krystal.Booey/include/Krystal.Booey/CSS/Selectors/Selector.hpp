@@ -29,8 +29,6 @@ namespace krys::boo::css
     PseudoClass,
     /// @brief Matches a pseudo-element of the element.
     PseudoElement,
-    /// @brief Matches a page pseudo-class (`:first`, `:left`, `:right`) in an `@page` selector.
-    PagePseudoClass,
     /// @brief Matches an element when it has a specific attribute, regardless of the value of that attribute.
     AttributeExists,
     /// @brief Matches an element when it has a specific attribute with a specific value.
@@ -58,14 +56,6 @@ namespace krys::boo::css
     /// for forgiving parsing of selectors that are not supported by the browser but need to be preserved for
     /// serialization.
     ForgivingUnknownNestContaining,
-  };
-
-  /// @brief The pseudo-classes allowed in an `@page` selector.
-  enum class SelectorPagePseudoClass : uint8
-  {
-    First,
-    Left,
-    Right,
   };
 
   /// @brief The relationship between two selectors in a SelectorList. From the perspective of the second
@@ -112,8 +102,6 @@ namespace krys::boo::css
     /// @brief Set when a selector is implicit (it isn't written by a UA or author but is implied by the
     /// CSSOM, e.g. `:root`).
     IsImplicit = 1 << 6,
-    /// @brief Set when the selector is an `@page` selector.
-    IsForPage = 1 << 7,
   };
 
   struct IsCaseSensitive : public StronglyTypedBool<IsCaseSensitive>
@@ -127,8 +115,7 @@ namespace krys::boo::css
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorMatch, 18uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorPagePseudoClass, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorMatch, 17uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorRelation, 8uz);
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::SelectorFlag, 8uz);
 
@@ -237,7 +224,7 @@ namespace krys::boo::css
   private:
     SelectorRelation _relation {SelectorRelation::Descendant};
     SelectorMatch _match {SelectorMatch::None};
-    // A SelectorPseudoClass, SelectorPseudoElement or SelectorPagePseudoClass, depending on _match.
+    // A SelectorPseudoClass or SelectorPseudoElement, depending on _match.
     uint8 _pseudoType {0};
     SelectorFlag _flags {SelectorFlag::IsFirstInComplexSelector | SelectorFlag::IsLastInComplexSelector};
 
@@ -268,7 +255,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD uint32 ComputeSpecificity() const noexcept;
     KRYS_NODISCARD Array<uint8, 3> ComputeSpecificityTuple() const noexcept;
-    KRYS_NODISCARD uint32 SpecificityForPage() const noexcept;
 
     bool VisitSimpleSelectors(
       VisitFunc &&func,
@@ -375,12 +361,6 @@ namespace krys::boo::css
       return static_cast<SelectorPseudoElement>(_pseudoType);
     }
 
-    KRYS_NODISCARD SelectorPagePseudoClass PagePseudoClass() const noexcept
-    {
-      krys_debug_assert(Match() == SelectorMatch::PagePseudoClass);
-      return static_cast<SelectorPagePseudoClass>(_pseudoType);
-    }
-
     KRYS_NODISCARD bool MatchesPseudoElement() const noexcept
     {
       return Match() == SelectorMatch::PseudoElement;
@@ -420,11 +400,6 @@ namespace krys::boo::css
     void SetLastInSelectorList() noexcept
     {
       SetFlag(SelectorFlag::IsLastInSelectorList, true);
-    }
-
-    KRYS_NODISCARD bool IsForPage() const noexcept
-    {
-      return HasFlag(_flags, SelectorFlag::IsForPage);
     }
 
     /// @brief Whether this selector is not author/UA written.
@@ -467,11 +442,6 @@ namespace krys::boo::css
       _pseudoType = ToUnderlying(pseudoElement);
     }
 
-    void SetPagePseudoClass(SelectorPagePseudoClass pagePseudoClass) noexcept
-    {
-      _pseudoType = ToUnderlying(pagePseudoClass);
-    }
-
     void SetRelation(SelectorRelation relation) noexcept
     {
       _relation = relation;
@@ -480,11 +450,6 @@ namespace krys::boo::css
     void SetMatch(SelectorMatch match) noexcept
     {
       _match = match;
-    }
-
-    void SetForPage() noexcept
-    {
-      SetFlag(SelectorFlag::IsForPage, true);
     }
 
     void SetImplicit() noexcept

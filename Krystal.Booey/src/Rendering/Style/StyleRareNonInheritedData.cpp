@@ -19,7 +19,6 @@ namespace krys::boo
         // CounterDirectives
         ,
         WillChange(style::ComputedStyle::InitialWillChange()),
-        PageSize(style::ComputedStyle::InitialPageSize()),
         ShapeOutside(style::ComputedStyle::InitialShapeOutside()),
         ShapeMargin(style::ComputedStyle::InitialShapeMargin()),
         ShapeImageThreshold(style::ComputedStyle::InitialShapeImageThreshold()),
@@ -106,8 +105,8 @@ namespace krys::boo
         TouchAction(o.TouchAction), InitialLetter(o.InitialLetter), BackdropFilter(o.BackdropFilter),
         Grid(o.Grid), GridItem(o.GridItem), MaskBorder(o.MaskBorder), Clip(o.Clip),
         ScrollMargin(o.ScrollMargin), ScrollPadding(o.ScrollPadding), CounterDirectives(o.CounterDirectives),
-        WillChange(o.WillChange), PageSize(o.PageSize), ShapeOutside(o.ShapeOutside),
-        ShapeMargin(o.ShapeMargin), ShapeImageThreshold(o.ShapeImageThreshold), Perspective(o.Perspective),
+        WillChange(o.WillChange), ShapeOutside(o.ShapeOutside), ShapeMargin(o.ShapeMargin),
+        ShapeImageThreshold(o.ShapeImageThreshold), Perspective(o.Perspective),
         PerspectiveOrigin(o.PerspectiveOrigin), ClipPath(o.ClipPath), CustomProperties(o.CustomProperties),
         CustomPaintWatchedProperties(o.CustomPaintWatchedProperties), Rotate(o.Rotate), Scale(o.Scale),
         Translate(o.Translate), ContainerNames(o.ContainerNames),
@@ -159,11 +158,10 @@ namespace krys::boo
            && BackdropFilter == o.BackdropFilter && Grid == o.Grid && GridItem == o.GridItem
            && MaskBorder == o.MaskBorder && Clip == o.Clip && ScrollMargin == o.ScrollMargin
            && ScrollPadding == o.ScrollPadding && CounterDirectives == o.CounterDirectives
-           && WillChange == o.WillChange && PageSize == o.PageSize && ShapeOutside == o.ShapeOutside
-           && ShapeMargin == o.ShapeMargin && ShapeImageThreshold == o.ShapeImageThreshold
-           && Perspective == o.Perspective && PerspectiveOrigin == o.PerspectiveOrigin
-           && ClipPath == o.ClipPath && TextDecorationColor == o.TextDecorationColor
-           && CustomProperties == o.CustomProperties
+           && WillChange == o.WillChange && ShapeOutside == o.ShapeOutside && ShapeMargin == o.ShapeMargin
+           && ShapeImageThreshold == o.ShapeImageThreshold && Perspective == o.Perspective
+           && PerspectiveOrigin == o.PerspectiveOrigin && ClipPath == o.ClipPath
+           && TextDecorationColor == o.TextDecorationColor && CustomProperties == o.CustomProperties
            && CustomPaintWatchedProperties == o.CustomPaintWatchedProperties && Rotate == o.Rotate
            && Scale == o.Scale && Translate == o.Translate && ContainerNames == o.ContainerNames
            && ColumnGap == o.ColumnGap && RowGap == o.RowGap && ItemTolerance == o.ItemTolerance

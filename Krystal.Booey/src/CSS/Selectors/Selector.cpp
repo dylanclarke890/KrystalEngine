@@ -137,10 +137,6 @@ namespace krys::boo::css
     SelectorSpecificity SimpleSelectorSpecificity(const Selector &simpleSelector,
                                                   IgnorePseudoElement ignorePseudoElement) noexcept
     {
-      krys_debug_assert_msg(!simpleSelector.IsForPage(),
-                            "Page selectors are not treated as real selectors that are matched. The value "
-                            "computed here only account for real selectors.");
-
       if (simpleSelector.IsImplicit()) KRYS_UNLIKELY
       {
         return 0;
@@ -153,7 +149,6 @@ namespace krys::boo::css
           return SelectorSpecificityIncrement::ClassA;
         }
         case SelectorMatch::NestingParent:
-        case SelectorMatch::PagePseudoClass:
         {
           break;
         }
@@ -262,49 +257,6 @@ namespace krys::boo::css
   Array<uint8, 3> Selector::ComputeSpecificityTuple() const noexcept
   {
     return ComplexSelectorSpecificity(*this).SpecificityTuple();
-  }
-
-  uint32 Selector::SpecificityForPage() const noexcept
-  {
-    krys_debug_assert(IsForPage());
-
-    // See https://drafts.csswg.org/css-page-3/#cascading-and-page-context
-    uint32 s = 0;
-
-    for (const auto *component = this; component; component = component->PrecedingComplexSelectorComponent())
-    {
-      switch (component->Match())
-      {
-        case SelectorMatch::Type:
-        {
-          s += component->TagQualifiedName().LocalName() == dom::StarAtom() ? 0 : 4;
-          break;
-        }
-        case SelectorMatch::PagePseudoClass:
-        {
-          switch (component->PagePseudoClass())
-          {
-            case SelectorPagePseudoClass::First:
-            {
-              s += 2;
-              break;
-            }
-            case SelectorPagePseudoClass::Left:
-            case SelectorPagePseudoClass::Right:
-            {
-              s += 1;
-              break;
-            }
-          }
-          break;
-        }
-        default:
-        {
-          break;
-        }
-      }
-    }
-    return s;
   }
 
 #pragma endregion
@@ -847,27 +799,6 @@ namespace krys::boo::css
           else
           {
             builder.Append(u8']');
-          }
-        }
-      }
-      else if (selector->Match() == SelectorMatch::PagePseudoClass)
-      {
-        switch (selector->PagePseudoClass())
-        {
-          case SelectorPagePseudoClass::First:
-          {
-            builder.Append(u8":first");
-            break;
-          }
-          case SelectorPagePseudoClass::Left:
-          {
-            builder.Append(u8":left");
-            break;
-          }
-          case SelectorPagePseudoClass::Right:
-          {
-            builder.Append(u8":right");
-            break;
           }
         }
       }

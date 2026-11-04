@@ -699,7 +699,6 @@ namespace krys::boo::css
             return true;
           }
           case RuleType::Media:
-          case RuleType::Page:
           case RuleType::Keyframes:
           case RuleType::Namespace:
           case RuleType::Charset:
@@ -748,7 +747,6 @@ namespace krys::boo::css
           case RuleType::Import:
           case RuleType::CounterStyle:
           case RuleType::Media:
-          case RuleType::Page:
           case RuleType::Keyframes:
           case RuleType::Namespace:
           case RuleType::Charset:

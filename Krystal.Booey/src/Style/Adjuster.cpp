@@ -694,9 +694,6 @@ namespace krys::boo::style
     }
     else if (!IsOverflowClipOrVisible(style.OverflowY()))
     {
-      // FIXME: Once we implement pagination controls, overflow-x should default to hidden
-      // if overflow-y is set to -webkit-paged-x or -webkit-page-y. For now, we'll let it
-      // default to auto so we can at least scroll through the pages.
       // Values of 'clip' and 'visible' can only be used with 'clip' and 'visible'.
       // If they aren't, 'clip' and 'visible' is reset.
       if (style.OverflowX() == Overflow::Visible)
@@ -721,10 +718,6 @@ namespace krys::boo::style
         style.SetOverflowY(Overflow::Hidden);
       }
     }
-
-    // FIXME: Paged overflow (`-webkit-paged-x`/`-webkit-paged-y`) on elements other than <html> and <body>
-    // sets the column styles from the pagination mode (`setColumnStylesFromPaginationMode`); there is no
-    // frame view.
 
     // Let the theme also have a crack at adjusting the style.
     if (style.HasAppearance())
@@ -956,7 +949,6 @@ namespace krys::boo::style
       auto newRootStyle = RenderStyle::ClonePtr(renderViewStyle);
       newRootStyle->SetWritingMode(writingMode);
       newRootStyle->SetDirection(direction);
-      // FIXME: setColumnStylesFromPaginationMode, once documents have a view with a pagination mode.
       update.AddInitialContainingBlockUpdate(krys::move(newRootStyle));
     }
 

@@ -197,7 +197,7 @@ namespace krys::boo::style
     // FIXME: Add the rules of the page user style sheet and the injected and document user style sheets, once
     // there are user style sheets (ExtensionStyleSheets).
 
-    if (userStyle->RuleCount() > 0 || !userStyle->PageRules().empty())
+    if (userStyle->RuleCount() > 0)
     {
       _userStyle = krys::move(userStyle);
     }

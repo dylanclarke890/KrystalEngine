@@ -17,7 +17,6 @@ namespace krys::boo::css
     Keyframes,
     Media,
     Namespace,
-    Page,
     PositionTry,
     Supports,
     ViewTransition,
@@ -46,4 +45,4 @@ namespace krys::boo::css
   KRYS_NODISCARD AtRuleId AtRuleIdFromName(CSSOMStringView name) noexcept;
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::AtRuleId, 26uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::AtRuleId, 25uz);

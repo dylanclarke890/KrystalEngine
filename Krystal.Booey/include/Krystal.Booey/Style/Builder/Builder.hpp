@@ -111,8 +111,6 @@ namespace krys::boo::style
     KRYS_NODISCARD Maybe<ResolvedCustomProperty>
       ResolveCustomPropertyValue(css::CustomPropertyValue &) noexcept;
 
-    void ApplyPageSizeDescriptor(css::Value &) noexcept;
-
     KRYS_NODISCARD const PropertyCascade *EnsureRollbackCascadeForRevert() noexcept;
     KRYS_NODISCARD const PropertyCascade *EnsureRollbackCascadeForRevertLayer() noexcept;
 

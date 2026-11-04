@@ -407,7 +407,6 @@ namespace krys::boo::css
           case SelectorMatch::AttributeSubstring:
           case SelectorMatch::AttributePrefix:
           case SelectorMatch::AttributeSuffix:
-          case SelectorMatch::PagePseudoClass:
           case SelectorMatch::PseudoElement:                  return true;
           case SelectorMatch::HasScope:
           case SelectorMatch::NestingParent:

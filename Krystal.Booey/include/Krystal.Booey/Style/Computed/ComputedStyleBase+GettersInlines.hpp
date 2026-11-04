@@ -441,11 +441,6 @@ namespace krys::boo::style
 
   // FIXME: Support descriptors
 
-  inline const PageSize &ComputedStyleBase::GetPageSize() const
-  {
-    return _nonInheritedData->RareData->PageSize;
-  }
-
   // FIXME: Add a type that encapsulates both caretColor() and hasAutoCaretColor().
 
   inline const Color &ComputedStyleBase::CaretColor() const

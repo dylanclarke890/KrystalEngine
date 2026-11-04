@@ -181,13 +181,6 @@ namespace krys::boo::style
         return;
       }
 
-      case css::RuleType::Page:
-        if (_ruleSet)
-        {
-          _ruleSet->AddPageRule(static_cast<css::PageRule &>(*rule));
-        }
-        return;
-
       case css::RuleType::Media:
       {
         auto &mediaRule = static_cast<css::MediaRule &>(*rule);

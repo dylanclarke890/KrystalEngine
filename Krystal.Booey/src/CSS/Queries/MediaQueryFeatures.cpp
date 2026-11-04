@@ -525,9 +525,7 @@ namespace krys::boo::css::mq::Features
       {
         // FIXME: Match none when scrollEnabled is set to false by UIKit.
         auto &view = ViewOf(context);
-        bool matchesPaged =
-          view.MediaType() == PrintAtom() || view.GetPagination().Mode != PaginationMode::Unpaginated;
-        return MatchingIdentifiers {matchesPaged ? ValueId::Paged : ValueId::Scroll};
+        return MatchingIdentifiers {view.MediaType() == PrintAtom() ? ValueId::Paged : ValueId::Scroll};
       }};
     return schema;
   }

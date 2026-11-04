@@ -334,14 +334,9 @@ namespace krys::boo::css::tests
       CHECK(Downcast<FontFaceRule>(*sheet->RuleAt(1)).Properties().PropertyCount() == 0);
     }
 
-    SECTION("@page")
+    SECTION("@page is an unknown at-rule")
     {
-      auto sheet = ParseSheet(u8"@page :first { margin: 1px } @page { margin: 2px } @page :foo { }");
-      REQUIRE(sheet->RuleCount() == 2);
-      auto &page = Downcast<PageRule>(*sheet->RuleAt(0));
-      CHECK(AsText(page.Properties()) == "margin: 1px;");
-      REQUIRE(page.Selector());
-      CHECK(ToNarrow(page.Selector()->SelectorText()) == ":first");
+      CHECK(ParseSheet(u8"@page { margin: 1px } a { }")->RuleCount() == 1);
     }
 
     SECTION("@keyframes")
@@ -578,27 +573,6 @@ namespace krys::boo::css::tests
     REQUIRE(rule);
     CHECK(AsText(rule->Properties()) == "color: red; margin: 0px;");
     CHECK_FALSE(Parser::ParseNestedDeclarations(context, u8"foo: bar"));
-  }
-
-  TEST_CASE_METHOD(ValueFixture, "Parser::ParsePageSelector", "[CSS][Parser]")
-  {
-    auto sheet = StyleSheetContents::Create(SheetContext());
-    auto selectors = [&](utf8_stringview text)
-    {
-      Tokens tokens {text};
-      return SelectorsText(Parser::ParsePageSelector(tokens.Tokenizer.Tokens(), sheet.get()));
-    };
-
-    CHECK(selectors(u8":left") == ":left");
-    CHECK(selectors(u8"name") == "name");
-    CHECK(selectors(u8"name:first") == "name:first");
-    CHECK(SelectorsText(Parser::ParsePageSelector(TokenRange({}), sheet.get())) == "");
-    CHECK(selectors(u8":hover").empty());
-    CHECK(selectors(u8"a b").empty());
-
-    // Without a sheet, the type selector is in any namespace.
-    Tokens tokens {u8"name"};
-    CHECK(SelectorsText(Parser::ParsePageSelector(tokens.Tokenizer.Tokens(), nullptr)) == "name");
   }
 
   TEST_CASE("Parser::ConsumeTrailingImportantAndWhitespace", "[CSS][Parser]")

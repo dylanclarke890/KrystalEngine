@@ -915,16 +915,6 @@ slot {
     display: contents;
 }
 
-/* page */
-
-@page {
-    /* FIXME: Define the right default values for page properties. */
-    size: auto;
-    margin: auto;
-    padding: 0px;
-    border-width: 0px;
-}
-
 /* noscript support */
 
 @media (scripting) {

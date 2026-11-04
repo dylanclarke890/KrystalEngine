@@ -191,8 +191,6 @@ namespace krys::boo
     Clip,
     Scroll,
     Auto,
-    PagedX,
-    PagedY
   };
 
   enum class Clear : uint8

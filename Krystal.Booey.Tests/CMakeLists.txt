@@ -113,7 +113,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSOM/CSSLayerStatementRule.cpp
 		tests/CSS/CSSOM/CSSMediaRule.cpp
 		tests/CSS/CSSOM/CSSNamespaceRule.cpp
-		tests/CSS/CSSOM/CSSPageRule.cpp
 		tests/CSS/CSSOM/CSSPositionTryRule.cpp
 		tests/CSS/CSSOM/CSSPropertyRule.cpp
 		tests/CSS/CSSOM/CSSRule.cpp

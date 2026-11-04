@@ -159,7 +159,6 @@ namespace krys::boo
     struct Opacity;
     struct Orphans;
     struct PaddingEdge;
-    struct PageSize;
     struct Perspective;
     struct Position;
     struct PositionAnchor;
@@ -575,10 +574,6 @@ namespace krys::boo
       // `counter-*`
       KRYS_NODISCARD const CounterDirectiveMap &GetCounterDirectives() const noexcept;
       KRYS_NODISCARD CounterDirectiveMap &AccessCounterDirectives() noexcept;
-
-      // `@page size`
-      inline const PageSize &GetPageSize() const;
-      inline void SetPageSize(PageSize &&) noexcept;
 
       struct NonInheritedFlags
       {

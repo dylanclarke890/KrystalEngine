@@ -89,8 +89,6 @@ namespace krys::boo::css::tests
     SECTION("overflow")
     {
       CHECK(ShorthandToText(u8"hidden", PropertyId::Overflow) == "overflow-x: hidden; overflow-y: hidden");
-      CHECK(ShorthandToText(u8"-webkit-paged-x", PropertyId::Overflow)
-            == "overflow-x: auto; overflow-y: -webkit-paged-x");
     }
 
     SECTION("grid-template")

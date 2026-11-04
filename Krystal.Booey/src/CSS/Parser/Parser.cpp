@@ -302,66 +302,6 @@ namespace krys::boo::css
     styleSheet.ShrinkToFit();
   }
 
-  SelectorList Parser::ParsePageSelector(TokenRange tokens, StyleSheetContents *styleSheet) noexcept
-  {
-    // We only support a small subset of the css-page spec.
-    tokens.DiscardWhitespace();
-    Maybe<CSSOMStringAtom> typeSelector;
-    if (tokens.Peek().Type() == TokenType::Ident)
-    {
-      typeSelector = CSSOMStringAtom(tokens.Consume().IdentCodePoints());
-    }
-
-    Maybe<CSSOMStringView> pseudo;
-    if (tokens.Peek().Type() == TokenType::Colon)
-    {
-      tokens.Discard();
-      if (tokens.Peek().Type() != TokenType::Ident)
-      {
-        return {};
-      }
-      pseudo = tokens.Consume().IdentCodePoints();
-    }
-
-    tokens.DiscardWhitespace();
-    if (!tokens.IsAtEnd())
-    {
-      return {}; // Parse error; extra tokens in @page selector
-    }
-
-    // Upstream dereferences the sheet unconditionally; without one, use a sheet's initial default namespace.
-    auto defaultNamespace = styleSheet ? styleSheet->DefaultNamespace() : dom::StarAtom();
-
-    UniquePtr<MutableSelector> selector;
-    if (typeSelector && !pseudo)
-    {
-      selector = CreateUnique<MutableSelector>(
-        dom::QualifiedName(defaultNamespace, CSSOMStringAtom::Null(), *typeSelector));
-    }
-    else
-    {
-      selector = CreateUnique<MutableSelector>();
-      if (pseudo)
-      {
-        selector = MutableSelector::ParsePagePseudoSelector(*pseudo);
-        if (!selector || selector->Match() != SelectorMatch::PagePseudoClass)
-        {
-          return {};
-        }
-      }
-      if (typeSelector)
-      {
-        selector->AppendTagInComplexSelector(
-          dom::QualifiedName(defaultNamespace, CSSOMStringAtom::Null(), *typeSelector));
-      }
-    }
-
-    selector->SetForPage();
-    MutableSelectorList selectors;
-    selectors.push_back(krys::move(selector));
-    return SelectorList(krys::move(selectors));
-  }
-
   bool Parser::SupportsDeclaration(TokenRange &tokens) noexcept
   {
     bool result = false;
@@ -540,7 +480,6 @@ namespace krys::boo::css
                  : nullptr;
       case AtRuleId::FontPaletteValues: return ConsumeFontPaletteValuesRule(prelude, block);
       case AtRuleId::Keyframes:         return ConsumeKeyframesRule(prelude, block);
-      case AtRuleId::Page:              return ConsumePageRule(prelude, block);
       case AtRuleId::CounterStyle:      return ConsumeCounterStyleRule(prelude, block);
       case AtRuleId::Layer:             return ConsumeLayerRule(prelude, block);
       case AtRuleId::Container:         return ConsumeContainerRule(prelude, block);
@@ -1139,19 +1078,6 @@ namespace krys::boo::css
 
     keyframeRule->ShrinkToFit();
     return keyframeRule;
-  }
-
-  RefPtr<PageRule> Parser::ConsumePageRule(TokenRange prelude, TokenRange block) noexcept
-  {
-    auto selectorList = ParsePageSelector(prelude, _styleSheet.get());
-    if (selectorList.IsEmpty())
-    {
-      return nullptr; // Parse error, invalid @page selector
-    }
-
-    auto declarations = ConsumeDeclarationListInNewNestingContext(block, RuleType::Page);
-
-    return PageRule::Create(CreateStyleProperties(declarations, _context.Mode), krys::move(selectorList));
   }
 
   RefPtr<CounterStyleRule> Parser::ConsumeCounterStyleRule(TokenRange prelude, TokenRange block) noexcept

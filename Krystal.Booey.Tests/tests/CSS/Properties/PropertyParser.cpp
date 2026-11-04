@@ -155,13 +155,6 @@ namespace krys::boo::css::tests
             == "<fail>");
     }
 
-    SECTION("@page")
-    {
-      CHECK(ParseToText(u8"a4", PropertyId::Size, RuleType::Page) == "size: a4");
-      CHECK(ParseToText(u8"1px", PropertyId::MarginTop, RuleType::Page) == "margin-top: 1px");
-      CHECK(ParseToText(u8"auto", PropertyId::Page, RuleType::Page) == "<fail>");
-    }
-
     SECTION("Descriptors")
     {
       CHECK(ParseToText(u8"swap", PropertyId::FontDisplay, RuleType::FontFace) == "font-display: swap");

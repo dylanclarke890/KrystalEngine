@@ -132,7 +132,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `env()` has no values: without the document's `ConstantPropertyMap` an `env()` reference falls back or is invalid at computed-value time (FIXME in `VariableReferenceValue.cpp`).
 - `::cue` rules for WebVTT elements aren't collected (FIXME in `ElementRuleCollector.cpp`).
 - View transitions are not implemented: named view transition pseudo-elements get no captured class list, the document element's pseudo-elements aren't created in `TreeResolver`, and an element captured in a view transition isn't forced flat in `Adjuster`.
-- Pagination (`-webkit-paged-x/y`, `setColumnStylesFromPaginationMode`), visually ordered documents and design mode aren't applied in `ResolveForDocument` and `Adjuster` (FIXMEs).
+- Visually ordered documents and design mode aren't applied in `ResolveForDocument` and `Adjuster` (FIXMEs).
 - No visibility adjustment (`VisibilityAdjustment`): `adjustVisibilityForPseudoElement` and the force-hidden subtree adjustment are FIXMEs.
 - `Adjuster` leaves SVG transforms not stored on the style, and the layer-based SVG engine's `z-index`/stacking branches, as FIXMEs.
 - `Style::Extractor` has no branch for properties with running keyframe effects (FIXME).

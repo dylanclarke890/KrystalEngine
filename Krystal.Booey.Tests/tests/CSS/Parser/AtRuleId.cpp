@@ -22,7 +22,7 @@ namespace krys::boo::css::tests
       CHECK(AtRuleIdFromName(u8"media") == AtRuleId::Media);
       CHECK(AtRuleIdFromName(u8"namespace") == AtRuleId::Namespace);
       CHECK(AtRuleIdFromName(u8"ornaments") == AtRuleId::Ornaments);
-      CHECK(AtRuleIdFromName(u8"page") == AtRuleId::Page);
+      CHECK(AtRuleIdFromName(u8"page") == AtRuleId::Invalid);
       CHECK(AtRuleIdFromName(u8"position-try") == AtRuleId::PositionTry);
       CHECK(AtRuleIdFromName(u8"property") == AtRuleId::Property);
       CHECK(AtRuleIdFromName(u8"scope") == AtRuleId::Scope);

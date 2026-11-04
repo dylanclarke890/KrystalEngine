@@ -1168,10 +1168,7 @@ namespace krys::boo
       case Overflow::Clip:   vMode = overrideHidden ? ScrollbarMode::Auto : ScrollbarMode::AlwaysOff; break;
       case Overflow::Scroll: vMode = ScrollbarMode::AlwaysOn; break;
       case Overflow::Auto:   vMode = ScrollbarMode::Auto; break;
-      default:
-        // Don't set it at all. Values of Overflow::PagedX and Overflow::PagedY are handled by
-        // applyPaginationToViewPort().
-        break;
+      default:               break;
     }
   }
 
@@ -1474,21 +1471,6 @@ namespace krys::boo
     }
 
     _mediaType = mediaType;
-
-    if (auto *document = Frame().Document())
-    {
-      document->StyleScope().DidChangeStyleSheetEnvironment();
-    }
-  }
-
-  void LocalFrameView::SetPagination(const boo::Pagination &pagination) noexcept
-  {
-    if (_pagination == pagination)
-    {
-      return;
-    }
-
-    _pagination = pagination;
 
     if (auto *document = Frame().Document())
     {

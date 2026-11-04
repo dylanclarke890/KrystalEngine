@@ -26,7 +26,6 @@
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Rules/ElementRuleCollector.hpp"
 #include "Krystal.Booey/Style/Rules/MatchResultCache.hpp"
-#include "Krystal.Booey/Style/Rules/PageRuleCollector.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSetBuilder.hpp"
 #include "Krystal.Booey/Style/Rules/UserAgentStyle.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -690,31 +689,6 @@ namespace krys::boo::style
     // FIXME: Adjuster::adjustVisibilityForPseudoElement comes with the visibility adjustment of elements.
 
     return ResolvedStyle {state.TakeStyle(), nullptr, collector.ReleaseMatchResult()};
-  }
-
-  UniquePtr<RenderStyle> Resolver::StyleForPage(int32 pageIndex) noexcept
-  {
-    auto documentElement = Document().DocumentElement();
-    if (!documentElement || !documentElement->GetRenderStyle())
-    {
-      return RenderStyle::CreatePtr();
-    }
-
-    auto state = State(*documentElement, Document().InitialContainingBlockStyle(), nullptr, nullptr);
-
-    state.SetStyle(RenderStyle::CreatePtr());
-    state.Style()->InheritFrom(*state.RootElementStyle());
-
-    PageRuleCollector collector(_ruleSets, documentElement->GetRenderStyle()->GetWritingMode());
-    collector.MatchAllPageRules(pageIndex);
-
-    auto &result = collector.GetMatchResult();
-
-    Builder builder(*state.Style(), GetBuilderContext(state), result);
-    builder.ApplyAllProperties();
-
-    // Now return the style.
-    return state.TakeStyle();
   }
 
   UniquePtr<RenderStyle> Resolver::DefaultStyleForElement(const dom::Document &document,

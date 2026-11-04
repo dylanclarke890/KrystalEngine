@@ -13,7 +13,6 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSPageRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSPropertyRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp"
@@ -67,10 +66,6 @@ namespace krys::boo::css
       case RuleType::NestedDeclarations:
       {
         return std::invoke(std::forward<Visitor>(visitor), static_cast<NestedDeclarationsRule &>(*this));
-      }
-      case RuleType::Page:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<PageRule &>(*this));
       }
       case RuleType::FontFace:
       {
@@ -229,10 +224,6 @@ namespace krys::boo::css
         else if constexpr (SameType<TRule, NestedDeclarationsRule>)
         {
           return CSSNestedDeclarations::Create(rule, parentSheet);
-        }
-        else if constexpr (SameType<TRule, PageRule>)
-        {
-          return CSSPageRule::Create(rule, parentSheet);
         }
         else if constexpr (SameType<TRule, FontFaceRule>)
         {
@@ -662,37 +653,6 @@ namespace krys::boo::css
   Ref<FontFeatureValuesRule> FontFeatureValuesRule::Copy() const noexcept
   {
     return AdoptRef(*new FontFeatureValuesRule(*this));
-  }
-
-#pragma endregion
-
-#pragma region PageRule
-
-  PageRule::PageRule(Ref<StyleProperties> &&properties, SelectorList &&selectors) noexcept
-      : Rule(RuleType::Page), _properties(krys::move(properties)), _selectorList(krys::move(selectors))
-  {
-  }
-
-  PageRule::PageRule(const PageRule &other) noexcept
-      : Rule(other), _properties(other._properties->MutableCopy()), _selectorList(other._selectorList)
-  {
-  }
-
-  PageRule::~PageRule() noexcept = default;
-
-  Ref<PageRule> PageRule::Create(Ref<StyleProperties> &&properties, SelectorList &&selectors) noexcept
-  {
-    return AdoptRef(*new PageRule(krys::move(properties), krys::move(selectors)));
-  }
-
-  Ref<PageRule> PageRule::Copy() const noexcept
-  {
-    return AdoptRef(*new PageRule(*this));
-  }
-
-  MutableStyleProperties &PageRule::MutableProperties() noexcept
-  {
-    return EnsureMutable(_properties);
   }
 
 #pragma endregion

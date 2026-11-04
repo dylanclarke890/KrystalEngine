@@ -113,11 +113,6 @@ namespace krys::boo::css
       return Type() == RuleType::Media;
     }
 
-    KRYS_NODISCARD bool IsPageRule() const noexcept
-    {
-      return Type() == RuleType::Page;
-    }
-
     KRYS_NODISCARD bool IsStyleRule() const noexcept
     {
       return Type() == RuleType::Style || Type() == RuleType::StyleWithNesting
@@ -493,42 +488,6 @@ namespace krys::boo::css
     }
   };
 
-  /// @brief `@page`.
-  class PageRule final : public Rule
-  {
-  private:
-    Ref<StyleProperties> _properties;
-    SelectorList _selectorList;
-
-    PageRule(Ref<StyleProperties> &&properties, SelectorList &&selectors) noexcept;
-    PageRule(const PageRule &other) noexcept;
-
-  public:
-    ~PageRule() noexcept;
-
-    KRYS_NODISCARD static Ref<PageRule> Create(Ref<StyleProperties> &&properties,
-                                               SelectorList &&selectors) noexcept;
-
-    KRYS_NODISCARD Ref<PageRule> Copy() const noexcept;
-
-    KRYS_NODISCARD const css::Selector *Selector() const noexcept
-    {
-      return _selectorList.FirstSelectorComponent();
-    }
-
-    KRYS_NODISCARD const StyleProperties &Properties() const noexcept
-    {
-      return *_properties;
-    }
-
-    KRYS_NODISCARD MutableStyleProperties &MutableProperties() noexcept;
-
-    void WrapperAdoptSelectorList(SelectorList &&selectors) noexcept
-    {
-      _selectorList = krys::move(selectors);
-    }
-  };
-
   /// @brief The base of the rules that contain other rules.
   class GroupRule : public Rule
   {
@@ -863,13 +822,6 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::MediaRule)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Rule &rule) noexcept
   {
     return rule.IsMediaRule();
-  }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
-
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PageRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::Rule &rule) noexcept
-  {
-    return rule.IsPageRule();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 

@@ -129,8 +129,6 @@ namespace krys::boo::css
                                                                  const ParserContext &context) noexcept;
     static void ParseStyleSheet(CSSOMStringView string, const ParserContext &context,
                                 StyleSheetContents &styleSheet) noexcept;
-    KRYS_NODISCARD static SelectorList ParsePageSelector(TokenRange tokens,
-                                                         StyleSheetContents *styleSheet) noexcept;
 
     KRYS_NODISCARD bool SupportsDeclaration(TokenRange &tokens) noexcept;
 
@@ -180,7 +178,6 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<FontPaletteValuesRule> ConsumeFontPaletteValuesRule(TokenRange prelude,
                                                                               TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<KeyframesRule> ConsumeKeyframesRule(TokenRange prelude, TokenRange block) noexcept;
-    KRYS_NODISCARD RefPtr<PageRule> ConsumePageRule(TokenRange prelude, TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<CounterStyleRule> ConsumeCounterStyleRule(TokenRange prelude,
                                                                     TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<LayerRule> ConsumeLayerRule(TokenRange prelude, Maybe<TokenRange> block) noexcept;

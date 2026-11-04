@@ -24,7 +24,6 @@
 #include "Krystal.Booey/Style/Rules/MatchResult.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
-#include "Krystal.Booey/Style/Values/Page/PageSize.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -417,12 +416,6 @@ namespace krys::boo::style
     // FIXME: Watch the input properties of a `paint()` image's paint worklet (`addCustomPaintWatchProperty`)
     // once paint worklets are ported.
 
-    if (id == css::PropertyId::Size && valueType == ApplyValueType::Value) KRYS_UNLIKELY
-    {
-      ApplyPageSizeDescriptor(*valueToApply);
-      return;
-    }
-
     BuilderGenerated::ApplyProperty(id, *_state, *valueToApply, valueType);
 
     if (!isRevertOrRevertLayer)
@@ -768,20 +761,6 @@ namespace krys::boo::style
 
     return css::PropertyParser::ParseTypedCustomPropertyValue(
       name, registered->Syntax, resolvedData->TokenRange(), *_state, resolvedData->Context());
-  }
-
-  void Builder::ApplyPageSizeDescriptor(css::Value &value) noexcept
-  {
-    _state->Style().SetPageSize(ComputedStyle::InitialPageSize());
-
-    auto convertedPageSize = ConvertCSSValueToStyle<PageSize>(*_state, value);
-
-    if (_state->IsCurrentPropertyInvalidAtComputedValueTime())
-    {
-      return;
-    }
-
-    _state->Style().SetPageSize(krys::move(convertedPageSize));
   }
 
   const PropertyCascade *Builder::EnsureRollbackCascadeForRevert() noexcept

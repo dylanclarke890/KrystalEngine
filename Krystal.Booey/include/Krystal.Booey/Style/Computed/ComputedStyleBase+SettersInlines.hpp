@@ -363,11 +363,6 @@ namespace krys::boo::style
 
   // FIXME: Support descriptors
 
-  inline void ComputedStyleBase::SetPageSize(PageSize &&pageSize) noexcept
-  {
-    SET_NESTED(_nonInheritedData, RareData, PageSize, krys::move(pageSize));
-  }
-
   // FIXME: Add a type that encapsulates both caretColor() and hasAutoCaretColor().
 
   inline void ComputedStyleBase::SetCaretColor(Color &&color) noexcept

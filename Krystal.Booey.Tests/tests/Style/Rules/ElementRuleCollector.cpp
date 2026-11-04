@@ -16,7 +16,6 @@
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Rules/MatchResult.hpp"
-#include "Krystal.Booey/Style/Rules/PageRuleCollector.hpp"
 #include "Krystal.Booey/Style/Rules/ScopeRuleSets.hpp"
 #include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -518,51 +517,6 @@ namespace krys::boo::style::tests
       link->AuthorDeclarations.push_back({ShareRef<const css::StyleProperties>(*a)});
       REQUIRE(link->IsForLink);
       REQUIRE_FALSE(first->CacheablePropertiesEqual(*link));
-    }
-  }
-
-  TEST_CASE_METHOD(css::tests::ValueFixture, "PageRuleCollector: @page rules", "[Style][PageRuleCollector]")
-  {
-    RunTasks();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
-      @page :first { margin-top: 2px; }
-      @page { margin-top: 1px; }
-      @page :left { margin-top: 3px; }
-      @page :right { margin-top: 4px; }
-      @page :left { }
-    </style>)");
-    auto &ruleSets = document->StyleScope().GetResolver().RuleSets();
-
-    auto margins = [&](const MatchResult &result)
-    {
-      Strings values;
-      for (auto &matchedProperties : result.AuthorDeclarations)
-      {
-        values.push_back(
-          ToNarrow(matchedProperties.Properties->GetPropertyValue(css::PropertyId::MarginTop)));
-      }
-      return values;
-    };
-
-    SECTION("Left-to-right: the first page is a right page")
-    {
-      PageRuleCollector first(ruleSets, WritingMode());
-      first.MatchAllPageRules(0);
-      // The user agent's print sheet first, then the author rules sorted by specificity: :first beats :left
-      // and :right.
-      REQUIRE(margins(first.GetMatchResult()) == Strings {"auto", "1px", "4px", "2px"});
-
-      PageRuleCollector second(ruleSets, WritingMode());
-      second.MatchAllPageRules(1);
-      REQUIRE(margins(second.GetMatchResult()) == Strings {"auto", "1px", "3px"});
-    }
-
-    SECTION("Right-to-left: the first page is a left page")
-    {
-      WritingMode rightToLeft(StyleWritingMode::HorizontalTb, TextDirection::RTL, TextOrientation::Mixed);
-      PageRuleCollector first(ruleSets, rightToLeft);
-      first.MatchAllPageRules(0);
-      REQUIRE(margins(first.GetMatchResult()) == Strings {"auto", "1px", "3px", "2px"});
     }
   }
 }

@@ -1456,8 +1456,6 @@ NaN
 from-image
 
 // overflow
--webkit-paged-x
--webkit-paged-y
 
 // paint-order
 // normal

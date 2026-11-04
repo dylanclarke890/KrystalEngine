@@ -321,7 +321,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp
-  include/Krystal.Booey/CSS/CSSOM/CSSPageRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSPropertyRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSRule.hpp
@@ -337,7 +336,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/StyleSheets/CSSStyleSheetObservableArray.hpp
   include/Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp
   include/Krystal.Booey/CSS/Descriptors/CSSFunctionDescriptors.hpp
-  include/Krystal.Booey/CSS/Descriptors/CSSPageDescriptors.hpp
   include/Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp
   include/Krystal.Booey/CSS/Descriptors/PropertySetCSSDescriptors.hpp
   include/Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp
@@ -713,7 +711,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/CSSOM/CSSMediaRule.cpp
   src/CSS/CSSOM/CSSNamespaceRule.cpp
   src/CSS/CSSOM/CSSNestedDeclarations.cpp
-  src/CSS/CSSOM/CSSPageRule.cpp
   src/CSS/CSSOM/CSSPositionTryRule.cpp
   src/CSS/CSSOM/CSSPropertyRule.cpp
   src/CSS/CSSOM/CSSRule.cpp
@@ -729,7 +726,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/StyleSheets/CSSStyleSheetObservableArray.cpp
   src/CSS/Descriptors/CSSFontFaceDescriptors.cpp
   src/CSS/Descriptors/CSSFunctionDescriptors.cpp
-  src/CSS/Descriptors/CSSPageDescriptors.cpp
   src/CSS/Descriptors/CSSPositionTryDescriptors.cpp
   src/CSS/Descriptors/PropertySetCSSDescriptors.cpp
   src/CSS/DOMMatrix/DOMMatrix.cpp
@@ -2672,7 +2668,6 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp
   include/Krystal.Booey/Rendering/MathML/RenderMathMLUnderOver.hpp
   include/Krystal.Booey/Rendering/MotionPath.hpp
-  include/Krystal.Booey/Rendering/Pagination.hpp
   include/Krystal.Booey/Rendering/Painting/BackgroundPainter.hpp
   include/Krystal.Booey/Rendering/Painting/BorderEdge.hpp
   include/Krystal.Booey/Rendering/Painting/BorderPainter.hpp
@@ -3187,7 +3182,6 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Rules/MatchedDeclarationsCache.hpp
   include/Krystal.Booey/Style/Rules/MatchResult.hpp
   include/Krystal.Booey/Style/Rules/MatchResultCache.hpp
-  include/Krystal.Booey/Style/Rules/PageRuleCollector.hpp
   include/Krystal.Booey/Style/Rules/PropertyAllowlist.hpp
   include/Krystal.Booey/Style/Rules/RuleData.hpp
   include/Krystal.Booey/Style/Rules/RuleFeature.hpp
@@ -3379,7 +3373,6 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Values/Overflow/MaximumLines.hpp
   include/Krystal.Booey/Style/Values/Overflow/ScrollbarGutter.hpp
   include/Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp
-  include/Krystal.Booey/Style/Values/Page/PageSize.hpp
   include/Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp
   include/Krystal.Booey/Style/Values/Position/Inset.hpp
   include/Krystal.Booey/Style/Values/Primitives/Concepts.hpp
@@ -3556,7 +3549,6 @@ set(KRYSTAL_BOOEY_STYLE_SOURCES
   src/Style/Rules/ElementRuleCollector.cpp
   src/Style/Rules/MatchedDeclarationsCache.cpp
   src/Style/Rules/MatchResultCache.cpp
-  src/Style/Rules/PageRuleCollector.cpp
   src/Style/Rules/PropertyAllowlist.cpp
   src/Style/Rules/RuleData.cpp
   src/Style/Rules/RuleFeature.cpp
@@ -3696,7 +3688,6 @@ set(KRYSTAL_BOOEY_STYLE_SOURCES
   src/Style/Values/NonStandard/WebKitLocale.cpp
   src/Style/Values/Overflow/BlockEllipsis.cpp
   src/Style/Values/Overflow/ScrollbarGutter.cpp
-  src/Style/Values/Page/PageSize.cpp
   src/Style/Values/PointerEvents/TouchAction.cpp
   src/Style/Values/Primitives/LengthResolution.cpp
   src/Style/Values/Primitives/LengthWrapperData.cpp

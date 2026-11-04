@@ -66,5 +66,4 @@ namespace krys::boo::style::tests
       CHECK(Serialised(Convert<Filter>(PropertyId::BackdropFilter, u8"blur(2px)")) == "blur(2px)");
     }
   }
-
 }

@@ -147,8 +147,6 @@ namespace krys::boo::style
       StyleForPseudoElement(dom::Element &element, const PseudoElementRequest &pseudoElementRequest,
                             const ResolutionContext &context) noexcept;
 
-    KRYS_NODISCARD UniquePtr<RenderStyle> StyleForPage(int32 pageIndex) noexcept;
-
     KRYS_NODISCARD dom::Document &Document() noexcept;
     KRYS_NODISCARD const dom::Document &Document() const noexcept;
 

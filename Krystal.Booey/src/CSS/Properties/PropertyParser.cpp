@@ -85,10 +85,6 @@ namespace krys::boo::css
   KRYS_NODISCARD static bool ConsumeKeyframeDescriptor(TokenRange &, const ParserContext &, PropertyId,
                                                        IsImportant, PropertyParserResult &) noexcept;
 
-  // @page descriptors.
-  KRYS_NODISCARD static bool ConsumePageDescriptor(TokenRange &, const ParserContext &, PropertyId,
-                                                   IsImportant, PropertyParserResult &) noexcept;
-
   // @property descriptors.
   KRYS_NODISCARD static bool ConsumePropertyDescriptor(TokenRange &, const ParserContext &, PropertyId,
                                                        PropertyParserResult &) noexcept;
@@ -253,11 +249,6 @@ namespace krys::boo::css
       case RuleType::Keyframe:
       {
         parseSuccess = ConsumeKeyframeDescriptor(range, context, property, important, result);
-        break;
-      }
-      case RuleType::Page:
-      {
-        parseSuccess = ConsumePageDescriptor(range, context, property, important, result);
         break;
       }
       case RuleType::Property:
@@ -891,36 +882,6 @@ namespace krys::boo::css
       case PropertyId::AnimationPlayState:      return false;
       default:                                  return ConsumeStyleProperty(range, context, property, important, RuleType::Keyframe, result);
     }
-  }
-
-  bool ConsumePageDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                             IsImportant important, PropertyParserResult &result) noexcept
-  {
-    // Does not apply in @page per-spec.
-    if (property == PropertyId::Page)
-    {
-      return false;
-    }
-
-    auto state = PropertyParserState {
-      .Context = context,
-      .CurrentRule = RuleType::Page,
-      .CurrentProperty = property,
-      .Important = IsImportant(false),
-    };
-
-    if (RefPtr parsedValue = PropertyParsing::ParsePageDescriptor(range, property, state))
-    {
-      if (!range.IsAtEnd())
-      {
-        return false;
-      }
-
-      result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
-      return true;
-    }
-
-    return ConsumeStyleProperty(range, context, property, important, RuleType::Page, result);
   }
 
   bool ConsumePropertyDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,

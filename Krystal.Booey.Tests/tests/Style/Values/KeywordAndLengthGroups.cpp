@@ -23,7 +23,6 @@
 #include "Krystal.Booey/Style/Values/Overflow/MaximumLines.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollbarGutter.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp"
-#include "Krystal.Booey/Style/Values/Page/PageSize.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
@@ -103,30 +102,6 @@ namespace krys::boo::style::tests
       CHECK(Serialised(Convert<StrokeWidth>(PropertyId::StrokeWidth, u8"2")) == "2px");
       CHECK(Serialised(Convert<StrokeWidth>(PropertyId::StrokeWidth, u8"5%")) == "5%");
       CHECK(Convert<StrokeMiterlimit>(PropertyId::StrokeMiterlimit, u8"6").Value.Value == 6.f);
-    }
-
-    SECTION("page size")
-    {
-      auto a4 = ConvertCSSValueToStyle<PageSize>(*State, *css::PrimitiveValue::Create(ValueId::A4));
-      CHECK(Serialised(a4) == "793.700806px 1122.519653px");
-
-      auto landscape = ConvertCSSValueToStyle<PageSize>(
-        *State, *css::ValuePair::Create(css::PrimitiveValue::Create(ValueId::Letter),
-                                        css::PrimitiveValue::Create(ValueId::Landscape)));
-      CHECK(Serialised(landscape) == "1056px 816px");
-
-      auto lengths = ConvertCSSValueToStyle<PageSize>(
-        *State, *css::ValuePair::Create(css::PrimitiveValue::Create(1, css::UnitType::in),
-                                        css::PrimitiveValue::Create(2, css::UnitType::in)));
-      CHECK(Serialised(lengths) == "96px 192px");
-
-      CHECK(
-        Serialised(ConvertCSSValueToStyle<PageSize>(*State, *css::PrimitiveValue::Create(ValueId::Portrait)))
-        == "portrait");
-      CHECK_FALSE(IsInvalid());
-
-      std::ignore = ConvertCSSValueToStyle<PageSize>(*State, *css::PrimitiveValue::Create(ValueId::Red));
-      CHECK(IsInvalid());
     }
   }
 

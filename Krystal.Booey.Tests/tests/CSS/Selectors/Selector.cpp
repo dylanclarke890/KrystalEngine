@@ -37,11 +37,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Selector(enum traits)", "[CSS][Selectors][Selector]")
   {
-    STATIC_CHECK(EnumTraits<SelectorMatch>::DistinctValues == 18uz);
+    STATIC_CHECK(EnumTraits<SelectorMatch>::DistinctValues == 17uz);
     STATIC_CHECK(EnumTraits<SelectorRelation>::DistinctValues == 8uz);
-    STATIC_CHECK(EnumTraits<SelectorPagePseudoClass>::DistinctValues == 3uz);
     STATIC_CHECK(EnumTraits<PseudoElementType>::DistinctValues == 17uz);
-    STATIC_CHECK(ToUnderlying(SelectorMatch::ForgivingUnknownNestContaining) == 17u);
+    STATIC_CHECK(ToUnderlying(SelectorMatch::ForgivingUnknownNestContaining) == 16u);
     STATIC_CHECK(ToUnderlying(SelectorRelation::ShadowSlotted) == 7u);
   }
 
@@ -206,16 +205,6 @@ namespace krys::boo::css::tests
     CHECK(Text(krys::move(cue)) == u8"::cue(b)");
   }
 
-  TEST_CASE("Selector::SelectorText(page)", "[CSS][Selectors][Selector]")
-  {
-    auto first = MutableSelector::ParsePagePseudoSelector(u8"first");
-    REQUIRE(first);
-    CHECK(Text(krys::move(first)) == u8":first");
-    CHECK(Text(MutableSelector::ParsePagePseudoSelector(u8"LEFT")) == u8":left");
-    CHECK(Text(MutableSelector::ParsePagePseudoSelector(u8"right")) == u8":right");
-    CHECK(!MutableSelector::ParsePagePseudoSelector(u8"blank"));
-  }
-
   TEST_CASE("Selector::SetValue(match lowercase)", "[CSS][Selectors][Selector]")
   {
     auto quirky = CreateUnique<MutableSelector>();
@@ -308,27 +297,6 @@ namespace krys::boo::css::tests
     CHECK(tuple[0] == 1);
     CHECK(tuple[1] == 0xFF);
     CHECK(tuple[2] == 1);
-  }
-
-  TEST_CASE("Selector::SpecificityForPage", "[CSS][Selectors][Selector]")
-  {
-    auto pageSelector = [](UniquePtr<MutableSelector> selector)
-    {
-      for (auto *current = selector.get(); current; current = current->PrecedingComplexSelectorComponent())
-      {
-        current->SetForPage();
-      }
-      return B::List(krys::move(selector));
-    };
-
-    auto named =
-      pageSelector(B::Compound(B::Type(u8"toc"), MutableSelector::ParsePagePseudoSelector(u8"first")));
-    CHECK(named.FirstSelectorComponent()->IsForPage());
-    CHECK(named.FirstSelectorComponent()->SpecificityForPage() == 6);
-    CHECK(named.SelectorsText() == u8"toc:first");
-
-    auto left = pageSelector(MutableSelector::ParsePagePseudoSelector(u8"left"));
-    CHECK(left.FirstSelectorComponent()->SpecificityForPage() == 1);
   }
 
   TEST_CASE("Selector::MatchNth", "[CSS][Selectors][Selector]")

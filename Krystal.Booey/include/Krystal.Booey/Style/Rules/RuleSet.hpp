@@ -165,7 +165,6 @@ namespace krys::boo::style
     RuleDataVector _focusVisiblePseudoClassRules;
     RuleDataVector _rootElementRules;
     RuleDataVector _universalRules;
-    List<css::PageRule *> _pageRules;
     RefPtr<css::ViewTransitionRule> _viewTransitionRule;
     RuleFeatureSet _features;
     List<DynamicMediaQueryRules> _dynamicMediaQueryRules;
@@ -200,7 +199,6 @@ namespace krys::boo::style
     KRYS_NODISCARD static Ref<RuleSet> Create() noexcept;
 
     void AddRule(const css::StyleRule &rule, uint32 selectorIndex, uint32 selectorListIndex) noexcept;
-    void AddPageRule(css::PageRule &rule) noexcept;
     void SetViewTransitionRule(css::ViewTransitionRule &rule) noexcept;
     KRYS_NODISCARD RefPtr<css::ViewTransitionRule> GetViewTransitionRule() const noexcept;
 
@@ -289,11 +287,6 @@ namespace krys::boo::style
     KRYS_NODISCARD const RuleDataVector *UniversalRules() const noexcept
     {
       return &_universalRules;
-    }
-
-    KRYS_NODISCARD const List<css::PageRule *> &PageRules() const noexcept
-    {
-      return _pageRules;
     }
 
     KRYS_NODISCARD uint32 RuleCount() const noexcept

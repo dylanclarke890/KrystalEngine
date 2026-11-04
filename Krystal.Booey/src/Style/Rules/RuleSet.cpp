@@ -277,8 +277,7 @@ namespace krys::boo::style
         case css::SelectorMatch::ForgivingUnknown:
         case css::SelectorMatch::ForgivingUnknownNestContaining:
         case css::SelectorMatch::HasScope:
-        case css::SelectorMatch::NestingParent:
-        case css::SelectorMatch::PagePseudoClass:                break;
+        case css::SelectorMatch::NestingParent:                  break;
       }
       // We only process the subject (rightmost compound selector).
       if (selector->Relation() != css::SelectorRelation::Compounding)
@@ -401,11 +400,6 @@ namespace krys::boo::style
 
     // If we didn't find a specialized map to stick it in, file under universal rules.
     _universalRules.push_back(ruleData);
-  }
-
-  void RuleSet::AddPageRule(css::PageRule &rule) noexcept
-  {
-    _pageRules.push_back(&rule);
   }
 
   void RuleSet::SetViewTransitionRule(css::ViewTransitionRule &rule) noexcept
@@ -590,7 +584,6 @@ namespace krys::boo::style
     ShrinkRulesToFit(_rootElementRules);
     ShrinkRulesToFit(_universalRules);
 
-    _pageRules.shrink_to_fit();
     _features.ShrinkToFit();
 
     for (auto &rule : _dynamicMediaQueryRules)

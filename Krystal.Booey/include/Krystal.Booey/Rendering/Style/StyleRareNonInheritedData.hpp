@@ -28,7 +28,6 @@
 #include "Krystal.Booey/Style/Values/Overflow/MaximumLines.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollbarGutter.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp"
-#include "Krystal.Booey/Style/Values/Page/PageSize.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Rhythm/BlockStepSize.hpp"
@@ -122,8 +121,6 @@ namespace krys::boo
     CounterDirectiveMap CounterDirectives;
 
     style::WillChange WillChange;
-
-    style::PageSize PageSize;
 
     style::ShapeOutside ShapeOutside;
     style::ShapeMargin ShapeMargin;

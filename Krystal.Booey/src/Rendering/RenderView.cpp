@@ -128,13 +128,6 @@ namespace krys::boo
     // RenderViews should never be called to paint with an offset not on device pixels.
     krys_debug_assert(LayoutPoint(IntPoint(paintOffset.X().ToInt(), paintOffset.Y().ToInt())) == paintOffset);
 
-    // This avoids painting garbage between columns if there is a column gap.
-    if (FrameView().GetPagination().Mode != PaginationMode::Unpaginated
-        && paintInfo.ShouldPaintWithinRoot(*this))
-    {
-      paintInfo.Context().FillRect(FloatRect(paintInfo.Rect), FrameView().BaseBackgroundColor());
-    }
-
     PaintObject(paintInfo, paintOffset);
   }
 

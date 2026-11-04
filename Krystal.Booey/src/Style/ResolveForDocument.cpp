@@ -33,9 +33,6 @@ namespace krys::boo::style
 
     Adjuster::AdjustEventListenerRegionTypesForRootStyle(documentStyle, document);
 
-    // FIXME: Paginated views set the column styles from their pagination mode
-    // (setColumnStylesFromPaginationMode), which needs the dropped `-webkit-column-axis`.
-
     auto fontDescription = [&]()
     {
       auto &settings = document.GetSettings().Values;

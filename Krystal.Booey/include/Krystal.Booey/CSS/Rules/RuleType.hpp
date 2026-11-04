@@ -14,7 +14,6 @@ namespace krys::boo::css
     Import = 3,
     Media = 4,
     FontFace = 5,
-    Page = 6,
     Keyframes = 7,
     Keyframe = 8,
     Margin = 9,
@@ -42,4 +41,4 @@ namespace krys::boo::css
   constexpr auto FirstUnexposedRuleType = RuleType::ViewTransition;
 }
 
-KRYS_DEFINE_ENUM_TRAITS(krys::boo::css::RuleType, 27uz, false, false);
+KRYS_DEFINE_ENUM_TRAITS(krys::boo::css::RuleType, 26uz, false, false);

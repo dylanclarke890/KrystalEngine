@@ -14,7 +14,6 @@
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/Pagination.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -35,7 +34,7 @@ namespace krys::boo
   class RenderView;
 
   /// @brief The view a frame's document is laid out in: its frame rect, the size content is laid out at, the
-  /// media type, pagination, the sizes viewport units resolve against, the layout context, and its scroll
+  /// media type, the sizes viewport units resolve against, the layout context, and its scroll
   /// position within the document (the scrolling half of a scroll view).
   /// @note FIXME: No obscured insets, visual viewport or auto-sizing, and views
   /// aren't widgets in a widget tree (there's no `Widget` or `ScrollView`): the visible content is the frame
@@ -78,7 +77,6 @@ namespace krys::boo
     bool _useFixedLayout {false};
     bool _hasFlippedBlockRenderers {false};
     css::CSSOMStringAtom _mediaType;
-    boo::Pagination _pagination;
     Maybe<OverrideViewportSize> _defaultViewportSizeOverride;
     Maybe<OverrideViewportSize> _smallViewportSizeOverride;
     Maybe<OverrideViewportSize> _largeViewportSizeOverride;
@@ -646,13 +644,6 @@ namespace krys::boo
 
     /// @brief Sets the view's media type, and re-evaluates the document's style sheets if it changed.
     void SetMediaType(const css::CSSOMStringAtom &mediaType) noexcept;
-
-    KRYS_NODISCARD const boo::Pagination &GetPagination() const noexcept
-    {
-      return _pagination;
-    }
-
-    void SetPagination(const boo::Pagination &pagination) noexcept;
 
     void SetOverrideSizeForCSSDefaultViewportUnits(OverrideViewportSize size) noexcept;
 

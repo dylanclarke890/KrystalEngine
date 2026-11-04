@@ -25,7 +25,6 @@ namespace krys::boo::css
       {u8"media"sv, AtRuleId::Media},
       {u8"namespace"sv, AtRuleId::Namespace},
       {u8"ornaments"sv, AtRuleId::Ornaments},
-      {u8"page"sv, AtRuleId::Page},
       {u8"position-try"sv, AtRuleId::PositionTry},
       {u8"property"sv, AtRuleId::Property},
       {u8"scope"sv, AtRuleId::Scope},

@@ -374,11 +374,10 @@ namespace krys::boo::style::tests
   {
     // Without a resolver, at-rules that change the resolver are skipped.
     auto sheet = ParseSheet(u8"@keyframes k { from {} } @view-transition { navigation: auto; }"
-                            u8"@position-try --p { top: 0; } @page { margin: 0; } .a {}");
+                            u8"@position-try --p { top: 0; } .a {}");
     auto ruleSet = Build(*sheet);
     REQUIRE_FALSE(ruleSet->GetViewTransitionRule());
     REQUIRE_FALSE(ruleSet->PositionTryRuleForName(Atom(u8"--p")));
-    REQUIRE(ruleSet->PageRules().size() == 1uz);
     REQUIRE(ruleSet->RuleCount() == 1u);
   }
 }

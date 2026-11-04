@@ -7128,14 +7128,6 @@
         {
           "value": "overlay",
           "status": "non-standard"
-        },
-        {
-          "value": "-webkit-paged-x",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-paged-y",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -7511,22 +7503,6 @@
       "specification": {
         "module": "css-22",
         "url": "https://www.w3.org/TR/CSS22/box.html#propdef-padding-top"
-      }
-    },
-    "page": {
-      "animation-type": "not animatable (needs triage)",
-      "animation-type-comment": "Current spec animation type is 'discrete'",
-      "initial": "0",
-      "values": ["auto"],
-      "codegen-properties": {
-        "skip-style-builder": true,
-        "skip-style-extractor": true,
-        "skip-render-style": true,
-        "parser-grammar": "auto | <custom-ident>"
-      },
-      "specification": {
-        "module": "css-page",
-        "url": "https://www.w3.org/TR/css-page-3/#propdef-page"
       }
     },
     "page-break-after": {
@@ -12575,17 +12551,6 @@
         }
       }
     },
-    "@page": {
-      "size": {
-        "codegen-properties": {
-          "parser-grammar": "<length [0,inf]>{1,2}@(type=ValuePair) | auto | [ <page-size> || [ portrait | landscape ] ]@(type=ValuePair)"
-        },
-        "specification": {
-          "module": "css-page",
-          "url": "https://www.w3.org/TR/css3-page/#page-size-prop"
-        }
-      }
-    },
     "@property": {
       "syntax": {
         "codegen-properties": {
@@ -13458,13 +13423,6 @@
       "specification": {
         "module": "css-transitions",
         "url": "https://drafts.csswg.org/css-transitions-2/#typedef-transition-behavior-value"
-      }
-    },
-    "<page-size>": {
-      "grammar": "A5 | A4 | A3 | B5 | B4 | jis-B5 | jis-B4 | letter | legal | ledger",
-      "specification": {
-        "module": "css-page",
-        "url": "https://www.w3.org/TR/css-page-3/#typedef-page-size-page-size"
       }
     },
     "<filter-value-list>": {

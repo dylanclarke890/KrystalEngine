@@ -284,8 +284,6 @@ namespace krys::boo::style::tests
               div:first-child { height: 3px }
               p::before { content: "x"; width: 3px }
               #anchor::before { content: attr(data-x) }
-              @page { margin-top: 7px }
-              @page :first { margin-left: 9px }
             </style><body><div id=a class=a></div><div id=b class=a style="height: 4px"></div>
             <a id=link href="x"></a><a id=self href=""></a><a id=anchor></a><p id=p></p>
             <svg><a id=svglink xlink:href="x"></a><svg id=inner></svg></svg>)",
@@ -395,28 +393,6 @@ namespace krys::boo::style::tests
       auto after = GetResolver().StyleForPseudoElement(
         ById(u8"p"), PseudoElementRequest {PseudoElementType::After}, {.ParentStyle = p.Style.get()});
       CHECK_FALSE(after);
-    }
-
-    SECTION("Pages")
-    {
-      // Without a resolved document element style there's no writing mode to resolve pages against.
-      auto unresolved = GetResolver().StyleForPage(0);
-      CHECK(Serialised(*unresolved, unresolved->MarginTop()) == "0px");
-
-      // The document element's style is the one it's rendered with.
-      auto frame = LocalFrame::Create();
-      frame->CreateView({800, 600});
-      frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-      auto first = GetResolver().StyleForPage(0);
-      CHECK(Serialised(*first, first->MarginTop()) == "7px");
-      CHECK(Serialised(*first, first->MarginLeft()) == "9px");
-      // Inherited from the initial containing block.
-      CHECK(first->ComputedFontSize() == 16);
-
-      auto second = GetResolver().StyleForPage(1);
-      CHECK(Serialised(*second, second->MarginTop()) == "7px");
-      // From the user agent's @page rule.
-      CHECK(Serialised(*second, second->MarginLeft()) == "auto");
     }
 
     SECTION("Matched rules")

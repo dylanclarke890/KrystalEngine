@@ -621,8 +621,6 @@ namespace krys::boo
       case Overflow::Hidden:  return css::ValueId::Hidden;
       case Overflow::Scroll:  return css::ValueId::Scroll;
       case Overflow::Auto:    return css::ValueId::Auto;
-      case Overflow::PagedX:  return css::ValueId::WebkitPagedX;
-      case Overflow::PagedY:  return css::ValueId::WebkitPagedY;
       case Overflow::Clip:    return css::ValueId::Clip;
     }
     krys_debug_assert_msg(false, "Unexpected value");
@@ -634,15 +632,13 @@ namespace krys::boo
   {
     switch (valueID)
     {
-      case css::ValueId::Visible:      return Overflow::Visible;
-      case css::ValueId::Hidden:       return Overflow::Hidden;
-      case css::ValueId::Scroll:       return Overflow::Scroll;
+      case css::ValueId::Visible: return Overflow::Visible;
+      case css::ValueId::Hidden:  return Overflow::Hidden;
+      case css::ValueId::Scroll:  return Overflow::Scroll;
       case css::ValueId::Overlay:
-      case css::ValueId::Auto:         return Overflow::Auto;
-      case css::ValueId::WebkitPagedX: return Overflow::PagedX;
-      case css::ValueId::WebkitPagedY: return Overflow::PagedY;
-      case css::ValueId::Clip:         return Overflow::Clip;
-      default:                         break;
+      case css::ValueId::Auto:    return Overflow::Auto;
+      case css::ValueId::Clip:    return Overflow::Clip;
+      default:                    break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return Overflow::Visible;

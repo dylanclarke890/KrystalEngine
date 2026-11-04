@@ -7,32 +7,6 @@
 
 namespace krys::boo::css
 {
-  UniquePtr<MutableSelector> MutableSelector::ParsePagePseudoSelector(CSSOMStringView name) noexcept
-  {
-    SelectorPagePseudoClass pseudoType;
-    if (text::IsASCIICaselessEqual(name, CSSOMStringView {u8"first"}))
-    {
-      pseudoType = SelectorPagePseudoClass::First;
-    }
-    else if (text::IsASCIICaselessEqual(name, CSSOMStringView {u8"left"}))
-    {
-      pseudoType = SelectorPagePseudoClass::Left;
-    }
-    else if (text::IsASCIICaselessEqual(name, CSSOMStringView {u8"right"}))
-    {
-      pseudoType = SelectorPagePseudoClass::Right;
-    }
-    else
-    {
-      return nullptr;
-    }
-
-    auto selector = CreateUnique<MutableSelector>();
-    selector->_selector->SetMatch(SelectorMatch::PagePseudoClass);
-    selector->_selector->SetPagePseudoClass(pseudoType);
-    return selector;
-  }
-
   UniquePtr<MutableSelector>
     MutableSelector::ParsePseudoElementSelector(CSSOMStringView name,
                                                 const SelectorParserContext &context) noexcept

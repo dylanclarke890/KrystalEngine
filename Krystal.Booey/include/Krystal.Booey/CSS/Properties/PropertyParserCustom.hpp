@@ -1122,15 +1122,6 @@ namespace krys::boo::css
       if (tokens.IsAtEnd())
       {
         yValueId = xValueId;
-
-        // FIXME: -webkit-paged-x or -webkit-paged-y only apply to overflow-y. If this value has been
-        // set using the shorthand, then for now overflow-x will default to auto, but once we implement
-        // pagination controls, it should default to hidden. If the overflow-y value is anything but
-        // paged-x or paged-y, then overflow-x and overflow-y should have the same value.
-        if (xValueId == ValueId::WebkitPagedX || xValueId == ValueId::WebkitPagedY)
-        {
-          xValueId = ValueId::Auto;
-        }
       }
       else
       {

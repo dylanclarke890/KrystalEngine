@@ -37,5 +37,4 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"blur(1px) none", ConsumeFilter) == "<null>");
     CHECK(ConsumeToText(u8"apple-invert-lightness()", ConsumeFilter) == "<null>");
   }
-
 }

@@ -273,10 +273,6 @@ namespace krys::boo
     KRYS_NODISCARD inline const CounterDirectiveMap &GetCounterDirectives() const noexcept;
     inline CounterDirectiveMap &AccessCounterDirectives() noexcept;
 
-    // `@page size`
-    KRYS_NODISCARD inline const style::PageSize &GetPageSize() const noexcept;
-    inline void SetPageSize(style::PageSize &&) noexcept;
-
     using NonInheritedFlags = style::ComputedStyle::NonInheritedFlags;
     using InheritedFlags = style::ComputedStyle::InheritedFlags;
 

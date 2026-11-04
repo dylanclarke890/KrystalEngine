@@ -14,9 +14,4 @@ namespace krys::boo::style
   {
     return css::keywords::Auto {};
   }
-
-  inline PageSize ComputedStyle::InitialPageSize() noexcept
-  {
-    return css::keywords::Auto {};
-  }
 }

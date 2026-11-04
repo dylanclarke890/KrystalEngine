@@ -129,7 +129,7 @@ namespace krys::boo::style::tests
 
     SECTION("Other rules dirty all style")
     {
-      Invalidator invalidator({ParseSheet(u8"@page { margin: 0 }")},
+      Invalidator invalidator({ParseSheet(u8"@font-face { font-family: a }")},
                               fixture.GetResolver().MediaQueryEvaluator());
       CHECK(invalidator.DirtiesAllStyle());
 
