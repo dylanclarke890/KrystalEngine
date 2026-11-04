@@ -786,13 +786,13 @@ namespace krys::boo::html
 
     // 4. If target's active sandboxing flag set has the sandboxed automatic features browsing context flag,
     //    then return.
-    // FIXME: Sandboxing flags, once there are frames to sandbox.
+    // (There's no sandboxing, as there are no nested browsing contexts.)
 
     // 5. If the allow focus steps given target return false, then return.
     // (Focus is always allowed; see Focus in HTMLOrSVGOrMathMLElement.)
 
     // 6. Let topDocument be target's node navigable's top-level traversable's active document.
-    // FIXME: The main frame's document, once there are frames.
+    // (A document is its frame's, the only one.)
     auto &topDocument = target;
 
     // 7. If topDocument's autofocus processed flag is false, then remove the element from topDocument's

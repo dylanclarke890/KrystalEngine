@@ -38,10 +38,9 @@ namespace krys::boo
 
   /// @brief A page's drags and drops: which element a press may drag, starting a drag through the host's
   /// drag client, and what a drag over the page and its drop do: the page's drag events, then by default
-  /// editing (text moved or copied into editable content), files into file inputs, or a load of what's
-  /// dropped.
+  /// editing (text moved or copied into editable content) or files into file inputs.
   // FIXME: Dragging colour inputs and dropping colours, with colours on the pasteboard; dropped image
-  // placeholders, attachments and models, which are Cocoa's; remote frames.
+  // placeholders, attachments and models, which are Cocoa's.
   class DragController
   {
     KRYS_NON_COPY_MOVABLE(DragController);

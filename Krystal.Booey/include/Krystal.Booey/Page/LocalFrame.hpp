@@ -114,7 +114,6 @@ namespace krys::boo
     /// @brief The caret position nearest @p framePoint (in the frame's contents).
     KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const IntPoint &framePoint) const noexcept;
     /// @brief The document under @p point (in the window).
-    // FIXME: A subframe's document, once there are subframes.
     KRYS_NODISCARD dom::Document *DocumentAtPoint(const IntPoint &point) noexcept;
 
     /// @brief The zoom applied to the whole document (the root style's `zoom`).
@@ -134,10 +133,8 @@ namespace krys::boo
     void SetPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor) noexcept;
 
     /// @brief How much the frame's content is scaled: the page's scale.
-    // FIXME: A subframe's is its owner's zoom relative to the root frame's, once there are subframes.
     KRYS_NODISCARD float FrameScaleFactor() const noexcept;
     /// @brief Tells the frame's compositor the device or page scale changed.
-    // FIXME: And the child frames, once there are subframes.
     void DeviceOrPageScaleFactorChanged() noexcept;
 
     /// @brief The device and user state the frame's document is presented with.

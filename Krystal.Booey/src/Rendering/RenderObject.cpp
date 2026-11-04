@@ -1471,7 +1471,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool FullRepaintIsScheduled(const RenderObject &renderer) noexcept
     {
-      // FIXME: Documents in frames, once there are frames.
       if (!renderer.View().UsesCompositing())
       {
         return false;

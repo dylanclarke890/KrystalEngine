@@ -81,7 +81,6 @@ namespace krys::boo
     {
       _pageScaleFactor = scale;
 
-      // FIXME: Every root frame, once there are subframes.
       if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
       {
         view->LayoutContext().SetNeedsLayoutAfterViewConfigurationChange();
@@ -306,7 +305,7 @@ namespace krys::boo
 
     if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
     {
-      view->FlushCompositingStateIncludingSubframes();
+      view->FlushCompositingState();
     }
 
     // FIXME: The scrolling tree, once there's asynchronous scrolling.
@@ -347,7 +346,6 @@ namespace krys::boo
 
   void Page::LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions) noexcept
   {
-    // FIXME: Child frames, once there are frames.
     if (RefPtr<dom::Document> document = ShareRefPtr(_mainFrame->Document()); document && _mainFrame->View())
     {
       (void)document->UpdateLayout(layoutOptions);
@@ -356,7 +354,6 @@ namespace krys::boo
 
   void Page::ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept
   {
-    // FIXME: Child frames, once there are frames.
     if (RefPtr<dom::Document> document = ShareRefPtr(_mainFrame->Document()))
     {
       functor(*document);
@@ -444,7 +441,7 @@ namespace krys::boo
     // to kickstart the animation loop.
     if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
     {
-      view->ResumeVisibleImageAnimationsIncludingSubframes();
+      view->ResumeVisibleImageAnimations();
     }
   }
 

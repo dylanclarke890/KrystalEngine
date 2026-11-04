@@ -3557,7 +3557,6 @@ namespace krys::boo
 
   RenderLayer *RenderLayer::EnclosingContainingBlockLayer(CrossFrameBoundaries) const noexcept
   {
-    // FIXME: Cross into the owner frame's layer (enclosingFrameRenderLayer), once there are frames.
     return EnclosingLayerInContainingBlockOrder();
   }
 

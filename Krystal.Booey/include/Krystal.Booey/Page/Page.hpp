@@ -64,8 +64,7 @@ namespace krys::boo
   /// before the host paints them (the specification's "update the rendering"). Something that changes what
   /// the page shows schedules a rendering update; the host runs it at its next rendering opportunity.
   /// @see https://html.spec.whatwg.org/#update-the-rendering
-  // FIXME: The rest of the page: settings, the focus controller, the rest of the chrome, page overlays,
-  // frames other than the main frame.
+  // FIXME: The rest of the page: settings, the focus controller, the rest of the chrome, page overlays.
   class Page final : public RefCounted<Page>, public CanMakeWeakPtr<Page>
   {
     KRYS_NON_COPY_MOVABLE(Page);

@@ -114,8 +114,7 @@ namespace krys::boo
     enum RootLayerAttachment : uint8
     {
       RootLayerUnattached,
-      RootLayerAttachedViaChromeClient,
-      RootLayerAttachedViaEnclosingFrame
+      RootLayerAttachedViaChromeClient
     };
 
     class BackingSharingState;
@@ -231,7 +230,7 @@ namespace krys::boo
     void NotifyFlushRequired(const GraphicsLayer *) noexcept override;
     void NotifySubsequentFlushRequired(const GraphicsLayer *) noexcept override;
 
-    void FlushPendingLayerChanges(bool isFlushRoot = true) noexcept;
+    void FlushPendingLayerChanges() noexcept;
 
     void SetRenderingIsSuppressed(bool suppressed) noexcept;
 
@@ -614,8 +613,6 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldCompositeOverflowControls() const noexcept;
 
     KRYS_NODISCARD bool DocumentUsesTiledBacking() const noexcept;
-    KRYS_NODISCARD bool IsRootFrameCompositor() const noexcept;
-    KRYS_NODISCARD bool IsMainFrameCompositor() const noexcept;
 
     void UpdateCompositingForLayerTreeAsTextDump() noexcept;
   };

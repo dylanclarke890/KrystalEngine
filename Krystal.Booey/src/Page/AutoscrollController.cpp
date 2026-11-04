@@ -108,7 +108,6 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Subframes (mouseDownWasInSubframe), once there are frames.
   void AutoscrollController::StopAutoscrollTimer(bool rendererIsBeingDestroyed) noexcept
   {
     auto *scrollable = _autoscrollRenderer.get();

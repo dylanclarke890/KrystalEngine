@@ -74,8 +74,7 @@ namespace krys::boo
   };
 
   /// @brief How to scroll a rect into view.
-  // FIXME: Cross-origin scrolling (shouldAllowCrossOriginScrolling) and forward-only scrolling
-  // (onlyAllowForwardScrolling), once there are frames and find-in-page.
+  // FIXME: Forward-only scrolling (onlyAllowForwardScrolling), once there's find-in-page.
   struct ScrollRectToVisibleOptions
   {
     SelectionRevealMode RevealMode {SelectionRevealMode::Reveal};

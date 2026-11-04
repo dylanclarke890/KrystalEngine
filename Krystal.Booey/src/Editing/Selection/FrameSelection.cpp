@@ -486,7 +486,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Revealing up to the main frame and delegating the main frame's scroll, once there are frames.
     if (options.Contains(SetSelectionOption::RevealSelectionUpToMainFrame))
     {
       _selectionRevealMode = SelectionRevealMode::RevealUpToMainFrame;
@@ -2622,8 +2621,7 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Focusing the anchor a caret is in when browsing with a caret (enclosingAnchorElement), and leaving
-  // out frame elements, once there are frames.
+  // FIXME: Focusing the anchor a caret is in when browsing with a caret (enclosingAnchorElement).
   void FrameSelection::SetFocusedElementIfNeeded(EnumSet<SetSelectionOption> options) noexcept
   {
     if (IsNone() || !IsFocused())

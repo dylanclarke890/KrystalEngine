@@ -37,7 +37,8 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
   entry list to the host unencoded (`Platform/Network/FormData`, `FormDataBuilder` and the mailto handling are
   gone); dropping a URL loads nothing; `CachePolicy` is `Use` or `Reload`; `FetchOptions` lost mode and
   credentials, and `LoadedFromOpaqueSource` (read by nothing) is gone.
-- [ ] **4. Subframes.** The frame tree is the main frame only. `<iframe>`, `<frame>`, `<object>` and `<embed>`
+- [x] **4. Subframes.** (Nothing loaded nested documents already: the FIXMEs went, with the compositor's
+  enclosing-frame attachment and the `IncludingSubframes` names.) The frame tree is the main frame only. `<iframe>`, `<frame>`, `<object>` and `<embed>`
   stay as elements with reflected attributes but load no nested document (check whether `<object>`/`<embed>`
   image or SVG rendering needs a frame). Delete the "frames other than the main frame"/subframe FIXMEs.
 - [ ] **5. Timers, blobs.** (The gamepads went in step 2.)

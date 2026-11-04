@@ -93,14 +93,12 @@ namespace krys::boo
 
   void LocalFrameView::Show() noexcept
   {
-    // FIXME: Showing child views, once there are subframes.
     _selfVisible = true;
     // FIXME: Pausing speculative tiling for the main frame, once there's tiling.
   }
 
   void LocalFrameView::Hide() noexcept
   {
-    // FIXME: Hiding child views, once there are subframes.
     _selfVisible = false;
   }
 
@@ -420,7 +418,7 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::FlushCompositingStateForThisFrame(const LocalFrame &rootFrameForFlush) noexcept
+  bool LocalFrameView::FlushCompositingState() noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (!renderView)
@@ -435,15 +433,9 @@ namespace krys::boo
       return false;
     }
 
-    renderView->Compositor().FlushPendingLayerChanges(&rootFrameForFlush == &Frame());
+    renderView->Compositor().FlushPendingLayerChanges();
 
     return true;
-  }
-
-  bool LocalFrameView::FlushCompositingStateIncludingSubframes() noexcept
-  {
-    // FIXME: Subframes, once there are any.
-    return FlushCompositingStateForThisFrame(Frame());
   }
 
   void LocalFrameView::EnterCompositingMode() noexcept
@@ -723,8 +715,6 @@ namespace krys::boo
   void LocalFrameView::ScrollContentsSlowPath(const IntRect &updateRect) noexcept
   {
     RepaintSlowRepaintObjects();
-
-    // FIXME: A frame inside a compositing layer repaints its owner's box, once there are frames in frames.
 
     InvalidateRect(updateRect);
   }
@@ -1086,8 +1076,7 @@ namespace krys::boo
 
   Ref<Scrollbar> LocalFrameView::CreateScrollbar(ScrollbarOrientation orientation) noexcept
   {
-    // FIXME: Custom scrollbars (::-webkit-scrollbar, dropped as non-standard) and a frame owner's scrollbar
-    // style, once there are frames.
+    // FIXME: Custom scrollbars (::-webkit-scrollbar, dropped as non-standard).
     return Scrollbar::CreateNativeScrollbar(*this, orientation, ScrollbarWidthStyle());
   }
 
@@ -1193,7 +1182,7 @@ namespace krys::boo
   void LocalFrameView::CalculateScrollbarModesForLayout(
     ScrollbarMode &hMode, ScrollbarMode &vMode, ScrollbarModesCalculationStrategy strategy) const noexcept
   {
-    // FIXME: The frame's scrolling mode (scrollingMode), once there are frames; the viewport renderer type.
+    // FIXME: The viewport renderer type.
     if (_canHaveScrollbars || strategy == ScrollbarModesCalculationStrategy::RulesFromWebContentOnly)
     {
       hMode = ScrollbarMode::Auto;
@@ -1232,8 +1221,6 @@ namespace krys::boo
       }
       return;
     }
-
-    // FIXME: Framesets turn the scrollbars off, once there are framesets.
 
     if (Is<html::HTMLBodyElement>(*bodyOrFrameset) && rootRenderer)
     {
@@ -1276,7 +1263,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: A frameset body lays its children out, once there are framesets.
     auto firstLayout = !_layoutContext.DidFirstLayout();
     if (firstLayout)
     {
@@ -1363,8 +1349,6 @@ namespace krys::boo
     {
       return false;
     }
-
-    // FIXME: #2, a frame owner that isn't visible to hit testing, once there are frames.
 
     // Cover #3 and #4.
     ScrollbarMode horizontalMode;
@@ -1774,8 +1758,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Scroll a child frame's view and then its owner (scrollRectToVisibleInChildView), once there are
-    // frames.
     renderer.View().FrameView().ScrollRectToVisibleInTopLevelView(adjustedRect, isFixed, adjustedOptions);
     return true;
   }
@@ -1784,9 +1766,7 @@ namespace krys::boo
                                                          EnumSet<BoxAxis> isFixed,
                                                          const ScrollRectToVisibleOptions &options) noexcept
   {
-    // FIXME: Revealing up to the main frame only and delegating the main frame's scroll to the client
-    // (RevealUpToMainFrame, DelegateMainFrameScroll), once there are frames and a client; the view is the
-    // main frame's.
+    // FIXME: Delegating the scroll to the client (DelegateMainFrameScroll), once there's a client.
     if (options.RevealMode == SelectionRevealMode::RevealUpToMainFrame)
     {
       return;
@@ -2298,13 +2278,11 @@ namespace krys::boo
 
     // When the viewport contents changes (scroll, resize, style recalc, layout, ...),
     // check if we should resume animated images.
-    // FIXME: Subframes, once there are any.
     ResumeVisibleImageAnimations(VisibleContentRect());
   }
 
-  void LocalFrameView::ResumeVisibleImageAnimationsIncludingSubframes() noexcept
+  void LocalFrameView::ResumeVisibleImageAnimations() noexcept
   {
-    // FIXME: Subframes, once there are any.
     ResumeVisibleImageAnimations(VisibleContentRect());
   }
 
@@ -2520,8 +2498,6 @@ namespace krys::boo
     {
       return false;
     }
-
-    // FIXME: Only the main frame, once there are other frames.
 
     document->FragmentHighlightRegistry().Clear();
 

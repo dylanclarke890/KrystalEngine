@@ -162,7 +162,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Keyframe offsets in named timeline ranges compute to NaN without a view timeline.
 - View transitions' animations are absent, so view transition names take no part in composite order comparisons (FIXME in `WebAnimationUtilities.cpp`) and group pseudo-elements' size and transform animations don't exist.
 - `TreeResolver` skips the back/forward cache and printing checks on the animated-update path, and has a FIXME to push after-change style into the parent stack.
-- Image animations pause out of view and resume (`RenderView::AddRendererWithPausedImageAnimations`), but the test is only the main frame's visible content rect (FIXME in `LocalFrameView.cpp` for subframes), and there is no per-element or page animation control (`RenderElement::AllowsAnimation` is always true; FIXME).
+- Image animations pause out of view and resume (`RenderView::AddRendererWithPausedImageAnimations`), and there is no per-element or page animation control (`RenderElement::AllowsAnimation` is always true; FIXME).
 - The per-timer throttle in `DOMTimer` for timers that make no visible changes is a FIXME.
 - Extent computation for animated motion path (`offset-*`) properties is missing (FIXME in `KeyframeEffect.cpp`).
 - `onbegin`, `onend` and `onrepeat` attributes on SMIL elements don't exist.
@@ -223,7 +223,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Reference (SVG `url()`) filters are identities on composited layers (`TextureMapper.cpp` converts the other filter functions to `LayerFilter2D`).
 - Clip paths never composite as shape layers; a composited clip path is painted into the mask layer. Replicas (reflections), repaint counters, repeating contents tiles (`WrapMode::Repeat`) and creating tiles over several frames are FIXMEs.
 - `TextureMapperLayer` composites the whole tree each frame, with no damage tracking.
-- The compositor has no scrolling nodes, iframe or widget layers, video or plug-in layers, event or interaction regions, layer flush throttling, model or separated layers, or HDR and wide gamut backings (`ContentsFormat` is RGBA8 only). There is no `TiledBacking` (`SetIsInWindow` and `SetTileCoverage` do nothing), the fixed root background layer is never composited, and the host's compositing policy under memory pressure and subframe `forceCompositingMode` are FIXMEs.
+- The compositor has no scrolling nodes, widget layers, video or plug-in layers, event or interaction regions, layer flush throttling, model or separated layers, or HDR and wide gamut backings (`ContentsFormat` is RGBA8 only). There is no `TiledBacking` (`SetIsInWindow` and `SetTileCoverage` do nothing), the fixed root background layer is never composited, and the host's compositing policy under memory pressure is a FIXME.
 
 ## Text and fonts
 
@@ -360,7 +360,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Pan scrolling (middle-button autoscroll) and its icon are absent; selection autoscroll works.
 - Drag and drop: colour drags and drops, plugin documents and image overlays are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
 - Dragging out of a page to other applications is not supported: `DoDragDrop` is a modal loop that would block the frames, so a drag that starts in a page stays in it.
-- Sequential focus navigation does not handle frames or moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions, nested navigables or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
+- Sequential focus navigation does not handle moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
 - Spatial navigation is only the focus candidate search (off by default through `Settings::SpatialNavigationEnabled`); the CSS Spatial Navigation draft (`navbeforefocus`, `navnotarget`, `spatialNavigationSearch()`, `focusableAreas()`, `spatial-navigation-*`) is not implemented.
 - Keyboard: caps lock handling in text fields, Escape hiding validation messages and leaving fullscreen, the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs. The default keyboard handler doesn't handle Backspace (history navigation; FIXME).
 - Touch: documents without touch event listeners aren't skipped (`hasTouchEventHandlers` is a FIXME), and touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.
@@ -368,7 +368,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Gamepad: XInput only (Xbox-style pads, four at most, polled), with no GameInput, SDL or Windows.Gaming.Input backend.
 - Hit testing ignores child frames. `HitTestResult` queries about what was hit (selection, images, media, titles, editing, link targets) are FIXMEs. `RenderLayer` hit testing lacks view transitions, SVG resources, fixed container sampling, resizers and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area.
 - `IsDraggableLink` is a local check (an HTML link with `href`, not editable); the editable-link-behaviour setting is absent.
-- Page overlays, subframes and synthetic touch events are FIXMEs in `EventHandler`.
+- Page overlays and synthetic touch events are FIXMEs in `EventHandler`.
 
 ## Loading, navigation and history
 
@@ -394,7 +394,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `Window`: timers are not throttled or aligned, and animation frames are not throttled below the page's rate.
 - Fragment navigation does not reset scroll anchoring (there is none) and has no text indicator for a text fragment (FIXME in `LocalFrameView.cpp`).
 - `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents, fullscreen and view transitions steps of the update are FIXMEs, and `Document` has no post-layout task timer.
-- Frames: there is no frame loader for subframes and no frame tree. Sequential navigation, hit testing and painting skip frames.
 
 ## Core and infrastructure
 

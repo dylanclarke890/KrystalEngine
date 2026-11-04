@@ -844,8 +844,6 @@ namespace krys::boo
     auto *document = frame->Document();
     if (!behavior.Contains(RenderAsTextFlag::DontUpdateLayout))
     {
-      // FIXME: Update the layout of the subframes too (updateLayoutAndStyleIfNeededRecursive), once there are
-      // frames.
       (void)document->UpdateLayout();
     }
 

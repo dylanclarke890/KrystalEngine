@@ -700,7 +700,7 @@ namespace krys::ui
 
     // The rendering update runs in Update; painting only needs the layout and the layers up to date.
     (void)Document().UpdateLayout({boo::dom::LayoutOptions::UpdateCompositingLayers});
-    (void)view->FlushCompositingStateIncludingSubframes();
+    (void)view->FlushCompositingState();
 
     // What the view repaints is in its layers: the damage it tracks for a page that isn't composited is
     // dropped.

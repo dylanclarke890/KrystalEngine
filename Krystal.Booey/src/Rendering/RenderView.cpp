@@ -221,9 +221,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Frames whose enclosing layers can't blit to the window (cannotBlitToWindow), once there are
-    // subframes.
-
     if (!ShouldPaintBaseBackground())
     {
       return;
@@ -304,8 +301,7 @@ namespace krys::boo
   bool RenderView::ShouldPaintBaseBackground() const noexcept
   {
     // Fill with a base color if we're the root document.
-    // FIXME: Subframes (frames, iframes whose colour scheme differs from their owner's, transparent SVG
-    // documents), once there are any; every view is its page's main frame.
+    // Every view is its page's main frame.
     return !FrameView().IsTransparent();
   }
 

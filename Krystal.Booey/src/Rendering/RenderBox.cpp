@@ -4174,7 +4174,6 @@ namespace krys::boo
     return windowAutoscrollPoint - windowPoint;
   }
 
-  // FIXME: Subframes' owner elements (ownerElement), once there are frames.
   RenderBox *RenderBox::FindAutoscrollable(RenderObject *renderer) noexcept
   {
     while (renderer)

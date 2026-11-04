@@ -36,7 +36,6 @@ namespace krys::boo
     constexpr bool IsNotTextInsertion = false;
     constexpr bool IsTextInsertion = true;
 
-    // FIXME: The frame of the event's target (targetFrame), once there are subframes.
     KRYS_NODISCARD LocalFrame &TargetFrame(LocalFrame &frame, dom::Event *) noexcept
     {
       return frame;

@@ -542,9 +542,6 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: Finding the frame the target names and telling its loader client the submit event is coming
-    // (FrameLoaderClient::dispatchWillSendSubmitEvent), with subframes and navigation.
-
     Ref<HTMLFormElement> protectedThis = ShareRef(*this);
 
     auto submitEvent = SubmitEvent::Create(ShareRefPtr(static_cast<HTMLElement *>(submitter)));

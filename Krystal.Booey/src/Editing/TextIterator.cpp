@@ -186,7 +186,6 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: The frame owner elements' clips, once there are subframes.
       return false;
     }
   }

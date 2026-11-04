@@ -596,12 +596,7 @@ namespace krys::boo
     bool showRepaintCounter = false;
     bool acceleratedDrawingEnabled = false;
 
-    // forceCompositingMode for subframes can only be computed after layout.
-    bool forceCompositingMode = _forceCompositingMode;
-    if (IsRootFrameCompositor())
-    {
-      forceCompositingMode = hasAcceleratedCompositing;
-    }
+    bool forceCompositingMode = hasAcceleratedCompositing;
 
     if (hasAcceleratedCompositing != _hasAcceleratedCompositing || showDebugBorders != _showDebugBorders
         || showRepaintCounter != _showRepaintCounter || forceCompositingMode != _forceCompositingMode)
@@ -628,9 +623,6 @@ namespace krys::boo
   void RenderLayerCompositor::CacheAcceleratedCompositingFlagsAfterLayout() noexcept
   {
     CacheAcceleratedCompositingFlags();
-
-    // FIXME: Subframes' forceCompositingMode (requiresCompositingForScrollableFrame), once there are
-    // subframes.
   }
 
   bool RenderLayerCompositor::CanRender3DTransforms() const noexcept
@@ -699,16 +691,8 @@ namespace krys::boo
     return visibleRect;
   }
 
-  void RenderLayerCompositor::FlushPendingLayerChanges(bool isFlushRoot) noexcept
+  void RenderLayerCompositor::FlushPendingLayerChanges() noexcept
   {
-    // LocalFrameView::flushCompositingStateIncludingSubframes() flushes each subframe, but
-    // GraphicsLayer::flushCompositingState() will cross frame boundaries if the GraphicsLayers are connected
-    // (the RootLayerAttachedViaEnclosingFrame case). As long as we're not the root of the flush, we can bail.
-    if (!isFlushRoot && GetRootLayerAttachment() == RootLayerAttachedViaEnclosingFrame)
-    {
-      return;
-    }
-
     if (GetRootLayerAttachment() == RootLayerUnattached)
     {
       _shouldFlushOnReattach = true;
@@ -2745,7 +2729,7 @@ namespace krys::boo
       return;
     }
 
-    FlushPendingLayerChanges(true);
+    FlushPendingLayerChanges();
   }
 
   utf8_string RenderLayerCompositor::LayerTreeAsText(EnumSet<LayerTreeAsTextOptions> options,
@@ -4091,17 +4075,6 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderLayerCompositor::IsRootFrameCompositor() const noexcept
-  {
-    // FIXME: Frames other than the main frame, once there are any.
-    return true;
-  }
-
-  bool RenderLayerCompositor::IsMainFrameCompositor() const noexcept
-  {
-    return true;
-  }
-
   bool RenderLayerCompositor::ShouldCompositeOverflowControls() const noexcept
   {
     auto &frameView = _renderView.FrameView();
@@ -4112,11 +4085,6 @@ namespace krys::boo
     }
 
     if (DocumentUsesTiledBacking())
-    {
-      return true;
-    }
-
-    if (_overflowControlsHostLayer && IsRootFrameCompositor())
     {
       return true;
     }
@@ -4457,10 +4425,6 @@ namespace krys::boo
                                                           RootGraphicsLayer());
         }
         break;
-      case RootLayerAttachedViaEnclosingFrame:
-        // FIXME: Frames other than the main frame, once there are any.
-        krys_debug_assert(false);
-        break;
     }
 
     _rootLayerAttachment = attachment;
@@ -4482,9 +4446,6 @@ namespace krys::boo
 
     switch (_rootLayerAttachment)
     {
-      case RootLayerAttachedViaEnclosingFrame:
-        // FIXME: Frames other than the main frame, once there are any.
-        break;
       case RootLayerAttachedViaChromeClient:
         if (auto *page = GetPage())
         {

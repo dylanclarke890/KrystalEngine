@@ -180,7 +180,7 @@ namespace krys::boo
   {
     if (layer.IsRenderViewLayer())
     {
-      // FIXME: Frames other than the main frame and tiled backings for the frame view, once there are any.
+      // FIXME: Tiled backings for the frame view, once there are any.
       _isMainFrameRenderViewLayer = true;
       _isRootFrameRenderViewLayer = true;
       _isFrameLayerWithTiledBacking = false;
@@ -1156,7 +1156,7 @@ namespace krys::boo
       layerConfigChanged = true;
     }
 
-    // FIXME: Plug-ins, video, remote frames, models and widgets' content layers, once there are any.
+    // FIXME: Video and widgets' content layers, once there are any.
     if (ShouldSetContentsDisplayDelegate())
     {
       auto &canvas = Downcast<html::HTMLCanvasElement>(*Renderer().GetElement());

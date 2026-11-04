@@ -89,8 +89,8 @@ namespace krys::boo
   /// (`dragstart`, then `drag` as it moves and `dragend` when it ends, at the source), and a drag over the
   /// page gets `dragenter`, `dragover`, `dragleave` and `drop` at its targets.
   // FIXME: The rest of the event handler: the keyboard's other default actions (selection by the keyboard is
-  // with the keyboard and the DOM's Selection), context menus, resizers, subframes, pan scrolling, pointer
-  // lock and touch events.
+  // with the keyboard and the DOM's Selection), context menus, resizers, pan scrolling, pointer lock and
+  // touch events.
 
   // Pointer events from the mouse are dispatched by the elements as they get mouse events
   // (`Element::DispatchMouseEvent`).
@@ -447,7 +447,6 @@ namespace krys::boo
     bool LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
                                dom::Node *startingNode = nullptr) noexcept;
     /// @brief As `ScrollOverflow`, or else scrolls the view.
-    // FIXME: Then the parent frame, once there are subframes.
     bool ScrollRecursively(ScrollDirection direction, ScrollGranularity granularity,
                            dom::Node *startingNode = nullptr) noexcept;
     bool LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,

@@ -264,8 +264,6 @@ namespace krys::boo
   {
     Ref frame = ShareRef(_frame);
 
-    // FIXME: Hit testing in the root frame (the frames above can obscure this one), once there are subframes.
-
     auto result = HitTestResult {point};
     RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
     if (!document)
@@ -274,7 +272,6 @@ namespace krys::boo
     }
 
     // We should always start hit testing a clean tree.
-    // FIXME: The subframes' too (updateLayoutAndStyleIfNeededRecursive), once there are subframes.
     (void)document->UpdateLayout();
 
     HitTestRequest request(hitType);
@@ -437,7 +434,7 @@ namespace krys::boo
     UpdateLastScrollbarUnderMouse(scrollbar.get(), SetOrClearLastScrollbar::Set);
     bool passedToScrollbar = scrollbar && PassMousePressEventToScrollbar(mouseEvent, scrollbar.get());
 
-    // FIXME: Subframes and pan scrolling.
+    // FIXME: Pan scrolling.
 
     _clickCount = platformMouseEvent.ClickCount();
     _clickNode = ShareRefPtr(mouseEvent.TargetNode());
@@ -590,8 +587,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Subframes and remote frames.
-
     if (auto *view = frame->View())
     {
       UpdateCursor(*view, mouseEvent.GetHitTestResult(), platformMouseEvent.ShiftKey());
@@ -725,7 +720,7 @@ namespace krys::boo
                                                     HitTestRequest::Type::DisallowUserAgentShadowContent}),
       platformMouseEvent);
 
-    // FIXME: Mouse capture, subframes and remote frames.
+    // FIXME: Mouse capture.
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
     bool swallowMouseUpEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseUp), targetNode.get(),
@@ -1072,7 +1067,6 @@ namespace krys::boo
     if (initialKeyEvent.GetType() == Type::RawKeyDown)
     {
       (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
-      // FIXME: Also when the focused frame changed, once there are subframes.
       return keydown->DefaultPrevented() || keydown->DefaultHandled()
              || DefaultKeyboardEventHandler(*keydown);
     }
@@ -1103,8 +1097,7 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Also when the focused frame changed, once there are subframes; the backward compatibility mode,
-    // which dispatches a cancelled keypress anyway.
+    // FIXME: The backward compatibility mode, which dispatches a cancelled keypress anyway.
     bool keydownResult =
       keydown->DefaultPrevented() || keydown->DefaultHandled() || DefaultKeyboardEventHandler(*keydown);
     if (keydownResult)
@@ -1823,7 +1816,7 @@ namespace krys::boo
 
     RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement());
 
-    // FIXME: Widgets and subframes (isOverWidget, passWheelEventToWidget), once there are subframes.
+    // FIXME: Widgets (isOverWidget, passWheelEventToWidget), once there are any.
 
     if (element)
     {
@@ -3374,7 +3367,6 @@ namespace krys::boo
     return {accept, null};
   }
 
-  // FIXME: Subframes' drags (contentFrameForNode), once there are subframes.
   EventHandler::DragTargetResponse
     EventHandler::UpdateDragAndDrop(const PlatformMouseEvent &event,
                                     const Func<UniquePtr<Pasteboard>()> &makePasteboard,
@@ -3411,10 +3403,7 @@ namespace krys::boo
     DragTargetResponse response;
     if (_dragTarget != newTarget)
     {
-      // FIXME: this ordering was explicitly chosen to match WinIE. However,
-      // it is sometimes incorrect when dragging within subframes.
-      //
-      // Moreover, this ordering conforms to the HTML spec's drag-and-drop processing model.
+      // This ordering matches the HTML spec's drag-and-drop processing model.
       if (newTarget)
       {
         // As per the HTML spec, we must always fire a drag event before firing a dragenter, dragleave, or

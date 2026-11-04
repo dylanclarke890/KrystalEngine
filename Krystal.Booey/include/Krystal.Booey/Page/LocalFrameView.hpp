@@ -162,7 +162,6 @@ namespace krys::boo
     }
 
     /// @brief Whether the view is actually visible.
-    // FIXME: And its parent is visible, once there are subframes.
     KRYS_NODISCARD bool IsVisible() const noexcept
     {
       return _selfVisible;
@@ -294,9 +293,8 @@ namespace krys::boo
     void WillRecalcStyle() noexcept;
     void SetIsInWindow(bool isInWindow) noexcept;
 
-    bool FlushCompositingStateForThisFrame(const LocalFrame &rootFrameForFlush) noexcept;
     /// @brief Returns true if the flush was completed.
-    bool FlushCompositingStateIncludingSubframes() noexcept;
+    bool FlushCompositingState() noexcept;
 
     // Sometimes (for plug-ins) we need to eagerly go into compositing mode.
     void EnterCompositingMode() noexcept;
@@ -527,7 +525,7 @@ namespace krys::boo
     // FIXME: The visible viewport rect, once there's one.
     void ViewportContentsChanged() noexcept;
     void ResumeVisibleImageAnimations(const IntRect &visibleRect) noexcept;
-    void ResumeVisibleImageAnimationsIncludingSubframes() noexcept;
+    void ResumeVisibleImageAnimations() noexcept;
 
     // Conversions between the view's coordinates (its frame's, at the origin, as there's no widget tree) and
     // the contents'.

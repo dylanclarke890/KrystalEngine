@@ -1555,7 +1555,6 @@ namespace krys::boo::dom
       return false;
     }
 
-    // FIXME: Child frames (allowsAnyFrameContent: updating their layout too) come with frames.
     (void)UpdateLayout();
     if (!GetRenderView())
     {
@@ -1640,8 +1639,6 @@ namespace krys::boo::dom
     List<RefPtr<Element>> elementsToClearHover;
     List<RefPtr<Element>> elementsToSetHover;
 
-    // FIXME: Update the hover and active state of the subframe documents the element is in, once there are
-    // frames.
     RefPtr<Element> innerElementInDocument = ShareRefPtr(innerElement);
     if (innerElementInDocument && &innerElementInDocument->NodeDocument() != this)
     {
@@ -1726,7 +1723,6 @@ namespace krys::boo::dom
         }
         elementsToClearHover.push_back(ShareRefPtr(element));
       }
-      // FIXME: Unset the hovered nodes in the subframe document of a frame owner, once there are frames.
     }
 
     bool sawCommonAncestor = false;
