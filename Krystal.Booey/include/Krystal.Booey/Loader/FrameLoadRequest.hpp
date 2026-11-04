@@ -4,7 +4,6 @@
 #include "Krystal.Booey/Loader/FetchOptions.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
-#include "Krystal.Booey/Page/WindowFeatures.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -20,22 +19,11 @@ namespace krys::boo
   class FrameLoadRequestBase
   {
   private:
-    NewFrameOpenerPolicy _newFrameOpenerPolicy {NewFrameOpenerPolicy::Allow};
     dom::DOMStringAtom _downloadAttribute {dom::DOMStringAtom::Null()};
     RefPtr<dom::Element> _sourceElement;
-    Maybe<WindowFeatures> _windowFeatures;
     bool _isRequestFromClientOrUserInput {false};
 
   public:
-    KRYS_NODISCARD NewFrameOpenerPolicy GetNewFrameOpenerPolicy() const noexcept
-    {
-      return _newFrameOpenerPolicy;
-    }
-    void SetNewFrameOpenerPolicy(NewFrameOpenerPolicy policy) noexcept
-    {
-      _newFrameOpenerPolicy = policy;
-    }
-
     /// @brief The `download` attribute of the link followed; null if it has none.
     KRYS_NODISCARD dom::DOMStringAtom DownloadAttribute() const noexcept
     {
@@ -48,16 +36,6 @@ namespace krys::boo
       return _sourceElement.get();
     }
     void SetSourceElement(dom::Element *sourceElement) noexcept;
-
-    /// @brief The features `window.open()` asked a new window to have, if it opened one.
-    KRYS_NODISCARD const Maybe<WindowFeatures> &GetWindowFeatures() const noexcept
-    {
-      return _windowFeatures;
-    }
-    void SetWindowFeatures(Maybe<WindowFeatures> &&features) noexcept
-    {
-      _windowFeatures = krys::move(features);
-    }
 
     /// @brief Whether the host or the user asked for the navigation, rather than the page.
     KRYS_NODISCARD bool IsRequestFromClientOrUserInput() const noexcept

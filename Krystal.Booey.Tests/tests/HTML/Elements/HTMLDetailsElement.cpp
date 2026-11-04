@@ -68,9 +68,9 @@ namespace krys::boo::html::tests
 
     void Navigate(NavigationFixture &fixture, utf8_stringview url) noexcept
     {
-      fixture.Frame->Loader().ChangeLocation(
-        url::URL(fixture.Document->GetURL(), url), dom::DOMStringAtom::Empty(), nullptr,
-        ReferrerPolicy::EmptyString, std::nullopt, dom::DOMStringAtom::Null());
+      fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url),
+                                             dom::DOMStringAtom::Empty(), nullptr,
+                                             ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
       html::EventLoop::Current().RunUntilIdle();
     }
   }

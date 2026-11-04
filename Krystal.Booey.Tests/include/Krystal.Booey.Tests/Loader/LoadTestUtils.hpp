@@ -77,34 +77,12 @@ namespace krys::boo::tests
     }
   };
 
-  /// @brief Records the alerts shown and print requests.
-  struct LeavingChromeClient final : ChromeClient
-  {
-    List<std::string> Alerts;
-    uint32 PrintRequests {0};
-
-    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
-    {
-    }
-
-    void RunJavaScriptAlert(LocalFrame &, const dom::DOMString &message) noexcept override
-    {
-      Alerts.push_back(Narrow(message));
-    }
-
-    void Print(LocalFrame &) noexcept override
-    {
-      ++PrintRequests;
-    }
-  };
-
   /// @brief A page whose main frame starts with its initial empty document, and whose loads come from a
   /// test strategy.
   struct LoadFixture : css::tests::ValueFixture, LoaderFixture
   {
     List<std::string> Events;
     LoadRecordingClient *Client {nullptr};
-    LeavingChromeClient *Chrome {nullptr};
     Ref<Page> TestPage {CreatePage()};
 
     LoadFixture() noexcept
@@ -118,9 +96,7 @@ namespace krys::boo::tests
     {
       auto client = CreateUnique<LoadRecordingClient>(Events);
       Client = client.get();
-      auto chrome = CreateUnique<LeavingChromeClient>();
-      Chrome = chrome.get();
-      return Page::Create(krys::move(chrome), nullptr, krys::move(client));
+      return Page::Create(CreateUnique<EmptyChromeClient>(), nullptr, krys::move(client));
     }
 
     KRYS_NODISCARD LocalFrame &Frame() const noexcept

@@ -127,7 +127,6 @@ namespace krys::boo::html
   class TreeBuilder;
   class LazyLoadImageObserver;
   class RenderBlocking;
-  class SerializedScriptValue;
 
   enum class TaskSource : uint8;
 }
@@ -742,24 +741,6 @@ namespace krys::boo::dom
     /// @brief An empty collection, for historical reasons.
     /// @see https://html.spec.whatwg.org/#dom-document-applets
     KRYS_NODISCARD Ref<HTMLCollection> Applets() noexcept;
-
-    /// @brief Does nothing.
-    /// @see https://html.spec.whatwg.org/#dom-document-clear
-    void Clear() const noexcept
-    {
-    }
-
-    /// @brief Does nothing.
-    /// @see https://html.spec.whatwg.org/#dom-document-captureevents
-    void CaptureEvents() const noexcept
-    {
-    }
-
-    /// @brief Does nothing.
-    /// @see https://html.spec.whatwg.org/#dom-document-releaseevents
-    void ReleaseEvents() const noexcept
-    {
-    }
 
 #pragma endregion
 
@@ -2094,9 +2075,6 @@ namespace krys::boo::dom
     }
 
   private:
-    /// @brief Stops the effects the gamepads' haptic actuators are playing, as the document is suspended or
-    /// stopped.
-    void StopGamepadHapticEffects() noexcept;
   };
 }
 

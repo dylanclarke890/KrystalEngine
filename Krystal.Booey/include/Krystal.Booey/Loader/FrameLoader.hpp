@@ -144,13 +144,11 @@ namespace krys::boo
     /// @param passedTarget The browsing context to navigate (`_self` and the others, or a name); empty for
     /// the document's base target.
     /// @param triggeringEvent The event that started the navigation (a click), if any.
-    /// @param openerPolicy Whether a new browsing context gets an opener; by default, unless the referrer
-    /// policy is `no-referrer`.
     /// @param downloadAttribute The link's `download` attribute; null if it has none.
     /// @param sourceElement The link, if any.
     void ChangeLocation(const url::URL &url, dom::DOMStringAtom passedTarget, dom::Event *triggeringEvent,
-                        ReferrerPolicy referrerPolicy, Maybe<NewFrameOpenerPolicy> openerPolicy,
-                        dom::DOMStringAtom downloadAttribute, dom::Element *sourceElement = nullptr) noexcept;
+                        ReferrerPolicy referrerPolicy, dom::DOMStringAtom downloadAttribute,
+                        dom::Element *sourceElement = nullptr) noexcept;
 
     /// @brief Navigates as @p frameRequest asks, to a `GET` request.
     void ChangeLocation(FrameLoadRequest &&frameRequest, dom::Event *triggeringEvent = nullptr) noexcept;
@@ -159,8 +157,8 @@ namespace krys::boo
     void SubmitForm(Ref<FormSubmission> &&submission) noexcept;
 
     /// @brief The frame a navigation targeting @p name navigates: this frame for an empty name, `_self`,
-    /// `_parent`, `_top` (a frame is the only one in its tree) and the frame's own name; null for `_blank`
-    /// and other names, which would open a new browsing context.
+    /// `_parent` and `_top` (a frame is the only one in its tree); null for `_blank` and other names, which
+    /// would open a new browsing context.
     KRYS_NODISCARD LocalFrame *FindFrameForNavigation(dom::DOMStringView name) const noexcept;
 
     /// @brief Run when the parser stops parsing the frame's document: scrolls to its URL's fragment.

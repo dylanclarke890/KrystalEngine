@@ -35,9 +35,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Text/EncodingRegistry.hpp"
@@ -242,11 +240,10 @@ namespace krys::boo::dom::tests
     };
 
     CHECK(Is<CompositionEvent>(*create(u8"compositionevent")));
-    CHECK(dynamic_cast<CustomEvent<RefPtr<html::SerializedScriptValue>> *>(&*create(u8"customevent")));
+    CHECK(dynamic_cast<CustomEvent<EmptyTag> *>(&*create(u8"customevent")));
     CHECK(Is<DragEvent>(*create(u8"dragevent")));
     CHECK(Is<FocusEvent>(*create(u8"focusevent")));
     CHECK(Is<KeyboardEvent>(*create(u8"keyboardevent")));
-    CHECK(Is<html::MessageEvent>(*create(u8"messageevent")));
     CHECK(Is<MouseEvent>(*create(u8"mouseevent")));
     CHECK(Is<MouseEvent>(*create(u8"mouseevents")));
     CHECK(Is<TextEvent>(*create(u8"textevent")));
@@ -309,34 +306,33 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("Document.createEvent(): the event is initialised with the legacy init methods",
-            "[DOM][Document][Event][dom:dom-document-createevent][html:dom-messageevent-initmessageevent]")
+            "[DOM][Document][Event][dom:dom-document-createevent][dom:dom-customevent-initcustomevent]")
   {
     auto document = CreateRef<HTMLDocument>();
 
-    SECTION("initMessageEvent")
+    using CreatedCustomEvent = CustomEvent<EmptyTag>;
+
+    SECTION("initCustomEvent")
     {
-      auto event = document->CreateEvent(u8"messageevent").ReleaseValue();
-      auto &message = Downcast<html::MessageEvent>(*event);
-      message.InitMessageEvent(DOMStringAtom(u8"message"), true, false, nullptr, u8"https://example.com",
-                               u8"7");
-      CHECK(message.Type() == u8"message");
-      CHECK(message.Bubbles());
-      CHECK(message.Origin() == u8"https://example.com");
-      CHECK(message.LastEventId() == u8"7");
-      CHECK(message.Source() == nullptr);
+      auto event = document->CreateEvent(u8"customevent").ReleaseValue();
+      auto &custom = static_cast<CreatedCustomEvent &>(*event);
+      custom.InitCustomEvent(DOMStringAtom(u8"custom"), true, false, EmptyTag {});
+      CHECK(custom.Type() == u8"custom");
+      CHECK(custom.Bubbles());
+      CHECK(custom.Detail());
     }
 
     SECTION("Not while it's being dispatched")
     {
-      auto event = document->CreateEvent(u8"messageevent").ReleaseValue();
-      auto &message = Downcast<html::MessageEvent>(*event);
-      message.InitMessageEvent(DOMStringAtom(u8"message"));
+      auto event = document->CreateEvent(u8"customevent").ReleaseValue();
+      auto &custom = static_cast<CreatedCustomEvent &>(*event);
+      custom.InitCustomEvent(DOMStringAtom(u8"custom"));
       auto element = document->CreateElement(u8"div").ReleaseValue();
-      auto handle = element->AddEventListener<html::MessageEvent>(
-        DOMStringAtom(u8"message"),
-        [](html::MessageEvent &dispatched) { dispatched.InitMessageEvent(DOMStringAtom(u8"other")); });
-      CHECK_FALSE(element->DispatchEvent(message).HasException());
-      CHECK(message.Type() == u8"message");
+      auto handle = element->AddEventListener(
+        DOMStringAtom(u8"custom"), [](Event &dispatched)
+        { static_cast<CreatedCustomEvent &>(dispatched).InitCustomEvent(DOMStringAtom(u8"other")); });
+      CHECK_FALSE(element->DispatchEvent(custom).HasException());
+      CHECK(custom.Type() == u8"custom");
     }
   }
 
@@ -927,7 +923,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Document's obsolete members",
             "[DOM][Document][html:other-elements,-attributes-and-apis][html:dom-document-anchors]"
-            "[html:dom-document-applets][html:dom-document-clear][html:dom-document-fgcolor]")
+            "[html:dom-document-applets][html:dom-document-fgcolor]")
   {
     SECTION("anchors are the a elements with names, and applets is empty")
     {
@@ -939,9 +935,6 @@ namespace krys::boo::dom::tests
       CHECK(document->Applets()->Length() == 0);
       CHECK(&*document->Applets() == &*document->Applets());
 
-      document->Clear();
-      document->CaptureEvents();
-      document->ReleaseEvents();
       CHECK(document->Anchors()->Length() == 2);
     }
 

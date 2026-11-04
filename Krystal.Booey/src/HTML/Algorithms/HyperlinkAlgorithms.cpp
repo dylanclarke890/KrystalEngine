@@ -112,29 +112,6 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HyperlinkAlgorithms::GetNoopener(const HTMLElement &element, const url::URL &url,
-                                        dom::DOMStringView target) noexcept
-  {
-    // 1. If element's link types include the noopener or noreferrer keyword, then return true.
-    if (HasRel(element, u8"noopener") || HasRel(element, u8"noreferrer"))
-    {
-      return true;
-    }
-
-    // 2. If element's link types do not include the opener keyword and target is an ASCII case-insensitive
-    //    match for "_blank", then return true.
-    // (Not for a javascript: URL, which opens no document.)
-    if (!HasRel(element, u8"opener") && text::IsASCIICaselessEqual(target, utf8_stringview(u8"_blank"))
-        && !url.ProtocolIsJavaScript())
-    {
-      return true;
-    }
-
-    // 3. (Skipped: there's no blob URL store, so no URL has a blob URL entry.)
-    // 4. Return false.
-    return false;
-  }
-
   void HyperlinkAlgorithms::ActivationBehavior(HTMLElement &element, dom::Event &event) noexcept
   {
     // 1. If element has no href attribute, then return.
@@ -225,9 +202,7 @@ namespace krys::boo::html
       return;
     }
 
-    // 6. Let noopener be the result of getting an element's noopener with subject, urlRecord, and
-    //    targetAttributeValue.
-    auto noopener = GetNoopener(subject, urlRecord, targetAttributeValue.View());
+    // 6. (Skipped: there are no openers, as the host opens new windows.)
 
     // 7. Let targetNavigable be the first return value of applying the rules for choosing a navigable given
     //    targetAttributeValue, subject's node navigable, and noopener.
@@ -251,7 +226,6 @@ namespace krys::boo::html
     auto downloadAttribute = subject.GetAttribute(u8"download");
     auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : dom::DOMStringAtom::Null();
     frame->Loader().ChangeLocation(urlRecord, targetAttributeValue, &event, HyperlinkReferrerPolicy(subject),
-                                   noopener ? NewFrameOpenerPolicy::Suppress : NewFrameOpenerPolicy::Allow,
                                    download, &subject);
 
     // FIXME: Pings (the ping attribute), once there are network loads.

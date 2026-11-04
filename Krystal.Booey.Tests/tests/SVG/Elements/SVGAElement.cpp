@@ -63,7 +63,6 @@ namespace krys::boo::svg::tests
       CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/x.html");
       CHECK(fixture.Navigations()[0].IsNewWindow);
       CHECK(fixture.Navigations()[0].NewWindowName == "_blank");
-      CHECK(fixture.Navigations()[0].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
     }
 
     SECTION("targets and link types")
@@ -71,12 +70,10 @@ namespace krys::boo::svg::tests
       Click(fixture.ById(u8"blank"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].NewWindowName == "_blank");
-      CHECK(fixture.Navigations()[0].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Allow);
 
       Click(fixture.ById(u8"noopener"));
       REQUIRE(fixture.Navigations().size() == 2);
       CHECK(fixture.Navigations()[1].NewWindowName == "results");
-      CHECK(fixture.Navigations()[1].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
     }
 
     SECTION("other buttons' clicks are followed too")

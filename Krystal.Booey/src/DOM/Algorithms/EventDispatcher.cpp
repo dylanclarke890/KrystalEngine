@@ -549,20 +549,9 @@ namespace krys::boo::dom
       }
 
       // 2i. Let currentEvent be undefined.
-      RefPtr<Event> currentEvent;
-
-      // 2j. If listenerGlobal is a Window object:
-      if (global)
-      {
-        // 2j.i. Set currentEvent to listenerGlobal's current event.
-        currentEvent = global->_currentEvent;
-
-        // 2j.ii. If invocationTargetInShadowTree is false, then set listenerGlobal's current event to event.
-        if (!invocationTargetInShadowTree)
-        {
-          global->_currentEvent = ShareRefPtr(&event);
-        }
-      }
+      // 2j. If listenerGlobal is a Window object: ...
+      // (Skipped: there's no window.event to save and set.)
+      (void)invocationTargetInShadowTree;
 
       // 2k. If listener's passive is true, then set event's in passive listener flag.
       if (listener->Passive() == true)
@@ -590,10 +579,7 @@ namespace krys::boo::dom
       event._inPassiveListener = false;
 
       // 2o. If listenerGlobal is a Window object, then set listenerGlobal's current event to currentEvent.
-      if (global)
-      {
-        global->_currentEvent = krys::move(currentEvent);
-      }
+      // (Skipped: there's no window.event to restore.)
 
       // 2p. If event's stop immediate propagation flag is set, then break.
       if (event._stopImmediatePropagation)

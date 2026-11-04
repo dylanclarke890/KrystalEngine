@@ -111,9 +111,6 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-range-clonerange
     KRYS_NODISCARD Ref<Range> CloneRange() const noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#dom-range-detach
-    void Detach() noexcept;
-
     /// @see https://dom.spec.whatwg.org/#dom-range-ispointinrange
     KRYS_NODISCARD ExceptionOr<bool> IsPointInRange(Node &node, uint64 offset) const noexcept;
 

@@ -15,12 +15,10 @@ namespace krys::boo::svg
   enum class SVGALinkRelation : uint8
   {
     NoReferrer,
-    NoOpener,
-    Opener
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGALinkRelation, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGALinkRelation, 1uz);
 
 namespace krys::boo::svg
 {

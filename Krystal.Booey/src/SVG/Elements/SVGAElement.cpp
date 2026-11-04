@@ -70,14 +70,6 @@ namespace krys::boo::svg
       {
         _linkRelations.Add(SVGALinkRelation::NoReferrer);
       }
-      if (hasToken(u8"noopener"))
-      {
-        _linkRelations.Add(SVGALinkRelation::NoOpener);
-      }
-      if (hasToken(u8"opener"))
-      {
-        _linkRelations.Add(SVGALinkRelation::Opener);
-      }
       if (_relList)
       {
         _relList->AssociatedAttributeValueChanged();
@@ -172,19 +164,11 @@ namespace krys::boo::svg
 
     auto referrerPolicy =
       HasRel(SVGALinkRelation::NoReferrer) ? ReferrerPolicy::NoReferrer : ReferrerPolicy::EmptyString;
-    auto newFrameOpenerPolicy = NewFrameOpenerPolicy::Allow;
-    if (HasRel(SVGALinkRelation::NoOpener) || HasRel(SVGALinkRelation::NoReferrer)
-        || (!HasRel(SVGALinkRelation::Opener)
-            && text::IsASCIICaselessEqual(target.View(), utf8_stringview(u8"_blank"))
-            && !completedURL.ProtocolIsJavaScript()))
-    {
-      newFrameOpenerPolicy = NewFrameOpenerPolicy::Suppress;
-    }
 
     if (RefPtr<LocalFrame> frame = ShareRefPtr(document->Frame()))
     {
-      frame->Loader().ChangeLocation(completedURL, target, &event, referrerPolicy, newFrameOpenerPolicy,
-                                     dom::DOMStringAtom::Null(), this);
+      frame->Loader().ChangeLocation(completedURL, target, &event, referrerPolicy, dom::DOMStringAtom::Null(),
+                                     this);
     }
   }
 

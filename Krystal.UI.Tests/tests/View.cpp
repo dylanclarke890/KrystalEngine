@@ -30,7 +30,6 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
@@ -1429,23 +1428,20 @@ namespace krys::ui::tests
                                   "touchcancel:b/0,1", "pointercancel:a/touch3/0/0", "touchcancel:a/0,1"});
     }
 
-    SECTION("the pointing devices: media features and maxTouchPoints")
+    SECTION("the pointing devices: media features")
     {
       auto &window = *view.Document().Window();
       CHECK(window.MatchMedia(u8"(pointer: fine) and (hover: hover)")->Matches());
-      CHECK(window.GetNavigator().MaxTouchPoints() == 0);
 
       view.SetPointingDevices({.Mouse = false, .Pen = false, .Touch = true, .MaxTouchPoints = 10});
       CHECK(window.MatchMedia(u8"(pointer: coarse) and (hover: none)")->Matches());
       CHECK(window.MatchMedia(u8"(any-pointer: coarse) and (any-hover: none)")->Matches());
       CHECK_FALSE(window.MatchMedia(u8"(any-pointer: fine)")->Matches());
-      CHECK(window.GetNavigator().MaxTouchPoints() == 10);
 
       view.SetPointingDevices({.Mouse = true, .Pen = true, .Touch = true, .MaxTouchPoints = 5});
       CHECK(
         window.MatchMedia(u8"(pointer: fine) and (any-pointer: coarse) and (any-pointer: fine)")->Matches());
       CHECK(window.MatchMedia(u8"(any-hover: hover)")->Matches());
-      CHECK(window.GetNavigator().MaxTouchPoints() == 5);
     }
   }
 
@@ -2615,92 +2611,22 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
-  TEST_CASE("View: the page's window asks the host to focus and close it", "[UI]")
+  TEST_CASE("View: the page's window asks the host to focus it", "[UI]")
   {
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html>");
     WaitForLoad(view);
 
     uint32 focusRequests = 0;
-    uint32 closeRequests = 0;
     auto &window = *view.Document().Window();
 
     // Without a handler, nothing happens.
     window.Focus();
 
     view.SetFocusRequestHandler([&] { ++focusRequests; });
-    view.SetCloseRequestHandler([&] { ++closeRequests; });
 
     view.Document().Window()->Focus();
     CHECK(focusRequests == 1);
-    view.Document().Window()->Close();
-    CHECK(closeRequests == 0);
-    boo::html::EventLoop::Current().RunUntilIdle();
-    CHECK(closeRequests == 1);
-  }
-
-  TEST_CASE("View: the page's window geometry is the host's", "[UI]")
-  {
-    View view({400, 300});
-    view.LoadHTML(u8"<!DOCTYPE html>");
-    WaitForLoad(view);
-    auto &window = *view.Document().Window();
-
-    // Until the host says, the window is the viewport at the screen's origin.
-    CHECK(window.OuterWidth() == 400);
-    CHECK(window.OuterHeight() == 300);
-    CHECK(window.ScreenX() == 0);
-
-    view.SetWindowRect(boo::FloatRect(10, 20, 800, 600));
-    CHECK(window.ScreenX() == 10);
-    CHECK(window.ScreenY() == 20);
-    CHECK(window.OuterWidth() == 800);
-
-    auto environment = view.Frame().GetMediaEnvironment();
-    environment.ScreenSize = boo::FloatSize(1'920, 1'080);
-    view.Frame().SetMediaEnvironment(environment);
-
-    List<boo::FloatRect> requests;
-    view.SetWindowRectRequestHandler([&](const boo::FloatRect &rect) { requests.push_back(rect); });
-    window.MoveTo(100, 200);
-    REQUIRE(requests.size() == 1);
-    CHECK(requests[0] == boo::FloatRect(100, 200, 800, 600));
-  }
-
-  TEST_CASE("View: the page's prompts and console messages reach the host's handlers", "[UI]")
-  {
-    View view({400, 300});
-    view.LoadHTML(u8"<!DOCTYPE html>", boo::url::URL(u8"https://example.com/page.html"));
-    WaitForLoad(view);
-    auto &window = *view.Document().Window();
-
-    // Without handlers, prompts show nothing and are cancelled.
-    window.Alert(u8"Hi");
-    CHECK_FALSE(window.Confirm(u8"Sure?"));
-    CHECK_FALSE(window.Prompt(u8"Name?"));
-
-    List<std::string> shown;
-    view.SetAlertHandler([&](const utf8_string &message)
-                         { shown.push_back(std::string(message.begin(), message.end())); });
-    view.SetConfirmHandler([](const utf8_string &) { return true; });
-    view.SetPromptHandler([](const utf8_string &, const utf8_string &defaultValue)
-                          { return Maybe<utf8_string>(defaultValue + u8"!"); });
-    List<ConsoleMessage> messages;
-    view.SetConsoleMessageHandler([&](const ConsoleMessage &message) { messages.push_back(message); });
-
-    window.Alert(u8"Hi");
-    CHECK(shown == List<std::string> {"Hi"});
-    CHECK(window.Confirm(u8"Sure?"));
-    CHECK(window.Prompt(u8"Name?", u8"Ada") == boo::dom::DOMString(u8"Ada!"));
-
-    window.ReportError(u8"Something broke");
-    REQUIRE(messages.size() == 1);
-    CHECK(messages[0].Level == boo::MessageLevel::Error);
-    CHECK(messages[0].Message == u8"Something broke");
-    CHECK(messages[0].SourceURL == u8"https://example.com/page.html");
-
-    view.SetUserAgent(u8"KrystalGame/1.0");
-    CHECK(window.GetNavigator().UserAgent() == u8"KrystalGame/1.0");
   }
 
   TEST_CASE("View: loads pages on a later task, and tells the host", "[UI]")

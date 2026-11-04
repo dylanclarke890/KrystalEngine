@@ -28,16 +28,15 @@
 #include "Krystal.Editor/PageCanvas2D.hpp"
 #include "Krystal.Editor/PageCube.hpp"
 #include "Krystal.Editor/PageDragAndDrop.hpp"
-#include "Krystal.Editor/PageGamepads.hpp"
 #include "Krystal.Editor/PageObservers.hpp"
 #include "Krystal.Editor/PagePointers.hpp"
+#include "Krystal.Editor/PageSpatialNavigation.hpp"
 #include "Krystal.Editor/PageTextInput.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
-#include "Krystal.UI/GamepadProvider.hpp"
 #include "Krystal.UI/View.hpp"
 #include <algorithm>
 #include <cmath>
@@ -73,10 +72,6 @@ namespace krys
     gfx::TextureHandle _image {};
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
-    /// @brief The input's pads, for pages (the shared gamepad provider while the editor runs), and the
-    /// provider before it.
-    UniquePtr<ui::GamepadProvider> _gamepadProvider {};
-    boo::GamepadProvider *_previousGamepadProvider {nullptr};
     UniquePtr<ui::View> _pageView {};
     /// @brief The page's listeners, which go when the page is loaded again.
     boo::dom::EventListenerHandle _cardPicker;
@@ -89,8 +84,8 @@ namespace krys
     UniquePtr<editor::PageAnimations> _animations;
     /// @brief The page's pointer samples from C++, made once it has loaded.
     UniquePtr<editor::PagePointers> _pointers;
-    /// @brief The page's gamepad samples from C++, made once it has loaded.
-    UniquePtr<editor::PageGamepads> _gamepads;
+    /// @brief The page's spatial navigation sample from C++, made once it has loaded.
+    UniquePtr<editor::PageSpatialNavigation> _spatialNavigation;
     /// @brief The page's input method sample from C++, made once it has loaded.
     UniquePtr<editor::PageTextInput> _textInput;
     /// @brief The page's drag and drop sample from C++, made once it has loaded.
@@ -134,9 +129,6 @@ namespace krys
       _renderer = krys::move(*renderer);
       CreateImage();
       LoadFonts();
-      _gamepadProvider = CreateUnique<ui::GamepadProvider>(*_context->Input);
-      _previousGamepadProvider = &boo::GamepadProvider::Singleton();
-      boo::GamepadProvider::SetSharedProvider(*_gamepadProvider);
       CreatePage();
     }
 
@@ -145,17 +137,12 @@ namespace krys
       _observers = nullptr;
       _animations = nullptr;
       _pointers = nullptr;
-      _gamepads = nullptr;
+      _spatialNavigation = nullptr;
       _textInput = nullptr;
       _dragAndDrop = nullptr;
       _cube = nullptr;
       _canvas2D = nullptr;
       _pageView = nullptr;
-      if (_previousGamepadProvider)
-      {
-        boo::GamepadProvider::SetSharedProvider(*_previousGamepadProvider);
-      }
-      _gamepadProvider = nullptr;
       _booeyFonts = {};
       _renderer = nullptr;
       _boldFont = nullptr;
@@ -487,12 +474,7 @@ namespace krys
       _pageTime += std::chrono::duration_cast<MonotonicTime::duration>(dt);
       if (_pageView)
       {
-        // The pads reach the page's Gamepad API, and drive the page as the keyboard does, before its frame
-        // runs.
-        if (_gamepadProvider)
-        {
-          _gamepadProvider->Update(_pageTime);
-        }
+        // The pads drive the page as the keyboard does, before its frame runs.
         _pageView->GamepadInput(_context->Input->GetGamepads(), _pageTime);
         if (_cube)
         {
@@ -611,7 +593,7 @@ namespace krys
           _observers = nullptr;
           _animations = nullptr;
           _pointers = nullptr;
-          _gamepads = nullptr;
+          _spatialNavigation = nullptr;
           _textInput = nullptr;
           _dragAndDrop = nullptr;
           _cube = nullptr;
@@ -622,7 +604,7 @@ namespace krys
           _observers = CreateUnique<editor::PageObservers>(document);
           _animations = CreateUnique<editor::PageAnimations>(document);
           _pointers = CreateUnique<editor::PagePointers>(document);
-          _gamepads = CreateUnique<editor::PageGamepads>(document);
+          _spatialNavigation = CreateUnique<editor::PageSpatialNavigation>(document);
           _textInput = CreateUnique<editor::PageTextInput>(document);
           _dragAndDrop = CreateUnique<editor::PageDragAndDrop>(document);
           _cube = nullptr;

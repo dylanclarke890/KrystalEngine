@@ -22,15 +22,11 @@ namespace krys::boo::html
     Timer,
     /// @see https://w3c.github.io/requestidlecallback/#start-an-idle-period-algorithm
     IdleTask,
-    /// @see https://html.spec.whatwg.org/#posted-message-task-source
-    PostedMessage,
     /// @brief The user agent's own asynchronous work.
     InternalAsyncTask,
-    /// @see https://w3c.github.io/gamepad/#dfn-gamepad-task-source
-    Gamepad,
     /// @see https://html.spec.whatwg.org/#canvas-blob-serialisation-task-source
     CanvasBlobSerialization,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TaskSource, 11uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TaskSource, 9uz);

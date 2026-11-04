@@ -378,7 +378,6 @@ namespace krys::boo
 
   void FrameLoader::ChangeLocation(const url::URL &url, dom::DOMStringAtom passedTarget,
                                    dom::Event *triggeringEvent, ReferrerPolicy referrerPolicy,
-                                   Maybe<NewFrameOpenerPolicy> openerPolicy,
                                    dom::DOMStringAtom downloadAttribute, dom::Element *sourceElement) noexcept
   {
     auto *document = _frame.Document();
@@ -389,9 +388,6 @@ namespace krys::boo
 
     FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(url), passedTarget,
                                       downloadAttribute);
-    frameLoadRequest.SetNewFrameOpenerPolicy(
-      openerPolicy.value_or(referrerPolicy == ReferrerPolicy::NoReferrer ? NewFrameOpenerPolicy::Suppress
-                                                                         : NewFrameOpenerPolicy::Allow));
     frameLoadRequest.SetReferrerPolicy(referrerPolicy);
     frameLoadRequest.SetSourceElement(sourceElement);
     ChangeLocation(krys::move(frameLoadRequest), triggeringEvent);
@@ -424,8 +420,6 @@ namespace krys::boo
     NavigationAction action(request, false, triggeringEvent, frameRequest.DownloadAttribute(),
                             frameRequest.SourceElement());
     action.SetIsRequestFromClientOrUserInput(frameRequest.IsRequestFromClientOrUserInput());
-    action.SetNewFrameOpenerPolicy(frameRequest.GetNewFrameOpenerPolicy());
-    action.SetWindowFeatures(Maybe<WindowFeatures>(frameRequest.GetWindowFeatures()));
 
     // Scroll to the fragment even if the URL is exactly the same, so pages with `#` links work.
     if (targetsThisFrame && !isDownload && ShouldPerformFragmentNavigation(request.URL()))
@@ -525,14 +519,8 @@ namespace krys::boo
       return &_frame;
     }
     // 7. Otherwise, if name is not an ASCII case-insensitive match for "_blank", then set chosen to the
-    // result
-    //    of finding a navigable by target name given name and currentNavigable.
-    // https://html.spec.whatwg.org/#find-a-navigable-by-target-name
-    // (The frame is the only navigable to search, and there are no other top-level browsing contexts.)
-    if (!text::IsASCIICaselessEqual(name, utf8_stringview(u8"_blank")) && name == _frame.SpecifiedName())
-    {
-      return &_frame;
-    }
+    //    result of finding a navigable by target name given name and currentNavigable.
+    // (The frame has no name, as there's no window.name, and there are no other browsing contexts.)
     // 8. If chosen is null, then a new top-level traversable is being requested.
     // (RequestNavigation asks the host for one.)
     return nullptr;

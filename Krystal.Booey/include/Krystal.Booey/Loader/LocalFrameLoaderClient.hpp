@@ -48,17 +48,6 @@ namespace krys::boo
       (void)frameName;
     }
 
-    /// @brief The user agent string for @p url, as `navigator.userAgent` reports it.
-    KRYS_NODISCARD virtual dom::DOMString UserAgent(const url::URL &url) const noexcept
-    {
-      (void)url;
-      return dom::DOMString(DefaultUserAgent);
-    }
-
-    /// @brief Booey's user agent string, unless the host gives its own.
-    static constexpr utf8_stringview DefaultUserAgent =
-      u8"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/605.1.15 (KHTML, like Gecko) Booey";
-
     /// @brief A document started loading in the frame (provisionally: the frame shows its old document).
     virtual void DispatchDidStartProvisionalLoad() noexcept
     {

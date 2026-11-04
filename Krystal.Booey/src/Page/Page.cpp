@@ -281,19 +281,6 @@ namespace krys::boo
     FinalizeRenderingUpdate();
   }
 
-  void Page::NetworkStateChanged(bool isOnLine) noexcept
-  {
-    List<Ref<dom::Document>> documents;
-    ForEachDocument([&](dom::Document &document) { documents.push_back(ShareRef(document)); });
-
-    auto eventName = dom::DOMStringAtom(isOnLine ? EventNames::Online : EventNames::Offline);
-    for (auto &document : documents)
-    {
-      Ref<dom::Event> event = dom::Event::Create(eventName, false, false);
-      document->DispatchWindowEvent(*event);
-    }
-  }
-
   void Page::OpportunisticallyRunIdleCallbacks(MonotonicTime::duration deadline) noexcept
   {
     if (MonotonicTime::Now() >= deadline)

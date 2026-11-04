@@ -93,17 +93,14 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTitleElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
-#include "Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
@@ -112,7 +109,6 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
-#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
@@ -155,6 +151,7 @@
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
+#include "Krystal.Core/Utils/Tags.hpp"
 #include <algorithm>
 #include <chrono>
 #include <format>
@@ -666,7 +663,8 @@ namespace krys::boo::dom
       }
       if (matches(u8"customevent"))
       {
-        return CreateRef<CustomEvent<RefPtr<html::SerializedScriptValue>>>(empty);
+        // (Without script, there's no detail type to give it.)
+        return CreateRef<CustomEvent<EmptyTag>>(empty);
       }
       if (matches(u8"dragevent"))
       {
@@ -683,10 +681,6 @@ namespace krys::boo::dom
       if (matches(u8"keyboardevent"))
       {
         return CreateRef<KeyboardEvent>(empty);
-      }
-      if (matches(u8"messageevent"))
-      {
-        return CreateRef<html::MessageEvent>(empty);
       }
       if (matches(u8"mouseevent") || matches(u8"mouseevents"))
       {
@@ -2419,10 +2413,7 @@ namespace krys::boo::dom
     if (HasSkippedResizeObservations())
     {
       SetHasSkippedResizeObservations(false);
-      if (RefPtr<LocalDOMWindow> window = ShareRefPtr(Window()))
-      {
-        window->ReportError(u8"ResizeObserver loop completed with undelivered notifications.");
-      }
+      // (The loop error isn't reported, as there's no script error reporting.)
       // Starting a new schedule the next round of notify.
       ScheduleRenderingUpdate({RenderingUpdateStep::ResizeObservations});
     }
@@ -3316,7 +3307,6 @@ namespace krys::boo::dom
     {
       timer->Suspend();
     }
-    StopGamepadHapticEffects();
   }
 
   void Document::ResumeActiveDOMObjects(ReasonForSuspension reason) noexcept
@@ -3330,15 +3320,6 @@ namespace krys::boo::dom
     for (auto &[id, timer] : _timeouts)
     {
       timer->Resume();
-    }
-  }
-
-  void Document::StopGamepadHapticEffects() noexcept
-  {
-    auto *navigator = _domWindow ? _domWindow->NavigatorIfExists() : nullptr;
-    if (auto *gamepads = navigator ? navigator->GamepadsIfExists() : nullptr)
-    {
-      gamepads->StopHapticEffects();
     }
   }
 
@@ -3360,8 +3341,6 @@ namespace krys::boo::dom
     {
       closeWatcherManager->DestroyAll();
     }
-
-    StopGamepadHapticEffects();
   }
 
   LocalDOMWindow *Document::DefaultView() const noexcept
@@ -3602,16 +3581,6 @@ namespace krys::boo::dom
     DispatchPageshowEvent(false);
 
     // An event handler may have removed the frame.
-    if (!Frame())
-    {
-      return;
-    }
-
-    // Print if print() asked to while the document was loading.
-    if (RefPtr<LocalDOMWindow> window = _domWindow)
-    {
-      window->FinishedLoading();
-    }
     if (!Frame())
     {
       return;

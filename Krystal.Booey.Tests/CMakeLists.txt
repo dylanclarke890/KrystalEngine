@@ -422,7 +422,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/PenAndTouch.cpp
 		tests/Page/PointerLockController.cpp
 		tests/Page/SpatialNavigation.cpp
-		tests/Modules/Gamepad/Gamepad.cpp
 		tests/FileAPI/Blob.cpp
 		tests/DOM/DataTransfer/DataTransfer.cpp
 		tests/Page/PointerCaptureController.cpp

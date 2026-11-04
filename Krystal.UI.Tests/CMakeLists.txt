@@ -50,11 +50,9 @@ target_sources(Krystal.UI.Tests
     tests/BidiEditing.cpp
     tests/Canvas2D.cpp
     tests/Compositing.cpp
-    tests/Gamepads.cpp
     tests/DragAndDrop.cpp
     tests/InputMethod.cpp
     tests/GamepadNavigation.cpp
-    tests/GamepadProvider.cpp
     tests/Golden.cpp
     tests/GraphicsContextRender2D.cpp
     tests/MathML.cpp

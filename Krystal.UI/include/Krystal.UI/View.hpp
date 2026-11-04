@@ -8,12 +8,10 @@
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
-#include "Krystal.Booey/Page/ConsoleTypes.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
-#include "Krystal.Booey/Page/WindowFeatures.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp"
@@ -70,8 +68,6 @@ namespace krys::ui
     bool MetaKey {false};
     /// @brief The link's `download` attribute, if it has one.
     Maybe<utf8_string> Download;
-    /// @brief The features `window.open()` asked the new window to have, if it opened one.
-    Maybe<boo::WindowFeatures> Features;
 
     /// @brief Whether a form was submitted.
     bool IsFormSubmission {false};
@@ -102,18 +98,6 @@ namespace krys::ui
     LoadEventType Type {LoadEventType::Started};
     /// @brief The error, for a failure.
     boo::ResourceError Error;
-  };
-
-  /// @brief A message the page sends to the developer console (an error it didn't handle, a warning).
-  struct ConsoleMessage
-  {
-    boo::MessageSource Source {boo::MessageSource::Other};
-    boo::MessageLevel Level {boo::MessageLevel::Log};
-    utf8_string Message;
-    /// @brief Where it came from: the document's URL.
-    utf8_string SourceURL;
-    uint32 Line {0};
-    uint32 Column {0};
   };
 
   /// @brief Shows a Booey page: parses its document into the page's main frame, with a view of the viewport's
@@ -579,7 +563,7 @@ namespace krys::ui
 
     /// @brief The page is shown (true) or hidden (false): hidden while its window is minimised or another
     /// view is drawn in its place. Hidden, the page fires `visibilitychange`, suspends its animation frame
-    /// callbacks and animations, and stops its gamepad effects. A page starts shown.
+    /// callbacks and animations. A page starts shown.
     void SetVisible(bool visible) noexcept;
 
     /// @brief Whether the page is shown (`SetVisible`).
@@ -593,47 +577,6 @@ namespace krys::ui
     /// @brief Calls @p handler when the page asks to be brought to the front (`window.focus()`); the host
     /// decides whether to raise its window. A view without a handler ignores it.
     void SetFocusRequestHandler(Func<void()> &&handler) noexcept;
-
-    /// @brief Calls @p handler when the page asks to be closed (`window.close()`), on a task after the
-    /// request; the host closes the view (it may destroy it then) or keeps it. A view without a handler stays
-    /// open.
-    void SetCloseRequestHandler(Func<void()> &&handler) noexcept;
-
-    /// @brief Tells the page where the host's window is on the screen and its size (`screenX`, `outerWidth`
-    /// and the others); until the host does, it's the viewport at the screen's origin.
-    void SetWindowRect(const boo::FloatRect &rect) noexcept;
-
-    /// @brief Calls @p handler when the page asks to move or resize the host's window (`moveTo()`,
-    /// `resizeTo()` and the others), with the rectangle it asks for, already kept on the screen; the host
-    /// moves its window (and reports it with `SetWindowRect`) or ignores it.
-    void SetWindowRectRequestHandler(Func<void(const boo::FloatRect &)> &&handler) noexcept;
-
-    /// @brief Calls @p handler to show the page's `alert()` message. Without one, alerts show nothing.
-    void SetAlertHandler(Func<void(const utf8_string &)> &&handler) noexcept;
-
-    /// @brief Calls @p handler to ask the user to confirm the page's `confirm()` message. Without one,
-    /// nothing is confirmed.
-    void SetConfirmHandler(Func<bool(const utf8_string &)> &&handler) noexcept;
-
-    /// @brief Calls @p handler to ask the user for the page's `prompt()` text, with its message and default
-    /// value; null if they cancel. Without one, prompts are cancelled.
-    void
-      SetPromptHandler(Func<Maybe<utf8_string>(const utf8_string &, const utf8_string &)> &&handler) noexcept;
-
-    /// @brief Calls @p handler when the page asks to be printed (`print()`).
-    void SetPrintHandler(Func<void()> &&handler) noexcept;
-
-    /// @brief Calls @p handler with each message the page sends to the developer console.
-    void SetConsoleMessageHandler(Func<void(const ConsoleMessage &)> &&handler) noexcept;
-
-    /// @brief Calls @p handler when the page asks to handle a scheme's URLs (`registerProtocolHandler()`,
-    /// with true) or stops (`unregisterProtocolHandler()`, with false), with the scheme and the handler's
-    /// URL.
-    void SetProtocolHandlerRequestHandler(
-      Func<void(const utf8_string &scheme, const utf8_string &url, bool registered)> &&handler) noexcept;
-
-    /// @brief The user agent string the page reports (`navigator.userAgent`); Booey's unless set.
-    void SetUserAgent(utf8_string &&userAgent) noexcept;
 
     /// @brief The view's document: the main frame's.
     KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept;

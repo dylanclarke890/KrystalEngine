@@ -1907,8 +1907,6 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Elements/HTMLVideoElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp
   include/Krystal.Booey/HTML/EventLoop/EventLoop.hpp
-  include/Krystal.Booey/HTML/Events/ErrorEvent.hpp
-  include/Krystal.Booey/HTML/Events/MessageEvent.hpp
   include/Krystal.Booey/HTML/Events/PageTransitionEvent.hpp
   include/Krystal.Booey/HTML/Events/SubmitEvent.hpp
   include/Krystal.Booey/HTML/Forms/Autofill.hpp
@@ -1982,7 +1980,6 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp
   include/Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp
-  include/Krystal.Booey/HTML/Types/SerializedScriptValue.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp
@@ -2114,8 +2111,6 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Elements/HTMLVideoElement.cpp
   src/HTML/Elements/HTMLWBRElement.cpp
   src/HTML/EventLoop/EventLoop.cpp
-  src/HTML/Events/ErrorEvent.cpp
-  src/HTML/Events/MessageEvent.cpp
   src/HTML/Events/PageTransitionEvent.cpp
   src/HTML/Events/SubmitEvent.cpp
   src/HTML/Forms/Autofill.cpp
@@ -2438,30 +2433,9 @@ set(KRYSTAL_BOOEY_MATHML_SOURCES
   src/MathML/Elements/MathMLUnderOverElement.cpp
 )
 
-set(KRYSTAL_BOOEY_MODULES_HEADERS
-  include/Krystal.Booey/Modules/Gamepad/Gamepad.hpp
-  include/Krystal.Booey/Modules/Gamepad/GamepadButton.hpp
-  include/Krystal.Booey/Modules/Gamepad/GamepadEffectParameters.hpp
-  include/Krystal.Booey/Modules/Gamepad/GamepadEvent.hpp
-  include/Krystal.Booey/Modules/Gamepad/GamepadHapticActuator.hpp
-  include/Krystal.Booey/Modules/Gamepad/GamepadHapticEffectType.hpp
-  include/Krystal.Booey/Modules/Gamepad/GamepadManager.hpp
-  include/Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp
-)
-
-set(KRYSTAL_BOOEY_MODULES_SOURCES
-  src/Modules/Gamepad/Gamepad.cpp
-  src/Modules/Gamepad/GamepadEvent.cpp
-  src/Modules/Gamepad/GamepadHapticActuator.cpp
-  src/Modules/Gamepad/GamepadManager.cpp
-  src/Modules/Gamepad/NavigatorGamepad.cpp
-)
-
 set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/AutoscrollController.hpp
-  include/Krystal.Booey/Page/BarProp.hpp
   include/Krystal.Booey/Page/ChromeClient.hpp
-  include/Krystal.Booey/Page/ConsoleTypes.hpp
   include/Krystal.Booey/Page/DOMSelection.hpp
   include/Krystal.Booey/Page/DOMTimer.hpp
   include/Krystal.Booey/Page/Drag/DragActions.hpp
@@ -2471,7 +2445,6 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/Drag/DragState.hpp
   include/Krystal.Booey/Page/EditorClient.hpp
   include/Krystal.Booey/Page/EventHandler.hpp
-  include/Krystal.Booey/Page/External.hpp
   include/Krystal.Booey/Page/FrameSnapshotting.hpp
   include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp
   include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverCallback.hpp
@@ -2483,7 +2456,6 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
   include/Krystal.Booey/Page/MouseEventTypes.hpp
   include/Krystal.Booey/Page/MouseEventWithHitTestResults.hpp
-  include/Krystal.Booey/Page/Navigator.hpp
   include/Krystal.Booey/Page/Page.hpp
   include/Krystal.Booey/Page/PointerCaptureController.hpp
   include/Krystal.Booey/Page/PointerLockController.hpp
@@ -2494,15 +2466,12 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserverEntry.hpp
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserverOptions.hpp
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp
-  include/Krystal.Booey/Page/Screen.hpp
   include/Krystal.Booey/Page/ScrollBehavior.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
   include/Krystal.Booey/Page/ScrollOptions.hpp
   include/Krystal.Booey/Page/Settings.hpp
   include/Krystal.Booey/Page/SpatialNavigation.hpp
-  include/Krystal.Booey/Page/UserActivation.hpp
   include/Krystal.Booey/Page/VisualViewport.hpp
-  include/Krystal.Booey/Page/WindowFeatures.hpp
 )
 
 set(KRYSTAL_BOOEY_PAGE_SOURCES
@@ -2518,19 +2487,16 @@ set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
-  src/Page/Navigator.cpp
   src/Page/Page.cpp
   src/Page/PointerCaptureController.cpp
   src/Page/PointerLockController.cpp
   src/Page/ResizeObserver/ResizeObservation.cpp
   src/Page/ResizeObserver/ResizeObserver.cpp
-  src/Page/Screen.cpp
   src/Page/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp
   src/Page/Settings.cpp
   src/Page/SpatialNavigation.cpp
   src/Page/VisualViewport.cpp
-  src/Page/WindowFeatures.cpp
 )
 
 set(KRYSTAL_BOOEY_PLATFORM_HEADERS
@@ -2554,11 +2520,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp
   include/Krystal.Booey/Platform/Events/PointerID.hpp
   include/Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp
-  include/Krystal.Booey/Platform/Gamepad/EmptyGamepadProvider.hpp
-  include/Krystal.Booey/Platform/Gamepad/GamepadConstants.hpp
-  include/Krystal.Booey/Platform/Gamepad/GamepadProvider.hpp
-  include/Krystal.Booey/Platform/Gamepad/GamepadProviderClient.hpp
-  include/Krystal.Booey/Platform/Gamepad/PlatformGamepad.hpp
   include/Krystal.Booey/Platform/GraphicsClient.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageReader.hpp
@@ -2612,8 +2573,6 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/CaretAnimator.cpp
   src/Platform/DateComponents.cpp
   src/Platform/Decimal.cpp
-  src/Platform/Gamepad/EmptyGamepadProvider.cpp
-  src/Platform/Gamepad/GamepadProvider.cpp
   src/Platform/ImageDecoders/BMPImageDecoder.cpp
   src/Platform/ImageDecoders/BMPImageReader.cpp
   src/Platform/ImageDecoders/GIFImageDecoder.cpp
@@ -2651,11 +2610,6 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/ThemeAdwaita.cpp
   src/Platform/ThreadTimers.cpp
   src/Platform/Timer.cpp
-)
-
-set(KRYSTAL_BOOEY_PLUGINS_HEADERS
-  include/Krystal.Booey/Plugins/DOMMimeTypeArray.hpp
-  include/Krystal.Booey/Plugins/DOMPluginArray.hpp
 )
 
 set(KRYSTAL_BOOEY_RENDERING_HEADERS
@@ -4316,10 +4270,8 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_LAYOUT_HEADERS}
       ${KRYSTAL_BOOEY_LOADER_HEADERS}
       ${KRYSTAL_BOOEY_MATHML_HEADERS}
-      ${KRYSTAL_BOOEY_MODULES_HEADERS}
       ${KRYSTAL_BOOEY_PAGE_HEADERS}
       ${KRYSTAL_BOOEY_PLATFORM_HEADERS}
-      ${KRYSTAL_BOOEY_PLUGINS_HEADERS}
       ${KRYSTAL_BOOEY_RENDERING_HEADERS}
       ${KRYSTAL_BOOEY_STYLE_HEADERS}
       ${KRYSTAL_BOOEY_SVG_HEADERS}
@@ -4341,7 +4293,6 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_LAYOUT_SOURCES}
     ${KRYSTAL_BOOEY_LOADER_SOURCES}
     ${KRYSTAL_BOOEY_MATHML_SOURCES}
-    ${KRYSTAL_BOOEY_MODULES_SOURCES}
     ${KRYSTAL_BOOEY_PAGE_SOURCES}
     ${KRYSTAL_BOOEY_PLATFORM_SOURCES}
     ${KRYSTAL_BOOEY_RENDERING_SOURCES}

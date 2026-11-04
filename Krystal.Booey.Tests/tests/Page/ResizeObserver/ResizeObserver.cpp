@@ -4,7 +4,6 @@
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/ErrorEvent.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/ResizeObserver/ResizeObserverEntry.hpp"
@@ -189,10 +188,6 @@ namespace krys::boo::tests
     {
       fixture.TestPage->UpdateRendering();
     };
-    List<std::string> errors;
-    auto errorHandle = fixture.Document->Window()->AddEventListener(
-      u8"error",
-      [&](dom::Event &event) { errors.push_back(Narrow(Downcast<html::ErrorEvent>(event).Message())); });
 
     SECTION("Resizing a deeper element in a callback is reported in the same update")
     {
@@ -200,7 +195,6 @@ namespace krys::boo::tests
       recorder.Observer->Observe(inner);
       update();
       CHECK(recorder.Take().size() == 1);
-      CHECK(errors.empty());
 
       recorder.OnDeliver = [&](ResizeObserver &)
       {
@@ -212,10 +206,9 @@ namespace krys::boo::tests
       REQUIRE(rounds.size() == 2);
       CHECK(rounds[0].size() == 2); // The outer box, and the inner box as it's as wide.
       CHECK(rounds[1] == List<Observed> {{"inner", 0, 0, 150, 30, 150, 30, 150, 30}});
-      CHECK(errors.empty());
     }
 
-    SECTION("Resizing a shallower element in a callback is left for the next update, with an error")
+    SECTION("Resizing a shallower element in a callback is left for the next update")
     {
       recorder.Observer->Observe(outer, {ResizeObserverBoxOptions::BorderBox});
       recorder.Observer->Observe(inner);
@@ -230,7 +223,6 @@ namespace krys::boo::tests
       SetStyle(inner, u8"height: 20px");
       update();
       CHECK(recorder.Take() == List<List<Observed>> {{{"inner", 0, 0, 200, 20, 200, 20, 200, 20}}});
-      CHECK(errors == List<std::string> {"ResizeObserver loop completed with undelivered notifications."});
 
       update();
       CHECK(recorder.Take() == List<List<Observed>> {{{"outer", 0, 5, 200, 100, 200, 100, 200, 105}}});

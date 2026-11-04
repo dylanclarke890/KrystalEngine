@@ -83,13 +83,6 @@ namespace krys::boo::html
       }
       return dom::DOMString(target);
     }
-
-    struct FormRelAttributes
-    {
-      bool Noopener {false};
-      bool Noreferrer {false};
-      bool Opener {false};
-    };
   }
 
   HTMLFormElement::HTMLFormElement(dom::Document &document) noexcept
@@ -646,8 +639,7 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: The rel attribute's noopener, noreferrer and opener, which set the submission's opener and
-    // referrer policies.
+    // FIXME: The rel attribute's noreferrer, which sets the submission's referrer policy.
 
     _plannedFormSubmission = CreateWeakPtr(formSubmission.get());
 

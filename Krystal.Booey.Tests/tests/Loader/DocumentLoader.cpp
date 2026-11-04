@@ -373,9 +373,9 @@ namespace krys::boo::tests
     // Navigating from the events does nothing.
     auto tryToNavigate = [&]
     {
-      fixture.Frame().Loader().ChangeLocation(
-        url::URL(u8"https://example.com/elsewhere.html"), dom::DOMStringAtom::Empty(), nullptr,
-        ReferrerPolicy::EmptyString, std::nullopt, dom::DOMStringAtom::Null());
+      fixture.Frame().Loader().ChangeLocation(url::URL(u8"https://example.com/elsewhere.html"),
+                                              dom::DOMStringAtom::Empty(), nullptr,
+                                              ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
     };
     auto pageHide = window->AddEventListener<html::PageTransitionEvent>(u8"pagehide",
                                                                         [&](html::PageTransitionEvent &event)
@@ -391,8 +391,6 @@ namespace krys::boo::tests
                                            {
                                              CHECK(event.Target().get() == first.get());
                                              events.push_back("unload");
-                                             // No dialogs while unloading.
-                                             window->Alert(u8"Gone");
                                              tryToNavigate();
                                            });
 
@@ -403,7 +401,6 @@ namespace krys::boo::tests
     CHECK(events == List<std::string> {"pagehide", "unload"});
     CHECK(fixture.Document().GetURL().String() == u8"https://example.com/second.html");
     CHECK_FALSE(first->PageShowing());
-    CHECK(fixture.Chrome->Alerts.empty());
     CHECK(std::ranges::find(fixture.Events, "navigation to https://example.com/elsewhere.html")
           == fixture.Events.end());
   }
@@ -446,35 +443,4 @@ namespace krys::boo::tests
     CHECK(fixture.Document().ContentLanguage() == u8"de");
     CHECK(paragraph->Matches(u8":lang(de)").Value());
   }
-
-  TEST_CASE(
-    "Window.print(): a document still loading prints once it has loaded",
-    "[Loader][DocumentLoader][html:dom-print][html:print-when-loaded][html:printing-steps][html:the-end]")
-  {
-    LoadFixture fixture;
-    List<std::string> events;
-    List<dom::EventListenerHandle> handles;
-    fixture.Client->OnClearWindowObject = [&]
-    {
-      auto *window = fixture.Document().Window();
-      handles.push_back(window->AddEventListener(u8"load", [&](dom::Event &) { events.push_back("load"); }));
-      handles.push_back(
-        window->AddEventListener(u8"beforeprint", [&](dom::Event &) { events.push_back("beforeprint"); }));
-      handles.push_back(
-        window->AddEventListener(u8"afterprint", [&](dom::Event &) { events.push_back("afterprint"); }));
-      window->Print();
-    };
-
-    fixture.LoadMarkup(u8"<!DOCTYPE html><p>Page</p>", u8"https://example.com/page.html");
-    html::EventLoop::Current().RunUntilIdle();
-    CHECK(events == List<std::string> {"load", "beforeprint", "afterprint"});
-    CHECK(fixture.Chrome->PrintRequests == 1);
-
-    SECTION("once it has loaded, it prints at once")
-    {
-      fixture.Document().Window()->Print();
-      CHECK(fixture.Chrome->PrintRequests == 2);
-    }
-  }
-
 }

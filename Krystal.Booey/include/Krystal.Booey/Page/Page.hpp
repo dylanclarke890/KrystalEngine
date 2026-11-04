@@ -85,7 +85,6 @@ namespace krys::boo
     uint32 _renderingUpdateDepth {0};
     float _pageScaleFactor {1};
     bool _renderingUpdateIsScheduled {false};
-    bool _isClosing {false};
     bool _isVisible {true};
     bool _scriptedAnimationsSuspended {false};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
@@ -198,23 +197,6 @@ namespace krys::boo
     // FIXME: The rest of what the page resets (the sampled top color, element targeting and the like), once
     // there are those.
     void DidChangeMainDocument(dom::Document *newDocument) noexcept;
-
-    /// @brief Whether the page's window asked to be closed (its top-level traversable's is closing).
-    /// @see https://html.spec.whatwg.org/#is-closing
-    KRYS_NODISCARD bool IsClosing() const noexcept
-    {
-      return _isClosing;
-    }
-
-    void SetIsClosing() noexcept
-    {
-      _isClosing = true;
-    }
-
-    /// @brief The host's network became reachable (@p isOnLine) or not: `online` or `offline` fires at each
-    /// of the page's windows.
-    /// @see https://html.spec.whatwg.org/#event-online
-    void NetworkStateChanged(bool isOnLine) noexcept;
 
     /// @brief Starts an idle period in each of the page's documents that has idle callbacks, which runs them
     /// until @p deadline (in real time). The host calls this after a rendering update, with the time it can

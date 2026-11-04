@@ -924,11 +924,6 @@ namespace krys::boo::dom
     return CreateRef<Range>(start, end);
   }
 
-  void Range::Detach() noexcept
-  {
-    // Do nothing.
-  }
-
   ExceptionOr<bool> Range::IsPointInRange(Node &node, uint64 offset) const noexcept
   {
     // 1. If node's root is not this's root, then return false.

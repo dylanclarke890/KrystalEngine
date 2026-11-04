@@ -13,13 +13,6 @@ namespace krys::boo
     Reload,
   };
 
-  /// @brief Whether a new browsing context opened by a navigation gets its opener.
-  enum class NewFrameOpenerPolicy : uint8
-  {
-    Suppress,
-    Allow
-  };
-
   /// @brief What started a navigation.
   enum class NavigationType : uint8
   {

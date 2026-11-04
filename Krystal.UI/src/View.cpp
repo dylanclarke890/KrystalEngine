@@ -24,7 +24,6 @@
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
@@ -65,139 +64,8 @@ namespace krys::ui
     GraphicsLayerFactoryTextureMapper _factory;
     GraphicsLayerTextureMapper *_rootLayer {nullptr};
     Func<void()> _focusRequestHandler;
-    Func<void()> _closeRequestHandler;
-    Func<void(const boo::FloatRect &)> _windowRectRequestHandler;
-    Maybe<boo::FloatRect> _windowRect;
-    Func<void(const utf8_string &)> _alertHandler;
-    Func<bool(const utf8_string &)> _confirmHandler;
-    Func<Maybe<utf8_string>(const utf8_string &, const utf8_string &)> _promptHandler;
-    Func<void()> _printHandler;
-    Func<void(const ConsoleMessage &)> _consoleMessageHandler;
-    Func<void(const utf8_string &, const utf8_string &, bool)> _protocolHandlerRequestHandler;
 
   public:
-    void RegisterProtocolHandler(const boo::dom::DOMString &scheme,
-                                 const boo::dom::DOMString &url) noexcept override
-    {
-      if (_protocolHandlerRequestHandler)
-      {
-        _protocolHandlerRequestHandler(scheme, url, true);
-      }
-    }
-
-    void UnregisterProtocolHandler(const boo::dom::DOMString &scheme,
-                                   const boo::dom::DOMString &url) noexcept override
-    {
-      if (_protocolHandlerRequestHandler)
-      {
-        _protocolHandlerRequestHandler(scheme, url, false);
-      }
-    }
-
-    void SetProtocolHandlerRequestHandler(
-      Func<void(const utf8_string &, const utf8_string &, bool)> &&handler) noexcept
-    {
-      _protocolHandlerRequestHandler = krys::move(handler);
-    }
-
-    void RunJavaScriptAlert(boo::LocalFrame &, const boo::dom::DOMString &message) noexcept override
-    {
-      if (_alertHandler)
-      {
-        _alertHandler(message);
-      }
-    }
-
-    KRYS_NODISCARD bool RunJavaScriptConfirm(boo::LocalFrame &,
-                                             const boo::dom::DOMString &message) noexcept override
-    {
-      return _confirmHandler && _confirmHandler(message);
-    }
-
-    KRYS_NODISCARD Maybe<boo::dom::DOMString>
-      RunJavaScriptPrompt(boo::LocalFrame &, const boo::dom::DOMString &message,
-                          const boo::dom::DOMString &defaultValue) noexcept override
-    {
-      if (!_promptHandler)
-      {
-        return null;
-      }
-      auto result = _promptHandler(message, defaultValue);
-      return result ? Maybe<boo::dom::DOMString>(boo::dom::DOMString(*result)) : null;
-    }
-
-    void Print(boo::LocalFrame &) noexcept override
-    {
-      if (_printHandler)
-      {
-        _printHandler();
-      }
-    }
-
-    void AddMessageToConsole(boo::MessageSource source, boo::MessageLevel level,
-                             const boo::dom::DOMString &message, uint32 lineNumber, uint32 columnNumber,
-                             const boo::dom::DOMString &sourceID) noexcept override
-    {
-      if (_consoleMessageHandler)
-      {
-        _consoleMessageHandler(ConsoleMessage {source, level, message, sourceID, lineNumber, columnNumber});
-      }
-    }
-
-    void SetAlertHandler(Func<void(const utf8_string &)> &&handler) noexcept
-    {
-      _alertHandler = krys::move(handler);
-    }
-
-    void SetConfirmHandler(Func<bool(const utf8_string &)> &&handler) noexcept
-    {
-      _confirmHandler = krys::move(handler);
-    }
-
-    void
-      SetPromptHandler(Func<Maybe<utf8_string>(const utf8_string &, const utf8_string &)> &&handler) noexcept
-    {
-      _promptHandler = krys::move(handler);
-    }
-
-    void SetPrintHandler(Func<void()> &&handler) noexcept
-    {
-      _printHandler = krys::move(handler);
-    }
-
-    void SetConsoleMessageHandler(Func<void(const ConsoleMessage &)> &&handler) noexcept
-    {
-      _consoleMessageHandler = krys::move(handler);
-    }
-
-    KRYS_NODISCARD boo::FloatRect WindowRect() const noexcept override
-    {
-      if (_windowRect)
-      {
-        return *_windowRect;
-      }
-      return _view ? boo::FloatRect(boo::FloatPoint(), boo::FloatSize(_view->ViewportSize()))
-                   : boo::FloatRect();
-    }
-
-    void SetWindowRect(const boo::FloatRect &rect) noexcept override
-    {
-      if (_windowRectRequestHandler)
-      {
-        _windowRectRequestHandler(rect);
-      }
-    }
-
-    void SetHostWindowRect(const boo::FloatRect &rect) noexcept
-    {
-      _windowRect = rect;
-    }
-
-    void SetWindowRectRequestHandler(Func<void(const boo::FloatRect &)> &&handler) noexcept
-    {
-      _windowRectRequestHandler = krys::move(handler);
-    }
-
     void Focus() noexcept override
     {
       if (_focusRequestHandler)
@@ -206,22 +74,9 @@ namespace krys::ui
       }
     }
 
-    void CloseWindow() noexcept override
-    {
-      if (_closeRequestHandler)
-      {
-        _closeRequestHandler();
-      }
-    }
-
     void SetFocusRequestHandler(Func<void()> &&handler) noexcept
     {
       _focusRequestHandler = krys::move(handler);
-    }
-
-    void SetCloseRequestHandler(Func<void()> &&handler) noexcept
-    {
-      _closeRequestHandler = krys::move(handler);
     }
 
     void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
@@ -347,7 +202,6 @@ namespace krys::ui
   private:
     View *_view {nullptr};
     Func<void(const NavigationRequest &)> _navigationHandler;
-    Maybe<utf8_string> _userAgent;
     Func<void(const LoadEvent &)> _loadHandler;
 
   public:
@@ -399,16 +253,6 @@ namespace krys::ui
       {
         _loadHandler(event);
       }
-    }
-
-    KRYS_NODISCARD boo::dom::DOMString UserAgent(const boo::url::URL &url) const noexcept override
-    {
-      return _userAgent ? boo::dom::DOMString(*_userAgent) : boo::LocalFrameLoaderClient::UserAgent(url);
-    }
-
-    void SetUserAgent(utf8_string &&userAgent) noexcept
-    {
-      _userAgent = krys::move(userAgent);
     }
 
     void DispatchNavigationRequested(const boo::NavigationAction &action, const boo::ResourceRequest &request,
@@ -466,7 +310,6 @@ namespace krys::ui
       {
         navigation.Download = utf8_string(action.DownloadAttribute().View());
       }
-      navigation.Features = action.GetWindowFeatures();
       navigation.Method = request.HTTPMethod();
       if (formSubmission)
       {
@@ -1725,7 +1568,6 @@ namespace krys::ui
     }
     // A pen hovers, as the mouse does.
     environment.HoverSupportedByAnyAvailablePointingDevice = devices.Mouse || devices.Pen;
-    environment.MaxTouchPoints = devices.Touch ? devices.MaxTouchPoints : 0;
     _frame->SetMediaEnvironment(environment);
   }
 
@@ -2253,62 +2095,6 @@ namespace krys::ui
   void View::SetFocusRequestHandler(Func<void()> &&handler) noexcept
   {
     _chromeClient->SetFocusRequestHandler(krys::move(handler));
-  }
-
-  void View::SetCloseRequestHandler(Func<void()> &&handler) noexcept
-  {
-    _chromeClient->SetCloseRequestHandler(krys::move(handler));
-  }
-
-  void View::SetWindowRect(const boo::FloatRect &rect) noexcept
-  {
-    _chromeClient->SetHostWindowRect(rect);
-  }
-
-  void View::SetWindowRectRequestHandler(Func<void(const boo::FloatRect &)> &&handler) noexcept
-  {
-    _chromeClient->SetWindowRectRequestHandler(krys::move(handler));
-  }
-
-  void View::SetAlertHandler(Func<void(const utf8_string &)> &&handler) noexcept
-  {
-    _chromeClient->SetAlertHandler(krys::move(handler));
-  }
-
-  void View::SetConfirmHandler(Func<bool(const utf8_string &)> &&handler) noexcept
-  {
-    _chromeClient->SetConfirmHandler(krys::move(handler));
-  }
-
-  void View::SetPromptHandler(
-    Func<Maybe<utf8_string>(const utf8_string &, const utf8_string &)> &&handler) noexcept
-  {
-    _chromeClient->SetPromptHandler(krys::move(handler));
-  }
-
-  void View::SetPrintHandler(Func<void()> &&handler) noexcept
-  {
-    _chromeClient->SetPrintHandler(krys::move(handler));
-  }
-
-  void View::SetConsoleMessageHandler(Func<void(const ConsoleMessage &)> &&handler) noexcept
-  {
-    _chromeClient->SetConsoleMessageHandler(krys::move(handler));
-  }
-
-  void View::SetProtocolHandlerRequestHandler(
-    Func<void(const utf8_string &scheme, const utf8_string &url, bool registered)> &&handler) noexcept
-  {
-    _chromeClient->SetProtocolHandlerRequestHandler(krys::move(handler));
-  }
-
-  void View::SetUserAgent(utf8_string &&userAgent) noexcept
-  {
-    _frameLoaderClient->SetUserAgent(krys::move(userAgent));
-    if (auto *window = Document().Window())
-    {
-      window->GetNavigator().UserAgentChanged();
-    }
   }
 
   namespace

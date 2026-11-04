@@ -30,7 +30,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `DataTransferItem` has no `getAsEntry` (no file system API).
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).
 - A task's document is not checked for being fully active (documents never in a frame, such as `createHTMLDocument()`, run their tasks). Subresource loads, `close()`, the scroll to the anchor and `AbortSignal.timeout()` are not tagged with a document, so suspension does not hold them.
-- Suspension covers only the document's timers, animation frame callbacks and gamepad haptics: no media, view transitions, font loading, service workers or IndexedDB, and animations aren't suspended (FIXME in `WebAnimation.hpp`).
+- Suspension covers only the document's timers and animation frame callbacks: no media, view transitions, font loading, service workers or IndexedDB, and animations aren't suspended (FIXME in `WebAnimation.hpp`).
 - Security origins do not exist, beyond serializing a URL's (`URLDecomposition::SerializedOrigin`): there's no same origin or same origin-domain check, and `document.domain` isn't implemented. `CSSStyleSheet::CanAccessRules`, `ParserContext::HasDocumentSecurityOrigin`, `canReceiveDragData`, `canDisplay` and cross-origin image reuse are FIXMEs that allow everything, and `EventHandler::CanDropCurrentlyDraggedImageAsFile` is always true.
 - There is no ID map per tree scope: `getElementById` and selector fast paths walk the tree, live collections re-walk on every access, and `HTMLImageElement::AssociatedMapElement` walks the tree too. A node in a shadow tree finds its tree scope by walking to its root on every call.
 - `FirstChild()`, `ParentNode()` and friends return raw pointers rather than `RefPtr`; `NodeFilter` is clunky from C++.
@@ -65,13 +65,13 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `<input type=color>` has no `alpha` or `colorspace` support (FIXME in `ColorInputType.hpp`) and no `EventQueueScope`, so its events aren't queued until the value is set (FIXME in `ColorInputType.cpp`).
 - Opening a date or colour picker by clicking the control isn't checked against a user gesture (`showPicker()` is); FIXMEs in `BaseDateAndTimeInputType.cpp` and `ColorInputType.cpp`.
 - No autofill (`:autofill`), caps lock indicator or strong password fields on password fields, validation message bubble, `RenderSearchField` (search fields have no recent searches), or input purpose hints (`inputmode`, `autocapitalize`, spell checking). Numbers aren't localised (FIXMEs in `NumberInputType.cpp`); dates are, through ICU.
-- Form submission has no `rel` handling (`noopener`, `noreferrer`, `opener`; FIXME in `HTMLFormElement.cpp`), no `img` elements among a form's named items (FIXME in `HTMLFormControlsCollection.cpp`), no request body in the navigation (FIXME in `FormSubmission.cpp`), and encodes UTF-8 only.
+- Form submission has no `rel=noreferrer` handling (FIXME in `HTMLFormElement.cpp`), no `img` elements among a form's named items (FIXME in `HTMLFormControlsCollection.cpp`), no request body in the navigation (FIXME in `FormSubmission.cpp`), and encodes UTF-8 only.
 - `<select>`: list boxes have no pan scrolling, there is no customizable `<select>` (`appearance: base-select`; a `<button>` in a select is still a submit button and isn't inert, FIXME in `HTMLButtonElement.cpp`), and option changes are not reported to the chrome client (FIXME in `HTMLSelectElement.cpp`).
 - Fieldset legends are not placed in the border (see *Layout*).
 - `<input type=image>` doesn't load or show its image (FIXMEs in `ImageInputType.cpp`), so its dimensions come only from its box or its `width` and `height` attributes.
 - `<img>` lacks form association, `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` fires no events for video posters and has no `<object>` fallback (FIXMEs); `ImageLoader`'s reuse of available images has no preloads or origins (FIXMEs).
 - `HTMLLinkElement` recognises only `rel=stylesheet` and `alternate`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, icons, manifests, integrity, CORS, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
-- `<a ping>`, `opener` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported, and `<object>` and `<embed>` don't display their resources (no images, documents or plugins), so an object always shows its fallback content.
+- `<a ping>` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported, and `<object>` and `<embed>` don't display their resources (no images, documents or plugins), so an object always shows its fallback content.
 - `<marquee>`'s `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` and `stop()` are not implemented, and marquees don't scroll (FIXME in `HTMLMarqueeElement.hpp`).
 - `autofocus` insertion steps run only for HTML elements, not SVG or MathML elements.
 - Popovers: no `interestfor` and no `:open`.
@@ -364,8 +364,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Spatial navigation is only the focus candidate search (off by default through `Settings::SpatialNavigationEnabled`); the CSS Spatial Navigation draft (`navbeforefocus`, `navnotarget`, `spatialNavigationSearch()`, `focusableAreas()`, `spatial-navigation-*`) is not implemented.
 - Keyboard: caps lock handling in text fields, Escape hiding validation messages and leaving fullscreen, the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs. The default keyboard handler doesn't handle Backspace (history navigation; FIXME).
 - Touch: documents without touch event listeners aren't skipped (`hasTouchEventHandlers` is a FIXME), and touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.
-- Pointer lock: the sandbox flag check (`SecurityError`) is a FIXME. The window side of pointer lock and gamepads is untested (it needs a real cursor or device).
-- Gamepad: XInput only (Xbox-style pads, four at most, polled), with no GameInput, SDL or Windows.Gaming.Input backend. There is no `trigger-rumble`, no extensions (`GamepadPose`, touches, lights) and no permissions-policy `SecurityError`.
+- Pointer lock: the sandbox flag check (`SecurityError`) is a FIXME. The window side of pointer lock is untested (it needs a real cursor).
+- Gamepad: XInput only (Xbox-style pads, four at most, polled), with no GameInput, SDL or Windows.Gaming.Input backend.
 - Hit testing ignores child frames. `HitTestResult` queries about what was hit (selection, images, media, titles, editing, link targets) are FIXMEs. `RenderLayer` hit testing lacks view transitions, SVG resources, fixed container sampling, resizers and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area.
 - `IsDraggableLink` is a local check (an HTML link with `href`, not editable); the editable-link-behaviour setting is absent.
 - Page overlays, subframes and synthetic touch events are FIXMEs in `EventHandler`.
@@ -384,14 +384,14 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- Remote loading: there is no network loader, cookies, origins, CORS, referrers, pings, preloads or integrity checks; the host pushes data in through the loader strategy. `navigator.cookieEnabled` is false.
+- Remote loading: there is no network loader, cookies, origins, CORS, referrers, pings, preloads or integrity checks; the host pushes data in through the loader strategy.
 - `DocumentLoader` has no redirects, content policies (responses shown as downloads), archives or streaming; the main resource arrives whole on a networking task. `POST` bodies do not reach the loader strategy, so a reload cannot re-post one. There is no progress tracker, and HTTP status checks, `X-Content-Type-Options: nosniff` and content type parsing (`ParsedContentType`) are absent because responses carry no headers or statuses.
 - `DocumentWriter` takes HTML, XML and text documents in UTF-8 only (BOMs removed, split sequences kept, invalid bytes replaced), with no other encodings; there are no image, media or plug-in documents. Form `accept-charset` is not honoured.
 - The only pragmas are `content-language` and `default-style`; the `Content-Language` header is ignored, as responses have no headers.
 - Prerendering, speculation rules, `javascript:` URLs, `pagereveal`/`pageswap` and view transitions are not implemented. Icons, manifests and alternate style sheet sets chosen by script are not loaded.
 - No DOM `URL` interface or `URLSearchParams` (`url::URL` is internal), so WPT `setters_tests.json` is not run.
 - There is no global history or visited link store, so `:visited` matches only links with an empty `href` and `VisitedLinkState` has nothing to ask. There are no deferred loads, multipart loads or unreachable URLs.
-- `Window`: there are no message ports or transfers, `postMessage()` only reaches the window itself, `screen.orientation` is absent, reported errors carry no script location, and prompts cannot be shown without a page. There is no sandboxed modals flag. Timers are not throttled or aligned, and animation frames are not throttled below the page's rate.
+- `Window`: timers are not throttled or aligned, and animation frames are not throttled below the page's rate.
 - Fragment navigation does not reset scroll anchoring (there is none) and has no text indicator for a text fragment (FIXME in `LocalFrameView.cpp`).
 - `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents, fullscreen and view transitions steps of the update are FIXMEs, and `Document` has no post-layout task timer.
 - Frames: there is no frame loader for subframes and no frame tree. Sequential navigation, hit testing and painting skip frames.
@@ -405,5 +405,5 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- **No console.** Exceptions thrown by listeners, parse errors, and failed custom element constructions and upgrades have nowhere to be reported; only `reportError()` reaches the host, through `ChromeClient::AddMessageToConsole`.
+- **No console.** Exceptions thrown by listeners, parse errors, and failed custom element constructions and upgrades have nowhere to be reported; a future inspector gets its own diagnostics channel.
 - **No garbage collector.** Listener callbacks that capture their own target keep it alive.

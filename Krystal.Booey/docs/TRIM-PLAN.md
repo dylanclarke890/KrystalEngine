@@ -24,21 +24,15 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
 - [x] **1b. Form state.** `Forms/FormController`'s saving and restoring of form control state (nothing restores
   it now), the controls' `SaveFormControlState`/`RestoreFormControlState`, and form-associated custom elements'
   `Restore` callback.
-- [ ] **2. Window APIs.**
-  - Remove `Page/Navigator` (with `Plugins/` and `View`'s user-agent override; check `Languages`
-    readers first), `BarProp`, `External`, `WindowFeatures`, `Screen` (and `MediaEnvironment::ScreenAvailableRect`;
-    keep `ScreenSize` and the depth fields for media queries), the `UserActivation` object (the window's
-    activation state stays).
-  - `LocalDOMWindow`: remove `alert`/`confirm`/`prompt`, `print`, `open`/`close`/`opener`/`closed`/`stop`/`name`,
-    `moveTo`/`moveBy`/`resizeTo`/`resizeBy`, `screenX`/`screenY`, `status`, `postMessage`, `atob`/`btoa`,
-    `window.event` (and the `_currentEvent` save/restore in `EventDispatcher.cpp`), `captureEvents`/
-    `releaseEvents`, `clientInformation`, `reportError`, the origin and secure-context getters, the frame-tree
-    getters. Trim `ChromeClient` to match, and `FrameLoadRequest`/`NavigationAction`'s window features and
-    opener policy.
-  - Remove `MessageEvent`, `ErrorEvent` (and the special `onerror` handling in `EventTarget.cpp`),
-    `Types/SerializedScriptValue`.
-  - Console: remove `ConsoleTypes`, `ChromeClient::AddMessageToConsole`, `View::SetConsoleMessageHandler`/
-    `ConsoleMessage`. A future inspector gets its own diagnostics channel.
+- [x] **2. Window APIs** (with step 5's gamepads, as `Navigator` held the Gamepad API). Removed `Navigator`,
+  `Plugins/`, `BarProp`, `External`, `Screen`, `UserActivation`, `WindowFeatures`, `ConsoleTypes`,
+  `MessageEvent`, `ErrorEvent`, `SerializedScriptValue`, `Modules/Gamepad/`, `Platform/Gamepad/`, Krystal.UI's
+  `GamepadProvider` and the Editor's `PageGamepads` (its nav-grid half is now `PageSpatialNavigation`); the
+  window's prompts, print, `open()`/`close()`, name, geometry, frame-tree getters, `postMessage()`,
+  `reportError()`, `atob()`/`btoa()`, origin getters and `window.event`; the online/offline, language change
+  and gamepad events; the opener policy; `ChromeClient`'s and `View`'s matching hooks and the user agent; and
+  the no-op legacy members (`captureEvents()`/`releaseEvents()`, `document.clear()`, `Range`/`NodeIterator`
+  `detach()`, `window.blur()`). History-action activation stays: close watchers use it.
 - [ ] **3. Navigation leftovers.** (Navigation itself went to the host in step 1.)
   - `FormSubmission`: keep the entry list and the `submit` event, hand the data to the host; remove the URL and
     body encoding with `Platform/Network/FormData` and `FormDataBuilder`.
@@ -48,10 +42,7 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
 - [ ] **4. Subframes.** The frame tree is the main frame only. `<iframe>`, `<frame>`, `<object>` and `<embed>`
   stay as elements with reflected attributes but load no nested document (check whether `<object>`/`<embed>`
   image or SVG rendering needs a frame). Delete the "frames other than the main frame"/subframe FIXMEs.
-- [ ] **5. Gamepad, timers, blobs.**
-  - Remove `Modules/Gamepad/`, `Platform/Gamepad/`, Krystal.UI `GamepadProvider`, the window's gamepad listener
-    counting, and the Editor's `PageGamepads` sample (and its markup in `pages/index.html`). `View`'s gamepad
-    focus navigation stays.
+- [ ] **5. Timers, blobs.** (The gamepads went in step 2.)
   - Replace `DOMTimer` (`setTimeout`/`setInterval`, `Document::_timeouts`, the nesting clamp) with a C++
     document timer that fires as a document task, so it pauses while the document is suspended.
   - Remove `DOM/Scheduling/IdleCallbackController`.

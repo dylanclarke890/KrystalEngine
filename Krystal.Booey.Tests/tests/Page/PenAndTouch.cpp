@@ -9,7 +9,6 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp"
@@ -370,17 +369,5 @@ namespace krys::boo::tests
     CHECK(down->Pressure() == 0.75f);
     CHECK(down->Buttons() == 1);
     CHECK(down->TiltX() == 30);
-  }
-
-  TEST_CASE("Navigator: maxTouchPoints", "[Page][TouchEvent]")
-  {
-    TouchFixture fixture;
-    auto &navigator = fixture.Document->Window()->GetNavigator();
-    CHECK(navigator.MaxTouchPoints() == 0);
-
-    auto environment = fixture.Frame->GetMediaEnvironment();
-    environment.MaxTouchPoints = 10;
-    fixture.Frame->SetMediaEnvironment(environment);
-    CHECK(navigator.MaxTouchPoints() == 10);
   }
 }

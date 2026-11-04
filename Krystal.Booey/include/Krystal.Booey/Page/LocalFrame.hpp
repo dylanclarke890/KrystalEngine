@@ -36,8 +36,6 @@ namespace krys::boo
     UniquePtr<EventHandler> _eventHandler;
     UniquePtr<FrameLoader> _loader;
     css::mq::MediaEnvironment _mediaEnvironment;
-    /// @see https://html.spec.whatwg.org/#nav-target
-    dom::DOMString _specifiedName;
     float _pageZoomFactor {1};
     float _textZoomFactor {1};
     CachePolicy _subresourceCachePolicy {CachePolicy::Verify};
@@ -87,18 +85,6 @@ namespace krys::boo
     KRYS_NODISCARD LocalDOMWindow *Window() const noexcept
     {
       return _document ? _document->Window() : nullptr;
-    }
-
-    /// @brief The frame's name (its navigable's target name), which links and forms can target.
-    /// @see https://html.spec.whatwg.org/#nav-target
-    KRYS_NODISCARD const dom::DOMString &SpecifiedName() const noexcept
-    {
-      return _specifiedName;
-    }
-
-    void SetSpecifiedName(dom::DOMString name) noexcept
-    {
-      _specifiedName = krys::move(name);
     }
 
     /// @brief The view the frame's document is laid out in, if any.

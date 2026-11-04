@@ -47,11 +47,6 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#hyperlink-referrer-policy
     KRYS_NODISCARD static ReferrerPolicy HyperlinkReferrerPolicy(const HTMLElement &subject) noexcept;
 
-    /// @brief Whether a window @p element's link (or form) opens to @p url in @p target gets no opener.
-    /// @see https://html.spec.whatwg.org/#get-an-element's-noopener
-    KRYS_NODISCARD static bool GetNoopener(const HTMLElement &element, const url::URL &url,
-                                           dom::DOMStringView target) noexcept;
-
     /// @brief The activation behaviour of `<a>` and `<area>`: follows the link, with the coordinates clicked
     /// on a server-side image map.
     /// @see https://html.spec.whatwg.org/#the-a-element:activation-behaviour
