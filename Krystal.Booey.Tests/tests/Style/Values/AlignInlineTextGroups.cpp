@@ -179,9 +179,17 @@ namespace krys::boo::style::tests
       CHECK(RoundTrip<TabSize>(*this, PropertyId::TabSize, u8"20px") == "20px");
       CHECK(RoundTrip<HyphenateCharacter>(*this, PropertyId::HyphenateCharacter, u8"auto") == "auto");
       CHECK(RoundTrip<HyphenateCharacter>(*this, PropertyId::HyphenateCharacter, u8"\"-\"") == "\"-\"");
-      CHECK(RoundTrip<HyphenateLimitEdge>(*this, PropertyId::WebkitHyphenateLimitBefore, u8"3") == "3");
-      CHECK(RoundTrip<HyphenateLimitLines>(*this, PropertyId::WebkitHyphenateLimitLines, u8"no-limit")
+      // A missing third value is the second, and a missing second value is `auto`.
+      CHECK(RoundTrip<HyphenateLimitChars>(*this, PropertyId::HyphenateLimitChars, u8"auto") == "auto");
+      CHECK(RoundTrip<HyphenateLimitChars>(*this, PropertyId::HyphenateLimitChars, u8"6") == "6");
+      CHECK(RoundTrip<HyphenateLimitChars>(*this, PropertyId::HyphenateLimitChars, u8"6 auto auto") == "6");
+      CHECK(RoundTrip<HyphenateLimitChars>(*this, PropertyId::HyphenateLimitChars, u8"6 3") == "6 3");
+      CHECK(RoundTrip<HyphenateLimitChars>(*this, PropertyId::HyphenateLimitChars, u8"6 3 3") == "6 3");
+      CHECK(RoundTrip<HyphenateLimitChars>(*this, PropertyId::HyphenateLimitChars, u8"auto 3 2")
+            == "auto 3 2");
+      CHECK(RoundTrip<HyphenateLimitLines>(*this, PropertyId::HyphenateLimitLines, u8"no-limit")
             == "no-limit");
+      CHECK(RoundTrip<HyphenateLimitLines>(*this, PropertyId::HyphenateLimitLines, u8"2") == "2");
     }
   }
 

@@ -34,8 +34,7 @@ namespace krys::boo
         TextBoxEdge(style::ComputedStyle::InitialTextBoxEdge()),
         LineFitEdge(style::ComputedStyle::InitialLineFitEdge()),
         Widows(style::ComputedStyle::InitialWidows()), Orphans(style::ComputedStyle::InitialOrphans()),
-        HyphenateLimitBefore(style::ComputedStyle::InitialHyphenateLimitBefore()),
-        HyphenateLimitAfter(style::ComputedStyle::InitialHyphenateLimitAfter()),
+        HyphenateLimitChars(style::ComputedStyle::InitialHyphenateLimitChars()),
         HyphenateLimitLines(style::ComputedStyle::InitialHyphenateLimitLines()),
         UsedTouchAction(style::ComputedStyle::InitialTouchAction()),
         TextSecurity(static_cast<unsigned>(style::ComputedStyle::InitialTextSecurity())),
@@ -85,14 +84,14 @@ namespace krys::boo
         EventListenerRegionTypes(o.EventListenerRegionTypes), StrokeWidth(o.StrokeWidth),
         TextUnderlineOffset(o.TextUnderlineOffset), TabSize(o.TabSize), StrokeMiterLimit(o.StrokeMiterLimit),
         MathDepth(o.MathDepth), TextBoxEdge(o.TextBoxEdge), LineFitEdge(o.LineFitEdge), Widows(o.Widows),
-        Orphans(o.Orphans), HyphenateLimitBefore(o.HyphenateLimitBefore),
-        HyphenateLimitAfter(o.HyphenateLimitAfter), HyphenateLimitLines(o.HyphenateLimitLines),
-        UsedTouchAction(o.UsedTouchAction), TextSecurity(o.TextSecurity), UserModify(o.UserModify),
-        WordBreak(o.WordBreak), OverflowWrap(o.OverflowWrap), LineBreak(o.LineBreak),
-        UserSelect(o.UserSelect), SpeakAs(o.SpeakAs), Hyphens(o.Hyphens), TextCombine(o.TextCombine),
-        TextEmphasisPosition(o.TextEmphasisPosition), TextUnderlinePosition(o.TextUnderlinePosition),
-        LineBoxContain(o.LineBoxContain), ImageOrientation(o.ImageOrientation),
-        ImageRendering(o.ImageRendering), TextAlignLast(o.TextAlignLast), TextJustify(o.TextJustify),
+        Orphans(o.Orphans), HyphenateLimitChars(o.HyphenateLimitChars),
+        HyphenateLimitLines(o.HyphenateLimitLines), UsedTouchAction(o.UsedTouchAction),
+        TextSecurity(o.TextSecurity), UserModify(o.UserModify), WordBreak(o.WordBreak),
+        OverflowWrap(o.OverflowWrap), LineBreak(o.LineBreak), UserSelect(o.UserSelect), SpeakAs(o.SpeakAs),
+        Hyphens(o.Hyphens), TextCombine(o.TextCombine), TextEmphasisPosition(o.TextEmphasisPosition),
+        TextUnderlinePosition(o.TextUnderlinePosition), LineBoxContain(o.LineBoxContain),
+        ImageOrientation(o.ImageOrientation), ImageRendering(o.ImageRendering),
+        TextAlignLast(o.TextAlignLast), TextJustify(o.TextJustify),
         TextDecorationSkipInk(o.TextDecorationSkipInk), MathShift(o.MathShift), MathStyle(o.MathStyle),
         RubyPosition(o.RubyPosition), RubyAlign(o.RubyAlign), RubyOverhang(o.RubyOverhang),
         HangingPunctuation(o.HangingPunctuation), PaintOrder(o.PaintOrder), CapStyle(o.CapStyle),
@@ -125,14 +124,13 @@ namespace krys::boo
            && StrokeMiterLimit == o.StrokeMiterLimit && Widows == o.Widows && Orphans == o.Orphans
            && TextSecurity == o.TextSecurity && UserModify == o.UserModify && WordBreak == o.WordBreak
            && OverflowWrap == o.OverflowWrap && LineBreak == o.LineBreak && UserSelect == o.UserSelect
-           && SpeakAs == o.SpeakAs && Hyphens == o.Hyphens && HyphenateLimitBefore == o.HyphenateLimitBefore
-           && HyphenateLimitAfter == o.HyphenateLimitAfter && HyphenateLimitLines == o.HyphenateLimitLines
-           && ColorScheme == o.ColorScheme && TextCombine == o.TextCombine
-           && TextEmphasisPosition == o.TextEmphasisPosition && LineBoxContain == o.LineBoxContain
-           && HyphenateCharacter == o.HyphenateCharacter && Quotes == o.Quotes && TabSize == o.TabSize
-           && ImageOrientation == o.ImageOrientation && ImageRendering == o.ImageRendering
-           && TextAlignLast == o.TextAlignLast && TextJustify == o.TextJustify
-           && TextDecorationSkipInk == o.TextDecorationSkipInk
+           && SpeakAs == o.SpeakAs && Hyphens == o.Hyphens && HyphenateLimitChars == o.HyphenateLimitChars
+           && HyphenateLimitLines == o.HyphenateLimitLines && ColorScheme == o.ColorScheme
+           && TextCombine == o.TextCombine && TextEmphasisPosition == o.TextEmphasisPosition
+           && LineBoxContain == o.LineBoxContain && HyphenateCharacter == o.HyphenateCharacter
+           && Quotes == o.Quotes && TabSize == o.TabSize && ImageOrientation == o.ImageOrientation
+           && ImageRendering == o.ImageRendering && TextAlignLast == o.TextAlignLast
+           && TextJustify == o.TextJustify && TextDecorationSkipInk == o.TextDecorationSkipInk
            && TextUnderlinePosition == o.TextUnderlinePosition && RubyPosition == o.RubyPosition
            && RubyAlign == o.RubyAlign && RubyOverhang == o.RubyOverhang
            && HangingPunctuation == o.HangingPunctuation && PaintOrder == o.PaintOrder

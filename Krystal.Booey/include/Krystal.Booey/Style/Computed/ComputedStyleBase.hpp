@@ -124,7 +124,7 @@ namespace krys::boo
     struct GridTrackSizes;
     struct HangingPunctuation;
     struct HyphenateCharacter;
-    struct HyphenateLimitEdge;
+    struct HyphenateLimitChars;
     struct HyphenateLimitLines;
     struct ImageOrNone;
     struct InsetEdge;

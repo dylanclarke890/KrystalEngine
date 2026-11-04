@@ -112,7 +112,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), user style sheets' `@import`s and load options aren't handled, and `ImportRule` has FIXMEs for opaque CORS sources.
 - `RuleSet` doesn't clone `::cue` rules for the cue background box (no WebVTT cues).
 - `SizesAttributeParser` doesn't clear the font selector for font-relative units (FIXME).
-- The standard `user-select` isn't implemented; only `-webkit-user-select` exists and the user agent sheets use it.
 - `css::calc::Value::DoubleValueDeprecated` doesn't log when the tree needs conversion data (FIXME in `ValueEvaluation.cpp`).
 - There is no inspector: `:hover` can't be forced and there are no observer hooks for source ranges.
 - Imported sheets are always strict about the sheet type; quirks-mode lax loading for same-origin requests needs security origins (FIXME in `StyleSheetContents.cpp`).

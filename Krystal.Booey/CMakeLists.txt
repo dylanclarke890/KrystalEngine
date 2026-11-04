@@ -3449,6 +3449,7 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Values/SVG/SVGStrokeDashoffset.hpp
   include/Krystal.Booey/Style/Values/Text/HangingPunctuation.hpp
   include/Krystal.Booey/Style/Values/Text/HyphenateCharacter.hpp
+  include/Krystal.Booey/Style/Values/Text/HyphenateLimitChars.hpp
   include/Krystal.Booey/Style/Values/Text/HyphenateLimitEdge.hpp
   include/Krystal.Booey/Style/Values/Text/HyphenateLimitLines.hpp
   include/Krystal.Booey/Style/Values/Text/LetterSpacing.hpp
@@ -3724,6 +3725,7 @@ set(KRYSTAL_BOOEY_STYLE_SOURCES
   src/Style/Values/SVG/SVGStrokeDasharray.cpp
   src/Style/Values/SVG/SVGStrokeDashoffset.cpp
   src/Style/Values/Text/HangingPunctuation.cpp
+  src/Style/Values/Text/HyphenateLimitChars.cpp
   src/Style/Values/Text/LetterSpacing.cpp
   src/Style/Values/Text/TabSize.cpp
   src/Style/Values/Text/TextAlign.cpp

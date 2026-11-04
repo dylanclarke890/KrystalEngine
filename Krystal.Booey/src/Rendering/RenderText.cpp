@@ -1581,10 +1581,10 @@ namespace krys::boo
     {
       maxWordWidth = 0;
 
-      // Map 'hyphenate-limit-{before,after}: auto;' to 2.
-      auto before = style.HyphenateLimitBefore().TryValue();
+      // Map `auto` before and after limits (`hyphenate-limit-chars`) to 2.
+      auto before = style.GetHyphenateLimitChars().Before.TryValue();
       minimumPrefixLength = before ? static_cast<size_t>(before->Value) : 2;
-      auto after = style.HyphenateLimitAfter().TryValue();
+      auto after = style.GetHyphenateLimitChars().After.TryValue();
       minimumSuffixLength = after ? static_cast<size_t>(after->Value) : 2;
     }
 

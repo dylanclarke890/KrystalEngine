@@ -604,7 +604,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "DragController: draggable elements that can't be selected",
                    "[Page][DragController]")
   {
-    DragFixture fixture(u8"<div id=src draggable=true style=\"-webkit-user-select:none\">source</div>");
+    DragFixture fixture(u8"<div id=src draggable=true style=\"user-select:none\">source</div>");
     CHECK(!fixture.ById(u8"src").FirstChild()->CanStartSelection());
     fixture.ById(u8"src").RemoveAttribute(u8"draggable");
     (void)fixture.Document->UpdateLayout();

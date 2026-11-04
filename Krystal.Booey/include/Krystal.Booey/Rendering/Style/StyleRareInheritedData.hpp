@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Style/Values/SVG/SVGPaintOrder.hpp"
 #include "Krystal.Booey/Style/Values/Text/HangingPunctuation.hpp"
 #include "Krystal.Booey/Style/Values/Text/HyphenateCharacter.hpp"
-#include "Krystal.Booey/Style/Values/Text/HyphenateLimitEdge.hpp"
+#include "Krystal.Booey/Style/Values/Text/HyphenateLimitChars.hpp"
 #include "Krystal.Booey/Style/Values/Text/HyphenateLimitLines.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextAlignLast.hpp"
@@ -106,8 +106,7 @@ namespace krys::boo
 
     style::Widows Widows;
     style::Orphans Orphans;
-    style::HyphenateLimitEdge HyphenateLimitBefore;
-    style::HyphenateLimitEdge HyphenateLimitAfter;
+    style::HyphenateLimitChars HyphenateLimitChars;
     style::HyphenateLimitLines HyphenateLimitLines;
 
     style::TouchAction UsedTouchAction;

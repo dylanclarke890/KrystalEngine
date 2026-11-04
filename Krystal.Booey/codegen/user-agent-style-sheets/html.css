@@ -389,7 +389,7 @@ input {
     border: 2px inset gray;
     padding: 1px;
     -internal-rtl-ordering: logical;
-    -webkit-user-select: text;
+    user-select: text;
     cursor: auto;
 }
 
@@ -507,7 +507,7 @@ input::-webkit-inner-spin-button {
      * button in layout(). */
     height: 1.5em;
     flex: none;
-    -webkit-user-select: none;
+    user-select: none;
 }
 
 textarea {
@@ -516,7 +516,7 @@ textarea {
     background-color: Canvas;
     border: 1px solid;
     -internal-rtl-ordering: logical;
-    -webkit-user-select: text;
+    user-select: text;
     padding: 2px;
     resize: -internal-textarea-auto;
     cursor: auto;

@@ -10099,8 +10099,9 @@
         "url": "https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character"
       }
     },
-    "-webkit-hyphenate-limit-after": {
-      "animation-type": "not animatable (legacy)",
+    "hyphenate-limit-chars": {
+      "animation-type": "discrete",
+      "animation-type-comment": "Current spec animation type is 'by computed value type'",
       "inherited": true,
       "initial": "auto",
       "values": ["auto"],
@@ -10108,27 +10109,17 @@
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "value",
-        "render-style-type": "Style::HyphenateLimitEdge",
-        "parser-grammar": "auto | <number [0,inf]>"
+        "render-style-type": "Style::HyphenateLimitChars",
+        "parser-grammar": "[ auto | <integer [0,inf]> ]{1,3}"
       },
-      "status": "non-standard"
+      "specification": {
+        "module": "css-text",
+        "url": "https://www.w3.org/TR/css-text-4/#propdef-hyphenate-limit-chars"
+      }
     },
-    "-webkit-hyphenate-limit-before": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto"],
-      "codegen-properties": {
-        "render-style-initial-constexpr": true,
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "value",
-        "render-style-type": "Style::HyphenateLimitEdge",
-        "parser-grammar": "auto | <number [0,inf]>"
-      },
-      "status": "non-standard"
-    },
-    "-webkit-hyphenate-limit-lines": {
-      "animation-type": "not animatable (legacy)",
+    "hyphenate-limit-lines": {
+      "animation-type": "discrete",
+      "animation-type-comment": "Current spec animation type is 'by computed value type'",
       "inherited": true,
       "initial": "no-limit",
       "values": ["no-limit"],
@@ -10137,10 +10128,7 @@
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "value",
         "render-style-type": "Style::HyphenateLimitLines",
-        "parser-grammar": "no-limit | <number [0,inf]>"
-      },
-      "status": {
-        "status": "experimental"
+        "parser-grammar": "no-limit | <integer [0,inf]>"
       },
       "specification": {
         "module": "css-text",
@@ -10164,7 +10152,7 @@
         "url": "https://drafts.csswg.org/css-text-3/"
       }
     },
-    "-webkit-initial-letter": {
+    "initial-letter": {
       "animation-type": "discrete",
       "initial": "normal",
       "values": ["normal"],
@@ -10175,9 +10163,6 @@
         "render-style-type": "Style::WebkitInitialLetter",
         "parser-grammar": "normal | <number [0,inf]>{1,2}@(type=ValuePair default=previous)",
         "parser-grammar-comment": "Spec does not match our implementation. Spec is 'normal | [ <number [1,inf]> <integer [1,inf]> ] | [ <number [1,inf]> && [ drop | raise ]? ]'"
-      },
-      "status": {
-        "status": "experimental"
       },
       "specification": {
         "module": "css-inline",
@@ -10930,7 +10915,7 @@
       },
       "status": "non-standard"
     },
-    "-webkit-user-select": {
+    "user-select": {
       "animation-type": "not animatable (needs triage)",
       "animation-type-comment": "Current spec for standard 'user-select' animation type is 'discrete'",
       "inherited": true,
@@ -10951,9 +10936,6 @@
         "render-style-storage-kind": "enum",
         "render-style-type": "UserSelect",
         "parser-grammar": "<<values>>"
-      },
-      "status": {
-        "status": "experimental"
       },
       "specification": {
         "module": "css-ui",

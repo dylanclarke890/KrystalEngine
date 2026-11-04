@@ -252,7 +252,7 @@ div.drag-field { min-height: 60px; }
 .selection p { margin: 0 0 8px; font-size: 13px; line-height: 18px; }
 .selection .quote { padding: 4px 10px; border-left: 4px solid #ef476f; background: #f7f8fb; }
 .selection .quote::selection { background: #ef476f; color: #ffffff; }
-.selection .label { -webkit-user-select: none; padding: 0 4px; border-radius: 4px; background: #ffd166; }
+.selection .label { user-select: none; padding: 0 4px; border-radius: 4px; background: #ffd166; }
 .selection img { width: 24px; height: 16px; vertical-align: middle; }
 .caret { cursor: text; caret-color: #7b2cbf; }
 .caret p { margin: 0 0 8px; font-size: 13px; line-height: 18px; }

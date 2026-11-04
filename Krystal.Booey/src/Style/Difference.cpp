@@ -410,14 +410,14 @@ namespace krys::boo::style
         || a.TextBoxEdge != b.TextBoxEdge || a.LineFitEdge != b.LineFitEdge || a.UsedZoom != b.UsedZoom
         || a.WordBreak != b.WordBreak || a.OverflowWrap != b.OverflowWrap || a.LineBreak != b.LineBreak
         || a.TextSecurity != b.TextSecurity || a.Hyphens != b.Hyphens
-        || a.HyphenateLimitBefore != b.HyphenateLimitBefore || a.HyphenateLimitAfter != b.HyphenateLimitAfter
-        || a.HyphenateCharacter != b.HyphenateCharacter || a.RubyPosition != b.RubyPosition
-        || a.RubyAlign != b.RubyAlign || a.RubyOverhang != b.RubyOverhang || a.TextCombine != b.TextCombine
-        || a.TextEmphasisStyle != b.TextEmphasisStyle || a.TextEmphasisPosition != b.TextEmphasisPosition
-        || a.TabSize != b.TabSize || a.LineBoxContain != b.LineBoxContain
-        || a.ImageOrientation != b.ImageOrientation || a.HangingPunctuation != b.HangingPunctuation
-        || a.UsedContentVisibility != b.UsedContentVisibility || a.ListStyleType != b.ListStyleType
-        || a.ListStyleImage != b.ListStyleImage || a.BlockEllipsis != b.BlockEllipsis)
+        || a.HyphenateLimitChars != b.HyphenateLimitChars || a.HyphenateCharacter != b.HyphenateCharacter
+        || a.RubyPosition != b.RubyPosition || a.RubyAlign != b.RubyAlign || a.RubyOverhang != b.RubyOverhang
+        || a.TextCombine != b.TextCombine || a.TextEmphasisStyle != b.TextEmphasisStyle
+        || a.TextEmphasisPosition != b.TextEmphasisPosition || a.TabSize != b.TabSize
+        || a.LineBoxContain != b.LineBoxContain || a.ImageOrientation != b.ImageOrientation
+        || a.HangingPunctuation != b.HangingPunctuation || a.UsedContentVisibility != b.UsedContentVisibility
+        || a.ListStyleType != b.ListStyleType || a.ListStyleImage != b.ListStyleImage
+        || a.BlockEllipsis != b.BlockEllipsis)
     {
       return true;
     }
