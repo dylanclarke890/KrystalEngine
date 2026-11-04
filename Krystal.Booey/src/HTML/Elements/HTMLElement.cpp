@@ -1679,13 +1679,13 @@ namespace krys::boo::html
     if (!value.empty())
     {
       // Have to quote so the locale id is treated as a string instead of as a CSS keyword.
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitLocale,
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale,
                                            css::SerialiseString(css::CSSOMString(value)));
     }
     else
     {
       // The empty string means the language is explicitly unknown.
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitLocale, css::ValueId::Auto);
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale, css::ValueId::Auto);
     }
   }
 

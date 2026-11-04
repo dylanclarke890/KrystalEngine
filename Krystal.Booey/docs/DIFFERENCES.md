@@ -114,7 +114,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Media features read the frame's `MediaEnvironment`, which the host fills in. `hover`/`any-hover` and the pointer features default to a mouse (hover, fine pointer).
 - There are no view transitions: `@view-transition` is an unknown at-rule, `view-transition-name`/`-class` are unknown properties, and `:active-view-transition(-type)` and the `::view-transition*` pseudo-elements are invalid selectors.
 - There's no paged media: `@page` is an unknown at-rule (no `CSSPageRule`, page selectors, `size` descriptor or `page` property), and `overflow-block: paged` matches only the `print` media type.
-- Non-standard properties are unknown properties: `-webkit-text-fill-color` (Compatibility; text is filled with `color`), `-webkit-font-smoothing`, `-webkit-user-modify`, `-webkit-user-drag`, `-webkit-tap-highlight-color`, `-webkit-background-size`, `-webkit-text-combine`, `-webkit-ruby-position`, `-webkit-line-align`, `-webkit-column-progression` and the `-apple-*` properties. `contenteditable` and `draggable` map to internal properties (`-internal-user-modify`, `-internal-user-drag`) that style sheets can't set.
+- Non-standard properties are unknown properties: `-webkit-text-fill-color` (Compatibility; text is filled with `color`), `-webkit-font-smoothing`, `-webkit-user-modify`, `-webkit-user-drag`, `-webkit-tap-highlight-color`, `-webkit-background-size`, `-webkit-text-combine`, `-webkit-ruby-position`, `-webkit-line-align`, `-webkit-column-progression`, `-webkit-mask-position` and the `-apple-*` properties. Others are internal properties (`-internal-*`) that only the user agent's style sheets and C++ set: `-webkit-user-modify` and `-webkit-user-drag` (from `contenteditable` and `draggable`), `-webkit-locale` (from `lang`), `-webkit-text-security` (password fields, which mask with discs; the circle and square masks are gone), `-webkit-text-decorations-in-effect`, `-webkit-rtl-ordering`, `-webkit-line-box-contain` and the `border-spacing` and `mask-position` longhands (`-webkit-border-horizontal-spacing` and so on), so only the shorthands can be set.
 - An unknown `::-webkit-*` pseudo-element is a parse error, where Selectors keeps it valid (matching nothing) for compatibility.
 - `CSSOMString` can't be null, so nullable attributes are empty for null (`Href()`, `Title()`), and the rule model can't tell an empty `supports()` from none (so `@import "a" supports()` serialises without it); `CSSPropertyRule` omits an empty `syntax`.
 
@@ -186,7 +186,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
-- `-webkit-text-security` masks one character per code point (`RenderText::SecureText`), so a character outside the BMP gets one mask.
+- Password fields mask one character per code point (`RenderText::SecureText`), so a character outside the BMP gets one mask.
 
 ### From Chrome
 

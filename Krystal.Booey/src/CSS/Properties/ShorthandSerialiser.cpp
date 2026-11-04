@@ -388,8 +388,7 @@ namespace krys::boo::css
         case PropertyId::BackgroundPosition:
         case PropertyId::Mask:
         case PropertyId::MaskPosition:
-        case PropertyId::Transition:
-        case PropertyId::WebkitMaskPosition:   return SerialiseLayered();
+        case PropertyId::Transition:           return SerialiseLayered();
         case PropertyId::Border:               return SerialiseBorder(4);
         case PropertyId::BorderBlock:
         case PropertyId::BorderInline:         return SerialiseBorder(2);
@@ -804,12 +803,12 @@ namespace krys::boo::css
           // A single background-position value (identifier or numeric) sets the other value to center.
           // A single mask-position value (identifier or numeric) sets the other value to center.
           // Order matters when one is numeric, but not when both are identifiers.
-          if (longhand == PropertyId::BackgroundPositionY || longhand == PropertyId::WebkitMaskPositionY)
+          if (longhand == PropertyId::BackgroundPositionY || longhand == PropertyId::InternalMaskPositionY)
           {
             // The previous property is X.
             krys_debug_assert(j >= 1);
             krys_debug_assert(LonghandProperty(j - 1) == PropertyId::BackgroundPositionX
-                              || LonghandProperty(j - 1) == PropertyId::WebkitMaskPositionX);
+                              || LonghandProperty(j - 1) == PropertyId::InternalMaskPositionX);
             if (Length() == 2)
             {
               krys_debug_assert(j == 1);
@@ -858,9 +857,9 @@ namespace krys::boo::css
             // The previous properties are X and Y.
             krys_debug_assert(j >= 2);
             krys_debug_assert(LonghandProperty(j - 2) == PropertyId::BackgroundPositionX
-                              || LonghandProperty(j - 2) == PropertyId::WebkitMaskPositionX);
+                              || LonghandProperty(j - 2) == PropertyId::InternalMaskPositionX);
             krys_debug_assert(LonghandProperty(j - 1) == PropertyId::BackgroundPositionY
-                              || LonghandProperty(j - 1) == PropertyId::WebkitMaskPositionY);
+                              || LonghandProperty(j - 1) == PropertyId::InternalMaskPositionY);
             layerValues.Skip(j - 2) = false;
             layerValues.Skip(j - 1) = false;
           }

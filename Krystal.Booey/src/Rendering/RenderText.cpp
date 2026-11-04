@@ -593,14 +593,9 @@ namespace krys::boo
 
     // At rendering time, if certain fonts are used, these characters get swapped out with higher-quality PUA
     // characters. See RenderBlock::updateSecurityDiscCharacters().
-    switch (style.GetTextSecurity())
+    if (style.GetTextSecurity() == TextSecurity::Disc)
     {
-      case TextSecurity::None:   break;
-      // We use the same characters here as for list markers.
-      // See the listMarkerText function in RenderListMarker.cpp.
-      case TextSecurity::Circle: SecureText(text::WhiteBullet); break;
-      case TextSecurity::Disc:   SecureText(text::Bullet); break;
-      case TextSecurity::Square: SecureText(text::BlackSquare); break;
+      SecureText(text::Bullet);
     }
 
     _containsOnlyASCII = text::IsASCII(utf8_stringview {_text});

@@ -388,7 +388,7 @@ input {
     background-color: Canvas;
     border: 2px inset gray;
     padding: 1px;
-    -webkit-rtl-ordering: logical;
+    -internal-rtl-ordering: logical;
     -webkit-user-select: text;
     cursor: auto;
 }
@@ -515,7 +515,7 @@ textarea {
     color: CanvasText;
     background-color: Canvas;
     border: 1px solid;
-    -webkit-rtl-ordering: logical;
+    -internal-rtl-ordering: logical;
     -webkit-user-select: text;
     padding: 2px;
     resize: -internal-textarea-auto;
@@ -525,7 +525,7 @@ textarea {
 }
 
 ::placeholder {
-    -webkit-text-security: none;
+    -internal-text-security: none;
     color: darkGray;
     direction: inherit !important;
     pointer-events: none !important;
@@ -677,7 +677,7 @@ select {
     background-color: Canvas;
     align-items: center;
     white-space: pre;
-    -webkit-rtl-ordering: logical;
+    -internal-rtl-ordering: logical;
     cursor: default;
 }
 

@@ -224,8 +224,7 @@ namespace krys::boo::css
       // Avoid legacy shorthands according to https://www.w3.org/TR/css-cascade-5/#legacy-shorthand
       case PropertyId::PageBreakAfter:
       case PropertyId::PageBreakBefore:
-      case PropertyId::PageBreakInside:
-      case PropertyId::WebkitMaskPosition: return false;
+      case PropertyId::PageBreakInside:    return false;
 
       // No other browser currently supports text-decoration-skip, so it's currently more web
       // compatible to avoid collapsing text-decoration-skip-ink, its only longhand.

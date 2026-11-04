@@ -83,7 +83,7 @@ namespace krys::boo::css::tests
     SECTION("mask with a position")
     {
       CHECK(ShorthandToText(u8"url(a.png) 10px 20px", PropertyId::Mask)
-              .contains("-webkit-mask-position-x: 10px; -webkit-mask-position-y: 20px"));
+              .contains("-internal-mask-position-x: 10px; -internal-mask-position-y: 20px"));
     }
 
     SECTION("overflow")

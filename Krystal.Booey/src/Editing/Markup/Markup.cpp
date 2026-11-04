@@ -401,7 +401,7 @@ namespace krys::boo
       // With AnnotateForInterchange::Yes, wrappingStyleForSerialization should have removed
       // -webkit-text-decorations-in-effect
       krys_debug_assert(!ShouldAnnotate()
-                        || PropertyMissingOrEqualToNone(style, PropertyId::WebkitTextDecorationsInEffect));
+                        || PropertyMissingOrEqualToNone(style, PropertyId::InternalTextDecorationsInEffect));
       out.push_back(u8'<');
       out.append(isBlock ? u8"div" : u8"span");
       out.push_back(u8' ');
@@ -1207,9 +1207,9 @@ namespace krys::boo
                 (void)style->SetProperty(PropertyId::TextDecorationStyle, ValueId::Solid);
                 (void)style->SetProperty(PropertyId::TextDecorationColor, ValueId::Currentcolor);
               }
-              if (!PropertyMissingOrEqualToNone(style, PropertyId::WebkitTextDecorationsInEffect))
+              if (!PropertyMissingOrEqualToNone(style, PropertyId::InternalTextDecorationsInEffect))
               {
-                (void)style->SetProperty(PropertyId::WebkitTextDecorationsInEffect, ValueId::None);
+                (void)style->SetProperty(PropertyId::InternalTextDecorationsInEffect, ValueId::None);
               }
               accumulator.WrapWithStyleNode(style, true);
             }

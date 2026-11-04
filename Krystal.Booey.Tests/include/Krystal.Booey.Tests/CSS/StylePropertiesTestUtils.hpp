@@ -64,7 +64,7 @@ namespace krys::boo::css::tests
       auto property = FindProperty(name);
       INFO(ToNarrow(name));
       REQUIRE(property != PropertyId::Invalid);
-      REQUIRE(IsExposed(property, context.PropertySettings));
+      REQUIRE((IsExposed(property, context.PropertySettings) || IsInternal(property)));
       REQUIRE(PropertyParser::ParseValue(property, important, tokens.Tokenizer.Tokens(), context, parsed,
                                          RuleType::Style));
     }

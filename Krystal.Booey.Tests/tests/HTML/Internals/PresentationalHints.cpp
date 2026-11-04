@@ -65,8 +65,8 @@ namespace krys::boo::html::tests
              "read-write-plaintext-only;");
     CHECK(Hints(u8"<span id=e contenteditable=false></span>") == "-internal-user-modify: read-only;");
     CHECK(Hints(u8"<span id=e contenteditable=maybe></span>").empty());
-    CHECK(Hints(u8"<span id=e lang=en></span>") == "-webkit-locale: \"en\";");
-    CHECK(Hints(u8"<span id=e lang></span>") == "-webkit-locale: auto;");
+    CHECK(Hints(u8"<span id=e lang=en></span>") == "-internal-locale: \"en\";");
+    CHECK(Hints(u8"<span id=e lang></span>") == "-internal-locale: auto;");
 
     SECTION("Attribute changes rebuild the hints")
     {

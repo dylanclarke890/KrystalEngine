@@ -59,7 +59,7 @@ namespace krys::boo
       PropertyId::WhiteSpaceCollapse,
       PropertyId::Widows,
       PropertyId::WordSpacing,
-      PropertyId::WebkitTextDecorationsInEffect,
+      PropertyId::InternalTextDecorationsInEffect,
 
       // Non-inheritable properties
       PropertyId::BackgroundColor,
@@ -70,7 +70,7 @@ namespace krys::boo
     };
 
     constexpr std::array PostLayoutEditingProperties {
-      PropertyId::FontWeight, PropertyId::FontStyle, PropertyId::WebkitTextDecorationsInEffect,
+      PropertyId::FontWeight, PropertyId::FontStyle, PropertyId::InternalTextDecorationsInEffect,
       PropertyId::Direction,  PropertyId::TextAlign, PropertyId::Color,
     };
 
@@ -303,7 +303,7 @@ namespace krys::boo
       }
 
       auto &mutableStyle = *style._mutableStyle;
-      return mutableStyle.GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect)
+      return mutableStyle.GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect)
              || mutableStyle.GetPropertyCSSValue(PropertyId::TextDecorationLine);
     }
 
@@ -321,7 +321,7 @@ namespace krys::boo
       }
       auto *mutableStyle = style.Style();
       RefPtr<css::Value> styleValue =
-        mutableStyle->GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect);
+        mutableStyle->GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect);
       if (!styleValue)
       {
         styleValue = mutableStyle->GetPropertyCSSValue(PropertyId::TextDecorationLine);
@@ -651,14 +651,14 @@ namespace krys::boo
                                        value->CssText(css::DefaultSerialisationContext()));
       }
       if (RefPtr<css::Value> value =
-            computedStyleAtPosition.PropertyValue(PropertyId::WebkitTextDecorationsInEffect))
+            computedStyleAtPosition.PropertyValue(PropertyId::InternalTextDecorationsInEffect))
       {
         (void)mutableStyle.SetProperty(PropertyId::TextDecorationLine,
                                        value->CssText(css::DefaultSerialisationContext()));
         (void)mutableStyle.SetProperty(PropertyId::TextDecorationThickness, ValueId::Auto);
         (void)mutableStyle.SetProperty(PropertyId::TextDecorationStyle, ValueId::Solid);
         (void)mutableStyle.SetProperty(PropertyId::TextDecorationColor, ValueId::Currentcolor);
-        (void)mutableStyle.RemoveProperty(PropertyId::WebkitTextDecorationsInEffect);
+        (void)mutableStyle.RemoveProperty(PropertyId::InternalTextDecorationsInEffect);
       }
     }
 
@@ -829,7 +829,8 @@ namespace krys::boo
 
     auto underline = css::PrimitiveValue::Create(ValueId::Underline);
     auto lineThrough = css::PrimitiveValue::Create(ValueId::LineThrough);
-    RefPtr<css::Value> value = _mutableStyle->GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect);
+    RefPtr<css::Value> value =
+      _mutableStyle->GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect);
     css::ValueListBuilder valueList;
     if (auto *list = DynamicDowncast<css::ValueList>(value.get()))
     {
@@ -848,7 +849,7 @@ namespace krys::boo
         valueList.push_back(krys::move(lineThrough));
       }
     }
-    _mutableStyle->SetProperty(PropertyId::WebkitTextDecorationsInEffect,
+    _mutableStyle->SetProperty(PropertyId::InternalTextDecorationsInEffect,
                                css::ValueList::CreateSpaceSeparated(krys::move(valueList)));
   }
 
@@ -970,7 +971,7 @@ namespace krys::boo
 
     auto &mutableStyle = *_mutableStyle;
     RefPtr<css::Value> textDecorationsInEffect =
-      mutableStyle.GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect);
+      mutableStyle.GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect);
     if (!textDecorationsInEffect)
     {
       return;
@@ -987,7 +988,7 @@ namespace krys::boo
     {
       (void)mutableStyle.RemoveProperty(PropertyId::TextDecoration);
     }
-    (void)mutableStyle.RemoveProperty(PropertyId::WebkitTextDecorationsInEffect);
+    (void)mutableStyle.RemoveProperty(PropertyId::InternalTextDecorationsInEffect);
   }
 
   namespace
@@ -995,7 +996,7 @@ namespace krys::boo
     // CSS properties that create a visual difference only when applied to text.
     constexpr std::array TextOnlyProperties {
       PropertyId::TextDecorationLine,
-      PropertyId::WebkitTextDecorationsInEffect,
+      PropertyId::InternalTextDecorationsInEffect,
       PropertyId::FontStyle,
       PropertyId::FontWeight,
       PropertyId::Color,
@@ -1187,7 +1188,7 @@ namespace krys::boo
         continue;
       }
 
-      if (propertyID == PropertyId::WebkitTextDecorationsInEffect
+      if (propertyID == PropertyId::InternalTextDecorationsInEffect
           && inlineStyle->GetPropertyCSSValue(PropertyId::TextDecorationLine))
       {
         if (!newInlineStyle)
@@ -1704,7 +1705,7 @@ namespace krys::boo
 
       // text decorations never override values.
       if ((property.Id() == PropertyId::TextDecorationLine
-           || property.Id() == PropertyId::WebkitTextDecorationsInEffect)
+           || property.Id() == PropertyId::InternalTextDecorationsInEffect)
           && value)
       {
         if (auto *propertyValueList = DynamicDowncast<css::ValueList>(*property.Value()))
@@ -2169,7 +2170,7 @@ namespace krys::boo
     {
       return false;
     }
-    auto value = ExtractPropertyValue(*_mutableStyle, PropertyId::WebkitTextDecorationsInEffect);
+    auto value = ExtractPropertyValue(*_mutableStyle, PropertyId::InternalTextDecorationsInEffect);
     auto *textDecorations = DynamicDowncast<css::ValueList>(value.get());
     if (!textDecorations)
     {
@@ -2347,7 +2348,7 @@ namespace krys::boo
   {
     void ReconcileTextDecorationProperties(css::MutableStyleProperties &style) noexcept
     {
-      auto textDecorationsInEffect = style.GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect);
+      auto textDecorationsInEffect = style.GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect);
       auto textDecoration = style.GetPropertyCSSValue(PropertyId::TextDecorationLine);
       // We shouldn't have both text-decoration and -webkit-text-decorations-in-effect because that wouldn't
       // make sense.
@@ -2356,7 +2357,7 @@ namespace krys::boo
       {
         (void)style.SetProperty(PropertyId::TextDecoration,
                                 textDecorationsInEffect->CssText(css::DefaultSerialisationContext()));
-        (void)style.RemoveProperty(PropertyId::WebkitTextDecorationsInEffect);
+        (void)style.RemoveProperty(PropertyId::InternalTextDecorationsInEffect);
         textDecoration = textDecorationsInEffect;
       }
 
@@ -2402,7 +2403,7 @@ namespace krys::boo
     bool shouldAddStrikeThrough = style->StrikeThroughChange() == TextDecorationChange::Add;
     if (shouldAddUnderline || shouldAddStrikeThrough)
     {
-      RefPtr<css::Value> value = computedStyle.PropertyValue(PropertyId::WebkitTextDecorationsInEffect);
+      RefPtr<css::Value> value = computedStyle.PropertyValue(PropertyId::InternalTextDecorationsInEffect);
       if (!value || !Is<css::ValueList>(*value))
       {
         value = computedStyle.PropertyValue(PropertyId::TextDecorationLine);
@@ -2617,9 +2618,9 @@ namespace krys::boo
       Ref<css::MutableStyleProperties> mutableStyle = ShareRef(*result->Style());
 
       auto baseTextDecorationsInEffect =
-        ExtractPropertyValue(baseStyle, PropertyId::WebkitTextDecorationsInEffect);
+        ExtractPropertyValue(baseStyle, PropertyId::InternalTextDecorationsInEffect);
       DiffTextDecorations(*mutableStyle, PropertyId::TextDecorationLine, baseTextDecorationsInEffect.get());
-      DiffTextDecorations(*mutableStyle, PropertyId::WebkitTextDecorationsInEffect,
+      DiffTextDecorations(*mutableStyle, PropertyId::InternalTextDecorationsInEffect,
                           baseTextDecorationsInEffect.get());
 
       if (ExtractPropertyValue(baseStyle, PropertyId::FontWeight)

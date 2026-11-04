@@ -1828,7 +1828,9 @@ namespace krys::boo::css
       return TopContext().ParsedProperties.size() != oldPropertiesCount;
     };
 
-    if (!IsExposed(property, &_context.PropertySettings))
+    // Internal properties are only for the user agent's style sheets.
+    if (!IsExposed(property, &_context.PropertySettings)
+        && !(IsInternal(property) && IsUASheetBehavior(_context.Mode)))
     {
       property = PropertyId::Invalid;
     }

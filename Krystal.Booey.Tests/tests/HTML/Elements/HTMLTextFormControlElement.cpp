@@ -391,6 +391,8 @@ namespace krys::boo::tests
 
     // The text is drawn masked, one disc per character.
     CHECK(text.Style().GetTextSecurity() == TextSecurity::Disc);
+    CHECK(Downcast<RenderText>(text).Text() == u8"••••••");
+    CHECK(Downcast<RenderText>(text).OriginalText() == u8"secret");
     field.Focus();
     CHECK(fixture.Selection().Selection().IsInPasswordField());
 

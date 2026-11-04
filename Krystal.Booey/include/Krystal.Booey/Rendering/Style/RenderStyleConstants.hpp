@@ -335,12 +335,10 @@ namespace krys::boo
     Stretch
   };
 
-  enum class TextSecurity : uint8
+  enum class TextSecurity : bool
   {
     None,
-    Disc,
-    Circle,
-    Square
+    Disc
   };
 
   enum class InputSecurity : bool

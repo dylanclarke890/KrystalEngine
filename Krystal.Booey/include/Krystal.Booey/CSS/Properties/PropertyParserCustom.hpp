@@ -435,9 +435,9 @@ namespace krys::boo::css
         return false;
       }
 
-      result.AddPropertyForCurrentShorthand(state, PropertyId::WebkitBorderHorizontalSpacing,
+      result.AddPropertyForCurrentShorthand(state, PropertyId::InternalBorderHorizontalSpacing,
                                             krys::move(horizontalSpacing));
-      result.AddPropertyForCurrentShorthand(state, PropertyId::WebkitBorderVerticalSpacing,
+      result.AddPropertyForCurrentShorthand(state, PropertyId::InternalBorderVerticalSpacing,
                                             krys::move(verticalSpacing));
 
       return true;
@@ -786,11 +786,11 @@ namespace krys::boo::css
           }
 
           // -webkit-mask-*
-          case PropertyId::WebkitMaskPositionX:
+          case PropertyId::InternalMaskPositionX:
           {
             return PropertyParsing::ConsumeSingleWebkitMaskPositionX(tokens, state);
           }
-          case PropertyId::WebkitMaskPositionY:
+          case PropertyId::InternalMaskPositionY:
           {
             return PropertyParsing::ConsumeSingleWebkitMaskPositionY(tokens, state);
           }
@@ -835,7 +835,7 @@ namespace krys::boo::css
             RefPtr<Value> valueY;
             PropertyId property = shorthandProperties[i];
 
-            if (property == PropertyId::BackgroundPositionX || property == PropertyId::WebkitMaskPositionX)
+            if (property == PropertyId::BackgroundPositionX || property == PropertyId::InternalMaskPositionX)
             {
               // Note: This assumes y properties (for example background-position-y) follow the x properties
               // in the shorthand array.
@@ -886,7 +886,7 @@ namespace krys::boo::css
               }
             }
             else if (property == PropertyId::BackgroundPositionY
-                     || property == PropertyId::WebkitMaskPositionY)
+                     || property == PropertyId::InternalMaskPositionY)
             {
               continue;
             }

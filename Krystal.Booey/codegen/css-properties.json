@@ -1377,12 +1377,13 @@
         "url": "https://drafts.csswg.org/css-fonts-4/#propdef-font-variant"
       }
     },
-    "-webkit-locale": {
+    "-internal-locale": {
       "animation-type": "not animatable (legacy)",
       "inherited": true,
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
+        "internal-only": true,
         "font-description-name-for-methods": "SpecifiedLocale",
         "font-property": true,
         "high-priority": true,
@@ -3543,8 +3544,8 @@
       "initial": "0px 0px",
       "codegen-properties": {
         "longhands": [
-          "-webkit-border-horizontal-spacing",
-          "-webkit-border-vertical-spacing"
+          "-internal-border-horizontal-spacing",
+          "-internal-border-vertical-spacing"
         ],
         "accepts-quirky-length": true,
         "shorthand-pattern": "CoalescingPair",
@@ -3559,11 +3560,12 @@
         "url": "https://www.w3.org/TR/CSS22/tables.html#separated-borders"
       }
     },
-    "-webkit-border-horizontal-spacing": {
+    "-internal-border-horizontal-spacing": {
       "animation-type": "by computed value",
       "inherited": true,
       "initial": "0px",
       "codegen-properties": {
+        "internal-only": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_inheritedData"],
         "render-style-storage-kind": "value",
@@ -3572,11 +3574,12 @@
       },
       "status": "non-standard"
     },
-    "-webkit-border-vertical-spacing": {
+    "-internal-border-vertical-spacing": {
       "animation-type": "by computed value",
       "inherited": true,
       "initial": "0px",
       "codegen-properties": {
+        "internal-only": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_inheritedData"],
         "render-style-storage-kind": "value",
@@ -5714,8 +5717,8 @@
       "codegen-properties": {
         "longhands": [
           "mask-image",
-          "-webkit-mask-position-x",
-          "-webkit-mask-position-y",
+          "-internal-mask-position-x",
+          "-internal-mask-position-y",
           "mask-size",
           "mask-repeat",
           "mask-origin",
@@ -6017,7 +6020,7 @@
     },
     "mask-position": {
       "codegen-properties": {
-        "longhands": ["-webkit-mask-position-x", "-webkit-mask-position-y"],
+        "longhands": ["-internal-mask-position-x", "-internal-mask-position-y"],
         "parser-function": "ConsumeMaskPositionShorthand",
         "parser-grammar": "<position>#",
         "parser-grammar-unused": true,
@@ -6028,24 +6031,11 @@
         "url": "https://drafts.fxtf.org/css-masking-1/#propdef-mask-position"
       }
     },
-    "-webkit-mask-position": {
-      "codegen-properties": {
-        "longhands": ["-webkit-mask-position-x", "-webkit-mask-position-y"],
-        "parser-function": "ConsumeBackgroundPositionShorthand",
-        "parser-grammar": "<bg-position>#",
-        "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
-      },
-      "status": "non-standard",
-      "specification": {
-        "module": "css-masking",
-        "url": "https://drafts.fxtf.org/css-masking-1/#propdef-mask-position"
-      }
-    },
-    "-webkit-mask-position-x": {
+    "-internal-mask-position-x": {
       "animation-type": "repeatable list",
       "initial": "0%",
       "codegen-properties": {
+        "internal-only": true,
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "PositionX",
         "coordinated-value-list-property-item-type": "Style::PositionX",
@@ -6062,10 +6052,11 @@
         "url": "https://drafts.fxtf.org/css-masking-1/#propdef-mask-position"
       }
     },
-    "-webkit-mask-position-y": {
+    "-internal-mask-position-y": {
       "animation-type": "repeatable list",
       "initial": "0%",
       "codegen-properties": {
+        "internal-only": true,
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "PositionY",
         "coordinated-value-list-property-item-type": "Style::PositionY",
@@ -10193,7 +10184,7 @@
         "url": "https://www.w3.org/TR/css-inline/#propdef-initial-letter"
       }
     },
-    "-webkit-line-box-contain": {
+    "-internal-line-box-contain": {
       "animation-type": "not animatable (legacy)",
       "inherited": true,
       "initial": "block inline replaced",
@@ -10208,6 +10199,7 @@
         "initial-letter"
       ],
       "codegen-properties": {
+        "internal-only": true,
         "render-style-initial-custom": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "raw",
@@ -10399,12 +10391,13 @@
         "url": "https://www.w3.org/TR/css-color-adjust/#print-color-adjust"
       }
     },
-    "-webkit-rtl-ordering": {
+    "-internal-rtl-ordering": {
       "animation-type": "not animatable (legacy)",
       "inherited": true,
       "initial": "logical",
       "values": ["logical", "visual"],
       "codegen-properties": {
+        "internal-only": true,
         "render-style-initial": "initialRTLOrdering",
         "render-style-setter": "setRTLOrdering",
         "render-style-storage-path": ["m_inheritedFlags"],
@@ -10594,11 +10587,12 @@
         "url": "https://drafts.csswg.org/css-text-decor-4/#text-decoration-thickness-property"
       }
     },
-    "-webkit-text-decorations-in-effect": {
+    "-internal-text-decorations-in-effect": {
       "animation-type": "not animatable (internal)",
       "inherited": true,
       "initial": "none",
       "codegen-properties": {
+        "internal-only": true,
         "skip-style-builder": true,
         "render-style-name-for-methods": "TextDecorationLineInEffect",
         "render-style-storage-path": ["m_inheritedFlags"],
@@ -10675,12 +10669,13 @@
         "url": "https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style"
       }
     },
-    "-webkit-text-security": {
+    "-internal-text-security": {
       "animation-type": "not animatable (legacy)",
       "inherited": true,
       "initial": "none",
-      "values": ["disc", "circle", "square", "none"],
+      "values": ["disc", "none"],
       "codegen-properties": {
+        "internal-only": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "TextSecurity",
@@ -10914,7 +10909,6 @@
       "values": ["auto", "none", "element"],
       "codegen-properties": {
         "internal-only": true,
-        "render-style-name-for-methods": "UserDrag",
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "UserDrag",
@@ -10929,7 +10923,6 @@
       "values": ["read-only", "read-write", "read-write-plaintext-only"],
       "codegen-properties": {
         "internal-only": true,
-        "render-style-name-for-methods": "UserModify",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "UserModify",

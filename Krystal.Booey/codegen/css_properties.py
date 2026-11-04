@@ -741,8 +741,11 @@ class StylePropertyCodeGenProperties:
         if f"{family_name}-name-for-methods" not in json_value:
             json_value[f"{family_name}-name-for-methods"] = property_name.name_for_methods
             if family_name in ("render-style", "font-description"):
-                # Non-standard properties keep their `-webkit-` prefix but not in their accessor names.
-                json_value[f"{family_name}-name-for-methods"] = property_name.name_for_methods.replace("Webkit", "")
+                # Non-standard and internal properties keep their `-webkit-` or `-internal-` prefix but not in
+                # their accessor names.
+                json_value[f"{family_name}-name-for-methods"] = (
+                    property_name.name_for_methods.replace("Webkit", "").removeprefix("Internal")
+                )
 
         if family_name == "render-style":
             StylePropertyCodeGenProperties._complete_render_style_name_family(json_value)
