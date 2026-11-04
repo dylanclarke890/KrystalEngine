@@ -28,6 +28,10 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#autofill-processing-model
   struct AutofillData
   {
+    // FIXME: Booey has no autofill, so only `IDLExposedValue` is read (by the `autocomplete` getters). The
+    // processing model's token validation is still needed to normalise it, so `ReflectAttribute` can't replace
+    // this, but the field name, hint set, scope and credential type could go, leaving one function that
+    // computes the exposed value.
     /// @see https://html.spec.whatwg.org/#autofill-field-name
     dom::DOMString FieldName;
 
