@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Booey/Editing/VisiblePosition.hpp"
+#include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"

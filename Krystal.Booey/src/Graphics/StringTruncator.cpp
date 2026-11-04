@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/StringTruncator.hpp"
-#include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include <unicode/ubrk.h>
 
 namespace krys::boo

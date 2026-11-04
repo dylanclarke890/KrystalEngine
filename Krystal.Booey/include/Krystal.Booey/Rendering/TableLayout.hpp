@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 

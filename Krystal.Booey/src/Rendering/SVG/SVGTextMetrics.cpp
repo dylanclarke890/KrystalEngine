@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGTextMetrics.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
 
 namespace krys::boo
 {

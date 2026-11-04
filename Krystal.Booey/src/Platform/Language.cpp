@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Platform/Language.hpp"
-#include "Krystal.Booey/Core/PlatformLocale.hpp"
+#include "Krystal.Booey/Platform/PlatformLocale.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo

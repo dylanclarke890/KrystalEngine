@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
@@ -18,6 +17,7 @@
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolveForFont.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
 
 namespace krys::boo::html
 {

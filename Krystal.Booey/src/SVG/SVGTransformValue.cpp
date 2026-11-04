@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGTransformValue.hpp"
-#include "Krystal.Booey/Core/FloatConversion.hpp"
-#include "Krystal.Booey/Core/NumberFormatting.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
 namespace krys::boo::svg

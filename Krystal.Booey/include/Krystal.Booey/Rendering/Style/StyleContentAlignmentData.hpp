@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 
 namespace krys::boo
 {

@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"

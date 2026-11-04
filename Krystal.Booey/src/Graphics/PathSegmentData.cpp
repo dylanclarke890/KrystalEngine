@@ -1,10 +1,9 @@
 ﻿#include "Krystal.Booey/Graphics/PathSegmentData.hpp"
 
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include <cmath>
 #include <numbers>
@@ -625,7 +624,9 @@ namespace krys::boo
     // The rotation is in radians, about the centre.
     auto rect = FloatRect {minXMinYCorner, maxXMaxYCorner};
     AffineTransform rotation;
-    rotation.Translate(Center.X(), Center.Y()).RotateRadians(this->Rotation).Translate(-Center.X(), -Center.Y());
+    rotation.Translate(Center.X(), Center.Y())
+      .RotateRadians(this->Rotation)
+      .Translate(-Center.X(), -Center.Y());
     rect = rotation.MapRect(rect);
     boundingRect.UniteEvenIfEmpty(rect);
   }

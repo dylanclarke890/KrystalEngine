@@ -1,10 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Editing/TextGranularity.hpp"
+#include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
@@ -16,6 +15,7 @@
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"

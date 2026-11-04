@@ -1,11 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Graphics/DoubleSize.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -257,6 +256,9 @@ namespace krys::boo
   {
     return a.Width() * b.Height() - a.Height() * b.Width();
   }
+
+  // Keeps the scalar overloads visible alongside this one.
+  using krys::AreEssentiallyEqual;
 
   KRYS_NODISCARD inline bool AreEssentiallyEqual(const FloatSize &a, const FloatSize &b) noexcept
   {

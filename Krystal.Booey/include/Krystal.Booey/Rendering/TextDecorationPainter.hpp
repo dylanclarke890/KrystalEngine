@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"
@@ -8,6 +7,7 @@
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 

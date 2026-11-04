@@ -13,7 +13,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
-#include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"

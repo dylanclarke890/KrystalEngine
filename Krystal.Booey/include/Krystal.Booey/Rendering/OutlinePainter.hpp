@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 

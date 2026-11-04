@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/IterationStatus.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/UnitCategory.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/IterationStatus.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 

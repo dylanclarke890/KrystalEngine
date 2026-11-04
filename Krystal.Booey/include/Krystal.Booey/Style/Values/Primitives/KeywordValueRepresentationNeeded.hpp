@@ -1,18 +1,18 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
-#include "Krystal.Booey/Core/TextFlags.hpp"
-#include "Krystal.Booey/Core/TextSpacing.hpp"
-#include "Krystal.Booey/Core/ThemeTypes.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
+#include "Krystal.Booey/Platform/ThemeTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
+#include "Krystal.Booey/Text/TextSpacing.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 
 // FIXME: Add specializations of ValueRepresentation for all enums listed in this file.
 

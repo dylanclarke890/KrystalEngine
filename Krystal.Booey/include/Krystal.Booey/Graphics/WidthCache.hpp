@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextSpacing.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Types/Array.hpp"

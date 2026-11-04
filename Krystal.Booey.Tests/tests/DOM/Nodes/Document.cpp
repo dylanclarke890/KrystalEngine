@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
-#include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
@@ -43,6 +42,7 @@
 #include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Text/EncodingRegistry.hpp"
 
 namespace krys::boo::dom::tests
 {

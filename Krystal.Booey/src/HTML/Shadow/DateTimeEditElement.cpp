@@ -1,6 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp"
-#include "Krystal.Booey/Core/DateTimeFormat.hpp"
-#include "Krystal.Booey/Core/PlatformLocale.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Events/FocusEvent.hpp"
@@ -10,6 +8,8 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/InputTypes/DateTimeFieldsState.hpp"
 #include "Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp"
+#include "Krystal.Booey/Platform/DateTimeFormat.hpp"
+#include "Krystal.Booey/Platform/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include <algorithm>
 #include <limits>

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo

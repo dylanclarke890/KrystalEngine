@@ -10,7 +10,7 @@
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveKeywordList.hpp"
+#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperData.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 
 namespace krys::boo::css
 {

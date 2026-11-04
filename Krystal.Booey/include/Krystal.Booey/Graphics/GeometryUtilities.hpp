@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/RectEdges.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/RectEdges.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

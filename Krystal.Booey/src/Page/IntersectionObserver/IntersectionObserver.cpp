@@ -1,6 +1,4 @@
 ﻿#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp"
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -12,6 +10,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -25,6 +24,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>

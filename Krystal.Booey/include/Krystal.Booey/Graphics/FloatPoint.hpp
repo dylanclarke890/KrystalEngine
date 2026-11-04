@@ -1,12 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include <algorithm>
 #include <cmath>
@@ -328,6 +327,9 @@ namespace krys::boo
   {
     return FloatPoint(a.Width(), a.Height());
   }
+
+  // Keeps the scalar overloads visible alongside this one.
+  using krys::AreEssentiallyEqual;
 
   KRYS_NODISCARD inline bool AreEssentiallyEqual(const FloatPoint &a, const FloatPoint &b) noexcept
   {

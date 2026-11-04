@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

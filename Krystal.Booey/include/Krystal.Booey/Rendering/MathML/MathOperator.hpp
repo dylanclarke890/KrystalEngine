@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/GlyphPage.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"

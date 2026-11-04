@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/ComplexTextController.hpp"
-#include "Krystal.Booey/Core/CharacterProperties.hpp"
-#include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Text/CharacterProperties.hpp"
+#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include <algorithm>

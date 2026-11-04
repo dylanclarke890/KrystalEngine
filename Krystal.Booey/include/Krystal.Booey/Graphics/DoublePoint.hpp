@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Graphics/DoubleSize.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
 namespace krys::boo

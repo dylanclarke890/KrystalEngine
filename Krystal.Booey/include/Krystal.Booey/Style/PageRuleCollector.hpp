@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/MatchResult.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 

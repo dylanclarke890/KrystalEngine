@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/Glyph.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
 namespace krys::boo::style

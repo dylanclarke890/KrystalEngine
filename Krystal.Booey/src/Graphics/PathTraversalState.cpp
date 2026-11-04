@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
 
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 

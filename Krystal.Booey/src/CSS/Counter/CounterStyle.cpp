@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Counter/CounterStyle.hpp"
-#include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"

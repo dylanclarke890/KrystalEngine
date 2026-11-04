@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
 
 namespace krys::boo::css
 {

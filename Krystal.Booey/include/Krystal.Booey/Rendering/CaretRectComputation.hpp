@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Editing/InlineRunAndOffset.hpp"
+#include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 

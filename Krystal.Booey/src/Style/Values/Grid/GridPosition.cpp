@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::style

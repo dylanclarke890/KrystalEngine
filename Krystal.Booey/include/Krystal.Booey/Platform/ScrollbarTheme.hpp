@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"

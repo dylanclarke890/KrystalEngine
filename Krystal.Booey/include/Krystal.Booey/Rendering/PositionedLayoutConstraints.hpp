@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/LayoutRange.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
 #include "Krystal.Booey/Style/Values/Box/Margin.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEConvolveMatrix.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"

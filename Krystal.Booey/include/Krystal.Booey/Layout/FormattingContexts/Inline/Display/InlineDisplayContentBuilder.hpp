@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContent.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBox.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/LineLayoutResult.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"

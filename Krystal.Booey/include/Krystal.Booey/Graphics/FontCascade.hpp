@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/CharacterProperties.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.Booey/Graphics/GlyphBuffer.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"

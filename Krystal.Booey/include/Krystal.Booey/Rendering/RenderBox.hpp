@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
+#include "Krystal.Booey/Graphics/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/LayoutRange.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderOverflow.hpp"
 #include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"

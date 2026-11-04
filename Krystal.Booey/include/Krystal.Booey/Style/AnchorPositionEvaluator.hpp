@@ -1,9 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
@@ -11,6 +10,7 @@
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/ResolvedScopedName.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"

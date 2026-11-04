@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/CompactVariant.hpp"
 #include "Krystal.Core/Types/FlatteningVariant.hpp"
 #include "Krystal.Core/Types/Markable.hpp"

@@ -1,8 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderListBox.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
@@ -20,6 +19,7 @@
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include <cmath>
 #include <numbers>
 

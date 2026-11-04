@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

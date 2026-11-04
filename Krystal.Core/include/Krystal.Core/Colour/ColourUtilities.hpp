@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Colour/ColourComponents.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 #include <functional>

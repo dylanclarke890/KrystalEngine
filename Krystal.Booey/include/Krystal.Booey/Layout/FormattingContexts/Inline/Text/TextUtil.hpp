@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextBreakIterator.hpp"
-#include "Krystal.Booey/Core/TextSpacing.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Layout/LayoutUnits.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Text/TextBreakIterator.hpp"
+#include "Krystal.Booey/Text/TextSpacing.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"

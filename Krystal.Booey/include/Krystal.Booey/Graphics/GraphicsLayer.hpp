@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
@@ -14,6 +13,7 @@
 #include "Krystal.Booey/Graphics/PlatformLayerIdentifier.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"

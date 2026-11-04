@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/FormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineItem.hpp"

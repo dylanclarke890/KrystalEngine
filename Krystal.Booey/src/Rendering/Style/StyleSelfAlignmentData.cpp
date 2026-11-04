@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 
 namespace krys::boo
 {

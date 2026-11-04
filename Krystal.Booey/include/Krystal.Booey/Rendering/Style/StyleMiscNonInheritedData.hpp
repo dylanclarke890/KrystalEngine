@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignContent.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignItems.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignSelf.hpp"

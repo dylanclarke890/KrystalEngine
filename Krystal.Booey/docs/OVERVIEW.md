@@ -20,7 +20,7 @@ Without scripting, the DOM's callbacks are C++: listeners are `Func`s owned by `
 
 ### Conventions
 
-- **UTF-8 throughout.** There's no 8-bit/16-bit split and no Latin-1 path, and offsets into text are bytes. CSS code uses the aliases in `CSS/Types/CSSOMString.hpp` (`CSSOMString`, `CSSOMStringView`, `CSSOMStringAtom`) rather than the Core or `dom::` names; literals are `u8"foo"sv`. Text helpers live in Krystal.Core's `Text/` (add missing ones there), apart from those that need ICU (`TextBreakIterator`, `CharacterProperties`), which are in `Krystal.Booey/Core/` because Core doesn't link ICU.
+- **UTF-8 throughout.** There's no 8-bit/16-bit split and no Latin-1 path, and offsets into text are bytes. CSS code uses the aliases in `CSS/Types/CSSOMString.hpp` (`CSSOMString`, `CSSOMStringView`, `CSSOMStringAtom`) rather than the Core or `dom::` names; literals are `u8"foo"sv`. Text helpers live in Krystal.Core's `Text/` (add missing ones there), apart from those that need ICU (`TextBreakIterator`, `CharacterProperties`), which are in Booey's `Text/` because Core doesn't link ICU.
 - **Serialisers** take a `StringBuilder &` (`Text/StringBuilder.hpp`), whose variadic `Append` writes floats in ECMAScript `Number.prototype.toString` form. `TextStream` writes doubles as `%.2f`, rounding ties away from zero.
 - **No weak sets or maps.** Holders keep lists or hash sets of raw pointers, walk them from copies and clear themselves on destruction.
 - **Type lists** use brigand (vcpkg) rather than hand-rolled lists. Core doesn't link it, so its `VariantOrSingle` takes a pack: from a list, write `brigand::wrap<List, VariantOrSingle>`.

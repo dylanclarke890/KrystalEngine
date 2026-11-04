@@ -19,7 +19,7 @@
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>
 

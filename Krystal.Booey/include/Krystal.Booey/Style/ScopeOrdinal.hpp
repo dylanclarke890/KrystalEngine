@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
 namespace krys::boo::style

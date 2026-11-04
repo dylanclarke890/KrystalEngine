@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/FloatPointGraph.hpp"
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>

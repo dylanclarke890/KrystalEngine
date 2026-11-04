@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
 
 namespace krys::boo

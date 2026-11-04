@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <algorithm>
 

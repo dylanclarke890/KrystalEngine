@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/Loader/DocumentWriter.hpp"
-#include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -7,6 +6,7 @@
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Text/EncodingRegistry.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"

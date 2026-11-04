@@ -2,13 +2,13 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style

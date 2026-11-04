@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/RectCorners.hpp"
-#include "Krystal.Booey/Core/RectEdges.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Graphics/RectCorners.hpp"
+#include "Krystal.Booey/Graphics/RectEdges.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"

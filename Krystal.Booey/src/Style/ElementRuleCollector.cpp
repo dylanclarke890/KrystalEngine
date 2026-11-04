@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/Style/ElementRuleCollector.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
@@ -30,6 +29,7 @@
 #include "Krystal.Booey/Style/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/UserAgentStyle.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"

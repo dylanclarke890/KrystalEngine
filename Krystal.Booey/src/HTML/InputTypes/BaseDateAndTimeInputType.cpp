@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/BaseDateAndTimeInputType.hpp"
-#include "Krystal.Booey/Core/PlatformLocale.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/DateTimeChooserParameters.hpp"
+#include "Krystal.Booey/Platform/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include <charconv>
 #include <cmath>

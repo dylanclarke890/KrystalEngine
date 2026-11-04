@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/TabSize.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 
 namespace krys::boo::tests
 {

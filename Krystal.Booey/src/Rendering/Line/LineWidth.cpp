@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/Line/LineWidth.hpp"
 
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 
 namespace krys::boo

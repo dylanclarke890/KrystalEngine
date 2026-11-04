@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo

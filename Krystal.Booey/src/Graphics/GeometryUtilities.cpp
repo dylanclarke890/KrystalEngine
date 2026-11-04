@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
-#include "Krystal.Booey/Core/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>
 #include <numeric>

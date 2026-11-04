@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerClient.hpp"
 #include "Krystal.Booey/Graphics/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/LayerAncestorClippingStack.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"

@@ -1,10 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlock.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
@@ -30,6 +29,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
 
 namespace krys::boo
 {

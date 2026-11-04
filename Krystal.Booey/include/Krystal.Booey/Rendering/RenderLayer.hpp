@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
+#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerEnums.hpp"
@@ -13,6 +12,7 @@
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Page/ScrollBehavior.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/ClipRect.hpp"
 #include "Krystal.Booey/Rendering/LayerFragment.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"

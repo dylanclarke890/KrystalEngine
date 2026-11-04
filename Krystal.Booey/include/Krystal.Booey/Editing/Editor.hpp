@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/EditAction.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
-#include "Krystal.Booey/Editing/TemporarySelectionChange.hpp"
+#include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

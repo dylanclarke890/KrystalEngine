@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/NinePieceImagePainter.hpp"
-#include "Krystal.Booey/Core/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Rendering/ImageQualityController.hpp"

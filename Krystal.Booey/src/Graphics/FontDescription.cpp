@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/FontDescription.hpp"
-#include "Krystal.Booey/Core/LocaleToScriptMapping.hpp"
+#include "Krystal.Booey/Text/LocaleToScriptMapping.hpp"
 
 namespace krys::boo
 {

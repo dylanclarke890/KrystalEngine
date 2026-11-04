@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/FragmentDirective/FragmentDirectiveRangeFinder.hpp"
-#include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
@@ -18,6 +17,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <compare>
 #include <unicode/ubrk.h>

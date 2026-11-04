@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/Region.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <random>
 
 namespace krys::boo::tests

@@ -46,7 +46,7 @@ Status: n/a (author conformance: the parser is 13.2)
 #### [13.1.2 Elements](https://html.spec.whatwg.org/#elements-2)
 
 Status: reviewed (2026-11-02)
-> The void elements, with those that serialize as void, are `ElementCannotHaveEndTag` in `Editing/MarkupAccumulator.cpp`; raw text and escapable raw text elements switch the tokenizer's state in the tree builder (reviewed with the parser).
+> The void elements, with those that serialize as void, are `ElementCannotHaveEndTag` in `Editing/Markup/MarkupAccumulator.cpp`; raw text and escapable raw text elements switch the tokenizer's state in the tree builder (reviewed with the parser).
 <!-- definitions: syntax-elements void-elements the-template-element-2 raw-text-elements escapable-raw-text-elements foreign-elements normal-elements syntax-tags syntax-tag-name -->
 
 ##### [13.1.2.1 Start tags](https://html.spec.whatwg.org/#start-tags)

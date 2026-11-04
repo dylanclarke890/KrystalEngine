@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextSpacing.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
@@ -21,6 +20,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
+#include "Krystal.Booey/Text/TextSpacing.hpp"
 #include <cmath>
 
 namespace krys::boo::style

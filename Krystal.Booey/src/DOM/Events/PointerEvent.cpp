@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Debug.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 

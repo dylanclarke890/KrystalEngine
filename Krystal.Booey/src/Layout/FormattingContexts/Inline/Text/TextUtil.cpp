@@ -1,7 +1,4 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
-#include "Krystal.Booey/Core/CharacterProperties.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
-#include "Krystal.Booey/Core/UnicodeHelpers.hpp"
 #include "Krystal.Booey/Graphics/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
@@ -11,6 +8,9 @@
 #include "Krystal.Booey/Rendering/BreakablePositions.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
+#include "Krystal.Booey/Text/CharacterProperties.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
+#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include <cmath>

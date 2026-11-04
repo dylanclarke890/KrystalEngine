@@ -2,13 +2,13 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 
 namespace krys::boo::style
 {

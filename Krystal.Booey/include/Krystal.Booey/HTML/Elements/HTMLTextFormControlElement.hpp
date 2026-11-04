@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 
 namespace krys::boo
 {

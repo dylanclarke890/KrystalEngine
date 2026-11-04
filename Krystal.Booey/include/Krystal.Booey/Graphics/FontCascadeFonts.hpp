@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/FontRanges.hpp"
 #include "Krystal.Booey/Graphics/GlyphPage.hpp"
 #include "Krystal.Booey/Graphics/WidthCache.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"

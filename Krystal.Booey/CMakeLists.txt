@@ -279,57 +279,6 @@ set(KRYSTAL_BOOEY_ANIMATION_SOURCES
   src/Animation/WebAnimationUtilities.cpp
 )
 
-set(KRYSTAL_BOOEY_CORE_HEADERS
-  include/Krystal.Booey/Core/BidiContext.hpp
-  include/Krystal.Booey/Core/BidiResolver.hpp
-  include/Krystal.Booey/Core/BidiRunList.hpp
-  include/Krystal.Booey/Core/BoxExtents.hpp
-  include/Krystal.Booey/Core/BoxSides.hpp
-  include/Krystal.Booey/Core/CharacterProperties.hpp
-  include/Krystal.Booey/Core/DateTimeFormat.hpp
-  include/Krystal.Booey/Core/EncodingRegistry.hpp
-  include/Krystal.Booey/Core/FloatConversion.hpp
-  include/Krystal.Booey/Core/Hyphenation.hpp
-  include/Krystal.Booey/Core/IterationStatus.hpp
-  include/Krystal.Booey/Core/LayoutUnit.hpp
-  include/Krystal.Booey/Core/LocaleICU.hpp
-  include/Krystal.Booey/Core/LocaleToScriptMapping.hpp
-  include/Krystal.Booey/Core/MathExtras.hpp
-  include/Krystal.Booey/Core/NumberFormatting.hpp
-  include/Krystal.Booey/Core/PlatformLocale.hpp
-  include/Krystal.Booey/Core/RectCorners.hpp
-  include/Krystal.Booey/Core/RectEdges.hpp
-  include/Krystal.Booey/Core/ScrollTypes.hpp
-  include/Krystal.Booey/Core/StyleAppearance.hpp
-  include/Krystal.Booey/Core/TextBoundaries.hpp
-  include/Krystal.Booey/Core/TextBreakIterator.hpp
-  include/Krystal.Booey/Core/TextFlags.hpp
-  include/Krystal.Booey/Core/TextSpacing.hpp
-  include/Krystal.Booey/Core/ThemeTypes.hpp
-  include/Krystal.Booey/Core/TouchAction.hpp
-  include/Krystal.Booey/Core/UnicodeBidi.hpp
-  include/Krystal.Booey/Core/UnicodeHelpers.hpp
-  include/Krystal.Booey/Core/WritingMode.hpp
-)
-
-set(KRYSTAL_BOOEY_CORE_SOURCES
-  src/Core/BidiContext.cpp
-  src/Core/DateTimeFormat.cpp
-  src/Core/EncodingRegistry.cpp
-  src/Core/Hyphenation.cpp
-  src/Core/LayoutUnit.cpp
-  src/Core/LocaleICU.cpp
-  src/Core/LocaleToScriptMapping.cpp
-  src/Core/NumberFormatting.cpp
-  src/Core/PlatformLocale.cpp
-  src/Core/StyleAppearance.cpp
-  src/Core/TextBoundaries.cpp
-  src/Core/TextBreakIterator.cpp
-  src/Core/TextFlags.cpp
-  src/Core/TextSpacing.cpp
-  src/Core/UnicodeHelpers.cpp
-)
-
 set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Calc/AllowedSymbols.hpp
   include/Krystal.Booey/CSS/Calc/CalcType.hpp
@@ -426,6 +375,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Parser/TokenSerialisationMode.hpp
   include/Krystal.Booey/CSS/Parser/TokenType.hpp
   include/Krystal.Booey/CSS/Parser/VariableParser.hpp
+  include/Krystal.Booey/CSS/Values/NumberFormatting.hpp
   include/Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Align.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp
@@ -889,6 +839,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/CSSOM/StyleAttributeMutationScope.cpp
   src/CSS/StyleSheets/StyleSheetContents.cpp
   src/CSS/StyleSheets/StyleSheetList.cpp
+  src/CSS/Values/NumberFormatting.cpp
   src/CSS/Values/ToLengthConversionData.cpp
   src/CSS/TypedOM/CSSKeywordValue.cpp
   src/CSS/TypedOM/CSSNumericValue.cpp
@@ -1288,107 +1239,107 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
 )
 
 set(KRYSTAL_BOOEY_EDITING_HEADERS
-  include/Krystal.Booey/Editing/AppendNodeCommand.hpp
-  include/Krystal.Booey/Editing/ApplyStyleCommand.hpp
-  include/Krystal.Booey/Editing/BreakBlockquoteCommand.hpp
   include/Krystal.Booey/Editing/CharacterRange.hpp
-  include/Krystal.Booey/Editing/CompositeEditCommand.hpp
+  include/Krystal.Booey/Editing/Commands/AppendNodeCommand.hpp
+  include/Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp
+  include/Krystal.Booey/Editing/Commands/BreakBlockquoteCommand.hpp
+  include/Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp
+  include/Krystal.Booey/Editing/Commands/DeleteFromTextNodeCommand.hpp
+  include/Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp
+  include/Krystal.Booey/Editing/Commands/EditCommand.hpp
+  include/Krystal.Booey/Editing/Commands/InsertIntoTextNodeCommand.hpp
+  include/Krystal.Booey/Editing/Commands/InsertLineBreakCommand.hpp
+  include/Krystal.Booey/Editing/Commands/InsertNodeBeforeCommand.hpp
+  include/Krystal.Booey/Editing/Commands/InsertParagraphSeparatorCommand.hpp
+  include/Krystal.Booey/Editing/Commands/InsertTextCommand.hpp
+  include/Krystal.Booey/Editing/Commands/MergeIdenticalElementsCommand.hpp
+  include/Krystal.Booey/Editing/Commands/MoveSelectionCommand.hpp
+  include/Krystal.Booey/Editing/Commands/RemoveNodeCommand.hpp
+  include/Krystal.Booey/Editing/Commands/RemoveNodePreservingChildrenCommand.hpp
+  include/Krystal.Booey/Editing/Commands/ReplaceNodeWithSpanCommand.hpp
+  include/Krystal.Booey/Editing/Commands/ReplaceSelectionCommand.hpp
+  include/Krystal.Booey/Editing/Commands/SetNodeAttributeCommand.hpp
+  include/Krystal.Booey/Editing/Commands/SimplifyMarkupCommand.hpp
+  include/Krystal.Booey/Editing/Commands/SplitElementCommand.hpp
+  include/Krystal.Booey/Editing/Commands/SplitTextNodeCommand.hpp
+  include/Krystal.Booey/Editing/Commands/SplitTextNodeContainingElementCommand.hpp
+  include/Krystal.Booey/Editing/Commands/TextInsertionBaseCommand.hpp
+  include/Krystal.Booey/Editing/Commands/TypingCommand.hpp
+  include/Krystal.Booey/Editing/Commands/UndoStep.hpp
+  include/Krystal.Booey/Editing/Commands/WrapContentsInDummySpanCommand.hpp
   include/Krystal.Booey/Editing/CompositionHighlight.hpp
   include/Krystal.Booey/Editing/CompositionUnderline.hpp
-  include/Krystal.Booey/Editing/DeleteFromTextNodeCommand.hpp
-  include/Krystal.Booey/Editing/DeleteSelectionCommand.hpp
   include/Krystal.Booey/Editing/EditAction.hpp
-  include/Krystal.Booey/Editing/EditCommand.hpp
   include/Krystal.Booey/Editing/Editing.hpp
   include/Krystal.Booey/Editing/EditingBehavior.hpp
-  include/Krystal.Booey/Editing/EditingBoundary.hpp
   include/Krystal.Booey/Editing/EditingStyle.hpp
   include/Krystal.Booey/Editing/Editor.hpp
-  include/Krystal.Booey/Editing/FrameSelection.hpp
-  include/Krystal.Booey/Editing/HTMLInterchange.hpp
-  include/Krystal.Booey/Editing/InlineRunAndOffset.hpp
-  include/Krystal.Booey/Editing/InsertIntoTextNodeCommand.hpp
-  include/Krystal.Booey/Editing/InsertLineBreakCommand.hpp
-  include/Krystal.Booey/Editing/InsertNodeBeforeCommand.hpp
-  include/Krystal.Booey/Editing/InsertParagraphSeparatorCommand.hpp
-  include/Krystal.Booey/Editing/InsertTextCommand.hpp
-  include/Krystal.Booey/Editing/Markup.hpp
-  include/Krystal.Booey/Editing/MarkupAccumulator.hpp
-  include/Krystal.Booey/Editing/MergeIdenticalElementsCommand.hpp
-  include/Krystal.Booey/Editing/MoveSelectionCommand.hpp
-  include/Krystal.Booey/Editing/PasteboardFileListReader.hpp
-  include/Krystal.Booey/Editing/RemoveNodeCommand.hpp
-  include/Krystal.Booey/Editing/RemoveNodePreservingChildrenCommand.hpp
-  include/Krystal.Booey/Editing/RenderedPosition.hpp
-  include/Krystal.Booey/Editing/ReplaceNodeWithSpanCommand.hpp
-  include/Krystal.Booey/Editing/ReplaceSelectionCommand.hpp
-  include/Krystal.Booey/Editing/SetNodeAttributeCommand.hpp
-  include/Krystal.Booey/Editing/SimplifyMarkupCommand.hpp
+  include/Krystal.Booey/Editing/Markup/HTMLInterchange.hpp
+  include/Krystal.Booey/Editing/Markup/Markup.hpp
+  include/Krystal.Booey/Editing/Markup/MarkupAccumulator.hpp
+  include/Krystal.Booey/Editing/Markup/PasteboardFileListReader.hpp
+  include/Krystal.Booey/Editing/Markup/WebContentReader.hpp
+  include/Krystal.Booey/Editing/Selection/EditingBoundary.hpp
+  include/Krystal.Booey/Editing/Selection/FrameSelection.hpp
+  include/Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp
+  include/Krystal.Booey/Editing/Selection/RenderedPosition.hpp
+  include/Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp
+  include/Krystal.Booey/Editing/Selection/TextAffinity.hpp
+  include/Krystal.Booey/Editing/Selection/TextGranularity.hpp
+  include/Krystal.Booey/Editing/Selection/VisiblePosition.hpp
+  include/Krystal.Booey/Editing/Selection/VisibleSelection.hpp
+  include/Krystal.Booey/Editing/Selection/VisibleUnits.hpp
   include/Krystal.Booey/Editing/SmartReplace.hpp
-  include/Krystal.Booey/Editing/SplitElementCommand.hpp
-  include/Krystal.Booey/Editing/SplitTextNodeCommand.hpp
-  include/Krystal.Booey/Editing/SplitTextNodeContainingElementCommand.hpp
-  include/Krystal.Booey/Editing/TemporarySelectionChange.hpp
-  include/Krystal.Booey/Editing/TextAffinity.hpp
-  include/Krystal.Booey/Editing/TextGranularity.hpp
-  include/Krystal.Booey/Editing/TextInsertionBaseCommand.hpp
   include/Krystal.Booey/Editing/TextIterator.hpp
   include/Krystal.Booey/Editing/TextIteratorBehavior.hpp
-  include/Krystal.Booey/Editing/TypingCommand.hpp
-  include/Krystal.Booey/Editing/UndoStep.hpp
-  include/Krystal.Booey/Editing/VisiblePosition.hpp
-  include/Krystal.Booey/Editing/VisibleSelection.hpp
-  include/Krystal.Booey/Editing/VisibleUnits.hpp
-  include/Krystal.Booey/Editing/WebContentReader.hpp
-  include/Krystal.Booey/Editing/WrapContentsInDummySpanCommand.hpp
   include/Krystal.Booey/Editing/WritingDirection.hpp
 )
 
 set(KRYSTAL_BOOEY_EDITING_SOURCES
-  src/Editing/AppendNodeCommand.cpp
-  src/Editing/ApplyStyleCommand.cpp
-  src/Editing/BreakBlockquoteCommand.cpp
-  src/Editing/CompositeEditCommand.cpp
-  src/Editing/DeleteFromTextNodeCommand.cpp
-  src/Editing/DeleteSelectionCommand.cpp
+  src/Editing/Commands/AppendNodeCommand.cpp
+  src/Editing/Commands/ApplyStyleCommand.cpp
+  src/Editing/Commands/BreakBlockquoteCommand.cpp
+  src/Editing/Commands/CompositeEditCommand.cpp
+  src/Editing/Commands/DeleteFromTextNodeCommand.cpp
+  src/Editing/Commands/DeleteSelectionCommand.cpp
+  src/Editing/Commands/EditCommand.cpp
+  src/Editing/Commands/InsertIntoTextNodeCommand.cpp
+  src/Editing/Commands/InsertLineBreakCommand.cpp
+  src/Editing/Commands/InsertNodeBeforeCommand.cpp
+  src/Editing/Commands/InsertParagraphSeparatorCommand.cpp
+  src/Editing/Commands/InsertTextCommand.cpp
+  src/Editing/Commands/MergeIdenticalElementsCommand.cpp
+  src/Editing/Commands/MoveSelectionCommand.cpp
+  src/Editing/Commands/RemoveNodeCommand.cpp
+  src/Editing/Commands/RemoveNodePreservingChildrenCommand.cpp
+  src/Editing/Commands/ReplaceNodeWithSpanCommand.cpp
+  src/Editing/Commands/ReplaceSelectionCommand.cpp
+  src/Editing/Commands/SetNodeAttributeCommand.cpp
+  src/Editing/Commands/SimplifyMarkupCommand.cpp
+  src/Editing/Commands/SplitElementCommand.cpp
+  src/Editing/Commands/SplitTextNodeCommand.cpp
+  src/Editing/Commands/SplitTextNodeContainingElementCommand.cpp
+  src/Editing/Commands/TextInsertionBaseCommand.cpp
+  src/Editing/Commands/TypingCommand.cpp
+  src/Editing/Commands/WrapContentsInDummySpanCommand.cpp
   src/Editing/EditAction.cpp
-  src/Editing/EditCommand.cpp
   src/Editing/Editing.cpp
   src/Editing/EditingStyle.cpp
   src/Editing/Editor.cpp
   src/Editing/EditorCommand.cpp
-  src/Editing/FrameSelection.cpp
-  src/Editing/HTMLInterchange.cpp
-  src/Editing/InsertIntoTextNodeCommand.cpp
-  src/Editing/InsertLineBreakCommand.cpp
-  src/Editing/InsertNodeBeforeCommand.cpp
-  src/Editing/InsertParagraphSeparatorCommand.cpp
-  src/Editing/InsertTextCommand.cpp
-  src/Editing/Markup.cpp
-  src/Editing/MarkupAccumulator.cpp
-  src/Editing/MergeIdenticalElementsCommand.cpp
-  src/Editing/MoveSelectionCommand.cpp
-  src/Editing/PasteboardFileListReader.cpp
-  src/Editing/RemoveNodeCommand.cpp
-  src/Editing/RemoveNodePreservingChildrenCommand.cpp
-  src/Editing/RenderedPosition.cpp
-  src/Editing/ReplaceNodeWithSpanCommand.cpp
-  src/Editing/ReplaceSelectionCommand.cpp
-  src/Editing/SetNodeAttributeCommand.cpp
-  src/Editing/SimplifyMarkupCommand.cpp
+  src/Editing/Markup/HTMLInterchange.cpp
+  src/Editing/Markup/Markup.cpp
+  src/Editing/Markup/MarkupAccumulator.cpp
+  src/Editing/Markup/PasteboardFileListReader.cpp
+  src/Editing/Markup/WebContentReader.cpp
+  src/Editing/Selection/FrameSelection.cpp
+  src/Editing/Selection/RenderedPosition.cpp
+  src/Editing/Selection/TemporarySelectionChange.cpp
+  src/Editing/Selection/VisiblePosition.cpp
+  src/Editing/Selection/VisibleSelection.cpp
+  src/Editing/Selection/VisibleUnits.cpp
   src/Editing/SmartReplace.cpp
-  src/Editing/SplitElementCommand.cpp
-  src/Editing/SplitTextNodeCommand.cpp
-  src/Editing/SplitTextNodeContainingElementCommand.cpp
-  src/Editing/TemporarySelectionChange.cpp
-  src/Editing/TextInsertionBaseCommand.cpp
   src/Editing/TextIterator.cpp
-  src/Editing/TypingCommand.cpp
-  src/Editing/VisiblePosition.cpp
-  src/Editing/VisibleSelection.cpp
-  src/Editing/VisibleUnits.cpp
-  src/Editing/WebContentReader.cpp
-  src/Editing/WrapContentsInDummySpanCommand.cpp
 )
 
 set(KRYSTAL_BOOEY_FILEAPI_HEADERS
@@ -1423,6 +1374,8 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/BitmapImage.hpp
   include/Krystal.Booey/Graphics/BitmapImageDescriptor.hpp
   include/Krystal.Booey/Graphics/BitmapImageSource.hpp
+  include/Krystal.Booey/Graphics/BoxExtents.hpp
+  include/Krystal.Booey/Graphics/BoxSides.hpp
   include/Krystal.Booey/Graphics/ByteArrayPixelBuffer.hpp
   include/Krystal.Booey/Graphics/Color/Color.hpp
   include/Krystal.Booey/Graphics/Color/ColorBlending.hpp
@@ -1584,6 +1537,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/LayoutRect.hpp
   include/Krystal.Booey/Graphics/LayoutRoundedRect.hpp
   include/Krystal.Booey/Graphics/LayoutSize.hpp
+  include/Krystal.Booey/Graphics/LayoutUnit.hpp
   include/Krystal.Booey/Graphics/NativeImage.hpp
   include/Krystal.Booey/Graphics/NativeImageSource.hpp
   include/Krystal.Booey/Graphics/NullGraphicsContext.hpp
@@ -1603,6 +1557,8 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/PlatformDynamicRangeLimit.hpp
   include/Krystal.Booey/Graphics/PlatformImage.hpp
   include/Krystal.Booey/Graphics/PlatformLayerIdentifier.hpp
+  include/Krystal.Booey/Graphics/RectCorners.hpp
+  include/Krystal.Booey/Graphics/RectEdges.hpp
   include/Krystal.Booey/Graphics/Region.hpp
   include/Krystal.Booey/Graphics/RenderingMode.hpp
   include/Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp
@@ -1767,6 +1723,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/LayoutRect.cpp
   src/Graphics/LayoutRoundedRect.cpp
   src/Graphics/LayoutSize.cpp
+  src/Graphics/LayoutUnit.cpp
   src/Graphics/NativeImage.cpp
   src/Graphics/NativeImageSource.cpp
   src/Graphics/OpenType/OpenTypeMathData.cpp
@@ -2630,6 +2587,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/DateTimeChooser.hpp
   include/Krystal.Booey/Platform/DateTimeChooserClient.hpp
   include/Krystal.Booey/Platform/DateTimeChooserParameters.hpp
+  include/Krystal.Booey/Platform/DateTimeFormat.hpp
   include/Krystal.Booey/Platform/Decimal.hpp
   include/Krystal.Booey/Platform/DragData.hpp
   include/Krystal.Booey/Platform/DragImage.hpp
@@ -2650,6 +2608,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp
   include/Krystal.Booey/Platform/ImageDecoders/WEBPImageDecoder.hpp
   include/Krystal.Booey/Platform/Language.hpp
+  include/Krystal.Booey/Platform/LocaleICU.hpp
   include/Krystal.Booey/Platform/LocalizedStrings.hpp
   include/Krystal.Booey/Platform/MIMETypeRegistry.hpp
   include/Krystal.Booey/Platform/Network/BlobData.hpp
@@ -2665,6 +2624,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/PathStrokeStrategy.hpp
   include/Krystal.Booey/Platform/PlatformEvent.hpp
   include/Krystal.Booey/Platform/PlatformKeyboardEvent.hpp
+  include/Krystal.Booey/Platform/PlatformLocale.hpp
   include/Krystal.Booey/Platform/PlatformMouseEvent.hpp
   include/Krystal.Booey/Platform/PlatformStrategies.hpp
   include/Krystal.Booey/Platform/PlatformTouchEvent.hpp
@@ -2680,12 +2640,14 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/ScrollbarTheme.hpp
   include/Krystal.Booey/Platform/ScrollbarThemeAdwaita.hpp
   include/Krystal.Booey/Platform/ScrollbarThemeComposite.hpp
+  include/Krystal.Booey/Platform/ScrollTypes.hpp
   include/Krystal.Booey/Platform/SelectionData.hpp
   include/Krystal.Booey/Platform/SharedBuffer.hpp
   include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
   include/Krystal.Booey/Platform/StaticPasteboard.hpp
   include/Krystal.Booey/Platform/Theme.hpp
   include/Krystal.Booey/Platform/ThemeAdwaita.hpp
+  include/Krystal.Booey/Platform/ThemeTypes.hpp
   include/Krystal.Booey/Platform/ThreadTimers.hpp
   include/Krystal.Booey/Platform/Timer.hpp
   include/Krystal.Booey/Platform/WindowsKeyboardCodes.hpp
@@ -2694,6 +2656,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
 set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/CaretAnimator.cpp
   src/Platform/DateComponents.cpp
+  src/Platform/DateTimeFormat.cpp
   src/Platform/Decimal.cpp
   src/Platform/DragData.cpp
   src/Platform/DragImage.cpp
@@ -2710,6 +2673,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/ImageDecoders/ScalableImageDecoderFrame.cpp
   src/Platform/ImageDecoders/WEBPImageDecoder.cpp
   src/Platform/Language.cpp
+  src/Platform/LocaleICU.cpp
   src/Platform/LocalizedStrings.cpp
   src/Platform/MIMETypeRegistry.cpp
   src/Platform/Network/BlobData.cpp
@@ -2718,6 +2682,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Network/FormDataBuilder.cpp
   src/Platform/Pasteboard.cpp
   src/Platform/PasteboardCustomData.cpp
+  src/Platform/PlatformLocale.cpp
   src/Platform/PlatformStrategies.cpp
   src/Platform/ScrollableArea.cpp
   src/Platform/ScrollAlignment.cpp
@@ -3359,7 +3324,9 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/ScopeRuleSets.hpp
   include/Krystal.Booey/Style/SelectorMatchingState.hpp
   include/Krystal.Booey/Style/Styleable.hpp
+  include/Krystal.Booey/Style/StyleAppearance.hpp
   include/Krystal.Booey/Style/StyleSheetContentsCache.hpp
+  include/Krystal.Booey/Style/TouchAction.hpp
   include/Krystal.Booey/Style/TransformResolver.hpp
   include/Krystal.Booey/Style/TreeResolutionState.hpp
   include/Krystal.Booey/Style/TreeResolver.hpp
@@ -3725,6 +3692,7 @@ set(KRYSTAL_BOOEY_STYLE_SOURCES
   src/Style/ScopedName.cpp
   src/Style/ScopeRuleSets.cpp
   src/Style/Styleable.cpp
+  src/Style/StyleAppearance.cpp
   src/Style/StyleSheetContentsCache.cpp
   src/Style/TransformResolver.cpp
   src/Style/TreeResolver.cpp
@@ -4137,6 +4105,23 @@ set(KRYSTAL_BOOEY_SVG_HEADERS
   include/Krystal.Booey/SVG/SVGZoomAndPanType.hpp
 )
 
+set(KRYSTAL_BOOEY_TEXT_HEADERS
+  include/Krystal.Booey/Text/BidiContext.hpp
+  include/Krystal.Booey/Text/BidiResolver.hpp
+  include/Krystal.Booey/Text/BidiRunList.hpp
+  include/Krystal.Booey/Text/CharacterProperties.hpp
+  include/Krystal.Booey/Text/EncodingRegistry.hpp
+  include/Krystal.Booey/Text/Hyphenation.hpp
+  include/Krystal.Booey/Text/LocaleToScriptMapping.hpp
+  include/Krystal.Booey/Text/TextBoundaries.hpp
+  include/Krystal.Booey/Text/TextBreakIterator.hpp
+  include/Krystal.Booey/Text/TextFlags.hpp
+  include/Krystal.Booey/Text/TextSpacing.hpp
+  include/Krystal.Booey/Text/UnicodeBidi.hpp
+  include/Krystal.Booey/Text/UnicodeHelpers.hpp
+  include/Krystal.Booey/Text/WritingMode.hpp
+)
+
 set(KRYSTAL_BOOEY_SVG_SOURCES
   src/SVG/Animation/SMILTime.cpp
   src/SVG/Animation/SMILTimeContainer.cpp
@@ -4257,6 +4242,18 @@ set(KRYSTAL_BOOEY_SVG_SOURCES
   src/SVG/SVGZoomAndPan.cpp
 )
 
+set(KRYSTAL_BOOEY_TEXT_SOURCES
+  src/Text/BidiContext.cpp
+  src/Text/EncodingRegistry.cpp
+  src/Text/Hyphenation.cpp
+  src/Text/LocaleToScriptMapping.cpp
+  src/Text/TextBoundaries.cpp
+  src/Text/TextBreakIterator.cpp
+  src/Text/TextFlags.cpp
+  src/Text/TextSpacing.cpp
+  src/Text/UnicodeHelpers.cpp
+)
+
 set(KRYSTAL_BOOEY_TYPES_HEADERS
   include/Krystal.Booey/Types/IsEOF.hpp
   include/Krystal.Booey/Types/NestingLevelIncrementer.hpp
@@ -4353,7 +4350,6 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_GENERATED_HEADERS}
       ${KRYSTAL_BOOEY_BUNDLED_FONTS_HEADERS}
       ${KRYSTAL_BOOEY_ANIMATION_HEADERS}
-      ${KRYSTAL_BOOEY_CORE_HEADERS}
       ${KRYSTAL_BOOEY_CSS_HEADERS}
       ${KRYSTAL_BOOEY_DOM_HEADERS}
       ${KRYSTAL_BOOEY_EDITING_HEADERS}
@@ -4372,6 +4368,7 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_RENDERING_HEADERS}
       ${KRYSTAL_BOOEY_STYLE_HEADERS}
       ${KRYSTAL_BOOEY_SVG_HEADERS}
+      ${KRYSTAL_BOOEY_TEXT_HEADERS}
       ${KRYSTAL_BOOEY_TYPES_HEADERS}
       ${KRYSTAL_BOOEY_URL_HEADERS}
       ${KRYSTAL_BOOEY_XML_HEADERS}
@@ -4379,7 +4376,6 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_GENERATED_SOURCES}
     ${KRYSTAL_BOOEY_BUNDLED_FONTS_SOURCES}
     ${KRYSTAL_BOOEY_ANIMATION_SOURCES}
-    ${KRYSTAL_BOOEY_CORE_SOURCES}
     ${KRYSTAL_BOOEY_CSS_SOURCES}
     ${KRYSTAL_BOOEY_DOM_SOURCES}
     ${KRYSTAL_BOOEY_EDITING_SOURCES}
@@ -4396,6 +4392,7 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_RENDERING_SOURCES}
     ${KRYSTAL_BOOEY_STYLE_SOURCES}
     ${KRYSTAL_BOOEY_SVG_SOURCES}
+    ${KRYSTAL_BOOEY_TEXT_SOURCES}
     ${KRYSTAL_BOOEY_URL_SOURCES}
     ${KRYSTAL_BOOEY_XML_SOURCES}
 )

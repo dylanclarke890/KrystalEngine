@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include <algorithm>
 
@@ -429,6 +429,9 @@ namespace krys::boo
     c.Expand(b);
     return c;
   }
+
+  // Keeps the scalar overloads visible alongside this one.
+  using krys::AreEssentiallyEqual;
 
   KRYS_NODISCARD inline bool AreEssentiallyEqual(const FloatRect &a, const FloatRect &b) noexcept
   {

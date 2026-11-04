@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Transforms/PerspectiveTransformOperation.hpp"
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
 namespace krys::boo

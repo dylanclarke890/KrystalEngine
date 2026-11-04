@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
 #include "Krystal.Booey/Style/Calc/Tree.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"

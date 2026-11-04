@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/InputType.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -38,6 +37,7 @@
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include <array>

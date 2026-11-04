@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
-#include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlStyle.hpp"
 #include "Krystal.Booey/Graphics/DashArray.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItem.hpp"
@@ -13,6 +11,8 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
 namespace krys::boo::display_list

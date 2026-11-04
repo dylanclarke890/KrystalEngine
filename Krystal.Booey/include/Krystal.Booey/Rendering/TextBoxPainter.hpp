@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
@@ -12,6 +11,7 @@
 #include "Krystal.Booey/Rendering/TextBoxSelectableRange.hpp"
 #include "Krystal.Booey/Rendering/TextDecorationPainter.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 
 namespace krys::boo
 {

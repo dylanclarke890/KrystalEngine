@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayBox.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineTypes.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

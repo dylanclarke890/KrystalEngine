@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyFlag.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImplicit.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsSetFromShorthand.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"

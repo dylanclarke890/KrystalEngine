@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/FontPlatformData.hpp"
@@ -9,6 +8,7 @@
 #include "Krystal.Booey/Graphics/GlyphPage.hpp"
 #include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"

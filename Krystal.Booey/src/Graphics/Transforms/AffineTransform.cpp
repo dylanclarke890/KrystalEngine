@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include <cmath>
 #include <numbers>

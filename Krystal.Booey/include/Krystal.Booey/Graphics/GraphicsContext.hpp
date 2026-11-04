@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/DashArray.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FloatSegment.hpp"
@@ -12,6 +11,7 @@
 #include "Krystal.Booey/Graphics/ImagePaintingOptions.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"

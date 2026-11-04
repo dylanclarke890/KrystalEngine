@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/PlatformDynamicRangeLimit.hpp"
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
 namespace krys::boo

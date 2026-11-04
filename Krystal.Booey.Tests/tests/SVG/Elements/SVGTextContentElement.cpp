@@ -3,7 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Booey/SVG/SVGPoint.hpp"

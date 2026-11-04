@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include <algorithm>
 #include <cmath>

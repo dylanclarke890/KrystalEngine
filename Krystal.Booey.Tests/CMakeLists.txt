@@ -99,10 +99,6 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/Style/ResolverTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
-		# Core
-		tests/Core/LayoutUnit.cpp
-		tests/Core/NumberFormatting.cpp
-
 		# CSS
 		tests/CSS/CSSOM/CSSContainerRule.cpp
 		tests/CSS/CSSOM/CSSCounterStyleRule.cpp
@@ -305,10 +301,12 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Selectors/SelectorParser.cpp
 		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
 		tests/CSS/Selectors/UserAgentParts.cpp
+		tests/CSS/Values/NumberFormatting.cpp
 		tests/CSS/Values/PrimitiveValueMappings.cpp
 		tests/CSS/StyleSheets/StyleSheetContents.cpp
 
 		# Graphics
+		tests/Graphics/LayoutUnit.cpp
 		tests/Graphics/WOFFFileFormat.cpp
 		tests/Graphics/DoublePoint.cpp
 		tests/Graphics/FloatPoint.cpp
@@ -365,12 +363,12 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/Quaternion.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Graphics/Transforms/TransformationMatrix.cpp
-		tests/Core/DateTimeFormat.cpp
-		tests/Core/LocaleICU.cpp
-		tests/Core/LocaleToScriptMapping.cpp
-		tests/Core/TextBreakIterator.cpp
-		tests/Core/TextFlags.cpp
-		tests/Core/TextSpacing.cpp
+		tests/Platform/DateTimeFormat.cpp
+		tests/Platform/LocaleICU.cpp
+		tests/Text/LocaleToScriptMapping.cpp
+		tests/Text/TextBreakIterator.cpp
+		tests/Text/TextFlags.cpp
+		tests/Text/TextSpacing.cpp
 		tests/Rendering/Style/GridSpan.cpp
 		tests/Rendering/Style/RenderStyleConstants.cpp
 
@@ -691,17 +689,17 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/MutationObservers/MutationRecord.cpp
 		tests/DOM/NodeLifetime.cpp
 		tests/DOM/TopLayer.cpp
-		tests/Editing/TextIterator.cpp
-		tests/Editing/VisiblePosition.cpp
-		tests/Editing/VisibleSelection.cpp
-		tests/Editing/ApplyStyleCommand.cpp
+		tests/Editing/Commands/ApplyStyleCommand.cpp
+		tests/Editing/Commands/TypingCommand.cpp
 		tests/Editing/Composition.cpp
 		tests/Editing/Editor.cpp
-		tests/Editing/Markup.cpp
-		tests/Editing/TypingCommand.cpp
-		tests/Editing/FrameSelection.cpp
+		tests/Editing/Markup/Markup.cpp
+		tests/Editing/Selection/FrameSelection.cpp
+		tests/Editing/Selection/VisiblePosition.cpp
+		tests/Editing/Selection/VisibleSelection.cpp
+		tests/Editing/TextIterator.cpp
 		tests/Rendering/RenderSelection.cpp
-		tests/Editing/VisibleUnits.cpp
+		tests/Editing/Selection/VisibleUnits.cpp
 		tests/DOM/Traversal/NodeFilter.cpp
 		tests/DOM/Traversal/NodeIterator.cpp
 		tests/DOM/Traversal/TreeWalker.cpp

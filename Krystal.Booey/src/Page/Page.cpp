@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/History/BackForwardCache.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/History/BackForwardList.hpp"

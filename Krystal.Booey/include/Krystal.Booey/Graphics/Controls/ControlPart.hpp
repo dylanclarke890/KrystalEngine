@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlFactory.hpp"
 #include "Krystal.Booey/Graphics/Controls/PlatformControl.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"

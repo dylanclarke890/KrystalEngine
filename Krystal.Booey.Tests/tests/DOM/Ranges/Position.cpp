@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/PositionIterator.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Booey/Editing/InlineRunAndOffset.hpp"
+#include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 
 namespace krys::boo::dom::tests

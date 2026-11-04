@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Core/BidiResolver.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/Graphics/TextRunIterator.hpp"
+#include "Krystal.Booey/Text/BidiResolver.hpp"
 #include <cmath>
 
 namespace krys::boo

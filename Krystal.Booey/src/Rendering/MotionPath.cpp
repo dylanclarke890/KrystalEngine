@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Values/Motion/OffsetPath.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 

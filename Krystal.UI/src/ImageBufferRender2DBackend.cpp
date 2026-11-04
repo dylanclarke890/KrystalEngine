@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/PixelBuffer.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Gfx/CommandBuffer.hpp"
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"

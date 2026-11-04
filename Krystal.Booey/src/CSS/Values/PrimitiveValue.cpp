@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/Core/FloatConversion.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/RectEdges.hpp"
 #include "Krystal.Booey/Graphics/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/RectEdges.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo

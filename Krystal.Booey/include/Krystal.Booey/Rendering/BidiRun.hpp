@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BidiResolver.hpp"
+#include "Krystal.Booey/Text/BidiResolver.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 
 namespace krys::boo

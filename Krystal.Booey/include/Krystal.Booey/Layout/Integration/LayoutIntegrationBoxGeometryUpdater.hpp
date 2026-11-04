@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineTypes.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"

@@ -1,6 +1,4 @@
 ﻿#include "Krystal.Booey/Rendering/RenderMenuList.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
-#include "Krystal.Booey/Core/UnicodeHelpers.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
@@ -19,6 +17,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
+#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
 #include <cmath>
 
 namespace krys::boo

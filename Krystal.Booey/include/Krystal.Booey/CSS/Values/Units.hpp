@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Values/UnitCategory.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 
 namespace krys::boo::css
 {

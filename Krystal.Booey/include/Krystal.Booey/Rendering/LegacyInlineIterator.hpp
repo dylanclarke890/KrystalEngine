@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/Rendering/BidiRun.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <limits>

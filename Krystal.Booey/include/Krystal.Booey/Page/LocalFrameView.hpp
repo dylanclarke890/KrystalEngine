@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Graphics/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
@@ -12,6 +11,7 @@
 #include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollableArea.hpp"
+#include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/Pagination.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"

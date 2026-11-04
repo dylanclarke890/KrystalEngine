@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/TimeInputType.hpp"
-#include "Krystal.Booey/Core/PlatformLocale.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/DateTimeFieldsState.hpp"
+#include "Krystal.Booey/Platform/PlatformLocale.hpp"
 #include <cmath>
 
 namespace krys::boo::html

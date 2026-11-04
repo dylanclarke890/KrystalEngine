@@ -236,7 +236,7 @@ Status: reviewed (2026-11-01)
 #### [8.5.4 The innerHTML property](https://html.spec.whatwg.org/#the-innerhtml-property)
 
 Status: reviewed (2026-11-01)
-> The fragment parsing and serializing algorithm steps (`HTMLInsertionAlgorithms.cpp`, `Editing/Markup.cpp`); `innerHTML` follows the existing markup code (see `DIFFERENCES.md`).
+> The fragment parsing and serializing algorithm steps (`HTMLInsertionAlgorithms.cpp`, `Editing/Markup/Markup.cpp`); `innerHTML` follows the existing markup code (see `DIFFERENCES.md`).
 <!-- definitions: fragment-parser-mode fragment-parser-mode-safe fragment-parser-mode-unsafe fragment-parser-mode-legacy -->
 
 - [x] [fragment serializing algorithm steps](https://html.spec.whatwg.org/#fragment-serializing-algorithm-steps) — The fragment serializing algorithm steps, given an Element, Document, or DocumentFragment node and a boolean require well-formed, are:

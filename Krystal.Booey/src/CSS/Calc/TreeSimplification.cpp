@@ -14,7 +14,7 @@
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>

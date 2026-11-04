@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/FontRanges.hpp"
-#include "Krystal.Booey/Core/CharacterProperties.hpp"
+#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo

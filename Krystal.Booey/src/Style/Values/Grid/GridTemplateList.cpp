@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Style/Values/Grid/GridPosition.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 
 namespace krys::boo::style
 {

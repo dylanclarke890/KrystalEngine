@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentConstrainer.hpp"
-#include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
@@ -7,6 +6,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 #include <ranges>

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextBreakIterator.hpp"
+#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"

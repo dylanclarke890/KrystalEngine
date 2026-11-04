@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/FontBaseline.hpp"
 #include "Krystal.Booey/Layout/Floats/FloatingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Block/BlockLayoutState.hpp"
@@ -9,6 +8,7 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineTypes.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/LineLayoutResult.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <compare>
 

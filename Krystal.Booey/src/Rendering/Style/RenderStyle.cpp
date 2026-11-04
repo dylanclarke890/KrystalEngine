@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Style/Values/Text/TextTransform.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>
 

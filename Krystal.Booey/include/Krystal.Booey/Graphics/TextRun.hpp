@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextFlags.hpp"
-#include "Krystal.Booey/Core/TextSpacing.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/TabSize.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
+#include "Krystal.Booey/Text/TextSpacing.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"

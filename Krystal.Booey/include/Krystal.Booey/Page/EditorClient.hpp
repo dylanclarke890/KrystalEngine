@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
-#include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

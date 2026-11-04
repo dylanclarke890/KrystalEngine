@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Events/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/RectEdges.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/Graphics/RectEdges.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css

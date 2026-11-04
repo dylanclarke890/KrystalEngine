@@ -1,15 +1,15 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextFlags.hpp"
-#include "Krystal.Booey/Core/TextSpacing.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/Graphics/FontPalette.hpp"
 #include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
 #include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
+#include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/StringAtom.hpp"

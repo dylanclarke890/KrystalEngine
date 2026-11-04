@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
-#include "Krystal.Booey/Core/NumberFormatting.hpp"
+#include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
 #include "Krystal.Booey/Graphics/SpringSolver.hpp"
 #include "Krystal.Booey/Graphics/UnitBezier.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"

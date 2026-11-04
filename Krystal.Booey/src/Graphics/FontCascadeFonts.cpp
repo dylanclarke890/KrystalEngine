@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Graphics/FontCascadeFonts.hpp"
-#include "Krystal.Booey/Core/CharacterProperties.hpp"
 #include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/FontSelector.hpp"
+#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <unicode/utf8.h>
 

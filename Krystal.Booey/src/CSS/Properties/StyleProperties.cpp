@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
-#include "Krystal.Booey/Core/IterationStatus.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
@@ -15,6 +14,7 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Core/Types/IterationStatus.hpp"
 #include <bitset>
 #include <print>
 
