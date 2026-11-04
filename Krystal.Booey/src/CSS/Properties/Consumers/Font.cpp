@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
@@ -162,35 +162,35 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       case ValueId::Serif:
       {
-        return WebKitFontFamilyNames::SerifFamily();
+        return GenericFontFamilyNames::SerifFamily();
       }
       case ValueId::SansSerif:
       {
-        return WebKitFontFamilyNames::SansSerifFamily();
+        return GenericFontFamilyNames::SansSerifFamily();
       }
       case ValueId::Cursive:
       {
-        return WebKitFontFamilyNames::CursiveFamily();
+        return GenericFontFamilyNames::CursiveFamily();
       }
       case ValueId::Fantasy:
       {
-        return WebKitFontFamilyNames::FantasyFamily();
+        return GenericFontFamilyNames::FantasyFamily();
       }
       case ValueId::Monospace:
       {
-        return WebKitFontFamilyNames::MonospaceFamily();
+        return GenericFontFamilyNames::MonospaceFamily();
       }
       case ValueId::WebkitPictograph:
       {
-        return WebKitFontFamilyNames::PictographFamily();
+        return GenericFontFamilyNames::PictographFamily();
       }
       case ValueId::SystemUi:
       {
-        return WebKitFontFamilyNames::SystemUiFamily();
+        return GenericFontFamilyNames::SystemUiFamily();
       }
       case ValueId::Math:
       {
-        return WebKitFontFamilyNames::MathFamily();
+        return GenericFontFamilyNames::MathFamily();
       }
       default:
       {
@@ -199,46 +199,46 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  WebKitFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept
+  GenericFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept
   {
     switch (ident)
     {
       case ValueId::Serif:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::SerifFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::SerifFamily;
       }
       case ValueId::SansSerif:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::SansSerifFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::SansSerifFamily;
       }
       case ValueId::Cursive:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::CursiveFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::CursiveFamily;
       }
       case ValueId::Fantasy:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::FantasyFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::FantasyFamily;
       }
       case ValueId::Monospace:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::MonospaceFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::MonospaceFamily;
       }
       case ValueId::WebkitPictograph:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::PictographFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::PictographFamily;
       }
       case ValueId::SystemUi:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::SystemUiFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::SystemUiFamily;
       }
       case ValueId::Math:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::MathFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::MathFamily;
       }
       default:
       {
         krys_debug_assert(false);
-        return WebKitFontFamilyNames::FamilyNamesIndex::StandardFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::StandardFamily;
       }
     }
   }

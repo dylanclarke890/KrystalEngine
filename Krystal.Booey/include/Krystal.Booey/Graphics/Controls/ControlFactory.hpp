@@ -17,7 +17,6 @@ namespace krys::boo
   class ProgressBarPart;
   class SearchFieldCancelButtonPart;
   class SearchFieldPart;
-  class SearchFieldResultsPart;
   class SliderThumbPart;
   class SliderTrackPart;
   class TextAreaPart;
@@ -52,8 +51,6 @@ namespace krys::boo
       CreatePlatformSearchField(SearchFieldPart &) noexcept = 0;
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformSearchFieldCancelButton(SearchFieldCancelButtonPart &) noexcept = 0;
-    KRYS_NODISCARD virtual UniquePtr<PlatformControl>
-      CreatePlatformSearchFieldResults(SearchFieldResultsPart &) noexcept = 0;
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformSliderThumb(SliderThumbPart &) noexcept = 0;
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>

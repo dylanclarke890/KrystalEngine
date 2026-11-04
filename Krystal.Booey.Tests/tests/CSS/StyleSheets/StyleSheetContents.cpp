@@ -359,13 +359,11 @@ namespace krys::boo::css::tests
     auto rule = CreateStyleRule(u8".a", u8"color: red");
     sheet->ParserAppendRule(Ref<Rule>(rule));
     sheet->ParserSetEncodingFromCharsetRule(u8"utf-8");
-    sheet->ParserSetUsesStyleBasedEditability();
     sheet->CheckLoaded();
 
     auto copy = sheet->Copy();
     CHECK(copy->RuleCount() == 2);
     CHECK(copy->LoadCompleted());
-    CHECK(copy->UsesStyleBasedEditability());
     CHECK(copy->EncodingFromCharsetRule() == u8"utf-8");
     CHECK(copy->ChildRules()[0].get() != rule.get());
     CHECK(copy->LayerRulesBeforeImportRules()[0].get() != sheet->LayerRulesBeforeImportRules()[0].get());

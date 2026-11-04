@@ -615,7 +615,7 @@ namespace krys::boo::css
     }
 
     auto prelude = preludeStart.RangeUntil(tokens);
-    TokenRange block = ConsumeBlockCheckingForEditability(tokens);
+    TokenRange block = tokens.ConsumeBlock();
 
     if (allowedRules <= AllowedRules::RegularRules)
     {
@@ -628,29 +628,6 @@ namespace krys::boo::css
     }
 
     return nullptr;
-  }
-
-  TokenRange Parser::ConsumeBlockCheckingForEditability(TokenRange &tokens) noexcept
-  {
-    krys_debug_assert(tokens.Peek().IsBlockStart());
-
-    auto *styleSheet = _styleSheet.get();
-    if (styleSheet && !styleSheet->UsesStyleBasedEditability())
-    {
-      auto blockRange = tokens;
-      std::ignore = blockRange.ConsumeBlock();
-      for (const auto &token : tokens.RangeUntil(blockRange))
-      {
-        if (token.Type() == TokenType::Ident
-            && text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"-webkit-user-modify")))
-        {
-          styleSheet->ParserSetUsesStyleBasedEditability();
-          break;
-        }
-      }
-    }
-
-    return tokens.ConsumeBlock();
   }
 
   namespace

@@ -2,7 +2,7 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
@@ -80,9 +80,9 @@ namespace krys::boo::css::tests
       CHECK(families.SetSerifFontFamily(u8"Liberation Sans", USCRIPT_ARABIC));
       CHECK(families.SerifFontFamily(USCRIPT_ARABIC) == u8"Liberation Sans");
       CHECK(families.SerifFontFamily(USCRIPT_LATIN) == u8"Ahem");
-      CHECK(*families.FontFamily(WebKitFontFamilyNames::FamilyNamesIndex::SerifFamily, USCRIPT_GREEK)
+      CHECK(*families.FontFamily(GenericFontFamilyNames::FamilyNamesIndex::SerifFamily, USCRIPT_GREEK)
             == u8"Ahem");
-      CHECK_FALSE(families.FontFamily(WebKitFontFamilyNames::FamilyNamesIndex::SystemUiFamily));
+      CHECK_FALSE(families.FontFamily(GenericFontFamilyNames::FamilyNamesIndex::SystemUiFamily));
       CHECK(families.SetSerifFontFamily(u8"", USCRIPT_COMMON));
       CHECK(families.SerifFontFamily(USCRIPT_LATIN).empty());
     }

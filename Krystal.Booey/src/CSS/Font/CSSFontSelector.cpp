@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/CSS/Font/FontFaceSet.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Font/SegmentedFontFace.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
@@ -23,7 +23,7 @@
 
 namespace krys::boo::css
 {
-  using namespace WebKitFontFamilyNames;
+  using namespace GenericFontFamilyNames;
 
   namespace
   {

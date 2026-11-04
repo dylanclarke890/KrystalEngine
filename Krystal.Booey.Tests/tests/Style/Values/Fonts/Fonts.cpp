@@ -1,7 +1,7 @@
 ﻿#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
@@ -47,14 +47,14 @@ namespace krys::boo::style::tests
     REQUIRE(families.size() == 3);
     CHECK(families.IsSpecifiedFont());
     CHECK(families.First().Value == css::CSSOMStringAtom {u8"Foo Bar"});
-    CHECK(families.ToPlatform()[1] == css::WebKitFontFamilyNames::SerifFamily());
+    CHECK(families.ToPlatform()[1] == css::GenericFontFamilyNames::SerifFamily());
     CHECK(families.Last().Value == css::CSSOMStringAtom {u8"Arial"});
     CHECK(Serialised(families) == "\"Foo Bar\", serif, Arial");
     CHECK(Created(families) == "\"Foo Bar\", serif, Arial");
 
     auto generic = Convert<FontFamilies>(PropertyId::FontFamily, u8"monospace, Courier");
     CHECK(generic.FirstFontKind() == FontFamilyKind::Generic);
-    CHECK(generic.First().Value == css::WebKitFontFamilyNames::MonospaceFamily());
+    CHECK(generic.First().Value == css::GenericFontFamilyNames::MonospaceFamily());
     CHECK(Serialised(generic) == "monospace, Courier");
 
     // FIXME: `-webkit-body` is the settings' standard font family, which is empty until there's a `Settings`
@@ -65,7 +65,7 @@ namespace krys::boo::style::tests
 
     auto system = ConvertSystemFont<FontFamilies>(*State);
     CHECK(system.FirstFontKind() == FontFamilyKind::Generic);
-    CHECK(system.First().Value == css::WebKitFontFamilyNames::StandardFamily());
+    CHECK(system.First().Value == css::GenericFontFamilyNames::StandardFamily());
     CHECK_FALSE(IsInvalid());
 
     CHECK(families == Convert<FontFamilies>(PropertyId::FontFamily, u8"\"Foo Bar\", serif, Arial"));

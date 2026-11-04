@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontCascadeFonts.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
@@ -252,7 +252,7 @@ namespace krys::boo
       if (fontRanges.IsNull() && fontSelector)
       {
         fontRanges =
-          fontSelector->FontRangesForFamily(description, css::WebKitFontFamilyNames::StandardFamily());
+          fontSelector->FontRangesForFamily(description, css::GenericFontFamilyNames::StandardFamily());
       }
       if (fontRanges.IsNull())
       {

@@ -12,7 +12,7 @@ namespace krys
 
 namespace krys::boo
 {
-  // Legacy shadow blur radius is used for canvas, and -webkit-box-shadow.
+  // Legacy shadow blur radius is used for canvas.
   // It has different treatment of radii > 8px.
   enum class ShadowRadiusMode : bool
   {

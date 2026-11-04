@@ -1,59 +1,59 @@
-﻿#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+﻿#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css::WebKitFontFamilyNames
+namespace krys::boo::css::GenericFontFamilyNames
 {
   const CSSOMStringAtom &CursiveFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"-webkit-cursive"};
+    static const CSSOMStringAtom name {u8"-internal-cursive"};
     return name;
   }
 
   const CSSOMStringAtom &FantasyFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"-webkit-fantasy"};
+    static const CSSOMStringAtom name {u8"-internal-fantasy"};
     return name;
   }
 
   const CSSOMStringAtom &MathFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"math"};
+    static const CSSOMStringAtom name {u8"-internal-math"};
     return name;
   }
 
   const CSSOMStringAtom &MonospaceFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"-webkit-monospace"};
+    static const CSSOMStringAtom name {u8"-internal-monospace"};
     return name;
   }
 
   const CSSOMStringAtom &PictographFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"-webkit-pictograph"};
+    static const CSSOMStringAtom name {u8"-internal-pictograph"};
     return name;
   }
 
   const CSSOMStringAtom &SansSerifFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"-webkit-sans-serif"};
+    static const CSSOMStringAtom name {u8"-internal-sans-serif"};
     return name;
   }
 
   const CSSOMStringAtom &SerifFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"-webkit-serif"};
+    static const CSSOMStringAtom name {u8"-internal-serif"};
     return name;
   }
 
   const CSSOMStringAtom &StandardFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"-webkit-standard"};
+    static const CSSOMStringAtom name {u8"-internal-standard"};
     return name;
   }
 
   const CSSOMStringAtom &SystemUiFamily() noexcept
   {
-    static const CSSOMStringAtom name {u8"-webkit-system-ui"};
+    static const CSSOMStringAtom name {u8"-internal-system-ui"};
     return name;
   }
 

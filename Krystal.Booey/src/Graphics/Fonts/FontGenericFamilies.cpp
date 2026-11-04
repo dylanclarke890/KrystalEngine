@@ -3,7 +3,7 @@
 
 namespace krys::boo
 {
-  using namespace css::WebKitFontFamilyNames;
+  using namespace css::GenericFontFamilyNames;
 
   KRYS_NODISCARD static const utf8_string &EmptyFamily() noexcept
   {

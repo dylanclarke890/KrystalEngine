@@ -215,8 +215,6 @@ namespace krys::boo::css
     void ConsumeCustomPropertyValue(TokenRange tokens, const CSSOMStringAtom &propertyName,
                                     IsImportant important) noexcept;
 
-    KRYS_NODISCARD TokenRange ConsumeBlockCheckingForEditability(TokenRange &tokens) noexcept;
-
     KRYS_NODISCARD Ref<Rule> CreateNestedDeclarationsRule() noexcept;
 
     void RunInNewNestingContext(auto &&run) noexcept

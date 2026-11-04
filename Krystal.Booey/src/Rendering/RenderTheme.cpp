@@ -17,7 +17,6 @@
 #include "Krystal.Booey/Graphics/Controls/ProgressBarPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/SearchFieldCancelButtonPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/SearchFieldPart.hpp"
-#include "Krystal.Booey/Graphics/Controls/SearchFieldResultsPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/SliderThumbPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/SliderTrackPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/TextAreaPart.hpp"
@@ -532,7 +531,7 @@ namespace krys::boo
       case StyleAppearance::SearchFieldDecoration:        break;
 
       case StyleAppearance::SearchFieldResultsDecoration:
-      case StyleAppearance::SearchFieldResultsButton:     return SearchFieldResultsPart::Create(appearance);
+      case StyleAppearance::SearchFieldResultsButton:     break;
 
       case StyleAppearance::SearchFieldCancelButton:      return SearchFieldCancelButtonPart::Create();
 

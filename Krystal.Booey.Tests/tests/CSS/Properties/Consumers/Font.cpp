@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 
@@ -78,18 +78,18 @@ namespace krys::boo::css::PropertyParserHelpers::tests
 
   TEST_CASE("PropertyParserHelpers(GenericFontFamily)", "[CSS][Properties][Consumers]")
   {
-    CHECK(GenericFontFamily(ValueId::Serif) == WebKitFontFamilyNames::SerifFamily());
-    CHECK(GenericFontFamily(ValueId::SansSerif).View() == u8"-webkit-sans-serif");
-    CHECK(GenericFontFamily(ValueId::Math).View() == u8"math");
+    CHECK(GenericFontFamily(ValueId::Serif) == GenericFontFamilyNames::SerifFamily());
+    CHECK(GenericFontFamily(ValueId::SansSerif).View() == u8"-internal-sans-serif");
+    CHECK(GenericFontFamily(ValueId::Math).View() == u8"-internal-math");
     CHECK(GenericFontFamily(ValueId::WebkitBody) == CSSOMStringAtom::Null());
     CHECK(GenericFontFamily(ValueId::Bold) == CSSOMStringAtom::Null());
 
     CHECK(GenericFontFamilyIndex(ValueId::Monospace)
-          == WebKitFontFamilyNames::FamilyNamesIndex::MonospaceFamily);
+          == GenericFontFamilyNames::FamilyNamesIndex::MonospaceFamily);
     CHECK(GenericFontFamilyIndex(ValueId::SystemUi)
-          == WebKitFontFamilyNames::FamilyNamesIndex::SystemUiFamily);
-    CHECK(WebKitFontFamilyNames::FamilyName(WebKitFontFamilyNames::FamilyNamesIndex::StandardFamily).View()
-          == u8"-webkit-standard");
+          == GenericFontFamilyNames::FamilyNamesIndex::SystemUiFamily);
+    CHECK(GenericFontFamilyNames::FamilyName(GenericFontFamilyNames::FamilyNamesIndex::StandardFamily).View()
+          == u8"-internal-standard");
   }
 
   TEST_CASE("PropertyParserHelpers(ConsumeFamilyName)", "[CSS][Properties][Consumers]")

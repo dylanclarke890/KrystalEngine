@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
@@ -724,7 +724,7 @@ namespace krys::boo::style
       RenderStyle::CreatePtrWithRegisteredInitialValues(document.StyleScope().GetCustomPropertyRegistry());
 
     FontCascadeDescription fontDescription;
-    fontDescription.SetOneFamily(css::WebKitFontFamilyNames::StandardFamily());
+    fontDescription.SetOneFamily(css::GenericFontFamilyNames::StandardFamily());
     fontDescription.SetKeywordSizeFromIdentifier(css::ValueId::Medium);
 
     auto size = FontSizeForKeyword(static_cast<uint32>(css::ValueId::Medium), false, document);

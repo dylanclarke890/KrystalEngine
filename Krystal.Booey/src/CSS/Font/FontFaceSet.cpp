@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/Font/FontFaceSet.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Font/FontFaceSource.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Font/SegmentedFontFace.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
@@ -11,7 +11,7 @@
 
 namespace krys::boo::css
 {
-  using namespace WebKitFontFamilyNames;
+  using namespace GenericFontFamilyNames;
 
   size_t
     CSSFontFaceSet::FontSelectionRequestHash::operator()(const FontSelectionRequest &request) const noexcept

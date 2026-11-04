@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -42,7 +42,7 @@ namespace krys::boo
     KRYS_NODISCARD const utf8_string &MathFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
 
     /// @brief The family the generic family @p family resolves to for @p script, or null for `system-ui`.
-    KRYS_NODISCARD const utf8_string *FontFamily(css::WebKitFontFamilyNames::FamilyNamesIndex family,
+    KRYS_NODISCARD const utf8_string *FontFamily(css::GenericFontFamilyNames::FamilyNamesIndex family,
                                                  UScriptCode script = USCRIPT_COMMON) const noexcept;
 
     /// @return Whether the family changed.

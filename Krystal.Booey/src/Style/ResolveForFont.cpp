@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/ResolveForFont.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Font/FontSelectionValueInlines.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesEvaluateCalc.hpp"
@@ -299,11 +299,11 @@ namespace krys::boo::style
           // FIXME: Treat system-ui like other generic font families
           if (ident == css::ValueId::SystemUi)
           {
-            return {css::WebKitFontFamilyNames::SystemUiFamily(), true};
+            return {css::GenericFontFamilyNames::SystemUiFamily(), true};
           }
-          return {
-            css::WebKitFontFamilyNames::FamilyName(css::PropertyParserHelpers::GenericFontFamilyIndex(ident)),
-            true};
+          return {css::GenericFontFamilyNames::FamilyName(
+                    css::PropertyParserHelpers::GenericFontFamilyIndex(ident)),
+                  true};
         },
         [&](const css::CSSOMStringAtom &familyString) -> std::pair<StringAtom, bool>
         { return {familyString, false}; });

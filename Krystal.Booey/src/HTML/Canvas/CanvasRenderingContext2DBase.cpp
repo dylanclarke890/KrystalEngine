@@ -3022,9 +3022,11 @@ namespace krys::boo::html
     for (uint32 i = 0; i < font.FamilyCount(); ++i)
     {
       auto family = font.FamilyAt(i).View();
-      if (family.starts_with(u8"-webkit-"))
+      // The generic families' internal names serialise as their keywords.
+      constexpr utf8_stringview internalPrefix = u8"-internal-";
+      if (family.starts_with(internalPrefix))
       {
-        family = family.substr(8);
+        family = family.substr(internalPrefix.size());
       }
 
       auto separator = i ? utf8_stringview {u8", "} : utf8_stringview {u8" "};

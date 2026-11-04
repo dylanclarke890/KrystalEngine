@@ -82,7 +82,6 @@ namespace krys::boo::css
         _encodingFromCharsetRule(other._encodingFromCharsetRule), _namespaces(other._namespaces),
         _defaultNamespace(other._defaultNamespace), _isUserStyleSheet(other._isUserStyleSheet),
         _loadCompleted(true), _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
-        _usesStyleBasedEditability(other._usesStyleBasedEditability),
         _hasNestingRulesCache(other._hasNestingRulesCache), _parserContext(other._parserContext)
   {
     krys_debug_assert(other.IsCacheable());

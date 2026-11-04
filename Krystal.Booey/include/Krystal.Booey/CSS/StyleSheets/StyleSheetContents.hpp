@@ -58,7 +58,6 @@ namespace krys::boo::css
     bool _loadCompleted {false};
     bool _hasSyntacticallyValidCSSHeader {true};
     bool _didLoadErrorOccur {false};
-    bool _usesStyleBasedEditability {false};
     bool _isMutable {false};
     mutable bool _hasResolvedNesting {false};
     mutable Maybe<bool> _hasNestingRulesCache;
@@ -164,11 +163,6 @@ namespace krys::boo::css
     void ParserAppendRule(Ref<Rule> &&rule) noexcept;
     void ParserSetEncodingFromCharsetRule(const CSSOMString &encoding) noexcept;
 
-    void ParserSetUsesStyleBasedEditability() noexcept
-    {
-      _usesStyleBasedEditability = true;
-    }
-
     void ClearRules() noexcept;
 
     KRYS_NODISCARD CSSOMString EncodingFromCharsetRule() const noexcept
@@ -231,11 +225,6 @@ namespace krys::boo::css
     /// @brief The rule at @p index, counting the early layer statements, then the import rules, then the
     /// namespace rules, then the other rules.
     KRYS_NODISCARD Rule *RuleAt(uint32 index) const noexcept;
-
-    KRYS_NODISCARD bool UsesStyleBasedEditability() const noexcept
-    {
-      return _usesStyleBasedEditability;
-    }
 
     /// @brief A rough size estimate for the memory cache.
     KRYS_NODISCARD uint32 EstimatedSizeInBytes() const noexcept;

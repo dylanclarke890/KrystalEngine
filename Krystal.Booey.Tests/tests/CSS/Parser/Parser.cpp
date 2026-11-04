@@ -526,12 +526,6 @@ namespace krys::boo::css::tests
     }
   }
 
-  TEST_CASE_METHOD(ValueFixture, "Parser::ParseStyleSheet: style-based editability", "[CSS][Parser]")
-  {
-    CHECK_FALSE(ParseSheet(u8"a { color: red }")->UsesStyleBasedEditability());
-    CHECK(ParseSheet(u8"a { -WEBKIT-user-modify: read-write }")->UsesStyleBasedEditability());
-  }
-
   TEST_CASE_METHOD(ValueFixture, "StyleSheetContents::ParseString", "[CSS][Parser]")
   {
     auto sheet = StyleSheetContents::Create(SheetContext());

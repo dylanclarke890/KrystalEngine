@@ -675,7 +675,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/VariableData.hpp
   include/Krystal.Booey/CSS/Values/VariableReferenceValue.hpp
   include/Krystal.Booey/CSS/Values/ViewValue.hpp
-  include/Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp
+  include/Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -951,7 +951,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/VariableData.cpp
   src/CSS/Values/VariableReferenceValue.cpp
   src/CSS/Values/ViewValue.cpp
-  src/CSS/Font/WebKitFontFamilyNames.cpp
+  src/CSS/Font/GenericFontFamilyNames.cpp
 )
 
 set(KRYSTAL_BOOEY_DOM_HEADERS
@@ -1380,7 +1380,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Controls/ProgressBarPart.hpp
   include/Krystal.Booey/Graphics/Controls/SearchFieldCancelButtonPart.hpp
   include/Krystal.Booey/Graphics/Controls/SearchFieldPart.hpp
-  include/Krystal.Booey/Graphics/Controls/SearchFieldResultsPart.hpp
   include/Krystal.Booey/Graphics/Controls/SliderThumbPart.hpp
   include/Krystal.Booey/Graphics/Controls/SliderTrackPart.hpp
   include/Krystal.Booey/Graphics/Controls/TextAreaPart.hpp

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
@@ -222,14 +222,14 @@ namespace krys::boo::tests
 
     SECTION("families")
     {
-      description.SetOneFamily(css::WebKitFontFamilyNames::MonospaceFamily());
+      description.SetOneFamily(css::GenericFontFamilyNames::MonospaceFamily());
       CHECK(description.UseFixedDefaultSize());
       description.SetFamilies(
-        List<StringAtom> {StringAtom {u8"Arial"}, css::WebKitFontFamilyNames::SerifFamily()});
+        List<StringAtom> {StringAtom {u8"Arial"}, css::GenericFontFamilyNames::SerifFamily()});
       CHECK_FALSE(description.UseFixedDefaultSize());
       CHECK(description.FamilyCount() == 2);
       CHECK(description.EffectiveFamilyCount() == 2);
-      CHECK(description.EffectiveFamilyAt(1) == css::WebKitFontFamilyNames::SerifFamily());
+      CHECK(description.EffectiveFamilyAt(1) == css::GenericFontFamilyNames::SerifFamily());
 
       CHECK(FontCascadeDescription::FamilyNamesAreEqual(StringAtom {u8"Arial"}, StringAtom {u8"aRIAL"}));
       CHECK_FALSE(
@@ -326,7 +326,7 @@ namespace krys::boo::tests
     auto &database = SystemFontDatabase::Singleton();
     CHECK(&database == &SystemFontDatabase::Singleton());
     CHECK(database.SystemFontShorthandFamily(SystemFontDatabase::FontShorthand::Caption)
-          == css::WebKitFontFamilyNames::StandardFamily());
+          == css::GenericFontFamilyNames::StandardFamily());
     CHECK(database.SystemFontShorthandSize(SystemFontDatabase::FontShorthand::StatusBar) == 16.f);
     CHECK(database.SystemFontShorthandWeight(SystemFontDatabase::FontShorthand::Menu) == NormalWeightValue());
   }

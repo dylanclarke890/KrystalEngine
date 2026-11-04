@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -42,7 +42,7 @@ namespace krys::boo::style
 
       FontCascadeDescription fontDescription;
       fontDescription.SetSpecifiedLocale(StringAtom(document.ContentLanguage()));
-      fontDescription.SetOneFamily(css::WebKitFontFamilyNames::StandardFamily());
+      fontDescription.SetOneFamily(css::GenericFontFamilyNames::StandardFamily());
       // FIXME: The settings' shouldAllowUserInstalledFonts comes with Settings (its default, Yes, is the
       // description's).
       // FIXME: We need evaluationTimeZoomEnabled to be accessible from FontDescription, not only from

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
@@ -1822,7 +1822,7 @@ namespace krys::boo
           auto familyName = LoneFontFamilyName(value);
           if (FontCache::IsSystemFontForbiddenForEditing(familyName)
               || (standardFontFamilySerializationMode == StandardFontFamilySerializationMode::Strip
-                  && familyName == css::WebKitFontFamilyNames::StandardFamily().View()))
+                  && familyName == css::GenericFontFamilyNames::StandardFamily().View()))
           {
             shouldRemoveFontFamily = true;
           }

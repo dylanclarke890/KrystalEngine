@@ -203,9 +203,8 @@ namespace krys::boo
         const auto &zoomFactor = style.UsedZoomForLength();
         FloatSize shadowOffset(shadow.Location.x().ResolveZoom(zoomFactor),
                                shadow.Location.y().ResolveZoom(zoomFactor));
-        context.SetDropShadow(
-          {shadowOffset, shadow.Blur.ResolveZoom(zoomFactor), style.ColorResolvingCurrentColor(shadow.Color),
-           shadow.IsWebkitBoxShadow ? ShadowRadiusMode::Legacy : ShadowRadiusMode::Default});
+        context.SetDropShadow({shadowOffset, shadow.Blur.ResolveZoom(zoomFactor),
+                               style.ColorResolvingCurrentColor(shadow.Color), ShadowRadiusMode::Default});
         break;
       }
     }
@@ -1103,9 +1102,7 @@ namespace krys::boo
                      RoundToDevicePixel(shadowRectOrigin.Y(), deviceScaleFactor));
         FloatSize snappedShadowOffset = snappedShadowOrigin - pixelSnappedFillRect.Location();
 
-        context.SetDropShadow(
-          {snappedShadowOffset, shadowRadius, shadowColor,
-           shadow.IsWebkitBoxShadow ? ShadowRadiusMode::Legacy : ShadowRadiusMode::Default});
+        context.SetDropShadow({snappedShadowOffset, shadowRadius, shadowColor, ShadowRadiusMode::Default});
 
         adjustedBorderShape.ClipOutOuterShape(context, deviceScaleFactor);
 
@@ -1201,9 +1198,7 @@ namespace krys::boo
         shadowOffset -= extraOffset;
 
         auto snappedShadowOffset = RoundSizeToDevicePixels(shadowOffset, deviceScaleFactor);
-        context.SetDropShadow(
-          {snappedShadowOffset, shadowRadius, shadowColor,
-           shadow.IsWebkitBoxShadow ? ShadowRadiusMode::Legacy : ShadowRadiusMode::Default});
+        context.SetDropShadow({snappedShadowOffset, shadowRadius, shadowColor, ShadowRadiusMode::Default});
 
         shapeForInnerHole.FillRectWithInnerHoleShape(context, shadowCastingRect, fillColor,
                                                      deviceScaleFactor);

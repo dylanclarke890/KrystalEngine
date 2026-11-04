@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -87,7 +87,7 @@ namespace krys::boo
     /// @brief Only use fixed default size when there is only one font family, and that family is "monospace".
     KRYS_NODISCARD bool UseFixedDefaultSize() const noexcept
     {
-      return FamilyCount() == 1 && FirstFamily() == css::WebKitFontFamilyNames::MonospaceFamily();
+      return FamilyCount() == 1 && FirstFamily() == css::GenericFontFamilyNames::MonospaceFamily();
     }
 
     KRYS_NODISCARD boo::Kerning GetKerning() const noexcept

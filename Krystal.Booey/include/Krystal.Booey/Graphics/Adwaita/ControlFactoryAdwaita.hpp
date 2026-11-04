@@ -24,8 +24,6 @@ namespace krys::boo
     KRYS_NODISCARD UniquePtr<PlatformControl> CreatePlatformSearchField(SearchFieldPart &) noexcept final;
     KRYS_NODISCARD UniquePtr<PlatformControl>
       CreatePlatformSearchFieldCancelButton(SearchFieldCancelButtonPart &) noexcept final;
-    KRYS_NODISCARD UniquePtr<PlatformControl>
-      CreatePlatformSearchFieldResults(SearchFieldResultsPart &) noexcept final;
     KRYS_NODISCARD UniquePtr<PlatformControl> CreatePlatformSliderThumb(SliderThumbPart &) noexcept final;
     KRYS_NODISCARD UniquePtr<PlatformControl> CreatePlatformSliderTrack(SliderTrackPart &) noexcept final;
     KRYS_NODISCARD UniquePtr<PlatformControl> CreatePlatformTextArea(TextAreaPart &) noexcept final;

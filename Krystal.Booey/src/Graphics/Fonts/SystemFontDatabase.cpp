@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
-#include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 
 namespace krys::boo
 {
@@ -51,7 +51,7 @@ namespace krys::boo
   {
     // FIXME: Ask the platform for its system fonts, once there's a font backend. Until then every system font
     // is the standard family at 16px and normal weight.
-    return {css::WebKitFontFamilyNames::StandardFamily(), 16, NormalWeightValue()};
+    return {css::GenericFontFamilyNames::StandardFamily(), 16, NormalWeightValue()};
   }
 
   void SystemFontDatabase::PlatformInvalidate() noexcept
