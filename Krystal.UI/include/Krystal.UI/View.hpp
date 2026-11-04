@@ -7,7 +7,6 @@
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/Region.hpp"
-#include "Krystal.Booey/History/BackForwardList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/Page/ConsoleTypes.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
@@ -48,17 +47,8 @@
 
 namespace krys::ui
 {
-  /// @brief What the host decides to do with a navigation.
-  enum class NavigationPolicy : uint8
-  {
-    /// @brief Navigate: within the page (to a fragment), or to another document, which loads.
-    Allow,
-    /// @brief Leave the page as it is: the host may have handled the navigation itself.
-    Ignore,
-  };
-
-  /// @brief A navigation the page asks the host about (a link followed or a form submitted), as the host's
-  /// handler receives it.
+  /// @brief A navigation the page asks the host for (a link followed or a form submitted), as the host's
+  /// handler receives it. The view doesn't navigate: the host loads what it wants.
   struct NavigationRequest
   {
     /// @brief The URL to navigate to: for a form, the action, with the form data as its query for a `GET`.
@@ -69,8 +59,6 @@ namespace krys::ui
     /// @brief Whether the target names another browsing context (`_blank` or a name), which the host would
     /// open.
     bool OpensNewWindow {false};
-    /// @brief Whether allowing it navigates within the page: to a fragment of the page's URL.
-    bool IsSameDocument {false};
     /// @brief The element that started it: the link or the form.
     RefPtr<boo::dom::Element> SourceElement;
     /// @brief The mouse button that followed the link, if a click did.
@@ -114,8 +102,6 @@ namespace krys::ui
     LoadEventType Type {LoadEventType::Started};
     /// @brief The error, for a failure.
     boo::ResourceError Error;
-    /// @brief Whether the committed document came back from the back/forward cache, already loaded.
-    bool FromBackForwardCache {false};
   };
 
   /// @brief A message the page sends to the developer console (an error it didn't handle, a warning).
@@ -163,8 +149,6 @@ namespace krys::ui
     /// @brief The page's accelerated image buffers (its canvases' bitmaps), whose textures go with the view.
     UniquePtr<AcceleratedImageBuffers> _acceleratedImageBuffers {
       CreateUnique<AcceleratedImageBuffers>(_fonts)};
-    /// @brief The page's session history, which the page shares.
-    Ref<boo::BackForwardList> _backForwardList;
     Ref<boo::Page> _page;
     Ref<boo::LocalFrame> _frame;
     FontFaceCache _fonts;
@@ -332,10 +316,6 @@ namespace krys::ui
     /// @brief The part of the right stick's scroll not scrolled yet (scrolls are in whole pixels).
     boo::DoubleSize _gamepadScrollRemainder;
 
-    /// @brief How many pages the back/forward cache keeps, unless the host sets it
-    /// (`boo::BackForwardCache::Singleton().SetMaxSize`).
-    static constexpr uint32 DefaultBackForwardCacheCapacity {3};
-
     // FIXME: The system's double click time and distance, once the host reports them.
     static constexpr std::chrono::milliseconds DoubleClickTime {500};
     static constexpr int32 DoubleClickDistance {2};
@@ -396,28 +376,7 @@ namespace krys::ui
     void Stop() noexcept;
     /// @brief Calls @p handler as loads start, commit, finish and fail.
     void SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept;
-
-    /// @brief The view's session history: an item for each document it showed (and each fragment it went
-    /// to), the current one and those before and after it.
-    KRYS_NODISCARD boo::BackForwardList &GetBackForwardList() const noexcept
-    {
-      return *_backForwardList;
-    }
-    /// @brief Whether there's an item before the current one.
-    KRYS_NODISCARD bool CanGoBack() const noexcept;
-    /// @brief Whether there's an item after the current one.
-    KRYS_NODISCARD bool CanGoForward() const noexcept;
-    /// @brief Goes back to the item before the current one: its document loads again on a later task (with
-    /// its scroll position and form state), unless the item is for the current document (a fragment).
-    /// @return Whether there was an item to go back to.
-    bool GoBack() noexcept;
-    /// @brief Goes forward to the item after the current one, as `GoBack` goes back.
-    /// @return Whether there was an item to go forward to.
-    bool GoForward() noexcept;
-    /// @brief Goes to @p item, one of the back/forward list's.
-    void GoToItem(boo::HistoryItem &item) noexcept;
-    /// @brief Loads the current document again, its resources revalidated; it keeps its history item and
-    /// scroll position, but not its form state.
+    /// @brief Loads the current document again, its resources revalidated, without its form state.
     void Reload() noexcept;
 
     /// @brief Defines @p name as a custom element, whose behaviour @p factory creates, in every document the
@@ -626,9 +585,10 @@ namespace krys::ui
     /// @brief Whether the page is shown (`SetVisible`).
     KRYS_NODISCARD bool IsVisible() const noexcept;
 
-    /// @brief Asks @p handler about each navigation the page starts (links followed and forms submitted). A
-    /// view without a handler allows every navigation, so only navigations within the page happen.
-    void SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept;
+    /// @brief Calls @p handler with each navigation the page asks for (links followed and forms submitted),
+    /// other than a link to a fragment of the page, which scrolls to it. The view doesn't navigate: the
+    /// handler loads what it wants (`Load`, `LoadFile`, `LoadHTML`).
+    void SetNavigationHandler(Func<void(const NavigationRequest &)> &&handler) noexcept;
 
     /// @brief Calls @p handler when the page asks to be brought to the front (`window.focus()`); the host
     /// decides whether to raise its window. A view without a handler ignores it.
@@ -662,11 +622,6 @@ namespace krys::ui
 
     /// @brief Calls @p handler when the page asks to be printed (`print()`).
     void SetPrintHandler(Func<void()> &&handler) noexcept;
-
-    /// @brief Calls @p handler when the page asks the user to confirm leaving it (its `beforeunload` was
-    /// cancelled, after the user interacted with it), with its message; the handler returns whether to leave.
-    /// Without one, the page is left.
-    void SetBeforeUnloadHandler(Func<bool(const utf8_string &)> &&handler) noexcept;
 
     /// @brief Calls @p handler with each message the page sends to the developer console.
     void SetConsoleMessageHandler(Func<void(const ConsoleMessage &)> &&handler) noexcept;
@@ -713,8 +668,7 @@ namespace krys::ui
     /// mouse pressed, or the window lost focus.
     void ConfirmCompositionForHost() noexcept;
 
-    /// @brief A load committed (a new document, or one the back/forward cache kept): it's painted with the
-    /// view's focus state.
+    /// @brief A load committed: the new document is painted with the view's focus state.
     void DidCommitLoad() noexcept;
 
     /// @brief Replaces the document with one parsed from @p markup at once, without a load: the overlays'

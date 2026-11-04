@@ -137,15 +137,12 @@ namespace krys::boo
     // Showing the document in the frame makes its window; the host then sets up the window before the
     // document is parsed (its custom element definitions, say).
     // The previous document is kept alive too, so the new window can take over its navigation entries.
-    RefPtr<dom::Document> previousDocument = ShareRefPtr(frame->Document());
-    RefPtr<LocalDOMWindow> previousWindow =
-      previousDocument ? ShareRefPtr(previousDocument->Window()) : nullptr;
     frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
     if (frame->Document() != document.get())
     {
       return false;
     }
-    frame->Loader().DidBeginDocument(previousWindow.get());
+    frame->Loader().DidBeginDocument();
 
     // The document is loading until its parser finishes.
     document->SetParsing(true);

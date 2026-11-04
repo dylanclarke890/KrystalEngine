@@ -378,11 +378,6 @@ namespace krys::boo::dom
       return false;
     }
 
-    KRYS_NODISCARD virtual bool IsHashChangeEvent() const noexcept
-    {
-      return false;
-    }
-
     KRYS_NODISCARD virtual bool IsMessageEvent() const noexcept
     {
       return false;
@@ -394,26 +389,6 @@ namespace krys::boo::dom
     }
 
     KRYS_NODISCARD virtual bool IsPageTransitionEvent() const noexcept
-    {
-      return false;
-    }
-
-    KRYS_NODISCARD virtual bool IsPopStateEvent() const noexcept
-    {
-      return false;
-    }
-
-    KRYS_NODISCARD virtual bool IsNavigateEvent() const noexcept
-    {
-      return false;
-    }
-
-    KRYS_NODISCARD virtual bool IsNavigationCurrentEntryChangeEvent() const noexcept
-    {
-      return false;
-    }
-
-    KRYS_NODISCARD virtual bool IsBeforeUnloadEvent() const noexcept
     {
       return false;
     }

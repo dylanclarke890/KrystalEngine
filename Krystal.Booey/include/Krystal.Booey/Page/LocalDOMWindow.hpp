@@ -46,9 +46,6 @@ namespace krys::boo
 {
   class BarProp;
   class DOMSelection;
-  class History;
-  class Location;
-  class Navigation;
   class Navigator;
   class External;
   class LocalFrame;
@@ -85,9 +82,6 @@ namespace krys::boo
     mutable RefPtr<BarProp> _toolbar;
     mutable RefPtr<External> _external;
     mutable RefPtr<Navigator> _navigator;
-    mutable RefPtr<boo::Location> _location;
-    mutable RefPtr<boo::History> _history;
-    mutable RefPtr<boo::Navigation> _navigation;
     mutable RefPtr<html::CloseWatcherManager> _closeWatcherManager;
     mutable RefPtr<Screen> _screen;
     mutable RefPtr<VisualViewport> _visualViewport;
@@ -158,22 +152,6 @@ namespace krys::boo
     {
       return *this;
     }
-
-    /// @brief The window's `Location`: its document's URL, which navigates the window when it's set.
-    /// @see https://html.spec.whatwg.org/#dom-location
-    KRYS_NODISCARD boo::Location &GetLocation() const noexcept;
-
-    /// @brief The window's `History`: its page's session history.
-    /// @see https://html.spec.whatwg.org/#dom-history
-    KRYS_NODISCARD boo::History &GetHistory() const noexcept;
-
-    /// @brief The window's `Navigation`: its document's origin's session history entries, and the navigations
-    /// it starts and intercepts.
-    /// @see https://html.spec.whatwg.org/#dom-navigation
-    KRYS_NODISCARD boo::Navigation &GetNavigation() const noexcept;
-
-    /// @brief The window's `Navigation`, if it was made.
-    KRYS_NODISCARD boo::Navigation *NavigationIfExists() const noexcept;
 
     /// @brief The window's close watchers.
     /// @see https://html.spec.whatwg.org/#close-watcher-manager

@@ -25,11 +25,8 @@
 #include "Krystal.Booey/Page/DOMTimer.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/External.hpp"
-#include "Krystal.Booey/Page/History.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Location.hpp"
-#include "Krystal.Booey/Page/Navigation/Navigation.hpp"
 #include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
@@ -273,12 +270,6 @@ namespace krys::boo
     // FIXME: Only if the page is script-closable (opened by script, or with one session history entry); a
     // warning on the console otherwise.
 
-    // (The page may ask to stay, through beforeunload, as definitely closing would prompt.)
-    if (auto *frame = Frame(); frame && !frame->Loader().ShouldClose())
-    {
-      return;
-    }
-
     // 6a. Set thisTraversable's is closing to true.
     // 6b. Queue a task on the DOM manipulation task source to definitely close thisTraversable.
     page->SetIsClosing();
@@ -456,38 +447,6 @@ namespace krys::boo
       add(element->GetAttribute(u8"id"));
     }
     return names;
-  }
-
-  boo::Location &LocalDOMWindow::GetLocation() const noexcept
-  {
-    if (!_location)
-    {
-      _location = boo::Location::Create(const_cast<LocalDOMWindow &>(*this));
-    }
-    return *_location;
-  }
-
-  boo::History &LocalDOMWindow::GetHistory() const noexcept
-  {
-    if (!_history)
-    {
-      _history = boo::History::Create(const_cast<LocalDOMWindow &>(*this));
-    }
-    return *_history;
-  }
-
-  boo::Navigation &LocalDOMWindow::GetNavigation() const noexcept
-  {
-    if (!_navigation)
-    {
-      _navigation = boo::Navigation::Create(const_cast<LocalDOMWindow &>(*this));
-    }
-    return *_navigation;
-  }
-
-  boo::Navigation *LocalDOMWindow::NavigationIfExists() const noexcept
-  {
-    return _navigation.get();
   }
 
   html::CloseWatcherManager &LocalDOMWindow::GetCloseWatcherManager() const noexcept

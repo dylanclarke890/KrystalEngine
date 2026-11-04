@@ -64,7 +64,6 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
-#include "Krystal.Booey/History/HistoryItem.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -94,14 +93,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTitleElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/BeforeUnloadEvent.hpp"
-#include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
-#include "Krystal.Booey/HTML/Events/PopStateEvent.hpp"
 #include "Krystal.Booey/HTML/Forms/FormController.hpp"
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
-#include "Krystal.Booey/HTML/MicroParsers/Refresh.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
@@ -109,17 +104,14 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
-#include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
-#include "Krystal.Booey/Page/History.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Location.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -167,12 +159,27 @@
 #include <algorithm>
 #include <chrono>
 #include <format>
+#include <random>
 
 namespace krys::boo::dom
 {
   namespace
   {
     constexpr auto IntersectionObserversInitialUpdateDelay = std::chrono::milliseconds(2'000);
+
+    /// @brief A random (version 4) UUID, in its string form.
+    KRYS_NODISCARD DOMString CreateVersion4UUIDString() noexcept
+    {
+      static std::mt19937_64 generator {std::random_device {}()};
+      uint64 high = generator();
+      uint64 low = generator();
+      // The version (4) and the variant (10xx).
+      high = (high & 0xFF'FF'FF'FF'FF'FF'0F'FFull) | 0x00'00'00'00'00'00'40'00ull;
+      low = (low & 0x3F'FF'FF'FF'FF'FF'FF'FFull) | 0x80'00'00'00'00'00'00'00ull;
+      auto string = std::format("{:08x}-{:04x}-{:04x}-{:04x}-{:012x}", high >> 32, (high >> 16) & 0xFFFF,
+                                high & 0xFFFF, low >> 48, low & 0xFF'FF'FF'FF'FF'FFull);
+      return DOMString(string.begin(), string.end());
+    }
 
     void CallbackForContainIntrinsicSize(const List<Ref<ResizeObserverEntry>> &entries,
                                          ResizeObserver &observer) noexcept
@@ -654,10 +661,6 @@ namespace krys::boo::dom
       };
       DOMStringAtom empty(u8"");
 
-      if (matches(u8"beforeunloadevent"))
-      {
-        return CreateRef<html::BeforeUnloadEvent>();
-      }
       if (matches(u8"compositionevent"))
       {
         return CreateRef<CompositionEvent>(empty);
@@ -677,10 +680,6 @@ namespace krys::boo::dom
       if (matches(u8"focusevent"))
       {
         return CreateRef<FocusEvent>(empty);
-      }
-      if (matches(u8"hashchangeevent"))
-      {
-        return CreateRef<html::HashChangeEvent>(empty);
       }
       if (matches(u8"keyboardevent"))
       {
@@ -3090,13 +3089,6 @@ namespace krys::boo::dom
                                          });
   }
 
-  void Document::EnqueueHashchangeEvent(USVString oldURL, USVString newURL) noexcept
-  {
-    // FIXME: popstate event and hashchange event are supposed to fire in a single task.
-    QueueTaskToDispatchEventOnWindow(html::TaskSource::DOMManipulation,
-                                     html::HashChangeEvent::Create(krys::move(oldURL), krys::move(newURL)));
-  }
-
   LocalDOMWindow *Document::Window() const noexcept
   {
     return _domWindow.get();
@@ -3107,30 +3099,6 @@ namespace krys::boo::dom
     // A Document d is fully active if d is the active document of a navigable navigable, and either navigable
     // is a top-level traversable or navigable's container document is fully active.
     return _frame && _frame->Document() == this;
-  }
-
-  void Document::StatePopped(RefPtr<html::SerializedScriptValue> &&stateObject) noexcept
-  {
-    if (!Frame())
-    {
-      return;
-    }
-
-    RefPtr<LocalDOMWindow> window = _domWindow;
-    auto event =
-      html::PopStateEvent::Create(krys::move(stateObject), window ? &window->GetHistory() : nullptr);
-    DispatchWindowEvent(*event);
-  }
-
-  void Document::UpdateURLForPushOrReplaceState(const url::URL &url) noexcept
-  {
-    if (!Frame())
-    {
-      return;
-    }
-
-    SetURL(url);
-    // FIXME: The outgoing referrer and the document loader's request URL.
   }
 
   int32 Document::CircularSequentialID() noexcept
@@ -3364,43 +3332,6 @@ namespace krys::boo::dom
     {
       timer->Resume();
     }
-  }
-
-  void Document::SetBackForwardCacheState(BackForwardCacheState state) noexcept
-  {
-    if (_backForwardCacheState == state)
-    {
-      return;
-    }
-
-    _backForwardCacheState = state;
-
-    switch (state)
-    {
-      case BackForwardCacheState::InBackForwardCache:
-        if (RefPtr<LocalFrameView> frameView = ShareRefPtr(View()))
-        {
-          frameView->CacheCurrentScrollState();
-        }
-        ExitPointerLock();
-        // FIXME: The shared object pool, once there's one.
-        StyleScope().ClearResolver();
-        _styleRecalcTimer.Stop();
-        break;
-      case BackForwardCacheState::NotInBackForwardCache:
-        if (ChildNeedsStyleRecalc())
-        {
-          ScheduleStyleRecalc();
-        }
-        break;
-      case BackForwardCacheState::AboutToEnterBackForwardCache: break;
-    }
-  }
-
-  void Document::DetachFromCachedFrame() noexcept
-  {
-    krys_debug_assert(_backForwardCacheState == BackForwardCacheState::InBackForwardCache);
-    _frame = nullptr;
   }
 
   void Document::StopGamepadHapticEffects() noexcept
@@ -3804,54 +3735,9 @@ namespace krys::boo::dom
       return;
     }
 
-    if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"refresh")))
-    {
-      // https://html.spec.whatwg.org/#attr-meta-http-equiv-refresh
-      // 1. If the meta element has no content attribute, or if that attribute's value is the empty string,
-      //    then return.
-      // 2. Let input be the value of the element's content attribute.
-      // 3. Run the shared declarative refresh steps with the meta element's node document, input, and the
-      //    meta element.
-      // https://html.spec.whatwg.org/#shared-declarative-refresh-steps
-      // 1. If document's will declaratively refresh is true, then return.
-      auto *frame = Frame();
-      if (_willDeclarativelyRefresh || !frame || content.empty())
-      {
-        return;
-      }
-
-      // 2. to 11j. are ParseRefresh.
-      auto directive = html::ParseRefresh(content);
-      if (!directive)
-      {
-        return;
-      }
-
-      // 11k. Parse: Set urlRecord to the result of encoding-parsing a URL given urlString, relative to
-      //      document.
-      auto url = directive->URL.empty() ? GetURL() : CompleteURL(directive->URL);
-
-      // 11l. If urlRecord is failure, then return.
-      // 11m. If urlRecord's scheme is "javascript", then return.
-      if (!url.IsValid() || url.ProtocolIsJavaScript())
-      {
-        return;
-      }
-
-      // 12. Set document's will declaratively refresh to true.
-      _willDeclarativelyRefresh = true;
-
-      // 13. Perform one or more of the following steps: After the refresh has come due, if the user has not
-      //     canceled the redirect and, if meta is given, document's active sandboxing flag set does not have
-      //     the sandboxed automatic features browsing context flag set, then navigate document's node
-      //     navigable to urlRecord using document, with historyHandling set to "replace".
-      // (There's no sandboxing, and nothing to cancel the redirect with.)
-      frame->GetNavigationScheduler().ScheduleRedirect(*this, directive->Delay, url, IsMetaRefresh::Yes);
-      return;
-    }
-
-    // FIXME: Content-Security-Policy and the other pragmas, once there's a security policy; Set-Cookie is
-    // obsolete and ignored, as are X-UA-Compatible and Content-Type (the parser reads the charset).
+    // Refresh is ignored, as Booey doesn't navigate by itself; so are Content-Security-Policy (there's no
+    // security policy), Set-Cookie (obsolete), X-UA-Compatible and Content-Type (the parser reads the
+    // charset).
   }
 
   void Document::SetContentLanguage(DOMString language) noexcept
@@ -3864,12 +3750,6 @@ namespace krys::boo::dom
 
     // Recalculate style so language is used when selecting the initial font, and :lang() matches.
     StyleScope().DidChangeStyleSheetEnvironment();
-  }
-
-  boo::Location *Document::GetLocation() const noexcept
-  {
-    // Return this's relevant global object's Location object, if this is fully active, and null otherwise.
-    return Frame() && _domWindow ? &_domWindow->GetLocation() : nullptr;
   }
 
   void Document::DispatchPagehideEvent(bool persisted) noexcept
@@ -4099,8 +3979,7 @@ namespace krys::boo::dom
 
   void Document::WillBeRemovedFromFrame() noexcept
   {
-    // FIXME: Unload, page hide and the other steps of unloading the document; the back/forward cache suspends
-    // the document's active objects rather than stopping them.
+    // FIXME: Unload, page hide and the other steps of unloading the document.
     StopActiveDOMObjects();
     _selection->WillBeRemovedFromFrame();
 
@@ -4579,8 +4458,7 @@ namespace krys::boo::dom
 
   void Document::ScheduleStyleRecalc() noexcept
   {
-    if (_styleRecalcTimer.IsActive()
-        || _backForwardCacheState != BackForwardCacheState::NotInBackForwardCache)
+    if (_styleRecalcTimer.IsActive())
     {
       return;
     }

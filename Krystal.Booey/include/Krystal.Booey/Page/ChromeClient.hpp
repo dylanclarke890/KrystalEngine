@@ -99,17 +99,6 @@ namespace krys::boo
       return null;
     }
 
-    /// @brief The page asks the user to confirm leaving it (its `beforeunload` was cancelled), with
-    /// @p message (its `returnValue`).
-    /// @return Whether to leave: true without a host.
-    KRYS_NODISCARD virtual bool RunBeforeUnloadConfirmPanel(const dom::DOMString &message,
-                                                            LocalFrame &frame) noexcept
-    {
-      (void)message;
-      (void)frame;
-      return true;
-    }
-
     /// @brief The page asks to be printed (`print()`); the host decides.
     virtual void Print(LocalFrame &frame) noexcept
     {

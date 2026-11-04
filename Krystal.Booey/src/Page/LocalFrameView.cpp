@@ -1280,7 +1280,6 @@ namespace krys::boo
     auto firstLayout = !_layoutContext.DidFirstLayout();
     if (firstLayout)
     {
-      _firstLayoutCallbackPending = true;
       _lastViewportSize = SizeForResizeEvent();
       _lastUsedZoomFactor = layoutRoot.Style().UsedZoom();
       _lastFrameScaleFactor = Frame().FrameScaleFactor();
@@ -1297,16 +1296,6 @@ namespace krys::boo
       {
         MarkRootOrBodyRendererDirty();
       }
-    }
-  }
-
-  void LocalFrameView::FireLayoutRelatedMilestonesIfNeeded() noexcept
-  {
-    // FIXME: The page's other layout milestones (visually non-empty), once a client asks for them.
-    if (_firstLayoutCallbackPending)
-    {
-      _firstLayoutCallbackPending = false;
-      Frame().Loader().DidFirstLayout();
     }
   }
 

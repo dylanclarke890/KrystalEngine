@@ -52,7 +52,7 @@ namespace krys::boo::tests
     return received;
   }
 
-  /// @brief A document in a page whose host records form submissions (and ignores them).
+  /// @brief A document in a page whose host records form submissions.
   struct FormFixture : style::tests::ResolverFixture
   {
     RecordingFrameLoaderClient *LoaderClient {nullptr};
@@ -63,7 +63,6 @@ namespace krys::boo::tests
         : ResolverFixture(u8"<!DOCTYPE html>" + utf8_string(markup), style::tests::WithView::No)
     {
       auto loaderClient = CreateUnique<RecordingFrameLoaderClient>();
-      loaderClient->Policy = PolicyAction::Ignore;
       loaderClient->OnRecord = [this](const ReceivedNavigation &navigation)
       {
         if (navigation.Submission)

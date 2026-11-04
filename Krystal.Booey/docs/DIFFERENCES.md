@@ -14,8 +14,8 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `CustomEvent`'s `detail` is typed by the host rather than `any`: `CustomEvent<T>` holds a `Maybe<T>`, empty for null.
 - JavaScript values (`any`) are `SerializedScriptValue`, a reference-counted base class the host derives from. There is no structured serialization, and so no `structuredClone()`.
 - `IntersectionObserver` is notified directly in the rendering update, where the specification queues a task.
-- `DOMContentLoaded` fires synchronously at the end of parsing (`FinishedParsing`), where the specification queues a task. `load` fires from a later task (`CheckCompleted`, then `ImplicitClose`), and `hashchange` is queued on the window.
-- Event handler content attributes (`onclick="..."`) are scripts and stay inert: setting one doesn't replace a C++ handler as the specification's would. Handlers are set from C++ with `On<Name>()`/`SetOn<Name>()`. They're `Func<void(dom::Event &)>` and cancel with `PreventDefault()`, so `onerror`'s arguments and `onbeforeunload`'s return value don't exist.
+- `DOMContentLoaded` fires synchronously at the end of parsing (`FinishedParsing`), where the specification queues a task. `load` fires from a later task (`CheckCompleted`, then `ImplicitClose`).
+- Event handler content attributes (`onclick="..."`) are scripts and stay inert: setting one doesn't replace a C++ handler as the specification's would. Handlers are set from C++ with `On<Name>()`/`SetOn<Name>()`. They're `Func<void(dom::Event &)>` and cancel with `PreventDefault()`, so `onerror`'s arguments don't exist.
 - A listener's global, whose current event `event` is, is the current target's window (`EventDispatcher::RelevantWindow`), since listeners are host code without realms. Other targets, such as signals and media query lists, set no current event (FIXME).
 - Nodes are equal when their node types match, where the specification asks for the same interfaces: an `HTMLDocument` equals an `XMLDocument` with equal children.
 - Documents have no origin and no base URL override, so cloning a document copies neither: the copy's base URL comes from its own URL and `<base>` element. `new Document()` skips setting its origin, and getting the base URL is the document base URL.
@@ -243,16 +243,13 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
-- `popstate` fires as the frame goes to the entry (also for fragment navigations), not in one task with `hashchange` (FIXME).
-- `history.pushState()` and `replaceState()` throw `SecurityError` when called more than 100 times in 10 seconds, and `QuotaExceededError` past 64 MB of state. The specification's limit (allowed to perform a navigation or history update) returns without an exception. Script-initiated Navigation API navigations past that rate limit reject their promises with `QuotaExceededError`.
+- Booey doesn't navigate by itself: following a link, `window.open()` and submitting a form hand the navigation to the host, which loads what it wants. Only a link to a fragment of the document in its own browsing context navigates, within the document.
+- There is no session history: no `History`, `Navigation` or `Location` (`window.location`, `document.location`), no back/forward cache (`pageshow` and `pagehide` are never persisted), and no `popstate`, `hashchange`, `beforeunload` or `BeforeUnloadEvent`. `<meta http-equiv=refresh>` is ignored.
 - A response of a type that's neither HTML, XML nor text (one the specification would hand off to other software, or download) is loaded as an HTML document of that type.
-- In quirks mode, a fragment finds an `a` element by its `name` ASCII case-insensitively (`Document::FindAnchor`), and `beforeunload` isn't fired at a document without a body.
-- Session history is `HistoryItem`s in the page's back/forward list, moved through by `FrameLoader`, `HistoryController` and `NavigationScheduler` tasks, rather than session history entries with steps applied by a traversable's session history traversal queue. The order of events in navigations, reloads and traversals matches the specification's where tests check it.
-- An intercepted `reload` navigation with no fragment, or one that matches nothing, restores the scroll position rather than scrolling to the beginning, and updates the Navigation API entries, as Chrome does.
-- A `navigate` event's `userInitiated` is whether the window has transient activation, as there's no user involvement to pass, and a traversal's `cancelable` doesn't check for history-action activation. `hasUAVisualTransition` is always false.
+- In quirks mode, a fragment finds an `a` element by its `name` ASCII case-insensitively (`Document::FindAnchor`).
 - `postMessage()` only reaches the window itself, with the window as the incumbent; `reportError()` takes a message and an optional value, without a script location.
 - A document's visibility state is its page's (hidden without one), so `visibilityState` changes as soon as the host shows or hides the page and `visibilitychange` follows in a task (`Document::VisibilityStateChanged`); the specification sets the state in that task. There is no `VisibilityStateEntry`, as there's no performance timeline.
-- `window.open()` navigates an existing browsing context, or asks the client's new-window policy and returns null for a new one (there are no other windows to return).
+- `window.open()` hands the navigation to the host, for an existing browsing context or a new one, and returns null for a new one (there are no other windows to return).
 - The initial `about:blank` document, which never loads, prints at once rather than after its load event.
 - Timers clamp differently: a timeout is raised to 4 ms only once timers are nested 10 deep (5 for intervals), where the specification clamps beyond a nesting level of 5, and an interval repeats at a fixed rate rather than being set again after each run.
 - Animation frame callbacks are given the frame's timestamp rounded to whole milliseconds.

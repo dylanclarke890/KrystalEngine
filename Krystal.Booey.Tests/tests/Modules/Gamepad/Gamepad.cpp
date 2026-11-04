@@ -414,9 +414,9 @@ namespace krys::boo::tests
     // Stopping the document's active objects stops the effect playing.
     results.clear();
     actuator->PlayEffect(GamepadHapticEffectType::DualRumble, {.Duration = 100}, record(u8"fourth"));
-    fixture.Document->SuspendActiveDOMObjects(dom::ReasonForSuspension::BackForwardCache);
+    fixture.Document->SuspendActiveDOMObjects(dom::ReasonForSuspension::PageWillBeSuspended);
     CHECK(provider.Stops == 2);
-    fixture.Document->ResumeActiveDOMObjects(dom::ReasonForSuspension::BackForwardCache);
+    fixture.Document->ResumeActiveDOMObjects(dom::ReasonForSuspension::PageWillBeSuspended);
     runTasks();
     CHECK(results == List<std::string> {"fourth preempted"});
 

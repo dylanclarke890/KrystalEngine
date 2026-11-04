@@ -404,7 +404,7 @@ namespace krys::ui::tests
   {
     boo::MemoryCache::Singleton().EvictResources();
     View view({1'200, 600});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    FollowLinks(view);
     auto page = gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html";
     REQUIRE(view.LoadFile(page).has_value());
     WaitForLoad(view);

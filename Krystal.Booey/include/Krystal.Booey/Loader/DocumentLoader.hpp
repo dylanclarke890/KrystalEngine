@@ -41,7 +41,6 @@ namespace krys::boo
     bool _committed {false};
     bool _isStopping {false};
     bool _gotFirstByte {false};
-    bool _isClientRedirect {false};
 
     DocumentLoader(ResourceRequest &&request, Maybe<SubstituteData> &&substituteData) noexcept;
 
@@ -73,17 +72,6 @@ namespace krys::boo
     KRYS_NODISCARD const url::URL &URLForHistory() const noexcept
     {
       return DocumentURL();
-    }
-
-    /// @brief Whether the load replaces the document that started it in the session history (a redirect, or a
-    /// location change before it loaded).
-    KRYS_NODISCARD bool IsClientRedirect() const noexcept
-    {
-      return _isClientRedirect;
-    }
-    void SetIsClientRedirect(bool isClientRedirect) noexcept
-    {
-      _isClientRedirect = isClientRedirect;
     }
 
     KRYS_NODISCARD const Maybe<SubstituteData> &GetSubstituteData() const noexcept

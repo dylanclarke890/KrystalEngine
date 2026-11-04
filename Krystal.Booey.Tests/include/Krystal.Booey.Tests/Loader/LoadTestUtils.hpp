@@ -23,37 +23,20 @@ namespace krys::boo::tests
     return std::string(reinterpret_cast<const char *>(text.data()), text.size());
   }
 
-  /// @brief Records what the loader tells the host, and allows every navigation.
+  /// @brief Records what the loader tells the host.
   class LoadRecordingClient final : public LocalFrameLoaderClient
   {
   public:
     List<std::string> &Events;
-    PolicyAction Policy {PolicyAction::Use};
-    /// @brief Whether pages may enter the back/forward cache.
-    bool CachePages {true};
 
     explicit LoadRecordingClient(List<std::string> &events) noexcept : Events(events)
     {
     }
 
-    KRYS_NODISCARD PolicyAction DispatchDecidePolicyForNavigationAction(
-      const NavigationAction &action, const ResourceRequest &, const FormSubmission *) noexcept override
+    void DispatchNavigationRequested(const NavigationAction &, const ResourceRequest &request,
+                                     const FormSubmission *) noexcept override
     {
-      Events.push_back(action.IsRequestFromClientOrUserInput() ? "policy (host)" : "policy");
-      return Policy;
-    }
-
-    KRYS_NODISCARD PolicyAction DispatchDecidePolicyForNewWindowAction(const NavigationAction &,
-                                                                       const ResourceRequest &,
-                                                                       const FormSubmission *,
-                                                                       dom::DOMStringView) noexcept override
-    {
-      return PolicyAction::Ignore;
-    }
-
-    KRYS_NODISCARD bool CanCachePage() const noexcept override
-    {
-      return CachePages;
+      Events.push_back("navigation to " + Narrow(request.URL().String()));
     }
 
     void DispatchDidStartProvisionalLoad() noexcept override
@@ -94,22 +77,14 @@ namespace krys::boo::tests
     }
   };
 
-  /// @brief Answers whether to leave a page, and records the alerts shown and print requests.
+  /// @brief Records the alerts shown and print requests.
   struct LeavingChromeClient final : ChromeClient
   {
-    bool Leave {true};
-    uint32 ConfirmPanels {0};
     List<std::string> Alerts;
     uint32 PrintRequests {0};
 
     void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
     {
-    }
-
-    KRYS_NODISCARD bool RunBeforeUnloadConfirmPanel(const dom::DOMString &, LocalFrame &) noexcept override
-    {
-      ++ConfirmPanels;
-      return Leave;
     }
 
     void RunJavaScriptAlert(LocalFrame &, const dom::DOMString &message) noexcept override

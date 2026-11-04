@@ -111,10 +111,6 @@ namespace krys::boo
     /// @brief Tries the URL's text directives again while the page may still be loading their text.
     Timer _scrollToTextFragmentRetryTimer;
     Maybe<MonotonicTime::duration> _scrollToTextFragmentInitialAttemptTime;
-    /// @brief The scroll position as the document entered the back/forward cache.
-    ScrollPosition _cachedScrollPosition;
-    /// @brief Whether the frame's loader is still to hear of the first layout.
-    bool _firstLayoutCallbackPending {false};
     /// @brief How the user last scrolled the view, if they did.
     Maybe<UserScrollType> _lastUserScrollType;
     bool _wasEverScrolledExplicitlyByUser {false};
@@ -493,9 +489,6 @@ namespace krys::boo
     /// (or the body) for layout if the size content is laid out at changed.
     void WillDoLayout(const RenderElement &layoutRoot) noexcept;
 
-    /// @brief After a layout: tells the frame's loader of its first layout, once.
-    void FireLayoutRelatedMilestonesIfNeeded() noexcept;
-
     /// @brief Whether the user can scroll the view: it has overflow, and `overflow` doesn't hide both axes.
     KRYS_NODISCARD bool IsScrollable() const noexcept;
     /// @brief Scrolls the view by a step of @p granularity in a direction relative to the document's writing
@@ -719,17 +712,6 @@ namespace krys::boo
     void ScheduleSelectionUpdate() noexcept;
     /// @brief Cancels a scroll to the focused element that hasn't happened yet.
     void CancelScheduledScrolls() noexcept;
-
-    /// @brief Keeps the scroll position, as the view's document enters the back/forward cache.
-    void CacheCurrentScrollState() noexcept
-    {
-      _cachedScrollPosition = GetScrollPosition();
-    }
-
-    KRYS_NODISCARD const ScrollPosition &CachedScrollPosition() const noexcept
-    {
-      return _cachedScrollPosition;
-    }
 
     /// @brief Whether the user scrolled the view (since the view was made, or its last user scroll type was
     /// cleared).

@@ -91,8 +91,7 @@ namespace krys::boo::tests
       {
         auto client = CreateUnique<TestDragClient>();
         Client = client.get();
-        TestPage =
-          Page::Create(nullptr, CreateUnique<TestEditorClient>(), nullptr, nullptr, krys::move(client));
+        TestPage = Page::Create(nullptr, CreateUnique<TestEditorClient>(), nullptr, krys::move(client));
         Frame = ShareRefPtr(&TestPage->MainFrame());
         Frame->CreateView({400, 300});
         Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));

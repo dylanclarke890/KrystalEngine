@@ -1767,22 +1767,9 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
 )
 
 set(KRYSTAL_BOOEY_HISTORY_HEADERS
-  include/Krystal.Booey/History/BackForwardCache.hpp
-  include/Krystal.Booey/History/BackForwardClient.hpp
-  include/Krystal.Booey/History/BackForwardController.hpp
-  include/Krystal.Booey/History/BackForwardList.hpp
-  include/Krystal.Booey/History/CachedFrame.hpp
-  include/Krystal.Booey/History/CachedPage.hpp
-  include/Krystal.Booey/History/HistoryItem.hpp
 )
 
 set(KRYSTAL_BOOEY_HISTORY_SOURCES
-  src/History/BackForwardCache.cpp
-  src/History/BackForwardController.cpp
-  src/History/BackForwardList.cpp
-  src/History/CachedFrame.cpp
-  src/History/CachedPage.cpp
-  src/History/HistoryItem.cpp
 )
 
 set(KRYSTAL_BOOEY_HTML_HEADERS
@@ -1920,12 +1907,9 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Elements/HTMLVideoElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp
   include/Krystal.Booey/HTML/EventLoop/EventLoop.hpp
-  include/Krystal.Booey/HTML/Events/BeforeUnloadEvent.hpp
   include/Krystal.Booey/HTML/Events/ErrorEvent.hpp
-  include/Krystal.Booey/HTML/Events/HashChangeEvent.hpp
   include/Krystal.Booey/HTML/Events/MessageEvent.hpp
   include/Krystal.Booey/HTML/Events/PageTransitionEvent.hpp
-  include/Krystal.Booey/HTML/Events/PopStateEvent.hpp
   include/Krystal.Booey/HTML/Events/SubmitEvent.hpp
   include/Krystal.Booey/HTML/Forms/Autofill.hpp
   include/Krystal.Booey/HTML/Forms/DOMFormData.hpp
@@ -1980,7 +1964,6 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/MicroParsers/MicroParserError.hpp
   include/Krystal.Booey/HTML/MicroParsers/MicroParserResult.hpp
   include/Krystal.Booey/HTML/MicroParsers/Numbers.hpp
-  include/Krystal.Booey/HTML/MicroParsers/Refresh.hpp
   include/Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp
   include/Krystal.Booey/HTML/Mixins/URLDecomposition.hpp
   include/Krystal.Booey/HTML/Parser/CharacterReference.hpp
@@ -2132,12 +2115,9 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Elements/HTMLVideoElement.cpp
   src/HTML/Elements/HTMLWBRElement.cpp
   src/HTML/EventLoop/EventLoop.cpp
-  src/HTML/Events/BeforeUnloadEvent.cpp
   src/HTML/Events/ErrorEvent.cpp
-  src/HTML/Events/HashChangeEvent.cpp
   src/HTML/Events/MessageEvent.cpp
   src/HTML/Events/PageTransitionEvent.cpp
-  src/HTML/Events/PopStateEvent.cpp
   src/HTML/Events/SubmitEvent.cpp
   src/HTML/Forms/Autofill.cpp
   src/HTML/Forms/DOMFormData.cpp
@@ -2179,7 +2159,6 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Internals/HTMLElementFactory.cpp
   src/HTML/Internals/InlineStyleSheetOwner.cpp
   src/HTML/MicroParsers/Numbers.cpp
-  src/HTML/MicroParsers/Refresh.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
   src/HTML/Mixins/URLDecomposition.cpp
   src/HTML/Parser/DocumentParser.cpp
@@ -2396,13 +2375,11 @@ set(KRYSTAL_BOOEY_LOADER_HEADERS
   include/Krystal.Booey/Loader/FrameLoader.hpp
   include/Krystal.Booey/Loader/FrameLoaderTypes.hpp
   include/Krystal.Booey/Loader/FrameLoadRequest.hpp
-  include/Krystal.Booey/Loader/HistoryController.hpp
   include/Krystal.Booey/Loader/ImageLoader.hpp
   include/Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp
   include/Krystal.Booey/Loader/LoaderStrategy.hpp
   include/Krystal.Booey/Loader/LocalFrameLoaderClient.hpp
   include/Krystal.Booey/Loader/NavigationAction.hpp
-  include/Krystal.Booey/Loader/NavigationScheduler.hpp
   include/Krystal.Booey/Loader/ResourceLoaderOptions.hpp
   include/Krystal.Booey/Loader/SubstituteData.hpp
 )
@@ -2420,10 +2397,8 @@ set(KRYSTAL_BOOEY_LOADER_SOURCES
   src/Loader/FormSubmission.cpp
   src/Loader/FrameLoader.cpp
   src/Loader/FrameLoadRequest.cpp
-  src/Loader/HistoryController.cpp
   src/Loader/ImageLoader.cpp
   src/Loader/NavigationAction.cpp
-  src/Loader/NavigationScheduler.cpp
 )
 
 set(KRYSTAL_BOOEY_MATHML_HEADERS
@@ -2500,7 +2475,6 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/EventHandler.hpp
   include/Krystal.Booey/Page/External.hpp
   include/Krystal.Booey/Page/FrameSnapshotting.hpp
-  include/Krystal.Booey/Page/History.hpp
   include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp
   include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverCallback.hpp
   include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp
@@ -2509,18 +2483,8 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/LocalFrame.hpp
   include/Krystal.Booey/Page/LocalFrameView.hpp
   include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
-  include/Krystal.Booey/Page/Location.hpp
   include/Krystal.Booey/Page/MouseEventTypes.hpp
   include/Krystal.Booey/Page/MouseEventWithHitTestResults.hpp
-  include/Krystal.Booey/Page/Navigation/NavigateEvent.hpp
-  include/Krystal.Booey/Page/Navigation/Navigation.hpp
-  include/Krystal.Booey/Page/Navigation/NavigationActivation.hpp
-  include/Krystal.Booey/Page/Navigation/NavigationCurrentEntryChangeEvent.hpp
-  include/Krystal.Booey/Page/Navigation/NavigationDestination.hpp
-  include/Krystal.Booey/Page/Navigation/NavigationHistoryEntry.hpp
-  include/Krystal.Booey/Page/Navigation/NavigationNavigationType.hpp
-  include/Krystal.Booey/Page/Navigation/NavigationPromise.hpp
-  include/Krystal.Booey/Page/Navigation/NavigationTransition.hpp
   include/Krystal.Booey/Page/Navigator.hpp
   include/Krystal.Booey/Page/Page.hpp
   include/Krystal.Booey/Page/PointerCaptureController.hpp
@@ -2550,19 +2514,12 @@ set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/Drag/DragController.cpp
   src/Page/EventHandler.cpp
   src/Page/FrameSnapshotting.cpp
-  src/Page/History.cpp
   src/Page/IntersectionObserver/IntersectionObserver.cpp
   src/Page/IntersectionObserver/IntersectionObserverEntry.cpp
   src/Page/LocalDOMWindow.cpp
   src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
-  src/Page/Location.cpp
-  src/Page/Navigation/NavigateEvent.cpp
-  src/Page/Navigation/Navigation.cpp
-  src/Page/Navigation/NavigationCurrentEntryChangeEvent.cpp
-  src/Page/Navigation/NavigationHistoryEntry.cpp
-  src/Page/Navigation/NavigationPromise.cpp
   src/Page/Navigator.cpp
   src/Page/Page.cpp
   src/Page/PointerCaptureController.cpp

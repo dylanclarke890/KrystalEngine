@@ -3,7 +3,6 @@
 #include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
-#include "Krystal.Booey/Page/Navigation/NavigationNavigationType.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom
@@ -17,7 +16,6 @@ namespace krys::boo
 {
   /// @brief A navigation as the host is asked about it: the URL, what started it (a link, a form) and the
   /// input event that did.
-  // FIXME: User gestures, back and forward items and the requester's origin.
   class NavigationAction : public FrameLoadRequestBase
   {
   public:
@@ -49,26 +47,13 @@ namespace krys::boo
     Maybe<UIEventWithKeyStateData> _keyStateEventData;
     Maybe<MouseEventData> _mouseEventData;
     NavigationType _type {NavigationType::Other};
-    Maybe<NavigationNavigationType> _navigationAPIType;
 
   public:
     NavigationAction() noexcept;
-
-    /// @brief The Navigation API's type of the navigation, if it's one the API reports.
-    KRYS_NODISCARD Maybe<NavigationNavigationType> NavigationAPIType() const noexcept
-    {
-      return _navigationAPIType;
-    }
-    void SetNavigationAPIType(Maybe<NavigationNavigationType> navigationAPIType) noexcept
-    {
-      _navigationAPIType = navigationAPIType;
-    }
-    NavigationAction(const ResourceRequest &originalRequest, FrameLoadType frameLoadType,
-                     bool isFormSubmission, dom::Event *event = nullptr,
+    NavigationAction(const ResourceRequest &originalRequest, bool isFormSubmission,
+                     dom::Event *event = nullptr,
                      dom::DOMStringAtom downloadAttribute = dom::DOMStringAtom::Null(),
                      dom::Element *sourceElement = nullptr) noexcept;
-    NavigationAction(FrameLoadRequest &request, NavigationType type = NavigationType::Other,
-                     dom::Event *event = nullptr) noexcept;
     ~NavigationAction() noexcept;
     NavigationAction(const NavigationAction &) noexcept;
     NavigationAction &operator=(const NavigationAction &) noexcept;

@@ -118,7 +118,7 @@ namespace krys::boo::html::tests
 
   TEST_CASE("HTMLAnchorElement: Enter follows a focused link", "[HTML][HTMLAnchorElement]")
   {
-    NavigationFixture fixture(u8R"(<a id=a href="#section">Section</a>)");
+    NavigationFixture fixture(u8R"(<a id=a href="other.html">Other</a>)");
     auto &a = fixture.Get<HTMLAnchorElement>(u8"a");
     (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
     a.Focus();
@@ -133,7 +133,7 @@ namespace krys::boo::html::tests
 
     REQUIRE(fixture.Navigations().size() == 1);
     auto &navigation = fixture.Navigations()[0];
-    CHECK(navigation.URL == "https://example.com/dir/page.html#section");
+    CHECK(navigation.URL == "https://example.com/dir/other.html");
     // The simulated click's underlying key press has the modifiers.
     REQUIRE(navigation.Action.KeyStateEventData());
     CHECK(navigation.Action.KeyStateEventData()->ShiftKey);

@@ -69,7 +69,6 @@ namespace krys::boo
   class IntersectionObserver;
   class LocalDOMWindow;
   class LocalFrame;
-  class Location;
   class LocalFrameView;
   class Locale;
   class RenderElement;
@@ -137,14 +136,6 @@ namespace krys::boo::html
 namespace krys::boo::dom
 {
   enum class PopoverState : uint8;
-  /// @brief Where a document is in entering the back/forward cache.
-  enum class BackForwardCacheState : uint8
-  {
-    NotInBackForwardCache,
-    /// @brief Its page is leaving it: `pagehide` fires before it's cached.
-    AboutToEnterBackForwardCache,
-    InBackForwardCache
-  };
 
   /// @brief Various flags used for optimizations in the Document class.
   enum class DocumentFlags : uint16
@@ -180,8 +171,6 @@ namespace krys::boo::dom
   {
     JavaScriptDebuggerPaused,
     WillDeferLoading,
-    /// @brief The document is in the back/forward cache.
-    BackForwardCache,
     /// @brief The host suspended the page.
     PageWillBeSuspended
   };
@@ -326,7 +315,6 @@ namespace krys::boo::dom
     // The element the pointer was pressed on: the chain of its ancestors stays `:active` until it's released.
     RefPtr<Element> _activeElement;
     bool _isFocusedAndActive {true};
-    BackForwardCacheState _backForwardCacheState {BackForwardCacheState::NotInBackForwardCache};
     Maybe<ReasonForSuspension> _reasonForSuspendingActiveDOMObjects;
     bool _isSuspended {false};
     List<WeakPtr<Element>> _documentSuspensionCallbackElements;
@@ -418,8 +406,6 @@ namespace krys::boo::dom
     uint32 _loadEventDelayCount {0};
     /// @see https://html.spec.whatwg.org/#unload-counter
     uint32 _unloadCounter {0};
-    /// @see https://html.spec.whatwg.org/#will-declaratively-refresh
-    bool _willDeclarativelyRefresh {false};
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
     DOMString _contentLanguage;
     /// @brief The document's timers (`setTimeout()`, `setInterval()`), by ID.
@@ -642,9 +628,6 @@ namespace krys::boo::dom
 
     // FIXME: Check - do we need to implement these?
     // resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
-
-    /// @see https://html.spec.whatwg.org/#dom-document-location
-    // [ PutForwards = href, LegacyUnforgeable ] readonly attribute Location? location;
 
     /// @see https://html.spec.whatwg.org/#dom-document-domain
     // attribute USVString domain;
@@ -1279,18 +1262,9 @@ namespace krys::boo::dom
     /// it.
     void DidRemoveAllPendingStylesheet() noexcept;
 
-    /// @brief Queues a task to fire `hashchange` from @p oldURL to @p newURL.
-    void EnqueueHashchangeEvent(dom::USVString oldURL, dom::USVString newURL) noexcept;
-
     /// @brief Whether the document is its frame's (its navigable's active document).
     /// @see https://html.spec.whatwg.org/#fully-active
     KRYS_NODISCARD bool IsFullyActive() const noexcept;
-
-    /// @brief The frame went to a history entry of the document with @p stateObject: fires `popstate`.
-    void StatePopped(RefPtr<html::SerializedScriptValue> &&stateObject) noexcept;
-
-    /// @brief Gives the document @p url, which `pushState()` or `replaceState()` set.
-    void UpdateURLForPushOrReplaceState(const url::URL &url) noexcept;
 
     /// @brief The document's custom highlights, which `::highlight()` styles.
     /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-css-highlights
@@ -1518,10 +1492,6 @@ namespace krys::boo::dom
       _isDirAttributeDirty = true;
     }
 
-    /// @brief The window's `Location`, while the document is fully active; null otherwise.
-    /// @see https://html.spec.whatwg.org/#dom-document-location
-    KRYS_NODISCARD boo::Location *GetLocation() const noexcept;
-
     /// @brief Fires `pagehide` at the window if the document is showing.
     /// @see https://html.spec.whatwg.org/#unload-a-document
     void DispatchPagehideEvent(bool persisted) noexcept;
@@ -1591,7 +1561,7 @@ namespace krys::boo::dom
       return _activeDOMObjectsAreStopped;
     }
 
-    /// @brief Suspends the document (as it enters the back/forward cache): its tasks wait, and its timers,
+    /// @brief Suspends the document (as the host hides it): its tasks wait, and its timers,
     /// animation frame callbacks, animations and layout stop, until it's resumed for the same @p reason.
     void Suspend(ReasonForSuspension reason) noexcept;
     void Resume(ReasonForSuspension reason) noexcept;
@@ -1629,17 +1599,6 @@ namespace krys::boo::dom
       return _reasonForSuspendingActiveDOMObjects;
     }
 
-    KRYS_NODISCARD BackForwardCacheState GetBackForwardCacheState() const noexcept
-    {
-      return _backForwardCacheState;
-    }
-
-    /// @brief Notes where the document is in entering the back/forward cache: as it's cached, its view's
-    /// scroll position is kept, and its style resolver and pending style update go.
-    void SetBackForwardCacheState(BackForwardCacheState state) noexcept;
-
-    /// @brief Detaches the document, now in the back/forward cache, from its frame.
-    void DetachFromCachedFrame() noexcept;
     /// @brief Queues a task on @p source that fires @p event at the document's window, if it has one then.
     void QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<Event> &&event) noexcept;
     /// @brief Queues a task on @p source that fires @p event at the document.

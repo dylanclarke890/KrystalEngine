@@ -24,7 +24,6 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Navigation/Navigation.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/SpatialNavigation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -1498,15 +1497,6 @@ namespace krys::boo::html
       element->SetFocus(true, visibility);
 
       document.ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Focused);
-
-      // The focus moved while a navigation is ongoing: its finish doesn't reset it.
-      if (auto *window = document.Window())
-      {
-        if (auto *navigation = window->NavigationIfExists())
-        {
-          navigation->SetFocusChanged(FocusDidChange::Yes);
-        }
-      }
     }
 
     if (auto *editorClient = document.GetEditor().Client())

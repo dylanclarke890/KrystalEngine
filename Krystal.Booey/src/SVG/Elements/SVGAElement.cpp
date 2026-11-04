@@ -184,7 +184,7 @@ namespace krys::boo::svg
     if (RefPtr<LocalFrame> frame = ShareRefPtr(document->Frame()))
     {
       frame->Loader().ChangeLocation(completedURL, target, &event, referrerPolicy, newFrameOpenerPolicy,
-                                     dom::DOMStringAtom::Null(), NavigationHistoryBehavior::Auto, this);
+                                     dom::DOMStringAtom::Null(), this);
     }
   }
 

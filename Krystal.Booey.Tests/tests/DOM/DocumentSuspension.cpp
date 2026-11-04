@@ -34,7 +34,7 @@ namespace krys::boo::tests
       }
     };
 
-    constexpr auto Reason = dom::ReasonForSuspension::BackForwardCache;
+    constexpr auto Reason = dom::ReasonForSuspension::PageWillBeSuspended;
   }
 
   TEST_CASE("A suspended document's tasks wait until it resumes", "[DOM][Document][Suspension]")
@@ -63,7 +63,7 @@ namespace krys::boo::tests
 
     SECTION("resuming for another reason doesn't resume it")
     {
-      document.ResumeScheduledTasks(dom::ReasonForSuspension::PageWillBeSuspended);
+      document.ResumeScheduledTasks(dom::ReasonForSuspension::WillDeferLoading);
       CHECK(document.ScheduledTasksAreSuspended());
       eventLoop.RunUntilIdle();
       CHECK(fired == 0);
@@ -133,35 +133,4 @@ namespace krys::boo::tests
     CHECK(frames == 1);
   }
 
-  TEST_CASE("A document's back/forward cache state", "[DOM][Document][Suspension]")
-  {
-    SuspensionFixture fixture;
-    auto &document = fixture.Document();
-    CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::NotInBackForwardCache);
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::AboutToEnterBackForwardCache);
-    CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::AboutToEnterBackForwardCache);
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::InBackForwardCache);
-    CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::InBackForwardCache);
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::NotInBackForwardCache);
-    CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::NotInBackForwardCache);
-  }
-
-  TEST_CASE("A document in the back/forward cache doesn't recalculate its style",
-            "[DOM][Document][Suspension]")
-  {
-    SuspensionFixture fixture;
-    auto &document = fixture.Document();
-    auto &eventLoop = html::EventLoop::Current();
-    document.UpdateStyleIfNeeded();
-
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::InBackForwardCache);
-    (void)document.Body()->FirstElementChild()->SetAttribute(u8"style", u8"color: blue");
-    eventLoop.RunUntilIdle();
-    CHECK(document.HasPendingStyleRecalc());
-
-    // Leaving the cache schedules it.
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::NotInBackForwardCache);
-    eventLoop.RunUntilIdle();
-    CHECK_FALSE(document.HasPendingStyleRecalc());
-  }
 }

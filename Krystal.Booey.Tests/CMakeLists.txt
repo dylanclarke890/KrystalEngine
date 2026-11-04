@@ -436,18 +436,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
-		tests/Loader/HistoryController.cpp
-		tests/History/BackForwardList.cpp
 		tests/HTML/Forms/Autofill.cpp
-		tests/HTML/Forms/FormController.cpp
 		tests/HTML/Forms/FormListedElement.cpp
 		tests/HTML/Forms/ValidatedFormListedElement.cpp
 		tests/DOM/DocumentColorScheme.cpp
 		tests/DOM/DocumentSuspension.cpp
-		tests/History/BackForwardCache.cpp
-		tests/Page/History.cpp
-		tests/Page/Navigation/Navigation.cpp
-		tests/HTML/MicroParsers/Refresh.cpp
 		tests/Rendering/FloatingObjects.cpp
 		tests/Rendering/GeneratedContent/RenderListItem.cpp
 		tests/Rendering/GeneratedContent/RenderListMarker.cpp

@@ -35,8 +35,6 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/BeforeUnloadEvent.hpp"
-#include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
@@ -243,12 +241,10 @@ namespace krys::boo::dom::tests
       return event.ReleaseValue();
     };
 
-    CHECK(Is<html::BeforeUnloadEvent>(*create(u8"beforeunloadevent")));
     CHECK(Is<CompositionEvent>(*create(u8"compositionevent")));
     CHECK(dynamic_cast<CustomEvent<RefPtr<html::SerializedScriptValue>> *>(&*create(u8"customevent")));
     CHECK(Is<DragEvent>(*create(u8"dragevent")));
     CHECK(Is<FocusEvent>(*create(u8"focusevent")));
-    CHECK(Is<html::HashChangeEvent>(*create(u8"hashchangeevent")));
     CHECK(Is<KeyboardEvent>(*create(u8"keyboardevent")));
     CHECK(Is<html::MessageEvent>(*create(u8"messageevent")));
     CHECK(Is<MouseEvent>(*create(u8"mouseevent")));
@@ -279,9 +275,9 @@ namespace krys::boo::dom::tests
             "[DOM][Document][Event][dom:dom-document-createevent]")
   {
     auto document = CreateRef<HTMLDocument>();
-    for (auto name :
-         {u8"", u8"foo", u8"mouseeventz", u8"devicemotionevent", u8"deviceorientationevent", u8"wheelevent",
-          u8"keyboardevents", u8"popstateevent", u8"mutationevent", u8"storageevent"})
+    for (auto name : {u8"", u8"foo", u8"mouseeventz", u8"devicemotionevent", u8"deviceorientationevent",
+                      u8"wheelevent", u8"keyboardevents", u8"popstateevent", u8"mutationevent",
+                      u8"storageevent", u8"beforeunloadevent", u8"hashchangeevent"})
     {
       auto event = document->CreateEvent(name);
       REQUIRE(event.HasException());
@@ -295,7 +291,7 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<HTMLDocument>();
     auto &loop = html::EventLoop::Current();
     loop.Run(loop.Now() + std::chrono::milliseconds(3));
-    auto event = document->CreateEvent(u8"beforeunloadevent").ReleaseValue();
+    auto event = document->CreateEvent(u8"focusevent").ReleaseValue();
 
     CHECK(event->Type().View().empty());
     CHECK_FALSE(event->Bubbles());

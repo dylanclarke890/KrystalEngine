@@ -244,12 +244,7 @@ namespace krys::boo
     }
 
     // The post-layout tasks: the animations layout brought into view resume, the fragment's target is
-    // scrolled back into view, the window is told if the viewport resized, and the loader of the first
-    // layout.
-    if (!IsLayoutNested() && Document()->DocumentElement())
-    {
-      _frameView.FireLayoutRelatedMilestonesIfNeeded();
-    }
+    // scrolled back into view, and the window is told if the viewport resized.
     _frameView.ViewportContentsChanged();
     _frameView.ScheduleScrollToAnchorAndTextFragment();
     _frameView.ScheduleResizeEventIfNeeded();

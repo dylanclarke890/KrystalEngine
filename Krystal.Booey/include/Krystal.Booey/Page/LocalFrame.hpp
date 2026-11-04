@@ -5,7 +5,6 @@
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -36,7 +35,6 @@ namespace krys::boo
     RefPtr<LocalFrameView> _view;
     UniquePtr<EventHandler> _eventHandler;
     UniquePtr<FrameLoader> _loader;
-    UniquePtr<NavigationScheduler> _navigationScheduler;
     css::mq::MediaEnvironment _mediaEnvironment;
     /// @see https://html.spec.whatwg.org/#nav-target
     dom::DOMString _specifiedName;
@@ -55,16 +53,10 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<LocalFrame>
       Create(Page *page = nullptr, UniquePtr<LocalFrameLoaderClient> loaderClient = nullptr) noexcept;
 
-    /// @brief Navigates the frame: links and form submissions go through it.
+    /// @brief Loads documents into the frame; links and form submissions go through it to the host.
     KRYS_NODISCARD FrameLoader &Loader() const noexcept
     {
       return *_loader;
-    }
-
-    /// @brief The frame's navigations to come (redirects, location changes, form submissions).
-    KRYS_NODISCARD NavigationScheduler &GetNavigationScheduler() const noexcept
-    {
-      return *_navigationScheduler;
     }
 
     /// @brief How the document's subresources use the memory cache, unless the load type has a policy (a

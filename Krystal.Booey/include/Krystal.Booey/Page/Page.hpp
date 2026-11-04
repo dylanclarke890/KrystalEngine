@@ -2,7 +2,6 @@
 
 #include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
-#include "Krystal.Booey/History/BackForwardClient.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
@@ -26,11 +25,9 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
-  class BackForwardController;
   class DragCaretController;
   class DragController;
   class GraphicsContext;
-  class HistoryItem;
   class LocalFrame;
   class PointerCaptureController;
   class PointerLockController;
@@ -41,7 +38,6 @@ namespace krys::boo
   // update.
   enum class RenderingUpdateStep : uint8
   {
-    RestoreScrollPositionAndViewState,
     FlushAutofocusCandidates,
     Resize,
     Scroll,
@@ -60,7 +56,7 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 16uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 15uz);
 
 namespace krys::boo
 {
@@ -77,7 +73,6 @@ namespace krys::boo
   private:
     UniquePtr<ChromeClient> _chromeClient;
     UniquePtr<EditorClient> _editorClient;
-    UniquePtr<BackForwardController> _backForwardController;
     UniquePtr<PointerCaptureController> _pointerCaptureController;
     UniquePtr<PointerLockController> _pointerLockController;
     UniquePtr<DragController> _dragController;
@@ -93,11 +88,10 @@ namespace krys::boo
     bool _isClosing {false};
     bool _isVisible {true};
     bool _scriptedAnimationsSuspended {false};
-    /// @brief The page's session storage (its top-level traversable's), by origin.
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
 
     Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-         RefPtr<BackForwardClient> &&backForwardClient, UniquePtr<DragClient> dragClient) noexcept;
+         UniquePtr<DragClient> dragClient) noexcept;
 
   public:
     ~Page() noexcept;
@@ -108,13 +102,10 @@ namespace krys::boo
     /// client.
     /// @param mainFrameLoaderClient The host's side of the main frame's loader; without one, the main frame
     /// ignores navigations.
-    /// @param backForwardClient The page's back/forward list; without one, the page keeps it in memory (a
-    /// `BackForwardList`).
     /// @param dragClient The host's side of drags in the page; without one, no drag starts in the page.
     KRYS_NODISCARD static Ref<Page> Create(UniquePtr<ChromeClient> chromeClient = nullptr,
                                            UniquePtr<EditorClient> editorClient = nullptr,
                                            UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient = nullptr,
-                                           RefPtr<BackForwardClient> backForwardClient = nullptr,
                                            UniquePtr<DragClient> dragClient = nullptr) noexcept;
 
     KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
@@ -168,12 +159,6 @@ namespace krys::boo
     /// @brief Resumes the paused animated images visible in the main frame's view.
     void ResumeAnimatingImages() noexcept;
 
-    /// @brief The page's session history.
-    KRYS_NODISCARD BackForwardController &BackForward() const noexcept
-    {
-      return *_backForwardController;
-    }
-
     /// @brief The page's pointers and the elements capturing them.
     KRYS_NODISCARD PointerCaptureController &GetPointerCaptureController() const noexcept
     {
@@ -213,16 +198,6 @@ namespace krys::boo
     // FIXME: The rest of what the page resets (the sampled top color, element targeting and the like), once
     // there are those.
     void DidChangeMainDocument(dom::Document *newDocument) noexcept;
-
-    /// @brief Goes to @p item in @p frame (back or forward), once the frame's load stops, if it's for another
-    /// document.
-    void GoToItem(LocalFrame &frame, HistoryItem &item, FrameLoadType type) noexcept;
-
-    /// @brief Goes to @p item in @p frame for the Navigation API (`traverseTo()`): if its `navigate` is
-    /// canceled, @p tracker's promises are rejected.
-    void GoToItemForNavigationAPI(LocalFrame &frame, HistoryItem &item, FrameLoadType type,
-                                  LocalFrame &triggeringFrame,
-                                  struct NavigationAPIMethodTracker *tracker) noexcept;
 
     /// @brief Whether the page's window asked to be closed (its top-level traversable's is closing).
     /// @see https://html.spec.whatwg.org/#is-closing
@@ -274,9 +249,6 @@ namespace krys::boo
 
     /// @brief Brings the style and layout of the page's documents up to date.
     void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
-
-    /// @brief Destroys the render trees of the page's documents, as the page enters the back/forward cache.
-    void DestroyRenderTrees() noexcept;
 
     void ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept;
     /// @brief Calls @p functor for each document that's rendered.

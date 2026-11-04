@@ -10,8 +10,6 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
-#include "Krystal.Booey/History/BackForwardCache.hpp"
-#include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
@@ -75,7 +73,6 @@ namespace krys::ui
     Func<Maybe<utf8_string>(const utf8_string &, const utf8_string &)> _promptHandler;
     Func<void()> _printHandler;
     Func<void(const ConsoleMessage &)> _consoleMessageHandler;
-    Func<bool(const utf8_string &)> _beforeUnloadHandler;
     Func<void(const utf8_string &, const utf8_string &, bool)> _protocolHandlerRequestHandler;
 
   public:
@@ -127,17 +124,6 @@ namespace krys::ui
       }
       auto result = _promptHandler(message, defaultValue);
       return result ? Maybe<boo::dom::DOMString>(boo::dom::DOMString(*result)) : null;
-    }
-
-    KRYS_NODISCARD bool RunBeforeUnloadConfirmPanel(const boo::dom::DOMString &message,
-                                                    boo::LocalFrame &) noexcept override
-    {
-      return !_beforeUnloadHandler || _beforeUnloadHandler(message);
-    }
-
-    void SetBeforeUnloadHandler(Func<bool(const utf8_string &)> &&handler) noexcept
-    {
-      _beforeUnloadHandler = krys::move(handler);
     }
 
     void Print(boo::LocalFrame &) noexcept override
@@ -360,7 +346,7 @@ namespace krys::ui
   {
   private:
     View *_view {nullptr};
-    Func<NavigationPolicy(const NavigationRequest &)> _navigationHandler;
+    Func<void(const NavigationRequest &)> _navigationHandler;
     Maybe<utf8_string> _userAgent;
     Func<void(const LoadEvent &)> _loadHandler;
 
@@ -380,25 +366,11 @@ namespace krys::ui
 
     void DispatchDidCommitLoad() noexcept override
     {
-      // A page from the back/forward cache commits once it's restored, so the host sees its document.
-      if (_view && _view->Frame().Loader().IsLoadingFromCachedPage())
-      {
-        return;
-      }
       if (_view)
       {
         _view->DidCommitLoad();
       }
       Notify({LoadEventType::Committed, {}});
-    }
-
-    void DidRestoreFromBackForwardCache() noexcept override
-    {
-      if (_view)
-      {
-        _view->DidCommitLoad();
-      }
-      Notify({LoadEventType::Committed, {}, true});
     }
 
     void DispatchDidFinishLoad() noexcept override
@@ -439,19 +411,17 @@ namespace krys::ui
       _userAgent = krys::move(userAgent);
     }
 
-    KRYS_NODISCARD boo::PolicyAction
-      DispatchDecidePolicyForNavigationAction(const boo::NavigationAction &action,
-                                              const boo::ResourceRequest &request,
-                                              const boo::FormSubmission *formSubmission) noexcept override
+    void DispatchNavigationRequested(const boo::NavigationAction &action, const boo::ResourceRequest &request,
+                                     const boo::FormSubmission *formSubmission) noexcept override
     {
-      return Decide(action, request, formSubmission, {});
+      Request(action, request, formSubmission, {});
     }
 
-    KRYS_NODISCARD boo::PolicyAction DispatchDecidePolicyForNewWindowAction(
-      const boo::NavigationAction &action, const boo::ResourceRequest &request,
-      const boo::FormSubmission *formSubmission, boo::dom::DOMStringView frameName) noexcept override
+    void DispatchNewWindowRequested(const boo::NavigationAction &action, const boo::ResourceRequest &request,
+                                    const boo::FormSubmission *formSubmission,
+                                    boo::dom::DOMStringView frameName) noexcept override
     {
-      return Decide(action, request, formSubmission, frameName);
+      Request(action, request, formSubmission, frameName);
     }
 
     void SetView(View *view) noexcept
@@ -459,7 +429,7 @@ namespace krys::ui
       _view = view;
     }
 
-    void SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept
+    void SetNavigationHandler(Func<void(const NavigationRequest &)> &&handler) noexcept
     {
       _navigationHandler = krys::move(handler);
     }
@@ -467,15 +437,13 @@ namespace krys::ui
   private:
     /// @param newWindowName The browsing context a new window would be; null (a null view) for the view's
     /// own.
-    KRYS_NODISCARD boo::PolicyAction Decide(const boo::NavigationAction &action,
-                                            const boo::ResourceRequest &request,
-                                            const boo::FormSubmission *formSubmission,
-                                            boo::dom::DOMStringView newWindowName) const noexcept
+    void Request(const boo::NavigationAction &action, const boo::ResourceRequest &request,
+                 const boo::FormSubmission *formSubmission,
+                 boo::dom::DOMStringView newWindowName) const noexcept
     {
-      // The host's own loads aren't asked about.
-      if (!_navigationHandler || action.IsRequestFromClientOrUserInput())
+      if (!_navigationHandler)
       {
-        return boo::PolicyAction::Use;
+        return;
       }
 
       NavigationRequest navigation;
@@ -521,14 +489,7 @@ namespace krys::ui
           }
         }
       }
-      if (_view && !navigation.OpensNewWindow && navigation.Method == u8"GET")
-      {
-        navigation.IsSameDocument =
-          !boo::FrameLoader::ShouldReload(_view->Document().GetURL(), request.URL());
-      }
-
-      return _navigationHandler(navigation) == NavigationPolicy::Allow ? boo::PolicyAction::Use
-                                                                       : boo::PolicyAction::Ignore;
+      _navigationHandler(navigation);
     }
   };
 
@@ -569,19 +530,12 @@ namespace krys::ui
   }
 
   View::View(const boo::IntSize &viewportSize) noexcept
-      : _backForwardList(boo::BackForwardList::Create()),
-        _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateEditorClient(_editorClient),
-                                CreateFrameLoaderClient(_frameLoaderClient), _backForwardList,
-                                CreateDragClient(_dragClient))),
+      : _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateEditorClient(_editorClient),
+                                CreateFrameLoaderClient(_frameLoaderClient), CreateDragClient(_dragClient))),
         _frame(ShareRef(_page->MainFrame()))
   {
     static std::once_flag valuePool;
     std::call_once(valuePool, [] { boo::css::StaticValuePool::Init(); });
-
-    // The back/forward cache keeps a few pages, unless the host sizes it.
-    static std::once_flag backForwardCache;
-    std::call_once(backForwardCache,
-                   [] { boo::BackForwardCache::Singleton().SetMaxSize(DefaultBackForwardCacheCapacity); });
 
     auto &strategies = boo::PlatformStrategies::Singleton();
     if (!strategies.GetLoaderStrategy())
@@ -664,7 +618,7 @@ namespace krys::ui
 
   void View::Stop() noexcept
   {
-    _frame->Loader().StopForUserCancel();
+    _frame->Loader().StopAllLoaders();
   }
 
   void View::SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept
@@ -672,46 +626,15 @@ namespace krys::ui
     _frameLoaderClient->SetLoadHandler(krys::move(handler));
   }
 
-  bool View::CanGoBack() const noexcept
-  {
-    return _page->BackForward().CanGoBackOrForward(-1);
-  }
-
-  bool View::CanGoForward() const noexcept
-  {
-    return _page->BackForward().CanGoBackOrForward(1);
-  }
-
-  bool View::GoBack() noexcept
-  {
-    bool wentBack = _page->BackForward().GoBack();
-    PerformMicrotaskCheckpoint();
-    return wentBack;
-  }
-
-  bool View::GoForward() noexcept
-  {
-    bool wentForward = _page->BackForward().GoForward();
-    PerformMicrotaskCheckpoint();
-    return wentForward;
-  }
-
-  void View::GoToItem(boo::HistoryItem &item) noexcept
-  {
-    _page->GoToItem(*_frame, item, boo::FrameLoadType::IndexedBackForward);
-    PerformMicrotaskCheckpoint();
-  }
-
   void View::Reload() noexcept
   {
-    _frame->Loader().Reload(true);
+    _frame->Loader().Reload();
     PerformMicrotaskCheckpoint();
   }
 
   void View::DidCommitLoad() noexcept
   {
-    // A committed document (a new one, or one the back/forward cache restored) takes the window's focus and
-    // is painted; the old one's overlay goes.
+    // A committed document takes the window's focus and is painted; the old one's overlay goes.
     if (_overlay)
     {
       _overlay->Hide();
@@ -1225,19 +1148,9 @@ namespace krys::ui
       return;
     }
 
-    bool handled = _frame->GetEventHandler().HandleMouseReleaseEvent(MouseEvent(
+    (void)_frame->GetEventHandler().HandleMouseReleaseEvent(MouseEvent(
       boo::PlatformEvent::Type::MouseReleased, point, button, _clickCount, input::ToBooey(modifiers)));
     PerformMicrotaskCheckpoint();
-
-    // The mouse's back and forward buttons go back and forward, unless the page handled them.
-    if (!handled && button == boo::MouseButton::Back)
-    {
-      (void)GoBack();
-    }
-    else if (!handled && button == boo::MouseButton::Forward)
-    {
-      (void)GoForward();
-    }
   }
 
   void View::MouseLeft() noexcept
@@ -1919,19 +1832,6 @@ namespace krys::ui
     _heldKeyValues.insert_or_assign(key, event.Key());
     bool handled = _frame->GetEventHandler().KeyEvent(event);
     PerformMicrotaskCheckpoint();
-
-    // Alt+Left and Alt+Right go back and forward, unless the page handled them.
-    if (!handled && modifiers == pal::KeyModifiers {pal::KeyModifier::Alt})
-    {
-      if (key == pal::Key::LeftArrow)
-      {
-        return GoBack();
-      }
-      if (key == pal::Key::RightArrow)
-      {
-        return GoForward();
-      }
-    }
     return handled;
   }
 
@@ -2345,7 +2245,7 @@ namespace krys::ui
     return _page->IsVisible();
   }
 
-  void View::SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept
+  void View::SetNavigationHandler(Func<void(const NavigationRequest &)> &&handler) noexcept
   {
     _frameLoaderClient->SetNavigationHandler(krys::move(handler));
   }
@@ -2389,11 +2289,6 @@ namespace krys::ui
   void View::SetPrintHandler(Func<void()> &&handler) noexcept
   {
     _chromeClient->SetPrintHandler(krys::move(handler));
-  }
-
-  void View::SetBeforeUnloadHandler(Func<bool(const utf8_string &)> &&handler) noexcept
-  {
-    _chromeClient->SetBeforeUnloadHandler(krys::move(handler));
   }
 
   void View::SetConsoleMessageHandler(Func<void(const ConsoleMessage &)> &&handler) noexcept

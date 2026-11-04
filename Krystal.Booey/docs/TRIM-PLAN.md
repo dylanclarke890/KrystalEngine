@@ -16,14 +16,16 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
   everything in a standard"), with a "not planned" list: scripting, network loads and HTTP semantics, origins and
   the security model, printing and pagination, session history and navigation, subframes, plugins, view
   transitions, async scrolling, rubber-banding, reflections, text autosizing.
-- [ ] **1. History.** Remove `History/` (`BackForwardCache`, `CachedPage`, `CachedFrame`,
-  `BackForwardList`/`Controller`/`Client`, `HistoryItem`) and `Loader/HistoryController`. Krystal.UI `View`:
-  remove `GoBack`/`GoForward`/`CanGoBack`/`CanGoForward`/`GoToItem`/`GetBackForwardList`, `FromBackForwardCache`,
-  `DidRestoreFromBackForwardCache`, `DefaultBackForwardCacheCapacity`. `Forms/FormController`: remove saving and
-  restoring form state to history items. `pageshow`/`pagehide` stay (`persisted` always false).
+- [x] **1. Session history and navigation** (with the window APIs that navigate and the navigation part of
+  step 3, as `FrameLoader` tied them together). Removed `History/`, `HistoryController`, `NavigationScheduler`,
+  `Refresh`, `Page/History`, `Page/Navigation/`, `Page/Location`, `PopStateEvent`, `HashChangeEvent`,
+  `BeforeUnloadEvent`; `FrameLoader` loads only what the host asks and hands links and form submissions to the
+  host; `View`'s back/forward and before-unload handler; the Editor's router and history buttons.
+- [ ] **1b. Form state.** `Forms/FormController`'s saving and restoring of form control state (nothing restores
+  it now), the controls' `SaveFormControlState`/`RestoreFormControlState`, and form-associated custom elements'
+  `Restore` callback.
 - [ ] **2. Window APIs.**
-  - Remove `Page/Navigation/` (with `NavigationPromise`), `Page/History`, `PopStateEvent`, `HashChangeEvent`,
-    `Page/Location`, `Page/Navigator` (with `Plugins/` and `View`'s user-agent override; check `Languages`
+  - Remove `Page/Navigator` (with `Plugins/` and `View`'s user-agent override; check `Languages`
     readers first), `BarProp`, `External`, `WindowFeatures`, `Screen` (and `MediaEnvironment::ScreenAvailableRect`;
     keep `ScreenSize` and the depth fields for media queries), the `UserActivation` object (the window's
     activation state stays).
@@ -31,17 +33,13 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
     `moveTo`/`moveBy`/`resizeTo`/`resizeBy`, `screenX`/`screenY`, `status`, `postMessage`, `atob`/`btoa`,
     `window.event` (and the `_currentEvent` save/restore in `EventDispatcher.cpp`), `captureEvents`/
     `releaseEvents`, `clientInformation`, `reportError`, the origin and secure-context getters, the frame-tree
-    getters. Trim `ChromeClient` to match.
+    getters. Trim `ChromeClient` to match, and `FrameLoadRequest`/`NavigationAction`'s window features and
+    opener policy.
   - Remove `MessageEvent`, `ErrorEvent` (and the special `onerror` handling in `EventTarget.cpp`),
-    `BeforeUnloadEvent`, `Types/SerializedScriptValue`.
+    `Types/SerializedScriptValue`.
   - Console: remove `ConsoleTypes`, `ChromeClient::AddMessageToConsole`, `View::SetConsoleMessageHandler`/
     `ConsoleMessage`. A future inspector gets its own diagnostics channel.
-- [ ] **3. Navigation goes to the host.** Booey doesn't navigate itself: link activation and form submission go
-  to `View`'s navigation handler, and documents load only when the host asks. Fragment links still scroll within
-  the document (no history entry, no `hashchange`).
-  - Shrink `FrameLoader` to loading a request into the main frame: no history items, cached pages, scheduled
-    navigation, `navigate`/`beforeunload` plumbing or target lookup.
-  - Remove `NavigationScheduler` and `MicroParsers/Refresh`.
+- [ ] **3. Navigation leftovers.** (Navigation itself went to the host in step 1.)
   - `FormSubmission`: keep the entry list and the `submit` event, hand the data to the host; remove the URL and
     body encoding with `Platform/Network/FormData` and `FormDataBuilder`.
   - Drag and drop: remove the "load the dropped URL" action.

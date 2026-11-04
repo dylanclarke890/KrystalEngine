@@ -252,7 +252,7 @@ namespace krys::boo::html
     auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : dom::DOMStringAtom::Null();
     frame->Loader().ChangeLocation(urlRecord, targetAttributeValue, &event, HyperlinkReferrerPolicy(subject),
                                    noopener ? NewFrameOpenerPolicy::Suppress : NewFrameOpenerPolicy::Allow,
-                                   download, NavigationHistoryBehavior::Push, &subject);
+                                   download, &subject);
 
     // FIXME: Pings (the ping attribute), once there are network loads.
   }

@@ -42,49 +42,27 @@ namespace krys::boo
       return std::nullopt;
     }
 
-    KRYS_NODISCARD NavigationType GetNavigationType(FrameLoadType frameLoadType, bool isFormSubmission,
-                                                    bool haveEvent) noexcept
+    KRYS_NODISCARD NavigationType GetNavigationType(bool isFormSubmission, bool haveEvent) noexcept
     {
       if (isFormSubmission)
       {
         return NavigationType::FormSubmitted;
       }
-      if (haveEvent)
-      {
-        return NavigationType::LinkClicked;
-      }
-      if (IsReload(frameLoadType))
-      {
-        return NavigationType::Reload;
-      }
-      if (IsBackForwardLoadType(frameLoadType))
-      {
-        return NavigationType::BackForward;
-      }
-      return NavigationType::Other;
+      return haveEvent ? NavigationType::LinkClicked : NavigationType::Other;
     }
   }
 
   NavigationAction::NavigationAction() noexcept = default;
 
-  NavigationAction::NavigationAction(const ResourceRequest &originalRequest, FrameLoadType frameLoadType,
-                                     bool isFormSubmission, dom::Event *event,
-                                     dom::DOMStringAtom downloadAttribute,
+  NavigationAction::NavigationAction(const ResourceRequest &originalRequest, bool isFormSubmission,
+                                     dom::Event *event, dom::DOMStringAtom downloadAttribute,
                                      dom::Element *sourceElement) noexcept
       : _originalRequest(originalRequest), _keyStateEventData(KeyStateDataForFirstEventWithKeyState(event)),
         _mouseEventData(MouseEventDataForFirstMouseEvent(event)),
-        _type(GetNavigationType(frameLoadType, isFormSubmission, event != nullptr))
+        _type(GetNavigationType(isFormSubmission, event != nullptr))
   {
     SetDownloadAttribute(downloadAttribute);
     SetSourceElement(sourceElement);
-  }
-
-  NavigationAction::NavigationAction(FrameLoadRequest &request, NavigationType type,
-                                     dom::Event *event) noexcept
-      : FrameLoadRequestBase(request), _originalRequest(request.GetResourceRequest()),
-        _keyStateEventData(KeyStateDataForFirstEventWithKeyState(event)),
-        _mouseEventData(MouseEventDataForFirstMouseEvent(event)), _type(type)
-  {
   }
 
   NavigationAction::~NavigationAction() noexcept = default;

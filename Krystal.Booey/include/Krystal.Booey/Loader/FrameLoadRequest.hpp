@@ -25,19 +25,8 @@ namespace krys::boo
     RefPtr<dom::Element> _sourceElement;
     Maybe<WindowFeatures> _windowFeatures;
     bool _isRequestFromClientOrUserInput {false};
-    bool _isFromNavigationAPI {false};
 
   public:
-    /// @brief Whether the Navigation API started the navigation (`navigation.navigate()`, `reload()`).
-    KRYS_NODISCARD bool IsFromNavigationAPI() const noexcept
-    {
-      return _isFromNavigationAPI;
-    }
-    void SetIsFromNavigationAPI(bool isFromNavigationAPI) noexcept
-    {
-      _isFromNavigationAPI = isFromNavigationAPI;
-    }
-
     KRYS_NODISCARD NewFrameOpenerPolicy GetNewFrameOpenerPolicy() const noexcept
     {
       return _newFrameOpenerPolicy;
@@ -96,7 +85,6 @@ namespace krys::boo
 
   /// @brief A request to load a URL into a frame: what's loaded, from which document, into which browsing
   /// context.
-  // FIXME: History locking, client redirects and the security origin.
   class FrameLoadRequest : public FrameLoadRequestBase
   {
   private:
@@ -104,7 +92,6 @@ namespace krys::boo
     ResourceRequest _resourceRequest;
     dom::DOMStringAtom _frameName;
     ReferrerPolicy _referrerPolicy {ReferrerPolicy::EmptyString};
-    NavigationHistoryBehavior _navigationHistoryBehavior {NavigationHistoryBehavior::Auto};
     Maybe<SubstituteData> _substituteData;
 
   public:
@@ -165,15 +152,6 @@ namespace krys::boo
     void SetReferrerPolicy(ReferrerPolicy referrerPolicy) noexcept
     {
       _referrerPolicy = referrerPolicy;
-    }
-
-    KRYS_NODISCARD NavigationHistoryBehavior GetNavigationHistoryBehavior() const noexcept
-    {
-      return _navigationHistoryBehavior;
-    }
-    void SetNavigationHistoryBehavior(NavigationHistoryBehavior historyHandling) noexcept
-    {
-      _navigationHistoryBehavior = historyHandling;
     }
   };
 }

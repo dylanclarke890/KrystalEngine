@@ -4,7 +4,6 @@
 #include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -66,22 +65,13 @@ namespace krys::boo::tests
     CHECK(document.FindAnchor(u8"missing") == nullptr);
   }
 
-  TEST_CASE(
-    "Fragment navigation",
-    "[Loader][FragmentNavigation][html:the-hashchangeevent-interface][html:dom-hashchangeevent-oldurl]"
-    "[html:dom-hashchangeevent-newurl]")
+  TEST_CASE("Fragment navigation", "[Loader][FragmentNavigation]")
   {
     FragmentFixture fixture;
-    List<std::pair<std::string, std::string>> hashChanges;
-    // hashchange fires at the window, trusted.
-    auto handle = fixture.Document->Window()->AddEventListener<html::HashChangeEvent>(
-      u8"hashchange",
-      [&](html::HashChangeEvent &event)
-      {
-        CHECK(event.IsTrusted());
-        CHECK(event.Target().get() == fixture.Document->Window());
-        hashChanges.emplace_back(Str(event.OldURL()), Str(event.NewURL()));
-      });
+    // There's no hashchange: Booey has no session history.
+    uint32 hashChanges = 0;
+    auto handle =
+      fixture.Document->Window()->AddEventListener(u8"hashchange", [&](dom::Event &) { ++hashChanges; });
 
     SECTION("a link to a fragment scrolls its target into view and makes it the target")
     {
@@ -98,10 +88,7 @@ namespace krys::boo::tests
       // The heading isn't focusable: the viewport is focused, and navigation starts from the heading.
       CHECK(fixture.Document->FocusedElement() == nullptr);
       CHECK(fixture.Document->SequentialFocusNavigationStartingPoint() == &fixture.ById(u8"section"));
-
-      REQUIRE(hashChanges.size() == 1);
-      CHECK(hashChanges[0].first == "https://example.com/dir/page.html");
-      CHECK(hashChanges[0].second == "https://example.com/dir/page.html#section");
+      CHECK(hashChanges == 0);
     }
 
     SECTION("a focusable target is focused")
@@ -124,7 +111,6 @@ namespace krys::boo::tests
       fixture.Navigate(u8"#section");
       fixture.Navigate(u8"#");
       CHECK(fixture.ScrollY() == 0);
-      CHECK(hashChanges.size() == 4);
     }
 
     SECTION("names and percent-encoded IDs")
@@ -144,16 +130,14 @@ namespace krys::boo::tests
       CHECK(fixture.DocumentURL() == "https://example.com/dir/page.html#nothing");
       CHECK(fixture.Target() == nullptr);
       CHECK(fixture.ScrollY() == scrollY);
-      CHECK(hashChanges.size() == 2);
     }
 
-    SECTION("the same fragment again scrolls again, without a hashchange")
+    SECTION("the same fragment again scrolls again")
     {
       fixture.Navigate(u8"#section");
       fixture.Frame->View()->SetScrollPosition({0, 0});
       fixture.Navigate(u8"#section");
       CHECK(fixture.TopOf(u8"section") == 0);
-      CHECK(hashChanges.size() == 1);
     }
   }
 

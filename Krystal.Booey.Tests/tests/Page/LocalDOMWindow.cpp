@@ -1042,20 +1042,24 @@ namespace krys::boo::tests
     CHECK_FALSE(window.HasTransientActivation());
     CHECK(window.HasStickyActivation());
 
-    // An existing browsing context is navigated, without activation.
-    auto self = window.Open(u8"#here", dom::DOMStringAtom(u8"_self"));
+    // An existing browsing context is navigated, without activation: to another document by the host, and to
+    // a fragment of the document within it.
+    auto self = window.Open(u8"next.html", dom::DOMStringAtom(u8"_self"));
     REQUIRE_FALSE(self.HasException());
     CHECK(self.Value() == &window);
     REQUIRE(navigations.size() == 2);
     CHECK_FALSE(navigations[1].IsNewWindow);
-    CHECK(navigations[1].URL == "https://example.com/dir/page.html#here");
+    CHECK(navigations[1].URL == "https://example.com/dir/next.html");
+    (void)window.Open(u8"#here", dom::DOMStringAtom(u8"_self"));
+    CHECK(navigations.size() == 2);
+    CHECK(fixture.Document->GetURL().String() == u8"https://example.com/dir/page.html#here");
 
     // With noopener, an existing browsing context is returned only for _self, _parent and _top.
     window.SetName(u8"main");
     auto named = window.Open(u8"#named", dom::DOMStringAtom(u8"main"), u8"noopener");
     REQUIRE_FALSE(named.HasException());
     CHECK(named.Value() == nullptr);
-    CHECK(navigations.size() == 3);
+    CHECK(fixture.Document->GetURL().String() == u8"https://example.com/dir/page.html#named");
     auto selfNoOpener = window.Open(u8"", dom::DOMStringAtom(u8"_SELF"), u8"noopener");
     REQUIRE_FALSE(selfNoOpener.HasException());
     CHECK(selfNoOpener.Value() == &window);
