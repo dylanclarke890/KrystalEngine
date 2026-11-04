@@ -9,10 +9,10 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
-#include "Krystal.Booey/Style/Builder.hpp"
+#include "Krystal.Booey/Style/Builder/Builder.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
-#include "Krystal.Booey/Style/MatchResult.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Rules/MatchResult.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 

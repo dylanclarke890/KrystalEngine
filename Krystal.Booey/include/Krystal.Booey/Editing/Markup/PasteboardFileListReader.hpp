@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/FileAPI/File.hpp"
-#include "Krystal.Booey/Platform/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 
 namespace krys::boo
 {

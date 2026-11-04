@@ -7,10 +7,10 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
-#include "Krystal.Booey/Platform/DragData.hpp"
-#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
-#include "Krystal.Booey/Rendering/RenderFileUploadControl.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
 
 namespace krys::boo::html
 {

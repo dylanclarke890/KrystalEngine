@@ -2,7 +2,7 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
-#include "Krystal.Booey/Rendering/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 
 namespace krys::boo::html
 {

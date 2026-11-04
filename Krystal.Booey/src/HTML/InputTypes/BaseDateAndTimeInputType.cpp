@@ -8,8 +8,8 @@
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/DateTimeChooserParameters.hpp"
-#include "Krystal.Booey/Platform/PlatformLocale.hpp"
+#include "Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp"
+#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include <charconv>
 #include <cmath>

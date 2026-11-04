@@ -48,7 +48,7 @@ How each area of Booey is put together, by area. `DIFFERENCES.md` and `KNOWN-ISS
 - `matchMedia()` is on `Document`. `MediaQueryList` change events are reported when the host calls `Document::EvaluateMediaQueriesAndReportChanges()` (for example after `SetMediaEnvironment`); `matches` keeps its result until then. `MediaQueryList` isn't an `ActiveDOMObject` and has no `onchange`.
 - Font-relative units in media queries resolve against the document element's user agent style, with the css-values-4 fallback metrics (ascent = font size, line spacing 1.2em, `ex` 0.5em, `ch` 0.5em, `ic` 1em) when there is no font data. Container query size features evaluate as unknown without a principal box; `style()` container queries evaluate fully.
 - Constructed `CSSStyleSheet`s use the document's base URL and parser context (default settings).
-- Generated builder and extractor code (`Style/BuilderGenerated.cpp`, `Style/ExtractorGenerated.cpp`) goes in the build's codegen directory (not committed) and is compiled with `/bigobj`.
+- Generated builder and extractor code (`Style/Builder/BuilderGenerated.cpp`, `Style/Extractor/ExtractorGenerated.cpp`) goes in the build's codegen directory (not committed) and is compiled with `/bigobj`.
 
 ## Style (cascade and computed values)
 

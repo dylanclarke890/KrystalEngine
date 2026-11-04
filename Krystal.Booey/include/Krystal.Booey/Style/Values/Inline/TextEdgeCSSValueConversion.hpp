@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Values/Inline/TextEdge.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Rendering/LegacyInlineIterator.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyInlineIterator.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include <functional>

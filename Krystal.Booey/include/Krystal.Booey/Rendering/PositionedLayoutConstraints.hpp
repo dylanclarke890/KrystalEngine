@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRange.hpp"
-#include "Krystal.Booey/Platform/ScrollTypes.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
 #include "Krystal.Booey/Style/Values/Box/Margin.hpp"

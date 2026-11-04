@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRange.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
-#include "Krystal.Booey/Platform/ScrollTypes.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderOverflow.hpp"
 #include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"

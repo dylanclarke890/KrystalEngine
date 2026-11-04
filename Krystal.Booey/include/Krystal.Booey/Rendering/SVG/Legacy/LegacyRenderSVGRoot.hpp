@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"

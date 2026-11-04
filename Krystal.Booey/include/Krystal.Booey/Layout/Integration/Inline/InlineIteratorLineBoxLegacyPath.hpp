@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxLegacyPath.hpp"
-#include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 

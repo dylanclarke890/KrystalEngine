@@ -40,7 +40,7 @@
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"

@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Color/AbsoluteColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorLayers.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorMix.hpp"

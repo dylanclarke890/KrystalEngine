@@ -2,11 +2,11 @@
 
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
-#include "Krystal.Booey/Rendering/LegacyInlineTextBox.hpp"
-#include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyInlineTextBox.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
+#include "Krystal.Booey/Rendering/Selection/TextBoxSelectableRange.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
-#include "Krystal.Booey/Rendering/TextBoxSelectableRange.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::inline_iterator

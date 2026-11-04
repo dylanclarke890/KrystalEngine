@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Rendering/LegacyInlineFlowBox.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"

@@ -42,13 +42,13 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/ScrollAlignment.hpp"
-#include "Krystal.Booey/Platform/StaticPasteboard.hpp"
-#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
-#include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 
 namespace krys::boo

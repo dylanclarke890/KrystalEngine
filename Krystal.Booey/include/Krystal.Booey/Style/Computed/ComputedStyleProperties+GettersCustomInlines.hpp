@@ -8,7 +8,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include "Krystal.Booey/Platform/ScrollTypes.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/PositionTryOrder.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleAppleColorFilterData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleBackdropFilterData.hpp"

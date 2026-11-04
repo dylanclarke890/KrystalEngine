@@ -3,8 +3,8 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
-#include "Krystal.Booey/Rendering/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

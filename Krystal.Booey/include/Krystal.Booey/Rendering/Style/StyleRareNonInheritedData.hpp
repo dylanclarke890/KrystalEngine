@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/Platform/ScrollTypes.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/CounterDirectives.hpp"
-#include "Krystal.Booey/Style/NameScope.hpp"
-#include "Krystal.Booey/Style/ScopedName.hpp"
+#include "Krystal.Booey/Style/Scope/NameScope.hpp"
+#include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/Align/GapGutter.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/AnchorName.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionAnchor.hpp"

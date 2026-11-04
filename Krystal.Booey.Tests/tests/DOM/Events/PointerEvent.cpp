@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include <numbers>
 
 namespace krys::boo::dom::tests

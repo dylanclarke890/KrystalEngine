@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
-#include "Krystal.Booey/Style/ScopeOrdinal.hpp"
+#include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"

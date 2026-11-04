@@ -9138,7 +9138,7 @@ class GeneratePropertyShorthandFunctions:
                     to.write("return {};")
 
 
-# Generates `Style/BuilderGenerated.cpp`.
+# Generates `Style/Builder/BuilderGenerated.cpp`.
 class GenerateStyleBuilderGenerated:
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
@@ -9393,19 +9393,19 @@ class GenerateStyleBuilderGenerated:
         to.write("}")
 
     def generate_style_builder_generated_cpp(self):
-        with open(self.generation_context.output_cpp_path("Style/BuilderGenerated.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Style/Builder/BuilderGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/Style/BuilderGenerated.hpp",
+                for_header="Krystal.Booey/Style/Builder/BuilderGenerated.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/Consumers/Font.hpp",
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp",
                     "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp",
-                    "Krystal.Booey/Style/BuilderCustom.hpp",
-                    "Krystal.Booey/Style/BuilderState.hpp",
-                    "Krystal.Booey/Style/BuilderStateInlines.hpp",
+                    "Krystal.Booey/Style/Builder/BuilderCustom.hpp",
+                    "Krystal.Booey/Style/Builder/BuilderState.hpp",
+                    "Krystal.Booey/Style/Builder/BuilderStateInlines.hpp",
                     "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp",
                 ],
             )
@@ -9415,7 +9415,7 @@ class GenerateStyleBuilderGenerated:
                 self._generate_style_builder_generated_cpp_builder_generated_apply(to=writer)
 
 
-# Generates `Style/ExtractorGenerated.cpp`.
+# Generates `Style/Extractor/ExtractorGenerated.cpp`.
 class GenerateStyleExtractorGenerated:
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
@@ -9697,20 +9697,20 @@ class GenerateStyleExtractorGenerated:
         )
 
     def generate_style_extractor_generated_cpp(self):
-        with open(self.generation_context.output_cpp_path("Style/ExtractorGenerated.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Style/Extractor/ExtractorGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/Style/ExtractorGenerated.hpp",
+                for_header="Krystal.Booey/Style/Extractor/ExtractorGenerated.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp",
                     "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp",
                     "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp",
-                    "Krystal.Booey/Style/ExtractorCustom.hpp",
-                    "Krystal.Booey/Style/ExtractorState.hpp",
+                    "Krystal.Booey/Style/Extractor/ExtractorCustom.hpp",
+                    "Krystal.Booey/Style/Extractor/ExtractorState.hpp",
                 ],
             )
 
@@ -9739,7 +9739,7 @@ class GenerateStyleInterpolationWrapperMap:
 
     def generate_css_property_animation_wrapper_map_h(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/Style/InterpolationWrapperMap.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Style/Interpolation/InterpolationWrapperMap.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -9758,12 +9758,12 @@ class GenerateStyleInterpolationWrapperMap:
                 self._generate_css_property_animation_wrapper_map_h_wrapper_map_declaration(to=writer)
 
     def generate_css_property_animation_wrapper_map_cpp(self):
-        with open(self.generation_context.output_cpp_path("Style/InterpolationWrapperMap.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Style/Interpolation/InterpolationWrapperMap.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/Style/InterpolationWrapperMap.hpp",
+                for_header="Krystal.Booey/Style/Interpolation/InterpolationWrapperMap.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
                     "Krystal.Core/Types/List.hpp",
@@ -9771,7 +9771,7 @@ class GenerateStyleInterpolationWrapperMap:
             )
 
             writer.write("#define STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP 1")
-            writer.write('#include "Krystal.Booey/Style/InterpolationWrappers.hpp"')
+            writer.write('#include "Krystal.Booey/Style/Interpolation/InterpolationWrappers.hpp"')
             writer.write("#undef STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP")
 
             with writer.namespace(namespace="krys::boo::style::interpolation"):
@@ -11941,16 +11941,16 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
 
     def generate_style_changed_animatable_properties_generated_cpp(self):
         with open(
-            self.generation_context.output_cpp_path("Style/ChangedAnimatablePropertiesGenerated.cpp"),
+            self.generation_context.output_cpp_path("Style/Interpolation/ChangedAnimatablePropertiesGenerated.cpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
 
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/Style/ChangedAnimatablePropertiesGenerated.hpp",
+                for_header="Krystal.Booey/Style/Interpolation/ChangedAnimatablePropertiesGenerated.hpp",
                 headers=[
-                    "Krystal.Booey/Style/ChangedAnimatablePropertiesCustom.hpp",
+                    "Krystal.Booey/Style/Interpolation/ChangedAnimatablePropertiesCustom.hpp",
                 ],
             )
             with writer.namespace(namespace="krys::boo::style"):

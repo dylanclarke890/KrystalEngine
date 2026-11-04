@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
-#include "Krystal.Booey/Rendering/BreakablePositions.hpp"
+#include "Krystal.Booey/Rendering/Line/BreakablePositions.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Booey/Text/CharacterProperties.hpp"

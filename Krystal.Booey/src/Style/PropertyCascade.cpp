@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/Style/PropertyAllowlist.hpp"
+#include "Krystal.Booey/Style/Rules/PropertyAllowlist.hpp"
 #include <algorithm>
 
 namespace krys::boo::style

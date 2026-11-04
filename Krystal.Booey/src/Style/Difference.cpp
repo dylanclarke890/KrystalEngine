@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
-#include "Krystal.Booey/Style/Extractor.hpp"
+#include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
 
 namespace krys::boo::style

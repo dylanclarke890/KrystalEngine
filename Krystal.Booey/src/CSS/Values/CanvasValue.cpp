@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/CanvasValue.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCanvasImage.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 
 namespace krys::boo::css
 {

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"

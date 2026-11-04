@@ -3,7 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/SVG/AnimationTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/Style/Extractor.hpp"
+#include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSetElement.hpp"

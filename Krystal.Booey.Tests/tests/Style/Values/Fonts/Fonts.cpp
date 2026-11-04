@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFamily.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFeatureSettings.hpp"

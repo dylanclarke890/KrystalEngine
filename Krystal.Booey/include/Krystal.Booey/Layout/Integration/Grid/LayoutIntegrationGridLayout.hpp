@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Layout/LayoutState.hpp"
-#include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"

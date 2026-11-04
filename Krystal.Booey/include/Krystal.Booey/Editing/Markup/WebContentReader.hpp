@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
-#include "Krystal.Booey/Platform/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <utility>
 

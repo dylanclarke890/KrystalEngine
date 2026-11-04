@@ -11,7 +11,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 
 namespace krys::boo::html::tests
 {

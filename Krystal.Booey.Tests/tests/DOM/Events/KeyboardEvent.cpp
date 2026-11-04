@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 
 namespace krys::boo::dom::tests
 {

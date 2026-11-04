@@ -17,7 +17,7 @@
 #include "Krystal.Booey/Graphics/Filters/SourceGraphic.hpp"
 #include "Krystal.Booey/Graphics/Filters/SpotLightSource.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
-#include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
+#include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo::tests

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
-#include "Krystal.Booey/Rendering/RenderProgress.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::html

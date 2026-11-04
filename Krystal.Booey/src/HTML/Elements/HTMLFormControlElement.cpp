@@ -11,7 +11,7 @@
 #include "Krystal.Booey/HTML/Forms/FormController.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 
 namespace krys::boo::html

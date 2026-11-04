@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFontElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Style/Extractor.hpp"
-#include "Krystal.Booey/Style/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/ResolveForFont.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include <algorithm>

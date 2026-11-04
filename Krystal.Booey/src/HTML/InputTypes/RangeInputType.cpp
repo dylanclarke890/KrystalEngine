@@ -7,7 +7,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
-#include "Krystal.Booey/Rendering/RenderSlider.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>

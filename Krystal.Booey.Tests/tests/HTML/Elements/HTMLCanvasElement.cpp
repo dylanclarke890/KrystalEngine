@@ -7,7 +7,7 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
 
 namespace krys::boo::tests
 {

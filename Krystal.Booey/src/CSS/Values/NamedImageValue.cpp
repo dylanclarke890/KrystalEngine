@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleNamedImage.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 
 namespace krys::boo::css
 {

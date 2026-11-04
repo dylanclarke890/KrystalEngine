@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextBoxPainter.hpp"
-#include "Krystal.Booey/Style/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include <cmath>
 #include <limits>
 

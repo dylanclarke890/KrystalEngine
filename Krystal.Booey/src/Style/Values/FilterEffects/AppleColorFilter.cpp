@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/AppleInvertLightnessFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/BrightnessFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/ContrastFunction.hpp"

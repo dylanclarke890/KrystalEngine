@@ -16,8 +16,8 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/StyleSheetContentsCache.hpp"
+#include "Krystal.Booey/Style/Rules/StyleSheetContentsCache.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Visitor.hpp"
 

@@ -3,10 +3,10 @@
 #include "Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Booey/Style/Builder.hpp"
+#include "Krystal.Booey/Style/Builder/Builder.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::css
 {

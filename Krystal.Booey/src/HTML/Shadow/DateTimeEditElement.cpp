@@ -8,8 +8,8 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/InputTypes/DateTimeFieldsState.hpp"
 #include "Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp"
-#include "Krystal.Booey/Platform/DateTimeFormat.hpp"
-#include "Krystal.Booey/Platform/PlatformLocale.hpp"
+#include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
+#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include <algorithm>
 #include <limits>

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/FilterEffects/AppleInvertLightnessFunction.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 
 namespace krys::boo::style
 {

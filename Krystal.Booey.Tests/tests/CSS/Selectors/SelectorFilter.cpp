@@ -7,9 +7,9 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Style/HasSelectorFilter.hpp"
-#include "Krystal.Booey/Style/RuleFeature.hpp"
-#include "Krystal.Booey/Style/SelectorMatchingState.hpp"
+#include "Krystal.Booey/Style/Invalidation/HasSelectorFilter.hpp"
+#include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
+#include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 
 namespace krys::boo::css::tests
 {

@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/SelectorMatchingState.hpp"
+#include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TreeResolutionState.hpp"
 #include "Krystal.Booey/Style/Update.hpp"

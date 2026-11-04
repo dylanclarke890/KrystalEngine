@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/Style/Interpolation.hpp"
+#include "Krystal.Booey/Style/Interpolation/Interpolation.hpp"
 #include <algorithm>
 
 namespace krys::boo

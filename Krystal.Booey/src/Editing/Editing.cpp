@@ -27,13 +27,13 @@
 #include "Krystal.Booey/HTML/Elements/HTMLUListElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
-#include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <unicode/uchar.h>
 

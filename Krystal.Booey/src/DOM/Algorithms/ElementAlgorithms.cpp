@@ -13,10 +13,10 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
-#include "Krystal.Booey/Style/AttributeChangeInvalidation.hpp"
-#include "Krystal.Booey/Style/ClassChangeInvalidation.hpp"
-#include "Krystal.Booey/Style/IdChangeInvalidation.hpp"
-#include "Krystal.Booey/Style/PseudoClassStateInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/AttributeChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/ClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/IdChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassStateInvalidation.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <utility>
 

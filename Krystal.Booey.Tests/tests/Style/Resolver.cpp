@@ -17,10 +17,10 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
-#include "Krystal.Booey/Style/RuleSet.hpp"
-#include "Krystal.Booey/Style/RuleSetBuilder.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/UserAgentStyle.hpp"
+#include "Krystal.Booey/Style/Rules/RuleSet.hpp"
+#include "Krystal.Booey/Style/Rules/RuleSetBuilder.hpp"
+#include "Krystal.Booey/Style/Rules/UserAgentStyle.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::style::tests
 {

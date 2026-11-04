@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Rendering/RenderImageResource.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGImageLoader.hpp"

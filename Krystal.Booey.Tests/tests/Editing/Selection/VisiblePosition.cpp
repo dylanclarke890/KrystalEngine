@@ -5,10 +5,10 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/RenderedPosition.hpp"
-#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
 
 namespace krys::boo::tests
 {

@@ -36,7 +36,7 @@
 #include "Krystal.Booey/Page/Screen.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Page/WindowFeatures.hpp"
-#include "Krystal.Booey/Platform/Language.hpp"
+#include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Base64.hpp"

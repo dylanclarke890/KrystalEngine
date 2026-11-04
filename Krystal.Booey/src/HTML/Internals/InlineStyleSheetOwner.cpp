@@ -7,8 +7,8 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/StyleSheetContentsCache.hpp"
+#include "Krystal.Booey/Style/Rules/StyleSheetContentsCache.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <utility>

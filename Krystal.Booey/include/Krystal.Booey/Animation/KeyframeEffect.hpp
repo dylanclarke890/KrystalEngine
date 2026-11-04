@@ -10,7 +10,7 @@
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
-#include "Krystal.Booey/Style/InterpolationClient.hpp"
+#include "Krystal.Booey/Style/Interpolation/InterpolationClient.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"

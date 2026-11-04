@@ -12,7 +12,7 @@
 #include "Krystal.Booey/HTML/Canvas/TextMetrics.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
+#include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

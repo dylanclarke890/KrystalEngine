@@ -10,7 +10,7 @@
 #include "Krystal.Booey/CSS/Media/MediaList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Style/StyleSheetContentsCache.hpp"
+#include "Krystal.Booey/Style/Rules/StyleSheetContentsCache.hpp"
 
 namespace krys::boo::css::tests
 {

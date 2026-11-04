@@ -11,7 +11,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
-#include "Krystal.Booey/Style/Interpolation.hpp"
+#include "Krystal.Booey/Style/Interpolation/Interpolation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include <algorithm>
 

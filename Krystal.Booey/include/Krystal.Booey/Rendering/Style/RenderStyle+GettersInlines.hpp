@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
 #define RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP 1

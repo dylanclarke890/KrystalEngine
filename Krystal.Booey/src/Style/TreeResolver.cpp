@@ -21,11 +21,11 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
-#include "Krystal.Booey/Style/Builder.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
-#include "Krystal.Booey/Style/MatchResultCache.hpp"
+#include "Krystal.Booey/Style/Builder/Builder.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Rules/MatchResultCache.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include <ranges>
 

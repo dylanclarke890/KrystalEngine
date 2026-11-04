@@ -9,7 +9,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/UserActivation.hpp"
-#include "Krystal.Booey/Platform/Language.hpp"
+#include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Plugins/DOMMimeTypeArray.hpp"
 #include "Krystal.Booey/Plugins/DOMPluginArray.hpp"

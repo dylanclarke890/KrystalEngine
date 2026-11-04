@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
-#include "Krystal.Booey/Platform/DragImage.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"

@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
-#include "Krystal.Booey/Style/Builder.hpp"
+#include "Krystal.Booey/Style/Builder/Builder.hpp"
 
 namespace krys::boo::css
 {

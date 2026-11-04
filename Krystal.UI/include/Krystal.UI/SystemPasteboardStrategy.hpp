@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 
 namespace krys::ui
 {

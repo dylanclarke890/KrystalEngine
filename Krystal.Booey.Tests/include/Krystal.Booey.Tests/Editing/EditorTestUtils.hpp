@@ -16,12 +16,12 @@
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/PasteboardCustomData.hpp"
-#include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
+#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Platform/SelectionData.hpp"
-#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include <string>
 
 namespace krys::boo::tests

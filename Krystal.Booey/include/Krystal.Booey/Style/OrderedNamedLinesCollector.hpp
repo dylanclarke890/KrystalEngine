@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/Style/ExtractorState.hpp"
+#include "Krystal.Booey/Style/Extractor/ExtractorState.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridOrderedNamedLinesMap.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTemplateList.hpp"
 #include "Krystal.Core/Assert.hpp"

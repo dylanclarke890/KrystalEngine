@@ -4,7 +4,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 
 namespace krys::boo::html
 {

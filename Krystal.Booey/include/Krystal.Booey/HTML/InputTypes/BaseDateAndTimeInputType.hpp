@@ -2,9 +2,9 @@
 
 #include "Krystal.Booey/HTML/InputTypes/InputType.hpp"
 #include "Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp"
-#include "Krystal.Booey/Platform/DateTimeChooser.hpp"
-#include "Krystal.Booey/Platform/DateTimeChooserClient.hpp"
-#include "Krystal.Booey/Platform/DateTimeFormat.hpp"
+#include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
+#include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo

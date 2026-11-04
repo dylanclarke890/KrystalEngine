@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
-#include "Krystal.Booey/Rendering/BorderShape.hpp"
+#include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Box/Margin.hpp"

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Queries/ContainerQuery.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
-#include "Krystal.Booey/Style/ScopeOrdinal.hpp"
+#include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"

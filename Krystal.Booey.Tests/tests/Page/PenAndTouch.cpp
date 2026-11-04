@@ -12,7 +12,7 @@
 #include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
-#include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp"
 #include <string>
 
 namespace krys::boo::tests

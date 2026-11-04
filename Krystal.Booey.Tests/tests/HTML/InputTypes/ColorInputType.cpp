@@ -6,8 +6,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Platform/ColorChooser.hpp"
-#include "Krystal.Booey/Platform/ColorChooserClient.hpp"
+#include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/ColorChooserClient.hpp"
 
 namespace krys::boo::tests
 {

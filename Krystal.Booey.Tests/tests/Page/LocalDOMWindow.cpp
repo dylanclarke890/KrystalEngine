@@ -31,12 +31,12 @@
 #include "Krystal.Booey/Page/Screen.hpp"
 #include "Krystal.Booey/Page/UserActivation.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
-#include "Krystal.Booey/Platform/Language.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Booey/Plugins/DOMMimeTypeArray.hpp"
 #include "Krystal.Booey/Plugins/DOMPluginArray.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::tests
 {

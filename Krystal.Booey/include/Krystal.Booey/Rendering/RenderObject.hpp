@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
-#include "Krystal.Booey/Rendering/RenderObjectHighlightState.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
+#include "Krystal.Booey/Rendering/Selection/RenderObjectHighlightState.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
 #include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Style/ScopeOrdinal.hpp"
+#include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 
 namespace krys::boo::style

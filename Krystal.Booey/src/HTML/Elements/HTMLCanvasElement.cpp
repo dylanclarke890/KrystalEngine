@@ -12,7 +12,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
-#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html

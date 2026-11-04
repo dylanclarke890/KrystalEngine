@@ -12,8 +12,8 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
-#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
 #include <algorithm>
 #include <unicode/utf8.h>
 

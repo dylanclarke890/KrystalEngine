@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderListItem.hpp"
-#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Style/Values/Lists/ListStyleType.hpp"
 
 namespace krys::boo

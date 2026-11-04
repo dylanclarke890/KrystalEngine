@@ -14,7 +14,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
+#include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.UI/Render2DConversions.hpp"
 #include <filesystem>
