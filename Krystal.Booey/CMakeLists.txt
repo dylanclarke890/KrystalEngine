@@ -1914,7 +1914,6 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Forms/Autofill.hpp
   include/Krystal.Booey/HTML/Forms/DOMFormData.hpp
   include/Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp
-  include/Krystal.Booey/HTML/Forms/FormController.hpp
   include/Krystal.Booey/HTML/Forms/FormListedElement.hpp
   include/Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp
   include/Krystal.Booey/HTML/Forms/TypeAhead.hpp
@@ -2122,7 +2121,6 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Forms/Autofill.cpp
   src/HTML/Forms/DOMFormData.cpp
   src/HTML/Forms/FormAssociatedElement.cpp
-  src/HTML/Forms/FormController.cpp
   src/HTML/Forms/FormListedElement.cpp
   src/HTML/Forms/RadioButtonGroups.cpp
   src/HTML/Forms/TypeAhead.cpp

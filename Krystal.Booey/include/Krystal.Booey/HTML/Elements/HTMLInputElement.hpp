@@ -53,11 +53,6 @@ namespace krys::boo::html
     bool _isActivatedSubmit : 1 {false};
     bool _wasModifiedByUser : 1 {false};
     bool _hasPendingUserAgentShadowTreeUpdate : 1 {false};
-    /// @brief Whether the parser made the input and hasn't finished its children.
-    bool _parsingInProgress : 1 {false};
-    /// @brief Whether the input was given its saved state.
-    bool _stateRestored : 1 {false};
-    bool _valueAttributeWasUpdatedAfterParsing : 1 {false};
     bool _canReceiveDroppedFiles : 1 {false};
     AutoCompleteSetting _autocomplete {Uninitialized};
     RefPtr<InputType> _inputType;
@@ -567,25 +562,6 @@ namespace krys::boo::html
     KRYS_NODISCARD bool ShouldAutocomplete() const noexcept final;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept final;
-
-    void FinishParsingChildren() noexcept final;
-
-    /// @brief The parser made the input: its `checked` attribute waits until its children are parsed, in case
-    /// its saved state is restored.
-    void SetCreatedByParser() noexcept
-    {
-      _parsingInProgress = true;
-    }
-
-    /// @brief Whether the `value` attribute was set after the parser made the input.
-    KRYS_NODISCARD bool ValueAttributeWasUpdatedAfterParsing() const noexcept
-    {
-      return _valueAttributeWasUpdatedAfterParsing;
-    }
-
-    KRYS_NODISCARD bool ShouldSaveAndRestoreFormControlState() const noexcept final;
-    KRYS_NODISCARD FormControlState SaveFormControlState() const noexcept final;
-    void RestoreFormControlState(const FormControlState &state) noexcept final;
 
     void LegacyPreActivationBehavior(dom::Event &event) noexcept final;
     void ActivationBehavior(dom::Event &event) noexcept final;

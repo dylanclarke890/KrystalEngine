@@ -95,7 +95,6 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
-#include "Krystal.Booey/HTML/Forms/FormController.hpp"
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
@@ -3586,33 +3585,6 @@ namespace krys::boo::dom
                                              frame->Loader().CheckCompleted();
                                            }
                                          });
-  }
-
-  html::FormController &Document::GetFormController() noexcept
-  {
-    if (!_formController)
-    {
-      _formController = CreateUnique<html::FormController>();
-    }
-    return *_formController;
-  }
-
-  List<DOMString> Document::FormElementsState() const noexcept
-  {
-    if (!_formController)
-    {
-      return {};
-    }
-    return _formController->FormElementsState(*this);
-  }
-
-  void Document::SetStateForNewFormElements(const List<DOMString> &stateVector) noexcept
-  {
-    if (stateVector.empty() && !_formController)
-    {
-      return;
-    }
-    GetFormController().SetStateForNewFormElements(stateVector);
   }
 
   void Document::ImplicitClose() noexcept

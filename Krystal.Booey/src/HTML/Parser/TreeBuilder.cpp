@@ -4327,10 +4327,6 @@ namespace krys::boo::html
     {
       element->SetCustomElementRegistry(krys::move(registry));
     }
-    if (auto *input = DynamicDowncast<HTMLInputElement>(element.get()))
-    {
-      input->SetCreatedByParser();
-    }
     // 17. For each attribute of token's attributes:
     for (auto &attr : attributes)
     {

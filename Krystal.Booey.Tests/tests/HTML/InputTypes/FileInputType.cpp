@@ -98,24 +98,6 @@ namespace krys::boo::html::tests
       CHECK(Str(input.Value()).empty());
       CHECK_FALSE(input.CheckValidity());
     }
-
-    SECTION("The files are saved and restored with their names")
-    {
-      CHECK(input.SaveFormControlState().empty());
-      List<Ref<File>> files;
-      files.push_back(File::Create(u8"C:/dir/a.txt", u8"shown.txt"));
-      input.SetFiles(FileList::Create(krys::move(files)));
-      auto state = input.SaveFormControlState();
-      CHECK(state == FormControlState {u8"C:/dir/a.txt", u8"shown.txt", u8""});
-
-      input.SetFiles(FileList::Create());
-      log->Types.clear();
-      input.RestoreFormControlState(state);
-      CHECK(log->Joined() == "input change");
-      REQUIRE(input.Files()->Length() == 1);
-      CHECK(input.Files()->GetFile(0).Path() == u8"C:/dir/a.txt");
-      CHECK(input.Files()->GetFile(0).Name() == u8"shown.txt");
-    }
   }
 
   TEST_CASE("FileInputType: form data", "[HTML][Forms][Input]")

@@ -21,7 +21,7 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
   `Refresh`, `Page/History`, `Page/Navigation/`, `Page/Location`, `PopStateEvent`, `HashChangeEvent`,
   `BeforeUnloadEvent`; `FrameLoader` loads only what the host asks and hands links and form submissions to the
   host; `View`'s back/forward and before-unload handler; the Editor's router and history buttons.
-- [ ] **1b. Form state.** `Forms/FormController`'s saving and restoring of form control state (nothing restores
+- [x] **1b. Form state.** `Forms/FormController`'s saving and restoring of form control state (nothing restores
   it now), the controls' `SaveFormControlState`/`RestoreFormControlState`, and form-associated custom elements'
   `Restore` callback.
 - [ ] **2. Window APIs.**

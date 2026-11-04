@@ -8,7 +8,6 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/Forms/FormController.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
@@ -31,15 +30,6 @@ namespace krys::boo::html
                                                  HTMLElementFlags flags) noexcept
       : HTMLElement(document, interface, flags, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
-  }
-
-  void HTMLFormControlElement::FinishParsingChildren() noexcept
-  {
-    HTMLElement::FinishParsingChildren();
-    if (!FormController::OwnerForm(*this))
-    {
-      RestoreFormControlStateIfNecessary();
-    }
   }
 
   void HTMLFormControlElement::DidAttachRenderers() noexcept

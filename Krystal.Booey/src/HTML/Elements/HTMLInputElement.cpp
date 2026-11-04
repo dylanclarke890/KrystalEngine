@@ -1795,7 +1795,6 @@ namespace krys::boo::html
       {
         UpdateEffectiveTextDirection();
       }
-      _valueAttributeWasUpdatedAfterParsing = !_parsingInProgress;
     }
     else if (localName == u8"name")
     {
@@ -1806,11 +1805,7 @@ namespace krys::boo::html
     else if (localName == u8"checked")
     {
       SetDefaultCheckedState(value.has_value());
-      // Another radio button in the same group might be checked by state restore. We shouldn't call
-      // setChecked() even if this has the checked attribute. So, delay the setChecked() call until
-      // finishParsingChildren() is called if parsing is in progress.
-      if ((!_parsingInProgress || !NodeDocument().GetFormController().HasFormStateToRestore())
-          && !_dirtyCheckednessFlag)
+      if (!_dirtyCheckednessFlag)
       {
         SetChecked(value.has_value());
         // SetChecked() above sets the dirty checkedness flag so we need to reset it.
@@ -1948,37 +1943,6 @@ namespace krys::boo::html
     NodeDocument().RemoveElementWithPendingUserAgentShadowTreeUpdate(*this);
     _hasPendingUserAgentShadowTreeUpdate = false;
     _inputType->CreateShadowSubtreeIfNeeded();
-  }
-
-  void HTMLInputElement::FinishParsingChildren() noexcept
-  {
-    _parsingInProgress = false;
-    krys_debug_assert(_inputType);
-    HTMLTextFormControlElement::FinishParsingChildren();
-    if (!_stateRestored)
-    {
-      if (HasAttribute(u8"checked"))
-      {
-        SetChecked(true);
-      }
-      _dirtyCheckednessFlag = false;
-    }
-  }
-
-  bool HTMLInputElement::ShouldSaveAndRestoreFormControlState() const noexcept
-  {
-    return _inputType->ShouldSaveAndRestoreFormControlState();
-  }
-
-  FormControlState HTMLInputElement::SaveFormControlState() const noexcept
-  {
-    return _inputType->SaveFormControlState();
-  }
-
-  void HTMLInputElement::RestoreFormControlState(const FormControlState &state) noexcept
-  {
-    _inputType->RestoreFormControlState(state);
-    _stateRestored = true;
   }
 
   bool HTMLInputElement::RendererIsNeeded(const RenderStyle &style) noexcept

@@ -14,46 +14,6 @@
 
 namespace krys::boo::html
 {
-  FormControlState FileInputType::SaveFormControlState() const noexcept
-  {
-    if (_fileList->IsEmpty())
-    {
-      return {};
-    }
-
-    FormControlState stateVector;
-    stateVector.reserve(_fileList->Files().size() * 2 + 1);
-    for (auto &file : _fileList->Files())
-    {
-      stateVector.emplace_back(file->Path());
-      stateVector.emplace_back(file->Name());
-    }
-    stateVector.push_back(_displayString);
-    return stateVector;
-  }
-
-  void FileInputType::RestoreFormControlState(const FormControlState &state) noexcept
-  {
-    if (state.empty())
-    {
-      return;
-    }
-
-    // The files' paths and names, then the display string.
-    auto size = state.size() - 1;
-    if (!state[size].empty())
-    {
-      _displayString = state[size];
-    }
-    List<Ref<File>> files;
-    files.reserve(size / 2);
-    for (size_t i = 0; i + 1 < size; i += 2)
-    {
-      files.push_back(File::Create(state[i], state[i + 1]));
-    }
-    SetFiles(FileList::Create(krys::move(files)), WasSetByJavaScript::No);
-  }
-
   bool FileInputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());

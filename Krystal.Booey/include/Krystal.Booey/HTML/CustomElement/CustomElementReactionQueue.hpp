@@ -40,7 +40,6 @@ namespace krys::boo::html
       FormAssociated,
       FormReset,
       FormDisabled,
-      FormStateRestore,
     };
 
     struct AdoptedPayload
@@ -65,13 +64,8 @@ namespace krys::boo::html
 
     using FormDisabledPayload = bool;
 
-    struct FormStateRestorePayload
-    {
-      CustomElementFormValue State;
-    };
-
-    using Payload = Maybe<Variant<AdoptedPayload, AttributeChangedPayload, FormAssociatedPayload,
-                                  FormDisabledPayload, FormStateRestorePayload>>;
+    using Payload =
+      Maybe<Variant<AdoptedPayload, AttributeChangedPayload, FormAssociatedPayload, FormDisabledPayload>>;
 
   private:
     Type _type {Type::Invalid};
@@ -159,8 +153,6 @@ namespace krys::boo::html
     static void EnqueueFormAssociatedCallbackIfNeeded(dom::Element &element, HTMLFormElement *form) noexcept;
     static void EnqueueFormDisabledCallbackIfNeeded(dom::Element &element, bool isDisabled) noexcept;
     static void EnqueueFormResetCallbackIfNeeded(dom::Element &element) noexcept;
-    static void EnqueueFormStateRestoreCallbackIfNeeded(dom::Element &element,
-                                                        CustomElementFormValue &&state) noexcept;
 
     /// @brief Enqueues the callbacks an upgrade implies: an attribute change for each observed attribute the
     /// element has, then the connection if it's connected.

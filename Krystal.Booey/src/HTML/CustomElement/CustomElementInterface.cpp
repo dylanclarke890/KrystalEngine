@@ -235,11 +235,4 @@ namespace krys::boo::html
     InvokeCallback(element,
                    [&](CustomElement &customElement) { customElement.FormDisabledCallback(isDisabled); });
   }
-
-  void CustomElementInterface::InvokeFormStateRestoreCallback(dom::Element &element,
-                                                              const CustomElementFormValue &state) noexcept
-  {
-    InvokeCallback(element, [&](CustomElement &customElement)
-                   { customElement.FormStateRestoreCallback(state, FormStateRestoreMode::Restore); });
-  }
 }

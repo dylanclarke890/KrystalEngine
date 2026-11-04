@@ -115,7 +115,6 @@ namespace krys::boo::html
   class CustomElementAlgorithms;
   class CustomElementRegistry;
   class FocusAlgorithms;
-  class FormController;
   class HTMLBaseElement;
   class HTMLDialogElement;
   class HTMLBodyElement;
@@ -323,7 +322,6 @@ namespace krys::boo::dom
     bool _activeDOMObjectsAreStopped {false};
     UniquePtr<FrameSelection> _selection;
     UniquePtr<boo::Editor> _editor;
-    UniquePtr<html::FormController> _formController;
     RefPtr<DOMSelection> _domSelection;
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
@@ -1458,20 +1456,6 @@ namespace krys::boo::dom
     /// `content-language` and `default-style`; the others are ignored.
     /// @see https://html.spec.whatwg.org/#pragma-directives
     void ProcessMetaHttpEquiv(DOMStringView equiv, DOMStringView content) noexcept;
-
-    /// @brief Saves and restores the state of the document's form controls, made on first use.
-    KRYS_NODISCARD html::FormController &GetFormController() noexcept;
-
-    KRYS_NODISCARD html::FormController *FormControllerIfExists() const noexcept
-    {
-      return _formController.get();
-    }
-
-    /// @brief The state of the document's form controls, saved to its history item as it's left.
-    KRYS_NODISCARD List<DOMString> FormElementsState() const noexcept;
-
-    /// @brief The form state the document's controls are given as they're parsed: their history item's.
-    void SetStateForNewFormElements(const List<DOMString> &stateVector) noexcept;
 
     /// @brief The document's language from its `content-language` pragma, for elements without a language of
     /// their own; empty if it has none.

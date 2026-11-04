@@ -22,7 +22,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
 - Failed custom element constructions and upgrades, exceptions thrown by listeners and parse errors are not reported anywhere (no console; FIXMEs in `CustomElementInterface.cpp`).
 - `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `document.open()`/`write()`, `nonce`).
-- `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`. Form-associated custom elements' state is restored only in the restore mode, never `FormStateRestoreMode::Autocomplete` (no autofill).
+- `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
 - The backup custom element queue is global rather than one per agent.
 - No `onpointer*`, `ontouch*`, `onpointerlockchange` or `onpointerlockerror` handlers, no `document.onreadystatechange`, and no outermost-`<svg>` window event handlers (`onunload`, `onresize`, `onscroll`, ...).
@@ -60,11 +60,11 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- `<input type=file>` has no file chooser, file icon (`icon()`, `requestIcon`, `iconLoaded`) or tooltip naming the chosen files; the host's file picker is a FIXME in `FileInputType.hpp`. The name uses the room the icon would take. Files are set from C++ (`FileInputType::SetFiles`, which fires `input` and `change` unless set by script), dropped, or restored with form state; there are no directory uploads.
+- `<input type=file>` has no file chooser, file icon (`icon()`, `requestIcon`, `iconLoaded`) or tooltip naming the chosen files; the host's file picker is a FIXME in `FileInputType.hpp`. The name uses the room the icon would take. Files are set from C++ (`FileInputType::SetFiles`, which fires `input` and `change` unless set by script) or dropped; there are no directory uploads.
 - `<datalist>`: `HTMLInputElement` has no `list` (FIXME), so there are no list suggestions, tick marks on sliders, list button, or colour and date suggestions.
 - `<input type=color>` has no `alpha` or `colorspace` support (FIXME in `ColorInputType.hpp`) and no `EventQueueScope`, so its events aren't queued until the value is set (FIXME in `ColorInputType.cpp`).
 - Opening a date or colour picker by clicking the control isn't checked against a user gesture (`showPicker()` is); FIXMEs in `BaseDateAndTimeInputType.cpp` and `ColorInputType.cpp`.
-- No autofill (`:autofill`, `FormStateRestoreMode::Autocomplete`), caps lock indicator or strong password fields on password fields, validation message bubble, `RenderSearchField` (search fields have no recent searches), or input purpose hints (`inputmode`, `autocapitalize`, spell checking). Numbers aren't localised (FIXMEs in `NumberInputType.cpp`); dates are, through ICU.
+- No autofill (`:autofill`), caps lock indicator or strong password fields on password fields, validation message bubble, `RenderSearchField` (search fields have no recent searches), or input purpose hints (`inputmode`, `autocapitalize`, spell checking). Numbers aren't localised (FIXMEs in `NumberInputType.cpp`); dates are, through ICU.
 - Form submission has no `rel` handling (`noopener`, `noreferrer`, `opener`; FIXME in `HTMLFormElement.cpp`), no `img` elements among a form's named items (FIXME in `HTMLFormControlsCollection.cpp`), no request body in the navigation (FIXME in `FormSubmission.cpp`), and encodes UTF-8 only.
 - `<select>`: list boxes have no pan scrolling, there is no customizable `<select>` (`appearance: base-select`; a `<button>` in a select is still a submit button and isn't inert, FIXME in `HTMLButtonElement.cpp`), and option changes are not reported to the chrome client (FIXME in `HTMLSelectElement.cpp`).
 - Fieldset legends are not placed in the border (see *Layout*).

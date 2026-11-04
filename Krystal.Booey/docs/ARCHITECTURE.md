@@ -32,7 +32,6 @@ How each area of Booey is put together, by area. `DIFFERENCES.md` and `KNOWN-ISS
 - Dialogs, popovers and close watchers follow the specification's model. `html::CloseWatcher` is made from C++ with `CloseWatcher::Create(document, {.Signal = ...})`, the window's `CloseWatcherManager` groups watchers by user activation, and Escape closes the newest group first.
 - Custom commands (`--name`) are delivered as `CommandEvent`s at the `commandfor` element for C++ to handle. Popovers' invokers are implicit anchors.
 - `<details>` has a user agent shadow tree (summary slot, content slot styled by `::details-content`, skipped with `content-visibility: hidden` while closed); `name` groups are exclusive accordions.
-- Form control state is saved and restored by `FormController` with the history item (not for reloads, password fields or `autocomplete=off`); form-associated custom elements get `FormStateRestoreCallback` with the `Restore` mode.
 - `:checked`, `:default`, `:indeterminate` and related pseudo-classes are computed from element state that follows the HTML specification (checkbox and radio `Checked()`, option `Selected()`, the nearest ancestor form's default button).
 - Date, colour, file and select controls delegate their choosing to the host (colour picker, date picker, select popup, file chooser) through client interfaces such as `ColorChooserClient`; the control reads the host's answer, and the host hides its picker before telling the client.
 

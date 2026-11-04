@@ -433,16 +433,6 @@ namespace krys::boo::html
     // didProgrammaticallyClearTextFormControl, with accessibility and the host's autofill.
   }
 
-  FormControlState HTMLTextAreaElement::SaveFormControlState() const noexcept
-  {
-    return _isDirty ? FormControlState {Value()} : FormControlState {};
-  }
-
-  void HTMLTextAreaElement::RestoreFormControlState(const FormControlState &state) noexcept
-  {
-    (void)SetValue(state[0]);
-  }
-
   // https://html.spec.whatwg.org/#dom-textarea-defaultvalue
   dom::DOMString HTMLTextAreaElement::DefaultValue() const noexcept
   {
