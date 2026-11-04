@@ -170,20 +170,6 @@ namespace krys::boo::style
     storeIdentifier(scopeRuleIdentifier, _scopeRuleIdentifierForRulePosition);
 
     const auto scopeRules = ScopeRulesFor(ruleData);
-    auto computeLinkMatchType = [&]
-    {
-      // General case: no @scope rule or current rule selector is not :scope.
-      if (scopeRules.empty() || !ruleData.Selector()->HasScope())
-      {
-        return css::SelectorChecker::DetermineLinkMatchType(ruleData.Selector());
-      }
-
-      // When current rule is :scope, we need to take into account the @scope selectors to determine the link
-      // match type.
-      return css::SelectorChecker::DetermineLinkMatchType(ruleData.Selector(), scopeRules.back().get());
-    };
-    ruleData.SetLinkMatchType(computeLinkMatchType());
-
     if (featureCollectionContext)
     {
       _features.CollectFeatures(*featureCollectionContext, ruleData, scopeRules);

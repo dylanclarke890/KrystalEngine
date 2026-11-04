@@ -54,14 +54,14 @@ namespace krys::boo::style::tests
       Ref<dom::Document> Document {CreateRef<dom::Document>()};
       RenderStyle Style {RenderStyle::Create()};
 
-      Color Convert(const css::Color &value, ForVisitedLink forVisitedLink = ForVisitedLink::No)
+      Color Convert(const css::Color &value)
       {
-        return ToStyleColor(value, Document, Style, css::ToLengthConversionData {}, forVisitedLink);
+        return ToStyleColor(value, Document, Style, css::ToLengthConversionData {});
       }
 
-      Color Convert(utf8_stringview text, ForVisitedLink forVisitedLink = ForVisitedLink::No)
+      Color Convert(utf8_stringview text)
       {
-        return Convert(ParseCSS(text), forVisitedLink);
+        return Convert(ParseCSS(text));
       }
     };
 
@@ -186,10 +186,8 @@ namespace krys::boo::style::tests
 
     SECTION("the nesting level is restored")
     {
-      auto state = ColorResolutionState {.Document = resolution.Document,
-                                         .Style = resolution.Style,
-                                         .ConversionData = {},
-                                         .ForVisitedLink = ForVisitedLink::No};
+      auto state = ColorResolutionState {
+        .Document = resolution.Document, .Style = resolution.Style, .ConversionData = {}};
       auto color =
         ToStyleColor(ParseCSS(u8"color-mix(in srgb, rgb(from red r g b), contrast-color(red))"), state);
       CHECK(color.IsResolvedColor());
@@ -200,9 +198,9 @@ namespace krys::boo::style::tests
   TEST_CASE("Style colour(conversion of keywords)", "[Style][Values][Color]")
   {
     Resolution resolution;
-    auto keyword = [&](css::ValueId id, ForVisitedLink forVisitedLink = ForVisitedLink::No)
+    auto keyword = [&](css::ValueId id)
     {
-      return resolution.Convert(css::Color {css::KeywordColor {id}}, forVisitedLink);
+      return resolution.Convert(css::Color {css::KeywordColor {id}});
     };
 
     SECTION("currentcolor stays unresolved")
@@ -215,10 +213,7 @@ namespace krys::boo::style::tests
       CHECK(keyword(css::ValueId::InternalDocumentTextColor).GetResolvedColor() == boo::Color::black);
 
       auto link = css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions::None);
-      auto visitedLink = css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions::ForVisitedLink);
-      REQUIRE(link != visitedLink);
       CHECK(keyword(css::ValueId::WebkitLink).GetResolvedColor() == link);
-      CHECK(keyword(css::ValueId::WebkitLink, ForVisitedLink::Yes).GetResolvedColor() == visitedLink);
 
       CHECK(keyword(css::ValueId::WebkitActivelink).GetResolvedColor()
             == css::ColorFromKeyword(css::ValueId::WebkitActivelink, ColorOptions::None));
@@ -393,13 +388,10 @@ namespace krys::boo::style::tests
   {
     RenderStyle style {RenderStyle::Create()};
     CHECK(style.GetColor() == boo::Color::black);
-    CHECK(style.VisitedLinkColor() == boo::Color::black);
 
     style.SetColor(boo::Color {Red});
-    style.SetVisitedLinkColor(boo::Color {Blue});
     CHECK(style.ColorResolvingCurrentColor(Color {}) == boo::Color {Red});
-    CHECK(style.ColorResolvingCurrentColor(Color {}, true) == boo::Color {Blue});
-    CHECK(style.ColorResolvingCurrentColor(Color {Green}, true) == boo::Color {Green});
+    CHECK(style.ColorResolvingCurrentColor(Color {Green}) == boo::Color {Green});
   }
 
   TEST_CASE("Style colour(blending)", "[Style][Values][Color]")

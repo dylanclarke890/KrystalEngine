@@ -187,13 +187,6 @@ namespace krys::boo::style::tests
       REQUIRE(Find(*ruleSet, u8"div").GetPropertyAllowlist() == PropertyAllowlist::None);
     }
 
-    SECTION("Link match types")
-    {
-      REQUIRE(Find(*ruleSet, u8":link").LinkMatchType() == css::SelectorChecker::MatchLink);
-      REQUIRE(Find(*ruleSet, u8":visited").LinkMatchType() == css::SelectorChecker::MatchVisited);
-      REQUIRE(Find(*ruleSet, u8"div").LinkMatchType() == css::SelectorChecker::MatchAll);
-    }
-
     SECTION("Ancestor identifiers are kept for the selector filter")
     {
       REQUIRE(Find(*ruleSet, u8"div").DescendantSelectorIdentifierHashes()[0] == 0u);

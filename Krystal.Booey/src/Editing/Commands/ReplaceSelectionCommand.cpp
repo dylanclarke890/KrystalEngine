@@ -11,7 +11,6 @@
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
-#include "Krystal.Booey/Editing/Commands/BreakBlockquoteCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/SimplifyMarkupCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
@@ -103,23 +102,6 @@ namespace krys::boo
         }
       }
       return position;
-    }
-
-    KRYS_NODISCARD bool HasMatchingQuoteLevel(VisiblePosition endOfExistingContent,
-                                              VisiblePosition endOfInsertedContent) noexcept
-    {
-      dom::Position existing = endOfExistingContent.DeepEquivalent();
-      dom::Position inserted = endOfInsertedContent.DeepEquivalent();
-      bool isInsideMailBlockquote =
-        EnclosingNodeOfType(inserted, IsMailBlockquote, EditingBoundaryCrossingRule::CanCrossEditingBoundary)
-        != nullptr;
-      return isInsideMailBlockquote
-             && (NumEnclosingMailBlockquotes(existing) == NumEnclosingMailBlockquotes(inserted));
-    }
-
-    KRYS_NODISCARD bool IsMailPasteAsQuotationNode(const dom::Node &node) noexcept
-    {
-      return HasTagName(&node, html::TagName::blockquote) && HasClass(node, ApplePasteAsQuotation);
     }
 
     KRYS_NODISCARD bool IsHeaderElement(const dom::Node &a) noexcept
@@ -248,8 +230,7 @@ namespace krys::boo
       // one of our internal classes.
       auto classAttribute = element->GetAttribute(dom::DOMStringAtom(u8"class")).value_or(dom::DOMString());
       utf8_stringview classAttributeValue = classAttribute;
-      if (classAttributeValue == AppleTabSpanClass || classAttributeValue == AppleConvertedSpace
-          || classAttributeValue == ApplePasteAsQuotation)
+      if (classAttributeValue == AppleTabSpanClass || classAttributeValue == AppleConvertedSpace)
       {
         return true;
       }
@@ -723,8 +704,7 @@ namespace krys::boo
         _matchStyle(options.Contains(CommandOption::MatchStyle)), _documentFragment(krys::move(fragment)),
         _preventNesting(options.Contains(CommandOption::PreventNesting)),
         _movingParagraph(options.Contains(CommandOption::MovingParagraph)),
-        _sanitizeFragment(options.Contains(CommandOption::SanitizeFragment)),
-        _ignoreMailBlockquote(options.Contains(CommandOption::IgnoreMailBlockquote))
+        _sanitizeFragment(options.Contains(CommandOption::SanitizeFragment))
   {
   }
 
@@ -737,8 +717,7 @@ namespace krys::boo
   }
 
   bool ReplaceSelectionCommand::ShouldMergeStart(bool selectionStartWasStartOfParagraph,
-                                                 bool fragmentHasInterchangeNewlineAtStart,
-                                                 bool selectionStartWasInsideMailBlockquote) noexcept
+                                                 bool fragmentHasInterchangeNewlineAtStart) noexcept
   {
     if (_movingParagraph)
     {
@@ -751,18 +730,6 @@ namespace krys::boo
     if (prev.IsNull())
     {
       return false;
-    }
-
-    // When we have matching quote levels, its ok to merge more frequently.
-    // For a successful merge, we still need to make sure that the inserted content starts with the beginning
-    // of a paragraph. And we should only merge here if the selection start was inside a mail blockquote. This
-    // prevents against removing a blockquote from newly pasted quoted content that was pasted into an
-    // unquoted position.  If that unquoted position happens to be right after another blockquote, we don't
-    // want to merge and risk stripping a valid block (and newline) from the pasted content.
-    if (IsStartOfParagraph(startOfInsertedContent) && selectionStartWasInsideMailBlockquote
-        && HasMatchingQuoteLevel(prev, PositionAtEndOfInsertedContent()))
-    {
-      return true;
     }
 
     return !selectionStartWasStartOfParagraph && !fragmentHasInterchangeNewlineAtStart
@@ -797,8 +764,7 @@ namespace krys::boo
     RefPtr<dom::Node> destinationNode = ShareRefPtr(destination.DeepEquivalent().DeprecatedNode());
     auto sourceBlock = EnclosingBlock(sourceNode);
     auto destinationBlock = EnclosingBlock(destinationNode);
-    return !EnclosingNodeOfType(source.DeepEquivalent(), &IsMailPasteAsQuotationNode) && sourceBlock
-           && (!HasTagName(sourceBlock.get(), html::TagName::blockquote) || IsMailBlockquote(*sourceBlock))
+    return sourceBlock && !HasTagName(sourceBlock.get(), html::TagName::blockquote)
            && EnclosingListChild(sourceBlock.get()) == EnclosingListChild(destinationNode.get())
            && EnclosingTableCell(source.DeepEquivalent()) == EnclosingTableCell(destination.DeepEquivalent())
            && (!IsHeaderElement(*sourceBlock) || HaveSameTagName(*sourceBlock, destinationBlock.get()))
@@ -854,30 +820,6 @@ namespace krys::boo
         }
 
         RefPtr<dom::ContainerNode> context = ShareRefPtr(element->ParentNode());
-
-        // If Mail wraps the fragment with a Paste as Quotation blockquote, or if you're pasting into a quoted
-        // region, styles from blockquoteNode are allowed to override those from the source document, see
-        // <rdar://problem/4930986> and <rdar://problem/5089327>.
-        auto hasBlockquoteNode = [&]() -> bool
-        {
-          if (!context)
-          {
-            return false;
-          }
-          if (IsMailPasteAsQuotationNode(*context))
-          {
-            return true;
-          }
-          return EnclosingNodeOfType(dom::FirstPositionInNode(context.get()), IsMailBlockquote,
-                                     EditingBoundaryCrossingRule::CanCrossEditingBoundary)
-                 != nullptr;
-        };
-        if (hasBlockquoteNode())
-        {
-          newInlineStyle->RemoveStyleFromRulesAndContext(*element,
-                                                         TreeQueries::DocumentElement(GetDocument()));
-        }
-
         newInlineStyle->RemoveStyleFromRulesAndContext(*element, context.get());
       }
 
@@ -916,36 +858,6 @@ namespace krys::boo
       if (element->ParentNode() && element->ParentNode()->HasRichlyEditableStyle())
       {
         RemoveNodeAttribute(*element, dom::DOMStringAtom(u8"contenteditable"));
-      }
-
-      // WebKit used to not add display: inline and float: none on copy.
-      // Keep this code around for backward compatibility
-      if (IsLegacyAppleStyleSpan(element.get()))
-      {
-        if (!element->FirstChild())
-        {
-          insertedNodes.WillRemoveNodePreservingChildren(element.get());
-          RemoveNodePreservingChildren(*element);
-          continue;
-        }
-        // There are other styles that style rules can give to style spans,
-        // but these are the two important ones because they'll prevent
-        // inserted content from appearing in the right paragraph.
-        // FIXME: Hyatt is concerned that selectively using display:inline will give inconsistent
-        // results. We already know one issue because td elements ignore their display property
-        // in quirks mode (which Mail.app is always in). We should look for an alternative.
-
-        // Mutate using the CSSOM wrapper so we get the same event behavior as a script.
-        if (IsBlock(*element))
-        {
-          (void)element->Style().SetPropertyInternal(css::PropertyId::Display, u8"inline",
-                                                     css::IsImportant(false));
-        }
-        if (element->Renderer() && element->Renderer()->Style().IsFloating())
-        {
-          (void)element->Style().SetPropertyInternal(css::PropertyId::Float, u8"none",
-                                                     css::IsImportant(false));
-        }
       }
     }
   }
@@ -1112,125 +1024,6 @@ namespace krys::boo
     return _startOfInsertedContent;
   }
 
-  namespace
-  {
-    // Remove style spans before insertion if they are unnecessary.  It's faster because we'll
-    // avoid doing a layout.
-    bool HandleStyleSpansBeforeInsertion(ReplacementFragment &fragment,
-                                         const dom::Position &insertionPos) noexcept
-    {
-      RefPtr<dom::Node> topNode = ShareRefPtr(fragment.FirstChild());
-      if (!topNode)
-      {
-        return false;
-      }
-
-      // Handling the case where we are doing Paste as Quotation or pasting into quoted content is more
-      // complicated (see handleStyleSpans) and doesn't receive the optimization.
-      if (IsMailPasteAsQuotationNode(*topNode)
-          || EnclosingNodeOfType(FirstPositionInOrBeforeNode(topNode.get()), IsMailBlockquote,
-                                 EditingBoundaryCrossingRule::CanCrossEditingBoundary))
-      {
-        return false;
-      }
-
-      // Either there are no style spans in the fragment or a WebKit client has added content to the fragment
-      // before inserting it.  Look for and handle style spans after insertion.
-      if (!IsLegacyAppleStyleSpan(topNode.get()))
-      {
-        return false;
-      }
-
-      auto &wrappingStyleSpan = Downcast<dom::Element>(*topNode);
-      auto styleAtInsertionPos = EditingStyle::Create(insertionPos.ParentAnchoredEquivalent());
-      auto styleText = styleAtInsertionPos->Style()->AsText(css::DefaultSerialisationContext());
-
-      // FIXME: This string comparison is a naive way of comparing two styles.
-      // We should be taking the diff and check that the diff is empty.
-      if (styleText
-          != wrappingStyleSpan.GetAttribute(dom::DOMStringAtom(u8"style")).value_or(dom::DOMString()))
-      {
-        return false;
-      }
-
-      fragment.RemoveNodePreservingChildren(wrappingStyleSpan);
-      return true;
-    }
-  }
-
-  // At copy time, WebKit wraps copied content in a span that contains the source document's
-  // default styles.  If the copied Range inherits any other styles from its ancestors, we put
-  // those styles on a second span.
-  // This function removes redundant styles from those spans, and removes the spans if all their
-  // styles are redundant.
-  // We should remove the Apple-style-span class when we're done, see <rdar://problem/5685600>.
-  // We should remove styles from spans that are overridden by all of their children, either here
-  // or at copy time.
-  void ReplaceSelectionCommand::HandleStyleSpans(InsertedNodes &insertedNodes) noexcept
-  {
-    RefPtr<html::HTMLElement> wrappingStyleSpan;
-    // The style span that contains the source document's default style should be at
-    // the top of the fragment, but Mail sometimes adds a wrapper (for Paste As Quotation),
-    // so search for the top level style span instead of assuming it's at the top.
-    for (auto *node = insertedNodes.FirstNodeInserted(); node; node = TreeQueries::Next(*node))
-    {
-      if (IsLegacyAppleStyleSpan(node))
-      {
-        wrappingStyleSpan = ShareRefPtr(&Downcast<html::HTMLElement>(*node));
-        break;
-      }
-    }
-
-    // There might not be any style spans if we're pasting from another application or if
-    // we are here because of a document.execCommand("InsertHTML", ...) call.
-    if (!wrappingStyleSpan)
-    {
-      return;
-    }
-
-    auto style = EditingStyle::Create(wrappingStyleSpan->InlineStyle());
-    RefPtr<dom::Node> context = ShareRefPtr<dom::Node>(wrappingStyleSpan->ParentNode());
-
-    // If Mail wraps the fragment with a Paste as Quotation blockquote, or if you're pasting into a quoted
-    // region, styles from blockquoteNode are allowed to override those from the source document, see
-    // <rdar://problem/4930986> and <rdar://problem/5089327>.
-    RefPtr<dom::Node> blockquoteNode;
-    if (context && IsMailPasteAsQuotationNode(*context))
-    {
-      blockquoteNode = context;
-    }
-    else
-    {
-      blockquoteNode = EnclosingNodeOfType(dom::FirstPositionInNode(context.get()), IsMailBlockquote,
-                                           EditingBoundaryCrossingRule::CanCrossEditingBoundary);
-    }
-    if (blockquoteNode)
-    {
-      context = ShareRefPtr<dom::Node>(TreeQueries::DocumentElement(GetDocument()));
-    }
-
-    // This operation requires that only editing styles to be removed from sourceDocumentStyle.
-    style->PrepareToApplyAt(dom::FirstPositionInNode(context.get()));
-
-    // Remove block properties in the span's style. This prevents properties that probably have no effect
-    // currently from affecting blocks later if the style is cloned for a new block element during a future
-    // editing operation.
-    // FIXME: They *can* have an effect currently if blocks beneath the style span aren't individually marked
-    // with block styles by the editing engine used to style them.  WebKit doesn't do this, but others might.
-    style->RemoveBlockProperties();
-
-    if (style->IsEmpty() || !wrappingStyleSpan->FirstChild())
-    {
-      insertedNodes.WillRemoveNodePreservingChildren(wrappingStyleSpan.get());
-      RemoveNodePreservingChildren(*wrappingStyleSpan);
-    }
-    else
-    {
-      SetNodeAttribute(*wrappingStyleSpan, dom::DOMStringAtom(u8"style"),
-                       style->Style()->AsText(css::DefaultSerialisationContext()));
-    }
-  }
-
   void ReplaceSelectionCommand::MergeEndIfNeeded() noexcept
   {
     if (!_shouldMergeEnd)
@@ -1354,15 +1147,11 @@ namespace krys::boo
     auto startBlock = EnclosingBlock(ShareRefPtr(visibleStart.DeepEquivalent().DeprecatedNode()));
 
     dom::Position insertionPos = selection.Start();
-    bool shouldHandleMailBlockquote =
-      EnclosingNodeOfType(insertionPos, IsMailBlockquote,
-                          EditingBoundaryCrossingRule::CanCrossEditingBoundary)
-      && !_ignoreMailBlockquote;
     bool selectionIsPlainText = !selection.IsContentRichlyEditable();
     RefPtr<dom::Element> currentRoot = ShareRefPtr(selection.RootEditableElement());
 
-    if ((selectionStartWasStartOfParagraph && selectionEndWasEndOfParagraph && !shouldHandleMailBlockquote)
-        || startBlock == currentRoot || (startBlock && IsListItem(*startBlock)) || selectionIsPlainText)
+    if ((selectionStartWasStartOfParagraph && selectionEndWasEndOfParagraph) || startBlock == currentRoot
+        || (startBlock && IsListItem(*startBlock)) || selectionIsPlainText)
     {
       _preventNesting = false;
     }
@@ -1373,10 +1162,7 @@ namespace krys::boo
       // spans multiple blocks, not merging may leave an empty line.
       // When the start of the selection being pasted into is at the start of a block, not merging
       // will leave hanging block(s).
-      // Merge blocks if the start of the selection was in a Mail blockquote, since we handle
-      // that case specially to prevent nesting.
-      bool mergeBlocksAfterDelete =
-        shouldHandleMailBlockquote || IsEndOfParagraph(visibleEnd) || IsStartOfBlock(visibleStart);
+      bool mergeBlocksAfterDelete = IsEndOfParagraph(visibleEnd) || IsStartOfBlock(visibleStart);
       // FIXME: We should only expand to include fully selected special elements if we are copying a
       // selection and pasting it on top of itself.
       // FIXME: capturing the content of this delete would allow a replace accessibility notification instead
@@ -1418,31 +1204,13 @@ namespace krys::boo
       // We split the current paragraph in two to avoid nesting the blocks from the fragment inside the
       // current block. For example paste <div>foo</div><div>bar</div><div>baz</div> into <div>x^x</div>,
       // where ^ is the caret. As long as the  div styles are the same, visually you'd expect:
-      // <div>xbar</div><div>bar</div><div>bazx</div>, not <div>xbar<div>bar</div><div>bazx</div></div>. Don't
-      // do this if the selection started in a Mail blockquote.
-      if (_preventNesting && !shouldHandleMailBlockquote && !IsEndOfParagraph(visibleStart)
-          && !IsStartOfParagraph(visibleStart))
+      // <div>xbar</div><div>bar</div><div>bazx</div>, not <div>xbar<div>bar</div><div>bazx</div></div>.
+      if (_preventNesting && !IsEndOfParagraph(visibleStart) && !IsStartOfParagraph(visibleStart))
       {
         InsertParagraphSeparator();
         SetEndingSelection(VisibleSelection(EndingSelection().VisibleStart().Previous()));
       }
       insertionPos = EndingSelection().Start();
-    }
-
-    // We don't want any of the pasted content to end up nested in a Mail blockquote, so first break
-    // out of any surrounding Mail blockquotes. Unless we're inserting in a table, in which case
-    // breaking the blockquote will prevent the content from actually being inserted in the table.
-    if (shouldHandleMailBlockquote && _preventNesting
-        && !(EnclosingNodeOfType(insertionPos, &IsTableStructureNode)))
-    {
-      ApplyCommandToComposite(BreakBlockquoteCommand::Create(GetDocument()));
-      // This will leave a br between the split.
-      if (RefPtr<dom::Node> br = ShareRefPtr(EndingSelection().Start().DeprecatedNode()))
-      {
-        krys_debug_assert(HasTagName(br.get(), html::TagName::br));
-        insertionPos = dom::PositionInParentBeforeNode(br.get());
-        RemoveNode(*br);
-      }
     }
 
     // Inserting content could cause whitespace to collapse, e.g. inserting <div>foo</div> into hello^ world.
@@ -1470,9 +1238,7 @@ namespace krys::boo
     RefPtr<dom::Node> insertionBlock = EnclosingBlock(ShareRefPtr(insertionPos.DeprecatedNode()));
 
     // Adjust insertionPos to prevent nesting.
-    // If the start was in a Mail blockquote, we will have already handled adjusting insertionPos above.
-    if (_preventNesting && insertionBlock && insertionBlock != currentRoot && !IsTableCell(*insertionBlock)
-        && !shouldHandleMailBlockquote)
+    if (_preventNesting && insertionBlock && insertionBlock != currentRoot && !IsTableCell(*insertionBlock))
     {
       VisiblePosition visibleInsertionPos(insertionPos);
       if (IsEndOfBlock(visibleInsertionPos)
@@ -1502,7 +1268,6 @@ namespace krys::boo
     insertionPos = PositionOutsideTabSpan(insertionPos);
 
     bool hasBlankLinesBetweenParagraphs = HasBlankLineBetweenParagraphs(insertionPos);
-    bool handledStyleSpans = HandleStyleSpansBeforeInsertion(fragment, insertionPos);
 
     // We're finished if there is nothing to add.
     if (fragment.IsEmpty() || !fragment.FirstChild())
@@ -1568,11 +1333,9 @@ namespace krys::boo
     }
 
     auto blockStart = EnclosingBlock(ShareRefPtr(insertionPos.DeprecatedNode()));
-    bool isInsertingIntoList =
-      (IsListHTMLElement(refNode.get())
-       || (IsLegacyAppleStyleSpan(refNode.get()) && IsListHTMLElement(refNode->FirstChild())))
-      && blockStart && blockStart->Renderer()->IsRenderListItem()
-      && blockStart->ParentNode()->HasEditableStyle();
+    bool isInsertingIntoList = IsListHTMLElement(refNode.get()) && blockStart
+                               && blockStart->Renderer()->IsRenderListItem()
+                               && blockStart->ParentNode()->HasEditableStyle();
     if (isInsertingIntoList)
     {
       refNode =
@@ -1623,11 +1386,6 @@ namespace krys::boo
     if (IsRichlyEditablePosition(insertionPos))
     {
       RemoveUnrenderedTextNodesAtEnds(insertedNodes);
-    }
-
-    if (!handledStyleSpans)
-    {
-      HandleStyleSpans(insertedNodes);
     }
 
     // Mutation events (bug 20161) may have already removed the inserted content
@@ -1705,8 +1463,7 @@ namespace krys::boo
     // the start merge so that the start merge doesn't effect our decision.
     _shouldMergeEnd = ShouldMergeEnd(selectionEndWasEndOfParagraph);
 
-    if (ShouldMergeStart(selectionStartWasStartOfParagraph, fragment.HasInterchangeNewlineAtStart(),
-                         shouldHandleMailBlockquote))
+    if (ShouldMergeStart(selectionStartWasStartOfParagraph, fragment.HasInterchangeNewlineAtStart()))
     {
       VisiblePosition startOfParagraphToMove = PositionAtStartOfInsertedContent();
       VisiblePosition destination = startOfParagraphToMove.Previous();
@@ -1774,11 +1531,7 @@ namespace krys::boo
           {
             // Use a default paragraph element (a plain div) for the empty paragraph, using the last paragraph
             // block's style seems to annoy users.
-            InsertParagraphSeparator(
-              true, !shouldHandleMailBlockquote
-                      && HighestEnclosingNodeOfType(endOfInsertedContent.DeepEquivalent(), IsMailBlockquote,
-                                                    EditingBoundaryCrossingRule::CannotCrossEditingBoundary,
-                                                    insertedNodes.FirstNodeInserted()->ParentNode()));
+            InsertParagraphSeparator(true);
           }
 
           // Select up to the paragraph separator that was added.
@@ -1795,12 +1548,6 @@ namespace krys::boo
     else
     {
       MergeEndIfNeeded();
-    }
-
-    if (auto mailBlockquote = EnclosingNodeOfType(PositionAtStartOfInsertedContent().DeepEquivalent(),
-                                                  IsMailPasteAsQuotationNode))
-    {
-      RemoveNodeAttribute(Downcast<dom::Element>(*mailBlockquote), dom::DOMStringAtom(u8"class"));
     }
 
     if (ShouldPerformSmartReplace())

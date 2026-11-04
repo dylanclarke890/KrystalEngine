@@ -6,14 +6,12 @@ namespace krys::boo
 {
 
   StyleFillData::StyleFillData() noexcept
-      : FillOpacity(style::ComputedStyle::InitialFillOpacity()), Fill(style::ComputedStyle::InitialFill()),
-        VisitedLinkFill(style::ComputedStyle::InitialFill())
+      : FillOpacity(style::ComputedStyle::InitialFillOpacity()), Fill(style::ComputedStyle::InitialFill())
   {
   }
 
   inline StyleFillData::StyleFillData(const StyleFillData &other) noexcept
-      : RefCounted<StyleFillData>(), FillOpacity(other.FillOpacity), Fill(other.Fill),
-        VisitedLinkFill(other.VisitedLinkFill)
+      : RefCounted<StyleFillData>(), FillOpacity(other.FillOpacity), Fill(other.Fill)
   {
   }
 
@@ -24,13 +22,12 @@ namespace krys::boo
 
   bool StyleFillData::operator==(const StyleFillData &other) const noexcept
   {
-    return FillOpacity == other.FillOpacity && Fill == other.Fill && VisitedLinkFill == other.VisitedLinkFill;
+    return FillOpacity == other.FillOpacity && Fill == other.Fill;
   }
 
   StyleStrokeData::StyleStrokeData() noexcept
       : StrokeOpacity(style::ComputedStyle::InitialStrokeOpacity()),
         Stroke(style::ComputedStyle::InitialStroke()),
-        VisitedLinkStroke(style::ComputedStyle::InitialStroke()),
         StrokeDashOffset(style::ComputedStyle::InitialStrokeDashOffset()),
         StrokeDashArray(style::ComputedStyle::InitialStrokeDashArray())
   {
@@ -38,8 +35,7 @@ namespace krys::boo
 
   inline StyleStrokeData::StyleStrokeData(const StyleStrokeData &other) noexcept
       : RefCounted<StyleStrokeData>(), StrokeOpacity(other.StrokeOpacity), Stroke(other.Stroke),
-        VisitedLinkStroke(other.VisitedLinkStroke), StrokeDashOffset(other.StrokeDashOffset),
-        StrokeDashArray(other.StrokeDashArray)
+        StrokeDashOffset(other.StrokeDashOffset), StrokeDashArray(other.StrokeDashArray)
   {
   }
 
@@ -51,8 +47,7 @@ namespace krys::boo
   bool StyleStrokeData::operator==(const StyleStrokeData &other) const noexcept
   {
     return StrokeOpacity == other.StrokeOpacity && Stroke == other.Stroke
-           && VisitedLinkStroke == other.VisitedLinkStroke && StrokeDashOffset == other.StrokeDashOffset
-           && StrokeDashArray == other.StrokeDashArray;
+           && StrokeDashOffset == other.StrokeDashOffset && StrokeDashArray == other.StrokeDashArray;
   }
 
   StyleStopData::StyleStopData() noexcept

@@ -92,29 +92,6 @@ namespace krys::boo::style::tests
     }
   }
 
-  TEST_CASE_METHOD(BuilderGeneratedFixture, "BuilderGenerated: visited link colours",
-                   "[Style][BuilderGenerated]")
-  {
-    SECTION("Both the regular and the visited link style")
-    {
-      Apply(PropertyId::BackgroundColor, u8"red");
-      CHECK(Serialised(Style.BackgroundColor()) == "rgb(255, 0, 0)");
-      CHECK(Serialised(Style.VisitedLinkBackgroundColor()) == "rgb(255, 0, 0)");
-    }
-
-    SECTION("Initial and inherited values")
-    {
-      ParentStyle.SetBackgroundColor(Color {boo::Color {boo::Color::blue}});
-      ApplyInherit(PropertyId::BackgroundColor);
-      CHECK(Serialised(Style.BackgroundColor()) == "rgb(0, 0, 255)");
-      CHECK(Serialised(Style.VisitedLinkBackgroundColor()) == "rgb(0, 0, 255)");
-
-      ApplyInitial(PropertyId::BackgroundColor);
-      CHECK(Style.BackgroundColor() == ComputedStyle::InitialBackgroundColor());
-      CHECK(Style.VisitedLinkBackgroundColor() == ComputedStyle::InitialBackgroundColor());
-    }
-  }
-
   TEST_CASE_METHOD(BuilderGeneratedFixture, "BuilderGenerated: font properties", "[Style][BuilderGenerated]")
   {
     SECTION("Font properties set the font description")

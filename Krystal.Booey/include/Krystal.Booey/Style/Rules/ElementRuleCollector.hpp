@@ -60,7 +60,6 @@ namespace krys::boo::style
     {
       RefPtr<const dom::ContainerNode> ScopingRoot;
       uint32 Distance {std::numeric_limits<uint32>::max()};
-      bool MatchesVisited {false};
     };
 
   private:

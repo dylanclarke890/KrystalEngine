@@ -220,7 +220,7 @@ namespace krys::boo
     }
 
     auto &graphicsContext = _paintInfo.Context();
-    auto outlineColor = styleToUse.VisitedDependentColorWithColorFilter(css::PropertyId::OutlineColor);
+    auto outlineColor = styleToUse.ColorWithColorFilter(css::PropertyId::OutlineColor);
     auto useTransparencyLayer = !outlineColor.IsOpaque();
     if (useTransparencyLayer)
     {
@@ -255,7 +255,7 @@ namespace krys::boo
       rect.Inflate(LayoutUnit(outlineOffset));
       pixelSnappedFocusRingRects.push_back(SnapRectToDevicePixels(rect, deviceScaleFactor));
     }
-    auto focusRingColor = style.VisitedDependentColorWithColorFilter(css::PropertyId::OutlineColor);
+    auto focusRingColor = style.ColorWithColorFilter(css::PropertyId::OutlineColor);
     if (style.HasBorderRadius())
     {
       auto path = PathWithShrinkWrappedRects(pixelSnappedFocusRingRects, style.BorderRadii(), outlineOffset,

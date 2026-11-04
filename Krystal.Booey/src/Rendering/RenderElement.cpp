@@ -1726,10 +1726,10 @@ namespace krys::boo
 
     if (auto pseudoStyle = SelectionPseudoStyle())
     {
-      Color color = pseudoStyle->VisitedDependentColorWithColorFilter(colorProperty);
+      Color color = pseudoStyle->ColorWithColorFilter(colorProperty);
       if (!color.IsValid())
       {
-        color = pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::Color);
+        color = pseudoStyle->ColorWithColorFilter(css::PropertyId::Color);
       }
       return color;
     }
@@ -1839,7 +1839,7 @@ namespace krys::boo
     if (selection.ShouldShowBlockCursor() && selection.IsCaret())
     {
       return RenderTheme::Singleton().TransformSelectionBackgroundColor(
-        Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color), options);
+        Style().ColorWithColorFilter(css::PropertyId::Color), options);
     }
 
     const RenderElement *pseudoStyleCandidate = this;
@@ -1851,11 +1851,10 @@ namespace krys::boo
     if (pseudoStyleCandidate)
     {
       auto pseudoStyle = pseudoStyleCandidate->SelectionPseudoStyle();
-      if (pseudoStyle
-          && pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor).IsValid())
+      if (pseudoStyle && pseudoStyle->ColorWithColorFilter(css::PropertyId::BackgroundColor).IsValid())
       {
         return RenderTheme::Singleton().TransformSelectionBackgroundColor(
-          pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor), options);
+          pseudoStyle->ColorWithColorFilter(css::PropertyId::BackgroundColor), options);
       }
     }
 

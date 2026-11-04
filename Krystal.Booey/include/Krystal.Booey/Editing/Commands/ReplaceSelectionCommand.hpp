@@ -18,11 +18,10 @@ namespace krys::boo
     PreventNesting,
     MovingParagraph,
     SanitizeFragment,
-    IgnoreMailBlockquote,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ReplaceSelectionCommandOption, 7uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ReplaceSelectionCommandOption, 6uz);
 
 namespace krys::boo
 {
@@ -76,7 +75,6 @@ namespace krys::boo
     bool _movingParagraph;
     bool _sanitizeFragment;
     bool _shouldMergeEnd {false};
-    bool _ignoreMailBlockquote;
 
   public:
     ReplaceSelectionCommand(dom::Document &document, RefPtr<dom::DocumentFragment> &&fragment,
@@ -110,8 +108,7 @@ namespace krys::boo
                                           const VisiblePosition &originalVisPosBeforeEndBR) noexcept;
 
     KRYS_NODISCARD bool ShouldMergeStart(bool selectionStartWasStartOfParagraph,
-                                         bool fragmentHasInterchangeNewlineAtStart,
-                                         bool selectionStartWasInsideMailBlockquote) noexcept;
+                                         bool fragmentHasInterchangeNewlineAtStart) noexcept;
     KRYS_NODISCARD bool ShouldMergeEnd(bool selectionEndWasEndOfParagraph) noexcept;
     KRYS_NODISCARD bool ShouldMerge(const VisiblePosition &source,
                                     const VisiblePosition &destination) noexcept;
@@ -123,7 +120,6 @@ namespace krys::boo
     void RemoveRedundantStylesAndKeepStyleSpanInline(InsertedNodes &insertedNodes) noexcept;
     void MakeInsertedContentRoundTrippableWithHTMLTreeBuilder(InsertedNodes &insertedNodes) noexcept;
     void MoveNodeOutOfAncestor(dom::Node &node, dom::Node &ancestor, InsertedNodes &insertedNodes) noexcept;
-    void HandleStyleSpans(InsertedNodes &insertedNodes) noexcept;
 
     KRYS_NODISCARD VisiblePosition PositionAtStartOfInsertedContent() const noexcept;
     KRYS_NODISCARD VisiblePosition PositionAtEndOfInsertedContent() const noexcept;

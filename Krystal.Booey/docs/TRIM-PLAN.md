@@ -48,7 +48,8 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
   - Removed `DOM/Scheduling/IdleCallbackController` (and `Page::OpportunisticallyRunIdleCallbacks`).
   - Removed `HTMLCanvasElement::ToBlob` (and its tests). `BlobPropertyBag` stays: it's the kept `Blob` and
     `File` constructors' options.
-- [ ] **6. DOM and Editing leftovers.**
+- [x] **6. DOM and Editing leftovers.** (`::target-text` stays, styling text the host marks in the fragment
+  highlight registry; `:link` matches every link and the cascade has one value per property.)
   - Remove `DOM/FragmentDirective/` and `TextIterator`'s `FoldQuoteMarks`.
   - Remove `Internals/VisitedLinkState`, `Style/ForVisitedLink`, `StyleVisitedLinkColorData` and the visited
     colour plumbing (`:visited` stays and never matches).

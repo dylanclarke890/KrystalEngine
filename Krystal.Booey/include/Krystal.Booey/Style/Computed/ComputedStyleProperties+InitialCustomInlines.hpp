@@ -25,7 +25,6 @@
 #include "Krystal.Booey/Rendering/Style/StyleRareNonInheritedData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSurroundData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleTransformData.hpp"
-#include "Krystal.Booey/Rendering/Style/StyleVisitedLinkColorData.hpp"
 #include "Krystal.Booey/Rendering/Style/SVGRenderStyle.hpp"
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"

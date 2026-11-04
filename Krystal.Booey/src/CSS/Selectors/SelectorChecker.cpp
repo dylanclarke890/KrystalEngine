@@ -23,17 +23,10 @@
 
 namespace krys::boo::css
 {
-  enum class VisitedMatchType : uint8
-  {
-    Disabled,
-    Enabled
-  };
-
   struct SelectorChecker::LocalContext
   {
     const Selector *CurrentSelector;
     const dom::Element *Element;
-    VisitedMatchType VisitedType;
     const Selector *FirstSelectorOfTheFragment;
     Maybe<style::PseudoElementIdentifier> RequestedPseudoElement;
     bool IsMatchElement {true};
@@ -46,10 +39,10 @@ namespace krys::boo::css
     bool MatchedHostPseudoClass {false};
     bool IsNegation {false};
 
-    LocalContext(const Selector &selector, const dom::Element &element, VisitedMatchType visitedMatchType,
+    LocalContext(const Selector &selector, const dom::Element &element,
                  Maybe<style::PseudoElementIdentifier> requestedPseudoElement) noexcept
-        : CurrentSelector(&selector), Element(&element), VisitedType(visitedMatchType),
-          FirstSelectorOfTheFragment(&selector), RequestedPseudoElement(krys::move(requestedPseudoElement))
+        : CurrentSelector(&selector), Element(&element), FirstSelectorOfTheFragment(&selector),
+          RequestedPseudoElement(krys::move(requestedPseudoElement))
     {
     }
   };
@@ -170,12 +163,6 @@ namespace krys::boo::css
       LocalContextForParent(const SelectorChecker::LocalContext &context) noexcept
     {
       SelectorChecker::LocalContext updatedContext(context);
-      // Disable :visited matching when we see the first link.
-      if (IsLink(*context.Element))
-      {
-        updatedContext.VisitedType = VisitedMatchType::Disabled;
-      }
-
       updatedContext.IsMatchElement = false;
       updatedContext.IsSubjectOrAdjacentElement = false;
 
@@ -526,10 +513,7 @@ namespace krys::boo::css
                               CheckingContext &checkingContext) const noexcept
   {
     auto &requestedPseudoElement = checkingContext.RequestedPseudoElement();
-    LocalContext context(selector, element,
-                         checkingContext.ResolvingMode == Mode::QueryingRules ? VisitedMatchType::Disabled
-                                                                              : VisitedMatchType::Enabled,
-                         requestedPseudoElement);
+    LocalContext context(selector, element, requestedPseudoElement);
 
     if (checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Shadow)
     {
@@ -573,7 +557,7 @@ namespace krys::boo::css
     if (auto *selectorList = selector.SubSelectors())
     {
       krys_debug_assert(selectorList->SelectorCount() == 1);
-      LocalContext context(*selectorList->FirstSelectorComponent(), element, VisitedMatchType::Enabled, null);
+      LocalContext context(*selectorList->FirstSelectorComponent(), element, null);
       context.InFunctionalPseudoClass = true;
       context.PseudoElementEffective = false;
       EnumSet<PseudoElementType> ignoredPseudoElements;
@@ -680,12 +664,6 @@ namespace krys::boo::css
           && !collectedPseudoElements.Contains(context.RequestedPseudoElement->Type))
       {
         return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
-      }
-
-      // Disable :visited matching when we try to match anything else than an ancestors.
-      if (!context.CurrentSelector->HasDescendantOrChildRelation())
-      {
-        nextContext.VisitedType = VisitedMatchType::Disabled;
       }
 
       nextContext.RequestedPseudoElement = null;
@@ -1334,29 +1312,9 @@ namespace krys::boo::css
           return false;
         case SelectorPseudoClass::AnyLink:
         case SelectorPseudoClass::Link:
-          // :visited and :link matches are separated later when applying the style. Here both classes match
-          // all links...
+          // There's no history, so every link is unvisited.
           return IsLink(element);
-        case SelectorPseudoClass::Visited:
-        {
-          // ...except if :visited matching is disabled for ancestor/sibling matching.
-          // Inside functional pseudo class except for :not, :visited never matches.
-          if (context.InFunctionalPseudoClass)
-          {
-            return false;
-          }
-          auto match = IsLink(element) && context.VisitedType == VisitedMatchType::Enabled;
-          if (!match)
-          {
-            return false;
-          }
-          // Track that :visited matched during scoping root evaluation
-          if (checkingContext.IsEvaluatingScopingRoot)
-          {
-            checkingContext.ScopingRootMatchesVisited = true;
-          }
-          return true;
-        }
+        case SelectorPseudoClass::Visited:      return false;
         case SelectorPseudoClass::Focus:        return MatchesFocusPseudoClass(element);
         case SelectorPseudoClass::FocusVisible: return MatchesFocusVisiblePseudoClass(element);
         case SelectorPseudoClass::FocusWithin:  return MatchesFocusWithinPseudoClass(element);
@@ -1442,16 +1400,6 @@ namespace krys::boo::css
           if (dom::TreeQueries::GetShadowRoot(element))
           {
             context.MatchedHostPseudoClass = true;
-          }
-
-          // Prevent double :visited matching when scoping root matched :visited
-          if (checkingContext.ScopingRootMatchesVisited && context.VisitedType == VisitedMatchType::Disabled)
-          {
-            return false;
-          }
-          if (checkingContext.ScopingRootMatchesVisited)
-          {
-            context.VisitedType = VisitedMatchType::Disabled;
           }
 
           return true;
@@ -1784,7 +1732,7 @@ namespace krys::boo::css
 
     auto checkRelative = [&](const dom::Element &elementToCheck)
     {
-      LocalContext hasContext(hasSelector, elementToCheck, VisitedMatchType::Disabled, null);
+      LocalContext hasContext(hasSelector, elementToCheck, null);
       hasContext.InFunctionalPseudoClass = true;
       hasContext.PseudoElementEffective = false;
 
@@ -1977,61 +1925,5 @@ namespace krys::boo::css
       // FIXME: The group, old and new pseudo-elements depend on the document's active view transition.
       default:                                         return false;
     }
-  }
-
-  uint32 SelectorChecker::DetermineLinkMatchType(const Selector *selector,
-                                                 const ScopeRule *scopeRule) noexcept
-  {
-    uint32 linkMatchType = MatchAll;
-
-    auto scopingRootLinkMatchType = [&]() -> uint32
-    {
-      if (!scopeRule || scopeRule->ScopeStart().IsEmpty())
-      {
-        return MatchAll;
-      }
-
-      // FIXME: Support multiple selectors
-      auto scopingRootLinkMatchType =
-        DetermineLinkMatchType(scopeRule->ScopeStart().FirstSelectorComponent());
-      if (!scopeRule->ScopeEnd().IsEmpty())
-      {
-        scopingRootLinkMatchType &= DetermineLinkMatchType(scopeRule->ScopeEnd().FirstSelectorComponent());
-      }
-      return scopingRootLinkMatchType;
-    };
-
-    // Statically determine if this selector will match a link in visited, unvisited or any state, or never.
-    // :visited never matches other elements than the innermost link element.
-    for (; selector; selector = selector->PrecedingComplexSelectorComponent())
-    {
-      if (selector->Match() == SelectorMatch::PseudoClass)
-      {
-        switch (selector->PseudoClass())
-        {
-          case SelectorPseudoClass::Link:    linkMatchType &= ~MatchVisited; break;
-          case SelectorPseudoClass::Visited: linkMatchType &= ~MatchLink; break;
-          case SelectorPseudoClass::Scope:
-            // :scope refers to the scoping root, so it should inherit the link matching constraints from it.
-            linkMatchType &= scopingRootLinkMatchType();
-            break;
-          default: break;
-        }
-      }
-      auto relation = selector->Relation();
-      if (relation == SelectorRelation::Compounding)
-      {
-        continue;
-      }
-      if (!selector->HasDescendantOrChildRelation())
-      {
-        return linkMatchType;
-      }
-      if (linkMatchType != MatchAll)
-      {
-        return linkMatchType;
-      }
-    }
-    return linkMatchType;
   }
 }

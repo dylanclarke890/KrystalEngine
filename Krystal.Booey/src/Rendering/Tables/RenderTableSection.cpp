@@ -1668,8 +1668,8 @@ namespace krys::boo
       return;
     }
     BorderPainter::DrawLineForBoxSide(paintInfo.Context(), GetDocument(), FloatRect(rect), side,
-                                      Style().VisitedDependentColorWithColorFilter(borderColor), borderStyle,
-                                      0, 0, antialias);
+                                      Style().ColorWithColorFilter(borderColor), borderStyle, 0, 0,
+                                      antialias);
   }
 
   LayoutUnit RenderTableSection::OffsetLeftForRowGroupBorder(RenderTableCell *cell,

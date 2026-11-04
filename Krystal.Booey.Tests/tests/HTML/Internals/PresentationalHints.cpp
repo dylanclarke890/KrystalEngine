@@ -260,13 +260,10 @@ namespace krys::boo::html::tests
       auto document = ResolverFixture::Parse(u8"<body link=red vlink=#00f alink=lime>");
       auto style = RenderStyle::Create();
       CHECK(document->LinkColor(style) == boo::Color(SRGBA<uint8> {255, 0, 0}));
-      CHECK(document->VisitedLinkColor(style) == boo::Color(SRGBA<uint8> {0, 0, 255}));
       CHECK(document->ActiveLinkColor(style) == boo::Color(SRGBA<uint8> {0, 255, 0}));
 
       document->Body()->RemoveAttribute(u8"link");
       CHECK(document->LinkColor(style) == css::ColorFromKeyword(css::ValueId::WebkitLink, {}));
-      REQUIRE_FALSE(document->Body()->SetAttribute(u8"vlink", u8"transparent").HasException());
-      CHECK(document->VisitedLinkColor(style) != boo::Color(SRGBA<uint8> {0, 0, 255}));
     }
   }
 

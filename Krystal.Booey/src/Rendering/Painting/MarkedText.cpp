@@ -223,12 +223,9 @@ namespace krys::boo
       }
     };
 
-    if (document.GetSettings().ScrollToTextFragmentEnabled)
+    if (auto *registry = document.FragmentHighlightRegistryIfExists())
     {
-      if (auto *registry = document.FragmentHighlightRegistryIfExists())
-      {
-        appendMarkedTextHighlights(*registry, Type::FragmentHighlight);
-      }
+      appendMarkedTextHighlights(*registry, Type::FragmentHighlight);
     }
 
     // FIXME: The text extraction and app highlights' registries, once there are any.

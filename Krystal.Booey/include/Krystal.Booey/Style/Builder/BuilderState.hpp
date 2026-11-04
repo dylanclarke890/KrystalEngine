@@ -88,7 +88,6 @@ namespace krys::boo::style
     std::bitset<css::TotalPropertyIdValues> _invalidAtComputedValueTimeProperties;
 
     const PropertyCascade::Property *_currentProperty {nullptr};
-    css::SelectorChecker::LinkMatchMask _linkMatch {};
 
     bool _fontDirty {false};
     List<css::CSSOMStringAtom> _registeredContentAttributes;
@@ -147,16 +146,6 @@ namespace krys::boo::style
 
     KRYS_NODISCARD inline const FontCascadeDescription &GetFontDescription() const noexcept;
     KRYS_NODISCARD inline const FontCascadeDescription &ParentFontDescription() const noexcept;
-
-    KRYS_NODISCARD bool ApplyPropertyToRegularStyle() const noexcept
-    {
-      return _linkMatch != css::SelectorChecker::MatchVisited;
-    }
-
-    KRYS_NODISCARD bool ApplyPropertyToVisitedLinkStyle() const noexcept
-    {
-      return _linkMatch != css::SelectorChecker::MatchLink;
-    }
 
     KRYS_NODISCARD float ZoomWithTextZoomFactor() noexcept;
 

@@ -145,54 +145,6 @@ namespace krys::boo::style::interpolation
   StyleTypeWrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
                    void (TSetterStyle::*setter)(T &&) noexcept) -> StyleTypeWrapper<T, T, T &&>;
 
-  template <typename T>
-  class VisitedAffectedStyleTypeWrapper : public WrapperBase
-  {
-  protected:
-    StyleTypeWrapper<T, const T &, T &&> _wrapper;
-    StyleTypeWrapper<T, const T &, T &&> _visitedWrapper;
-
-  public:
-    VisitedAffectedStyleTypeWrapper(css::PropertyId property,
-                                    const T &(RenderStyleProperties::*getter)() const noexcept,
-                                    void (RenderStyleProperties::*setter)(T &&) noexcept,
-                                    const T &(RenderStyleProperties::*visitedGetter)() const noexcept,
-                                    void (RenderStyleProperties::*visitedSetter)(T &&) noexcept) noexcept
-        : WrapperBase(property), _wrapper(property, getter, setter),
-          _visitedWrapper(property, visitedGetter, visitedSetter)
-    {
-    }
-
-    KRYS_NODISCARD bool Equals(const RenderStyle &a, const RenderStyle &b) const noexcept override
-    {
-      return _wrapper.Equals(a, b) && _visitedWrapper.Equals(a, b);
-    }
-
-    KRYS_NODISCARD bool
-      RequiresInterpolationForAccumulativeIteration(const RenderStyle &a,
-                                                    const RenderStyle &b) const noexcept override
-    {
-      return _wrapper.RequiresInterpolationForAccumulativeIteration(a, b)
-             && _visitedWrapper.RequiresInterpolationForAccumulativeIteration(a, b);
-    }
-
-    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
-                     const Context &context) const noexcept override
-    {
-      _wrapper.Interpolate(destination, from, to, context);
-      _visitedWrapper.Interpolate(destination, from, to, context);
-    }
-  };
-
-  // Deduction guide for getter/setters that return const references and take r-value references.
-  template <typename T, typename TGetterStyle, typename TSetterStyle, typename TVisitedGetterStyle,
-            typename TVisitedSetterStyle>
-  VisitedAffectedStyleTypeWrapper(css::PropertyId, const T &(TGetterStyle::*getter)() const noexcept,
-                                  void (TSetterStyle::*setter)(T &&) noexcept,
-                                  const T &(TVisitedGetterStyle::*visitedGetter)() const noexcept,
-                                  void (TVisitedSetterStyle::*visitedSetter)(T &&) noexcept)
-    -> VisitedAffectedStyleTypeWrapper<T>;
-
   // MARK: - Discrete Wrappers
 
   template <typename T, typename TGetter = T, typename TSetter = T>
@@ -287,6 +239,13 @@ namespace krys::boo::style::interpolation
     {
     }
 
+    KRYS_NODISCARD bool
+      RequiresInterpolationForAccumulativeIteration(const RenderStyle &,
+                                                    const RenderStyle &) const noexcept override
+    {
+      return true;
+    }
+
     void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
                      const Context &context) const noexcept override
     {
@@ -294,114 +253,46 @@ namespace krys::boo::style::interpolation
     }
   };
 
-  class VisitedAffectedColorWrapper final : public WrapperBase
+  class CaretColorWrapper final : public StyleTypeWrapper<style::Color, const style::Color &, style::Color &&>
   {
-  protected:
-    ColorWrapper _wrapper;
-    ColorWrapper _visitedWrapper;
+    using Base = StyleTypeWrapper<style::Color, const style::Color &, style::Color &&>;
 
-  public:
-    VisitedAffectedColorWrapper(css::PropertyId property,
-                                const boo::Color &(RenderStyleProperties::*getter)() const noexcept,
-                                void (RenderStyleProperties::*setter)(boo::Color &&) noexcept,
-                                const boo::Color &(RenderStyleProperties::*visitedGetter)() const noexcept,
-                                void (RenderStyleProperties::*visitedSetter)(boo::Color &&) noexcept) noexcept
-        : WrapperBase(property), _wrapper(property, getter, setter),
-          _visitedWrapper(property, visitedGetter, visitedSetter)
-    {
-    }
-
-    KRYS_NODISCARD bool Equals(const RenderStyle &a, const RenderStyle &b) const noexcept final
-    {
-      return _wrapper.Equals(a, b) && _visitedWrapper.Equals(a, b);
-    }
-
-    KRYS_NODISCARD bool
-      RequiresInterpolationForAccumulativeIteration(const RenderStyle &,
-                                                    const RenderStyle &) const noexcept final
-    {
-      return true;
-    }
-
-    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
-                     const Context &context) const noexcept final
-    {
-      _wrapper.Interpolate(destination, from, to, context);
-      _visitedWrapper.Interpolate(destination, from, to, context);
-    }
-  };
-
-  class CaretColorWrapper final : public VisitedAffectedStyleTypeWrapper<style::Color>
-  {
   public:
     CaretColorWrapper() noexcept
-        : VisitedAffectedStyleTypeWrapper<style::Color>(
-            css::PropertyId::CaretColor, &RenderStyleProperties::CaretColor,
-            &RenderStyleProperties::SetCaretColor, &RenderStyleProperties::VisitedLinkCaretColor,
-            &RenderStyleProperties::SetVisitedLinkCaretColor)
+        : Base(css::PropertyId::CaretColor, &RenderStyleProperties::CaretColor,
+               &RenderStyleProperties::SetCaretColor)
     {
     }
 
     KRYS_NODISCARD bool Equals(const RenderStyle &a, const RenderStyle &b) const noexcept final
     {
-      return a.HasAutoCaretColor() == b.HasAutoCaretColor()
-             && a.HasVisitedLinkAutoCaretColor() == b.HasVisitedLinkAutoCaretColor()
-             && VisitedAffectedStyleTypeWrapper<style::Color>::Equals(a, b);
+      return a.HasAutoCaretColor() == b.HasAutoCaretColor() && Base::Equals(a, b);
     }
 
     KRYS_NODISCARD bool CanInterpolate(const RenderStyle &from, const RenderStyle &to,
                                        CompositeOperation) const noexcept final
     {
-      return CanInterpolateCaretColor(from, to, false) || CanInterpolateCaretColor(from, to, true);
+      return !from.HasAutoCaretColor() && !to.HasAutoCaretColor();
     }
 
     void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
                      const Context &context) const noexcept final
     {
-      if (CanInterpolateCaretColor(from, to, false))
+      if (CanInterpolate(from, to, CompositeOperation::Replace))
       {
-        _wrapper.Interpolate(destination, from, to, context);
+        Base::Interpolate(destination, from, to, context);
+        return;
+      }
+
+      const auto &blendingRenderStyle = context.Progress < 0.5 ? from : to;
+      if (blendingRenderStyle.HasAutoCaretColor())
+      {
+        destination.SetHasAutoCaretColor();
       }
       else
       {
-        const auto &blendingRenderStyle = context.Progress < 0.5 ? from : to;
-        if (blendingRenderStyle.HasAutoCaretColor())
-        {
-          destination.SetHasAutoCaretColor();
-        }
-        else
-        {
-          destination.SetCaretColor(style::Color {blendingRenderStyle.CaretColor()});
-        }
+        destination.SetCaretColor(style::Color {blendingRenderStyle.CaretColor()});
       }
-
-      if (CanInterpolateCaretColor(from, to, true))
-      {
-        _visitedWrapper.Interpolate(destination, from, to, context);
-      }
-      else
-      {
-        const auto &blendingRenderStyle = context.Progress < 0.5 ? from : to;
-        if (blendingRenderStyle.HasVisitedLinkAutoCaretColor())
-        {
-          destination.SetHasVisitedLinkAutoCaretColor();
-        }
-        else
-        {
-          destination.SetVisitedLinkCaretColor(style::Color {blendingRenderStyle.VisitedLinkCaretColor()});
-        }
-      }
-    }
-
-  private:
-    KRYS_NODISCARD static bool CanInterpolateCaretColor(const RenderStyle &from, const RenderStyle &to,
-                                                        bool visited) noexcept
-    {
-      if (visited)
-      {
-        return !from.HasVisitedLinkAutoCaretColor() && !to.HasVisitedLinkAutoCaretColor();
-      }
-      return !from.HasAutoCaretColor() && !to.HasAutoCaretColor();
     }
   };
 

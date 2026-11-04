@@ -11,12 +11,6 @@
 
 namespace krys::boo::css
 {
-  CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(dom::Element &element,
-                                                           AllowVisited allowVisited) noexcept
-      : _element(ShareRef(element)), _allowVisitedStyle(allowVisited == AllowVisited::Yes)
-  {
-  }
-
   CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(dom::Element &element, IsEmpty isEmpty) noexcept
       : _element(ShareRef(element)), _isEmpty(isEmpty == IsEmpty::Yes)
   {
@@ -29,12 +23,6 @@ namespace krys::boo::css
   }
 
   CSSComputedStyleDeclaration::~CSSComputedStyleDeclaration() noexcept = default;
-
-  Ref<CSSComputedStyleDeclaration> CSSComputedStyleDeclaration::Create(dom::Element &element,
-                                                                       AllowVisited allowVisited) noexcept
-  {
-    return AdoptRef(*new CSSComputedStyleDeclaration(element, allowVisited));
-  }
 
   Ref<CSSComputedStyleDeclaration> CSSComputedStyleDeclaration::Create(
     dom::Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
@@ -49,7 +37,7 @@ namespace krys::boo::css
 
   style::Extractor CSSComputedStyleDeclaration::GetExtractor() const noexcept
   {
-    return style::Extractor(_element.get(), _allowVisitedStyle, _pseudoElementIdentifier);
+    return style::Extractor(_element.get(), _pseudoElementIdentifier);
   }
 
   CSSOMString CSSComputedStyleDeclaration::CssText() const noexcept

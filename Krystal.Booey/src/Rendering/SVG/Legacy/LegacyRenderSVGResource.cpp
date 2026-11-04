@@ -57,24 +57,6 @@ namespace krys::boo
         color = style.ColorResolvingCurrentColor(*paintColor);
       }
 
-      if (style.GetInsideLink() == InsideLink::InsideVisited)
-      {
-        // FIXME: This code doesn't support the uri component of the visited link paint,
-        // https://bugs.webkit.org/show_bug.cgi?id=70006
-        const auto &visitedPaint = applyToFill ? style.VisitedLinkFill() : style.VisitedLinkStroke();
-
-        // For `currentcolor`, 'color' already contains the 'visitedColor'.
-        if (auto visitedPaintColor = visitedPaint.TryColor();
-            visitedPaintColor && !visitedPaintColor->IsCurrentColor())
-        {
-          if (auto visitedColor = style.ColorResolvingCurrentColor(*visitedPaintColor);
-              visitedColor.IsValid())
-          {
-            color = visitedColor.ColorWithAlpha(color.AlphaAsFloat());
-          }
-        }
-      }
-
       // If the primary resource is just a color, return immediately.
       auto *colorResource = LegacyRenderSVGResource::SharedSolidPaintingResource();
       if (paint.IsColor())

@@ -46,7 +46,6 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
-#include "Krystal.Booey/DOM/Internals/VisitedLinkState.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -1344,9 +1343,6 @@ namespace krys::boo::dom
   void Document::SetURL(url::URL url) noexcept
   {
     url::URL newURL = url.IsEmpty() ? url::AboutBlankURL() : krys::move(url);
-
-    // https://wicg.github.io/scroll-to-text-fragment/#process-and-consume-fragment-directive
-    _fragmentDirective = newURL.ConsumeFragmentDirective();
 
     if (newURL == _url)
     {
@@ -4709,15 +4705,6 @@ namespace krys::boo::dom
     return krys::move(elementStyle.Style);
   }
 
-  VisitedLinkState &Document::GetVisitedLinkState() const noexcept
-  {
-    if (!_visitedLinkState)
-    {
-      _visitedLinkState = CreateUnique<VisitedLinkState>(const_cast<Document &>(*this));
-    }
-    return *_visitedLinkState;
-  }
-
   boo::Color Document::LinkColor(const RenderStyle &style) const noexcept
   {
     if (_linkColor.IsValid())
@@ -4725,16 +4712,6 @@ namespace krys::boo::dom
       return _linkColor;
     }
     return css::ColorFromKeyword(css::ValueId::WebkitLink, StyleColorOptions(&style));
-  }
-
-  boo::Color Document::VisitedLinkColor(const RenderStyle &style) const noexcept
-  {
-    if (_visitedLinkColor.IsValid())
-    {
-      return _visitedLinkColor;
-    }
-    return css::ColorFromKeyword(css::ValueId::WebkitLink,
-                                 StyleColorOptions(&style) | style::ColorOptions::ForVisitedLink);
   }
 
   boo::Color Document::ActiveLinkColor(const RenderStyle &style) const noexcept
@@ -4749,11 +4726,6 @@ namespace krys::boo::dom
   void Document::ResetLinkColor() noexcept
   {
     _linkColor = {};
-  }
-
-  void Document::ResetVisitedLinkColor() noexcept
-  {
-    _visitedLinkColor = {};
   }
 
   void Document::ResetActiveLinkColor() noexcept

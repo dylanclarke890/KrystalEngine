@@ -9,7 +9,6 @@
 #include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/Editing/Commands/AppendNodeCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
-#include "Krystal.Booey/Editing/Commands/BreakBlockquoteCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/DeleteFromTextNodeCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertIntoTextNodeCommand.hpp"
@@ -422,11 +421,10 @@ namespace krys::boo
     ApplyCommandToComposite(ApplyStyleCommand::Create(element, true));
   }
 
-  void CompositeEditCommand::InsertParagraphSeparator(bool useDefaultParagraphElement,
-                                                      bool pasteBlockquoteIntoUnquotedArea) noexcept
+  void CompositeEditCommand::InsertParagraphSeparator(bool useDefaultParagraphElement) noexcept
   {
-    ApplyCommandToComposite(InsertParagraphSeparatorCommand::Create(
-      GetDocument(), useDefaultParagraphElement, pasteBlockquoteIntoUnquotedArea, EditingAction()));
+    ApplyCommandToComposite(
+      InsertParagraphSeparatorCommand::Create(GetDocument(), useDefaultParagraphElement, EditingAction()));
   }
 
   void CompositeEditCommand::InsertLineBreak() noexcept
@@ -694,30 +692,7 @@ namespace krys::boo
       }
       if (newline != utf8_stringview::npos)
       {
-        VisiblePosition caret(EndingSelection().VisibleStart());
-        if (EnclosingNodeOfType(caret.DeepEquivalent(), &IsMailBlockquote))
-        {
-          // FIXME: Breaking a blockquote when the caret is just after a space will collapse the
-          // space. Modify startIndex or length to compensate for this so that the ending selection
-          // will be positioned correctly.
-          // <rdar://problem/9914462> breaking a Mail blockquote just after a space collapses the space
-          if (caret.Previous().CharacterAfter() == U' ')
-          {
-            if (!offset && !startIndex)
-            {
-              startIndex--;
-            }
-            else if (!length)
-            {
-              length--;
-            }
-          }
-          ApplyCommandToComposite(BreakBlockquoteCommand::Create(GetDocument()));
-        }
-        else
-        {
-          InsertLineBreak();
-        }
+        InsertLineBreak();
       }
 
       offset = newline + 1;
@@ -2004,78 +1979,6 @@ namespace krys::boo
     if (!style->IsEmpty())
     {
       ApplyStyle(style.get());
-    }
-
-    return true;
-  }
-
-  // If the caret is in an empty quoted paragraph, and either there is nothing before that
-  // paragraph, or what is before is unquoted, and the user presses delete, unquote that paragraph.
-  bool CompositeEditCommand::BreakOutOfEmptyMailBlockquotedParagraph() noexcept
-  {
-    if (!EndingSelection().IsCaret())
-    {
-      return false;
-    }
-
-    VisiblePosition caret(EndingSelection().VisibleStart());
-    RefPtr<dom::Node> highestBlockquote =
-      HighestEnclosingNodeOfType(caret.DeepEquivalent(), &IsMailBlockquote);
-    if (!highestBlockquote)
-    {
-      return false;
-    }
-
-    if (!IsStartOfParagraph(caret) || !IsEndOfParagraph(caret))
-    {
-      return false;
-    }
-
-    VisiblePosition previous(caret.Previous(EditingBoundaryCrossingRule::CannotCrossEditingBoundary));
-    // Only move forward if there's nothing before the caret, or if there's unquoted content before it.
-    if (EnclosingNodeOfType(previous.DeepEquivalent(), &IsMailBlockquote))
-    {
-      return false;
-    }
-
-    Ref<dom::Document> document = ShareRef(GetDocument());
-    auto br = CreateBreakElement(*document);
-    // We want to replace this quoted paragraph with an unquoted one, so insert a br
-    // to hold the caret before the highest blockquote.
-    (void)InsertNodeBefore(*br, *highestBlockquote);
-    VisiblePosition atBR = dom::PositionBeforeNode(br.get());
-    // If the br we inserted collapsed, for example foo<br><blockquote>...</blockquote>, insert
-    // a second one.
-    if (!IsStartOfParagraph(atBR))
-    {
-      (void)InsertNodeBefore(*CreateBreakElement(*document), *br);
-    }
-    SetEndingSelection(VisibleSelection(atBR, EndingSelection().GetDirectionality()));
-
-    // If this is an empty paragraph there must be a line break here.
-    if (!LineBreakExistsAtVisiblePosition(caret))
-    {
-      return false;
-    }
-
-    dom::Position caretPos(caret.DeepEquivalent().Downstream());
-    // A line break is either a br or a preserved newline.
-    krys_debug_assert(IsHTMLElementOfType(caretPos.DeprecatedNode(), html::TagName::br)
-                      || (Is<dom::Text>(*caretPos.DeprecatedNode())
-                          && caretPos.DeprecatedNode()->Renderer()->Style().PreserveNewline()));
-
-    if (IsHTMLElementOfType(caretPos.DeprecatedNode(), html::TagName::br))
-    {
-      RemoveNodeAndPruneAncestors(*caretPos.DeprecatedNode());
-    }
-    else if (RefPtr<dom::Text> textNode = ShareRefPtr(DynamicDowncast<dom::Text>(*caretPos.DeprecatedNode())))
-    {
-      krys_debug_assert(caretPos.DeprecatedEditingOffset() == 0);
-      RefPtr<dom::ContainerNode> parentNode = ShareRefPtr(textNode->ParentNode());
-      // The preserved newline must be the first thing in the node, since otherwise the previous
-      // paragraph would be quoted, and we verified that it wasn't above.
-      DeleteTextFromNode(*textNode, 0, 1);
-      Prune(parentNode.get());
     }
 
     return true;

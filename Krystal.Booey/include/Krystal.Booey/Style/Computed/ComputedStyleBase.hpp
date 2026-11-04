@@ -324,9 +324,6 @@ namespace krys::boo
       KRYS_NODISCARD inline bool UseTreeCountingFunctions() const noexcept;
       inline void SetUsesTreeCountingFunctions() noexcept;
 
-      KRYS_NODISCARD inline InsideLink GetInsideLink() const noexcept;
-      inline void SetInsideLink(InsideLink) noexcept;
-
       KRYS_NODISCARD inline bool IsLink() const noexcept;
       inline void SetIsLink(bool) noexcept;
 
@@ -569,13 +566,9 @@ namespace krys::boo
 
       // `caret-color`
       inline const Color &CaretColor() const;
-      inline const Color &VisitedLinkCaretColor() const;
       KRYS_NODISCARD inline bool HasAutoCaretColor() const noexcept;
-      KRYS_NODISCARD inline bool HasVisitedLinkAutoCaretColor() const noexcept;
       inline void SetCaretColor(Color &&) noexcept;
-      inline void SetVisitedLinkCaretColor(Color &&) noexcept;
       inline void SetHasAutoCaretColor() noexcept;
-      inline void SetHasVisitedLinkAutoCaretColor() noexcept;
 
       // `cursor`
       KRYS_NODISCARD inline CursorType GetCursorType() const noexcept;
@@ -659,12 +652,11 @@ namespace krys::boo
         // -webkit- Stuff = 1 bit
         uint8 RtlOrdering : 1;
 
-        // Color Stuff = 4 bits
+        // Color Stuff = 2 bits
         uint8 HasExplicitlySetColor : 1;
         uint8 PrintColorAdjust : 1;
-        uint8 InsideLink : 2;
 
-        // Total = 56 bits (fits in 8 bytes)
+        // Total = 54 bits (fits in 8 bytes)
       };
 
       const StyleNonInheritedData &NonInheritedData() const

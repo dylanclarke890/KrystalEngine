@@ -410,7 +410,7 @@ namespace krys::boo
 
   inline bool RenderStyle::HasBackground() const noexcept
   {
-    return VisitedDependentColor(css::PropertyId::BackgroundColor).IsVisible() || HasBackgroundImage();
+    return ColorResolvingCurrentColor(css::PropertyId::BackgroundColor).IsVisible() || HasBackgroundImage();
   }
 
   inline bool RenderStyle::HasBackgroundImage() const noexcept

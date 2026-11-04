@@ -324,12 +324,5 @@ namespace krys::boo::html::tests
       CHECK(Downcast<HTMLElement>(fixture.ById(u8"plain")).HasAttribute(u8"hidden"));
       CHECK(events.empty());
     }
-
-    SECTION("A text fragment opens the details its text is in")
-    {
-      Navigate(fixture, u8"#:~:text=answer%20is%20here");
-      CHECK(document.CSSTarget() == &fixture.ById(u8"answer"));
-      CHECK(details.Open());
-    }
   }
 }

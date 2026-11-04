@@ -67,10 +67,8 @@ namespace krys::boo::style::tests
     SECTION("currentcolor resolves to the parent's colour")
     {
       ParentStyle.SetColor(boo::Color {boo::Color::blue});
-      ParentStyle.SetVisitedLinkColor(boo::Color {boo::Color::green});
       Apply(PropertyId::Color, u8"currentcolor");
       CHECK(Style.GetColor() == boo::Color {boo::Color::blue});
-      CHECK(Style.VisitedLinkColor() == boo::Color {boo::Color::green});
       CHECK(Style.DisallowsFastPathInheritance());
     }
 
@@ -91,7 +89,6 @@ namespace krys::boo::style::tests
       ParentStyle.SetColor(boo::Color {boo::Color::blue});
       ApplyInherit(PropertyId::Color);
       CHECK(Style.GetColor() == boo::Color {boo::Color::blue});
-      CHECK(Style.VisitedLinkColor() == boo::Color {boo::Color::blue});
     }
 
     SECTION("caret-color: auto")
@@ -102,7 +99,6 @@ namespace krys::boo::style::tests
 
       Apply(PropertyId::CaretColor, u8"auto");
       CHECK(Style.HasAutoCaretColor());
-      CHECK(Style.HasVisitedLinkAutoCaretColor());
     }
 
     SECTION("stroke-color is explicitly set")
@@ -116,7 +112,6 @@ namespace krys::boo::style::tests
     {
       Apply(PropertyId::Fill, u8"red");
       CHECK(Serialised(Style.Fill()) == "rgb(255, 0, 0)");
-      CHECK(Serialised(Style.VisitedLinkFill()) == "rgb(255, 0, 0)");
 
       ApplyInherit(PropertyId::Stroke);
       CHECK(Style.Stroke() == ParentStyle.Stroke());

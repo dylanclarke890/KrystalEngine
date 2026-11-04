@@ -39,8 +39,6 @@ namespace krys::boo::style
 
     const RenderElement *Renderer;
 
-    bool AllowVisitedStyle;
-
     css::ValuePool &Pool;
   };
 }

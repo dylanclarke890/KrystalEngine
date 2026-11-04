@@ -22,11 +22,6 @@ namespace krys::boo
     _computedStyle.SetUsesTreeCountingFunctions();
   }
 
-  inline void RenderStyleBase::SetInsideLink(InsideLink insideLink) noexcept
-  {
-    _computedStyle.SetInsideLink(insideLink);
-  }
-
   inline void RenderStyleBase::SetIsLink(bool isLink) noexcept
   {
     _computedStyle.SetIsLink(isLink);
@@ -333,13 +328,4 @@ namespace krys::boo
     _computedStyle.SetHasAutoCaretColor();
   }
 
-  inline void RenderStyleBase::SetVisitedLinkCaretColor(style::Color &&value) noexcept
-  {
-    _computedStyle.SetVisitedLinkCaretColor(krys::move(value));
-  }
-
-  inline void RenderStyleBase::SetHasVisitedLinkAutoCaretColor() noexcept
-  {
-    _computedStyle.SetHasVisitedLinkAutoCaretColor();
-  }
 }

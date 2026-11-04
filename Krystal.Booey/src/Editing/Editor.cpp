@@ -64,7 +64,6 @@ namespace krys::boo
         case ClipboardEventKind::Cut:              return EventNames::Cut;
         case ClipboardEventKind::Paste:
         case ClipboardEventKind::PasteAsPlainText:
-        case ClipboardEventKind::PasteAsQuotation:
         case ClipboardEventKind::PasteFont:        return EventNames::Paste;
         case ClipboardEventKind::BeforeCopy:       return EventNames::BeforeCopy;
         case ClipboardEventKind::BeforeCut:        return EventNames::BeforeCut;
@@ -193,7 +192,6 @@ namespace krys::boo
                                                           krys::move(pasteboard));
         }
         case ClipboardEventKind::Paste:
-        case ClipboardEventKind::PasteAsQuotation:
         case ClipboardEventKind::PasteFont:
           return dom::DataTransfer::CreateForCopyAndPaste(document, StoreMode::Readonly,
                                                           Pasteboard::CreateForCopyAndPaste());
@@ -464,17 +462,15 @@ namespace krys::boo
 
   // FIXME: The edit action of the paste (the event's input type), with removing backgrounds.
   void Editor::PasteAsFragment(Ref<dom::DocumentFragment> &&pastingFragment, bool smartReplace,
-                               bool matchStyle, MailBlockquoteHandling respectsMailBlockquote,
-                               EditAction) noexcept
+                               bool matchStyle, EditAction) noexcept
   {
     RefPtr<dom::Element> target = FindEventTargetFromSelection();
     if (!target)
     {
       return;
     }
-    auto event =
-      dom::TextEvent::CreateForFragmentPaste(krys::move(pastingFragment), dom::TextEventInputType::Paste,
-                                             smartReplace, matchStyle, respectsMailBlockquote);
+    auto event = dom::TextEvent::CreateForFragmentPaste(
+      krys::move(pastingFragment), dom::TextEventInputType::Paste, smartReplace, matchStyle);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -491,7 +487,6 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Quoting the fragment (quoteFragmentForPasting), with mail blockquotes.
   void Editor::PasteWithPasteboard(Pasteboard *pasteboard, EnumSet<PasteOption> options) noexcept
   {
     auto range = SelectedRange();
@@ -504,10 +499,7 @@ namespace krys::boo
                                              options.Contains(PasteOption::AllowPlainText), chosePlainText);
     if (fragment && ShouldInsertFragment(*fragment, range))
     {
-      PasteAsFragment(ShareRef(*fragment), CanSmartReplaceWithPasteboard(*pasteboard), chosePlainText,
-                      options.Contains(PasteOption::IgnoreMailBlockquote)
-                        ? MailBlockquoteHandling::IgnoreBlockquote
-                        : MailBlockquoteHandling::RespectBlockquote);
+      PasteAsFragment(ShareRef(*fragment), CanSmartReplaceWithPasteboard(*pasteboard), chosePlainText);
     }
   }
 
@@ -1330,14 +1322,6 @@ namespace krys::boo
     return true;
   }
 
-  bool Editor::InsertParagraphSeparatorInQuotedContent() noexcept
-  {
-    // FIXME: Why is this missing calls to canEdit, canEditRichly, etc.?
-    TypingCommand::InsertParagraphSeparatorInQuotedContent(_document);
-    RevealSelectionAfterEditingOperation();
-    return true;
-  }
-
   bool Editor::HandleTextEvent(dom::TextEvent &event) noexcept
   {
     // Default event handling for Drag and Drop will be handled by DragController
@@ -1353,7 +1337,7 @@ namespace krys::boo
       if (event.PastingFragment())
       {
         ReplaceSelectionWithFragment(*event.PastingFragment(), false, event.ShouldSmartReplace(),
-                                     event.ShouldMatchStyle(), action, event.GetMailBlockquoteHandling());
+                                     event.ShouldMatchStyle(), action);
       }
       else
       {
@@ -1454,8 +1438,8 @@ namespace krys::boo
   // accessibility's notifications of the pasted text, with accessibility; and checking the spelling of the
   // editable root, with text checking.
   void Editor::ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
-                                            bool smartReplace, bool matchStyle, EditAction editingAction,
-                                            MailBlockquoteHandling mailBlockquoteHandling) noexcept
+                                            bool smartReplace, bool matchStyle,
+                                            EditAction editingAction) noexcept
   {
     VisibleSelection selection = _document.Selection().Selection();
     if (selection.IsNone() || !selection.IsContentEditable())
@@ -1477,10 +1461,6 @@ namespace krys::boo
     if (matchStyle)
     {
       options.Add(ReplaceSelectionCommand::CommandOption::MatchStyle);
-    }
-    if (mailBlockquoteHandling == MailBlockquoteHandling::IgnoreBlockquote)
-    {
-      options.Add(ReplaceSelectionCommand::CommandOption::IgnoreMailBlockquote);
     }
 
     auto command = ReplaceSelectionCommand::Create(_document, ShareRefPtr(&fragment), options, editingAction);

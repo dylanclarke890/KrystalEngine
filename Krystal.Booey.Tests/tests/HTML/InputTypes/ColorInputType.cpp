@@ -112,9 +112,9 @@ namespace krys::boo::tests
     // It's drawn with the colour.
     (void)fixture.Document->UpdateLayout();
     REQUIRE(swatch.Renderer());
-    CHECK(SerialisationForCSS(
-            swatch.Renderer()->Style().VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor))
-          == u8"rgb(0, 0, 255)");
+    CHECK(
+      SerialisationForCSS(swatch.Renderer()->Style().ColorWithColorFilter(css::PropertyId::BackgroundColor))
+      == u8"rgb(0, 0, 255)");
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ColorInputType: the colour chooser", "[HTML][ColorInputType]")

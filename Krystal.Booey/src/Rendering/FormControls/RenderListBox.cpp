@@ -558,7 +558,7 @@ namespace krys::boo
     itemText = ApplyTextTransform(Style(), krys::move(itemText));
 
     auto &theme = RenderTheme::Singleton();
-    Color textColor = itemStyle->VisitedDependentColorWithColorFilter(css::PropertyId::Color);
+    Color textColor = itemStyle->ColorWithColorFilter(css::PropertyId::Color);
     if (optionElement && optionElement->Selected())
     {
       if (GetDocument().Selection().IsFocusedAndActive()
@@ -639,7 +639,7 @@ namespace krys::boo
     }
     else
     {
-      backColor = itemStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+      backColor = itemStyle->ColorWithColorFilter(css::PropertyId::BackgroundColor);
     }
 
     // Draw the background for this list box item

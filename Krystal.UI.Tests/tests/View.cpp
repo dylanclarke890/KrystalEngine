@@ -557,12 +557,6 @@ namespace krys::ui::tests
       CHECK_FALSE(secret.Open());
       click(u8"a[href='#secret']");
       CHECK(secret.Open());
-      // The text fragment link opens the question whose answer it finds, which closes the other.
-      click(u8"details[name=faq]:not([open]) summary");
-      CHECK(fresh.Open());
-      click(u8"a[href^='#:~:text=From']");
-      CHECK(local.Open());
-      CHECK_FALSE(fresh.Open());
     }
 
     SECTION("the header's menu is anchored to its button")

@@ -35,9 +35,7 @@ namespace krys::boo::style
       const StyleRareInheritedData &a, const StyleRareInheritedData &b,
       CSSPropertiesBitSet &changingProperties) noexcept
     {
-      if (a.CaretColor != b.CaretColor || a.VisitedLinkCaretColor != b.VisitedLinkCaretColor
-          || a.HasAutoCaretColor != b.HasAutoCaretColor
-          || a.HasVisitedLinkAutoCaretColor != b.HasVisitedLinkAutoCaretColor)
+      if (a.CaretColor != b.CaretColor || a.HasAutoCaretColor != b.HasAutoCaretColor)
       {
         changingProperties.Set(css::PropertyId::CaretColor);
       }

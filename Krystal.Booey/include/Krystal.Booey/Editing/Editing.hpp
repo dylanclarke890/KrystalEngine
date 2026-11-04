@@ -237,9 +237,6 @@ namespace krys::boo
   KRYS_NODISCARD dom::Element *TabSpanNode(dom::Node *node) noexcept;
   KRYS_NODISCARD dom::Element *ParentTabSpanNode(dom::Node *node) noexcept;
 
-  KRYS_NODISCARD bool IsMailBlockquote(const dom::Node &node) noexcept;
-  KRYS_NODISCARD uint32 NumEnclosingMailBlockquotes(const dom::Position &position) noexcept;
-
   KRYS_NODISCARD RefPtr<dom::Element> EnclosingList(dom::Node *node) noexcept;
   KRYS_NODISCARD RefPtr<dom::Node> EnclosingListChild(dom::Node *node) noexcept;
   KRYS_NODISCARD RefPtr<dom::Node> EnclosingEmptyListItem(const VisiblePosition &position) noexcept;

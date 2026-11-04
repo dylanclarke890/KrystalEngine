@@ -16,8 +16,8 @@ namespace krys::boo
 
   inline StyleMultiColData::StyleMultiColData(const StyleMultiColData &other) noexcept
       : RefCounted<StyleMultiColData>(), ColumnWidth(other.ColumnWidth), ColumnCount(other.ColumnCount),
-        ColumnRule(other.ColumnRule), VisitedLinkColumnRuleColor(other.VisitedLinkColumnRuleColor),
-        ColumnFill(other.ColumnFill), ColumnSpan(other.ColumnSpan), ColumnProgression(other.ColumnProgression)
+        ColumnRule(other.ColumnRule), ColumnFill(other.ColumnFill), ColumnSpan(other.ColumnSpan),
+        ColumnProgression(other.ColumnProgression)
   {
   }
 
@@ -29,9 +29,8 @@ namespace krys::boo
   bool StyleMultiColData::operator==(const StyleMultiColData &other) const noexcept
   {
     return ColumnWidth == other.ColumnWidth && ColumnCount == other.ColumnCount
-           && ColumnRule == other.ColumnRule && VisitedLinkColumnRuleColor == other.VisitedLinkColumnRuleColor
-           && ColumnFill == other.ColumnFill && ColumnSpan == other.ColumnSpan
-           && ColumnProgression == other.ColumnProgression;
+           && ColumnRule == other.ColumnRule && ColumnFill == other.ColumnFill
+           && ColumnSpan == other.ColumnSpan && ColumnProgression == other.ColumnProgression;
   }
 
   style::LineWidth StyleMultiColData::ColumnRuleWidth() const noexcept

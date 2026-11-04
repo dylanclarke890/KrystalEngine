@@ -31,7 +31,6 @@ namespace krys::boo::css
     const Ref<dom::Element> _element;
     Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier {null};
     bool _isEmpty {false};
-    bool _allowVisitedStyle {false};
 
   public:
     void AddRef() const noexcept final
@@ -49,12 +48,6 @@ namespace krys::boo::css
       return RefCounted::GetRefCount();
     }
 
-    enum class AllowVisited : bool
-    {
-      No,
-      Yes
-    };
-    KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration> Create(dom::Element &, AllowVisited) noexcept;
     KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration>
       Create(dom::Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
     KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration> CreateEmpty(dom::Element &) noexcept;
@@ -64,7 +57,6 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString GetPropertyValue(PropertyId) const noexcept;
 
   private:
-    CSSComputedStyleDeclaration(dom::Element &, AllowVisited) noexcept;
     CSSComputedStyleDeclaration(dom::Element &, IsEmpty) noexcept;
     CSSComputedStyleDeclaration(dom::Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
 

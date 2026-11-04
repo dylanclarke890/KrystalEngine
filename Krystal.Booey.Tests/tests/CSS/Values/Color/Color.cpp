@@ -129,11 +129,8 @@ namespace krys::boo::css::tests
       PlatformColorResolutionState state;
       state.ResolvedCurrentColor = boo::Color::blue;
       state.ResolvedWebkitLink = boo::Color::red;
-      state.ResolvedWebkitLinkVisited = boo::Color::green;
       CHECK(Resolve(Keyword(ValueId::Currentcolor), state) == boo::Color::blue);
       CHECK(Resolve(Keyword(ValueId::WebkitLink), state) == boo::Color::red);
-      state.ForVisitedLink = style::ForVisitedLink::Yes;
-      CHECK(Resolve(Keyword(ValueId::WebkitLink), state) == boo::Color::green);
 
       state.KeywordOptions = style::ColorOptions::UseDarkAppearance;
       CHECK(Resolve(Keyword(ValueId::Linktext), state) == boo::Color {SRGBA<uint8> {158, 158, 255}});

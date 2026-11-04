@@ -37,7 +37,6 @@ namespace krys::boo::style
     uint32 _selectorListIndex : 16;
     uint32 _matchBasedOnRuleHash : 3;
     uint32 _canMatchPseudoElement : 1;
-    uint32 _linkMatchType : 2; // SelectorChecker::LinkMatchMask
     uint32 _propertyAllowlist : 3;
     uint32 _usedRuleTypes : 1;
     uint32 _isEnabled : 1;
@@ -82,16 +81,6 @@ namespace krys::boo::style
     KRYS_NODISCARD MatchBasedOnRuleHash GetMatchBasedOnRuleHash() const noexcept
     {
       return static_cast<MatchBasedOnRuleHash>(_matchBasedOnRuleHash);
-    }
-
-    KRYS_NODISCARD uint32 LinkMatchType() const noexcept
-    {
-      return _linkMatchType;
-    }
-
-    void SetLinkMatchType(uint32 value) noexcept
-    {
-      _linkMatchType = value;
     }
 
     KRYS_NODISCARD style::PropertyAllowlist GetPropertyAllowlist() const noexcept

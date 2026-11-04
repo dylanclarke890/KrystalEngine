@@ -666,13 +666,6 @@ namespace krys::boo
     None
   };
 
-  enum class InsideLink : uint8
-  {
-    NotInside,
-    InsideUnvisited,
-    InsideVisited
-  };
-
   enum class PointerEvents : uint8
   {
     None,

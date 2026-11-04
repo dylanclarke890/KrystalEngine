@@ -319,7 +319,7 @@ namespace krys::boo
 
     info.Context().SetStrokeThickness(thickness);
     info.Context().SetStrokeStyle(StrokeStyle::SolidStroke);
-    info.Context().SetStrokeColor(Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color));
+    info.Context().SetStrokeColor(Style().ColorWithColorFilter(css::PropertyId::Color));
     // MathML Core says the fraction bar takes the full width of the content box.
     auto endPoint = RoundPointToDevicePixels(
       LayoutPoint(LayoutUnit(adjustedPaintOffset.X()) + LogicalWidth() - BorderAndPaddingLogicalWidth(),

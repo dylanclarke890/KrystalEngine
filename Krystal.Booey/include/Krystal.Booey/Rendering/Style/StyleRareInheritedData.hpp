@@ -70,10 +70,7 @@ namespace krys::boo
 
     style::Color TextFillColor;
     style::Color TextEmphasisColor;
-    style::Color VisitedLinkTextFillColor;
-    style::Color VisitedLinkTextEmphasisColor;
     style::Color CaretColor;
-    style::Color VisitedLinkCaretColor;
 
     style::AccentColor AccentColor;
 
@@ -84,7 +81,6 @@ namespace krys::boo
     style::Quotes Quotes;
 
     style::Color StrokeColor;
-    style::Color VisitedLinkStrokeColor;
 
     style::ColorScheme ColorScheme;
 
@@ -151,7 +147,6 @@ namespace krys::boo
     unsigned HasExplicitlySetStrokeWidth : 1;
     unsigned HasExplicitlySetStrokeColor : 1;
     unsigned HasAutoCaretColor : 1;
-    unsigned HasVisitedLinkAutoCaretColor : 1;
     unsigned EffectiveInert : 1;
     unsigned EffectivelyTransparent : 1;
     unsigned IsInSubtreeWithBlendMode : 1;

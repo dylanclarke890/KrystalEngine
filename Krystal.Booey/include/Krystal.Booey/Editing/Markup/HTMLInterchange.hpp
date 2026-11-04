@@ -13,8 +13,6 @@ namespace krys::boo
   constexpr utf8_stringview AppleInterchangeNewline = u8"Apple-interchange-newline";
   constexpr utf8_stringview AppleConvertedSpace = u8"Apple-converted-space";
   constexpr utf8_stringview WebKitMSOListQuirksStyle = u8"WebKit-mso-list-quirks-style";
-  constexpr utf8_stringview ApplePasteAsQuotation = u8"Apple-paste-as-quotation";
-  constexpr utf8_stringview AppleStyleSpanClass = u8"Apple-style-span";
   constexpr utf8_stringview AppleTabSpanClass = u8"Apple-tab-span";
 
   enum class AnnotateForInterchange : bool

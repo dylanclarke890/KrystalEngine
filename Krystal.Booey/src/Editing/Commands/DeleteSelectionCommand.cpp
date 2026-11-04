@@ -471,21 +471,6 @@ namespace krys::boo
       _endingPosition = _downstreamStart;
     }
 
-    // We don't want to merge into a block if it will mean changing the quote level of content after deleting
-    // selections that contain a whole number paragraphs plus a line break, since it is unclear to most users
-    // that such a selection actually ends at the start of the next paragraph. This matches TextEdit behavior
-    // for indented paragraphs.
-    // Only apply this rule if the endingSelection is a range selection.  If it is a caret, then other
-    // operations have created the selection we're deleting (like the process of creating a selection to
-    // delete during a backspace), and the user isn't in the situation described above.
-    if (NumEnclosingMailBlockquotes(start) != NumEnclosingMailBlockquotes(end)
-        && IsStartOfParagraph(visibleEnd) && IsStartOfParagraph(VisiblePosition(start))
-        && EndingSelection().IsRange())
-    {
-      _mergeBlocksAfterDelete = false;
-      _pruneStartBlockIfNecessary = true;
-    }
-
     // Handle leading and trailing whitespace, as well as smart delete adjustments to the selection
     _leadingWhitespace = _upstreamStart.LeadingWhitespacePosition(_selectionToDelete.GetAffinity());
     _trailingWhitespace = _downstreamEnd.TrailingWhitespacePosition(VisiblePosition::DefaultAffinity);
@@ -583,17 +568,6 @@ namespace krys::boo
     _typingStyle = EditingStyle::Create(_selectionToDelete.Start(),
                                         EditingStyle::PropertiesToInclude::EditingPropertiesInEffect);
     _typingStyle->RemoveStyleAddedByNode(EnclosingAnchorElement(_selectionToDelete.Start()).get());
-
-    // If we're deleting into a Mail blockquote, save the style at end() instead of start()
-    // We'll use this later in computeTypingStyleAfterDelete if we end up outside of a Mail blockquote
-    if (EnclosingNodeOfType(_selectionToDelete.Start(), IsMailBlockquote))
-    {
-      _deleteIntoBlockquoteStyle = EditingStyle::Create(_selectionToDelete.End());
-    }
-    else
-    {
-      _deleteIntoBlockquoteStyle = nullptr;
-    }
   }
 
   bool DeleteSelectionCommand::HandleSpecialCaseBRDelete() noexcept
@@ -1235,15 +1209,6 @@ namespace krys::boo
     // commands being composed with this one will work, and also cache it on the command,
     // so the Frame::appliedEditing can set it after the whole composite command
     // has completed.
-
-    // If we deleted into a blockquote, but are now no longer in a blockquote, use the alternate typing style
-    if (_deleteIntoBlockquoteStyle
-        && !EnclosingNodeOfType(_endingPosition, IsMailBlockquote,
-                                EditingBoundaryCrossingRule::CanCrossEditingBoundary))
-    {
-      _typingStyle = _deleteIntoBlockquoteStyle;
-    }
-    _deleteIntoBlockquoteStyle = nullptr;
 
     _typingStyle->PrepareToApplyAt(_endingPosition);
     if (_typingStyle->IsEmpty())

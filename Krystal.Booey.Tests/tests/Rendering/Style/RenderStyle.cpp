@@ -66,11 +66,6 @@ namespace krys::boo::tests
     CHECK(style.BorderTop().Color == style::Color {boo::Color {Blue}});
     CHECK(style.HasBorder());
 
-    // Visited link colours are separate.
-    style.SetVisitedLinkBackgroundColor(style::Color {boo::Color {Blue}});
-    CHECK(style.VisitedLinkBackgroundColor() == style::Color {boo::Color {Blue}});
-    CHECK(style.BackgroundColor() == ComputedStyle::InitialBackgroundColor());
-
     // Flags that aren't properties.
     style.SetUsesViewportUnits();
     CHECK(style.UsesViewportUnits());
@@ -188,26 +183,18 @@ namespace krys::boo::tests
     style.SetColor(boo::Color {Red});
 
     // `currentcolor` resolves to `color`.
-    CHECK(style.ColorResolvingCurrentColor(css::PropertyId::BorderTopColor, false) == Red);
+    CHECK(style.ColorResolvingCurrentColor(css::PropertyId::BorderTopColor) == Red);
     CHECK(style.ColorResolvingCurrentColor(style::Color::GetCurrentColor()) == Red);
-    CHECK(style.ColorResolvingCurrentColor(css::PropertyId::Color, false) == Red);
+    CHECK(style.ColorResolvingCurrentColor(css::PropertyId::Color) == Red);
 
     // Without an explicit stroke colour the stroke uses `color`.
     CHECK(style.UsedStrokeColor() == Red);
     CHECK(style.UsedStrokeWidth(IntSize {100, 100}) == 0);
 
     style.SetBorderTopColor(style::Color {boo::Color {Blue}});
-    CHECK(style.ColorResolvingCurrentColor(css::PropertyId::BorderTopColor, false) == Blue);
+    CHECK(style.ColorResolvingCurrentColor(css::PropertyId::BorderTopColor) == Blue);
     // Logical properties resolve through the writing mode.
-    CHECK(style.ColorResolvingCurrentColor(css::PropertyId::BorderBlockStartColor, false) == Blue);
-
-    // Outside visited links the visited colours aren't used.
-    style.SetVisitedLinkBorderTopColor(style::Color {boo::Color {boo::Color::white}});
-    CHECK(style.VisitedDependentColor(css::PropertyId::BorderTopColor) == Blue);
-    style.SetInsideLink(InsideLink::InsideVisited);
-    CHECK(style.VisitedDependentColor(css::PropertyId::BorderTopColor) == boo::Color {boo::Color::white});
-    CHECK(style.VisitedDependentColor(css::PropertyId::BorderTopColor, PaintBehavior::DontShowVisitedLinks)
-          == Blue);
+    CHECK(style.ColorResolvingCurrentColor(css::PropertyId::BorderBlockStartColor) == Blue);
   }
 
   TEST_CASE("RenderStyle: zoom adjustment", "[Rendering][Style][RenderStyle]")

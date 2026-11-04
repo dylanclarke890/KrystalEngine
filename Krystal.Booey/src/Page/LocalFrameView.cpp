@@ -2,8 +2,6 @@
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/FragmentDirective/FragmentDirectiveParser.hpp"
-#include "Krystal.Booey/DOM/FragmentDirective/FragmentDirectiveRangeFinder.hpp"
 #include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
@@ -52,8 +50,7 @@ namespace krys::boo
 {
   LocalFrameView::LocalFrameView(LocalFrame &frame) noexcept
       : _frame(WeakPtr<LocalFrame>::WithRef(frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
-        _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired),
-        _scrollToTextFragmentRetryTimer(*this, &LocalFrameView::ScrollToTextFragmentRetryTimerFired)
+        _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired)
   {
   }
 
@@ -626,13 +623,13 @@ namespace krys::boo
     boo::Color bodyBackgroundColor;
     if (htmlElement && htmlElement->Renderer())
     {
-      htmlBackgroundColor = htmlElement->Renderer()->Style().VisitedDependentColorWithColorFilter(
-        css::PropertyId::BackgroundColor);
+      htmlBackgroundColor =
+        htmlElement->Renderer()->Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
     }
     if (bodyElement && bodyElement->Renderer())
     {
-      bodyBackgroundColor = bodyElement->Renderer()->Style().VisitedDependentColorWithColorFilter(
-        css::PropertyId::BackgroundColor);
+      bodyBackgroundColor =
+        bodyElement->Renderer()->Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
     }
 
     if (!bodyBackgroundColor.IsValid())
@@ -917,8 +914,7 @@ namespace krys::boo
     {
       if (auto *rootBackground = renderView->RendererForRootBackground())
       {
-        auto rootColor =
-          rootBackground->Style().VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+        auto rootColor = rootBackground->Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
         color = color.IsVisible() ? BlendSourceOver(color, rootColor) : rootColor;
       }
     }
@@ -2470,183 +2466,6 @@ namespace krys::boo
   {
     _shouldScrollToFocusedElement = false;
     _delayedScrollToFocusedElementTimer.Stop();
-    CancelScheduledTextFragmentIndicatorTimer();
-  }
-
-  void LocalFrameView::CancelScheduledTextFragmentIndicatorTimer() noexcept
-  {
-    if (_skipScrollResetOfScrollToTextFragmentRange)
-    {
-      return;
-    }
-    _pendingTextFragmentIndicatorRange = std::nullopt;
-    _pendingTextFragmentIndicatorText.clear();
-    _lastRevealedTextFragmentRect = std::nullopt;
-    // FIXME: The text indicator (its delayed timer and whether it was created), once there's one.
-  }
-
-  bool LocalFrameView::ScrollToTextFragment(bool isRetry) noexcept
-  {
-    static constexpr MonotonicTime::duration scrollToTextFragmentRetryInterval =
-      std::chrono::milliseconds(500);
-    static constexpr MonotonicTime::duration scrollToTextFragmentRetryTimeout = std::chrono::seconds(3);
-
-    krys_assert(Frame().Document());
-    Ref<dom::Document> document = ShareRef(*Frame().Document());
-
-    if (!document->GetSettings().ScrollToTextFragmentEnabled)
-    {
-      return false;
-    }
-
-    document->FragmentHighlightRegistry().Clear();
-
-    auto &fragmentDirective = document->FragmentDirective();
-    if (fragmentDirective.empty())
-    {
-      return false;
-    }
-
-    dom::FragmentDirectiveParser fragmentDirectiveParser(fragmentDirective);
-    if (!fragmentDirectiveParser.IsValid())
-    {
-      return false;
-    }
-
-    auto &parsedTextDirectives = fragmentDirectiveParser.ParsedTextDirectives();
-    auto highlightRanges =
-      dom::FragmentDirectiveRangeFinder::FindRangesFromTextDirectives(parsedTextDirectives, *document);
-    if (document->GetSettings().ScrollToTextFragmentMarkingEnabled)
-    {
-      for (auto &range : highlightRanges)
-      {
-        if (auto init = dom::StaticRangeInit::Create(range.Start, range.End); !init.HasException())
-        {
-          document->FragmentHighlightRegistry().AddAnnotationHighlightWithRange(
-            CreateRef<dom::StaticRange>(init.ReleaseValue()));
-        }
-      }
-    }
-
-    // If we didn't find the expected range, retry every 500ms, until the first of:
-    //   - we successfully find the range
-    //   - the user scrolls the view
-    //   - the 3s timeout expires
-    if (highlightRanges.empty())
-    {
-      auto now = html::EventLoop::Current().Now();
-      if (!isRetry)
-      {
-        _scrollToTextFragmentRetryTimer.StartRepeating(scrollToTextFragmentRetryInterval);
-        _scrollToTextFragmentInitialAttemptTime = now;
-      }
-      else if (!_scrollToTextFragmentInitialAttemptTime
-               || now - *_scrollToTextFragmentInitialAttemptTime >= scrollToTextFragmentRetryTimeout
-               || _wasEverScrolledExplicitlyByUser)
-      {
-        _scrollToTextFragmentRetryTimer.Stop();
-      }
-
-      return false;
-    }
-
-    _scrollToTextFragmentRetryTimer.Stop();
-
-    auto &range = highlightRanges.front();
-    RefPtr<dom::Node> commonAncestor =
-      ShareRefPtr(dom::CommonInclusiveAncestor<dom::TreeType::ComposedTree>(range));
-    if (commonAncestor && !Is<dom::Element>(*commonAncestor))
-    {
-      commonAncestor = ShareRefPtr<dom::Node>(commonAncestor->ParentElement());
-    }
-    if (commonAncestor)
-    {
-      document->SetCSSTarget(&Downcast<dom::Element>(*commonAncestor));
-      (void)dom::RevealClosedDetailsAndHiddenUntilFoundAncestors(*commonAncestor);
-    }
-
-    {
-      TemporarySelectionChange selectionChange(
-        *document, VisibleSelection(range),
-        {TemporarySelectionOption::RevealSelection, TemporarySelectionOption::RevealSelectionBounds,
-         TemporarySelectionOption::UserTriggered, TemporarySelectionOption::ForceCenterScroll});
-    }
-    // FIXME: The text indicator, once there's one (scrollToTextFragmentIndicatorEnabled).
-
-    MaintainScrollPositionAtScrollToTextFragmentRange(range);
-
-    return true;
-  }
-
-  void LocalFrameView::ScrollToTextFragmentRetryTimerFired() noexcept
-  {
-    (void)ScrollToTextFragment(true);
-  }
-
-  void
-    LocalFrameView::MaintainScrollPositionAtScrollToTextFragmentRange(const dom::SimpleRange &range) noexcept
-  {
-    _pendingTextFragmentIndicatorRange = range;
-    _pendingTextFragmentIndicatorText = PlainText(range);
-    _lastRevealedTextFragmentRect = std::nullopt;
-    if (!_pendingTextFragmentIndicatorRange)
-    {
-      return;
-    }
-
-    ScrollToPendingTextFragmentRange();
-  }
-
-  void LocalFrameView::ScrollToPendingTextFragmentRange() noexcept
-  {
-    if (_wasEverScrolledExplicitlyByUser)
-    {
-      return;
-    }
-
-    if (!_pendingTextFragmentIndicatorRange)
-    {
-      return;
-    }
-
-    if (LayoutContext().NeedsLayout())
-    {
-      return;
-    }
-
-    auto range = *_pendingTextFragmentIndicatorRange;
-    if (_pendingTextFragmentIndicatorText != PlainText(range))
-    {
-      return;
-    }
-
-    if (!range.StartContainer().Renderer() || !range.EndContainer().Renderer())
-    {
-      return;
-    }
-
-    // Revealing the range changes the selection, which lays out again (Booey brings the render tree's
-    // selection up to date with a layout), so the range is only revealed again once layout has moved it.
-    auto rangeRect =
-      UnionRect(VisiblePosition(dom::MakeContainerOffsetPosition(range.Start)).AbsoluteCaretBounds(),
-                VisiblePosition(dom::MakeContainerOffsetPosition(range.End)).AbsoluteCaretBounds());
-    if (_lastRevealedTextFragmentRect == rangeRect)
-    {
-      return;
-    }
-    _lastRevealedTextFragmentRect = rangeRect;
-
-    auto &document = *Frame().Document();
-
-    SetForScope skipScrollResetOfScrollToTextFragmentRange(_skipScrollResetOfScrollToTextFragmentRange, true);
-
-    TemporarySelectionChange selectionChange(
-      document, VisibleSelection(range),
-      {TemporarySelectionOption::RevealSelection, TemporarySelectionOption::RevealSelectionBounds,
-       TemporarySelectionOption::UserTriggered, TemporarySelectionOption::ForceCenterScroll,
-       TemporarySelectionOption::OnlyAllowForwardScrolling});
-
-    // FIXME: The text indicator, once there's one.
   }
 
   namespace
@@ -2664,12 +2483,6 @@ namespace krys::boo
   bool LocalFrameView::ScrollToFragment(const url::URL &url) noexcept
   {
     krys_assert(Frame().Document());
-
-    // A text fragment's range is the indicated part, as the text fragments specification has it.
-    if (ScrollToTextFragment())
-    {
-      return true;
-    }
 
     // https://html.spec.whatwg.org/#the-indicated-part-of-the-document
     // 1. If document's URL does not equal url with exclude fragments set to true, then return null.
@@ -2815,10 +2628,10 @@ namespace krys::boo
     }
     else
     {
-      ScheduleScrollToAnchorAndTextFragment();
+      ScheduleScrollToAnchor();
     }
 
-    ScrollToAnchorAndTextFragmentNowIfNeeded();
+    ScrollToAnchorNowIfNeeded();
   }
 
   int32 LocalFrameView::MapFromLayoutToCSSUnits(LayoutUnit value) const noexcept
@@ -2889,10 +2702,10 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::ScheduleScrollToAnchorAndTextFragment() noexcept
+  void LocalFrameView::ScheduleScrollToAnchor() noexcept
   {
     auto *anchorNode = _maintainScrollPositionAnchor.get();
-    if (!anchorNode && !_pendingTextFragmentIndicatorRange)
+    if (!anchorNode)
     {
       return;
     }
@@ -2913,17 +2726,17 @@ namespace krys::boo
                                              SetForScope scrollPositionAnchor(
                                                protectedThis->_maintainScrollPositionAnchor,
                                                protectedThis->_scheduledMaintainScrollPositionAnchor);
-                                             protectedThis->ScrollToAnchorAndTextFragmentNowIfNeeded();
+                                             protectedThis->ScrollToAnchorNowIfNeeded();
                                            }
                                            else
                                            {
-                                             protectedThis->ScrollToAnchorAndTextFragmentNowIfNeeded();
+                                             protectedThis->ScrollToAnchorNowIfNeeded();
                                            }
                                            protectedThis->_scheduledMaintainScrollPositionAnchor = nullptr;
                                          });
   }
 
-  void LocalFrameView::ScrollToAnchorAndTextFragmentNowIfNeeded() noexcept
+  void LocalFrameView::ScrollToAnchorNowIfNeeded() noexcept
   {
     if (!_scheduledToScrollToAnchor)
     {
@@ -2932,7 +2745,6 @@ namespace krys::boo
 
     _scheduledToScrollToAnchor = false;
     ScrollToAnchor();
-    ScrollToPendingTextFragmentRange();
   }
 
   void LocalFrameView::ScrollToAnchor() noexcept

@@ -205,11 +205,7 @@ namespace krys::boo
     bool InsertNodeBefore(dom::Node &insertChild, dom::Node &refChild,
                           ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
                             DoNotAssumeContentIsAlwaysEditable) noexcept;
-    void InsertParagraphSeparatorAtPosition(const dom::Position &position,
-                                            bool useDefaultParagraphElement = false,
-                                            bool pasteBlockquoteIntoUnquotedArea = false) noexcept;
-    void InsertParagraphSeparator(bool useDefaultParagraphElement = false,
-                                  bool pasteBlockquoteIntoUnquotedArea = false) noexcept;
+    void InsertParagraphSeparator(bool useDefaultParagraphElement = false) noexcept;
     void InsertLineBreak() noexcept;
     void InsertTextIntoNode(dom::Text &node, uint32 offset, utf8_stringview text,
                             AllowPasswordEcho allowPasswordEcho = AllowPasswordEcho::Yes) noexcept;
@@ -284,7 +280,6 @@ namespace krys::boo
 
     KRYS_NODISCARD VisibleSelection ShouldBreakOutOfEmptyListItem() const noexcept;
     bool BreakOutOfEmptyListItem() noexcept;
-    bool BreakOutOfEmptyMailBlockquotedParagraph() noexcept;
 
     dom::Position PositionAvoidingSpecialElementBoundary(const dom::Position &original) noexcept;
 

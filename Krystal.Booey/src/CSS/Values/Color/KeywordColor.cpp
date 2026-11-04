@@ -88,13 +88,11 @@ namespace krys::boo::css
     switch (unresolved.Value)
     {
       case ValueId::InternalDocumentTextColor: return state.InternalDocumentTextColor();
-      case ValueId::WebkitLink:
-        return state.ForVisitedLink == style::ForVisitedLink::Yes ? state.WebkitLinkVisited()
-                                                                  : state.WebkitLink();
-      case ValueId::WebkitActivelink:     return state.WebkitActiveLink();
-      case ValueId::WebkitFocusRingColor: return state.WebkitFocusRingColor();
-      case ValueId::Currentcolor:         return state.CurrentColor();
-      default:                            return ColorFromKeyword(unresolved.Value, state.KeywordOptions);
+      case ValueId::WebkitLink:                return state.WebkitLink();
+      case ValueId::WebkitActivelink:          return state.WebkitActiveLink();
+      case ValueId::WebkitFocusRingColor:      return state.WebkitFocusRingColor();
+      case ValueId::Currentcolor:              return state.CurrentColor();
+      default:                                 return ColorFromKeyword(unresolved.Value, state.KeywordOptions);
     }
   }
 

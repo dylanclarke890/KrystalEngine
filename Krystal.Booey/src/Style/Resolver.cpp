@@ -7,10 +7,10 @@
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
-#include "Krystal.Booey/DOM/Internals/VisitedLinkState.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -262,13 +262,9 @@ namespace krys::boo::style
       state.Style()->SetUseSVGZoomRulesForLength(true);
     }
 
-    auto linkState = Document().GetVisitedLinkState().DetermineLinkState(element);
-    if (linkState != InsideLink::NotInside)
+    if (css::IsLink(element))
     {
-      auto &style = *state.Style();
-      style.SetIsLink(true);
-      // FIXME: The inspector can force `:visited` (forcePseudoState); there's no inspector.
-      style.SetInsideLink(linkState);
+      state.Style()->SetIsLink(true);
     }
 
     return state;
@@ -829,14 +825,10 @@ namespace krys::boo::style
 
       if (inheritedEqual)
       {
-        auto linkStatus = style.GetInsideLink();
         // If the cache item parent style has identical inherited properties to the current parent style then
         // the resulting style will be identical too. We copy the inherited properties over from the cache and
         // are done.
         style.InheritFrom(*cacheEntry.RenderStyle);
-
-        // Link status is treated like an inherited property. We need to explicitly restore it.
-        style.SetInsideLink(linkStatus);
       }
 
       includedProperties = {};

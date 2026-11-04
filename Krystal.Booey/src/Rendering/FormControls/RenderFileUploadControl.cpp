@@ -190,7 +190,7 @@ namespace krys::boo
       return static_cast<float>(RoundToInt(MarginBoxLogicalHeight(ContainingBlock()->GetWritingMode())));
     }();
 
-    paintInfo.Context().SetFillColor(Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color));
+    paintInfo.Context().SetFillColor(Style().ColorWithColorFilter(css::PropertyId::Color));
 
     // Draw the filename
     {

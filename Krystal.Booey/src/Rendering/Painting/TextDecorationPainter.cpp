@@ -451,7 +451,7 @@ namespace krys::boo
       return Color::white;
     }
 
-    return style.VisitedDependentColorWithColorFilter(css::PropertyId::TextDecorationColor, paintBehavior);
+    return style.ColorWithColorFilter(css::PropertyId::TextDecorationColor);
   }
 
   TextDecorationPainter::Styles TextDecorationPainter::StylesForRenderer(

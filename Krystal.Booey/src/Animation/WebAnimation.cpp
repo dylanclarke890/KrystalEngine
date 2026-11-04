@@ -2075,7 +2075,7 @@ namespace krys::boo
       return RenderStyle::Clone(renderer->Style());
     }();
 
-    style::Extractor computedStyleExtractor {styledElement.get(), false, null};
+    style::Extractor computedStyleExtractor {styledElement.get(), null};
 
     css::ParserContext parserContext(styledElement->NodeDocument());
     auto inlineStyle = [&]()

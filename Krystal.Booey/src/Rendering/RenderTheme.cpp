@@ -704,7 +704,7 @@ namespace krys::boo
       style.ComputedFontSize(),
       style.UsedZoom(),
       style.UsedAccentColor(renderObject.StyleColorOptions()),
-      style.VisitedDependentColorWithColorFilter(css::PropertyId::Color),
+      style.ColorWithColorFilter(css::PropertyId::Color),
       style::Evaluate<FloatBoxExtent>(style.BorderWidth(), style::ZoomNeeded {}),
     };
   }
@@ -1559,9 +1559,7 @@ namespace krys::boo
 
   RenderTheme::ColorCache &RenderTheme::GetColorCache(style::ColorOptions options) const noexcept
   {
-    auto optionsIgnoringVisitedLink =
-      static_cast<uint8>(options) & ~static_cast<uint8>(style::ColorOptions::ForVisitedLink);
-    return _colorCacheMap[static_cast<uint8>(optionsIgnoringVisitedLink)];
+    return _colorCacheMap[static_cast<uint8>(options)];
   }
 
   namespace
@@ -1580,7 +1578,6 @@ namespace krys::boo
   Color RenderTheme::SystemColor(ValueId cssValueId, style::ColorOptions options) const noexcept
   {
     auto useDarkAppearance = HasFlag(options, style::ColorOptions::UseDarkAppearance);
-    auto forVisitedLink = HasFlag(options, style::ColorOptions::ForVisitedLink);
 
     switch (cssValueId)
     {
@@ -1608,75 +1605,68 @@ namespace krys::boo
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-buttonface
       // The face background color for push buttons.
-      case ValueId::Buttonface:       return Color::lightGray;
+      case ValueId::Buttonface:          return Color::lightGray;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-buttontext
       // Text on push buttons.
-      case ValueId::Buttontext:       return Color::black;
+      case ValueId::Buttontext:          return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-buttonborder
       // The base border color for push buttons.
-      case ValueId::Buttonborder:     return Color::white;
+      case ValueId::Buttonborder:        return Color::white;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-field
       // Background of input fields.
-      case ValueId::Field:            return Color::white;
+      case ValueId::Field:               return Color::white;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-fieldtext
       // Text in input fields.
-      case ValueId::Fieldtext:        return Color::black;
+      case ValueId::Fieldtext:           return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-highlight
       // Background of selected text, for example from ::selection.
-      case ValueId::Highlight:        return SRGBA<uint8> {181, 213, 255};
+      case ValueId::Highlight:           return SRGBA<uint8> {181, 213, 255};
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-highlighttext
       // Text of selected text.
-      case ValueId::Highlighttext:    return Color::black;
+      case ValueId::Highlighttext:       return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-selecteditem
       // Background of selected items, for example a selected checkbox.
-      case ValueId::Selecteditem:     return Color::lightGray;
+      case ValueId::Selecteditem:        return Color::lightGray;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-selecteditemtext
       // Text of selected items.
-      case ValueId::Selecteditemtext: return Color::black;
+      case ValueId::Selecteditemtext:    return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-mark
       // Background of text that has been specially marked (such as by the HTML mark element).
-      case ValueId::Mark:             return Color::yellow;
+      case ValueId::Mark:                return Color::yellow;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-marktext
       // Text that has been specially marked (such as by the HTML mark element).
-      case ValueId::Marktext:         return Color::black;
+      case ValueId::Marktext:            return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-graytext
       // Disabled text. (Often, but not necessarily, gray.)
-      case ValueId::Graytext:         return Color::darkGray;
+      case ValueId::Graytext:            return Color::darkGray;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-accentcolor
       // Background of accented user interface controls.
-      case ValueId::Accentcolor:      return SRGBA<uint8> {0, 122, 255};
+      case ValueId::Accentcolor:         return SRGBA<uint8> {0, 122, 255};
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-accentcolortext
       // Text of accented user interface controls.
-      case ValueId::Accentcolortext:  return Color::black;
+      case ValueId::Accentcolortext:     return Color::black;
 
       // Non-standard addition.
-      case ValueId::Activebuttontext: return Color::black;
+      case ValueId::Activebuttontext:    return Color::black;
 
       // Non-standard addition.
-      case ValueId::Text:             return Color::black;
+      case ValueId::Text:                return Color::black;
 
       // Non-standard addition.
-      case ValueId::WebkitLink:
-      {
-        if (forVisitedLink)
-        {
-          return DefaultVisitedLinkColor(useDarkAppearance);
-        }
-        return DefaultLinkColor(useDarkAppearance);
-      }
+      case ValueId::WebkitLink:          return DefaultLinkColor(useDarkAppearance);
 
       // Deprecated system-colors:
       // https://drafts.csswg.org/css-color-4/#deprecated-system-colors

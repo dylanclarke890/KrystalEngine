@@ -34,7 +34,6 @@ namespace krys::boo
     RefPtr<dom::Node> _startBlock;
     RefPtr<dom::Node> _endBlock;
     RefPtr<EditingStyle> _typingStyle;
-    RefPtr<EditingStyle> _deleteIntoBlockquoteStyle;
     RefPtr<dom::Node> _startRoot;
     RefPtr<dom::Node> _endRoot;
     RefPtr<dom::Node> _startTableRow;

@@ -96,7 +96,6 @@ namespace krys::boo::css
       RefPtr<const dom::ContainerNode> Scope;
       const dom::Element *HasScope {nullptr};
       bool MatchesAllHasScopes {false};
-      bool IsEvaluatingScopingRoot {false};
       style::ScopeOrdinal StyleScopeOrdinal {style::ScopeOrdinal::Element};
       style::SelectorMatchingState *SelectorMatchingState {nullptr};
 
@@ -105,7 +104,6 @@ namespace krys::boo::css
       EnumSet<PseudoElementType> PublicPseudoElements;
       bool MatchedInsideScope {false};
       bool DisallowHasPseudoClass {false};
-      bool ScopingRootMatchesVisited {false};
 
       explicit CheckingContext(Mode resolvingMode) noexcept : ResolvingMode(resolvingMode)
       {
@@ -120,14 +118,6 @@ namespace krys::boo::css
       {
         return _requestedPseudoElement;
       }
-    };
-
-    enum LinkMatchMask : uint32
-    {
-      MatchDefault = 0,
-      MatchLink = 1,
-      MatchVisited = 2,
-      MatchAll = MatchLink | MatchVisited
     };
 
     struct LocalContext;
@@ -150,9 +140,6 @@ namespace krys::boo::css
                                                         const dom::QualifiedName &attributeName,
                                                         const CSSOMStringAtom &attributeValue,
                                                         const Selector &selector) noexcept;
-
-    KRYS_NODISCARD static uint32 DetermineLinkMatchType(const Selector *selector,
-                                                        const ScopeRule *scopeRule = nullptr) noexcept;
 
   private:
     KRYS_NODISCARD MatchResult

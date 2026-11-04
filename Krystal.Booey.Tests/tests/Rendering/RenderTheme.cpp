@@ -56,10 +56,6 @@ namespace krys::boo::tests
 
       CHECK(SystemColor(ValueId::WebkitLink, ColorOptions::None)
             == SystemColor(ValueId::Linktext, ColorOptions::None));
-      CHECK(SystemColor(ValueId::WebkitLink, ColorOptions::ForVisitedLink)
-            == SystemColor(ValueId::Visitedtext, ColorOptions::None));
-      CHECK(SystemColor(ValueId::WebkitLink, ColorOptions::ForVisitedLink | ColorOptions::UseDarkAppearance)
-            == SystemColor(ValueId::Visitedtext, ColorOptions::UseDarkAppearance));
     }
 
     SECTION("Deprecated system colours map to their replacements")

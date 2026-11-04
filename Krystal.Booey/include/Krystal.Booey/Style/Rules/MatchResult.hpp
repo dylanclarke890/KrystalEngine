@@ -32,7 +32,6 @@ namespace krys::boo::style
   struct MatchedProperties
   {
     Ref<const css::StyleProperties> Properties;
-    uint8 LinkMatchType {css::SelectorChecker::MatchAll};
     PropertyAllowlist AllowlistType {PropertyAllowlist::None};
     ScopeOrdinal StyleScopeOrdinal {ScopeOrdinal::Element};
     style::FromStyleAttribute FromStyleAttribute {style::FromStyleAttribute::No};
@@ -42,9 +41,8 @@ namespace krys::boo::style
 
     KRYS_NODISCARD friend bool operator==(const MatchedProperties &a, const MatchedProperties &b) noexcept
     {
-      return a.Properties.get() == b.Properties.get() && a.LinkMatchType == b.LinkMatchType
-             && a.AllowlistType == b.AllowlistType && a.StyleScopeOrdinal == b.StyleScopeOrdinal
-             && a.FromStyleAttribute == b.FromStyleAttribute
+      return a.Properties.get() == b.Properties.get() && a.AllowlistType == b.AllowlistType
+             && a.StyleScopeOrdinal == b.StyleScopeOrdinal && a.FromStyleAttribute == b.FromStyleAttribute
              && a.CascadeLayerPriority == b.CascadeLayerPriority && a.UsedRuleTypes == b.UsedRuleTypes
              && a.IsCacheable == b.IsCacheable;
     }
@@ -146,10 +144,9 @@ namespace krys
       krys_debug_assert(matchedProperties.IsCacheable == boo::style::IsCacheable::Yes);
 
       return krys::Hash::Combine(
-        matchedProperties.Properties.get(), matchedProperties.LinkMatchType,
-        ToUnderlying(matchedProperties.AllowlistType), ToUnderlying(matchedProperties.StyleScopeOrdinal),
-        ToUnderlying(matchedProperties.FromStyleAttribute), matchedProperties.CascadeLayerPriority,
-        matchedProperties.UsedRuleTypes.ToRaw());
+        matchedProperties.Properties.get(), ToUnderlying(matchedProperties.AllowlistType),
+        ToUnderlying(matchedProperties.StyleScopeOrdinal), ToUnderlying(matchedProperties.FromStyleAttribute),
+        matchedProperties.CascadeLayerPriority, matchedProperties.UsedRuleTypes.ToRaw());
     }
 
     KRYS_NODISCARD static bool Equal(const boo::style::MatchedProperties &a,

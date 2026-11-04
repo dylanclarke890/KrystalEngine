@@ -397,7 +397,7 @@ namespace krys::boo::style
     // FIXME: We shouldn't mutate document when resolving style.
     if (&element == _document->Body().get())
     {
-      _document->SetTextColor(update.Style->VisitedDependentColor(css::PropertyId::Color));
+      _document->SetTextColor(update.Style->ColorResolvingCurrentColor(css::PropertyId::Color));
     }
 
     // FIXME: These elements should not change renderer based on appearance property.

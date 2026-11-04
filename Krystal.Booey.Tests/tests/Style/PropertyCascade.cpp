@@ -25,7 +25,6 @@ namespace krys::boo::style::tests
       ScopeOrdinal StyleScopeOrdinal {ScopeOrdinal::Element};
       style::CascadeLayerPriority CascadeLayerPriority {RuleSet::CascadeLayerPriorityForUnlayered};
       style::FromStyleAttribute FromStyleAttribute {style::FromStyleAttribute::No};
-      uint8 LinkMatchType {css::SelectorChecker::MatchAll};
       EnumSet<UsedRuleType> UsedRuleTypes {};
       PropertyAllowlist AllowlistType {PropertyAllowlist::None};
       style::IsCacheable IsCacheable {style::IsCacheable::Yes};
@@ -34,7 +33,6 @@ namespace krys::boo::style::tests
     KRYS_NODISCARD MatchedProperties Block(utf8_stringview css, const BlockOptions &options = {})
     {
       return MatchedProperties {.Properties = ImmutableDeclarations(css),
-                                .LinkMatchType = options.LinkMatchType,
                                 .AllowlistType = options.AllowlistType,
                                 .StyleScopeOrdinal = options.StyleScopeOrdinal,
                                 .FromStyleAttribute = options.FromStyleAttribute,
@@ -56,14 +54,13 @@ namespace krys::boo::style::tests
     }
 
     /// @brief The winning value of a property, or "" if none.
-    KRYS_NODISCARD std::string Winner(const PropertyCascade &cascade, PropertyId id,
-                                      uint8 linkMatchType = css::SelectorChecker::MatchDefault)
+    KRYS_NODISCARD std::string Winner(const PropertyCascade &cascade, PropertyId id)
     {
       if (!Has(cascade, id))
       {
         return {};
       }
-      auto *value = Get(cascade, id).CssValue[linkMatchType];
+      auto *value = Get(cascade, id).CssValue;
       return value ? CssText(*value) : std::string {};
     }
 
@@ -73,7 +70,7 @@ namespace krys::boo::style::tests
       {
         return {};
       }
-      return CssText(*cascade.LogicalGroupProperty(id).CssValue[css::SelectorChecker::MatchDefault]);
+      return CssText(*cascade.LogicalGroupProperty(id).CssValue);
     }
 
     KRYS_NODISCARD std::string CustomWinner(const PropertyCascade &cascade, utf8_stringview name)
@@ -83,7 +80,7 @@ namespace krys::boo::style::tests
       {
         return {};
       }
-      return CssText(*cascade.GetCustomProperty(atom).CssValue[css::SelectorChecker::MatchDefault]);
+      return CssText(*cascade.GetCustomProperty(atom).CssValue);
     }
 
     KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
@@ -184,36 +181,6 @@ namespace krys::boo::style::tests
       CHECK(Winner(cascade, PropertyId::Color) == "red");
       CHECK(Get(cascade, PropertyId::Color).StyleScopeOrdinal == ScopeOrdinal::FirstSlot);
     }
-  }
-
-  TEST_CASE_METHOD(css::tests::ValueFixture, "PropertyCascade: link match types", "[Style][PropertyCascade]")
-  {
-    auto result = MatchResult::Create(true);
-    result->UserAgentDeclarations.push_back(Block(u8"color: black; width: 1px"));
-    result->AuthorDeclarations.push_back(
-      Block(u8"color: blue", {.LinkMatchType = css::SelectorChecker::MatchLink}));
-    result->AuthorDeclarations.push_back(
-      Block(u8"color: purple; width: 2px", {.LinkMatchType = css::SelectorChecker::MatchVisited}));
-
-    PropertyCascade cascade(*result, PropertyCascade::NormalProperties());
-
-    auto &color = Get(cascade, PropertyId::Color);
-    CHECK(Winner(cascade, PropertyId::Color, css::SelectorChecker::MatchDefault) == "black");
-    CHECK(Winner(cascade, PropertyId::Color, css::SelectorChecker::MatchLink) == "blue");
-    CHECK(Winner(cascade, PropertyId::Color, css::SelectorChecker::MatchVisited) == "purple");
-    CHECK(color.Origins[css::SelectorChecker::MatchDefault] == Origin::UserAgent);
-    CHECK(color.Origins[css::SelectorChecker::MatchLink] == Origin::Author);
-    CHECK(color.Origins[css::SelectorChecker::MatchVisited] == Origin::Author);
-    CHECK(color.Origin == Origin::Author);
-
-    // A property first set for one link state has no value for the others.
-    auto result2 = MatchResult::Create(true);
-    result2->AuthorDeclarations.push_back(
-      Block(u8"color: blue", {.LinkMatchType = css::SelectorChecker::MatchLink}));
-    PropertyCascade cascade2(*result2, PropertyCascade::NormalProperties());
-    CHECK(Get(cascade2, PropertyId::Color).CssValue[css::SelectorChecker::MatchDefault] == nullptr);
-    CHECK(Winner(cascade2, PropertyId::Color, css::SelectorChecker::MatchLink) == "blue");
-    CHECK(Get(cascade2, PropertyId::Color).CssValue[css::SelectorChecker::MatchVisited] == nullptr);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "PropertyCascade: logical property groups",
@@ -555,6 +522,6 @@ namespace krys::boo::style::tests
     auto *margin = cascade.LastPropertyResolvingLogicalPropertyPair(PropertyId::MarginLeft, WritingMode());
     REQUIRE(margin);
     CHECK(margin->Id == PropertyId::MarginInlineStart);
-    CHECK(CssText(*margin->CssValue[css::SelectorChecker::MatchDefault]) == "2px");
+    CHECK(CssText(*margin->CssValue) == "2px");
   }
 }

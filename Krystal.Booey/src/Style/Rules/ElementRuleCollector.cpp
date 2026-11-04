@@ -353,7 +353,6 @@ namespace krys::boo::style
       AddMatchedProperties(
         {
           ShareRef(matchedRule.RuleData->StyleRule().Properties()),
-          static_cast<uint8>(matchedRule.RuleData->LinkMatchType()),
           matchedRule.RuleData->GetPropertyAllowlist(),
           matchedRule.StyleScopeOrdinal,
           FromStyleAttribute::No,
@@ -615,7 +614,6 @@ namespace krys::boo::style
     if (scopingRoot)
     {
       context.Scope = scopingRoot->ScopingRoot;
-      context.ScopingRootMatchesVisited = scopingRoot->MatchesVisited;
     }
 
     auto *selector = ruleData.Selector();
@@ -796,14 +794,10 @@ namespace krys::boo::style
               {
                 subContext.Scope = previousScopingRoot->ScopingRoot;
               }
-              // Reset visited flag for each scoping root evaluation
-              subContext.ScopingRootMatchesVisited = false;
-              subContext.IsEvaluatingScopingRoot = true;
               auto match = checker.Match(selector, *ancestor, subContext);
               if (match)
               {
-                scopingRoots.push_back(
-                  {ShareRefPtr(ancestor), distance, subContext.ScopingRootMatchesVisited});
+                scopingRoots.push_back({ShareRefPtr(ancestor), distance});
               }
             };
             if (previousScopingRoots.empty())
@@ -1136,7 +1130,6 @@ namespace krys::boo::style
     auto propertyAllowlist = _pseudoElementRequest
                                ? PropertyAllowlistForPseudoElement(_pseudoElementRequest->GetType())
                                : PropertyAllowlist::None;
-    _result->AuthorDeclarations.push_back(
-      {ShareRef(keyframe.Properties()), css::SelectorChecker::MatchAll, propertyAllowlist});
+    _result->AuthorDeclarations.push_back({ShareRef(keyframe.Properties()), propertyAllowlist});
   }
 }

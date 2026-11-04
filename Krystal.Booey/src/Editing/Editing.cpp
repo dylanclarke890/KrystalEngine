@@ -1312,29 +1312,6 @@ namespace krys::boo
     return Is<dom::Text>(node) ? TabSpanNode(node->ParentNode()) : nullptr;
   }
 
-  bool IsMailBlockquote(const dom::Node &node) noexcept
-  {
-    if (!IsHTMLElementOfType(&node, html::TagName::blockquote))
-    {
-      return false;
-    }
-    return Downcast<dom::Element>(node).GetAttribute(dom::DOMStringAtom(u8"type"))
-           == dom::DOMString(u8"cite");
-  }
-
-  uint32 NumEnclosingMailBlockquotes(const dom::Position &position) noexcept
-  {
-    uint32 count = 0;
-    for (auto *node = position.DeprecatedNode(); node; node = node->ParentNode())
-    {
-      if (IsMailBlockquote(*node))
-      {
-        ++count;
-      }
-    }
-    return count;
-  }
-
   RefPtr<dom::Element> EnclosingList(dom::Node *node) noexcept
   {
     if (!node)

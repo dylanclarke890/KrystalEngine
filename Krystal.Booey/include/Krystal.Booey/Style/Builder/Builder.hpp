@@ -100,12 +100,10 @@ namespace krys::boo::style
     template <CustomPropertyCycleTracking trackCycles>
     void ApplyPropertiesImpl(css::PropertyId firstProperty, css::PropertyId lastProperty) noexcept;
     void ApplyCascadeProperty(const PropertyCascade::Property &) noexcept;
-    KRYS_NODISCARD bool ApplyRollbackCascadeProperty(const PropertyCascade &, css::PropertyId,
-                                                     css::SelectorChecker::LinkMatchMask) noexcept;
+    KRYS_NODISCARD bool ApplyRollbackCascadeProperty(const PropertyCascade &, css::PropertyId) noexcept;
     KRYS_NODISCARD bool ApplyRollbackCascadeCustomProperty(const PropertyCascade &,
                                                            const css::CSSOMStringAtom &) noexcept;
-    void ApplyProperty(css::PropertyId, css::Value &, css::SelectorChecker::LinkMatchMask,
-                       PropertyCascade::Origin) noexcept;
+    void ApplyProperty(css::PropertyId, css::Value &, PropertyCascade::Origin) noexcept;
     void ApplyCustomProperty(const css::CSSOMStringAtom &name, ResolvedCustomProperty &&) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ResolveInternalAutoBaseFunction(css::Value &) noexcept;

@@ -488,9 +488,8 @@ namespace krys::boo
     adjustedOffset.MoveBy(Location());
     path.Translate(ToFloatSize(adjustedOffset));
 
-    paintInfo.Context().DrawFocusRing(
-      path, outlineWidth,
-      areaElementStyle->VisitedDependentColorWithColorFilter(css::PropertyId::OutlineColor));
+    paintInfo.Context().DrawFocusRing(path, outlineWidth,
+                                      areaElementStyle->ColorWithColorFilter(css::PropertyId::OutlineColor));
   }
 
   void RenderImage::AreaElementFocusChanged(html::HTMLAreaElement &element) noexcept
@@ -613,7 +612,7 @@ namespace krys::boo
           };
           if (hasRoomForAltText())
           {
-            context.SetFillColor(style.VisitedDependentColorWithColorFilter(css::PropertyId::Color));
+            context.SetFillColor(style.ColorWithColorFilter(css::PropertyId::Color));
             if (isHorizontal)
             {
               auto contentHorizontalOffset =

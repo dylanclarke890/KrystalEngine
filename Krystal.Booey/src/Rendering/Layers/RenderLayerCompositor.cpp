@@ -4148,11 +4148,10 @@ namespace krys::boo
     Color oldBackgroundColor;
     if (oldStyle)
     {
-      oldBackgroundColor = oldStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+      oldBackgroundColor = oldStyle->ColorWithColorFilter(css::PropertyId::BackgroundColor);
     }
 
-    if (oldBackgroundColor
-        != renderer.Style().VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor))
+    if (oldBackgroundColor != renderer.Style().ColorWithColorFilter(css::PropertyId::BackgroundColor))
     {
       RootBackgroundColorOrTransparencyChanged();
     }

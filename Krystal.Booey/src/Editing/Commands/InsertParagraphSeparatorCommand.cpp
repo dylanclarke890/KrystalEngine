@@ -139,11 +139,9 @@ namespace krys::boo
 
   InsertParagraphSeparatorCommand::InsertParagraphSeparatorCommand(dom::Document &document,
                                                                    bool mustUseDefaultParagraphElement,
-                                                                   bool pasteBlockquoteIntoUnquotedArea,
                                                                    EditAction editingAction) noexcept
       : CompositeEditCommand(document, editingAction),
-        _mustUseDefaultParagraphElement(mustUseDefaultParagraphElement),
-        _pasteBlockquoteIntoUnquotedArea(pasteBlockquoteIntoUnquotedArea)
+        _mustUseDefaultParagraphElement(mustUseDefaultParagraphElement)
   {
   }
 
@@ -151,11 +149,9 @@ namespace krys::boo
 
   Ref<InsertParagraphSeparatorCommand>
     InsertParagraphSeparatorCommand::Create(dom::Document &document, bool useDefaultParagraphElement,
-                                            bool pasteBlockquoteIntoUnquotedArea,
                                             EditAction editingAction) noexcept
   {
-    return CreateRef<InsertParagraphSeparatorCommand>(document, useDefaultParagraphElement,
-                                                      pasteBlockquoteIntoUnquotedArea, editingAction);
+    return CreateRef<InsertParagraphSeparatorCommand>(document, useDefaultParagraphElement, editingAction);
   }
 
   bool InsertParagraphSeparatorCommand::PreservesTypingStyle() const noexcept
@@ -370,17 +366,6 @@ namespace krys::boo
       }
       else
       {
-        // We can get here if we pasted a copied portion of a blockquote with a newline at the end and are
-        // trying to paste it into an unquoted area. We then don't want the newline within the blockquote or
-        // else it will also be quoted.
-        if (_pasteBlockquoteIntoUnquotedArea)
-        {
-          if (auto highestBlockquote = HighestEnclosingNodeOfType(canonicalPos, &IsMailBlockquote))
-          {
-            startBlock = ShareRefPtr(&Downcast<dom::Element>(*highestBlockquote));
-          }
-        }
-
         // Most of the time we want to stay at the nesting level of the startBlock (e.g., when nesting within
         // lists).  However, for div nodes, this can result in nested div tags that are hard to break out of.
         RefPtr<dom::Element> siblingNode = startBlock;

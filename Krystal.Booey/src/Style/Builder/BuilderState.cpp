@@ -351,10 +351,6 @@ namespace krys::boo::style
       {
         return false;
       }
-      if (!ApplyPropertyToRegularStyle())
-      {
-        return false;
-      }
       // FIXME: `Element::isDevolvableWidget()` comes with the form controls; the devolvable widgets are the
       // elements the user agent style gives an appearance.
       return RenderTheme::HasAppearanceForElementTypeFromUAStyle(*GetElement());

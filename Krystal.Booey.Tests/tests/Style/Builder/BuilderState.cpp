@@ -188,10 +188,6 @@ namespace krys::boo::style::tests
   {
     auto document = ParseDocument(u8"<!DOCTYPE html><body><button id=button></button><p id=p></p></body>");
 
-    // Link matching is off, so properties apply to both the regular and the visited link style.
-    CHECK(State->ApplyPropertyToRegularStyle());
-    CHECK(State->ApplyPropertyToVisitedLinkStyle());
-
     Reset(&ById(*document, u8"p"));
     State->DisableNativeAppearanceIfNeeded(PropertyId::BackgroundColor, PropertyCascade::Origin::Author);
     CHECK_FALSE(Style.NativeAppearanceDisabled());

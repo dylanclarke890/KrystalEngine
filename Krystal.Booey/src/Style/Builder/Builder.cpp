@@ -32,30 +32,6 @@ namespace krys::boo::style
 {
   namespace
   {
-    KRYS_NODISCARD bool IsValidVisitedLinkProperty(css::PropertyId id) noexcept
-    {
-      switch (id)
-      {
-        case css::PropertyId::BackgroundColor:
-        case css::PropertyId::BorderLeftColor:
-        case css::PropertyId::BorderRightColor:
-        case css::PropertyId::BorderTopColor:
-        case css::PropertyId::BorderBottomColor:
-        case css::PropertyId::CaretColor:
-        case css::PropertyId::Color:
-        case css::PropertyId::OutlineColor:
-        case css::PropertyId::ColumnRuleColor:
-        case css::PropertyId::TextDecorationColor:
-        case css::PropertyId::TextEmphasisColor:
-        case css::PropertyId::Fill:
-        case css::PropertyId::Stroke:
-        case css::PropertyId::StrokeColor:         return true;
-        default:                                   break;
-      }
-
-      return false;
-    }
-
     KRYS_NODISCARD const css::StyleProperties *
       PositionTryFallbackProperties(const BuilderContext &context) noexcept
     {
@@ -224,13 +200,13 @@ namespace krys::boo::style
   void Builder::ApplyCustomPropertyImpl(const css::CSSOMStringAtom &name,
                                         const PropertyCascade::Property &property) noexcept
   {
-    if (!property.CssValue[css::SelectorChecker::MatchDefault])
+    if (!property.CssValue)
     {
       return;
     }
 
-    Ref customPropertyValue = ShareRef(const_cast<css::CustomPropertyValue &>(
-      Downcast<css::CustomPropertyValue>(*property.CssValue[css::SelectorChecker::MatchDefault])));
+    Ref customPropertyValue = ShareRef(
+      const_cast<css::CustomPropertyValue &>(Downcast<css::CustomPropertyValue>(*property.CssValue)));
 
     bool inCycle = !_state->_inProgressCustomProperties.insert(name).second;
     if (inCycle)
@@ -273,7 +249,6 @@ namespace krys::boo::style
 
     {
       SetForScope levelScope(_state->_currentProperty, &property);
-      SetForScope scopedLinkMatchMutation(_state->_linkMatch, css::SelectorChecker::MatchDefault);
       ApplyCustomProperty(name, krys::move(*resolvedValue));
     }
 
@@ -285,33 +260,14 @@ namespace krys::boo::style
   void Builder::ApplyCascadeProperty(const PropertyCascade::Property &property) noexcept
   {
     SetForScope levelScope(_state->_currentProperty, &property);
-
-    auto applyWithLinkMatch = [&](css::SelectorChecker::LinkMatchMask linkMatch)
+    if (property.CssValue)
     {
-      if (property.CssValue[linkMatch])
-      {
-        SetForScope scopedLinkMatchMutation(_state->_linkMatch, linkMatch);
-        ApplyProperty(property.Id, const_cast<css::Value &>(*property.CssValue[linkMatch]), linkMatch,
-                      property.Origins[linkMatch]);
-      }
-    };
-
-    applyWithLinkMatch(css::SelectorChecker::MatchDefault);
-
-    if (_state->Style().GetInsideLink() == InsideLink::NotInside)
-    {
-      return;
+      ApplyProperty(property.Id, const_cast<css::Value &>(*property.CssValue), property.Origin);
     }
-
-    applyWithLinkMatch(css::SelectorChecker::MatchLink);
-    applyWithLinkMatch(css::SelectorChecker::MatchVisited);
-
-    _state->_linkMatch = css::SelectorChecker::MatchDefault;
   }
 
   bool Builder::ApplyRollbackCascadeProperty(const PropertyCascade &rollbackCascade,
-                                             css::PropertyId propertyId,
-                                             css::SelectorChecker::LinkMatchMask linkMatchMask) noexcept
+                                             css::PropertyId propertyId) noexcept
   {
     krys_debug_assert(propertyId != css::PropertyId::Custom);
 
@@ -334,10 +290,10 @@ namespace krys::boo::style
       return false;
     }
 
-    if (const auto *value = rollbackProperty->CssValue[linkMatchMask])
+    if (const auto *value = rollbackProperty->CssValue)
     {
       SetForScope levelScope(_state->_currentProperty, rollbackProperty);
-      ApplyProperty(propertyId, const_cast<css::Value &>(*value), linkMatchMask, rollbackProperty->Origin);
+      ApplyProperty(propertyId, const_cast<css::Value &>(*value), rollbackProperty->Origin);
     }
     return true;
   }
@@ -352,7 +308,7 @@ namespace krys::boo::style
     }
 
     const auto &rollbackProperty = iterator->second;
-    if (const auto *value = rollbackProperty.CssValue[css::SelectorChecker::MatchDefault])
+    if (const auto *value = rollbackProperty.CssValue)
     {
       Ref customPropertyValue =
         ShareRef(const_cast<css::CustomPropertyValue &>(Downcast<css::CustomPropertyValue>(*value)));
@@ -370,7 +326,6 @@ namespace krys::boo::style
   }
 
   void Builder::ApplyProperty(css::PropertyId id, css::Value &value,
-                              css::SelectorChecker::LinkMatchMask linkMatchMask,
                               PropertyCascade::Origin cascadeOrigin) noexcept
   {
     krys_debug_assert_msg(!css::IsShorthand(id), "A shorthand property wasn't expanded at parsing time");
@@ -385,7 +340,7 @@ namespace krys::boo::style
     {
       auto newId = css::Property::ResolveDirectionAwareProperty(id, style.GetWritingMode());
       krys_debug_assert(newId != id);
-      return ApplyProperty(newId, *valueToApply, linkMatchMask, cascadeOrigin);
+      return ApplyProperty(newId, *valueToApply, cascadeOrigin);
     }
 
     if (_state->GetPositionTryFallback())
@@ -429,7 +384,7 @@ namespace krys::boo::style
       {
         // With the rollback cascade built, we need to obtain the property and apply it. If the property is
         // not present, then we behave like "unset." Otherwise we apply the property instead of our own.
-        if (ApplyRollbackCascadeProperty(*rollbackCascade, id, linkMatchMask))
+        if (ApplyRollbackCascadeProperty(*rollbackCascade, id))
         {
           return;
         }
@@ -452,12 +407,6 @@ namespace krys::boo::style
     if (isUnset || isRevertOrRevertLayer)
     {
       valueType = unsetValueType();
-    }
-
-    if (!_state->ApplyPropertyToRegularStyle() && !IsValidVisitedLinkProperty(id))
-    {
-      // Limit the properties that can be applied to only the ones honored by :visited.
-      return;
     }
 
     if (valueType == ApplyValueType::Inherit && !isInheritedProperty())
@@ -593,12 +542,6 @@ namespace krys::boo::style
           }
         }
 
-        if (!_state->ApplyPropertyToRegularStyle())
-        {
-          // Limit the properties that can be applied to only the ones honored by :visited.
-          return;
-        }
-
         if (valueType == ApplyValueType::Inherit && !isInheritedProperty())
         {
           style.SetHasExplicitlyInheritedProperties();
@@ -611,15 +554,7 @@ namespace krys::boo::style
           case ApplyValueType::Value:   krys_debug_assert(false); break;
         }
       },
-      [&](Ref<const CustomProperty> &&resolved)
-      {
-        if (!_state->ApplyPropertyToRegularStyle())
-        {
-          // Limit the properties that can be applied to only the ones honored by :visited.
-          return;
-        }
-        applyValue(krys::move(resolved));
-      });
+      [&](Ref<const CustomProperty> &&resolved) { applyValue(krys::move(resolved)); });
   }
 
   Ref<css::Value> Builder::ResolveInternalAutoBaseFunction(css::Value &value) noexcept

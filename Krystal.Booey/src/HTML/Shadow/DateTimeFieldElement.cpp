@@ -37,9 +37,8 @@ namespace krys::boo::html
 
     if (!HasValue() && shadowHostStyle)
     {
-      auto textColor = shadowHostStyle->VisitedDependentColorWithColorFilter(css::PropertyId::Color);
-      auto backgroundColor =
-        shadowHostStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+      auto textColor = shadowHostStyle->ColorWithColorFilter(css::PropertyId::Color);
+      auto backgroundColor = shadowHostStyle->ColorWithColorFilter(css::PropertyId::BackgroundColor);
       style.SetColor(RenderTheme::Singleton().DatePlaceholderTextColor(textColor, backgroundColor));
     }
 

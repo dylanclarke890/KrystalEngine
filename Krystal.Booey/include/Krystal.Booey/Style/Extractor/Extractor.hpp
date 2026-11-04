@@ -38,13 +38,12 @@ namespace krys::boo::style
   private:
     RefPtr<dom::Element> _element;
     Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier;
-    bool _allowVisitedStyle;
 
   public:
-    explicit Extractor(dom::Node *, bool allowVisitedStyle = false) noexcept;
-    Extractor(dom::Node *, bool allowVisitedStyle, const Maybe<style::PseudoElementIdentifier> &) noexcept;
-    explicit Extractor(dom::Element *, bool allowVisitedStyle = false) noexcept;
-    Extractor(dom::Element *, bool allowVisitedStyle, const Maybe<style::PseudoElementIdentifier> &) noexcept;
+    explicit Extractor(dom::Node *) noexcept;
+    Extractor(dom::Node *, const Maybe<style::PseudoElementIdentifier> &) noexcept;
+    explicit Extractor(dom::Element *) noexcept;
+    Extractor(dom::Element *, const Maybe<style::PseudoElementIdentifier> &) noexcept;
 
     enum class UpdateLayout : bool
     {

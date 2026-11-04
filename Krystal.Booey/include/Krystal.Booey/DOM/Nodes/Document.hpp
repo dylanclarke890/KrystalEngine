@@ -193,7 +193,6 @@ namespace krys::boo::dom
   class Text;
   class TreeWalker;
   class UserActionElementSet;
-  class VisitedLinkState;
 
   enum class DidUpdateAnyContentRelevancy : bool;
 
@@ -365,8 +364,6 @@ namespace krys::boo::dom
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
     RefPtr<HighlightRegistry> _highlightRegistry;
     RefPtr<HighlightRegistry> _fragmentHighlightRegistry;
-    // The text directives taken from the URL's fragment (after `:~:`).
-    utf8_string _fragmentDirective;
     SequentialFocusNavigationStartingPointPosition _sequentialFocusNavigationStartingPointPosition {
       SequentialFocusNavigationStartingPointPosition::At};
 
@@ -421,7 +418,6 @@ namespace krys::boo::dom
     // Renderer updates (of text) that the next style resolution applies.
     UniquePtr<style::Update> _pendingRenderTreeUpdate;
 
-    mutable UniquePtr<VisitedLinkState> _visitedLinkState;
     mutable UniquePtr<RenderStyle> _initialContainingBlockStyle;
     // The style the render view would have, for a document without one; `RenderTreeUpdater` keeps it here.
     UniquePtr<RenderStyle> _renderViewStyle;
@@ -448,7 +444,6 @@ namespace krys::boo::dom
 
     boo::Color _textColor {boo::Color::black};
     boo::Color _linkColor;
-    boo::Color _visitedLinkColor;
     boo::Color _activeLinkColor;
     // The colour schemes from the document's `<meta name="color-scheme">`.
     EnumSet<boo::ColorScheme> _colorScheme;
@@ -1243,7 +1238,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD HighlightRegistry &GetHighlightRegistry() noexcept;
     KRYS_NODISCARD HighlightRegistry *HighlightRegistryIfExists() const noexcept;
 
-    /// @brief The highlights of the text the URL's text directives indicate, which `::target-text` styles.
+    /// @brief The highlights of the target text, which `::target-text` styles: the host marks it, as there
+    /// are no text directives.
     KRYS_NODISCARD HighlightRegistry &FragmentHighlightRegistry() noexcept;
     KRYS_NODISCARD HighlightRegistry *FragmentHighlightRegistryIfExists() const noexcept;
 
@@ -1253,14 +1249,6 @@ namespace krys::boo::dom
     /// @brief Works out where each highlight range's painting starts and ends, repainting what moved; run at
     /// each rendering update.
     void UpdateHighlightPositions() noexcept;
-
-    /// @brief The fragment directive of the document's URL (what followed `:~:`), which `SetURL` takes from
-    /// the URL.
-    /// @see https://wicg.github.io/scroll-to-text-fragment/#fragment-directive
-    KRYS_NODISCARD const utf8_string &FragmentDirective() const noexcept
-    {
-      return _fragmentDirective;
-    }
 
     /// @brief Run when the parser stops parsing the document: its frame's loader scrolls to the fragment.
     void FinishedParsing() noexcept;
@@ -1718,9 +1706,6 @@ namespace krys::boo::dom
     /// @brief Recomputes the keyframes of the document's CSS animations of the `@keyframes` rule @p name.
     void KeyframesRuleDidChange(const css::CSSOMString &name) noexcept;
 
-    /// @brief Determines whether links are visited, for `:visited` and the link styles.
-    KRYS_NODISCARD VisitedLinkState &GetVisitedLinkState() const noexcept;
-
     void SetHasStyleWithViewportUnits() noexcept
     {
       _hasStyleWithViewportUnits = true;
@@ -1748,8 +1733,6 @@ namespace krys::boo::dom
 
     /// @brief The colour of `-webkit-link`: the `<body link>` colour, or the keyword's.
     KRYS_NODISCARD boo::Color LinkColor(const RenderStyle &style) const noexcept;
-    /// @brief The colour of visited `-webkit-link`: the `<body vlink>` colour, or the keyword's.
-    KRYS_NODISCARD boo::Color VisitedLinkColor(const RenderStyle &style) const noexcept;
     /// @brief The colour of `-webkit-activelink`: the `<body alink>` colour, or the keyword's.
     KRYS_NODISCARD boo::Color ActiveLinkColor(const RenderStyle &style) const noexcept;
 
@@ -1758,18 +1741,12 @@ namespace krys::boo::dom
       _linkColor = color;
     }
 
-    void SetVisitedLinkColor(const boo::Color &color) noexcept
-    {
-      _visitedLinkColor = color;
-    }
-
     void SetActiveLinkColor(const boo::Color &color) noexcept
     {
       _activeLinkColor = color;
     }
 
     void ResetLinkColor() noexcept;
-    void ResetVisitedLinkColor() noexcept;
     void ResetActiveLinkColor() noexcept;
 
     /// @brief The colour schemes @p style uses: its `color-scheme`, or the document's (from

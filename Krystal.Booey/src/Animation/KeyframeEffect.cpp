@@ -1066,7 +1066,7 @@ namespace krys::boo
     const auto *lastStyleChangeEventStyle = TargetStyleable()->LastStyleChangeEventStyle();
     const auto &elementStyle = lastStyleChangeEventStyle ? *lastStyleChangeEventStyle : CurrentStyle();
 
-    style::Extractor computedStyleExtractor {target.get(), false, _pseudoElementIdentifier};
+    style::Extractor computedStyleExtractor {target.get(), _pseudoElementIdentifier};
 
     BlendingKeyframes computedBlendingKeyframes(_blendingKeyframes.Identifier());
     computedBlendingKeyframes.CopyKeyframes(_blendingKeyframes);

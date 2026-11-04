@@ -6,7 +6,6 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 
 #include "Krystal.Booey/Rendering/Style/StyleTransformData.hpp"
-#include "Krystal.Booey/Rendering/Style/StyleVisitedLinkColorData.hpp"
 
 namespace krys::boo
 {
@@ -14,8 +13,8 @@ namespace krys::boo
   StyleMiscNonInheritedData::StyleMiscNonInheritedData() noexcept
       : Opacity(style::ComputedStyle::InitialOpacity()), FlexibleBox(StyleFlexibleBoxData::Create()),
         MultiCol(StyleMultiColData::Create()), Filter(StyleFilterData::Create()),
-        Transform(StyleTransformData::Create()), VisitedLinkColor(StyleVisitedLinkColorData::Create()),
-        Mask(css::keywords::None {}), Animations(css::keywords::None {}), Transitions(css::keywords::All {}),
+        Transform(StyleTransformData::Create()), Mask(css::keywords::None {}),
+        Animations(css::keywords::None {}), Transitions(css::keywords::All {}),
         Content(style::ComputedStyle::InitialContent()), BoxShadow(style::ComputedStyle::InitialBoxShadow()),
         AspectRatio(style::ComputedStyle::InitialAspectRatio()),
         AlignContent(style::ComputedStyle::InitialAlignContent()),
@@ -38,13 +37,12 @@ namespace krys::boo
 
   StyleMiscNonInheritedData::StyleMiscNonInheritedData(const StyleMiscNonInheritedData &o) noexcept
       : RefCounted<StyleMiscNonInheritedData>(), Opacity(o.Opacity), FlexibleBox(o.FlexibleBox),
-        MultiCol(o.MultiCol), Filter(o.Filter), Transform(o.Transform), VisitedLinkColor(o.VisitedLinkColor),
-        Mask(o.Mask), Animations(o.Animations), Transitions(o.Transitions), Content(o.Content),
-        BoxShadow(o.BoxShadow), AspectRatio(o.AspectRatio), AlignContent(o.AlignContent),
-        AlignItems(o.AlignItems), AlignSelf(o.AlignSelf), JustifyContent(o.JustifyContent),
-        JustifyItems(o.JustifyItems), JustifySelf(o.JustifySelf), ObjectPosition(o.ObjectPosition),
-        Order(o.Order), HasAttrContent(o.HasAttrContent),
-        HasDisplayAffectedByAnimations(o.HasDisplayAffectedByAnimations),
+        MultiCol(o.MultiCol), Filter(o.Filter), Transform(o.Transform), Mask(o.Mask),
+        Animations(o.Animations), Transitions(o.Transitions), Content(o.Content), BoxShadow(o.BoxShadow),
+        AspectRatio(o.AspectRatio), AlignContent(o.AlignContent), AlignItems(o.AlignItems),
+        AlignSelf(o.AlignSelf), JustifyContent(o.JustifyContent), JustifyItems(o.JustifyItems),
+        JustifySelf(o.JustifySelf), ObjectPosition(o.ObjectPosition), Order(o.Order),
+        HasAttrContent(o.HasAttrContent), HasDisplayAffectedByAnimations(o.HasDisplayAffectedByAnimations),
         HasExplicitlySetColorScheme(o.HasExplicitlySetColorScheme),
         HasExplicitlySetDirection(o.HasExplicitlySetDirection),
         HasExplicitlySetWritingMode(o.HasExplicitlySetWritingMode), TableLayout(o.TableLayout),
@@ -63,11 +61,10 @@ namespace krys::boo
   bool StyleMiscNonInheritedData::operator==(const StyleMiscNonInheritedData &o) const noexcept
   {
     return Opacity == o.Opacity && FlexibleBox == o.FlexibleBox && MultiCol == o.MultiCol
-           && Filter == o.Filter && Transform == o.Transform && VisitedLinkColor == o.VisitedLinkColor
-           && Mask == o.Mask && Animations == o.Animations && Transitions == o.Transitions
-           && Content == o.Content && BoxShadow == o.BoxShadow && AspectRatio == o.AspectRatio
-           && AlignContent == o.AlignContent && AlignItems == o.AlignItems && AlignSelf == o.AlignSelf
-           && JustifyContent == o.JustifyContent && JustifyItems == o.JustifyItems
+           && Filter == o.Filter && Transform == o.Transform && Mask == o.Mask && Animations == o.Animations
+           && Transitions == o.Transitions && Content == o.Content && BoxShadow == o.BoxShadow
+           && AspectRatio == o.AspectRatio && AlignContent == o.AlignContent && AlignItems == o.AlignItems
+           && AlignSelf == o.AlignSelf && JustifyContent == o.JustifyContent && JustifyItems == o.JustifyItems
            && JustifySelf == o.JustifySelf && ObjectPosition == o.ObjectPosition && Order == o.Order
            && HasAttrContent == o.HasAttrContent
            && HasDisplayAffectedByAnimations == o.HasDisplayAffectedByAnimations

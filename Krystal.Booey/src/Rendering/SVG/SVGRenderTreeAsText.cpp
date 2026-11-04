@@ -563,12 +563,12 @@ namespace krys::boo
       ts << u8" contains 1 chunk(s)";
 
       if (text.Parent()
-          && (text.Parent()->Style().VisitedDependentColor(css::PropertyId::Color)
-              != text.Style().VisitedDependentColor(css::PropertyId::Color)))
+          && (text.Parent()->Style().ColorResolvingCurrentColor(css::PropertyId::Color)
+              != text.Style().ColorResolvingCurrentColor(css::PropertyId::Color)))
       {
         WriteNameValuePair(
           ts, u8"color",
-          SerialisationForRenderTreeAsText(text.Style().VisitedDependentColor(css::PropertyId::Color)));
+          SerialisationForRenderTreeAsText(text.Style().ColorResolvingCurrentColor(css::PropertyId::Color)));
       }
     }
 

@@ -86,9 +86,7 @@ namespace krys::boo::style
       ScopeOrdinal StyleScopeOrdinal {ScopeOrdinal::Element};
       style::CascadeLayerPriority CascadeLayerPriority {0};
       style::FromStyleAttribute FromStyleAttribute {style::FromStyleAttribute::No};
-      // Values for link match states MatchDefault, MatchLink and MatchVisited
-      Array<const css::Value *, 3> CssValue {};
-      Array<PropertyCascade::Origin, 3> Origins {};
+      const css::Value *CssValue {nullptr};
     };
 
   private:

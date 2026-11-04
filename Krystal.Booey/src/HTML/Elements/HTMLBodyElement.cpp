@@ -145,19 +145,6 @@ namespace krys::boo::html
     {
       auto &document = NodeDocument();
       auto parsedColor = value ? ParseLegacyColorValue(*value) : Maybe<SRGBA<uint8>> {};
-      if (localName == u8"vlink")
-      {
-        if (parsedColor)
-        {
-          document.SetVisitedLinkColor(*parsedColor);
-        }
-        else
-        {
-          document.ResetVisitedLinkColor();
-        }
-        InvalidateStyleForSubtree();
-        return;
-      }
       if (localName == u8"alink")
       {
         if (parsedColor)

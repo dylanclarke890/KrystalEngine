@@ -236,7 +236,7 @@ namespace krys::boo
       context.FillRect(FloatRect(SnappedIntRect(selectionRect)), _listItem->SelectionBackgroundColor());
     }
 
-    auto color = Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color);
+    auto color = Style().ColorWithColorFilter(css::PropertyId::Color);
     context.SetStrokeColor(color);
     context.SetStrokeStyle(StrokeStyle::SolidStroke);
     context.SetStrokeThickness(1.0f);

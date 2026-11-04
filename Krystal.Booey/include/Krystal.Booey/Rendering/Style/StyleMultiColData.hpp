@@ -26,7 +26,6 @@ namespace krys::boo
     style::ColumnWidth ColumnWidth {css::keywords::Auto {}};
     style::ColumnCount ColumnCount {css::keywords::Auto {}};
     BorderValue ColumnRule;
-    style::Color VisitedLinkColumnRuleColor;
 
     unsigned ColumnFill : 1;
     unsigned ColumnSpan : 1;

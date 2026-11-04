@@ -67,8 +67,7 @@ namespace krys::boo
       }
     }
 
-    auto backgroundColor =
-      _renderer.Style().VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+    auto backgroundColor = _renderer.Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
     auto compositeOp = Document().CompositeOperatorForBackgroundColor(backgroundColor, _renderer);
 
     PaintFillLayers(backgroundColor, _renderer.Style().GetBackgroundLayers(), paintRect, bleedAvoidance,
@@ -90,7 +89,7 @@ namespace krys::boo
     }
 
     const auto &style = rootBackgroundRenderer->Style();
-    auto backgroundColor = style.VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+    auto backgroundColor = style.ColorWithColorFilter(css::PropertyId::BackgroundColor);
     auto compositeOp = Document().CompositeOperatorForBackgroundColor(backgroundColor, _renderer);
 
     PaintFillLayers(backgroundColor, style.GetBackgroundLayers(), View().BackgroundRect(),
@@ -981,8 +980,7 @@ namespace krys::boo
     bool hasBorderRadius = style.HasBorderRadius();
     float deviceScaleFactor = Document().DeviceScaleFactor();
 
-    bool hasOpaqueBackground =
-      style.VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor).IsOpaque();
+    bool hasOpaqueBackground = style.ColorWithColorFilter(css::PropertyId::BackgroundColor).IsOpaque();
     const auto &zoomFactor = style.UsedZoomForLength();
     for (const auto &shadow : style.GetBoxShadow())
     {
@@ -1254,7 +1252,7 @@ namespace krys::boo
       return false;
     }
 
-    Color backgroundColor = style.VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+    Color backgroundColor = style.ColorWithColorFilter(css::PropertyId::BackgroundColor);
     if (!backgroundColor.IsOpaque())
     {
       return false;

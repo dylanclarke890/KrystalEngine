@@ -19,11 +19,6 @@ namespace krys::boo::css
     return {};
   }
 
-  boo::Color PlatformColorResolutionDelegate::WebkitLinkVisited() const noexcept
-  {
-    return {};
-  }
-
   boo::Color PlatformColorResolutionDelegate::WebkitActiveLink() const noexcept
   {
     return {};

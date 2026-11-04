@@ -616,23 +616,6 @@ class StylePropertyCodeGenProperties:
         Schema.Entry("render-style-storage-name", allowed_types=[str]),
         Schema.Entry("render-style-storage-path", allowed_types=[list]),
         Schema.Entry("render-style-type", allowed_types=[str]),
-        Schema.Entry(
-            "render-style-visited-link-getter-custom",
-            allowed_types=[bool],
-            default_value=False,
-        ),
-        Schema.Entry(
-            "render-style-visited-link-setter-custom",
-            allowed_types=[bool],
-            default_value=False,
-        ),
-        Schema.Entry(
-            "render-style-visited-link-storage-container",
-            allowed_types=[str],
-            default_value="data",
-        ),
-        Schema.Entry("render-style-visited-link-storage-name", allowed_types=[str]),
-        Schema.Entry("render-style-visited-link-storage-path", allowed_types=[list]),
         Schema.Entry("style-builder-custom", allowed_types=[str]),
         Schema.Entry(
             "style-builder-needs-system-font-shorthand-check",
@@ -640,7 +623,6 @@ class StylePropertyCodeGenProperties:
             default_value=False,
         ),
         Schema.Entry("style-extractor-custom", allowed_types=[bool], default_value=False),
-        Schema.Entry("visited-link-color-support", allowed_types=[bool], default_value=False),
     )
 
     longhands: list[Longhand] | list[StyleProperty] | None
@@ -739,17 +721,10 @@ class StylePropertyCodeGenProperties:
     render_style_storage_name: str | None
     render_style_storage_path: list | None
     render_style_type: str | None
-    render_style_visited_link_getter_custom: bool
-    render_style_visited_link_setter_custom: bool
-    render_style_visited_link_storage_container: str
-    render_style_visited_link_storage_name: str | None
-    render_style_visited_link_storage_path: list | None
 
     style_builder_custom: str | None
     style_builder_needs_system_font_shorthand_check: bool
     style_extractor_custom: bool
-
-    visited_link_color_support: bool
 
     def __init__(self, property_name: PropertyName, **dictionary):
         StylePropertyCodeGenProperties.schema.set_attributes_from_dictionary(dictionary, instance=self)
@@ -811,12 +786,11 @@ class StylePropertyCodeGenProperties:
         else:
             json_value["render-style-initial"] = krystal_member_name(json_value["render-style-initial"])
 
-        for key in ("render-style-storage-path", "render-style-visited-link-storage-path",
-                    "render-style-has-explicitly-set-storage-path"):
+        for key in ("render-style-storage-path", "render-style-has-explicitly-set-storage-path"):
             if key in json_value:
                 json_value[key] = [krystal_member_path(component) for component in json_value[key]]
 
-        for key in ("render-style-visited-link-storage-name", "render-style-has-explicitly-set-storage-name"):
+        for key in ("render-style-has-explicitly-set-storage-name",):
             if key in json_value:
                 json_value[key] = krystal_member_name(json_value[key])
 
@@ -986,15 +960,6 @@ class StylePropertyCodeGenProperties:
                 json_value["render-style-getter-custom"] = True
                 json_value["render-style-setter-custom"] = True
 
-        if "render-style-visited-link-storage-container" in json_value:
-            valid_containers = ["data", "struct", "physical-group", "opaque"]
-            if json_value["render-style-visited-link-storage-container"] not in valid_containers:
-                raise Exception(f"{key_path} must be one of {valid_containers}.")
-
-            if json_value["render-style-visited-link-storage-container"] == "opaque":
-                json_value["render-style-visited-link-getter-custom"] = True
-                json_value["render-style-visited-link-setter-custom"] = True
-
         if "render-style-has-explicitly-set-storage-container" in json_value:
             valid_containers = ["data", "struct", "physical-group", "opaque"]
             if json_value["render-style-has-explicitly-set-storage-container"] not in valid_containers:
@@ -1003,11 +968,6 @@ class StylePropertyCodeGenProperties:
             if json_value["render-style-has-explicitly-set-storage-container"] == "opaque":
                 json_value["render-style-has-explicitly-set-getter-custom"] = True
                 json_value["render-style-has-explicitly-set-setter-custom"] = True
-
-        if "render-style-visited-link-storage-name" not in json_value:
-            json_value["render-style-visited-link-storage-name"] = (
-                f"VisitedLink{json_value['render-style-name-for-methods']}"
-            )
 
         if "render-style-has-explicitly-set-storage-name" not in json_value:
             json_value["render-style-has-explicitly-set-storage-name"] = (
@@ -1994,14 +1954,12 @@ class RenderStyleStorageTreeNode:
     kind: str
     children: dict[str, "RenderStyleStorageTreeNode"]
     properties: list[StyleProperty]
-    visited_link_properties: list[StyleProperty]
 
     def __init__(self, name: str):
         self.name = name
         self.kind = "data"
         self.children = {}
         self.properties = []
-        self.visited_link_properties = []
 
     def __str__(self):
         return f"RenderStyleStorageTreeNode {vars(self)}"
@@ -2117,26 +2075,6 @@ class PropertiesAndDescriptors:
 
             tree_node.kind = property.codegen_properties.render_style_storage_container
             tree_node.properties.append(property)
-
-            if property.codegen_properties.render_style_visited_link_storage_path:
-                tree_node = root
-                for path_entry in property.codegen_properties.render_style_visited_link_storage_path:
-                    path_entry_node = RenderStyleStorageTreeNode(path_entry)
-
-                    if path_entry_node.name not in tree_node.children:
-                        tree_node.children.update({path_entry_node.name: path_entry_node})
-                    tree_node = tree_node.children[path_entry_node.name]
-
-                if (
-                    tree_node.kind != "data"
-                    and tree_node.kind != property.codegen_properties.render_style_visited_link_storage_container
-                ):
-                    raise Exception(
-                        f"Storage container '{'/'.join(property.codegen_properties.render_style_visited_link_storage_path)}' has multiple container kinds specified: '{tree_node.kind}' and '{property.codegen_properties.render_style_visited_link_storage_container}'"
-                    )
-
-                tree_node.kind = property.codegen_properties.render_style_visited_link_storage_container
-                tree_node.visited_link_properties.append(property)
 
         return root
 
@@ -9169,28 +9107,6 @@ class GenerateStyleBuilderGenerated:
     def _font_description_setter(self, property):
         return property.codegen_properties.font_description_setter.replace("set", "SetFontDescription", 1)
 
-    def _write_if(self, to: Writer, condition: str, statement: str):
-        to.write(f"if ({condition})")
-        to.write("{")
-        with to.indent():
-            to.write(statement)
-        to.write("}")
-
-    # Color property setters.
-
-    def _generate_visited_link_color_supporting_property_setter(self, to: Writer, property, value, visited_value):
-        name = property.codegen_properties.render_style_name_for_methods
-        self._write_if(
-            to,
-            "builderState.ApplyPropertyToRegularStyle()",
-            f"builderState.Style().{property.codegen_properties.render_style_setter}({value});",
-        )
-        self._write_if(
-            to,
-            "builderState.ApplyPropertyToVisitedLinkStyle()",
-            f"builderState.Style().SetVisitedLink{name}({visited_value});",
-        )
-
     # CoordinatedValueList property setters.
 
     def _generate_coordinated_value_list_property_initial_value_setter(self, to: Writer, property):
@@ -9215,11 +9131,7 @@ class GenerateStyleBuilderGenerated:
         to.write("{")
 
         with to.indent():
-            if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_setter(
-                    to, property, self._initial_value(property), self._initial_value(property)
-                )
-            elif property.codegen_properties.coordinated_value_list_property:
+            if property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_initial_value_setter(to, property)
             elif property.codegen_properties.font_property:
                 to.write(f"builderState.{self._font_description_setter(property)}({self._initial_value(property)});")
@@ -9238,11 +9150,7 @@ class GenerateStyleBuilderGenerated:
         to.write("{")
 
         with to.indent():
-            if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_setter(
-                    to, property, self._inherited_value(property), self._inherited_value(property)
-                )
-            elif property.codegen_properties.coordinated_value_list_property:
+            if property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_inherit_value_setter(to, property)
             elif property.codegen_properties.font_property:
                 to.write(
@@ -9278,14 +9186,7 @@ class GenerateStyleBuilderGenerated:
                     to.write("return;")
                 to.write("}")
 
-            if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_setter(
-                    to,
-                    property,
-                    self._converted_value(property, ["ForVisitedLink::No"]),
-                    self._converted_value(property, ["ForVisitedLink::Yes"]),
-                )
-            elif property.codegen_properties.coordinated_value_list_property:
+            if property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_value_setter(to, property)
             elif property.codegen_properties.font_property:
                 to.write(f"builderState.{self._font_description_setter(property)}({self._converted_value(property)});")
@@ -9441,43 +9342,12 @@ class GenerateStyleExtractorGenerated:
     def wrap_in_serialiser(property, value):
         return f"Serialise(builder, context, extractorState.Style, {value})"
 
-    def _write_if(self, to: Writer, condition: str, statements: list[str]):
-        to.write(f"if ({condition})")
-        to.write("{")
-        with to.indent():
-            for statement in statements:
-                to.write(statement)
-        to.write("}")
-
     def _write_function(self, to: Writer, signature: str, write_body):
         to.write(signature)
         to.write("{")
         with to.indent():
             write_body()
         to.write("}")
-
-    # Color property getters.
-
-    def _generate_visited_link_color_supporting_property_value_getter(self, to: Writer, property):
-        self._write_if(
-            to,
-            "extractorState.AllowVisitedStyle",
-            [
-                f"return extractorState.Pool.CreateColorValue(extractorState.Style.VisitedDependentColor(css::{property.id}));"
-            ],
-        )
-        self._generate_property_value_getter(to, property)
-
-    def _generate_visited_link_color_supporting_property_value_serialisation_getter(self, to: Writer, property):
-        self._write_if(
-            to,
-            "extractorState.AllowVisitedStyle",
-            [
-                f"builder.Append(SerialisationForCSS(extractorState.Style.VisitedDependentColor(css::{property.id})));",
-                "return;",
-            ],
-        )
-        self._generate_property_value_serialisation_getter(to, property)
 
     # Animation property getters.
 
@@ -9545,9 +9415,7 @@ class GenerateStyleExtractorGenerated:
 
     def _generate_style_extractor_generated_cpp_value_extractor(self, to: Writer, property: StyleProperty):
         def body():
-            if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_value_getter(to, property)
-            elif property.codegen_properties.coordinated_value_list_property:
+            if property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_value_getter(to, property)
             else:
                 self._generate_property_value_getter(to, property)
@@ -9562,9 +9430,7 @@ class GenerateStyleExtractorGenerated:
         self, to: Writer, property: StyleProperty
     ):
         def body():
-            if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_value_serialisation_getter(to, property)
-            elif property.codegen_properties.coordinated_value_list_property:
+            if property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_value_serialisation_getter(to, property)
             else:
                 self._generate_property_value_serialisation_getter(to, property)
@@ -9825,8 +9691,6 @@ class GenerateStyleInterpolationWrapperMap:
         ):
             if property.codegen_properties.coordinated_value_list_property:
                 property_wrapper_type = "CoordinatedValueListPropertyStyleTypeWrapper"
-            elif property.codegen_properties.visited_link_color_support:
-                property_wrapper_type = "VisitedAffectedStyleTypeWrapper"
             else:
                 property_wrapper_type = "StyleTypeWrapper"
         elif property.animation_type == "discrete":
@@ -9878,11 +9742,6 @@ class GenerateStyleInterpolationWrapperMap:
                     property_wrapper_parameters += [f"&{style_type}::{setter}"]
 
                 # Add property type specific parameters
-                if property.codegen_properties.visited_link_color_support:
-                    property_wrapper_parameters += [
-                        f"&{style_type}::VisitedLink{name_for_methods}",
-                        f"&{style_type}::SetVisitedLink{name_for_methods}",
-                    ]
 
                 # Add additional specified parameters
                 if property.codegen_properties.animation_wrapper_requires_additional_parameters is not None:
@@ -10156,29 +10015,6 @@ class GenerateStyleComputedStyleProperties:
                     return_type=initial_return_type,
                 )
 
-            if property.codegen_properties.render_style_visited_link_storage_path:
-                getter_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
-                setter_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
-                getter_annotations = "inline "
-                getter_return_type = property.getter_return_type
-                setter_annotations = f"inline "
-                setter_return_type = f"void"
-                setter_argument_type = property.setter_argument_type
-
-                self._generate_getter_function_declaration(
-                    to=to,
-                    function_name=getter_name,
-                    annotations=getter_annotations,
-                    return_type=getter_return_type,
-                )
-                self._generate_setter_function_declaration(
-                    to=to,
-                    function_name=setter_name,
-                    annotations=setter_annotations,
-                    return_type=setter_return_type,
-                    argument_type=setter_argument_type,
-                )
-
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
                 getter_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 setter_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
@@ -10345,33 +10181,6 @@ class GenerateStyleComputedStyleProperties:
                 storage_kind = property.codegen_properties.render_style_storage_kind
                 container_kind = property.codegen_properties.render_style_storage_container
                 container_path = property.codegen_properties.render_style_storage_path
-
-                self._generate_getters_inlines_property_function_definition(
-                    to=to,
-                    function_name=function_name,
-                    annotations=annotations,
-                    return_type=return_type,
-                    get_expression=self._compute_get_expression(
-                        property,
-                        container_kind,
-                        container_path,
-                        storage_type,
-                        storage_name,
-                        storage_kind,
-                    ),
-                )
-
-            if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
-                annotations = "inline "
-                return_type = property.getter_return_type
-                storage_type = property.codegen_properties.render_style_type
-                storage_kind = (
-                    property.codegen_properties.render_style_storage_kind
-                )  # the storage kind for visited links are always the same as the principle value
-                storage_name = property.codegen_properties.render_style_visited_link_storage_name
-                container_kind = property.codegen_properties.render_style_visited_link_storage_container
-                container_path = property.codegen_properties.render_style_visited_link_storage_path
 
                 self._generate_getters_inlines_property_function_definition(
                     to=to,
@@ -10692,46 +10501,6 @@ class GenerateStyleComputedStyleProperties:
                 storage_name = property.codegen_properties.render_style_storage_name
                 container_kind = property.codegen_properties.render_style_storage_container
                 container_path = property.codegen_properties.render_style_storage_path
-
-                self._generate_setters_inlines_property_function_definition(
-                    to=to,
-                    function_name=function_name,
-                    annotations=annotations,
-                    return_type=return_type,
-                    argument_type=argument_type,
-                    argument_name=argument_name,
-                    get_expression=self._compute_get_expression(
-                        property,
-                        container_kind,
-                        container_path,
-                        storage_type,
-                        storage_name,
-                        storage_kind,
-                    ),
-                    set_expression=self._compute_set_expression(
-                        property,
-                        container_kind,
-                        container_path,
-                        storage_type,
-                        storage_name,
-                        storage_kind,
-                        argument_name,
-                    ),
-                )
-
-            if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
-                annotations = "inline "
-                return_type = "void"
-                argument_type = property.setter_argument_type
-                argument_name = "value"
-                storage_type = property.codegen_properties.render_style_type
-                storage_kind = (
-                    property.codegen_properties.render_style_storage_kind
-                )  # the storage kind for visited links are always the same as the principle value
-                storage_name = property.codegen_properties.render_style_visited_link_storage_name
-                container_kind = property.codegen_properties.render_style_visited_link_storage_container
-                container_path = property.codegen_properties.render_style_visited_link_storage_path
 
                 self._generate_setters_inlines_property_function_definition(
                     to=to,
@@ -11186,29 +10955,6 @@ class GenerateRenderStyleProperties:
                     argument_type=setter_argument_type,
                 )
 
-            if property.codegen_properties.render_style_visited_link_storage_path:
-                getter_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
-                setter_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
-                getter_annotations = "inline "
-                getter_return_type = property.getter_return_type
-                setter_annotations = f"inline "
-                setter_return_type = f"void"
-                setter_argument_type = property.setter_argument_type
-
-                self._generate_getter_function_declaration(
-                    to=to,
-                    function_name=getter_name,
-                    annotations=getter_annotations,
-                    return_type=getter_return_type,
-                )
-                self._generate_setter_function_declaration(
-                    to=to,
-                    function_name=setter_name,
-                    annotations=setter_annotations,
-                    return_type=setter_return_type,
-                    argument_type=setter_argument_type,
-                )
-
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
                 getter_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 setter_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
@@ -11373,18 +11119,6 @@ class GenerateRenderStyleProperties:
                 annotations=annotations,
                 return_type=return_type,
             )
-
-            if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
-                annotations = "inline "
-                return_type = property.getter_return_type
-
-                self._generate_getters_inlines_function_definition(
-                    to=to,
-                    function_name=function_name,
-                    annotations=annotations,
-                    return_type=return_type,
-                )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
                 function_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
@@ -11558,26 +11292,6 @@ class GenerateRenderStyleProperties:
                 forwarding_expression=self._compute_forwarding_expression(storage_kind, argument_name),
             )
 
-            if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
-                annotations = "inline "
-                return_type = "void"
-                argument_type = property.setter_argument_type
-                argument_name = "value"
-                storage_kind = (
-                    property.codegen_properties.render_style_storage_kind
-                )  # the storage kind for visited links are always the same as the principle value
-
-                self._generate_setters_inlines_function_definition(
-                    to=to,
-                    function_name=function_name,
-                    annotations=annotations,
-                    return_type=return_type,
-                    argument_type=argument_type,
-                    argument_name=argument_name,
-                    forwarding_expression=self._compute_forwarding_expression(storage_kind, argument_name),
-                )
-
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
                 function_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
@@ -11706,7 +11420,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
             animatable_properties = set()
             non_animatable_properties = set()
 
-            for property in itertools.chain(tree_node.properties, tree_node.visited_link_properties):
+            for property in tree_node.properties:
                 if not property.is_animatable:
                     non_animatable_properties.add(property)
                 else:
@@ -11763,15 +11477,6 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                     non_animatable_properties.append(property)
                 else:
                     animatable_properties.append(property)
-
-            animatable_visited_link_properties = []
-            non_animatable_visited_link_properties = []
-
-            for property in sorted(tree_node.visited_link_properties, key=lambda x: x.id):
-                if not property.is_animatable:
-                    non_animatable_visited_link_properties.append(property)
-                else:
-                    animatable_visited_link_properties.append(property)
 
             # Generate the "data" children, which require an additional check.
             for child in data_children:
@@ -11835,46 +11540,11 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                 with to.indent():
                     to.write(f"changingProperties.Set(css::{property.id});")
 
-            if (
-                data_children or opaque_children or struct_children or animatable_properties
-            ) and animatable_visited_link_properties:
-                to.newline()
-
-            # Generate the animatable visited link property children.
-            for property in animatable_visited_link_properties:
-                if property.codegen_properties.render_style_changed_for_animation_custom:
-                    to.write(
-                        f"ChangedAnimatablePropertiesCustom::ConservativelyCollectChangedAnimatablePropertiesForVisitedLink{property.id_without_prefix}(a, b, changingProperties);"
-                    )
-                    continue
-
-                expression = None
-                if tree_node.kind == "data":
-                    expression = f"{property.codegen_properties.render_style_visited_link_storage_name}"
-                elif tree_node.kind == "struct":
-                    expression = f"{property.codegen_properties.render_style_visited_link_storage_name}"
-                elif tree_node.kind == "physical-group":
-                    expression = (
-                        f"{Name(property.codegen_properties.logical_property_group.resolver).id_without_prefix}()"
-                    )
-                assert type(expression) is str, f"Expected expression to be a string, got {type(expression)}"
-
-                to.write(f"if (a.{expression} != b.{expression})")
-                with to.indent():
-                    to.write(f"changingProperties.Set(css::{property.id});")
-
             # Print out comments detailing the non-animatable properties that were skipped.
             if non_animatable_properties:
                 to.newline()
                 to.write("// Non-animatable properties:")
                 for property in non_animatable_properties:
-                    to.write(f"// SKIPPED '{property}' - {property.animation_type}")
-
-            # Print out comments detailing the non-animatable visited link properties that were skipped.
-            if non_animatable_visited_link_properties:
-                to.newline()
-                to.write("// Non-animatable visited link properties:")
-                for property in non_animatable_visited_link_properties:
                     to.write(f"// SKIPPED '{property}' - {property.animation_type}")
 
         to.write(f"}}")
@@ -11897,11 +11567,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                 generated_children.append(child)
 
         # If we didn't generate any callable children, and we don't have any animatable properties, there is nothing to generate here.
-        if (
-            not generated_children
-            and not any(property.is_animatable for property in tree_node.properties)
-            and not any(property.is_animatable for property in tree_node.visited_link_properties)
-        ):
+        if not generated_children and not any(property.is_animatable for property in tree_node.properties):
             return False
 
         # Second, generate the function for this tree node.

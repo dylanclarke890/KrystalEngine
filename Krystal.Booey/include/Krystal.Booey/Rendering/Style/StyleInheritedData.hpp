@@ -31,7 +31,6 @@ namespace krys::boo
 
     DataRef<StyleFontData> FontData;
     boo::Color Color;
-    boo::Color VisitedLinkColor;
 
   private:
     StyleInheritedData() noexcept;

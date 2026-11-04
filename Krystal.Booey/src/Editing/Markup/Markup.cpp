@@ -1043,13 +1043,6 @@ namespace krys::boo
             }
           }
         }
-
-        // Retain the Mail quote level by including all ancestor mail block quotes.
-        if (auto highestMailBlockquote = HighestEnclosingNodeOfType(
-              start, IsMailBlockquote, EditingBoundaryCrossingRule::CanCrossEditingBoundary))
-        {
-          specialCommonAncestor = krys::move(highestMailBlockquote);
-        }
       }
 
       RefPtr<dom::Node> checkAncestor =

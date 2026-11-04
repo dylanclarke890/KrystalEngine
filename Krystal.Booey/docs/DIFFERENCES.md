@@ -117,6 +117,10 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ## Style (cascade and computed values)
 
+### From the specs
+
+- There's no history, so every link is unvisited: `:visited` never matches and there are no visited link styles (no per-link-state cascade, visited colours or `<body vlink>` colour). `:link` matches every link.
+
 ### From Chrome
 
 - A computed `letter-spacing` of zero serialises as `normal`, as the computed value can't tell `normal` from `0`; Chrome serialises `letter-spacing: 0` as `0px`.
@@ -176,7 +180,6 @@ Record a difference here when you make one, and remove it when Booey comes back 
 ### From the specs
 
 - `-webkit-text-security` masks one character per code point (`RenderText::SecureText`), so a character outside the BMP gets one mask.
-- Text fragments: `FragmentDirectiveRangeFinder` runs only the specification's search over the nodes' text, so matching ignores ASCII case only (FIXME). Quotation marks fold to straight forms on both sides (`FoldQuoteMarks`, with source offsets because folding changes UTF-8 lengths).
 
 ### From Chrome
 
@@ -227,6 +230,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- There are no mail blockquotes: a `<blockquote type=cite>` is edited like any other block (no breaking out of quotes on Enter or paste, no `InsertNewlineInQuotedContent` command), and pasted `Apple-style-span` and `Apple-paste-as-quotation` markup gets no special treatment.
 - Chrome's `getClientRects` reports an inline box's pieces separately around bidi-reordered content; Booey reports one rect where they're on one line.
 
 ## Input and events
@@ -258,5 +262,5 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Animation frame callbacks are given the frame's timestamp rounded to whole milliseconds.
 - DOM timestamps are the host's time since the window's time origin, so they pause and scale with the engine.
 - There's no `requestIdleCallback()`: the host runs its own idle work between frames.
-- `Document::SetURL` takes the fragment directive from every URL it's given (empty when there is none), so a text fragment link within the page works and a later plain fragment isn't sent to the old text.
+- There are no text fragments: a URL's `:~:` is part of its fragment like any other text, so `#:~:text=` links don't find, highlight or scroll to text. `::target-text` styles the text the host marks in `Document::FragmentHighlightRegistry()`.
 - `url::URL` has no encoding override, so queries are always UTF-8 percent-encoded. IDNA uses `uidna_nameToASCII_UTF8` from vcpkg's ICU (Unicode 17), so `tests/URL/WPT.cpp` expects the `IdnaTestV2.json` cases with U+32931 and U+32B9A to be valid where the data expects a V7 failure, because Unicode 17 assigned those code points.

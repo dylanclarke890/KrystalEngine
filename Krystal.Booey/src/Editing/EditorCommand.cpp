@@ -763,13 +763,6 @@ namespace krys::boo
                                                             : dom::TextEventInputType::LineBreak);
     }
 
-    bool ExecuteInsertNewlineInQuotedContent(LocalFrame &frame, dom::Event *, EditorCommandSource,
-                                             utf8_stringview) noexcept
-    {
-      TypingCommand::InsertParagraphSeparatorInQuotedContent(*frame.Document());
-      return true;
-    }
-
     bool ExecuteInsertParagraph(LocalFrame &frame, dom::Event *, EditorCommandSource,
                                 utf8_stringview) noexcept
     {
@@ -1055,9 +1048,6 @@ namespace krys::boo
         DoNotAllowExecutionWhenDisabled}},
       {u8"InsertNewline",
        {ExecuteInsertNewline, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsTextInsertion,
-        DoNotAllowExecutionWhenDisabled}},
-      {u8"InsertNewlineInQuotedContent",
-       {ExecuteInsertNewlineInQuotedContent, Supported, EnabledInRichlyEditableText, IsNotTextInsertion,
         DoNotAllowExecutionWhenDisabled}},
       {u8"InsertParagraph",
        {ExecuteInsertParagraph, Supported, EnabledInEditableText, IsNotTextInsertion,

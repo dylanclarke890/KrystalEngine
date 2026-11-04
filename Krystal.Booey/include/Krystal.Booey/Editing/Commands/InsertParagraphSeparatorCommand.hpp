@@ -11,16 +11,14 @@ namespace krys::boo
   private:
     RefPtr<EditingStyle> _style;
     bool _mustUseDefaultParagraphElement;
-    bool _pasteBlockquoteIntoUnquotedArea;
 
   public:
     InsertParagraphSeparatorCommand(dom::Document &document, bool mustUseDefaultParagraphElement,
-                                    bool pasteBlockquoteIntoUnquotedArea, EditAction editingAction) noexcept;
+                                    EditAction editingAction) noexcept;
     ~InsertParagraphSeparatorCommand() noexcept override;
 
     KRYS_NODISCARD static Ref<InsertParagraphSeparatorCommand>
       Create(dom::Document &document, bool useDefaultParagraphElement = false,
-             bool pasteBlockquoteIntoUnquotedArea = false,
              EditAction editingAction = EditAction::Insert) noexcept;
 
   private:

@@ -67,13 +67,6 @@
     "The custom code for the property should be located in css/StyleBuilderCustom.h",
     "and named applyValue[CSSPropertyName]().",
     "",
-    "* visited-link-color-support:",
-    "Indicates that this CSS property is a color property with a",
-    "\"setVisitedLinkXXX()\" setter on RenderStyle to be called when",
-    "StyleResolver::applyPropertyToVisitedLinkStyle() return true.",
-    "The regular setter on RenderStyle will only be called if",
-    "StyleResolver::applyPropertyToRegularStyle() returns true.",
-    "",
     "* color-property:",
     "Indicates that this CSS property is color-related (populates",
     "CSSProperty::isColorProperty().",
@@ -347,7 +340,6 @@
       "codegen-properties": {
         "animation-wrapper": "CaretColorWrapper",
         "animation-wrapper-requires-override-parameters": [],
-        "visited-link-color-support": true,
         "color-property": true,
         "style-builder-custom": "All",
         "skip-render-style-getter": true,
@@ -368,8 +360,7 @@
       "initial": "Canvastext",
       "codegen-properties": {
         "accepts-quirky-color": true,
-        "animation-wrapper": "VisitedAffectedColorWrapper",
-        "visited-link-color-support": true,
+        "animation-wrapper": "ColorWrapper",
         "color-property": true,
         "style-builder-custom": "All",
         "style-extractor-custom": true,
@@ -383,7 +374,6 @@
         "render-style-storage-path": ["_inheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "WebCore::Color",
-        "render-style-visited-link-storage-path": ["_inheritedData"],
         "parser-grammar": "<color>"
       },
       "status": {
@@ -2229,17 +2219,11 @@
       "initial": "transparent",
       "codegen-properties": {
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": ["_nonInheritedData", "backgroundData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor"
-        ],
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -2799,7 +2783,6 @@
           "resolver": "bottom"
         },
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": [
@@ -2810,13 +2793,6 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor",
-          "visitedLinkBorderColors"
-        ],
-        "render-style-visited-link-storage-container": "physical-group",
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -3423,7 +3399,6 @@
           "resolver": "left"
         },
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": [
@@ -3434,13 +3409,6 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor",
-          "visitedLinkBorderColors"
-        ],
-        "render-style-visited-link-storage-container": "physical-group",
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -3559,7 +3527,6 @@
           "resolver": "right"
         },
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": [
@@ -3570,13 +3537,6 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor",
-          "visitedLinkBorderColors"
-        ],
-        "render-style-visited-link-storage-container": "physical-group",
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -3777,7 +3737,6 @@
           "resolver": "top"
         },
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": [
@@ -3788,13 +3747,6 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor",
-          "visitedLinkBorderColors"
-        ],
-        "render-style-visited-link-storage-container": "physical-group",
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -4790,19 +4742,16 @@
         }
       ],
       "codegen-properties": {
-        "animation-wrapper": "VisitedAffectedStyleTypeWrapper<SVGPaint>",
+        "animation-wrapper": "StyleTypeWrapper",
         "animation-wrapper-requires-override-parameters": [
           "css::PropertyId::Fill",
           "&RenderStyle::Fill",
-          "&RenderStyle::SetFill",
-          "&RenderStyle::VisitedLinkFill",
-          "&RenderStyle::SetVisitedLinkFill"
+          "&RenderStyle::SetFill"
         ],
         "style-builder-custom": "All",
         "render-style-storage-path": ["m_svgStyle", "fillData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::SVGPaint",
-        "render-style-visited-link-storage-path": ["m_svgStyle", "fillData"],
         "color-property": true,
         "parser-grammar": "none | <color> | [ <url> [ none | <color> ]? ]",
         "parser-grammar-comment": "Current spec grammar is 'none | <color> | [ <url> [ none | <color> ]? ] | context-fill | context-stroke'",
@@ -7004,7 +6953,6 @@
       "initial": "currentcolor",
       "initial-comment": "Current spec initial value is 'auto'.",
       "codegen-properties": {
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -7014,11 +6962,6 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor"
-        ],
         "parser-grammar": "-webkit-focus-ring-color | <color>",
         "parser-grammar-comment": "Current spec grammar is 'auto | <color> | <image-1D>'"
       },
@@ -7928,19 +7871,16 @@
         }
       ],
       "codegen-properties": {
-        "animation-wrapper": "VisitedAffectedStyleTypeWrapper<SVGPaint>",
+        "animation-wrapper": "StyleTypeWrapper",
         "animation-wrapper-requires-override-parameters": [
           "css::PropertyId::Stroke",
           "&RenderStyle::Stroke",
-          "&RenderStyle::SetStroke",
-          "&RenderStyle::VisitedLinkStroke",
-          "&RenderStyle::SetVisitedLinkStroke"
+          "&RenderStyle::SetStroke"
         ],
         "style-builder-custom": "All",
         "render-style-storage-path": ["m_svgStyle", "strokeData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::SVGPaint",
-        "render-style-visited-link-storage-path": ["m_svgStyle", "strokeData"],
         "color-property": true,
         "parser-grammar": "none | <color> | [ <url> [ none | <color> ]? ]",
         "parser-grammar-comment": "Current spec grammar is 'none | <color> | [ <url> [ none | <color> ]? ] | context-fill | context-stroke'",
@@ -8068,7 +8008,6 @@
       "initial": "transparent",
       "codegen-properties": {
         "animation-wrapper": "StyleTypeWrapper",
-        "animation-wrapper-comment": "FIXME: Why doesn't this use VisitedAffectedStyleTypeWrapper?",
         "animation-wrapper-requires-override-parameters": [
           "css::PropertyId::StrokeColor",
           "&RenderStyle::StrokeColor",
@@ -8079,8 +8018,6 @@
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": ["m_rareInheritedData"],
-        "visited-link-color-support": true,
         "color-property": true,
         "parser-grammar": "<color>"
       },
@@ -9369,7 +9306,6 @@
       "initial": "currentcolor",
       "codegen-properties": {
         "aliases": ["-webkit-column-rule-color"],
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-name": "color",
         "render-style-storage-path": [
@@ -9381,11 +9317,6 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "multiCol"
-        ],
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -10779,16 +10710,10 @@
       "initial": "currentcolor",
       "codegen-properties": {
         "aliases": ["-webkit-text-decoration-color"],
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor"
-        ],
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -10923,12 +10848,10 @@
       "initial": "currentcolor",
       "codegen-properties": {
         "aliases": ["-epub-text-emphasis-color", "-webkit-text-emphasis-color"],
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": ["m_rareInheritedData"],
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -10974,12 +10897,10 @@
       "inherited": true,
       "initial": "currentcolor",
       "codegen-properties": {
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": ["m_rareInheritedData"],
         "parser-grammar": "<color>"
       },
       "status": {

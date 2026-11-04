@@ -6,7 +6,6 @@
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 
 namespace krys::boo::style
 {
@@ -21,8 +20,7 @@ namespace krys::boo::style
 
   // MARK: - Conversion
 
-  SVGPaint CSSValueConversion<SVGPaint>::operator()(BuilderState &state, const css::Value &value,
-                                                    ForVisitedLink forVisitedLink) noexcept
+  SVGPaint CSSValueConversion<SVGPaint>::operator()(BuilderState &state, const css::Value &value) noexcept
   {
     if (const auto *list = DynamicDowncast<css::ValueList>(value))
     {
@@ -55,7 +53,7 @@ namespace krys::boo::style
         }
       }
 
-      return SVGPaint::URLColor {url, ConvertCSSValueToStyle<Color>(state, *list->Item(1), forVisitedLink)};
+      return SVGPaint::URLColor {url, ConvertCSSValueToStyle<Color>(state, *list->Item(1))};
     }
 
     if (const auto *urlValue = DynamicDowncast<css::UrlValue>(value))
@@ -77,7 +75,7 @@ namespace krys::boo::style
       }
     }
 
-    return ConvertCSSValueToStyle<Color>(state, value, forVisitedLink);
+    return ConvertCSSValueToStyle<Color>(state, value);
   }
 
   // MARK: - Blending

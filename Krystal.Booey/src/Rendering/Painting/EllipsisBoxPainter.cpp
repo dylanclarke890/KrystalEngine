@@ -21,7 +21,7 @@ namespace krys::boo
     // FIXME: Transition it to TextPainter.
     auto &context = _paintInfo.Context();
     auto &lineStyle = _lineBox.Style();
-    auto textColor = lineStyle.VisitedDependentColorWithColorFilter(css::PropertyId::WebkitTextFillColor);
+    auto textColor = lineStyle.ColorWithColorFilter(css::PropertyId::WebkitTextFillColor);
 
     if (_paintInfo.ForceTextColor())
     {
@@ -92,7 +92,7 @@ namespace krys::boo
     auto &context = _paintInfo.Context();
     auto &style = _lineBox.Style();
 
-    auto textColor = style.VisitedDependentColorWithColorFilter(css::PropertyId::Color);
+    auto textColor = style.ColorWithColorFilter(css::PropertyId::Color);
     auto backgroundColor = _selectionBackgroundColor;
     if (!backgroundColor.IsVisible())
     {

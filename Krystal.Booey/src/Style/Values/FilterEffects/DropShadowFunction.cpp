@@ -7,7 +7,6 @@
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 
@@ -39,8 +38,7 @@ namespace krys::boo::style
                          ? css::RoundForImpreciseConversion<int>(
                              ConvertToStyle(*filter.StdDeviation, state).ResolveZoom(zoomFactor))
                          : 0;
-    auto color =
-      filter.Color ? ToStyleColor(*filter.Color, state, ForVisitedLink::No) : style::Color {CurrentColor {}};
+    auto color = filter.Color ? ToStyleColor(*filter.Color, state) : style::Color {CurrentColor {}};
 
     return DropShadowFilterOperationWithStyleColor::Create(IntPoint {x, y}, stdDeviation, color);
   }

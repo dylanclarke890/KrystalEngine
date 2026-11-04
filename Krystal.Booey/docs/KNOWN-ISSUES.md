@@ -75,7 +75,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `<marquee>`'s `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` and `stop()` are not implemented, and marquees don't scroll (FIXME in `HTMLMarqueeElement.hpp`).
 - `autofocus` insertion steps run only for HTML elements, not SVG or MathML elements.
 - Popovers: no `interestfor` and no `:open`.
-- `<details>` auto-expansion for find in page waits for a find feature; text directly inside a `<details>` isn't revealed by a text fragment (reveal starts from the element around the text).
+- `<details>` auto-expansion for find in page waits for a find feature.
 - `MIMETypeRegistry::MIMETypeForExtension` has only a built-in table; most other extensions have no type (FIXME in `MIMETypeRegistry.cpp`).
 - Slider thumbs can't be dragged by touch: a touch pan scrolls.
 
@@ -114,7 +114,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `SizesAttributeParser` doesn't clear the font selector for font-relative units (FIXME).
 - The standard `user-select` isn't implemented; only `-webkit-user-select` exists and the user agent sheets use it.
 - `css::calc::Value::DoubleValueDeprecated` doesn't log when the tree needs conversion data (FIXME in `ValueEvaluation.cpp`).
-- There is no inspector: `:visited` and `:hover` can't be forced and there are no observer hooks for source ranges.
+- There is no inspector: `:hover` can't be forced and there are no observer hooks for source ranges.
 - Imported sheets are always strict about the sheet type; quirks-mode lax loading for same-origin requests needs security origins (FIXME in `StyleSheetContents.cpp`).
 
 ## Style (cascade and computed values)
@@ -132,7 +132,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `env()` has no values: without the document's `ConstantPropertyMap` an `env()` reference falls back or is invalid at computed-value time (FIXME in `VariableReferenceValue.cpp`).
 - `::cue` rules for WebVTT elements aren't collected (FIXME in `ElementRuleCollector.cpp`).
 - View transitions are not implemented: named view transition pseudo-elements get no captured class list, the document element's pseudo-elements aren't created in `TreeResolver`, and an element captured in a view transition isn't forced flat in `Adjuster`.
-- `VisitedLinkState` has no visited link store: links with an empty `href` (the document itself) are visited, all others unvisited, and links aren't invalidated when their visited state changes.
 - Pagination (`-webkit-paged-x/y`, `setColumnStylesFromPaginationMode`), visually ordered documents and design mode aren't applied in `ResolveForDocument` and `Adjuster` (FIXMEs).
 - No visibility adjustment (`VisibilityAdjustment`): `adjustVisibilityForPseudoElement` and the force-hidden subtree adjustment are FIXMEs.
 - `Adjuster` leaves SVG transforms not stored on the style, and the layer-based SVG engine's `z-index`/stacking branches, as FIXMEs.
@@ -178,7 +177,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Image-based `shape-outside` is not supported: `ShapeOutsideInfo` builds only box, rectangle and polygon shapes (no raster shape, no `shape-image-threshold`), and shapes have no display paths for highlighting (FIXMEs in `LayoutShape.hpp` and `ShapeOutsideInfo.cpp`).
 - `text-combine-upright` is not implemented: there is no combined-text renderer (`RenderCombineText`), so `BoxTreeUpdater`, the inline iterators, `RenderBlockFlow` and `RenderText` treat combined text as ordinary text (FIXMEs).
 - `layout_integration::GridLayout::CanUseFor` accepts only single-track spans at explicit unnamed lines and the self-alignments `start`, `flex-start`, `self-start`, `normal` and `stretch`; other grids fall back to `RenderGrid`. Multi-column spans in `ImplicitGrid` are a FIXME.
-- `RenderTreeAsText` leaves out SVG paint features and visual overflow, file upload control names, the fieldset's intrinsic border and the Apple-style-span editing artefact (FIXMEs).
+- `RenderTreeAsText` leaves out SVG paint features and visual overflow, file upload control names, and the fieldset's intrinsic border (FIXMEs).
 
 ## Painting
 
@@ -245,8 +244,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `FontCache` has no memory-pressure limits; the host cannot report pressure (FIXME in `FontCache.cpp`). The purge of inactive fonts runs on a timer only.
 - Right-to-left scripts other than Arabic and Hebrew (Syriac, Thaana, N'Ko and so on) have no bundled font and work only if the host registers one. Kashida justification is not done.
 - Web fonts: SVG fonts, font collections (the item in a collection is not selectable), a font parsing policy (safe font parser, trusted types) and `FontFace`/`FontFaceSet` as an API from C++ are missing. Font loading has no settings: installed fonts are always allowed and load completions are never ignored.
-- Text search (`findPlainText`, `SearchBuffer`) is absent, as is the text fragment finder's first pass through it. The text iterator does not traverse the flat tree, enter image overlays or emit text placeholders (FIXMEs in `TextIterator.cpp`).
-- Text fragments have no text indicator and no directive generator (making a link to a selection).
+- Text search (`findPlainText`, `SearchBuffer`) is absent. The text iterator does not traverse the flat tree, enter image overlays or emit text placeholders (FIXMEs in `TextIterator.cpp`).
 - There are no spelling or grammar markers, text checking, dictation or kill ring.
 
 ## Images and resources
@@ -320,7 +318,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - `document.designMode` is not implemented, so a document can't be made editable as a whole (FIXMEs in `HTMLElement::EditabilityFromContentEditableAttr`).
 - `execCommand()` and `queryCommandState()`/`queryCommandValue()` are not implemented; `Document` only declares the IDL in a comment. `EditorCommand` has 86 selection, navigation, delete, insert, clipboard and undo/redo commands but no state or value for them.
-- Formatting commands are absent: bold, italic and the rest of the `styleWithCSS`/`-webkit-font-size-delta` family, lists, indent and outdent, format block, links, remove format. Tab spans, mail blockquotes and `quoteFragmentForPasting` are absent with them. The `MakeTextWritingDirection*` commands apply styles but report no state.
+- Formatting commands are absent: bold, italic and the rest of the `styleWithCSS`/`-webkit-font-size-delta` family, lists, indent and outdent, format block, links, remove format. Tab spans are absent with them. The `MakeTextWritingDirection*` commands apply styles but report no state.
 - Paste does not render the fragment in a staging document to take its text as rendered and drop invisible content (`ReplacementFragment`); it does not remove event handler attributes or `javascript:` URLs from pasted markup (FIXMEs in `ReplaceSelectionCommand.cpp`). `MarkupAccumulator` does not resolve URL attributes against the base URL, and the markup sanitiser's staging page has no dark appearance.
 - Bidi-aware pasting (matching each pasted paragraph's direction) and the bidi contiguity helpers (`AdjustToVisuallyContiguousRange` and relatives) are absent.
 - `EditorClient` is only the selection, clipboard permission, undo/redo, composition and text-field hooks. It has no `shouldInsertText`/`shouldDeleteRange`/`shouldBeginEditing`/`shouldApplyStyle` delegates, so the host cannot veto or observe edits, and no spelling, grammar or text-checking, autocorrection or autofill hooks.
@@ -328,7 +326,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - The kill ring and mark, find in page, the drag caret, the overtype block cursor, caret browsing's focusing of the anchor the caret is in, stopping the blink while typing, beeping on empty cuts and deletes, and spatial navigation's use of the caret are absent.
 - Taps do not place the caret at the nearest word boundary (`WordBoundaryForPositionWithoutCrossingLine`; FIXME in `EventHandler.cpp`).
 - Image documents, image overlays and writing images to the pasteboard are absent. Link decoration filtering and the `application/x-moz-file` quirk are not implemented.
-- Text extraction and app highlights are not implemented (for text fragments, see *Text and fonts*).
+- Text extraction and app highlights are not implemented.
 - Script access to the clipboard (`javaScriptCanAccessClipboard`, `domPasteAllowed`) is off (FIXMEs in `EditorCommand.cpp`). Password fields are kept off the clipboard.
 - Input methods are IMM32 only. TSF features (reconversion, inline handwriting, speech), custom highlights and annotations (inline predictions, writing suggestions), `inputmode`, `ime-mode` and an on-screen keyboard are not supported. The page draws no candidate list and the host is not told the candidates; the IME draws its own windows.
 - Undo does not cancel a composition.
@@ -389,9 +387,9 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - The only pragmas are `content-language` and `default-style`; the `Content-Language` header is ignored, as responses have no headers.
 - Prerendering, speculation rules, `javascript:` URLs, `pagereveal`/`pageswap` and view transitions are not implemented. Icons, manifests and alternate style sheet sets chosen by script are not loaded.
 - No DOM `URL` interface or `URLSearchParams` (`url::URL` is internal), so WPT `setters_tests.json` is not run.
-- There is no global history or visited link store, so `:visited` matches only links with an empty `href` and `VisitedLinkState` has nothing to ask. There are no deferred loads, multipart loads or unreachable URLs.
+- There are no deferred loads, multipart loads or unreachable URLs.
 - Document timers are not throttled or aligned, and animation frames are not throttled below the page's rate.
-- Fragment navigation does not reset scroll anchoring (there is none) and has no text indicator for a text fragment (FIXME in `LocalFrameView.cpp`).
+- Fragment navigation does not reset scroll anchoring (there is none).
 - `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents, fullscreen and view transitions steps of the update are FIXMEs, and `Document` has no post-layout task timer.
 
 ## Core and infrastructure

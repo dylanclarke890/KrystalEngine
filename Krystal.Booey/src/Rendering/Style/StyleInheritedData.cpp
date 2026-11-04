@@ -9,14 +9,14 @@ namespace krys::boo
       : BorderHorizontalSpacing(style::ComputedStyle::InitialBorderHorizontalSpacing()),
         BorderVerticalSpacing(style::ComputedStyle::InitialBorderVerticalSpacing()),
         LineHeight(style::ComputedStyle::InitialLineHeight()), FontData(StyleFontData::Create()),
-        Color(style::ComputedStyle::InitialColor()), VisitedLinkColor(style::ComputedStyle::InitialColor())
+        Color(style::ComputedStyle::InitialColor())
   {
   }
 
   inline StyleInheritedData::StyleInheritedData(const StyleInheritedData &o) noexcept
       : RefCounted<StyleInheritedData>(), BorderHorizontalSpacing(o.BorderHorizontalSpacing),
         BorderVerticalSpacing(o.BorderVerticalSpacing), LineHeight(o.LineHeight), FontData(o.FontData),
-        Color(o.Color), VisitedLinkColor(o.VisitedLinkColor)
+        Color(o.Color)
   {
     krys_debug_assert_msg(o == *this, "StyleInheritedData should be properly copied.");
   }
@@ -36,7 +36,7 @@ namespace krys::boo
     // These properties also need to have "fast-path-inherited" codegen property set.
     // Cases where other properties depend on these values need to disallow the fast path (via
     // RenderStyle::setDisallowsFastPathInheritance).
-    return Color == other.Color && VisitedLinkColor == other.VisitedLinkColor;
+    return Color == other.Color;
   }
 
   bool StyleInheritedData::NonFastPathInheritedEqual(const StyleInheritedData &other) const noexcept
@@ -49,6 +49,5 @@ namespace krys::boo
   void StyleInheritedData::FastPathInheritFrom(const StyleInheritedData &inheritParent) noexcept
   {
     Color = inheritParent.Color;
-    VisitedLinkColor = inheritParent.VisitedLinkColor;
   }
 }

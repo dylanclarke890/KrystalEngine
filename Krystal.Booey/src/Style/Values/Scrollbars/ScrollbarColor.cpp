@@ -5,7 +5,6 @@
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 
 namespace krys::boo::style
 {
@@ -29,8 +28,8 @@ namespace krys::boo::style
     const auto &track = pair->Second();
 
     return ScrollbarColor::Parts {
-      .Thumb = ConvertCSSValueToStyle<Color>(state, thumb, style::ForVisitedLink::No),
-      .Track = ConvertCSSValueToStyle<Color>(state, track, style::ForVisitedLink::No),
+      .Thumb = ConvertCSSValueToStyle<Color>(state, thumb),
+      .Track = ConvertCSSValueToStyle<Color>(state, track),
     };
   }
 

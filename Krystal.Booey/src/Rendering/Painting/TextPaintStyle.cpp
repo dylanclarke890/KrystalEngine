@@ -130,8 +130,7 @@ namespace krys::boo
       return paintStyle;
     }
 
-    paintStyle.FillColor = lineStyle.VisitedDependentColorWithColorFilter(
-      css::PropertyId::WebkitTextFillColor, paintInfo.PaintBehavior);
+    paintStyle.FillColor = lineStyle.ColorWithColorFilter(css::PropertyId::WebkitTextFillColor);
 
     bool forceBackgroundToWhite = false;
     if (renderer.GetDocument().Printing())
@@ -166,8 +165,7 @@ namespace krys::boo
       paintStyle.StrokeColor = AdjustColorForVisibilityOnBackground(paintStyle.StrokeColor, Color::white);
     }
 
-    paintStyle.EmphasisMarkColor =
-      lineStyle.VisitedDependentColorWithColorFilter(css::PropertyId::TextEmphasisColor);
+    paintStyle.EmphasisMarkColor = lineStyle.ColorWithColorFilter(css::PropertyId::TextEmphasisColor);
 
     // Make the text stroke color legible against a white background
     if (forceBackgroundToWhite)

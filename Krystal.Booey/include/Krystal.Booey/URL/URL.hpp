@@ -243,9 +243,6 @@ namespace krys::boo::url
 
     void SetFragmentIdentifier(utf8_stringview identifier) noexcept;
     void RemoveFragmentIdentifier() noexcept;
-    /// @brief Removes the fragment directive (`:~:` and what follows) from the fragment and returns it.
-    /// @see https://wicg.github.io/scroll-to-text-fragment/#the-fragment-directive
-    utf8_string ConsumeFragmentDirective() noexcept;
     void RemoveQueryAndFragmentIdentifier() noexcept;
 
     KRYS_NODISCARD static bool HostIsIPAddress(utf8_stringview host) noexcept;
@@ -329,5 +326,4 @@ namespace krys::boo::url
   // FIXME: This needs a new, more specific name. The general thing named here can't be implemented correctly,
   // since different parts of a URL need different escaping.
   KRYS_NODISCARD utf8_string EncodeWithURLEscapeSequences(utf8_stringview input) noexcept;
-  KRYS_NODISCARD utf8_string PercentEncodeFragmentDirectiveSpecialCharacters(utf8_stringview input) noexcept;
 }

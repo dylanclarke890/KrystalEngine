@@ -24,8 +24,8 @@ namespace krys::boo
                                    css::PropertyId borderColorProperty, BorderStyle borderStyle,
                                    bool isTransparent, bool isPresent)
     {
-      auto color = setColorsToBlack ? boo::Color(boo::Color::black)
-                                    : style.VisitedDependentColorWithColorFilter(borderColorProperty);
+      auto color =
+        setColorsToBlack ? boo::Color(boo::Color::black) : style.ColorWithColorFilter(borderColorProperty);
       auto evaluatedWidth = style::Evaluate<float>(width, style::ZoomNeeded {});
       auto inflatedWidth = evaluatedWidth ? evaluatedWidth + inflation : evaluatedWidth;
       return BorderEdge(inflatedWidth, color, borderStyle, !setColorsToBlack && isTransparent, isPresent,
@@ -49,7 +49,7 @@ namespace krys::boo
   BorderEdges GetBorderEdgesForOutline(const RenderStyle &style, BorderStyle borderStyle,
                                        float deviceScaleFactor) noexcept
   {
-    auto color = style.VisitedDependentColorWithColorFilter(css::PropertyId::OutlineColor);
+    auto color = style.ColorWithColorFilter(css::PropertyId::OutlineColor);
     auto isTransparent = color.IsValid() && !color.IsVisible();
     auto size = style::Evaluate<float>(style.OutlineWidth(), style::ZoomNeeded {});
     return {BorderEdge {size, color, borderStyle, isTransparent, true, deviceScaleFactor},

@@ -169,10 +169,7 @@ namespace krys::boo::style
     if (!a.StrokeData->Stroke.HasSameType(b.StrokeData->Stroke)
         || a.StrokeData->Stroke.UrlDisregardingType() != b.StrokeData->Stroke.UrlDisregardingType()
         || a.StrokeData->StrokeDashArray != b.StrokeData->StrokeDashArray
-        || a.StrokeData->StrokeDashOffset != b.StrokeData->StrokeDashOffset
-        || !a.StrokeData->VisitedLinkStroke.HasSameType(b.StrokeData->VisitedLinkStroke)
-        || a.StrokeData->VisitedLinkStroke.UrlDisregardingType()
-             != b.StrokeData->VisitedLinkStroke.UrlDisregardingType())
+        || a.StrokeData->StrokeDashOffset != b.StrokeData->StrokeDashOffset)
     {
       return true;
     }
@@ -888,20 +885,13 @@ namespace krys::boo::style
     if (&a == &b)
     {
       krys_debug_assert(currentColorDiffers);
-      return ContainsCurrentColor(a.StrokeData->Stroke)
-             || ContainsCurrentColor(a.StrokeData->VisitedLinkStroke)
-             || a.MiscData->FloodColor.ContainsCurrentColor()
-             || a.MiscData->LightingColor.ContainsCurrentColor()
-             || ContainsCurrentColor(
-               a.FillData->Fill); // FIXME: Should this be checking fillData->visitedLinkFill as well?
+      return ContainsCurrentColor(a.StrokeData->Stroke) || a.MiscData->FloodColor.ContainsCurrentColor()
+             || a.MiscData->LightingColor.ContainsCurrentColor() || ContainsCurrentColor(a.FillData->Fill);
     }
 
     if (a.StrokeData->StrokeOpacity != b.StrokeData->StrokeOpacity
         || ColorChangeRequiresRepaint(a.StrokeData->Stroke.ColorDisregardingType(),
-                                      b.StrokeData->Stroke.ColorDisregardingType(), currentColorDiffers)
-        || ColorChangeRequiresRepaint(a.StrokeData->VisitedLinkStroke.ColorDisregardingType(),
-                                      b.StrokeData->VisitedLinkStroke.ColorDisregardingType(),
-                                      currentColorDiffers))
+                                      b.StrokeData->Stroke.ColorDisregardingType(), currentColorDiffers))
     {
       return true;
     }
@@ -1068,8 +1058,7 @@ namespace krys::boo::style
     }
 
     if (a.UsedVisibility() != b.UsedVisibility()
-        || a.GetInheritedFlags().PrintColorAdjust != b.GetInheritedFlags().PrintColorAdjust
-        || a.GetInheritedFlags().InsideLink != b.GetInheritedFlags().InsideLink)
+        || a.GetInheritedFlags().PrintColorAdjust != b.GetInheritedFlags().PrintColorAdjust)
     {
       return true;
     }

@@ -497,8 +497,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Loader/Cache/CachedFont.cpp
 		tests/Loader/Cache/CachedResourceLoader.cpp
 		tests/Loader/FragmentNavigation.cpp
-		tests/DOM/FragmentDirective/FragmentDirectiveParser.cpp
-		tests/DOM/FragmentDirective/FragmentDirectiveRangeFinder.cpp
 		tests/DOM/Highlights/Highlight.cpp
 		tests/Loader/FrameLoader.cpp
 		tests/HTML/Parser/SrcsetParser.cpp

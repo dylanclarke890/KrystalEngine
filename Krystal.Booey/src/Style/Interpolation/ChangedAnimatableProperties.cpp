@@ -26,11 +26,5 @@ namespace krys::boo::style
         changingProperties.Set(css::PropertyId::TextEmphasisStyle);
       }
     }
-
-    // `insideLink` changes visited / non-visited colors, thus, we need to add all color properties.
-    if (a.GetInsideLink() != b.GetInsideLink())
-    {
-      changingProperties.Merge(css::Property::ColorProperties());
-    }
   }
 }

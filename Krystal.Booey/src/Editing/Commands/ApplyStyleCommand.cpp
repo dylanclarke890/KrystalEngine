@@ -41,10 +41,6 @@ namespace krys::boo
       }
 
       uint32 matchedAttributes = 0;
-      if (element.GetAttribute(dom::DOMStringAtom(u8"class")) == dom::DOMString(AppleStyleSpanClass))
-      {
-        matchedAttributes++;
-      }
       if (element.HasAttribute(dom::DOMStringAtom(u8"style"))
           && (shouldStyleAttributeBeEmpty == AllowNonEmptyStyleAttribute || !element.InlineStyle()
               || element.InlineStyle()->empty()))
@@ -173,13 +169,6 @@ namespace krys::boo
       result.append(b);
       return result;
     }
-  }
-
-  bool IsLegacyAppleStyleSpan(const dom::Node *node) noexcept
-  {
-    return IsHTMLElementOfType(node, html::TagName::span)
-           && Downcast<dom::Element>(*node).GetAttribute(dom::DOMStringAtom(u8"class"))
-                == dom::DOMString(AppleStyleSpanClass);
   }
 
   bool IsStyleSpanOrSpanWithOnlyStyleAttribute(const dom::Element &element) noexcept
@@ -616,7 +605,7 @@ namespace krys::boo
     }
   }
 
-  void ApplyStyleCommand::CleanupUnstyledAppleStyleSpans(dom::ContainerNode *dummySpanAncestor) noexcept
+  void ApplyStyleCommand::CleanupUnstyledStyleSpans(dom::ContainerNode *dummySpanAncestor) noexcept
   {
     if (!dummySpanAncestor)
     {
@@ -944,10 +933,10 @@ namespace krys::boo
     FixRangeAndApplyInlineStyle(*styleToApply, start, end);
 
     // Remove dummy style spans created by splitting text elements.
-    CleanupUnstyledAppleStyleSpans(startDummySpanAncestor.get());
+    CleanupUnstyledStyleSpans(startDummySpanAncestor.get());
     if (endDummySpanAncestor != startDummySpanAncestor)
     {
-      CleanupUnstyledAppleStyleSpans(endDummySpanAncestor.get());
+      CleanupUnstyledStyleSpans(endDummySpanAncestor.get());
     }
   }
 

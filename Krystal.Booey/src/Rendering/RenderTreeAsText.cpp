@@ -155,7 +155,6 @@ namespace krys::boo
       if (!tagName.empty())
       {
         ts << " {" << tagName << '}';
-        // FIXME: Flag empty or unstyled Apple-style-spans (an editing artifact).
       }
     }
 
@@ -204,18 +203,18 @@ namespace krys::boo
 
       if (renderElement->Parent())
       {
-        Color color = renderElement->Style().VisitedDependentColor(css::PropertyId::Color);
+        Color color = renderElement->Style().ColorResolvingCurrentColor(css::PropertyId::Color);
         if (!EqualIgnoringSemanticColor(
-              renderElement->Parent()->Style().VisitedDependentColor(css::PropertyId::Color), color))
+              renderElement->Parent()->Style().ColorResolvingCurrentColor(css::PropertyId::Color), color))
         {
           ts << " [color=" << SerialisationForRenderTreeAsText(color) << ']';
         }
 
         // Do not dump invalid or transparent backgrounds, since that is the default.
         Color backgroundColor =
-          renderElement->Style().VisitedDependentColor(css::PropertyId::BackgroundColor);
+          renderElement->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
         if (!EqualIgnoringSemanticColor(
-              renderElement->Parent()->Style().VisitedDependentColor(css::PropertyId::BackgroundColor),
+              renderElement->Parent()->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor),
               backgroundColor)
             && backgroundColor != Color(Color::transparentBlack))
         {
@@ -223,10 +222,10 @@ namespace krys::boo
         }
 
         Color textFillColor =
-          renderElement->Style().VisitedDependentColor(css::PropertyId::WebkitTextFillColor);
-        if (!EqualIgnoringSemanticColor(
-              renderElement->Parent()->Style().VisitedDependentColor(css::PropertyId::WebkitTextFillColor),
-              textFillColor)
+          renderElement->Style().ColorResolvingCurrentColor(css::PropertyId::WebkitTextFillColor);
+        if (!EqualIgnoringSemanticColor(renderElement->Parent()->Style().ColorResolvingCurrentColor(
+                                          css::PropertyId::WebkitTextFillColor),
+                                        textFillColor)
             && textFillColor != color && textFillColor != Color(Color::transparentBlack))
         {
           ts << " [textFillColor=" << SerialisationForRenderTreeAsText(textFillColor) << ']';

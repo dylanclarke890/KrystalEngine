@@ -5,11 +5,6 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo
-{
-  enum class MailBlockquoteHandling : bool;
-}
-
 namespace krys::boo::dom
 {
   class DocumentFragment;
@@ -41,14 +36,12 @@ namespace krys::boo::dom
     RefPtr<DocumentFragment> _pastingFragment;
     bool _shouldSmartReplace {false};
     bool _shouldMatchStyle {false};
-    MailBlockquoteHandling _mailBlockquoteHandling;
 
   public:
     TextEvent() noexcept;
     TextEvent(DOMStringView data, TextEventInputType inputType) noexcept;
     TextEvent(DOMStringView data, RefPtr<DocumentFragment> &&pastingFragment, TextEventInputType inputType,
-              bool shouldSmartReplace, bool shouldMatchStyle,
-              MailBlockquoteHandling mailBlockquoteHandling) noexcept;
+              bool shouldSmartReplace, bool shouldMatchStyle) noexcept;
     ~TextEvent() noexcept override;
 
     /// @brief A trusted `textInput` event, which bubbles, can be cancelled and crosses shadow boundaries.
@@ -56,10 +49,10 @@ namespace krys::boo::dom
       Create(DOMStringView data, TextEventInputType inputType = TextEventInputType::Keyboard) noexcept;
     KRYS_NODISCARD static Ref<TextEvent> CreateForPlainTextPaste(DOMStringView data,
                                                                  bool shouldSmartReplace) noexcept;
-    KRYS_NODISCARD static Ref<TextEvent>
-      CreateForFragmentPaste(RefPtr<DocumentFragment> &&data, TextEventInputType inputType,
-                             bool shouldSmartReplace, bool shouldMatchStyle,
-                             MailBlockquoteHandling mailBlockquoteHandling) noexcept;
+    KRYS_NODISCARD static Ref<TextEvent> CreateForFragmentPaste(RefPtr<DocumentFragment> &&data,
+                                                                TextEventInputType inputType,
+                                                                bool shouldSmartReplace,
+                                                                bool shouldMatchStyle) noexcept;
     KRYS_NODISCARD static Ref<TextEvent> CreateForDrop(DOMStringView data) noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-textevent-inittextevent
@@ -119,10 +112,6 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool ShouldMatchStyle() const noexcept
     {
       return _shouldMatchStyle;
-    }
-    KRYS_NODISCARD MailBlockquoteHandling GetMailBlockquoteHandling() const noexcept
-    {
-      return _mailBlockquoteHandling;
     }
     KRYS_NODISCARD DocumentFragment *PastingFragment() const noexcept;
   };

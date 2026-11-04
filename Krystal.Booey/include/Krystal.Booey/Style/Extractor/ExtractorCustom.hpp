@@ -2370,21 +2370,12 @@ namespace krys::boo::style
 
   inline Ref<css::Value> ExtractorCustom::ExtractColor(ExtractorState &state) noexcept
   {
-    if (state.AllowVisitedStyle)
-    {
-      return state.Pool.CreateColorValue(state.Style.VisitedDependentColor(css::PropertyId::Color));
-    }
     return ExtractCSSValue<css::PropertyId::Color>(state);
   }
 
   inline void ExtractorCustom::ExtractColorSerialisation(ExtractorState &state, StringBuilder &builder,
                                                          const css::SerialisationContext &context) noexcept
   {
-    if (state.AllowVisitedStyle)
-    {
-      builder.Append(SerialisationForCSS(state.Style.VisitedDependentColor(css::PropertyId::Color)));
-      return;
-    }
     ExtractSerialisation<css::PropertyId::Color>(state, builder, context);
   }
 

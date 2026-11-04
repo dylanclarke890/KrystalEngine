@@ -2,7 +2,6 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
-#include "Krystal.Booey/Editing/Commands/BreakBlockquoteCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertLineBreakCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertParagraphSeparatorCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertTextCommand.hpp"
@@ -111,10 +110,8 @@ namespace krys::boo
           return EditAction::TypingDeleteForward;
         case TypingCommand::Type::InsertText:
           return isAutocompletion ? EditAction::InsertReplacement : EditAction::TypingInsertText;
-        case TypingCommand::Type::InsertLineBreak: return EditAction::TypingInsertLineBreak;
-        case TypingCommand::Type::InsertParagraphSeparator:
-        case TypingCommand::Type::InsertParagraphSeparatorInQuotedContent:
-          return EditAction::TypingInsertParagraph;
+        case TypingCommand::Type::InsertLineBreak:          return EditAction::TypingInsertLineBreak;
+        case TypingCommand::Type::InsertParagraphSeparator: return EditAction::TypingInsertParagraph;
       }
       return EditAction::Unspecified;
     }
@@ -304,19 +301,6 @@ namespace krys::boo
     Create(document, Type::InsertLineBreak, {}, options)->Apply();
   }
 
-  void TypingCommand::InsertParagraphSeparatorInQuotedContent(dom::Document &document) noexcept
-  {
-    if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
-    {
-      lastTypingCommand->SetIsAutocompletion(false);
-      lastTypingCommand->SetCompositionType(TextCompositionType::None);
-      lastTypingCommand->InsertParagraphSeparatorInQuotedContent();
-      return;
-    }
-
-    Create(document, Type::InsertParagraphSeparatorInQuotedContent)->Apply();
-  }
-
   void TypingCommand::InsertParagraphSeparator(dom::Document &document, EnumSet<Option> options) noexcept
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
@@ -384,13 +368,12 @@ namespace krys::boo
 
     switch (_commandType)
     {
-      case Type::DeleteSelection:                         DeleteSelection(_smartDelete); return;
-      case Type::DeleteKey:                               DeleteKeyPressed(_granularity, _shouldAddToKillRing); return;
-      case Type::ForwardDeleteKey:                        ForwardDeleteKeyPressed(_granularity, _shouldAddToKillRing); return;
-      case Type::InsertLineBreak:                         InsertLineBreak(); return;
-      case Type::InsertParagraphSeparator:                InsertParagraphSeparator(); return;
-      case Type::InsertParagraphSeparatorInQuotedContent: InsertParagraphSeparatorInQuotedContent(); return;
-      case Type::InsertText:                              InsertText(_textToInsert, _selectInsertedText); return;
+      case Type::DeleteSelection:          DeleteSelection(_smartDelete); return;
+      case Type::DeleteKey:                DeleteKeyPressed(_granularity, _shouldAddToKillRing); return;
+      case Type::ForwardDeleteKey:         ForwardDeleteKeyPressed(_granularity, _shouldAddToKillRing); return;
+      case Type::InsertLineBreak:          InsertLineBreak(); return;
+      case Type::InsertParagraphSeparator: InsertParagraphSeparator(); return;
+      case Type::InsertText:               InsertText(_textToInsert, _selectInsertedText); return;
     }
 
     krys_debug_assert(false);
@@ -524,29 +507,9 @@ namespace krys::boo
       return;
     }
 
-    ApplyCommandToComposite(InsertParagraphSeparatorCommand::Create(GetDocument(), false, false,
-                                                                    EditAction::TypingInsertParagraph));
+    ApplyCommandToComposite(
+      InsertParagraphSeparatorCommand::Create(GetDocument(), false, EditAction::TypingInsertParagraph));
     TypingAddedToOpenCommand(Type::InsertParagraphSeparator);
-  }
-
-  void TypingCommand::InsertParagraphSeparatorInQuotedContent() noexcept
-  {
-    if (!WillAddTypingToOpenCommand(Type::InsertParagraphSeparatorInQuotedContent,
-                                    TextGranularity::ParagraphGranularity))
-    {
-      return;
-    }
-
-    // If the selection starts inside a table, just insert the paragraph separator normally
-    // Breaking the blockquote would also break apart the table, which is unecessary when inserting a newline
-    if (EnclosingNodeOfType(EndingSelection().Start(), &IsTableStructureNode))
-    {
-      InsertParagraphSeparator();
-      return;
-    }
-
-    ApplyCommandToComposite(BreakBlockquoteCommand::Create(GetDocument()));
-    TypingAddedToOpenCommand(Type::InsertParagraphSeparatorInQuotedContent);
   }
 
   bool TypingCommand::MakeEditableRootEmpty() noexcept
@@ -596,13 +559,6 @@ namespace krys::boo
     }
     else
     {
-      // After breaking out of an empty mail blockquote, we still want continue with the deletion
-      // so actual content will get deleted, and not just the quote style.
-      if (BreakOutOfEmptyMailBlockquotedParagraph())
-      {
-        TypingAddedToOpenCommand(Type::DeleteKey);
-      }
-
       _smartDelete = false;
 
       FrameSelection selection;
@@ -884,9 +840,8 @@ namespace krys::boo
       case Type::DeleteKey:
       case Type::ForwardDeleteKey:
       case Type::InsertParagraphSeparator:
-      case Type::InsertLineBreak:                         _preservesTypingStyle = true; return;
-      case Type::InsertParagraphSeparatorInQuotedContent:
-      case Type::InsertText:                              _preservesTypingStyle = false; return;
+      case Type::InsertLineBreak:          _preservesTypingStyle = true; return;
+      case Type::InsertText:               _preservesTypingStyle = false; return;
     }
     krys_debug_assert(false);
     _preservesTypingStyle = false;

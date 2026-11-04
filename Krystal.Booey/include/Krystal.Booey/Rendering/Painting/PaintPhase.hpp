@@ -56,7 +56,6 @@ namespace krys::boo
     // Paint is updating external backing store and visits all content, including composited content and
     // always completes image decoding of painted images. FIXME: Will be removed.
     Snapshotting,
-    DontShowVisitedLinks,
     ExcludeReplacedContentExceptForIFrames,
     ExcludeText,
     FixedAndStickyLayersOnly,
@@ -66,4 +65,4 @@ namespace krys::boo
 }
 
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::PaintPhase, 14uz)
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PaintBehavior, 24uz)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PaintBehavior, 23uz)

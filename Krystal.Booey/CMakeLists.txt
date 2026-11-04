@@ -1025,9 +1025,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/UIEvent.hpp
   include/Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp
   include/Krystal.Booey/DOM/Events/WheelEvent.hpp
-  include/Krystal.Booey/DOM/FragmentDirective/FragmentDirectiveParser.hpp
-  include/Krystal.Booey/DOM/FragmentDirective/FragmentDirectiveRangeFinder.hpp
-  include/Krystal.Booey/DOM/FragmentDirective/FragmentDirectiveUtilities.hpp
   include/Krystal.Booey/DOM/Geometry/DOMPoint.hpp
   include/Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp
   include/Krystal.Booey/DOM/Geometry/DOMRect.hpp
@@ -1047,7 +1044,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp
   include/Krystal.Booey/DOM/Internals/UserActionElementSet.hpp
   include/Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp
-  include/Krystal.Booey/DOM/Internals/VisitedLinkState.hpp
   include/Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp
   include/Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp
   include/Krystal.Booey/DOM/Iterators/ElementAndTextDescendantIterator.hpp
@@ -1174,9 +1170,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/TouchEvent.cpp
   src/DOM/Events/TouchList.cpp
   src/DOM/Events/WheelEvent.cpp
-  src/DOM/FragmentDirective/FragmentDirectiveParser.cpp
-  src/DOM/FragmentDirective/FragmentDirectiveRangeFinder.cpp
-  src/DOM/FragmentDirective/FragmentDirectiveUtilities.cpp
   src/DOM/Geometry/DOMPointReadOnly.cpp
   src/DOM/Geometry/DOMRectList.cpp
   src/DOM/Highlights/Highlight.cpp
@@ -1190,7 +1183,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Internals/PopoverData.cpp
   src/DOM/Internals/QualifiedNameCache.cpp
   src/DOM/Internals/UserActionElementSet.cpp
-  src/DOM/Internals/VisitedLinkState.cpp
   src/DOM/Iterators/ComposedTreeIterator.cpp
   src/DOM/Mixins/ChildNode.cpp
   src/DOM/Mixins/DocumentOrShadowRoot.cpp
@@ -1240,7 +1232,6 @@ set(KRYSTAL_BOOEY_EDITING_HEADERS
   include/Krystal.Booey/Editing/CharacterRange.hpp
   include/Krystal.Booey/Editing/Commands/AppendNodeCommand.hpp
   include/Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp
-  include/Krystal.Booey/Editing/Commands/BreakBlockquoteCommand.hpp
   include/Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp
   include/Krystal.Booey/Editing/Commands/DeleteFromTextNodeCommand.hpp
   include/Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp
@@ -1296,7 +1287,6 @@ set(KRYSTAL_BOOEY_EDITING_HEADERS
 set(KRYSTAL_BOOEY_EDITING_SOURCES
   src/Editing/Commands/AppendNodeCommand.cpp
   src/Editing/Commands/ApplyStyleCommand.cpp
-  src/Editing/Commands/BreakBlockquoteCommand.cpp
   src/Editing/Commands/CompositeEditCommand.cpp
   src/Editing/Commands/DeleteFromTextNodeCommand.cpp
   src/Editing/Commands/DeleteSelectionCommand.cpp
@@ -2804,7 +2794,6 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp
   include/Krystal.Booey/Rendering/Style/StyleSurroundData.hpp
   include/Krystal.Booey/Rendering/Style/StyleTransformData.hpp
-  include/Krystal.Booey/Rendering/Style/StyleVisitedLinkColorData.hpp
   include/Krystal.Booey/Rendering/Style/SVGRenderStyle.hpp
   include/Krystal.Booey/Rendering/Style/SVGRenderStyleDefs.hpp
   include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp
@@ -3057,7 +3046,6 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Style/StyleSelfAlignmentData.cpp
   src/Rendering/Style/StyleSurroundData.cpp
   src/Rendering/Style/StyleTransformData.cpp
-  src/Rendering/Style/StyleVisitedLinkColorData.cpp
   src/Rendering/Style/SVGRenderStyle.cpp
   src/Rendering/Style/SVGRenderStyleDefs.cpp
   src/Rendering/SVG/Legacy/LegacyRenderSVGContainer.cpp
@@ -3175,7 +3163,6 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Extractor/ExtractorCustom.hpp
   include/Krystal.Booey/Style/Extractor/ExtractorGenerated.hpp
   include/Krystal.Booey/Style/Extractor/ExtractorState.hpp
-  include/Krystal.Booey/Style/ForVisitedLink.hpp
   include/Krystal.Booey/Style/InlineTextBoxStyle.hpp
   include/Krystal.Booey/Style/Interpolation/ChangedAnimatableProperties.hpp
   include/Krystal.Booey/Style/Interpolation/ChangedAnimatablePropertiesCustom.hpp

@@ -22,7 +22,6 @@
 #include "Krystal.Booey/Rendering/Style/StyleRareNonInheritedData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSurroundData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleTransformData.hpp"
-#include "Krystal.Booey/Rendering/Style/StyleVisitedLinkColorData.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImage.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFamily.hpp"
@@ -77,11 +76,6 @@ namespace krys::boo::style
   inline bool ComputedStyleBase::UseTreeCountingFunctions() const noexcept
   {
     return _nonInheritedFlags.UseTreeCountingFunctions;
-  }
-
-  inline InsideLink ComputedStyleBase::GetInsideLink() const noexcept
-  {
-    return static_cast<boo::InsideLink>(_inheritedFlags.InsideLink);
   }
 
   inline bool ComputedStyleBase::IsLink() const noexcept
@@ -463,15 +457,5 @@ namespace krys::boo::style
   inline bool ComputedStyleBase::HasAutoCaretColor() const noexcept
   {
     return _rareInheritedData->HasAutoCaretColor;
-  }
-
-  inline const Color &ComputedStyleBase::VisitedLinkCaretColor() const
-  {
-    return _rareInheritedData->VisitedLinkCaretColor;
-  }
-
-  inline bool ComputedStyleBase::HasVisitedLinkAutoCaretColor() const noexcept
-  {
-    return _rareInheritedData->HasVisitedLinkAutoCaretColor;
   }
 }

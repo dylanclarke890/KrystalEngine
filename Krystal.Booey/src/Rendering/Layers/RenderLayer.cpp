@@ -5943,11 +5943,6 @@ namespace krys::boo
         SetupFilters(context, localPaintingInfo, localPaintFlags, columnAwareOffsetFromRoot, backgroundRect);
       GraphicsContext &currentContext = filterContext ? *filterContext : context;
 
-      if (filterContext)
-      {
-        localPaintingInfo.PaintBehavior.Add(PaintBehavior::DontShowVisitedLinks);
-      }
-
       // If this layer's renderer is a child of the subtreePaintRoot, we render unconditionally, which
       // is done by passing a nil subtreePaintRoot down to our renderer (as if no subtreePaintRoot was ever
       // set). Otherwise, our renderer tree may or may not contain the subtreePaintRoot root, so we pass that
@@ -6250,7 +6245,6 @@ namespace krys::boo
       PaintBehavior::ExcludeReplacedContentExceptForIFrames,
       PaintBehavior::ExcludeText,
       PaintBehavior::FixedAndStickyLayersOnly,
-      PaintBehavior::DontShowVisitedLinks,
       PaintBehavior::DrawsHDRContent,
     };
     localPaintBehavior.Add(localPaintingInfo.PaintBehavior & flagsToCopy);

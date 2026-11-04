@@ -29,7 +29,7 @@ namespace krys::boo::svg
       {
         if (auto *renderer = Element->Renderer())
         {
-          return renderer->Style().VisitedDependentColor(css::PropertyId::Color);
+          return renderer->Style().ColorResolvingCurrentColor(css::PropertyId::Color);
         }
         return {};
       }

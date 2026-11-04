@@ -43,8 +43,7 @@ namespace krys::boo
       ForwardDeleteKey,
       InsertText,
       InsertLineBreak,
-      InsertParagraphSeparator,
-      InsertParagraphSeparatorInQuotedContent
+      InsertParagraphSeparator
     };
 
     enum class TextCompositionType : uint8
@@ -100,13 +99,11 @@ namespace krys::boo
                            TextCompositionType compositionType = TextCompositionType::None) noexcept;
     static void InsertLineBreak(dom::Document &document, EnumSet<Option> options) noexcept;
     static void InsertParagraphSeparator(dom::Document &document, EnumSet<Option> options) noexcept;
-    static void InsertParagraphSeparatorInQuotedContent(dom::Document &document) noexcept;
     static void CloseTyping(dom::Document &document) noexcept;
 
     void InsertText(utf8_stringview text, bool selectInsertedText) noexcept;
     void InsertTextRunWithoutNewlines(utf8_stringview text, bool selectInsertedText) noexcept;
     void InsertLineBreak() noexcept;
-    void InsertParagraphSeparatorInQuotedContent() noexcept;
     void InsertParagraphSeparator() noexcept;
     void DeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept;
     void ForwardDeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept;

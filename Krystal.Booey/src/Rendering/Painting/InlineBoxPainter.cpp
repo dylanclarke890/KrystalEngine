@@ -140,7 +140,7 @@ namespace krys::boo
       PaintBoxShadow(style::ShadowStyle::Normal, paintRect);
     }
 
-    auto color = styleToUse.VisitedDependentColor(css::PropertyId::BackgroundColor, _paintInfo.PaintBehavior);
+    auto color = styleToUse.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     auto compositeOp = Renderer().GetDocument().CompositeOperatorForBackgroundColor(color, Renderer());
 
     color = styleToUse.ColorByApplyingColorFilter(color);

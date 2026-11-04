@@ -34,11 +34,9 @@ namespace krys::boo
                                                             BorderPrecedence precedence) noexcept
     {
       const auto &style = renderer.Style();
-      return CollapsedBorderValue(border,
-                                  includeColor == IncludeBorderColor::Yes
-                                    ? style.VisitedDependentColorWithColorFilter(colorProperty)
-                                    : Color(),
-                                  precedence, style.UsedZoomForLength());
+      return CollapsedBorderValue(
+        border, includeColor == IncludeBorderColor::Yes ? style.ColorWithColorFilter(colorProperty) : Color(),
+        precedence, style.UsedZoomForLength());
     }
 
     KRYS_NODISCARD css::PropertyId ColorProperty(IncludeBorderColor includeColor,
@@ -2162,7 +2160,7 @@ namespace krys::boo
     const auto &backgroundStyle = backgroundObject->Style();
     auto &bgLayers = backgroundStyle.GetBackgroundLayers();
 
-    auto color = backgroundStyle.VisitedDependentColor(css::PropertyId::BackgroundColor);
+    auto color = backgroundStyle.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     if (!style::HasImageInAnyLayer(bgLayers) && !color.IsVisible())
     {
       return;

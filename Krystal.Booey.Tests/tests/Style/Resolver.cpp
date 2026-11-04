@@ -358,18 +358,16 @@ namespace krys::boo::style::tests
     {
       auto link = Resolve(ById(u8"link"));
       CHECK(link.Style->IsLink());
-      CHECK(link.Style->GetInsideLink() == InsideLink::InsideUnvisited);
 
-      // A link to the document itself is visited.
+      // A link to the document itself is a link like any other: none are visited.
       auto self = Resolve(ById(u8"self"));
-      CHECK(self.Style->GetInsideLink() == InsideLink::InsideVisited);
+      CHECK(self.Style->IsLink());
 
       auto anchor = Resolve(ById(u8"anchor"));
       CHECK_FALSE(anchor.Style->IsLink());
-      CHECK(anchor.Style->GetInsideLink() == InsideLink::NotInside);
 
       auto svgLink = Resolve(ById(u8"svglink"));
-      CHECK(svgLink.Style->GetInsideLink() == InsideLink::InsideUnvisited);
+      CHECK(svgLink.Style->IsLink());
     }
 
     SECTION("SVG zoom rules")

@@ -283,13 +283,9 @@ namespace krys::boo
 
     // Resolves the currentColor keyword, but must not be used for the "color" property which has a different
     // semantic.
-    KRYS_NODISCARD Color ColorResolvingCurrentColor(css::PropertyId colorProperty,
-                                                    bool visitedLink) const noexcept;
-    KRYS_NODISCARD Color ColorResolvingCurrentColor(const style::Color &,
-                                                    bool visitedLink = false) const noexcept;
-    KRYS_NODISCARD Color VisitedDependentColor(css::PropertyId, EnumSet<PaintBehavior> = {}) const noexcept;
-    KRYS_NODISCARD Color VisitedDependentColorWithColorFilter(css::PropertyId,
-                                                              EnumSet<PaintBehavior> = {}) const noexcept;
+    KRYS_NODISCARD Color ColorResolvingCurrentColor(css::PropertyId colorProperty) const noexcept;
+    KRYS_NODISCARD Color ColorResolvingCurrentColor(const style::Color &) const noexcept;
+    KRYS_NODISCARD Color ColorWithColorFilter(css::PropertyId) const noexcept;
     KRYS_NODISCARD Color ColorByApplyingColorFilter(const Color &) const noexcept;
     KRYS_NODISCARD Color ColorWithColorFilter(const style::Color &) const noexcept;
 
@@ -297,8 +293,7 @@ namespace krys::boo
     // This constructor is used to implement the replace operation.
     RenderStyle(RenderStyle &, RenderStyle &&) noexcept;
 
-    KRYS_NODISCARD const style::Color &UnresolvedColorForProperty(css::PropertyId,
-                                                                  bool visitedLink = false) const noexcept;
+    KRYS_NODISCARD const style::Color &UnresolvedColorForProperty(css::PropertyId) const noexcept;
     KRYS_NODISCARD css::PropertyId UsedStrokeColorProperty() const noexcept;
 
     KRYS_NODISCARD inline bool HasAutoLeftAndRight() const noexcept;

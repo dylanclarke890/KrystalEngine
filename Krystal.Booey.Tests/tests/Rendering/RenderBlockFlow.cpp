@@ -161,7 +161,7 @@ layer at (0,0) size 800x600
     REQUIRE_FALSE(fixture.ById(u8"parent").SetAttribute(u8"style", u8"color: red").HasException());
     fixture.Document->UpdateStyleIfNeeded();
     REQUIRE(parent.FirstChild() == anonymous);
-    CHECK(anonymous->Style().VisitedDependentColor(css::PropertyId::Color)
+    CHECK(anonymous->Style().ColorResolvingCurrentColor(css::PropertyId::Color)
           == Color(SRGBA<uint8> {255, 0, 0}));
   }
 

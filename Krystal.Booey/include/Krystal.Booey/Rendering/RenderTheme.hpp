@@ -64,7 +64,6 @@ namespace krys::boo
 
       Color SystemLinkColor;
       Color SystemActiveLinkColor;
-      Color SystemVisitedLinkColor;
       Color SystemFocusRingColor;
       Color SystemControlAccentColor;
 

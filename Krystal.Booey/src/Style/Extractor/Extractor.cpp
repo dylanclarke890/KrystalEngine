@@ -245,26 +245,23 @@ namespace krys::boo::style
     }
   }
 
-  Extractor::Extractor(dom::Node *node, bool allowVisitedStyle,
+  Extractor::Extractor(dom::Node *node,
                        const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
-      : Extractor(StyleElementForNode(node), allowVisitedStyle, pseudoElementIdentifier)
+      : Extractor(StyleElementForNode(node), pseudoElementIdentifier)
   {
   }
 
-  Extractor::Extractor(dom::Node *node, bool allowVisitedStyle) noexcept
-      : Extractor(node, allowVisitedStyle, null)
+  Extractor::Extractor(dom::Node *node) noexcept : Extractor(node, null)
   {
   }
 
-  Extractor::Extractor(dom::Element *element, bool allowVisitedStyle,
+  Extractor::Extractor(dom::Element *element,
                        const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
-      : _element(ShareRefPtr(element)), _pseudoElementIdentifier(pseudoElementIdentifier),
-        _allowVisitedStyle(allowVisitedStyle)
+      : _element(ShareRefPtr(element)), _pseudoElementIdentifier(pseudoElementIdentifier)
   {
   }
 
-  Extractor::Extractor(dom::Element *element, bool allowVisitedStyle) noexcept
-      : Extractor(element, allowVisitedStyle, null)
+  Extractor::Extractor(dom::Element *element) noexcept : Extractor(element, null)
   {
   }
 
@@ -558,7 +555,6 @@ namespace krys::boo::style
       .Element = Ref<dom::Element>(_element),
       .PseudoElementIdentifier = _pseudoElementIdentifier,
       .Renderer = renderer,
-      .AllowVisitedStyle = _allowVisitedStyle,
       .Pool = pool,
     };
     return ExtractorGenerated::ExtractValue(state, propertyID);
@@ -581,7 +577,6 @@ namespace krys::boo::style
       .Element = Ref<dom::Element>(_element),
       .PseudoElementIdentifier = _pseudoElementIdentifier,
       .Renderer = renderer,
-      .AllowVisitedStyle = _allowVisitedStyle,
       .Pool = pool,
     };
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, propertyID);

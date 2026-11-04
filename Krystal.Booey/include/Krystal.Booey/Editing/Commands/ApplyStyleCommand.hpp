@@ -132,7 +132,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsValidCaretPositionInTextNode(const dom::Position &position) noexcept;
     bool MergeStartWithPreviousIfIdentical(const dom::Position &start, const dom::Position &end) noexcept;
     bool MergeEndWithNextIfIdentical(const dom::Position &start, const dom::Position &end) noexcept;
-    void CleanupUnstyledAppleStyleSpans(dom::ContainerNode *dummySpanAncestor) noexcept;
+    void CleanupUnstyledStyleSpans(dom::ContainerNode *dummySpanAncestor) noexcept;
     bool SurroundNodeRangeWithElement(dom::Node &start, dom::Node &end, Ref<dom::Element> &&element) noexcept;
     KRYS_NODISCARD float ComputedFontSize(dom::Node *node) noexcept;
     void JoinChildTextNodes(dom::Node *node, const dom::Position &start, const dom::Position &end) noexcept;
@@ -155,7 +155,6 @@ namespace krys::boo
   KRYS_NODISCARD bool IsEmptyFontTag(
     const dom::Element *element,
     ShouldStyleAttributeBeEmpty shouldStyleAttributeBeEmpty = StyleAttributeShouldBeEmpty) noexcept;
-  KRYS_NODISCARD bool IsLegacyAppleStyleSpan(const dom::Node *node) noexcept;
   KRYS_NODISCARD bool IsStyleSpanOrSpanWithOnlyStyleAttribute(const dom::Element &element) noexcept;
   KRYS_NODISCARD Ref<dom::Element> CreateStyleSpanElement(dom::Document &document) noexcept;
 }

@@ -154,7 +154,6 @@ namespace krys::boo::style::tests
       REQUIRE(matchedProperties.FromStyleAttribute == FromStyleAttribute::No);
       REQUIRE(matchedProperties.IsCacheable == IsCacheable::Yes);
       REQUIRE(matchedProperties.AllowlistType == PropertyAllowlist::None);
-      REQUIRE(matchedProperties.LinkMatchType == css::SelectorChecker::MatchAll);
     }
 
     SECTION("Empty rules are skipped unless asked for")
@@ -269,8 +268,6 @@ namespace krys::boo::style::tests
       auto link = MatchAll(ById(*document, u8"a"));
       REQUIRE(link->IsForLink);
       REQUIRE(Names(link->AuthorDeclarations) == Strings {"link"});
-      auto *matched = Find(link->AuthorDeclarations, u8"link");
-      REQUIRE(matched->LinkMatchType == css::SelectorChecker::MatchLink);
 
       auto anchor = MatchAll(ById(*document, u8"b"));
       REQUIRE_FALSE(anchor->IsForLink);

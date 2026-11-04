@@ -1445,11 +1445,6 @@ namespace krys::boo
       return false; // element is not a span, a html element equivalent, or font element.
     }
 
-    if (element.GetAttribute(dom::DOMStringAtom(u8"class")) == dom::DOMString(AppleStyleSpanClass))
-    {
-      matchedAttributes++;
-    }
-
     if (element.HasAttribute(dom::DOMStringAtom(u8"style")))
     {
       if (auto *styledElement = DynamicDowncast<dom::StyledElement>(element))
@@ -1659,14 +1654,6 @@ namespace krys::boo
     {
       auto wrappingStyle = EditingStyle::Create(&context, PropertiesToInclude::EditingPropertiesInEffect);
 
-      // Styles that Mail blockquotes contribute should only be placed on the Mail blockquote,
-      // to help us differentiate those styles from ones that the user has applied.
-      // This helps us get the color of content pasted into blockquotes right.
-      wrappingStyle->RemoveStyleAddedByNode(
-        EnclosingNodeOfType(FirstPositionInOrBeforeNode(&context), IsMailBlockquote,
-                            EditingBoundaryCrossingRule::CanCrossEditingBoundary)
-          .get());
-
       // Call CollapseTextDecorationProperties first or otherwise it'll copy the value over from in-effect to
       // text-decorations.
       wrappingStyle->CollapseTextDecorationProperties();
@@ -1679,7 +1666,7 @@ namespace krys::boo
     // When not annotating for interchange, we only preserve inline style declarations.
     for (auto *node = &context; node && !Is<dom::Document>(*node); node = node->ParentNode())
     {
-      if (auto *element = DynamicDowncast<dom::StyledElement>(*node); element && !IsMailBlockquote(*element))
+      if (auto *element = DynamicDowncast<dom::StyledElement>(*node))
       {
         wrappingStyle->MergeInlineAndImplicitStyleOfElement(
           *element, CSSPropertyOverrideMode::DoNotOverrideValues,

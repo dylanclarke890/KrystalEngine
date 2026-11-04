@@ -42,7 +42,6 @@
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
@@ -684,7 +683,7 @@ namespace krys::boo::css
           return style::ConvertCSSValueToStyle<style::Resolution<>>(builderState,
                                                                     Downcast<PrimitiveValue>(value));
         case CustomPropertySyntax::Type::Color:
-          return style::ConvertCSSValueToStyle<style::Color>(builderState, value, style::ForVisitedLink::No);
+          return style::ConvertCSSValueToStyle<style::Color>(builderState, value);
         case CustomPropertySyntax::Type::Image:
         {
           auto styleImage = builderState.CreateStyleImage(value);

@@ -6303,7 +6303,7 @@ namespace krys::boo
     // If there is only one layer and no image, check whether the background color is opaque.
     if (Style().GetBackgroundLayers().UsedLength() == 1 && !topLayer.HasImage())
     {
-      Color bgColor = Style().VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+      Color bgColor = Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
       if (bgColor.IsOpaque())
       {
         return true;

@@ -12,7 +12,6 @@
 #include "Krystal.Booey/Style/Builder/BuilderStateInlines.hpp"
 #include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Inline/TextEdgeCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/CoordinatedValueListValue.hpp"
@@ -899,68 +898,31 @@ namespace krys::boo::style
 
   inline void BuilderCustom::ApplyInitialCaretColor(BuilderState &builderState) noexcept
   {
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      builderState.Style().SetHasAutoCaretColor();
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      builderState.Style().SetHasVisitedLinkAutoCaretColor();
-    }
+    builderState.Style().SetHasAutoCaretColor();
   }
 
   inline void BuilderCustom::ApplyInheritCaretColor(BuilderState &builderState) noexcept
   {
     auto &color = builderState.ParentStyle().CaretColor();
-    if (builderState.ApplyPropertyToRegularStyle())
+    if (builderState.ParentStyle().HasAutoCaretColor())
     {
-      if (builderState.ParentStyle().HasAutoCaretColor())
-      {
-        builderState.Style().SetHasAutoCaretColor();
-      }
-      else
-      {
-        builderState.Style().SetCaretColor(ForwardInheritedValue(color));
-      }
+      builderState.Style().SetHasAutoCaretColor();
     }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
+    else
     {
-      if (builderState.ParentStyle().HasVisitedLinkAutoCaretColor())
-      {
-        builderState.Style().SetHasVisitedLinkAutoCaretColor();
-      }
-      else
-      {
-        builderState.Style().SetVisitedLinkCaretColor(ForwardInheritedValue(color));
-      }
+      builderState.Style().SetCaretColor(ForwardInheritedValue(color));
     }
   }
 
   inline void BuilderCustom::ApplyValueCaretColor(BuilderState &builderState, css::Value &value) noexcept
   {
-    if (builderState.ApplyPropertyToRegularStyle())
+    if (value.ValueId() == css::ValueId::Auto)
     {
-      if (value.ValueId() == css::ValueId::Auto)
-      {
-        builderState.Style().SetHasAutoCaretColor();
-      }
-      else
-      {
-        builderState.Style().SetCaretColor(
-          ConvertCSSValueToStyle<Color>(builderState, value, ForVisitedLink::No));
-      }
+      builderState.Style().SetHasAutoCaretColor();
     }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
+    else
     {
-      if (value.ValueId() == css::ValueId::Auto)
-      {
-        builderState.Style().SetHasVisitedLinkAutoCaretColor();
-      }
-      else
-      {
-        builderState.Style().SetVisitedLinkCaretColor(
-          ConvertCSSValueToStyle<Color>(builderState, value, ForVisitedLink::Yes));
-      }
+      builderState.Style().SetCaretColor(ConvertCSSValueToStyle<Color>(builderState, value));
     }
   }
 
@@ -1291,14 +1253,7 @@ namespace krys::boo::style
   inline void BuilderCustom::ApplyInitialFill(BuilderState &builderState) noexcept
   {
     auto &style = builderState.Style();
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      style.SetFill(style::ComputedStyle::InitialFill());
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      style.SetVisitedLinkFill(style::ComputedStyle::InitialFill());
-    }
+    style.SetFill(style::ComputedStyle::InitialFill());
   }
 
   inline void BuilderCustom::ApplyInheritFill(BuilderState &builderState) noexcept
@@ -1306,40 +1261,19 @@ namespace krys::boo::style
     auto &style = builderState.Style();
     auto &parentStyle = builderState.ParentStyle();
 
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      style.SetFill(ForwardInheritedValue(parentStyle.Fill()));
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      style.SetVisitedLinkFill(ForwardInheritedValue(parentStyle.Fill()));
-    }
+    style.SetFill(ForwardInheritedValue(parentStyle.Fill()));
   }
 
   inline void BuilderCustom::ApplyValueFill(BuilderState &builderState, css::Value &value) noexcept
   {
     auto &style = builderState.Style();
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      style.SetFill(ConvertCSSValueToStyle<SVGPaint>(builderState, value, ForVisitedLink::No));
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      style.SetVisitedLinkFill(ConvertCSSValueToStyle<SVGPaint>(builderState, value, ForVisitedLink::Yes));
-    }
+    style.SetFill(ConvertCSSValueToStyle<SVGPaint>(builderState, value));
   }
 
   inline void BuilderCustom::ApplyInitialStroke(BuilderState &builderState) noexcept
   {
     auto &style = builderState.Style();
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      style.SetStroke(style::ComputedStyle::InitialStroke());
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      style.SetVisitedLinkStroke(style::ComputedStyle::InitialStroke());
-    }
+    style.SetStroke(style::ComputedStyle::InitialStroke());
   }
 
   inline void BuilderCustom::ApplyInheritStroke(BuilderState &builderState) noexcept
@@ -1347,27 +1281,13 @@ namespace krys::boo::style
     auto &style = builderState.Style();
     auto &parentStyle = builderState.ParentStyle();
 
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      style.SetStroke(ForwardInheritedValue(parentStyle.Stroke()));
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      style.SetVisitedLinkStroke(ForwardInheritedValue(parentStyle.Stroke()));
-    }
+    style.SetStroke(ForwardInheritedValue(parentStyle.Stroke()));
   }
 
   inline void BuilderCustom::ApplyValueStroke(BuilderState &builderState, css::Value &value) noexcept
   {
     auto &style = builderState.Style();
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      style.SetStroke(ConvertCSSValueToStyle<SVGPaint>(builderState, value, ForVisitedLink::No));
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      style.SetVisitedLinkStroke(ConvertCSSValueToStyle<SVGPaint>(builderState, value, ForVisitedLink::Yes));
-    }
+    style.SetStroke(ConvertCSSValueToStyle<SVGPaint>(builderState, value));
   }
 
   inline void BuilderCustom::ApplyInitialFontSize(BuilderState &builderState) noexcept
@@ -1573,33 +1493,15 @@ namespace krys::boo::style
 
   inline void BuilderCustom::ApplyValueStrokeColor(BuilderState &builderState, css::Value &value) noexcept
   {
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      builderState.Style().SetStrokeColor(
-        ConvertCSSValueToStyle<Color>(builderState, value, ForVisitedLink::No));
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      builderState.Style().SetVisitedLinkStrokeColor(
-        ConvertCSSValueToStyle<Color>(builderState, value, ForVisitedLink::Yes));
-    }
+    builderState.Style().SetStrokeColor(ConvertCSSValueToStyle<Color>(builderState, value));
     builderState.Style().SetHasExplicitlySetStrokeColor(true);
   }
 
   // For the color property, "currentcolor" is actually the inherited computed color.
   inline void BuilderCustom::ApplyValueColor(BuilderState &builderState, css::Value &value) noexcept
   {
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      auto color = ConvertCSSValueToStyle<Color>(builderState, value, ForVisitedLink::No);
-      builderState.Style().SetColor(color.ResolveColor(builderState.ParentStyle().GetColor()));
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      auto color = ConvertCSSValueToStyle<Color>(builderState, value, ForVisitedLink::Yes);
-      builderState.Style().SetVisitedLinkColor(
-        color.ResolveColor(builderState.ParentStyle().VisitedLinkColor()));
-    }
+    auto color = ConvertCSSValueToStyle<Color>(builderState, value);
+    builderState.Style().SetColor(color.ResolveColor(builderState.ParentStyle().GetColor()));
 
     builderState.Style().SetDisallowsFastPathInheritance();
     builderState.Style().SetHasExplicitlySetColor(builderState.IsAuthorOrigin());
@@ -1607,14 +1509,7 @@ namespace krys::boo::style
 
   inline void BuilderCustom::ApplyInitialColor(BuilderState &builderState) noexcept
   {
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      builderState.Style().SetColor(style::ComputedStyle::InitialColor());
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      builderState.Style().SetVisitedLinkColor(style::ComputedStyle::InitialColor());
-    }
+    builderState.Style().SetColor(style::ComputedStyle::InitialColor());
 
     builderState.Style().SetDisallowsFastPathInheritance();
     builderState.Style().SetHasExplicitlySetColor(builderState.IsAuthorOrigin());
@@ -1622,14 +1517,7 @@ namespace krys::boo::style
 
   inline void BuilderCustom::ApplyInheritColor(BuilderState &builderState) noexcept
   {
-    if (builderState.ApplyPropertyToRegularStyle())
-    {
-      builderState.Style().SetColor(ForwardInheritedValue(builderState.ParentStyle().GetColor()));
-    }
-    if (builderState.ApplyPropertyToVisitedLinkStyle())
-    {
-      builderState.Style().SetVisitedLinkColor(ForwardInheritedValue(builderState.ParentStyle().GetColor()));
-    }
+    builderState.Style().SetColor(ForwardInheritedValue(builderState.ParentStyle().GetColor()));
 
     builderState.Style().SetDisallowsFastPathInheritance();
     builderState.Style().SetHasExplicitlySetColor(builderState.IsAuthorOrigin());
