@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
+#include "Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"

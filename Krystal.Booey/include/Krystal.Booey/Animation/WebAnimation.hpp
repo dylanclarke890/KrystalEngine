@@ -2,9 +2,9 @@
 
 #include "Krystal.Booey/Animation/AnimationEffect.hpp"
 #include "Krystal.Booey/Animation/AnimationPromise.hpp"
-#include "Krystal.Booey/Animation/AnimationTimeline.hpp"
-#include "Krystal.Booey/Animation/TimelineRangeValue.hpp"
-#include "Krystal.Booey/Animation/WebAnimationTime.hpp"
+#include "Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/TimelineRangeValue.hpp"
+#include "Krystal.Booey/Animation/Timing/WebAnimationTime.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"

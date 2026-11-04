@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
-#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
+#include "Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"

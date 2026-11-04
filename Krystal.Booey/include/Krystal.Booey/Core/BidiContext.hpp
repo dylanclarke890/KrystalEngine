@@ -17,9 +17,9 @@ namespace krys::boo
   class BidiContext : public ThreadSafeRefCounted<BidiContext>
   {
   private:
-    uint32 _level
-      : 6; // The maximium bidi level is 62: http://unicode.org/reports/tr9/#Explicit_Levels_and_Directions
-    uint32 _direction : 5; // Direction
+    // The maximium bidi level is 62: http://unicode.org/reports/tr9/#Explicit_Levels_and_Directions
+    uint32 _level : 6;
+    uint32 _direction : 5;
     uint32 _override : 1;
     uint32 _source : 1; // BidiEmbeddingSource
     RefPtr<BidiContext> _parent;

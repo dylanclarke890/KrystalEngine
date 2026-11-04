@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
-#include "Krystal.Booey/Animation/KeyframeInput.hpp"
+#include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"

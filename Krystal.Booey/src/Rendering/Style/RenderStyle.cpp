@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-#include "Krystal.Booey/Animation/ScrollAxis.hpp"
+#include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"

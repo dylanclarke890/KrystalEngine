@@ -20,12 +20,6 @@ namespace krys::boo
     ForcesStackingContext
   };
 
-  enum class UseAcceleratedAction : bool
-  {
-    No,
-    Yes
-  };
-
   enum class UseCachedCurrentTime : bool
   {
     No,
@@ -43,24 +37,6 @@ namespace krys::boo
     CSSAnimation,
     CSSTransition,
     WebAnimation
-  };
-
-  /// @brief A property an accelerated effect animates.
-  enum class AcceleratedEffectProperty : uint16
-  {
-    Invalid = 1 << 0,
-    Opacity = 1 << 1,
-    Transform = 1 << 2,
-    Translate = 1 << 3,
-    Rotate = 1 << 4,
-    Scale = 1 << 5,
-    OffsetPath = 1 << 6,
-    OffsetDistance = 1 << 7,
-    OffsetPosition = 1 << 8,
-    OffsetAnchor = 1 << 9,
-    OffsetRotate = 1 << 10,
-    Filter = 1 << 11,
-    BackdropFilter = 1 << 12
   };
 
   /// @brief Hashes an animatable property, for maps keyed by it.

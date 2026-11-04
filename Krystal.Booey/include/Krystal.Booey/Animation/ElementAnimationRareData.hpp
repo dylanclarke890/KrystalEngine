@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/AnimationTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"

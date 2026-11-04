@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
-#include "Krystal.Booey/Animation/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
+#include "Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/ContentVisibilityAutoStateChangeEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"

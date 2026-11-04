@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/EffectTiming.hpp"
+#include "Krystal.Booey/Animation/Timing/EffectTiming.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/AnimationEffectPhase.hpp"
+#include "Krystal.Booey/Animation/Timing/AnimationEffectPhase.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"

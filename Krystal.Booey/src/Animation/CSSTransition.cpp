@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/AnimationEffect.hpp"
-#include "Krystal.Booey/Animation/CSSTransitionEvent.hpp"
+#include "Krystal.Booey/Animation/Events/CSSTransitionEvent.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"

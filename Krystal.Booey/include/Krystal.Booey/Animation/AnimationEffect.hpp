@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/AnimationEffectTiming.hpp"
-#include "Krystal.Booey/Animation/ComputedEffectTiming.hpp"
-#include "Krystal.Booey/Animation/EffectTiming.hpp"
-#include "Krystal.Booey/Animation/OptionalEffectTiming.hpp"
+#include "Krystal.Booey/Animation/Timing/AnimationEffectTiming.hpp"
+#include "Krystal.Booey/Animation/Timing/ComputedEffectTiming.hpp"
+#include "Krystal.Booey/Animation/Timing/EffectTiming.hpp"
+#include "Krystal.Booey/Animation/Timing/OptionalEffectTiming.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"

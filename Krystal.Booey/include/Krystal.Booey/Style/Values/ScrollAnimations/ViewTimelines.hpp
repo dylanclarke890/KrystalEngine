@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/ViewTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

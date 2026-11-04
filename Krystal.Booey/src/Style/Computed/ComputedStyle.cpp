@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+SettersInlines.hpp"
 
-#include "Krystal.Booey/Animation/ScrollAxis.hpp"
+#include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"

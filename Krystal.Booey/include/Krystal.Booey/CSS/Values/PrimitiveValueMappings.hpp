@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/ScrollAxis.hpp"
+#include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Core/StyleAppearance.hpp"
 #include "Krystal.Booey/Core/TextFlags.hpp"

@@ -206,79 +206,76 @@ add_custom_command(
 # Every header and source is listed here; a file that isn't listed isn't built.
 set(KRYSTAL_BOOEY_ANIMATION_HEADERS
   include/Krystal.Booey/Animation/AnimationEffect.hpp
-  include/Krystal.Booey/Animation/AnimationEffectPhase.hpp
-  include/Krystal.Booey/Animation/AnimationEffectTiming.hpp
-  include/Krystal.Booey/Animation/AnimationEventBase.hpp
-  include/Krystal.Booey/Animation/AnimationPlaybackEvent.hpp
   include/Krystal.Booey/Animation/AnimationPromise.hpp
-  include/Krystal.Booey/Animation/AnimationTimeline.hpp
-  include/Krystal.Booey/Animation/AnimationTimelinesController.hpp
-  include/Krystal.Booey/Animation/BasicEffectTiming.hpp
-  include/Krystal.Booey/Animation/BlendingKeyframes.hpp
-  include/Krystal.Booey/Animation/CompositeOperation.hpp
-  include/Krystal.Booey/Animation/CompositeOperationOrAuto.hpp
-  include/Krystal.Booey/Animation/ComputedEffectTiming.hpp
   include/Krystal.Booey/Animation/CSSAnimation.hpp
-  include/Krystal.Booey/Animation/CSSAnimationEvent.hpp
   include/Krystal.Booey/Animation/CSSTransition.hpp
-  include/Krystal.Booey/Animation/CSSTransitionEvent.hpp
-  include/Krystal.Booey/Animation/DocumentTimeline.hpp
-  include/Krystal.Booey/Animation/DocumentTimelineOptions.hpp
-  include/Krystal.Booey/Animation/EffectTiming.hpp
   include/Krystal.Booey/Animation/ElementAnimationRareData.hpp
-  include/Krystal.Booey/Animation/FillMode.hpp
+  include/Krystal.Booey/Animation/Events/AnimationEventBase.hpp
+  include/Krystal.Booey/Animation/Events/AnimationPlaybackEvent.hpp
+  include/Krystal.Booey/Animation/Events/CSSAnimationEvent.hpp
+  include/Krystal.Booey/Animation/Events/CSSTransitionEvent.hpp
+  include/Krystal.Booey/Animation/Events/StyleOriginatedAnimationEvent.hpp
   include/Krystal.Booey/Animation/GetAnimationsOptions.hpp
   include/Krystal.Booey/Animation/KeyframeAnimationOptions.hpp
   include/Krystal.Booey/Animation/KeyframeEffect.hpp
   include/Krystal.Booey/Animation/KeyframeEffectOptions.hpp
   include/Krystal.Booey/Animation/KeyframeEffectStack.hpp
-  include/Krystal.Booey/Animation/KeyframeInput.hpp
-  include/Krystal.Booey/Animation/KeyframeInterpolation.hpp
-  include/Krystal.Booey/Animation/OptionalEffectTiming.hpp
-  include/Krystal.Booey/Animation/PlaybackDirection.hpp
-  include/Krystal.Booey/Animation/ScrollAxis.hpp
-  include/Krystal.Booey/Animation/ScrollTimeline.hpp
-  include/Krystal.Booey/Animation/ScrollTimelineOptions.hpp
+  include/Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp
+  include/Krystal.Booey/Animation/Keyframes/CompositeOperationOrAuto.hpp
+  include/Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp
+  include/Krystal.Booey/Animation/Keyframes/KeyframeInterpolation.hpp
   include/Krystal.Booey/Animation/StyleOriginatedAnimation.hpp
-  include/Krystal.Booey/Animation/StyleOriginatedAnimationEvent.hpp
-  include/Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp
-  include/Krystal.Booey/Animation/TimelineRangeOffset.hpp
-  include/Krystal.Booey/Animation/TimelineRangeValue.hpp
-  include/Krystal.Booey/Animation/ViewTimeline.hpp
-  include/Krystal.Booey/Animation/ViewTimelineOptions.hpp
+  include/Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp
+  include/Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp
+  include/Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp
+  include/Krystal.Booey/Animation/Timelines/DocumentTimelineOptions.hpp
+  include/Krystal.Booey/Animation/Timelines/ScrollAxis.hpp
+  include/Krystal.Booey/Animation/Timelines/ScrollTimeline.hpp
+  include/Krystal.Booey/Animation/Timelines/ScrollTimelineOptions.hpp
+  include/Krystal.Booey/Animation/Timelines/StyleOriginatedTimelinesController.hpp
+  include/Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp
+  include/Krystal.Booey/Animation/Timelines/TimelineRangeValue.hpp
+  include/Krystal.Booey/Animation/Timelines/ViewTimeline.hpp
+  include/Krystal.Booey/Animation/Timelines/ViewTimelineOptions.hpp
+  include/Krystal.Booey/Animation/Timing/AnimationEffectPhase.hpp
+  include/Krystal.Booey/Animation/Timing/AnimationEffectTiming.hpp
+  include/Krystal.Booey/Animation/Timing/ComputedEffectTiming.hpp
+  include/Krystal.Booey/Animation/Timing/EffectTiming.hpp
+  include/Krystal.Booey/Animation/Timing/FillMode.hpp
+  include/Krystal.Booey/Animation/Timing/OptionalEffectTiming.hpp
+  include/Krystal.Booey/Animation/Timing/PlaybackDirection.hpp
+  include/Krystal.Booey/Animation/Timing/WebAnimationTime.hpp
   include/Krystal.Booey/Animation/WebAnimation.hpp
-  include/Krystal.Booey/Animation/WebAnimationTime.hpp
   include/Krystal.Booey/Animation/WebAnimationTypes.hpp
   include/Krystal.Booey/Animation/WebAnimationUtilities.hpp
 )
 
 set(KRYSTAL_BOOEY_ANIMATION_SOURCES
   src/Animation/AnimationEffect.cpp
-  src/Animation/AnimationEffectTiming.cpp
-  src/Animation/AnimationEventBase.cpp
-  src/Animation/AnimationPlaybackEvent.cpp
   src/Animation/AnimationPromise.cpp
-  src/Animation/AnimationTimeline.cpp
-  src/Animation/AnimationTimelinesController.cpp
-  src/Animation/BlendingKeyframes.cpp
-  src/Animation/CompositeOperation.cpp
   src/Animation/CSSAnimation.cpp
-  src/Animation/CSSAnimationEvent.cpp
   src/Animation/CSSTransition.cpp
-  src/Animation/CSSTransitionEvent.cpp
-  src/Animation/DocumentTimeline.cpp
   src/Animation/ElementAnimationRareData.cpp
+  src/Animation/Events/AnimationEventBase.cpp
+  src/Animation/Events/AnimationPlaybackEvent.cpp
+  src/Animation/Events/CSSAnimationEvent.cpp
+  src/Animation/Events/CSSTransitionEvent.cpp
+  src/Animation/Events/StyleOriginatedAnimationEvent.cpp
   src/Animation/KeyframeEffect.cpp
   src/Animation/KeyframeEffectStack.cpp
-  src/Animation/KeyframeInterpolation.cpp
-  src/Animation/ScrollTimeline.cpp
+  src/Animation/Keyframes/BlendingKeyframes.cpp
+  src/Animation/Keyframes/KeyframeInterpolation.cpp
   src/Animation/StyleOriginatedAnimation.cpp
-  src/Animation/StyleOriginatedAnimationEvent.cpp
-  src/Animation/StyleOriginatedTimelinesController.cpp
-  src/Animation/TimelineRangeValue.cpp
-  src/Animation/ViewTimeline.cpp
+  src/Animation/Timelines/AnimationTimeline.cpp
+  src/Animation/Timelines/AnimationTimelinesController.cpp
+  src/Animation/Timelines/DocumentTimeline.cpp
+  src/Animation/Timelines/ScrollTimeline.cpp
+  src/Animation/Timelines/StyleOriginatedTimelinesController.cpp
+  src/Animation/Timelines/TimelineRangeValue.cpp
+  src/Animation/Timelines/ViewTimeline.cpp
+  src/Animation/Timing/AnimationEffectTiming.cpp
+  src/Animation/Timing/WebAnimationTime.cpp
   src/Animation/WebAnimation.cpp
-  src/Animation/WebAnimationTime.cpp
   src/Animation/WebAnimationUtilities.cpp
 )
 

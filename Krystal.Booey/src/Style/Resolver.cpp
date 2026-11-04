@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
-#include "Krystal.Booey/Animation/CompositeOperation.hpp"
+#include "Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
@@ -465,15 +464,7 @@ namespace krys::boo::style
 
     auto compositeOperationForKeyframe = [](const css::KeyframeRule &keyframe) -> CompositeOperation
     {
-      if (auto compositeOperationCSSValue =
-            keyframe.Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
-      {
-        if (auto compositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
-        {
-          return *compositeOperation;
-        }
-      }
-      return Animation::InitialCompositeOperation();
+      return KeyframeRuleCompositeOperation(keyframe).value_or(Animation::InitialCompositeOperation());
     };
 
     auto timingFunctionForKeyframe = [&](const css::KeyframeRule &keyframe) -> RefPtr<const TimingFunction>
@@ -616,13 +607,9 @@ namespace krys::boo::style
         {
           blendingKeyframe.SetTimingFunction(CreateTimingFunctionDeprecated(*timingFunctionCSSValue));
         }
-        if (auto compositeOperationCSSValue =
-              keyframeRule->Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
+        if (auto compositeOperation = KeyframeRuleCompositeOperation(*keyframeRule))
         {
-          if (auto compositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
-          {
-            blendingKeyframe.SetCompositeOperation(*compositeOperation);
-          }
+          blendingKeyframe.SetCompositeOperation(*compositeOperation);
         }
         list.Insert(krys::move(blendingKeyframe));
         list.UpdatePropertiesMetadata(keyframeRule->Properties());

@@ -1,6 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"

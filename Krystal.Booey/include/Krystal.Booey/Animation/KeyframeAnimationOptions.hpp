@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectOptions.hpp"
-#include "Krystal.Booey/Animation/TimelineRangeValue.hpp"
+#include "Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/TimelineRangeValue.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo

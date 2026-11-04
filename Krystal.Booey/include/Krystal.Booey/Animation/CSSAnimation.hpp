@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/OptionalEffectTiming.hpp"
 #include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
+#include "Krystal.Booey/Animation/Timing/OptionalEffectTiming.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/Animations/Animation.hpp"
 #include "Krystal.Core/Enum.hpp"

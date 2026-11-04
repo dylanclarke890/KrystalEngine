@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
-#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
+#include "Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp"
 #include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"

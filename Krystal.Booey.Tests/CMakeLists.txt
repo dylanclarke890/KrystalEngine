@@ -382,15 +382,15 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/FontCascade.cpp
 		tests/Animation/Animatable.cpp
 		tests/Animation/AnimationEffect.cpp
-		tests/Animation/AnimationEffectTiming.cpp
-		tests/Animation/BlendingKeyframes.cpp
 		tests/Animation/CSSAnimation.cpp
 		tests/Animation/CSSTransition.cpp
 		tests/Animation/KeyframeEffect.cpp
-		tests/Animation/KeyframeInterpolation.cpp
-		tests/Animation/ScrollTimeline.cpp
-		tests/Animation/StyleOriginatedTimelinesController.cpp
-		tests/Animation/ViewTimeline.cpp
+		tests/Animation/Keyframes/BlendingKeyframes.cpp
+		tests/Animation/Keyframes/KeyframeInterpolation.cpp
+		tests/Animation/Timelines/ScrollTimeline.cpp
+		tests/Animation/Timelines/StyleOriginatedTimelinesController.cpp
+		tests/Animation/Timelines/ViewTimeline.cpp
+		tests/Animation/Timing/AnimationEffectTiming.cpp
 		tests/Animation/WebAnimation.cpp
 		tests/CSS/Font/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp

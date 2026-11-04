@@ -1,9 +1,8 @@
 ﻿#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
-#include "Krystal.Booey/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
-#include "Krystal.Booey/Animation/ViewTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
@@ -1123,15 +1122,7 @@ namespace krys::boo
 
       auto compositeOperationForStyleRuleKeyframe = [&](const Ref<css::KeyframeRule> &styleRuleKeyframe)
       {
-        if (auto compositeOperationCSSValue =
-              styleRuleKeyframe->Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
-        {
-          if (auto keyframeCompositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
-          {
-            return *keyframeCompositeOperation;
-          }
-        }
-        return defaultCompositeOperation;
+        return KeyframeRuleCompositeOperation(*styleRuleKeyframe).value_or(defaultCompositeOperation);
       };
 
       auto timingFunctionForStyleRuleKeyframe =
@@ -3619,13 +3610,7 @@ namespace krys::boo
 
   bool KeyframeEffect::IsPropertyAdditiveOrCumulative(KeyframeInterpolation::Property property) const noexcept
   {
-    if (const auto *animatableCSSProperty = std::get_if<AnimatableCSSProperty>(&property))
-    {
-      return style::interpolation::IsAdditiveOrCumulative(*animatableCSSProperty);
-    }
-
-    krys_debug_assert(false);
-    return false;
+    return style::interpolation::IsAdditiveOrCumulative(property);
   }
 
   RefPtr<const ViewTimeline> KeyframeEffect::ActiveViewTimeline() const noexcept

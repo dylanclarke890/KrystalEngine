@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Animation/AnimationEventBase.hpp"
-#include "Krystal.Booey/Animation/CSSAnimationEvent.hpp"
-#include "Krystal.Booey/Animation/CSSTransitionEvent.hpp"
+#include "Krystal.Booey/Animation/Events/AnimationEventBase.hpp"
+#include "Krystal.Booey/Animation/Events/CSSAnimationEvent.hpp"
+#include "Krystal.Booey/Animation/Events/CSSTransitionEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"

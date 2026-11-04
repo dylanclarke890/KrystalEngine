@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyleBase+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyleProperties.hpp"
 
-#include "Krystal.Booey/Animation/ViewTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Core/StyleAppearance.hpp"

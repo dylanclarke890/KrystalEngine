@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Animation/AnimationEffect.hpp"
-#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
-#include "Krystal.Booey/Animation/CompositeOperationOrAuto.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectOptions.hpp"
-#include "Krystal.Booey/Animation/KeyframeInput.hpp"
-#include "Krystal.Booey/Animation/KeyframeInterpolation.hpp"
-#include "Krystal.Booey/Animation/TimelineRangeOffset.hpp"
+#include "Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp"
+#include "Krystal.Booey/Animation/Keyframes/CompositeOperationOrAuto.hpp"
+#include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
+#include "Krystal.Booey/Animation/Keyframes/KeyframeInterpolation.hpp"
+#include "Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"

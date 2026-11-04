@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/WebAnimationTime.hpp"
+#include "Krystal.Booey/Animation/Timing/WebAnimationTime.hpp"
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerAnimation.hpp"
