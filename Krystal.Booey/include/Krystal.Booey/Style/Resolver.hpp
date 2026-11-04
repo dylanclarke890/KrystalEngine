@@ -187,9 +187,6 @@ namespace krys::boo::style
                                                            const css::KeyframeRule &keyframe,
                                                            BlendingKeyframe &blendingKeyframe) const noexcept;
 
-    void SetViewTransitionStyles(css::SelectorPseudoElement element, const css::CSSOMStringAtom &name,
-                                 Ref<css::MutableStyleProperties> properties) noexcept;
-
     KRYS_NODISCARD List<RefPtr<const css::StyleRule>>
       StyleRulesForElement(const dom::Element *element, uint32 rulesToInclude = AllButEmptyCSSRules) noexcept;
     KRYS_NODISCARD List<RefPtr<const css::StyleRule>>
@@ -210,8 +207,6 @@ namespace krys::boo::style
     KRYS_NODISCARD List<Ref<css::KeyframeRule>>
       KeyframeRulesForName(const css::CSSOMStringAtom &animationName,
                            const TimingFunction *defaultTimingFunction) const noexcept;
-
-    KRYS_NODISCARD RefPtr<css::ViewTransitionRule> GetViewTransitionRule() const noexcept;
 
     /// @brief A style with the initial values and the document's default font (`medium`), for @p element
     /// (which may be null).

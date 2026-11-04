@@ -35,7 +35,6 @@ namespace krys::boo::style
   css::StyleSheetContents *UserAgentStyle::PopoverStyleSheet;
   css::StyleSheetContents *UserAgentStyle::HorizontalFormControlsStyleSheet;
   css::StyleSheetContents *UserAgentStyle::CounterStylesStyleSheet;
-  css::StyleSheetContents *UserAgentStyle::ViewTransitionsStyleSheet;
 
   namespace
   {
@@ -231,13 +230,6 @@ namespace krys::boo::style
     }
 
     // FIXME: The fullscreen style sheet, once documents have the Fullscreen API.
-
-    if (!ViewTransitionsStyleSheet)
-    {
-      ViewTransitionsStyleSheet = ParseUASheet(css::ViewTransitionsUserAgentStyleSheet);
-      AddToDefaultStyle(*ViewTransitionsStyleSheet);
-      AddUserAgentKeyframes(*ViewTransitionsStyleSheet);
-    }
 
     krys_debug_assert(DefaultStyle->Features().IdsInRules.empty());
   }

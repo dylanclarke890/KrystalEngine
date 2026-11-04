@@ -35,7 +35,6 @@ namespace krys::boo::css
   class MutableStyleProperties;
   class PositionTryRule;
   class StyleSheetContents;
-  class ViewTransitionRule;
   struct ParserContext;
 
   /// @brief Parses style sheets, rules and declaration lists into the internal rule model.
@@ -186,8 +185,6 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<ScopeRule> ConsumeScopeRule(TokenRange prelude, TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<StartingStyleRule> ConsumeStartingStyleRule(TokenRange prelude,
                                                                       TokenRange block) noexcept;
-    KRYS_NODISCARD RefPtr<ViewTransitionRule> ConsumeViewTransitionRule(TokenRange prelude,
-                                                                        TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<PositionTryRule> ConsumePositionTryRule(TokenRange prelude,
                                                                   TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<FunctionRule> ConsumeFunctionRule(TokenRange prelude, TokenRange block) noexcept;

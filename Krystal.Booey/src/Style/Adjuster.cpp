@@ -725,16 +725,12 @@ namespace krys::boo::style
       AdjustThemeStyle(style, _parentStyle);
     }
 
-    // This should be kept in sync with requiresRenderingConsolidationForViewTransition
     if (style.Preserves3D())
     {
       bool forceToFlat = style.OverflowX() != Overflow::Visible || style.HasOpacity()
                          || style.OverflowY() != Overflow::Visible || style.HasClip() || style.HasClipPath()
                          || style.HasFilter() || style.HasIsolation() || style.HasMask()
-                         || style.HasBackdropFilter() || style.HasBlendMode()
-                         || !style.GetViewTransitionName().IsNone();
-      // FIXME: An element captured in an active view transition is forced to flat; there are no view
-      // transitions.
+                         || style.HasBackdropFilter() || style.HasBlendMode();
       style.SetTransformStyleForcedToFlat(forceToFlat);
     }
 

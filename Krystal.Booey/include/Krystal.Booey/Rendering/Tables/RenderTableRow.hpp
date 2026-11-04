@@ -94,7 +94,7 @@ namespace krys::boo
     KRYS_NODISCARD bool RequiresLayer() const noexcept final
     {
       return HasNonVisibleOverflow() || HasTransformRelatedProperty() || HasHiddenBackface() || HasClipPath()
-             || CreatesGroup() || IsStickilyPositioned() || RequiresRenderingConsolidationForViewTransition();
+             || CreatesGroup() || IsStickilyPositioned();
     }
   };
 }

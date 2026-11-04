@@ -347,14 +347,6 @@ namespace krys::boo::css::tests
     CHECK(!SelectorParser::ParsePseudoElement(u8"::part(x)", context).first);
     CHECK(!SelectorParser::ParsePseudoElement(u8"before", context).first);
     CHECK(!SelectorParser::ParsePseudoElement(u8"", context).first);
-
-    auto enabled = AllEnabled();
-    CHECK(SelectorParser::ParsePseudoElement(u8"::view-transition-group(x)", enabled)
-          == Pair<bool, Maybe<Identifier>> {
-            true, Identifier {PseudoElementType::ViewTransitionGroup, CSSOMStringAtom(u8"x")}});
-    CHECK(!SelectorParser::ParsePseudoElement(u8"::view-transition-group(*)", enabled).first);
-    CHECK(style::IsNamedViewTransitionPseudoElement(
-      SelectorParser::ParsePseudoElement(u8"::view-transition-new(x)", enabled).second));
   }
 
   TEST_CASE("SelectorParser(forgiving lists)", "[CSS][Selectors][SelectorParser]")
@@ -421,11 +413,6 @@ namespace krys::boo::css::tests
     CHECK(Parse(u8":not") == u8"<invalid>");
     CHECK(Parse(u8":is(::before)") == u8":is(::before)");
     CHECK(Parse(u8":not(::before)") == u8"<invalid>");
-
-    CHECK(Parse(u8":active-view-transition-type(a, b)", AllEnabled())
-          == u8":active-view-transition-type(a, b)");
-    CHECK(Parse(u8":active-view-transition-type(a,)", AllEnabled()) == u8"<invalid>");
-    CHECK(Parse(u8":active-view-transition-type(initial)", AllEnabled()) == u8"<invalid>");
   }
 
   TEST_CASE("SelectorParser(pseudo-elements)", "[CSS][Selectors][SelectorParser]")
@@ -454,16 +441,6 @@ namespace krys::boo::css::tests
     CHECK(Parse(u8"video::cue(b, i)") == u8"video::cue(b, i)");
     CHECK(Parse(u8"::cue(b c)") == u8"<invalid>");
     CHECK(Parse(u8"::target-text", AllEnabled()) == u8"::target-text");
-
-    auto enabled = AllEnabled();
-    CHECK(Parse(u8"::view-transition-group(*)", enabled) == u8"::view-transition-group(*)");
-    CHECK(Parse(u8"::view-transition-group(.a)", enabled) == u8"::view-transition-group(*.a)");
-    CHECK(Parse(u8"::view-transition-old(x.a.b)", enabled) == u8"::view-transition-old(x.a.b)");
-    CHECK(Parse(u8"::view-transition-new(x):only-child", enabled) == u8"::view-transition-new(x):only-child");
-    CHECK(Parse(u8"::view-transition-new(x):hover", enabled) == u8"<invalid>");
-    CHECK(Parse(u8"::view-transition-new(x .a)", enabled) == u8"<invalid>");
-    CHECK(Parse(u8"::view-transition-new(none)", enabled) == u8"::view-transition-new(none)");
-    CHECK(Parse(u8"::view-transition-new(inherit)", enabled) == u8"<invalid>");
 
     // User agent parts and ::part() cross into a shadow tree, so they start a new compound.
     auto part = ParseValid(u8"input.a::details-content");

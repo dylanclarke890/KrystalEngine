@@ -3489,12 +3489,6 @@ namespace krys::boo
 
   GraphicsLayer *RenderLayerBacking::ChildForSuperlayers() const noexcept
   {
-    // FIXME: The document element captured in a view transition, once there are view transitions.
-    return ChildForSuperlayersExcludingViewTransitions();
-  }
-
-  GraphicsLayer *RenderLayerBacking::ChildForSuperlayersExcludingViewTransitions() const noexcept
-  {
     if (_transformFlatteningLayer)
     {
       return _transformFlatteningLayer.get();

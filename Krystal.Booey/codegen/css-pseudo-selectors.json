@@ -39,11 +39,6 @@
             "user-agent-sheet-only": true
         },
         "active": {},
-        "active-view-transition": {
-        },
-        "active-view-transition-type": {
-            "argument": "required"
-        },
         "any-link": {},
         "autofill": {},
         "buffering": {},
@@ -341,20 +336,6 @@
         "track": {
             "settings-flag": "thumbAndTrackPseudoElementsEnabled",
             "user-agent-part": true
-        },
-        "view-transition": {
-        },
-        "view-transition-group": {
-            "argument": "required"
-        },
-        "view-transition-image-pair": {
-            "argument": "required"
-        },
-        "view-transition-new": {
-            "argument": "required"
-        },
-        "view-transition-old": {
-            "argument": "required"
         }
     }
 }

@@ -179,8 +179,7 @@ namespace krys::boo::css
       // Used for :contains and :nth-*
       CSSOMStringAtom Argument {CSSOMStringAtom::Null()};
 
-      // Used for :active-view-transition-type, ::highlight, ::view-transition-{group, image-pair, new, old},
-      // ::part arguments.
+      // Used for ::highlight and ::part arguments.
       FixedVector<CSSOMStringAtom> ArgumentList;
 
       // Used for :lang arguments.

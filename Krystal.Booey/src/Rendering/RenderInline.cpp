@@ -808,8 +808,7 @@ namespace krys::boo
   bool RenderInline::RequiresLayer() const noexcept
   {
     return IsInFlowPositioned() || CreatesGroup() || HasClipPath()
-           || Style().GetWillChange().CanCreateStackingContext() || HasRunningAcceleratedAnimations()
-           || RequiresRenderingConsolidationForViewTransition();
+           || Style().GetWillChange().CanCreateStackingContext() || HasRunningAcceleratedAnimations();
   }
 
   void RenderInline::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept

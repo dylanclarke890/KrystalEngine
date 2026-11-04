@@ -112,6 +112,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `@supports` condition text is trimmed of ASCII whitespace and the vertical tab.
 - Whitespace tokens serialise compactly: in normal mode a run of spaces and tabs is one space and each newline another (`a \n b` becomes `a   b`); in custom property mode whitespace keeps its length and its newlines, with tabs as spaces. In custom property mode a dimension keeps its original text, escapes included (`10\70 x`).
 - Media features read the frame's `MediaEnvironment`, which the host fills in. `hover`/`any-hover` and the pointer features default to a mouse (hover, fine pointer).
+- There are no view transitions: `@view-transition` is an unknown at-rule, `view-transition-name`/`-class` are unknown properties, and `:active-view-transition(-type)` and the `::view-transition*` pseudo-elements are invalid selectors.
 - There's no paged media: `@page` is an unknown at-rule (no `CSSPageRule`, page selectors, `size` descriptor or `page` property), and `overflow-block: paged` matches only the `print` media type.
 - An unknown `::-webkit-*` pseudo-element is a parse error, where Selectors keeps it valid (matching nothing) for compatibility.
 - `CSSOMString` can't be null, so nullable attributes are empty for null (`Href()`, `Title()`), and the rule model can't tell an empty `supports()` from none (so `@import "a" supports()` serialises without it); `CSSPropertyRule` omits an empty `syntax`.

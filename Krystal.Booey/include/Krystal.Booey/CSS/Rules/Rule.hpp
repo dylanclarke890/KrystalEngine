@@ -171,11 +171,6 @@ namespace krys::boo::css
       return Type() == RuleType::StartingStyle;
     }
 
-    KRYS_NODISCARD bool IsViewTransitionRule() const noexcept
-    {
-      return Type() == RuleType::ViewTransition;
-    }
-
     KRYS_NODISCARD bool IsPositionTryRule() const noexcept
     {
       return Type() == RuleType::PositionTry;

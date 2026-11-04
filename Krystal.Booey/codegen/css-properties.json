@@ -11886,37 +11886,6 @@
         "url": "https://drafts.csswg.org/scroll-animations-1/#view-timeline-name"
       }
     },
-    "view-transition-class": {
-      "animation-type": "discrete",
-      "initial": "none",
-      "values": ["none"],
-      "codegen-properties": {
-        "render-style-name-for-methods": "ViewTransitionClasses",
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::ViewTransitionClasses",
-        "parser-grammar": "none | <custom-ident excluding=none>+@(no-single-item-opt)"
-      },
-      "specification": {
-        "module": "css-view-transitions",
-        "url": "https://drafts.csswg.org/css-view-transitions-2/#view-transition-class-prop"
-      }
-    },
-    "view-transition-name": {
-      "animation-type": "discrete",
-      "initial": "none",
-      "values": ["none", "auto", "match-element"],
-      "codegen-properties": {
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::ViewTransitionName",
-        "parser-grammar": "none | auto | match-element | <custom-ident>"
-      },
-      "specification": {
-        "module": "css-view-transitions",
-        "url": "https://drafts.csswg.org/css-view-transitions/#view-transition-name-prop"
-      }
-    },
     "anchor-name": {
       "animation-type": "discrete",
       "initial": "none",
@@ -12590,32 +12559,6 @@
           "url": "https://www.w3.org/TR/css-mixins-1/#descdef-function-result"
         }
       }
-    },
-    "@view-transition": {
-      "navigation": {
-        "values": ["none", "auto"],
-        "codegen-properties": {
-          "parser-grammar": "<<values>>",
-          "parser-exported": true
-        },
-        "specification": {
-          "module": "css-view-transitions",
-          "url": "https://www.w3.org/TR/css-view-transitions-2/#view-transition-navigation-descriptor"
-        }
-      },
-      "types": {
-        "values": ["none"],
-        "codegen-properties": {
-          "parser-function": "ConsumeViewTransitionTypes",
-          "parser-grammar": "none | <custom-ident excluding=none>+",
-          "parser-grammar-unused": true,
-          "parser-grammar-unused-reason": "Needs support for excluding from <custom-ident> based on prefixes."
-        },
-        "specification": {
-          "module": "css-view-transitions",
-          "url": "https://www.w3.org/TR/css-view-transitions-2/#view-transition-navigation-descriptor"
-        }
-      }
     }
   },
   "categories": {
@@ -12873,11 +12816,6 @@
       "shortname": "CSS Viewport",
       "longname": "CSS Viewport Module",
       "url": "https://drafts.csswg.org/css-viewport/"
-    },
-    "css-view-transitions": {
-      "shortname": "CSS View Transitions",
-      "longname": "CSS View Transitions Module",
-      "url": "https://drafts.csswg.org/css-view-transitions/"
     },
     "css-will-change": {
       "shortname": "CSS Will Change",

@@ -233,7 +233,6 @@ namespace krys::boo
 
     KRYS_NODISCARD GraphicsLayer *ParentForSublayers() const noexcept;
     KRYS_NODISCARD GraphicsLayer *ChildForSuperlayers() const noexcept;
-    KRYS_NODISCARD GraphicsLayer *ChildForSuperlayersExcludingViewTransitions() const noexcept;
 
     // RenderLayers with backing normally short-circuit paintLayer() because their content is rendered via
     // callbacks from GraphicsLayer. However, the document layer is special, because it has a GraphicsLayer to

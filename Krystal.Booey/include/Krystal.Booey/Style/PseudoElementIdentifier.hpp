@@ -12,36 +12,12 @@ namespace krys::boo::style
   {
     PseudoElementType Type;
 
-    /// @brief Highlight name for ::highlight or view transition name for view transition pseudo elements.
+    /// @brief The highlight name, for `::highlight`.
     css::CSSOMStringAtom NameArgument {css::CSSOMStringAtom::Null()};
 
     KRYS_NODISCARD friend bool operator==(const PseudoElementIdentifier &,
                                           const PseudoElementIdentifier &) noexcept = default;
   };
-
-  KRYS_NODISCARD inline bool
-    IsNamedViewTransitionPseudoElement(const Maybe<PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
-  {
-    if (!pseudoElementIdentifier)
-    {
-      return false;
-    }
-
-    switch (pseudoElementIdentifier->Type)
-    {
-      case PseudoElementType::ViewTransitionGroup:
-      case PseudoElementType::ViewTransitionImagePair:
-      case PseudoElementType::ViewTransitionOld:
-      case PseudoElementType::ViewTransitionNew:
-      {
-        return true;
-      }
-      default:
-      {
-        return false;
-      }
-    }
-  }
 }
 
 namespace krys

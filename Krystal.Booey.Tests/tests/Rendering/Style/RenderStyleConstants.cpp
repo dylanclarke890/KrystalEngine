@@ -11,9 +11,6 @@ namespace krys::boo::tests
     SECTION("Parent pseudo-elements")
     {
       CHECK(ParentPseudoElement(PseudoElementType::FirstLetter) == PseudoElementType::FirstLine);
-      CHECK(ParentPseudoElement(PseudoElementType::ViewTransitionNew)
-            == PseudoElementType::ViewTransitionImagePair);
-      CHECK(ParentPseudoElement(PseudoElementType::ViewTransitionGroup) == PseudoElementType::ViewTransition);
       CHECK_FALSE(ParentPseudoElement(PseudoElementType::Before));
       CHECK(AllPseudoElementTypes.Contains(PseudoElementType::Marker));
     }

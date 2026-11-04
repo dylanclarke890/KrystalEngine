@@ -112,7 +112,6 @@ namespace krys::boo::style
     dom::ShadowRoot *_shadowRoot {nullptr};
 
     RefPtr<Resolver> _resolver;
-    mutable RefPtr<RuleSet> _dynamicViewTransitionsStyle;
 
     List<RefPtr<css::StyleSheet>> _styleSheetsForStyleSheetList;
     List<RefPtr<css::CSSStyleSheet>> _activeStyleSheets;
@@ -241,7 +240,6 @@ namespace krys::boo::style
     KRYS_NODISCARD const Resolver *ResolverIfExists() const noexcept;
 
     void ClearResolver() noexcept;
-    void ClearViewTransitionStyles() noexcept;
 
     /// @brief Drops the cached styles of the resolvers of this scope (and, for the document, of its shadow
     /// trees), after a change that can change the styles built from the same declarations.

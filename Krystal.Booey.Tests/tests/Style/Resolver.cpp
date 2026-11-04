@@ -158,21 +158,19 @@ namespace krys::boo::style::tests
             == "y");
     REQUIRE(resolver.IsAnimationNameValid(u8"spin"));
     REQUIRE_FALSE(resolver.IsAnimationNameValid(u8"nope"));
-    REQUIRE_FALSE(resolver.GetViewTransitionRule());
 
-    SECTION("@view-transition and @position-try")
+    SECTION("@position-try")
     {
       css::ParserContext context(css::ParserMode::HTMLStandard);
       auto sheet = css::StyleSheetContents::Create(context);
-      sheet->ParseString(u8"@view-transition { navigation: auto; } @position-try --p { top: 0; }"
+      sheet->ParseString(u8"@position-try --p { top: 0; }"
                          u8"@layer a { @position-try --q { top: 0; } } @position-try --p { top: 1px; }");
-      REQUIRE(sheet->ChildRules().size() == 4uz);
+      REQUIRE(sheet->ChildRules().size() == 3uz);
       auto ruleSet = RuleSet::Create();
       {
         RuleSetBuilder builder(*ruleSet, resolver.MediaQueryEvaluator(), &resolver);
         builder.AddRulesFromSheet(*sheet);
       }
-      REQUIRE(ruleSet->GetViewTransitionRule());
       REQUIRE(ruleSet->RuleCount() == 0u);
       REQUIRE(ruleSet->PositionTryRuleForName(Atom(u8"--q")));
       // The last rule with a name wins.
@@ -439,20 +437,6 @@ namespace krys::boo::style::tests
       CHECK(GetResolver().RuleSets().Features().ContentAttributeNamesInRules.contains(
         css::CSSOMStringAtom(u8"data-x")));
     }
-  }
-
-  TEST_CASE_METHOD(ElementStyleFixture, "Resolver: view transition styles", "[Style][Resolver]")
-  {
-    auto &resolver = GetResolver();
-    auto *dynamicStyle = resolver.RuleSets().DynamicViewTransitionsStyle();
-    REQUIRE(dynamicStyle);
-    auto before = dynamicStyle->RuleCount();
-
-    auto properties = css::MutableStyleProperties::Create(css::ParserMode::HTMLStandard);
-    REQUIRE(properties->SetProperty(css::PropertyId::Width, u8"5px"));
-    resolver.SetViewTransitionStyles(css::SelectorPseudoElement::ViewTransitionGroup,
-                                     css::CSSOMStringAtom(u8"x"), properties);
-    CHECK(dynamicStyle->RuleCount() == before + 1);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Resolver: random() base values", "[Style][Resolver]")

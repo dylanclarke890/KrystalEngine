@@ -1019,10 +1019,7 @@ namespace krys::boo
     // https://github.com/w3c/fxtf-drafts/issues/557
     return IsRenderViewLayer() || Renderer().IsTransparent() || Renderer().HasBackdropFilter()
            || Renderer().HasClipPath() || Renderer().HasFilter() || Renderer().HasBlendMode()
-           || Renderer().HasMask()
-           || (Renderer().RequiresRenderingConsolidationForViewTransition()
-               && !Renderer().IsDocumentElementRenderer())
-           || Renderer().Style().GetWillChange().CanBeBackdropRoot();
+           || Renderer().HasMask() || Renderer().Style().GetWillChange().CanBeBackdropRoot();
   }
 
   bool RenderLayer::SetCanBeBackdropRoot(bool canBeBackdropRoot) noexcept
@@ -1038,10 +1035,10 @@ namespace krys::boo
   static bool CanCreateStackingContext(const RenderLayer &layer) noexcept
   {
     const auto &renderer = layer.Renderer();
-    // FIXME: View transition captures, once there are any.
-    return renderer.HasTransformRelatedProperty() || renderer.HasClipPath() || renderer.HasFilter()
-           || renderer.HasMask() || renderer.HasBackdropFilter() || renderer.HasBlendMode()
-           || renderer.IsTransparent() || renderer.RequiresRenderingConsolidationForViewTransition()
+    // "The root element forms the root stacking context." https://www.w3.org/TR/CSS22/visuren.html#z-index
+    return renderer.IsDocumentElementRenderer() || renderer.HasTransformRelatedProperty()
+           || renderer.HasClipPath() || renderer.HasFilter() || renderer.HasMask()
+           || renderer.HasBackdropFilter() || renderer.HasBlendMode() || renderer.IsTransparent()
            || renderer.IsPositioned() // Note that this only creates stacking context in conjunction with
                                       // explicit z-index.
            || renderer.Style().HasIsolation() || renderer.ShouldApplyPaintContainment()
@@ -1064,11 +1061,9 @@ namespace krys::boo
 
   bool RenderLayer::ShouldBeCSSStackingContext() const noexcept
   {
-    // FIXME: View transition captures and containing blocks, once there are view transitions.
+    // "The root element forms the root stacking context." https://www.w3.org/TR/CSS22/visuren.html#z-index
     return !Renderer().Style().UsedZIndex().IsAuto() || Renderer().ShouldApplyLayoutContainment()
-           || Renderer().ShouldApplyPaintContainment()
-           || Renderer().RequiresRenderingConsolidationForViewTransition()
-           || Renderer().IsViewTransitionRoot() || Renderer().IsViewTransitionContainingBlock()
+           || Renderer().ShouldApplyPaintContainment() || Renderer().IsDocumentElementRenderer()
            || IsRenderViewLayer();
   }
 
@@ -4382,9 +4377,6 @@ namespace krys::boo
       return LayoutRect();
     }
 
-    // FIXME: Descendants captured in a view transition (ExcludeViewTransitionCapturedDescendants), once there
-    // are view transitions.
-
     if (IsRenderViewLayer())
     {
       // The root layer is always just the size of the document.
@@ -6129,8 +6121,6 @@ namespace krys::boo
     LayerListMutationDetector mutationChecker(*this);
 #endif
 
-    // FIXME: Skipping view transition captures (PaintingSkipDescendantViewTransition), once there are view
-    // transitions.
     for (auto *childLayer : layerIterator)
     {
       childLayer->PaintLayer(context, paintingInfo, paintFlags);

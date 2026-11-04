@@ -36,7 +36,6 @@ namespace krys::boo::style
     static css::StyleSheetContents *HorizontalFormControlsStyleSheet;
     static css::StyleSheetContents *PopoverStyleSheet;
     static css::StyleSheetContents *CounterStylesStyleSheet;
-    static css::StyleSheetContents *ViewTransitionsStyleSheet;
 
     static void InitDefaultStyleSheet() noexcept;
     static void EnsureDefaultStyleSheetsForElement(const dom::Element &element) noexcept;

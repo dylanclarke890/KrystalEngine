@@ -19,7 +19,6 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSStartingStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
@@ -28,7 +27,6 @@
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <functional>
@@ -135,10 +133,6 @@ namespace krys::boo::css
       case RuleType::StartingStyle:
       {
         return std::invoke(std::forward<Visitor>(visitor), static_cast<StartingStyleRule &>(*this));
-      }
-      case RuleType::ViewTransition:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<ViewTransitionRule &>(*this));
       }
       case RuleType::PositionTry:
       {
@@ -288,10 +282,6 @@ namespace krys::boo::css
         else if constexpr (SameType<TRule, StartingStyleRule>)
         {
           return CSSStartingStyleRule::Create(rule, parentSheet);
-        }
-        else if constexpr (SameType<TRule, ViewTransitionRule>)
-        {
-          return CSSViewTransitionRule::Create(rule, parentSheet);
         }
         else if constexpr (SameType<TRule, PositionTryRule>)
         {

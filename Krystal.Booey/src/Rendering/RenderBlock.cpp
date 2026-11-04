@@ -2439,13 +2439,6 @@ namespace krys::boo
           krys_debug_assert(false);
           break;
 
-        case PseudoElementType::ViewTransition:
-        case PseudoElementType::ViewTransitionGroup:
-        case PseudoElementType::ViewTransitionImagePair:
-          // The view transition pseudo-elements should hit-test to their originating element (the document
-          // element).
-          return GetDocument().DocumentElement().get();
-
         default: break;
       }
     }

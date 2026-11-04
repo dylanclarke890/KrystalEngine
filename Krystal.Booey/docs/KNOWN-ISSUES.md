@@ -30,7 +30,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `DataTransferItem` has no `getAsEntry` (no file system API).
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).
 - A task's document is not checked for being fully active (documents never in a frame, such as `createHTMLDocument()`, run their tasks). Subresource loads, `close()`, the scroll to the anchor and `AbortSignal.timeout()` are not tagged with a document, so suspension does not hold them.
-- Suspension covers only the document's timers and animation frame callbacks: no media, view transitions, font loading, service workers or IndexedDB, and animations aren't suspended (FIXME in `WebAnimation.hpp`).
+- Suspension covers only the document's timers and animation frame callbacks: no media, font loading, service workers or IndexedDB, and animations aren't suspended (FIXME in `WebAnimation.hpp`).
 - Security origins do not exist, beyond serializing a URL's (`URLDecomposition::SerializedOrigin`): there's no same origin or same origin-domain check, and `document.domain` isn't implemented. `CSSStyleSheet::CanAccessRules`, `ParserContext::HasDocumentSecurityOrigin`, `canReceiveDragData`, `canDisplay` and cross-origin image reuse are FIXMEs that allow everything, and `EventHandler::CanDropCurrentlyDraggedImageAsFile` is always true.
 - There is no ID map per tree scope: `getElementById` and selector fast paths walk the tree, live collections re-walk on every access, and `HTMLImageElement::AssociatedMapElement` walks the tree too. A node in a shadow tree finds its tree scope by walking to its root on every call.
 - `FirstChild()`, `ParentNode()` and friends return raw pointers rather than `RefPtr`; `NodeFilter` is clunky from C++.
@@ -106,7 +106,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `@font-face`'s `font-size-adjust`, features and variations aren't applied to loaded fonts (FIXMEs in `FontCustomPlatformData.cpp`). `@font-palette-values` and `@font-feature-values` are parsed but have no effect on fonts (FIXME in `CSSFontSelector.cpp`).
 - The `s` attribute-selector flag (Selectors 4) is rejected (FIXME in `SelectorParser.cpp`); supporting it needs a selector flag and serialisation.
 - `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).
-- State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`, `:active-view-transition(-type)` and the view-transition pseudo-elements. `:visited` matches only links with an empty `href` (see *Style*).
+- State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
 - `:lang()` has no document default language or Content-Language header (FIXME in `SelectorCheckerTestFunctions.cpp`); WebVTT elements don't use their cue's language.
 - `SelectorQuery` has no ID fast paths (rightmost-ID lookup, filtering the root by an ancestor ID, `[id=...]`; FIXMEs until tree scopes map IDs).
 - No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), user style sheets' `@import`s and load options aren't handled, and `ImportRule` has FIXMEs for opaque CORS sources.
@@ -131,7 +131,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - `env()` has no values: without the document's `ConstantPropertyMap` an `env()` reference falls back or is invalid at computed-value time (FIXME in `VariableReferenceValue.cpp`).
 - `::cue` rules for WebVTT elements aren't collected (FIXME in `ElementRuleCollector.cpp`).
-- View transitions are not implemented: named view transition pseudo-elements get no captured class list, the document element's pseudo-elements aren't created in `TreeResolver`, and an element captured in a view transition isn't forced flat in `Adjuster`.
 - Visually ordered documents and design mode aren't applied in `ResolveForDocument` and `Adjuster` (FIXMEs).
 - No visibility adjustment (`VisibilityAdjustment`): `adjustVisibilityForPseudoElement` and the force-hidden subtree adjustment are FIXMEs.
 - `Adjuster` leaves SVG transforms not stored on the style, and the layer-based SVG engine's `z-index`/stacking branches, as FIXMEs.
@@ -159,7 +158,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No `Animation.frameRate` or `CustomEffect` (non-standard proposals).
 - Scroll and view timelines have no accelerated representation (no threaded animations), and a change in view timeline metrics doesn't update the timeline (FIXME in `KeyframeEffect.cpp`).
 - Keyframe offsets in named timeline ranges compute to NaN without a view timeline.
-- View transitions' animations are absent, so view transition names take no part in composite order comparisons (FIXME in `WebAnimationUtilities.cpp`) and group pseudo-elements' size and transform animations don't exist.
 - `TreeResolver` skips the back/forward cache and printing checks on the animated-update path, and has a FIXME to push after-change style into the parent stack.
 - Image animations pause out of view and resume (`RenderView::AddRendererWithPausedImageAnimations`), and there is no per-element or page animation control (`RenderElement::AllowsAnimation` is always true; FIXME).
 - Extent computation for animated motion path (`offset-*`) properties is missing (FIXME in `KeyframeEffect.cpp`).
@@ -192,7 +190,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - The compositing operators `darker` and `difference` are not mapped: `CompositeOperator` falls back to source-over (FIXME in Krystal.UI's `GraphicsContextRender2D.cpp`).
 - There's no software filter path: filters are applied by the host's accelerated backend, or by the graphics context for the ones it can draw. Reference filter clients and SVG shapes' filter regions are FIXMEs (see *SVG*), and `filter: url()` to an external document is not supported (see *Images and resources*).
 - Backdrop filters are drawn only by the compositor: the flattened whole repaint (`View::Record`) doesn't draw them.
-- `::backdrop` is missing from repaint and `Styleable::FromRenderer`, and there are no view transition captures.
+- `::backdrop` is missing from repaint and `Styleable::FromRenderer`.
 - The broken image icon is not drawn (FIXMEs in `CachedImage.cpp` and `RenderImage.cpp`).
 - `ImageQualityController::ChooseInterpolationQuality` returns the style's quality or the default: there is no size- or scroll-dependent choice.
 - Text painting has no document markers (spelling, grammar), no IME composition painting, no dragged or transparent content and no glyph display list cache. There is no print-backgrounds setting, and font subpixel quantization is a FIXME.
@@ -363,7 +361,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Touch: documents without touch event listeners aren't skipped (`hasTouchEventHandlers` is a FIXME), and touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.
 - Pointer lock: the sandbox flag check (`SecurityError`) is a FIXME. The window side of pointer lock is untested (it needs a real cursor).
 - Gamepad: XInput only (Xbox-style pads, four at most, polled), with no GameInput, SDL or Windows.Gaming.Input backend.
-- Hit testing ignores child frames. `HitTestResult` queries about what was hit (selection, images, media, titles, editing, link targets) are FIXMEs. `RenderLayer` hit testing lacks view transitions, SVG resources, fixed container sampling, resizers and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area.
+- Hit testing ignores child frames. `HitTestResult` queries about what was hit (selection, images, media, titles, editing, link targets) are FIXMEs. `RenderLayer` hit testing lacks SVG resources, fixed container sampling, resizers and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area.
 - `IsDraggableLink` is a local check (an HTML link with `href`, not editable); the editable-link-behaviour setting is absent.
 - Page overlays and synthetic touch events are FIXMEs in `EventHandler`.
 
@@ -385,12 +383,12 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `DocumentLoader` has no redirects, content policies (responses shown as downloads), archives or streaming; the main resource arrives whole on a networking task. There is no progress tracker, and HTTP status checks, `X-Content-Type-Options: nosniff` and content type parsing (`ParsedContentType`) are absent because responses carry no headers or statuses.
 - `DocumentWriter` takes HTML, XML and text documents in UTF-8 only (BOMs removed, split sequences kept, invalid bytes replaced), with no other encodings; there are no image, media or plug-in documents.
 - The only pragmas are `content-language` and `default-style`; the `Content-Language` header is ignored, as responses have no headers.
-- Prerendering, speculation rules, `javascript:` URLs, `pagereveal`/`pageswap` and view transitions are not implemented. Icons, manifests and alternate style sheet sets chosen by script are not loaded.
+- Prerendering, speculation rules, `javascript:` URLs, `pagereveal`/`pageswap` are not implemented. Icons, manifests and alternate style sheet sets chosen by script are not loaded.
 - No DOM `URL` interface or `URLSearchParams` (`url::URL` is internal), so WPT `setters_tests.json` is not run.
 - There are no deferred loads, multipart loads or unreachable URLs.
 - Document timers are not throttled or aligned, and animation frames are not throttled below the page's rate.
 - Fragment navigation does not reset scroll anchoring (there is none).
-- `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents, fullscreen and view transitions steps of the update are FIXMEs, and `Document` has no post-layout task timer.
+- `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents and fullscreen steps of the update are FIXMEs, and `Document` has no post-layout task timer.
 
 ## Core and infrastructure
 

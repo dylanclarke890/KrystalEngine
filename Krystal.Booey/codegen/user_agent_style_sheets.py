@@ -21,7 +21,6 @@ SHEETS = {
     "MathMLFontSizeMathUserAgentStyleSheet": "mathmlFontSizeMath.css",
     "CounterStylesUserAgentStyleSheet": "counterStyles.css",
     "PopoverUserAgentStyleSheet": "popover.css",
-    "ViewTransitionsUserAgentStyleSheet": "viewTransitions.css",
     "HorizontalFormControlsUserAgentStyleSheet": "horizontalFormControls.css",
     "ThemeAdwaitaUserAgentStyleSheet": "themeAdwaita.css",
     "MeterElementShadowUserAgentStyleSheet": "meterElementShadow.css",

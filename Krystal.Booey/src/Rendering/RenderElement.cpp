@@ -1396,8 +1396,7 @@ namespace krys::boo
     // FIXME: We could save this call when the change only affected non-inherited properties.
     for (auto &elementChild : ChildrenOfType<RenderElement>(*this))
     {
-      if (!elementChild.IsAnonymous() || elementChild.Style().GetPseudoElementType()
-          || elementChild.IsViewTransitionContainingBlock())
+      if (!elementChild.IsAnonymous() || elementChild.Style().GetPseudoElementType())
       {
         continue;
       }
@@ -1616,7 +1615,7 @@ namespace krys::boo
     // FIXME: Multi-column sets, once there are any.
     return IsAnonymous() && Style().Display() == DisplayType::Block && !Style().GetPseudoElementType()
            && IsRenderBlock() && !IsRenderMathMLBlock() && !IsRenderListMarker() && !IsRenderFragmentedFlow()
-           && !IsRenderView() && !IsViewTransitionContainingBlock();
+           && !IsRenderView();
   }
 
   bool RenderElement::IsBlockContainer() const noexcept
@@ -1949,8 +1948,7 @@ namespace krys::boo
                && (styleToUse ? styleToUse->HasTransformRelatedProperty() : HasTransformRelatedProperty()))
            || (style.HasBackdropFilter() && !IsDocumentElementRenderer())
            || (style.HasFilter() && !IsDocumentElementRenderer()) || IsLegacyRenderSVGForeignObject()
-           || ShouldApplyLayoutContainment(styleToUse) || ShouldApplyPaintContainment(styleToUse)
-           || IsViewTransitionContainingBlock();
+           || ShouldApplyLayoutContainment(styleToUse) || ShouldApplyPaintContainment(styleToUse);
   }
 
   bool RenderElement::CanContainAbsolutelyPositionedObjects(const RenderStyle *styleToUse) const noexcept
@@ -2290,22 +2288,6 @@ namespace krys::boo
   {
     return style.HasOpacity() || style.HasMask() || style.HasClipPath() || style.HasFilter()
            || style.HasBackdropFilter() || style.HasBlendMode();
-  }
-
-  bool RenderElement::HasViewTransitionName() const noexcept
-  {
-    return !Style().GetViewTransitionName().IsNone();
-  }
-
-  bool RenderElement::IsViewTransitionRoot() const noexcept
-  {
-    return Style().GetPseudoElementType() == PseudoElementType::ViewTransition;
-  }
-
-  bool RenderElement::RequiresRenderingConsolidationForViewTransition() const noexcept
-  {
-    // FIXME: Renderers captured in a view transition too, once there are view transitions.
-    return HasViewTransitionName();
   }
 
   FloatRect RenderElement::TransformReferenceBoxRect() const noexcept

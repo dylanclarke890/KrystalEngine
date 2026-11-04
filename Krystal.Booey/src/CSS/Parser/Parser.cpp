@@ -27,7 +27,6 @@
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
@@ -486,7 +485,6 @@ namespace krys::boo::css
       case AtRuleId::Property:          return ConsumePropertyRule(prelude, block);
       case AtRuleId::Scope:             return ConsumeScopeRule(prelude, block);
       case AtRuleId::StartingStyle:     return ConsumeStartingStyleRule(prelude, block);
-      case AtRuleId::ViewTransition:    return ConsumeViewTransitionRule(prelude, block);
       case AtRuleId::PositionTry:       return ConsumePositionTryRule(prelude, block);
       case AtRuleId::Function:          return ConsumeFunctionRule(prelude, block);
       default:                          return nullptr; // Parse error, unrecognised at-rule with block
@@ -1097,17 +1095,6 @@ namespace krys::boo::css
       return nullptr;
     }
     return CounterStyleRule::Create(name, krys::move(descriptors));
-  }
-
-  RefPtr<ViewTransitionRule> Parser::ConsumeViewTransitionRule(TokenRange prelude, TokenRange block) noexcept
-  {
-    if (!prelude.IsAtEnd())
-    {
-      return nullptr; // Parse error; @view-transition prelude should be empty
-    }
-
-    auto declarations = ConsumeDeclarationListInNewNestingContext(block, RuleType::ViewTransition);
-    return ViewTransitionRule::Create(CreateStyleProperties(declarations, _context.Mode));
   }
 
   RefPtr<PositionTryRule> Parser::ConsumePositionTryRule(TokenRange prelude, TokenRange block) noexcept
@@ -1812,8 +1799,7 @@ namespace krys::boo::css
     {
       return type == RuleType::CounterStyle || type == RuleType::FontFace
              || type == RuleType::FontPaletteValues || type == RuleType::Keyframe
-             || type == RuleType::PositionTry || type == RuleType::ViewTransition
-             || type == RuleType::Function;
+             || type == RuleType::PositionTry || type == RuleType::Function;
     }
   }
 

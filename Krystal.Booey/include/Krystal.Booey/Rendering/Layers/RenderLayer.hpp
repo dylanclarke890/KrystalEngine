@@ -266,7 +266,6 @@ namespace krys::boo
       IncludeRootBackgroundPaintingArea,
       PreserveAncestorFlags,
       UseLocalClipRectExcludingCompositingIfPossible,
-      ExcludeViewTransitionCapturedDescendants,
     };
     static constexpr EnumSet<CalculateLayerBoundsFlag> DefaultCalculateLayerBoundsFlags()
     {
@@ -1122,7 +1121,6 @@ namespace krys::boo
       PaintingChildClippingMaskPhase,
       PaintingSVGClippingMask,
       CollectingEventRegion,
-      PaintingSkipDescendantViewTransition,
     };
     static constexpr EnumSet<PaintLayerFlag> PaintLayerPaintingCompositingAllPhasesFlags()
     {

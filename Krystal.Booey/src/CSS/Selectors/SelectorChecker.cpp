@@ -34,7 +34,6 @@ namespace krys::boo::css
     bool InFunctionalPseudoClass {false};
     bool PseudoElementEffective {true};
     bool HasSelectionPseudo {false};
-    bool HasViewTransitionPseudo {false};
     bool MustMatchHostPseudoClass {false};
     bool MatchedHostPseudoClass {false};
     bool IsNegation {false};
@@ -146,17 +145,6 @@ namespace krys::boo::css
         }
       }
       return count;
-    }
-
-    KRYS_NODISCARD bool
-      HasViewTransitionPseudoElement(EnumSet<PseudoElementType> collectedPseudoElements) noexcept
-    {
-      auto functionalPseudoElementSet = EnumSet {
-        PseudoElementType::ViewTransition,          PseudoElementType::ViewTransitionGroup,
-        PseudoElementType::ViewTransitionImagePair, PseudoElementType::ViewTransitionNew,
-        PseudoElementType::ViewTransitionOld,
-      };
-      return collectedPseudoElements.ContainsAny(functionalPseudoElementSet);
     }
 
     KRYS_NODISCARD SelectorChecker::LocalContext
@@ -767,15 +755,10 @@ namespace krys::boo::css
       case SelectorRelation::Compounding:
       {
         // a selector is invalid if something follows a pseudo-element
-        // We make an exception for view transition pseudo elements and allow a set of pseudo classes (but
-        // nothing else) to follow the pseudo elements.
         nextContext.HasSelectionPseudo = collectedPseudoElements.Contains(PseudoElementType::Selection);
-        nextContext.HasViewTransitionPseudo = HasViewTransitionPseudoElement(collectedPseudoElements);
 
         if ((context.IsMatchElement || checkingContext.ResolvingMode == Mode::CollectingRules)
-            && collectedPseudoElements && !nextContext.HasSelectionPseudo
-            && !(nextContext.HasViewTransitionPseudo
-                 && nextContext.CurrentSelector->Match() == SelectorMatch::PseudoClass))
+            && collectedPseudoElements && !nextContext.HasSelectionPseudo)
         {
           return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
         }
@@ -977,11 +960,6 @@ namespace krys::boo::css
           }
         }
         return true;
-      }
-
-      if (context.HasViewTransitionPseudo)
-      {
-        return CheckViewTransitionPseudoClass(checkingContext, element, selector);
       }
 
       // Normal element pseudo class checking.
@@ -1431,11 +1409,6 @@ namespace krys::boo::css
         case SelectorPseudoClass::PopoverOpen:          return element.IsPopoverShowing();
 
         case SelectorPseudoClass::InternalHtmlDocument: return Is<dom::HTMLDocument>(element.NodeDocument());
-
-        case SelectorPseudoClass::ActiveViewTransition:
-        case SelectorPseudoClass::ActiveViewTransitionType:
-          // FIXME: View transitions; no document has an active one.
-          return false;
       }
       return false;
     }
@@ -1552,42 +1525,6 @@ namespace krys::boo::css
             return false;
           }
           return (*selector.ArgumentList())[0] == requestedPseudoElement->NameArgument;
-
-        case SelectorPseudoElement::ViewTransitionGroup:
-        case SelectorPseudoElement::ViewTransitionImagePair:
-        case SelectorPseudoElement::ViewTransitionOld:
-        case SelectorPseudoElement::ViewTransitionNew:
-        {
-          // Always matches when not specifically requested so it gets added to the collectedPseudoElements.
-          if (!requestedPseudoElement)
-          {
-            return true;
-          }
-          if (requestedPseudoElement->Type != Selector::StylePseudoElementTypeFor(selector.PseudoElement())
-              || !selector.ArgumentList())
-          {
-            return false;
-          }
-
-          auto &list = *selector.ArgumentList();
-          auto &name = list[0];
-          if (name != dom::StarAtom() && name != requestedPseudoElement->NameArgument)
-          {
-            return false;
-          }
-
-          if (list.size() == 1)
-          {
-            return true;
-          }
-
-          return std::all_of(list.begin() + 1, list.end(),
-                             [&](const CSSOMStringAtom &classSelector)
-                             {
-                               return std::ranges::find(checkingContext.ClassList, classSelector)
-                                      != checkingContext.ClassList.end();
-                             });
-        }
 
         default: return true;
       }
@@ -1900,29 +1837,4 @@ namespace krys::boo::css
     return result;
   }
 
-  bool SelectorChecker::CheckViewTransitionPseudoClass(const CheckingContext &checkingContext,
-                                                       const dom::Element &element,
-                                                       const Selector &selector) const noexcept
-  {
-    (void)element;
-    krys_debug_assert(selector.Match() == SelectorMatch::PseudoClass);
-
-    if (selector.PseudoClass() != SelectorPseudoClass::OnlyChild)
-    {
-      return false;
-    }
-
-    auto &pseudoIdentifier = checkingContext.RequestedPseudoElement();
-    if (!pseudoIdentifier)
-    {
-      return false;
-    }
-
-    switch (pseudoIdentifier->Type)
-    {
-      case PseudoElementType::ViewTransitionImagePair: return true;
-      // FIXME: The group, old and new pseudo-elements depend on the document's active view transition.
-      default:                                         return false;
-    }
-  }
 }

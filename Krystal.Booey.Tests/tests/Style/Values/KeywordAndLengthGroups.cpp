@@ -35,8 +35,6 @@
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
 #include "Krystal.Booey/Style/Values/Speech/SpeakAs.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/Zoom.hpp"
-#include "Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionClass.hpp"
-#include "Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionName.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
 
 namespace krys::boo::style::tests
@@ -201,24 +199,6 @@ namespace krys::boo::style::tests
       CHECK(Serialised(string) == "\"...\"");
       CHECK(Convert<MaximumLines>(PropertyId::MaxLines, u8"none").IsNone());
       CHECK(Convert<MaximumLines>(PropertyId::MaxLines, u8"3") == MaximumLines {MaximumLines::Value {3}});
-    }
-
-    SECTION("view transitions")
-    {
-      auto viewTransitionName = [&](utf8_stringview value)
-      {
-        Build(PropertyId::ViewTransitionName, value, ScopeOrdinal::Shadow);
-        return Style.GetViewTransitionName();
-      };
-
-      CHECK(viewTransitionName(u8"none").IsNone());
-      // Names are scoped to the declaration's style scope.
-      auto named = viewTransitionName(u8"hero");
-      CHECK(named.IsCustomIdentifier());
-      CHECK(named.GetScopeOrdinal() == ScopeOrdinal::Shadow);
-      CHECK(Serialised(named) == "hero");
-      CHECK(viewTransitionName(u8"auto").IsAuto());
-      CHECK(viewTransitionName(u8"match-element").IsMatchElement());
     }
 
     SECTION("color-scheme")

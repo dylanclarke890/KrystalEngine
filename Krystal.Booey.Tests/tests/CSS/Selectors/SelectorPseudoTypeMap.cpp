@@ -27,10 +27,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorEnums(traits)", "[CSS][Selectors][SelectorPseudoTypeMap]")
   {
-    STATIC_CHECK(EnumTraits<SelectorPseudoClass>::DistinctValues == 64uz);
-    STATIC_CHECK(EnumTraits<SelectorPseudoElement>::DistinctValues == 21uz);
+    STATIC_CHECK(EnumTraits<SelectorPseudoClass>::DistinctValues == 62uz);
+    STATIC_CHECK(EnumTraits<SelectorPseudoElement>::DistinctValues == 16uz);
     STATIC_CHECK(BitCount<SelectorPseudoClass>() == 6u);
-    STATIC_CHECK(BitCount<SelectorPseudoElement>() == 5u);
+    STATIC_CHECK(BitCount<SelectorPseudoElement>() == 4u);
   }
 
   TEST_CASE("FindPseudoClassAndCompatibilityElementName(pseudo-classes)",
@@ -40,7 +40,6 @@ namespace krys::boo::css::tests
     CHECK(IsPseudoClass(u8"nth-last-of-type", SelectorPseudoClass::NthLastOfType));
     CHECK(IsPseudoClass(u8"is", SelectorPseudoClass::Is));
     CHECK(IsPseudoClass(u8"where", SelectorPseudoClass::Where));
-    CHECK(IsPseudoClass(u8"active-view-transition-type", SelectorPseudoClass::ActiveViewTransitionType));
     CHECK(IsPseudoClass(u8"popover-open", SelectorPseudoClass::PopoverOpen));
     CHECK(IsPseudoClass(u8"volume-locked", SelectorPseudoClass::VolumeLocked));
 
@@ -94,8 +93,6 @@ namespace krys::boo::css::tests
   {
     CHECK(FindPseudoElementName(u8"before") == SelectorPseudoElement::Before);
     CHECK(FindPseudoElementName(u8"marker") == SelectorPseudoElement::Marker);
-    CHECK(FindPseudoElementName(u8"view-transition-image-pair")
-          == SelectorPseudoElement::ViewTransitionImagePair);
     CHECK(FindPseudoElementName(u8"Highlight") == SelectorPseudoElement::Highlight);
     CHECK(FindPseudoElementName(u8"cue") == SelectorPseudoElement::Cue);
   }

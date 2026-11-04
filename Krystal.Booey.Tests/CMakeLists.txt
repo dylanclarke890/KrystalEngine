@@ -121,7 +121,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSOM/CSSStartingStyleRule.cpp
 		tests/CSS/CSSOM/CSSStyleRule.cpp
 		tests/CSS/CSSOM/CSSSupportsRule.cpp
-		tests/CSS/CSSOM/CSSViewTransitionRule.cpp
 		tests/CSS/Counter/CounterStyle.cpp
 		tests/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
 		tests/CSS/CSSOM/CSSStyleProperties.cpp
@@ -193,7 +192,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/UI.cpp
 		tests/CSS/Properties/Consumers/URL.cpp
 		tests/CSS/Properties/Consumers/UnicodeRange.cpp
-		tests/CSS/Properties/Consumers/ViewTransition.cpp
 		tests/CSS/Properties/Consumers/WillChange.cpp
 		tests/CSS/Properties/Property.cpp
 		tests/CSS/Properties/PropertyInitialValues.cpp

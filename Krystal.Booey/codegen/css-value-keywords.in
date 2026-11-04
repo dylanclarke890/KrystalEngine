@@ -1796,9 +1796,6 @@ anchors-valid
 anchors-visible
 no-overflow
 
-// view-transition-name
-match-element
-
 // <url>
 // url
 

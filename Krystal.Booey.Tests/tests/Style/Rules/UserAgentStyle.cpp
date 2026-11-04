@@ -173,14 +173,6 @@ namespace krys::boo::style::tests
       UserAgentStyle::EnsureDefaultStyleSheetsForElement(*popover);
       RequireFullyParsed(css::PopoverUserAgentStyleSheet, UserAgentStyle::PopoverStyleSheet);
     }
-
-    SECTION("View transitions, with their keyframes")
-    {
-      auto div = document->CreateElement(u8"div").ReleaseValue();
-      UserAgentStyle::EnsureDefaultStyleSheetsForElement(*div);
-      RequireFullyParsed(css::ViewTransitionsUserAgentStyleSheet, UserAgentStyle::ViewTransitionsStyleSheet);
-      REQUIRE(Resolver::UserAgentKeyframes().contains(css::CSSOMStringAtom(u8"-ua-view-transition-fade-in")));
-    }
   }
 
   TEST_CASE("UserAgentStyle: a form that's a child of a table part isn't rendered",

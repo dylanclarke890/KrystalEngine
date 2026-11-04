@@ -160,8 +160,7 @@ namespace krys::boo
     IsFragmentContainer,
     IsFragmentedFlow,
     IsTextControl,
-    IsSVGBlock,
-    IsViewTransitionContainingBlock
+    IsSVGBlock
   };
 
   enum class RenderObjectLineBreakFlag : uint8
@@ -174,7 +173,6 @@ namespace krys::boo
     IsImage,
     IsMedia,
     IsWidget,
-    IsViewTransitionCapture,
     UsesBoundaryCaching
   };
 
@@ -201,9 +199,9 @@ namespace krys::boo
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 20uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectTypeFlag, 8uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBlockFlowFlag, 5uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBlockFlowFlag, 4uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectLineBreakFlag, 1uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectReplacedFlag, 5uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectReplacedFlag, 4uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectSVGModelObjectFlag, 6uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBoundingRectBehavior, 6uz);
 
@@ -273,7 +271,6 @@ namespace krys::boo
       VTTCue,
       Video,
       View,
-      ViewTransitionCapture,
       MathMLBlock,
       MathMLFraction,
       MathMLMath,
@@ -954,11 +951,6 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderSearchField() const noexcept
     {
       return _type == Type::SearchField;
-    }
-    KRYS_NODISCARD bool IsViewTransitionContainingBlock() const noexcept
-    {
-      return IsRenderBlockFlow()
-             && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsViewTransitionContainingBlock);
     }
     KRYS_NODISCARD bool IsRenderView() const noexcept
     {

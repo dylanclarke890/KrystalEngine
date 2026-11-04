@@ -67,7 +67,6 @@ namespace krys::boo::style
     Ref<const RuleSet> _authorStyle;
     RefPtr<const RuleSet> _userStyle;
     RefPtr<const RuleSet> _userAgentMediaQueryStyle;
-    RefPtr<const RuleSet> _dynamicViewTransitionsStyle;
     SelectorMatchingState *_selectorMatchingState;
 
     bool _shouldIncludeEmptyRules {false};

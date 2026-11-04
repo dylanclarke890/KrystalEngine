@@ -33,7 +33,6 @@ namespace krys::boo::css
       {u8"stylistic"sv, AtRuleId::Stylistic},
       {u8"supports"sv, AtRuleId::Supports},
       {u8"swash"sv, AtRuleId::Swash},
-      {u8"view-transition"sv, AtRuleId::ViewTransition},
     }};
 
     for (const auto &[ruleName, id] : mappings)

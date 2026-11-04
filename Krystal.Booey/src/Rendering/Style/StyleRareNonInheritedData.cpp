@@ -32,8 +32,6 @@ namespace krys::boo
         Rotate(style::ComputedStyle::InitialRotate()), Scale(style::ComputedStyle::InitialScale()),
         Translate(style::ComputedStyle::InitialTranslate()),
         ContainerNames(style::ComputedStyle::InitialContainerNames()),
-        ViewTransitionClasses(style::ComputedStyle::InitialViewTransitionClasses()),
-        ViewTransitionName(style::ComputedStyle::InitialViewTransitionName()),
         ColumnGap(style::ComputedStyle::InitialColumnGap()), RowGap(style::ComputedStyle::InitialRowGap()),
         ItemTolerance(style::ComputedStyle::InitialItemTolerance()),
         OffsetPath(style::ComputedStyle::InitialOffsetPath()),
@@ -109,16 +107,15 @@ namespace krys::boo
         ShapeImageThreshold(o.ShapeImageThreshold), Perspective(o.Perspective),
         PerspectiveOrigin(o.PerspectiveOrigin), ClipPath(o.ClipPath), CustomProperties(o.CustomProperties),
         CustomPaintWatchedProperties(o.CustomPaintWatchedProperties), Rotate(o.Rotate), Scale(o.Scale),
-        Translate(o.Translate), ContainerNames(o.ContainerNames),
-        ViewTransitionClasses(o.ViewTransitionClasses), ViewTransitionName(o.ViewTransitionName),
-        ColumnGap(o.ColumnGap), RowGap(o.RowGap), ItemTolerance(o.ItemTolerance), OffsetPath(o.OffsetPath),
-        OffsetDistance(o.OffsetDistance), OffsetPosition(o.OffsetPosition), OffsetAnchor(o.OffsetAnchor),
-        OffsetRotate(o.OffsetRotate), TextDecorationColor(o.TextDecorationColor),
-        TextDecorationThickness(o.TextDecorationThickness), ScrollTimelines(o.ScrollTimelines),
-        ScrollTimelineAxes(o.ScrollTimelineAxes), ScrollTimelineNames(o.ScrollTimelineNames),
-        ViewTimelines(o.ViewTimelines), ViewTimelineInsets(o.ViewTimelineInsets),
-        ViewTimelineAxes(o.ViewTimelineAxes), ViewTimelineNames(o.ViewTimelineNames),
-        TimelineScope(o.TimelineScope), ScrollbarGutter(o.ScrollbarGutter), ScrollSnapType(o.ScrollSnapType),
+        Translate(o.Translate), ContainerNames(o.ContainerNames), ColumnGap(o.ColumnGap), RowGap(o.RowGap),
+        ItemTolerance(o.ItemTolerance), OffsetPath(o.OffsetPath), OffsetDistance(o.OffsetDistance),
+        OffsetPosition(o.OffsetPosition), OffsetAnchor(o.OffsetAnchor), OffsetRotate(o.OffsetRotate),
+        TextDecorationColor(o.TextDecorationColor), TextDecorationThickness(o.TextDecorationThickness),
+        ScrollTimelines(o.ScrollTimelines), ScrollTimelineAxes(o.ScrollTimelineAxes),
+        ScrollTimelineNames(o.ScrollTimelineNames), ViewTimelines(o.ViewTimelines),
+        ViewTimelineInsets(o.ViewTimelineInsets), ViewTimelineAxes(o.ViewTimelineAxes),
+        ViewTimelineNames(o.ViewTimelineNames), TimelineScope(o.TimelineScope),
+        ScrollbarGutter(o.ScrollbarGutter), ScrollSnapType(o.ScrollSnapType),
         ScrollSnapAlign(o.ScrollSnapAlign), PseudoElementNameArgument(o.PseudoElementNameArgument),
         AnchorNames(o.AnchorNames), AnchorScope(o.AnchorScope), PositionAnchor(o.PositionAnchor),
         PositionArea(o.PositionArea), PositionTryFallbacks(o.PositionTryFallbacks),
@@ -188,8 +185,7 @@ namespace krys::boo
            && InputSecurity == o.InputSecurity && ContentVisibility == o.ContentVisibility
            && BreakAfter == o.BreakAfter && BreakBefore == o.BreakBefore && BreakInside == o.BreakInside
            && ContainerType == o.ContainerType && TextBoxTrim == o.TextBoxTrim
-           && OverflowAnchor == o.OverflowAnchor && ViewTransitionClasses == o.ViewTransitionClasses
-           && ViewTransitionName == o.ViewTransitionName && PositionTryOrder == o.PositionTryOrder
+           && OverflowAnchor == o.OverflowAnchor && PositionTryOrder == o.PositionTryOrder
            && PositionVisibility == o.PositionVisibility && FieldSizing == o.FieldSizing
            && NativeAppearanceDisabled == o.NativeAppearanceDisabled && ScrollbarWidth == o.ScrollbarWidth
            && UsesAnchorFunctions == o.UsesAnchorFunctions

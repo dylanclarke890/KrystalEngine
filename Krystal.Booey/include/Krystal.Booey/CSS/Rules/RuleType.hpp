@@ -22,8 +22,7 @@ namespace krys::boo::css
     Supports = 12,
     FontFeatureValues = 14,
     // Numbers above 14 are not exposed to the web.
-    ViewTransition = 15,
-    LayerBlock,
+    LayerBlock = 15,
     LayerStatement,
     Container,
     FontPaletteValues,
@@ -38,7 +37,7 @@ namespace krys::boo::css
     FunctionDeclarations,
   };
 
-  constexpr auto FirstUnexposedRuleType = RuleType::ViewTransition;
+  constexpr auto FirstUnexposedRuleType = RuleType::LayerBlock;
 }
 
-KRYS_DEFINE_ENUM_TRAITS(krys::boo::css::RuleType, 26uz, false, false);
+KRYS_DEFINE_ENUM_TRAITS(krys::boo::css::RuleType, 25uz, false, false);

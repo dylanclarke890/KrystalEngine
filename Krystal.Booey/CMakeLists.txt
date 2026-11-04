@@ -329,7 +329,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/CSSOM/CSSStartingStyleRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp
-  include/Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp
   include/Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp
@@ -434,7 +433,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/UI.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/URL.hpp
-  include/Krystal.Booey/CSS/Properties/Consumers/ViewTransition.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp
   include/Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp
   include/Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp
@@ -480,7 +478,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Rules/PositionTryRule.hpp
   include/Krystal.Booey/CSS/Rules/Rule.hpp
   include/Krystal.Booey/CSS/Rules/RuleType.hpp
-  include/Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp
   include/Krystal.Booey/CSS/Selectors/MutableSelector.hpp
   include/Krystal.Booey/CSS/Selectors/Selector.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorChecker.hpp
@@ -719,7 +716,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/CSSOM/CSSStartingStyleRule.cpp
   src/CSS/CSSOM/CSSStyleRule.cpp
   src/CSS/CSSOM/CSSSupportsRule.cpp
-  src/CSS/CSSOM/CSSViewTransitionRule.cpp
   src/CSS/CSSOM/CSSStyleDeclaration.cpp
   src/CSS/CSSOM/CSSStyleProperties.cpp
   src/CSS/StyleSheets/CSSStyleSheet.cpp
@@ -791,7 +787,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Consumers/UI.cpp
   src/CSS/Properties/Consumers/UnicodeRange.cpp
   src/CSS/Properties/Consumers/URL.cpp
-  src/CSS/Properties/Consumers/ViewTransition.cpp
   src/CSS/Properties/Consumers/WillChange.cpp
   src/CSS/Properties/ImmutableStyleProperties.cpp
   src/CSS/Properties/MutableStyleProperties.cpp
@@ -820,7 +815,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Rules/KeyframesRule.cpp
   src/CSS/Rules/PositionTryRule.cpp
   src/CSS/Rules/Rule.cpp
-  src/CSS/Rules/ViewTransitionRule.cpp
   src/CSS/Selectors/MutableSelector.cpp
   src/CSS/Selectors/Selector.cpp
   src/CSS/Selectors/SelectorChecker.cpp
@@ -3502,8 +3496,6 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Values/UI/Resize.hpp
   include/Krystal.Booey/Style/Values/Viewport/Zoom.hpp
   include/Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp
-  include/Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionClass.hpp
-  include/Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionName.hpp
   include/Krystal.Booey/Style/Values/WillChange/WillChange.hpp
 )
 
@@ -3767,7 +3759,6 @@ set(KRYSTAL_BOOEY_STYLE_SOURCES
   src/Style/Values/UI/AccentColor.cpp
   src/Style/Values/UI/Cursor.cpp
   src/Style/Values/UI/Resize.cpp
-  src/Style/Values/ViewTransitions/ViewTransitionName.cpp
   src/Style/Values/WillChange/WillChange.cpp
 )
 

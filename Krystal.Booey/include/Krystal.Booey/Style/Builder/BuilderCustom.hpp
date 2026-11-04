@@ -584,17 +584,6 @@ namespace krys::boo::style
     auto copy = value;
     return copy;
   }
-  KRYS_NODISCARD inline ViewTransitionClasses
-    ForwardInheritedValue(const ViewTransitionClasses &value) noexcept
-  {
-    auto copy = value;
-    return copy;
-  }
-  KRYS_NODISCARD inline ViewTransitionName ForwardInheritedValue(const ViewTransitionName &value) noexcept
-  {
-    auto copy = value;
-    return copy;
-  }
   KRYS_NODISCARD inline WebkitInitialLetter ForwardInheritedValue(const WebkitInitialLetter &value) noexcept
   {
     auto copy = value;

@@ -164,11 +164,6 @@ namespace krys::boo::style
     builder.AddRulesFromSheet(*UserAgentStyle::MediaQueryStyleSheet);
   }
 
-  RuleSet *ScopeRuleSets::DynamicViewTransitionsStyle() const noexcept
-  {
-    return _dynamicViewTransitionsStyle.get();
-  }
-
   RuleSet *ScopeRuleSets::UserStyle() const noexcept
   {
     if (_usesSharedUserStyle)
@@ -266,26 +261,6 @@ namespace krys::boo::style
     }
 
     return false;
-  }
-
-  RefPtr<css::ViewTransitionRule> ScopeRuleSets::GetViewTransitionRule() const noexcept
-  {
-    if (auto viewTransitionRule = _authorStyle->GetViewTransitionRule())
-    {
-      return viewTransitionRule;
-    }
-
-    if (_userStyle && _userStyle->GetViewTransitionRule())
-    {
-      return _userStyle->GetViewTransitionRule();
-    }
-
-    if (_userAgentMediaQueryStyle && _userAgentMediaQueryStyle->GetViewTransitionRule())
-    {
-      return _userAgentMediaQueryStyle->GetViewTransitionRule();
-    }
-
-    return nullptr;
   }
 
   Maybe<DynamicMediaQueryEvaluationChanges>

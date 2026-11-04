@@ -63,7 +63,6 @@ namespace krys::boo::style
   private:
     RefPtr<RuleSet> _authorStyle;
     mutable RefPtr<RuleSet> _userAgentMediaQueryStyle;
-    mutable RefPtr<RuleSet> _dynamicViewTransitionsStyle;
     RefPtr<RuleSet> _userStyle;
 
     Resolver &_styleResolver;
@@ -97,7 +96,6 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD RuleSet *UserAgentMediaQueryStyle() const noexcept;
-    KRYS_NODISCARD RuleSet *DynamicViewTransitionsStyle() const noexcept;
 
     KRYS_NODISCARD RuleSet &AuthorStyle() const noexcept
     {
@@ -147,18 +145,11 @@ namespace krys::boo::style
     KRYS_NODISCARD bool HasContainerQueries() const noexcept;
     KRYS_NODISCARD bool HasScopeRules() const noexcept;
 
-    KRYS_NODISCARD RefPtr<css::ViewTransitionRule> GetViewTransitionRule() const noexcept;
-
     KRYS_NODISCARD Maybe<DynamicMediaQueryEvaluationChanges>
       EvaluateDynamicMediaQueryRules(const css::mq::MediaQueryEvaluator &evaluator) noexcept;
 
     // FIXME: There should be just the const version.
     KRYS_NODISCARD RuleFeatureSet &MutableFeatures() noexcept;
-
-    void SetDynamicViewTransitionsStyle(RuleSet *ruleSet) noexcept
-    {
-      _dynamicViewTransitionsStyle = ShareRefPtr(ruleSet);
-    }
 
     KRYS_NODISCARD bool &IsInvalidatingStyleWithRuleSets() noexcept
     {

@@ -31,7 +31,6 @@ namespace krys::boo::css::tests
       CHECK(AtRuleIdFromName(u8"stylistic") == AtRuleId::Stylistic);
       CHECK(AtRuleIdFromName(u8"supports") == AtRuleId::Supports);
       CHECK(AtRuleIdFromName(u8"swash") == AtRuleId::Swash);
-      CHECK(AtRuleIdFromName(u8"view-transition") == AtRuleId::ViewTransition);
     }
 
     SECTION("ASCII case-insensitive")

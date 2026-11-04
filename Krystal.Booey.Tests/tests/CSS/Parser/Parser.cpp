@@ -11,7 +11,6 @@
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
@@ -381,13 +380,6 @@ namespace krys::boo::css::tests
       auto &universal = Downcast<PropertyRule>(*sheet->RuleAt(1)).GetDescriptor();
       CHECK(universal.Inherits == true);
       CHECK_FALSE(universal.InitialValue);
-    }
-
-    SECTION("@view-transition")
-    {
-      auto sheet = ParseSheet(u8"@view-transition { navigation: auto } @view-transition x { }");
-      REQUIRE(sheet->RuleCount() == 1);
-      CHECK(Downcast<ViewTransitionRule>(*sheet->RuleAt(0)).Navigation() == ViewTransitionNavigation::Auto);
     }
 
     SECTION("@position-try")

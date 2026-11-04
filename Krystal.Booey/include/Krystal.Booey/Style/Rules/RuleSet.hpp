@@ -4,7 +4,6 @@
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -155,7 +154,6 @@ namespace krys::boo::style
     AtomRuleMap _tagLocalNameRules;
     AtomRuleMap _tagLowercaseLocalNameRules;
     AtomRuleMap _userAgentPartRules;
-    AtomRuleMap _namedPseudoElementRules;
     RuleDataVector _linkPseudoClassRules;
     RuleDataVector _cuePseudoRules;
     RuleDataVector _hostPseudoClassRules;
@@ -165,7 +163,6 @@ namespace krys::boo::style
     RuleDataVector _focusVisiblePseudoClassRules;
     RuleDataVector _rootElementRules;
     RuleDataVector _universalRules;
-    RefPtr<css::ViewTransitionRule> _viewTransitionRule;
     RuleFeatureSet _features;
     List<DynamicMediaQueryRules> _dynamicMediaQueryRules;
     HashMap<List<size_t>, Ref<const RuleSet>, IndexListHash> _mediaQueryInvalidationRuleSetCache;
@@ -199,8 +196,6 @@ namespace krys::boo::style
     KRYS_NODISCARD static Ref<RuleSet> Create() noexcept;
 
     void AddRule(const css::StyleRule &rule, uint32 selectorIndex, uint32 selectorListIndex) noexcept;
-    void SetViewTransitionRule(css::ViewTransitionRule &rule) noexcept;
-    KRYS_NODISCARD RefPtr<css::ViewTransitionRule> GetViewTransitionRule() const noexcept;
 
     void AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map, const RuleData &ruleData) noexcept;
     void ShrinkToFit() noexcept;
@@ -241,12 +236,6 @@ namespace krys::boo::style
     KRYS_NODISCARD const RuleDataVector *LinkPseudoClassRules() const noexcept
     {
       return &_linkPseudoClassRules;
-    }
-
-    KRYS_NODISCARD const RuleDataVector *
-      NamedPseudoElementRules(const css::CSSOMStringAtom &key) const noexcept
-    {
-      return Find(_namedPseudoElementRules, key);
     }
 
     KRYS_NODISCARD const RuleDataVector &CuePseudoRules() const noexcept

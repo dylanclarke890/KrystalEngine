@@ -1575,8 +1575,7 @@ namespace krys::boo
       if (requireDescendantTraversal || requiresChildRebuild)
       {
         // FIXME: Widgets' content layers (attachWidgetContentLayersIfNecessary), once there are iframes and
-        // plug-ins; view transitions' new content layers (collectViewTransitionNewContentLayers), once there
-        // are view transitions.
+        // plug-ins.
 
         // If the layer has a clipping layer the overflow controls layers will be siblings of the clipping
         // layer. Otherwise, the overflow control layers are normal children.

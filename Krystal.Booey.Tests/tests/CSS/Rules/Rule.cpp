@@ -49,8 +49,8 @@ namespace krys::boo::css::tests
     CHECK(static_cast<int>(RuleType::CounterStyle) == 11);
     CHECK(static_cast<int>(RuleType::Supports) == 12);
     CHECK(static_cast<int>(RuleType::FontFeatureValues) == 14);
-    CHECK(FirstUnexposedRuleType == RuleType::ViewTransition);
-    CHECK(static_cast<int>(RuleType::FunctionDeclarations) == 28);
+    CHECK(FirstUnexposedRuleType == RuleType::LayerBlock);
+    CHECK(static_cast<int>(RuleType::FunctionDeclarations) == 27);
   }
 
   TEST_CASE_METHOD(ValueFixture, "StyleRule", "[CSS][Rules][Rule]")

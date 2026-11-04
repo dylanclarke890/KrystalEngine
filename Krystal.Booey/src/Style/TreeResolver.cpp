@@ -826,12 +826,8 @@ namespace krys::boo::style
     {
       if (auto parentPseudoId = ParentPseudoElement(pseudoElementIdentifier.Type))
       {
-        auto nameArgument = (*parentPseudoId == PseudoElementType::ViewTransitionGroup
-                             || *parentPseudoId == PseudoElementType::ViewTransitionImagePair)
-                              ? pseudoElementIdentifier.NameArgument
-                              : css::CSSOMStringAtom::Null();
-        if (auto *parentPseudoStyle = elementUpdate.Style->GetCachedPseudoStyle(
-              PseudoElementIdentifier {*parentPseudoId, nameArgument}))
+        if (auto *parentPseudoStyle =
+              elementUpdate.Style->GetCachedPseudoStyle(PseudoElementIdentifier {*parentPseudoId}))
         {
           return parentPseudoStyle;
         }

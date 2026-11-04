@@ -52,8 +52,6 @@
 #include "Krystal.Booey/Style/Values/Transforms/Scale.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Translate.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/Zoom.hpp"
-#include "Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionClass.hpp"
-#include "Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionName.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
 #include "Krystal.Core/Types/DataRef.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -139,9 +137,6 @@ namespace krys::boo
     style::Translate Translate;
 
     style::ContainerNames ContainerNames;
-
-    style::ViewTransitionClasses ViewTransitionClasses;
-    style::ViewTransitionName ViewTransitionName;
 
     style::GapGutter ColumnGap;
     style::GapGutter RowGap;

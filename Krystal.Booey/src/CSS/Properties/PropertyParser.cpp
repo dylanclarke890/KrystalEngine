@@ -89,10 +89,6 @@ namespace krys::boo::css
   KRYS_NODISCARD static bool ConsumePropertyDescriptor(TokenRange &, const ParserContext &, PropertyId,
                                                        PropertyParserResult &) noexcept;
 
-  // @view-transition descriptors.
-  KRYS_NODISCARD static bool ConsumeViewTransitionDescriptor(TokenRange &, const ParserContext &, PropertyId,
-                                                             PropertyParserResult &) noexcept;
-
   // @position-try descriptors.
   KRYS_NODISCARD static bool ConsumePositionTryDescriptor(TokenRange &, const ParserContext &, PropertyId,
                                                           IsImportant, PropertyParserResult &) noexcept;
@@ -254,11 +250,6 @@ namespace krys::boo::css
       case RuleType::Property:
       {
         parseSuccess = ConsumePropertyDescriptor(range, context, property, result);
-        break;
-      }
-      case RuleType::ViewTransition:
-      {
-        parseSuccess = ConsumeViewTransitionDescriptor(range, context, property, result);
         break;
       }
       case RuleType::PositionTry:
@@ -895,26 +886,6 @@ namespace krys::boo::css
     };
 
     RefPtr parsedValue = PropertyParsing::ParsePropertyDescriptor(range, property, state);
-    if (!parsedValue || !range.IsAtEnd())
-    {
-      return false;
-    }
-
-    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
-    return true;
-  }
-
-  bool ConsumeViewTransitionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                       PropertyParserResult &result) noexcept
-  {
-    auto state = PropertyParserState {
-      .Context = context,
-      .CurrentRule = RuleType::ViewTransition,
-      .CurrentProperty = property,
-      .Important = IsImportant(false),
-    };
-
-    RefPtr parsedValue = PropertyParsing::ParseViewTransitionDescriptor(range, property, state);
     if (!parsedValue || !range.IsAtEnd())
     {
       return false;

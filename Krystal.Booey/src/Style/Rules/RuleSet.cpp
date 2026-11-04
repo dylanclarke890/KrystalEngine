@@ -188,7 +188,6 @@ namespace krys::boo::style
     const css::Selector *customPseudoElementSelector = nullptr;
     const css::Selector *slottedPseudoElementSelector = nullptr;
     const css::Selector *partPseudoElementSelector = nullptr;
-    const css::Selector *namedPseudoElementSelector = nullptr;
     const css::Selector *cuePseudoElementSelector = nullptr;
     const css::Selector *selector = ruleData.Selector();
     do
@@ -240,16 +239,7 @@ namespace krys::boo::style
             case css::SelectorPseudoElement::Slotted:       slottedPseudoElementSelector = selector; break;
             case css::SelectorPseudoElement::Part:          partPseudoElementSelector = selector; break;
             case css::SelectorPseudoElement::Cue:           cuePseudoElementSelector = selector; break;
-            case css::SelectorPseudoElement::ViewTransitionGroup:
-            case css::SelectorPseudoElement::ViewTransitionImagePair:
-            case css::SelectorPseudoElement::ViewTransitionOld:
-            case css::SelectorPseudoElement::ViewTransitionNew:
-              if (selector->ArgumentList()->at(0) != dom::StarAtom())
-              {
-                namedPseudoElementSelector = selector;
-              }
-              break;
-            default: break;
+            default:                                        break;
           }
           break;
         case css::SelectorMatch::PseudoClass:
@@ -379,12 +369,6 @@ namespace krys::boo::style
       return;
     }
 
-    if (namedPseudoElementSelector)
-    {
-      AddToRuleSet(namedPseudoElementSelector->ArgumentList()->at(0), _namedPseudoElementRules, ruleData);
-      return;
-    }
-
     if (rootElementSelector)
     {
       _rootElementRules.push_back(ruleData);
@@ -400,16 +384,6 @@ namespace krys::boo::style
 
     // If we didn't find a specialized map to stick it in, file under universal rules.
     _universalRules.push_back(ruleData);
-  }
-
-  void RuleSet::SetViewTransitionRule(css::ViewTransitionRule &rule) noexcept
-  {
-    _viewTransitionRule = ShareRefPtr(&rule);
-  }
-
-  RefPtr<css::ViewTransitionRule> RuleSet::GetViewTransitionRule() const noexcept
-  {
-    return _viewTransitionRule;
   }
 
   template <typename TFunction>
@@ -438,7 +412,6 @@ namespace krys::boo::style
     traverseMap(_tagLocalNameRules);
     traverseMap(_tagLowercaseLocalNameRules);
     traverseMap(_userAgentPartRules);
-    traverseMap(_namedPseudoElementRules);
     traverseVector(_linkPseudoClassRules);
     traverseVector(_cuePseudoRules);
     traverseVector(_hostPseudoClassRules);
@@ -573,7 +546,6 @@ namespace krys::boo::style
     shrinkMapVectorsToFit(_tagLocalNameRules);
     shrinkMapVectorsToFit(_tagLowercaseLocalNameRules);
     shrinkMapVectorsToFit(_userAgentPartRules);
-    shrinkMapVectorsToFit(_namedPseudoElementRules);
     ShrinkRulesToFit(_linkPseudoClassRules);
     ShrinkRulesToFit(_cuePseudoRules);
     ShrinkRulesToFit(_hostPseudoClassRules);

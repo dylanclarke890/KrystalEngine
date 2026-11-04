@@ -714,7 +714,6 @@ namespace krys::boo::css
           case RuleType::Property:
           case RuleType::Scope:
           case RuleType::StartingStyle:
-          case RuleType::ViewTransition:
           case RuleType::PositionTry:
           case RuleType::Function:
           case RuleType::FunctionDeclarations:
@@ -762,7 +761,6 @@ namespace krys::boo::css
           case RuleType::Property:
           case RuleType::Scope:
           case RuleType::StartingStyle:
-          case RuleType::ViewTransition:
           case RuleType::PositionTry:
           case RuleType::Function:
           case RuleType::FunctionDeclarations:

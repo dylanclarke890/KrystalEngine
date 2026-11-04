@@ -81,7 +81,6 @@ namespace krys::boo::style
       : _element(ShareRef(element)), _authorStyle(ShareRef(ruleSets.AuthorStyle())),
         _userStyle(ShareRefPtr(ruleSets.UserStyle())),
         _userAgentMediaQueryStyle(ShareRefPtr(ruleSets.UserAgentMediaQueryStyle())),
-        _dynamicViewTransitionsStyle(ShareRefPtr(ruleSets.DynamicViewTransitionsStyle())),
         _selectorMatchingState(selectorMatchingState), _mode(mode),
         _result(MatchResult::Create(css::IsLink(element)))
   {
@@ -278,11 +277,6 @@ namespace krys::boo::style
       {
         CollectMatchingRulesForList(rules, matchRequest);
       }
-    }
-    if (_pseudoElementRequest && _pseudoElementRequest->NameArgument() != css::CSSOMStringAtom::Null())
-    {
-      CollectMatchingRulesForList(
-        matchRequest.RuleSet.NamedPseudoElementRules(_pseudoElementRequest->NameArgument()), matchRequest);
     }
     if (css::IsLink(element))
     {
@@ -552,11 +546,6 @@ namespace krys::boo::style
     {
       MatchUARules(*_userAgentMediaQueryStyle);
     }
-
-    if (_dynamicViewTransitionsStyle)
-    {
-      MatchUARules(*_dynamicViewTransitionsStyle);
-    }
   }
 
   void ElementRuleCollector::MatchUARules(const RuleSet &rules) noexcept
@@ -606,8 +595,6 @@ namespace krys::boo::style
     {
       auto &pseudoElementIdentifier = _pseudoElementRequest->Identifier();
       context.SetRequestedPseudoElement(pseudoElementIdentifier);
-      // FIXME: The class list of the captured element for named view transition pseudo-elements
-      // (IsNamedViewTransitionPseudoElement), once documents have an active view transition.
     }
     context.StyleScopeOrdinal = styleScopeOrdinal;
     context.SelectorMatchingState = _selectorMatchingState;

@@ -6,7 +6,6 @@
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
@@ -246,7 +245,6 @@ namespace krys::boo::style
       case css::RuleType::FontFeatureValues:
       case css::RuleType::Keyframes:
       case css::RuleType::Property:
-      case css::RuleType::ViewTransition:
       case css::RuleType::PositionTry:
         DisallowDynamicMediaQueryEvaluationIfNeeded();
         if (_resolver)
@@ -664,11 +662,6 @@ namespace krys::boo::style
         auto &registry = _resolver->Document().StyleScope().GetCustomPropertyRegistry();
         registry.RegisterFromStylesheet(styleRuleProperty->GetDescriptor());
         continue;
-      }
-
-      if (auto *styleRuleViewTransition = DynamicDowncast<css::ViewTransitionRule>(rule))
-      {
-        _ruleSet->SetViewTransitionRule(*styleRuleViewTransition);
       }
 
       if (auto *positionTryRule = DynamicDowncast<css::PositionTryRule>(rule))

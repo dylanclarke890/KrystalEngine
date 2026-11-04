@@ -220,8 +220,6 @@ namespace krys::boo
     struct VerticalAlign;
     struct ViewTimelineInsets;
     struct ViewTimelines;
-    struct ViewTransitionClasses;
-    struct ViewTransitionName;
     struct WebkitInitialLetter;
     struct WebkitLineBoxContain;
     struct WebkitLocale;
@@ -276,7 +274,7 @@ namespace krys::boo
     using Transitions = CoordinatedValueList<Transition>;
     using WebkitBorderSpacing = Length<css::NonNegativeUnzoomed>;
 
-    constexpr auto PublicPseudoIDBits = 17;
+    constexpr auto PublicPseudoIDBits = 12;
     constexpr auto TextDecorationLineBits = 5;
     constexpr auto TextTransformBits = 6;
     constexpr auto PseudoElementTypeBits = 5;

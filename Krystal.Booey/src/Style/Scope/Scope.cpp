@@ -167,13 +167,6 @@ namespace krys::boo::style
 
     _resolver = Resolver::Create(*_document, Resolver::ScopeType::Document);
 
-    if (!_dynamicViewTransitionsStyle)
-    {
-      _dynamicViewTransitionsStyle = RuleSet::Create();
-    }
-
-    _resolver->RuleSets().SetDynamicViewTransitionsStyle(_dynamicViewTransitionsStyle.get());
-
     _document->GetFontSelector().BuildStarted();
 
     _resolver->RuleSets().InitializeUserStyle();
@@ -254,12 +247,6 @@ namespace krys::boo::style
     _resolver = nullptr;
     GetCustomPropertyRegistry().ClearRegisteredFromStylesheets();
     GetCounterStyleRegistry().ClearAuthorCounterStyles();
-  }
-
-  void Scope::ClearViewTransitionStyles() noexcept
-  {
-    ClearResolver();
-    _dynamicViewTransitionsStyle = nullptr;
   }
 
   void Scope::InvalidateMatchedDeclarationsCache() noexcept

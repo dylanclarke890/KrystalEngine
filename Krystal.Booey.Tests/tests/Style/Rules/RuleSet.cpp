@@ -105,11 +105,11 @@ namespace krys::boo::style::tests
     auto sheet =
       ParseSheet(u8"#x {} .a.b {} .b {} [title] {} div {} * {} :link {} :focus {} :focus-visible {}"
                  u8":root {} :host {} ::slotted(p) {} ::part(p) {} ::cue {} ::cue(b) {}"
-                 u8"::view-transition-group(x) {} ::view-transition-group(*) {} [style] {}"
+                 u8"[style] {}"
                  u8".a span {} p, span {} :scope {} :is(:host) {}");
     auto ruleSet = Build(*sheet);
 
-    REQUIRE(ruleSet->RuleCount() == 23u);
+    REQUIRE(ruleSet->RuleCount() == 21u);
 
     REQUIRE(Texts(ruleSet->IdRules(Atom(u8"x"))) == List<std::string> {"#x"});
     // The class bucket with fewer rules is chosen: .b had none when .a.b was added, so it went into .a.
@@ -130,11 +130,8 @@ namespace krys::boo::style::tests
     REQUIRE(Texts(&ruleSet->PartPseudoElementRules()) == List<std::string> {"::part(p)"});
     REQUIRE(Texts(ruleSet->UserAgentPartRules(Atom(u8"cue"))) == List<std::string> {"::cue"});
     REQUIRE(Texts(&ruleSet->CuePseudoRules()) == List<std::string> {"::cue(b)"});
-    REQUIRE(Texts(ruleSet->NamedPseudoElementRules(Atom(u8"x")))
-            == List<std::string> {"::view-transition-group(x)"});
     // `[style]` isn't bucketed: the style attribute is synchronised lazily.
-    REQUIRE(Texts(ruleSet->UniversalRules())
-            == List<std::string> {"*", "::view-transition-group(*)", "[style]", ":scope", ":is(:host)"});
+    REQUIRE(Texts(ruleSet->UniversalRules()) == List<std::string> {"*", "[style]", ":scope", ":is(:host)"});
 
     REQUIRE(ruleSet->HasAttributeRules());
     REQUIRE(ruleSet->HasUserAgentPartRules());
@@ -373,10 +370,8 @@ namespace krys::boo::style::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "RuleSet: resolver mutating rules", "[Style][RuleSet]")
   {
     // Without a resolver, at-rules that change the resolver are skipped.
-    auto sheet = ParseSheet(u8"@keyframes k { from {} } @view-transition { navigation: auto; }"
-                            u8"@position-try --p { top: 0; } .a {}");
+    auto sheet = ParseSheet(u8"@keyframes k { from {} } @position-try --p { top: 0; } .a {}");
     auto ruleSet = Build(*sheet);
-    REQUIRE_FALSE(ruleSet->GetViewTransitionRule());
     REQUIRE_FALSE(ruleSet->PositionTryRuleForName(Atom(u8"--p")));
     REQUIRE(ruleSet->RuleCount() == 1u);
   }

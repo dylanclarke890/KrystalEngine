@@ -1036,9 +1036,8 @@ namespace krys::boo
 
   bool RenderBoxModelObject::RequiresLayer() const noexcept
   {
-    // FIXME: Reflections were dropped; view transition captures, once there are view transitions.
     return IsDocumentElementRenderer() || IsPositioned() || CreatesGroup() || HasTransformRelatedProperty()
-           || HasHiddenBackface() || RequiresRenderingConsolidationForViewTransition();
+           || HasHiddenBackface();
   }
 
   void RenderBoxModelObject::ApplyTransform(TransformationMatrix &, const RenderStyle &, const FloatRect &,

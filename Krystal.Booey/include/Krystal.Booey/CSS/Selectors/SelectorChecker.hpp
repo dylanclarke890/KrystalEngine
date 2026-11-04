@@ -152,10 +152,6 @@ namespace krys::boo::css
                                           const SelectorList &selectorList) const noexcept;
     KRYS_NODISCARD bool MatchHasPseudoClass(CheckingContext &checkingContext, const dom::Element &element,
                                             const Selector &hasSelector) const noexcept;
-
-    KRYS_NODISCARD bool CheckViewTransitionPseudoClass(const CheckingContext &checkingContext,
-                                                       const dom::Element &element,
-                                                       const Selector &selector) const noexcept;
   };
 
   inline bool SelectorChecker::IsCommonPseudoClassSelector(const Selector *selector) noexcept

@@ -365,33 +365,6 @@ namespace krys::boo::css
       return FixedVector<PossiblyQuotedIdentifier>(list.begin(), list.end());
     }
 
-    KRYS_NODISCARD Maybe<FixedVector<CSSOMStringAtom>>
-      ConsumeCommaSeparatedCustomIdentList(TokenRange &tokens) noexcept
-    {
-      List<CSSOMStringAtom> customIdents;
-
-      do
-      {
-        auto ident = PropertyParserHelpers::ConsumeCustomIdentRaw(tokens);
-        if (!ident || ident->empty())
-        {
-          return {};
-        }
-
-        customIdents.push_back(CSSOMStringAtom(*ident));
-      } while (PropertyParserHelpers::ConsumeComma(tokens));
-
-      if (!tokens.IsAtEnd())
-      {
-        return {};
-      }
-
-      // The parsing code guarantees there has to be at least one custom ident.
-      krys_debug_assert(!customIdents.empty());
-
-      return FixedVector<CSSOMStringAtom>(customIdents.begin(), customIdents.end());
-    }
-
     /// @brief Whether a compound has a pseudo-element, so no compound may follow it.
     KRYS_NODISCARD bool HasPseudoElementForRightmostCompound(const MutableSelector &simpleSelector,
                                                              ParserMode parserMode) noexcept
@@ -573,13 +546,6 @@ namespace krys::boo::css
         case SelectorPseudoElement::Part:
         {
           return !IsTreeStructuralPseudoClass(pseudoClass);
-        }
-        case SelectorPseudoElement::ViewTransitionGroup:
-        case SelectorPseudoElement::ViewTransitionImagePair:
-        case SelectorPseudoElement::ViewTransitionNew:
-        case SelectorPseudoElement::ViewTransitionOld:
-        {
-          return pseudoClass == SelectorPseudoClass::OnlyChild;
         }
         case SelectorPseudoElement::UserAgentPart:
         {
@@ -1125,16 +1091,6 @@ namespace krys::boo::css
           selector->SetArgument(CSSOMStringAtom(ident.IdentCodePoints()));
           return selector;
         }
-        case SelectorPseudoClass::ActiveViewTransitionType:
-        {
-          auto typeList = ConsumeCommaSeparatedCustomIdentList(block);
-          if (!typeList)
-          {
-            return nullptr;
-          }
-          selector->SetArgumentList(krys::move(*typeList));
-          return selector;
-        }
         default:
         {
           break;
@@ -1164,64 +1120,6 @@ namespace krys::boo::css
             return nullptr;
           }
           selector->SetArgumentList(FixedVector<CSSOMStringAtom> {CSSOMStringAtom(ident.IdentCodePoints())});
-          return selector;
-        }
-        case SelectorPseudoElement::ViewTransitionGroup:
-        case SelectorPseudoElement::ViewTransitionImagePair:
-        case SelectorPseudoElement::ViewTransitionOld:
-        case SelectorPseudoElement::ViewTransitionNew:
-        {
-          List<CSSOMStringAtom> nameAndClasses;
-
-          // Check for implicit universal selector.
-          if (IsDelimiter(block.Peek(), U'.'))
-          {
-            nameAndClasses.push_back(dom::StarAtom());
-          }
-
-          // Parse name or explicit universal selector.
-          if (nameAndClasses.empty())
-          {
-            const auto &ident = block.Consume();
-            if (ident.Type() == TokenType::Ident && IsValidCustomIdentifier(ident.ValueId()))
-            {
-              nameAndClasses.push_back(CSSOMStringAtom(ident.IdentCodePoints()));
-            }
-            else if (IsDelimiter(ident, U'*'))
-            {
-              nameAndClasses.push_back(dom::StarAtom());
-            }
-            else
-            {
-              return nullptr;
-            }
-          }
-
-          // Parse classes.
-          while (!block.IsAtEnd() && block.Peek().Type() != TokenType::Whitespace)
-          {
-            if (!IsDelimiter(block.Peek(), U'.'))
-            {
-              return nullptr;
-            }
-            std::ignore = block.Consume();
-
-            if (block.Peek().Type() != TokenType::Ident)
-            {
-              return nullptr;
-            }
-            nameAndClasses.push_back(CSSOMStringAtom(block.Consume().IdentCodePoints()));
-          }
-
-          block.DiscardWhitespace();
-
-          if (!block.IsAtEnd())
-          {
-            return nullptr;
-          }
-
-          selector->SetArgumentList(
-            FixedVector<CSSOMStringAtom>(nameAndClasses.begin(), nameAndClasses.end()));
           return selector;
         }
         case SelectorPseudoElement::Part:
@@ -1883,19 +1781,6 @@ namespace krys::boo::css
           return {};
         }
         return {true, style::PseudoElementIdentifier {PseudoElementType::Highlight,
-                                                      CSSOMStringAtom(ident.IdentCodePoints())}};
-      }
-      case SelectorPseudoElement::ViewTransitionGroup:
-      case SelectorPseudoElement::ViewTransitionImagePair:
-      case SelectorPseudoElement::ViewTransitionOld:
-      case SelectorPseudoElement::ViewTransitionNew:
-      {
-        const auto &ident = block.ConsumeIncludingWhitespace();
-        if (ident.Type() != TokenType::Ident || !IsValidCustomIdentifier(ident.ValueId()) || !block.IsAtEnd())
-        {
-          return {};
-        }
-        return {true, style::PseudoElementIdentifier {*Selector::StylePseudoElementTypeFor(*pseudoElement),
                                                       CSSOMStringAtom(ident.IdentCodePoints())}};
       }
       default:

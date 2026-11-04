@@ -91,7 +91,7 @@ namespace krys::boo::tests
     {
       REQUIRE(rootLayer);
       CHECK(viewLayer.IsStackingContext());
-      // The root's `view-transition-name: root` (from the UA style sheet) makes it a stacking context.
+      // The root element forms the root stacking context.
       CHECK(rootLayer->IsStackingContext());
       CHECK(LayerOf(fixture, u8"z1")->IsStackingContext());
       CHECK(LayerOf(fixture, u8"zneg")->IsStackingContext());

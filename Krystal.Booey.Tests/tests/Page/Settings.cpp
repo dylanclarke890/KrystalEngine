@@ -85,7 +85,6 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "Settings: standard features are always on", "[Page][Settings]")
   {
     ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
-      @view-transition { navigation: auto }
       @position-try --a { top: 0 }
       #p { display: grid-lanes; width: calc(random(1px, 1px)); color: contrast-color(black);
            text-box: trim-both cap alphabetic; overflow-anchor: none }
@@ -95,7 +94,7 @@ namespace krys::boo::tests
     auto &document = *fixture.Document;
     auto &contents = document.StyleScope().ActiveStyleSheets().front()->Contents();
     // Every rule parsed.
-    CHECK(contents.RuleCount() == 5);
+    CHECK(contents.RuleCount() == 4);
 
     document.UpdateStyleIfNeeded();
     auto *style = fixture.ById(u8"p").GetRenderStyle();

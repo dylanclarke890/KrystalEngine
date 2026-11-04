@@ -58,7 +58,6 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/UI.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/ViewTransition.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp"
 #include "Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp"
 #include "Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp"

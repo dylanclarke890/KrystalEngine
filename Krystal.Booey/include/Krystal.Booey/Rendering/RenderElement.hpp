@@ -402,9 +402,6 @@ namespace krys::boo
     {
       return CreatesGroupForStyle(Style());
     }
-    KRYS_NODISCARD bool HasViewTransitionName() const noexcept;
-    KRYS_NODISCARD bool IsViewTransitionRoot() const noexcept;
-    KRYS_NODISCARD bool RequiresRenderingConsolidationForViewTransition() const noexcept;
 
     KRYS_NODISCARD FloatRect TransformReferenceBoxRect() const noexcept;
     KRYS_NODISCARD FloatRect TransformReferenceBoxRect(const RenderStyle &style) const noexcept;

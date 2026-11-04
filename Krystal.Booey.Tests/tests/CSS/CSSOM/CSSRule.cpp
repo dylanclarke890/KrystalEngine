@@ -22,8 +22,7 @@ namespace krys::boo::css::tests
                                u8"@font-feature-values e { } "
                                u8"@layer f; "
                                u8"@container (min-width: 1px) { } "
-                               u8"@property --g { syntax: \"*\"; inherits: false; } "
-                               u8"@view-transition { } ");
+                               u8"@property --g { syntax: \"*\"; inherits: false; } ");
 
     auto typeAt = [&](uint32 index)
     {
@@ -31,7 +30,7 @@ namespace krys::boo::css::tests
       return sheet->Item(index)->TypeForCSSOM();
     };
 
-    REQUIRE(sheet->Length() == 13);
+    REQUIRE(sheet->Length() == 12);
     CHECK(typeAt(0) == 3);  // IMPORT_RULE
     CHECK(typeAt(1) == 10); // NAMESPACE_RULE
     CHECK(typeAt(2) == 1);  // STYLE_RULE
@@ -45,7 +44,6 @@ namespace krys::boo::css::tests
     CHECK(typeAt(9) == 0);
     CHECK(typeAt(10) == 0);
     CHECK(typeAt(11) == 0);
-    CHECK(typeAt(12) == 0);
   }
 
   TEST_CASE("CSSRule: parents", "[CSS][CSSOM][CSSRule]")
