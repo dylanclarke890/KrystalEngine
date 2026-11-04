@@ -196,6 +196,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
+- The deprecated `zoomAndPan` attribute and `SVGZoomAndPan` interface aren't supported; `zoomAndPan()` in an `svgView(...)` fragment is parsed and ignored.
 - `getComputedTextLength` sums the fragments' unstretched widths, so `lengthAdjust="spacingAndGlyphs"` doesn't change it.
 - A `mask-image: url()` that references a `<mask>` draws the mask's content as an image (`SVGResourceImage`), so it masks by alpha rather than by luminance.
 

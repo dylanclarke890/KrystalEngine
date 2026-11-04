@@ -189,8 +189,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Respect zoomAndPan="disabled" in standalone SVG documents, once SVG elements have it.
-
     document->ResolveStyle(dom::Document::ResolveStyleType::Rebuild);
 
     if (RefPtr<LocalFrameView> view = _view)

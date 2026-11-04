@@ -2,7 +2,6 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
-#include "Krystal.Booey/SVG/SVGZoomAndPan.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::svg
@@ -11,7 +10,7 @@ namespace krys::boo::svg
 
   /// @brief The `<view>` element: a view of the document's `<svg>` that a fragment identifier can pick.
   /// @see https://svgwg.org/svg2-draft/linking.html#InterfaceSVGViewElement
-  class SVGViewElement final : public SVGElement, public SVGFitToViewBox, public SVGZoomAndPan
+  class SVGViewElement final : public SVGElement, public SVGFitToViewBox
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGViewElement);
 

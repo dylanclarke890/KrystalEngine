@@ -3957,8 +3957,6 @@ set(KRYSTAL_BOOEY_SVG_HEADERS
   include/Krystal.Booey/SVG/Elements/SVGUseElement.hpp
   include/Krystal.Booey/SVG/Elements/SVGViewElement.hpp
   include/Krystal.Booey/SVG/SVGViewSpec.hpp
-  include/Krystal.Booey/SVG/SVGZoomAndPan.hpp
-  include/Krystal.Booey/SVG/SVGZoomAndPanType.hpp
 )
 
 set(KRYSTAL_BOOEY_TEXT_HEADERS
@@ -4095,7 +4093,6 @@ set(KRYSTAL_BOOEY_SVG_SOURCES
   src/SVG/Elements/SVGUseElement.cpp
   src/SVG/Elements/SVGViewElement.cpp
   src/SVG/SVGViewSpec.cpp
-  src/SVG/SVGZoomAndPan.cpp
 )
 
 set(KRYSTAL_BOOEY_TEXT_SOURCES

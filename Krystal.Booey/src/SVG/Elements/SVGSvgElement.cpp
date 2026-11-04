@@ -242,7 +242,6 @@ namespace krys::boo::svg
     ReportAttributeParsingError(parseError, name, string);
 
     SVGFitToViewBox::ParseAttribute(name, value);
-    SVGZoomAndPan::ParseAttribute(*this, name, value);
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);
   }
 
@@ -753,7 +752,6 @@ namespace krys::boo::svg
         auto &view = rootElement->CurrentView();
         view.SetViewBox(ViewBox());
         view.SetPreserveAspectRatio(PreserveAspectRatio());
-        view.SetZoomAndPan(ZoomAndPan());
         _currentViewFragmentIdentifier = {};
       }
     }
@@ -791,15 +789,6 @@ namespace krys::boo::svg
     else
     {
       view.SetPreserveAspectRatio(PreserveAspectRatio());
-    }
-
-    if (viewElement.HasAttributeNS(noNamespace, SVGNames::ZoomAndPanAttr().LocalName()))
-    {
-      view.SetZoomAndPan(viewElement.ZoomAndPan());
-    }
-    else
-    {
-      view.SetZoomAndPan(ZoomAndPan());
     }
   }
 

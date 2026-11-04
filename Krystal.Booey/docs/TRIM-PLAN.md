@@ -56,7 +56,7 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
   - Remove mail blockquotes: `BreakBlockquoteCommand`, `InsertNewlineInQuotedContent`, the mail-blockquote checks,
     `Apple-paste-as-quotation` and `Apple-style-span` (keep `Apple-interchange-newline` and
     `Apple-converted-space`).
-- [ ] **7. Rendering, CSS and SVG leftovers.**
+- [x] **7. Rendering, CSS and SVG leftovers.**
   - `-apple-color-filter`: `AppleColorFilter`/`AppleColorFilterValue`, `AppleInvertLightnessFunction`,
     `StyleAppleColorFilterData`, `EditingStyle::InverseTransformColorIfNeeded`, the `WithColorFilter` colour
     lookups.

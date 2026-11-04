@@ -43,12 +43,12 @@ namespace krys::boo::svg::tests
     auto &root = Downcast<LegacyRenderSVGRoot>(*svg.Renderer());
     CHECK(root.LocalToBorderBoxTransform() == AffineTransform(2, 0, 0, 2, 0, 0));
 
-    // A view specification replaces the view box, aspect ratio and zoom and pan, and adds a transform.
+    // A view specification replaces the view box and aspect ratio, and adds a transform. The deprecated
+    // zoomAndPan() is parsed and ignored.
     CHECK(svg.ScrollToFragment(u8"svgView(viewBox(0,0,50,25);preserveAspectRatio(none);zoomAndPan(disable);"
                                u8"transform(translate(5 5)))"));
     CHECK(svg.UseCurrentView());
     CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 50, 25));
-    CHECK(svg.CurrentView().ZoomAndPan() == SVGZoomAndPanDisable);
     CHECK(svg.CurrentView().TransformString() == u8"translate(5 5)");
     (void)fixture.Document->UpdateLayout();
     CHECK(root.LocalToBorderBoxTransform() == AffineTransform(4, 0, 0, 4, 20, 20));
@@ -74,7 +74,7 @@ namespace krys::boo::svg::tests
   {
     auto document = ResolverFixture::Parse(
       u8R"html(<svg id=s viewBox="0 0 100 50" preserveAspectRatio="xMinYMin"><view id=v viewBox="0 0 20 10" />)html"
-      u8R"html(<view id=w zoomAndPan=disable /></svg>)html");
+      u8R"html(<view id=w /></svg>)html");
     MakeSVGTheDocumentElement(*document, u8"s");
     auto &svg = ById<SVGSvgElement>(*document, u8"s");
     auto &view = ById<SVGViewElement>(*document, u8"v");
@@ -95,7 +95,6 @@ namespace krys::boo::svg::tests
     auto &other = ById<SVGViewElement>(*document, u8"w");
     CHECK(svg.ScrollToFragment(u8"w"));
     CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 100, 50));
-    CHECK(svg.CurrentView().ZoomAndPan() == SVGZoomAndPanDisable);
     CHECK(other.TargetElement() == &svg);
     CHECK(view.TargetElement() == nullptr);
 

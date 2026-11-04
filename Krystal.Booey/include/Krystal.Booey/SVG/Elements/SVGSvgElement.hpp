@@ -4,7 +4,6 @@
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
 #include "Krystal.Booey/SVG/SVGPoint.hpp"
-#include "Krystal.Booey/SVG/SVGZoomAndPan.hpp"
 
 namespace krys::boo::css
 {
@@ -30,7 +29,7 @@ namespace krys::boo::svg
 
   /// @brief The `<svg>` element: a viewport, the root of an SVG document fragment when it's outermost.
   /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGSVGElement
-  class SVGSvgElement final : public SVGGraphicsElement, public SVGFitToViewBox, public SVGZoomAndPan
+  class SVGSvgElement final : public SVGGraphicsElement, public SVGFitToViewBox
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGSvgElement);
 

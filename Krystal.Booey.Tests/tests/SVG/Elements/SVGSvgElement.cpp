@@ -98,25 +98,6 @@ namespace krys::boo::svg::tests
       CHECK(svg.PreserveAspectRatioString() == u8"xMidYMid meet");
     }
 
-    SECTION("zoomAndPan")
-    {
-      CHECK(svg.ZoomAndPan() == SVGZoomAndPanMagnify);
-      REQUIRE_FALSE(svg.SetAttribute(u8"zoomAndPan", u8"disable").HasException());
-      CHECK(svg.ZoomAndPan() == SVGZoomAndPanDisable);
-      REQUIRE_FALSE(svg.SetAttribute(u8"zoomAndPan", u8"other").HasException());
-      CHECK(svg.ZoomAndPan() == SVGZoomAndPanUnknown);
-
-      // An absent attribute is magnify.
-      svg.RemoveAttribute(u8"zoomAndPan");
-      CHECK(svg.ZoomAndPan() == SVGZoomAndPanMagnify);
-
-      // It can't be set through the DOM.
-      auto result = svg.SetZoomAndPan(uint16 {SVGZoomAndPan::SVG_ZOOMANDPAN_DISABLE});
-      REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::NoModificationAllowedError);
-      CHECK(svg.ZoomAndPan() == SVGZoomAndPanMagnify);
-    }
-
     SECTION("transform")
     {
       CHECK(svg.Transform().IsEmpty());

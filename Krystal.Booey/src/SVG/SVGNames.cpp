@@ -138,7 +138,6 @@ namespace krys::boo::svg
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(Y1Attr, u8"y1")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(Y2Attr, u8"y2")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(YAttr, u8"y")
-  KRYS_DEFINE_SVG_ATTRIBUTE_NAME(ZoomAndPanAttr, u8"zoomAndPan")
 
   // Filters
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(AmplitudeAttr, u8"amplitude")

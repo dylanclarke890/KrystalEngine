@@ -29,7 +29,6 @@ namespace krys::boo::svg
                                         Maybe<dom::DOMStringView> value) noexcept
   {
     SVGFitToViewBox::ParseAttribute(name, value);
-    SVGZoomAndPan::ParseAttribute(*this, name, value);
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
