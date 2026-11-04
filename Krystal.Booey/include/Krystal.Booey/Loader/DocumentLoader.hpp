@@ -23,8 +23,6 @@ namespace krys::boo
   /// URL, or the host's substitute data), which, once it arrives, commits the load and is written into the
   /// frame as its document.
   /// @note The main resource arrives whole, on a networking task after the load starts.
-  // FIXME: Redirects, responses that aren't documents (downloads), archives and the application cache,
-  // streamed data, and the subresource loaders a document loader owns, once there are those.
   class DocumentLoader final : public RefCounted<DocumentLoader>, public CanMakeWeakPtr<DocumentLoader>
   {
     KRYS_NON_COPY_MOVABLE(DocumentLoader);

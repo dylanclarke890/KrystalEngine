@@ -77,9 +77,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The sandboxed pointer lock browsing context flag (a SecurityError), once there are sandboxed
-    // frames.
-
     if (options && options->UnadjustedMovement && !SupportsUnadjustedMovement())
     {
       // If options["unadjustedMovement"] is true and the platform does not support unadjustedMovement:

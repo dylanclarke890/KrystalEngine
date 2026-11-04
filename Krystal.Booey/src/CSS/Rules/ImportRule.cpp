@@ -137,7 +137,6 @@ namespace krys::boo::css
       rootSheet = sheet;
     }
 
-    // FIXME: Skip Content Security Policy check when stylesheet is in a user agent shadow tree.
     auto options = CachedResourceLoader::DefaultCachedResourceOptions();
     CachedResourceRequest request(ResourceRequest(krys::move(absURL)), options);
     request.SetCharset(utf8_string(_parentStyleSheet->Charset()));

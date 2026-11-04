@@ -24,9 +24,6 @@ namespace krys::boo::style
         return;
       }
 
-      // FIXME: Skip the content security policy check in user agent shadow trees, and fetch mask and
-      // shape-outside images in CORS or anonymous mode (useAnonymousModeWhenFetchingMaskImages), once there
-      // are those.
       ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();
 
       const_cast<StyleImage &>(*styleImage).Load(document.GetCachedResourceLoader(), options);

@@ -41,11 +41,6 @@ namespace krys::boo::css
                                                        IsImportant important) noexcept = 0;
     KRYS_NODISCARD virtual Ref<MutableStyleProperties> CopyProperties() const noexcept = 0;
 
-    // FIXME: It would be more efficient, by virtue of avoiding the text transformation and hash lookup
-    // currently required in the implementation, if we could could smuggle the PropertyId through the
-    // bindings, perhaps by encoding it into the HashTableValue and then passing it together with the
-    // PropertyName.
-
     // Shared implementation for all properties that match
     // https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-camel_cased_attribute.
     KRYS_NODISCARD CSSOMString

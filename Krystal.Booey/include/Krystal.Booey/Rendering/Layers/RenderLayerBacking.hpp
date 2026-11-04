@@ -41,9 +41,8 @@ namespace krys::boo
   /// and makes decisions about intra-layer rendering optimizations.
   ///
   /// There is one RenderLayerBacking for each RenderLayer that is composited.
-  // FIXME: The scrolling coordinator's nodes, event regions, accelerated animations, tiled backings,
-  // reflections, video, canvases, plug-ins, models, iframes, view transitions, HDR and display list drawing
-  // for tests, once there are any.
+  // FIXME: Event regions, accelerated animations, tiled backings, video, canvases, models, HDR and display
+  // list drawing for tests, once there are any.
   class RenderLayerBacking final : public GraphicsLayerClient
   {
     friend class PaintedContentsInfo;

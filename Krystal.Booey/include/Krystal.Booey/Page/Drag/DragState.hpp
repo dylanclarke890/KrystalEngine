@@ -9,8 +9,6 @@
 namespace krys::boo
 {
   /// @brief The drag a mouse gesture may start, or has started, in a page.
-  // FIXME: The origin an image's data is restricted to (restrictedOriginForImageData), once there are
-  // security origins.
   struct DragState
   {
     /// @brief The element that may be a drag source, for the current mouse gesture.

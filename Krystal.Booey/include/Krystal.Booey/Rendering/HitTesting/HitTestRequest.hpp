@@ -60,8 +60,6 @@ namespace krys::boo
       AssertConsistentType(type);
     }
 
-    // FIXME: This constructor should be phased out in favor of the `HitTestSource` version above, such that
-    // all call sites must consider whether the hit test request is user-triggered or bindings-triggered.
     HitTestRequest(EnumSet<Type> type = DefaultTypes) noexcept : _type(type)
     {
       AssertConsistentType(type);

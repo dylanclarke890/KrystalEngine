@@ -4309,7 +4309,6 @@ namespace krys::boo::html
     if (willExecuteScript)
     {
       // 14a. Increment document's throw-on-dynamic-markup-insertion counter.
-      // FIXME: The counter, once there's document.write().
       // 14b. If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
       EventLoop::Current().PerformMicrotaskCheckpoint();
       // 14c. Push a new element queue onto document's relevant agent's custom element reactions stack.

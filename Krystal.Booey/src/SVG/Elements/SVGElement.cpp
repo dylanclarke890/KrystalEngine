@@ -209,8 +209,6 @@ namespace krys::boo::svg
       return;
     }
 
-    // FIXME: Report "Invalid value for <tag> attribute name="value"" (or "Invalid negative value for ...") to
-    // the console, once there's one.
     (void)name;
     (void)value;
   }

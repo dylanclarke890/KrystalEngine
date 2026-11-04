@@ -388,8 +388,6 @@ namespace krys::boo::css
     {
       return false;
     }
-    // FIXME: Whether the document's security origin can request the sheet's URL, once there are origins;
-    // every URL can be requested until then.
     return true;
   }
 

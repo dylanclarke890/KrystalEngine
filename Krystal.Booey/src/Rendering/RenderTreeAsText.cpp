@@ -852,8 +852,6 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: Lay out for printing (PrintingMode), once there's printing.
-
     return ExternalRepresentation(*renderer, behavior);
   }
 

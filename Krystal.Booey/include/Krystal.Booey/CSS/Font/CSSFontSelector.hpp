@@ -28,7 +28,6 @@ namespace krys::boo::css
 
   /// @brief A document's font selector: resolves the generic families with the document's settings and finds
   /// the fonts of the families its styles name, from its `@font-face` rules first.
-  // FIXME: The `FontFaceSet` interface (`document.fonts`), once there's scripting.
   class CSSFontSelector final : public FontSelector
   {
     KRYS_NON_COPY_MOVABLE(CSSFontSelector);

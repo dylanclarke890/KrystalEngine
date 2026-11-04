@@ -315,7 +315,6 @@ namespace krys::boo
                            MayExtendDragSession mayExtendDragSession = MayExtendDragSession::No) noexcept;
 
     /// @brief Whether a drag of an image may be dropped in the frame as a file.
-    // FIXME: The origin the image's data is restricted to, once there are security origins.
     KRYS_NODISCARD bool CanDropCurrentlyDraggedImageAsFile() const noexcept;
 
     /// @brief Extends the selection to the last known mouse position, as dragging (and autoscrolling) does.
@@ -402,8 +401,8 @@ namespace krys::boo
     /// @brief Handles a turn of the mouse wheel: `wheel` at the element under the mouse, then, unless it's
     /// cancelled, a scroll of the nearest box that can scroll that way, or else the view.
     /// @return Whether the event was cancelled or scrolled something.
-    // FIXME: Latching, the delta filter, scroll snapping, gesture states and asynchronous scrolling come with
-    // touchpad gestures, scroll snapping and a scrolling thread.
+    // FIXME: Latching, the delta filter, scroll snapping and gesture states come with touchpad gestures and
+    // scroll snapping.
     bool HandleWheelEvent(const PlatformWheelEvent &event) noexcept;
     /// @brief The default action of a `wheel` event at @p startNode: scrolls the nearest enclosing box that
     /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops

@@ -356,7 +356,6 @@ namespace krys::boo::dom
     krys_debug_assert(_isCSS);
     css::ParserContext parserContext(*document, baseURL, charset);
 
-    // FIXME: Whether the cached sheet is CORS-same-origin, once there are origins.
     auto cssSheet = css::CSSStyleSheet::Create(
       css::StyleSheetContents::Create(css::CSSOMString(href), parserContext), *this, true);
     cssSheet->SetDisabled(_alternate);

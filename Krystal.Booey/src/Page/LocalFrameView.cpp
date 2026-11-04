@@ -305,8 +305,6 @@ namespace krys::boo
       // We need to repaint the entire backing store.
       ScrollContentsSlowPath(updateRect);
     }
-
-    // FIXME: The overhang areas, once there's rubber-banding.
   }
 
   bool LocalFrameView::ScrollContentsFastPath(const IntSize &scrollDelta,
@@ -683,8 +681,6 @@ namespace krys::boo
 
   void LocalFrameView::UpdateCompositingLayersAfterScrolling() noexcept
   {
-    // FIXME: The scrolling thread updating the fixed elements (shouldUpdateCompositingLayersAfterScrolling),
-    // once there's async scrolling.
     if (!_layoutContext.IsLayoutNested() && !_viewportConstrainedObjects.empty())
     {
       if (auto *renderView = GetRenderViewForUpdate())
@@ -863,8 +859,6 @@ namespace krys::boo
 
       PaintContents(context, documentDirtyRect);
     }
-
-    // FIXME: The overhang areas, once there's rubber-banding.
 
     // Now paint the scrollbars.
     if (_horizontalScrollbar || _verticalScrollbar)
@@ -1858,7 +1852,6 @@ namespace krys::boo
     }
     _contentsSize = newSize;
     UpdateScrollbars(GetScrollPosition());
-    // FIXME: The overhang areas, once there's rubber-banding.
   }
 
   void LocalFrameView::AdjustViewSize() noexcept
@@ -1956,7 +1949,6 @@ namespace krys::boo
 
     auto scrollToPosition = [&](ScrollPosition position)
     {
-      // FIXME: Not while rubber-banding, once there's rubber-banding.
       auto adjustedScrollPosition = AdjustScrollPositionWithinRange(position);
       if (adjustedScrollPosition != GetScrollPosition() || ScrollOriginChanged())
       {
@@ -2335,9 +2327,8 @@ namespace krys::boo
 
   LayoutPoint LocalFrameView::ScrollPositionForFixedPosition() const noexcept
   {
-    // FIXME: The layout viewport's origin (visualViewportEnabled), the scroll position constrained to the
-    // document for rubber-banding, and the header and footer, once there are visual viewports, rubber-banding
-    // and headers.
+    // FIXME: The layout viewport's origin (visualViewportEnabled), and the header and footer, once there are
+    // visual viewports and headers.
     LayoutPoint position(GetScrollPosition());
     LayoutRect visibleContentRect(VisibleContentRect());
     LayoutSize totalContentsSize(ContentsSize());

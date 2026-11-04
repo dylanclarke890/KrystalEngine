@@ -530,8 +530,7 @@ namespace krys::boo
 
     /// @brief Paints the view's part of @p rect (in the view's coordinates): its visible contents, scrolled
     /// by the scroll position.
-    // FIXME: The overhang areas, scrollbars and pan scroll icon, once there's rubber-banding, scrollbars and
-    // pan scrolling.
+    // FIXME: The scrollbars and pan scroll icon, once there are scrollbars and pan scrolling.
     void Paint(GraphicsContext &context, const IntRect &rect) noexcept;
 
     /// @brief Damages @p rect of the contents (in the contents' coordinates): the host paints it again.

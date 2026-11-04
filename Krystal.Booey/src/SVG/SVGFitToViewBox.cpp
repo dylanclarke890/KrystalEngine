@@ -92,8 +92,6 @@ namespace krys::boo::svg
 
     if (validate)
     {
-      // FIXME: Report the problems below to the document's SVG extensions (reportWarning, reportError), once
-      // there's a console.
       if (!x || !y || !width || !height)
       {
         return {};

@@ -597,8 +597,6 @@ namespace krys::boo
       return SpanReplacementType::None;
     }
 
-    // FIXME: Leaving out event handler attributes and javascript: URLs (isEventHandlerAttribute,
-    // attributeContainsJavaScriptURL), with scripting.
     void StyledMarkupAccumulator::AppendStartTag(utf8_string &out, const dom::Element &element,
                                                  bool addDisplayInline,
                                                  RangeFullySelectsNode rangeFullySelectsNode) noexcept

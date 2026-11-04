@@ -50,8 +50,6 @@ namespace krys::boo::svg
   {
     auto string = value.value_or(dom::DOMStringView {});
 
-    // FIXME: Report the values that fail to parse ("Filtered element will not be displayed.") as warnings,
-    // once there's a console.
     if (name == SVGNames::InAttr())
     {
       _in1->SetBaseValInternal(dom::DOMString(string));

@@ -147,7 +147,6 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Unsuccessful HTTP responses can't be used, once responses have a status.
     (void)hasHTTPStatusOK;
 
     if (!MimeTypeAllowedByNosniff())

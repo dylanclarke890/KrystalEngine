@@ -350,7 +350,6 @@ namespace krys::boo
 
     if (paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeReplacedContentExceptForIFrames))
     {
-      // FIXME: Except iframes, once they have renderers.
       return false;
     }
 

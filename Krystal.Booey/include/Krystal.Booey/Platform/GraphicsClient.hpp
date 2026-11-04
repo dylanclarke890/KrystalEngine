@@ -13,8 +13,8 @@ namespace krys::boo
   enum class RenderingPurpose : uint8;
 
   /// @brief The host's graphics: the image buffers it makes with its own backends.
-  // FIXME: The display's identifier, WebGL and WebGPU contexts, and serialised image buffers, once there are
-  // any; image buffers' pixel formats come with the formats (sRGB, 8 bits a channel).
+  // FIXME: The display's identifier and serialised image buffers, once there are any; image buffers' pixel
+  // formats come with the formats (sRGB, 8 bits a channel).
   class GraphicsClient
   {
     friend class ImageBuffer;

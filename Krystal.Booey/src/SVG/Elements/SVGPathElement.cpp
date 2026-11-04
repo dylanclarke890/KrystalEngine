@@ -42,9 +42,9 @@ namespace krys::boo::svg
       {
         _pathSegList->BaseVal()->ClearByteStreamData();
       }
-      else if (!_pathSegList->BaseVal()->Parse(string))
+      else
       {
-        // FIXME: Report "Problem parsing d="value"" to the console, once there's one.
+        _pathSegList->BaseVal()->Parse(string);
       }
     }
 

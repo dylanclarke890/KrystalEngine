@@ -2582,7 +2582,6 @@ namespace krys::boo::html
     RefPtr<PixelBuffer> pixelBuffer = buffer->GetPixelBuffer(format, imageDataRect);
     if (!pixelBuffer)
     {
-      // FIXME: A console message: "Unable to get image data from canvas. Requested size was w x h".
       return dom::Exception {dom::ExceptionCode::InvalidStateError};
     }
 

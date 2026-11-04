@@ -79,8 +79,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Link annotations for PDFs (addPDFURLAnnotationForLink) come with printing.
-
     auto borderStyle = ToBorderStyle(styleToUse.GetOutlineStyle());
     if (!borderStyle || *borderStyle == BorderStyle::None)
     {
@@ -137,8 +135,6 @@ namespace krys::boo
       PaintFocusRing(renderer, focusRingRects);
       return;
     }
-
-    // FIXME: Link annotations for PDFs (addPDFURLAnnotationForLink) come with printing.
 
     if (_paintInfo.Context().PaintingDisabled() || !styleToUse.HasOutline())
     {

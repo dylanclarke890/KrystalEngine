@@ -32,7 +32,6 @@ namespace krys::boo
   using RenderCounterSet = HashMap<const RenderCounter *, WeakPtr<RenderCounter>>;
 
   /// @brief The root of a document's render tree, shown in the document's view.
-  // FIXME: Printing, once there's printing.
   class RenderView final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderView);
@@ -172,7 +171,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldUsePrintingLayout() const noexcept
     {
-      // FIXME: Printing, once there is any.
       return false;
     }
 

@@ -70,7 +70,7 @@ namespace krys::boo
   enum class Affinity : bool;
   enum class HitTestSource : bool;
 
-  // FIXME: SVG transforms and view transition captures come with their features.
+  // FIXME: SVG transforms come with SVG.
   enum class RenderObjectStateFlag : uint8
   {
     IsBlock,
@@ -1740,7 +1740,6 @@ namespace krys::boo
       bool PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis {false};
       EnumSet<style::MarginTrimSide> TrimmedMargins;
       bool HasOutlineAutoAncestor {false};
-      // FIXME: Reflections, once there are any.
 
       // From RenderElement
       UniquePtr<boo::ReferencedSVGResources> ReferencedSVGResources;

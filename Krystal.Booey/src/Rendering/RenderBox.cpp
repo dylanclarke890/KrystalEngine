@@ -463,7 +463,6 @@ namespace krys::boo
     }
 
     SetHasTransformRelatedProperty(ComputeHasTransformRelatedProperty(styleToUse));
-    // FIXME: Reflections (`-webkit-box-reflect` was dropped).
   }
 
   bool RenderBox::ComputeHasTransformRelatedProperty(const RenderStyle &styleToUse) const noexcept
@@ -3008,7 +3007,6 @@ namespace krys::boo
     // specified. When we're printing, we also need this quirk if the body or root has a percentage height
     // since we don't set a height in RenderView when we're printing. So without this quirk, the height has
     // nothing to be a percentage of, and it ends up being 0. That is bad.
-    // FIXME: The paginated content when printing, once there's printing.
     if (StretchesToViewport())
     {
       auto margins = CollapsedMarginBefore() + CollapsedMarginAfter();
@@ -3919,7 +3917,7 @@ namespace krys::boo
 
   bool RenderBox::HasIntrinsicAspectRatio() const noexcept
   {
-    // FIXME: Video and view transition captures, once they have renderers.
+    // FIXME: Video, once it has renderers.
     return IsBlockLevelReplacedOrAtomicInline() && (IsRenderImage() || IsRenderHTMLCanvas());
   }
 
@@ -4477,7 +4475,6 @@ namespace krys::boo
     }
 
     auto adjustedRects = rects;
-    // FIXME: Reflections (`-webkit-box-reflect` was dropped).
 
     if (container == this)
     {

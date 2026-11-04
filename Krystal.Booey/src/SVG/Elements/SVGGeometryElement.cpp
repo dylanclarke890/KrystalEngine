@@ -139,8 +139,6 @@ namespace krys::boo::svg
     if (name == SVGNames::PathLengthAttr())
     {
       _pathLength->SetBaseValInternal(ToFloat(value.value_or(dom::DOMStringView {})));
-      // FIXME: Report "A negative value for path attribute <pathLength> is not allowed" to the console, once
-      // there's one.
     }
 
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);

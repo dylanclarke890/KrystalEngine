@@ -18,8 +18,8 @@ namespace krys::boo
   class PlatformWheelEvent;
   /// @brief Something that scrolls: a scroll position within its contents, its scroll origin, and its
   /// scrollbars.
-  // FIXME: The scroll animator and scrollbars controller, scroll snapping, scroll anchoring, rubber-banding
-  // and compositing layers: scrolls are immediate.
+  // FIXME: The scroll animator and scrollbars controller, scroll snapping, scroll anchoring and compositing
+  // layers: scrolls are immediate.
   class ScrollableArea : public CanMakeWeakPtr<ScrollableArea>, public CanMakeCheckedPtr<ScrollableArea>
   {
     KRYS_NON_COPY_MOVABLE(ScrollableArea);
@@ -85,7 +85,7 @@ namespace krys::boo
 
     /// @brief Scrolls by @p wheelEvent's deltas, as a user scroll.
     /// @return Whether it scrolled: false if it can't scroll, or is at its end in the event's direction.
-    // FIXME: Animated scrolling, rubber-banding, momentum and scroll snapping, once there are those.
+    // FIXME: Animated scrolling, momentum and scroll snapping, once there are those.
     virtual bool HandleWheelEventForScrolling(const PlatformWheelEvent &wheelEvent) noexcept;
     KRYS_NODISCARD virtual bool IsScrollableOrRubberbandable() const noexcept = 0;
 

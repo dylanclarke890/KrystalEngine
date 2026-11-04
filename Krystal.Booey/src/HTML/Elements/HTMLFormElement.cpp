@@ -636,8 +636,6 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: The rel attribute's noreferrer, which sets the submission's referrer policy.
-
     _plannedFormSubmission = CreateWeakPtr(formSubmission.get());
 
     if (formSubmission->GetMethod() == FormSubmission::Method::Dialog)
@@ -734,8 +732,6 @@ namespace krys::boo::html
     {
       _attributes.SetAcceptCharset(newValue);
     }
-    // FIXME: Resetting the controls when the document is restored from the back/forward cache with
-    // autocomplete off (registerForDocumentSuspensionCallbacks), once there's a back/forward cache.
   }
 
   uint32 HTMLFormElement::FormElementIndexWithFormAttribute(dom::Element &element, uint32 rangeStart,

@@ -135,9 +135,6 @@ namespace krys::boo
     if (attr && !ContainsOnlyASCIIWhitespace(*attr))
     {
       ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();
-      // FIXME: The content security policy and content extension checks skipped for user agent shadow trees,
-      // the referrer policy, fetch priority, the image set initiator and the crossorigin attribute, once
-      // there are network loads.
       auto *imageElement = DynamicDowncast<html::HTMLImageElement>(element.get());
 
       // Use URL from original request for same URL loads in order to preserve the original base URL.
@@ -328,9 +325,6 @@ namespace krys::boo
 
       _hasPendingErrorEvent = true;
       LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
-
-      // FIXME: Log "Cannot load image <url> due to access control checks." to the console, once there's a
-      // console.
 
       krys_debug_assert(!_hasPendingLoadEvent);
 

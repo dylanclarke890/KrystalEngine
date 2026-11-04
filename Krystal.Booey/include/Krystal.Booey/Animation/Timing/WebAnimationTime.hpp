@@ -19,7 +19,6 @@ namespace krys::boo
 
   /// @brief An animation time: a time (for time-based timelines) or a percentage (for progress-based
   /// timelines).
-  // FIXME: Conversions to and from `CSSNumberish`, for the Web Animations interfaces, once there's scripting.
   class WebAnimationTime
   {
   private:

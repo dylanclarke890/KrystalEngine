@@ -1300,8 +1300,6 @@ namespace krys::boo
       {
         return dom::PositionInParentBeforeNode(node);
       }
-      // FIXME: The HitTestSource state should be propagated down from calls into JavaScript bindings.
-      // For the time being, just err on the side of passing in `Bindings`.
       auto *renderBox = DynamicDowncast<RenderBox>(renderer);
       auto localOffset = renderBox ? renderBox->LocationOffset() : LayoutSize {};
       return const_cast<RenderObject &>(renderer).VisiblePositionForPoint(pointInLine - localOffset,

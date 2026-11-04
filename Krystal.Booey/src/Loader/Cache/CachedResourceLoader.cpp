@@ -167,9 +167,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Content security policy, mixed content and the other checks before a request (canRequest),
-    // once there are network loads.
-
     auto &memoryCache = MemoryCache::Singleton();
     if (request.AllowsCaching() && memoryCache.Disabled())
     {

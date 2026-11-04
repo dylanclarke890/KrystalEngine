@@ -514,8 +514,6 @@ namespace krys::boo::css
 
   bool StyleSheetContents::ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
-    // FIXME: Lax type checks for same-origin requests in quirks mode, once there are security origins (file:
-    // URLs are each their own origin, so their requests are cross-origin).
     auto mimeTypeCheckHint = CachedCSSStyleSheet::MIMETypeCheckHint::Strict;
     bool hasValidMIMEType = true;
     bool hasHTTPStatusOK = true;
@@ -529,7 +527,6 @@ namespace krys::boo::css
     if (!hasValidMIMEType)
     {
       krys_debug_assert(!sheetText);
-      // FIXME: Log that the sheet wasn't parsed because its type isn't CSS, once there's a console.
       return false;
     }
     if (!sheetText)

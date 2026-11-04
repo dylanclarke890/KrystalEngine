@@ -44,8 +44,6 @@ namespace krys::boo::css
     Charset = charset;
     Mode = document.InQuirksMode() ? ParserMode::HTMLQuirks : ParserMode::HTMLStandard;
     IsHTMLDocument = Is<dom::HTMLDocument>(document);
-    // FIXME: Whether the document's security origin can request the base URL, once there are origins;
-    // every URL can be requested until then.
     HasDocumentSecurityOrigin = true;
 
     auto &settings = document.GetSettings();

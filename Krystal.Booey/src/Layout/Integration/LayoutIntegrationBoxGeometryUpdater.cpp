@@ -257,8 +257,8 @@ namespace krys::boo::layout_integration
         return null;
       }
 
-      // FIXME: Iframes, embedded objects and view transition captures have no baseline; images,
-      // attachments, buttons, list boxes, file upload controls and sliders have their own.
+      // FIXME: Images, attachments, buttons, list boxes, file upload controls and sliders have their own
+      // baseline.
       if (Is<LegacyRenderSVGRoot>(renderBox) || Is<RenderHTMLCanvas>(renderBox)
           || Is<RenderTextControlMultiLine>(renderBox))
       {

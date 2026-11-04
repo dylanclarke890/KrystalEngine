@@ -221,7 +221,6 @@ namespace krys::boo
 
   void RenderLayer::UpdateAlwaysIncludedInZOrderLists() noexcept
   {
-    // FIXME: View transition names, once there are view transitions.
     bool alwaysIncludedInZOrderLists = _intrinsicallyComposited;
     if (_alwaysIncludedInZOrderLists != alwaysIncludedInZOrderLists)
     {
@@ -1053,7 +1052,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Video, embedded objects and iframes too, once there are any.
+    // FIXME: Video too, once there is any.
     return Renderer().HasNonVisibleOverflow() || Renderer().IsRenderHTMLCanvas()
            || (Renderer().Style().SpecifiesColumns() && !IsRenderViewLayer())
            || Renderer().IsRenderFragmentedFlow();
@@ -1341,9 +1340,6 @@ namespace krys::boo
         posZOrderList->insert(posZOrderList->end(), topLayerLayers.begin(), topLayerLayers.end());
       }
     }
-
-    // FIXME: The view transition containing block goes last in the view's list, once there are view
-    // transitions.
   }
 
   void RenderLayer::RemoveSelfFromCompositor() noexcept
@@ -1394,8 +1390,6 @@ namespace krys::boo
                                   EnumSet<Compositing> &accumulatedDirtyFlags) noexcept
   {
     krys_debug_assert(!DescendantDependentFlagsAreDirty());
-    // FIXME: The view transition containing block is collected by the view too, once there are view
-    // transitions.
     if (EstablishesTopLayer())
     {
       return;
@@ -2657,7 +2651,7 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Video, embedded objects and iframes too, once there are any.
+    // FIXME: Video too, once there is any.
     return HasOverlayScrollbars() || HasCompositedScrollableOverflow() || Renderer().IsRenderTableRow()
            || Renderer().IsRenderHTMLCanvas() || Renderer().IsRenderFragmentedFlow();
   }
@@ -2797,8 +2791,6 @@ namespace krys::boo
           DirtyZOrderLists();
         }
       }
-
-      // FIXME: The view transition name, once there are view transitions.
 
       // Visibility and scrollability are input to canUseCompositedScrolling().
       if (_scrollableArea)
@@ -4511,8 +4503,6 @@ namespace krys::boo
 
     if (!hadScrollableArea)
     {
-      // FIXME: The compositing configuration update for asynchronous overflow scrolling, once there's async
-      // scrolling.
       _scrollableArea->RestoreScrollPosition();
     }
 
@@ -4549,8 +4539,6 @@ namespace krys::boo
     else
     {
       ClearLayerScrollableArea();
-      // FIXME: The compositing configuration update for asynchronous overflow scrolling, once there's async
-      // scrolling.
     }
 
     // FIXME: Tell the inspector the scrollbars changed, once there's an inspector.
@@ -4687,7 +4675,6 @@ namespace krys::boo
     // We need a special case for <iframe> because they never have
     // hasNonVisibleOverflow(). However, they do "implicitly" clip their contents, so
     // we want to allow resizing them also.
-    // FIXME: iframes too, once there are any.
     return Renderer().HasNonVisibleOverflow() && Renderer().Style().GetResize() != style::Resize::None;
   }
 
@@ -5012,7 +4999,6 @@ namespace krys::boo
       {
         // Note: we don't have to walk z-order lists since transparent elements always establish
         // a stacking container. This means we can just walk the layer tree directly.
-        // FIXME: Reflection layers (isReflectionLayer) are skipped upstream, once there are reflections.
         for (RenderLayer *curr = layer.FirstChild(); curr; curr = curr->NextSibling())
         {
           clipRect.Unite(TransparencyClipBox(*curr, rootLayer, transparencyBehavior,
@@ -5020,8 +5006,6 @@ namespace krys::boo
                                              paintDirtyRect));
         }
       }
-
-      // FIXME: Reflections (the reflected rect of the clip, united into it) come with reflections.
     }
 
     LayoutRect TransparencyClipBox(const RenderLayer &layer, const RenderLayer *rootLayer,
@@ -5087,8 +5071,7 @@ namespace krys::boo
                           const LayoutSize &subpixelOffset, EnumSet<PaintBehavior> paintBehavior,
                           RenderObject *subtreePaintRoot, EnumSet<PaintLayerFlag> paintFlags) noexcept
   {
-    // FIXME: Overlap test requests (for widgets), the security origin paint policy and region contexts come
-    // with widgets and hit testing.
+    // FIXME: Region contexts come with hit testing.
     LayerPaintingInfo paintingInfo(this, LayoutRect(EnclosingIntRect(damageRect)), paintBehavior,
                                    subpixelOffset, subtreePaintRoot);
     PaintLayer(context, paintingInfo, paintFlags);
@@ -5481,8 +5464,6 @@ namespace krys::boo
     auto localPaintFlags = paintFlags;
     localPaintFlags.Remove(PaintLayerFlag::AppliedTransform);
     localPaintFlags.Remove(PaintLayerFlag::PaintingOverflowContentsRoot);
-
-    // FIXME: Reflections (painted first, from the reflection layer) come with reflections.
 
     localPaintFlags.Add(PaintLayerPaintingCompositingAllPhasesFlags());
     PaintLayerContents(context, paintingInfo, localPaintFlags);
@@ -6611,8 +6592,8 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: Renderers captured in a view transition, SVG resources and hidden SVG containers, and fixed
-    // container sampling (isForFixedContainerSampling) come with view transitions, SVG and scrolling.
+    // FIXME: SVG resources and hidden SVG containers, and fixed container sampling
+    // (isForFixedContainerSampling) come with SVG and scrolling.
 
     // The natural thing would be to keep HitTestingTransformState on the stack, but it's big, so we
     // heap-allocate.

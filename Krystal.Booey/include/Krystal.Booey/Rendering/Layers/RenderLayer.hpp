@@ -145,8 +145,8 @@ namespace krys::boo
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Masks, SVG clip paths, reflections, resizing, scrollbars, event regions and fragmentation
-  // (paginated collectFragments) come with effects and fragmentation.
+  // FIXME: Masks, SVG clip paths, resizing, scrollbars, event regions and fragmentation (paginated
+  // collectFragments) come with effects and fragmentation.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
   {
     KRYS_NON_COPY_MOVABLE(RenderLayer);

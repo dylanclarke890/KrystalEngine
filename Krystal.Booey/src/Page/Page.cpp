@@ -245,8 +245,6 @@ namespace krys::boo
     RunProcessingStep(RenderingUpdateStep::UpdateContentRelevancy, [](dom::Document &document)
                       { (void)document.UpdateRelevancyOfContentVisibilityElements(); });
 
-    // FIXME: View transitions, once there are any.
-
     RunProcessingStep(RenderingUpdateStep::IntersectionObservations,
                       [](dom::Document &document) { document.UpdateIntersectionObservations(); });
 

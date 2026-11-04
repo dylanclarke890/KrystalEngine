@@ -765,7 +765,6 @@ namespace krys::boo::html
         LoadDeferredImage();
       }
     }
-    // FIXME: referrerpolicy and crossorigin, once there are network loads.
   }
 
   // https://html.spec.whatwg.org/#the-img-element:html-element-insertion-steps

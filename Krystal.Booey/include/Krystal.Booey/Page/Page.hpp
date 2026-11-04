@@ -33,9 +33,8 @@ namespace krys::boo
   class PointerLockController;
 
   /// @brief The steps of the rendering update that something asked for.
-  // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, view
-  // transitions, paint and event timing, video frame callbacks, validation messages and the scrolling tree
-  // update.
+  // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, paint and
+  // event timing, video frame callbacks, validation messages and the scrolling tree update.
   enum class RenderingUpdateStep : uint8
   {
     FlushAutofocusCandidates,
@@ -227,8 +226,7 @@ namespace krys::boo
 
     void ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept;
     /// @brief Calls @p functor for each document that's rendered.
-    // FIXME: Documents whose visual updates are suppressed, or that a view transition hides, once there are
-    // any.
+    // FIXME: Documents whose visual updates are suppressed, once there are any.
     void ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept;
 
   private:

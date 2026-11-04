@@ -5,7 +5,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
-// FIXME: The rubber-banding and snapping types come with rubber-banding and scroll snapping.
+// FIXME: The snapping types come with scroll snapping.
 
 namespace krys::boo
 {

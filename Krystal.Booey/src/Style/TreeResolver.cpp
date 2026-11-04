@@ -470,9 +470,6 @@ namespace krys::boo::style
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Backdrop});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Checkmark});
 
-    // FIXME: The view transition pseudo-elements of the document element, once documents have active view
-    // transitions.
-
     return {krys::move(update), descendantsToResolve};
   }
 
@@ -934,8 +931,6 @@ namespace krys::boo::style
 
     auto updateAnimations = [&]
     {
-      // FIXME: Not updating animations in the back/forward cache or while printing, once there are those.
-
       if (hasUnresolvedAnchorPosition)
       {
         return;

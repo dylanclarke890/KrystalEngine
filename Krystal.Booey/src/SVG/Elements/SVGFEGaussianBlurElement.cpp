@@ -59,8 +59,6 @@ namespace krys::boo::svg
       {
         _edgeMode->SetBaseValInternal<EdgeModeType>(propertyValue);
       }
-      // FIXME: Otherwise, report "feGaussianBlur: problem parsing edgeMode" as a warning, once there's a
-      // console.
     }
 
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);

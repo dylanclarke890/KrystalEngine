@@ -67,7 +67,6 @@ namespace krys::boo::svg
       _height->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Height, string, parseError,
                                                             SVGLengthNegativeValuesMode::Forbid));
     }
-    // FIXME: Load again when the CORS setting of crossorigin changes, once there are network loads.
     ReportAttributeParsingError(parseError, name, string);
 
     SVGURIReference::ParseAttribute(name, value);

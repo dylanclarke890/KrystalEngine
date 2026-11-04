@@ -266,7 +266,7 @@ namespace krys::boo
     bool shouldPaintBackgroundImage = bgImage && bgImage->CanRender(&_renderer, style.UsedZoom());
 
     // FIXME: Contentful paint detection and asynchronous image decoding (detectingContentfulPaint,
-    // invalidatingImagesWithAsyncDecodes); printing's forced white backgrounds come with printing.
+    // invalidatingImagesWithAsyncDecodes).
 
     bool baseBgColorOnly = (baseBgColorUsage == BaseBackgroundColorOnly);
     if (baseBgColorOnly && (!isRoot || !layer.IsLast || bgColor.IsOpaque()))

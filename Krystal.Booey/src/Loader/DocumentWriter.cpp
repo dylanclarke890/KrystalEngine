@@ -119,8 +119,6 @@ namespace krys::boo
     }
 
     // Create a new document before clearing the frame.
-    // FIXME: Reusing the initial empty document's window for a document of the same origin
-    // (takeDOMWindowFrom), once there are origins.
     auto document = dom::DOMImplementation::CreateDocument(_mimeType, url);
     // A document created by navigation allows declarative shadow roots.
     document->SetAllowDeclarativeShadowRoots(true);

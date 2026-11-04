@@ -34,7 +34,6 @@ namespace krys::boo
   /// @brief A form's submission: its method, action, target, encoding type and entry list, which the host
   /// handles. Booey doesn't encode the entries: the host turns them into a request if it wants one.
   /// @see https://html.spec.whatwg.org/#form-submission-algorithm
-  // FIXME: The referrer policy.
   class FormSubmission : public RefCounted<FormSubmission>, public CanMakeWeakPtr<FormSubmission>
   {
   public:

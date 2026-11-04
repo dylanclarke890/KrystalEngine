@@ -8,7 +8,6 @@
 namespace krys::boo
 {
   /// @brief What came back for a load: the URL it came from, its type and the length it said it had.
-  // FIXME: The HTTP status, headers, cache control, tainting and timing, once there are network loads.
   class ResourceResponse
   {
   private:

@@ -186,7 +186,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsAnonymousForPercentageResolution() const noexcept
     {
-      // FIXME: View transition pseudo-elements, once there are view transitions.
       return IsAnonymous();
     }
 

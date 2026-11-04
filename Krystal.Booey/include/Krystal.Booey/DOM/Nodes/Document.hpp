@@ -897,7 +897,6 @@ namespace krys::boo::dom
 
     /// @brief The identifier of the document's origin on pasteboards: a unique identifier, as documents have
     /// opaque origins.
-    // FIXME: The origin's serialisation when it isn't opaque, with security origins.
     KRYS_NODISCARD const DOMString &OriginIdentifierForPasteboard() const noexcept;
 
     /// @brief The script's view of the selection; null unless the document is fully active (shown in a
@@ -1594,7 +1593,7 @@ namespace krys::boo::dom
     void WillBeRemovedFromFrame() noexcept;
 
     /// @brief Whether the document is being printed.
-    // FIXME: Always false: frames don't print.
+    // Always false: there's no printing.
     KRYS_NODISCARD bool Printing() const noexcept
     {
       return false;

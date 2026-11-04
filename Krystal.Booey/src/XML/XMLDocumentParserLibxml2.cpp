@@ -139,8 +139,7 @@ namespace krys::boo::xml
         return false;
       }
 
-      // FIXME: Same-origin loads of external entities and DTDs (upstream allows them through a synchronous
-      // load), once there are origins and synchronous loads.
+      // External entities and DTDs aren't loaded: there are no network loads.
       return false;
     }
 
@@ -148,8 +147,7 @@ namespace krys::boo::xml
     {
       krys_debug_assert(XMLDocumentParserScope::CurrentCachedResourceLoader());
 
-      // FIXME: Load the resource synchronously through the scope's loader, once there are origins and
-      // synchronous loads; until then every load libxml2 asks for reads nothing.
+      // Every load libxml2 asks for reads nothing: there are no network loads.
       return &globalDescriptor;
     }
 
@@ -520,7 +518,6 @@ namespace krys::boo::xml
       element->FinishParsingChildren();
     }
 
-    // FIXME: Run the scripts the parser inserts, once there's scripting.
     PopCurrentNode();
   }
 

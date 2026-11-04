@@ -6,7 +6,6 @@
 namespace krys::boo
 {
   /// @brief What's asked of the loader: the URL to load, and the HTTP method.
-  // FIXME: The headers, body, cache policy, priority and first party, once there are network loads.
   class ResourceRequest
   {
   private:

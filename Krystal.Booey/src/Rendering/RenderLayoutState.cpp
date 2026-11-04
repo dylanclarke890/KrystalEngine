@@ -180,7 +180,6 @@ namespace krys::boo
     {
       for (auto *renderer = &subtreeLayoutRoot; renderer; renderer = renderer->Container())
       {
-        // FIXME: Reflections too, once there are any.
         if (renderer->IsTransformed())
         {
           return true;

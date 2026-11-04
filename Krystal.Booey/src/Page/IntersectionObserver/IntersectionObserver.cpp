@@ -504,7 +504,6 @@ namespace krys::boo
         return;
       }
 
-      // FIXME: Handle the case of an implicit-root observer that has a target in a different frame tree.
       if (targetRenderer->GetDocument().Frame() != &hostFrameView.Frame())
       {
         return;

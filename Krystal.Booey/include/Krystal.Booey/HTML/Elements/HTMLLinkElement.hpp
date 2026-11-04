@@ -27,9 +27,6 @@ namespace krys::boo::html
   using LinkEventSender = dom::EventSender<HTMLLinkElement>;
 
   /// @see https://html.spec.whatwg.org/#htmllinkelement
-  // FIXME: The link types other than style sheets (preloads, icons, manifests; LinkLoader), internal resource
-  // links (expect), integrity, CORS and referrer policies, and fetch priorities, once there are network
-  // loads.
   class HTMLLinkElement : public HTMLElement, public CachedStyleSheetClient
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLLinkElement);

@@ -373,8 +373,6 @@ namespace krys::boo::html
         UnblockRendering();
       }
 
-      // FIXME: Load stylesheets that are not needed for the rendering immediately with low priority, the
-      // nonce, integrity, referrer policy and fetch priority, once there are network loads.
       CachedResourceRequest request(ResourceRequest(_url),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       request.SetCharset(krys::move(charset));
@@ -507,7 +505,6 @@ namespace krys::boo::html
       _sheet->ClearOwnerNode();
     }
 
-    // FIXME: Whether the cached sheet is CORS-same-origin, once there are origins.
     _sheet = css::CSSStyleSheet::Create(krys::move(styleSheet), *this, true);
     _sheet->SetMediaQueries(css::mq::MediaQueryParser::Parse(_media, context));
     if (!dom::TreeQueries::IsInShadowTree(*this))

@@ -57,9 +57,6 @@ namespace krys::boo::svg
       return false;
     }
 
-    // FIXME: Once foreignObject elements within SVG images are updated to not leak cross-origin data
-    // (e.g., visited links, spellcheck) we can remove the SVGForeignObjectElement check here and
-    // research if we can remove the Image::renderingTaintsOrigin mechanism entirely.
     for (auto *node = dom::TreeQueries::Next(*rootElement, rootElement.get()); node;
          node = dom::TreeQueries::Next(*node, rootElement.get()))
     {
@@ -68,7 +65,6 @@ namespace krys::boo::svg
       {
         return true;
       }
-      // FIXME: <image> and <feImage> elements whose images taint the origin, once there are origins.
     }
 
     // Because SVG image rendering disallows external resources and links,

@@ -105,7 +105,7 @@ namespace krys::boo
   };
 
   /// @brief A block container that lays out block or inline content.
-  // FIXME: Pagination, multi-column flows and text autosizing.
+  // FIXME: Pagination and multi-column flows.
   class RenderBlockFlow : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderBlockFlow);

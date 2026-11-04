@@ -143,8 +143,6 @@ namespace krys::boo
 
   bool RenderObject::IsNonReplacedAtomicInlineLevelBox() const noexcept
   {
-    // FIXME: Check if iframe should really behave like non-replaced here.
-    // FIXME: Inline iframes, once there are iframe renderers.
     return !IsRenderReplaced() && IsAtomicInlineLevelBox();
   }
 
@@ -1644,7 +1642,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Nothing repaints while printing, once there's printing.
     IssueRepaint(null, ClipRepaintToLayer::No, forceRepaint);
   }
 
@@ -1676,7 +1673,6 @@ namespace krys::boo
     {
       return;
     }
-    // FIXME: Nothing repaints while printing, once there's printing.
 
     const auto *repaintContainer = ContainerForRepaint().Renderer;
 
@@ -1968,7 +1964,7 @@ namespace krys::boo
   {
     krys_debug_assert(!_parent);
 
-    // FIXME: The accessibility cache and view transitions, once there are any.
+    // FIXME: The accessibility cache, once there is one.
 
     RemoveRareData();
 

@@ -2802,7 +2802,6 @@ namespace krys::boo
            && IsSelectionRoot();
   }
 
-  // FIXME: Reflections (hasReflection), once there are any.
   bool RenderBlock::IsSelectionRoot() const noexcept
   {
     if (IsPseudoElement())

@@ -221,14 +221,10 @@ namespace krys::boo::html
     // 11. Navigate targetNavigable to urlString using subject's node document, with referrerPolicy set to
     //     subject's hyperlink referrer policy, userInvolvement set to userInvolvement, and sourceElement set
     //     to subject.
-    // FIXME: The suggested filename is sanitized (ResourceResponse::sanitizeSuggestedFilename), and ignored
-    // for a cross-origin URL, once there are downloads and origins.
     auto downloadAttribute = subject.GetAttribute(u8"download");
     auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : dom::DOMStringAtom::Null();
     frame->Loader().ChangeLocation(urlRecord, targetAttributeValue, &event, HyperlinkReferrerPolicy(subject),
                                    download, &subject);
-
-    // FIXME: Pings (the ping attribute), once there are network loads.
   }
 
   ReferrerPolicy HyperlinkAlgorithms::HyperlinkReferrerPolicy(const HTMLElement &subject) noexcept
@@ -240,7 +236,6 @@ namespace krys::boo::html
     }
 
     // 2. Return the current state of subject's referrerpolicy content attribute.
-    // FIXME: The referrerpolicy attribute, once requests have referrers.
     return ReferrerPolicy::EmptyString;
   }
 }

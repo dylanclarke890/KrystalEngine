@@ -484,8 +484,6 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Whether the document under the mouse can receive the initiator's data (canReceiveDragData), once
-  // there are security origins.
   DragHandlingMethod DragController::TryDocumentDrag(LocalFrame &frame, const DragData &dragData,
                                                      EnumSet<DragDestinationAction> destinationActionMask,
                                                      Maybe<DragOperation> &dragOperation) noexcept
@@ -923,7 +921,6 @@ namespace krys::boo
     return selectionDragElement;
   }
 
-  // FIXME: Whether the source's document may display the link (canDisplay), once there are security origins.
   void DragController::PrepareForDragStart(LocalFrame &source, EnumSet<boo::DragSourceAction> actionMask,
                                            dom::Element &element, dom::DataTransfer &dataTransfer,
                                            const IntPoint &dragOrigin) const noexcept
@@ -991,9 +988,8 @@ namespace krys::boo
     return hitTestResult;
   }
 
-  // FIXME: Touch drags, which upstream refuses on GTK, with touch drags; whether the source's document may
-  // display the link (canDisplay), once there are security origins. The page has no device scale factor of
-  // its own: the document's is used.
+  // FIXME: Touch drags, which upstream refuses on GTK, with touch drags. The page has no device scale factor
+  // of its own: the document's is used.
   bool DragController::StartDrag(LocalFrame &src, const DragState &state,
                                  EnumSet<DragOperation> sourceOperationMask,
                                  const PlatformMouseEvent &dragEvent, const IntPoint &dragOrigin,

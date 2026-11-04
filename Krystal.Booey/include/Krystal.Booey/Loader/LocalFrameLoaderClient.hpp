@@ -15,7 +15,6 @@ namespace krys::boo
 
   /// @brief What a frame's loader tells its host: the navigations the page asks for, and what happened to
   /// the loads the host started.
-  // FIXME: Downloads, the progress and the rest of the client, once there are those.
   class LocalFrameLoaderClient
   {
     KRYS_NON_COPY_MOVABLE(LocalFrameLoaderClient);

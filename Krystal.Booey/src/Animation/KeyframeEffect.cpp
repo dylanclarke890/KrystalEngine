@@ -3520,9 +3520,6 @@ namespace krys::boo
        && _blendingKeyframes.ContainsProperty(css::PropertyId::Width))
       || (_blendingKeyframes.HasHeightDependentTransform()
           && _blendingKeyframes.ContainsProperty(css::PropertyId::Height));
-
-    // FIXME: View transition group pseudo-elements' size and transform animations, once there are view
-    // transitions.
   }
 
   void KeyframeEffect::EffectStackNoLongerPreventsAcceleration() noexcept

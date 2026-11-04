@@ -16,7 +16,6 @@ namespace krys::boo
   };
 
   /// @brief A request for a cached resource: the resource request, how to load it and who asked.
-  // FIXME: Priorities, preloads, the origin and access control updates, once there are network loads.
   class CachedResourceRequest
   {
   private:

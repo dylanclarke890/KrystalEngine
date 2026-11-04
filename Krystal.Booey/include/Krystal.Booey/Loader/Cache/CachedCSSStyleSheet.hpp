@@ -12,9 +12,7 @@ namespace krys::boo::css
 namespace krys::boo
 {
   /// @brief A cached style sheet: the text a load brought, and the sheet parsed from it, kept for reuse.
-  // FIXME: Encodings other than UTF-8 (the request's charset, the response's and `@charset`), HTTP status and
-  // `X-Content-Type-Options: nosniff` checks, and revalidating the parsed sheet's subresources, once there
-  // are network loads.
+  // FIXME: Encodings other than UTF-8 (the request's charset, the response's and `@charset`).
   class CachedCSSStyleSheet final : public CachedResource
   {
   private:

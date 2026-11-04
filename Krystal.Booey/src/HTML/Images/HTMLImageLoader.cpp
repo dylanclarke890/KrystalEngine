@@ -13,8 +13,7 @@ namespace krys::boo::html
 
   void HTMLImageLoader::DispatchLoadEvent() noexcept
   {
-    // FIXME: Video posters fire no events, and an <object> considers an HTTP error status an error, once
-    // they load images.
+    // FIXME: Video posters fire no events, once they load images.
     bool errorOccurred = Image()->ErrorOccurred();
     (void)dom::EventDispatcher::FireEvent(
       dom::DOMStringAtom(errorOccurred ? EventNames::Error : EventNames::Load), GetElement());

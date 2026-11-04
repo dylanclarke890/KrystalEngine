@@ -91,10 +91,8 @@ namespace krys::boo
   /// order.
   ///
   /// There is one RenderLayerCompositor per RenderView.
-  // FIXME: The scrolling coordinator and asynchronous scrolling, iframes and plug-ins, video and model
-  // elements, view transitions, page overlays, event regions, rubber banding (overhang areas, headers
-  // and footers), tiled backings, settings and the compositing policy under memory pressure, once there are
-  // any.
+  // FIXME: Video and model elements, page overlays, event regions, headers and footers, tiled backings,
+  // settings and the compositing policy under memory pressure, once there are any.
   class RenderLayerCompositor final : public GraphicsLayerClient,
                                       public CanMakeCheckedPtr<RenderLayerCompositor>
   {

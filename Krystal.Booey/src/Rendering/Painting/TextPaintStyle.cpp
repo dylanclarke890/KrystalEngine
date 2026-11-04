@@ -140,8 +140,6 @@ namespace krys::boo
         forceBackgroundToWhite = true;
       }
 
-      // FIXME: The setting to print backgrounds (shouldPrintBackgrounds) comes with printing.
-
       if (forceBackgroundToWhite)
       {
         if (style::HasAnyBackgroundClipText(renderer.Style().GetBackgroundLayers()))

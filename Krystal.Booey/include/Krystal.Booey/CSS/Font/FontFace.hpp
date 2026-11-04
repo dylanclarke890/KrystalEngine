@@ -39,7 +39,6 @@ namespace krys::boo::css
 
   /// @brief A font face from an `@font-face` rule (or a face of an installed family that shares its name
   /// with one): its descriptors, its sources in order, and its loading state.
-  // FIXME: The `FontFace` wrapper, once there's scripting.
   class CSSFontFace final : public RefCounted<CSSFontFace>, public CanMakeWeakPtr<CSSFontFace>
   {
     KRYS_NON_COPY_MOVABLE(CSSFontFace);

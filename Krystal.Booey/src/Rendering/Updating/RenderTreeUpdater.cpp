@@ -418,7 +418,6 @@ namespace krys::boo
     auto *renderer = element.Renderer();
     if (!renderer)
     {
-      // FIXME: View transitions, once there are any.
       return;
     }
 
@@ -429,7 +428,7 @@ namespace krys::boo
     }
 
     GetGeneratedContent().UpdateBackdropRenderer(*renderer, minimalStyleDifference);
-    // FIXME: Writing suggestions and view transitions, once there are any.
+    // FIXME: Writing suggestions, once there are any.
 
     _builder->UpdateAfterDescendants(*renderer);
 

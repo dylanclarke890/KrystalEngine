@@ -677,7 +677,6 @@ namespace krys::boo
       if (!repaintRect.IsEmpty())
       {
         RepaintRectangle(repaintRect); // We need to do a partial repaint of our content.
-        // FIXME: Reflections (`-webkit-box-reflect` was dropped).
       }
     }
   }

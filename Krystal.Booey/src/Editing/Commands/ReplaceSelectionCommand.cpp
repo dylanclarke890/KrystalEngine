@@ -465,8 +465,6 @@ namespace krys::boo
 
   ReplaceSelectionCommand::~ReplaceSelectionCommand() noexcept = default;
 
-  // FIXME: Leaving out event handler attributes and javascript: URLs (isEventHandlerAttribute,
-  // attributeContainsJavaScriptURL), with scripting.
   void ReplacementFragment::RemoveContentsWithSideEffects() noexcept
   {
     List<Ref<dom::Element>> elementsToRemove;

@@ -211,7 +211,6 @@ namespace krys::boo
   void RenderLayerBacking::WillBeDestroyed(EnumSet<UpdateBackingSharingFlags> flags) noexcept
   {
     krys_debug_assert(_owningLayer.Backing() == this);
-    // FIXME: The scrolling coordinator (removeFromScrollCoordinatedLayers), once there's async scrolling.
 
     ClearBackingSharingLayers(flags);
   }
@@ -520,7 +519,6 @@ namespace krys::boo
   void RenderLayerBacking::UpdateTransform(const RenderStyle &style) noexcept
   {
     TransformationMatrix t;
-    // FIXME: Elements captured in a view transition, once there are view transitions.
     if (_owningLayer.IsTransformed())
     {
       _owningLayer.UpdateTransformFromStyle(t, style,
@@ -833,9 +831,6 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Elements captured in a view transition and the view transition's new pseudo-element, once there
-    // are view transitions.
-
     if (_isFrameLayerWithTiledBacking)
     {
       return false;
@@ -1001,7 +996,6 @@ namespace krys::boo
   {
     (void)UpdateMaskingLayer(Renderer().HasMask(), Renderer().HasClipPath());
 
-    // FIXME: Reflections (setReplicatedByLayer), once there are reflections.
     _graphicsLayer->SetReplicatedByLayer(nullptr);
 
     // FIXME: do we care if opacity is animating?
@@ -1118,7 +1112,6 @@ namespace krys::boo
       layerConfigChanged = true;
     }
 
-    // FIXME: Reflections (setReplicatedByLayer), once there are reflections.
     _graphicsLayer->SetReplicatedByLayer(nullptr);
 
     PaintedContentsInfo contentsInfo(*this);
@@ -1403,8 +1396,6 @@ namespace krys::boo
     krys_debug_assert(compositedAncestor == _owningLayer.AncestorCompositingLayer());
     LayoutRect parentGraphicsLayerRect = ComputeParentGraphicsLayerRect(compositedAncestor);
 
-    // FIXME: Content captured in a view transition, once there are view transitions.
-
     if (_ancestorClippingStack)
     {
       UpdateClippingStackLayerGeometry(*_ancestorClippingStack, compositedAncestor, parentGraphicsLayerRect);
@@ -1423,7 +1414,6 @@ namespace krys::boo
 
     auto primaryLayerPosition = FloatPoint(primaryGraphicsLayerRect.Location());
 
-    // FIXME: Reflections force transform-style to be flat, once there are reflections.
     bool preserves3D = style.Preserves3D();
 
     if (_viewportAnchorLayer)
@@ -1548,8 +1538,6 @@ namespace krys::boo
 
     UpdateChildrenTransformAndAnchorPoint(primaryGraphicsLayerRect, rendererOffset.FromParentGraphicsLayer());
 
-    // FIXME: Reflections, once there are reflections.
-
     if (_scrollContainerLayer)
     {
       krys_debug_assert(_scrolledContentsLayer);
@@ -1667,8 +1655,6 @@ namespace krys::boo
       ancestorCompositedBounds));
     UpdateBackdropFiltersGeometry();
 
-    // FIXME: Widgets (updateAfterWidgetResize), once there are iframes and plug-ins.
-
     PositionOverflowControlsLayers();
 
     if (SubpixelOffsetFromRendererChanged(oldSubpixelOffsetFromRenderer, _subpixelOffsetFromRenderer,
@@ -1716,9 +1702,8 @@ namespace krys::boo
 
   void RenderLayerBacking::UpdateScrollOffset(ScrollOffset scrollOffset) noexcept
   {
-    // FIXME: Scrolling outside the main thread (currentScrollType, requiresScrollPositionReconciliation),
-    // once there's async scrolling. Note that we implement the contents offset via the bounds origin on this
-    // layer, rather than a position on the sublayer.
+    // We implement the contents offset via the bounds origin on this layer, rather than a position on the
+    // sublayer.
     _scrollContainerLayer->SetBoundsOrigin(FloatPoint(scrollOffset));
 
     krys_debug_assert(_scrolledContentsLayer->Position().IsZero());
@@ -1820,7 +1805,6 @@ namespace krys::boo
 
   GraphicsLayer *RenderLayerBacking::LayerForContents() const noexcept
   {
-    // FIXME: Plug-ins hosted in a graphics layer, once there are plug-ins.
     return nullptr;
   }
 
@@ -2242,7 +2226,6 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: The scrolling coordinator's synchronous scrolling reasons, once there's async scrolling.
     return false;
   }
 
@@ -2369,8 +2352,6 @@ namespace krys::boo
 
     layersChanged |=
       createOrDestroyLayer(_layerForScrollCorner, needsScrollCornerLayer, true, u8"scroll corner");
-
-    // FIXME: The scrolling coordinator (scrollableAreaScrollbarLayerDidChange), once there's async scrolling.
 
     return layersChanged;
   }
@@ -2658,16 +2639,12 @@ namespace krys::boo
     }
     else
     {
-      // FIXME: The scrolling coordinator (willRemoveScrollingLayerWithBacking), once there's async scrolling.
-
       WillDestroyLayer(_scrollContainerLayer.get());
       WillDestroyLayer(_scrolledContentsLayer.get());
 
       GraphicsLayer::UnparentAndClear(_scrollContainerLayer);
       GraphicsLayer::UnparentAndClear(_scrolledContentsLayer);
     }
-
-    // FIXME: The scrolling coordinator (didAddScrollingLayer), once there's async scrolling.
 
     return true;
   }
@@ -3181,7 +3158,6 @@ namespace krys::boo
 
   bool RenderLayerBacking::ContainsPaintedContent(PaintedContentsInfo &contentsInfo) const noexcept
   {
-    // FIXME: Reflections (isReflection), once there are reflections.
     if (contentsInfo.IsSimpleContainer() || PaintsIntoWindow() || PaintsIntoCompositedAncestor()
         || _artificiallyInflatedBounds)
     {
@@ -3228,8 +3204,6 @@ namespace krys::boo
     {
       return false;
     }
-
-    // FIXME: View transition captures, once there are view transitions.
 
     auto *imageRenderer = DynamicDowncast<RenderImage>(Renderer());
     if (!imageRenderer)
@@ -3384,7 +3358,6 @@ namespace krys::boo
 
   void RenderLayerBacking::UpdateImageContents(PaintedContentsInfo &contentsInfo) noexcept
   {
-    // FIXME: View transition captures, once there are view transitions.
     auto &imageRenderer = Downcast<RenderImage>(Renderer());
 
     auto *cachedImage = imageRenderer.GetCachedImage();
@@ -3432,7 +3405,7 @@ namespace krys::boo
       return LayoutRect();
     }
 
-    // FIXME: Video and view transition captures, once there are any.
+    // FIXME: Video, once there is any.
     LayoutRect contentsRect;
     if (auto *renderReplaced = DynamicDowncast<RenderReplaced>(*renderBox))
     {
@@ -3971,8 +3944,6 @@ namespace krys::boo
   bool RenderLayerBacking::StartAnimation(double timeOffset, const GraphicsLayerAnimation &animation,
                                           const BlendingKeyframes &keyframes) noexcept
   {
-    // FIXME: Renderers captured in a view transition, once there are view transitions.
-
     // FIXME: SVG renderers that are layer aware.
     bool shouldApplyAnimationsToTargetRenderer = Renderer().IsRenderBox();
 

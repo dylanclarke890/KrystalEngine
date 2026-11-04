@@ -69,7 +69,7 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
   - View transitions: `@view-transition`, `view-transition-name`/`-class`, `::view-transition*`,
     `viewTransitions.css`.
   - `SVGZoomAndPan`/`SVGZoomAndPanType`.
-- [ ] **8. FIXME sweep.** Delete the FIXMEs for the "not planned" features. Keep the FIXMEs for features wanted
+- [x] **8. FIXME sweep.** Delete the FIXMEs for the "not planned" features. Keep the FIXMEs for features wanted
   later: multi-column (and the fragmentation it needs), accessibility, video and audio, fieldsets, scroll
   snapping, reference targets, spellcheck/grammar/autocorrect, marquee; and continuations (implementation notes).
 - [ ] **9. Non-standard CSS properties** (`codegen/css-properties.json`).

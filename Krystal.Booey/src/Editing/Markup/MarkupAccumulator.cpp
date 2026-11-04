@@ -194,7 +194,7 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Scripting, with scripting; until then <noscript>'s text is escaped like any other.
+    // There's no scripting, so <noscript>'s text is escaped like any other.
     KRYS_NODISCARD bool IsScriptEnabled(const dom::Node &) noexcept
     {
       return false;

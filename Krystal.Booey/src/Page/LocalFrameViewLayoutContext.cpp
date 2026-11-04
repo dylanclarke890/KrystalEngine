@@ -199,7 +199,6 @@ namespace krys::boo
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPreLayout);
       layoutRoot = CreateWeakPtr(SubtreeLayoutRoot() ? SubtreeLayoutRoot()
                                                      : static_cast<RenderElement *>(GetRenderView()));
-      // FIXME: Printing repaints everything too, once there's printing.
       _needsFullRepaint = Is<RenderView>(*layoutRoot) && _firstLayout;
       _frameView.WillDoLayout(*layoutRoot);
       _firstLayout = false;
@@ -216,7 +215,6 @@ namespace krys::boo
 
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InViewSizeAdjust);
-      // FIXME: Not while printing, once there's printing.
       if (Is<RenderView>(*layoutRoot))
       {
         // This is to protect _needsFullRepaint's value when layout() is getting re-entered through
@@ -265,8 +263,6 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: The repaint rect environment (device scale factor, printing, fixed layout), once there's
-    // printing.
     view->Layer()->UpdateLayerPositionsAfterStyleChange(false);
 
     return view->Compositor().DidRecalcStyleWithNoPendingLayout();

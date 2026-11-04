@@ -63,7 +63,7 @@ namespace krys::boo
     constexpr int32 CompositionEventKeyCode = 229;
 
     /// @brief The element key events go to in @p document: its focused element, or its body.
-    // FIXME: A fullscreen video and a plugin document's plugin, once there are any.
+    // FIXME: A fullscreen video, once there is one.
     // https://html.spec.whatwg.org/#focus-processing-model
     // (The target node of a routed key event.)
     KRYS_NODISCARD dom::Element *EventTargetElementForDocument(dom::Document *document) noexcept
@@ -1951,8 +1951,6 @@ namespace krys::boo
     {
       return true;
     }
-    // FIXME: A scroll that overscroll-behavior blocks rubber-bands (overscrollBehaviorAllowsRubberBand), once
-    // there's rubber-banding.
 
     return false;
   }
@@ -3253,8 +3251,6 @@ namespace krys::boo
     GetDragState().Source = ShareRefPtr(element);
   }
 
-  // FIXME: The origin the dragged image's data is restricted to (restrictedOriginForImageData), once there
-  // are security origins.
   bool EventHandler::CanDropCurrentlyDraggedImageAsFile() const noexcept
   {
     return true;
@@ -3609,9 +3605,6 @@ namespace krys::boo
            && !_frame.Document()->Selection().Selection().IsInPasswordField();
   }
 
-  // FIXME: The event loop's handling of the drag (eventLoopHandleMouseDragged) and the view activated by the
-  // press (eventActivatedView), which are the Mac's; images' origins (restrictedOriginForImageData), once
-  // there are security origins.
   bool EventHandler::HandleDrag(const MouseEventWithHitTestResults &event,
                                 CheckDragHysteresis checkDragHysteresis) noexcept
   {

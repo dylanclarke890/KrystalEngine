@@ -191,8 +191,6 @@ namespace krys::boo::html
 
   void ValidatedFormListedElement::ReportNonFocusableControlError() noexcept
   {
-    // FIXME: The console message ("An invalid form control with name='...' is not focusable."), once there's
-    // a console.
   }
 
   bool ValidatedFormListedElement::IsShowingValidationMessage() const noexcept

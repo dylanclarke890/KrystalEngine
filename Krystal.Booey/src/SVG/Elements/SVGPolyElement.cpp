@@ -22,10 +22,7 @@ namespace krys::boo::svg
   {
     if (name == SVGNames::PointsAttr())
     {
-      if (!_points->BaseVal()->Parse(value.value_or(dom::DOMStringView {})))
-      {
-        // FIXME: Report "Problem parsing points="value"" to the console, once there's one.
-      }
+      _points->BaseVal()->Parse(value.value_or(dom::DOMStringView {}));
     }
 
     SVGGeometryElement::AttributeChanged(name, oldValue, value);

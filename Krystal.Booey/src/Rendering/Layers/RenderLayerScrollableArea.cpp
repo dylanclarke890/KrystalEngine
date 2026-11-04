@@ -208,8 +208,6 @@ namespace krys::boo
 
     if (_scrollPosition == newPosition && GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating)
     {
-      // FIXME: Reconciling the composited scroll position at the end of a user scroll
-      // (requiresScrollPositionReconciliation), once there's async scrolling.
       return;
     }
 
@@ -678,7 +676,6 @@ namespace krys::boo
     if (hasScrollbar)
     {
       _hBar = CreateScrollbar(ScrollbarOrientation::Horizontal);
-      // FIXME: Rubber-banding elasticity, once there's rubber-banding.
     }
     else
     {
@@ -707,7 +704,6 @@ namespace krys::boo
     if (hasScrollbar)
     {
       _vBar = CreateScrollbar(ScrollbarOrientation::Vertical);
-      // FIXME: Rubber-banding elasticity, once there's rubber-banding.
     }
     else
     {
@@ -1163,7 +1159,7 @@ namespace krys::boo
 
     // FIXME: Update the snap offsets, once there's scroll snapping.
 
-    // FIXME: Don't clamp during rubber-banding or user scrolls, once there are any.
+    // FIXME: Don't clamp during user scrolls, once there are any.
     if (!box->IsHTMLMarquee())
     {
       // Layout may cause us to be at an invalid scroll position. In this case we need

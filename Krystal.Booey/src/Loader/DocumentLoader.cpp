@@ -169,7 +169,6 @@ namespace krys::boo
   {
     _response = krys::move(response);
 
-    // FIXME: The content policy (responses shown as downloads, or not shown), once there are downloads.
     CommitLoad(data);
   }
 

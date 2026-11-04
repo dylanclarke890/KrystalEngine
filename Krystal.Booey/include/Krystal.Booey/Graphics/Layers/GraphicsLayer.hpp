@@ -47,9 +47,9 @@ namespace krys::boo
   /// @brief An abstraction for a rendering surface with backing store, which may have associated
   /// transformation and animations.
   // FIXME: Event regions (EventRegion), once there's touch and interaction region tracking; asynchronous
-  // contents display delegates and video gravity, once there are videos; tiled
-  // backings (TiledBacking), which only Core Animation's layers have; threaded animations
-  // (AcceleratedEffectStack), with threaded compositing; scrolling node IDs, with async scrolling.
+  // contents display delegates and video gravity, once there are videos; tiled backings (TiledBacking), which
+  // only Core Animation's layers have; threaded animations (AcceleratedEffectStack), with threaded
+  // compositing.
   class GraphicsLayer : public RefCounted<GraphicsLayer>, public CanMakeWeakPtr<GraphicsLayer>
   {
   public:

@@ -368,8 +368,6 @@ namespace krys::boo
     const RenderLayer &layer, const RenderLayerCompositor &compositor, LayerOverlapMap &overlapMap,
     OverlapExtent &overlap) noexcept -> Provider *
   {
-    // FIXME: Reflections (hasReflection), once there are reflections.
-
     if (!_allowOverlappingProviders)
     {
       for (auto &candidate : _backingProviderCandidates)
@@ -725,7 +723,6 @@ namespace krys::boo
 
   void RenderLayerCompositor::DidChangePlatformLayerForLayer(RenderLayer &, const GraphicsLayer *) noexcept
   {
-    // FIXME: The scrolling coordinator's node layers, once there's async scrolling.
   }
 
   void RenderLayerCompositor::DidPaintBacking(RenderLayerBacking *) noexcept
@@ -1238,8 +1235,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Reflections (reflectionLayer), once there are reflections.
-
     // If we're back at the root, and no other layers need to be composited, and the root layer itself doesn't
     // need to be composited, then we can drop out of compositing mode altogether. However, don't drop out of
     // compositing mode if there are composited layers that we didn't hit in our traversal (e.g. because of
@@ -1498,14 +1493,10 @@ namespace krys::boo
         layerBacking->UpdateGeometry(traversalState.CompositingAncestor);
       }
 
-      // FIXME: Reflections (reflectionLayer), once there are reflections.
-
       if (!layer.Parent())
       {
         UpdateRootLayerPosition();
       }
-
-      // FIXME: The scrolling tree (updateScrollCoordinationForLayer), once there's async scrolling.
 
       traversalStateForDescendants.CompositingAncestor = &layer;
       traversalStateForDescendants.LayersClippedByScrollers = &layersClippedByScrollers;
@@ -1574,9 +1565,6 @@ namespace krys::boo
     {
       if (requireDescendantTraversal || requiresChildRebuild)
       {
-        // FIXME: Widgets' content layers (attachWidgetContentLayersIfNecessary), once there are iframes and
-        // plug-ins.
-
         // If the layer has a clipping layer the overflow controls layers will be siblings of the clipping
         // layer. Otherwise, the overflow control layers are normal children.
         if (!layerBacking->HasClippingLayer() && !layerBacking->HasScrollingLayer())
@@ -2230,7 +2218,6 @@ namespace krys::boo
         layer.SetViewportConstrainedNotCompositedReason(queryData.NonCompositedForPositionReason);
         layerChanged = true;
       }
-      // FIXME: The scrolling coordinator (frameViewFixedObjectsDidChange), once there's async scrolling.
     }
     else
     {
@@ -2637,7 +2624,6 @@ namespace krys::boo
 
   bool RenderLayerCompositor::HasCoordinatedScrolling() const noexcept
   {
-    // FIXME: The scrolling coordinator, once there's async scrolling.
     return false;
   }
 
@@ -2916,7 +2902,7 @@ namespace krys::boo
     }
 
     // The root layer always has a compositing layer, but it may not have backing.
-    // FIXME: Video, model, frame and plug-in reasons, once there are any.
+    // FIXME: Video and model reasons, once there are any.
     if (RequiresCompositingForTransform(renderer) || RequiresCompositingForAnimation(renderer)
         || RequiresCompositingForPosition(renderer, *renderer.Layer(), queryData)
         || RequiresCompositingForCanvas(renderer) || RequiresCompositingForFilters(renderer)
@@ -3020,7 +3006,7 @@ namespace krys::boo
       reasons.Add(CompositingReason::Transform3D);
     }
 
-    // FIXME: Video, model and plug-in reasons, once there are any.
+    // FIXME: Video and model reasons, once there are any.
     if (RequiresCompositingForCanvas(renderer))
     {
       reasons.Add(CompositingReason::Canvas);
@@ -3734,7 +3720,7 @@ namespace krys::boo
     RenderLayerCompositor::GetViewportConstrainedSublayers(const RenderLayer &layer,
                                                            const RenderLayer *) const noexcept
   {
-    // FIXME: View transitions and content inset background fill, once there are any.
+    // FIXME: Content inset background fill, once there is any.
     if (layer.Renderer().IsStickilyPositioned())
     {
       const RenderLayer *overflowLayer = nullptr;
@@ -3799,7 +3785,6 @@ namespace krys::boo
 
   bool RenderLayerCompositor::UseCoordinatedScrollingForLayer(const RenderLayer &layer) const noexcept
   {
-    // FIXME: The scrolling coordinator's overflow layers, once there's async scrolling.
     return layer.IsRenderViewLayer() && HasCoordinatedScrolling();
   }
 
@@ -3851,7 +3836,6 @@ namespace krys::boo
     RenderLayerCompositor::ComputeCoordinatedPositioningForLayer(const RenderLayer &,
                                                                  const RenderLayer *) const noexcept
   {
-    // FIXME: The scrolling coordinator, once there's async scrolling.
     return ScrollPositioningBehavior::None;
   }
 
@@ -4179,7 +4163,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The root element captured in a view transition, once there are view transitions.
     _rootContentsLayer->SetBackgroundColor(Color());
   }
 

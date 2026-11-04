@@ -67,8 +67,6 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::NumOctavesAttr())
     {
-      // FIXME: Report a value that isn't > 0 ("feTurbulence: problem parsing numOctaves") as a warning, once
-      // there's a console.
       _numOctaves->SetBaseValInternal(text::ParseInteger<int32>(string).value_or(InitialOctavesValue));
     }
 

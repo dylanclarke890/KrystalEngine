@@ -24,7 +24,6 @@ namespace krys::boo::dom
     options.ContentSecurityPolicy = isInitiatingElementInUserAgentShadowTree
                                       ? ContentSecurityPolicyImposition::SkipPolicyCheck
                                       : ContentSecurityPolicyImposition::DoPolicyCheck;
-    // FIXME: The same-origin data URL flag, once there are origins.
 
     CachedResourceRequest request(ResourceRequest(krys::move(url)), options);
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);

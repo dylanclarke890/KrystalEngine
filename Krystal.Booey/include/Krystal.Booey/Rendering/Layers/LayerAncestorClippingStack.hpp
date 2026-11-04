@@ -35,7 +35,6 @@ namespace krys::boo
 
   /// @brief Encapsulates the set of layers representing clipping in a layer's containing block ancestry, but
   /// not in its paint order ancestry.
-  // FIXME: The scrolling coordinator's overflow scroll proxy nodes, once there's async scrolling.
   class LayerAncestorClippingStack
   {
     KRYS_NON_COPY_MOVABLE(LayerAncestorClippingStack);

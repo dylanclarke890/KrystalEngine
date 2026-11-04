@@ -76,7 +76,6 @@ namespace krys::boo::css
       {
         request.SetInitiatorType(_initiatorType.View());
       }
-      // FIXME: Update the request for access control (CORS mode), once there are cross-origin checks.
       auto requested = loader.RequestImage(krys::move(request));
       _cachedImage = requested ? *requested : CachedResourceHandle<CachedImage>();
       _didRequestImage = true;

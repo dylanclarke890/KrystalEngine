@@ -102,7 +102,6 @@ namespace krys::boo::css
     bool ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept;
     void NotifyLoadedSheet(const CachedCSSStyleSheet *sheet) noexcept;
     /// @brief Whether a parsed sheet can be used again: none of its subresources failed.
-    // FIXME: Subresources that need revalidating, once there's HTTP caching.
     KRYS_NODISCARD bool SubresourcesAllowReuse() const noexcept;
     KRYS_NODISCARD bool IsLoadingSubresources() const noexcept;
 

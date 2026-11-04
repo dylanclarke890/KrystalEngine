@@ -129,7 +129,6 @@ namespace krys::boo
       krys_debug_assert(copiedAttributes.GetMethod() == Method::Post
                         || copiedAttributes.GetMethod() == Method::Get);
 
-      // FIXME: Upgrading insecure requests (the content security policy), once there's one.
       // FIXME: The form's accept-charset and the document's encoding, once there are encodings other than
       // UTF-8.
       RefPtr<html::DOMFormData> result =

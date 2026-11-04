@@ -76,8 +76,6 @@ namespace krys::boo::html
   void FileInputType::SetValue(dom::DOMStringView, bool valueChanged, TextFieldEventBehavior,
                                TextControlSetValueSelection) noexcept
   {
-    // FIXME: Should we clear the file list, or replace it with a new empty one here? This is observable from
-    // JavaScript through custom properties.
     if (!valueChanged)
     {
       return;

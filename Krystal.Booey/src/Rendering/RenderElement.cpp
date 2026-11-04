@@ -328,8 +328,8 @@ namespace krys::boo
     _hasInitializedStyle = true;
     StyleDidChange(style::DifferenceResult::NewStyle, nullptr);
 
-    // FIXME: We shouldn't have any text children that would need styleDidChange at this point, once there
-    // are text renderers; the view transition capture state, once there are view transitions.
+    // FIXME: We shouldn't have any text children that would need styleDidChange at this point, once there are
+    // text renderers.
   }
 
   void RenderElement::SetStyle(RenderStyle &&style, style::DifferenceResult minimalStyleDifference) noexcept
@@ -638,8 +638,6 @@ namespace krys::boo
                                                  const RepaintRects &oldRects,
                                                  const RepaintRects &newRects) noexcept
   {
-    // FIXME: Nothing repaints while printing, once there's printing.
-
     auto oldClippedOverflowRect = oldRects.ClippedOverflowRect;
     auto newClippedOverflowRect = newRects.ClippedOverflowRect;
     bool haveOutlinesBoundsRects = oldRects.OutlineBoundsRect && newRects.OutlineBoundsRect;
@@ -1115,8 +1113,6 @@ namespace krys::boo
     {
       frameView.AddSlowRepaintObject(*this);
     }
-
-    // FIXME: The extended background, once there's rubber-banding.
   }
 
   const RenderStyle *

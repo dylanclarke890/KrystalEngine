@@ -31,7 +31,6 @@ namespace krys::boo::html
       return AdoptRef(*element.release());
     }
 
-    // FIXME: Report the failure, once there's a console.
     auto element = CreateRef<HTMLUnknownElement>(document);
     element->SetIsCustomElementUpgradeCandidate();
     element->SetIsFailedCustomElement();
@@ -125,7 +124,6 @@ namespace krys::boo::html
       // 12a. Set element's custom element definition to null.
       // 12b. Empty element's custom element reaction queue.
       // 12c. Rethrow the exception (thus terminating this algorithm).
-      // FIXME: Report a NotSupportedError, once there's a console.
       element.ClearReactionQueueFromFailedCustomElement();
       return;
     }
@@ -144,7 +142,6 @@ namespace krys::boo::html
     if (customElement == nullptr || &customElement->Element() != htmlElement)
     {
       // 12. Finally, if the above steps threw an exception: [...]
-      // FIXME: Report the failure, once there's a console.
       element.SetIsFailedCustomElementWithoutClearingReactionQueue();
       element.ClearReactionQueueFromFailedCustomElement();
       return;

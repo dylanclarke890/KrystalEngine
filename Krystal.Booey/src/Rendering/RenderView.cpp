@@ -340,8 +340,6 @@ namespace krys::boo
 
   void RenderView::Layout() noexcept
   {
-    // FIXME: Printing (the page size and the preferred widths it sets), once there is any.
-
     // Use calcWidth/Height to get the new width/height, since this will take the full page zoom factor into
     // account.
     bool relayoutChildren =
@@ -368,7 +366,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The page height when printing and whether it changed, once there's printing.
     LayoutStateMaintainer statePusher(*this, {}, false);
 
     // FIXME: This should be called only when frame view (or the canvas we render onto) size changes.
@@ -394,7 +391,6 @@ namespace krys::boo
 
   void RenderView::UpdateLogicalWidth() noexcept
   {
-    // FIXME: The page width when printing, once there is any.
     SetLogicalWidth(LayoutUnit(ViewLogicalWidth()));
   }
 
@@ -410,8 +406,6 @@ namespace krys::boo
 
   LayoutUnit RenderView::PageOrViewLogicalHeight() const noexcept
   {
-    // FIXME: The page height when printing, and the pagination's page length in a multi-column view, once
-    // there are any.
     return LayoutUnit(ViewLogicalHeight());
   }
 
@@ -618,7 +612,6 @@ namespace krys::boo
 
   bool RenderView::ShouldRepaint(const LayoutRect &rect) const noexcept
   {
-    // FIXME: Nothing repaints while printing, once there's printing.
     return !rect.IsEmpty();
   }
 
@@ -647,8 +640,6 @@ namespace krys::boo
     // size/position.
     auto enclosingRect = EnclosingIntRect(repaintRect);
     auto viewRect = ViewRect();
-
-    // FIXME: A frame inside another frame repaints its owner's box, once there are iframes.
 
     if (_accumulatedRepaintRegion)
     {
@@ -692,8 +683,6 @@ namespace krys::boo
 
   void RenderView::FlushAccumulatedRepaintRegion() const noexcept
   {
-    // FIXME: A frame inside another frame repaints its owner's box, once there are iframes.
-
     krys_debug_assert(_accumulatedRepaintRegion);
     auto repaintRects = _accumulatedRepaintRegion->Rects();
     for (const auto &rect : repaintRects)
@@ -763,8 +752,6 @@ namespace krys::boo
     // If a container was specified, and was not nullptr or the RenderView,
     // then we should have found it by now.
     krys_debug_assert(!container || container == this);
-
-    // FIXME: Rects stay as they are while printing, once there's printing.
 
     auto adjustedRects = rects;
     if (GetWritingMode().IsBlockFlipped())

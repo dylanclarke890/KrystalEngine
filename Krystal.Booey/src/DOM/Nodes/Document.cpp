@@ -3164,8 +3164,8 @@ namespace krys::boo::dom
       }
     }
 
-    // FIXME: View transitions, the page's overlay scrollbars, the composited layers' pending update and font
-    // loading, once there are those.
+    // FIXME: The page's overlay scrollbars, the composited layers' pending update and font loading, once
+    // there are those.
     SuspendScheduledTasks(reason);
 
     // The frame's timers: the layout, the animations and autoscrolling stop.

@@ -97,7 +97,7 @@ namespace krys::boo
   {
     RenderBoxModelObject::UpdateFromStyle();
 
-    // FIXME: Support transforms and reflections on inline flows someday.
+    // FIXME: Support transforms on inline flows someday.
     SetHasTransformRelatedProperty(false);
   }
 
