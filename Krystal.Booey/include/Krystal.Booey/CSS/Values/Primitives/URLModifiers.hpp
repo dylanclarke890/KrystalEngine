@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Types.hpp"
-#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
 
 namespace krys::boo
 {
@@ -37,9 +36,6 @@ namespace krys::boo::css
     Maybe<URLCrossOriginFunction> CrossOrigin {};
     Maybe<URLIntegrityFunction> Integrity {};
     Maybe<URLReferrerPolicyFunction> ReferrerPolicy {};
-
-    // This is not a parsed value, but is implicit from context the modifiers were parsed with.
-    boo::LoadedFromOpaqueSource LoadedFromOpaqueSource {boo::LoadedFromOpaqueSource::No};
 
     KRYS_NODISCARD bool operator==(const URLModifiers &) const noexcept = default;
   };

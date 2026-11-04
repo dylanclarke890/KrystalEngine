@@ -2369,7 +2369,6 @@ set(KRYSTAL_BOOEY_LOADER_HEADERS
   include/Krystal.Booey/Loader/FrameLoaderTypes.hpp
   include/Krystal.Booey/Loader/FrameLoadRequest.hpp
   include/Krystal.Booey/Loader/ImageLoader.hpp
-  include/Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp
   include/Krystal.Booey/Loader/LoaderStrategy.hpp
   include/Krystal.Booey/Loader/LocalFrameLoaderClient.hpp
   include/Krystal.Booey/Loader/NavigationAction.hpp
@@ -2539,8 +2538,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/MIMETypeRegistry.hpp
   include/Krystal.Booey/Platform/Network/BlobData.hpp
   include/Krystal.Booey/Platform/Network/DataURLDecoder.hpp
-  include/Krystal.Booey/Platform/Network/FormData.hpp
-  include/Krystal.Booey/Platform/Network/FormDataBuilder.hpp
   include/Krystal.Booey/Platform/Network/ResourceError.hpp
   include/Krystal.Booey/Platform/Network/ResourceRequest.hpp
   include/Krystal.Booey/Platform/Network/ResourceResponse.hpp
@@ -2591,8 +2588,6 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/MIMETypeRegistry.cpp
   src/Platform/Network/BlobData.cpp
   src/Platform/Network/DataURLDecoder.cpp
-  src/Platform/Network/FormData.cpp
-  src/Platform/Network/FormDataBuilder.cpp
   src/Platform/Pasteboard/DragData.cpp
   src/Platform/Pasteboard/DragImage.cpp
   src/Platform/Pasteboard/Pasteboard.cpp

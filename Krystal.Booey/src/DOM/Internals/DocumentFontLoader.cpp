@@ -18,14 +18,12 @@ namespace krys::boo::dom
   }
 
   CachedFont *DocumentFontLoader::GetCachedFont(url::URL url, bool isSVG,
-                                                bool isInitiatingElementInUserAgentShadowTree,
-                                                LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept
+                                                bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();
     options.ContentSecurityPolicy = isInitiatingElementInUserAgentShadowTree
                                       ? ContentSecurityPolicyImposition::SkipPolicyCheck
                                       : ContentSecurityPolicyImposition::DoPolicyCheck;
-    options.IsLoadedFromOpaqueSource = loadedFromOpaqueSource;
     // FIXME: The same-origin data URL flag, once there are origins.
 
     CachedResourceRequest request(ResourceRequest(krys::move(url)), options);

@@ -68,13 +68,12 @@ namespace krys::boo::css
   {
     uint32 bits =
       static_cast<uint32>(IsHTMLDocument) << 0 | static_cast<uint32>(HasDocumentSecurityOrigin) << 1
-      | static_cast<uint32>(static_cast<bool>(LoadedFromOpaqueSource)) << 2
-      | static_cast<uint32>(useSystemAppearance) << 3 | static_cast<uint32>(springTimingFunctionEnabled) << 4
-      | static_cast<uint32>(cssTransformStyleSeparatedEnabled) << 5
-      | static_cast<uint32>(thumbAndTrackPseudoElementsEnabled) << 6
-      | static_cast<uint32>(colorLayersEnabled) << 7
-      | static_cast<uint32>(cssInternalAutoBaseParsingEnabled) << 8
-      | static_cast<uint32>(webkitMediaTextTrackDisplayQuirkEnabled) << 9;
+      | static_cast<uint32>(useSystemAppearance) << 2 | static_cast<uint32>(springTimingFunctionEnabled) << 3
+      | static_cast<uint32>(cssTransformStyleSeparatedEnabled) << 4
+      | static_cast<uint32>(thumbAndTrackPseudoElementsEnabled) << 5
+      | static_cast<uint32>(colorLayersEnabled) << 6
+      | static_cast<uint32>(cssInternalAutoBaseParsingEnabled) << 7
+      | static_cast<uint32>(webkitMediaTextTrackDisplayQuirkEnabled) << 8;
     return krys::Hash::Combine(BaseURL, Charset, PropertySettings, Mode, bits);
   }
 }

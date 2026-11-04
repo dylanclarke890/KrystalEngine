@@ -840,8 +840,22 @@ namespace krys
         return;
       }
 
+      // A form's entries, as name=value (a file by its name).
+      utf8_string entries;
+      if (request.Entries)
+      {
+        for (auto &item : request.Entries->Items())
+        {
+          auto *value = std::get_if<boo::dom::DOMString>(&item.Data);
+          auto *file = std::get_if<RefPtr<boo::File>>(&item.Data);
+          entries += (entries.empty() ? u8"" : u8"&") + item.Name + u8"="
+                     + (value   ? *value
+                        : *file ? utf8_string((*file)->Name())
+                                : utf8_string());
+        }
+      }
       _context->Logger->Info("Navigation: {} {} {}{}", Narrow(request.Method), Narrow(request.URL),
-                             Narrow(request.Body), request.OpensNewWindow ? " (new window)" : "");
+                             Narrow(entries), request.OpensNewWindow ? " (new window)" : "");
       if (auto label = _pageView->Document().GetElementById(u8"last-submission"))
       {
         utf8_string text = request.IsFormSubmission ? request.Method + u8" " + request.URL

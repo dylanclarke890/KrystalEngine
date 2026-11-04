@@ -70,9 +70,9 @@ namespace krys::boo
   {
     if (_isComplete)
     {
-      return CachePolicy::Verify;
+      return CachePolicy::Use;
     }
-    return _loadType == FrameLoadType::Reload ? CachePolicy::Revalidate : CachePolicy::Verify;
+    return _loadType == FrameLoadType::Reload ? CachePolicy::Reload : CachePolicy::Use;
   }
 
   void FrameLoader::Load(FrameLoadRequest &&request) noexcept
@@ -89,7 +89,6 @@ namespace krys::boo
 
     NavigationAction action(resourceRequest, false, nullptr, dom::DOMStringAtom::Null(),
                             request.SourceElement());
-    action.SetIsRequestFromClientOrUserInput(true);
     auto substituteData = request.GetSubstituteData();
     LoadWithNavigationAction(resourceRequest, krys::move(action), FrameLoadType::Standard,
                              krys::move(substituteData));
@@ -144,7 +143,6 @@ namespace krys::boo
 
     ResourceRequest request(documentLoader->Request());
     NavigationAction action(request, false);
-    action.SetIsRequestFromClientOrUserInput(true);
     LoadWithNavigationAction(request, krys::move(action), FrameLoadType::Reload, null);
   }
 
@@ -419,7 +417,6 @@ namespace krys::boo
     const auto &request = frameRequest.GetResourceRequest();
     NavigationAction action(request, false, triggeringEvent, frameRequest.DownloadAttribute(),
                             frameRequest.SourceElement());
-    action.SetIsRequestFromClientOrUserInput(frameRequest.IsRequestFromClientOrUserInput());
 
     // Scroll to the fragment even if the URL is exactly the same, so pages with `#` links work.
     if (targetsThisFrame && !isDownload && ShouldPerformFragmentNavigation(request.URL()))

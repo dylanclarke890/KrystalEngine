@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
+#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -49,7 +50,7 @@ namespace krys::ui
   /// handler receives it. The view doesn't navigate: the host loads what it wants.
   struct NavigationRequest
   {
-    /// @brief The URL to navigate to: for a form, the action, with the form data as its query for a `GET`.
+    /// @brief The URL to navigate to: for a form, its action.
     utf8_string URL;
     /// @brief The browsing context named (the link's or the form's target, or the document's base target);
     /// empty for the view's own.
@@ -73,10 +74,11 @@ namespace krys::ui
     bool IsFormSubmission {false};
     /// @brief `GET` or `POST`.
     utf8_string Method {u8"GET"};
-    /// @brief The `Content-Type` of a `POST`'s body, with its boundary for `multipart/form-data`.
-    utf8_string ContentType;
-    /// @brief The body of a `POST`; empty otherwise.
-    utf8_string Body;
+    /// @brief The form's encoding type, for the host to encode the entries with if it makes a request:
+    /// `application/x-www-form-urlencoded`, `multipart/form-data` or `text/plain`.
+    utf8_string EncodingType;
+    /// @brief The form's entries (its entry list), unencoded.
+    RefPtr<boo::html::DOMFormData> Entries;
   };
 
   /// @brief What happened to a load in the view, as the host's load handler hears it.
@@ -341,19 +343,19 @@ namespace krys::ui
     /// @brief Starts loading a document parsed from @p markup, at @p url (which relative URLs resolve
     /// against); `about:blank` if it's null. The document replaces the current one on a later task: run
     /// `Update` until `IsLoading` is false (or the load handler hears it committed).
-    /// @param cachePolicy How its style sheets, images and other resources use the memory cache: `Revalidate`
-    /// (or `Reload`) loads them again, as reloading a page does.
+    /// @param cachePolicy How its style sheets, images and other resources use the memory cache: `Reload`
+    /// loads them again, as reloading a page does.
     void LoadHTML(utf8_string &&markup, boo::url::URL &&url = {},
-                  boo::CachePolicy cachePolicy = boo::CachePolicy::Verify) noexcept;
+                  boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
     /// @brief Starts loading the UTF-8 file at @p path, at the file's URL, through the loader strategy; as
     /// `LoadHTML`, it replaces the current document on a later task.
     /// @param cachePolicy As for `LoadHTML`.
     /// @return An error if the file doesn't exist.
     KRYS_NODISCARD Expected<void> LoadFile(const std::filesystem::path &path,
-                                           boo::CachePolicy cachePolicy = boo::CachePolicy::Verify) noexcept;
+                                           boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
     /// @brief Starts loading @p url through the loader strategy.
     /// @param cachePolicy As for `LoadHTML`.
-    void Load(boo::url::URL &&url, boo::CachePolicy cachePolicy = boo::CachePolicy::Verify) noexcept;
+    void Load(boo::url::URL &&url, boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
     /// @brief Whether a document is loading.
     KRYS_NODISCARD bool IsLoading() const noexcept;
     /// @brief Stops the loading document, if any: the view keeps its current one.

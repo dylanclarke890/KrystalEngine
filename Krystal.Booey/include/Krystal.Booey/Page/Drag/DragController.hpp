@@ -167,12 +167,10 @@ namespace krys::boo
     bool DispatchTextInputEventFor(LocalFrame *innerFrame, const DragData &dragData) noexcept;
     bool CanProcessDrag(const DragData &dragData) noexcept;
     bool ConcludeEditDrag(const DragData &dragData) noexcept;
-    Maybe<DragOperation> OperationForLoad(const DragData &dragData) noexcept;
     DragHandlingMethod TryDocumentDrag(LocalFrame &frame, const DragData &dragData,
                                        EnumSet<DragDestinationAction> destinationActionMask,
                                        Maybe<DragOperation> &dragOperation) noexcept;
     bool TryDHTMLDrag(LocalFrame &frame, const DragData &dragData, Maybe<DragOperation> &operation) noexcept;
-    Maybe<DragOperation> DragOperationFor(const DragData &dragData) noexcept;
     void ClearDragCaret() noexcept;
     bool DragIsMove(FrameSelection &selection, const DragData &dragData) noexcept;
     bool IsCopyKeyDown(const DragData &dragData) noexcept;

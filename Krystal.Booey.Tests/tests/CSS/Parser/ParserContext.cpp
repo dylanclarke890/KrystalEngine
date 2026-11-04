@@ -20,7 +20,6 @@ namespace krys::boo::css::tests
       CHECK_FALSE(context.EnclosingRuleType);
       CHECK_FALSE(context.IsHTMLDocument);
       CHECK_FALSE(context.HasDocumentSecurityOrigin);
-      CHECK(context.LoadedFromOpaqueSource == LoadedFromOpaqueSource::No);
       CHECK_FALSE(context.springTimingFunctionEnabled);
       CHECK_FALSE(context.thumbAndTrackPseudoElementsEnabled);
       CHECK(context.PropertySettings == PropertySettings {});

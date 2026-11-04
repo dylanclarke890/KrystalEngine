@@ -38,7 +38,7 @@ namespace krys::boo
     css::mq::MediaEnvironment _mediaEnvironment;
     float _pageZoomFactor {1};
     float _textZoomFactor {1};
-    CachePolicy _subresourceCachePolicy {CachePolicy::Verify};
+    CachePolicy _subresourceCachePolicy {CachePolicy::Use};
     bool _documentIsBeingReplaced {false};
 
     LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept;
@@ -57,9 +57,8 @@ namespace krys::boo
       return *_loader;
     }
 
-    /// @brief How the document's subresources use the memory cache, unless the load type has a policy (a
-    /// reload, or going back and forward): the host sets `Revalidate` when it loads a page again, so edited
-    /// files load again.
+    /// @brief How the document's subresources use the memory cache, unless the load is a reload: the host
+    /// sets `Reload` when it loads a page again, so edited files load again.
     KRYS_NODISCARD CachePolicy SubresourceCachePolicy() const noexcept
     {
       return _subresourceCachePolicy;

@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -40,8 +39,7 @@ namespace krys::boo
       /// @brief The cached font for the file at @p url, or null if it can't be requested. Its file doesn't
       /// load until `BeginLoadingFontSoon`.
       KRYS_NODISCARD CachedFont *GetCachedFont(url::URL url, bool isSVG,
-                                               bool isInitiatingElementInUserAgentShadowTree,
-                                               LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept;
+                                               bool isInitiatingElementInUserAgentShadowTree) noexcept;
       void BeginLoadingFontSoon(CachedFont &font) noexcept;
 
       void LoadPendingFonts() noexcept;

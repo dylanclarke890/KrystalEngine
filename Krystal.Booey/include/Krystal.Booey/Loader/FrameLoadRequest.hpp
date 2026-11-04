@@ -21,7 +21,6 @@ namespace krys::boo
   private:
     dom::DOMStringAtom _downloadAttribute {dom::DOMStringAtom::Null()};
     RefPtr<dom::Element> _sourceElement;
-    bool _isRequestFromClientOrUserInput {false};
 
   public:
     /// @brief The `download` attribute of the link followed; null if it has none.
@@ -36,16 +35,6 @@ namespace krys::boo
       return _sourceElement.get();
     }
     void SetSourceElement(dom::Element *sourceElement) noexcept;
-
-    /// @brief Whether the host or the user asked for the navigation, rather than the page.
-    KRYS_NODISCARD bool IsRequestFromClientOrUserInput() const noexcept
-    {
-      return _isRequestFromClientOrUserInput;
-    }
-    void SetIsRequestFromClientOrUserInput(bool value) noexcept
-    {
-      _isRequestFromClientOrUserInput = value;
-    }
 
   protected:
     FrameLoadRequestBase() noexcept;

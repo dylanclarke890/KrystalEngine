@@ -3,7 +3,6 @@
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
-#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Booey/URL/URLHash.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -31,7 +30,6 @@ namespace krys::boo::css
     // This is only needed to support getMatchedCSSRules.
     bool HasDocumentSecurityOrigin : 1 {false};
 
-    boo::LoadedFromOpaqueSource LoadedFromOpaqueSource : 1 {boo::LoadedFromOpaqueSource::No};
     bool useSystemAppearance : 1 {false};
     bool shouldIgnoreImportRules : 1 {false};
 

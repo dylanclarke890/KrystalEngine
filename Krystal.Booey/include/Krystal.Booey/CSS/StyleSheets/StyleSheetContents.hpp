@@ -3,7 +3,6 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -288,16 +287,6 @@ namespace krys::boo::css
     void RemovedFromMemoryCache() noexcept;
 
     void ShrinkToFit() noexcept;
-
-    void SetAsLoadedFromOpaqueSource() noexcept
-    {
-      _parserContext.LoadedFromOpaqueSource = boo::LoadedFromOpaqueSource::Yes;
-    }
-
-    KRYS_NODISCARD boo::LoadedFromOpaqueSource LoadedFromOpaqueSource() const noexcept
-    {
-      return _parserContext.LoadedFromOpaqueSource;
-    }
 
     void SetLoadErrorOccured() noexcept
     {

@@ -242,10 +242,10 @@ namespace krys::boo::tests
       RunNetworkingTasks();
       CHECK(loader.Strategy.Requests.size() == 1u);
     }
-    // Revalidating loads it again (a file has no validators), once for the document.
+    // Reloading loads it again, once for the document.
     loader.Strategy.AddText(u8"file:///a.css", u8"#box { width: 20px }");
     {
-      PageInFrameFixture reloaded {utf8_string(markup), {200, 100}, CachePolicy::Revalidate};
+      PageInFrameFixture reloaded {utf8_string(markup), {200, 100}, CachePolicy::Reload};
       RunNetworkingTasks();
       CHECK(loader.Strategy.Requests.size() == 2u);
       CHECK(reloaded.RendererSize(u8"box") == IntSize(20, 0));

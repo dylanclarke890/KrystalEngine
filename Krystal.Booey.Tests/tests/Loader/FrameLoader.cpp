@@ -86,7 +86,7 @@ namespace krys::boo::tests
     CHECK(fixture.Client->Navigations.empty());
     REQUIRE(fixture.Navigations().size() == 1);
     auto &get = fixture.Navigations()[0];
-    CHECK(get.URL == "https://example.com/dir/page.html?n=v#done");
+    CHECK(get.URL == "https://example.com/dir/page.html#done");
     CHECK(get.HTTPMethod == "GET");
     CHECK(get.Action.Type() == NavigationType::FormSubmitted);
     CHECK(get.Action.SourceElement() == &fixture.ById(u8"get"));
@@ -113,6 +113,6 @@ namespace krys::boo::tests
     form.Action(u8"second");
     (void)form.RequestSubmit();
     REQUIRE(fixture.Navigations().size() == 1);
-    CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/second?n=v");
+    CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/second");
   }
 }

@@ -1031,7 +1031,9 @@ namespace krys::ui::tests
     CHECK_FALSE(dialog.Open());
     REQUIRE(submissions.size() == 1);
     CHECK(submissions[0].SourceElement.get() == &form);
-    CHECK(submissions[0].URL.starts_with(u8"https://example.com/settings?"));
+    CHECK(submissions[0].URL == u8"https://example.com/settings");
+    REQUIRE(submissions[0].Entries);
+    CHECK_FALSE(submissions[0].Entries->Items().empty());
 
     // Escape after a save doesn't save again.
     click(u8".settings button[command=show-modal]");
@@ -2147,7 +2149,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     (void)view.Update(boo::html::EventLoop::Current().Now());
     CHECK(WidthOf(view, u8"box") == 30);
-    REQUIRE(view.LoadFile(directory / "page.html", boo::CachePolicy::Revalidate).has_value());
+    REQUIRE(view.LoadFile(directory / "page.html", boo::CachePolicy::Reload).has_value());
     WaitForLoad(view);
     (void)view.Update(boo::html::EventLoop::Current().Now());
     CHECK(WidthOf(view, u8"box") == 50);
@@ -2190,8 +2192,14 @@ namespace krys::ui::tests
     CHECK(requests[0].SourceElement.get() == view.Document().QuerySelector(u8"form").Value().get());
     CHECK(requests[0].Method == u8"POST");
     CHECK(requests[0].URL == u8"https://example.com/order");
-    CHECK(requests[0].ContentType == u8"application/x-www-form-urlencoded");
-    CHECK(requests[0].Body == u8"size=large&empty=&go=1");
+    CHECK(requests[0].EncodingType == u8"application/x-www-form-urlencoded");
+    REQUIRE(requests[0].Entries);
+    List<utf8_string> entries;
+    for (auto &item : requests[0].Entries->Items())
+    {
+      entries.push_back(item.Name + u8"=" + std::get<boo::dom::DOMString>(item.Data));
+    }
+    CHECK(entries == List<utf8_string> {u8"size=large", u8"empty=", u8"go=1"});
   }
 
   TEST_CASE("View: hands links to the host", "[UI]")

@@ -52,7 +52,6 @@ namespace krys::boo
     enum RevalidationPolicy : uint8
     {
       Use,
-      Revalidate,
       Reload,
       Load
     };
@@ -140,7 +139,6 @@ namespace krys::boo
 
     KRYS_NODISCARD CachePolicy GetCachePolicy(boo::CachedResource::Type type) const noexcept;
     KRYS_NODISCARD RevalidationPolicy DetermineRevalidationPolicy(boo::CachedResource::Type,
-                                                                  CachedResourceRequest &,
                                                                   boo::CachedResource *existingResource,
                                                                   ImageLoading) const noexcept;
 

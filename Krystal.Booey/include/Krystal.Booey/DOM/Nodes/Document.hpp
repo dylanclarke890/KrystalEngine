@@ -25,7 +25,6 @@
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
-#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
 #include "Krystal.Booey/Page/DOMTimer.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
@@ -1701,8 +1700,8 @@ namespace krys::boo::dom
     /// @brief A request for the web font file at @p url (resolved against the document), or null if it can't
     /// be requested. The file doesn't load until `BeginLoadingFontSoon`.
     KRYS_NODISCARD RefPtr<FontLoadRequest>
-      GetFontLoadRequest(utf8_stringview url, bool isSVG, bool isInitiatingElementInUserAgentShadowTree,
-                         LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept;
+      GetFontLoadRequest(utf8_stringview url, bool isSVG,
+                         bool isInitiatingElementInUserAgentShadowTree) noexcept;
     void BeginLoadingFontSoon(FontLoadRequest &request) noexcept;
     void SuspendFontLoading() noexcept;
 

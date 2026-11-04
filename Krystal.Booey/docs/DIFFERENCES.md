@@ -243,7 +243,9 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
-- Booey doesn't navigate by itself: following a link and submitting a form hand the navigation to the host, which loads what it wants. Only a link to a fragment of the document in its own browsing context navigates, within the document.
+- Booey doesn't navigate by itself: following a link and submitting a form hand the navigation to the host, which loads what it wants. A form's entries reach the host unencoded, with the form's encoding type: Booey runs none of the encoding algorithms, so a `GET` submission's URL is the action without the entries as its query, and a `mailto:` action isn't given a body.
+- Dropping a URL on a page that doesn't take it loads nothing, where browsers load the dropped URL.
+- The CSS `crossorigin()` URL modifier is parsed but sets no request mode or credentials, as there's no network. Only a link to a fragment of the document in its own browsing context navigates, within the document.
 - There is no session history: no `History`, `Navigation` or `Location` (`window.location`, `document.location`), no back/forward cache (`pageshow` and `pagehide` are never persisted), and no `popstate`, `hashchange`, `beforeunload` or `BeforeUnloadEvent`. `<meta http-equiv=refresh>` is ignored.
 - A response of a type that's neither HTML, XML nor text (one the specification would hand off to other software, or download) is loaded as an HTML document of that type.
 - In quirks mode, a fragment finds an `a` element by its `name` ASCII case-insensitively (`Document::FindAnchor`).

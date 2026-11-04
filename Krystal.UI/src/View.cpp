@@ -319,18 +319,8 @@ namespace krys::ui
         {
           navigation.SourceElement = ShareRefPtr<boo::dom::Element>(formSubmission->Form());
         }
-        if (formSubmission->GetMethod() == boo::FormSubmission::Method::Post)
-        {
-          navigation.ContentType = formSubmission->ContentType();
-          if (!formSubmission->Boundary().empty())
-          {
-            navigation.ContentType += u8"; boundary=" + formSubmission->Boundary();
-          }
-          if (auto *data = formSubmission->Data())
-          {
-            navigation.Body = data->FlattenToString();
-          }
-        }
+        navigation.EncodingType = formSubmission->EncodingType();
+        navigation.Entries = ShareRefPtr(formSubmission->EntryList());
       }
       _navigationHandler(navigation);
     }

@@ -20,27 +20,10 @@ namespace krys::boo
     Default = StrictOriginWhenCrossOrigin
   };
 
-  /// @brief A fetch's options, as the Fetch specification's request has them.
-  // FIXME: The destination, cache mode, redirect mode, keepalive and client identifiers, once there are
-  // network loads.
+  /// @brief A fetch's options, as the Fetch specification's request has them: only those that apply without a
+  /// network (no mode, credentials, cache or redirect modes).
   struct FetchOptions
   {
-    enum class Mode : uint8
-    {
-      Navigate,
-      SameOrigin,
-      NoCors,
-      Cors
-    };
-    enum class Credentials : uint8
-    {
-      Omit,
-      SameOrigin,
-      Include
-    };
-
-    Mode RequestMode {Mode::NoCors};
-    Credentials CredentialsMode {Credentials::Include};
     ReferrerPolicy RequestReferrerPolicy {ReferrerPolicy::EmptyString};
     utf8_string Integrity;
   };

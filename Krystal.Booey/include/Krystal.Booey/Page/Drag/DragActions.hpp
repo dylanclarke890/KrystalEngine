@@ -12,18 +12,17 @@ namespace krys::boo
   enum class DragDestinationAction : uint8
   {
     DHTML,
-    Edit,
-    Load
+    Edit
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::DragDestinationAction, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::DragDestinationAction, 2uz);
 
 namespace krys::boo
 {
   KRYS_NODISCARD constexpr EnumSet<DragDestinationAction> AnyDragDestinationAction() noexcept
   {
-    return {DragDestinationAction::DHTML, DragDestinationAction::Edit, DragDestinationAction::Load};
+    return {DragDestinationAction::DHTML, DragDestinationAction::Edit};
   }
 
   /// @brief What a drag that starts in a page drags: an element the page made draggable, an image, a link,
@@ -83,14 +82,13 @@ namespace krys::boo
   };
 
   /// @brief How a drag over a page is handled: not at all, by editing plain or rich text, by a file input
-  /// taking files, by loading what's dropped, by setting a colour input, or by the page itself.
+  /// taking files, by setting a colour input, or by the page itself.
   enum class DragHandlingMethod : uint8
   {
     None,
     EditPlainText,
     EditRichText,
     UploadFile,
-    PageLoad,
     SetColor,
     NonDefault
   };

@@ -24,14 +24,14 @@ namespace krys::boo::tests
     Ref<dom::HTMLDocument> Document;
 
     explicit PageInFrameFixture(utf8_string &&markup, IntSize viewSize = {200, 100},
-                                CachePolicy cachePolicy = CachePolicy::Verify) noexcept
+                                CachePolicy cachePolicy = CachePolicy::Use) noexcept
         : PageInFrameFixture(LocalFrame::Create(), krys::move(markup), viewSize, cachePolicy)
     {
     }
 
     /// @brief As above, in @p page's main frame.
     PageInFrameFixture(Page &page, utf8_string &&markup, IntSize viewSize = {200, 100}) noexcept
-        : PageInFrameFixture(ShareRef(page.MainFrame()), krys::move(markup), viewSize, CachePolicy::Verify)
+        : PageInFrameFixture(ShareRef(page.MainFrame()), krys::move(markup), viewSize, CachePolicy::Use)
     {
     }
 

@@ -113,7 +113,7 @@ namespace krys::boo
     }
 
     /// @brief How the document's subresources use the memory cache, from the load type while the document
-    /// loads: revalidated for a reload.
+    /// loads: loaded again for a reload.
     KRYS_NODISCARD CachePolicy SubresourceCachePolicy() const noexcept;
 
     /// @brief Gives the frame its initial empty document (`about:blank`), at once.

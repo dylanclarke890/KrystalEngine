@@ -99,11 +99,6 @@ namespace krys::boo::css
     return _cachedImage && _cachedImage->CurrentFrameKnownToBeOpaque(&renderer);
   }
 
-  bool ImageValue::IsLoadedFromOpaqueSource() const noexcept
-  {
-    return _location.Modifiers.LoadedFromOpaqueSource == LoadedFromOpaqueSource::Yes;
-  }
-
   bool ImageValue::CustomTraverseSubresources(
     KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
   {

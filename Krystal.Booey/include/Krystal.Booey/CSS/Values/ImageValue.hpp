@@ -69,8 +69,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
 
-    KRYS_NODISCARD bool IsLoadedFromOpaqueSource() const noexcept;
-
     KRYS_NODISCARD IterationStatus
       CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept
     {

@@ -92,8 +92,7 @@ namespace krys::boo::css
     }
 
     RefPtr<FontLoadRequest> request = context.GetFontLoadRequest(_location.Resolved.String(), isFormatSVG,
-                                                                 isInitiatingElementInUserAgentShadowTree,
-                                                                 _location.Modifiers.LoadedFromOpaqueSource);
+                                                                 isInitiatingElementInUserAgentShadowTree);
     if (auto *cachedRequest = DynamicDowncast<CachedFontLoadRequest>(request.get()))
     {
       _cachedFont = &cachedRequest->GetCachedFont();

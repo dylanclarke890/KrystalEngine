@@ -131,20 +131,22 @@ namespace krys::boo::html::tests
     CHECK(Str(button.EncType()) == "application/x-www-form-urlencoded");
   }
 
-  TEST_CASE("HTMLFormElement: a submitter's formmethod picks the encoding",
+  TEST_CASE("HTMLFormElement: a submitter's formmethod and formenctype override the form's",
             "[HTML][Forms][html:concept-fs-method][html:concept-fs-enctype][html:concept-form-submit]")
   {
     FormFixture fixture(u8R"(<form id=f action="https://example.com/" method=post enctype=text/plain>
-      <input name=a value="1 2"><input type=submit id=get formmethod=get></form>)");
-    // A GET submission is URL-encoded whatever the enctype.
+      <input name=a value="1 2"><input type=submit id=get formmethod=get formenctype=multipart/form-data></form>)");
     fixture.Get<HTMLInputElement>(u8"get").Click();
     REQUIRE(fixture.Submissions().size() == 1);
-    CHECK(fixture.Submissions()[0].URL == "https://example.com/?a=1+2");
+    CHECK(fixture.Submissions()[0].Method == FormSubmission::Method::Get);
+    CHECK(fixture.Submissions()[0].EncodingType == "multipart/form-data");
+    // The entries are handed over unencoded, and the URL is the action.
+    CHECK(fixture.Submissions()[0].URL == "https://example.com/");
+    CHECK(fixture.Submissions()[0].Entries == "a=1 2");
   }
 
   TEST_CASE("HTMLFormElement: the entry list leaves out controls in datalists",
             "[HTML][Forms][html:constructing-the-form-data-set][html:create-an-entry]"
-            "[html:convert-to-a-list-of-name-value-pairs][html:text/plain-encoding-algorithm]"
             "[html:picking-an-encoding-for-the-form]")
   {
     FormFixture fixture(u8R"(<form id=p action="https://example.com/p" method=post enctype=text/plain
@@ -154,19 +156,7 @@ namespace krys::boo::html::tests
       <input name=dn value=hi dirname=dn.dir></form>)");
     fixture.Get<HTMLFormElement>(u8"p").Submit();
     REQUIRE(fixture.Submissions().size() == 1);
-    CHECK(fixture.Submissions()[0].Body
-          == "a\r\nb=x\r\n_charset_=UTF-8\r\ncb=on\r\nfl=\r\ndn=hi\r\ndn.dir=ltr\r\n");
-  }
-
-  TEST_CASE("HTMLFormElement: multipart bodies normalize newlines",
-            "[HTML][Forms][html:multipart/form-data-encoding-algorithm]")
-  {
-    FormFixture fixture(u8"<form id=mp action=https://example.com/m method=post enctype=multipart/form-data>"
-                        u8"<textarea name=x>a\nb</textarea></form>");
-    fixture.Get<HTMLFormElement>(u8"mp").Submit();
-    REQUIRE(fixture.Submissions().size() == 1);
-    CHECK(fixture.Submissions()[0].Body.find("a\r\nb") != std::string::npos);
-    CHECK(fixture.Submissions()[0].Body.find("name=\"x\"") != std::string::npos);
+    CHECK(fixture.Submissions()[0].Entries == "a\nb=x&_charset_=UTF-8&cb=on&fl=&dn=hi&dn.dir=ltr");
   }
 
   TEST_CASE(
@@ -248,7 +238,8 @@ namespace krys::boo::html::tests
     CHECK(fixture.Submissions().empty());
     enter(u8"o1");
     REQUIRE(fixture.Submissions().size() == 1);
-    CHECK(fixture.Submissions()[0].URL == "https://example.com/o?o1=");
+    CHECK(fixture.Submissions()[0].URL == "https://example.com/o");
+    CHECK(fixture.Submissions()[0].Entries == "o1=");
   }
 
   TEST_CASE("HTMLFormElement: submission",
@@ -272,8 +263,8 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       REQUIRE(fixture.Submissions().size() == 1);
       auto &submission = fixture.Submissions()[0];
       CHECK(submission.Method == FormSubmission::Method::Get);
-      CHECK(submission.URL
-            == "https://example.com/search?q=a+b%26c&n=3&on=on&r=y&s=two&t=line1%0D%0Aline2&added=1");
+      CHECK(submission.URL == "https://example.com/search");
+      CHECK(submission.Entries == "q=a b&c&n=3&on=on&r=y&s=two&t=line1\nline2&added=1");
       CHECK(submission.Target == "results");
       CHECK(events->Submitters.empty());
       CHECK(events->Entries.size() == 6);
@@ -284,7 +275,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       REQUIRE_FALSE(form.RequestSubmit(&fixture.Get<HTMLInputElement>(u8"go")).HasException());
       REQUIRE(fixture.Submissions().size() == 1);
       CHECK(fixture.Submissions()[0].Submitter == "go");
-      CHECK(fixture.Submissions()[0].URL.find("&go=Go&") != std::string::npos);
+      CHECK(fixture.Submissions()[0].Entries.find("&go=Go&") != std::string::npos);
       REQUIRE(events->Submitters.size() == 1);
       CHECK(events->Submitters[0] == "go");
 
@@ -302,35 +293,24 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       fixture.Get<HTMLButtonElement>(u8"other").Click();
       REQUIRE(fixture.Submissions().size() == 1);
       CHECK(fixture.Submissions()[0].Submitter == "other");
-      CHECK(fixture.Submissions()[0].URL.find("&other=o&") != std::string::npos);
-      CHECK(fixture.Submissions()[0].URL.find("go=Go") == std::string::npos);
+      CHECK(fixture.Submissions()[0].Entries.find("&other=o&") != std::string::npos);
+      CHECK(fixture.Submissions()[0].Entries.find("go=Go") == std::string::npos);
     }
 
-    SECTION("POST bodies")
+    SECTION("POST and the encoding type")
     {
       form.Method(u8"post");
       form.Submit();
       REQUIRE(fixture.Submissions().size() == 1);
       CHECK(fixture.Submissions()[0].Method == FormSubmission::Method::Post);
       CHECK(fixture.Submissions()[0].URL == "https://example.com/search");
-      CHECK(fixture.Submissions()[0].ContentType == "application/x-www-form-urlencoded");
-      CHECK(fixture.Submissions()[0].Body.starts_with("q=a+b%26c&n=3"));
+      CHECK(fixture.Submissions()[0].EncodingType == "application/x-www-form-urlencoded");
+      CHECK(fixture.Submissions()[0].Entries.starts_with("q=a b&c&n=3"));
 
-      form.EncType(u8"text/plain");
+      form.EncType(u8"TEXT/PLAIN");
       form.Submit();
       REQUIRE(fixture.Submissions().size() == 2);
-      CHECK(fixture.Submissions()[1].Body.starts_with("q=a b&c\r\nn=3\r\n"));
-
-      form.EncType(u8"multipart/form-data");
-      form.Submit();
-      REQUIRE(fixture.Submissions().size() == 3);
-      auto &multipart = fixture.Submissions()[2];
-      CHECK(multipart.ContentType == "multipart/form-data");
-      CHECK(multipart.Boundary.starts_with("----BooeyFormBoundary"));
-      CHECK(multipart.Body.starts_with("--" + multipart.Boundary + "\r\n"));
-      CHECK(multipart.Body.ends_with("--" + multipart.Boundary + "--\r\n"));
-      CHECK(multipart.Body.find("Content-Disposition: form-data; name=\"q\"\r\n\r\na b&c\r\n")
-            != std::string::npos);
+      CHECK(fixture.Submissions()[1].EncodingType == "text/plain");
     }
   }
 
@@ -342,11 +322,11 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     // A click from script has no position, so the coordinates are 0.
     fixture.Get<HTMLInputElement>(u8"named").Click();
     REQUIRE(fixture.Submissions().size() == 1);
-    CHECK(fixture.Submissions()[0].URL == "https://example.com/?a=1&pic.x=0&pic.y=0");
+    CHECK(fixture.Submissions()[0].Entries == "a=1&pic.x=0&pic.y=0");
 
     fixture.Get<HTMLInputElement>(u8"unnamed").Click();
     REQUIRE(fixture.Submissions().size() == 2);
-    CHECK(fixture.Submissions()[1].URL == "https://example.com/?a=1&x=0&y=0");
+    CHECK(fixture.Submissions()[1].Entries == "a=1&x=0&y=0");
   }
 
   TEST_CASE("HTMLFormElement: interactive validation",
@@ -400,7 +380,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     REQUIRE(fixture.Submissions().size() == 1);
     // The default button submits, as if it were clicked.
     CHECK(fixture.Submissions()[0].Submitter == "go");
-    CHECK(fixture.Submissions()[0].URL == "https://example.com/?t=v&go=Go");
+    CHECK(fixture.Submissions()[0].Entries == "t=v&go=Go");
   }
 
   TEST_CASE(

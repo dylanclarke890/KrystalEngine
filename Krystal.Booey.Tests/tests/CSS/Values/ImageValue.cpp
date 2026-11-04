@@ -24,7 +24,6 @@ namespace krys::boo::css::tests
       CHECK(value->IsImage());
       CHECK_FALSE(value->IsImageGeneratorValue());
       CHECK(value->URL() == url);
-      CHECK_FALSE(value->IsLoadedFromOpaqueSource());
       CHECK(CssText(*value) == "url(\"images/a.png\")");
     }
 
@@ -42,13 +41,6 @@ namespace krys::boo::css::tests
       CHECK(value->IsImageValue());
       CHECK(CssText(*value).empty());
     }
-  }
-
-  TEST_CASE_METHOD(ValueFixture, "ImageValue::IsLoadedFromOpaqueSource", "[CSS][Values][ImageValue]")
-  {
-    auto url = ImageURL(u8"a.png");
-    url.Modifiers.LoadedFromOpaqueSource = LoadedFromOpaqueSource::Yes;
-    CHECK(ImageValue::Create(url)->IsLoadedFromOpaqueSource());
   }
 
   TEST_CASE_METHOD(ValueFixture, "ImageValue equality", "[CSS][Values][ImageValue]")

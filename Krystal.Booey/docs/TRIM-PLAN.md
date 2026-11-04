@@ -33,12 +33,10 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
   and gamepad events; the opener policy; `ChromeClient`'s and `View`'s matching hooks and the user agent; and
   the no-op legacy members (`captureEvents()`/`releaseEvents()`, `document.clear()`, `Range`/`NodeIterator`
   `detach()`, `window.blur()`). History-action activation stays: close watchers use it.
-- [ ] **3. Navigation leftovers.** (Navigation itself went to the host in step 1.)
-  - `FormSubmission`: keep the entry list and the `submit` event, hand the data to the host; remove the URL and
-    body encoding with `Platform/Network/FormData` and `FormDataBuilder`.
-  - Drag and drop: remove the "load the dropped URL" action.
-  - Trim HTTP-only semantics: `CachePolicy` revalidation/expiry, `MemoryCache` expiry, `FetchOptions`/
-    `ResourceLoaderOptions` mode and credentials, `LoadedFromOpaqueSource` (check readers first).
+- [x] **3. Navigation leftovers.** (Navigation itself went to the host in step 1.) Form submissions hand the
+  entry list to the host unencoded (`Platform/Network/FormData`, `FormDataBuilder` and the mailto handling are
+  gone); dropping a URL loads nothing; `CachePolicy` is `Use` or `Reload`; `FetchOptions` lost mode and
+  credentials, and `LoadedFromOpaqueSource` (read by nothing) is gone.
 - [ ] **4. Subframes.** The frame tree is the main frame only. `<iframe>`, `<frame>`, `<object>` and `<embed>`
   stay as elements with reflected attributes but load no nested document (check whether `<object>`/`<embed>`
   image or SVG rendering needs a frame). Delete the "frames other than the main frame"/subframe FIXMEs.

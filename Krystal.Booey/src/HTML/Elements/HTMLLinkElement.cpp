@@ -514,11 +514,6 @@ namespace krys::boo::html
     {
       _sheet->SetTitle(css::CSSOMString(Title()));
     }
-
-    if (!_sheet->CanAccessRules())
-    {
-      _sheet->Contents().SetAsLoadedFromOpaqueSource();
-    }
   }
 
   // Processing the linked resource, for a stylesheet that loaded:

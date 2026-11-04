@@ -25,7 +25,6 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Page/Drag/DragState.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -123,8 +122,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool DragIsHandledByDocument(DragHandlingMethod dragHandlingMethod) noexcept
     {
-      return dragHandlingMethod != DragHandlingMethod::None
-             && dragHandlingMethod != DragHandlingMethod::PageLoad;
+      return dragHandlingMethod != DragHandlingMethod::None;
     }
 
     KRYS_NODISCARD RefPtr<html::HTMLInputElement> AsFileInput(dom::Node &node) noexcept
@@ -342,17 +340,6 @@ namespace krys::boo
     return dragData.Flags().Contains(DragApplicationFlags::IsCopyKeyDown);
   }
 
-  // FIXME: This logic is incomplete
-  Maybe<DragOperation> DragController::DragOperationFor(const DragData &dragData) noexcept
-  {
-    if (dragData.ContainsURL())
-    {
-      return DragOperation::Copy;
-    }
-
-    return null;
-  }
-
   bool DragController::DragIsMove(FrameSelection &selection, const DragData &dragData) noexcept
   {
     const VisibleSelection &visibleSelection = selection.Selection();
@@ -391,7 +378,6 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Opening external URLs (shouldOpenExternalURLsPolicyToPropagate), with external URLs.
   bool DragController::PerformDragOperation(DragData &&dragData) noexcept
   {
     SetForScope isPerformingDrop(_isPerformingDrop, true);
@@ -434,26 +420,10 @@ namespace krys::boo
       return true;
     }
 
+    // What the page and its editing don't take isn't loaded: Booey doesn't navigate by itself.
     _documentUnderMouse = nullptr;
     ClearDragCaret();
-
-    if (!OperationForLoad(dragData))
-    {
-      return false;
-    }
-
-    auto urlString = dragData.AsURL();
-    if (urlString.empty())
-    {
-      return false;
-    }
-
-    Client().WillPerformDragDestinationAction(DragDestinationAction::Load, dragData);
-    FrameLoadRequest frameLoadRequest(ShareRef(*mainFrame->Document()), ResourceRequest(url::URL(urlString)),
-                                      dom::DOMStringAtom::Null());
-    frameLoadRequest.SetIsRequestFromClientOrUserInput(true);
-    mainFrame->Loader().Load(krys::move(frameLoadRequest));
-    return true;
+    return false;
   }
 
   void DragController::MouseMovedIntoDocument(RefPtr<dom::Document> &&newDocument) noexcept
@@ -497,16 +467,7 @@ namespace krys::boo
 
     Maybe<DragOperation> dragOperation;
     _dragHandlingMethod = TryDocumentDrag(frame, dragData, _dragDestinationActionMask, dragOperation);
-    if (_dragHandlingMethod == DragHandlingMethod::None
-        && _dragDestinationActionMask.Contains(DragDestinationAction::Load))
-    {
-      dragOperation = OperationForLoad(dragData);
-      if (dragOperation)
-      {
-        _dragHandlingMethod = DragHandlingMethod::PageLoad;
-      }
-    }
-    else if (_dragHandlingMethod == DragHandlingMethod::SetColor)
+    if (_dragHandlingMethod == DragHandlingMethod::SetColor)
     {
       dragOperation = DragOperation::Copy;
     }
@@ -662,18 +623,6 @@ namespace krys::boo
   {
     _dragSourceAction = Client().DragSourceActionMaskForPoint(rootViewPoint);
     return _dragSourceAction;
-  }
-
-  // FIXME: Plugin documents, once there are plugins.
-  Maybe<DragOperation> DragController::OperationForLoad(const DragData &dragData) noexcept
-  {
-    auto *document = _page.MainFrame().DocumentAtPoint(dragData.ClientPosition());
-
-    if (document && (_didInitiateDrag || document->HasEditableStyle()))
-    {
-      return null;
-    }
-    return DragOperationFor(dragData);
   }
 
   bool DragController::DispatchTextInputEventFor(LocalFrame *innerFrame, const DragData &dragData) noexcept

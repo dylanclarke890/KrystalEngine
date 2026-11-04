@@ -61,9 +61,6 @@ namespace krys::boo::css::tests
     CHECK_FALSE(sheet->IsUserStyleSheet());
     CHECK_FALSE(sheet->LoadCompleted());
     CHECK_FALSE(sheet->IsLoading());
-    CHECK(sheet->LoadedFromOpaqueSource() == LoadedFromOpaqueSource::No);
-    sheet->SetAsLoadedFromOpaqueSource();
-    CHECK(sheet->LoadedFromOpaqueSource() == LoadedFromOpaqueSource::Yes);
 
     auto withURL =
       StyleSheetContents::Create(u8"https://example.com/a.css", ParserContext(ParserMode::HTMLQuirks));

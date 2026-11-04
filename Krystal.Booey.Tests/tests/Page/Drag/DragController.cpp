@@ -590,9 +590,10 @@ namespace krys::boo::tests
     fixture.Client->Data.SetURL(url::URL(u8"https://example.com/"), u8"Example");
     fixture.Client->SourceMask = AnyDragOperation();
 
-    // Over content that isn't editable, the page would load it.
-    CHECK(fixture.DragTo(10, 10) == DragOperation::Copy);
-    CHECK(fixture.Controller().GetDragHandlingMethod() == DragHandlingMethod::PageLoad);
+    // Over content that isn't editable, nothing takes it: Booey doesn't load what's dropped.
+    CHECK_FALSE(fixture.DragTo(10, 10));
+    CHECK(fixture.Controller().GetDragHandlingMethod() == DragHandlingMethod::None);
+    CHECK_FALSE(fixture.Drop(10, 10));
 
     // Editable content takes it as a link.
     CHECK(fixture.DragTo(100, 50) == DragOperation::Copy);

@@ -51,14 +51,6 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: A CORS resource of another origin isn't reused, once there are origins.
-
-      if (resource->Options().RequestMode != request.Options().RequestMode
-          || resource->Options().CredentialsMode != request.Options().CredentialsMode)
-      {
-        return false;
-      }
-
       return true;
     }
   }
