@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
 #include "Krystal.Booey/Rendering/LegacyInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Font/FontFace.hpp"
-#include "Krystal.Booey/Graphics/FontCascadeCache.hpp"
-#include "Krystal.Booey/Graphics/FontPaletteValues.hpp"
-#include "Krystal.Booey/Graphics/FontRanges.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascadeCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontPaletteValues.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontRanges.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 

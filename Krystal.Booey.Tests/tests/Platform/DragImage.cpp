@@ -9,7 +9,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBufferDisplayListBackend.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferDisplayListBackend.hpp"
 #include "Krystal.Booey/Page/FrameSnapshotting.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"

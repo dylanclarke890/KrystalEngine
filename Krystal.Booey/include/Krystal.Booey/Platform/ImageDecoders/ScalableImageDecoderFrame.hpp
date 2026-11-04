@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/ImageBackingStore.hpp"
-#include "Krystal.Booey/Graphics/ImageOrientation.hpp"
-#include "Krystal.Booey/Graphics/ImageTypes.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageBackingStore.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"

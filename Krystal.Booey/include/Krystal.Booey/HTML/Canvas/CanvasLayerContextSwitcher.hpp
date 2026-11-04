@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

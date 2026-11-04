@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
-#include "Krystal.Booey/Graphics/ImageBufferBackend.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferBackend.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"

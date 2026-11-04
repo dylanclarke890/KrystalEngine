@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTextLineBoxes.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp"

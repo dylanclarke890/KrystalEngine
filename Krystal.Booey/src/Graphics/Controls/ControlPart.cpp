@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 
 namespace krys::boo

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/LegacyInlineTextBox.hpp"
 
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

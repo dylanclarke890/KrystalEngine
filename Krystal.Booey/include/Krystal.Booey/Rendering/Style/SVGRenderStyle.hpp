@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/Style/SVGRenderStyleDefs.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGGlyphOrientationHorizontal.hpp"

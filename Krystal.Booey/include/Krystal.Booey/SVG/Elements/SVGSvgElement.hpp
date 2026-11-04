@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
 #include "Krystal.Booey/SVG/SVGPoint.hpp"

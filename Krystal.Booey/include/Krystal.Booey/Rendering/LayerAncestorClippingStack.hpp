@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
-#include "Krystal.Booey/Graphics/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"

@@ -9,7 +9,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Types/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"

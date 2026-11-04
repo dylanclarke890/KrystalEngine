@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Debug.hpp"

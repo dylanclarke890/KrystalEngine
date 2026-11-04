@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
 namespace krys::boo

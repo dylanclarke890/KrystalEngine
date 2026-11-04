@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerFactory.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerTransform.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerFactory.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransform.hpp"
 #include "Krystal.UI/Compositing/TextureMapperLayer.hpp"
 #include "Krystal.UI/Compositing/TextureMapperPlatformLayer.hpp"
 #include "Krystal.UI/Compositing/TextureMapperTiledBackingStore.hpp"

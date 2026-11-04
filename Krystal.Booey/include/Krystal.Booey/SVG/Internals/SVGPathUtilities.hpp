@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

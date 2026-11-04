@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Controls/ControlStyle.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo

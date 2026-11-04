@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGTextLayoutEngineSpacing.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 
 namespace krys::boo
 {

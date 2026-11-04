@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorder.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>

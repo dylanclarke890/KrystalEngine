@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 
 namespace krys::boo::svg

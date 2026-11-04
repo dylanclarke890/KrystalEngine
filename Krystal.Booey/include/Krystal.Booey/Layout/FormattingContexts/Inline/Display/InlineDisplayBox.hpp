@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineRect.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"

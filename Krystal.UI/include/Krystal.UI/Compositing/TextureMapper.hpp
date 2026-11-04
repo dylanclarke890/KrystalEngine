@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"

@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/HTML/Canvas/Path2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/TextMetrics.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/ImageObserver.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"

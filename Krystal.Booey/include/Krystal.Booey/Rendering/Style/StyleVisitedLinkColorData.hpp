@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/RectEdges.hpp"
+#include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 
 namespace krys::boo

@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 #include "Krystal.Booey/Graphics/Color/ColorInterpolation.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GradientColorStop.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"

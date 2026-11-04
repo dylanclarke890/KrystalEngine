@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGTests.hpp"

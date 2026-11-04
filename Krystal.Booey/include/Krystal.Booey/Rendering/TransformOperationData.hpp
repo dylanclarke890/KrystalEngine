@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
 
 namespace krys::boo

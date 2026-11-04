@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Page/ConsoleTypes.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/ColorChooser.hpp"

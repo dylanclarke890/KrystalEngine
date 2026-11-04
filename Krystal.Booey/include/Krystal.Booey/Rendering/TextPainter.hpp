@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/RotationDirection.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Paths/RotationDirection.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/TextPaintStyle.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"

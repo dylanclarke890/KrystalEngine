@@ -3,9 +3,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
-#include "Krystal.Booey/Graphics/FontCache.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/FontDatabase.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo::css::tests

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/ImageDecoder.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Attributes.hpp"

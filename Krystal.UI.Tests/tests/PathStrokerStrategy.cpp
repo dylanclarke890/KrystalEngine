@@ -1,7 +1,7 @@
 ﻿#include "Krystal.UI/PathStrokerStrategy.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 
 namespace krys::ui::tests
 {

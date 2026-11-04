@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGAnimationElement.hpp"
 
 namespace krys::boo

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Block/BlockLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"

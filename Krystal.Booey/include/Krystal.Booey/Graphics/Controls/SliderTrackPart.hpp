@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo

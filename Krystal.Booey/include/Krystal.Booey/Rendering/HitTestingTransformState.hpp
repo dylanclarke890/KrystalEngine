@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

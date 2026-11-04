@@ -1,6 +1,6 @@
 ﻿#include "Krystal.UI/Render2DConversions.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <cmath>
 

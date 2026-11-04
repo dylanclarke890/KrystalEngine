@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"

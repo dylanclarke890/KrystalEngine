@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Font/FontFace.hpp"
-#include "Krystal.Booey/Graphics/FontPaletteValues.hpp"
-#include "Krystal.Booey/Graphics/FontSelector.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontPaletteValues.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"

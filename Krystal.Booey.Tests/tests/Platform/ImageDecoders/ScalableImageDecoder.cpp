@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
-#include "Krystal.Booey/Graphics/ImageFrame.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include <cstdlib>
 

@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"

@@ -2,10 +2,10 @@
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Font/FontFace.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCache.hpp"
-#include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
-#include "Krystal.Booey/Graphics/FontCreationContext.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 
 namespace krys::boo::css

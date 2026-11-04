@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGPreserveAspectRatio.hpp"
 #include "Krystal.Core/Macros.hpp"

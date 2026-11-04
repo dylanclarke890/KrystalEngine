@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"

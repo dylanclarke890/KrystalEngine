@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Values/Shapes/ShapeFunction.hpp"
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
@@ -140,7 +140,8 @@ namespace krys::boo::style
         Evaluate<float>(lineCommand.ToBy, _boxSize.Height(), style::ZoomNeeded {})};
     }
 
-    KRYS_NODISCARD Maybe<CurveToCubicSegment> ParseCurveToCubicSegment(FloatPoint currentPosition) noexcept override
+    KRYS_NODISCARD Maybe<CurveToCubicSegment>
+      ParseCurveToCubicSegment(FloatPoint currentPosition) noexcept override
     {
       auto &curveCommand = CurrentValue<CurveCommand>();
 
@@ -157,7 +158,8 @@ namespace krys::boo::style
         });
     }
 
-    KRYS_NODISCARD Maybe<CurveToQuadraticSegment> ParseCurveToQuadraticSegment(FloatPoint currentPosition) noexcept override
+    KRYS_NODISCARD Maybe<CurveToQuadraticSegment>
+      ParseCurveToQuadraticSegment(FloatPoint currentPosition) noexcept override
     {
       auto &curveCommand = CurrentValue<CurveCommand>();
 
@@ -172,7 +174,8 @@ namespace krys::boo::style
         });
     }
 
-    KRYS_NODISCARD Maybe<CurveToCubicSmoothSegment> ParseCurveToCubicSmoothSegment(FloatPoint currentPosition) noexcept override
+    KRYS_NODISCARD Maybe<CurveToCubicSmoothSegment>
+      ParseCurveToCubicSmoothSegment(FloatPoint currentPosition) noexcept override
     {
       auto &smoothCommand = CurrentValue<SmoothCommand>();
 
@@ -188,7 +191,8 @@ namespace krys::boo::style
         });
     }
 
-    KRYS_NODISCARD Maybe<CurveToQuadraticSmoothSegment> ParseCurveToQuadraticSmoothSegment(FloatPoint) noexcept override
+    KRYS_NODISCARD Maybe<CurveToQuadraticSmoothSegment>
+      ParseCurveToQuadraticSmoothSegment(FloatPoint) noexcept override
     {
       auto &smoothCommand = CurrentValue<SmoothCommand>();
 
@@ -235,13 +239,15 @@ namespace krys::boo::style
         },
         [&](const HLineCommand &command)
         {
-          return std::holds_alternative<HLineCommand::To>(command.ToBy) ? svg::SVGPathSegType::LineToHorizontalAbs
-                                                                        : svg::SVGPathSegType::LineToHorizontalRel;
+          return std::holds_alternative<HLineCommand::To>(command.ToBy)
+                   ? svg::SVGPathSegType::LineToHorizontalAbs
+                   : svg::SVGPathSegType::LineToHorizontalRel;
         },
         [&](const VLineCommand &command)
         {
-          return std::holds_alternative<VLineCommand::To>(command.ToBy) ? svg::SVGPathSegType::LineToVerticalAbs
-                                                                        : svg::SVGPathSegType::LineToVerticalRel;
+          return std::holds_alternative<VLineCommand::To>(command.ToBy)
+                   ? svg::SVGPathSegType::LineToVerticalAbs
+                   : svg::SVGPathSegType::LineToVerticalRel;
         },
         [&](const CurveCommand &command)
         {
@@ -303,7 +309,8 @@ namespace krys::boo::style
   class ShapeConversionPathConsumer final : public svg::SVGPathConsumer
   {
   public:
-    explicit ShapeConversionPathConsumer(css::CommaSeparatedList<ShapeCommand>::Container &commands) noexcept : _commands(commands)
+    explicit ShapeConversionPathConsumer(css::CommaSeparatedList<ShapeCommand>::Container &commands) noexcept
+        : _commands(commands)
     {
     }
 
@@ -338,8 +345,10 @@ namespace krys::boo::style
     {
       switch (mode)
       {
-        case svg::PathCoordinateMode::AbsoluteCoordinates: return style::ToPosition {AbsoluteOffsetPoint(offsetPoint)};
-        case svg::PathCoordinateMode::RelativeCoordinates: return ByCoordinatePair {RelativeOffsetPoint(offsetPoint)};
+        case svg::PathCoordinateMode::AbsoluteCoordinates:
+          return style::ToPosition {AbsoluteOffsetPoint(offsetPoint)};
+        case svg::PathCoordinateMode::RelativeCoordinates:
+          return ByCoordinatePair {RelativeOffsetPoint(offsetPoint)};
       }
       krys_unreachable();
     }
@@ -358,12 +367,14 @@ namespace krys::boo::style
       krys_unreachable();
     }
 
-    KRYS_NODISCARD static style::AbsoluteControlPoint MakeAbsoluteControlPoint(const FloatPoint &controlPoint) noexcept
+    KRYS_NODISCARD static style::AbsoluteControlPoint
+      MakeAbsoluteControlPoint(const FloatPoint &controlPoint) noexcept
     {
       return {MakePosition(controlPoint), std::nullopt};
     }
 
-    KRYS_NODISCARD static style::RelativeControlPoint MakeRelativeControlPoint(const FloatPoint &controlPoint) noexcept
+    KRYS_NODISCARD static style::RelativeControlPoint
+      MakeRelativeControlPoint(const FloatPoint &controlPoint) noexcept
     {
       return {MakeCoordinatePair(controlPoint), std::nullopt};
     }
@@ -410,17 +421,17 @@ namespace krys::boo::style
       {
         case svg::PathCoordinateMode::AbsoluteCoordinates:
           _commands.push_back(CurveCommand {.ToBy = CurveCommand::To {
-                                           .Offset = AbsoluteOffsetPoint(offsetPoint),
-                                           .ControlPoint1 = MakeAbsoluteControlPoint(controlPoint1),
-                                           .ControlPoint2 = MakeAbsoluteControlPoint(controlPoint2),
-                                         }});
+                                              .Offset = AbsoluteOffsetPoint(offsetPoint),
+                                              .ControlPoint1 = MakeAbsoluteControlPoint(controlPoint1),
+                                              .ControlPoint2 = MakeAbsoluteControlPoint(controlPoint2),
+                                            }});
           break;
         case svg::PathCoordinateMode::RelativeCoordinates:
           _commands.push_back(CurveCommand {.ToBy = CurveCommand::By {
-                                           .Offset = RelativeOffsetPoint(offsetPoint),
-                                           .ControlPoint1 = MakeRelativeControlPoint(controlPoint1),
-                                           .ControlPoint2 = MakeRelativeControlPoint(controlPoint2),
-                                         }});
+                                              .Offset = RelativeOffsetPoint(offsetPoint),
+                                              .ControlPoint1 = MakeRelativeControlPoint(controlPoint1),
+                                              .ControlPoint2 = MakeRelativeControlPoint(controlPoint2),
+                                            }});
           break;
       }
     }
@@ -432,17 +443,17 @@ namespace krys::boo::style
       {
         case svg::PathCoordinateMode::AbsoluteCoordinates:
           _commands.push_back(CurveCommand {.ToBy = CurveCommand::To {
-                                           .Offset = AbsoluteOffsetPoint(offsetPoint),
-                                           .ControlPoint1 = MakeAbsoluteControlPoint(controlPoint),
-                                           .ControlPoint2 = null,
-                                         }});
+                                              .Offset = AbsoluteOffsetPoint(offsetPoint),
+                                              .ControlPoint1 = MakeAbsoluteControlPoint(controlPoint),
+                                              .ControlPoint2 = null,
+                                            }});
           break;
         case svg::PathCoordinateMode::RelativeCoordinates:
           _commands.push_back(CurveCommand {.ToBy = CurveCommand::By {
-                                           .Offset = RelativeOffsetPoint(offsetPoint),
-                                           .ControlPoint1 = MakeRelativeControlPoint(controlPoint),
-                                           .ControlPoint2 = null,
-                                         }});
+                                              .Offset = RelativeOffsetPoint(offsetPoint),
+                                              .ControlPoint1 = MakeRelativeControlPoint(controlPoint),
+                                              .ControlPoint2 = null,
+                                            }});
           break;
       }
     }
@@ -454,15 +465,15 @@ namespace krys::boo::style
       {
         case svg::PathCoordinateMode::AbsoluteCoordinates:
           _commands.push_back(SmoothCommand {.ToBy = SmoothCommand::To {
-                                            .Offset = AbsoluteOffsetPoint(offsetPoint),
-                                            .ControlPoint = MakeAbsoluteControlPoint(controlPoint),
-                                          }});
+                                               .Offset = AbsoluteOffsetPoint(offsetPoint),
+                                               .ControlPoint = MakeAbsoluteControlPoint(controlPoint),
+                                             }});
           break;
         case svg::PathCoordinateMode::RelativeCoordinates:
           _commands.push_back(SmoothCommand {.ToBy = SmoothCommand::By {
-                                            .Offset = RelativeOffsetPoint(offsetPoint),
-                                            .ControlPoint = MakeRelativeControlPoint(controlPoint),
-                                          }});
+                                               .Offset = RelativeOffsetPoint(offsetPoint),
+                                               .ControlPoint = MakeRelativeControlPoint(controlPoint),
+                                             }});
           break;
       }
     }
@@ -473,15 +484,15 @@ namespace krys::boo::style
       {
         case svg::PathCoordinateMode::AbsoluteCoordinates:
           _commands.push_back(SmoothCommand {.ToBy = SmoothCommand::To {
-                                            .Offset = AbsoluteOffsetPoint(offsetPoint),
-                                            .ControlPoint = null,
-                                          }});
+                                               .Offset = AbsoluteOffsetPoint(offsetPoint),
+                                               .ControlPoint = null,
+                                             }});
           break;
         case svg::PathCoordinateMode::RelativeCoordinates:
           _commands.push_back(SmoothCommand {.ToBy = SmoothCommand::By {
-                                            .Offset = RelativeOffsetPoint(offsetPoint),
-                                            .ControlPoint = null,
-                                          }});
+                                               .Offset = RelativeOffsetPoint(offsetPoint),
+                                               .ControlPoint = null,
+                                             }});
           break;
       }
     }

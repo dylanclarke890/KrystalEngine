@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 

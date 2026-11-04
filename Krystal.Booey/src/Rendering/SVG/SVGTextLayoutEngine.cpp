@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGTextLayoutEngine.hpp"
-#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
+#include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp"

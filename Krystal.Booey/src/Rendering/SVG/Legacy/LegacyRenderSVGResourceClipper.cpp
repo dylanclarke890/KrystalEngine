@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"

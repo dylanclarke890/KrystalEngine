@@ -11,11 +11,11 @@
 #include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCache.hpp"
-#include "Krystal.Booey/Graphics/FontCreationContext.hpp"
-#include "Krystal.Booey/Graphics/FontDescription.hpp"
-#include "Krystal.Booey/Graphics/FontRanges.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontRanges.hpp"
 #include "Krystal.Booey/Style/ResolveForFont.hpp"
 #include <algorithm>
 #include <utility>

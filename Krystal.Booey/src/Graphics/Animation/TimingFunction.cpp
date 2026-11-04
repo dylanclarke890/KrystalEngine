@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
 #include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
-#include "Krystal.Booey/Graphics/SpringSolver.hpp"
-#include "Krystal.Booey/Graphics/UnitBezier.hpp"
+#include "Krystal.Booey/Graphics/Animation/SpringSolver.hpp"
+#include "Krystal.Booey/Graphics/Animation/UnitBezier.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include <algorithm>

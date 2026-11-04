@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
 #include "Krystal.Booey/Rendering/PathOperation.hpp"

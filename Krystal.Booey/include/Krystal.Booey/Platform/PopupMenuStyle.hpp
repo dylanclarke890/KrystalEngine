@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Types/String.hpp"
 

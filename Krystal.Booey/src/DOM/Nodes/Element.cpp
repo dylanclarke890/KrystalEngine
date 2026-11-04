@@ -43,7 +43,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"

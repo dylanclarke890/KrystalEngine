@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGPathBuilder.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 
 namespace krys::boo::svg
 {

@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"

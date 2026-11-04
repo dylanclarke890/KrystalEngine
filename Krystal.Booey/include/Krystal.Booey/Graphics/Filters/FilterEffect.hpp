@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
+#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffectApplier.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffectGeometry.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterFunction.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsStyle.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontPalette.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontPalette.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 
 namespace krys::boo::style

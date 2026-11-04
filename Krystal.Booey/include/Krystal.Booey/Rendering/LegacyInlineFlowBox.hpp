@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/LegacyInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderOverflow.hpp"

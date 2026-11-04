@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxSides.hpp"
-#include "Krystal.Booey/Graphics/LayoutRange.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRange.hpp"
 #include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"

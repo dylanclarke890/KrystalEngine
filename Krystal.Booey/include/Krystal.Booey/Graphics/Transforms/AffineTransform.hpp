@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Array.hpp"

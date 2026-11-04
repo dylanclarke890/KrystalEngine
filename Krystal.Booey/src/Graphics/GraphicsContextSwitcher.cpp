@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Booey/Graphics/ImageBufferContextSwitcher.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferContextSwitcher.hpp"
 #include "Krystal.Booey/Graphics/TransparencyLayerContextSwitcher.hpp"
 
 namespace krys::boo

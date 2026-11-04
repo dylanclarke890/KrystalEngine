@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Graphics/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"

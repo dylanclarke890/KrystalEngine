@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
-#include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"

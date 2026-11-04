@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"

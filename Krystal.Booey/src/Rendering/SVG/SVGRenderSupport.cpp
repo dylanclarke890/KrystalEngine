@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"

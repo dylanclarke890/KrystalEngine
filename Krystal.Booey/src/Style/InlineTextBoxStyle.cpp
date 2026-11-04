@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"

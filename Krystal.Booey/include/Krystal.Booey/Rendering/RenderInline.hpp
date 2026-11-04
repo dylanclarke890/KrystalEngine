@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBoxList.hpp"
 #include "Krystal.Core/Attributes.hpp"

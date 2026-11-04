@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"

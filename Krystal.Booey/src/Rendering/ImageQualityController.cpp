@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/ImageQualityController.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/LegacyInlineBox.hpp"
 
-#include "Krystal.Booey/Graphics/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Rendering/LegacyInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"

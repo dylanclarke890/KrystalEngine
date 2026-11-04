@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Page/ScrollBehavior.hpp"
 #include "Krystal.Booey/Platform/CaretAnimator.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"

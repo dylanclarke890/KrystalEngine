@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include <algorithm>
 

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"

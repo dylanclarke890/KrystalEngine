@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
-#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
 #include "Krystal.Core/Types/List.hpp"

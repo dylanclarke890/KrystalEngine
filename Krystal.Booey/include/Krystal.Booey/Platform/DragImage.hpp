@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/ImageOrientation.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

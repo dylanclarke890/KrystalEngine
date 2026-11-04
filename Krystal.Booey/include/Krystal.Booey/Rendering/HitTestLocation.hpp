@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo

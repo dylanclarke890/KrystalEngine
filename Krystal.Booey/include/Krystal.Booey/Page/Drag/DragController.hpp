@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/Drag/DragClient.hpp"
 #include "Krystal.Booey/URL/URL.hpp"

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/FloatPoint3D.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Transforms/Quaternion.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Array.hpp"

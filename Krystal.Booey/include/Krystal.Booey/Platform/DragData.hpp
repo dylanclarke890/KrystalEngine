@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"

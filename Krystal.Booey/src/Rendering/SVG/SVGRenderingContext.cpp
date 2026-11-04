@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"

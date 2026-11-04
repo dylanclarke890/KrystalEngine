@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Page/Navigation/NavigationNavigationType.hpp"

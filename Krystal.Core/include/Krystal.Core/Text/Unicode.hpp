@@ -29,6 +29,7 @@ namespace krys::text
   constexpr char32 CarriageReturn = 0x000D;
   constexpr char32 CjkWater = 0x6C34;
   constexpr char32 DeleteCharacter = 0x007F;
+  constexpr char32 EmojiVariationSelector = 0xFE0F;
   constexpr char32 EnDash = 0x2013;
   constexpr char32 EthiopicWordspace = 0x1361;
   constexpr char32 FirstStrongIsolate = 0x2068;
@@ -87,6 +88,7 @@ namespace krys::text
   constexpr char32 Space = 0x0020;
   constexpr char32 SwungDash = 0x2053;
   constexpr char32 TabCharacter = 0x0009;
+  constexpr char32 TextVariationSelector = 0xFE0E;
   constexpr char32 TibetanMarkDelimiterTshegBstar = 0x0F0C;
   constexpr char32 TibetanMarkIntersyllabicTsheg = 0x0F0B;
   constexpr char32 TironianSignEt = 0x204A;

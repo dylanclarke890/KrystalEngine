@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"

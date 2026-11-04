@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
 
 namespace krys::boo

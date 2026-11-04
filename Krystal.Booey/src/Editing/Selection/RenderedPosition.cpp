@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Editing/Selection/RenderedPosition.hpp"
 #include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo

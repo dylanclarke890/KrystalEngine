@@ -20,7 +20,7 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"

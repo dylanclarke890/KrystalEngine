@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Rendering/CaretRectComputation.hpp"

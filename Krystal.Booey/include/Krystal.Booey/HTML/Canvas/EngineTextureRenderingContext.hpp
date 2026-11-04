@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTexture.hpp"
 #include "Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

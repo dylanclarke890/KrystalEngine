@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/PointerEventTypeNames.hpp"
-#include "Krystal.Booey/Graphics/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/PlatformEvent.hpp"
 #include "Krystal.Booey/Platform/PointerID.hpp"

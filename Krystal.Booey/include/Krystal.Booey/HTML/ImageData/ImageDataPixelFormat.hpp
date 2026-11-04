@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/PixelFormat.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/PixelFormat.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo::html

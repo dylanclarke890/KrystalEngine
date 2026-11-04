@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/FontFeatureValues.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp"
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 
 namespace krys::boo::tests

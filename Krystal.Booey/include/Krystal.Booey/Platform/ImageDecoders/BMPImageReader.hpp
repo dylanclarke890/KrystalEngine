@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
 #include <array>
 #include <cstring>

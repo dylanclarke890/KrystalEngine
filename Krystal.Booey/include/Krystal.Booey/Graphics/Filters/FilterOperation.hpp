@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
 namespace krys::boo

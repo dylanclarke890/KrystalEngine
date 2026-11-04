@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Graphics/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"

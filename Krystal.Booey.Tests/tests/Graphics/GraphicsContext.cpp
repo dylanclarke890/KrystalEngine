@@ -2,7 +2,7 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
-#include "Krystal.Booey/Graphics/FloatSegment.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"

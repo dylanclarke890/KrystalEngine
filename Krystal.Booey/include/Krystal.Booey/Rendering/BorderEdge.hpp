@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
-#include "Krystal.Booey/Graphics/RectEdges.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 

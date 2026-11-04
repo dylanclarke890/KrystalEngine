@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Rendering/RenderObjectHighlightState.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"

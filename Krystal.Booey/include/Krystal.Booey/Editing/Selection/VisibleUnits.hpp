@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

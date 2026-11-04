@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxSides.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"

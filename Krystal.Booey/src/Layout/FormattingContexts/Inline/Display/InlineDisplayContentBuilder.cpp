@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContentBuilder.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/FormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"

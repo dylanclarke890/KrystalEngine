@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/ImageTypes.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClient.hpp"
 
 namespace krys::boo

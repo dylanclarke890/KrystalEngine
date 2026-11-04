@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGCircleElement.hpp"

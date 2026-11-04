@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

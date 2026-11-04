@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/GlyphPage.hpp"
-#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
-#include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
+#include "Krystal.Booey/Graphics/Fonts/GlyphPage.hpp"
+#include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 

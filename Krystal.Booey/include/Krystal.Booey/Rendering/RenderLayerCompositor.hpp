@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerClient.hpp"
-#include "Krystal.Booey/Graphics/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerClient.hpp"
 #include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/LayerAncestorClippingStack.hpp"

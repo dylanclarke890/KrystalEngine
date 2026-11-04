@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Values/Shapes/CircleFunction.hpp"
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"

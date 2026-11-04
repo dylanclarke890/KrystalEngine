@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
 #include "Krystal.Booey/Rendering/TextBoxSelectableRange.hpp"

@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Values/Shapes/EllipseFunction.hpp"
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Images/Gradient.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
@@ -101,8 +101,7 @@ namespace krys::boo::style
     };
 
     return canBlendRadius(get<0>(a.Radii), get<0>(b.Radii))
-           && canBlendRadius(get<1>(a.Radii), get<1>(b.Radii))
-           && style::CanBlend(a.Position, b.Position);
+           && canBlendRadius(get<1>(a.Radii), get<1>(b.Radii)) && style::CanBlend(a.Position, b.Position);
   }
 
   Ellipse Blending<Ellipse>::Blend(const Ellipse &a, const Ellipse &b,

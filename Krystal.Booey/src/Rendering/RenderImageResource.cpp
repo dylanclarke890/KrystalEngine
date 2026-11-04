@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderImageResource.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

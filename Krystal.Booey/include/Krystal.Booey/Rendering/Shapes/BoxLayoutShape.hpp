@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Rendering/Shapes/LayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/SourceImage.hpp"
+#include "Krystal.Booey/Graphics/Images/SourceImage.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 

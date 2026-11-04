@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 

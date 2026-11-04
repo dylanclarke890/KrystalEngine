@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterRenderer.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterEffectGraph.hpp"

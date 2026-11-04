@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
-#include "Krystal.Booey/Graphics/FontGenericFamilies.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"

@@ -3,8 +3,8 @@
 
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/FontMetrics.hpp"
-#include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"

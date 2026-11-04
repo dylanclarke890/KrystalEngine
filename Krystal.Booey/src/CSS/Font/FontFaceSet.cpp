@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Font/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/Graphics/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include <algorithm>
 

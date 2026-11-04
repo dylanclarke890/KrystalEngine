@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Platform/DragImage.hpp"
 #include "Krystal.Booey/URL/URL.hpp"

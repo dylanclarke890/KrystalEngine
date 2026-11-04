@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/BorderShape.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"
 

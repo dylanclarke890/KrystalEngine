@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"

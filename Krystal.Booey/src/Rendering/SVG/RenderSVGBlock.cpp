@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 
-#include "Krystal.Booey/Graphics/ImageOrientation.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 
 namespace krys::boo::style
 {

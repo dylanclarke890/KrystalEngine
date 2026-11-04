@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 
 #include "Krystal.Core/RefCounted.hpp"

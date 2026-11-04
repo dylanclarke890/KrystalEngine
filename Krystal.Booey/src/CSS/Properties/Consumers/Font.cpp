@@ -32,7 +32,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers

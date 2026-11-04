@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSFontFeatureValuesRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/Graphics/FontFeatureValues.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <charconv>

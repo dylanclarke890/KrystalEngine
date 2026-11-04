@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Core/Text/ParsingUtilities.hpp"

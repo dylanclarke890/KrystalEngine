@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 
 namespace krys::boo::svg::tests

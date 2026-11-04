@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/ImageOrientation.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 
 namespace krys::boo::tests
 {

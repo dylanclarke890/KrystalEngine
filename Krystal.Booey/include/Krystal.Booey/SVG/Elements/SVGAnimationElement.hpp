@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/UnitBezier.hpp"
+#include "Krystal.Booey/Graphics/Animation/UnitBezier.hpp"
 #include "Krystal.Booey/SVG/Animation/SVGSMILElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
 #include "Krystal.Booey/SVG/SVGTests.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.UI/EngineTexture.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.UI/Compositing/EngineTextureLayer.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 

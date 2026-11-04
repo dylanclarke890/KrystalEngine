@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLScripts.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>

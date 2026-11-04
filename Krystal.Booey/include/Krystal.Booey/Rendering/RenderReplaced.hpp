@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

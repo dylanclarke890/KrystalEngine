@@ -16,7 +16,7 @@
 #include "Krystal.Booey/Graphics/Filters/PointLightSource.hpp"
 #include "Krystal.Booey/Graphics/Filters/SourceGraphic.hpp"
 #include "Krystal.Booey/Graphics/Filters/SpotLightSource.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hash.hpp"

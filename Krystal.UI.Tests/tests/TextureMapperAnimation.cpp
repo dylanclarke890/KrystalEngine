@@ -1,8 +1,8 @@
 ﻿#include "Krystal.UI/Compositing/TextureMapperAnimation.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerFloatAnimationValue.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerFloatAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransformAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperations.hpp"
 #include <chrono>

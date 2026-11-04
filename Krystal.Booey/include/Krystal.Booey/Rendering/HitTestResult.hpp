@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"

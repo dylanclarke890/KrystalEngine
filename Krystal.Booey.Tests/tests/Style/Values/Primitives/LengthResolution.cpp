@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 
 namespace krys::boo::style::tests
 {

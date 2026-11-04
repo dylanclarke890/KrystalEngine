@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/ImageOrientation.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleFilterImage.hpp"

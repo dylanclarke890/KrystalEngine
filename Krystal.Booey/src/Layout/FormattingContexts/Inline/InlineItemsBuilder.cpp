@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineItemsBuilder.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineSoftLineBreakItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionCache.hpp"

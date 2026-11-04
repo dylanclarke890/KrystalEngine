@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

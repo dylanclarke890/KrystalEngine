@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Rendering/Style/GridArea.hpp"
 #include "Krystal.Booey/Rendering/Style/GridSpan.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTrackSizingDirection.hpp"

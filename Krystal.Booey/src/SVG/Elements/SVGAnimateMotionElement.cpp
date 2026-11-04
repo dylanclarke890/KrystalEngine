@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGAnimateMotionElement.hpp"
-#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
+#include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"

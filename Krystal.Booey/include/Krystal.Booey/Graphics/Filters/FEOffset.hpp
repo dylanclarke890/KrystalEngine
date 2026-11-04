@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

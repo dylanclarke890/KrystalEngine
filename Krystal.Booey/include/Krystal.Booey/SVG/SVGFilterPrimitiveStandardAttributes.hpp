@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffectGeometry.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedString.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"

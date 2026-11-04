@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Platform/PathStrokeStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include <cmath>

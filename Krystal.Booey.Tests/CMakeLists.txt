@@ -306,32 +306,32 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/StyleSheets/StyleSheetContents.cpp
 
 		# Graphics
-		tests/Graphics/LayoutUnit.cpp
-		tests/Graphics/WOFFFileFormat.cpp
-		tests/Graphics/DoublePoint.cpp
-		tests/Graphics/FloatPoint.cpp
-		tests/Graphics/Pattern.cpp
-		tests/Graphics/FloatPoint3D.cpp
-		tests/Graphics/FloatQuad.cpp
-		tests/Graphics/FloatRect.cpp
-		tests/Graphics/FloatSize.cpp
-		tests/Graphics/FontCustomPlatformData.cpp
-		tests/Graphics/FontFeatureValues.cpp
-		tests/Graphics/FontPaletteValues.cpp
-		tests/Graphics/FontTaggedSettings.cpp
-		tests/Graphics/Transforms/TransformOperations.cpp
+		tests/Graphics/DisplayLists/DisplayListRecorder.cpp
 		tests/Graphics/Filters/FilterEffect.cpp
 		tests/Graphics/Filters/FilterOperations.cpp
+		tests/Graphics/Fonts/FontCustomPlatformData.cpp
+		tests/Graphics/Fonts/FontFeatureValues.cpp
+		tests/Graphics/Fonts/FontPaletteValues.cpp
+		tests/Graphics/Fonts/FontTaggedSettings.cpp
+		tests/Graphics/Fonts/WOFFFileFormat.cpp
+		tests/Graphics/Geometry/DoublePoint.cpp
+		tests/Graphics/Geometry/FloatPoint.cpp
+		tests/Graphics/Geometry/FloatPoint3D.cpp
+		tests/Graphics/Geometry/FloatQuad.cpp
+		tests/Graphics/Geometry/FloatRect.cpp
+		tests/Graphics/Geometry/FloatSize.cpp
+		tests/Graphics/Geometry/LayoutUnit.cpp
+		tests/Graphics/Geometry/RoundedRect.cpp
 		tests/Graphics/Gradient.cpp
-		tests/Graphics/RoundedRect.cpp
-		tests/Graphics/Path.cpp
-		tests/Graphics/DisplayLists/DisplayListRecorder.cpp
-		tests/Graphics/BitmapImage.cpp
 		tests/Graphics/GraphicsContext.cpp
-		tests/Graphics/GraphicsLayer.cpp
-		tests/Graphics/ImageBuffer.cpp
-		tests/Graphics/ImageBufferUtilities.cpp
-		tests/Graphics/PixelBuffer.cpp
+		tests/Graphics/ImageBuffers/ImageBuffer.cpp
+		tests/Graphics/ImageBuffers/ImageBufferUtilities.cpp
+		tests/Graphics/ImageBuffers/PixelBuffer.cpp
+		tests/Graphics/Images/BitmapImage.cpp
+		tests/Graphics/Layers/GraphicsLayer.cpp
+		tests/Graphics/Paths/Path.cpp
+		tests/Graphics/Pattern.cpp
+		tests/Graphics/Transforms/TransformOperations.cpp
 		tests/Style/Values/Shapes/Shapes.cpp
 		tests/Style/Values/Masking/Masking.cpp
 		tests/Style/Values/Motion/Motion.cpp
@@ -344,25 +344,25 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Computed/ComputedStyleInitial.cpp
 		tests/Style/NameScope.cpp
 		tests/Graphics/Animation/TimingFunction.cpp
-		tests/Graphics/FontDescription.cpp
-		tests/Graphics/FontSelectionAlgorithm.cpp
-		tests/Graphics/GeometryUtilities.cpp
-		tests/Graphics/IntPoint.cpp
-		tests/Graphics/IntRect.cpp
-		tests/Graphics/IntSize.cpp
-		tests/Graphics/LayoutPoint.cpp
-		tests/Graphics/LayoutRect.cpp
-		tests/Graphics/LayoutSize.cpp
-		tests/Graphics/Region.cpp
-		tests/Graphics/Transforms/AffineTransform.cpp
 		tests/Graphics/Color/Color.cpp
 		tests/Graphics/Color/ColorBlending.cpp
 		tests/Graphics/Color/ColorInterpolation.cpp
 		tests/Graphics/Color/ColorSerialisation.cpp
 		tests/Graphics/Color/NamedColors.cpp
+		tests/Graphics/Fonts/FontDescription.cpp
+		tests/Graphics/Fonts/FontSelectionAlgorithm.cpp
+		tests/Graphics/Geometry/GeometryUtilities.cpp
+		tests/Graphics/Geometry/IntPoint.cpp
+		tests/Graphics/Geometry/IntRect.cpp
+		tests/Graphics/Geometry/IntSize.cpp
+		tests/Graphics/Geometry/LayoutPoint.cpp
+		tests/Graphics/Geometry/LayoutRect.cpp
+		tests/Graphics/Geometry/LayoutSize.cpp
+		tests/Graphics/Geometry/Region.cpp
+		tests/Graphics/Transforms/AffineTransform.cpp
 		tests/Graphics/Transforms/Quaternion.cpp
-		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Graphics/Transforms/TransformationMatrix.cpp
+		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Platform/DateTimeFormat.cpp
 		tests/Platform/LocaleICU.cpp
 		tests/Text/LocaleToScriptMapping.cpp
@@ -373,11 +373,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Style/RenderStyleConstants.cpp
 
 		# Style
-		tests/Graphics/FloatPointGraph.cpp
-		tests/Graphics/Font.cpp
-		tests/Graphics/FontCache.cpp
-		tests/Graphics/ComplexTextController.cpp
-		tests/Graphics/FontCascade.cpp
+		tests/Graphics/Fonts/Font.cpp
+		tests/Graphics/Fonts/FontCache.cpp
+		tests/Graphics/Fonts/FontCascade.cpp
+		tests/Graphics/Geometry/FloatPointGraph.cpp
+		tests/Graphics/TextRuns/ComplexTextController.cpp
 		tests/Animation/Animatable.cpp
 		tests/Animation/AnimationEffect.cpp
 		tests/Animation/CSSAnimation.cpp
@@ -392,9 +392,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Animation/WebAnimation.cpp
 		tests/CSS/Font/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp
-		tests/Graphics/FontDatabase.cpp
-		tests/Graphics/TextRunIterator.cpp
-		tests/Graphics/WidthIterator.cpp
+		tests/Graphics/Fonts/FontDatabase.cpp
+		tests/Graphics/TextRuns/TextRunIterator.cpp
+		tests/Graphics/TextRuns/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
 		tests/Page/LocalFrameViewScrolling.cpp
 		tests/Rendering/RenderBox.cpp
@@ -429,7 +429,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp
 		tests/Page/Drag/DragController.cpp
-		tests/Graphics/StringTruncator.cpp
+		tests/Graphics/TextRuns/StringTruncator.cpp
 		tests/Platform/DragImage.cpp
 		tests/Page/IntersectionObserver/IntersectionObserver.cpp
 		tests/Page/ResizeObserver/ResizeObserver.cpp
@@ -729,7 +729,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/Internals/PresentationalHints.cpp
 		tests/MathML/Elements/MathMLElement.cpp
-		tests/Graphics/OpenType/OpenTypeMathData.cpp
+		tests/Graphics/Fonts/OpenTypeMathData.cpp
 		tests/Rendering/MathML/MathVariant.cpp
 		tests/Rendering/MathML/RenderMathMLBlock.cpp
 		tests/Rendering/MathML/RenderMathMLFraction.cpp

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutRange.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRange.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineTypes.hpp"
 #include "Krystal.Booey/Rendering/Grid.hpp"
 #include "Krystal.Booey/Rendering/GridMasonryLayout.hpp"

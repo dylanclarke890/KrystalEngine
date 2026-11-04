@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/SVG/SVGLengthValue.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"

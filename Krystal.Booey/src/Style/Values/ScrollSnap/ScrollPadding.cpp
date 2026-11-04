@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
 
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 
 namespace krys::boo::style

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Style/Values/Text/LetterSpacing.hpp"
 #include "Krystal.Booey/Style/Values/Text/WordSpacing.hpp"
 #include "Krystal.Core/Types/DataRef.hpp"

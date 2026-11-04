@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Invalidation/InlineDamage.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"

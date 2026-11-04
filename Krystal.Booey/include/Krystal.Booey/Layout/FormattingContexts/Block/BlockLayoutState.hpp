@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Layout/Floats/PlacedFloats.hpp"
 #include "Krystal.Booey/Style/Values/Inline/TextBoxEdge.hpp"
 #include "Krystal.Core/Assert.hpp"

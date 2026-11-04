@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerClient.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerEnums.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerClient.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
 #include "Krystal.Booey/Rendering/LayerAncestorClippingStack.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"

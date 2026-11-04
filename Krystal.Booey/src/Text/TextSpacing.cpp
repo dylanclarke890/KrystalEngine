@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Text/TextSpacing.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"

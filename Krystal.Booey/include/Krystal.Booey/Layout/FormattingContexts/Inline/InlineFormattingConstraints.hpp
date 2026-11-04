@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/FormattingConstraints.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"

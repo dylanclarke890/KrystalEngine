@@ -13,7 +13,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"

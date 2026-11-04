@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Image.hpp"
-#include "Krystal.Booey/Graphics/ImageObserver.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"

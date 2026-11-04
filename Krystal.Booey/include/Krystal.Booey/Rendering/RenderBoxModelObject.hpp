@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
-#include "Krystal.Booey/Graphics/RectEdges.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"

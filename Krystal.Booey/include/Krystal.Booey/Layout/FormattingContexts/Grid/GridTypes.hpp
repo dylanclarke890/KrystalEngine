@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutUnit.hpp"
-#include "Krystal.Booey/Graphics/RectEdges.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTrackBreadth.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"

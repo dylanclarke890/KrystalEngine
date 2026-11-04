@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasBase.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
+#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
 
 namespace krys::boo::html

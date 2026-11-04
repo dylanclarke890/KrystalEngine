@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/Graphics/SVGImageCache.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"

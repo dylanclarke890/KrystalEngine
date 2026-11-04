@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasBase.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DSettings.hpp"

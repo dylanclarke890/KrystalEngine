@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/ScopeIdentifier.hpp"

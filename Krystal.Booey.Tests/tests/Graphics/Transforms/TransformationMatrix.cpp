@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 
 namespace krys::boo::tests

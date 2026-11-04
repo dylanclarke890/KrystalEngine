@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"

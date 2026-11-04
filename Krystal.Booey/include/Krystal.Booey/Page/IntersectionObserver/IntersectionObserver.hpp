@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverCallback.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"

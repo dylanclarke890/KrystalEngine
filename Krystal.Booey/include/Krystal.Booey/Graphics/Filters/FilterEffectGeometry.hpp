@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"

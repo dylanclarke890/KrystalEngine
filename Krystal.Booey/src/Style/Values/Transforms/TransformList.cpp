@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Transforms/TransformList.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/Matrix3DTransformFunction.hpp"
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 
 namespace krys::boo::style

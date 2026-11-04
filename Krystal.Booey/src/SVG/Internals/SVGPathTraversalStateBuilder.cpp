@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGPathTraversalStateBuilder.hpp"
-#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
+#include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 
 namespace krys::boo::svg
 {

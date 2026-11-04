@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGFEConvolveMatrixElement.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"

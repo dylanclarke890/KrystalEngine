@@ -2,9 +2,9 @@
 
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Platform/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/ThemeTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"

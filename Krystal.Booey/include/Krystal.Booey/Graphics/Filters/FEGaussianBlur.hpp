@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEConvolveMatrix.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

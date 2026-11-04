@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterResults.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include <algorithm>
 
 namespace krys::boo

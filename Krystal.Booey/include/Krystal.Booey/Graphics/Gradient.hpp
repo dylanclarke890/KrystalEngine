@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/GradientColorStops.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Core/RefCounted.hpp"

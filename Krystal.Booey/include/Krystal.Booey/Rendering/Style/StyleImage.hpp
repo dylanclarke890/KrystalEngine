@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"

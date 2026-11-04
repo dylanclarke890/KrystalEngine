@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 

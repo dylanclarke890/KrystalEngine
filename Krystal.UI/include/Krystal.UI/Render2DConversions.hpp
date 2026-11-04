@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Graphics/WindRule.hpp"
 #include "Krystal.Gfx/Render2D/Gradient2D.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/Rect2D.hpp"

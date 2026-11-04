@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContent.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBox.hpp"

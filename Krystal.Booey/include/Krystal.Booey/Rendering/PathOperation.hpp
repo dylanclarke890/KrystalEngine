@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Values/Motion/RayFunction.hpp"

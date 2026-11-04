@@ -82,7 +82,7 @@ set(KRYSTAL_BOOEY_HEADER_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/codegen/headers
 set(KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/codegen")
 
 # Sources whose file-local helpers share names (and differ) with another source's.
-set_source_files_properties(src/Graphics/WidthIterator.cpp
+set_source_files_properties(src/Graphics/TextRuns/WidthIterator.cpp
                             src/Rendering/TextBoxPainter.cpp
   PROPERTIES
     SKIP_UNITY_BUILD_INCLUSION ON
@@ -1370,13 +1370,9 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp
   include/Krystal.Booey/Graphics/Animation/CompositeOperation.hpp
   include/Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp
+  include/Krystal.Booey/Graphics/Animation/SpringSolver.hpp
   include/Krystal.Booey/Graphics/Animation/TimingFunction.hpp
-  include/Krystal.Booey/Graphics/BitmapImage.hpp
-  include/Krystal.Booey/Graphics/BitmapImageDescriptor.hpp
-  include/Krystal.Booey/Graphics/BitmapImageSource.hpp
-  include/Krystal.Booey/Graphics/BoxExtents.hpp
-  include/Krystal.Booey/Graphics/BoxSides.hpp
-  include/Krystal.Booey/Graphics/ByteArrayPixelBuffer.hpp
+  include/Krystal.Booey/Graphics/Animation/UnitBezier.hpp
   include/Krystal.Booey/Graphics/Color/Color.hpp
   include/Krystal.Booey/Graphics/Color/ColorBlending.hpp
   include/Krystal.Booey/Graphics/Color/ColorFlags.hpp
@@ -1385,9 +1381,8 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp
   include/Krystal.Booey/Graphics/Color/ColorLuminance.hpp
   include/Krystal.Booey/Graphics/Color/ColorSerialisation.hpp
+  include/Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp
   include/Krystal.Booey/Graphics/Color/NamedColors.hpp
-  include/Krystal.Booey/Graphics/ComplexTextController.hpp
-  include/Krystal.Booey/Graphics/ContentsFormat.hpp
   include/Krystal.Booey/Graphics/Controls/ButtonPart.hpp
   include/Krystal.Booey/Graphics/Controls/ColorWellPart.hpp
   include/Krystal.Booey/Graphics/Controls/ControlFactory.hpp
@@ -1407,16 +1402,11 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Controls/TextAreaPart.hpp
   include/Krystal.Booey/Graphics/Controls/TextFieldPart.hpp
   include/Krystal.Booey/Graphics/Controls/ToggleButtonPart.hpp
-  include/Krystal.Booey/Graphics/DashArray.hpp
-  include/Krystal.Booey/Graphics/DecodingOptions.hpp
-  include/Krystal.Booey/Graphics/DestinationColorSpace.hpp
   include/Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp
   include/Krystal.Booey/Graphics/DisplayLists/DisplayListItem.hpp
   include/Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp
   include/Krystal.Booey/Graphics/DisplayLists/DisplayListRecorder.hpp
   include/Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp
-  include/Krystal.Booey/Graphics/DoublePoint.hpp
-  include/Krystal.Booey/Graphics/DoubleSize.hpp
   include/Krystal.Booey/Graphics/Filters/DistantLightSource.hpp
   include/Krystal.Booey/Graphics/Filters/FEBlend.hpp
   include/Krystal.Booey/Graphics/Filters/FEColorMatrix.hpp
@@ -1452,127 +1442,142 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Filters/SourceAlpha.hpp
   include/Krystal.Booey/Graphics/Filters/SourceGraphic.hpp
   include/Krystal.Booey/Graphics/Filters/SpotLightSource.hpp
-  include/Krystal.Booey/Graphics/FloatPoint.hpp
-  include/Krystal.Booey/Graphics/FloatPoint3D.hpp
-  include/Krystal.Booey/Graphics/FloatPointGraph.hpp
-  include/Krystal.Booey/Graphics/FloatPolygon.hpp
-  include/Krystal.Booey/Graphics/FloatQuad.hpp
-  include/Krystal.Booey/Graphics/FloatRect.hpp
-  include/Krystal.Booey/Graphics/FloatRoundedRect.hpp
-  include/Krystal.Booey/Graphics/FloatSegment.hpp
-  include/Krystal.Booey/Graphics/FloatSize.hpp
-  include/Krystal.Booey/Graphics/Font.hpp
-  include/Krystal.Booey/Graphics/FontBaseline.hpp
-  include/Krystal.Booey/Graphics/FontCache.hpp
-  include/Krystal.Booey/Graphics/FontCascade.hpp
-  include/Krystal.Booey/Graphics/FontCascadeCache.hpp
-  include/Krystal.Booey/Graphics/FontCascadeDescription.hpp
-  include/Krystal.Booey/Graphics/FontCascadeFonts.hpp
-  include/Krystal.Booey/Graphics/FontCreationContext.hpp
-  include/Krystal.Booey/Graphics/FontCustomPlatformData.hpp
-  include/Krystal.Booey/Graphics/FontDatabase.hpp
-  include/Krystal.Booey/Graphics/FontDescription.hpp
-  include/Krystal.Booey/Graphics/FontFeatureValues.hpp
-  include/Krystal.Booey/Graphics/FontGenericFamilies.hpp
-  include/Krystal.Booey/Graphics/FontMetrics.hpp
-  include/Krystal.Booey/Graphics/FontPalette.hpp
-  include/Krystal.Booey/Graphics/FontPaletteValues.hpp
-  include/Krystal.Booey/Graphics/FontPlatformData.hpp
-  include/Krystal.Booey/Graphics/FontRanges.hpp
-  include/Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp
-  include/Krystal.Booey/Graphics/FontSelector.hpp
-  include/Krystal.Booey/Graphics/FontSizeAdjust.hpp
-  include/Krystal.Booey/Graphics/FontTaggedSettings.hpp
-  include/Krystal.Booey/Graphics/GeneratedImage.hpp
-  include/Krystal.Booey/Graphics/GeometryUtilities.hpp
-  include/Krystal.Booey/Graphics/Glyph.hpp
-  include/Krystal.Booey/Graphics/GlyphBuffer.hpp
-  include/Krystal.Booey/Graphics/GlyphBufferMembers.hpp
-  include/Krystal.Booey/Graphics/GlyphMetricsMap.hpp
-  include/Krystal.Booey/Graphics/GlyphPage.hpp
+  include/Krystal.Booey/Graphics/Fonts/Font.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontBaseline.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontCache.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontCascade.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontCascadeCache.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontCascadeFonts.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontDatabase.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontDescription.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontMetrics.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontPalette.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontPaletteValues.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontPlatformData.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontRanges.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontSelector.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp
+  include/Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp
+  include/Krystal.Booey/Graphics/Fonts/Glyph.hpp
+  include/Krystal.Booey/Graphics/Fonts/GlyphBuffer.hpp
+  include/Krystal.Booey/Graphics/Fonts/GlyphBufferMembers.hpp
+  include/Krystal.Booey/Graphics/Fonts/GlyphMetricsMap.hpp
+  include/Krystal.Booey/Graphics/Fonts/GlyphPage.hpp
+  include/Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp
+  include/Krystal.Booey/Graphics/Fonts/SystemFallbackFontCache.hpp
+  include/Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp
+  include/Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp
+  include/Krystal.Booey/Graphics/Geometry/BoxExtents.hpp
+  include/Krystal.Booey/Graphics/Geometry/BoxSides.hpp
+  include/Krystal.Booey/Graphics/Geometry/DoublePoint.hpp
+  include/Krystal.Booey/Graphics/Geometry/DoubleSize.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatPoint.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatPointGraph.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatPolygon.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatQuad.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatRect.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatSegment.hpp
+  include/Krystal.Booey/Graphics/Geometry/FloatSize.hpp
+  include/Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp
+  include/Krystal.Booey/Graphics/Geometry/IntPoint.hpp
+  include/Krystal.Booey/Graphics/Geometry/IntRect.hpp
+  include/Krystal.Booey/Graphics/Geometry/IntRectHash.hpp
+  include/Krystal.Booey/Graphics/Geometry/IntSize.hpp
+  include/Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp
+  include/Krystal.Booey/Graphics/Geometry/LayoutRange.hpp
+  include/Krystal.Booey/Graphics/Geometry/LayoutRect.hpp
+  include/Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp
+  include/Krystal.Booey/Graphics/Geometry/LayoutSize.hpp
+  include/Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp
+  include/Krystal.Booey/Graphics/Geometry/RectCorners.hpp
+  include/Krystal.Booey/Graphics/Geometry/RectEdges.hpp
+  include/Krystal.Booey/Graphics/Geometry/Region.hpp
   include/Krystal.Booey/Graphics/Gradient.hpp
   include/Krystal.Booey/Graphics/GradientColorStop.hpp
   include/Krystal.Booey/Graphics/GradientColorStops.hpp
-  include/Krystal.Booey/Graphics/GradientImage.hpp
   include/Krystal.Booey/Graphics/GraphicsContext.hpp
   include/Krystal.Booey/Graphics/GraphicsContextState.hpp
   include/Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp
   include/Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayer.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerAnimation.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerAnimationValue.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerClient.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerContentsDisplayDelegate.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerEnums.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerFactory.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerFilterAnimationValue.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerFloatAnimationValue.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerKeyframeValueList.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerTransform.hpp
-  include/Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp
   include/Krystal.Booey/Graphics/GraphicsStyle.hpp
   include/Krystal.Booey/Graphics/GraphicsTypes.hpp
-  include/Krystal.Booey/Graphics/Image.hpp
-  include/Krystal.Booey/Graphics/ImageBackingStore.hpp
-  include/Krystal.Booey/Graphics/ImageBuffer.hpp
-  include/Krystal.Booey/Graphics/ImageBufferBackend.hpp
-  include/Krystal.Booey/Graphics/ImageBufferContextSwitcher.hpp
-  include/Krystal.Booey/Graphics/ImageBufferDisplayListBackend.hpp
-  include/Krystal.Booey/Graphics/ImageBufferUtilities.hpp
-  include/Krystal.Booey/Graphics/ImageDecoder.hpp
-  include/Krystal.Booey/Graphics/ImageFrame.hpp
-  include/Krystal.Booey/Graphics/ImageFrameAnimator.hpp
-  include/Krystal.Booey/Graphics/ImageObserver.hpp
-  include/Krystal.Booey/Graphics/ImageOrientation.hpp
-  include/Krystal.Booey/Graphics/ImagePaintingOptions.hpp
-  include/Krystal.Booey/Graphics/ImageSource.hpp
-  include/Krystal.Booey/Graphics/ImageTypes.hpp
-  include/Krystal.Booey/Graphics/IntPoint.hpp
-  include/Krystal.Booey/Graphics/IntRect.hpp
-  include/Krystal.Booey/Graphics/IntRectHash.hpp
-  include/Krystal.Booey/Graphics/IntSize.hpp
-  include/Krystal.Booey/Graphics/LayerTreeAsTextOptions.hpp
-  include/Krystal.Booey/Graphics/LayoutPoint.hpp
-  include/Krystal.Booey/Graphics/LayoutRange.hpp
-  include/Krystal.Booey/Graphics/LayoutRect.hpp
-  include/Krystal.Booey/Graphics/LayoutRoundedRect.hpp
-  include/Krystal.Booey/Graphics/LayoutSize.hpp
-  include/Krystal.Booey/Graphics/LayoutUnit.hpp
-  include/Krystal.Booey/Graphics/NativeImage.hpp
-  include/Krystal.Booey/Graphics/NativeImageSource.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/ImageBufferBackend.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/ImageBufferContextSwitcher.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/ImageBufferDisplayListBackend.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/ImageBufferUtilities.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/PixelBufferConversion.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/PixelBufferFormat.hpp
+  include/Krystal.Booey/Graphics/ImageBuffers/PixelFormat.hpp
+  include/Krystal.Booey/Graphics/Images/BitmapImage.hpp
+  include/Krystal.Booey/Graphics/Images/BitmapImageDescriptor.hpp
+  include/Krystal.Booey/Graphics/Images/BitmapImageSource.hpp
+  include/Krystal.Booey/Graphics/Images/DecodingOptions.hpp
+  include/Krystal.Booey/Graphics/Images/GeneratedImage.hpp
+  include/Krystal.Booey/Graphics/Images/GradientImage.hpp
+  include/Krystal.Booey/Graphics/Images/Image.hpp
+  include/Krystal.Booey/Graphics/Images/ImageBackingStore.hpp
+  include/Krystal.Booey/Graphics/Images/ImageDecoder.hpp
+  include/Krystal.Booey/Graphics/Images/ImageFrame.hpp
+  include/Krystal.Booey/Graphics/Images/ImageFrameAnimator.hpp
+  include/Krystal.Booey/Graphics/Images/ImageObserver.hpp
+  include/Krystal.Booey/Graphics/Images/ImageOrientation.hpp
+  include/Krystal.Booey/Graphics/Images/ImagePaintingOptions.hpp
+  include/Krystal.Booey/Graphics/Images/ImageSource.hpp
+  include/Krystal.Booey/Graphics/Images/ImageTypes.hpp
+  include/Krystal.Booey/Graphics/Images/NativeImage.hpp
+  include/Krystal.Booey/Graphics/Images/NativeImageSource.hpp
+  include/Krystal.Booey/Graphics/Images/PlatformImage.hpp
+  include/Krystal.Booey/Graphics/Images/SourceImage.hpp
+  include/Krystal.Booey/Graphics/Layers/ContentsFormat.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerAnimationValue.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerClient.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerFactory.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerFloatAnimationValue.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerKeyframeValueList.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerTransform.hpp
+  include/Krystal.Booey/Graphics/Layers/GraphicsLayerTransformAnimationValue.hpp
+  include/Krystal.Booey/Graphics/Layers/LayerTreeAsTextOptions.hpp
+  include/Krystal.Booey/Graphics/Layers/PlatformLayerIdentifier.hpp
   include/Krystal.Booey/Graphics/NullGraphicsContext.hpp
-  include/Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp
-  include/Krystal.Booey/Graphics/Path.hpp
-  include/Krystal.Booey/Graphics/PathElement.hpp
-  include/Krystal.Booey/Graphics/PathImpl.hpp
-  include/Krystal.Booey/Graphics/PathSegment.hpp
-  include/Krystal.Booey/Graphics/PathSegmentData.hpp
-  include/Krystal.Booey/Graphics/PathStream.hpp
-  include/Krystal.Booey/Graphics/PathTraversalState.hpp
+  include/Krystal.Booey/Graphics/Paths/DashArray.hpp
+  include/Krystal.Booey/Graphics/Paths/Path.hpp
+  include/Krystal.Booey/Graphics/Paths/PathElement.hpp
+  include/Krystal.Booey/Graphics/Paths/PathImpl.hpp
+  include/Krystal.Booey/Graphics/Paths/PathSegment.hpp
+  include/Krystal.Booey/Graphics/Paths/PathSegmentData.hpp
+  include/Krystal.Booey/Graphics/Paths/PathStream.hpp
+  include/Krystal.Booey/Graphics/Paths/PathTraversalState.hpp
+  include/Krystal.Booey/Graphics/Paths/RotationDirection.hpp
+  include/Krystal.Booey/Graphics/Paths/WindRule.hpp
   include/Krystal.Booey/Graphics/Pattern.hpp
-  include/Krystal.Booey/Graphics/PixelBuffer.hpp
-  include/Krystal.Booey/Graphics/PixelBufferConversion.hpp
-  include/Krystal.Booey/Graphics/PixelBufferFormat.hpp
-  include/Krystal.Booey/Graphics/PixelFormat.hpp
   include/Krystal.Booey/Graphics/PlatformDynamicRangeLimit.hpp
-  include/Krystal.Booey/Graphics/PlatformImage.hpp
-  include/Krystal.Booey/Graphics/PlatformLayerIdentifier.hpp
-  include/Krystal.Booey/Graphics/RectCorners.hpp
-  include/Krystal.Booey/Graphics/RectEdges.hpp
-  include/Krystal.Booey/Graphics/Region.hpp
   include/Krystal.Booey/Graphics/RenderingMode.hpp
   include/Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp
-  include/Krystal.Booey/Graphics/RotationDirection.hpp
   include/Krystal.Booey/Graphics/SourceBrush.hpp
   include/Krystal.Booey/Graphics/SourceBrushLogicalGradient.hpp
-  include/Krystal.Booey/Graphics/SourceImage.hpp
-  include/Krystal.Booey/Graphics/SpringSolver.hpp
-  include/Krystal.Booey/Graphics/StringTruncator.hpp
-  include/Krystal.Booey/Graphics/SystemFallbackFontCache.hpp
-  include/Krystal.Booey/Graphics/SystemFontDatabase.hpp
-  include/Krystal.Booey/Graphics/TabSize.hpp
-  include/Krystal.Booey/Graphics/TextRun.hpp
-  include/Krystal.Booey/Graphics/TextRunIterator.hpp
+  include/Krystal.Booey/Graphics/TextRuns/ComplexTextController.hpp
+  include/Krystal.Booey/Graphics/TextRuns/StringTruncator.hpp
+  include/Krystal.Booey/Graphics/TextRuns/TabSize.hpp
+  include/Krystal.Booey/Graphics/TextRuns/TextRun.hpp
+  include/Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp
+  include/Krystal.Booey/Graphics/TextRuns/WidthCache.hpp
+  include/Krystal.Booey/Graphics/TextRuns/WidthIterator.hpp
   include/Krystal.Booey/Graphics/Transforms/AffineTransform.hpp
   include/Krystal.Booey/Graphics/Transforms/IdentityTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/Matrix3DTransformOperation.hpp
@@ -1589,11 +1594,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Transforms/TransformState.hpp
   include/Krystal.Booey/Graphics/Transforms/TranslateTransformOperation.hpp
   include/Krystal.Booey/Graphics/TransparencyLayerContextSwitcher.hpp
-  include/Krystal.Booey/Graphics/UnitBezier.hpp
-  include/Krystal.Booey/Graphics/WidthCache.hpp
-  include/Krystal.Booey/Graphics/WidthIterator.hpp
-  include/Krystal.Booey/Graphics/WindRule.hpp
-  include/Krystal.Booey/Graphics/WOFFFileFormat.hpp
 )
 
 set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
@@ -1609,33 +1609,25 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Adwaita/TextFieldAdwaita.cpp
   src/Graphics/Adwaita/ToggleButtonAdwaita.cpp
   src/Graphics/Animation/TimingFunction.cpp
-  src/Graphics/BitmapImage.cpp
-  src/Graphics/BitmapImageDescriptor.cpp
-  src/Graphics/BitmapImageSource.cpp
-  src/Graphics/ByteArrayPixelBuffer.cpp
   src/Graphics/Color/Color.cpp
   src/Graphics/Color/ColorBlending.cpp
   src/Graphics/Color/ColorInterpolation.cpp
   src/Graphics/Color/ColorInterpolationMethod.cpp
   src/Graphics/Color/ColorLuminance.cpp
   src/Graphics/Color/ColorSerialisation.cpp
+  src/Graphics/Color/DestinationColorSpace.cpp
   src/Graphics/Color/NamedColors.cpp
-  src/Graphics/ComplexTextController.cpp
-  src/Graphics/ComplexTextControllerHarfBuzz.cpp
-  src/Graphics/ContentsFormat.cpp
   src/Graphics/Controls/ControlFactory.cpp
   src/Graphics/Controls/ControlPart.cpp
   src/Graphics/Controls/ControlStyle.cpp
   src/Graphics/Controls/MeterPart.cpp
   src/Graphics/Controls/ProgressBarPart.cpp
   src/Graphics/Controls/SliderTrackPart.cpp
-  src/Graphics/DestinationColorSpace.cpp
   src/Graphics/DisplayLists/DisplayList.cpp
   src/Graphics/DisplayLists/DisplayListItem.cpp
   src/Graphics/DisplayLists/DisplayListItems.cpp
   src/Graphics/DisplayLists/DisplayListRecorder.cpp
   src/Graphics/DisplayLists/DisplayListRecorderImpl.cpp
-  src/Graphics/DoubleSize.cpp
   src/Graphics/Filters/DistantLightSource.cpp
   src/Graphics/Filters/FEBlend.cpp
   src/Graphics/Filters/FEColorMatrix.cpp
@@ -1666,87 +1658,97 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Filters/SourceAlpha.cpp
   src/Graphics/Filters/SourceGraphic.cpp
   src/Graphics/Filters/SpotLightSource.cpp
-  src/Graphics/FloatPoint.cpp
-  src/Graphics/FloatPoint3D.cpp
-  src/Graphics/FloatPointGraph.cpp
-  src/Graphics/FloatPolygon.cpp
-  src/Graphics/FloatQuad.cpp
-  src/Graphics/FloatRect.cpp
-  src/Graphics/FloatRoundedRect.cpp
-  src/Graphics/FloatSegment.cpp
-  src/Graphics/FloatSize.cpp
-  src/Graphics/Font.cpp
-  src/Graphics/FontCache.cpp
-  src/Graphics/FontCascade.cpp
-  src/Graphics/FontCascadeCache.cpp
-  src/Graphics/FontCascadeDescription.cpp
-  src/Graphics/FontCascadeFonts.cpp
-  src/Graphics/FontCustomPlatformData.cpp
-  src/Graphics/FontDatabase.cpp
-  src/Graphics/FontDescription.cpp
-  src/Graphics/FontFeatureValues.cpp
-  src/Graphics/FontGenericFamilies.cpp
-  src/Graphics/FontHarfBuzz.cpp
-  src/Graphics/FontPlatformData.cpp
-  src/Graphics/FontRanges.cpp
-  src/Graphics/FontSelectionAlgorithm.cpp
-  src/Graphics/GeneratedImage.cpp
-  src/Graphics/GeometryUtilities.cpp
+  src/Graphics/Fonts/Font.cpp
+  src/Graphics/Fonts/FontCache.cpp
+  src/Graphics/Fonts/FontCascade.cpp
+  src/Graphics/Fonts/FontCascadeCache.cpp
+  src/Graphics/Fonts/FontCascadeDescription.cpp
+  src/Graphics/Fonts/FontCascadeFonts.cpp
+  src/Graphics/Fonts/FontCustomPlatformData.cpp
+  src/Graphics/Fonts/FontDatabase.cpp
+  src/Graphics/Fonts/FontDescription.cpp
+  src/Graphics/Fonts/FontFeatureValues.cpp
+  src/Graphics/Fonts/FontGenericFamilies.cpp
+  src/Graphics/Fonts/FontHarfBuzz.cpp
+  src/Graphics/Fonts/FontPlatformData.cpp
+  src/Graphics/Fonts/FontRanges.cpp
+  src/Graphics/Fonts/FontSelectionAlgorithm.cpp
+  src/Graphics/Fonts/OpenTypeMathData.cpp
+  src/Graphics/Fonts/SystemFallbackFontCache.cpp
+  src/Graphics/Fonts/SystemFontDatabase.cpp
+  src/Graphics/Fonts/WOFFFileFormat.cpp
+  src/Graphics/Geometry/DoubleSize.cpp
+  src/Graphics/Geometry/FloatPoint.cpp
+  src/Graphics/Geometry/FloatPoint3D.cpp
+  src/Graphics/Geometry/FloatPointGraph.cpp
+  src/Graphics/Geometry/FloatPolygon.cpp
+  src/Graphics/Geometry/FloatQuad.cpp
+  src/Graphics/Geometry/FloatRect.cpp
+  src/Graphics/Geometry/FloatRoundedRect.cpp
+  src/Graphics/Geometry/FloatSegment.cpp
+  src/Graphics/Geometry/FloatSize.cpp
+  src/Graphics/Geometry/GeometryUtilities.cpp
+  src/Graphics/Geometry/IntPoint.cpp
+  src/Graphics/Geometry/IntRect.cpp
+  src/Graphics/Geometry/IntSize.cpp
+  src/Graphics/Geometry/LayoutPoint.cpp
+  src/Graphics/Geometry/LayoutRange.cpp
+  src/Graphics/Geometry/LayoutRect.cpp
+  src/Graphics/Geometry/LayoutRoundedRect.cpp
+  src/Graphics/Geometry/LayoutSize.cpp
+  src/Graphics/Geometry/LayoutUnit.cpp
+  src/Graphics/Geometry/Region.cpp
   src/Graphics/Gradient.cpp
   src/Graphics/GradientColorStop.cpp
   src/Graphics/GradientColorStops.cpp
-  src/Graphics/GradientImage.cpp
   src/Graphics/GraphicsContext.cpp
   src/Graphics/GraphicsContextState.cpp
   src/Graphics/GraphicsContextSwitcher.cpp
-  src/Graphics/GraphicsLayer.cpp
-  src/Graphics/GraphicsLayerAnimation.cpp
-  src/Graphics/GraphicsLayerKeyframeValueList.cpp
-  src/Graphics/GraphicsLayerTransform.cpp
   src/Graphics/GraphicsStyle.cpp
   src/Graphics/GraphicsTypes.cpp
-  src/Graphics/Image.cpp
-  src/Graphics/ImageBuffer.cpp
-  src/Graphics/ImageBufferBackend.cpp
-  src/Graphics/ImageBufferContextSwitcher.cpp
-  src/Graphics/ImageBufferDisplayListBackend.cpp
-  src/Graphics/ImageBufferUtilities.cpp
-  src/Graphics/ImageDecoder.cpp
-  src/Graphics/ImageFrame.cpp
-  src/Graphics/ImageFrameAnimator.cpp
-  src/Graphics/ImageSource.cpp
-  src/Graphics/IntPoint.cpp
-  src/Graphics/IntRect.cpp
-  src/Graphics/IntSize.cpp
-  src/Graphics/LayoutPoint.cpp
-  src/Graphics/LayoutRange.cpp
-  src/Graphics/LayoutRect.cpp
-  src/Graphics/LayoutRoundedRect.cpp
-  src/Graphics/LayoutSize.cpp
-  src/Graphics/LayoutUnit.cpp
-  src/Graphics/NativeImage.cpp
-  src/Graphics/NativeImageSource.cpp
-  src/Graphics/OpenType/OpenTypeMathData.cpp
-  src/Graphics/Path.cpp
-  src/Graphics/PathImpl.cpp
-  src/Graphics/PathSegment.cpp
-  src/Graphics/PathSegmentData.cpp
-  src/Graphics/PathStream.cpp
-  src/Graphics/PathTraversalState.cpp
+  src/Graphics/ImageBuffers/ByteArrayPixelBuffer.cpp
+  src/Graphics/ImageBuffers/ImageBuffer.cpp
+  src/Graphics/ImageBuffers/ImageBufferBackend.cpp
+  src/Graphics/ImageBuffers/ImageBufferContextSwitcher.cpp
+  src/Graphics/ImageBuffers/ImageBufferDisplayListBackend.cpp
+  src/Graphics/ImageBuffers/ImageBufferUtilities.cpp
+  src/Graphics/ImageBuffers/PixelBuffer.cpp
+  src/Graphics/ImageBuffers/PixelBufferConversion.cpp
+  src/Graphics/ImageBuffers/PixelBufferFormat.cpp
+  src/Graphics/ImageBuffers/PixelFormat.cpp
+  src/Graphics/Images/BitmapImage.cpp
+  src/Graphics/Images/BitmapImageDescriptor.cpp
+  src/Graphics/Images/BitmapImageSource.cpp
+  src/Graphics/Images/GeneratedImage.cpp
+  src/Graphics/Images/GradientImage.cpp
+  src/Graphics/Images/Image.cpp
+  src/Graphics/Images/ImageDecoder.cpp
+  src/Graphics/Images/ImageFrame.cpp
+  src/Graphics/Images/ImageFrameAnimator.cpp
+  src/Graphics/Images/ImageSource.cpp
+  src/Graphics/Images/NativeImage.cpp
+  src/Graphics/Images/NativeImageSource.cpp
+  src/Graphics/Images/SourceImage.cpp
+  src/Graphics/Layers/ContentsFormat.cpp
+  src/Graphics/Layers/GraphicsLayer.cpp
+  src/Graphics/Layers/GraphicsLayerAnimation.cpp
+  src/Graphics/Layers/GraphicsLayerKeyframeValueList.cpp
+  src/Graphics/Layers/GraphicsLayerTransform.cpp
+  src/Graphics/Paths/Path.cpp
+  src/Graphics/Paths/PathImpl.cpp
+  src/Graphics/Paths/PathSegment.cpp
+  src/Graphics/Paths/PathSegmentData.cpp
+  src/Graphics/Paths/PathStream.cpp
+  src/Graphics/Paths/PathTraversalState.cpp
+  src/Graphics/Paths/RotationDirection.cpp
   src/Graphics/Pattern.cpp
-  src/Graphics/PixelBuffer.cpp
-  src/Graphics/PixelBufferConversion.cpp
-  src/Graphics/PixelBufferFormat.cpp
-  src/Graphics/PixelFormat.cpp
   src/Graphics/PlatformDynamicRangeLimit.cpp
-  src/Graphics/Region.cpp
   src/Graphics/RenderingMode.cpp
-  src/Graphics/RotationDirection.cpp
   src/Graphics/SourceBrush.cpp
-  src/Graphics/SourceImage.cpp
-  src/Graphics/StringTruncator.cpp
-  src/Graphics/SystemFallbackFontCache.cpp
-  src/Graphics/SystemFontDatabase.cpp
+  src/Graphics/TextRuns/ComplexTextController.cpp
+  src/Graphics/TextRuns/ComplexTextControllerHarfBuzz.cpp
+  src/Graphics/TextRuns/StringTruncator.cpp
+  src/Graphics/TextRuns/WidthIterator.cpp
   src/Graphics/Transforms/AffineTransform.cpp
   src/Graphics/Transforms/IdentityTransformOperation.cpp
   src/Graphics/Transforms/Matrix3DTransformOperation.cpp
@@ -1762,8 +1764,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Transforms/TransformState.cpp
   src/Graphics/Transforms/TranslateTransformOperation.cpp
   src/Graphics/TransparencyLayerContextSwitcher.cpp
-  src/Graphics/WidthIterator.cpp
-  src/Graphics/WOFFFileFormat.cpp
 )
 
 set(KRYSTAL_BOOEY_HISTORY_HEADERS

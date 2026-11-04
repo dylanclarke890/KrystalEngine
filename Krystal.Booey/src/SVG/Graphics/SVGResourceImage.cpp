@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/Graphics/SVGResourceImage.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
