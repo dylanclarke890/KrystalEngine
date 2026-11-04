@@ -741,24 +741,11 @@ namespace krys::boo
     Visual
   };
 
-  enum class ColumnProgression : bool
-  {
-    Normal,
-    Reverse
-  };
-
-  enum class LineAlign : bool
-  {
-    None,
-    Edges
-  };
-
   enum class RubyPosition : uint8
   {
     Over,
     Under,
-    InterCharacter,
-    LegacyInterCharacter
+    InterCharacter
   };
 
   enum class RubyAlign : uint8

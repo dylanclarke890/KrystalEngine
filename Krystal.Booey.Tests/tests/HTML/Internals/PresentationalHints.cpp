@@ -56,14 +56,14 @@ namespace krys::boo::html::tests
     CHECK(Hints(u8"<span id=e dir=auto></span>") == "unicode-bidi: isolate;");
     CHECK(Hints(u8"<pre id=e dir=auto></pre>") == "unicode-bidi: plaintext;");
     CHECK(Hints(u8"<span id=e dir=sideways></span>").empty());
-    CHECK(Hints(u8"<span id=e draggable=true></span>") == "-webkit-user-drag: element;");
-    CHECK(Hints(u8"<span id=e draggable=false></span>") == "-webkit-user-drag: none;");
+    CHECK(Hints(u8"<span id=e draggable=true></span>") == "-internal-user-drag: element;");
+    CHECK(Hints(u8"<span id=e draggable=false></span>") == "-internal-user-drag: none;");
     CHECK(Hints(u8"<span id=e contenteditable></span>")
-          == "overflow-wrap: break-word; line-break: after-white-space; -webkit-user-modify: read-write;");
+          == "overflow-wrap: break-word; line-break: after-white-space; -internal-user-modify: read-write;");
     CHECK(Hints(u8"<span id=e contenteditable=plaintext-only></span>")
-          == "overflow-wrap: break-word; line-break: after-white-space; -webkit-user-modify: "
+          == "overflow-wrap: break-word; line-break: after-white-space; -internal-user-modify: "
              "read-write-plaintext-only;");
-    CHECK(Hints(u8"<span id=e contenteditable=false></span>") == "-webkit-user-modify: read-only;");
+    CHECK(Hints(u8"<span id=e contenteditable=false></span>") == "-internal-user-modify: read-only;");
     CHECK(Hints(u8"<span id=e contenteditable=maybe></span>").empty());
     CHECK(Hints(u8"<span id=e lang=en></span>") == "-webkit-locale: \"en\";");
     CHECK(Hints(u8"<span id=e lang></span>") == "-webkit-locale: auto;");

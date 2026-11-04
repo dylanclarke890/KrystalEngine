@@ -21,7 +21,6 @@ namespace krys::boo
     Color StrokeColor;
     Color EmphasisMarkColor;
     float StrokeWidth {0};
-    // This is not set for -webkit-text-fill-color.
     bool HasExplicitlySetFillColor {false};
     style::SVGPaintOrder PaintOrder {css::keywords::Normal {}};
     LineJoin Join {LineJoin::Miter};

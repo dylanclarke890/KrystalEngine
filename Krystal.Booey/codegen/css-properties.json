@@ -983,26 +983,6 @@
         "url": "https://drafts.csswg.org/css-fonts/#font-palette-prop"
       }
     },
-    "-webkit-font-smoothing": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto", "none", "antialiased", "subpixel-antialiased"],
-      "codegen-properties": {
-        "font-property": true,
-        "high-priority": true,
-        "render-style-storage-container": "opaque",
-        "render-style-storage-path": [
-          "_inheritedData",
-          "fontData",
-          "fontCascade"
-        ],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "FontSmoothingMode",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
     "font-variant-ligatures": {
       "animation-type": "discrete",
       "inherited": true,
@@ -1639,33 +1619,6 @@
       "specification": {
         "module": "css-ruby",
         "url": "https://drafts.csswg.org/css-ruby-1/#rubypos"
-      }
-    },
-    "-webkit-ruby-position": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "before",
-      "values": [
-        {
-          "value": "before",
-          "status": "deprecated"
-        },
-        {
-          "value": "after",
-          "status": "deprecated"
-        },
-        "inter-character"
-      ],
-      "codegen-properties": {
-        "cascade-alias": "ruby-position",
-        "skip-style-builder": true,
-        "style-extractor-custom": true,
-        "parser-grammar": "before | after | inter-character@(aliased-to=legacy-inter-character)",
-        "parser-grammar-comment": "Current spec grammar is '[ alternate || [ over | under ] ] | inter-character'."
-      },
-      "specification": {
-        "module": "css-ruby",
-        "url": "https://www.w3.org/TR/css-ruby-1/#rubypos"
       }
     },
     "alignment-baseline": {
@@ -2374,23 +2327,6 @@
         "disables-native-appearance": true,
         "separator": " ",
         "parser-grammar": "<single-background-size>#"
-      },
-      "specification": {
-        "module": "css-backgrounds",
-        "url": "https://www.w3.org/TR/css3-background/#background-size"
-      }
-    },
-    "-webkit-background-size": {
-      "codegen-properties": {
-        "longhands": ["background-size"],
-        "shorthand-pattern": "Single",
-        "parser-function": "ConsumeWebkitBackgroundSizeShorthand",
-        "parser-grammar": "<single-webkit-background-size>#",
-        "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
-      },
-      "status": {
-        "comment": "FIXME: Should be a cascade-alias like the other -webkit-background-* properties, rather than a shorthand. Differs from background-size only in the interpretation of a single value: '-webkit-background-size: l;' is equivalent to 'background-size: l l;' whereas 'background-size: l;' is equivalent to 'background-size: l auto;'"
       },
       "specification": {
         "module": "css-backgrounds",
@@ -4592,21 +4528,6 @@
         "url": "https://drafts.csswg.org/css-ui-4/#cursor"
       }
     },
-    "-webkit-cursor-visibility": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto", "auto-hide"],
-      "codegen-properties": {
-        "enable-if": "ENABLE_CURSOR_VISIBILITY",
-        "render-style-storage-path": ["m_inheritedFlags"],
-        "render-style-storage-container": "struct",
-        "render-style-storage-kind": "enum",
-        "render-style-type": "CursorVisibility",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
     "cx": {
       "animation-type": "by computed value",
       "initial": "0px",
@@ -5303,28 +5224,14 @@
       "inherited": true,
       "initial": "normal",
       "values": ["normal"],
-      "codegen-properties": [
-        {
-          "enable-if": "ENABLE_TEXT_AUTOSIZING",
-          "animation-wrapper-requires-getter": "SpecifiedLineHeight",
-          "style-builder-custom": "All",
-          "style-extractor-custom": true,
-          "render-style-storage-path": ["_inheritedData"],
-          "render-style-storage-kind": "reference",
-          "render-style-type": "Style::LineHeight",
-          "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
-          "parser-exported": true
-        },
-        {
-          "enable-if": "!ENABLE_TEXT_AUTOSIZING",
-          "style-extractor-custom": true,
-          "render-style-storage-path": ["_inheritedData"],
-          "render-style-storage-kind": "reference",
-          "render-style-type": "Style::LineHeight",
-          "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
-          "parser-exported": true
-        }
-      ],
+      "codegen-properties": {
+        "style-extractor-custom": true,
+        "render-style-storage-path": ["_inheritedData"],
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::LineHeight",
+        "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
+        "parser-exported": true
+      },
       "specification": {
         "module": "css-inline",
         "url": "https://www.w3.org/TR/css-inline-3/#line-height-property"
@@ -9230,25 +9137,6 @@
         "url": "https://drafts.csswg.org/css-align/#gap-shorthand"
       }
     },
-    "-webkit-column-progression": {
-      "animation-type": "not animatable (legacy)",
-      "initial": "normal",
-      "values": ["normal", "reverse"],
-      "codegen-properties": {
-        "render-style-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "multiCol"
-        ],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "ColumnProgression",
-        "parser-grammar": "<<values>>"
-      },
-      "status": {
-        "status": "non-standard",
-        "comment": "Added in https://bugs.webkit.org/show_bug.cgi?id=89315"
-      }
-    },
     "column-rule": {
       "codegen-properties": {
         "aliases": ["-webkit-column-rule"],
@@ -10331,26 +10219,6 @@
         "comment": "Added in https://trac.webkit.org/changeset/81684"
       }
     },
-    "-webkit-line-align": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "none",
-      "values": ["none", "edges"],
-      "codegen-properties": {
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "LineAlign",
-        "parser-grammar": "<<values>>"
-      },
-      "status": {
-        "status": "obsolete",
-        "comment": "Added in https://trac.webkit.org/changeset/108133"
-      },
-      "specification": {
-        "module": "css-line-grid",
-        "url": "https://www.w3.org/TR/css-line-grid-1/"
-      }
-    },
     "line-break": {
       "animation-type": "discrete",
       "inherited": true,
@@ -10547,23 +10415,6 @@
       },
       "status": "non-standard"
     },
-    "-webkit-text-combine": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "none",
-      "values": ["none", "horizontal"],
-      "codegen-properties": {
-        "aliases": ["-epub-text-combine"],
-        "cascade-alias": "text-combine-upright",
-        "skip-style-builder": true,
-        "style-extractor-custom": true,
-        "parser-grammar": "<<values>>"
-      },
-      "status": {
-        "status": "obsolete",
-        "comment": "Use text-combine-upright instead."
-      }
-    },
     "text-combine-upright": {
       "animation-type": "not animatable",
       "inherited": true,
@@ -10759,18 +10610,6 @@
       },
       "status": "non-standard"
     },
-    "-internal-text-autosizing-status": {
-      "animation-type": "not animatable (internal)",
-      "inherited": true,
-      "codegen-properties": {
-        "enable-if": "ENABLE_TEXT_AUTOSIZING",
-        "skip-style-builder": true,
-        "skip-parser": true,
-        "skip-render-style": true,
-        "internal-only": true
-      },
-      "status": "non-standard"
-    },
     "text-emphasis": {
       "inherited": true,
       "codegen-properties": {
@@ -10834,22 +10673,6 @@
       "specification": {
         "module": "css-text-decor",
         "url": "https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style"
-      }
-    },
-    "-webkit-text-fill-color": {
-      "animation-type": "by computed value",
-      "inherited": true,
-      "initial": "currentcolor",
-      "codegen-properties": {
-        "color-property": true,
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::Color",
-        "parser-grammar": "<color>"
-      },
-      "status": {
-        "status": "non-standard",
-        "comment": "Obsoleted by fill-color"
       }
     },
     "-webkit-text-security": {
@@ -11085,11 +10908,13 @@
         "url": "https://drafts.csswg.org/css-transforms-2/#propdef-rotate"
       }
     },
-    "-webkit-user-drag": {
-      "animation-type": "not animatable (legacy)",
+    "-internal-user-drag": {
+      "animation-type": "not animatable (internal)",
       "initial": "auto",
       "values": ["auto", "none", "element"],
       "codegen-properties": {
+        "internal-only": true,
+        "render-style-name-for-methods": "UserDrag",
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "UserDrag",
@@ -11097,12 +10922,14 @@
       },
       "status": "non-standard"
     },
-    "-webkit-user-modify": {
-      "animation-type": "not animatable (legacy)",
+    "-internal-user-modify": {
+      "animation-type": "not animatable (internal)",
       "inherited": true,
       "initial": "read-only",
       "values": ["read-only", "read-write", "read-write-plaintext-only"],
       "codegen-properties": {
+        "internal-only": true,
+        "render-style-name-for-methods": "UserModify",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "UserModify",
@@ -12018,37 +11845,6 @@
         "url": "https://drafts.csswg.org/css-anchor-position/#position-visibility"
       }
     },
-    "-webkit-tap-highlight-color": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "@TapHighlightColor",
-      "codegen-properties": {
-        "enable-if": "ENABLE_TOUCH_EVENTS",
-        "color-property": true,
-        "render-style-initial-custom": true,
-        "render-style-initial-inline": false,
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::Color",
-        "parser-grammar": "<color>"
-      },
-      "status": "non-standard"
-    },
-    "-webkit-overflow-scrolling": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto", "touch"],
-      "codegen-properties": {
-        "enable-if": "ENABLE_WEBKIT_OVERFLOW_SCROLLING_CSS_PROPERTY",
-        "settings-flag": "legacyOverflowScrollingTouchEnabled",
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "Style::WebkitOverflowScrolling",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
     "touch-action": {
       "animation-type": "discrete",
       "initial": "auto",
@@ -12095,135 +11891,6 @@
         "module": "pointerevents",
         "url": "https://www.w3.org/TR/pointerevents/#the-touch-action-css-property"
       }
-    },
-    "-webkit-touch-callout": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "default",
-      "values": ["default", "none"],
-      "codegen-properties": {
-        "enable-if": "ENABLE_WEBKIT_TOUCH_CALLOUT_CSS_PROPERTY",
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "Style::WebkitTouchCallout",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
-    "-apple-visual-effect": {
-      "animation-type": "discrete",
-      "initial": "none",
-      "values": [
-        "none",
-        "-apple-system-blur-material-ultra-thin",
-        "-apple-system-blur-material-thin",
-        "-apple-system-blur-material",
-        "-apple-system-blur-material-thick",
-        "-apple-system-blur-material-chrome",
-        {
-          "value": "-apple-system-glass-material",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        {
-          "value": "-apple-system-glass-material-clear",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        {
-          "value": "-apple-system-glass-material-subdued",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        {
-          "value": "-apple-system-glass-material-media-controls",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        {
-          "value": "-apple-system-glass-material-media-controls-subdued",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        "-apple-system-vibrancy-label",
-        "-apple-system-vibrancy-secondary-label",
-        "-apple-system-vibrancy-tertiary-label",
-        "-apple-system-vibrancy-quaternary-label",
-        "-apple-system-vibrancy-fill",
-        "-apple-system-vibrancy-secondary-fill",
-        "-apple-system-vibrancy-tertiary-fill",
-        "-apple-system-vibrancy-separator"
-      ],
-      "codegen-properties": {
-        "enable-if": "HAVE_CORE_MATERIAL",
-        "settings-flag": "useSystemAppearance",
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "AppleVisualEffect",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
-    "-apple-pay-button-style": {
-      "animation-type": "not animatable (legacy)",
-      "initial": "black",
-      "values": ["white", "white-outline", "black"],
-      "codegen-properties": {
-        "enable-if": "ENABLE_APPLE_PAY",
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "ApplePayButtonStyle",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
-    "-apple-pay-button-type": {
-      "animation-type": "not animatable (legacy)",
-      "initial": "plain",
-      "values": [
-        "plain",
-        "buy",
-        "set-up",
-        "donate",
-        "check-out",
-        "book",
-        "subscribe",
-        {
-          "value": "reload",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "add-money",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "top-up",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "order",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "rent",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "support",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "contribute",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "tip",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        }
-      ],
-      "codegen-properties": {
-        "enable-if": "ENABLE_APPLE_PAY",
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "ApplePayButtonType",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
     }
   },
   "descriptors": {

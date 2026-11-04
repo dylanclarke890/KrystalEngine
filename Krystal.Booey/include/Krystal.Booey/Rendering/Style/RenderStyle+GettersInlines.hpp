@@ -341,8 +341,7 @@ namespace krys::boo
 
   inline bool RenderStyle::IsInterCharacterRubyPosition() const noexcept
   {
-    auto rubyPosition = GetRubyPosition();
-    return rubyPosition == RubyPosition::InterCharacter || rubyPosition == RubyPosition::LegacyInterCharacter;
+    return GetRubyPosition() == RubyPosition::InterCharacter;
   }
 
   KRYS_NODISCARD inline bool GeneratesBox(const RenderStyle &style) noexcept

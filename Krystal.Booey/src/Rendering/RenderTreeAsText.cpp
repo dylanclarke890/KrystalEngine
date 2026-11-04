@@ -221,16 +221,6 @@ namespace krys::boo
           ts << " [bgcolor=" << SerialisationForRenderTreeAsText(backgroundColor) << ']';
         }
 
-        Color textFillColor =
-          renderElement->Style().ColorResolvingCurrentColor(css::PropertyId::WebkitTextFillColor);
-        if (!EqualIgnoringSemanticColor(renderElement->Parent()->Style().ColorResolvingCurrentColor(
-                                          css::PropertyId::WebkitTextFillColor),
-                                        textFillColor)
-            && textFillColor != color && textFillColor != Color(Color::transparentBlack))
-        {
-          ts << " [textFillColor=" << SerialisationForRenderTreeAsText(textFillColor) << ']';
-        }
-
         // The text stroke properties (-webkit-text-stroke-*) were dropped.
       }
 

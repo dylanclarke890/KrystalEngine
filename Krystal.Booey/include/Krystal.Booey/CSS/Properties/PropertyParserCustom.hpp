@@ -1025,25 +1025,6 @@ namespace krys::boo::css
       return true;
     }
 
-    KRYS_NODISCARD static bool ConsumeWebkitBackgroundSizeShorthand(TokenRange &tokens,
-                                                                    PropertyParserState &state,
-                                                                    const PropertyShorthand &,
-                                                                    PropertyParserResult &result) noexcept
-    {
-      auto backgroundSize = ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(
-        tokens, [](auto &tokens, auto &state) { return ConsumeSingleWebkitBackgroundSize(tokens, state); },
-        state);
-
-      if (!backgroundSize || !tokens.IsAtEnd())
-      {
-        return false;
-      }
-
-      result.AddPropertyForCurrentShorthand(state, PropertyId::BackgroundSize, krys::move(backgroundSize));
-
-      return true;
-    }
-
     KRYS_NODISCARD static bool ConsumeMaskShorthand(TokenRange &tokens, PropertyParserState &state,
                                                     const PropertyShorthand &shorthand,
                                                     PropertyParserResult &result) noexcept

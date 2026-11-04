@@ -75,9 +75,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"-1px", ConsumeSingleBackgroundSize) == "<null>");
     CHECK(ConsumeToText(u8"cover 10px", ConsumeSingleBackgroundSize) == "<partial>");
 
-    // -webkit-background-size repeats a single length; mask-size leaves it alone.
-    CHECK(ConsumeToText(u8"10px", ConsumeSingleWebkitBackgroundSize) == "10px 10px");
-    CHECK(ConsumeToText(u8"10px 20px", ConsumeSingleWebkitBackgroundSize) == "10px 20px");
+    // mask-size leaves a single length alone.
     CHECK(ConsumeToText(u8"10px", ConsumeSingleMaskSize) == "10px");
     CHECK(ConsumeToText(u8"10px 20px", ConsumeSingleMaskSize) == "10px 20px");
   }

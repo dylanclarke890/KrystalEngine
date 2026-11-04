@@ -21,7 +21,7 @@ namespace krys::boo
     // FIXME: Transition it to TextPainter.
     auto &context = _paintInfo.Context();
     auto &lineStyle = _lineBox.Style();
-    auto textColor = lineStyle.ColorResolvingCurrentColor(css::PropertyId::WebkitTextFillColor);
+    auto textColor = lineStyle.ColorResolvingCurrentColor(css::PropertyId::Color);
 
     if (_paintInfo.ForceTextColor())
     {

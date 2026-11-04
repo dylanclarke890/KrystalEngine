@@ -65,7 +65,6 @@ namespace krys::boo
     float UsedZoom;
     float DeviceScaleFactor {1.0f};
 
-    style::Color TextFillColor;
     style::Color TextEmphasisColor;
     style::Color CaretColor;
 
@@ -127,7 +126,6 @@ namespace krys::boo
     unsigned LineBoxContain : 7;
     unsigned ImageOrientation : 1;
     unsigned ImageRendering : 3;
-    unsigned LineAlign : 1;
     unsigned TextAlignLast : 3;
     unsigned TextJustify : 2;
     unsigned TextDecorationSkipInk : 2;

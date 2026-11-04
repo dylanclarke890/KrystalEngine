@@ -969,10 +969,8 @@ namespace krys::boo
     switch (valueID)
     {
       case css::ValueId::None: return TextCombine::None;
-      case css::ValueId::All:
-      case css::ValueId::Horizontal: // -webkit-text-combine only
-        return TextCombine::All;
-      default: break;
+      case css::ValueId::All:  return TextCombine::All;
+      default:                 break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return TextCombine::None;
@@ -982,10 +980,9 @@ namespace krys::boo
   {
     switch (e)
     {
-      case RubyPosition::Over:                 return css::ValueId::Over;
-      case RubyPosition::Under:                return css::ValueId::Under;
-      case RubyPosition::InterCharacter:       return css::ValueId::InterCharacter;
-      case RubyPosition::LegacyInterCharacter: return css::ValueId::LegacyInterCharacter;
+      case RubyPosition::Over:           return css::ValueId::Over;
+      case RubyPosition::Under:          return css::ValueId::Under;
+      case RubyPosition::InterCharacter: return css::ValueId::InterCharacter;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return css::ValueId::Invalid;
@@ -996,15 +993,10 @@ namespace krys::boo
   {
     switch (valueID)
     {
-      case css::ValueId::Over:
-      case css::ValueId::Before: // -webkit-ruby-position only
-        return RubyPosition::Over;
-      case css::ValueId::Under:
-      case css::ValueId::After: // -webkit-ruby-position only
-        return RubyPosition::Under;
-      case css::ValueId::InterCharacter:       return RubyPosition::InterCharacter;
-      case css::ValueId::LegacyInterCharacter: return RubyPosition::LegacyInterCharacter;
-      default:                                 break;
+      case css::ValueId::Over:           return RubyPosition::Over;
+      case css::ValueId::Under:          return RubyPosition::Under;
+      case css::ValueId::InterCharacter: return RubyPosition::InterCharacter;
+      default:                           break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return RubyPosition::Over;
@@ -1144,12 +1136,6 @@ namespace krys::boo
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
 
-#define KRYS_MAPPING_TYPE FontSmoothingMode
-#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(None) CASE(Antialiased) CASE(SubpixelAntialiased)
-  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
-#undef KRYS_MAPPING_TYPE
-#undef KRYS_MAPPING_FOR_EACH
-
 #define KRYS_MAPPING_TYPE TextRenderingMode
 #define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Auto) CASE(OptimizeSpeed) CASE(OptimizeLegibility) CASE(GeometricPrecision)
@@ -1159,12 +1145,6 @@ namespace krys::boo
 
 #define KRYS_MAPPING_TYPE Hyphens
 #define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Manual) CASE(Auto)
-  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
-#undef KRYS_MAPPING_TYPE
-#undef KRYS_MAPPING_FOR_EACH
-
-#define KRYS_MAPPING_TYPE LineAlign
-#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Edges)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
@@ -1324,12 +1304,6 @@ namespace krys::boo
 #define KRYS_MAPPING_TYPE TransformBox
 #define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(StrokeBox) CASE(ContentBox) CASE(BorderBox) CASE(FillBox) CASE(ViewBox)
-  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
-#undef KRYS_MAPPING_TYPE
-#undef KRYS_MAPPING_FOR_EACH
-
-#define KRYS_MAPPING_TYPE ColumnProgression
-#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Reverse)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH

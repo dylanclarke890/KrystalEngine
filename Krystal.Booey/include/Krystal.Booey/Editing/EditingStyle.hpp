@@ -232,7 +232,6 @@ namespace krys::boo
 
   private:
     void Init(dom::Node *node, PropertiesToInclude propertiesToInclude) noexcept;
-    void RemoveTextFillAndStrokeColorsIfNeeded(const RenderStyle *renderStyle) noexcept;
     Ref<css::MutableStyleProperties>
       RemoveInlineStyleRedundantDueToMatchedRules(dom::StyledElement &element) noexcept;
     void RemoveStyleInContextNotOverridenByMatchedRules(

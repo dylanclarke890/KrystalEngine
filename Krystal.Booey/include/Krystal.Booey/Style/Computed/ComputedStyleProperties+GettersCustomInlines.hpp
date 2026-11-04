@@ -167,11 +167,6 @@ namespace krys::boo::style
     return GetFontDescription().GetKerning();
   }
 
-  inline FontSmoothingMode ComputedStyleProperties::FontSmoothing() const noexcept
-  {
-    return GetFontDescription().FontSmoothing();
-  }
-
   inline FontSynthesisLonghandValue ComputedStyleProperties::FontSynthesisSmallCaps() const noexcept
   {
     return GetFontDescription().FontSynthesisSmallCaps();

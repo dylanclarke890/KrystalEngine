@@ -144,17 +144,6 @@ namespace krys::boo::style
     _style.MutableFontDescriptionWithoutUpdate().SetFontSizeAdjust(fontSizeAdjust.Platform());
   }
 
-  inline void BuilderState::SetFontDescriptionFontSmoothing(FontSmoothingMode fontSmoothing) noexcept
-  {
-    if (_style.GetFontDescription().FontSmoothing() == fontSmoothing)
-    {
-      return;
-    }
-
-    _fontDirty = true;
-    _style.MutableFontDescriptionWithoutUpdate().SetFontSmoothing(krys::move(fontSmoothing));
-  }
-
   inline void BuilderState::SetFontDescriptionFontStyle(FontStyle fontStyle) noexcept
   {
     auto &description = _style.GetFontDescription();

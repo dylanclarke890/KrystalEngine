@@ -1809,7 +1809,7 @@ namespace krys::boo
 
   Color RenderElement::SelectionForegroundColor() const noexcept
   {
-    return SelectionColor(css::PropertyId::WebkitTextFillColor);
+    return SelectionColor(css::PropertyId::Color);
   }
 
   Color RenderElement::SelectionEmphasisMarkColor() const noexcept

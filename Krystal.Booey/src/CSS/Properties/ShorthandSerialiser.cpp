@@ -463,8 +463,7 @@ namespace krys::boo::css
         case PropertyId::PageBreakBefore:      return SerialisePageBreak();
         case PropertyId::PageBreakInside:      return SerialiseBreakInside();
         case PropertyId::PositionTry:          return SerialisePositionTry();
-        case PropertyId::TextDecorationSkip:
-        case PropertyId::WebkitBackgroundSize: return SerialiseLonghandValue(0);
+        case PropertyId::TextDecorationSkip:   return SerialiseLonghandValue(0);
         case PropertyId::TransformOrigin:      return SerialiseLonghandsOmittingTrailingInitialValue();
         case PropertyId::TextWrap:             return SerialiseTextWrap();
         case PropertyId::TextBox:              return SerialiseTextBox();

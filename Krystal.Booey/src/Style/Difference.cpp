@@ -415,10 +415,9 @@ namespace krys::boo::style
         || a.RubyAlign != b.RubyAlign || a.RubyOverhang != b.RubyOverhang || a.TextCombine != b.TextCombine
         || a.TextEmphasisStyle != b.TextEmphasisStyle || a.TextEmphasisPosition != b.TextEmphasisPosition
         || a.TabSize != b.TabSize || a.LineBoxContain != b.LineBoxContain
-        || a.ImageOrientation != b.ImageOrientation || a.LineAlign != b.LineAlign
-        || a.HangingPunctuation != b.HangingPunctuation || a.UsedContentVisibility != b.UsedContentVisibility
-        || a.ListStyleType != b.ListStyleType || a.ListStyleImage != b.ListStyleImage
-        || a.BlockEllipsis != b.BlockEllipsis)
+        || a.ImageOrientation != b.ImageOrientation || a.HangingPunctuation != b.HangingPunctuation
+        || a.UsedContentVisibility != b.UsedContentVisibility || a.ListStyleType != b.ListStyleType
+        || a.ListStyleImage != b.ListStyleImage || a.BlockEllipsis != b.BlockEllipsis)
     {
       return true;
     }
@@ -1139,7 +1138,6 @@ namespace krys::boo::style
     if (&a.RareInheritedData() != &b.RareInheritedData())
     {
       if (a.RareInheritedData().TextDecorationSkipInk != b.RareInheritedData().TextDecorationSkipInk
-          || a.RareInheritedData().TextFillColor != b.RareInheritedData().TextFillColor
           || a.RareInheritedData().TextEmphasisColor != b.RareInheritedData().TextEmphasisColor
           || a.RareInheritedData().TextEmphasisStyle != b.RareInheritedData().TextEmphasisStyle
           || a.RareInheritedData().StrokeColor != b.RareInheritedData().StrokeColor

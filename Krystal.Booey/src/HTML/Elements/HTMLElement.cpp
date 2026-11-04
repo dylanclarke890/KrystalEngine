@@ -1763,7 +1763,7 @@ namespace krys::boo::html
           break;
         }
       }
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserModify, userModifyValue);
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalUserModify, userModifyValue);
     }
     else if (localName == u8"hidden")
     {
@@ -1783,12 +1783,13 @@ namespace krys::boo::html
       {
         case DraggableAttributeState::True:
         {
-          AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::Element);
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalUserDrag,
+                                               css::ValueId::Element);
           break;
         }
         case DraggableAttributeState::False:
         {
-          AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::None);
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalUserDrag, css::ValueId::None);
           break;
         }
         case DraggableAttributeState::Auto: break;

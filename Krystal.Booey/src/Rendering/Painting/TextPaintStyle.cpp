@@ -130,7 +130,7 @@ namespace krys::boo
       return paintStyle;
     }
 
-    paintStyle.FillColor = lineStyle.ColorResolvingCurrentColor(css::PropertyId::WebkitTextFillColor);
+    paintStyle.FillColor = lineStyle.ColorResolvingCurrentColor(css::PropertyId::Color);
 
     bool forceBackgroundToWhite = false;
     if (renderer.GetDocument().Printing())

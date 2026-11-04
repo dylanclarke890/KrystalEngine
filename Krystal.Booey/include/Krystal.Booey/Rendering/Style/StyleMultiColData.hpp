@@ -29,7 +29,6 @@ namespace krys::boo
 
     unsigned ColumnFill : 1;
     unsigned ColumnSpan : 1;
-    unsigned ColumnProgression : 2;
 
   private:
     StyleMultiColData() noexcept;

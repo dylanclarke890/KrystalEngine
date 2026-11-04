@@ -94,8 +94,6 @@ namespace krys::boo::style
     KRYS_DECLARE_EXTRACTOR_CUSTOM(AnimationDuration);
     KRYS_DECLARE_EXTRACTOR_CUSTOM(Widows);
     KRYS_DECLARE_EXTRACTOR_CUSTOM(Orphans);
-    KRYS_DECLARE_EXTRACTOR_CUSTOM(WebkitTextCombine);
-    KRYS_DECLARE_EXTRACTOR_CUSTOM(WebkitRubyPosition);
     KRYS_DECLARE_EXTRACTOR_CUSTOM(Color);
 
     // MARK: Shorthands
@@ -923,38 +921,6 @@ namespace krys::boo::style
     decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
     {
       return functor(state.Style.GetOrphans().TryValue().value_or(2));
-    }
-  };
-
-  template <>
-  struct PropertyExtractorAdaptor<css::PropertyId::WebkitTextCombine>
-  {
-    template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
-    {
-      auto textCombine = state.Style.GetTextCombine();
-      if (textCombine == TextCombine::All)
-      {
-        return functor(css::keywords::Horizontal {});
-      }
-      return functor(textCombine);
-    }
-  };
-
-  template <>
-  struct PropertyExtractorAdaptor<css::PropertyId::WebkitRubyPosition>
-  {
-    template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
-    {
-      switch (state.Style.GetRubyPosition())
-      {
-        case RubyPosition::Over:                 return functor(css::keywords::Before {});
-        case RubyPosition::Under:                return functor(css::keywords::After {});
-        case RubyPosition::InterCharacter:
-        case RubyPosition::LegacyInterCharacter: return functor(css::keywords::InterCharacter {});
-      }
-      krys_unreachable();
     }
   };
 
@@ -2149,8 +2115,6 @@ namespace krys::boo::style
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED(Rotate)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED(Widows)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED(Orphans)
-  KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED(WebkitTextCombine)
-  KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED(WebkitRubyPosition)
 
 #undef KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED
 

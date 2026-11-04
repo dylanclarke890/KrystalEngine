@@ -244,7 +244,6 @@ namespace krys::boo
           css::Property::ResolveDirectionAwareProperty(colorProperty, GetWritingMode()));
       case css::PropertyId::ColumnRuleColor:     return ColumnRuleColor();
       case css::PropertyId::TextEmphasisColor:   return TextEmphasisColor();
-      case css::PropertyId::WebkitTextFillColor: return TextFillColor();
       case css::PropertyId::TextDecorationColor: return TextDecorationColor();
       case css::PropertyId::CaretColor:          return CaretColor();
       default:                                   krys_debug_assert_msg(false, "Unreachable"); break;
@@ -275,8 +274,6 @@ namespace krys::boo
             return strokeColor;
           }
         }
-
-        return ColorResolvingCurrentColor(css::PropertyId::WebkitTextFillColor);
       }
 
       return GetColor();

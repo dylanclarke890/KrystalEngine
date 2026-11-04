@@ -217,7 +217,6 @@ namespace krys::boo::style
     inline void SetFontDescriptionFeatureSettings(FontFeatureSettings &&) noexcept;
     inline void SetFontDescriptionFontPalette(FontPalette &&) noexcept;
     inline void SetFontDescriptionFontSizeAdjust(FontSizeAdjust) noexcept;
-    inline void SetFontDescriptionFontSmoothing(FontSmoothingMode) noexcept;
     inline void SetFontDescriptionFontStyle(FontStyle) noexcept;
     inline void SetFontDescriptionFontSynthesisSmallCaps(FontSynthesisLonghandValue) noexcept;
     inline void SetFontDescriptionFontSynthesisStyle(FontSynthesisLonghandValue) noexcept;

@@ -1043,14 +1043,6 @@ digits
 literal-punctuation
 no-punctuation
 
-//
-// -webkit-font-smoothing
-//
-// auto
-// none
-antialiased
-subpixel-antialiased
-
 // text-box-edge
 leading
 // text
@@ -1099,11 +1091,8 @@ sideways-rl
 // Non-standard
 horizontal-bt
 
-// -webkit-ruby-position
-after
-before
+// ruby-position
 inter-character
-legacy-inter-character
 
 // -webkit-text-combine
 // horizontal
@@ -1182,9 +1171,6 @@ proximity
 break
 
 wrap
-
-// -webkit-line-align
-edges
 
 alphabetic
 

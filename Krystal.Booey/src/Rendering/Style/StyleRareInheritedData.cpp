@@ -10,7 +10,6 @@ namespace krys::boo
 
   StyleRareInheritedData::StyleRareInheritedData() noexcept
       : UsedZoom(style::Evaluate<float>(style::ComputedStyle::InitialZoom())), DeviceScaleFactor(1.0f),
-        TextFillColor(style::ComputedStyle::InitialTextFillColor()),
         TextEmphasisColor(style::ComputedStyle::InitialTextEmphasisColor()),
         CaretColor(style::Color::GetCurrentColor()), AccentColor(style::ComputedStyle::InitialAccentColor()),
         ScrollbarColor(style::ComputedStyle::InitialScrollbarColor()),
@@ -55,7 +54,6 @@ namespace krys::boo
         LineBoxContain(static_cast<unsigned>(style::ComputedStyle::InitialLineBoxContain().ToRaw())),
         ImageOrientation(static_cast<unsigned>(style::ComputedStyle::InitialImageOrientation())),
         ImageRendering(static_cast<unsigned>(style::ComputedStyle::InitialImageRendering())),
-        LineAlign(static_cast<unsigned>(style::ComputedStyle::InitialLineAlign())),
         TextAlignLast(static_cast<unsigned>(style::ComputedStyle::InitialTextAlignLast())),
         TextJustify(static_cast<unsigned>(style::ComputedStyle::InitialTextJustify())),
         TextDecorationSkipInk(static_cast<unsigned>(style::ComputedStyle::InitialTextDecorationSkipInk())),
@@ -78,24 +76,23 @@ namespace krys::boo
 
   inline StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData &o) noexcept
       : RefCounted<StyleRareInheritedData>(), UsedZoom(o.UsedZoom), DeviceScaleFactor(o.DeviceScaleFactor),
-        TextFillColor(o.TextFillColor), TextEmphasisColor(o.TextEmphasisColor), CaretColor(o.CaretColor),
-        AccentColor(o.AccentColor), ScrollbarColor(o.ScrollbarColor), TextEmphasisStyle(o.TextEmphasisStyle),
-        Quotes(o.Quotes), StrokeColor(o.StrokeColor), ColorScheme(o.ColorScheme),
-        CursorImages(o.CursorImages), ListStyleType(o.ListStyleType), BlockEllipsis(o.BlockEllipsis),
-        TextIndent(o.TextIndent), ListStyleImage(o.ListStyleImage), DynamicRangeLimit(o.DynamicRangeLimit),
-        TextShadow(o.TextShadow), HyphenateCharacter(o.HyphenateCharacter),
-        CustomProperties(o.CustomProperties), EventListenerRegionTypes(o.EventListenerRegionTypes),
-        StrokeWidth(o.StrokeWidth), TextUnderlineOffset(o.TextUnderlineOffset), TabSize(o.TabSize),
-        StrokeMiterLimit(o.StrokeMiterLimit), MathDepth(o.MathDepth), TextBoxEdge(o.TextBoxEdge),
-        LineFitEdge(o.LineFitEdge), Widows(o.Widows), Orphans(o.Orphans),
-        HyphenateLimitBefore(o.HyphenateLimitBefore), HyphenateLimitAfter(o.HyphenateLimitAfter),
-        HyphenateLimitLines(o.HyphenateLimitLines), UsedTouchAction(o.UsedTouchAction),
-        TextSecurity(o.TextSecurity), UserModify(o.UserModify), WordBreak(o.WordBreak),
-        OverflowWrap(o.OverflowWrap), LineBreak(o.LineBreak), UserSelect(o.UserSelect), SpeakAs(o.SpeakAs),
-        Hyphens(o.Hyphens), TextCombine(o.TextCombine), TextEmphasisPosition(o.TextEmphasisPosition),
-        TextUnderlinePosition(o.TextUnderlinePosition), LineBoxContain(o.LineBoxContain),
-        ImageOrientation(o.ImageOrientation), ImageRendering(o.ImageRendering), LineAlign(o.LineAlign),
-        TextAlignLast(o.TextAlignLast), TextJustify(o.TextJustify),
+        TextEmphasisColor(o.TextEmphasisColor), CaretColor(o.CaretColor), AccentColor(o.AccentColor),
+        ScrollbarColor(o.ScrollbarColor), TextEmphasisStyle(o.TextEmphasisStyle), Quotes(o.Quotes),
+        StrokeColor(o.StrokeColor), ColorScheme(o.ColorScheme), CursorImages(o.CursorImages),
+        ListStyleType(o.ListStyleType), BlockEllipsis(o.BlockEllipsis), TextIndent(o.TextIndent),
+        ListStyleImage(o.ListStyleImage), DynamicRangeLimit(o.DynamicRangeLimit), TextShadow(o.TextShadow),
+        HyphenateCharacter(o.HyphenateCharacter), CustomProperties(o.CustomProperties),
+        EventListenerRegionTypes(o.EventListenerRegionTypes), StrokeWidth(o.StrokeWidth),
+        TextUnderlineOffset(o.TextUnderlineOffset), TabSize(o.TabSize), StrokeMiterLimit(o.StrokeMiterLimit),
+        MathDepth(o.MathDepth), TextBoxEdge(o.TextBoxEdge), LineFitEdge(o.LineFitEdge), Widows(o.Widows),
+        Orphans(o.Orphans), HyphenateLimitBefore(o.HyphenateLimitBefore),
+        HyphenateLimitAfter(o.HyphenateLimitAfter), HyphenateLimitLines(o.HyphenateLimitLines),
+        UsedTouchAction(o.UsedTouchAction), TextSecurity(o.TextSecurity), UserModify(o.UserModify),
+        WordBreak(o.WordBreak), OverflowWrap(o.OverflowWrap), LineBreak(o.LineBreak),
+        UserSelect(o.UserSelect), SpeakAs(o.SpeakAs), Hyphens(o.Hyphens), TextCombine(o.TextCombine),
+        TextEmphasisPosition(o.TextEmphasisPosition), TextUnderlinePosition(o.TextUnderlinePosition),
+        LineBoxContain(o.LineBoxContain), ImageOrientation(o.ImageOrientation),
+        ImageRendering(o.ImageRendering), TextAlignLast(o.TextAlignLast), TextJustify(o.TextJustify),
         TextDecorationSkipInk(o.TextDecorationSkipInk), MathShift(o.MathShift), MathStyle(o.MathStyle),
         RubyPosition(o.RubyPosition), RubyAlign(o.RubyAlign), RubyOverhang(o.RubyOverhang),
         HangingPunctuation(o.HangingPunctuation), PaintOrder(o.PaintOrder), CapStyle(o.CapStyle),
@@ -119,8 +116,7 @@ namespace krys::boo
 
   bool StyleRareInheritedData::operator==(const StyleRareInheritedData &o) const noexcept
   {
-    return UsedZoom == o.UsedZoom && TextFillColor == o.TextFillColor
-           && TextEmphasisColor == o.TextEmphasisColor && CaretColor == o.CaretColor
+    return UsedZoom == o.UsedZoom && TextEmphasisColor == o.TextEmphasisColor && CaretColor == o.CaretColor
            && AccentColor == o.AccentColor && ScrollbarColor == o.ScrollbarColor
            && DynamicRangeLimit == o.DynamicRangeLimit && TextShadow == o.TextShadow
            && CursorImages == o.CursorImages && TextEmphasisStyle == o.TextEmphasisStyle
@@ -138,7 +134,7 @@ namespace krys::boo
            && TextAlignLast == o.TextAlignLast && TextJustify == o.TextJustify
            && TextDecorationSkipInk == o.TextDecorationSkipInk
            && TextUnderlinePosition == o.TextUnderlinePosition && RubyPosition == o.RubyPosition
-           && RubyAlign == o.RubyAlign && RubyOverhang == o.RubyOverhang && LineAlign == o.LineAlign
+           && RubyAlign == o.RubyAlign && RubyOverhang == o.RubyOverhang
            && HangingPunctuation == o.HangingPunctuation && PaintOrder == o.PaintOrder
            && CapStyle == o.CapStyle && JoinStyle == o.JoinStyle
            && HasExplicitlySetStrokeWidth == o.HasExplicitlySetStrokeWidth

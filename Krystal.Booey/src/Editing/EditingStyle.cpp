@@ -60,7 +60,6 @@ namespace krys::boo
       PropertyId::Widows,
       PropertyId::WordSpacing,
       PropertyId::WebkitTextDecorationsInEffect,
-      PropertyId::WebkitTextFillColor,
 
       // Non-inheritable properties
       PropertyId::BackgroundColor,
@@ -668,7 +667,6 @@ namespace krys::boo
       bool shouldSetFontSize = false;
       {
         auto *renderStyle = node->ComputedStyle();
-        RemoveTextFillAndStrokeColorsIfNeeded(renderStyle);
         shouldSetFontSize = renderStyle->GetFontDescription().KeywordSize();
       }
 
@@ -684,14 +682,6 @@ namespace krys::boo
 
     _shouldUseFixedDefaultFontSize = computedStyleAtPosition.UseFixedFontDefaultSize();
     ExtractFontSizeDelta();
-  }
-
-  void EditingStyle::RemoveTextFillAndStrokeColorsIfNeeded(const RenderStyle *renderStyle) noexcept
-  {
-    if (renderStyle->TextFillColor().IsCurrentColor())
-    {
-      (void)_mutableStyle->RemoveProperty(PropertyId::WebkitTextFillColor);
-    }
   }
 
   void EditingStyle::SetProperty(PropertyId propertyID, const dom::DOMString &value,
