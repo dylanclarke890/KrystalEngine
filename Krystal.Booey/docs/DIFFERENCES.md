@@ -134,6 +134,10 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ## Layout
 
+### From the specs
+
+- `display: -webkit-box` and `-webkit-inline-box` (Compatibility) are parse errors: there's no legacy box layout or `-webkit-line-clamp`; use flex and `line-clamp`.
+
 ### From Chrome
 
 - Ordered list markers sit a little further from their text than Chrome's (the `decorations` golden); this is marker layout, not painting.

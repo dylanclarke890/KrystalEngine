@@ -18,7 +18,6 @@ namespace krys::boo::layout
     {
       size_t MaximumLines {0};
       bool ShouldDiscardOverflow {false};
-      bool IsLegacy {true};
     };
 
     enum class TextBoxTrimSide : bool

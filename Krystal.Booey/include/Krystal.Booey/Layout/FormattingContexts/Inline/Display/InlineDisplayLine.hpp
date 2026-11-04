@@ -60,7 +60,6 @@ namespace krys::boo::inline_display
     bool _isHorizontal : 1 {true};
     bool _isFirstAfterPageBreak : 1 {false};
     bool _isFullyTruncatedInBlockDirection : 1 {false};
-    bool _hasContentAfterEllipsisBox : 1 {false};
     bool _hasInflowBox : 1 {false};
     bool _hasContentfulBox : 1 {false};
     bool _hasBlockLevelBox : 1 {false};
@@ -157,7 +156,7 @@ namespace krys::boo::inline_display
       {
         return {};
       }
-      if (!HasEllipsis() || HasContentAfterEllipsisBox())
+      if (!HasEllipsis())
       {
         return _inkOverflow;
       }
@@ -285,14 +284,6 @@ namespace krys::boo::inline_display
     KRYS_NODISCARD bool IsFullyTruncatedInBlockDirection() const noexcept
     {
       return _isFullyTruncatedInBlockDirection;
-    }
-    KRYS_NODISCARD bool HasContentAfterEllipsisBox() const noexcept
-    {
-      return _hasContentAfterEllipsisBox;
-    }
-    void SetHasContentAfterEllipsisBox() noexcept
-    {
-      _hasContentAfterEllipsisBox = true;
     }
 
     KRYS_NODISCARD bool HasInflowBox() const noexcept

@@ -831,7 +831,6 @@ namespace krys::boo::layout
     {
       return false;
     }
-    krys_debug_assert(!lineClamp->IsLegacy);
     return lineClamp->MaximumLines == inlineLayoutState.LineCountWithInlineContentIncludingNestedBlocks();
   }
 

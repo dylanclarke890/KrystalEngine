@@ -230,7 +230,6 @@ namespace krys::boo
       Button,
       CombineText,
       Counter,
-      DeprecatedFlexibleBox,
       DetailsMarker,
       EmbeddedObject,
       FileUploadControl,
@@ -862,14 +861,6 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderFlexibleBox() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsFlexibleBox);
-    }
-    KRYS_NODISCARD bool IsRenderDeprecatedFlexibleBox() const noexcept
-    {
-      return _type == Type::DeprecatedFlexibleBox;
-    }
-    KRYS_NODISCARD bool IsFlexibleBoxIncludingDeprecated() const noexcept
-    {
-      return IsRenderFlexibleBox() || IsRenderDeprecatedFlexibleBox();
     }
     KRYS_NODISCARD bool IsRenderListItem() const noexcept
     {

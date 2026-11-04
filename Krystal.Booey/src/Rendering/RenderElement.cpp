@@ -31,7 +31,6 @@
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
-#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -161,9 +160,6 @@ namespace krys::boo
       case DisplayType::InlineGrid:
       case DisplayType::GridLanes:
       case DisplayType::InlineGridLanes: return CreateRenderer<RenderGrid>(element, krys::move(style));
-      case DisplayType::Box:
-      case DisplayType::InlineBox:
-        return CreateRenderer<RenderDeprecatedFlexibleBox>(element, krys::move(style));
       case DisplayType::RubyBase:
         return CreateRenderer<RenderInline>(Type::Inline, element, krys::move(style));
       case DisplayType::RubyAnnotation:
@@ -1618,10 +1614,9 @@ namespace krys::boo
   bool RenderElement::IsAnonymousBlock() const noexcept
   {
     // FIXME: Multi-column sets, once there are any.
-    return IsAnonymous() && (Style().Display() == DisplayType::Block || Style().Display() == DisplayType::Box)
-           && !Style().GetPseudoElementType() && IsRenderBlock() && !IsRenderMathMLBlock()
-           && !IsRenderListMarker() && !IsRenderFragmentedFlow() && !IsRenderView()
-           && !IsViewTransitionContainingBlock();
+    return IsAnonymous() && Style().Display() == DisplayType::Block && !Style().GetPseudoElementType()
+           && IsRenderBlock() && !IsRenderMathMLBlock() && !IsRenderListMarker() && !IsRenderFragmentedFlow()
+           && !IsRenderView() && !IsViewTransitionContainingBlock();
   }
 
   bool RenderElement::IsBlockContainer() const noexcept

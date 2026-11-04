@@ -500,8 +500,6 @@ namespace krys::boo
       case DisplayType::TableColumn:      return css::ValueId::TableColumn;
       case DisplayType::TableCell:        return css::ValueId::TableCell;
       case DisplayType::TableCaption:     return css::ValueId::TableCaption;
-      case DisplayType::Box:              return css::ValueId::WebkitBox;
-      case DisplayType::InlineBox:        return css::ValueId::WebkitInlineBox;
       case DisplayType::Flex:             return css::ValueId::Flex;
       case DisplayType::InlineFlex:       return css::ValueId::InlineFlex;
       case DisplayType::Grid:             return css::ValueId::Grid;
@@ -539,8 +537,6 @@ namespace krys::boo
       case css::ValueId::TableColumn:      return DisplayType::TableColumn;
       case css::ValueId::TableCell:        return DisplayType::TableCell;
       case css::ValueId::TableCaption:     return DisplayType::TableCaption;
-      case css::ValueId::WebkitBox:        return DisplayType::Box;
-      case css::ValueId::WebkitInlineBox:  return DisplayType::InlineBox;
       case css::ValueId::Flex:             return DisplayType::Flex;
       case css::ValueId::InlineFlex:       return DisplayType::InlineFlex;
       case css::ValueId::Grid:             return DisplayType::Grid;

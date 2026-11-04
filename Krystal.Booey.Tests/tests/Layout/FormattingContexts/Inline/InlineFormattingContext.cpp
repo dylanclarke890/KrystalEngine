@@ -349,25 +349,6 @@ namespace krys::boo::tests
       REQUIRE(text.PartiallyVisibleContentLength());
       CHECK(*text.PartiallyVisibleContentLength() < 4);
     }
-
-    SECTION("Legacy line-clamp truncates the lines after the clamp")
-    {
-      auto layout =
-        InlineLayout {fixture, u8"clamp", 35_lu, layout::BlockLayoutState::LineClamp {2, false, true}};
-      auto result = layout.Layout();
-
-      // Legacy clamping lays out every line, but the ones after the clamp are truncated, and the clamped line
-      // gets a block ellipsis.
-      auto &lines = result.DisplayContent.LineList;
-      REQUIRE(lines.size() == 3);
-      CHECK_FALSE(lines[0].IsFullyTruncatedInBlockDirection());
-      CHECK_FALSE(lines[1].IsFullyTruncatedInBlockDirection());
-      CHECK(lines[2].IsFullyTruncatedInBlockDirection());
-      CHECK_FALSE(lines[0].HasEllipsis());
-      REQUIRE(lines[1].HasEllipsis());
-      CHECK(lines[1].GetEllipsis()->EllipsisType == inline_display::Line::Ellipsis::Type::Block);
-      CHECK(layout.FormattingContext().GetLayoutState().LegacyClampedLineIndex() == 1u);
-    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "InlineFormattingContext: intrinsic widths",

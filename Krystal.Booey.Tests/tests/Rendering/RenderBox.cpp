@@ -4,7 +4,6 @@
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
-#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -24,7 +23,6 @@ namespace krys::boo::tests
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
       #flex { display: flex }
       #grid { display: grid }
-      #box { display: -webkit-box }
       #li { display: list-item }
       #table { display: table }
       #caption { display: table-caption }
@@ -34,7 +32,7 @@ namespace krys::boo::tests
       #colgroup { display: table-column-group }
       #col { display: table-column }
     </style><body id=body><div id=block></div><span id=span></span><div id=flex><div id=item></div></div>
-    <div id=grid><div id=gitem></div></div><div id=box></div><div id=li></div><div id=table></div>
+    <div id=grid><div id=gitem></div></div><div id=li></div><div id=table></div>
     <div id=caption></div><div id=group></div><div id=row></div><div id=cell></div>
     <div id=colgroup></div><div id=col></div><fieldset id=fieldset></fieldset></body>)html"};
     fixture.Document->UpdateStyleIfNeeded();
@@ -54,7 +52,6 @@ namespace krys::boo::tests
       CHECK(Is<RenderBoxModelObject>(renderer(u8"span")));
       CHECK(Is<RenderFlexibleBox>(renderer(u8"flex")));
       CHECK(Is<RenderGrid>(renderer(u8"grid")));
-      CHECK(Is<RenderDeprecatedFlexibleBox>(renderer(u8"box")));
       CHECK(Is<RenderListItem>(renderer(u8"li")));
       CHECK(Is<RenderTable>(renderer(u8"table")));
       CHECK(Is<RenderTableCaption>(renderer(u8"caption")));
@@ -88,14 +85,13 @@ namespace krys::boo::tests
       CHECK(renderer(u8"block").ChildrenInline());
       CHECK(renderer(u8"span").ChildrenInline());
       CHECK_FALSE(renderer(u8"flex").ChildrenInline());
-      CHECK_FALSE(renderer(u8"box").ChildrenInline());
     }
 
     SECTION("Flex and grid items")
     {
       auto &item = Downcast<RenderBox>(renderer(u8"item"));
       CHECK(item.IsFlexItem());
-      CHECK(item.IsFlexItemIncludingDeprecated());
+      CHECK(item.IsInFlowFlexChild());
       CHECK_FALSE(item.IsGridItem());
       CHECK_FALSE(item.IsBlockLevelBox());
       CHECK(Downcast<RenderBox>(renderer(u8"gitem")).IsGridItem());

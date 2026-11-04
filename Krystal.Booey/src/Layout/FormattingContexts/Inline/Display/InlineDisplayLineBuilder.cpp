@@ -316,80 +316,6 @@ namespace krys::boo::layout
       return FloatRect {rootInlineBox.Left(), ellipsisStart, rootInlineBox.Width(), ellipsisWidth};
     }
 
-    KRYS_NODISCARD bool IsEligibleForLinkBoxLineClamp(const inline_display::Boxes &displayBoxes) noexcept
-    {
-      if (displayBoxes.size() < 3)
-      {
-        // We need at least 3 display boxes to generate content with link ([root inline box][inline
-        // box][content])
-        return false;
-      }
-      auto writingMode = displayBoxes[0].LayoutBox().GetWritingMode();
-      if (writingMode.IsBidiRTL() || writingMode.IsVertical())
-      {
-        return false;
-      }
-      auto &linkCandidateBox = displayBoxes[displayBoxes.size() - 2];
-      if (!linkCandidateBox.IsNonRootInlineBox() || !linkCandidateBox.IsFirstForLayoutBox())
-      {
-        // Link spanning multiple lines looks odd with line-clamp.
-        return false;
-      }
-      return linkCandidateBox.LayoutBox().Style().IsLink();
-    }
-
-    constexpr int32 LegacyMatchingLinkBoxOffset = 3;
-
-    void MakeRoomForLinkBoxOnClampedLineIfNeeded(inline_display::Line &clampedLine,
-                                                 inline_display::Boxes &displayBoxes,
-                                                 size_t insertionPosition, float linkContentWidth) noexcept
-    {
-      krys_debug_assert(insertionPosition);
-      auto ellipsisBoxRect = clampedLine.GetEllipsis()->VisualRect;
-      if (ellipsisBoxRect.MaxX() + linkContentWidth <= clampedLine.Right())
-      {
-        return;
-      }
-      auto &rootStyle = displayBoxes[0].LayoutBox().Style();
-      auto startIndex = [&]() -> size_t
-      {
-        krys_debug_assert(insertionPosition);
-        for (size_t index = insertionPosition - 1; index--;)
-        {
-          if (displayBoxes[index].IsRootInlineBox())
-          {
-            return index + 1;
-          }
-          return index;
-        }
-        krys_debug_assert(false);
-        return 0;
-      };
-      auto endIndex = insertionPosition - 1;
-      auto ellispsisPosition = clampedLine.Right() - linkContentWidth - LegacyMatchingLinkBoxOffset;
-      auto ellipsisStart = TruncateOverflowingDisplayBoxes(
-        displayBoxes, startIndex(), endIndex, clampedLine.Left(), ellispsisPosition, ellipsisBoxRect.Width(),
-        rootStyle, LineEndingTruncationPolicy::WhenContentOverflowsInBlockDirection);
-      ellipsisBoxRect.SetX(ellipsisStart);
-      clampedLine.SetEllipsis({inline_display::Line::Ellipsis::Type::Block, ellipsisBoxRect,
-                               TextUtil::EllipsisTextInInlineDirection(clampedLine.IsHorizontal())});
-    }
-
-    void MoveDisplayBoxToClampedLine(inline_display::Lines &displayLines, size_t clampedLineIndex,
-                                     inline_display::Box &displayBox, float horizontalOffset) noexcept
-    {
-      auto &clampedLine = displayLines[clampedLineIndex];
-      displayBox.SetLeft(clampedLine.GetEllipsis()->VisualRect.MaxX() + horizontalOffset
-                         + LegacyMatchingLinkBoxOffset);
-      // Assume baseline alignment here.
-      displayBox.MoveVertically((clampedLine.Top() + clampedLine.Baseline())
-                                - (displayLines.back().Top() + displayLines.back().Baseline()));
-
-      auto &originalLine = displayLines[displayBox.LineIndex()];
-      originalLine.SetBoxCount(originalLine.BoxCount() - 1);
-      displayBox.MoveToLine(static_cast<uint32>(clampedLineIndex));
-      clampedLine.SetBoxCount(clampedLine.BoxCount() + 1);
-    }
   }
 
   InlineDisplayLineBuilder::InlineDisplayLineBuilder(InlineFormattingContext &inlineFormattingContext,
@@ -563,111 +489,9 @@ namespace krys::boo::layout
       lineIsFullyTruncatedInBlockDirection};
   }
 
-  void InlineDisplayLineBuilder::AddLegacyLineClampTrailingLinkBoxIfApplicable(
-    const InlineFormattingContext &inlineFormattingContext, const InlineLayoutState &inlineLayoutState,
-    inline_display::Content &displayContent) noexcept
-  {
-    // This is link-box type of line clamping (-webkit-line-clamp) where we check if the inline content ends
-    // in a link and move such link content next to the clamped line's trailing ellispsis. It is meant to
-    // produce the following rendering
-    //
-    // first line
-    // second line is clamped... more info
-    //
-    // where "more info" is a link and it comes from the end of the inline content (normally invisible due to
-    // block direction clamping). It supports horizontal, left-to-right content only where the link inline box
-    // has (non-split) text content and when the link content ('more info') fits the clamped line.
-    auto clampedLineIndex = inlineLayoutState.LegacyClampedLineIndex();
-    if (!clampedLineIndex)
-    {
-      return;
-    }
-    auto &displayLines = displayContent.LineList;
-    if (displayLines.empty() || *clampedLineIndex >= displayLines.size()
-        || !displayLines[*clampedLineIndex].HasEllipsis())
-    {
-      krys_debug_assert(false);
-      return;
-    }
-    if (*clampedLineIndex == displayLines.size() - 1)
-    {
-      // No need to link-box line clamp the last line.
-      return;
-    }
-
-    if (!IsEligibleForLinkBoxLineClamp(displayContent.BoxList))
-    {
-      return;
-    }
-
-    auto &displayBoxes = displayContent.BoxList;
-    auto insertionPosition = [&]() -> Maybe<size_t>
-    {
-      for (size_t boxIndex = 0; boxIndex < displayBoxes.size(); ++boxIndex)
-      {
-        if (displayBoxes[boxIndex].LineIndex() > *clampedLineIndex)
-        {
-          return boxIndex;
-        }
-      }
-      return null;
-    }();
-
-    if (!insertionPosition || !*insertionPosition || *insertionPosition >= displayBoxes.size() - 1)
-    {
-      // Unexpected cases where the insertion point is at the leading/trailing box. They both indicate
-      // incorrect line-clamp position and would produce incorrect rendering.
-      krys_debug_assert(false);
-      return;
-    }
-    auto &clampedLine = displayLines[*clampedLineIndex];
-    auto linkContentWidth = displayBoxes[displayBoxes.size() - 2].VisualRectIgnoringBlockDirection().Width();
-    if (linkContentWidth >= clampedLine.LineBoxWidth())
-    {
-      // Not enough space for "more info" content.
-      return;
-    }
-    auto linkContentDisplayBox = krys::move(displayBoxes.back());
-    displayBoxes.pop_back();
-    auto linkInlineBoxDisplayBox = krys::move(displayBoxes.back());
-    displayBoxes.pop_back();
-
-    auto handleTrailingLineBreakIfApplicable = [&]
-    {
-      // "more info" gets inserted after the trailing run on the clamped line unless the trailing content is
-      // forced line break.
-      auto &trailingDisplayBox = displayBoxes[*insertionPosition - 1];
-      if (!trailingDisplayBox.IsLineBreak())
-      {
-        return;
-      }
-      // Move trailing line break after the link box.
-      trailingDisplayBox.MoveHorizontally(linkContentWidth);
-      --*insertionPosition;
-    };
-    handleTrailingLineBreakIfApplicable();
-
-    MakeRoomForLinkBoxOnClampedLineIfNeeded(clampedLine, displayBoxes, *insertionPosition, linkContentWidth);
-
-    // link box content
-    MoveDisplayBoxToClampedLine(displayLines, *clampedLineIndex, linkContentDisplayBox,
-                                inlineFormattingContext.GeometryForBox(linkInlineBoxDisplayBox.LayoutBox())
-                                  .MarginBorderAndPaddingStart()
-                                  .ToFloat());
-    displayBoxes.insert(displayBoxes.begin() + static_cast<ptrdiff_t>(*insertionPosition),
-                        linkContentDisplayBox);
-    // Link inline box
-    MoveDisplayBoxToClampedLine(displayLines, *clampedLineIndex, linkInlineBoxDisplayBox, 0.f);
-    displayBoxes.insert(displayBoxes.begin() + static_cast<ptrdiff_t>(*insertionPosition),
-                        linkInlineBoxDisplayBox);
-
-    clampedLine.SetHasContentAfterEllipsisBox();
-  }
-
   void InlineDisplayLineBuilder::ApplyEllipsisIfNeeded(LineEndingTruncationPolicy truncationPolicy,
                                                        inline_display::Line &displayLine,
-                                                       inline_display::Boxes &displayBoxes,
-                                                       bool isLegacyLineClamp) noexcept
+                                                       inline_display::Boxes &displayBoxes) noexcept
   {
     if (truncationPolicy == LineEndingTruncationPolicy::NoTruncation || !displayBoxes.size())
     {
@@ -676,10 +500,8 @@ namespace krys::boo::layout
 
     auto ellipsisText = [&]() -> StringAtom
     {
-      if (truncationPolicy == LineEndingTruncationPolicy::WhenContentOverflowsInInlineDirection
-          || isLegacyLineClamp)
+      if (truncationPolicy == LineEndingTruncationPolicy::WhenContentOverflowsInInlineDirection)
       {
-        // Legacy line clamp always uses ...
         return TextUtil::EllipsisTextInInlineDirection(displayLine.IsHorizontal());
       }
       return displayBoxes[0].LayoutBox().Style().GetBlockEllipsis().SwitchOn(

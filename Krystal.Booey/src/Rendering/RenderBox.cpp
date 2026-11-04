@@ -38,7 +38,6 @@
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
-#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -375,7 +374,7 @@ namespace krys::boo
     // we need to clear any override content size set by our container, because it would likely be incorrect
     // after the style change.
     if (IsOutOfFlowPositioned() && Parent()
-        && Parent()->Style().IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox())
+        && Parent()->Style().IsDisplayFlexibleOrGridFormattingContextBox())
     {
       ClearOverridingSize();
     }
@@ -2104,7 +2103,7 @@ namespace krys::boo
 
   static bool ShouldMarginInlineEndContributeToScrollableOverflow(const RenderBox &renderer) noexcept
   {
-    auto isSupportedContent = renderer.IsGridItem() || renderer.IsFlexItemIncludingDeprecated()
+    auto isSupportedContent = renderer.IsGridItem() || renderer.IsInFlowFlexChild()
                               || (renderer.IsInFlow() && renderer.Parent()->IsBlockContainer());
     if (!isSupportedContent)
     {
@@ -2139,8 +2138,7 @@ namespace krys::boo
     // The parent box is flexing us, so it has increased or decreased our width. Use the width from the style
     // context.
     // FIXME: Account for block-flow in flexible boxes (webkit.org/b/46418)
-    if (auto logicalWidth =
-          Parent()->IsFlexibleBoxIncludingDeprecated() ? OverridingBorderBoxLogicalWidth() : null)
+    if (auto logicalWidth = Parent()->IsRenderFlexibleBox() ? OverridingBorderBoxLogicalWidth() : null)
     {
       computedValues.Extent = *logicalWidth;
       return;
@@ -2153,8 +2151,6 @@ namespace krys::boo
     {
       // FIXME: Account for block-flow in flexible boxes.
       // https://bugs.webkit.org/show_bug.cgi?id=46418
-      // The legacy box properties were dropped, so a -webkit-box is always horizontal: replaced children stay
-      // replaced.
       auto isReplaced = Is<RenderReplaced>(*this);
       if (!isReplaced)
       {
@@ -2254,7 +2250,7 @@ namespace krys::boo
 
     auto shouldIgnoreOverconstrainedMargin = [&]
     {
-      if (IsGridItem() || IsFlexItemIncludingDeprecated())
+      if (IsGridItem() || IsInFlowFlexChild())
       {
         return true;
       }
@@ -2549,9 +2545,6 @@ namespace krys::boo
 
   bool RenderBox::IsStretchingColumnFlexItem() const noexcept
   {
-    // The legacy box properties were dropped, so a -webkit-box is always horizontal and never stretches its
-    // children's widths.
-
     // We don't stretch multiline flexboxes because they need to apply line spacing (align-content) first.
     if (Is<RenderFlexibleBox>(*Parent()) && Parent()->Style().GetFlexWrap() == FlexWrap::NoWrap
         && Parent()->Style().IsColumnFlexDirection() && ColumnFlexItemHasStretchAlignment())
@@ -2734,16 +2727,6 @@ namespace krys::boo
       }
     }
 
-    // Flexible horizontal boxes lay out children at their intrinsic widths.  Also vertical boxes
-    // that don't stretch their kids lay out their children at their intrinsic widths.
-    // FIXME: Think about block-flow here.
-    // https://bugs.webkit.org/show_bug.cgi?id=46473
-    // The legacy box properties were dropped, so a -webkit-box is always horizontal.
-    if (Parent()->IsRenderDeprecatedFlexibleBox())
-    {
-      return true;
-    }
-
     // Button, input, select, textarea, and legend treat width value of 'auto' as 'intrinsic' unless it's in a
     // stretching column flexbox.
     // FIXME: Think about block-flow here.
@@ -2923,24 +2906,6 @@ namespace krys::boo
         return null;
       }
 
-      if (auto *deprecatedFlexBox = DynamicDowncast<RenderDeprecatedFlexibleBox>(parent))
-      {
-        if (auto overridingLogicalHeight = OverridingBorderBoxLogicalHeight())
-        {
-          return *overridingLogicalHeight;
-        }
-
-        // The legacy box properties were dropped, so a -webkit-box is horizontal and stretches: its replaced
-        // children aren't treated as replaced.
-
-        // Block children of horizontal flexible boxes fill the height of the box.
-        if (Style().LogicalHeight().IsAuto() && deprecatedFlexBox->IsStretchingChildren())
-        {
-          return deprecatedFlexBox->ContentBoxLogicalHeight() - MarginBefore() - MarginAfter();
-        }
-
-        return null;
-      }
       if (Is<RenderGrid>(parent))
       {
         if (auto overridingLogicalHeight = OverridingBorderBoxLogicalHeight())
@@ -3353,8 +3318,7 @@ namespace krys::boo
     // percentages.
     return GetDocument().InQuirksMode() && !containingBlock.IsRenderTableCell()
            && !containingBlock.IsOutOfFlowPositioned() && !containingBlock.IsRenderGrid()
-           && !containingBlock.IsFlexibleBoxIncludingDeprecated()
-           && containingBlock.Style().LogicalHeight().IsAuto();
+           && !containingBlock.IsRenderFlexibleBox() && containingBlock.Style().LogicalHeight().IsAuto();
   }
 
   static bool TableCellShouldHaveZeroInitialSize(const RenderTableCell &tableCell, const RenderBox &child,
@@ -3523,9 +3487,7 @@ namespace krys::boo
   {
     auto logicalWidth = OverridingLogicalWidthForFlexBasisComputation().value_or(Style().LogicalWidth());
     auto fixedLogicalWidth = logicalWidth.TryFixed();
-    return fixedLogicalWidth && fixedLogicalWidth->IsPositiveOrZero()
-           && !(IsDeprecatedFlexItem()
-                && !static_cast<int32>(fixedLogicalWidth->ResolveZoom(Style().UsedZoomForLength())));
+    return fixedLogicalWidth && fixedLogicalWidth->IsPositiveOrZero();
   }
 
   void RenderBox::ComputePreferredLogicalWidths() noexcept
@@ -3936,8 +3898,7 @@ namespace krys::boo
 
     // We need the containing block to have a definite block-size in order to resolve the block-size of the
     // descendant, except when in quirks mode. Flexboxes follow strict behavior even in quirks mode, though.
-    if (!containingBlock
-        || (GetDocument().InQuirksMode() && !containingBlock->IsFlexibleBoxIncludingDeprecated()))
+    if (!containingBlock || (GetDocument().InQuirksMode() && !containingBlock->IsRenderFlexibleBox()))
     {
       return false;
     }

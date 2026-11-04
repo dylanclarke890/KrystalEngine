@@ -100,7 +100,7 @@ namespace krys::boo
           {
             if (auto *renderBox = DynamicDowncast<RenderBox>(beforeChildAnonymousContainer))
             {
-              return renderBox->IsFlexItemIncludingDeprecated() || renderBox->IsGridItem();
+              return renderBox->IsInFlowFlexChild() || renderBox->IsGridItem();
             }
             return false;
           };

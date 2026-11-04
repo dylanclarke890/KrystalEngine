@@ -19,7 +19,6 @@ namespace krys::boo::layout
     InlineLayoutUnit _clearGapBeforeFirstLine {0.f};
     InlineLayoutUnit _clearGapAfterLastLine {0.f};
     InlineLayoutUnit _firstLineStartTrimForInitialLetter {0.f};
-    Maybe<size_t> _legacyClampedLineIndex {};
     Maybe<size_t> _hyphenateLimitLines {};
     size_t _successiveHyphenatedLineCount {0};
     // Note that this does not include lines from nested blocks and it does not include lines with no content
@@ -83,15 +82,6 @@ namespace krys::boo::layout
     KRYS_NODISCARD const AvailableLineWidthOverride &GetAvailableLineWidthOverride() const noexcept
     {
       return _availableLineWidthOverride;
-    }
-
-    void SetLegacyClampedLineIndex(size_t lineIndex) noexcept
-    {
-      _legacyClampedLineIndex = lineIndex;
-    }
-    KRYS_NODISCARD Maybe<size_t> LegacyClampedLineIndex() const noexcept
-    {
-      return _legacyClampedLineIndex;
     }
 
     void SetLineCount(size_t lineCount) noexcept

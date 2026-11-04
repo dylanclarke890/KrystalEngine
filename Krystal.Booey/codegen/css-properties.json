@@ -479,16 +479,6 @@
         "contents",
         "none",
         {
-          "value": "-webkit-box",
-          "status": "obsolete",
-          "url": "https://compat.spec.whatwg.org/#css-keyword-mappings"
-        },
-        {
-          "value": "-webkit-inline-box",
-          "status": "obsolete",
-          "url": "https://compat.spec.whatwg.org/#css-keyword-mappings"
-        },
-        {
           "value": "-webkit-flex",
           "status": "obsolete"
         },
@@ -13926,7 +13916,7 @@
       }
     },
     "<-webkit-display>": {
-      "grammar": "-webkit-inline-flex | -webkit-box | -webkit-inline-box | -webkit-flex",
+      "grammar": "-webkit-inline-flex | -webkit-flex",
       "status": "non-standard"
     },
     "<single-scroll-timeline-name>": {

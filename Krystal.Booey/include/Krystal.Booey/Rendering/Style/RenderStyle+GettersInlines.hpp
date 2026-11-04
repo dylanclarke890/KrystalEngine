@@ -220,19 +220,19 @@ namespace krys::boo
 
   constexpr bool RenderStyle::IsDisplayBlockType(DisplayType display) noexcept
   {
-    return display == DisplayType::Block || display == DisplayType::Box || display == DisplayType::Flex
-           || display == DisplayType::FlowRoot || display == DisplayType::Grid
-           || display == DisplayType::GridLanes || display == DisplayType::ListItem
-           || display == DisplayType::Table || display == DisplayType::RubyBlock;
+    return display == DisplayType::Block || display == DisplayType::Flex || display == DisplayType::FlowRoot
+           || display == DisplayType::Grid || display == DisplayType::GridLanes
+           || display == DisplayType::ListItem || display == DisplayType::Table
+           || display == DisplayType::RubyBlock;
   }
 
   constexpr bool RenderStyle::IsDisplayInlineType(DisplayType display) noexcept
   {
     return display == DisplayType::Inline || display == DisplayType::InlineBlock
-           || display == DisplayType::InlineBox || display == DisplayType::InlineFlex
-           || display == DisplayType::InlineGrid || display == DisplayType::InlineGridLanes
-           || display == DisplayType::InlineTable || display == DisplayType::Ruby
-           || display == DisplayType::RubyBase || display == DisplayType::RubyAnnotation;
+           || display == DisplayType::InlineFlex || display == DisplayType::InlineGrid
+           || display == DisplayType::InlineGridLanes || display == DisplayType::InlineTable
+           || display == DisplayType::Ruby || display == DisplayType::RubyBase
+           || display == DisplayType::RubyAnnotation;
   }
 
   constexpr bool RenderStyle::IsDisplayRegionType() const noexcept
@@ -650,25 +650,9 @@ namespace krys::boo
     return IsDisplayBlockType(Display());
   }
 
-  constexpr bool RenderStyle::IsDisplayDeprecatedFlexibleBox(DisplayType display) noexcept
-  {
-    return display == DisplayType::Box || display == DisplayType::InlineBox;
-  }
-
   constexpr bool RenderStyle::IsDisplayFlexibleBox(DisplayType display) noexcept
   {
     return display == DisplayType::Flex || display == DisplayType::InlineFlex;
-  }
-
-  constexpr bool RenderStyle::IsDisplayDeprecatedFlexibleBox() const noexcept
-  {
-    return IsDisplayDeprecatedFlexibleBox(Display());
-  }
-
-  constexpr bool
-    RenderStyle::IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const noexcept
-  {
-    return IsDisplayFlexibleOrGridFormattingContextBox() || IsDisplayDeprecatedFlexibleBox();
   }
 
   constexpr bool RenderStyle::IsDisplayFlexibleOrGridFormattingContextBox() const noexcept

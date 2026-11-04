@@ -251,7 +251,6 @@ namespace krys::boo::layout_integration
     KRYS_NODISCARD inline Maybe<layout::BlockLayoutState::LineClamp>
       LineClamp(const RenderBlockFlow &rootRenderer) noexcept
     {
-      // The legacy line clamp (-webkit-line-clamp) was dropped.
       auto *layoutState = rootRenderer.View().FrameView().LayoutContext().LayoutState();
       if (!layoutState)
       {
@@ -259,8 +258,8 @@ namespace krys::boo::layout_integration
       }
       if (auto lineClamp = layoutState->GetLineClamp())
       {
-        return layout::BlockLayoutState::LineClamp {lineClamp->MaximumLines, lineClamp->ShouldDiscardOverflow,
-                                                    false};
+        return layout::BlockLayoutState::LineClamp {lineClamp->MaximumLines,
+                                                    lineClamp->ShouldDiscardOverflow};
       }
       return null;
     }

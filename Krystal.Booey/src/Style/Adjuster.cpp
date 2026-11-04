@@ -40,7 +40,6 @@ namespace krys::boo::style
       {
         case DisplayType::Block:
         case DisplayType::Table:
-        case DisplayType::Box:
         case DisplayType::Flex:
         case DisplayType::Grid:
         case DisplayType::GridLanes:
@@ -48,7 +47,6 @@ namespace krys::boo::style
         case DisplayType::ListItem:
         case DisplayType::RubyBlock:        return display;
         case DisplayType::InlineTable:      return DisplayType::Table;
-        case DisplayType::InlineBox:        return DisplayType::Box;
         case DisplayType::InlineFlex:       return DisplayType::Flex;
         case DisplayType::InlineGrid:       return DisplayType::Grid;
         case DisplayType::InlineGridLanes:  return DisplayType::GridLanes;
@@ -81,7 +79,6 @@ namespace krys::boo::style
       {
         case DisplayType::Block:            return DisplayType::InlineBlock;
         case DisplayType::Table:            return DisplayType::InlineTable;
-        case DisplayType::Box:              return DisplayType::InlineBox;
         case DisplayType::Flex:             return DisplayType::InlineFlex;
         case DisplayType::Grid:             return DisplayType::InlineGrid;
         case DisplayType::GridLanes:        return DisplayType::InlineGridLanes;
@@ -90,7 +87,6 @@ namespace krys::boo::style
         case DisplayType::Inline:
         case DisplayType::InlineBlock:
         case DisplayType::InlineTable:
-        case DisplayType::InlineBox:
         case DisplayType::InlineFlex:
         case DisplayType::InlineGrid:
         case DisplayType::InlineGridLanes:
@@ -140,8 +136,7 @@ namespace krys::boo::style
         case DisplayType::InlineBlock:
         case DisplayType::InlineGrid:
         case DisplayType::InlineGridLanes:
-        case DisplayType::InlineFlex:
-        case DisplayType::InlineBox:       return false;
+        case DisplayType::InlineFlex:      return false;
         default:                           break;
       };
 
@@ -535,19 +530,6 @@ namespace krys::boo::style
             style.SetGridAutoFlowDirection(GridAutoFlow::Direction::Row);
           }
         }
-      }
-
-      if (style.IsDisplayDeprecatedFlexibleBox())
-      {
-        // FIXME: Since we don't support block-flow on flexible boxes yet, disallow setting
-        // of block-flow to anything other than StyleWritingMode::HorizontalTb.
-        // https://bugs.webkit.org/show_bug.cgi?id=46418 - Flexible box support.
-        style.SetWritingMode(StyleWritingMode::HorizontalTb);
-      }
-
-      if (_parentBoxStyle.IsDisplayDeprecatedFlexibleBox())
-      {
-        style.SetFloating(Float::None);
       }
 
       // https://www.w3.org/TR/css-display/#transformations

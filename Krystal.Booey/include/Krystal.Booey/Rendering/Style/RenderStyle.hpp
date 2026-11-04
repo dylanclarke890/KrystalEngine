@@ -237,9 +237,6 @@ namespace krys::boo
     KRYS_NODISCARD constexpr bool IsDisplayInlineType() const noexcept;
     KRYS_NODISCARD constexpr bool IsOriginalDisplayInlineType() const noexcept;
     KRYS_NODISCARD constexpr bool IsDisplayFlexibleOrGridFormattingContextBox() const noexcept;
-    KRYS_NODISCARD constexpr bool IsDisplayDeprecatedFlexibleBox() const noexcept;
-    KRYS_NODISCARD constexpr bool
-      IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const noexcept;
     KRYS_NODISCARD constexpr bool IsDisplayRegionType() const noexcept;
     KRYS_NODISCARD constexpr bool IsDisplayBlockLevel() const noexcept;
     KRYS_NODISCARD constexpr bool IsOriginalDisplayBlockType() const noexcept;
@@ -302,7 +299,6 @@ namespace krys::boo
     KRYS_NODISCARD constexpr static bool IsDisplayGridBox(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsDisplayGridLanesBox(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsDisplayFlexibleOrGridFormattingContextBox(DisplayType) noexcept;
-    KRYS_NODISCARD constexpr static bool IsDisplayDeprecatedFlexibleBox(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsDisplayListItemType(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsDisplayTableOrTablePart(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsInternalTableBox(DisplayType) noexcept;

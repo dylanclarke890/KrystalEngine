@@ -310,16 +310,9 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool IsDeprecatedFlexItem() const noexcept
+    KRYS_NODISCARD bool IsInFlowFlexChild() const noexcept
     {
-      return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent()
-             && Parent()->IsRenderDeprecatedFlexibleBox();
-    }
-
-    KRYS_NODISCARD bool IsFlexItemIncludingDeprecated() const noexcept
-    {
-      return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent()
-             && Parent()->IsFlexibleBoxIncludingDeprecated();
+      return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent() && Parent()->IsRenderFlexibleBox();
     }
 
     // block-level boxes are boxes that participate in a block formatting context.

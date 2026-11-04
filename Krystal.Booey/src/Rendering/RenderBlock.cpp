@@ -18,7 +18,6 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
-#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -760,7 +759,7 @@ namespace krys::boo
       {
         break;
       }
-      else if (current.IsFlexibleBoxIncludingDeprecated() || current.IsRenderGrid())
+      else if (current.IsRenderFlexibleBox() || current.IsRenderGrid())
       {
         return {};
       }
@@ -879,11 +878,10 @@ namespace krys::boo
     {
       return true;
     }
-    return IsNonReplacedAtomicInlineLevelBox()
-           || style.IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox()
-           || IsFlexItemIncludingDeprecated() || IsRenderTable() || IsRenderTableCell()
-           || IsRenderTableCaption() || IsFieldset() || IsDocumentElementRenderer()
-           || IsRenderFragmentedFlow() || IsLegacyRenderSVGForeignObject() || style.SpecifiesColumns()
+    return IsNonReplacedAtomicInlineLevelBox() || style.IsDisplayFlexibleOrGridFormattingContextBox()
+           || IsInFlowFlexChild() || IsRenderTable() || IsRenderTableCell() || IsRenderTableCaption()
+           || IsFieldset() || IsDocumentElementRenderer() || IsRenderFragmentedFlow()
+           || IsLegacyRenderSVGForeignObject() || style.SpecifiesColumns()
            || style.GetColumnSpan() == ColumnSpan::All || style.Display() == DisplayType::FlowRoot
            || EstablishesIndependentFormattingContext();
   }
@@ -1761,9 +1759,7 @@ namespace krys::boo
     const auto &styleToUse = Style();
     auto logicalWidth = OverridingLogicalWidthForFlexBasisComputation().value_or(styleToUse.LogicalWidth());
     if (auto fixedLogicalWidth = logicalWidth.TryFixed();
-        !IsRenderTableCell() && fixedLogicalWidth && fixedLogicalWidth->IsPositiveOrZero()
-        && !(IsDeprecatedFlexItem()
-             && !static_cast<int32>(fixedLogicalWidth->ResolveZoom(Style().UsedZoomForLength()))))
+        !IsRenderTableCell() && fixedLogicalWidth && fixedLogicalWidth->IsPositiveOrZero())
     {
       _minPreferredLogicalWidth = AdjustContentBoxLogicalWidthForBoxSizing(
         LayoutUnit {fixedLogicalWidth->ResolveZoom(styleToUse.UsedZoomForLength())});
@@ -2698,7 +2694,7 @@ namespace krys::boo
         return CreatePositionWithAffinity(CaretMaxOffset(), Affinity::Downstream);
       }
     }
-    if (IsFlexibleBoxIncludingDeprecated() || IsRenderGrid())
+    if (IsRenderFlexibleBox() || IsRenderGrid())
     {
       return RenderBox::PositionForPoint(point, source);
     }
@@ -2832,7 +2828,7 @@ namespace krys::boo
     if (IsBody() || IsDocumentElementRenderer() || HasNonVisibleOverflow() || IsPositioned() || IsFloating()
         || IsRenderTableCell() || IsNonReplacedAtomicInlineLevelBox() || IsTransformed() || HasMask()
         || IsWritingModeRoot() || IsRenderFragmentedFlow() || Style().GetColumnSpan() == ColumnSpan::All
-        || IsFlexItemIncludingDeprecated() || IsGridItem())
+        || IsInFlowFlexChild() || IsGridItem())
     {
       return true;
     }
@@ -2958,7 +2954,7 @@ namespace krys::boo
       return {};
     }
 
-    if (IsFlexItem() || IsGridItem() || IsDeprecatedFlexItem())
+    if (IsFlexItem() || IsGridItem())
     {
       // FIXME: Adding a selection gap to these blocks would produce correct (visual) result only if we could
       // also paint selection gaps between them, as we do for blocks in a BFC. Returning an empty gap rect
@@ -3062,8 +3058,8 @@ namespace krys::boo
       }
 
       // FIXME: Eventually we won't special-case table and other layout roots like this.
-      auto propagatesSelectionToChildren = Is<RenderTable>(*curr) || Is<RenderFlexibleBox>(*curr)
-                                           || Is<RenderDeprecatedFlexibleBox>(*curr) || Is<RenderGrid>(*curr);
+      auto propagatesSelectionToChildren =
+        Is<RenderTable>(*curr) || Is<RenderFlexibleBox>(*curr) || Is<RenderGrid>(*curr);
       auto paintsOwnSelection = curr->ShouldPaintSelectionGaps() || propagatesSelectionToChildren;
       bool fillBlockGaps =
         paintsOwnSelection || (curr->CanBeSelectionLeaf() && childState != HighlightState::None);

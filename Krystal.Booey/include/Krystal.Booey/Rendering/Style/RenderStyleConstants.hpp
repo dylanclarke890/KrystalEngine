@@ -649,8 +649,6 @@ namespace krys::boo
     TableColumn,
     TableCell,
     TableCaption,
-    Box,
-    InlineBox,
     Flex,
     InlineFlex,
     Contents,

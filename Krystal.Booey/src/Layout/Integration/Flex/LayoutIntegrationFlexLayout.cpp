@@ -234,7 +234,7 @@ namespace krys::boo::layout_integration
         return false;
       }
 
-      if (flexItem.IsFlexibleBoxIncludingDeprecated())
+      if (flexItem.IsRenderFlexibleBox())
       {
         return false;
       }

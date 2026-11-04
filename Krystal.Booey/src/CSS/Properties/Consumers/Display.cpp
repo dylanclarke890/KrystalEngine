@@ -40,8 +40,6 @@ namespace krys::boo::css::PropertyParserHelpers
         ValueId::RubyBase, ValueId::RubyText,
         // <display-legacy>
         ValueId::InlineBlock, ValueId::InlineFlex, ValueId::InlineGrid, ValueId::InlineTable,
-        // Prefixed values
-        ValueId::WebkitInlineBox, ValueId::WebkitBox,
         // No layout support for the full <display-listitem> syntax, so treat it as <display-legacy>
         ValueId::ListItem>(range);
     }();
