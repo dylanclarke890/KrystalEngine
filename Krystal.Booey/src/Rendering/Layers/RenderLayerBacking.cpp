@@ -2728,7 +2728,7 @@ namespace krys::boo
       }
 
       // FIXME: Allow color+image compositing when it makes sense. For now bailing out.
-      if (style.ColorWithColorFilter(css::PropertyId::BackgroundColor).IsVisible())
+      if (style.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor).IsVisible())
       {
         return false;
       }
@@ -2785,7 +2785,7 @@ namespace krys::boo
       backgroundRenderer = &Renderer();
     }
 
-    return backgroundRenderer->Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
+    return backgroundRenderer->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
   }
 
   void RenderLayerBacking::UpdateDirectlyCompositedBackgroundColor(PaintedContentsInfo &contentsInfo,

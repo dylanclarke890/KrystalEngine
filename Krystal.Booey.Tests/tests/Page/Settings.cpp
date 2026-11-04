@@ -34,22 +34,15 @@ namespace krys::boo::tests
       settings->SpringTimingFunctionEnabled = true;
       settings->CSSColorLayersEnabled = true;
       settings->ThumbAndTrackPseudoElementsEnabled = true;
-      settings->ColorFilterEnabled = true;
       document.SetSettings(Ref<Settings>(settings));
 
       auto &context = document.CssParserContext();
       CHECK(context.springTimingFunctionEnabled);
       CHECK(context.colorLayersEnabled);
       CHECK(context.thumbAndTrackPseudoElementsEnabled);
-      CHECK(context.PropertySettings.colorFilterEnabled);
       CHECK(css::SelectorParserContext(document).thumbAndTrackPseudoElementsEnabled);
 
-      // Embedder properties are exposed in computed style only when their setting is on.
-      auto &exposed = document.ExposedComputedCSSPropertyIds();
-      CHECK(std::ranges::find(exposed, css::PropertyId::AppleColorFilter) != exposed.end());
       document.SetSettings(Settings::Create());
-      auto &hidden = document.ExposedComputedCSSPropertyIds();
-      CHECK(std::ranges::find(hidden, css::PropertyId::AppleColorFilter) == hidden.end());
       CHECK_FALSE(document.CssParserContext().springTimingFunctionEnabled);
     }
 

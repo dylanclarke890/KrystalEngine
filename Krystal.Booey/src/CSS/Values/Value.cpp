@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/AttrValue.hpp"
 #include "Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/BasicShapeValue.hpp"
@@ -71,10 +70,6 @@ namespace krys::boo::css
   {
     switch (_type)
     {
-      case ValueType::AppleColorFilter:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), Downcast<AppleColorFilterValue>(*this));
-      }
       case ValueType::Attr:
       {
         return std::invoke(std::forward<Visitor>(visitor), Downcast<AttrValue>(*this));

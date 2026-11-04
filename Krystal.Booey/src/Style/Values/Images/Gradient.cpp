@@ -93,25 +93,20 @@ namespace krys::boo::style
 
   // MARK: - Platform Gradient Resolution
 
-  KRYS_NODISCARD static boo::Color ResolveColorStopColor(const Color &styleColor, const RenderStyle &style,
-                                                         bool hasColorFilter) noexcept
+  KRYS_NODISCARD static boo::Color ResolveColorStopColor(const Color &styleColor,
+                                                         const RenderStyle &style) noexcept
   {
-    if (hasColorFilter)
-    {
-      return style.ColorWithColorFilter(styleColor);
-    }
     return style.ColorResolvingCurrentColor(styleColor);
   }
 
   KRYS_NODISCARD static boo::Color ResolveColorStopColor(const Markable<Color> &styleColor,
-                                                         const RenderStyle &style,
-                                                         bool hasColorFilter) noexcept
+                                                         const RenderStyle &style) noexcept
   {
     if (!styleColor)
     {
       return {};
     }
-    return ResolveColorStopColor(*styleColor, style, hasColorFilter);
+    return ResolveColorStopColor(*styleColor, style);
   }
 
   KRYS_NODISCARD static Maybe<float>
@@ -429,12 +424,10 @@ namespace krys::boo::style
                                                                       const StyleGradient &styleGradient,
                                                                       const RenderStyle &style) noexcept
   {
-    bool hasColorFilter = style.HasAppleColorFilter();
     GradientColorStops::StopVector result;
     for (const auto &stop : styleGradient.Parameters.Stops)
     {
-      result.push_back(
-        {ResolveColorStopPosition(stop.Position), ResolveColorStopColor(stop.Color, style, hasColorFilter)});
+      result.push_back({ResolveColorStopPosition(stop.Position), ResolveColorStopColor(stop.Color, style)});
     }
 
     std::ranges::stable_sort(result, {}, &boo::GradientColorStop::Offset);
@@ -447,8 +440,6 @@ namespace krys::boo::style
                                                  const StyleGradient &styleGradient,
                                                  const RenderStyle &style) noexcept
   {
-    bool hasColorFilter = style.HasAppleColorFilter();
-
     size_t numberOfStops = styleGradient.Parameters.Stops.size();
     List<ResolvedGradientStop> stops(numberOfStops);
 
@@ -458,7 +449,7 @@ namespace krys::boo::style
     {
       auto &stop = styleGradient.Parameters.Stops[i];
 
-      stops[i].Color = ResolveColorStopColor(stop.Color, style, hasColorFilter);
+      stops[i].Color = ResolveColorStopColor(stop.Color, style);
 
       auto offset = ResolveColorStopPosition(stop.Position, gradientLength);
       if (offset)
@@ -1448,11 +1439,8 @@ namespace krys::boo::style
   template <typename T>
   KRYS_NODISCARD static bool IsOpaque(const T &gradient, const RenderStyle &style) noexcept
   {
-    bool hasColorFilter = style.HasAppleColorFilter();
-
-    return std::ranges::all_of(
-      gradient.Parameters.Stops,
-      [&](auto &stop) { return ResolveColorStopColor(stop.Color, style, hasColorFilter).IsOpaque(); });
+    return std::ranges::all_of(gradient.Parameters.Stops, [&](auto &stop)
+                               { return ResolveColorStopColor(stop.Color, style).IsOpaque(); });
   }
 
   KRYS_NODISCARD bool IsOpaque(const Gradient &gradient, const RenderStyle &style) noexcept

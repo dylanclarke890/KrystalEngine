@@ -67,7 +67,7 @@ namespace krys::boo
       }
     }
 
-    auto backgroundColor = _renderer.Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
+    auto backgroundColor = _renderer.Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     auto compositeOp = Document().CompositeOperatorForBackgroundColor(backgroundColor, _renderer);
 
     PaintFillLayers(backgroundColor, _renderer.Style().GetBackgroundLayers(), paintRect, bleedAvoidance,
@@ -89,7 +89,7 @@ namespace krys::boo
     }
 
     const auto &style = rootBackgroundRenderer->Style();
-    auto backgroundColor = style.ColorWithColorFilter(css::PropertyId::BackgroundColor);
+    auto backgroundColor = style.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     auto compositeOp = Document().CompositeOperatorForBackgroundColor(backgroundColor, _renderer);
 
     PaintFillLayers(backgroundColor, style.GetBackgroundLayers(), View().BackgroundRect(),
@@ -204,7 +204,7 @@ namespace krys::boo
         FloatSize shadowOffset(shadow.Location.x().ResolveZoom(zoomFactor),
                                shadow.Location.y().ResolveZoom(zoomFactor));
         context.SetDropShadow(
-          {shadowOffset, shadow.Blur.ResolveZoom(zoomFactor), style.ColorWithColorFilter(shadow.Color),
+          {shadowOffset, shadow.Blur.ResolveZoom(zoomFactor), style.ColorResolvingCurrentColor(shadow.Color),
            shadow.IsWebkitBoxShadow ? ShadowRadiusMode::Legacy : ShadowRadiusMode::Default});
         break;
       }
@@ -980,7 +980,7 @@ namespace krys::boo
     bool hasBorderRadius = style.HasBorderRadius();
     float deviceScaleFactor = Document().DeviceScaleFactor();
 
-    bool hasOpaqueBackground = style.ColorWithColorFilter(css::PropertyId::BackgroundColor).IsOpaque();
+    bool hasOpaqueBackground = style.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor).IsOpaque();
     const auto &zoomFactor = style.UsedZoomForLength();
     for (const auto &shadow : style.GetBoxShadow())
     {
@@ -1000,7 +1000,7 @@ namespace krys::boo
         continue;
       }
 
-      auto shadowColor = style.ColorWithColorFilter(shadow.Color);
+      auto shadowColor = style.ColorResolvingCurrentColor(shadow.Color);
 
       auto shouldInflateBorderRect = [&]()
       {
@@ -1252,7 +1252,7 @@ namespace krys::boo
       return false;
     }
 
-    Color backgroundColor = style.ColorWithColorFilter(css::PropertyId::BackgroundColor);
+    Color backgroundColor = style.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     if (!backgroundColor.IsOpaque())
     {
       return false;

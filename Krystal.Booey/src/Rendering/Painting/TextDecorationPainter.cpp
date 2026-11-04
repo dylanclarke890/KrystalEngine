@@ -309,7 +309,7 @@ namespace krys::boo
           boxOrigin.Move(0, -extraOffset);
           extraOffset = 0;
         }
-        auto shadowColor = style.ColorWithColorFilter(shadow.Color);
+        auto shadowColor = style.ColorResolvingCurrentColor(shadow.Color);
 
         auto shadowOffset = TextBoxPainter::RotateShadowOffset(shadow.Location, _writingMode, zoomFactor);
         shadowOffset.Expand(0, -extraOffset);
@@ -451,7 +451,7 @@ namespace krys::boo
       return Color::white;
     }
 
-    return style.ColorWithColorFilter(css::PropertyId::TextDecorationColor);
+    return style.ColorResolvingCurrentColor(css::PropertyId::TextDecorationColor);
   }
 
   TextDecorationPainter::Styles TextDecorationPainter::StylesForRenderer(

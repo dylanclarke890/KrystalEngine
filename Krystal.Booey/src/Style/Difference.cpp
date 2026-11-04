@@ -987,10 +987,9 @@ namespace krys::boo::style
                                                      const StyleRareInheritedData &b) noexcept
   {
     return a.EffectiveInert != b.EffectiveInert || a.UserModify != b.UserModify
-           || a.UserSelect != b.UserSelect || a.AppleColorFilter != b.AppleColorFilter
-           || a.ImageRendering != b.ImageRendering || a.AccentColor != b.AccentColor
-           || a.InsideDefaultButton != b.InsideDefaultButton || a.InsideSubmitButton != b.InsideSubmitButton
-           || a.ColorScheme != b.ColorScheme;
+           || a.UserSelect != b.UserSelect || a.ImageRendering != b.ImageRendering
+           || a.AccentColor != b.AccentColor || a.InsideDefaultButton != b.InsideDefaultButton
+           || a.InsideSubmitButton != b.InsideSubmitButton || a.ColorScheme != b.ColorScheme;
   }
 
   static bool ChangedCustomPaintWatchedProperty(const RenderStyle &a, const StyleRareNonInheritedData &aData,

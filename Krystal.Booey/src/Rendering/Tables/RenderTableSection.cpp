@@ -1668,7 +1668,7 @@ namespace krys::boo
       return;
     }
     BorderPainter::DrawLineForBoxSide(paintInfo.Context(), GetDocument(), FloatRect(rect), side,
-                                      Style().ColorWithColorFilter(borderColor), borderStyle, 0, 0,
+                                      Style().ColorResolvingCurrentColor(borderColor), borderStyle, 0, 0,
                                       antialias);
   }
 

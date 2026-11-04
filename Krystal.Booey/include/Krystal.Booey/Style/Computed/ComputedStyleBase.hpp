@@ -76,7 +76,6 @@ namespace krys::boo
     struct AlignSelf;
     struct Animation;
     struct AnchorNames;
-    struct AppleColorFilter;
     struct AspectRatio;
     struct BackgroundLayer;
     struct BackgroundSize;

@@ -2353,13 +2353,6 @@ namespace krys::boo
     return foundDirection;
   }
 
-  // Colours are only inverted for -apple-color-filter, which isn't supported, so the style never changes.
-  Ref<EditingStyle> EditingStyle::InverseTransformColorIfNeeded(dom::Element &element) noexcept
-  {
-    (void)element;
-    return ShareRef(*this);
-  }
-
   namespace
   {
     void ReconcileTextDecorationProperties(css::MutableStyleProperties &style) noexcept

@@ -21,7 +21,7 @@ namespace krys::boo
     // FIXME: Transition it to TextPainter.
     auto &context = _paintInfo.Context();
     auto &lineStyle = _lineBox.Style();
-    auto textColor = lineStyle.ColorWithColorFilter(css::PropertyId::WebkitTextFillColor);
+    auto textColor = lineStyle.ColorResolvingCurrentColor(css::PropertyId::WebkitTextFillColor);
 
     if (_paintInfo.ForceTextColor())
     {
@@ -54,7 +54,7 @@ namespace krys::boo
       context.SetDropShadow({LayoutSize(LayoutUnit(shadow.Location.x().ResolveZoom(zoomFactor)),
                                         LayoutUnit(shadow.Location.y().ResolveZoom(zoomFactor))),
                              shadow.Blur.ResolveZoom(zoomFactor),
-                             lineStyle.ColorWithColorFilter(shadow.Color), ShadowRadiusMode::Default});
+                             lineStyle.ColorResolvingCurrentColor(shadow.Color), ShadowRadiusMode::Default});
       setShadow = true;
     }
 
@@ -92,7 +92,7 @@ namespace krys::boo
     auto &context = _paintInfo.Context();
     auto &style = _lineBox.Style();
 
-    auto textColor = style.ColorWithColorFilter(css::PropertyId::Color);
+    auto textColor = style.ColorResolvingCurrentColor(css::PropertyId::Color);
     auto backgroundColor = _selectionBackgroundColor;
     if (!backgroundColor.IsVisible())
     {

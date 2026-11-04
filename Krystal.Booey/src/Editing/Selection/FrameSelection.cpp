@@ -2503,16 +2503,16 @@ namespace krys::boo
     // CSS value "auto" is treated as an invalid color.
     if (elementStyle.HasAutoCaretColor() && parentStyle)
     {
-      auto parentBackgroundColor = parentStyle->ColorWithColorFilter(css::PropertyId::BackgroundColor);
-      auto elementBackgroundColor = elementStyle.ColorWithColorFilter(css::PropertyId::BackgroundColor);
+      auto parentBackgroundColor = parentStyle->ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
+      auto elementBackgroundColor = elementStyle.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
       auto disappearsIntoBackground =
         BlendSourceOver(parentBackgroundColor, elementBackgroundColor) == parentBackgroundColor;
       if (disappearsIntoBackground)
       {
-        return parentStyle->ColorWithColorFilter(css::PropertyId::CaretColor);
+        return parentStyle->ColorResolvingCurrentColor(css::PropertyId::CaretColor);
       }
     }
-    return elementStyle.ColorWithColorFilter(css::PropertyId::CaretColor);
+    return elementStyle.ColorResolvingCurrentColor(css::PropertyId::CaretColor);
   }
 
   void CaretBase::PaintCaret(const dom::Node &node, GraphicsContext &context, const LayoutPoint &paintOffset,

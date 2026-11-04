@@ -517,7 +517,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Types/CSSOMString.hpp
   include/Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp
   include/Krystal.Booey/CSS/Values/Aggregates.hpp
-  include/Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp
   include/Krystal.Booey/CSS/Values/AttrValue.hpp
   include/Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp
   include/Krystal.Booey/CSS/Values/BasicShapeValue.hpp
@@ -568,8 +567,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Easing/SpringEasingFunction.hpp
   include/Krystal.Booey/CSS/Values/Easing/StepsEasingFunction.hpp
   include/Krystal.Booey/CSS/Values/EasingFunctionValue.hpp
-  include/Krystal.Booey/CSS/Values/FilterEffects/AppleColorFilter.hpp
-  include/Krystal.Booey/CSS/Values/FilterEffects/AppleInvertLightnessFunction.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/BlurFunction.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/BrightnessFunction.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/ContrastFunction.hpp
@@ -855,7 +852,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/TypedOM/Numeric/CSSMathValue.cpp
   src/CSS/TypedOM/Numeric/CSSNumericArray.cpp
   src/CSS/TypedOM/Numeric/CSSNumericType.cpp
-  src/CSS/Values/AppleColorFilterValue.cpp
   src/CSS/Values/AttrValue.cpp
   src/CSS/Values/BackgroundRepeatValue.cpp
   src/CSS/Values/BasicShapeValue.cpp
@@ -2759,7 +2755,6 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/Style/RenderStyleBase+SettersInlines.hpp
   include/Krystal.Booey/Rendering/Style/RenderStyleBase.hpp
   include/Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp
-  include/Krystal.Booey/Rendering/Style/StyleAppleColorFilterData.hpp
   include/Krystal.Booey/Rendering/Style/StyleBackdropFilterData.hpp
   include/Krystal.Booey/Rendering/Style/StyleBackgroundData.hpp
   include/Krystal.Booey/Rendering/Style/StyleBorderImageData.hpp
@@ -3012,7 +3007,6 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Style/RenderStyle.cpp
   src/Rendering/Style/RenderStyleBase.cpp
   src/Rendering/Style/RenderStyleConstants.cpp
-  src/Rendering/Style/StyleAppleColorFilterData.cpp
   src/Rendering/Style/StyleBackdropFilterData.cpp
   src/Rendering/Style/StyleBackgroundData.cpp
   src/Rendering/Style/StyleBorderImageData.cpp
@@ -3304,8 +3298,6 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Values/Easing/StepsEasingFunction.hpp
   include/Krystal.Booey/Style/Values/FillStroke/StrokeMiterlimit.hpp
   include/Krystal.Booey/Style/Values/FillStroke/StrokeWidth.hpp
-  include/Krystal.Booey/Style/Values/FilterEffects/AppleColorFilter.hpp
-  include/Krystal.Booey/Style/Values/FilterEffects/AppleInvertLightnessFunction.hpp
   include/Krystal.Booey/Style/Values/FilterEffects/BlurFunction.hpp
   include/Krystal.Booey/Style/Values/FilterEffects/BrightnessFunction.hpp
   include/Krystal.Booey/Style/Values/FilterEffects/ContrastFunction.hpp
@@ -3643,8 +3635,6 @@ set(KRYSTAL_BOOEY_STYLE_SOURCES
   src/Style/Values/Easing/SpringEasingFunction.cpp
   src/Style/Values/Easing/StepsEasingFunction.cpp
   src/Style/Values/FillStroke/StrokeWidth.cpp
-  src/Style/Values/FilterEffects/AppleColorFilter.cpp
-  src/Style/Values/FilterEffects/AppleInvertLightnessFunction.cpp
   src/Style/Values/FilterEffects/BlurFunction.cpp
   src/Style/Values/FilterEffects/BrightnessFunction.cpp
   src/Style/Values/FilterEffects/ContrastFunction.cpp

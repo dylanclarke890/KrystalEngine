@@ -595,8 +595,8 @@ namespace krys::boo
     width -= 2;
 
     auto underlineColor = underline.UnderlineColor == CompositionUnderlineColor::TextColor
-                            ? _style.ColorWithColorFilter(css::PropertyId::WebkitTextFillColor)
-                            : _style.ColorByApplyingColorFilter(underline.Color);
+                            ? _style.ColorResolvingCurrentColor(css::PropertyId::WebkitTextFillColor)
+                            : underline.Color;
 
     auto &context = _paintInfo.Context();
     context.SetStrokeColor(underlineColor);

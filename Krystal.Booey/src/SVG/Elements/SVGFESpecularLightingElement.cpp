@@ -83,7 +83,7 @@ namespace krys::boo::svg
     if (attributeName == SVGNames::LightingColorAttr())
     {
       const auto &style = Renderer()->Style();
-      auto color = style.ColorWithColorFilter(style.LightingColor());
+      auto color = style.ColorResolvingCurrentColor(style.LightingColor());
       return effect.SetLightingColor(color);
     }
     if (attributeName == SVGNames::SurfaceScaleAttr())
@@ -193,7 +193,7 @@ namespace krys::boo::svg
     auto lightSource = lightElement->GetLightSource();
     const auto &style = renderer->Style();
 
-    auto color = style.ColorWithColorFilter(style.LightingColor());
+    auto color = style.ColorResolvingCurrentColor(style.LightingColor());
 
     return FESpecularLighting::Create(color, SurfaceScale(), SpecularConstant(), SpecularExponent(),
                                       KernelUnitLengthX(), KernelUnitLengthY(), krys::move(lightSource));

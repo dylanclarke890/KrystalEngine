@@ -37,11 +37,11 @@ namespace krys::boo
                                                attributes.X2(), attributes.Y2());
   }
 
-  Ref<Gradient> LegacyRenderSVGResourceLinearGradient::BuildGradient(const RenderStyle &style) const noexcept
+  Ref<Gradient> LegacyRenderSVGResourceLinearGradient::BuildGradient() const noexcept
   {
     return Gradient::Create(Gradient::LinearData {StartPoint(_attributes), EndPoint(_attributes)},
                             {ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Unpremultiplied},
                             PlatformSpreadMethodFromSVGType(_attributes.SpreadMethod()),
-                            StopsByApplyingColorFilter(_attributes.Stops(), style), false);
+                            GradientColorStops {_attributes.Stops()}, false);
   }
 }

@@ -290,28 +290,6 @@ namespace krys::boo
     return color.ResolveColor(GetColor());
   }
 
-  Color RenderStyle::ColorWithColorFilter(css::PropertyId colorProperty) const noexcept
-  {
-    if (!HasAppleColorFilter())
-    {
-      return ColorResolvingCurrentColor(colorProperty);
-    }
-
-    return ColorByApplyingColorFilter(ColorResolvingCurrentColor(colorProperty));
-  }
-
-  Color RenderStyle::ColorByApplyingColorFilter(const Color &color) const noexcept
-  {
-    auto transformedColor = color;
-    std::ignore = GetAppleColorFilter().TransformColor(transformedColor);
-    return transformedColor;
-  }
-
-  Color RenderStyle::ColorWithColorFilter(const style::Color &color) const noexcept
-  {
-    return ColorByApplyingColorFilter(ColorResolvingCurrentColor(color));
-  }
-
   // MARK: - Used Values
 
   float RenderStyle::OutlineSize() const noexcept
@@ -421,28 +399,14 @@ namespace krys::boo
   {
     return krys::SwitchOn(
       GetScrollbarColor(), [&](const css::keywords::Auto &) -> Color { return {}; },
-      [&](const auto &parts) -> Color
-      {
-        if (HasAppleColorFilter())
-        {
-          return ColorByApplyingColorFilter(ColorResolvingCurrentColor(parts.Thumb));
-        }
-        return ColorResolvingCurrentColor(parts.Thumb);
-      });
+      [&](const auto &parts) -> Color { return ColorResolvingCurrentColor(parts.Thumb); });
   }
 
   Color RenderStyle::UsedScrollbarTrackColor() const noexcept
   {
     return krys::SwitchOn(
       GetScrollbarColor(), [&](const css::keywords::Auto &) -> Color { return {}; },
-      [&](const auto &parts) -> Color
-      {
-        if (HasAppleColorFilter())
-        {
-          return ColorByApplyingColorFilter(ColorResolvingCurrentColor(parts.Track));
-        }
-        return ColorResolvingCurrentColor(parts.Track);
-      });
+      [&](const auto &parts) -> Color { return ColorResolvingCurrentColor(parts.Track); });
   }
 
   Color RenderStyle::UsedAccentColor(style::ColorOptions styleColorOptions) const noexcept
@@ -457,11 +421,6 @@ namespace krys::boo
         {
           auto computedCanvasColor = css::ColorFromKeyword(css::ValueId::Canvas, styleColorOptions);
           resolvedAccentColor = BlendSourceOver(computedCanvasColor, resolvedAccentColor);
-        }
-
-        if (HasAppleColorFilter())
-        {
-          return ColorByApplyingColorFilter(resolvedAccentColor);
         }
 
         return resolvedAccentColor;

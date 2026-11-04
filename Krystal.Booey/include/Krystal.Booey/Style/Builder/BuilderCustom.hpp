@@ -50,11 +50,6 @@ namespace krys::boo::style
     auto copy = value;
     return copy;
   }
-  KRYS_NODISCARD inline AppleColorFilter ForwardInheritedValue(const AppleColorFilter &value) noexcept
-  {
-    auto copy = value;
-    return copy;
-  }
   KRYS_NODISCARD inline AspectRatio ForwardInheritedValue(const AspectRatio &value) noexcept
   {
     auto copy = value;

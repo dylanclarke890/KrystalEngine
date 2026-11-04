@@ -535,7 +535,7 @@ namespace krys::boo
     }
 
     return PopupMenuStyle(
-      style->ColorWithColorFilter(css::PropertyId::Color), itemBackgroundColor, style->GetFontCascade(),
+      style->ColorResolvingCurrentColor(css::PropertyId::Color), itemBackgroundColor, style->GetFontCascade(),
       element->GetAttribute(u8"lang").value_or(dom::DOMString()),
       style->GetVisibility() == Visibility::Visible, style->Display() == DisplayType::None, true,
       style->GetWritingMode().BidiDirection(), IsOverride(style->GetUnicodeBidi()),
@@ -549,7 +549,7 @@ namespace krys::boo
     auto &listItems = SelectElement().ListItems();
     if (listIndex >= listItems.size())
     {
-      itemBackgroundColor = Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
+      itemBackgroundColor = Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
       itemHasCustomBackgroundColor = false;
       return;
     }
@@ -559,7 +559,7 @@ namespace krys::boo
     Color backgroundColor;
     if (auto *style = element->ComputedStyle())
     {
-      backgroundColor = style->ColorWithColorFilter(css::PropertyId::BackgroundColor);
+      backgroundColor = style->ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     }
 
     itemHasCustomBackgroundColor = backgroundColor.IsValid() && backgroundColor.IsVisible();
@@ -572,7 +572,7 @@ namespace krys::boo
 
     // Otherwise, the item's background is overlayed on top of the menu background.
     backgroundColor =
-      BlendSourceOver(Style().ColorWithColorFilter(css::PropertyId::BackgroundColor), backgroundColor);
+      BlendSourceOver(Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor), backgroundColor);
     if (backgroundColor.IsOpaque())
     {
       itemBackgroundColor = backgroundColor;
@@ -588,9 +588,9 @@ namespace krys::boo
     auto &styleToUse = _innerBlock ? _innerBlock->Style() : Style();
     auto absBounds = AbsoluteBoundingBoxRectIgnoringTransforms();
     return PopupMenuStyle(
-      styleToUse.ColorWithColorFilter(css::PropertyId::Color),
-      styleToUse.ColorWithColorFilter(css::PropertyId::BackgroundColor), styleToUse.GetFontCascade(), {},
-      styleToUse.UsedVisibility() == Visibility::Visible, styleToUse.Display() == DisplayType::None,
+      styleToUse.ColorResolvingCurrentColor(css::PropertyId::Color),
+      styleToUse.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor), styleToUse.GetFontCascade(),
+      {}, styleToUse.UsedVisibility() == Visibility::Visible, styleToUse.Display() == DisplayType::None,
       Style().HasUsedAppearance() && Style().UsedAppearance() == StyleAppearance::Menulist,
       Style().GetWritingMode().BidiDirection(), IsOverride(Style().GetUnicodeBidi()),
       PopupMenuStyle::BackgroundColorType::DefaultBackgroundColor, PopupMenuStyle::PopupMenuType::SelectPopup,

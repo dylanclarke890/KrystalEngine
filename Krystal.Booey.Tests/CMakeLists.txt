@@ -217,7 +217,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/Borders/BoxShadow.cpp
 		tests/CSS/Values/Color/Color.cpp
 		tests/CSS/Values/Easing/EasingFunction.cpp
-		tests/CSS/Values/FilterEffects/AppleColorFilter.cpp
 		tests/CSS/Values/FilterEffects/Filter.cpp
 		tests/CSS/Values/Motion/RayFunction.cpp
 		tests/CSS/Values/VariableData.cpp
@@ -273,7 +272,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/PathValue.cpp
 		tests/CSS/Values/BasicShapeValue.cpp
 		tests/CSS/Values/FilterValue.cpp
-		tests/CSS/Values/AppleColorFilterValue.cpp
 		tests/CSS/Values/RayValue.cpp
 		tests/CSS/Values/ScrollValue.cpp
 		tests/CSS/Values/ViewValue.cpp

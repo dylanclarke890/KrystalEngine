@@ -51,12 +51,12 @@ namespace krys::boo
                                                 attributes.Fr());
   }
 
-  Ref<Gradient> LegacyRenderSVGResourceRadialGradient::BuildGradient(const RenderStyle &style) const noexcept
+  Ref<Gradient> LegacyRenderSVGResourceRadialGradient::BuildGradient() const noexcept
   {
     return Gradient::Create(Gradient::RadialData {FocalPoint(_attributes), CenterPoint(_attributes),
                                                   FocalRadius(_attributes), Radius(_attributes), 1},
                             {ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Unpremultiplied},
                             PlatformSpreadMethodFromSVGType(_attributes.SpreadMethod()),
-                            StopsByApplyingColorFilter(_attributes.Stops(), style), false);
+                            GradientColorStops {_attributes.Stops()}, false);
   }
 }

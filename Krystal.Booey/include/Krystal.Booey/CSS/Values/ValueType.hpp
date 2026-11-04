@@ -22,7 +22,6 @@ namespace krys::boo::css
     Gradient,
 
     // Other non-list classes.
-    AppleColorFilter,
     Attr,
     BackgroundRepeat,
     BasicShape,

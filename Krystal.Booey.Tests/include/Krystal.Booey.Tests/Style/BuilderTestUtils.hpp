@@ -58,11 +58,10 @@ namespace krys::boo::style::tests
                                                                 .PositionTryFallback = PositionTryFallback});
     }
 
-    /// @brief A parser context with every settings-gated property the value tests use enabled.
+    /// @brief A parser context with every settings-gated feature the value tests use enabled.
     KRYS_NODISCARD static css::ParserContext ParseContext() noexcept
     {
       auto context = css::tests::DeclarationTestContext();
-      context.PropertySettings.colorFilterEnabled = true;
       context.springTimingFunctionEnabled = true;
       return context;
     }

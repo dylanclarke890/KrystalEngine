@@ -45,7 +45,6 @@
 
 namespace krys::boo
 {
-  class StyleAppleColorFilterData;
   class StyleImage;
 
   // This struct is for rarely used inherited CSS3, CSS2 and non-standard properties.
@@ -62,8 +61,6 @@ namespace krys::boo
     ~StyleRareInheritedData() noexcept;
 
     bool operator==(const StyleRareInheritedData &) const noexcept;
-
-    KRYS_NODISCARD bool HasColorFilters() const noexcept;
 
     float UsedZoom;
     float DeviceScaleFactor {1.0f};
@@ -99,7 +96,6 @@ namespace krys::boo
     EnumSet<EventListenerRegionType> EventListenerRegionTypes;
     style::StrokeWidth StrokeWidth;
     style::TextUnderlineOffset TextUnderlineOffset;
-    DataRef<StyleAppleColorFilterData> AppleColorFilter;
     style::TabSize TabSize;
 
     style::StrokeMiterlimit StrokeMiterLimit;

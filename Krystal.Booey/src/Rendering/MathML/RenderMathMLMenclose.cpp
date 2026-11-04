@@ -235,7 +235,7 @@ namespace krys::boo
 
     paintInfo.Context().SetStrokeThickness(thickness);
     paintInfo.Context().SetStrokeStyle(StrokeStyle::SolidStroke);
-    paintInfo.Context().SetStrokeColor(Style().ColorWithColorFilter(css::PropertyId::Color));
+    paintInfo.Context().SetStrokeColor(Style().ColorResolvingCurrentColor(css::PropertyId::Color));
     paintInfo.Context().SetFillColor(Color::transparentBlack);
     paintInfo.ApplyTransform(AffineTransform().Translate(FloatPoint(paintOffset + Location())));
 

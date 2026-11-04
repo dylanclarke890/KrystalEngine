@@ -624,12 +624,12 @@ namespace krys::boo
     if (htmlElement && htmlElement->Renderer())
     {
       htmlBackgroundColor =
-        htmlElement->Renderer()->Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
+        htmlElement->Renderer()->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     }
     if (bodyElement && bodyElement->Renderer())
     {
       bodyBackgroundColor =
-        bodyElement->Renderer()->Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
+        bodyElement->Renderer()->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     }
 
     if (!bodyBackgroundColor.IsValid())
@@ -914,7 +914,7 @@ namespace krys::boo
     {
       if (auto *rootBackground = renderView->RendererForRootBackground())
       {
-        auto rootColor = rootBackground->Style().ColorWithColorFilter(css::PropertyId::BackgroundColor);
+        auto rootColor = rootBackground->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
         color = color.IsVisible() ? BlendSourceOver(color, rootColor) : rootColor;
       }
     }

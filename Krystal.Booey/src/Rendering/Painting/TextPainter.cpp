@@ -27,7 +27,7 @@ namespace krys::boo
     auto shadowOffset = TextBoxPainter::RotateShadowOffset(
       shadow->Location, ignoreWritingMode ? WritingMode() : renderStyle.GetWritingMode(), zoomFactor);
     auto shadowRadius = shadow->Blur.ResolveZoom(zoomFactor);
-    auto shadowColor = renderStyle.ColorWithColorFilter(shadow->Color);
+    auto shadowColor = renderStyle.ColorResolvingCurrentColor(shadow->Color);
 
     // When drawing shadows, we usually clip the context to the area the shadow will reside, and then
     // draw the text itself outside the clipped area (so only the shadow shows up). However, we can

@@ -378,11 +378,6 @@ namespace krys::boo
     return Appearance() != StyleAppearance::None && Appearance() != StyleAppearance::Base;
   }
 
-  inline bool RenderStyle::HasAppleColorFilter() const noexcept
-  {
-    return !GetAppleColorFilter().IsNone();
-  }
-
   inline bool RenderStyle::HasAspectRatio() const noexcept
   {
     return GetAspectRatio().HasRatio();

@@ -836,7 +836,7 @@ namespace krys::boo
     // Make a copy of the PaintInfo because ApplyTransform will modify its rect.
     PaintInfo paintInfo(info);
     GraphicsContextStateSaver stateSaver(paintInfo.Context());
-    paintInfo.Context().SetFillColor(style.ColorWithColorFilter(css::PropertyId::Color));
+    paintInfo.Context().SetFillColor(style.ColorResolvingCurrentColor(css::PropertyId::Color));
 
     // For a radical character, we may need some scale transform to stretch it vertically or mirror it.
     if (_baseCharacter == RadicalOperator)

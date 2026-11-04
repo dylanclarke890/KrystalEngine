@@ -111,11 +111,6 @@ namespace krys::boo::css
 
 #pragma region Type Checks
 
-    KRYS_NODISCARD bool IsAppleColorFilterValue() const noexcept
-    {
-      return _type == ValueType::AppleColorFilter;
-    }
-
     KRYS_NODISCARD bool IsAttrValue() const noexcept
     {
       return _type == ValueType::Attr;

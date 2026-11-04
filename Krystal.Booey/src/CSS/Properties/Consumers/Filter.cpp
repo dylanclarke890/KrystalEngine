@@ -11,9 +11,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
-#include "Krystal.Booey/CSS/Values/FilterEffects/AppleColorFilter.hpp"
 #include "Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/CSS/Values/FilterEffects/FilterFunctionDescriptor.hpp"
 #include "Krystal.Booey/CSS/Values/FilterValue.hpp"
@@ -37,21 +35,6 @@ namespace krys::boo::css::PropertyParserHelpers
       return MetaConsumer<Number<ClosedUnitRangeClampUpper>,
                           Percentage<ClosedPercentageRangeClampUpper>>::Consume(args, state, {});
     }
-  }
-
-  KRYS_NODISCARD static Maybe<AppleInvertLightnessFunction>
-    ConsumeFilterAppleInvertLightness(TokenRange &range, PropertyParserState &) noexcept
-  {
-    // <-apple-invert-lightness()> = -apple-invert-lightness()
-    // Non-standard
-
-    auto args = ConsumeFunction(range);
-    if (!args.IsAtEnd())
-    {
-      return {};
-    }
-
-    return AppleInvertLightnessFunction {.Parameters = {}};
   }
 
   KRYS_NODISCARD static Maybe<BlurFunction> ConsumeFilterBlur(TokenRange &range,
@@ -474,150 +457,6 @@ namespace krys::boo::css::PropertyParserHelpers
     if (auto property = ConsumeUnresolvedFilter(range, state))
     {
       return FilterValue::Create({krys::move(*property)});
-    }
-
-    return nullptr;
-  }
-
-  // MARK: - <-apple-color-filter>
-
-  KRYS_NODISCARD static Maybe<AppleColorFilter::List>
-    ConsumeUnresolvedAppleColorFilterValueList(TokenRange &range, PropertyParserState &state) noexcept
-  {
-    // <-apple-color-filter-value-list = <-apple-color-filter-function>+
-    // <-apple-color-filter-function> = <-apple-invert-lightness() | <brightness()> | <contrast()> |
-    // <grayscale()> | <hue-rotate()> | <invert()> | <opacity()> | <sepia()> | <saturate()>
-
-    auto rangeCopy = range;
-
-    AppleColorFilter::List list;
-
-    auto AppendOnSuccess = [&](auto &&value) -> bool
-    {
-      if (!value)
-      {
-        return false;
-      }
-
-      list.Value.push_back(krys::move(*value));
-      return true;
-    };
-
-    do
-    {
-      switch (rangeCopy.Peek().FunctionId())
-      {
-        case ValueId::AppleInvertLightness:
-        {
-          if (!AppendOnSuccess(ConsumeFilterAppleInvertLightness(rangeCopy, state)))
-          {
-            return {};
-          }
-
-          break;
-        }
-        case ValueId::Brightness:
-        {
-          if (!AppendOnSuccess(ConsumeFilterBrightness(rangeCopy, state)))
-          {
-            return {};
-          }
-
-          break;
-        }
-        case ValueId::Contrast:
-        {
-          if (!AppendOnSuccess(ConsumeFilterContrast(rangeCopy, state)))
-          {
-            return {};
-          }
-
-          break;
-        }
-        case ValueId::Grayscale:
-        {
-          if (!AppendOnSuccess(ConsumeFilterGrayscale(rangeCopy, state)))
-          {
-            return {};
-          }
-
-          break;
-        }
-        case ValueId::HueRotate:
-        {
-          if (!AppendOnSuccess(ConsumeFilterHueRotate(rangeCopy, state)))
-          {
-            return {};
-          }
-
-          break;
-        }
-        case ValueId::Invert:
-        {
-          if (!AppendOnSuccess(ConsumeFilterInvert(rangeCopy, state)))
-          {
-            return {};
-          }
-
-          break;
-        }
-        case ValueId::Opacity:
-        {
-          if (!AppendOnSuccess(ConsumeFilterOpacity(rangeCopy, state)))
-          {
-            return {};
-          }
-
-          break;
-        }
-        case ValueId::Saturate:
-        {
-          if (!AppendOnSuccess(ConsumeFilterSaturate(rangeCopy, state)))
-          {
-            return {};
-          }
-          break;
-        }
-        case ValueId::Sepia:
-        {
-          if (!AppendOnSuccess(ConsumeFilterSepia(rangeCopy, state)))
-          {
-            return {};
-          }
-          break;
-        }
-        default: return {};
-      }
-    } while (!rangeCopy.IsAtEnd());
-
-    range = rangeCopy;
-
-    return {krys::move(list)};
-  }
-
-  Maybe<AppleColorFilter> ConsumeUnresolvedAppleColorFilter(TokenRange &range,
-                                                            PropertyParserState &state) noexcept
-  {
-    if (range.Peek().ValueId() == ValueId::None)
-    {
-      range.Discard();
-      range.DiscardWhitespace();
-      return AppleColorFilter {keywords::None {}};
-    }
-
-    if (auto filterValueList = ConsumeUnresolvedAppleColorFilterValueList(range, state))
-    {
-      return AppleColorFilter {krys::move(*filterValueList)};
-    }
-
-    return {};
-  }
-
-  RefPtr<Value> ConsumeAppleColorFilter(TokenRange &range, PropertyParserState &state) noexcept
-  {
-    if (auto property = ConsumeUnresolvedAppleColorFilter(range, state))
-    {
-      return AppleColorFilterValue::Create({krys::move(*property)});
     }
 
     return nullptr;

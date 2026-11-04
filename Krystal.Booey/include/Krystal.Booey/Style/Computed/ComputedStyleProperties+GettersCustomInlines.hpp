@@ -10,7 +10,6 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/PositionTryOrder.hpp"
-#include "Krystal.Booey/Rendering/Style/StyleAppleColorFilterData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleBackdropFilterData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleBackgroundData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleBoxData.hpp"

@@ -45,8 +45,6 @@ namespace krys::boo
 
     // Embedder features.
 
-    /// @brief `-apple-color-filter`.
-    bool ColorFilterEnabled {false};
     /// @brief The system `appearance` values (`default-button` and friends).
     bool UseSystemAppearance {false};
     /// @brief Moving a caret through content that isn't editable, with the keys that move one.

@@ -347,7 +347,7 @@ namespace krys::boo
 
     info.Context().SetStrokeThickness(ruleThickness);
     info.Context().SetStrokeStyle(StrokeStyle::SolidStroke);
-    info.Context().SetStrokeColor(Style().ColorWithColorFilter(css::PropertyId::Color));
+    info.Context().SetStrokeColor(Style().ColorResolvingCurrentColor(css::PropertyId::Color));
     LayoutPoint ruleOffsetFrom =
       paintOffset + Location() + LayoutPoint(0_lu, _radicalOperatorTop + ruleThickness / 2);
     LayoutPoint ruleOffsetTo = ruleOffsetFrom;

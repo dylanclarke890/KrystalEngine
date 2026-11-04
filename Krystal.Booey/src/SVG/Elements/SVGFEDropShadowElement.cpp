@@ -154,7 +154,7 @@ namespace krys::boo::svg
     const auto &style = renderer->Style();
 
     return FEDropShadow::Create(StdDeviationX(), StdDeviationY(), Dx(), Dy(),
-                                style.ColorWithColorFilter(style.FloodColor()),
+                                style.ColorResolvingCurrentColor(style.FloodColor()),
                                 style.FloodOpacity().Value.Value);
   }
 }

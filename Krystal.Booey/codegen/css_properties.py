@@ -7352,6 +7352,12 @@ class GenerationContext:
             if prologue:
                 to.write(prologue)
 
+            if not grouped_by_return_value:
+                to.write(default)
+                if epilogue:
+                    to.write(epilogue)
+                return
+
             with to.switch_block(expr="id"):
                 for return_expr, property_ids in grouped_by_return_value.items():
                     with to.multi_case_block(cases=property_ids):
@@ -8142,7 +8148,7 @@ class GeneratePropertyId:
         with to.namespace(namespace=""):
             self.generation_context.generate_property_id_switch_function(
                 to=to,
-                signature="KRYS_NODISCARD bool IsExposedNotInvalidAndNotInternal(PropertyId id, const PropertySettings &settings) noexcept",
+                signature="KRYS_NODISCARD bool IsExposedNotInvalidAndNotInternal(KRYS_MAYBE_UNUSED PropertyId id, KRYS_MAYBE_UNUSED const PropertySettings &settings) noexcept",
                 iterable=self.properties_and_descriptors.all_unique_with_settings_flag,
                 mapping=lambda p: f"return settings.{p.codegen_properties.settings_flag};",
                 default="return true;",
@@ -8330,12 +8336,12 @@ class GeneratePropertyId:
             to.write("return Span<const PropertyId> {PropertiesExcludingThreadedOnly};")
 
     def _generate_css_property_settings_constructor(self, *, to: Writer):
-        # `Settings` names its members in PascalCase: `colorFilterEnabled` is `Settings::ColorFilterEnabled`.
+        # `Settings` names its members in PascalCase: `useSystemAppearance` is `Settings::UseSystemAppearance`.
         settings_initializers = [
             f"{flag}(settings.{flag[0].upper()}{flag[1:]})" for flag in self.properties_and_descriptors.settings_flags
         ]
 
-        to.write(f"PropertySettings::PropertySettings(const Settings &settings) noexcept")
+        to.write(f"PropertySettings::PropertySettings(KRYS_MAYBE_UNUSED const Settings &settings) noexcept")
         with to.indent():
             if settings_initializers:
                 first_settings_initializer, *remaining_settings_initializers = settings_initializers
@@ -8349,7 +8355,7 @@ class GeneratePropertyId:
     def _generate_css_property_settings_operator_equal(self, *, to: Writer):
         expressions = [f"a.{flag} == b.{flag}" for flag in self.properties_and_descriptors.settings_flags]
 
-        with to.function_block(signature="bool operator==(const PropertySettings &a, const PropertySettings &b) noexcept"):
+        with to.function_block(signature="bool operator==(KRYS_MAYBE_UNUSED const PropertySettings &a, KRYS_MAYBE_UNUSED const PropertySettings &b) noexcept"):
             if not expressions:
                 to.write("return true;")
             else:

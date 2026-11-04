@@ -97,14 +97,6 @@ namespace krys::boo::css::tests
       CHECK(a.Hash() != b.Hash());
     }
 
-    SECTION("Property settings")
-    {
-      b.PropertySettings.colorFilterEnabled = true;
-      CHECK(a != b);
-      CHECK(a.Hash() != b.Hash());
-      CHECK(a.PropertySettings.Hash() != b.PropertySettings.Hash());
-    }
-
     SECTION("Enclosing rule type is compared but not hashed")
     {
       b.EnclosingRuleType = RuleType::Style;

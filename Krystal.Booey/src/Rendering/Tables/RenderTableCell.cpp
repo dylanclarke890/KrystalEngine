@@ -35,7 +35,8 @@ namespace krys::boo
     {
       const auto &style = renderer.Style();
       return CollapsedBorderValue(
-        border, includeColor == IncludeBorderColor::Yes ? style.ColorWithColorFilter(colorProperty) : Color(),
+        border,
+        includeColor == IncludeBorderColor::Yes ? style.ColorResolvingCurrentColor(colorProperty) : Color(),
         precedence, style.UsedZoomForLength());
     }
 
@@ -2165,8 +2166,6 @@ namespace krys::boo
     {
       return;
     }
-
-    color = backgroundStyle.ColorByApplyingColorFilter(color);
 
     LayoutPoint adjustedPaintOffset = paintOffset;
     if (backgroundObject != this)

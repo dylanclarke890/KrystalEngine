@@ -323,10 +323,6 @@ namespace krys::boo
   {
     switch (operation.GetType())
     {
-      case FilterOperation::Type::AppleInvertLightness:
-        krys_debug_assert(false); // AppleInvertLightness is only used in -apple-color-filter.
-        break;
-
       case FilterOperation::Type::Blur: return CreateBlurEffect(Downcast<BlurFilterOperation>(operation));
 
       case FilterOperation::Type::Brightness:

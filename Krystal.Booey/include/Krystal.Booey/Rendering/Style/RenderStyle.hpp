@@ -175,7 +175,6 @@ namespace krys::boo
     KRYS_NODISCARD inline bool HasAnimations() const noexcept;
     KRYS_NODISCARD inline bool HasAnimationsOrTransitions() const noexcept;
     KRYS_NODISCARD inline bool HasAppearance() const noexcept;
-    KRYS_NODISCARD inline bool HasAppleColorFilter() const noexcept;
     KRYS_NODISCARD inline bool HasAspectRatio() const noexcept;
     KRYS_NODISCARD inline bool HasAutoLengthContainIntrinsicSize() const noexcept;
     KRYS_NODISCARD inline bool HasBackdropFilter() const noexcept;
@@ -285,9 +284,6 @@ namespace krys::boo
     // semantic.
     KRYS_NODISCARD Color ColorResolvingCurrentColor(css::PropertyId colorProperty) const noexcept;
     KRYS_NODISCARD Color ColorResolvingCurrentColor(const style::Color &) const noexcept;
-    KRYS_NODISCARD Color ColorWithColorFilter(css::PropertyId) const noexcept;
-    KRYS_NODISCARD Color ColorByApplyingColorFilter(const Color &) const noexcept;
-    KRYS_NODISCARD Color ColorWithColorFilter(const style::Color &) const noexcept;
 
   private:
     // This constructor is used to implement the replace operation.

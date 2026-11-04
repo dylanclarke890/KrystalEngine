@@ -704,7 +704,7 @@ namespace krys::boo
       style.ComputedFontSize(),
       style.UsedZoom(),
       style.UsedAccentColor(renderObject.StyleColorOptions()),
-      style.ColorWithColorFilter(css::PropertyId::Color),
+      style.ColorResolvingCurrentColor(css::PropertyId::Color),
       style::Evaluate<FloatBoxExtent>(style.BorderWidth(), style::ZoomNeeded {}),
     };
   }

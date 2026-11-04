@@ -45,7 +45,7 @@ namespace krys::boo::svg
 
     const auto &style = renderer->Style();
 
-    auto color = style.ColorWithColorFilter(style.FloodColor());
+    auto color = style.ColorResolvingCurrentColor(style.FloodColor());
     float opacity = style.FloodOpacity().Value.Value;
 
     return FEFlood::Create(color, opacity);

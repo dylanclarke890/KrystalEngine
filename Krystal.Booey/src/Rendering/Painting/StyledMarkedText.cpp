@@ -22,7 +22,7 @@ namespace krys::boo
       return;
     }
 
-    style.BackgroundColor = pseudoElementStyle->ColorWithColorFilter(css::PropertyId::BackgroundColor);
+    style.BackgroundColor = pseudoElementStyle->ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     style.TextStyles.FillColor = pseudoElementStyle->UsedStrokeColor();
     style.TextStyles.StrokeColor = pseudoElementStyle->UsedStrokeColor();
     style.TextStyles.HasExplicitlySetFillColor = pseudoElementStyle->HasExplicitlySetColor();

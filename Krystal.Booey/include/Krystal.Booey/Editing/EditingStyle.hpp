@@ -230,8 +230,6 @@ namespace krys::boo
       return unicodeBidi == css::ValueId::Isolate || unicodeBidi == css::ValueId::Embed;
     }
 
-    KRYS_NODISCARD Ref<EditingStyle> InverseTransformColorIfNeeded(dom::Element &element) noexcept;
-
   private:
     void Init(dom::Node *node, PropertiesToInclude propertiesToInclude) noexcept;
     void RemoveTextFillAndStrokeColorsIfNeeded(const RenderStyle *renderStyle) noexcept;

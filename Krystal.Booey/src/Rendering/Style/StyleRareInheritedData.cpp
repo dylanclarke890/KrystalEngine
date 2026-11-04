@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Style/StyleRareInheritedData.hpp"
 
-#include "Krystal.Booey/Rendering/Style/StyleAppleColorFilterData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 
@@ -30,7 +29,6 @@ namespace krys::boo
         CustomProperties(style::CustomPropertyData::Create()), EventListenerRegionTypes {},
         StrokeWidth(style::ComputedStyle::InitialStrokeWidth()),
         TextUnderlineOffset(style::ComputedStyle::InitialTextUnderlineOffset()),
-        AppleColorFilter(StyleAppleColorFilterData::Create()),
         TabSize(style::ComputedStyle::InitialTabSize()),
         StrokeMiterLimit(style::ComputedStyle::InitialStrokeMiterLimit()),
         MathDepth(style::ComputedStyle::InitialMathDepth()),
@@ -87,22 +85,21 @@ namespace krys::boo
         TextIndent(o.TextIndent), ListStyleImage(o.ListStyleImage), DynamicRangeLimit(o.DynamicRangeLimit),
         TextShadow(o.TextShadow), HyphenateCharacter(o.HyphenateCharacter),
         CustomProperties(o.CustomProperties), EventListenerRegionTypes(o.EventListenerRegionTypes),
-        StrokeWidth(o.StrokeWidth), TextUnderlineOffset(o.TextUnderlineOffset),
-        AppleColorFilter(o.AppleColorFilter), TabSize(o.TabSize), StrokeMiterLimit(o.StrokeMiterLimit),
-        MathDepth(o.MathDepth), TextBoxEdge(o.TextBoxEdge), LineFitEdge(o.LineFitEdge), Widows(o.Widows),
-        Orphans(o.Orphans), HyphenateLimitBefore(o.HyphenateLimitBefore),
-        HyphenateLimitAfter(o.HyphenateLimitAfter), HyphenateLimitLines(o.HyphenateLimitLines),
-        UsedTouchAction(o.UsedTouchAction), TextSecurity(o.TextSecurity), UserModify(o.UserModify),
-        WordBreak(o.WordBreak), OverflowWrap(o.OverflowWrap), LineBreak(o.LineBreak),
-        UserSelect(o.UserSelect), SpeakAs(o.SpeakAs), Hyphens(o.Hyphens), TextCombine(o.TextCombine),
-        TextEmphasisPosition(o.TextEmphasisPosition), TextUnderlinePosition(o.TextUnderlinePosition),
-        LineBoxContain(o.LineBoxContain), ImageOrientation(o.ImageOrientation),
-        ImageRendering(o.ImageRendering), LineAlign(o.LineAlign), TextAlignLast(o.TextAlignLast),
-        TextJustify(o.TextJustify), TextDecorationSkipInk(o.TextDecorationSkipInk), MathShift(o.MathShift),
-        MathStyle(o.MathStyle), RubyPosition(o.RubyPosition), RubyAlign(o.RubyAlign),
-        RubyOverhang(o.RubyOverhang), HangingPunctuation(o.HangingPunctuation), PaintOrder(o.PaintOrder),
-        CapStyle(o.CapStyle), JoinStyle(o.JoinStyle),
-        HasExplicitlySetStrokeWidth(o.HasExplicitlySetStrokeWidth),
+        StrokeWidth(o.StrokeWidth), TextUnderlineOffset(o.TextUnderlineOffset), TabSize(o.TabSize),
+        StrokeMiterLimit(o.StrokeMiterLimit), MathDepth(o.MathDepth), TextBoxEdge(o.TextBoxEdge),
+        LineFitEdge(o.LineFitEdge), Widows(o.Widows), Orphans(o.Orphans),
+        HyphenateLimitBefore(o.HyphenateLimitBefore), HyphenateLimitAfter(o.HyphenateLimitAfter),
+        HyphenateLimitLines(o.HyphenateLimitLines), UsedTouchAction(o.UsedTouchAction),
+        TextSecurity(o.TextSecurity), UserModify(o.UserModify), WordBreak(o.WordBreak),
+        OverflowWrap(o.OverflowWrap), LineBreak(o.LineBreak), UserSelect(o.UserSelect), SpeakAs(o.SpeakAs),
+        Hyphens(o.Hyphens), TextCombine(o.TextCombine), TextEmphasisPosition(o.TextEmphasisPosition),
+        TextUnderlinePosition(o.TextUnderlinePosition), LineBoxContain(o.LineBoxContain),
+        ImageOrientation(o.ImageOrientation), ImageRendering(o.ImageRendering), LineAlign(o.LineAlign),
+        TextAlignLast(o.TextAlignLast), TextJustify(o.TextJustify),
+        TextDecorationSkipInk(o.TextDecorationSkipInk), MathShift(o.MathShift), MathStyle(o.MathStyle),
+        RubyPosition(o.RubyPosition), RubyAlign(o.RubyAlign), RubyOverhang(o.RubyOverhang),
+        HangingPunctuation(o.HangingPunctuation), PaintOrder(o.PaintOrder), CapStyle(o.CapStyle),
+        JoinStyle(o.JoinStyle), HasExplicitlySetStrokeWidth(o.HasExplicitlySetStrokeWidth),
         HasExplicitlySetStrokeColor(o.HasExplicitlySetStrokeColor), HasAutoCaretColor(o.HasAutoCaretColor),
         EffectiveInert(o.EffectiveInert), EffectivelyTransparent(o.EffectivelyTransparent),
         IsInSubtreeWithBlendMode(o.IsInSubtreeWithBlendMode), IsForceHidden(o.IsForceHidden),
@@ -136,8 +133,7 @@ namespace krys::boo
            && HyphenateLimitAfter == o.HyphenateLimitAfter && HyphenateLimitLines == o.HyphenateLimitLines
            && ColorScheme == o.ColorScheme && TextCombine == o.TextCombine
            && TextEmphasisPosition == o.TextEmphasisPosition && LineBoxContain == o.LineBoxContain
-           && HyphenateCharacter == o.HyphenateCharacter && Quotes == o.Quotes
-           && AppleColorFilter == o.AppleColorFilter && TabSize == o.TabSize
+           && HyphenateCharacter == o.HyphenateCharacter && Quotes == o.Quotes && TabSize == o.TabSize
            && ImageOrientation == o.ImageOrientation && ImageRendering == o.ImageRendering
            && TextAlignLast == o.TextAlignLast && TextJustify == o.TextJustify
            && TextDecorationSkipInk == o.TextDecorationSkipInk
@@ -158,10 +154,5 @@ namespace krys::boo
            && ListStyleImage == o.ListStyleImage && ListStyleType == o.ListStyleType
            && BlockEllipsis == o.BlockEllipsis && EvaluationTimeZoomEnabled == o.EvaluationTimeZoomEnabled
            && DeviceScaleFactor == o.DeviceScaleFactor && MathDepth == o.MathDepth;
-  }
-
-  bool StyleRareInheritedData::HasColorFilters() const noexcept
-  {
-    return !AppleColorFilter->AppleColorFilter.IsNone();
   }
 }

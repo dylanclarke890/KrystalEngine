@@ -9535,28 +9535,6 @@
         "url": "https://www.w3.org/TR/filter-effects/#FilterProperty"
       }
     },
-    "-apple-color-filter": {
-      "animation-type": "see prose",
-      "inherited": true,
-      "initial": "none",
-      "values": ["none"],
-      "codegen-properties": {
-        "settings-flag": "colorFilterEnabled",
-        "render-style-storage-path": [
-          "m_rareInheritedData",
-          "appleColorFilter"
-        ],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::AppleColorFilter",
-        "parser-function": "ConsumeAppleColorFilter",
-        "parser-grammar": "none | <-apple-color-filter-value-list>",
-        "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for the strong value representation."
-      },
-      "status": {
-        "status": "non-standard"
-      }
-    },
     "align-content": {
       "animation-type": "discrete",
       "initial": "normal",
@@ -13513,14 +13491,6 @@
         "url": "https://www.w3.org/TR/filter-effects/#typedef-filter-function"
       }
     },
-    "<color-filter-value-list>": {
-      "grammar": "<color-filter-function>+",
-      "status": "non-standard"
-    },
-    "<color-filter-function>": {
-      "grammar": "<brightness()> | <contrast()> | <grayscale()> | <hue-rotate()> | <invert()> | <opacity()> | <sepia()> | <saturate()> | <-apple-invert-lightness()>",
-      "status": "non-standard"
-    },
     "<blur()>": {
       "grammar": "blur( <length [0,inf]>? )",
       "specification": {
@@ -13590,10 +13560,6 @@
         "module": "css-filters",
         "url": "https://www.w3.org/TR/filter-effects/#funcdef-filter-sepia"
       }
-    },
-    "<-apple-invert-lightness()>": {
-      "grammar": "-apple-invert-lightness()",
-      "status": "non-standard"
     },
     "<baseline-position>": {
       "grammar": "[ first | last ]? && baseline",
