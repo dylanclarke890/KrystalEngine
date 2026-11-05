@@ -2346,14 +2346,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -4742,14 +4734,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -4834,14 +4818,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6039,14 +6015,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6074,14 +6042,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6113,14 +6073,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6167,14 +6119,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6206,14 +6150,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6241,14 +6177,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6280,14 +6208,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6315,14 +6235,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -8254,14 +8166,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -9131,14 +9035,6 @@
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -12158,7 +12054,7 @@
       }
     },
     "<width-or-height-keyword>": {
-      "grammar": "intrinsic | min-intrinsic | min-content | max-content | stretch | fit-content"
+      "grammar": "min-content | max-content | stretch | fit-content"
     },
     "<width-or-height>": {
       "grammar": "auto | <width-or-height-keyword> | <length-percentage [0,inf] anchor-size=allowed>",

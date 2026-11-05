@@ -1744,7 +1744,7 @@ namespace krys::boo
         return false;
       }
     }
-    if (!MainAxisIsFlexItemInlineAxis(flexItem) && (size.IsIntrinsic() || size.IsIntrinsicKeyword()))
+    if (!MainAxisIsFlexItemInlineAxis(flexItem) && size.IsIntrinsic())
     {
       return false;
     }

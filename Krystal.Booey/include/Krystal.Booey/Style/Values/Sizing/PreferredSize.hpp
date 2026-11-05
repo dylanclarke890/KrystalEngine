@@ -28,10 +28,9 @@ namespace krys::boo::style
   //
   // https://drafts.csswg.org/css-sizing-3/#preferred-size-properties
   // https://drafts.csswg.org/css-sizing-4/#sizing-values (additional values added)
-  struct PreferredSize
-      : LengthWrapperBase<LengthPercentage<css::NonNegativeUnzoomed>, css::keywords::Auto,
-                          css::keywords::MinContent, css::keywords::MaxContent, css::keywords::FitContent,
-                          css::keywords::Stretch, css::keywords::Intrinsic, css::keywords::MinIntrinsic>
+  struct PreferredSize : LengthWrapperBase<LengthPercentage<css::NonNegativeUnzoomed>, css::keywords::Auto,
+                                           css::keywords::MinContent, css::keywords::MaxContent,
+                                           css::keywords::FitContent, css::keywords::Stretch>
   {
     using Base::Base;
 
@@ -61,30 +60,17 @@ namespace krys::boo::style
     {
       return HoldsAlternative<css::keywords::Stretch>();
     }
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsIntrinsicKeyword() const noexcept
-    {
-      return HoldsAlternative<css::keywords::Intrinsic>();
-    }
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsMinIntrinsic() const noexcept
-    {
-      return HoldsAlternative<css::keywords::MinIntrinsic>();
-    }
 
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsIntrinsic() const noexcept
     {
       return HoldsAlternative<css::keywords::MinContent>() || HoldsAlternative<css::keywords::MaxContent>()
              || HoldsAlternative<css::keywords::Stretch>() || HoldsAlternative<css::keywords::FitContent>();
     }
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsLegacyIntrinsic() const noexcept
-    {
-      return HoldsAlternative<css::keywords::Intrinsic>() || HoldsAlternative<css::keywords::MinIntrinsic>();
-    }
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsIntrinsicOrLegacyIntrinsicOrAuto() const noexcept
+    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsIntrinsicOrAuto() const noexcept
     {
       return HoldsAlternative<css::keywords::MinContent>() || HoldsAlternative<css::keywords::MaxContent>()
              || HoldsAlternative<css::keywords::Stretch>() || HoldsAlternative<css::keywords::FitContent>()
-             || HoldsAlternative<css::keywords::Intrinsic>()
-             || HoldsAlternative<css::keywords::MinIntrinsic>() || HoldsAlternative<css::keywords::Auto>();
+             || HoldsAlternative<css::keywords::Auto>();
     }
 
   private:

@@ -2101,8 +2101,6 @@ namespace krys::boo::css
         {
           case ValueId::Auto:
           case ValueId::Content:
-          case ValueId::Intrinsic:
-          case ValueId::MinIntrinsic:
           case ValueId::MinContent:
           case ValueId::MaxContent:
           case ValueId::Stretch:

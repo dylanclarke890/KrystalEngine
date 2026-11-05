@@ -117,11 +117,9 @@ namespace krys::boo::GridLayoutFunctions
   {
     if (direction == GridTrackSizingDirection::Columns)
     {
-      return gridItem.HasRelativeLogicalWidth()
-             || gridItem.Style().LogicalWidth().IsIntrinsicOrLegacyIntrinsicOrAuto();
+      return gridItem.HasRelativeLogicalWidth() || gridItem.Style().LogicalWidth().IsIntrinsicOrAuto();
     }
-    return gridItem.HasRelativeLogicalHeight()
-           || gridItem.Style().LogicalHeight().IsIntrinsicOrLegacyIntrinsicOrAuto();
+    return gridItem.HasRelativeLogicalHeight() || gridItem.Style().LogicalHeight().IsIntrinsicOrAuto();
   }
 
   ExtraMarginsFromSubgrids ExtraMarginForSubgridAncestors(GridTrackSizingDirection direction,
@@ -206,7 +204,7 @@ namespace krys::boo::GridLayoutFunctions
       bool rendererHasAspectRatio = renderer.HasIntrinsicAspectRatio() || rendererStyle.HasAspectRatio();
 
       return rendererHasAspectRatio && rendererStyle.LogicalWidth().IsAuto()
-             && !rendererStyle.LogicalHeight().IsIntrinsicOrLegacyIntrinsicOrAuto();
+             && !rendererStyle.LogicalHeight().IsIntrinsicOrAuto();
     };
 
     for (auto &gridItemChild : ChildrenOfType<RenderBox>(gridItem))

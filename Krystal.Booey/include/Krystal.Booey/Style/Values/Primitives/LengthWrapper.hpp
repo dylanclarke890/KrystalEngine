@@ -61,8 +61,6 @@ namespace krys::boo::style
 
     constexpr static bool SupportsAuto = Keywords::IsValidKeyword(css::keywords::Auto {});
     constexpr static bool SupportsNormal = Keywords::IsValidKeyword(css::keywords::Normal {});
-    constexpr static bool SupportsIntrinsic = Keywords::IsValidKeyword(css::keywords::Intrinsic {});
-    constexpr static bool SupportsMinIntrinsic = Keywords::IsValidKeyword(css::keywords::MinIntrinsic {});
     constexpr static bool SupportsMinContent = Keywords::IsValidKeyword(css::keywords::MinContent {});
     constexpr static bool SupportsMaxContent = Keywords::IsValidKeyword(css::keywords::MaxContent {});
     constexpr static bool SupportsStretch = Keywords::IsValidKeyword(css::keywords::Stretch {});

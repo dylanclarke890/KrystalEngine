@@ -2392,11 +2392,6 @@ namespace krys::boo
       return ComputeIntrinsicLogicalWidthUsing(IntrinsicKeyword::WebkitFillAvailable, availableLogicalWidth,
                                                borderAndPadding);
     }
-    if (logicalWidth.IsMinIntrinsic())
-    {
-      return ComputeIntrinsicLogicalWidthUsing(IntrinsicKeyword::MinContent, availableLogicalWidth,
-                                               borderAndPadding);
-    }
     if (logicalWidth.IsMaxContent())
     {
       return ComputeIntrinsicLogicalWidthUsing(IntrinsicKeyword::MaxContent, availableLogicalWidth,
@@ -2466,7 +2461,7 @@ namespace krys::boo
         style::Evaluate<LayoutUnit>(logicalWidth, availableLogicalWidth, Style().UsedZoomForLength()));
     }
 
-    if (logicalWidth.IsIntrinsic() || logicalWidth.IsMinIntrinsic())
+    if (logicalWidth.IsIntrinsic())
     {
       return ComputeIntrinsicLogicalWidthUsing(logicalWidth, availableLogicalWidth,
                                                BorderAndPaddingLogicalWidth());
@@ -2685,14 +2680,6 @@ namespace krys::boo
              || !HasStretchedLogicalWidth();
     }
 
-    // This code may look a bit strange.  Basically width:intrinsic should clamp the size when testing both
-    // min-width and width.  max-width is only clamped if it is also intrinsic.
-    const auto &logicalWidth = Style().LogicalWidth();
-    if (logicalWidth.IsIntrinsicKeyword())
-    {
-      return true;
-    }
-
     // Children of a horizontal marquee do not fill the container by default.
     // FIXME: Need to deal with MarqueeDirection::Auto value properly. It could be vertical.
     // FIXME: Think about block-flow here.  Need to find out how marquee direction relates to
@@ -2730,7 +2717,7 @@ namespace krys::boo
     // stretching column flexbox.
     // FIXME: Think about block-flow here.
     // https://bugs.webkit.org/show_bug.cgi?id=46473
-    if (logicalWidth.IsAuto() && !IsStretchingColumnFlexItem())
+    if (Style().LogicalWidth().IsAuto() && !IsStretchingColumnFlexItem())
     {
       if (auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
           element
@@ -3186,7 +3173,7 @@ namespace krys::boo
     {
       return minMaxContent();
     }
-    if (logicalHeight.IsIntrinsic() || logicalHeight.IsMinIntrinsic() || logicalHeight.IsFitContent())
+    if (logicalHeight.IsIntrinsic() || logicalHeight.IsFitContent())
     {
       return intrinsic();
     }
@@ -3255,7 +3242,7 @@ namespace krys::boo
       return ComputePercentageLogicalHeight(logicalHeight);
     }
     if (logicalHeight.IsMinContent() || logicalHeight.IsMaxContent() || logicalHeight.IsFitContent()
-        || logicalHeight.IsFillAvailable() || logicalHeight.IsIntrinsic() || logicalHeight.IsMinIntrinsic())
+        || logicalHeight.IsFillAvailable() || logicalHeight.IsIntrinsic())
     {
       return intrinsic();
     }
@@ -5737,14 +5724,6 @@ namespace krys::boo
         || logicalWidth.IsMaxContent())
     {
       return intrinsic();
-    }
-    if (logicalWidth.IsIntrinsicKeyword() || logicalWidth.IsMinIntrinsic())
-    {
-      if (ShouldComputeLogicalWidthFromAspectRatio())
-      {
-        return inlineConstraints.ContainingSize();
-      }
-      return fallback();
     }
     if constexpr (std::same_as<SizeType, style::MaximumSize>)
     {

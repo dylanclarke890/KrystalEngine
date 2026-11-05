@@ -34,7 +34,7 @@ namespace krys::boo::style
     }
     // If our width is auto and left or right is specified then this
     // is not just a movement - we need to resize to our container.
-    if ((!a.Left().IsAuto() || !a.Right().IsAuto()) && width.IsIntrinsicOrLegacyIntrinsicOrAuto())
+    if ((!a.Left().IsAuto() || !a.Right().IsAuto()) && width.IsIntrinsicOrAuto())
     {
       return false;
     }

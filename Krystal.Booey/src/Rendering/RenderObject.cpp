@@ -2077,8 +2077,8 @@ namespace krys::boo
       return false;
     }
 
-    if (style.Width().IsIntrinsicOrLegacyIntrinsicOrAuto()
-        || style.Height().IsIntrinsicOrLegacyIntrinsicOrAuto() || style.Height().IsPercentOrCalculated())
+    if (style.Width().IsIntrinsicOrAuto() || style.Height().IsIntrinsicOrAuto()
+        || style.Height().IsPercentOrCalculated())
     {
       return false;
     }

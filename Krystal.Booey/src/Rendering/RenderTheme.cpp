@@ -1210,11 +1210,11 @@ namespace krys::boo
     // Other StyleAppearance types are composed controls with shadow subtree.
     if (appearance == StyleAppearance::Radio || appearance == StyleAppearance::Checkbox)
     {
-      if (minSize.Width().IsIntrinsicOrLegacyIntrinsicOrAuto())
+      if (minSize.Width().IsIntrinsicOrAuto())
       {
         resultWidth = preferredSize.Width().AsMinimumSize();
       }
-      if (minSize.Height().IsIntrinsicOrLegacyIntrinsicOrAuto())
+      if (minSize.Height().IsIntrinsicOrAuto())
       {
         resultHeight = preferredSize.Height().AsMinimumSize();
       }

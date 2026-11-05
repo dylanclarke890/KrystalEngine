@@ -4129,8 +4129,8 @@ namespace krys::boo
     // Firefox and Opera will allow a table cell to grow to fit an image inside it under
     // very specific cirucumstances (in order to match common WinIE renderings).
     // Not supporting the quirk has caused us to mis-render some real sites.
-    bool allowImagesToBreak = !GetDocument().InQuirksMode() || !IsRenderTableCell()
-                              || !styleToUse.LogicalWidth().IsIntrinsicOrLegacyIntrinsicOrAuto();
+    bool allowImagesToBreak =
+      !GetDocument().InQuirksMode() || !IsRenderTableCell() || !styleToUse.LogicalWidth().IsIntrinsicOrAuto();
 
     bool oldAutoWrap = styleToUse.AutoWrap();
 
