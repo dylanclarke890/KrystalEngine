@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/TreeResolver.hpp"
+#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
@@ -320,5 +321,17 @@ namespace krys::boo::style::tests
 
     CHECK(update->ElementStyle(s) == update->GetElementUpdate(s)->Style.get());
     CHECK(update->ElementStyle(fixture.ById(u8"p")) == fixture.ById(u8"p").GetRenderStyle());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "TreeResolver: trigonometric functions of sibling-index() angles", "[Style][TreeResolver]")
+  {
+    // The angle is only known per element, so the calculation is evaluated unsimplified, in canonical
+    // degrees.
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      div { opacity: sin(sibling-index() * 30deg) }
+    </style><div id=a></div><div id=b></div><div id=c></div>)"};
+    CHECK(Rendered(fixture.ById(u8"a")).GetOpacity().Value.Value == Catch::Approx(0.5f));
+    CHECK(Rendered(fixture.ById(u8"c")).GetOpacity().Value.Value == Catch::Approx(1.0f));
   }
 }

@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include <cmath>
+#include <numbers>
 
 namespace krys::boo::css::calc::tests
 {
@@ -96,12 +97,14 @@ namespace krys::boo::css::calc::tests
                             .Step = null})));
   }
 
-  // FIXME: trigonometric functions evaluate their argument as radians. Simplification converts canonical
-  // angles (degrees) first, but evaluation doesn't, so an angle that reaches evaluation unsimplified (e.g.
-  // `sin(sibling-index() * 10deg)` evaluated with `DoubleValue`) is read as radians. Upstream does the same.
-  TEST_CASE("TreeEvaluation(trigonometric functions of angles)", "[CSS][Calc][TreeEvaluation][!shouldfail]")
+  // An angle that reaches evaluation unsimplified (such as `sin(sibling-index() * 10deg)`) is in canonical
+  // degrees, as simplification takes it; a number is radians.
+  TEST_CASE("TreeEvaluation(trigonometric functions of angles)", "[CSS][Calc][TreeEvaluation]")
   {
     CHECK(Evaluate(Node(Sin {.A = Num(90.0, UnitType::deg)})) == Catch::Approx(1.0));
+    CHECK(Evaluate(Node(Cos {.A = Num(180.0, UnitType::deg)})) == Catch::Approx(-1.0));
+    CHECK(Evaluate(Node(Tan {.A = Num(45.0, UnitType::deg)})) == Catch::Approx(1.0));
+    CHECK(Evaluate(Node(Sin {.A = Num(std::numbers::pi / 2)})) == Catch::Approx(1.0));
   }
 
   TEST_CASE("TreeEvaluation(with default conversion data)", "[CSS][Calc][TreeEvaluation]")
