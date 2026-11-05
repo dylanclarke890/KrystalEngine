@@ -997,6 +997,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/MouseRelatedEvent.hpp
   include/Krystal.Booey/DOM/Events/PointerEvent.hpp
   include/Krystal.Booey/DOM/Events/PointerEventTypeNames.hpp
+  include/Krystal.Booey/DOM/Events/ScopedEventQueue.hpp
   include/Krystal.Booey/DOM/Events/SimulatedClick.hpp
   include/Krystal.Booey/DOM/Events/TextEvent.hpp
   include/Krystal.Booey/DOM/Events/ToggleEvent.hpp
@@ -1144,6 +1145,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/MouseRelatedEvent.cpp
   src/DOM/Events/PointerEvent.cpp
   src/DOM/Events/PointerEventTypeNames.cpp
+  src/DOM/Events/ScopedEventQueue.cpp
   src/DOM/Events/SimulatedClick.cpp
   src/DOM/Events/TextEvent.cpp
   src/DOM/Events/ToggleEvent.cpp

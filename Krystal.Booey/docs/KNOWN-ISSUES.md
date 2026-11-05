@@ -297,7 +297,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - Composition is not cancelled when the selection changes in ways that do not go through `RespondToChangedSelection()`, nor when the selection becomes `NoSelection` (FIXMEs in `Krystal.UI/src/EditorClient.cpp`).
 - `Pasteboard::CanSmartReplaceContents()` is false for the system clipboard, because the smart-paste type is neither written nor read; smart replace only works within a `SelectionData` carried by a drag.
-- `input` is dispatched straight away rather than through a scoped event queue, so typing commands that are applied again fire it from within the command (FIXME in `Editor.cpp`).
 
 ### Missing
 

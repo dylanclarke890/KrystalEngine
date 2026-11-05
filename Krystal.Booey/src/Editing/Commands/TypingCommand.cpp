@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertLineBreakCommand.hpp"
@@ -175,6 +176,7 @@ namespace krys::boo
 
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
+      dom::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(compositionType);
       lastTypingCommand->SetShouldPreventSpellChecking(options.Contains(Option::PreventSpellChecking));
@@ -192,6 +194,7 @@ namespace krys::boo
     {
       if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
       {
+        dom::EventQueueScope eventQueue;
         UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
         lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
         lastTypingCommand->SetCompositionType(TextCompositionType::None);
@@ -212,6 +215,7 @@ namespace krys::boo
     {
       if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
       {
+        dom::EventQueueScope eventQueue;
         UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
         lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
         lastTypingCommand->SetCompositionType(TextCompositionType::None);
@@ -264,6 +268,7 @@ namespace krys::boo
     // to deal with custom selections in a general way that can be used by all of the commands.
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
+      dom::EventQueueScope eventQueue;
       if (lastTypingCommand->EndingSelection() != selectionForInsertion)
       {
         lastTypingCommand->SetStartingSelection(selectionForInsertion);
@@ -290,6 +295,7 @@ namespace krys::boo
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
+      dom::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
@@ -305,6 +311,7 @@ namespace krys::boo
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
+      dom::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
@@ -441,6 +448,8 @@ namespace krys::boo
     return GetDocument().GetEditor().WillApplyEditing(*this, krys::move(targetRanges));
   }
 
+  // Typing added to an open command is applied outside its Apply(), so the static entry points scope the
+  // events it fires (`input` from AppliedEditing) to the whole of the typing.
   void TypingCommand::TypingAddedToOpenCommand(Type commandTypeForAddedTyping) noexcept
   {
     RefPtr<LocalFrame> protectedFrame = ShareRefPtr(GetDocument().Frame());

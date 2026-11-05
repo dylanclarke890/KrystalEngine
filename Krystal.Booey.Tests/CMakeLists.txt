@@ -407,6 +407,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Events/KeyboardEvent.cpp
 		tests/DOM/Events/MouseEvent.cpp
 		tests/DOM/Events/PointerEvent.cpp
+		tests/DOM/Events/ScopedEventQueue.cpp
 		tests/DOM/Events/ToggleEvent.cpp
 		tests/DOM/Events/WheelEvent.cpp
 		tests/DOM/Abort/AbortController.cpp

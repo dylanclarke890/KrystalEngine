@@ -256,6 +256,23 @@ namespace krys::boo::tests
       CHECK(Narrow(input->InputTypes[2]) == "insertParagraph");
     }
 
+    SECTION("Typing added to an open command fires input once the typing is applied")
+    {
+      (void)editor.InsertText(u8"d", nullptr);
+
+      // Each line of the text is added to the open command in turn.
+      List<std::string> htmlAtInput;
+      auto handle = root.AddEventListener(dom::DOMStringAtom(EventNames::Input), [&](dom::Event &)
+                                          { htmlAtInput.push_back(Narrow(fixture.InnerHTML(root))); });
+      (void)editor.InsertText(u8"e\nf", nullptr);
+
+      REQUIRE_FALSE(htmlAtInput.empty());
+      for (const auto &html : htmlAtInput)
+      {
+        CHECK(html == Narrow(fixture.InnerHTML(root)));
+      }
+    }
+
     SECTION("Undoing fires historyUndo")
     {
       (void)editor.InsertText(u8"d", nullptr);

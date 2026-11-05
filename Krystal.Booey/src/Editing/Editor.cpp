@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -105,8 +106,8 @@ namespace krys::boo
       return !event->DefaultPrevented();
     }
 
-    // FIXME: Typing commands that are applied again fire `input` from within the command, so it's dispatched
-    // to a scoped event queue rather than straight away, with a scoped event queue.
+    // `input` goes through the scoped event queue: typing added to an open typing command fires it from
+    // within the command, so it waits until the typing is applied.
     void DispatchInputEvent(dom::Element &element, utf8_stringview inputType,
                             dom::IsInputMethodComposing isInputMethodComposing,
                             Maybe<dom::DOMString> data = null,
@@ -116,7 +117,7 @@ namespace krys::boo
       auto event =
         dom::InputEvent::Create(dom::DOMStringAtom(EventNames::Input), inputType, false, krys::move(data),
                                 krys::move(dataTransfer), targetRanges, 0, isInputMethodComposing);
-      (void)dom::EventDispatcher::DispatchToTarget(*event, &element);
+      dom::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
     }
 
     bool DispatchBeforeInputEvents(RefPtr<dom::Element> startRoot, RefPtr<dom::Element> endRoot,

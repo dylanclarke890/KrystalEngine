@@ -216,7 +216,8 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: Queueing the events until the value is set (EventQueueScope), once events can be queued.
+    // FIXME: Queueing the events until the value is set (EventQueueScope), once form controls fire them
+    // through ScopedEventQueue.
     input->SetValueFromRenderer(serializedColor);
     UpdateColorSwatch();
     input->DispatchFormControlChangeEvent();
