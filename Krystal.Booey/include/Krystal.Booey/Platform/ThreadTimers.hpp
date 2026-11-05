@@ -14,7 +14,8 @@ namespace krys::boo
   /// @brief The active timers, in the order they fire (a heap on their fire times, then the order they were
   /// started), and the current time, which the host gives when it runs the event loop.
   /// @note Time never goes backwards: an earlier time than the current one is ignored. The timers are
-  /// process-wide, as there are no agents or threads (see DIFFERENCES.md).
+  /// process-wide, as there are no agents (see DIFFERENCES.md).
+  // FIXME: One set per thread, once there are threads.
   class ThreadTimers
   {
     friend class TimerBase;
