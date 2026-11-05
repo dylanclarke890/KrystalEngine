@@ -108,7 +108,7 @@ Status: reviewed (2026-11-01)
 #### [3.1.6 Render-blocking mechanism](https://html.spec.whatwg.org/#render-blocking-mechanism)
 
 Status: reviewed (2026-11-01)
-> `RenderBlocking`, with the render-blocking element set on the document. Fixed: render-blocking didn't check the document is render-blocked, and a frameset didn't count as the body element. The timeout and skipping render-blocked documents in the rendering update are FIXMEs (KNOWN-ISSUES.md).
+> `RenderBlocking`, with the render-blocking element set on the document. Fixed: render-blocking didn't check the document is render-blocked, and a frameset didn't count as the body element. The implementation-defined timeout is `RenderBlocking::Timeout` (5 seconds from the window's time origin); `Page::ForEachRenderableDocument` leaves render-blocked documents out of the rendering update, and `ui::View` keeps showing its last frame.
 <!-- definitions: render-blocking-element-set -->
 
 - [x] [allows adding render-blocking elements](https://html.spec.whatwg.org/#allows-adding-render-blocking-elements) — A Document document allows adding render-blocking elements if document's content type is "text/html" and the body element of document is null.

@@ -12,6 +12,7 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -271,6 +272,44 @@ namespace krys::boo::tests
       parser->InputStream().Append(u8"<!DOCTYPE html><div autofocus tabindex=0></div>", IsEOF(true));
       parser->PumpTokenizer();
       CHECK(document->AutofocusCandidates().empty());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "Page: render-blocked documents are left out of the rendering update",
+                   "[Page][RenderingUpdate][html:render-blocked][html:update-the-rendering]")
+  {
+    // An HTML document with no body yet is render-blocked.
+    auto page = Page::Create();
+    auto &frame = page->MainFrame();
+    frame.CreateView({200, 100});
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto html = document->CreateElement(u8"html").ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*html).HasException());
+    frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    REQUIRE(html::RenderBlocking::IsRenderBlocked(*document));
+
+    uint32 calls = 0;
+    (void)document->RequestAnimationFrame([&](dom::DOMHighResTimeStamp) { ++calls; });
+    page->UpdateRendering();
+    CHECK(calls == 0);
+    // The next rendering update tries again.
+    CHECK(page->IsRenderingUpdateScheduled());
+
+    SECTION("until it's unblocked")
+    {
+      REQUIRE_FALSE(html->AppendChild(*document->CreateElement(u8"body").ReleaseValue()).HasException());
+      page->UpdateRendering();
+      CHECK(calls == 1);
+    }
+
+    SECTION("or the block times out")
+    {
+      auto &loop = html::EventLoop::Current();
+      loop.Run(loop.Now() + html::RenderBlocking::Timeout + 1ms);
+      CHECK_FALSE(html::RenderBlocking::IsRenderBlocked(*document));
+      page->UpdateRendering();
+      CHECK(calls == 1);
     }
   }
 

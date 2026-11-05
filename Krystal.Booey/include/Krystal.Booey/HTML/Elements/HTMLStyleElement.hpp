@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp"
 
@@ -19,6 +20,8 @@ namespace krys::boo::html
     UniquePtr<dom::DOMTokenList> _blocking;
     InlineStyleSheetOwner _styleSheetOwner;
     bool _loadedSheet {false};
+    bool _createdByParser {false};
+    bool _isRenderBlocking {false};
 
   public:
     HTMLStyleElement(dom::Document &document) noexcept;
@@ -71,6 +74,13 @@ namespace krys::boo::html
     void FinishParsingChildren() noexcept override;
 
   public:
+    /// @brief Blocks rendering on the element if it's potentially render-blocking (its `blocking` attribute
+    /// has `render`, or the parser made it) and its `media` matches the environment.
+    /// @see https://html.spec.whatwg.org/#update-a-style-block
+    void PotentiallyBlockRendering(const css::mq::MediaQueryList &mediaQueries) noexcept;
+    /// @see https://html.spec.whatwg.org/#unblock-rendering
+    void UnblockRendering() noexcept;
+
     bool SheetLoaded() noexcept override;
     void NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept override;
     void StartLoadingDynamicSheet() noexcept override;
@@ -81,5 +91,10 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLStyleElement)
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
   {
     return target.IsHTMLStyleElement();
+  }
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    return element && element->IsHTMLStyleElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

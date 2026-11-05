@@ -83,6 +83,9 @@ namespace krys::boo
     uint32 _renderingUpdateDepth {0};
     float _pageScaleFactor {1};
     bool _renderingUpdateIsScheduled {false};
+    /// @brief Whether the rendering update in progress skipped a render-blocked document, which the next one
+    /// tries again.
+    mutable bool _skippedRenderBlockedDocument {false};
     bool _isVisible {true};
     bool _scriptedAnimationsSuspended {false};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
@@ -225,8 +228,7 @@ namespace krys::boo
     void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
 
     void ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept;
-    /// @brief Calls @p functor for each document that's rendered.
-    // FIXME: Documents whose visual updates are suppressed, once there are any.
+    /// @brief Calls @p functor for each document that's rendered: not render-blocked ones.
     void ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept;
 
   private:

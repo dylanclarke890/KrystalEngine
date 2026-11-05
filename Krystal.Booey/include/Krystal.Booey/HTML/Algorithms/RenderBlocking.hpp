@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include <chrono>
 
 namespace krys::boo::dom
 {
@@ -14,6 +15,10 @@ namespace krys::boo::html
   class RenderBlocking
   {
   public:
+    /// @brief The implementation-defined timeout: how long after its window's time origin a document can be
+    /// render-blocked, so that a style sheet that never loads doesn't keep the page from showing.
+    static constexpr auto Timeout = std::chrono::seconds(5);
+
     /// @see https://html.spec.whatwg.org/multipage/dom.html#allows-adding-render-blocking-elements
     KRYS_NODISCARD static bool AllowsAddingRenderBlockingElements(const dom::Document &document) noexcept;
 

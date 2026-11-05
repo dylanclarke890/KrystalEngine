@@ -978,7 +978,7 @@ Status: reviewed (2026-11-01)
 
 Status: reviewed (2026-11-01)
 > Fixed: the focus fixup step of updating the rendering sets the Navigation API's focus changed during ongoing navigation to false, so a navigation that finishes afterwards resets the focus.
-> `EventLoop::RunNextTask` runs the oldest runnable task and a microtask checkpoint; the host runs the loop (`Run`), updates the rendering (`Page::UpdateRendering`, in upstream's order of steps) and starts idle periods each frame. There's no long task reporting or canvas context loss.
+> `EventLoop::RunNextTask` runs the oldest runnable task and a microtask checkpoint; the host runs the loop (`Run`), updates the rendering (`Page::UpdateRendering`, in upstream's order of steps, leaving out render-blocked documents and trying again in the next one) and starts idle periods each frame. There's no long task reporting or canvas context loss.
 <!-- definitions: update-the-rendering context-lost-steps synchronous-section -->
 
 - [x] [An event loop must continually run through the following steps for as long as i…](https://html.spec.whatwg.org/#event-loop-processing-model) — An event loop must continually run through the following steps for as long as it exists:

@@ -86,4 +86,18 @@ namespace krys::boo::html::tests
     CHECK_FALSE(RenderBlocking::IsRenderBlocking(*link));
     CHECK_FALSE(RenderBlocking::IsRenderBlocked(*document));
   }
+
+  TEST_CASE("RenderBlocking: style elements block rendering until their sheet is processed",
+            "[HTML][RenderBlocking][html:update-a-style-block][html:potentially-render-blocking]")
+  {
+    auto document = CreateDocumentWithoutBody();
+    auto style = document->CreateElement(u8"style").ReleaseValue();
+    REQUIRE_FALSE(style->SetAttribute(u8"blocking", u8"render").HasException());
+
+    // Updating the style block blocks rendering on the element, and processing the sheet unblocks it, so a
+    // sheet with no critical subresources leaves nothing blocked.
+    REQUIRE_FALSE(style->AppendChild(*document->CreateTextNode(u8"p { color: red }")).HasException());
+    REQUIRE_FALSE(document->Head()->AppendChild(*style).HasException());
+    CHECK_FALSE(RenderBlocking::IsRenderBlocking(*style));
+  }
 }

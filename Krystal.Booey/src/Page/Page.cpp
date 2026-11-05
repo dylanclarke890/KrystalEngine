@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
@@ -179,6 +180,7 @@ namespace krys::boo
     _renderingUpdateRemainingSteps = AllRenderingUpdateSteps;
     _lastRenderingUpdateTimestamp = html::EventLoop::Current().Now();
     _renderingUpdateIsScheduled = false;
+    _skippedRenderBlockedDocument = false;
 
     LayoutIfNeeded();
 
@@ -317,7 +319,8 @@ namespace krys::boo
   void Page::RenderingUpdateCompleted() noexcept
   {
     _renderingUpdateRemainingSteps = {};
-    if (!_unfulfilledRequestedSteps.IsEmpty())
+    // A render-blocked document is updated once it's unblocked, or the block times out.
+    if (!_unfulfilledRequestedSteps.IsEmpty() || _skippedRenderBlockedDocument)
     {
       _renderingUpdateIsScheduled = true;
       _unfulfilledRequestedSteps = {};
@@ -427,8 +430,19 @@ namespace krys::boo
 
   void Page::ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept
   {
+    // https://html.spec.whatwg.org/#update-the-rendering
+    // Remove from docs any Document doc for which doc is render-blocked.
     List<Ref<dom::Document>> documents;
-    ForEachDocument([&](dom::Document &document) { documents.push_back(ShareRef(document)); });
+    ForEachDocument(
+      [&](dom::Document &document)
+      {
+        if (html::RenderBlocking::IsRenderBlocked(document))
+        {
+          _skippedRenderBlockedDocument = true;
+          return;
+        }
+        documents.push_back(ShareRef(document));
+      });
     for (auto &document : documents)
     {
       functor(*document);

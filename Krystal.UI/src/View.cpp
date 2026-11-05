@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -688,6 +689,12 @@ namespace krys::ui
         return;
       }
       _textureMapper = krys::move(*textureMapper);
+    }
+
+    // A render-blocked document isn't shown: the last frame stays until it's unblocked.
+    if (boo::html::RenderBlocking::IsRenderBlocked(Document()))
+    {
+      return;
     }
 
     // The rendering update runs in Update; painting only needs the layout and the layers up to date.
