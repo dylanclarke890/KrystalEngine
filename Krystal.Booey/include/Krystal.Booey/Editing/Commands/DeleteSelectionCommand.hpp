@@ -6,9 +6,7 @@ namespace krys::boo
 {
   /// @brief Deletes the selection, merging the paragraphs at its ends and fixing up the whitespace and the
   /// typing style left behind.
-  // FIXME: Autocorrection's record of the text it replaced
-  // (originalStringForAutocorrectionAtBeginningOfSelection, deletedAutocorrectionAtPosition), with document
-  // markers and text checking.
+  // (There's no autocorrection, whose record of the text it replaced would be kept; see DIFFERENCES.md.)
   class DeleteSelectionCommand : public CompositeEditCommand
   {
   private:

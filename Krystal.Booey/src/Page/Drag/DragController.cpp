@@ -865,8 +865,8 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Attachments and models, which are Cocoa's; image overlays' text, once there are image overlays;
-  // colour inputs, with dragging colours.
+  // FIXME: Attachments and models, which are Cocoa's; colour inputs, with dragging colours. (There's no
+  // image overlay text; see DIFFERENCES.md.)
   RefPtr<dom::Element> DragController::DraggableElement(const LocalFrame *sourceFrame,
                                                         dom::Element *startElement,
                                                         const IntPoint &dragOrigin,

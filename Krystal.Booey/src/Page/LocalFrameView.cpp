@@ -1767,8 +1767,8 @@ namespace krys::boo
       GetPossiblyFixedRectToExpose(viewRect, targetRect, isFixed, options.AlignX, options.AlignY);
 
     // Avoid scrolling to the rounded value of revealRect.location() if we don't actually need to scroll
-    // FIXME: Only scrolling forward (OnlyAllowForwardScrolling), once there's find-in-page; smooth scrolling
-    // (useSmoothScrolling), once there are scroll animations.
+    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations. (Only scrolling
+    // forward, OnlyAllowForwardScrolling, is for find in page, which there isn't; see DIFFERENCES.md.)
     if (revealRect != viewRect)
     {
       ScrollOffset clampedScrollPosition =

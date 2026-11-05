@@ -165,7 +165,7 @@ namespace krys::boo
 
   bool LegacyInlineTextBox::HasMarkers() const noexcept
   {
-    // FIXME: Document markers (MarkedText::collectForDocumentMarkers), once there are document markers.
+    // (There are no document markers; see DIFFERENCES.md.)
     return false;
   }
 

@@ -210,7 +210,7 @@ namespace krys::boo
     return {};
   }
 
-  // FIXME: Image overlays' hosts (nodeForImageData), once there are image overlays.
+  // (There are no image overlays, whose hosts would count; see DIFFERENCES.md.)
   Image *HitTestResult::GetImage() const noexcept
   {
     if (!_innerNonSharedNode)
@@ -308,7 +308,7 @@ namespace krys::boo
         || (request.DisallowsUserAgentShadowContentExceptForImageOverlays()
             && node->IsInUserAgentShadowTree()))
     {
-      // FIXME: Image overlays aren't exempt from the second check, with image overlays.
+      // (There are no image overlays to exempt from the second check; see DIFFERENCES.md.)
       node = AncestorNodeInThisScope(node->NodeDocument(), node);
     }
 

@@ -594,7 +594,7 @@ Status: reviewed (2026-11-01)
 #### [6.8.5 Spelling and grammar checking](https://html.spec.whatwg.org/#spelling-and-grammar-checking)
 
 Status: reviewed (2026-11-01)
-> `HTMLElement::SpellCheck`; every element's default behavior is inherit-by-default, true at the root. Text isn't checked (see `KNOWN-ISSUES.md`).
+> `HTMLElement::SpellCheck`; every element's default behavior is inherit-by-default, true at the root. Text isn't checked (see `DIFFERENCES.md`).
 > Fixed: the `spellcheck` getter was false in the Default state.
 <!-- definitions: concept-spellcheck-default concept-spellcheck-default-true concept-spellcheck-default-false concept-spellcheck-default-inherit attr-spellcheck -->
 

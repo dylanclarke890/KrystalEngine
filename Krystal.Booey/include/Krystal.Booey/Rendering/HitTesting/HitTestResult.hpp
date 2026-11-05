@@ -31,8 +31,8 @@ namespace krys::boo
 
   /// @brief What a hit test found: the innermost node under the point, the link element it's in, the point in
   /// its renderer's coordinates, and for list-based tests every node hit.
-  /// FIXME: Widgets (isOverWidget's widgets), and the rest of the queries about what was hit (spelling,
-  /// titles, media, links' targets, editability, dictation).
+  /// FIXME: Widgets (isOverWidget's widgets), and the rest of the queries about what was hit (titles, media,
+  /// links' targets, editability). (There's no spelling or dictation to ask about; see DIFFERENCES.md.)
   class HitTestResult
   {
   public:

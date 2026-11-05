@@ -19,8 +19,8 @@
 namespace krys::boo
 {
   // FIXME: The editing commands (cutting, pasting, styling, lists, indenting, links, inserting HTML, images
-  // and rules, the mark and kill ring, find and spelling), with editing commands; the commands' state and
-  // value (bold, the font and colours), with styling.
+  // and rules), with editing commands; the commands' state and value (bold, the font and colours), with
+  // styling. (There's no mark and kill ring, find or spelling; see DIFFERENCES.md.)
   class EditorInternalCommand
   {
   public:

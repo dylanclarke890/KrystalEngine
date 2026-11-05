@@ -350,7 +350,8 @@ namespace krys::boo
 
   namespace
   {
-    // FIXME: Traversing the flat tree (TraversesFlatTree), once something asks to (finding text).
+    // (The flat tree, TraversesFlatTree, is for finding text, and there's no find in page; see
+    // DIFFERENCES.md.)
     KRYS_NODISCARD inline dom::Node *FirstChild(TextIteratorBehaviors, dom::Node &node) noexcept
     {
       return node.FirstChild();
@@ -894,7 +895,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Entering image overlays (EntersImageOverlays), once there are any.
+    // (There are no image overlays to enter; see DIFFERENCES.md.)
 
     _hasEmitted = true;
 

@@ -119,8 +119,9 @@ namespace krys::boo
   /// @brief A document's editor: the commands that act on its selection (moving and extending it, selecting
   /// and copying), the keys bound to them, the clipboard, and the text an input method composes.
   // FIXME: Editing commands (typing, deleting, cutting, pasting, styling, undo and redo), the typing style,
-  // spelling and grammar, text checking, the mark and kill ring, find, and the editor's responses to
-  // selection and content changes, with editing commands, form controls and text input.
+  // and the editor's responses to selection and content changes, with editing commands, form controls and
+  // text input. (There's no spelling and grammar, text checking, mark and kill ring or find; see
+  // DIFFERENCES.md.)
   class Editor
   {
     KRYS_NON_COPY_MOVABLE(Editor);

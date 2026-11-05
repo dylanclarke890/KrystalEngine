@@ -412,7 +412,7 @@ namespace krys::boo
     Paste(*Pasteboard::CreateForCopyAndPaste(), fromMenuOrKeyBinding);
   }
 
-  // FIXME: Spelling markers (updateMarkersForWordsAffectedByEditing), with text checking.
+  // There are no spelling markers to update, as there's no text checking (see DIFFERENCES.md).
   void Editor::Paste(Pasteboard &pasteboard, FromMenuOrKeyBinding fromMenuOrKeyBinding) noexcept
   {
     bool oldPasting =
@@ -432,7 +432,7 @@ namespace krys::boo
     _pastingFromMenuOrKeyBinding = oldPasting;
   }
 
-  // FIXME: Spelling markers (updateMarkersForWordsAffectedByEditing), with text checking.
+  // There are no spelling markers to update, as there's no text checking (see DIFFERENCES.md).
   void Editor::PasteAsPlainText(FromMenuOrKeyBinding fromMenuOrKeyBinding) noexcept
   {
     bool oldPasting =
@@ -628,10 +628,9 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Image documents and image overlays (writeImageToPasteboard), with images on the pasteboard; the
-  // editor client's notifications around writing the selection; spelling markers
-  // (updateMarkersForWordsAffectedByEditing), with text checking; and accessibility's notification of the cut
-  // text, with accessibility.
+  // FIXME: Image documents (writeImageToPasteboard), with images on the pasteboard; the editor client's
+  // notifications around writing the selection; and accessibility's notification of the cut text, with
+  // accessibility. (There are no image overlays or spelling markers; see DIFFERENCES.md.)
   void Editor::PerformCutOrCopy(EditorActionSpecifier action) noexcept
   {
     auto selection = SelectedRange();
@@ -672,7 +671,7 @@ namespace krys::boo
 
   void Editor::TextFieldDidEndEditing(dom::Element &e) noexcept
   {
-    // FIXME: Dismissing the correction panel (dismissCorrectionPanelAsIgnored), with spelling correction.
+    // (There's no correction panel to dismiss, as there's no spelling correction; see DIFFERENCES.md.)
     if (auto *client = Client())
     {
       client->TextFieldDidEndEditing(e);
@@ -713,7 +712,8 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Writing Tools suppressing editing, and stopping scrolling as content grows while typing.
+  // FIXME: Stopping scrolling as content grows while typing. (There are no Writing Tools to suppress editing;
+  // see DIFFERENCES.md.)
   bool Editor::WillApplyEditing(CompositeEditCommand &command,
                                 List<RefPtr<dom::StaticRange>> &&targetRanges) noexcept
   {
@@ -757,8 +757,8 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Updating the editor's UI, with menus; and autocorrection's response (respondToAppliedEditing),
-  // with text checking.
+  // FIXME: Updating the editor's UI, with menus. (There's no autocorrection to respond; see
+  // DIFFERENCES.md.)
   void Editor::AppliedEditing(CompositeEditCommand &command) noexcept
   {
     _document.UpdateLayout();
@@ -912,8 +912,8 @@ namespace krys::boo
     return _lastEditCommand.get();
   }
 
-  // FIXME: Accessibility's notification of the change, with accessibility; and updating the spelling and
-  // grammar markers of the words the edit touched, with text checking.
+  // FIXME: Accessibility's notification of the change, with accessibility. (There are no spelling or
+  // grammar markers to update; see DIFFERENCES.md.)
   void Editor::RespondToChangedContents(const VisibleSelection &) noexcept
   {
     if (auto *client = Client())
@@ -1213,9 +1213,8 @@ namespace krys::boo
     return InsertText(text, triggeringEvent, dom::TextEventInputType::Keyboard);
   }
 
-  // FIXME: Dictation (DictationCommand), with dictation; autocorrection before and after the text, with text
-  // checking; and revealing the selection when the client asks (shouldRevealCurrentSelectionAfterInsertion),
-  // with the rest of the editor client.
+  // FIXME: Revealing the selection when the client asks (shouldRevealCurrentSelectionAfterInsertion), with
+  // the rest of the editor client. (There's no dictation or autocorrection; see DIFFERENCES.md.)
   bool Editor::InsertTextWithoutSendingTextEvent(utf8_stringview text, bool selectInsertedText,
                                                  dom::TextEvent *triggeringEvent) noexcept
   {
@@ -1360,7 +1359,7 @@ namespace krys::boo
     return InsertTextWithoutSendingTextEvent(data, false, &event);
   }
 
-  // FIXME: The kill ring (addRangeToKillRing, setStartNewKillRingSequence), with the kill ring.
+  // (There's no kill ring to add the range to; see DIFFERENCES.md.)
   bool Editor::DeleteWithDirection(SelectionDirection direction, TextGranularity granularity,
                                    bool shouldAddToKillRing, bool isTypingAction) noexcept
   {
@@ -1424,7 +1423,8 @@ namespace krys::boo
     DeleteSelectionCommand::Create(_document, smartDelete, true, false, false, true, editingAction)->Apply();
   }
 
-  // FIXME: Beeping when there's nothing to delete (systemBeep), with system sounds; and the kill ring.
+  // FIXME: Beeping when there's nothing to delete (systemBeep), with system sounds. (There's no kill ring;
+  // see DIFFERENCES.md.)
   void Editor::PerformDelete() noexcept
   {
     if (!CanDelete())
@@ -1435,9 +1435,9 @@ namespace krys::boo
     DeleteSelectionWithSmartDelete(CanSmartCopyOrDelete());
   }
 
-  // FIXME: Waiting for the inserted images to load before revealing the selection;
-  // accessibility's notifications of the pasted text, with accessibility; and checking the spelling of the
-  // editable root, with text checking.
+  // FIXME: Waiting for the inserted images to load before revealing the selection; and accessibility's
+  // notifications of the pasted text, with accessibility. (There's no spell checking; see
+  // DIFFERENCES.md.)
   void Editor::ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
                                             bool smartReplace, bool matchStyle,
                                             EditAction editingAction) noexcept
@@ -1872,9 +1872,9 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Spelling and grammar, the kill ring (setStartNewKillRingSequence), revealing images that load
-  // (imageElementsToLoadBeforeRevealingSelection) and the editor's user interface updates
-  // (scheduleEditorUIUpdate), with those.
+  // FIXME: Revealing images that load (imageElementsToLoadBeforeRevealingSelection) and the editor's user
+  // interface updates (scheduleEditorUIUpdate), with those. (There's no spelling and grammar checking or
+  // kill ring; see DIFFERENCES.md.)
   void Editor::RespondToChangedSelection(const VisibleSelection &,
                                          EnumSet<FrameSelectionSetSelectionOption>) noexcept
   {

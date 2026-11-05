@@ -27,7 +27,7 @@ namespace krys::boo::dom
   /// before the editor inserts it.
   /// @note Legacy.
   /// @see https://w3c.github.io/uievents/#legacy-textevent-events
-  // FIXME: Dictation's alternatives (dictationAlternatives), with dictation.
+  // (There are no dictation alternatives; see DIFFERENCES.md.)
   class TextEvent final : public UIEvent
   {
   private:

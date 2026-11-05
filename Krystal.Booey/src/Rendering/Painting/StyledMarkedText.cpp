@@ -62,7 +62,8 @@ namespace krys::boo
       case MarkedText::Type::Unmarked:              break;
       case MarkedText::Type::GrammarError:
       case MarkedText::Type::SpellingError:
-        // FIXME: ::grammar-error and ::spelling-error, once there are document markers.
+        // (::grammar-error and ::spelling-error never apply, as there are no document markers; see
+        // DIFFERENCES.md.)
         break;
       case MarkedText::Type::Highlight:
       {

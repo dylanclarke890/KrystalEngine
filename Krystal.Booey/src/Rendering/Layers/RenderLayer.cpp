@@ -1564,8 +1564,7 @@ namespace krys::boo
       SetSelfAndDescendantsNeedPositionUpdate();
     }
 
-    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
-    // markers.
+    // (There are no document markers whose rects to invalidate; see DIFFERENCES.md.)
     RecursiveUpdateLayerPositions(updateLayerPositionFlags(environmentChanged));
   }
 
@@ -1593,8 +1592,7 @@ namespace krys::boo
       SetSelfAndDescendantsNeedPositionUpdate();
     }
 
-    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
-    // markers.
+    // (There are no document markers whose rects to invalidate; see DIFFERENCES.md.)
     RecursiveUpdateLayerPositions(updateLayerPositionFlags(didFullRepaint, environmentChanged));
   }
 
@@ -4860,8 +4858,7 @@ namespace krys::boo
 
   void RenderLayer::UpdateLayerPositionsAfterOverflowScroll() noexcept
   {
-    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
-    // markers.
+    // (There are no document markers whose rects to invalidate; see DIFFERENCES.md.)
 
     // FIXME: why is it OK to not check the ancestors of this layer in order to
     // initialize the HasSeenViewportConstrainedAncestor and HasSeenAncestorWithOverflowClip flags?
@@ -4872,8 +4869,7 @@ namespace krys::boo
   {
     krys_debug_assert(IsRenderViewLayer());
 
-    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
-    // markers.
+    // (There are no document markers whose rects to invalidate; see DIFFERENCES.md.)
     RecursiveUpdateLayerPositionsAfterScroll();
   }
 

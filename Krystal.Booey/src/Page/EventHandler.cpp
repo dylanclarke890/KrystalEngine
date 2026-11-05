@@ -339,7 +339,7 @@ namespace krys::boo
       document->UpdateHoverActiveState(request, targetElement.get());
     }
 
-    // FIXME: Image overlays (disallowsUserAgentShadowContentExceptForImageOverlays), once there are any.
+    // (There are no image overlays; see DIFFERENCES.md.)
     if (request.DisallowsUserAgentShadowContent())
     {
       result.SetToNonUserAgentShadowAncestor();
@@ -1700,7 +1700,7 @@ namespace krys::boo
     {
       case CursorType::Auto:
       {
-        // FIXME: Image overlay text, once there are image overlays.
+        // (There's no image overlay text; see DIFFERENCES.md.)
         bool editable = node->HasEditableStyle();
 
         if (UseHandCursor(node, result.IsOverLink(), shiftKey))
@@ -2109,8 +2109,8 @@ namespace krys::boo
         type, *node, dom::EventInit {.Bubbles = true, .Cancelable = true});
     }
 
-    // FIXME: Image overlays (ImageOverlay::isInsideOverlay) and nodes that select on mouse down
-    // (shouldSelectOnMouseDown), once there are any.
+    // FIXME: Nodes that select on mouse down (shouldSelectOnMouseDown), once there are any. (There are no
+    // image overlays; see DIFFERENCES.md.)
     KRYS_NODISCARD RefPtr<dom::Node> NodeToSelectOnMouseDownForNode(dom::Node &targetNode) noexcept
     {
       return dom::Position::RootUserSelectAllForNode(&targetNode);
@@ -2891,8 +2891,8 @@ namespace krys::boo
     return UpdateSelectionForMouseDownDispatchingSelectStart(targetNode.get(), newSelection, granularity);
   }
 
-  // FIXME: The chrome client's shouldUseMouseEventForSelection, quirks and image overlay text, once there are
-  // any.
+  // FIXME: The chrome client's shouldUseMouseEventForSelection and quirks, once there are any. (There's no
+  // image overlay text; see DIFFERENCES.md.)
   bool EventHandler::CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) const noexcept
   {
     auto *node = event.TargetNode();
@@ -2911,8 +2911,8 @@ namespace krys::boo
     return _mouseDownMayStartSelect;
   }
 
-  // FIXME: Widgets and the scrollbar corner (isPointInScrollbarCorner); image overlays' text,
-  // once there are image overlays.
+  // FIXME: Widgets and the scrollbar corner (isPointInScrollbarCorner). (There's no image overlay text; see
+  // DIFFERENCES.md.)
   bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);
@@ -3095,7 +3095,7 @@ namespace krys::boo
     UpdateSelectionForMouseDrag(result);
   }
 
-  // FIXME: Image overlays (shouldExtendSelectionToTargetNode), once there are any.
+  // (There are no image overlays; see DIFFERENCES.md.)
   void EventHandler::UpdateSelectionForMouseDrag(const HitTestResult &hitTestResult) noexcept
   {
     if (!MouseDownMayStartSelect())

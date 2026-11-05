@@ -1895,7 +1895,7 @@ namespace krys::boo
                  DefaultSetSelectionOptions(userTriggered));
   }
 
-  // FIXME: Image overlays (ImageOverlay::isInsideOverlay), once there are any.
+  // (There are no image overlays; see DIFFERENCES.md.)
   bool FrameSelection::Contains(const LayoutPoint &point) const noexcept
   {
     // Treat a collapsed selection like no selection.

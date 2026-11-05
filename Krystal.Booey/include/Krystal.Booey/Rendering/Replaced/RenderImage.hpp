@@ -23,8 +23,8 @@ namespace krys::boo
   };
 
   /// @brief The renderer of an image: an `<img>`, or generated content (`content: url(...)`).
-  // FIXME: Shadow content (image overlays and controls), selection geometry, the broken image icon, and
-  // whether the foreground is known to be opaque.
+  // FIXME: Shadow content (controls), selection geometry, the broken image icon, and whether the foreground
+  // is known to be opaque. (There are no image overlays; see DIFFERENCES.md.)
   class RenderImage : public RenderReplaced
   {
     KRYS_NON_COPY_MOVABLE(RenderImage);

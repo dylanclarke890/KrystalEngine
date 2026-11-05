@@ -12,8 +12,8 @@ namespace krys::boo
 
   /// @brief A range of a text box's text painted in its own way (unmarked text, selection, document markers,
   /// highlights), by byte offsets into the box's text.
-  /// FIXME: Collecting document markers and dragged or transparent content (`collectForDocumentMarkers`,
-  /// `collectForDraggedAndTransparentContent`), once there are document markers and drag and drop; until then
+  /// FIXME: Collecting dragged content (`collectForDraggedAndTransparentContent`), once it's drawn
+  /// translucent. There are no document markers or transparent content to collect (see DIFFERENCES.md), so
   /// `RenderedDocumentMarker`s aren't kept.
   struct MarkedText
   {

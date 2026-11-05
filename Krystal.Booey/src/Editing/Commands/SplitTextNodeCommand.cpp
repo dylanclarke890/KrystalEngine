@@ -26,7 +26,7 @@ namespace krys::boo
     krys_debug_assert(_offset < _text2->Length());
   }
 
-  // FIXME: Copying document markers (spelling, grammar), with document markers.
+  // (There are no document markers to copy; see DIFFERENCES.md.)
   void SplitTextNodeCommand::DoApply() noexcept
   {
     auto *parent = _text2->ParentNode();

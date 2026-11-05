@@ -442,7 +442,6 @@ namespace krys::boo
     // These are characters that can behave as word boundaries, but can appear within words.
     // If they are just typed, i.e. if they are immediately followed by a caret, we want to delay text
     // checking until the next character has been typed.
-    // FIXME: this is required until <rdar://problem/6853027> is fixed and text checking can do this for us.
     return character == '\'' || character == '@' || character == 0x2019 /* rightSingleQuotationMark */
            || character == 0x05F4 /* hebrewPunctuationGershayim */;
   }

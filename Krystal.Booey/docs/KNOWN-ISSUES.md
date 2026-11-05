@@ -14,7 +14,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No Event Timing or Long Animation Frames timing: inner invoke doesn't record timing info for event listeners, and firing an event doesn't record task time (FIXMEs in `EventDispatcher.cpp` and `EventDispatcher.hpp`).
 - `Element` doesn't run the rest of `didMoveToNewDocument` (FIXME in `Element.cpp`): nodes aren't told they have moved. Observer data does move (`Element::OnAdopt`), but a canvas moved to another document doesn't move its context's preparation (FIXME in `HTMLCanvasElement.hpp`), and lazy-image moves are untested.
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
-- Failed custom element constructions and upgrades, exceptions thrown by listeners and parse errors are not reported anywhere (there's no console).
 - `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `nonce`).
 - `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
@@ -47,7 +46,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `<marquee>`'s `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` and `stop()` are not implemented, and marquees don't scroll (FIXME in `HTMLMarqueeElement.hpp`).
 - `autofocus` insertion steps run only for HTML elements, not SVG or MathML elements.
 - Popovers: no `interestfor` and no `:open`.
-- `<details>` auto-expansion for find in page waits for a find feature.
 - `MIMETypeRegistry::MIMETypeForExtension` has only a built-in table; most other extensions have no type (FIXME in `MIMETypeRegistry.cpp`).
 - Slider thumbs can't be dragged by touch: a touch pan scrolls.
 
@@ -255,7 +253,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `<video>`, `ImageBitmap` and `OffscreenCanvas` are not `CanvasImageSource`s. `createImageBitmap`, `OffscreenCanvas`, `ImageBitmapRenderingContext`, `PaintRenderingContext2D`, WebGL and WebGPU contexts do not exist, and there are no context loss events.
 - `getImageData` throws no `SecurityError` and canvases and patterns are always origin-clean (FIXME).
 - An image drawn without a renderer uses its own orientation, not its computed style's (FIXME).
-- No console messages are produced for failed canvas reads or for saves past the state stack limit.
 - A canvas copy and every readback wait for the GPU.
 - Image buffers of a resolution scale other than 1 replay their transforms unscaled (FIXME on Krystal.UI's `ImageBufferRender2DBackend`); canvases' buffers are always scale 1.
 - `letterSpacing` and `wordSpacing` reject `calc()` lengths.
@@ -275,7 +272,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Paste does not render the fragment in a staging document to take its text as rendered and drop invisible content (`ReplacementFragment`); it does not remove event handler attributes or `javascript:` URLs from pasted markup (FIXMEs in `ReplaceSelectionCommand.cpp`). `MarkupAccumulator` does not resolve URL attributes against the base URL, and the markup sanitiser's staging page has no dark appearance.
 - Bidi-aware pasting (matching each pasted paragraph's direction) and the bidi contiguity helpers (`AdjustToVisuallyContiguousRange` and relatives) are absent.
 - `EditorClient` is only the selection, clipboard permission, undo/redo, composition and text-field hooks. It has no `shouldInsertText`/`shouldDeleteRange`/`shouldBeginEditing`/`shouldApplyStyle` delegates, so the host cannot veto or observe edits, and no spelling, grammar or text-checking, autocorrection or autofill hooks.
-- Find in page, the drag caret, the overtype block cursor, caret browsing's focusing of the anchor the caret is in, stopping the blink while typing, beeping on empty cuts and deletes, and spatial navigation's use of the caret are absent.
+- The drag caret, the overtype block cursor, caret browsing's focusing of the anchor the caret is in, stopping the blink while typing, beeping on empty cuts and deletes, and spatial navigation's use of the caret are absent.
 - Taps do not place the caret at the nearest word boundary (`WordBoundaryForPositionWithoutCrossingLine`; FIXME in `EventHandler.cpp`).
 - Image documents and writing images to the pasteboard are absent. Link decoration filtering and the `application/x-moz-file` quirk are not implemented.
 - Script access to the clipboard (`javaScriptCanAccessClipboard`, `domPasteAllowed`) is off (FIXMEs in `EditorCommand.cpp`). Password fields are kept off the clipboard.

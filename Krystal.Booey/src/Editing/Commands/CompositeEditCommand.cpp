@@ -1691,8 +1691,7 @@ namespace krys::boo
                    preserveStyle);
   }
 
-  // FIXME: Clearing and marking the spelling and grammar of the moved paragraph
-  // (clearMisspellingsAndBadGrammar, markMisspellingsAndBadGrammar), with text checking.
+  // (There's no spelling and grammar to clear and mark on the moved paragraph; see DIFFERENCES.md.)
   void CompositeEditCommand::MoveParagraphs(const VisiblePosition &startOfParagraphToMove,
                                             const VisiblePosition &endOfParagraphToMove,
                                             const VisiblePosition &passedDestination, bool preserveSelection,

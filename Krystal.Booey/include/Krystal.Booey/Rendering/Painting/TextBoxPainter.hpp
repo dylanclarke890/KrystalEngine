@@ -40,9 +40,8 @@ namespace krys::boo
 
   /// @brief Paints a text box: its text, with shadows, emphasis marks, decorations, highlights, the selection
   /// and an input method's composition (its underlines, or else its fill).
-  /// FIXME: Document markers (their background fills and marked text, and platform document markers), the
-  /// composition's custom highlights, event regions, accessibility bounds and contentful paint tracking come
-  /// with document markers, event regions and accessibility.
+  /// FIXME: The composition's custom highlights, event regions, accessibility bounds and contentful paint
+  /// tracking come with event regions and accessibility. There are no document markers (see DIFFERENCES.md).
   /// FIXME: Combined text (`text-combine-upright`, `RenderCombineText`) is still to come.
   class TextBoxPainter
   {

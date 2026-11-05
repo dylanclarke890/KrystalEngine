@@ -74,7 +74,7 @@ namespace krys::boo
   };
 
   /// @brief How to scroll a rect into view.
-  // FIXME: Forward-only scrolling (onlyAllowForwardScrolling), once there's find-in-page.
+  // (There's no forward-only scrolling, which is for find in page; see DIFFERENCES.md.)
   struct ScrollRectToVisibleOptions
   {
     SelectionRevealMode RevealMode {SelectionRevealMode::Reveal};

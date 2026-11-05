@@ -241,8 +241,7 @@ namespace krys::boo
     typingCommand->SetEndingSelection(currentSelection);
   }
 
-  // FIXME: Updating the spelling and grammar markers of the words the typing touches
-  // (updateMarkersForWordsAffectedByEditing), with text checking.
+  // (There are no spelling and grammar markers to update; see DIFFERENCES.md.)
   void TypingCommand::InsertText(dom::Document &document, utf8_stringview text, dom::Event *triggeringEvent,
                                  EnumSet<Option> options, TextCompositionType composition) noexcept
   {
