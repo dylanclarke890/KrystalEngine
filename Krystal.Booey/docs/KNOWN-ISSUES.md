@@ -83,7 +83,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `Percentage` consumers don't divide percentages produced by `calc()` by 100. Test: `PropertyParserHelpers(ConsumePercentageDividedBy100OrNumber calc percentage)` (`[!shouldfail]`, `tests/CSS/Properties/Consumers/Percentage.cpp`).
 - A root `calc()` `Negate`/`Invert` serialises only its child (`calc(1em)`), although "serialize a math function" step 4 serialises the root's children. Test: `TreeSerialisation(root negate and invert)` (`[!shouldfail]`).
 - Trigonometric functions in `calc()` evaluate their argument as radians: simplification converts degrees first but evaluation doesn't, so an unsimplified angle that reaches evaluation (for example `sin(sibling-index() * 10deg)` through `DoubleValue`) is wrong. Test: `TreeEvaluation(trigonometric functions of angles)` (`[!shouldfail]`).
 - `:heading` / `:heading()` (Selectors 5) and HTML's `:open` (for details, dialog and select elements) aren't in the pseudo-class table, and `:host(:not(.a .b))` parses although WPT says it is invalid. Tests: `CSSSelectorParser(heading-01.dat)` and `CSSSelectorParser(not-03.dat)` in `tests/CSS/Selectors/SelectorParser.cpp` (`[!shouldfail]`).
