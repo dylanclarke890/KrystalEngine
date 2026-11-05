@@ -295,7 +295,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `PointerCaptureController` leaves `targetOverride` set after releasing a capture (FIXME in `PointerCaptureController.cpp`).
 - The hovered element does not follow content under a still mouse until the fake mouse move after a scroll fires, 100 ms later (250 ms when moves are slow). Fake moves use the last mouse event's modifiers and do not check page visibility or focus (FIXME in `EventHandler.cpp`).
 - The XInput gamepad backend never reports the Guide button (it stays released).
 - Drag events' modifier keys are always none: `DragController` makes their mouse event without keys (FIXME in `DragController.cpp`).

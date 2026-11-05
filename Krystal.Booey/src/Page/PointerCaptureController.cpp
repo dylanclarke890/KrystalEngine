@@ -118,7 +118,8 @@ namespace krys::boo
     // 3. For the specified pointerId, clear the pending pointer capture target override, if set.
     capturingData->PendingTargetOverride = nullptr;
 
-    // FIXME: This leaves value.targetOverride set: webkit.org/b/221342.
+    // The pointer capture target override stays set until the process pending pointer capture steps run for
+    // the pointer's next event, which fire lostpointercapture and clear it.
 
     UpdateHaveAnyCapturingElement();
     return {};

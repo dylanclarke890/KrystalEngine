@@ -295,11 +295,15 @@ namespace krys::boo::tests
       (void)fixture.Take();
       CHECK_FALSE(a.ReleasePointerCapture(MousePointerID).HasException());
       CHECK_FALSE(a.HasPointerCapture(MousePointerID));
+      // The capture lasts until the pointer's next event, as the release is only pending.
+      CHECK(fixture.Take().empty());
+      CHECK(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerID) == &a);
       fixture.Move(10, 75, 1);
       auto records = fixture.Take();
       REQUIRE_FALSE(records.empty());
       CHECK(records[0] == "lostpointercapture!:a");
       CHECK(std::ranges::find(records, "pointermove!:b") != records.end());
+      CHECK_FALSE(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerID));
     }
 
     SECTION("removing the capturing element fires lostpointercapture at the document")
