@@ -290,13 +290,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- Remote loading: there is no network loader, cookies, origins, CORS, referrers, pings, preloads or integrity checks; the host pushes data in through the loader strategy.
-- `DocumentLoader` has no redirects, content policies (responses shown as downloads), archives or streaming; the main resource arrives whole on a networking task. There is no progress tracker, and HTTP status checks, `X-Content-Type-Options: nosniff` and content type parsing (`ParsedContentType`) are absent because responses carry no headers or statuses.
-- `DocumentWriter` takes HTML, XML and text documents only: there are no image, media or plug-in documents.
-- The only pragmas are `content-language` and `default-style`; the `Content-Language` header is ignored, as responses have no headers.
-- Prerendering, speculation rules, `javascript:` URLs, `pagereveal`/`pageswap` are not implemented. Icons, manifests and alternate style sheet sets chosen by script are not loaded.
-- No DOM `URL` interface or `URLSearchParams` (`url::URL` is internal), so WPT `setters_tests.json` is not run.
-- There are no deferred loads, multipart loads or unreachable URLs.
-- Document timers are not throttled or aligned, and animation frames are not throttled below the page's rate.
-- Fragment navigation does not reset scroll anchoring (there is none).
-- `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents and fullscreen steps of the update are FIXMEs, and `Document` has no post-layout task timer.
+- Responses can't be streamed: the main resource arrives whole on a networking task, and the loader strategy has no cancellation or synchronous loads (FIXME in `LoaderStrategy.hpp`).
+- `DocumentWriter` takes HTML, XML and text documents only: there are no image or media documents.
+- Icons (`<link rel=icon>`) are not loaded or handed to the host.
+- Animation frames are not throttled below the page's rate (FIXME in `ScriptedAnimationController.cpp`), and scroll events are not throttled (FIXME in `LocalFrameView.cpp`).
+- `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents in the update is a FIXME.
