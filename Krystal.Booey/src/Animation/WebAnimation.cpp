@@ -67,8 +67,8 @@ namespace krys::boo
   }
 
   WebAnimation::WebAnimation(dom::Document &document) noexcept
-      : _readyPromise(AnimationPromise::Create(*this)), _finishedPromise(AnimationPromise::Create(*this)),
-        _document(CreateWeakPtr(&document))
+      : _readyPromise(detail::AnimationPromise::Create(*this)),
+        _finishedPromise(detail::AnimationPromise::Create(*this)), _document(CreateWeakPtr(&document))
   {
     Instances().insert(this);
   }
@@ -312,7 +312,7 @@ namespace krys::boo
         _timeToRunPendingPlayTask = TimeToRunPendingTask::WhenReady;
         if (!wasAlreadyPending)
         {
-          _readyPromise = AnimationPromise::Create(*this);
+          _readyPromise = detail::AnimationPromise::Create(*this);
         }
       }
       else if (previousPlayState == PlayState::Paused && previousProgress)
@@ -867,7 +867,7 @@ namespace krys::boo
 
       // 2. Reject the current finished promise with a DOMException named "AbortError".
       // 3. Set the [[PromiseIsHandled]] internal slot of the current finished promise to true.
-      if (!_finishedPromise->IsFulfilled())
+      if (!_finishedPromise->IsSettled())
       {
         html::EventLoop::Current().QueueMicrotask(
           [finishedPromise = _finishedPromise]() mutable
@@ -875,7 +875,7 @@ namespace krys::boo
       }
 
       // 4. Let current finished promise be a new (pending) Promise object.
-      _finishedPromise = AnimationPromise::Create(*this);
+      _finishedPromise = detail::AnimationPromise::Create(*this);
 
       // 5. Create an AnimationPlaybackEvent, cancelEvent.
       // 6. Set cancelEvent's type attribute to cancel.
@@ -1030,14 +1030,14 @@ namespace krys::boo
     html::EventLoop::Current().QueueMicrotask(
       [readyPromise = _readyPromise]() mutable
       {
-        if (!readyPromise->IsFulfilled())
+        if (!readyPromise->IsSettled())
         {
           readyPromise->Reject(dom::Exception {dom::ExceptionCode::AbortError});
         }
       });
 
     // 7. Let animation's current ready promise be the result of creating a new resolved Promise object.
-    _readyPromise = AnimationPromise::Create(*this);
+    _readyPromise = detail::AnimationPromise::Create(*this);
     _readyPromise->Resolve();
   }
 
@@ -1215,7 +1215,7 @@ namespace krys::boo
 
     // 5. If current finished state is true and the current finished promise is not yet resolved, perform the
     //    following steps:
-    if (currentFinishedState && !_finishedPromise->IsFulfilled())
+    if (currentFinishedState && !_finishedPromise->IsSettled())
     {
       AnimationDidFinish();
       if (synchronouslyNotify == SynchronouslyNotify::Yes)
@@ -1244,9 +1244,9 @@ namespace krys::boo
 
     // 6. If current finished state is false and animation's current finished promise is already resolved, set
     //    animation's current finished promise to a new (pending) Promise object.
-    if (!currentFinishedState && _finishedPromise->IsFulfilled())
+    if (!currentFinishedState && _finishedPromise->IsSettled())
     {
-      _finishedPromise = AnimationPromise::Create(*this);
+      _finishedPromise = detail::AnimationPromise::Create(*this);
     }
 
     UpdateRelevance();
@@ -1405,7 +1405,7 @@ namespace krys::boo
     //     relevant Realm of animation.
     if (!hasPendingReadyPromise)
     {
-      _readyPromise = AnimationPromise::Create(*this);
+      _readyPromise = detail::AnimationPromise::Create(*this);
     }
 
     // 12. Schedule a task to run as soon as animation is ready.
@@ -1492,7 +1492,7 @@ namespace krys::boo
     }
 
     // 4. Resolve animation's current ready promise with animation.
-    if (!_readyPromise->IsFulfilled())
+    if (!_readyPromise->IsSettled())
     {
       _readyPromise->Resolve();
     }
@@ -1572,7 +1572,7 @@ namespace krys::boo
     //    object.
     if (!hasPendingReadyPromise)
     {
-      _readyPromise = AnimationPromise::Create(*this);
+      _readyPromise = detail::AnimationPromise::Create(*this);
     }
 
     // 9. Schedule a task to be executed at the first possible moment where all of the following conditions
@@ -1678,7 +1678,7 @@ namespace krys::boo
     _startTime = null;
 
     // 5. Resolve animation's current ready promise with animation.
-    if (!_readyPromise->IsFulfilled())
+    if (!_readyPromise->IsSettled())
     {
       _readyPromise->Resolve();
     }

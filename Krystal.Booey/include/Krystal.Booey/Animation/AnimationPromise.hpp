@@ -14,17 +14,24 @@
 namespace krys::boo
 {
   class WebAnimation;
+}
 
-  /// @brief An animation's ready or finished promise, as script would wait on it: it's fulfilled with the
-  /// animation, or rejected with an exception, once. Callbacks given before or after it settles run as
-  /// microtasks once it has.
-  /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-ready
-  /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-finished
+namespace krys::boo::detail
+{
+  /// @brief An animation's current ready or finished promise, which `WebAnimation::WhenReady` and
+  /// `WebAnimation::WhenFinished` wait on: it's fulfilled with the animation, or rejected with an exception,
+  /// once. Callbacks given before or after it settles run as microtasks once it has.
+  /// @see https://drafts.csswg.org/web-animations-1/#current-ready-promise
+  /// @see https://drafts.csswg.org/web-animations-1/#current-finished-promise
   class AnimationPromise final : public RefCounted<AnimationPromise>
   {
     KRYS_NON_COPY_MOVABLE(AnimationPromise);
 
   public:
+    using FulfilledCallback = Func<void(WebAnimation &animation)>;
+    using RejectedCallback = Func<void(const dom::Exception &exception)>;
+
+  private:
     enum class Status : uint8
     {
       Pending,
@@ -32,10 +39,6 @@ namespace krys::boo
       Rejected
     };
 
-    using FulfilledCallback = Func<void(WebAnimation &animation)>;
-    using RejectedCallback = Func<void(const dom::Exception &exception)>;
-
-  private:
     Status _status {Status::Pending};
     /// @brief Weak, as the animation holds its promises.
     WeakPtr<WebAnimation> _animation;
@@ -50,33 +53,19 @@ namespace krys::boo
     /// @brief A pending promise of @p animation.
     KRYS_NODISCARD static Ref<AnimationPromise> Create(WebAnimation &animation) noexcept;
 
-    KRYS_NODISCARD Status GetStatus() const noexcept
-    {
-      return _status;
-    }
-
     /// @brief Whether the promise has settled: it's been fulfilled or rejected.
-    KRYS_NODISCARD bool IsFulfilled() const noexcept
+    KRYS_NODISCARD bool IsSettled() const noexcept
     {
       return _status != Status::Pending;
     }
 
-    /// @brief The animation the promise is for; null once it's gone.
-    KRYS_NODISCARD WebAnimation *Animation() const noexcept;
-
-    /// @brief The exception the promise was rejected with, if it was.
-    KRYS_NODISCARD const Maybe<dom::Exception> &GetException() const noexcept
-    {
-      return _exception;
-    }
-
     /// @brief Calls @p onFulfilled or @p onRejected (either may be null) as a microtask once the promise
     /// settles. A fulfilled promise's callback isn't called if the animation is gone.
-    void Then(FulfilledCallback &&onFulfilled, RejectedCallback &&onRejected = nullptr) noexcept;
+    void Then(FulfilledCallback onFulfilled, RejectedCallback onRejected) noexcept;
 
     /// @brief Fulfils the promise with its animation.
     void Resolve() noexcept;
-    void Reject(dom::Exception &&exception) noexcept;
+    void Reject(dom::Exception exception) noexcept;
 
   private:
     void Settle() noexcept;

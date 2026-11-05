@@ -85,7 +85,7 @@ Each step is its own commit, built and tested. Delete the FIXMEs a removal makes
     `user-select`, `-webkit-hyphenate-limit-*` → `hyphenate-limit-chars`/`-lines`.
   - Keep for now: the `::-webkit-*` form control pseudo-elements and `-webkit-link`/`-webkit-focus-ring-color`
     keywords (the only way to style built-in controls until CSS Forms' pseudo-elements).
-- [ ] **10. Promises.** Convert `AnimationPromise`, the last promise type, to callbacks (`WhenReady`/
+- [x] **10. Promises.** Convert `AnimationPromise`, the last promise type, to callbacks (`WhenReady`/
   `WhenFinished` with an error path), keeping its replaced-promise and reject-on-cancel behaviour.
 - [ ] **11. Finish.** Delete this file and its line in `Krystal.Booey/CLAUDE.md`.
 

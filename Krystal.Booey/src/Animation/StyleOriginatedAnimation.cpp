@@ -130,16 +130,17 @@ namespace krys::boo
     return WebAnimation::BindingsPending();
   }
 
-  AnimationPromise &StyleOriginatedAnimation::BindingsReady() noexcept
+  void StyleOriginatedAnimation::BindingsWhenReady(ReadyCallback onReady, ErrorCallback onError) noexcept
   {
     FlushPendingStyleChanges();
-    return WebAnimation::BindingsReady();
+    WebAnimation::BindingsWhenReady(krys::move(onReady), krys::move(onError));
   }
 
-  AnimationPromise &StyleOriginatedAnimation::BindingsFinished() noexcept
+  void StyleOriginatedAnimation::BindingsWhenFinished(ReadyCallback onFinished,
+                                                      ErrorCallback onError) noexcept
   {
     FlushPendingStyleChanges();
-    return WebAnimation::BindingsFinished();
+    WebAnimation::BindingsWhenFinished(krys::move(onFinished), krys::move(onError));
   }
 
   dom::ExceptionOr<void> StyleOriginatedAnimation::BindingsPlay() noexcept

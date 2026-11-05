@@ -91,8 +91,8 @@ namespace krys::boo
 
     RefPtr<AnimationEffect> _effect;
     RefPtr<AnimationTimeline> _timeline;
-    Ref<AnimationPromise> _readyPromise;
-    Ref<AnimationPromise> _finishedPromise;
+    Ref<detail::AnimationPromise> _readyPromise;
+    Ref<detail::AnimationPromise> _finishedPromise;
     Maybe<WebAnimationTime> _previousCurrentTime;
     Maybe<WebAnimationTime> _startTime;
     Maybe<WebAnimationTime> _pendingStartTime;
@@ -210,16 +210,25 @@ namespace krys::boo
       return HasPendingPauseTask() || HasPendingPlayTask();
     }
 
+    using ReadyCallback = detail::AnimationPromise::FulfilledCallback;
+    using ErrorCallback = detail::AnimationPromise::RejectedCallback;
+
+    /// @brief Calls @p onReady once the animation is ready, or @p onError (an `AbortError`) if it's
+    /// cancelled while a play or pause is pending. It waits on the current ready promise, so a later play or
+    /// pause doesn't move it to the next one. Either is called as a microtask.
     /// @see https://drafts.csswg.org/web-animations-1/#current-ready-promise
-    KRYS_NODISCARD AnimationPromise &Ready() noexcept
+    void WhenReady(ReadyCallback onReady, ErrorCallback onError = nullptr) noexcept
     {
-      return *_readyPromise;
+      _readyPromise->Then(krys::move(onReady), krys::move(onError));
     }
 
+    /// @brief Calls @p onFinished once the animation finishes, or @p onError (an `AbortError`) if it's
+    /// cancelled first. It waits on the current finished promise: once the animation has finished, it's
+    /// called straight away until the animation leaves the finished state. Either is called as a microtask.
     /// @see https://drafts.csswg.org/web-animations-1/#current-finished-promise
-    KRYS_NODISCARD AnimationPromise &Finished() noexcept
+    void WhenFinished(ReadyCallback onFinished, ErrorCallback onError = nullptr) noexcept
     {
-      return *_finishedPromise;
+      _finishedPromise->Then(krys::move(onFinished), krys::move(onError));
     }
 
     /// @see https://drafts.csswg.org/web-animations-1/#cancel-an-animation
@@ -273,13 +282,15 @@ namespace krys::boo
     {
       return Pending();
     }
-    KRYS_NODISCARD virtual AnimationPromise &BindingsReady() noexcept
+    /// @brief Waits on the ready promise, as `ready` does.
+    virtual void BindingsWhenReady(ReadyCallback onReady, ErrorCallback onError = nullptr) noexcept
     {
-      return Ready();
+      WhenReady(krys::move(onReady), krys::move(onError));
     }
-    KRYS_NODISCARD virtual AnimationPromise &BindingsFinished() noexcept
+    /// @brief Waits on the finished promise, as `finished` does.
+    virtual void BindingsWhenFinished(ReadyCallback onFinished, ErrorCallback onError = nullptr) noexcept
     {
-      return Finished();
+      WhenFinished(krys::move(onFinished), krys::move(onError));
     }
     /// @brief Plays the animation, as `play()` does.
     virtual dom::ExceptionOr<void> BindingsPlay() noexcept

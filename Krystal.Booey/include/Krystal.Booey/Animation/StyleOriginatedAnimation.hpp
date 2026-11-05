@@ -56,8 +56,8 @@ namespace krys::boo
     KRYS_NODISCARD WebAnimation::PlayState BindingsPlayState() const noexcept final;
     KRYS_NODISCARD WebAnimation::ReplaceState BindingsReplaceState() const noexcept final;
     KRYS_NODISCARD bool BindingsPending() const noexcept final;
-    KRYS_NODISCARD AnimationPromise &BindingsReady() noexcept final;
-    KRYS_NODISCARD AnimationPromise &BindingsFinished() noexcept final;
+    void BindingsWhenReady(ReadyCallback onReady, ErrorCallback onError = nullptr) noexcept final;
+    void BindingsWhenFinished(ReadyCallback onFinished, ErrorCallback onError = nullptr) noexcept final;
     dom::ExceptionOr<void> BindingsPlay() noexcept override;
     dom::ExceptionOr<void> BindingsPause() noexcept override;
 

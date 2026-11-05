@@ -39,21 +39,37 @@ namespace krys::boo::tests
       return result.ReleaseValue();
     }
 
-    /// @brief Records the outcomes of promises: the animation's ID when fulfilled, the exception's name when
-    /// rejected.
-    struct PromiseRecorder
+    /// @brief Records the outcomes of `WhenReady` and `WhenFinished`: what was waited on and the animation's
+    /// ID, or the exception's name.
+    struct AnimationWaitRecorder
     {
       List<std::string> Records;
 
-      void Watch(AnimationPromise &promise) noexcept
+      KRYS_NODISCARD WebAnimation::ReadyCallback Settled(std::string what) noexcept
       {
-        promise.Then(
-          [this](WebAnimation &animation)
-          { Records.push_back("fulfilled " + std::string(animation.Id().begin(), animation.Id().end())); },
-          [this](const dom::Exception &exception)
-          {
-            Records.push_back(exception.Code() == dom::ExceptionCode::AbortError ? "AbortError" : "rejected");
-          });
+        return [this, what](WebAnimation &animation)
+        {
+          Records.push_back(what + " " + std::string(animation.Id().begin(), animation.Id().end()));
+        };
+      }
+
+      KRYS_NODISCARD WebAnimation::ErrorCallback Failed(std::string what) noexcept
+      {
+        return [this, what](const dom::Exception &exception)
+        {
+          Records.push_back(
+            what + " " + (exception.Code() == dom::ExceptionCode::AbortError ? "AbortError" : "rejected"));
+        };
+      }
+
+      void WhenReady(WebAnimation &animation) noexcept
+      {
+        animation.WhenReady(Settled("ready"), Failed("ready"));
+      }
+
+      void WhenFinished(WebAnimation &animation) noexcept
+      {
+        animation.WhenFinished(Settled("finished"), Failed("finished"));
       }
     };
   }
@@ -145,7 +161,7 @@ namespace krys::boo::tests
     second->Cancel(WebAnimation::Silently::Yes);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Animatable: the ready and finished promises",
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Animatable: waiting for the animation to be ready and finished",
                    "[Animation][Animatable]")
   {
     AnimationPageFixture fixture {u8"<!DOCTYPE html><div id=box></div>"};
@@ -154,29 +170,32 @@ namespace krys::boo::tests
     options.Duration = 500.0;
     auto animation = Animate(fixture.ById(u8"box"), Fade(), options);
 
-    PromiseRecorder recorder;
-    Ref ready = ShareRef(animation->Ready());
-    recorder.Watch(*ready);
-    recorder.Watch(animation->Finished());
-    CHECK(ready->GetStatus() == AnimationPromise::Status::Pending);
+    AnimationWaitRecorder recorder;
+    recorder.WhenReady(*animation);
+    recorder.WhenFinished(*animation);
+    CHECK(animation->Pending());
+    CHECK(recorder.Records.empty());
 
-    // The ready promise resolves once the animation is ready, the finished promise once it has finished.
+    // The ready callback runs once the animation is ready, the finished one once it has finished.
     fixture.StartAnimations();
-    CHECK(ready->GetStatus() == AnimationPromise::Status::Fulfilled);
-    CHECK(recorder.Records == List<std::string> {"fulfilled a"});
+    CHECK(recorder.Records == List<std::string> {"ready a"});
     fixture.Frame(600ms);
     fixture.Frame();
-    CHECK(recorder.Records == List<std::string> {"fulfilled a", "fulfilled a"});
+    CHECK(recorder.Records == List<std::string> {"ready a", "finished a"});
 
-    // Playing again replaces the finished promise; canceling rejects it.
-    Ref finished = ShareRef(animation->Finished());
+    // A finished animation calls back straight away.
+    recorder.WhenFinished(*animation);
+    fixture.Frame();
+    CHECK(recorder.Records == List<std::string> {"ready a", "finished a", "finished a"});
+
+    // Playing again waits on a new finished promise; canceling rejects the pending ready promise, then it.
     REQUIRE_FALSE(animation->Play().HasException());
-    CHECK(&animation->Finished() != finished.get());
-    CHECK(finished->GetStatus() == AnimationPromise::Status::Fulfilled);
-    recorder.Watch(animation->Finished());
+    recorder.Records.clear();
+    recorder.WhenReady(*animation);
+    recorder.WhenFinished(*animation);
     animation->Cancel();
     fixture.Frame();
-    CHECK(recorder.Records == List<std::string> {"fulfilled a", "fulfilled a", "AbortError"});
+    CHECK(recorder.Records == List<std::string> {"ready AbortError", "finished AbortError"});
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Animatable: times from C++ are validated",
