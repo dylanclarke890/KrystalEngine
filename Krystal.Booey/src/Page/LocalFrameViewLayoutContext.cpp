@@ -177,7 +177,6 @@ namespace krys::boo
     SetForScope schedulingIsEnabled(_layoutSchedulingIsEnabled, false);
 
     _layoutTimer.Stop();
-    _setNeedsLayoutWasDeferred = false;
 
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPreLayout);
@@ -302,37 +301,16 @@ namespace krys::boo
     // Document::shouldScheduleLayout takes care of preventing us from scheduling
     // layout in that case.
     auto *renderView = GetRenderView();
-    return IsLayoutPending() || (renderView && renderView->NeedsLayout()) || SubtreeLayoutRoot()
-           || (_disableSetNeedsLayoutCount && _setNeedsLayoutWasDeferred);
+    return IsLayoutPending() || (renderView && renderView->NeedsLayout()) || SubtreeLayoutRoot();
   }
 
   void LocalFrameViewLayoutContext::SetNeedsLayoutAfterViewConfigurationChange() noexcept
   {
-    if (_disableSetNeedsLayoutCount)
-    {
-      _setNeedsLayoutWasDeferred = true;
-      return;
-    }
-
     if (auto *renderView = GetRenderView())
     {
       renderView->SetNeedsLayout();
       ScheduleLayout();
     }
-  }
-
-  void LocalFrameViewLayoutContext::EnableSetNeedsLayout() noexcept
-  {
-    krys_debug_assert(_disableSetNeedsLayoutCount);
-    if (!--_disableSetNeedsLayoutCount)
-    {
-      _setNeedsLayoutWasDeferred = false; // FIXME: Find a way to make the deferred layout actually happen.
-    }
-  }
-
-  void LocalFrameViewLayoutContext::DisableSetNeedsLayout() noexcept
-  {
-    ++_disableSetNeedsLayoutCount;
   }
 
   void LocalFrameViewLayoutContext::ScheduleLayout() noexcept

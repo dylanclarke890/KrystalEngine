@@ -1436,9 +1436,9 @@ namespace krys::boo
   {
     if (auto *document = Frame().Document())
     {
-      // FIXME: Merge this logic with m_setNeedsLayoutWasDeferred and find a more appropriate
-      // way of handling potential recursive layouts when the viewport is resized to accomodate
-      // the content but the content always overflows the viewport. See webkit.org/b/165781.
+      // FIXME: Find a more appropriate way of handling potential recursive layouts when the viewport is
+      // resized to accommodate the content but the content always overflows the viewport. See
+      // webkit.org/b/165781.
       if (_layoutContext.GetLayoutPhase() != LocalFrameViewLayoutContext::LayoutPhase::InViewSizeAdjust
           || !UseFixedLayout())
       {
