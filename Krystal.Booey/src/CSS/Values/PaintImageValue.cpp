@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
+#include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/Rendering/Style/StylePaintImage.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 
@@ -16,9 +17,27 @@ namespace krys::boo::css
 
   CSSOMString PaintImageValue::CustomCSSText(const SerialisationContext &) const noexcept
   {
-    // FIXME: This should include the arguments too.
     CSSOMString result {u8"paint("};
     result.append(_name);
+    // Each argument as Chrome keeps it: between the commas, without the whitespace around it.
+    auto arguments = _arguments->TokenRange();
+    while (!arguments.IsAtEnd())
+    {
+      arguments.DiscardWhitespace();
+      auto argument = arguments;
+      while (!arguments.IsAtEnd() && arguments.Peek().Type() != TokenType::Comma)
+      {
+        arguments.DiscardComponentValue();
+      }
+      auto range = argument.RangeUntil(arguments);
+      range.DiscardTrailingWhitespace();
+      result.append(u8", ");
+      result.append(range.Serialise(TokenSerialisationMode::CustomProperty));
+      if (!arguments.IsAtEnd())
+      {
+        arguments.Discard();
+      }
+    }
     result.push_back(u8')');
     return result;
   }

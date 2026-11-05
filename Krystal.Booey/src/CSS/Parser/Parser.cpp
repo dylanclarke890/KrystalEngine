@@ -688,8 +688,8 @@ namespace krys::boo::css
           && text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"supports")))
       {
         auto arguments = PropertyParserHelpers::ConsumeFunction(prelude);
-        auto supported = SupportsParser::SupportsCondition(
-          arguments, *this, SupportsParser::ParsingMode::AllowBareDeclarationAndGeneralEnclosed);
+        auto supported = SupportsParser::SupportsCondition(arguments, *this,
+                                                           SupportsParser::ParsingMode::AllowBareDeclaration);
         if (supported == SupportsParser::Invalid)
         {
           return null; // Discard import rule.

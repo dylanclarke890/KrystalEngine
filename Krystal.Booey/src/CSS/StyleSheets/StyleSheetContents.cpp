@@ -86,11 +86,11 @@ namespace krys::boo::css
   {
     krys_debug_assert(other.IsCacheable());
 
-    // FIXME: Copy import rules.
+    // A sheet with import rules isn't cacheable, so isn't copied.
     krys_debug_assert(other._importRules.empty());
 
-    // FIXME: Copy namespace rules.
-    krys_debug_assert(other._namespaceRules.empty());
+    // Namespace rules are immutable, so the copy shares them (as their CSSOM wrappers keep theirs).
+    _namespaceRules = other._namespaceRules;
 
     _layerRulesBeforeImportRules.reserve(other._layerRulesBeforeImportRules.size());
     for (const auto &rule : other._layerRulesBeforeImportRules)
@@ -141,11 +141,6 @@ namespace krys::boo::css
   {
     // FIXME: Support copying import rules.
     if (!_importRules.empty())
-    {
-      return false;
-    }
-    // FIXME: Support copying namespace rules.
-    if (!_namespaceRules.empty())
     {
       return false;
     }

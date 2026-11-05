@@ -218,12 +218,22 @@ namespace krys::boo::css::tests
 
     SECTION("Unsupported supports() condition")
     {
-      // supports() is parsed as CSS.supports(), which is never invalid, so the rule is always kept.
-      for (auto css : {u8"@import \"x.css\" supports(foo: bar);", u8"@import \"x.css\" supports(;"})
+      // An unsupported declaration or condition keeps the rule, which doesn't apply.
+      for (auto css : {u8"@import \"x.css\" supports(foo: bar);", u8"@import \"x.css\" supports((foo bar));"})
       {
         auto sheet = ParseSheet(css);
         REQUIRE(sheet->ImportRules().size() == 1);
         CHECK_FALSE(sheet->ImportRules()[0]->SupportsMatches());
+      }
+    }
+
+    SECTION("Invalid supports() condition")
+    {
+      // Neither a condition nor a declaration, the rule is discarded.
+      for (auto css : {u8"@import \"x.css\" supports(;", u8"@import \"x.css\" supports(foo bar);",
+                       u8"@import \"x.css\" supports(1px);"})
+      {
+        CHECK(ParseSheet(css)->ImportRules().empty());
       }
     }
 

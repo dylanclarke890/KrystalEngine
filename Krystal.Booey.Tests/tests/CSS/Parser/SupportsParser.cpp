@@ -84,4 +84,15 @@ namespace krys::boo::css::tests
     CHECK(Supports(u8"foo", mode) == SupportsParser::Unsupported);
     CHECK(Supports(u8"selector(a)", mode) == SupportsParser::Supported);
   }
+
+  TEST_CASE_METHOD(ValueFixture, "SupportsParser: @import supports() mode", "[CSS][SupportsParser]")
+  {
+    constexpr auto mode = SupportsParser::ParsingMode::AllowBareDeclaration;
+    CHECK(Supports(u8"display: grid", mode) == SupportsParser::Supported);
+    CHECK(Supports(u8"display: foo", mode) == SupportsParser::Unsupported);
+    CHECK(Supports(u8"(display: grid)", mode) == SupportsParser::Supported);
+    CHECK(Supports(u8"(foo bar)", mode) == SupportsParser::Unsupported);
+    CHECK(Supports(u8"foo", mode) == SupportsParser::Invalid);
+    CHECK(Supports(u8"foo bar", mode) == SupportsParser::Invalid);
+  }
 }

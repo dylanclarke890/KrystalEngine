@@ -197,7 +197,8 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"filter(none, sepia())", Image, context) == "filter(none, sepia())");
     CHECK(ConsumeToText(u8"filter(url(a.png))", Image, context) == "<null>");
 
-    CHECK(ConsumeToText(u8"paint(foo, 1px)", Image, context) == "paint(foo)");
+    CHECK(ConsumeToText(u8"paint(foo, 1px)", Image, context) == "paint(foo, 1px)");
+    CHECK(ConsumeToText(u8"paint(foo,  1px , red )", Image, context) == "paint(foo, 1px, red)");
     CHECK(ConsumeToText(u8"paint(foo)", Image, context) == "paint(foo)");
     CHECK(ConsumeToText(u8"paint(foo 1px)", Image, context) == "<null>");
   }
