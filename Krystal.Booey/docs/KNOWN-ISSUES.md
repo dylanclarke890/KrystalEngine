@@ -265,24 +265,17 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- The window gets no `focus`/`blur` events: `FocusAlgorithms` has FIXMEs for firing them at a document's `Window`, and `FocusEvent`/`UIEvent` have no `view`. `FocusOptions` has no selection restoration mode or focus direction.
+- The window gets no `focus`/`blur` events: `FocusAlgorithms` has FIXMEs for firing them at a document's `Window`, and `FocusEvent`/`UIEvent` have no `view`.
 - Keys the platform layer has no code for: Insert, Print Screen, Pause, Scroll Lock, Num Lock and the context menu key (FIXME in `Win32Window.cpp`). There is no keyboard route to `contextmenu` (`sendContextMenuEventForKey`), and no menu controller beyond the `contextmenu` event.
-- Access keys: `HTMLElement::AccessKeyAction` exists but nothing calls it (FIXME in `EventHandler.cpp`), `accessKeyLabel` is empty, and a legend has no accesskey delegatee; with no menus either, commands and their facets aren't exposed.
-- `screenX`/`screenY` on mouse, pen and touch events are not meaningful: the host does not report where the page is on the screen (FIXMEs in `View.cpp` and `Input.cpp`).
-- The window size ignores DPI (`Win32Window.cpp`, "Account for dpi?").
-- Click counting (500 ms, 2 px) and the touch gesture thresholds (tap, pan, long press, fling, pinch) are fixed constants in `View` rather than the system's double click time and distance and touch settings (FIXMEs in `View.hpp`).
+- Access keys: `HTMLElement::AccessKeyAction` exists but nothing calls it (FIXME in `EventHandler.cpp`), `accessKeyLabel` is empty, and a legend has no accesskey delegatee.
 - Custom cursors (`cursor: url()`) are absent (`Cursor` has no images; FIXME in `EventHandler::SelectCursor`), as are pan-scrolling and auto-hiding cursors.
 - Wheel: `PlatformWheelEvent` has no phases, velocities, precise deltas or inverted directions, so there is no scroll latching, wheel delta filter or precision touchpad gesture support (pinching, swiping, DirectManipulation). Pan gestures chain on to the next scroll box mid-gesture, as the wheel does.
 - Pan scrolling (middle-button autoscroll) and its icon are absent; selection autoscroll works.
-- Drag and drop: colour drags and drops, plugin documents and image overlays are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
-- Dragging out of a page to other applications is not supported: `DoDragDrop` is a modal loop that would block the frames, so a drag that starts in a page stays in it.
+- Drag and drop: colour drags and drops are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
 - Sequential focus navigation does not handle moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
-- Spatial navigation is only the focus candidate search (off by default through `Settings::SpatialNavigationEnabled`); the CSS Spatial Navigation draft (`navbeforefocus`, `navnotarget`, `spatialNavigationSearch()`, `focusableAreas()`, `spatial-navigation-*`) is not implemented.
-- Keyboard: caps lock handling in text fields, Escape hiding validation messages and leaving fullscreen, the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs. The default keyboard handler doesn't handle Backspace (history navigation; FIXME).
+- Keyboard: caps lock handling in text fields, Escape hiding validation messages, the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs.
 - Touch: documents without touch event listeners aren't skipped (`hasTouchEventHandlers` is a FIXME), and touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.
-- Pointer lock: the sandbox flag check (`SecurityError`) is a FIXME. The window side of pointer lock is untested (it needs a real cursor).
-- Gamepad: XInput only (Xbox-style pads, four at most, polled), with no GameInput, SDL or Windows.Gaming.Input backend.
-- Hit testing ignores child frames. `HitTestResult` queries about what was hit (selection, images, media, titles, editing, link targets) are FIXMEs. `RenderLayer` hit testing lacks SVG resources, fixed container sampling, resizers and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area.
+- `RenderLayer` hit testing lacks SVG resources, fixed container sampling and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area (FIXMEs in `RenderLayer.cpp`).
 - `IsDraggableLink` is a local check (an HTML link with `href`, not editable); the editable-link-behaviour setting is absent.
 - Page overlays and synthetic touch events are FIXMEs in `EventHandler`.
 
