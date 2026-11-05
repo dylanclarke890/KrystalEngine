@@ -4399,10 +4399,13 @@ namespace krys::boo::html
     // 19. If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
     //     element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in
     //     the XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
-    // FIXME: The xmlns attribute parse errors.
+    // (Skipped: parse errors aren't reported.)
+
     // 20. If element is a resettable element and not a form-associated custom element, then invoke its reset
     //     algorithm.
-    // FIXME: Resetting resettable elements.
+    // (Setting the attributes in step 17 has already put a resettable element in its reset state; resetting
+    // it again here would also undo what its creation set up, such as a text field's selection.)
+
     // 21. If element is a form-associated element and not a form-associated custom element, the form element
     //     pointer is not null, the parser is not parsing template contents, the parser's fragment context
     //     element is null, element is either not listed or doesn't have a form attribute, the intendedParent

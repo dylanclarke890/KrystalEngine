@@ -57,6 +57,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
+- Parse errors aren't reported: there's no console, so the parser recovers from each one as specified and says nothing (the `xmlns` attribute checks in create an element for a token are skipped).
 - A `script` end tag in the "text" insertion mode only pops the script and restores the original insertion mode: with no scripting there's no microtask checkpoint, insertion point or script nesting level, the script isn't prepared, and there's never a pending parsing-blocking script, so the parser never pauses or spins the event loop. An SVG `script` end tag in foreign content likewise only pops it, as the SVG script isn't processed.
 
 ## HTML elements and forms

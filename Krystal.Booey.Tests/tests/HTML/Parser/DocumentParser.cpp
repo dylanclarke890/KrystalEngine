@@ -11,7 +11,10 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/HTML/Parser/TreeBuilder.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
@@ -726,6 +729,22 @@ namespace krys::boo::html::tests
     auto href = svg->GetAttributeNodeNS(infra::Namespaces::XLink, u8"href");
     REQUIRE(href);
     CHECK(href->Prefix() == infra::NamespacePrefixes::XLink);
+  }
+
+  TEST_CASE("DocumentParser: form controls it creates start out reset",
+            "[HTML][DocumentParser][html:create-an-element-for-the-token]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto parser = CreateParser(*document, utf8_string(u8"<input id=i type=checkbox checked value=v>"
+                                                      u8"<textarea id=t>text</textarea>"
+                                                      u8"<select id=s><option>a<option selected>b</select>"));
+    (void)parser->PumpTokenizer();
+
+    auto &input = Downcast<HTMLInputElement>(*document->GetElementById(u8"i"));
+    CHECK(input.Checked());
+    CHECK(input.Value() == u8"v");
+    CHECK(Downcast<HTMLTextAreaElement>(*document->GetElementById(u8"t")).Value() == u8"text");
+    CHECK(Downcast<HTMLSelectElement>(*document->GetElementById(u8"s")).SelectedIndex() == 1);
   }
 }
 
