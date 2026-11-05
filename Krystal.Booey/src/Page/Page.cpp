@@ -166,8 +166,7 @@ namespace krys::boo
         return;
       }
 
-      // FIXME: The rendering update scheduler (display refresh), once the host reports refreshes: the host
-      // runs a scheduled update at its next frame.
+      // The host's frames are the page's rendering opportunities: it runs a scheduled update at its next one.
       _renderingUpdateIsScheduled = true;
       return;
     }
@@ -250,6 +249,12 @@ namespace krys::boo
       return;
     }
 
+    // A hidden page's documents aren't rendered: the update stays scheduled until the page is shown.
+    if (!_isVisible)
+    {
+      return;
+    }
+
     ++_renderingUpdateDepth;
     _unfulfilledRequestedSteps = {};
     _renderingUpdateRemainingSteps = AllRenderingUpdateSteps;
@@ -259,7 +264,8 @@ namespace krys::boo
 
     LayoutIfNeeded();
 
-    // FIXME: Revealing documents, once there's visibility.
+    // Revealing documents is skipped: it only fires pagereveal and starts view transitions, which there
+    // aren't (see DIFFERENCES.md).
 
     ForEachDocument(
       [](dom::Document &document)
@@ -466,6 +472,9 @@ namespace krys::boo
         });
 
       ResumeAnimatingImages();
+
+      // Updates asked for while the page was hidden were put off until now.
+      ScheduleRenderingUpdate();
     }
     else
     {

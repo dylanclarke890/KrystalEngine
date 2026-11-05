@@ -510,6 +510,25 @@ namespace krys::boo::tests
       CHECK(events == List<bool> {true, true});
     }
 
+    // https://html.spec.whatwg.org/#update-the-rendering (hidden documents aren't rendered)
+    SECTION("A hidden page's rendering updates wait for it to be shown")
+    {
+      page.SetIsVisible(false);
+      page.ScheduleRenderingUpdate();
+      page.UpdateRendering();
+      CHECK(page.IsRenderingUpdateScheduled());
+
+      page.SetIsVisible(true);
+      CHECK(page.IsRenderingUpdateScheduled());
+      page.UpdateRendering();
+      CHECK_FALSE(page.IsRenderingUpdateScheduled());
+
+      // Shown, a page is updated even if nothing asked while it was hidden.
+      page.SetIsVisible(false);
+      page.SetIsVisible(true);
+      CHECK(page.IsRenderingUpdateScheduled());
+    }
+
     SECTION("A hidden page's animation frame callbacks wait for it to be shown")
     {
       uint32 calls = 0;

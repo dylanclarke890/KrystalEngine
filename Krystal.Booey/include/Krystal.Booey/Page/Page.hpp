@@ -133,7 +133,7 @@ namespace krys::boo
     /// @brief Shows or hides the page, as its host reports: hidden while its window is minimised or another
     /// view is shown in its place. A hidden page suspends its animation frame callbacks and SMIL animations,
     /// and its CSS animations unless `Settings::HiddenPageCSSAnimationSuspensionEnabled` is off; its
-    /// documents' visibility state follows it.
+    /// documents' visibility state follows it, and its rendering updates wait until it's shown.
     void SetIsVisible(bool isVisible) noexcept;
 
     /// @brief Whether the page is shown; it is until its host hides it.
@@ -245,7 +245,8 @@ namespace krys::boo
     }
 
     /// @brief Runs the rendering update: the steps the page's documents need, in the specification's order,
-    /// with layout before and after the steps that read it, then flushes the composited layers' changes.
+    /// with layout before and after the steps that read it, then flushes the composited layers' changes. A
+    /// hidden page's update does nothing, and stays scheduled.
     void UpdateRendering() noexcept;
 
     /// @brief Brings the style and layout of the page's documents up to date.
