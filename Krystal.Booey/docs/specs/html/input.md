@@ -90,7 +90,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.5 Email state (type=email)](https://html.spec.whatwg.org/#email-state-%28type=email%29)
 
 Status: reviewed (2026-11-01)
-> `EmailInputType`; addresses are checked with the specification's pattern. User-facing punycode conversion is left out (no IDN in the UI).
+> `EmailInputType`; addresses are checked against the specification's grammar by hand (`IsValidEmailAddress`). User-facing punycode conversion is left out (no IDN in the UI).
 
 - [x] [Whenever the user changes the element's values, the user agent must run the fol…](https://html.spec.whatwg.org/#email-state-%28type=email%29) — Whenever the user changes the element's values, the user agent must run the following steps:
   - 1. Let latest values be a copy of the element's values.
@@ -299,7 +299,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.3.6 The pattern attribute](https://html.spec.whatwg.org/#the-pattern-attribute)
 
 Status: reviewed (2026-11-01)
-> `BaseTextInputType::PatternMismatch`, anchored; matched with `std::wregex` rather than the `v` flag (see `KNOWN-ISSUES.md`).
+> `BaseTextInputType::PatternMismatch`, matching whole values; an ICU regular expression rather than an ECMAScript one with the `v` flag (see `DIFFERENCES.md`).
 <!-- definitions: attr-input-pattern attr-input-title -->
 
 - [x] [compiled pattern regular expression](https://html.spec.whatwg.org/#compiled-pattern-regular-expression) — The compiled pattern regular expression of an input element, if it exists, is a JavaScript RegExp object. It is determined as follows:

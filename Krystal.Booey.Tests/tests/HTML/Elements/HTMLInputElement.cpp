@@ -305,6 +305,23 @@ namespace krys::boo::html::tests
     };
     CHECK(validAs(u8"email", u8"someone@example.com"));
     CHECK_FALSE(validAs(u8"email", u8"someone"));
+
+    SECTION("email addresses")
+    {
+      CHECK(validAs(u8"email", u8"a.b!#$%&'*+/=?^_`{|}~-@localhost"));
+      CHECK(validAs(u8"email", u8"a@x-1.EXAMPLE"));
+      CHECK(validAs(u8"email", dom::DOMString(u8"a@") + dom::DOMString(63, u8'x')));
+      CHECK_FALSE(validAs(u8"email", dom::DOMString(u8"a@") + dom::DOMString(64, u8'x')));
+      CHECK_FALSE(validAs(u8"email", u8"@example.com"));
+      CHECK_FALSE(validAs(u8"email", u8"a@"));
+      CHECK_FALSE(validAs(u8"email", u8"a@b..c"));
+      CHECK_FALSE(validAs(u8"email", u8"a@b."));
+      CHECK_FALSE(validAs(u8"email", u8"a@-b.c"));
+      CHECK_FALSE(validAs(u8"email", u8"a@b-.c"));
+      CHECK_FALSE(validAs(u8"email", u8"a@b@c"));
+      CHECK_FALSE(validAs(u8"email", u8"a(b)@c"));
+      CHECK_FALSE(validAs(u8"email", u8"\u00E9@example.com"));
+    }
     CHECK(validAs(u8"url", u8"https://example.com"));
     CHECK_FALSE(validAs(u8"url", u8"example"));
 
@@ -320,6 +337,25 @@ namespace krys::boo::html::tests
       // An invalid pattern matches anything.
       REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"(").HasException());
       CHECK_FALSE(input.PatternMismatch());
+      // The pattern must compile on its own, before it's anchored.
+      REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"a)|(b").HasException());
+      CHECK_FALSE(input.PatternMismatch());
+      // Unknown escapes are errors, as with the v flag.
+      REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"\\q").HasException());
+      (void)input.SetValue(u8"q");
+      CHECK_FALSE(input.PatternMismatch());
+
+      // Alternatives are anchored as a whole.
+      REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"a|b").HasException());
+      (void)input.SetValue(u8"ab");
+      CHECK(input.PatternMismatch());
+
+      // Patterns match code points, and know Unicode properties.
+      REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"\\p{L}.").HasException());
+      (void)input.SetValue(u8"\u00E9\U0001F600");
+      CHECK_FALSE(input.PatternMismatch());
+      (void)input.SetValue(u8"1\U0001F600");
+      CHECK(input.PatternMismatch());
     }
 
     SECTION("ranges and steps")

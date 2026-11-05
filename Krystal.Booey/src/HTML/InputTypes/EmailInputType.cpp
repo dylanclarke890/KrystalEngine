@@ -3,28 +3,69 @@
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
-#include <regex>
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html
 {
   namespace
   {
-    // From https://html.spec.whatwg.org/#valid-e-mail-address.
-    constexpr const char *EmailPattern =
-      "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9]"
-      "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
-
-    KRYS_NODISCARD bool IsValidEmailAddress(dom::DOMStringView address) noexcept
+    /// @brief Whether @p c is one of the ABNF's `atext` characters, which make up the part before the `@`.
+    KRYS_NODISCARD constexpr bool IsEmailLocalPartCharacter(char8_t c) noexcept
     {
-      if (address.empty())
+      return text::IsASCIIAlphanumeric(c)
+             || dom::DOMStringView(u8".!#$%&'*+/=?^_`{|}~-").find(c) != dom::DOMStringView::npos;
+    }
+
+    /// @brief Whether @p label is a domain label: 1 to 63 ASCII alphanumerics and hyphens, starting and
+    /// ending with an alphanumeric.
+    KRYS_NODISCARD constexpr bool IsValidEmailLabel(dom::DOMStringView label) noexcept
+    {
+      if (label.empty() || label.size() > 63 || !text::IsASCIIAlphanumeric(label.front())
+          || !text::IsASCIIAlphanumeric(label.back()))
       {
         return false;
       }
+      for (auto c : label)
+      {
+        if (!text::IsASCIIAlphanumeric(c) && c != u8'-')
+        {
+          return false;
+        }
+      }
+      return true;
+    }
 
-      static const std::regex regExp(EmailPattern,
-                                     std::regex_constants::ECMAScript | std::regex_constants::icase);
-      auto first = reinterpret_cast<const char *>(address.data());
-      return std::regex_match(first, first + address.size(), regExp);
+    /// @brief Whether @p address is a [valid email
+    /// address](https://html.spec.whatwg.org/#valid-e-mail-address).
+    KRYS_NODISCARD constexpr bool IsValidEmailAddress(dom::DOMStringView address) noexcept
+    {
+      auto at = address.find(u8'@');
+      if (at == 0 || at == dom::DOMStringView::npos)
+      {
+        return false;
+      }
+      for (auto c : address.substr(0, at))
+      {
+        if (!IsEmailLocalPartCharacter(c))
+        {
+          return false;
+        }
+      }
+
+      auto domain = address.substr(at + 1);
+      while (true)
+      {
+        auto dot = domain.find(u8'.');
+        if (!IsValidEmailLabel(domain.substr(0, dot)))
+        {
+          return false;
+        }
+        if (dot == dom::DOMStringView::npos)
+        {
+          return true;
+        }
+        domain.remove_prefix(dot + 1);
+      }
     }
   }
 

@@ -39,10 +39,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## HTML elements and forms
 
-### Bugs
-
-- `pattern` matches with `std::wregex` (ECMAScript) over UTF-16 instead of a JavaScript engine's regular expression with the `v` flag, and e-mail addresses with a `std::regex`; behaviour on exotic patterns can differ from browsers.
-
 ### Missing
 
 - `<input type=file>` has no file chooser, file icon (`icon()`, `requestIcon`, `iconLoaded`) or tooltip naming the chosen files; the host's file picker is a FIXME in `FileInputType.hpp`. The name uses the room the icon would take. Files are set from C++ (`FileInputType::SetFiles`, which fires `input` and `change` unless set by script) or dropped; there are no directory uploads.

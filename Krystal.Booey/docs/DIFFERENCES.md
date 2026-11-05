@@ -93,6 +93,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Form control state isn't saved or restored, as there's no session history: form-associated custom elements have no `formStateRestoreCallback`, and `ElementInternals.setFormValue()`'s state is kept but never used.
 - The `width` and `height` of `<img>`, `<col>` and `<colgroup>` ignore a relative length (`5*`, `Dimensions::ParseHTMLMultiLength`); the specification's rules for parsing dimension values read it as 5 pixels.
 - The number-like input types' values (`ParseToDoubleForNumberType`, `ParseToDecimalForNumberType`) accept a full stop followed directly by an exponent (`1.e5`), which isn't a valid floating-point number.
+- A `pattern` attribute is an ICU regular expression rather than an ECMAScript one with the `v` flag (`BaseTextInputType::PatternMismatch`). They mostly agree (classes, set operations, `\p{...}` properties, matching by code point, unknown escapes being errors), but exotic syntax can differ: ICU has possessive quantifiers and `(?i)`-style flags, and lacks the `v` flag's string literals in classes (`\q{...}`).
 
 ### From Chrome
 
