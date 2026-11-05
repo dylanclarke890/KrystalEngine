@@ -76,10 +76,8 @@ namespace krys::boo::css::calc::tests
           == u8"calc(2 * (1em + 1px))");
   }
 
-  // FIXME: a root Negate/Invert serialises only its child, dropping the operation (`calc(1em)`). Upstream
-  // does the same: step 4 of serialising a math function serialises the root's children, and only Sum/Product
-  // have overloads that serialise the node itself. Simplification normally removes these roots.
-  TEST_CASE("TreeSerialisation(root negate and invert)", "[CSS][Calc][TreeSerialisation][!shouldfail]")
+  // A root Negate or Invert is serialised itself, as a root Sum or Product is, rather than only its child.
+  TEST_CASE("TreeSerialisation(root negate and invert)", "[CSS][Calc][TreeSerialisation]")
   {
     CHECK(SerialiseTree(Node(Negate {.A = Num(1.0, UnitType::em)})) == u8"calc(-1 * 1em)");
     CHECK(SerialiseTree(Node(Invert {.A = Num(2.0)}, Type::CreateNumber())) == u8"calc(1 / 2)");

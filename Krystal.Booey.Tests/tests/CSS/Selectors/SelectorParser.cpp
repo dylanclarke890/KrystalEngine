@@ -149,11 +149,7 @@ namespace krys::boo::css::tests
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-02.dat");
 
-  // FIXME: A complex selector inside :not() inside :host() should be invalid (WPT parse-not.html).
-  TEST_CASE("CSSSelectorParser(not-03.dat)", "[CSS][CSSSelectorParser][!shouldfail]")
-  {
-    RunTest("not-03.dat");
-  }
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-03.dat");
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("part-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("part-02.dat");

@@ -38,6 +38,9 @@ namespace krys::boo::css
 
     bool _disallowPseudoElements {false};
     bool _disallowHasPseudoClass {false};
+    // Inside an argument that is a compound selector (`:host()`, `:host-context()`, `::slotted()`), where
+    // nested selector lists can hold only compound selectors.
+    bool _disallowComplexSelectors {false};
     bool _resistDefaultNamespace {false};
     bool _ignoreDefaultNamespace {false};
     bool _disableForgivingParsing {false};

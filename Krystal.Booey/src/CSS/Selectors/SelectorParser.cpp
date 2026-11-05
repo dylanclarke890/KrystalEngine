@@ -433,7 +433,7 @@ namespace krys::boo::css
       {
         return combinator == SelectorRelation::Descendant ? krys::move(selector) : nullptr;
       }
-      if (previousCompoundHasPseudoElement)
+      if (previousCompoundHasPseudoElement || _disallowComplexSelectors)
       {
         return nullptr;
       }
@@ -1053,6 +1053,7 @@ namespace krys::boo::css
         }
         case SelectorPseudoClass::Host:
         {
+          SetForScope disallowComplexSelectors(_disallowComplexSelectors, true);
           auto innerSelector = ConsumeCompoundSelector(block);
           block.DiscardWhitespace();
           if (!innerSelector || !block.IsAtEnd())
@@ -1139,6 +1140,7 @@ namespace krys::boo::css
         }
         case SelectorPseudoElement::Slotted:
         {
+          SetForScope disallowComplexSelectors(_disallowComplexSelectors, true);
           auto innerSelector = ConsumeCompoundSelector(block);
           block.DiscardWhitespace();
           if (!innerSelector || !block.IsAtEnd())

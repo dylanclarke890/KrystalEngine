@@ -104,6 +104,10 @@ namespace krys::boo::css::calc
                                              SerialisationState &) noexcept;
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Product> &,
                                              SerialisationState &) noexcept;
+  static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Negate> &,
+                                             SerialisationState &) noexcept;
+  static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Invert> &,
+                                             SerialisationState &) noexcept;
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Random> &,
                                              SerialisationState &) noexcept;
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Anchor> &,
@@ -450,6 +454,20 @@ namespace krys::boo::css::calc
   }
 
   void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<Product> &fn,
+                                      SerialisationState &state) noexcept
+  {
+    SerialiseCalculationTree(builder, fn, state);
+  }
+
+  // Step 4 read literally would serialise only a root Negate's or Invert's child, dropping the operation: as
+  // with Sum and Product, the root calc-operator node is serialised, without its parentheses.
+  void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<Negate> &fn,
+                                      SerialisationState &state) noexcept
+  {
+    SerialiseCalculationTree(builder, fn, state);
+  }
+
+  void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<Invert> &fn,
                                       SerialisationState &state) noexcept
   {
     SerialiseCalculationTree(builder, fn, state);
