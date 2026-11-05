@@ -392,7 +392,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - Krystal.Core's `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't take an explicit target type, and `Downcast` asserts on null; `OffsetRotateValue.cpp` works around it (FIXME).
-- Some of Krystal.Core's text tests aren't built: `tests/Text/Unicode.cpp`, `EncodingRegistry.cpp` and `Encodings/ASCII.cpp` are missing from `Krystal.Core.Tests/CMakeLists.txt`.
 
 ### Missing
 

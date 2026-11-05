@@ -66,6 +66,9 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Text/StringToIntegerConversion.cpp
 	PRIVATE tests/Text/ParsingUtilities.cpp
 	PRIVATE tests/Text/TextStream.cpp
+	PRIVATE tests/Text/EncodingRegistry.cpp
+	PRIVATE tests/Text/Unicode.cpp
+	PRIVATE tests/Text/Encodings/ASCII.cpp
 
   # Types
 	PRIVATE tests/Types/BloomFilter.cpp
