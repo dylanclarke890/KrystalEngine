@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/ColorInputType.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
@@ -216,8 +217,8 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: Queueing the events until the value is set (EventQueueScope), once form controls fire them
-    // through ScopedEventQueue.
+    // input and change wait until the swatch shows the new value.
+    dom::EventQueueScope eventQueue;
     input->SetValueFromRenderer(serializedColor);
     UpdateColorSwatch();
     input->DispatchFormControlChangeEvent();

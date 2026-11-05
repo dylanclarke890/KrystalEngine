@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -1092,8 +1093,8 @@ namespace krys::boo::html
     // Input event is fired by the Node::defaultEventHandler for editable controls.
     if (!IsTextField())
     {
-      auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true);
-      (void)dom::EventDispatcher::DispatchToTarget(*event, this);
+      dom::ScopedEventQueue::DispatchOrQueue(
+        dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true), ShareRef(*this));
     }
 
     UpdateValidity();
