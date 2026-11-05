@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLIFrameElement.hpp"
-#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
@@ -51,30 +50,6 @@ namespace krys::boo::html
   void HTMLIFrameElement::Name(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
-  }
-
-  dom::DOMTokenList &HTMLIFrameElement::Sandbox() noexcept
-  {
-    if (!_sandbox)
-    {
-      _sandbox =
-        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"sandbox",
-                                                   // Every token is supported: there's no sandboxing.
-                                                   [](dom::Document &, dom::DOMStringView) { return true; });
-    }
-
-    return *_sandbox;
-  }
-
-  void HTMLIFrameElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             dom::DOMStringAtom namespaceURI) noexcept
-  {
-    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"sandbox" && _sandbox)
-    {
-      _sandbox->AssociatedAttributeValueChanged();
-    }
   }
 
   dom::DOMString HTMLIFrameElement::Allow() const noexcept

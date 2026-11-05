@@ -384,11 +384,6 @@ namespace krys::boo::dom::tests
       auto &element = CreateHTML<html::HTMLFormElement>(*document, u8"form");
       CheckFollowsAttribute(element, element.RelList(), u8"rel");
     }
-    SECTION("iframe's sandbox")
-    {
-      auto &element = CreateHTML<html::HTMLIFrameElement>(*document, u8"iframe");
-      CheckFollowsAttribute(element, element.Sandbox(), u8"sandbox");
-    }
     SECTION("link's relList, sizes and blocking")
     {
       auto &element = CreateHTML<html::HTMLLinkElement>(*document, u8"link");
@@ -578,16 +573,14 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DOMTokenList.supports(): link's relList and iframe's sandbox support only their keywords",
-            "[DOM][DOMTokenList][dom:dom-domtokenlist-supports][!shouldfail]")
+  TEST_CASE("DOMTokenList.supports(): link's relList supports the link types Booey processes",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-supports]")
   {
-    // FIXME: Every token is supported until their supported tokens are implemented. See KNOWN-ISSUES.md.
     auto linkDocument = CreateRef<HTMLDocument>();
     auto &link = CreateHTML<html::HTMLLinkElement>(*linkDocument, u8"link");
+    CHECK(link.RelList().Supports(u8"stylesheet").ReleaseValue());
+    CHECK(link.RelList().Supports(u8"Alternate").ReleaseValue());
     CHECK_FALSE(link.RelList().Supports(u8"nonsense").ReleaseValue());
-
-    auto iframeDocument = CreateRef<HTMLDocument>();
-    auto &iframe = CreateHTML<html::HTMLIFrameElement>(*iframeDocument, u8"iframe");
-    CHECK_FALSE(iframe.Sandbox().Supports(u8"nonsense").ReleaseValue());
+    CHECK_FALSE(link.RelList().Supports(u8"preload").ReleaseValue());
   }
 }

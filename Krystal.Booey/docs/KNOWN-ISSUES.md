@@ -53,10 +53,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - `pattern` matches with `std::wregex` (ECMAScript) over UTF-16 instead of a JavaScript engine's regular expression with the `v` flag, and e-mail addresses with a `std::regex`; behaviour on exotic patterns can differ from browsers.
-- `LocalDOMWindow::Stop` doesn't stop the navigable's loading (FIXME).
-- `close()` closes any page: it does not check that the page is script-closable (FIXME).
 - `HTMLTableColElement::OnAttributeChanged` does not lay a column out again when its `width` attribute changes (FIXME); `Numbers::ParseInteger` can parse it.
-- `<link>`'s `relList.supports()` and `<iframe>`'s `sandbox.supports()` return true for every token (FIXME in `HTMLLinkElement.cpp` and `HTMLIFrameElement.cpp`): their supported tokens, the link types and sandboxing keywords Booey implements, aren't defined yet. Test: "DOMTokenList.supports(): link's relList and iframe's sandbox support only their keywords" (`[!shouldfail]`, `Krystal.Booey.Tests/tests/DOM/Collections/DOMTokenList.cpp`).
 
 ### Missing
 
@@ -363,11 +360,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `FrameLoader` does not fire `visibilitychange`, and a document left or cached keeps its visibility state (FIXMEs in `FrameLoader.cpp` and `CachedPage.cpp`).
-- `ScheduledFormSubmission` does not count as a quick redirect, so a pending submission does not stop a page being cached.
-- `Navigation` has no `sourceSnapshotParams` (FIXME in `Navigation.cpp`), does not consume history-action user activation on a traversal, and does not set destination state. `NavigationHistoryEntry` does not hide another document's entry URL for its referrer policy.
-- `NavigateEvent.intercept()` has no `precommitHandler`, so there's no `NavigationPrecommitController` (FIXME in `NavigateEvent.cpp`). There's no `notRestoredReasons` (`NotRestoredReasons`) on navigation timing.
-- `window.stop()` does not stop loading (FIXME in `LocalDOMWindow.cpp`).
+- `FrameLoader` does not fire `visibilitychange`, and a document it leaves keeps its visibility state (FIXME in `FrameLoader.cpp`).
 - The unloaded document keeps its event listeners.
 - `Document::ShouldScheduleLayout` does not wait for the view to be visually non-empty (FIXME in `Document.cpp`), and a deferred `SetNeedsLayout` is never made to happen (FIXME in `LocalFrameViewLayoutContext.cpp`).
 
