@@ -17,8 +17,8 @@ namespace krys::boo::html
 
   namespace
   {
-    /// @brief The backup element queue, and whether a microtask to process it is queued.
-    /// FIXME: One per similar-origin window agent, once there are agents (as the event loop).
+    /// @brief The backup element queue, and whether a microtask to process it is queued. It's process-wide,
+    /// as there are no agents to give one each (see DIFFERENCES.md).
     struct BackupElementQueue
     {
       CustomElementQueue Queue;

@@ -20,7 +20,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `nonce`).
 - `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
-- The backup custom element queue is global rather than one per agent.
 - No `onpointer*`, `ontouch*`, `onpointerlockchange` or `onpointerlockerror` handlers, no `document.onreadystatechange`, and no outermost-`<svg>` window event handlers (`onunload`, `onresize`, `onscroll`, ...).
 - `DocumentTouch` (`createTouch`, `createTouchList`) is not implemented; `Touch` has no constructor and there is no `TouchInit`.
 - `DataTransferItem` has no `getAsEntry` (no file system API).
