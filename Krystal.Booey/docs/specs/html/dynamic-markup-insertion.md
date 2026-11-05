@@ -8,13 +8,13 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [8.4 Dynamic markup insertion](https://html.spec.whatwg.org/#dynamic-markup-insertion)
 
-Status: n/a (there is no `document.open()`/`write()`, see `KNOWN-ISSUES.md`)
+Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 > The sections below.
 <!-- definitions: throw-on-dynamic-markup-insertion-counter -->
 
 #### [8.4.1 Opening the input stream](https://html.spec.whatwg.org/#opening-the-input-stream)
 
-Status: n/a (there is no `document.open()`/`write()`, see `KNOWN-ISSUES.md`)
+Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 > There's no script-created parser or insertion point.
 <!-- definitions: active-parser-was-aborted script-created-parser -->
 
@@ -50,7 +50,7 @@ Status: n/a (there is no `document.open()`/`write()`, see `KNOWN-ISSUES.md`)
 
 #### [8.4.2 Closing the input stream](https://html.spec.whatwg.org/#closing-the-input-stream)
 
-Status: n/a (there is no `document.open()`/`write()`, see `KNOWN-ISSUES.md`)
+Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 
 - [x] [Document.close()](https://html.spec.whatwg.org/#dom-document-close) — The close() method must run the following steps:
   - 1. If this is an XML document, then throw an "InvalidStateError" DOMException.
@@ -62,7 +62,7 @@ Status: n/a (there is no `document.open()`/`write()`, see `KNOWN-ISSUES.md`)
 
 #### [8.4.3 document.write()](https://html.spec.whatwg.org/#document.write%28%29)
 
-Status: n/a (there is no `document.open()`/`write()`, see `KNOWN-ISSUES.md`)
+Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 <!-- definitions: ignore-destructive-writes-counter -->
 
 - [x] [document write steps](https://html.spec.whatwg.org/#document-write-steps) — The document write steps, given a Document object document, a list text, a boolean lineFeed, and a string sink, are as follows:
@@ -86,7 +86,7 @@ Status: n/a (there is no `document.open()`/`write()`, see `KNOWN-ISSUES.md`)
 
 #### [8.4.4 document.writeln()](https://html.spec.whatwg.org/#document.writeln%28%29)
 
-Status: n/a (there is no `document.open()`/`write()`, see `KNOWN-ISSUES.md`)
+Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 
 - [x] [Document.document.writeln(...text)](https://html.spec.whatwg.org/#dom-document-writeln) — The document.writeln(...text) method steps are to run the document write steps with this, text, true, and "Document writeln".
 
@@ -97,7 +97,7 @@ Status: reviewed (2026-11-01)
 
 #### [8.5.1 The DOMParser interface](https://html.spec.whatwg.org/#the-domparser-interface)
 
-Status: n/a (there is no `DOMParser`, see `KNOWN-ISSUES.md`)
+Status: n/a (there is no `DOMParser`: `Document::ParseHTMLUnsafe` and `Document::ParseHTML` parse HTML into a new document)
 > `Document::ParseHTMLIntoNewDocument` implements parse HTML from a string, for `parseHTMLUnsafe()` and `parseHTML()`.
 <!-- definitions: dom-domparsersupportedtype-texthtml dom-domparsersupportedtype-otherwise -->
 
@@ -350,7 +350,7 @@ Status: reviewed (2026-11-01)
 
 #### [8.5.8 The XMLSerializer interface](https://html.spec.whatwg.org/#the-xmlserializer-interface)
 
-Status: n/a (there is no `XMLSerializer`, see `KNOWN-ISSUES.md`)
+Status: n/a (there is no `XMLSerializer`: `SerializeFragment` with `SerializationSyntax::XML` serializes a node as XML)
 
 - [x] [new XMLSerializer()](https://html.spec.whatwg.org/#dom-xmlserializer-constructor) — The new XMLSerializer() constructor steps are to do nothing.
 
