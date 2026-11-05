@@ -225,7 +225,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - Synthesised small caps write a capital in place of a lowercase letter only when both have the same UTF-8 length; otherwise the letter is shaped as written (FIXME in `ComplexTextController.cpp`).
 - `font-size-adjust` does not change the platform font's size: `FontPlatformData::updateSizeWithFontSizeAdjust` is not called from `FontCache` or `FontCustomPlatformData` (FIXMEs).
-- A page whose `@font-face` font is already in the memory cache keeps its table cells' preferred widths from before the font applied (a fifth of a pixel per cell in `bidi-layout`), so that golden fails when another page was loaded earlier in the process. Test: "Golden: a page whose web font is in the memory cache lays out as with a fresh one" (`[!shouldfail]`, `Krystal.UI.Tests/tests/Golden.cpp`).
 
 ### Missing
 

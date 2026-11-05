@@ -51,7 +51,6 @@ Krystal.UI is the only module that knows both Booey and Krystal.Gfx: it hosts Bo
 
 ### Bugs
 
-- The page-with-a-cached-web-font golden is `[!shouldfail]` (`Golden: a page whose web font is in the memory cache lays out as with a fresh one`): a page whose `@font-face` font comes from the memory cache keeps table cells' preferred widths from before the font applied.
 - `GraphicsContextRender2D` falls back to source-over for `PlusDarker` and `Difference`, which Render2D lacks (FIXME).
 - Buffers of a resolution scale other than 1 replay their transforms unscaled (FIXME in `ImageBufferRender2DBackend.hpp`).
 - `EditorClient`'s text-field notifications (`TextFieldDidBeginEditing`, `TextFieldDidEndEditing`, `TextDidChangeInTextField`, `TextWillBeDeletedInTextField`, `TextDidChangeInTextArea`) and `DoTextFieldCommandFromEvent` do nothing.

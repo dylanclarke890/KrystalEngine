@@ -559,9 +559,6 @@ namespace krys::boo
     }
 
     RecalcSectionsIfNeeded();
-    // FIXME: We should do this recalc lazily in BorderStart/BorderEnd so that we don't have to make sure
-    // to call this before we call BorderStart/BorderEnd to avoid getting a stale value.
-    RecalcBordersInRowDirection();
 
     bool sectionMoved = false;
     LayoutUnit movedSectionLogicalTop;
@@ -885,10 +882,6 @@ namespace krys::boo
                                                   TableIntrinsics intrinsics) const noexcept
   {
     RecalcSectionsIfNeeded();
-    // FIXME: Do the recalc in BorderStart/BorderEnd and make those const_cast this call.
-    // Then _borderStart/_borderEnd will be transparent a cache and it removes the possibility
-    // of reading out stale values.
-    const_cast<RenderTable *>(this)->RecalcBordersInRowDirection();
     // FIXME: Restructure the table layout code so that we can make this method const.
     const_cast<RenderTable *>(this)->_tableLayout->ComputeIntrinsicLogicalWidths(minWidth, maxWidth,
                                                                                  intrinsics);
@@ -1462,11 +1455,18 @@ namespace krys::boo
                                                               !GetWritingMode().IsInlineFlipped());
   }
 
-  void RenderTable::RecalcBordersInRowDirection() noexcept
+  // The row-direction borders are computed when they're asked for rather than cached at layout: a flex or
+  // grid container can size the table before its first layout.
+  LayoutUnit RenderTable::BorderStart() const noexcept
   {
-    // FIXME: We need to compute the collapsed before / after borders in the same fashion.
-    _borderStart = CalcBorderStart();
-    _borderEnd = CalcBorderEnd();
+    RecalcSectionsIfNeeded();
+    return CalcBorderStart();
+  }
+
+  LayoutUnit RenderTable::BorderEnd() const noexcept
+  {
+    RecalcSectionsIfNeeded();
+    return CalcBorderEnd();
   }
 
   LayoutUnit RenderTable::BorderBefore() const noexcept
