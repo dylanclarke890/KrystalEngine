@@ -35,7 +35,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- A `<meta charset>` or `http-equiv="Content-Type"` met while parsing doesn't change the encoding (FIXME in `TreeBuilder.cpp`), and there's no prescan for one, as documents decode UTF-8 only (see Loading).
 - The tree builder does not give form-associated elements their parser form owner on creation: `FormAssociatedElement::SetFormSetByParser` exists but nothing calls it (FIXME in `TreeBuilder.cpp`).
 - There is no `document.open()`, `document.write()`, `document.writeln()` or `document.close()`, so there's no script-created parser and no insertion point.
 - There is no `DOMParser` (`Document.parseHTMLUnsafe()` and `Document.parseHTML()` parse HTML into a new document) and no `XMLSerializer`.
@@ -230,7 +229,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - External reference filters (`filter: url(doc.svg#f)`) are not loaded or watched (FIXME in `RenderLayerFilters.cpp`). `cross-fade()` and filter images load their inputs but do not follow them as clients (FIXMEs in `StyleCrossfadeImage.cpp`, `StyleFilterImage.cpp`), so they do not update when an input loads, and `StyleCrossfadeImage::Blend` always returns null, so `cross-fade()` percentages don't interpolate.
-- Style sheets and linked text decode as UTF-8 only: the request's, response's, `@charset` and `<link charset>` encodings are not honoured, and an XML document's encoding declaration is recorded but not followed. There are no `nosniff` or HTTP status checks (FIXMEs in `CachedCSSStyleSheet.cpp`).
+- Style sheets have no `nosniff` or HTTP status checks (FIXMEs in `CachedCSSStyleSheet.cpp`).
 - `CachedResource` has no preloads, priorities or streaming and partial data; a resource decodes only once all its data has arrived. `CachedResourceLoader` loads images, fonts and style sheets only; other types, request counting, security checks and loads that do not delay the load event are FIXMEs. `MemoryCache` has one LRU list. `SharedBuffer` is one contiguous immutable buffer.
 - Images decode synchronously: there is no decoding work queue, so `DecodingMode::Asynchronous` decodes at once and its callbacks run before the call returns (FIXMEs in `BitmapImageSource.cpp`). `HTMLImageElement` and `SVGImageElement` have no `decode()`.
 - Animated images (GIF, APNG, animated WebP) do not decode the next frame ahead, have no `allowsAnimation` override or system animation controls, and no controls for suspended documents or off-screen views.
@@ -354,7 +353,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - Remote loading: there is no network loader, cookies, origins, CORS, referrers, pings, preloads or integrity checks; the host pushes data in through the loader strategy.
 - `DocumentLoader` has no redirects, content policies (responses shown as downloads), archives or streaming; the main resource arrives whole on a networking task. There is no progress tracker, and HTTP status checks, `X-Content-Type-Options: nosniff` and content type parsing (`ParsedContentType`) are absent because responses carry no headers or statuses.
-- `DocumentWriter` takes HTML, XML and text documents in UTF-8 only (BOMs removed, split sequences kept, invalid bytes replaced), with no other encodings; there are no image, media or plug-in documents.
+- `DocumentWriter` takes HTML, XML and text documents only: there are no image, media or plug-in documents.
 - The only pragmas are `content-language` and `default-style`; the `Content-Language` header is ignored, as responses have no headers.
 - Prerendering, speculation rules, `javascript:` URLs, `pagereveal`/`pageswap` are not implemented. Icons, manifests and alternate style sheet sets chosen by script are not loaded.
 - No DOM `URL` interface or `URLSearchParams` (`url::URL` is internal), so WPT `setters_tests.json` is not run.

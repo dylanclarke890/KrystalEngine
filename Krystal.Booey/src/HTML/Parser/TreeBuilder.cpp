@@ -871,7 +871,7 @@ namespace krys::boo::html
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
-            // FIXME: If the active speculative HTML parser is null:
+            // If the active speculative HTML parser is null:
             // If the element has a charset attribute, and getting an encoding from its value results in an
             // encoding, and the confidence is currently tentative, then change the encoding to the resulting
             // encoding.
@@ -880,6 +880,7 @@ namespace krys::boo::html
             // for extracting a character encoding from a meta element to that attribute's value returns an
             // encoding, and the confidence is currently tentative, then change the encoding to the extracted
             // encoding.
+            // (Skipped: documents are UTF-8 only; see DIFFERENCES.md.)
 
             return;
           }

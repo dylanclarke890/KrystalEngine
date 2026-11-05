@@ -263,6 +263,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
+- Everything is decoded as UTF-8: documents (through `DocumentWriter`), style sheets and linked text, with BOMs removed, sequences split across chunks kept and invalid bytes replaced. Encoding sniffing and the prescan, a `<meta charset>` or `http-equiv="Content-Type"` met while parsing, the request's and response's encodings, `@charset`, `<link charset>` and an XML document's encoding declaration (recorded but not followed) are all ignored, and form submissions are UTF-8 whatever their `accept-charset`. A host with text in another encoding converts it to UTF-8 before handing it to Booey.
 - Booey doesn't navigate by itself: following a link and submitting a form hand the navigation to the host, which loads what it wants. A form's entries reach the host unencoded, with the form's encoding type: Booey runs none of the encoding algorithms, so a `GET` submission's URL is the action without the entries as its query, and a `mailto:` action isn't given a body.
 - Dropping a URL on a page that doesn't take it loads nothing, where browsers load the dropped URL.
 - The CSS `crossorigin()` URL modifier is parsed but sets no request mode or credentials, as there's no network. Only a link to a fragment of the document in its own browsing context navigates, within the document.

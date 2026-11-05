@@ -520,7 +520,7 @@ Status: reviewed (2026-11-01)
 ##### [4.10.22.5 Selecting a form submission encoding](https://html.spec.whatwg.org/#selecting-a-form-submission-encoding)
 
 Status: reviewed (2026-11-01)
-> Always UTF-8 (FIXME in `FormSubmission.cpp`, see `KNOWN-ISSUES.md`).
+> Always UTF-8 (see `DIFFERENCES.md`).
 
 - [x] [pick an encoding for a form](https://html.spec.whatwg.org/#picking-an-encoding-for-the-form) — If the user agent is to pick an encoding for a form, it must run the following steps:
   - 1. Let encoding be the document's character encoding.
