@@ -148,6 +148,11 @@ namespace krys::boo::style
     UpdateFontForSizeChange();
 
     _style.GetFontCascade().Update(ShareRefPtr<FontSelector>(&fontSelector));
+    // `font-size-adjust: from-font` computes to the primary font's aspect value, which descendants inherit.
+    if (_style.GetFontDescription().GetFontSizeAdjust().ShouldResolveFromFont())
+    {
+      (void)_style.GetFontCascade().PrimaryFont();
+    }
 
     _fontDirty = false;
   }

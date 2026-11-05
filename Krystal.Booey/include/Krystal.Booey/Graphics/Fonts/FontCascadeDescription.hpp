@@ -11,6 +11,8 @@
 
 namespace krys::boo
 {
+  class Font;
+
   /// @brief A family a font cascade asks for. Platforms with native font family specifications (Core Text)
   /// add theirs as a second alternative.
   using FontFamilySpecification = StringAtom;
@@ -167,6 +169,8 @@ namespace krys::boo
       _isSpecifiedFont = isSpecifiedFont;
     }
 
-    // FIXME: `resolveFontSizeAdjustFromFontIfNeeded(const Font &)` comes with the font backend.
+    /// @brief Resolves `font-size-adjust: from-font` to @p font's aspect value for its metric, which is then
+    /// its computed value. Nothing changes if it's already resolved or the font lacks the metric.
+    void ResolveFontSizeAdjustFromFontIfNeeded(const Font &font) noexcept;
   };
 }

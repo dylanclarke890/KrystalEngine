@@ -198,11 +198,23 @@ namespace krys::boo::tests
       CHECK(data->GetFontPlatformData(description, false, false, FontCreationContext {}).Size()
             == Catch::Approx(10.f));
 
-      // Without a value (from-font before it's resolved), the size is unchanged.
+      // from-font resolves to the primary font's aspect value, which leaves the primary font's size alone.
       description.SetFontSizeAdjust({.Type = FontSizeAdjust::ValueType::FromFont});
       FontCascade fromFont {FontCascadeDescription {description}};
       fromFont.Update();
       CHECK(fromFont.PrimaryFont()->PlatformData().Size() == Catch::Approx(20.f));
+      auto resolved = fromFont.GetFontDescription().GetFontSizeAdjust();
+      CHECK(resolved.IsFromFont());
+      REQUIRE(resolved.Value);
+      CHECK(*resolved.Value == Catch::Approx(0.8f));
+
+      // Another family given the resolved value takes Ahem's aspect: Liberation Sans's x-height is
+      // 1082/2048em.
+      auto liberation = fromFont.GetFontDescription();
+      liberation.SetFamilies({StringAtom {u8"Liberation Sans"}});
+      FontCascade inherited {krys::move(liberation)};
+      inherited.Update();
+      CHECK(inherited.PrimaryFont()->PlatformData().Size() == Catch::Approx(20.f * 0.8f * 2048.f / 1082.f));
     }
 
     SECTION("Cascades with equal descriptions share their fonts")

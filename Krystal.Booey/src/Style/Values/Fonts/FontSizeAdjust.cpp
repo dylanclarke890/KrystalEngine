@@ -42,7 +42,7 @@ namespace krys::boo::style
         case css::ValueId::FromFont:
           // We cannot determine the primary font here, so we defer resolving the
           // aspect value for from-font to when the primary font is created.
-          // See FontCascadeFonts::primaryFont().
+          // See FontCascade::PrimaryFont().
           return {DefaultMetric, css::keywords::FromFont {}};
 
         case css::ValueId::Invalid:
@@ -71,7 +71,7 @@ namespace krys::boo::style
     {
       // We cannot determine the primary font here, so we defer resolving the
       // aspect value for from-font to when the primary font is created.
-      // See FontCascadeFonts::primaryFont().
+      // See FontCascade::PrimaryFont().
       return {metric, css::keywords::FromFont {}};
     }
 

@@ -5,6 +5,8 @@
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
@@ -150,6 +152,29 @@ namespace krys::boo::style::tests
       CHECK(document.UpdateStyleIfNeeded());
       CHECK(d.StyleValidity() == Validity::Valid);
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "TreeResolver: font-size-adjust: from-font is inherited as a number",
+                   "[Style][TreeResolver]")
+  {
+    (void)FontDatabase::Singleton().AddFontFile(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts"
+                                                / "Ahem.ttf");
+    ResolverFixture fixture {u8R"(<!DOCTYPE html>
+      <div id=a style="font: 20px 'Liberation Sans'; font-size-adjust: from-font"><span id=b
+        style="font-family: Ahem">x</span></div>)"};
+
+    // The div's primary font is Liberation Sans, whose x-height is 1082/2048em.
+    auto &a = Rendered(fixture.ById(u8"a"));
+    auto aspect = a.GetFontDescription().GetFontSizeAdjust().Value;
+    REQUIRE(aspect);
+    CHECK(*aspect == Catch::Approx(1082.f / 2048.f));
+    CHECK(a.GetFontCascade().PrimaryFont()->PlatformData().Size() == Catch::Approx(20.f));
+
+    // The span inherits the number, so Ahem (x-height 0.8em) is scaled to match.
+    auto &b = Rendered(fixture.ById(u8"b"));
+    CHECK(b.GetFontDescription().GetFontSizeAdjust().Value == aspect);
+    CHECK(b.GetFontCascade().PrimaryFont()->PlatformData().Size() == Catch::Approx(20.f * *aspect / 0.8f));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "TreeResolver: the document element and body",
