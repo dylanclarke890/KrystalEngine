@@ -247,6 +247,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- There's no spelling or grammar checking: no text checker, autocorrection or document markers, so `::spelling-error` and `::grammar-error` highlights are never painted. Nor are the platform's text services built in: dictation, Writing Tools, text extraction, app highlights, image overlays (text recognised in images) and the kill ring and mark.
 - There are no mail blockquotes: a `<blockquote type=cite>` is edited like any other block (no breaking out of quotes on Enter or paste, no `InsertNewlineInQuotedContent` command), and pasted `Apple-style-span` and `Apple-paste-as-quotation` markup gets no special treatment.
 - Chrome's `getClientRects` reports an inline box's pieces separately around bidi-reordered content; Booey reports one rect where they're on one line.
 
