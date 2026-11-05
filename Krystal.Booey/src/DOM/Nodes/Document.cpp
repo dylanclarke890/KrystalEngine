@@ -4134,7 +4134,7 @@ namespace krys::boo::dom
     {
       return false;
     }
-    // FIXME: Wait until the view is visually non-empty.
+    // (Browsers also wait until the view is visually non-empty; see DIFFERENCES.md.)
     return true;
   }
 

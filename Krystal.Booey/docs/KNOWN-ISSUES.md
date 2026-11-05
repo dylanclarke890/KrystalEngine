@@ -325,10 +325,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## Loading, navigation and history
 
-### Bugs
-
-- `Document::ShouldScheduleLayout` does not wait for the view to be visually non-empty (FIXME in `Document.cpp`).
-
 ### Missing
 
 - Remote loading: there is no network loader, cookies, origins, CORS, referrers, pings, preloads or integrity checks; the host pushes data in through the loader strategy.
