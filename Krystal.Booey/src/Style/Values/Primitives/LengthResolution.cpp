@@ -258,9 +258,17 @@ namespace krys::boo::style
     // We are only interested in canonicalizing to `px`, not adjusting for zoom, which will be handled later.
     // When computing font-size, zoom is not applied in the same way, so must be special cased here.
     auto computedValue = ComputeNonCalcLengthDouble(value, lengthUnit, conversionData);
-    if (conversionData.ComputingFontSize()
-        || (conversionData.EvaluationTimeZoomEnabled()
-            && conversionData.RangeZoomOption() == css::RangeZoomOptions::Unzoomed))
+    if (conversionData.ComputingFontSize())
+    {
+      return computedValue;
+    }
+    // Without a style, the only zoom applied is the conversion data's own.
+    if (!conversionData.Style())
+    {
+      return computedValue / conversionData.Zoom();
+    }
+    if ((conversionData.EvaluationTimeZoomEnabled()
+         && conversionData.RangeZoomOption() == css::RangeZoomOptions::Unzoomed))
     {
       return computedValue;
     }

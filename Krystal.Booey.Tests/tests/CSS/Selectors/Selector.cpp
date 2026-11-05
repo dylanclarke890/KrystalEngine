@@ -227,6 +227,9 @@ namespace krys::boo::css::tests
     CHECK(Specificity(B::Type(u8"div")) == C);
     CHECK(Specificity(B::Compound(B::Type(u8"div"), B::Id(u8"a"), B::Class(u8"b"))) == A + B_ + C);
     CHECK(Specificity(B::Attribute(SelectorMatch::AttributeExists, u8"href")) == B_);
+    // An & with no parent rule counts for nothing.
+    CHECK(Specificity(B::NestingParent()) == 0);
+    CHECK(Specificity(B::Compound(B::NestingParent(), B::Class(u8"a"))) == B_);
     CHECK(Specificity(B::PseudoClass(SelectorPseudoClass::Hover)) == B_);
     CHECK(Specificity(B::Combine(
             B::Type(u8"div"), SelectorRelation::Child,

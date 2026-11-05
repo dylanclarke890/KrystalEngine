@@ -98,5 +98,13 @@ namespace krys::boo::css::calc::tests
     CHECK(calculation->GetCategory() == css::Category::AnglePercentage);
     CHECK(calculation->Evaluate(360.0, style::ZoomNeeded {}) == 190.0);
     CHECK(calculation->Evaluate(0.0, style::ZoomNeeded {}) == 10.0);
+
+    // calc(10px + 50%) as a <length-percentage>: an absolute length needs no conversion data either.
+    auto length =
+      Create(css::Category::LengthPercentage, All,
+             CreateChild(Add(Num(10.0, UnitType::px), Num(50.0, UnitType::Percentage)), Type::CreateLength()),
+             Type::CreateLength());
+    auto lengthCalculation = length->CreateCalculationValue(NoConversionDataRequiredTag {});
+    CHECK(lengthCalculation->Evaluate(200.0, style::ZoomNeeded {}) == 110.0);
   }
 }
