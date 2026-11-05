@@ -27,6 +27,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -241,6 +242,35 @@ namespace krys::boo
     explicit EventHandler(LocalFrame &frame) noexcept;
     ~EventHandler() noexcept;
 
+    /// @brief Drops the elements of @p chain, the elements an enter or leave event goes to (deepest first,
+    /// each followed by its ancestors), that no listener for one of @p types would see. These events don't
+    /// bubble, so only a listener on the element itself, or a capturing one on an ancestor (its shadow roots,
+    /// document and window included), runs for it.
+    template <typename TElementChain>
+    static void RemoveBoundaryTargetsWithoutListeners(TElementChain &chain,
+                                                      Span<const dom::DOMStringAtom> types) noexcept
+    {
+      if (chain.empty())
+      {
+        return;
+      }
+
+      List<bool> keep(chain.size());
+      bool capturingAbove = HasCapturingBoundaryListenerAbove(*chain.back(), types);
+      for (size_t i = chain.size(); i-- > 0;)
+      {
+        if (!chain[i])
+        {
+          continue;
+        }
+        keep[i] = capturingAbove || HasBoundaryListener(*chain[i], types);
+        capturingAbove = capturingAbove || HasCapturingBoundaryListener(*chain[i], types);
+      }
+
+      size_t index = 0;
+      std::erase_if(chain, [&](const auto &) { return !keep[index++]; });
+    }
+
     /// @brief Forgets the mouse's state, as when the frame's document is replaced.
     void Clear() noexcept;
 
@@ -452,6 +482,18 @@ namespace krys::boo
                                   dom::Node *startingNode = nullptr) noexcept;
 
   private:
+    /// @brief Whether @p element has a listener for one of @p types, or its shadow root a capturing one.
+    KRYS_NODISCARD static bool HasBoundaryListener(const dom::Element &element,
+                                                   Span<const dom::DOMStringAtom> types) noexcept;
+    /// @brief Whether @p element, or its shadow root, has a capturing listener for one of @p types.
+    KRYS_NODISCARD static bool HasCapturingBoundaryListener(const dom::Element &element,
+                                                            Span<const dom::DOMStringAtom> types) noexcept;
+    /// @brief Whether an ancestor of @p element (with their shadow roots), its document or its window has a
+    /// capturing listener for one of @p types.
+    KRYS_NODISCARD static bool
+      HasCapturingBoundaryListenerAbove(const dom::Element &element,
+                                        Span<const dom::DOMStringAtom> types) noexcept;
+
     bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
     bool DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept;
     bool DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &event, ScrollLogicalDirection direction,

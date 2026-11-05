@@ -62,17 +62,21 @@ namespace krys::boo::tests
     };
 
     /// @brief A 200x100 view of @p markup with no body margin, which records the mouse events at its
-    /// document.
+    /// document unless @p recordAtDocument is false.
     struct MouseFixture : PaintFixture
     {
       List<std::string> Records;
 
-      explicit MouseFixture(utf8_stringview markup) noexcept
+      explicit MouseFixture(utf8_stringview markup, bool recordAtDocument = true) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0;font:16px sans-serif}</style>"
                            + utf8_string(markup),
                          {200, 100}, true)
       {
         (void)Document->UpdateLayout();
+        if (!recordAtDocument)
+        {
+          return;
+        }
         // Capturing at the document sees the events that don't bubble too.
         Ref<dom::EventListenerCallback> recorder = CreateRef<MouseRecorder>(Records);
         for (auto type : {u8"mousemove", u8"mouseover", u8"mouseout", u8"mouseenter", u8"mouseleave",
@@ -215,6 +219,27 @@ namespace krys::boo::tests
           == Strings {"mouseout:other(null)", "mouseleave:other", "mouseleave:body", "mouseleave:html"});
     CHECK(fixture.Handler().ElementUnderMouse() == nullptr);
     CHECK_FALSE(fixture.ById(u8"other").Hovered());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "EventHandler: enter and leave reach the element's listeners and capturing ancestors'",
+                   "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=outer style=padding:10px><div id=middle><div id=inner style=height:20px>"
+                          u8"</div></div></div>",
+                          false};
+    Ref<dom::EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
+    // Enter and leave don't bubble: inner's own listeners see only its events, and outer's capturing one sees
+    // those of the elements inside it too. Nothing listens on the others, so nothing is sent to them.
+    fixture.ById(u8"inner").AddEventListener(dom::DOMStringAtom(u8"mouseenter"), Ref {recorder}, false);
+    fixture.ById(u8"inner").AddEventListener(dom::DOMStringAtom(u8"pointerenter"), Ref {recorder}, false);
+    fixture.ById(u8"outer").AddEventListener(dom::DOMStringAtom(u8"mouseleave"), Ref {recorder}, true);
+
+    fixture.Move(15, 15);
+    CHECK(fixture.Take() == Strings {"pointerenter:inner/0", "mouseenter:inner"});
+
+    fixture.Move(-1, -1);
+    CHECK(fixture.Take() == Strings {"mouseleave:inner", "mouseleave:middle", "mouseleave:outer"});
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: presses, releases and clicks",

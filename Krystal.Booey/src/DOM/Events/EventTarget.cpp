@@ -40,6 +40,19 @@ namespace krys::boo::dom
     return EventListenerHandle(*this, *listener);
   }
 
+  bool EventTarget::HasEventListener(DOMStringAtom type) const noexcept
+  {
+    return std::ranges::any_of(_eventListenerList, [&](const Ref<EventListener> &listener)
+                               { return !listener->Removed() && listener->Type() == type; });
+  }
+
+  bool EventTarget::HasCapturingEventListener(DOMStringAtom type) const noexcept
+  {
+    return std::ranges::any_of(
+      _eventListenerList, [&](const Ref<EventListener> &listener)
+      { return !listener->Removed() && listener->Capture() && listener->Type() == type; });
+  }
+
   void EventTarget::RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
                                         const EventListenerOptionsOrBool &optionsOrBool) noexcept
   {

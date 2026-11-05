@@ -222,6 +222,63 @@ namespace krys::boo
 
   EventHandler::~EventHandler() noexcept = default;
 
+  namespace
+  {
+    KRYS_NODISCARD bool HasCapturingBoundaryListenerOn(const dom::EventTarget &target,
+                                                       Span<const dom::DOMStringAtom> types) noexcept
+    {
+      return std::ranges::any_of(types, [&](const dom::DOMStringAtom &type)
+                                 { return target.HasCapturingEventListener(type); });
+    }
+
+    KRYS_NODISCARD bool
+      HasCapturingBoundaryListenerOnShadowRoot(const dom::Element &element,
+                                               Span<const dom::DOMStringAtom> types) noexcept
+    {
+      auto &root = element.TreeScope().RootNode();
+      return Is<dom::ShadowRoot>(root) && HasCapturingBoundaryListenerOn(root, types);
+    }
+  }
+
+  bool EventHandler::HasBoundaryListener(const dom::Element &element,
+                                         Span<const dom::DOMStringAtom> types) noexcept
+  {
+    return std::ranges::any_of(types,
+                               [&](const dom::DOMStringAtom &type) { return element.HasEventListener(type); })
+           || HasCapturingBoundaryListenerOnShadowRoot(element, types);
+  }
+
+  bool EventHandler::HasCapturingBoundaryListener(const dom::Element &element,
+                                                  Span<const dom::DOMStringAtom> types) noexcept
+  {
+    return HasCapturingBoundaryListenerOn(element, types)
+           || HasCapturingBoundaryListenerOnShadowRoot(element, types);
+  }
+
+  bool EventHandler::HasCapturingBoundaryListenerAbove(const dom::Element &element,
+                                                       Span<const dom::DOMStringAtom> types) noexcept
+  {
+    if (HasCapturingBoundaryListenerOnShadowRoot(element, types))
+    {
+      return true;
+    }
+    for (auto *ancestor = element.ParentElementInComposedTree(); ancestor;
+         ancestor = ancestor->ParentElementInComposedTree())
+    {
+      if (HasCapturingBoundaryListener(*ancestor, types))
+      {
+        return true;
+      }
+    }
+    const auto &document = element.NodeDocument();
+    if (HasCapturingBoundaryListenerOn(document, types))
+    {
+      return true;
+    }
+    auto *window = document.Window();
+    return window && HasCapturingBoundaryListenerOn(*window, types);
+  }
+
   void EventHandler::ResizeLayerDestroyed() noexcept
   {
     krys_debug_assert(_resizeLayer);
@@ -790,9 +847,6 @@ namespace krys::boo
 
       if (_lastElementUnderMouse != _elementUnderMouse)
       {
-        // FIXME: Only dispatch mouseenter and mouseleave when an ancestor has a capturing listener or the
-        // element has a listener for them (they don't bubble), once targets can say which listeners they
-        // have; this optimization avoids O(n^2) capturing event-handler checks.
         List<Ref<dom::Element>> leftElementsChain;
         for (dom::Element *element = _lastElementUnderMouse.get(); element;
              element = element->ParentElementInComposedTree())
@@ -825,6 +879,15 @@ namespace krys::boo
           enteredElementsChain.erase(enteredElementsChain.end() - static_cast<ptrdiff_t>(i),
                                      enteredElementsChain.end());
         }
+
+        // Enter and leave events (and the pointer events dispatched with them) go only to the elements a
+        // listener would see them on, as they don't bubble.
+        const std::array leaveTypes {dom::DOMStringAtom(EventNames::MouseLeave),
+                                     dom::DOMStringAtom(EventNames::PointerLeave)};
+        const std::array enterTypes {dom::DOMStringAtom(EventNames::MouseEnter),
+                                     dom::DOMStringAtom(EventNames::PointerEnter)};
+        RemoveBoundaryTargetsWithoutListeners(leftElementsChain, leaveTypes);
+        RemoveBoundaryTargetsWithoutListeners(enteredElementsChain, enterTypes);
 
         if (RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse)
         {

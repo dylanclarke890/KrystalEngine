@@ -314,13 +314,14 @@ namespace krys::boo
                                                            bool isPrimary, LocalFrameView *view,
                                                            const DoublePoint &touchDelta) noexcept
   {
-    // FIXME: Only dispatch to the elements with a listener for the event, or all of them when an ancestor has
-    // a capturing one (they don't bubble), once targets can say which listeners they have.
     List<Ref<dom::Element>> targetChain;
     for (dom::Element *element = &targetElement; element; element = element->ParentElementInComposedTree())
     {
       targetChain.push_back(ShareRef(*element));
     }
+    // Enter and leave events don't bubble, so they go only to the elements a listener would see them on.
+    EventHandler::RemoveBoundaryTargetsWithoutListeners(targetChain,
+                                                        Span<const dom::DOMStringAtom>(&type, 1));
 
     if (type == EventNames::PointerEnter)
     {
@@ -397,9 +398,6 @@ namespace krys::boo
 
     if (pointerEvent->Type() == EventNames::PointerMove && previousTarget != currentTarget)
     {
-      // FIXME: Only dispatch pointerenter and pointerleave to the elements with a listener for them, or all
-      // of them when an ancestor has a capturing one (they don't bubble), once targets can say which
-      // listeners they have.
       List<Ref<dom::Element>> leftElementsChain;
       for (dom::Element *element = previousTarget.get(); element;
            element = element->ParentElementInComposedTree())
@@ -430,6 +428,14 @@ namespace krys::boo
         enteredElementsChain.erase(enteredElementsChain.end() - static_cast<ptrdiff_t>(i),
                                    enteredElementsChain.end());
       }
+
+      // Enter and leave events don't bubble, so they go only to the elements a listener would see them on.
+      const dom::DOMStringAtom leaveType(EventNames::PointerLeave);
+      const dom::DOMStringAtom enterType(EventNames::PointerEnter);
+      EventHandler::RemoveBoundaryTargetsWithoutListeners(leftElementsChain,
+                                                          Span<const dom::DOMStringAtom>(&leaveType, 1));
+      EventHandler::RemoveBoundaryTargetsWithoutListeners(enteredElementsChain,
+                                                          Span<const dom::DOMStringAtom>(&enterType, 1));
 
       if (previousTarget)
       {

@@ -139,6 +139,12 @@ namespace krys::boo::dom
       return _eventListenerList;
     }
 
+    /// @brief Whether the target has a listener for @p type.
+    KRYS_NODISCARD bool HasEventListener(DOMStringAtom type) const noexcept;
+
+    /// @brief Whether the target has a capturing listener for @p type.
+    KRYS_NODISCARD bool HasCapturingEventListener(DOMStringAtom type) const noexcept;
+
   protected:
     /// @brief The last reference was dropped: deletes the target, unless something else keeps it (a document
     /// that nodes still refer to).
