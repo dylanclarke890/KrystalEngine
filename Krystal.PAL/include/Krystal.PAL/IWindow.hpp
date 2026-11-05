@@ -3,6 +3,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
@@ -127,6 +128,9 @@ namespace krys::pal
     KRYS_NODISCARD virtual const string &GetTitle() const noexcept = 0;
 
     KRYS_NODISCARD virtual WindowSize GetSize() const noexcept = 0;
+
+    /// @brief The refresh rate of the display the window is on, in hertz, or null if the system doesn't say.
+    KRYS_NODISCARD virtual Maybe<uint32> DisplayRefreshRate() const noexcept = 0;
 
     virtual void Show() noexcept = 0;
 

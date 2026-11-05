@@ -360,9 +360,11 @@ namespace krys::boo
     {
       // In order to not have a stale cached current time, we schedule a timer to reset it in the time it
       // would take an animation frame to run under normal circumstances.
-      // FIXME: The page's preferred rendering update interval, once the host reports display refreshes.
-      _cachedCurrentTimeClearanceTimer.StartOneShot(
-        std::chrono::duration_cast<MonotonicTime::duration>(FullSpeedAnimationInterval));
+      auto *page = _document.GetPage();
+      _cachedCurrentTimeClearanceTimer.StartOneShot(page
+                                                      ? page->PreferredRenderingUpdateInterval()
+                                                      : std::chrono::duration_cast<MonotonicTime::duration>(
+                                                          Seconds {1.0 / Page::FullSpeedFramesPerSecond}));
     }
   }
 

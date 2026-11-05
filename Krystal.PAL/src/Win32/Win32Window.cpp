@@ -1040,6 +1040,12 @@ namespace krys::pal
           break;
         }
 #pragma endregion
+        case WM_DISPLAYCHANGE:
+        {
+          // The display's mode changed: its refresh rate is read again.
+          _refreshRateMonitor = nullptr;
+          break;
+        }
         case WM_MOVE:
         {
           if (_pointerLock)
@@ -1147,6 +1153,30 @@ namespace krys::pal
                            static_cast<uint32>(rect.bottom - rect.top)};
       }
       return WindowSize {0, 0};
+    }
+
+    Maybe<uint32> Win32Window::DisplayRefreshRate() const noexcept
+    {
+      auto *monitor = ::MonitorFromWindow(_handle, MONITOR_DEFAULTTONEAREST);
+      if (monitor == _refreshRateMonitor)
+      {
+        return _refreshRate;
+      }
+      _refreshRateMonitor = monitor;
+      _refreshRate = null;
+
+      MONITORINFOEXW info {};
+      info.cbSize = sizeof(info);
+      DEVMODEW mode {};
+      mode.dmSize = sizeof(mode);
+      // A frequency of 0 or 1 is the hardware's default, which the system doesn't name.
+      if (monitor && ::GetMonitorInfoW(monitor, &info)
+          && ::EnumDisplaySettingsW(info.szDevice, ENUM_CURRENT_SETTINGS, &mode)
+          && mode.dmDisplayFrequency > 1)
+      {
+        _refreshRate = static_cast<uint32>(mode.dmDisplayFrequency);
+      }
+      return _refreshRate;
     }
 
     void Win32Window::Show() noexcept

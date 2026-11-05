@@ -90,6 +90,7 @@ namespace krys::boo
     bool _isVisible {true};
     bool _scriptedAnimationsSuspended {false};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
+    uint32 _displayNominalFramesPerSecond {FullSpeedFramesPerSecond};
 
     Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
          UniquePtr<DragClient> dragClient) noexcept;
@@ -215,6 +216,18 @@ namespace krys::boo
     {
       return _renderingUpdateIsScheduled;
     }
+
+    /// @brief The rate the page is shown at when nothing tells it otherwise.
+    static constexpr uint32 FullSpeedFramesPerSecond {60};
+    /// @brief Sets the rate the host runs the page's rendering updates at (its display's refresh rate, or the
+    /// rate it caps its frames to), which animations align their updates to.
+    void SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept;
+    KRYS_NODISCARD uint32 DisplayNominalFramesPerSecond() const noexcept
+    {
+      return _displayNominalFramesPerSecond;
+    }
+    /// @brief The time between the page's rendering updates, at the host's rate.
+    KRYS_NODISCARD MonotonicTime::duration PreferredRenderingUpdateInterval() const noexcept;
     /// @brief The event loop's time at the start of the last rendering update.
     KRYS_NODISCARD MonotonicTime::duration LastRenderingUpdateTimestamp() const noexcept
     {

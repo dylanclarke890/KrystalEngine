@@ -2076,6 +2076,11 @@ namespace krys::ui
     return _page->IsVisible();
   }
 
+  void View::SetFramesPerSecond(uint32 framesPerSecond) noexcept
+  {
+    _page->SetDisplayNominalFramesPerSecond(framesPerSecond);
+  }
+
   void View::SetNavigationHandler(Func<void(const NavigationRequest &)> &&handler) noexcept
   {
     _frameLoaderClient->SetNavigationHandler(krys::move(handler));

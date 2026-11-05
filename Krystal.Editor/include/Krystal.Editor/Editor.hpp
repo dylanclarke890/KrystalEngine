@@ -474,6 +474,13 @@ namespace krys
       _pageTime += std::chrono::duration_cast<MonotonicTime::duration>(dt);
       if (_pageView)
       {
+        // The page's animations align their updates to the rate frames are drawn at: the display's with
+        // vsync, or else the cap.
+        const auto &settings = _context->Settings;
+        _pageView->SetFramesPerSecond(
+          settings.WindowSettings.VSync
+            ? _context->Window->DisplayRefreshRate().value_or(settings.RenderFramerate)
+            : settings.RenderFramerate);
         // The pads drive the page as the keyboard does, before its frame runs.
         _pageView->GamepadInput(_context->Input->GetGamepads(), _pageTime);
         if (_cube)

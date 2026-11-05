@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
+#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
@@ -612,6 +613,18 @@ namespace krys::boo::tests
     CHECK(svg.AnimationsPaused());
     fixture.TestPage->SetIsVisible(true);
     CHECK_FALSE(svg.AnimationsPaused());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: animations follow the host's frame rate",
+                   "[Page][Animation]")
+  {
+    PageFixture fixture {u8"<!DOCTYPE html>"};
+    auto &timeline = fixture.Document->Timeline();
+    CHECK(fixture.TestPage->DisplayNominalFramesPerSecond() == 60u);
+    CHECK(timeline.AnimationInterval().count() == Catch::Approx(1.0 / 60));
+
+    fixture.TestPage->SetDisplayNominalFramesPerSecond(144);
+    CHECK(timeline.AnimationInterval().count() == Catch::Approx(1.0 / 144));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Page: SMIL animations are sampled in the rendering update",

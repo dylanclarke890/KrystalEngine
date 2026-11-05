@@ -570,6 +570,10 @@ namespace krys::ui
     /// @brief Whether the page is shown (`SetVisible`).
     KRYS_NODISCARD bool IsVisible() const noexcept;
 
+    /// @brief The rate the host draws the page at, in frames per second: its display's refresh rate with
+    /// vsync, or the rate it caps its frames to. Animations align their updates to it. A page starts at 60.
+    void SetFramesPerSecond(uint32 framesPerSecond) noexcept;
+
     /// @brief Calls @p handler with each navigation the page asks for (links followed and forms submitted),
     /// other than a link to a fragment of the page, which scrolls to it. The view doesn't navigate: the
     /// handler loads what it wants (`Load`, `LoadFile`, `LoadHTML`).

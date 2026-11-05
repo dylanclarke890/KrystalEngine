@@ -51,6 +51,9 @@ namespace krys::pal::win32
     mutable bool _hasCaret {false};
     /// @brief The window's drop target, while the host takes drops.
     DropTarget *_dropTarget {nullptr};
+    /// @brief The display the refresh rate was last read for, and its rate; a display change clears them.
+    mutable HMONITOR _refreshRateMonitor {nullptr};
+    mutable Maybe<uint32> _refreshRate;
 
   public:
     Win32Window(const WindowSettings &settings);
@@ -64,6 +67,8 @@ namespace krys::pal::win32
     KRYS_NODISCARD const string &GetTitle() const noexcept override;
 
     KRYS_NODISCARD virtual WindowSize GetSize() const noexcept override;
+
+    KRYS_NODISCARD Maybe<uint32> DisplayRefreshRate() const noexcept override;
 
     void Show() noexcept override;
 

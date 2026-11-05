@@ -111,7 +111,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - SMIL animations don't pause for the image-animation setting (FIXME in `SVGDocumentExtensions.cpp`).
-- `DocumentTimeline::AnimationInterval` is always 15 ms (`FullSpeedAnimationInterval`), as there is no frame rate alignment (FIXME: the host's display refresh).
 
 ### Missing
 

@@ -167,6 +167,18 @@ namespace krys::boo
     }
   }
 
+  void Page::SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept
+  {
+    krys_debug_assert(framesPerSecond);
+    _displayNominalFramesPerSecond = std::max(framesPerSecond, 1u);
+  }
+
+  MonotonicTime::duration Page::PreferredRenderingUpdateInterval() const noexcept
+  {
+    return std::chrono::duration_cast<MonotonicTime::duration>(
+      std::chrono::duration<double>(1.0 / _displayNominalFramesPerSecond));
+  }
+
   // https://html.spec.whatwg.org/#update-the-rendering
   void Page::UpdateRendering() noexcept
   {
