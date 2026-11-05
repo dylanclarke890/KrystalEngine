@@ -191,6 +191,28 @@ namespace krys::boo::tests
       CHECK(ahem.FontForCombiningCharacterSequence(u8"a").get() == ahem.PrimaryFont().get());
     }
 
+    SECTION("Synthesised small caps shape capitals of any UTF-8 length")
+    {
+      auto smallCaps = liberation;
+      smallCaps.MutableFontDescription().SetVariantCaps(FontVariantCaps::Small);
+      smallCaps.Update();
+
+      // Dotless i (2 bytes) capitalises to I (1 byte), and turned a (2 bytes) to turned A (3 bytes).
+      TextRun run {u8"\u0131x\u0250"};
+      ComplexTextController controller {smallCaps, run};
+      GlyphBuffer buffer;
+      controller.Advance(run.Length(), &buffer);
+      REQUIRE(buffer.Size() == 3);
+      auto &primary = *smallCaps.PrimaryFont();
+      CHECK(buffer.GlyphAt(0) == primary.GlyphForCharacter(U'I'));
+      CHECK(buffer.GlyphAt(1) == primary.GlyphForCharacter(U'X'));
+      CHECK(buffer.GlyphAt(2) == primary.GlyphForCharacter(U'\u2C6F'));
+      CHECK(buffer.UncheckedStringOffsetAt(0) == 0);
+      CHECK(buffer.UncheckedStringOffsetAt(1) == 2);
+      CHECK(buffer.UncheckedStringOffsetAt(2) == 3);
+      CHECK(controller.TotalAdvance().Width() < liberation.Width(TextRun {u8"IX\u2C6F"}));
+    }
+
     SECTION("Glyph bounds")
     {
       auto ahem = Cascade(u8"Ahem");

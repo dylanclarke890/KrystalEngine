@@ -306,10 +306,11 @@ namespace krys::boo
   }
 
   void ComplexTextController::CollectComplexTextRunsForCharacters(utf8_stringview characters,
-                                                                  uint32 stringLocation,
-                                                                  const Font *font) noexcept
+                                                                  uint32 stringLocation, const Font *font,
+                                                                  Span<const char32> capitals) noexcept
   {
     krys_debug_assert(!characters.empty());
+    krys_debug_assert(capitals.empty() || capitals.size() == characters.length());
     auto length = static_cast<uint32>(characters.length());
     if (!font)
     {
@@ -358,9 +359,24 @@ namespace krys::boo
         hb_buffer_set_direction(buffer.get(), hb_script_get_horizontal_direction(HarfBuzzScript(run.Script)));
       }
 
-      hb_buffer_add_utf8(buffer.get(), reinterpret_cast<const char *>(characters.data()),
-                         static_cast<int>(length), run.StartIndex,
-                         static_cast<int>(run.EndIndex - run.StartIndex));
+      if (capitals.empty())
+      {
+        hb_buffer_add_utf8(buffer.get(), reinterpret_cast<const char *>(characters.data()),
+                           static_cast<int>(length), run.StartIndex,
+                           static_cast<int>(run.EndIndex - run.StartIndex));
+      }
+      else
+      {
+        // A capital's UTF-8 can be longer or shorter than its letter's, so the code points are added one by
+        // one, each with its letter's offset as its cluster, as hb_buffer_add_utf8 would give it.
+        hb_buffer_set_content_type(buffer.get(), HB_BUFFER_CONTENT_TYPE_UNICODE);
+        for (auto offset = run.StartIndex; offset < run.EndIndex;)
+        {
+          auto decoded = text::DecodeUTF8(Span<const char8> {characters}.subspan(offset));
+          hb_buffer_add(buffer.get(), capitals[offset] ? capitals[offset] : decoded.CodePoint, offset);
+          offset += decoded.Length;
+        }
+      }
 
       hb_shape(hbFont, buffer.get(), features.empty() ? nullptr : features.data(),
                static_cast<unsigned>(features.size()));

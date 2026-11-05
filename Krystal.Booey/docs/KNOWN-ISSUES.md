@@ -197,7 +197,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- Synthesised small caps write a capital in place of a lowercase letter only when both have the same UTF-8 length; otherwise the letter is shaped as written (FIXME in `ComplexTextController.cpp`).
 - `font-size-adjust` does not change the platform font's size: `FontPlatformData::updateSizeWithFontSizeAdjust` is not called from `FontCache` or `FontCustomPlatformData` (FIXMEs).
 
 ### Missing
