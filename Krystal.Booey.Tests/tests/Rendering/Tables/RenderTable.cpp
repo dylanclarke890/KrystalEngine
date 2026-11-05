@@ -276,6 +276,19 @@ layer at (0,0) size 800x10
     CHECK(CellOf(fixture, u8"b").Col() == 2);
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderTable: a column's width attribute changing lays it out",
+                   "[Rendering][RenderTable]")
+  {
+    ResolverFixture fixture {layout::tests::AhemDocument(
+      PlainTables, u8"<table><col id=col width=50><tr><td id=a>a</td><td id=b>b</td></tr></table>")};
+    CHECK(RectOf(fixture, u8"a").Width() == 50_lu);
+    CHECK(RectOf(fixture, u8"b").X() == 50_lu);
+
+    REQUIRE_FALSE(fixture.ById(u8"col").SetAttribute(u8"width", u8"80").HasException());
+    CHECK(RectOf(fixture, u8"a").Width() == 80_lu);
+    CHECK(RectOf(fixture, u8"b").X() == 80_lu);
+  }
+
   TEST_CASE("RenderTable: paints separated borders and backgrounds", "[Rendering][RenderTable]")
   {
     CHECK(Painted(u8"<style>body{margin:0}table{border:2px solid "

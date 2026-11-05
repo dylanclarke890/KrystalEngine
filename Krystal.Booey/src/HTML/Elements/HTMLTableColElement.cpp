@@ -31,8 +31,8 @@ namespace krys::boo::html
         col->UpdateFromElement();
       }
     }
-    // FIXME: Lay the column out again when its width attribute changes to a different integer
-    // (parseHTMLInteger, which Numbers::ParseInteger provides).
+    // A width change needs nothing here: it's a presentational hint, so the column is styled and laid out
+    // again.
   }
 
   uint32 HTMLTableColElement::Span() const noexcept

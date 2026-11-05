@@ -53,7 +53,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - `pattern` matches with `std::wregex` (ECMAScript) over UTF-16 instead of a JavaScript engine's regular expression with the `v` flag, and e-mail addresses with a `std::regex`; behaviour on exotic patterns can differ from browsers.
-- `HTMLTableColElement::OnAttributeChanged` does not lay a column out again when its `width` attribute changes (FIXME); `Numbers::ParseInteger` can parse it.
 
 ### Missing
 
