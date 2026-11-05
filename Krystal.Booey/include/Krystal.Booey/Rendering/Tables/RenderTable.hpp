@@ -67,8 +67,6 @@ namespace krys::boo
 
     LayoutUnit _hSpacing;
     LayoutUnit _vSpacing;
-    LayoutUnit _borderStart;
-    LayoutUnit _borderEnd;
     mutable LayoutUnit _columnOffsetTop {-1};
     mutable LayoutUnit _columnOffsetHeight {-1};
 
@@ -91,14 +89,8 @@ namespace krys::boo
 
     KRYS_NODISCARD bool CollapseBorders() const noexcept;
 
-    KRYS_NODISCARD LayoutUnit BorderStart() const noexcept final
-    {
-      return _borderStart;
-    }
-    KRYS_NODISCARD LayoutUnit BorderEnd() const noexcept final
-    {
-      return _borderEnd;
-    }
+    KRYS_NODISCARD LayoutUnit BorderStart() const noexcept final;
+    KRYS_NODISCARD LayoutUnit BorderEnd() const noexcept final;
     KRYS_NODISCARD LayoutUnit BorderBefore() const noexcept final;
     KRYS_NODISCARD LayoutUnit BorderAfter() const noexcept final;
 
@@ -120,7 +112,6 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit CalcBorderStart() const noexcept;
     KRYS_NODISCARD LayoutUnit CalcBorderEnd() const noexcept;
-    void RecalcBordersInRowDirection() noexcept;
 
     void ForceSectionsRecalc() noexcept
     {

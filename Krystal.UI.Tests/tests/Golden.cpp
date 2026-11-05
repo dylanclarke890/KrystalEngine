@@ -1002,12 +1002,10 @@ namespace krys::ui::tests
   }
 
   TEST_CASE("Golden: a page whose web font is in the memory cache lays out as with a fresh one",
-            "[UI][Golden][!shouldfail]")
+            "[UI][Golden]")
   {
-    // FIXME: A page whose @font-face font comes from the memory cache keeps table cells' preferred widths
-    // from before the font applied, so its table is sized differently from a page whose font loads (by a
-    // fifth of a pixel a cell here); setting the cells' text again fixes it. "Golden: bidi layout" fails when
-    // any page was loaded before it in the process. See Krystal.Booey/docs/KNOWN-ISSUES.md.
+    // A page whose font comes from the memory cache is laid out once, where a fresh font lays it out again
+    // when it loads; the flex row sizing the collapsed-border table has to get it right the first time.
     auto td3 = []
     {
       View view({360, 240});

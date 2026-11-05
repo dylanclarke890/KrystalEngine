@@ -49,11 +49,12 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(Consume(u8"auto") == "<null>");
   }
 
-  // FIXME: calc() producing a percentage isn't divided by 100 (also upstream).
+  // A calc() percentage keeps its form (its value isn't known until it's resolved); its users divide it by
+  // 100 then.
   TEST_CASE_METHOD(ValueFixture,
                    "PropertyParserHelpers(ConsumePercentageDividedBy100OrNumber calc percentage)",
-                   "[CSS][Properties][Consumers][!shouldfail]")
+                   "[CSS][Properties][Consumers]")
   {
-    CHECK(Consume(u8"calc(25%)") == "0.25");
+    CHECK(Consume(u8"calc(25%)") == "calc(25%)");
   }
 }

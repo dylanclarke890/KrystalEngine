@@ -246,6 +246,20 @@ layer at (0,0) size 800x10
       CHECK(CellOf(fixture, u8"b").BorderLeft() == 0_lu);
       CHECK(RectOf(fixture, u8"b") == LayoutRect(11, 0, 11, 12));
     }
+
+    SECTION("A flex item on its first layout")
+    {
+      ResolverFixture fixture {layout::tests::AhemDocument(
+        u8"#row { display: flex; width: 100px } #t, #other { flex: 1 } table { border-collapse: collapse } "
+        u8"td { padding: 0; border: 2px solid black }",
+        u8"<div id=row><table id=t><tr><td>a</td></tr></table><div id=other></div></div>")};
+
+      // The flex container sizes the table before the table has laid out, so its outer halves of the
+      // borders (1px each side) have to be known then: each item gets half of the 98px left over.
+      CHECK(RectOf(fixture, u8"t").Width() == 51_lu);
+      CHECK(RectOf(fixture, u8"other").X() == 51_lu);
+      CHECK(RectOf(fixture, u8"other").Width() == 49_lu);
+    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderTable: relayout", "[Rendering][RenderTable]")
