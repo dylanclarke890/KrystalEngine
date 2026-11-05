@@ -1461,9 +1461,15 @@ namespace krys::boo::html
   {
     if (_inputType->StoresValueSeparateFromAttribute())
     {
-      // Setting the value to null drops the dirty value, so the value follows the attribute again.
+      // Setting the value to null drops the dirty value, so the value follows the attribute again; the inner
+      // editor took the empty value set, so it's given the attribute's.
       (void)SetValue({});
       _valueIfDirty = std::nullopt;
+      SetFormControlValueMatchesRenderer(false);
+      if (_inputType->HasCreatedShadowSubtree())
+      {
+        _inputType->UpdateInnerTextValue();
+      }
       UpdatePlaceholderVisibility();
       UpdateValidity();
     }
