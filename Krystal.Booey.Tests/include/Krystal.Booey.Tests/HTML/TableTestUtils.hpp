@@ -48,7 +48,7 @@ namespace krys::boo::html::tests
 
     KRYS_NODISCARD std::string Markup() const noexcept
     {
-      return TableText(Body->FirstElementChild()->InnerHTML());
+      return TableText(Body->FirstElementChild()->InnerHTML().ReleaseValue());
     }
   };
 }

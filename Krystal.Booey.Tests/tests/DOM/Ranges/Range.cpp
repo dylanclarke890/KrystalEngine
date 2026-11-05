@@ -1734,8 +1734,8 @@ namespace krys::boo::dom::tests
     // Cloning keeps the partially contained elements, with only their contained parts.
     auto fragment = range->CloneContents().ReleaseValue();
     CHECK(fragment->ChildNodes()->Length() == 2u);
-    CHECK(Downcast<Element>(*fragment->FirstChild()).OuterHTML() == u8"<b id=\"b\">b</b>");
-    CHECK(Downcast<Element>(*fragment->LastChild()).OuterHTML() == u8"<i id=\"i\">i</i>");
+    CHECK(Downcast<Element>(*fragment->FirstChild()).OuterHTML().ReleaseValue() == u8"<b id=\"b\">b</b>");
+    CHECK(Downcast<Element>(*fragment->LastChild()).OuterHTML().ReleaseValue() == u8"<i id=\"i\">i</i>");
 
     // (div, 1) to (div, 2) contains <i> and its text.
     auto around = data.RangeOf(*data.Div, 1, *data.Div, 2);
@@ -1788,7 +1788,7 @@ namespace krys::boo::dom::tests
     {
       auto range = data.RangeOf(*data.BText, 1, *data.IText, 1);
       REQUIRE_FALSE(range->DeleteContents().HasException());
-      CHECK(data.Div->InnerHTML() == u8"<b id=\"b\">b</b><i id=\"i\">i</i><u id=\"u\"></u>");
+      CHECK(data.Div->InnerHTML().ReleaseValue() == u8"<b id=\"b\">b</b><i id=\"i\">i</i><u id=\"u\"></u>");
       // After <b> in the common ancestor <div>, not after the <div> in <body>.
       CHECK(range->StartContainer() == data.Div.get());
       CHECK(range->StartOffset() == 1uz);
@@ -1799,7 +1799,7 @@ namespace krys::boo::dom::tests
     {
       auto range = data.RangeOf(*data.BText, 1, *data.IText, 1);
       auto fragment = range->ExtractContents().ReleaseValue();
-      CHECK(data.Div->InnerHTML() == u8"<b id=\"b\">b</b><i id=\"i\">i</i><u id=\"u\"></u>");
+      CHECK(data.Div->InnerHTML().ReleaseValue() == u8"<b id=\"b\">b</b><i id=\"i\">i</i><u id=\"u\"></u>");
       CHECK(fragment->ChildNodes()->Length() == 2u);
       CHECK(range->StartContainer() == data.Div.get());
       CHECK(range->StartOffset() == 1uz);
@@ -1810,7 +1810,7 @@ namespace krys::boo::dom::tests
     {
       auto range = data.RangeOf(*data.Div, 0, *data.IText, 1);
       REQUIRE_FALSE(range->DeleteContents().HasException());
-      CHECK(data.Div->InnerHTML() == u8"<i id=\"i\">i</i><u id=\"u\"></u>");
+      CHECK(data.Div->InnerHTML().ReleaseValue() == u8"<i id=\"i\">i</i><u id=\"u\"></u>");
       CHECK(range->StartContainer() == data.Div.get());
       CHECK(range->StartOffset() == 0uz);
     }
@@ -1832,7 +1832,7 @@ namespace krys::boo::dom::tests
     auto range = data.RangeOf(*data.BText, 1, *data.BText, 1);
     auto em = data.Document->CreateElement(u8"em").ReleaseValue();
     REQUIRE_FALSE(range->InsertNode(*em).HasException());
-    CHECK(data.B->InnerHTML() == u8"b<em></em>b");
+    CHECK(data.B->InnerHTML().ReleaseValue() == u8"b<em></em>b");
     CHECK(range->StartContainer() == data.BText.get());
     CHECK(range->StartOffset() == 1uz);
     CHECK(range->EndContainer() == data.B.get());
@@ -1869,7 +1869,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(s->AppendChild(*data.Document->CreateTextNode(u8"old")).HasException());
     REQUIRE_FALSE(inText->SurroundContents(*s).HasException());
     // Inserting <s> split the text at the start, leaving an empty Text node before it.
-    CHECK(data.B->InnerHTML() == u8"<s>b</s>b");
+    CHECK(data.B->InnerHTML().ReleaseValue() == u8"<s>b</s>b");
     CHECK(data.B->ChildNodes()->Length() == 3u);
     CHECK(inText->StartContainer() == data.B.get());
     CHECK(inText->StartOffset() == 1uz);

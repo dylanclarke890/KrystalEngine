@@ -2515,10 +2515,11 @@ namespace krys::boo::dom
                              krys::move(options.ShadowRoots));
   }
 
-  DOMString Element::InnerHTML() const noexcept
+  ExceptionOr<DOMString> Element::InnerHTML() const noexcept
   {
-    return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy);
+    // The innerHTML getter steps are to return the result of running fragment serializing algorithm steps
+    // with this and true.
+    return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreesOfChildren);
   }
 
   ExceptionOr<void> Element::InnerHTML(DOMStringView markup) noexcept
@@ -2527,10 +2528,11 @@ namespace krys::boo::dom
     return ReplaceChildrenWithMarkup(markup, {});
   }
 
-  DOMString Element::OuterHTML() const noexcept
+  ExceptionOr<DOMString> Element::OuterHTML() const noexcept
   {
-    return SerializeFragment(*this, SerializedNodes::SubtreeIncludingNode, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy);
+    // 1. Let element be a fictional node whose only child is this.
+    // 2. Return the result of running fragment serializing algorithm steps with element and true.
+    return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreeIncludingNode);
   }
 
   ExceptionOr<void> Element::OuterHTML(DOMStringView markup) noexcept

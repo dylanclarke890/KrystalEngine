@@ -158,12 +158,25 @@ namespace krys::boo
     AllForInterchange
   };
 
+  enum class RequireWellFormed : bool
+  {
+    No,
+    Yes
+  };
+
   /// @see https://html.spec.whatwg.org/#serialising-html-fragments
   KRYS_NODISCARD utf8_string SerializeFragment(
     const dom::Node &node, SerializedNodes root, List<Ref<dom::Node>> *nodes = nullptr,
     ResolveURLs resolveURLs = ResolveURLs::No, Maybe<SerializationSyntax> serializationSyntax = null,
     SerializeShadowRoots serializeShadowRoots = SerializeShadowRoots::Explicit,
     List<Ref<dom::ShadowRoot>> &&explicitShadowRoots = {}) noexcept;
+
+  /// @brief Serializes @p node as the markup getters (`innerHTML`, `outerHTML`) do: as HTML in an HTML
+  /// document, and otherwise as XML that must be well-formed.
+  /// @return An `InvalidStateError` if the XML serialization meets one of its error cases.
+  /// @see https://html.spec.whatwg.org/#fragment-serializing-algorithm-steps
+  KRYS_NODISCARD dom::ExceptionOr<utf8_string>
+    SerializeFragmentRequiringWellFormed(const dom::Node &node, SerializedNodes root) noexcept;
 
   KRYS_NODISCARD utf8_string URLToMarkup(utf8_stringview url, utf8_stringview title) noexcept;
 

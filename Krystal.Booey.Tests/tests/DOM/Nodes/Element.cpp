@@ -607,7 +607,7 @@ namespace krys::boo::dom::tests
 
     REQUIRE_FALSE(element->InsertAdjacentText(InsertAdjacentWhere::BeforeBegin, u8"before").HasException());
     REQUIRE_FALSE(element->InsertAdjacentText(InsertAdjacentWhere::BeforeEnd, u8"end").HasException());
-    CHECK(parent->InnerHTML() == u8"before<p><b></b>end</p>");
+    CHECK(parent->InnerHTML().ReleaseValue() == u8"before<p><b></b>end</p>");
     REQUIRE(parent->FirstChild() != nullptr);
     CHECK(&parent->FirstChild()->NodeDocument() == document.get());
 

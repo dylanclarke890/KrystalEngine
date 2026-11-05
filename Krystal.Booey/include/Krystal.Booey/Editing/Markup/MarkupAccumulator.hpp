@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -75,15 +76,25 @@ namespace krys::boo
     uint32 _prefixLevel {0};
     SerializeShadowRoots _serializeShadowRoots;
     List<Ref<dom::ShadowRoot>> _explicitShadowRoots;
+    const RequireWellFormed _requireWellFormed;
+    bool _wellFormed {true};
 
   public:
     MarkupAccumulator(List<Ref<dom::Node>> *nodes, ResolveURLs resolveURLs,
                       SerializationSyntax serializationSyntax,
                       SerializeShadowRoots serializeShadowRoots = SerializeShadowRoots::Explicit,
-                      List<Ref<dom::ShadowRoot>> &&explicitShadowRoots = {}) noexcept;
+                      List<Ref<dom::ShadowRoot>> &&explicitShadowRoots = {},
+                      RequireWellFormed requireWellFormed = RequireWellFormed::No) noexcept;
     virtual ~MarkupAccumulator() noexcept;
 
     KRYS_NODISCARD utf8_string SerializeNodes(dom::Node &targetNode, SerializedNodes root) noexcept;
+
+    /// @brief False if the serialization required well-formed XML and met one of the error cases.
+    /// @see https://html.spec.whatwg.org/#xml-fragment-serialisation-algorithm
+    KRYS_NODISCARD bool IsWellFormed() const noexcept
+    {
+      return _wellFormed;
+    }
 
     static void AppendCharactersReplacingEntities(utf8_string &result, utf8_stringview source,
                                                   EnumSet<EntityMask> entityMask) noexcept;
@@ -140,6 +151,16 @@ namespace krys::boo
     KRYS_NODISCARD bool InXMLFragmentSerialization() const noexcept
     {
       return _serializationSyntax == SerializationSyntax::XML;
+    }
+    /// @brief Records that the serialization isn't well-formed unless @p wellFormed returns true, when it
+    /// must be (only the XML serialization has error cases).
+    template <Predicate TPredicate>
+    void CheckWellFormed(TPredicate &&wellFormed) noexcept
+    {
+      if (_wellFormed && _requireWellFormed == RequireWellFormed::Yes && InXMLFragmentSerialization())
+      {
+        _wellFormed = wellFormed();
+      }
     }
     KRYS_NODISCARD dom::DOMStringAtom GenerateUniquePrefix(const Namespaces &namespaces) noexcept;
     KRYS_NODISCARD utf8_string XMLAttributeSerialization(const dom::Attr &attribute, Namespaces *namespaces,

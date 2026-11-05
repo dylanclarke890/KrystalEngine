@@ -20,7 +20,7 @@ namespace krys::boo::html::tests
 
     KRYS_NODISCARD std::string InnerHTMLOf(dom::Document &document, dom::DOMStringView id) noexcept
     {
-      auto html = document.GetElementById(id)->InnerHTML();
+      auto html = document.GetElementById(id)->InnerHTML().ReleaseValue();
       return std::string(html.begin(), html.end());
     }
   }

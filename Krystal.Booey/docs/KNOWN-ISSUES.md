@@ -35,7 +35,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- Serializing XML (`innerHTML` and `outerHTML` in an XML document) doesn't check the specification's error cases, so a comment containing `--`, a processing instruction containing `?>` and the rest are written as markup that isn't well-formed rather than throwing an `InvalidStateError` (FIXMEs in `MarkupAccumulator.cpp`). Test: `The XML fragment serialization algorithm refuses a DOM that isn't well-formed` (`[!shouldfail]`, `tests/DOM/DOMParsing.cpp`).
 
 ## HTML elements and forms
 

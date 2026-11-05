@@ -455,13 +455,17 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml
     KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions &&options = {}) const noexcept;
 
+    /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
+    /// as well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
-    KRYS_NODISCARD DOMString InnerHTML() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
     ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
+    /// @brief The element serialized; in an XML document, an `InvalidStateError` if it can't be serialized as
+    /// well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
-    KRYS_NODISCARD DOMString OuterHTML() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> OuterHTML() const noexcept;
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
     ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
 

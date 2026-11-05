@@ -139,10 +139,11 @@ namespace krys::boo::dom
                              krys::move(options.ShadowRoots));
   }
 
-  DOMString ShadowRoot::InnerHTML() const noexcept
+  ExceptionOr<DOMString> ShadowRoot::InnerHTML() const noexcept
   {
-    return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy);
+    // The innerHTML getter steps are to return the result of running fragment serializing algorithm steps
+    // with this and true.
+    return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreesOfChildren);
   }
 
   ExceptionOr<void> ShadowRoot::InnerHTML(DOMStringView markup) noexcept

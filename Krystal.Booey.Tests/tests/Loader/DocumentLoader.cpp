@@ -132,7 +132,7 @@ namespace krys::boo::tests
     CHECK_FALSE(host->HasChildNodes());
     auto shadow = host->ShadowRoot();
     REQUIRE(shadow);
-    CHECK(shadow->InnerHTML() == u8"<b>s</b>");
+    CHECK(shadow->InnerHTML().ReleaseValue() == u8"<b>s</b>");
   }
 
   TEST_CASE("Documents load from the loader strategy and data: URLs", "[Loader][DocumentLoader]")
