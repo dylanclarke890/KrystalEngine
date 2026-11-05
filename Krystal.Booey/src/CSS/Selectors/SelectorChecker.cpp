@@ -172,6 +172,38 @@ namespace krys::boo::css
       return updatedContext;
     }
 
+    /// @brief Whether @p element is a top-level element of a virtual scoping root (the document fragment or
+    /// shadow root a query is scoped to), which Selectors makes its parent, and the rest of the complex
+    /// selector, from @p selector leftwards, matches that root: a compound of only `:scope`, as nothing else
+    /// matches it and it has no ancestors or siblings.
+    /// @note Otherwise a shadow root's elements go on to match `:host` against the host
+    /// (LocalContextForParent).
+    KRYS_NODISCARD bool
+      MatchesVirtualScopingRootAsParent(const SelectorChecker::CheckingContext &checkingContext,
+                                        const dom::Element &element, const Selector &selector) noexcept
+    {
+      const auto *scope = checkingContext.Scope.get();
+      if (!scope || Is<dom::Element>(*scope) || element.ParentNode() != scope)
+      {
+        return false;
+      }
+
+      for (const auto *simple = &selector; simple->IsScopePseudoClass();)
+      {
+        const auto *preceding = simple->PrecedingComplexSelectorComponent();
+        if (!preceding)
+        {
+          return true;
+        }
+        if (simple->Relation() != SelectorRelation::Compounding)
+        {
+          return false;
+        }
+        simple = preceding;
+      }
+      return false;
+    }
+
     KRYS_NODISCARD bool StartsWith(dom::DOMStringView value, dom::DOMStringView prefix,
                                    bool caseSensitive) noexcept
     {
@@ -668,10 +700,20 @@ namespace krys::boo::css
     switch (relation)
     {
       case SelectorRelation::Descendant:
-        nextContext = LocalContextForParent(nextContext);
         nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
-        for (; nextContext.Element; nextContext = LocalContextForParent(nextContext))
+        while (true)
         {
+          if (MatchesVirtualScopingRootAsParent(checkingContext, *nextContext.Element, *leftSelector))
+          {
+            return MatchResult::Matches(matchType);
+          }
+
+          nextContext = LocalContextForParent(nextContext);
+          if (!nextContext.Element)
+          {
+            return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
+          }
+
           EnumSet<PseudoElementType> ignoredPseudoElements;
           MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
           krys_debug_assert(!nextContext.PseudoElementEffective && !ignoredPseudoElements);
@@ -682,10 +724,13 @@ namespace krys::boo::css
             return MatchResult::UpdateWithMatchType(result, matchType);
           }
         }
-        return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
 
       case SelectorRelation::Child:
       {
+        if (MatchesVirtualScopingRootAsParent(checkingContext, *nextContext.Element, *leftSelector))
+        {
+          return MatchResult::Matches(matchType);
+        }
         nextContext = LocalContextForParent(nextContext);
         if (!nextContext.Element)
         {
@@ -1363,8 +1408,8 @@ namespace krys::boo::css
             return !context.IsNegation;
           }
 
-          // FIXME: A virtual scoping root (a document fragment or shadow root) should act as the parent of
-          // its top-level elements, so that `:scope > p` matches them; no element is ever equal to one.
+          // A virtual scoping root (a document fragment or shadow root) matches no element; the child and
+          // descendant combinators match `:scope` against it (MatchesVirtualScopingRootAsParent).
           const dom::Node *contextualReferenceNode =
             !checkingContext.Scope ? dom::TreeQueries::DocumentElement(element.NodeDocument())
                                    : static_cast<const dom::Node *>(checkingContext.Scope.get());

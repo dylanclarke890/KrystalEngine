@@ -6,10 +6,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## DOM
 
-### Bugs
-
-- `:scope` never matches when the scoping root is a document fragment or shadow root, so `fragment.querySelectorAll(":scope > p")` finds nothing; Selectors makes such a root the parent of its top-level elements. Test: `Scope-match: a fragment or shadow root is the parent of its top-level elements for :scope`.
-
 ### Missing
 
 - Responses (`ResourceResponse`) have no HTTP headers, so `document.lastModified` is always the current time, the specification's fallback when the date is unknown (it needs `Last-Modified`, or a file's modification date for file loads; FIXME in `Document.cpp`), and a language from a `Content-Language` header is not read (only the `<meta>` pragma is; FIXME in `SelectorCheckerTestFunctions.cpp`).

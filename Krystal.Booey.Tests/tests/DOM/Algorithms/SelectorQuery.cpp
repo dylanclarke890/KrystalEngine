@@ -148,9 +148,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  // FIXME: A virtual scoping root doesn't act as the parent of its top-level elements (SelectorChecker.cpp).
   TEST_CASE("Scope-match: a fragment or shadow root is the parent of its top-level elements for :scope",
-            "[DOM][SelectorQuery][dom:scope-match-a-selectors-string][!shouldfail]")
+            "[DOM][SelectorQuery][dom:scope-match-a-selectors-string]")
   {
     auto document = Parse(u8"<!DOCTYPE html><div id=host></div>");
     auto fragment = document->CreateDocumentFragment();
