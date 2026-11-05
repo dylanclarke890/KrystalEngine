@@ -291,7 +291,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Responses can't be streamed: the main resource arrives whole on a networking task, and the loader strategy has no cancellation or synchronous loads (FIXME in `LoaderStrategy.hpp`).
-- `DocumentWriter` takes HTML, XML and text documents only: there are no image or media documents.
 - Icons (`<link rel=icon>`) are not loaded or handed to the host.
 - Animation frames are not throttled below the page's rate (FIXME in `ScriptedAnimationController.cpp`), and scroll events are not throttled (FIXME in `LocalFrameView.cpp`).
 - `Page` has no rendering update scheduler: the host runs a scheduled update at its next frame (FIXME in `Page.cpp`). Revealing documents in the update is a FIXME.
