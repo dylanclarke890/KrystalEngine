@@ -285,6 +285,9 @@ namespace krys::boo
     /// @see https://w3c.github.io/selection-api/#dom-window-getselection
     KRYS_NODISCARD DOMSelection *GetSelection() const noexcept;
 
+  protected:
+    void DidAddEventListener(const dom::EventListener &listener) noexcept final;
+
   private:
     /// @brief Whether @p element is a named object of the window with the name @p name.
     KRYS_NODISCARD static bool IsNamedObject(const dom::Element &element, dom::DOMStringView name) noexcept;

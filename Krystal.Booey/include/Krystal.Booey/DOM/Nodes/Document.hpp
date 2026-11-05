@@ -398,6 +398,8 @@ namespace krys::boo::dom
     bool _isDirAttributeDirty {false};
     /// @brief Things other than loads that delay the document's load event.
     uint32 _loadEventDelayCount {0};
+    // Whether an `animationiteration` listener was ever added to the document's nodes or window.
+    bool _hasAnimationIterationListener {false};
     /// @see https://html.spec.whatwg.org/#unload-counter
     uint32 _unloadCounter {0};
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
@@ -1684,6 +1686,16 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/web-animations-1/#dom-document-timeline
     KRYS_NODISCARD DocumentTimeline &Timeline() noexcept;
     KRYS_NODISCARD DocumentTimeline *ExistingTimeline() const noexcept;
+
+    /// @brief Notes a listener for @p type added to one of the document's nodes or to its window. A type the
+    /// document has had a listener for stays noted.
+    void AddListenerTypeIfNeeded(DOMStringAtom type) noexcept;
+    /// @brief Whether an `animationiteration` listener was ever added to the document's nodes or window, so
+    /// CSS animations wake for each iteration to fire the event.
+    KRYS_NODISCARD bool HasAnimationIterationListener() const noexcept
+    {
+      return _hasAnimationIterationListener;
+    }
     /// @brief The relevant animations whose effects target elements in the document (outside shadow trees),
     /// in composite order.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-documentorshadowroot-getanimations

@@ -67,6 +67,16 @@ namespace krys::boo::dom
     // The new document is counted first: dropping the old one's count may delete it.
     document.IncrementReferencingNodeCount();
     std::exchange(_nodeDocument, &document)->DecrementReferencingNodeCount();
+    for (const auto &listener : EventListeners())
+    {
+      document.AddListenerTypeIfNeeded(listener->Type());
+    }
+  }
+
+  void Node::DidAddEventListener(const EventListener &listener) noexcept
+  {
+    EventTarget::DidAddEventListener(listener);
+    NodeDocument().AddListenerTypeIfNeeded(listener.Type());
   }
 
   DocumentOrShadowRoot &Node::TreeScope() const noexcept

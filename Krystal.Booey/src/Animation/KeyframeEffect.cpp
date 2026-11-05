@@ -3198,11 +3198,11 @@ namespace krys::boo
   Seconds KeyframeEffect::TimeToNextTick(const BasicEffectTiming &timing) noexcept
   {
     // CSS Animations need to trigger "animationiteration" events even if there is no need to update styles
-    // while animating, so if we're dealing with one we must wait until the next iteration.
-    // FIXME: Only when the document has `animationiteration` listeners (hasListenerType), once documents
-    // track their listener types.
+    // while animating, so if we're dealing with one we must wait until the next iteration, if anything
+    // listens for them.
+    auto *document = Document();
     if (timing.Phase == AnimationEffectPhase::Active && Animation() && Is<CSSAnimation>(*Animation())
-        && !TicksContinuouslyWhileActive())
+        && document && document->HasAnimationIterationListener() && !TicksContinuouslyWhileActive())
     {
       if (auto iterationProgress = GetComputedTiming().SimpleIterationProgress)
       {

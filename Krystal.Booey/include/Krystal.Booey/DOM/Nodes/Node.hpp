@@ -670,6 +670,7 @@ namespace krys::boo::dom
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
+    void DidAddEventListener(const EventListener &listener) noexcept override;
 
   public:
 #pragma region Tree Scope

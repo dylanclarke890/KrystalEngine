@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 
 namespace krys::boo::tests
@@ -99,6 +100,37 @@ namespace krys::boo::tests
     fixture.Frame();
     CHECK(recorder->Records
           == List<std::string> {"animationstart fade", "animationiteration fade", "animationend fade"});
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture,
+    "CSSAnimation: an animation that changes no style wakes for its iterations if they're listened for",
+    "[Animation][CSSAnimation]")
+  {
+    CSSAnimationFixture fixture {u8"<!DOCTYPE html><style>@keyframes empty{}#box{animation:empty 1s linear "
+                                 u8"2}</style><div id=box></div>"};
+    auto &animation = fixture.OnlyAnimation(u8"box");
+    fixture.StartAnimations();
+    fixture.Frame(250ms);
+    REQUIRE(animation.GetKeyframeEffect()->GetBasicTiming().Phase == AnimationEffectPhase::Active);
+
+    // Nothing to sample until it ends...
+    CHECK(animation.TimeToNextTick().count() == Catch::Approx(1.75));
+    CHECK_FALSE(fixture.Document->HasAnimationIterationListener());
+
+    // ...unless something listens for its iterations, on an element or the window.
+    auto recorder = CreateRef<AnimationEventRecorder>();
+    SECTION("On an element")
+    {
+      recorder->Listen(fixture.ById(u8"box"), {u8"animationiteration"});
+    }
+    SECTION("On the window")
+    {
+      fixture.Document->Window()->AddEventListener(dom::DOMStringAtom(u8"animationiteration"),
+                                                   ShareRef<dom::EventListenerCallback>(*recorder), false);
+    }
+    CHECK(fixture.Document->HasAnimationIterationListener());
+    CHECK(animation.TimeToNextTick().count() == Catch::Approx(0.75));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSAnimation: timing properties", "[Animation][CSSAnimation]")

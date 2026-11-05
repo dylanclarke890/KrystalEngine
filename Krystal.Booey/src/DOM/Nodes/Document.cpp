@@ -4083,6 +4083,14 @@ namespace krys::boo::dom
     }
   }
 
+  void Document::AddListenerTypeIfNeeded(DOMStringAtom type) noexcept
+  {
+    if (type == EventNames::AnimationIteration)
+    {
+      _hasAnimationIterationListener = true;
+    }
+  }
+
   void Document::UpdateAnimationsAndSendEvents() noexcept
   {
     if (auto *svgExtensions = SVGExtensionsIfExists())

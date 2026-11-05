@@ -64,6 +64,15 @@ namespace krys::boo
     return _document.get();
   }
 
+  void LocalDOMWindow::DidAddEventListener(const dom::EventListener &listener) noexcept
+  {
+    EventTarget::DidAddEventListener(listener);
+    if (auto *document = Document())
+    {
+      document->AddListenerTypeIfNeeded(listener.Type());
+    }
+  }
+
   LocalFrame *LocalDOMWindow::Frame() const noexcept
   {
     auto *document = Document();
