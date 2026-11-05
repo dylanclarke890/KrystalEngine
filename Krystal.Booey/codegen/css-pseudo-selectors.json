@@ -61,8 +61,11 @@
         "has": {
             "argument": "required"
         },
+        "heading": {
+        "argument": "optional"
+        },
         "host": {
-            "argument": "optional"
+        "argument": "optional"
         },
         "hover": {},
         "in-range": {},
@@ -96,6 +99,7 @@
         },
         "only-child": {},
         "only-of-type": {},
+        "open": {},
         "optional": {},
         "out-of-range": {},
         "past": {},

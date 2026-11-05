@@ -10,9 +10,14 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
 #include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -1451,7 +1456,42 @@ namespace krys::boo::css
           return dialog && dialog->IsModal();
         }
 
-        case SelectorPseudoClass::PopoverOpen:          return element.IsPopoverShowing();
+        case SelectorPseudoClass::PopoverOpen: return element.IsPopoverShowing();
+
+        // https://drafts.csswg.org/selectors-5/#headings
+        case SelectorPseudoClass::Heading:
+        {
+          auto *heading = DynamicDowncast<html::HTMLHeadingElement>(element);
+          if (!heading)
+          {
+            return false;
+          }
+          const auto *levels = selector.IntegerList();
+          if (!levels || levels->isEmpty())
+          {
+            return true;
+          }
+          return std::ranges::contains(*levels, static_cast<int32>(heading->ComputedHeadingLevel()));
+        }
+
+        // https://html.spec.whatwg.org/#selector-open
+        case SelectorPseudoClass::Open:
+        {
+          if (Is<html::HTMLDetailsElement>(element) || Is<html::HTMLDialogElement>(element))
+          {
+            return element.HasAttribute(dom::DOMStringAtom(u8"open"));
+          }
+          if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element))
+          {
+            auto *menuList = DynamicDowncast<RenderMenuList>(select->Renderer());
+            return menuList && menuList->PopupIsVisible();
+          }
+          if (auto *input = DynamicDowncast<html::HTMLInputElement>(element))
+          {
+            return input->IsPresentingAttachedView();
+          }
+          return false;
+        }
 
         case SelectorPseudoClass::InternalHtmlDocument: return Is<dom::HTMLDocument>(element.NodeDocument());
       }

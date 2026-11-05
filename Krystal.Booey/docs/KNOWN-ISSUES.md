@@ -53,7 +53,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `:heading` / `:heading()` (Selectors 5) and HTML's `:open` (for details, dialog and select elements) aren't in the pseudo-class table. Test: `CSSSelectorParser(heading-01.dat)` in `tests/CSS/Selectors/SelectorParser.cpp` (`[!shouldfail]`).
 - Range syntax in `style()` container queries and lists of container queries (css-conditional-5) aren't supported. Two cases in `tests/CSS/Queries/ContainerQueryParser.cpp` (`[!shouldfail]`).
 
 ### Missing

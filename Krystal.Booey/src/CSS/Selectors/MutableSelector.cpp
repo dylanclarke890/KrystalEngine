@@ -109,6 +109,12 @@ namespace krys::boo::css
     _selector->SetArgumentList(krys::move(list));
   }
 
+  void MutableSelector::SetIntegerList(FixedVector<int32> list) noexcept
+  {
+    krys_debug_assert(!list.isEmpty());
+    _selector->SetIntegerList(krys::move(list));
+  }
+
   void MutableSelector::SetLangList(FixedVector<PossiblyQuotedIdentifier> list) noexcept
   {
     krys_debug_assert(!list.isEmpty());

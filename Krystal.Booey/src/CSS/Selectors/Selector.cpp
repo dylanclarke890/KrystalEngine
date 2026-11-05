@@ -583,6 +583,23 @@ namespace krys::boo::css
             }
             break;
           }
+          case SelectorPseudoClass::Heading:
+          {
+            if (const auto *levels = selector->IntegerList(); levels && !levels->isEmpty())
+            {
+              builder.Append(u8'(');
+              for (const auto &level : *levels)
+              {
+                if (&level != &*levels->begin())
+                {
+                  builder.Append(u8", ");
+                }
+                builder.Append(level);
+              }
+              builder.Append(u8')');
+            }
+            break;
+          }
           case SelectorPseudoClass::Lang:
           {
             builder.Append(u8'(');
@@ -861,6 +878,12 @@ namespace krys::boo::css
     _data.Rare->ArgumentList = krys::move(argumentList);
   }
 
+  void Selector::SetIntegerList(FixedVector<int32> integerList) noexcept
+  {
+    CreateRareData();
+    _data.Rare->IntegerList = krys::move(integerList);
+  }
+
   void Selector::SetLangList(FixedVector<PossiblyQuotedIdentifier> langList) noexcept
   {
     CreateRareData();
@@ -908,7 +931,7 @@ namespace krys::boo::css
   Selector::RareData::RareData(const RareData &other) noexcept
       : MatchingValue(other.MatchingValue), SerialisingValue(other.SerialisingValue), NthA(other.NthA),
         NthB(other.NthB), Attribute(other.Attribute), Argument(other.Argument),
-        ArgumentList(other.ArgumentList), LangList(other.LangList)
+        ArgumentList(other.ArgumentList), LangList(other.LangList), IntegerList(other.IntegerList)
   {
     if (other.SubSelectors)
     {

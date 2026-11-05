@@ -1564,6 +1564,13 @@ namespace krys::boo::html
     {
       PopoverAttributeChanged(value);
     }
+
+    // The computed heading levels below, which `:heading()` matches, follow these.
+    if (namespaceURI == dom::DOMStringAtom::Null()
+        && (localName == u8"headingoffset" || localName == u8"headingreset") && oldValue != value)
+    {
+      InvalidateStyleForSubtree();
+    }
   }
 
 #pragma endregion

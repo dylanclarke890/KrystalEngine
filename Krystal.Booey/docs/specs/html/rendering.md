@@ -90,7 +90,7 @@ Status: reviewed (2026-11-02)
 #### [15.3.6 Sections and headings](https://html.spec.whatwg.org/#sections-and-headings)
 
 Status: reviewed (2026-11-02)
-> `h1` to `h6` in `html.css`; `:heading` isn't supported (see `KNOWN-ISSUES.md`).
+> `h1` to `h6` in `html.css`; `:heading` and `:heading()` match them by computed heading level (`SelectorChecker`).
 
 #### [15.3.7 Lists](https://html.spec.whatwg.org/#lists)
 

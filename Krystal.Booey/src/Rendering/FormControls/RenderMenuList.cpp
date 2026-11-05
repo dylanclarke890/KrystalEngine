@@ -17,6 +17,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Booey/Text/UnicodeHelpers.hpp"
 #include <cmath>
@@ -367,7 +368,11 @@ namespace krys::boo
     {
       return;
     }
-    _popupIsVisible = true;
+    {
+      style::PseudoClassChangeInvalidation styleInvalidation(SelectElement(), css::SelectorPseudoClass::Open,
+                                                             true);
+      _popupIsVisible = true;
+    }
 
     // Compute the top left taking transforms into account, but use the actual width of the element to size
     // the popup.
@@ -649,6 +654,8 @@ namespace krys::boo
 
   void RenderMenuList::PopupDidHide() noexcept
   {
+    style::PseudoClassChangeInvalidation styleInvalidation(SelectElement(), css::SelectorPseudoClass::Open,
+                                                           false);
     _popupIsVisible = false;
   }
 

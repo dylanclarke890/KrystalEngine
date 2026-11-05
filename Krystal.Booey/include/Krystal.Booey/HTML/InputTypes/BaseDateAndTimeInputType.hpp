@@ -126,10 +126,7 @@ namespace krys::boo::html
     // DateTimeChooserClient functions:
     void DidChooseValue(utf8_stringview value) noexcept final;
 
-    void DidEndChooser() noexcept final
-    {
-      _dateTimeChooser = nullptr;
-    }
+    void DidEndChooser() noexcept final;
 
     bool SetupDateTimeChooserParameters(DateTimeChooserParameters &parameters) noexcept;
     void CloseDateTimeChooser() noexcept;

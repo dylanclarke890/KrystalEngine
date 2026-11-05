@@ -185,6 +185,9 @@ namespace krys::boo::css
       // Used for :lang arguments.
       FixedVector<PossiblyQuotedIdentifier> LangList;
 
+      // Used for :heading() levels.
+      FixedVector<int32> IntegerList;
+
       // Used for :is(), :not(), :has(), :where(), :host(), :nth-*(... of) and ::slotted().
       UniquePtr<SelectorList> SubSelectors;
 
@@ -324,6 +327,12 @@ namespace krys::boo::css
       return HasRareData() ? &_data.Rare->LangList : nullptr;
     }
 
+    /// @brief The integers of `:heading()`.
+    KRYS_NODISCARD const FixedVector<int32> *IntegerList() const noexcept
+    {
+      return HasRareData() ? &_data.Rare->IntegerList : nullptr;
+    }
+
     KRYS_NODISCARD const SelectorList *SubSelectors() const noexcept
     {
       return HasRareData() ? _data.Rare->SubSelectors.get() : nullptr;
@@ -429,6 +438,7 @@ namespace krys::boo::css
     void SetArgument(const CSSOMStringAtom &value) noexcept;
     void SetArgumentList(FixedVector<CSSOMStringAtom> argumentList) noexcept;
     void SetLangList(FixedVector<PossiblyQuotedIdentifier> langList) noexcept;
+    void SetIntegerList(FixedVector<int32> integerList) noexcept;
     void SetSubSelectors(UniquePtr<SelectorList> subSelectors) noexcept;
 
     void SetPseudoClass(SelectorPseudoClass pseudoClass) noexcept

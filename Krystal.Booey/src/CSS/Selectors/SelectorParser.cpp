@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorInlines.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -1079,6 +1080,31 @@ namespace krys::boo::css
             return nullptr;
           }
           selector->SetSubSelectors(CreateUnique<SelectorList>(krys::move(selectorList)));
+          return selector;
+        }
+        // :heading( <integer># )
+        // https://drafts.csswg.org/selectors-5/#headings
+        case SelectorPseudoClass::Heading:
+        {
+          List<int32> levels;
+          while (true)
+          {
+            const auto &level = block.ConsumeIncludingWhitespace();
+            if (level.Type() != TokenType::Number || level.NumericValueType() != NumericValueType::Integer)
+            {
+              return nullptr;
+            }
+            levels.push_back(ClampTo<int32>(level.NumericValue()));
+            if (block.IsAtEnd())
+            {
+              break;
+            }
+            if (block.ConsumeIncludingWhitespace().Type() != TokenType::Comma)
+            {
+              return nullptr;
+            }
+          }
+          selector->SetIntegerList(FixedVector<int32>(levels.begin(), levels.end()));
           return selector;
         }
         case SelectorPseudoClass::Dir:

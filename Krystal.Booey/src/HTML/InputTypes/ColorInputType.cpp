@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <string_view>
 
@@ -187,6 +188,11 @@ namespace krys::boo::html
       }
       else
       {
+        Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
+        if (auto *element = Element())
+        {
+          styleInvalidation.emplace(*element, css::SelectorPseudoClass::Open, true);
+        }
         _chooser = chromeClient->CreateColorChooser(*this, ValueAsColor());
       }
     }
@@ -226,7 +232,14 @@ namespace krys::boo::html
 
   void ColorInputType::DidEndChooser() noexcept
   {
-    _chooser = nullptr;
+    {
+      Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
+      if (auto *element = Element())
+      {
+        styleInvalidation.emplace(*element, css::SelectorPseudoClass::Open, false);
+      }
+      _chooser = nullptr;
+    }
     if (auto *element = Element())
     {
       if (auto *renderer = element->Renderer())

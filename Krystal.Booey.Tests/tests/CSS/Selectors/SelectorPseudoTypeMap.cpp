@@ -27,7 +27,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorEnums(traits)", "[CSS][Selectors][SelectorPseudoTypeMap]")
   {
-    STATIC_CHECK(EnumTraits<SelectorPseudoClass>::DistinctValues == 62uz);
+    STATIC_CHECK(EnumTraits<SelectorPseudoClass>::DistinctValues == 64uz);
     STATIC_CHECK(EnumTraits<SelectorPseudoElement>::DistinctValues == 16uz);
     STATIC_CHECK(BitCount<SelectorPseudoClass>() == 6u);
     STATIC_CHECK(BitCount<SelectorPseudoElement>() == 4u);
@@ -41,6 +41,8 @@ namespace krys::boo::css::tests
     CHECK(IsPseudoClass(u8"is", SelectorPseudoClass::Is));
     CHECK(IsPseudoClass(u8"where", SelectorPseudoClass::Where));
     CHECK(IsPseudoClass(u8"popover-open", SelectorPseudoClass::PopoverOpen));
+    CHECK(IsPseudoClass(u8"heading", SelectorPseudoClass::Heading));
+    CHECK(IsPseudoClass(u8"open", SelectorPseudoClass::Open));
     CHECK(IsPseudoClass(u8"volume-locked", SelectorPseudoClass::VolumeLocked));
 
     // Internal, so the parser takes it only in user agent style sheets.

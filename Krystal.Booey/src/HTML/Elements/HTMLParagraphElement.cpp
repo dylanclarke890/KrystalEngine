@@ -6,7 +6,7 @@
 namespace krys::boo::html
 {
   HTMLParagraphElement::HTMLParagraphElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Heading)
+      : HTMLElement(document, HTMLElementInterface::Paragraph)
   {
   }
 

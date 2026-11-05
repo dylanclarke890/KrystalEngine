@@ -506,6 +506,12 @@ namespace krys::boo::html
       return;
     }
 
+    if (oldValue.has_value() != value.has_value())
+    {
+      style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::Open,
+                                                             value.has_value());
+    }
+
     // 3. If value is null and oldValue is not null, then run the dialog cleanup steps given element.
     // 4. If element's node document is not fully active, then return.
     // 5. If element is not connected, then return.

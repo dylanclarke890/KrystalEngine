@@ -134,11 +134,7 @@ namespace krys::boo::css::tests
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("has-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("has-02.dat");
 
-  // FIXME: :heading and :heading() (Selectors 5) aren't supported.
-  TEST_CASE("CSSSelectorParser(heading-01.dat)", "[CSS][CSSSelectorParser][!shouldfail]")
-  {
-    RunTest("heading-01.dat");
-  }
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("heading-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("heading-02.dat");
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("id-01.dat");
