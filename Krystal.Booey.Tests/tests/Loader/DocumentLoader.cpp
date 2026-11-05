@@ -360,7 +360,7 @@ namespace krys::boo::tests
   TEST_CASE(
     "Leaving a document: pagehide and unload",
     "[Loader][DocumentLoader][html:the-pagetransitionevent-interface][html:dom-pagetransitionevent-persisted]"
-    "[html:fire-a-page-transition-event][html:navigate]")
+    "[html:fire-a-page-transition-event][html:navigate][html:update-the-visibility-state]")
   {
     LoadFixture fixture;
     fixture.LoadMarkup(u8"<!DOCTYPE html><body><p>First</p></body>", u8"https://example.com/first.html");
@@ -397,14 +397,24 @@ namespace krys::boo::tests
     RefPtr<dom::Element> paragraph = first->QuerySelector(u8"p").ReleaseValue();
     REQUIRE(paragraph);
     auto onDocument = first->AddEventListener(u8"click", [](dom::Event &) {});
+    CHECK(first->VisibilityState() == html::DocumentVisibilityState::Visible);
+    auto visibilityChange = first->AddEventListener(u8"visibilitychange",
+                                                    [&](dom::Event &event)
+                                                    {
+                                                      CHECK(event.Bubbles());
+                                                      CHECK(first->Hidden());
+                                                      events.push_back("visibilitychange");
+                                                    });
     auto onParagraph = paragraph->AddEventListener(u8"click", [](dom::Event &) {});
 
     // A document is unloaded as the next one commits.
     fixture.LoadMarkup(u8"<!DOCTYPE html><p>Second</p>", u8"https://example.com/second.html");
     CHECK(events.empty());
     html::EventLoop::Current().RunUntilIdle();
-    CHECK(events == List<std::string> {"pagehide", "unload"});
+    CHECK(events == List<std::string> {"pagehide", "visibilitychange", "unload"});
     CHECK(fixture.Document().GetURL().String() == u8"https://example.com/second.html");
+    CHECK(first->VisibilityState() == html::DocumentVisibilityState::Hidden);
+    CHECK(fixture.Document().VisibilityState() == html::DocumentVisibilityState::Visible);
 
     // The unloaded document drops its listeners, and its window's and nodes'.
     CHECK_FALSE(window->HasEventListener(dom::DOMStringAtom(u8"pagehide")));

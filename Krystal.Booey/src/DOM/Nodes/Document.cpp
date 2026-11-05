@@ -1963,11 +1963,46 @@ namespace krys::boo::dom
     // The visibility of the document is inherited from the visibility of the page. If there is no page
     // associated with the document, we will assume that the page is hidden, as specified by the spec.
     auto *page = GetPage();
-    if (!page)
+    if (!page || _visibilityHiddenDueToDismissal)
     {
       return html::DocumentVisibilityState::Hidden;
     }
     return page->VisibilityState();
+  }
+
+  void Document::SetVisibilityHiddenDueToDismissal() noexcept
+  {
+    // 1. If document's visibility state equals visibilityState, then return.
+    if (_visibilityHiddenDueToDismissal)
+    {
+      return;
+    }
+    bool wasVisible = VisibilityState() == html::DocumentVisibilityState::Visible;
+
+    // 2. Set document's visibility state to visibilityState.
+    _visibilityHiddenDueToDismissal = true;
+    if (!wasVisible)
+    {
+      return;
+    }
+
+    // 3. (Skipped: there's no performance timeline for a VisibilityStateEntry.)
+    // 4. (Skipped: there's no screen orientation.)
+    // 5. (Skipped: there are no view transitions.)
+    // 6. Run any page visibility change steps which may be defined in other specifications, with visibility
+    //    state and document.
+    auto clients = _visibilityStateCallbackClients;
+    for (auto &client : clients)
+    {
+      if (auto *protectedClient = client.get())
+      {
+        protectedClient->VisibilityStateChanged();
+      }
+    }
+
+    // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
+    (void)EventDispatcher::DispatchToTarget(
+      *Event::Create(DOMStringAtom(EventNames::VisibilityChange), true, false), this);
   }
 
   void Document::VisibilityStateChanged() noexcept

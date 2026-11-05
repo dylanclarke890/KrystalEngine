@@ -254,7 +254,7 @@ namespace krys::boo
       document->DispatchPagehideEvent(false);
 
       // 10c. Update the visibility state of oldDocument to "hidden".
-      // FIXME: The visibility (visibilitychange), once there's one.
+      document->SetVisibilityHiddenDueToDismissal();
 
       // 12. If oldDocument's salvageable state is false, then fire an event named unload at oldDocument's
       //     relevant global object, with legacy target override flag set.

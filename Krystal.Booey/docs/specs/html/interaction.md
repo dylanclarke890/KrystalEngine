@@ -56,7 +56,7 @@ Status: reviewed (2026-11-01)
 ### [6.2 Page visibility](https://html.spec.whatwg.org/#page-visibility)
 
 Status: reviewed (2026-11-01)
-> A document's visibility state is its page's, updated as the host shows or hides the page (`Document::VisibilityStateChanged`), as upstream (see `DIFFERENCES.md`). There's no initial visibility state to set without navigables.
+> A document's visibility state is its page's, updated as the host shows or hides the page (`Document::VisibilityStateChanged`), as upstream (see `DIFFERENCES.md`); unloading a document hides it for good (`Document::SetVisibilityHiddenDueToDismissal`). There's no initial visibility state to set without navigables.
 <!-- definitions: visibility-state page-visibility-change-steps -->
 
 - [x] [When a user agent determines that the system visibility state for traversable n…](https://html.spec.whatwg.org/#page-visibility) — When a user agent determines that the system visibility state for traversable navigable traversable has changed to newState, it must run the following steps:

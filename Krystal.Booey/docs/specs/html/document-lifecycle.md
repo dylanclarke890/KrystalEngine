@@ -157,7 +157,7 @@ Status: reviewed (2026-11-01)
 #### [7.5.9 Unloading documents](https://html.spec.whatwg.org/#unloading-documents)
 
 Status: reviewed (2026-11-01)
-> `FrameLoader::DispatchUnloadEvents` and `Document::DispatchPagehideEvent`; the back/forward cache state is the salvageable state. Visibility isn't updated (see `KNOWN-ISSUES.md`), and there's no termination nesting level, as there's no script.
+> `FrameLoader::DispatchUnloadEvents` and `Document::DispatchPagehideEvent`; the back/forward cache state is the salvageable state. Hiding the document fires `visibilitychange` (`Document::SetVisibilityHiddenDueToDismissal`), and there's no termination nesting level, as there's no script.
 <!-- definitions: concept-document-salvageable page-showing suspension-time suspended-timer-handles termination-nesting-level unload-counter -->
 
 - [x] [unload](https://html.spec.whatwg.org/#unload-a-document) — To unload a Document oldDocument, given an optional Document newDocument:

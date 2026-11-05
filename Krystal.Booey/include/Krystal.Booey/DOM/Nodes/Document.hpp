@@ -385,6 +385,8 @@ namespace krys::boo::dom
     bool _needsVisualViewportScrollEvent {false};
     /// @brief Whether the resize events wait for the document to be shown again.
     bool _deferResizeEventForVisibilityChange {false};
+    // Set as the document is unloaded: it's hidden from then on, whatever its page's visibility.
+    bool _visibilityHiddenDueToDismissal {false};
     List<WeakPtr<VisibilityChangeClient>> _visibilityStateCallbackClients;
     /// @brief Whether the document's parser is running (a document a frame loads).
     bool _parsing {false};
@@ -761,9 +763,14 @@ namespace krys::boo::dom
       return VisibilityState() != html::DocumentVisibilityState::Visible;
     }
 
-    /// @brief The page's visibility: hidden if the document isn't in a page's frame.
+    /// @brief The page's visibility: hidden if the document isn't in a page's frame or has been unloaded.
     /// @see https://html.spec.whatwg.org/#dom-document-visibilitystate
     KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept;
+
+    /// @brief Hides the document as it's unloaded, firing `visibilitychange` straight away if it was visible.
+    /// It stays hidden.
+    /// @see https://html.spec.whatwg.org/#update-the-visibility-state
+    void SetVisibilityHiddenDueToDismissal() noexcept;
 
     /// @brief Fires `visibilitychange` in a task and tells the registered clients, as the page is shown or
     /// hidden.
