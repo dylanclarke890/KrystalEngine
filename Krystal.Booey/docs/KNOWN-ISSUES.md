@@ -31,11 +31,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - There is no ID map per tree scope: `getElementById` and selector fast paths walk the tree, live collections re-walk on every access, and `HTMLImageElement::AssociatedMapElement` walks the tree too. A node in a shadow tree finds its tree scope by walking to its root on every call.
 - `FirstChild()`, `ParentNode()` and friends return raw pointers rather than `RefPtr`; `NodeFilter` is clunky from C++.
 
-## HTML parser
-
-### Missing
-
-
 ## HTML elements and forms
 
 ### Missing
@@ -194,9 +189,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - The compositor has no scrolling nodes, widget layers, video or plug-in layers, event or interaction regions, layer flush throttling, model or separated layers, or HDR and wide gamut backings (`ContentsFormat` is RGBA8 only). There is no `TiledBacking` (`SetIsInWindow` and `SetTileCoverage` do nothing), the fixed root background layer is never composited, and the host's compositing policy under memory pressure is a FIXME.
 
 ## Text and fonts
-
-### Bugs
-
 
 ### Missing
 
