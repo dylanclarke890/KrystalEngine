@@ -33,6 +33,8 @@ namespace krys::boo
   private:
     // Text to display as long as the image isn't available.
     utf8_string _altText;
+    // Whether the alt text is an attribute's (`alt` or `title`), rather than the `content` property's.
+    bool _altTextIsFromAttribute {false};
     UniquePtr<RenderImageResource> _imageResource;
     bool _needsToSetSizeForAltText {false};
     bool _isGeneratedContent {false};

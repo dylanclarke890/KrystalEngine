@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -591,10 +592,16 @@ namespace krys::boo
           auto &fontMetrics = fontCascade.MetricsOfPrimaryFont();
           auto isHorizontal = GetWritingMode().IsHorizontal();
           // FIXME: The display string modified by the document's encoding.
-          // FIXME: With dir=auto, the directionality of the alt attribute: its first strong character's.
           auto textRun = RenderBlock::ConstructTextRun(
             _altText, style, ExpansionBehavior::DefaultBehavior(),
             {TextRunFlag::RespectDirection, TextRunFlag::RespectDirectionOverride});
+          // With dir=auto, the text has the directionality of its attribute: its first strong character's, or
+          // ltr. https://html.spec.whatwg.org/#directionality-of-the-attribute
+          if (auto *element = GetElement();
+              _altTextIsFromAttribute && element && element->HasAutoTextDirectionState())
+          {
+            textRun.SetDirection(DefaultWritingDirection(_altText).value_or(TextDirection::LTR));
+          }
           auto textWidth = LayoutUnit {fontCascade.Width(textRun)};
 
           auto hasRoomForAltText = [&]
@@ -736,6 +743,7 @@ namespace krys::boo
 
     // We check for null and not empty because we don't want to override empty-string
     // alt text provided by either of the above branches.
+    _altTextIsFromAttribute = altText.has_value();
     _altText = altText ? krys::move(*altText) : utf8_string(Style().AltFromContent());
   }
 

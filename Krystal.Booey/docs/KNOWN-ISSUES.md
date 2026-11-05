@@ -9,7 +9,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Responses (`ResourceResponse`) have no HTTP headers, so `document.lastModified` is always the current time, the specification's fallback when the date is unknown (it needs `Last-Modified`, or a file's modification date for file loads; FIXME in `Document.cpp`), and a language from a `Content-Language` header is not read (only the `<meta>` pragma is; FIXME in `SelectorCheckerTestFunctions.cpp`).
-- An image's alt text is drawn in the image's direction even with `dir=auto`, where the specification takes the directionality of the attribute from the alt text's first strong character (FIXME in `RenderImage.cpp`).
 - Render blocking doesn't hold back rendering: the rendering update doesn't skip render-blocked documents, and a document is render-blocked with no timeout (FIXME in `RenderBlocking.cpp`). `RenderBlocking` keeps the render-blocking element set, but only `<link>` adds to it.
 - `title` is never shown: there's no advisory information, no `HitTestResult::Title`, no tooltip hook on the chrome client, and Krystal.UI draws no tooltips.
 - No Fullscreen API (`:fullscreen`).
