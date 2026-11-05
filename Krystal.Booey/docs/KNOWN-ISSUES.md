@@ -56,7 +56,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - A root `calc()` `Negate`/`Invert` serialises only its child (`calc(1em)`), although "serialize a math function" step 4 serialises the root's children. Test: `TreeSerialisation(root negate and invert)` (`[!shouldfail]`).
 - `:heading` / `:heading()` (Selectors 5) and HTML's `:open` (for details, dialog and select elements) aren't in the pseudo-class table, and `:host(:not(.a .b))` parses although WPT says it is invalid. Tests: `CSSSelectorParser(heading-01.dat)` and `CSSSelectorParser(not-03.dat)` in `tests/CSS/Selectors/SelectorParser.cpp` (`[!shouldfail]`).
 - Range syntax in `style()` container queries and lists of container queries (css-conditional-5) aren't supported. Two cases in `tests/CSS/Queries/ContainerQueryParser.cpp` (`[!shouldfail]`).
-- Style sheets with `@import` rules, and imported ones, aren't cached or shared between documents, as in Chrome (FIXMEs in `StyleSheetContents.cpp`).
 
 ### Missing
 
