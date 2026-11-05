@@ -265,9 +265,6 @@ namespace krys::boo::svg
 
   void SMILTimeContainer::UpdateAnimations(SMILTime elapsed, bool seekToTime) noexcept
   {
-    // FIXME: Don't mutate the DOM while updating the animations (EventQueueScope), once the events the
-    // updates fire go through ScopedEventQueue.
-
     ProcessScheduledAnimations(
       [](SVGSMILElement &animation)
       {
