@@ -328,7 +328,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - `FrameLoader` does not fire `visibilitychange`, and a document it leaves keeps its visibility state (FIXME in `FrameLoader.cpp`).
-- The unloaded document keeps its event listeners.
 - `Document::ShouldScheduleLayout` does not wait for the view to be visually non-empty (FIXME in `Document.cpp`), and a deferred `SetNeedsLayout` is never made to happen (FIXME in `LocalFrameViewLayoutContext.cpp`).
 
 ### Missing

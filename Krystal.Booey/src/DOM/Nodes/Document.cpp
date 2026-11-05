@@ -18,6 +18,7 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
@@ -3882,6 +3883,8 @@ namespace krys::boo::dom
   {
     // FIXME: Unload, page hide and the other steps of unloading the document.
     StopActiveDOMObjects();
+    // The document gets no more events, and its listeners would keep alive whatever they hold.
+    RemoveAllEventListeners();
     _selection->WillBeRemovedFromFrame();
 
     if (HasLivingRenderTree())
@@ -3905,6 +3908,18 @@ namespace krys::boo::dom
     CommonTeardown();
 
     _frame = nullptr;
+  }
+
+  void Document::RemoveAllEventListeners() noexcept
+  {
+    if (auto *window = Window())
+    {
+      EventTargetAlgorithms::RemoveAllEventListeners(*window);
+    }
+    for (Node *node = this; node; node = TreeQueries::NextShadowIncluding(*node))
+    {
+      EventTargetAlgorithms::RemoveAllEventListeners(*node);
+    }
   }
 
   void Document::CommonTeardown() noexcept

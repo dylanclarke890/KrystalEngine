@@ -1945,6 +1945,8 @@ namespace krys::boo::dom
     /// @brief The teardown shared by the last reference going and leaving the frame: the observers
     /// disconnect.
     void CommonTeardown() noexcept;
+    /// @brief Removes the event listeners of the document, its window and its shadow-including descendants.
+    void RemoveAllEventListeners() noexcept;
 
     void SetQuirksMode(QuirksMode mode) noexcept;
 
