@@ -2167,7 +2167,8 @@ namespace krys::ui
     }
     drag.Position = point;
     drag.Modifiers = modifiers;
-    boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(modifiers));
+    boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(modifiers),
+                       input::ToBooey(modifiers));
 
     auto size = ViewportSize();
     bool inView = point.X() >= 0 && point.Y() >= 0 && point.X() < size.Width() && point.Y() < size.Height();
@@ -2198,7 +2199,8 @@ namespace krys::ui
     EnumSet<boo::DragOperation> operation;
     if (drag.InView)
     {
-      boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(drag.Modifiers));
+      boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(drag.Modifiers),
+                         input::ToBooey(drag.Modifiers));
       if (drop && drag.Operation)
       {
         if (controller.PerformDragOperation(krys::move(data)))
@@ -2244,7 +2246,8 @@ namespace krys::ui
       case pal::DragAction::Moved:
       {
         drag.Position = point;
-        boo::DragData data(&drag.Data, point, point, operationMask, DragFlags(input.Modifiers));
+        boo::DragData data(&drag.Data, point, point, operationMask, DragFlags(input.Modifiers),
+                           input::ToBooey(input.Modifiers));
         if (inView)
         {
           drag.Operation = controller.DragEnteredOrUpdated(*_frame, krys::move(data));
@@ -2278,7 +2281,8 @@ namespace krys::ui
           return null;
         }
 
-        boo::DragData data(&dropped.Data, point, point, operationMask, DragFlags(input.Modifiers));
+        boo::DragData data(&dropped.Data, point, point, operationMask, DragFlags(input.Modifiers),
+                           input::ToBooey(input.Modifiers));
         if (inView && dropped.Operation)
         {
           if (controller.PerformDragOperation(krys::move(data)))

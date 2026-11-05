@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -53,14 +54,17 @@ namespace krys::boo
     const SelectionData *_platformDragData {nullptr};
     EnumSet<DragOperation> _draggingSourceOperationMask;
     EnumSet<DragApplicationFlags> _applicationFlags;
+    EnumSet<PlatformEventModifier> _modifiers;
     List<utf8_string> _fileNames;
     EnumSet<DragDestinationAction> _dragDestinationActionMask;
     bool _disallowFileAccess {false};
 
   public:
     /// @param clientPosition The position of the drag within the target window, with (0,0) at the top left.
+    /// @param modifiers The modifier keys held, which the drag events report.
     DragData(const SelectionData *data, const IntPoint &clientPosition, const IntPoint &globalPosition,
              EnumSet<DragOperation> sourceOperationMask, EnumSet<DragApplicationFlags> flags = {},
+             EnumSet<PlatformEventModifier> modifiers = {},
              EnumSet<DragDestinationAction> destinationActionMask = AnyDragDestinationAction()) noexcept;
 
     KRYS_NODISCARD const IntPoint &ClientPosition() const noexcept
@@ -78,6 +82,10 @@ namespace krys::boo
     KRYS_NODISCARD EnumSet<DragApplicationFlags> Flags() const noexcept
     {
       return _applicationFlags;
+    }
+    KRYS_NODISCARD EnumSet<PlatformEventModifier> Modifiers() const noexcept
+    {
+      return _modifiers;
     }
     KRYS_NODISCARD const SelectionData *PlatformData() const noexcept
     {

@@ -293,7 +293,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- Drag events' modifier keys are always none: `DragController` makes their mouse event without keys (FIXME in `DragController.cpp`).
 
 ### Missing
 

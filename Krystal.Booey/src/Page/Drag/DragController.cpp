@@ -58,13 +58,13 @@ namespace krys::boo
 
   namespace
   {
-    // FIXME: The keys held (currentStateOfModifierKeys), once the host reports them outside its events.
+    /// @brief The mouse event drag events are made from, with the keys the host reports held.
     KRYS_NODISCARD PlatformMouseEvent CreateMouseEvent(const DragData &dragData) noexcept
     {
-      return PlatformMouseEvent(DoublePoint(dragData.ClientPosition()),
-                                DoublePoint(dragData.GlobalPosition()), MouseButton::Left,
-                                PlatformEvent::Type::MouseMoved, 0, {}, html::EventLoop::Current().Now(), 0,
-                                {}, ForceAtClick, SyntheticClickType::NoTap);
+      return PlatformMouseEvent(
+        DoublePoint(dragData.ClientPosition()), DoublePoint(dragData.GlobalPosition()), MouseButton::Left,
+        PlatformEvent::Type::MouseMoved, 0, dragData.Modifiers(), html::EventLoop::Current().Now(), 0, {},
+        ForceAtClick, SyntheticClickType::NoTap);
     }
 
     KRYS_NODISCARD RefPtr<dom::DocumentFragment> DocumentFragmentFromDragData(const DragData &dragData,
