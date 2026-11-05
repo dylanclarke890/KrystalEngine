@@ -751,9 +751,12 @@ namespace krys::boo::html
     {
       _relList = dom::ElementAlgorithms::CreateDOMTokenList(
         *this, u8"rel",
-        // FIXME: The supported tokens are the link types Booey processes (LinkRelAttribute::isSupported
-        // upstream), which aren't ported; every token is supported until they are.
-        [](dom::Document &, dom::DOMStringView) { return true; });
+        // The link types Booey processes.
+        [](dom::Document &, dom::DOMStringView token)
+        {
+          return text::IsASCIICaselessEqual(token, utf8_stringview(u8"stylesheet"))
+                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"alternate"));
+        });
     }
 
     return *_relList;

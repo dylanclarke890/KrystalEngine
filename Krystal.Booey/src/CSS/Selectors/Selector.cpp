@@ -150,7 +150,10 @@ namespace krys::boo::css
         }
         case SelectorMatch::NestingParent:
         {
-          break;
+          // A nested rule's & is resolved to its parent's selectors (an :is()) first; one left here has no
+          // parent rule, "or zero if no such nesting rule exists".
+          // https://drafts.csswg.org/css-nesting-1/#nest-selector
+          return 0;
         }
         case SelectorMatch::PseudoClass:
         {

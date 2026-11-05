@@ -3,6 +3,7 @@
 #include "Krystal.Core/IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/IO/Streams/Stream.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 #include <filesystem>
 #include <fstream>
 
@@ -47,9 +48,10 @@ namespace krys::io::tests
     const fs::path dataUI = data / "ui";
     const fs::path dataImg = data / "images";
 
-    // Clean slate
+    // Clean slate, and nothing left behind once the test ends (declared before the VFS, so it closes first).
     fs::remove_all(base);
     fs::remove_all(data);
+    auto removeSandbox = MakeScopeExit([] { fs::remove_all("vfs_test_sandbox"); });
     fs::create_directories(baseData);
     fs::create_directories(baseDB);
     fs::create_directories(dataUI);

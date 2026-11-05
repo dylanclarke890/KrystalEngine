@@ -53,10 +53,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - `pattern` matches with `std::wregex` (ECMAScript) over UTF-16 instead of a JavaScript engine's regular expression with the `v` flag, and e-mail addresses with a `std::regex`; behaviour on exotic patterns can differ from browsers.
-- `LocalDOMWindow::Stop` doesn't stop the navigable's loading (FIXME).
-- `close()` closes any page: it does not check that the page is script-closable (FIXME).
 - `HTMLTableColElement::OnAttributeChanged` does not lay a column out again when its `width` attribute changes (FIXME); `Numbers::ParseInteger` can parse it.
-- `<link>`'s `relList.supports()` and `<iframe>`'s `sandbox.supports()` return true for every token (FIXME in `HTMLLinkElement.cpp` and `HTMLIFrameElement.cpp`): their supported tokens, the link types and sandboxing keywords Booey implements, aren't defined yet. Test: "DOMTokenList.supports(): link's relList and iframe's sandbox support only their keywords" (`[!shouldfail]`, `Krystal.Booey.Tests/tests/DOM/Collections/DOMTokenList.cpp`).
 
 ### Missing
 
@@ -87,10 +84,9 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Trigonometric functions in `calc()` evaluate their argument as radians: simplification converts degrees first but evaluation doesn't, so an unsimplified angle that reaches evaluation (for example `sin(sibling-index() * 10deg)` through `DoubleValue`) is wrong. Test: `TreeEvaluation(trigonometric functions of angles)` (`[!shouldfail]`).
 - `:heading` / `:heading()` (Selectors 5) and HTML's `:open` (for details, dialog and select elements) aren't in the pseudo-class table, and `:host(:not(.a .b))` parses although WPT says it is invalid. Tests: `CSSSelectorParser(heading-01.dat)` and `CSSSelectorParser(not-03.dat)` in `tests/CSS/Selectors/SelectorParser.cpp` (`[!shouldfail]`).
 - Range syntax in `style()` container queries and lists of container queries (css-conditional-5) aren't supported. Two cases in `tests/CSS/Queries/ContainerQueryParser.cpp` (`[!shouldfail]`).
-- `css::calc::Value::CreateCalculationValue(NoConversionDataRequiredTag)` passes no conversion data, so a tree with a length (which doesn't require conversion data) asserts in `style::calc::ToStyle`. `ComputeCanonicalNonCalcLengthDouble` with conversion data that has no style dereferences a null style unless computing font-size.
 - `PaintImageValue` doesn't serialise its arguments.
 - `SingleAnimationRangeType` is defined twice (`css`, in `Consumers/Timeline.hpp`, and `style`, in `SingleAnimationRange.hpp`); the `css` one should go.
-- CSSOM bugs: `CSSPageRule::SetSelectorText` parses a selector list rather than a page selector; `CSSKeyframeRule::SetKeyText` changes the keyframe outside a mutation scope; `CSSNamespaceRule::Reattach` keeps the old rule; removing a shorthand returns an empty string; the `negative` descriptor always writes its suffix; serialising a name-only container query gives `--foo ` with a trailing space; the specificity of a bare `&` hits a debug assertion (nesting must be resolved first).
+- CSSOM bugs: `CSSPageRule::SetSelectorText` parses a selector list rather than a page selector; `CSSKeyframeRule::SetKeyText` changes the keyframe outside a mutation scope; `CSSNamespaceRule::Reattach` keeps the old rule; removing a shorthand returns an empty string; the `negative` descriptor always writes its suffix; serialising a name-only container query gives `--foo ` with a trailing space.
 - `@import ... supports()` is parsed in `CSS.supports()` mode, which falls back to general-enclosed and is never invalid, so the "discard the import rule" branch is unreachable.
 - `BorderImage.cpp` and `MaskBorder.cpp` in `Style/Values` use literal initial values instead of `ComputedStyle`'s (FIXME).
 - Copying a `StyleSheetContents` leaves out its `@import` and `@namespace` rules (FIXMEs).
@@ -120,8 +116,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - `Scope` iterates every element when viewport units change instead of a saved element list (FIXME in `Style/Scope/Scope.cpp`).
-- `scrollContainerSizeForPositionOptions` in `TreeResolver.cpp` tests `IsScrollContainerY` twice (FIXME: the second is likely the x axis).
-- `AnchorScrollAdjuster`'s constructor (`AnchorPositionEvaluator.cpp`) reads `align-self` in both writing modes for the vertical axis' `anchor-center` (FIXME: the vertical writing mode likely means `justify-self`).
 - `Style::Scope::UpdateActiveStyleSheets` doesn't wait for a living render tree or defer the update while style is being resolved (FIXME in `Scope.cpp`).
 - `TreeResolver` has a FIXME that its animation handling is wrong when transitions and animations both run on one element.
 
@@ -366,11 +360,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `FrameLoader` does not fire `visibilitychange`, and a document left or cached keeps its visibility state (FIXMEs in `FrameLoader.cpp` and `CachedPage.cpp`).
-- `ScheduledFormSubmission` does not count as a quick redirect, so a pending submission does not stop a page being cached.
-- `Navigation` has no `sourceSnapshotParams` (FIXME in `Navigation.cpp`), does not consume history-action user activation on a traversal, and does not set destination state. `NavigationHistoryEntry` does not hide another document's entry URL for its referrer policy.
-- `NavigateEvent.intercept()` has no `precommitHandler`, so there's no `NavigationPrecommitController` (FIXME in `NavigateEvent.cpp`). There's no `notRestoredReasons` (`NotRestoredReasons`) on navigation timing.
-- `window.stop()` does not stop loading (FIXME in `LocalDOMWindow.cpp`).
+- `FrameLoader` does not fire `visibilitychange`, and a document it leaves keeps its visibility state (FIXME in `FrameLoader.cpp`).
 - The unloaded document keeps its event listeners.
 - `Document::ShouldScheduleLayout` does not wait for the view to be visually non-empty (FIXME in `Document.cpp`), and a deferred `SetNeedsLayout` is never made to happen (FIXME in `LocalFrameViewLayoutContext.cpp`).
 
@@ -392,7 +382,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - Krystal.Core's `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't take an explicit target type, and `Downcast` asserts on null; `OffsetRotateValue.cpp` works around it (FIXME).
-- Some of Krystal.Core's text tests aren't built: `tests/Text/Unicode.cpp`, `EncodingRegistry.cpp` and `Encodings/ASCII.cpp` are missing from `Krystal.Core.Tests/CMakeLists.txt`.
 
 ### Missing
 

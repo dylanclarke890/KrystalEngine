@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
@@ -10,9 +9,6 @@ namespace krys::boo::html
   class HTMLIFrameElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLIFrameElement);
-
-  private:
-    UniquePtr<dom::DOMTokenList> _sandbox;
 
   public:
     KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
@@ -58,9 +54,6 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-iframe-name
     void Name(dom::DOMString value) noexcept;
 
-    /// @see  https://html.spec.whatwg.org/#dom-iframe-sandbox
-    KRYS_NODISCARD dom::DOMTokenList &Sandbox() noexcept;
-
     /// @see https://html.spec.whatwg.org/#dom-iframe-allow
     KRYS_NODISCARD dom::DOMString Allow() const noexcept;
 
@@ -96,12 +89,6 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-loading
     void Loading(dom::DOMString value) noexcept;
-
-    // FIXME: Implement the contentDocument, contentWindow and getSVGDocument()
-    // methods/attributes.
-    // readonly attribute Document? contentDocument;
-    // readonly attribute WindowProxy? contentWindow;
-    // Document? getSVGDocument();
 
 #pragma endregion
 
@@ -146,9 +133,6 @@ namespace krys::boo::html
 #pragma endregion
 
   protected:
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            dom::DOMStringAtom namespaceURI) noexcept override;
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;

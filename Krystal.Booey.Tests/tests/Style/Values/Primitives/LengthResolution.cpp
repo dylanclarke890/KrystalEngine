@@ -51,6 +51,10 @@ namespace krys::boo::style::tests
 
     // Without an element, container units fall back to the small viewport units.
     CHECK(ComputeNonCalcLengthDouble(50.0, LengthUnit::Cqw, conversionData) == 0.0);
+
+    // Canonicalising undoes only the conversion data's own zoom, as there's no style.
+    CHECK(ComputeCanonicalNonCalcLengthDouble(1.0, LengthUnit::In, conversionData) == 96.0);
+    CHECK(ComputeCanonicalNonCalcLengthDouble(1.0, LengthUnit::In, zoomed) == 96.0);
   }
 
   TEST_CASE("ToLengthConversionData(default)", "[CSS][ToLengthConversionData]")

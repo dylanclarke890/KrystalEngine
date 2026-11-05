@@ -311,7 +311,11 @@ namespace krys::boo::style::calc
     {
       case css::calc::Dimension::Length:
       {
-        krys_debug_assert(options.Evaluation.ConversionData);
+        // A tree that needs no conversion data has no relative lengths, so default data resolves its px.
+        if (!options.Evaluation.ConversionData)
+        {
+          return CreateDimension(ComputeNonCalcLengthDouble(root.Value, css::LengthUnit::Px, {}));
+        }
         return CreateDimension(
           ComputeNonCalcLengthDouble(root.Value, css::LengthUnit::Px, *options.Evaluation.ConversionData));
       }
