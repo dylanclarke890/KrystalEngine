@@ -45,7 +45,7 @@ namespace krys::boo::style
     VerticalAlign(css::keywords::TextBottom keyword) noexcept : _value {keyword}
     {
     }
-    VerticalAlign(css::keywords::WebkitBaselineMiddle keyword) noexcept : _value {keyword}
+    VerticalAlign(css::keywords::InternalBaselineMiddle keyword) noexcept : _value {keyword}
     {
     }
     VerticalAlign(Length &&length) noexcept : _value {krys::move(length)}
@@ -86,7 +86,7 @@ namespace krys::boo::style
     }
     KRYS_NODISCARD bool IsWebkitBaselineMiddle() const noexcept
     {
-      return krys::HoldsAlternative<css::keywords::WebkitBaselineMiddle>(_value);
+      return krys::HoldsAlternative<css::keywords::InternalBaselineMiddle>(_value);
     }
     KRYS_NODISCARD bool IsLength() const noexcept
     {
@@ -116,7 +116,7 @@ namespace krys::boo::style
 
     Variant<css::keywords::Baseline, css::keywords::Sub, css::keywords::Super, css::keywords::Top,
             css::keywords::TextTop, css::keywords::Middle, css::keywords::Bottom, css::keywords::TextBottom,
-            css::keywords::WebkitBaselineMiddle, VerticalAlignLength>
+            css::keywords::InternalBaselineMiddle, VerticalAlignLength>
       _value;
   };
 

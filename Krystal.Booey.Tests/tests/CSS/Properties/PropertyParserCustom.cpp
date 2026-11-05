@@ -124,8 +124,8 @@ namespace krys::boo::css::tests
 
     SECTION("flex")
     {
-      CHECK(ShorthandToText(u8"-webkit-fill-available", PropertyId::Flex)
-            == "flex-grow: 1; flex-shrink: 1; flex-basis: -webkit-fill-available");
+      CHECK(ShorthandToText(u8"stretch", PropertyId::Flex)
+            == "flex-grow: 1; flex-shrink: 1; flex-basis: stretch");
     }
 
     SECTION("view-timeline")

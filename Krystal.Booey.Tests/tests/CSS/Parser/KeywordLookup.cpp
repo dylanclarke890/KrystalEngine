@@ -29,7 +29,8 @@ namespace krys::boo::css::tests
   {
     CHECK(ValueIdFromName(u8"red") == ValueId::Red);
     CHECK(ValueIdFromName(u8"auto") == ValueId::Auto);
-    CHECK(ValueIdFromName(u8"-webkit-auto") == ValueId::WebkitAuto);
+    CHECK(ValueIdFromName(u8"-webkit-link") == ValueId::WebkitLink);
+    CHECK(ValueIdFromName(u8"-webkit-auto") == ValueId::Invalid);
     CHECK(ValueIdFromName(u8"not-a-keyword") == ValueId::Invalid);
   }
 
@@ -37,7 +38,7 @@ namespace krys::boo::css::tests
   {
     CHECK(ValueIdFromName(u8"RED") == ValueId::Red);
     CHECK(ValueIdFromName(u8"Auto") == ValueId::Auto);
-    CHECK(ValueIdFromName(u8"-WEBKIT-AUTO") == ValueId::WebkitAuto);
+    CHECK(ValueIdFromName(u8"-WEBKIT-LINK") == ValueId::WebkitLink);
   }
 
   TEST_CASE("ValueIdFromName(invalid input)", "[CSS][KeywordLookup]")
@@ -46,31 +47,6 @@ namespace krys::boo::css::tests
     CHECK(ValueIdFromName(CSSOMString(MaxValueKeywordLength + 1uz, u8'a')) == ValueId::Invalid);
     CHECK(ValueIdFromName(u8"réd") == ValueId::Invalid);
     CHECK(ValueIdFromName(CSSOMStringView(u8"re\0d", 4uz)) == ValueId::Invalid);
-  }
-
-  TEST_CASE("ValueIdFromName(-apple- prefix)", "[CSS][KeywordLookup]")
-  {
-    // Legacy -apple- keywords map to their -webkit- equivalents.
-    CHECK(ValueIdFromName(u8"-apple-auto") == ValueId::WebkitAuto);
-    CHECK(ValueIdFromName(u8"-Apple-Auto") == ValueId::WebkitAuto);
-    CHECK(ValueIdFromName(u8"-apple-linear-gradient") == ValueId::WebkitLinearGradient);
-
-    // Except -apple-system, -apple-pay* and -apple-wireless*.
-    CHECK(ValueIdFromName(u8"-apple-system") == ValueId::Invalid);
-    CHECK(ValueIdFromName(u8"-apple-pay-button") == ValueId::Invalid);
-    CHECK(ValueIdFromName(u8"-apple-wireless-playback") == ValueId::Invalid);
-
-    // Too short to be rewritten.
-    CHECK(ValueIdFromName(u8"-apple-") == ValueId::Invalid);
-    CHECK(ValueIdFromName(u8"-apple") == ValueId::Invalid);
-  }
-
-  TEST_CASE("ValueIdFromName(-apple- prefix at max length)", "[CSS][KeywordLookup]")
-  {
-    // The rewrite adds a character, so a max-length name must still fit.
-    CSSOMString name = u8"-apple-" + CSSOMString(MaxValueKeywordLength - 7uz, u8'a');
-    REQUIRE(name.size() == MaxValueKeywordLength);
-    CHECK(ValueIdFromName(name) == ValueId::Invalid);
   }
 
   TEST_CASE("IsCustomPropertyName", "[CSS][KeywordLookup]")

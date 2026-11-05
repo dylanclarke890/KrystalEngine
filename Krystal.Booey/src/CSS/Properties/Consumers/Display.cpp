@@ -67,14 +67,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    // Convert -webkit-flex/-webkit-inline-flex to flex/inline-flex
     ValueId nextValueId = range.Peek().ValueId();
-    if (nextValueId == ValueId::WebkitInlineFlex || nextValueId == ValueId::WebkitFlex)
-    {
-      DiscardIdent(range);
-      return PrimitiveValue::Create(nextValueId == ValueId::WebkitInlineFlex ? ValueId::InlineFlex
-                                                                             : ValueId::Flex);
-    }
 
     // Parse [ <display-outside> || <display-inside> ]
     Maybe<ValueId> parsedDisplayOutside;

@@ -138,10 +138,9 @@ large
 x-large
 xx-large
 xxx-large
--webkit-ruby-text
+-internal-ruby-text
 smaller
 larger
--webkit-xxx-large
 //math
 
 //
@@ -166,8 +165,6 @@ sans-serif
 cursive
 fantasy
 monospace
--webkit-body
--webkit-pictograph
 system-ui
 math
 //
@@ -287,6 +284,7 @@ plus-lighter
 //
 baseline
 middle
+-internal-baseline-middle
 sub
 super
 text-top
@@ -294,21 +292,18 @@ text-bottom
 top
 bottom
 // HTML alignment MIDDLE has no corresponding CSS alignment
--webkit-baseline-middle
 //
 // CSS_PROP_TEXT_ALIGN:
 // The order here must match the order of the Style::TextAlign enum in StyleTextAlign.h.
 //
--webkit-auto
 left
 right
 center
 justify
--webkit-left
--webkit-right
--webkit-center
+-internal-left
+-internal-right
+-internal-center
 match-parent
--webkit-match-parent
 -internal-th-center
 //start
 //end
@@ -459,8 +454,6 @@ grid-lanes
 inline-grid-lanes
 flow-root
 flow
--webkit-inline-flex
--webkit-flex
 // ruby
 block-ruby
 ruby-base
@@ -506,10 +499,6 @@ row-resize
 all-scroll
 zoom-in
 zoom-out
--webkit-grab
--webkit-grabbing
--webkit-zoom-in
--webkit-zoom-out
 //
 // CSS_PROP_CURSOR_VISIBILITY:
 // auto
@@ -572,9 +561,6 @@ invert
 inverted
 isolate-override
 plaintext
--webkit-isolate
--webkit-isolate-override
--webkit-plaintext
 level
 line-through
 local
@@ -751,12 +737,8 @@ min-intrinsic
 // CSS3 intrinsic dimension keywords
 //
 min-content
--webkit-min-content
 max-content
--webkit-max-content
--webkit-fill-available
 fit-content
--webkit-fit-content
 
 //
 // CSS_PROP_TEXT_OVERFLOW
@@ -875,7 +857,6 @@ content-box
 padding
 padding-box
 // text
--webkit-text
 
 //
 // Corner-shape
@@ -1148,8 +1129,6 @@ off
 optimizeQuality // ( deprecated)
 crisp-edges
 pixelated
--webkit-crisp-edges
--webkit-optimize-contrast
 
 // shape-outside
 nonzero
@@ -1176,7 +1155,6 @@ alphabetic
 
 // position
 sticky
--webkit-sticky
 
 // (pointer:) media feature
 // none

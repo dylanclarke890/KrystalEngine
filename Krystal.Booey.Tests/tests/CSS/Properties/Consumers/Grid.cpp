@@ -35,7 +35,6 @@ namespace krys::boo::css::PropertyParserHelpers::tests
   TEST_CASE("PropertyParserHelpers(IsGridBreadthIdent)", "[CSS][Properties][Consumers]")
   {
     CHECK(IsGridBreadthIdent(ValueId::MinContent));
-    CHECK(IsGridBreadthIdent(ValueId::WebkitMaxContent));
     CHECK(IsGridBreadthIdent(ValueId::Auto));
     CHECK_FALSE(IsGridBreadthIdent(ValueId::FitContent));
   }

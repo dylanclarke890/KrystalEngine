@@ -1911,7 +1911,7 @@ namespace krys::boo::html
     }
     else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"middle"))
     {
-      verticalAlignValue = css::ValueId::WebkitBaselineMiddle;
+      verticalAlignValue = css::ValueId::InternalBaselineMiddle;
     }
     else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"center"))
     {

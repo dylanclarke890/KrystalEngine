@@ -368,8 +368,7 @@ namespace krys::boo
       case css::ValueId::Content:
       case css::ValueId::ContentBox: return FillBox::ContentBox;
       case css::ValueId::BorderArea: return FillBox::BorderArea;
-      case css::ValueId::Text:
-      case css::ValueId::WebkitText: return FillBox::Text;
+      case css::ValueId::Text:       return FillBox::Text;
       case css::ValueId::NoClip:     return FillBox::NoClip;
       default:                       break;
     }
@@ -470,12 +469,8 @@ namespace krys::boo
   {
     switch (valueID)
     {
-      case css::ValueId::Copy:           return CursorType::Copy;
-      case css::ValueId::WebkitGrab:     return CursorType::Grab;
-      case css::ValueId::WebkitGrabbing: return CursorType::Grabbing;
-      case css::ValueId::WebkitZoomIn:   return CursorType::ZoomIn;
-      case css::ValueId::WebkitZoomOut:  return CursorType::ZoomOut;
-      case css::ValueId::None:           return CursorType::None;
+      case css::ValueId::Copy: return CursorType::Copy;
+      case css::ValueId::None: return CursorType::None;
       default:
         return static_cast<CursorType>(static_cast<uint16>(valueID)
                                        - static_cast<uint16>(css::ValueId::Auto));
@@ -721,13 +716,12 @@ namespace krys::boo
   {
     switch (valueID)
     {
-      case css::ValueId::Static:       return PositionType::Static;
-      case css::ValueId::Relative:     return PositionType::Relative;
-      case css::ValueId::Absolute:     return PositionType::Absolute;
-      case css::ValueId::Fixed:        return PositionType::Fixed;
-      case css::ValueId::Sticky:
-      case css::ValueId::WebkitSticky: return PositionType::Sticky;
-      default:                         break;
+      case css::ValueId::Static:   return PositionType::Static;
+      case css::ValueId::Relative: return PositionType::Relative;
+      case css::ValueId::Absolute: return PositionType::Absolute;
+      case css::ValueId::Fixed:    return PositionType::Fixed;
+      case css::ValueId::Sticky:   return PositionType::Sticky;
+      default:                     break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return PositionType::Static;
@@ -812,16 +806,13 @@ namespace krys::boo
   {
     switch (valueID)
     {
-      case css::ValueId::Normal:                return UnicodeBidi::Normal;
-      case css::ValueId::Embed:                 return UnicodeBidi::Embed;
-      case css::ValueId::BidiOverride:          return UnicodeBidi::Override;
-      case css::ValueId::Isolate:
-      case css::ValueId::WebkitIsolate:         return UnicodeBidi::Isolate;
-      case css::ValueId::IsolateOverride:
-      case css::ValueId::WebkitIsolateOverride: return UnicodeBidi::IsolateOverride;
-      case css::ValueId::Plaintext:
-      case css::ValueId::WebkitPlaintext:       return UnicodeBidi::Plaintext;
-      default:                                  break;
+      case css::ValueId::Normal:          return UnicodeBidi::Normal;
+      case css::ValueId::Embed:           return UnicodeBidi::Embed;
+      case css::ValueId::BidiOverride:    return UnicodeBidi::Override;
+      case css::ValueId::Isolate:         return UnicodeBidi::Isolate;
+      case css::ValueId::IsolateOverride: return UnicodeBidi::IsolateOverride;
+      case css::ValueId::Plaintext:       return UnicodeBidi::Plaintext;
+      default:                            break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return UnicodeBidi::Normal;
@@ -1258,14 +1249,12 @@ namespace krys::boo
   {
     switch (valueID)
     {
-      case css::ValueId::Auto:                   return ImageRendering::Auto;
-      case css::ValueId::WebkitOptimizeContrast:
-      case css::ValueId::CrispEdges:
-      case css::ValueId::WebkitCrispEdges:       return ImageRendering::CrispEdges;
-      case css::ValueId::Pixelated:              return ImageRendering::Pixelated;
-      case css::ValueId::OptimizeSpeed:          return ImageRendering::OptimizeSpeed;
-      case css::ValueId::OptimizeQuality:        return ImageRendering::OptimizeQuality;
-      default:                                   break;
+      case css::ValueId::Auto:            return ImageRendering::Auto;
+      case css::ValueId::CrispEdges:      return ImageRendering::CrispEdges;
+      case css::ValueId::Pixelated:       return ImageRendering::Pixelated;
+      case css::ValueId::OptimizeSpeed:   return ImageRendering::OptimizeSpeed;
+      case css::ValueId::OptimizeQuality: return ImageRendering::OptimizeQuality;
+      default:                            break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return ImageRendering::Auto;
@@ -1762,9 +1751,9 @@ namespace krys::boo
       case style::TextAlign::Right:        return css::ValueId::Right;
       case style::TextAlign::Center:       return css::ValueId::Center;
       case style::TextAlign::Justify:      return css::ValueId::Justify;
-      case style::TextAlign::WebKitLeft:   return css::ValueId::WebkitLeft;
-      case style::TextAlign::WebKitRight:  return css::ValueId::WebkitRight;
-      case style::TextAlign::WebKitCenter: return css::ValueId::WebkitCenter;
+      case style::TextAlign::WebKitLeft:   return css::ValueId::InternalLeft;
+      case style::TextAlign::WebKitRight:  return css::ValueId::InternalRight;
+      case style::TextAlign::WebKitCenter: return css::ValueId::InternalCenter;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return css::ValueId::Invalid;
@@ -1775,17 +1764,16 @@ namespace krys::boo
   {
     switch (valueID)
     {
-      case css::ValueId::WebkitAuto: // Legacy -webkit-auto. Equivalent to start.
-      case css::ValueId::Start:        return style::TextAlign::Start;
-      case css::ValueId::End:          return style::TextAlign::End;
-      case css::ValueId::Left:         return style::TextAlign::Left;
-      case css::ValueId::Right:        return style::TextAlign::Right;
-      case css::ValueId::Center:       return style::TextAlign::Center;
-      case css::ValueId::Justify:      return style::TextAlign::Justify;
-      case css::ValueId::WebkitLeft:   return style::TextAlign::WebKitLeft;
-      case css::ValueId::WebkitRight:  return style::TextAlign::WebKitRight;
-      case css::ValueId::WebkitCenter: return style::TextAlign::WebKitCenter;
-      default:                         break;
+      case css::ValueId::Start:          return style::TextAlign::Start;
+      case css::ValueId::End:            return style::TextAlign::End;
+      case css::ValueId::Left:           return style::TextAlign::Left;
+      case css::ValueId::Right:          return style::TextAlign::Right;
+      case css::ValueId::Center:         return style::TextAlign::Center;
+      case css::ValueId::Justify:        return style::TextAlign::Justify;
+      case css::ValueId::InternalLeft:   return style::TextAlign::WebKitLeft;
+      case css::ValueId::InternalRight:  return style::TextAlign::WebKitRight;
+      case css::ValueId::InternalCenter: return style::TextAlign::WebKitCenter;
+      default:                           break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return style::TextAlign::Start;
@@ -1806,9 +1794,9 @@ namespace krys::boo
         case style::TextAlign::Right:        return visitor(css::keywords::Right {});
         case style::TextAlign::Center:       return visitor(css::keywords::Center {});
         case style::TextAlign::Justify:      return visitor(css::keywords::Justify {});
-        case style::TextAlign::WebKitLeft:   return visitor(css::keywords::WebkitLeft {});
-        case style::TextAlign::WebKitRight:  return visitor(css::keywords::WebkitRight {});
-        case style::TextAlign::WebKitCenter: return visitor(css::keywords::WebkitCenter {});
+        case style::TextAlign::WebKitLeft:   return visitor(css::keywords::InternalLeft {});
+        case style::TextAlign::WebKitRight:  return visitor(css::keywords::InternalRight {});
+        case style::TextAlign::WebKitCenter: return visitor(css::keywords::InternalCenter {});
       }
       krys_unreachable();
     }

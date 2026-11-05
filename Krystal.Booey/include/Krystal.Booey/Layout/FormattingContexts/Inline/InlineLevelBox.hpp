@@ -64,7 +64,7 @@ namespace krys::boo::layout
     using VerticalAlignment =
       Variant<css::keywords::Baseline, css::keywords::Sub, css::keywords::Super, css::keywords::Top,
               css::keywords::TextTop, css::keywords::Middle, css::keywords::Bottom, css::keywords::TextBottom,
-              css::keywords::WebkitBaselineMiddle, InlineLayoutUnit>;
+              css::keywords::InternalBaselineMiddle, InlineLayoutUnit>;
 
     enum class Type : uint8
     {

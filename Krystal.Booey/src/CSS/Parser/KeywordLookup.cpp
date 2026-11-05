@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include <cstring>
 
 namespace krys::boo::css
 {
@@ -25,13 +24,6 @@ namespace krys::boo::css
       }
 
       return true;
-    }
-
-    // FIXME: Remove this mechanism entirely once we can do it without breaking the web.
-    KRYS_NODISCARD bool IsAppleLegacyValueKeyword(CSSOMStringView characters) noexcept
-    {
-      return characters.substr(1).starts_with(u8"apple-") && !characters.substr(7).starts_with(u8"system")
-             && !characters.substr(7).starts_with(u8"pay") && !characters.substr(7).starts_with(u8"wireless");
     }
   }
 
@@ -58,24 +50,13 @@ namespace krys::boo::css
       return css::ValueId::Invalid;
     }
 
-    // One extra character to turn "apple" into "webkit".
-    Array<char8, MaxValueKeywordLength + 1uz> buffer;
+    Array<char8, MaxValueKeywordLength> buffer;
     if (!ToASCIILowerInto(name, buffer))
     {
       return css::ValueId::Invalid;
     }
 
-    // In most cases, if the prefix is -apple-, change it to -webkit-. This makes the string one character
-    // longer.
-    auto length = name.size();
-    if (buffer[0] == u8'-' && IsAppleLegacyValueKeyword(CSSOMStringView(buffer.data(), length)))
-    {
-      std::memmove(buffer.data() + 7, buffer.data() + 6, length - 6);
-      std::memcpy(buffer.data() + 1, u8"webkit", 6);
-      ++length;
-    }
-
-    return FindValueKeyword(CSSOMStringView(buffer.data(), length));
+    return FindValueKeyword(CSSOMStringView(buffer.data(), name.size()));
   }
 
   bool IsCustomPropertyName(CSSOMStringView propertyName) noexcept

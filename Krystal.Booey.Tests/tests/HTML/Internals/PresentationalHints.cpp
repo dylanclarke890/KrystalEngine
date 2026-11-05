@@ -81,8 +81,8 @@ namespace krys::boo::html::tests
 
   TEST_CASE_METHOD(HintFixture, "Presentational hints: text elements", "[HTML][PresentationalHints]")
   {
-    CHECK(Hints(u8"<div id=e align=center></div>") == "text-align: -webkit-center;");
-    CHECK(Hints(u8"<p id=e align=left></p>") == "text-align: -webkit-left;");
+    CHECK(Hints(u8"<div id=e align=center></div>") == "text-align: -internal-center;");
+    CHECK(Hints(u8"<p id=e align=left></p>") == "text-align: -internal-left;");
     CHECK(Hints(u8"<p id=e align=justify></p>") == "text-align: justify;");
     CHECK(Hints(u8"<br id=e clear=all>") == "clear: both;");
     CHECK(Hints(u8"<br id=e clear=left>") == "clear: left;");
@@ -209,7 +209,7 @@ namespace krys::boo::html::tests
     CHECK(Hints(u8"<table><tr><td id=e nowrap width=0 height=5 valign=middle align=center "
                 u8"bgcolor=red></td></tr></table>")
           == "white-space: nowrap; height: 5px; vertical-align: middle; "
-             "text-align: -webkit-center; background-color: rgb(255, 0, 0);");
+             "text-align: -internal-center; background-color: rgb(255, 0, 0);");
     CHECK(Hints(u8"<table><colgroup id=e width=10%></colgroup></table>") == "width: 10%;");
     CHECK(Hints(u8"<table><caption id=e align=bottom></caption></table>") == "caption-side: bottom;");
 

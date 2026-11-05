@@ -601,15 +601,15 @@ namespace krys::boo
       switch (textAlign)
       {
         case ValueId::Center:
-        case ValueId::WebkitCenter: return ValueId::Center;
-        case ValueId::Justify:      return ValueId::Justify;
+        case ValueId::InternalCenter: return ValueId::Center;
+        case ValueId::Justify:        return ValueId::Justify;
         case ValueId::Left:
-        case ValueId::WebkitLeft:   return ValueId::Left;
+        case ValueId::InternalLeft:   return ValueId::Left;
         case ValueId::Right:
-        case ValueId::WebkitRight:  return ValueId::Right;
-        case ValueId::Start:        return direction != ValueId::Rtl ? ValueId::Left : ValueId::Right;
-        case ValueId::End:          return direction == ValueId::Rtl ? ValueId::Right : ValueId::Left;
-        default:                    break;
+        case ValueId::InternalRight:  return ValueId::Right;
+        case ValueId::Start:          return direction != ValueId::Rtl ? ValueId::Left : ValueId::Right;
+        case ValueId::End:            return direction == ValueId::Rtl ? ValueId::Right : ValueId::Left;
+        default:                      break;
       }
       return ValueId::Invalid;
     }

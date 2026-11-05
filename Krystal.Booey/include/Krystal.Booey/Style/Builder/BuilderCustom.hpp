@@ -1404,7 +1404,7 @@ namespace krys::boo::style
       builderState.SetFontDescriptionIsAbsoluteSize(
         (parentIsAbsoluteSize
          && (ident == css::ValueId::Larger || ident == css::ValueId::Smaller
-             || ident == css::ValueId::WebkitRubyText || ident == css::ValueId::Math))
+             || ident == css::ValueId::InternalRubyText || ident == css::ValueId::Math))
         || css::PropertyParserHelpers::IsSystemFontShorthand(ident));
 
       if (css::PropertyParserHelpers::IsSystemFontShorthand(ident))
@@ -1430,7 +1430,7 @@ namespace krys::boo::style
         case css::ValueId::Larger:  size = LargerFontSize(parentSize); break;
         case css::ValueId::Smaller: size = SmallerFontSize(parentSize); break;
         case css::ValueId::Math:    size = DetermineMathDepthScale(builderState) * parentSize; break;
-        case css::ValueId::WebkitRubyText:
+        case css::ValueId::InternalRubyText:
           size = DetermineRubyTextSizeMultiplier(builderState) * parentSize;
           break;
         default: break;

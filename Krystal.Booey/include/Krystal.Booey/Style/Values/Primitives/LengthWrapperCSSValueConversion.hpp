@@ -23,33 +23,6 @@ namespace krys::boo::style
         return true;
       }
 
-      // A few keywords have alternative spellings.
-      // FIXME: Find a generic solution to this problem.
-      if constexpr (SameType<K, css::keywords::MinContent>)
-      {
-        if (valueId == css::ValueId::WebkitMinContent)
-        {
-          result = T {keyword};
-          return true;
-        }
-      }
-      else if constexpr (SameType<K, css::keywords::MaxContent>)
-      {
-        if (valueId == css::ValueId::WebkitMaxContent)
-        {
-          result = T {keyword};
-          return true;
-        }
-      }
-      else if constexpr (SameType<K, css::keywords::FitContent>)
-      {
-        if (valueId == css::ValueId::WebkitFitContent)
-        {
-          result = T {keyword};
-          return true;
-        }
-      }
-
       return false;
     }
 

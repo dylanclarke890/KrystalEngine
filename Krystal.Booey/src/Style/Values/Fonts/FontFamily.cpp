@@ -32,11 +32,6 @@ namespace krys::boo::style
       }
 
       auto valueID = primitiveValue->ValueId();
-      if (valueID == css::ValueId::WebkitBody)
-      {
-        return {StandardFontFamily(state), FontFamilyKind::Specified};
-      }
-
       if (auto family = css::PropertyParserHelpers::GenericFontFamily(valueID);
           family != css::CSSOMStringAtom::Null())
       {
@@ -74,11 +69,6 @@ namespace krys::boo::style
         }
 
         auto valueID = contentValue.ValueId();
-        if (valueID == css::ValueId::WebkitBody)
-        {
-          return {StandardFontFamily(state), FontFamilyKind::Specified};
-        }
-
         return {css::PropertyParserHelpers::GenericFontFamily(valueID), FontFamilyKind::Generic};
       }();
 

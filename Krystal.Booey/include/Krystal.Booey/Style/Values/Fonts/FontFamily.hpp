@@ -44,10 +44,6 @@ namespace krys::boo::style
       {
         return visitor(css::keywords::Math {});
       }
-      if (Value == PictographFamily())
-      {
-        return visitor(css::keywords::WebkitPictograph {});
-      }
       if (Value == SansSerifFamily())
       {
         return visitor(css::keywords::SansSerif {});

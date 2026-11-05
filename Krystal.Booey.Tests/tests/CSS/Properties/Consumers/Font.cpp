@@ -81,7 +81,6 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(GenericFontFamily(ValueId::Serif) == GenericFontFamilyNames::SerifFamily());
     CHECK(GenericFontFamily(ValueId::SansSerif).View() == u8"-internal-sans-serif");
     CHECK(GenericFontFamily(ValueId::Math).View() == u8"-internal-math");
-    CHECK(GenericFontFamily(ValueId::WebkitBody) == CSSOMStringAtom::Null());
     CHECK(GenericFontFamily(ValueId::Bold) == CSSOMStringAtom::Null());
 
     CHECK(GenericFontFamilyIndex(ValueId::Monospace)
@@ -114,6 +113,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"serif", ConsumeFontFamily) == "serif");
     CHECK(ConsumeToText(u8"Arial, \"Times New Roman\", sans-serif", ConsumeFontFamily)
           == "Arial, \"Times New Roman\", sans-serif");
+    // There are no prefixed generic families: these are family names.
     CHECK(ConsumeToText(u8"-webkit-body, -webkit-pictograph, math", ConsumeFontFamily)
           == "-webkit-body, -webkit-pictograph, math");
     CHECK(ConsumeToText(u8"system-ui", ConsumeFontFamily) == "system-ui");
@@ -186,7 +186,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
 
     SECTION("Font size keywords")
     {
-      auto font = ConsumeFont(u8"-webkit-xxx-large a");
+      auto font = ConsumeFont(u8"xxx-large a");
       REQUIRE(font);
       CHECK(font->Size == UnresolvedFontSize {ValueId::XxxLarge});
 

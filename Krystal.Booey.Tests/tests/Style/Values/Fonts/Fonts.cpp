@@ -57,12 +57,6 @@ namespace krys::boo::style::tests
     CHECK(generic.First().Value == css::GenericFontFamilyNames::MonospaceFamily());
     CHECK(Serialised(generic) == "monospace, Courier");
 
-    // FIXME: `-webkit-body` is the settings' standard font family, which is empty until there's a `Settings`
-    // port.
-    auto body = Convert<FontFamilies>(PropertyId::FontFamily, u8"-webkit-body");
-    CHECK(body.IsSpecifiedFont());
-    CHECK(body.First().Value == css::CSSOMStringAtom::Empty());
-
     auto system = ConvertSystemFont<FontFamilies>(*State);
     CHECK(system.FirstFontKind() == FontFamilyKind::Generic);
     CHECK(system.First().Value == css::GenericFontFamilyNames::StandardFamily());

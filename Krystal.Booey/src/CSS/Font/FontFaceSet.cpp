@@ -122,15 +122,14 @@ namespace krys::boo::css
     // defining what font to use for those types.
     switch (value.ValueId())
     {
-      case ValueId::Serif:            return SerifFamily();
-      case ValueId::SansSerif:        return SansSerifFamily();
-      case ValueId::Cursive:          return CursiveFamily();
-      case ValueId::Fantasy:          return FantasyFamily();
-      case ValueId::Monospace:        return MonospaceFamily();
-      case ValueId::WebkitPictograph: return PictographFamily();
-      case ValueId::SystemUi:         return SystemUiFamily();
-      case ValueId::Math:             return MathFamily();
-      default:                        return StringAtom::Null();
+      case ValueId::Serif:     return SerifFamily();
+      case ValueId::SansSerif: return SansSerifFamily();
+      case ValueId::Cursive:   return CursiveFamily();
+      case ValueId::Fantasy:   return FantasyFamily();
+      case ValueId::Monospace: return MonospaceFamily();
+      case ValueId::SystemUi:  return SystemUiFamily();
+      case ValueId::Math:      return MathFamily();
+      default:                 return StringAtom::Null();
     }
   }
 

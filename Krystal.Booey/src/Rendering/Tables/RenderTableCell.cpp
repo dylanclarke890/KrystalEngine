@@ -556,7 +556,7 @@ namespace krys::boo
       { intrinsicPaddingBefore = (heightConstraint - borderBoxLogicalHeightWithoutIntrinsicPadding) / 2; },
       [&](const css::keywords::Bottom &)
       { intrinsicPaddingBefore = heightConstraint - borderBoxLogicalHeightWithoutIntrinsicPadding; },
-      [&](const css::keywords::WebkitBaselineMiddle &)
+      [&](const css::keywords::InternalBaselineMiddle &)
       {
         // Do nothing.
       },

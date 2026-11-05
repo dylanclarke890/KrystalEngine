@@ -39,8 +39,7 @@ namespace krys::boo::style
       return parentStyle.GetTextAlign();
     }
 
-    if (primitiveValue->ValueId() == css::ValueId::WebkitMatchParent
-        || primitiveValue->ValueId() == css::ValueId::MatchParent)
+    if (primitiveValue->ValueId() == css::ValueId::MatchParent)
     {
       const auto *element = state.GetElement();
 

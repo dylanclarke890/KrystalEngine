@@ -25,8 +25,7 @@ namespace krys::boo::css::PropertyParserHelpers
 {
   KRYS_NODISCARD bool IsGridBreadthIdent(ValueId id) noexcept
   {
-    return IdentMatches<ValueId::MinContent, ValueId::WebkitMinContent, ValueId::MaxContent,
-                        ValueId::WebkitMaxContent, ValueId::Auto>(id);
+    return IdentMatches<ValueId::MinContent, ValueId::MaxContent, ValueId::Auto>(id);
   }
 
   KRYS_NODISCARD static RefPtr<PrimitiveValue> ConsumeCustomIdentForGridLine(TokenRange &tokens) noexcept
@@ -193,9 +192,7 @@ namespace krys::boo::css::PropertyParserHelpers
     switch (primitiveValue.ValueId())
     {
       case ValueId::MinContent:
-      case ValueId::WebkitMinContent:
       case ValueId::MaxContent:
-      case ValueId::WebkitMaxContent:
       case ValueId::Auto:
       {
         return false;

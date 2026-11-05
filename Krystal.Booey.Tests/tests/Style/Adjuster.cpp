@@ -167,9 +167,10 @@ namespace krys::boo::style::tests
       CHECK(Adjusted(u8"display: table-cell; position: relative", &div)->GetPosition()
             == PositionType::Relative);
 
-      // Tables reset the -webkit- text-align values.
-      CHECK(Adjusted(u8"text-align: -webkit-center", &ById(u8"table"))->GetTextAlign() == TextAlign::Start);
-      CHECK(Adjusted(u8"text-align: -webkit-center", &div)->GetTextAlign() == TextAlign::WebKitCenter);
+      // Tables reset the internal text-align values, which only the user agent's style sheets set.
+      Mode = css::ParserMode::UASheet;
+      CHECK(Adjusted(u8"text-align: -internal-center", &ById(u8"table"))->GetTextAlign() == TextAlign::Start);
+      CHECK(Adjusted(u8"text-align: -internal-center", &div)->GetTextAlign() == TextAlign::WebKitCenter);
     }
 
     SECTION("Writing modes")

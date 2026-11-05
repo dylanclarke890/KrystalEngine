@@ -479,14 +479,6 @@
         "contents",
         "none",
         {
-          "value": "-webkit-flex",
-          "status": "obsolete"
-        },
-        {
-          "value": "-webkit-inline-flex",
-          "status": "obsolete"
-        },
-        {
           "value": "compact",
           "status": "removed",
           "url": "https://www.w3.org/TR/REC-CSS2/visuren.html#compact",
@@ -511,7 +503,7 @@
         "render-style-storage-kind": "enum",
         "render-style-type": "DisplayType",
         "parser-function": "ConsumeDisplay",
-        "parser-grammar": "[ <display-outside> || <display-inside> ] | <display-listitem> | <display-internal> | <display-box> | <display-legacy> | <-webkit-display>",
+        "parser-grammar": "[ <display-outside> || <display-inside> ] | <display-listitem> | <display-internal> | <display-box> | <display-legacy>",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for transforming parsed input to minimal form."
       },
@@ -575,10 +567,6 @@
         {
           "value": "ui-rounded",
           "status": "unimplemented"
-        },
-        {
-          "value": "-webkit-body",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -594,7 +582,7 @@
         ],
         "render-style-type": "Style::FontFamilies",
         "parser-function": "ConsumeFontFamily",
-        "parser-grammar": "[ <family-name> | <generic-family> | <-webkit-generic-family> ]#",
+        "parser-grammar": "[ <family-name> | <generic-family> ]#",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for primitive <family-name>."
       },
@@ -620,12 +608,8 @@
         "larger",
         "math",
         {
-          "value": "-webkit-xxx-large",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-ruby-text",
-          "status": "non-standard"
+          "value": "-internal-ruby-text",
+          "status": "internal"
         }
       ],
       "codegen-properties": {
@@ -644,7 +628,7 @@
           "fontCascade"
         ],
         "render-style-type": "float",
-        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math | <-webkit-absolute-size> | <-webkit-relative-size>",
+        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math | -internal-ruby-text",
         "parser-exported": true
       },
       "specification": {
@@ -2120,10 +2104,6 @@
         {
           "value": "text",
           "url": "https://drafts.csswg.org/css-backgrounds-4/#background-clip"
-        },
-        {
-          "value": "-webkit-text",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -2361,10 +2341,7 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -2376,22 +2353,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -4459,23 +4420,7 @@
         "row-resize",
         "all-scroll",
         "zoom-in",
-        "zoom-out",
-        {
-          "value": "-webkit-grab",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-grabbing",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-zoom-in",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-zoom-out",
-          "status": "non-standard"
-        }
+        "zoom-out"
       ],
       "codegen-properties": {
         "render-style-changed-for-animation-custom": true,
@@ -4792,10 +4737,7 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -4807,22 +4749,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -4883,14 +4809,6 @@
         {
           "value": "optimizeQuality",
           "url": "https://svgwg.org/svg2-draft/painting.html#ImageRenderingProperty"
-        },
-        {
-          "value": "-webkit-crisp-edges",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-optimize-contrast",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -4911,10 +4829,7 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -4926,22 +4841,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -5950,10 +5849,6 @@
         {
           "value": "padding",
           "status": "non-standard"
-        },
-        {
-          "value": "-webkit-text",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6139,10 +6034,7 @@
         "none",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -6154,22 +6046,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -6193,10 +6069,7 @@
         "none",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -6208,22 +6081,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -6251,10 +6108,7 @@
         "none",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -6266,22 +6120,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -6324,10 +6162,7 @@
         "none",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -6339,22 +6174,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -6382,10 +6201,7 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -6397,22 +6213,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -6436,10 +6236,7 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -6451,22 +6248,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -6494,10 +6275,7 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -6509,22 +6287,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -6548,10 +6310,7 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -6563,22 +6322,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -7442,11 +7185,7 @@
         "relative",
         "absolute",
         "sticky",
-        "fixed",
-        {
-          "value": "-webkit-sticky",
-          "status": "deprecated"
-        }
+        "fixed"
       ],
       "codegen-properties": {
         "render-style-storage-path": ["m_nonInheritedFlags"],
@@ -7923,24 +7662,16 @@
           "status": "unimplemented"
         },
         {
-          "value": "-webkit-auto",
-          "status": "non-standard"
+          "value": "-internal-left",
+          "status": "internal"
         },
         {
-          "value": "-webkit-left",
-          "status": "non-standard"
+          "value": "-internal-right",
+          "status": "internal"
         },
         {
-          "value": "-webkit-right",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-center",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-match-parent",
-          "status": "non-standard"
+          "value": "-internal-center",
+          "status": "internal"
         },
         {
           "value": "-internal-th-center",
@@ -8353,19 +8084,7 @@
         "isolate",
         "bidi-override",
         "isolate-override",
-        "plaintext",
-        {
-          "value": "-webkit-isolate",
-          "status": "deprecated"
-        },
-        {
-          "value": "-webkit-isolate-override",
-          "status": "deprecated"
-        },
-        {
-          "value": "-webkit-plaintext",
-          "status": "deprecated"
-        }
+        "plaintext"
       ],
       "codegen-properties": {
         "render-style-storage-path": ["m_nonInheritedFlags"],
@@ -8423,8 +8142,8 @@
         "bottom",
         "text-bottom",
         {
-          "value": "-webkit-baseline-middle",
-          "status": "non-standard"
+          "value": "-internal-baseline-middle",
+          "status": "internal"
         }
       ],
       "codegen-properties": {
@@ -8530,10 +8249,7 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -8545,22 +8261,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -9426,10 +9126,7 @@
         "content",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
@@ -9441,22 +9138,6 @@
         },
         {
           "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
           "status": "non-standard"
         }
       ],
@@ -12377,20 +12058,12 @@
         "url": "https://drafts.csswg.org/css-fonts-4/#valdef-font-size-absolute-size"
       }
     },
-    "<-webkit-absolute-size>": {
-      "grammar": "-webkit-xxx-large@(aliased-to=xxx-large)",
-      "status": "non-standard"
-    },
     "<relative-size>": {
       "grammar": "larger | smaller",
       "specification": {
         "module": "css-fonts-4",
         "url": "https://drafts.csswg.org/css-fonts-4/#valdef-font-size-relative-size"
       }
-    },
-    "<-webkit-relative-size>": {
-      "grammar": "-webkit-ruby-text",
-      "status": "non-standard"
     },
     "<font-weight-absolute>": {
       "grammar": "normal | bold | <number [1,1000]>",
@@ -12477,10 +12150,6 @@
         "url": "https://drafts.csswg.org/css-fonts-4/#generic-font-families"
       }
     },
-    "<-webkit-generic-family>": {
-      "grammar": "-webkit-body",
-      "status": "non-standard"
-    },
     "<gap-gutter>": {
       "grammar": "normal | <length-percentage [0,inf]>",
       "specification": {
@@ -12489,7 +12158,7 @@
       }
     },
     "<width-or-height-keyword>": {
-      "grammar": "intrinsic | min-intrinsic | min-content | -webkit-min-content | max-content | -webkit-max-content | -webkit-fill-available | fit-content | -webkit-fit-content"
+      "grammar": "intrinsic | min-intrinsic | min-content | max-content | stretch | fit-content"
     },
     "<width-or-height>": {
       "grammar": "auto | <width-or-height-keyword> | <length-percentage [0,inf] anchor-size=allowed>",
@@ -12642,22 +12311,6 @@
         "url": "https://drafts.fxtf.org/css-masking-1/#funcdef-clip-rect"
       }
     },
-    "<-webkit-origin-box>": {
-      "grammar": "<box> | border | content | padding | -webkit-text",
-      "status": "non-standard"
-    },
-    "<-webkit-clip-box>": {
-      "grammar": "<-webkit-origin-box> | text",
-      "status": "non-standard"
-    },
-    "<-webkit-compositing-operator>": {
-      "grammar": "clear | copy | source-over | source-in | source-out | source-atop | destination-over | destination-in | destination-out | destination-atop | xor | plus-darker | plus-lighter",
-      "status": "non-standard"
-    },
-    "<-webkit-masking-source-type>": {
-      "grammar": "auto | alpha | luminance",
-      "status": "non-standard"
-    },
     "<single-background-blend-mode>": {
       "grammar": "<blend-mode>",
       "exported": true,
@@ -12675,7 +12328,7 @@
       }
     },
     "<single-background-clip>": {
-      "grammar": "<box> | border-area | text | -webkit-text",
+      "grammar": "<box> | border-area | text",
       "exported": true,
       "specification": {
         "module": "css-backgrounds",
@@ -12729,7 +12382,7 @@
       "comment": "Out of spec. 'mask-clip' is currently defined to '[ <coord-box> | no-clip ]#'."
     },
     "<single-mask-origin>": {
-      "grammar": "<box> | border | content | padding | -webkit-text",
+      "grammar": "<box> | border | content | padding",
       "exported": true,
       "specification": {
         "module": "css-masking",
@@ -12769,26 +12422,6 @@
         "url": "https://drafts.fxtf.org/css-masking-1/#propdef-mask-mode"
       }
     },
-    "<single-webkit-background-clip>": {
-      "grammar": "<-webkit-clip-box>",
-      "exported": true,
-      "status": "non-standard"
-    },
-    "<single-webkit-background-origin>": {
-      "grammar": "<-webkit-origin-box>",
-      "exported": true,
-      "status": "non-standard"
-    },
-    "<single-webkit-mask-composite>": {
-      "grammar": "<-webkit-compositing-operator>",
-      "exported": true,
-      "status": "non-standard"
-    },
-    "<single-webkit-mask-clip>": {
-      "grammar": "<-webkit-clip-box>",
-      "exported": true,
-      "status": "non-standard"
-    },
     "<single-webkit-mask-position-x>": {
       "grammar": "<position-x>",
       "exported": true,
@@ -12796,11 +12429,6 @@
     },
     "<single-webkit-mask-position-y>": {
       "grammar": "<position-y>",
-      "exported": true,
-      "status": "non-standard"
-    },
-    "<single-webkit-mask-source-type>": {
-      "grammar": "<-webkit-masking-source-type>",
       "exported": true,
       "status": "non-standard"
     },
@@ -13322,10 +12950,6 @@
         "module": "css-display",
         "url": "https://www.w3.org/TR/css-display-3/#typedef-display-legacy"
       }
-    },
-    "<-webkit-display>": {
-      "grammar": "-webkit-inline-flex | -webkit-flex",
-      "status": "non-standard"
     },
     "<single-scroll-timeline-name>": {
       "grammar": "none | <dashed-ident>",

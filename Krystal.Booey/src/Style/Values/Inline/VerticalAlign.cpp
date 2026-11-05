@@ -24,16 +24,16 @@ namespace krys::boo::style
     {
       switch (primitiveValue->ValueId())
       {
-        case css::ValueId::Baseline:             return css::keywords::Baseline {};
-        case css::ValueId::Sub:                  return css::keywords::Sub {};
-        case css::ValueId::Super:                return css::keywords::Super {};
-        case css::ValueId::Top:                  return css::keywords::Top {};
-        case css::ValueId::TextTop:              return css::keywords::TextTop {};
-        case css::ValueId::Middle:               return css::keywords::Middle {};
-        case css::ValueId::Bottom:               return css::keywords::Bottom {};
-        case css::ValueId::TextBottom:           return css::keywords::TextBottom {};
-        case css::ValueId::WebkitBaselineMiddle: return css::keywords::WebkitBaselineMiddle {};
-        default:                                 break;
+        case css::ValueId::Baseline:               return css::keywords::Baseline {};
+        case css::ValueId::Sub:                    return css::keywords::Sub {};
+        case css::ValueId::Super:                  return css::keywords::Super {};
+        case css::ValueId::Top:                    return css::keywords::Top {};
+        case css::ValueId::TextTop:                return css::keywords::TextTop {};
+        case css::ValueId::Middle:                 return css::keywords::Middle {};
+        case css::ValueId::Bottom:                 return css::keywords::Bottom {};
+        case css::ValueId::TextBottom:             return css::keywords::TextBottom {};
+        case css::ValueId::InternalBaselineMiddle: return css::keywords::InternalBaselineMiddle {};
+        default:                                   break;
       }
 
       state.SetCurrentPropertyInvalidAtComputedValueTime();

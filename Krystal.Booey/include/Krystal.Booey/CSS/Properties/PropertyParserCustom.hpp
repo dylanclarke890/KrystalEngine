@@ -2104,12 +2104,9 @@ namespace krys::boo::css
           case ValueId::Intrinsic:
           case ValueId::MinIntrinsic:
           case ValueId::MinContent:
-          case ValueId::WebkitMinContent:
           case ValueId::MaxContent:
-          case ValueId::WebkitMaxContent:
-          case ValueId::WebkitFillAvailable:
+          case ValueId::Stretch:
           case ValueId::FitContent:
-          case ValueId::WebkitFitContent:
           {
             return true;
           }

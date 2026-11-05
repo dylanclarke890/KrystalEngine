@@ -180,10 +180,6 @@ namespace krys::boo::css::PropertyParserHelpers
       {
         return GenericFontFamilyNames::MonospaceFamily();
       }
-      case ValueId::WebkitPictograph:
-      {
-        return GenericFontFamilyNames::PictographFamily();
-      }
       case ValueId::SystemUi:
       {
         return GenericFontFamilyNames::SystemUiFamily();
@@ -222,10 +218,6 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Monospace:
       {
         return GenericFontFamilyNames::FamilyNamesIndex::MonospaceFamily;
-      }
-      case ValueId::WebkitPictograph:
-      {
-        return GenericFontFamilyNames::FamilyNamesIndex::PictographFamily;
       }
       case ValueId::SystemUi:
       {
@@ -283,8 +275,7 @@ namespace krys::boo::css::PropertyParserHelpers
   KRYS_NODISCARD static Maybe<ValueId> ConsumeGenericFamilyUnresolved(TokenRange &tokens) noexcept
   {
     return ConsumeIdentRaw<ValueId::Serif, ValueId::SansSerif, ValueId::Cursive, ValueId::Fantasy,
-                           ValueId::Monospace, ValueId::WebkitBody, ValueId::WebkitPictograph,
-                           ValueId::SystemUi, ValueId::Math>(tokens);
+                           ValueId::Monospace, ValueId::SystemUi, ValueId::Math>(tokens);
   }
 
   KRYS_NODISCARD static RefPtr<Value> ConsumeGenericFamily(TokenRange &tokens,
@@ -364,19 +355,9 @@ namespace krys::boo::css::PropertyParserHelpers
     // <'font-size> = <absolute-size> | <relative-size> | <length-percentage [0,∞]> | math
     // https://drafts.csswg.org/css-fonts-4/#propdef-font-size
 
-    // Additionally supports non-standard productions: <-webkit-absolute-size> | <-webkit-relative-size>
+    // Additionally supports the user agent's `-internal-ruby-text`.
 
     // FIXME: Add a way to export this "raw" version from the generated PropertyParsing.
-
-    // -webkit-xxx-large is a parse-time alias.
-    if (tokens.Peek().ValueId() == ValueId::WebkitXxxLarge)
-    {
-      if (auto ident = ConsumeIdentRaw(tokens); ident && *ident == ValueId::WebkitXxxLarge)
-      {
-        return UnresolvedFontSize {ValueId::XxxLarge};
-      }
-      return null;
-    }
 
     if ((tokens.Peek().ValueId() >= ValueId::XxSmall && tokens.Peek().ValueId() <= ValueId::Larger)
         || tokens.Peek().ValueId() == ValueId::Math)

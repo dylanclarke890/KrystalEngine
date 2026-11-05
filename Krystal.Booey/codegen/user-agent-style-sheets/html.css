@@ -88,7 +88,7 @@ q::after {
 center {
     display: block;
     /* special centering to be able to emulate the html4/netscape behaviour */
-    text-align: -webkit-center;
+    text-align: -internal-center;
 }
 
 hr {
@@ -269,7 +269,7 @@ th {
 
 caption {
     display: table-caption;
-    text-align: -webkit-center;
+    text-align: -internal-center;
 }
 
 /* for table elements with form inside following rules should apply */
@@ -366,7 +366,6 @@ button {
 
 input, textarea, select, button {
     margin: 0__qem;
-    font: -webkit-small-control;
     color: initial;
     letter-spacing: normal;
     word-spacing: normal;
@@ -856,7 +855,7 @@ ruby, rt {
 
 ruby > rt {
     display: ruby-text;
-    font-size: -webkit-ruby-text;
+    font-size: -internal-ruby-text;
     text-align: start;
     line-height: normal;
     text-emphasis: none;
