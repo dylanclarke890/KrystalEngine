@@ -293,6 +293,7 @@ namespace krys::boo::css
       krys_debug_assert(list->size() == 2);
       result.Prefix = SymbolFromValue(list->Item(0));
       result.Suffix = SymbolFromValue(list->Item(1));
+      result.HasSuffix = true;
     }
     else
     {
@@ -622,6 +623,10 @@ namespace krys::boo::css
     if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::Negative))
     {
       return {};
+    }
+    if (!NegativeSymbols.HasSuffix)
+    {
+      return NegativeSymbols.Prefix.CssText();
     }
     return NegativeSymbols.Prefix.CssText() + u8" " + NegativeSymbols.Suffix.CssText();
   }

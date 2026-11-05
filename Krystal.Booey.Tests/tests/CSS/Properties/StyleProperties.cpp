@@ -240,7 +240,7 @@ namespace krys::boo::css::tests
 
     text = u8"unchanged";
     CHECK(properties->RemoveProperty(PropertyId::Margin, &text));
-    CHECK(text.empty());
+    CHECK(ToNarrow(text) == "1px");
     CHECK_FALSE(properties->FindPropertyIndex(PropertyId::MarginTop));
 
     CHECK(properties->RemoveCustomProperty(u8"--foo", &text));

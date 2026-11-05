@@ -36,7 +36,10 @@ namespace krys::boo::css::cq
     if (query.Name != CSSOMStringAtom::Null() && query.Name != CSSOMStringAtom::Empty())
     {
       SerialiseIdentifier(CSSOMString(query.Name.View()), builder);
-      builder.Append(u8' ');
+      if (!query.Condition.Queries.empty())
+      {
+        builder.Append(u8' ');
+      }
     }
 
     mq::Serialise(builder, query.Condition);

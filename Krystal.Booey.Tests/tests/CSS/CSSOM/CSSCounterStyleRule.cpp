@@ -40,7 +40,9 @@ namespace krys::boo::css::tests
       rule.SetSuffix(u8"\">\"");
       CHECK(ToNarrow(rule.Suffix()) == "\">\"");
       rule.SetNegative(u8"\"-\"");
-      // The suffix is always written, even when it is empty.
+      // A suffix is written only when it's given, even an empty one.
+      CHECK(ToNarrow(rule.Negative()) == "\"-\"");
+      rule.SetNegative(u8"\"-\" \"\"");
       CHECK(ToNarrow(rule.Negative()) == "\"-\" \"\"");
       rule.SetRange(u8"auto");
       CHECK(ToNarrow(rule.Range()) == "auto");

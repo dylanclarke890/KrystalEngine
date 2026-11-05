@@ -73,10 +73,10 @@ namespace krys::boo::css::tests
 
     SECTION("a keyframe's key text and style")
     {
-      keyframe->SetKeyText(u8"10%");
+      REQUIRE_FALSE(keyframe->SetKeyText(u8"10%").HasException());
       CHECK(ToNarrow(keyframe->KeyText()) == "10%");
-      // An invalid key text is ignored.
-      keyframe->SetKeyText(u8"nonsense");
+      // An invalid key text throws, and leaves the key text as it was.
+      CHECK(ExceptionCodeOf(keyframe->SetKeyText(u8"nonsense")) == dom::ExceptionCode::SyntaxError);
       CHECK(ToNarrow(keyframe->KeyText()) == "10%");
 
       auto &style = keyframe->Style();

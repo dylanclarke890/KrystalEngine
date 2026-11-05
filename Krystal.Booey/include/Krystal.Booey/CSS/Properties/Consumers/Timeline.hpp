@@ -3,6 +3,11 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo::style
+{
+  enum class SingleAnimationRangeType : bool;
+}
+
 namespace krys::boo::css
 {
   class TokenRange;
@@ -11,12 +16,6 @@ namespace krys::boo::css
   class Value;
 
   enum class ValueId : uint16;
-
-  enum class SingleAnimationRangeType : bool
-  {
-    Start,
-    End
-  };
 
   namespace PropertyParserHelpers
   {
@@ -45,7 +44,7 @@ namespace krys::boo::css
     // <single-animation-range> = normal | <length-percentage> | <timeline-range-name> <length-percentage>?
     // https://drafts.csswg.org/scroll-animations-1/#propdef-animation-range-start
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleAnimationRange(TokenRange &tokens, PropertyParserState &state,
-                                                             SingleAnimationRangeType type) noexcept;
+                                                             style::SingleAnimationRangeType type) noexcept;
 
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleAnimationRangeStart(TokenRange &tokens,
                                                                   PropertyParserState &state) noexcept;
@@ -55,6 +54,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD RefPtr<Value> ParseSingleAnimationRange(const CSSOMString &input,
                                                            const ParserContext &context,
-                                                           SingleAnimationRangeType type) noexcept;
+                                                           style::SingleAnimationRangeType type) noexcept;
   }
 }

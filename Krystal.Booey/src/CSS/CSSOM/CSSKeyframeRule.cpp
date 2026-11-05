@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo::css
@@ -31,9 +32,14 @@ namespace krys::boo::css
     return _keyframe->KeyText();
   }
 
-  void CSSKeyframeRule::SetKeyText(const CSSOMString &text) noexcept
+  dom::ExceptionOr<void> CSSKeyframeRule::SetKeyText(const CSSOMString &text) noexcept
   {
-    std::ignore = _keyframe->SetKeyText(text);
+    CSSStyleSheet::RuleMutationScope mutationScope(this);
+    if (!_keyframe->SetKeyText(text))
+    {
+      return dom::ExceptionCode::SyntaxError;
+    }
+    return {};
   }
 
   CSSStyleProperties &CSSKeyframeRule::Style() noexcept

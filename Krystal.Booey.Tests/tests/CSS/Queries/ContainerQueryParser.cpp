@@ -210,6 +210,8 @@ namespace krys::boo::css::tests
     CHECK(query->Condition.Queries.empty());
     CHECK(query->RequiredAxes == cq::Axis::None);
     CHECK(query->ContainsUnknownFeature == cq::ContainsUnknownFeature::No);
+    CHECK(ConditionText(u8"--foo") == "--foo");
+    CHECK(ConditionText(u8"--foo (width > 1px)") == "--foo (width > 1px)");
   }
 
   TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: required axes",

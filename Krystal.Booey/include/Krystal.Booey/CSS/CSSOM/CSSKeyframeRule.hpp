@@ -31,7 +31,8 @@ namespace krys::boo::css
     void Reattach(Rule &rule) noexcept final;
 
     KRYS_NODISCARD CSSOMString KeyText() const noexcept;
-    void SetKeyText(const CSSOMString &text) noexcept;
+    /// @see https://drafts.csswg.org/css-animations-1/#dom-csskeyframerule-keytext
+    dom::ExceptionOr<void> SetKeyText(const CSSOMString &text) noexcept;
 
     KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
 

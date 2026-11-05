@@ -11,6 +11,7 @@
 #include "Krystal.Booey/CSS/Values/ScrollValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/ViewValue.hpp"
+#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -145,7 +146,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<Value> ConsumeSingleAnimationRange(TokenRange &tokens, PropertyParserState &state,
-                                            SingleAnimationRangeType type) noexcept
+                                            style::SingleAnimationRangeType type) noexcept
   {
     // <'animation-range-{start|end}'> = normal | <length-percentage> | <timeline-range-name>
     // <length-percentage>? https://drafts.csswg.org/scroll-animations-1/#propdef-animation-range-start
@@ -158,7 +159,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
 
       auto percentageValue = value.ResolveAsPercentageNoConversionDataRequired();
-      if (type == SingleAnimationRangeType::Start)
+      if (type == style::SingleAnimationRangeType::Start)
       {
         return percentageValue == 0;
       }
@@ -196,16 +197,16 @@ namespace krys::boo::css::PropertyParserHelpers
 
   RefPtr<Value> ConsumeSingleAnimationRangeStart(TokenRange &tokens, PropertyParserState &state) noexcept
   {
-    return ConsumeSingleAnimationRange(tokens, state, SingleAnimationRangeType::Start);
+    return ConsumeSingleAnimationRange(tokens, state, style::SingleAnimationRangeType::Start);
   }
 
   RefPtr<Value> ConsumeSingleAnimationRangeEnd(TokenRange &tokens, PropertyParserState &state) noexcept
   {
-    return ConsumeSingleAnimationRange(tokens, state, SingleAnimationRangeType::End);
+    return ConsumeSingleAnimationRange(tokens, state, style::SingleAnimationRangeType::End);
   }
 
   RefPtr<Value> ParseSingleAnimationRange(const CSSOMString &string, const ParserContext &context,
-                                          SingleAnimationRangeType type) noexcept
+                                          style::SingleAnimationRangeType type) noexcept
   {
     auto inputStream = InputStream(CSSOMString(string));
     auto tokenizer = Tokenizer(inputStream);

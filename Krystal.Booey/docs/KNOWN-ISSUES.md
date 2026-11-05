@@ -57,8 +57,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `:heading` / `:heading()` (Selectors 5) and HTML's `:open` (for details, dialog and select elements) aren't in the pseudo-class table, and `:host(:not(.a .b))` parses although WPT says it is invalid. Tests: `CSSSelectorParser(heading-01.dat)` and `CSSSelectorParser(not-03.dat)` in `tests/CSS/Selectors/SelectorParser.cpp` (`[!shouldfail]`).
 - Range syntax in `style()` container queries and lists of container queries (css-conditional-5) aren't supported. Two cases in `tests/CSS/Queries/ContainerQueryParser.cpp` (`[!shouldfail]`).
 - `PaintImageValue` doesn't serialise its arguments.
-- `SingleAnimationRangeType` is defined twice (`css`, in `Consumers/Timeline.hpp`, and `style`, in `SingleAnimationRange.hpp`); the `css` one should go.
-- CSSOM bugs: `CSSPageRule::SetSelectorText` parses a selector list rather than a page selector; `CSSKeyframeRule::SetKeyText` changes the keyframe outside a mutation scope; `CSSNamespaceRule::Reattach` keeps the old rule; removing a shorthand returns an empty string; the `negative` descriptor always writes its suffix; serialising a name-only container query gives `--foo ` with a trailing space.
 - `@import ... supports()` is parsed in `CSS.supports()` mode, which falls back to general-enclosed and is never invalid, so the "discard the import rule" branch is unreachable.
 - `BorderImage.cpp` and `MaskBorder.cpp` in `Style/Values` use literal initial values instead of `ComputedStyle`'s (FIXME).
 - Copying a `StyleSheetContents` leaves out its `@import` and `@namespace` rules (FIXMEs).
