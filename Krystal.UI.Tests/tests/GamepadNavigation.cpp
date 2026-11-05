@@ -174,8 +174,7 @@ namespace krys::ui::tests
 
     // A clicks the focused element.
     Ref<Counter> clicks = CreateRef<Counter>();
-    byId(u8"r4")->AddEventListener(boo::dom::DOMStringAtom(u8"click"),
-                                   Ref<boo::dom::EventListenerCallback> {clicks}, false);
+    byId(u8"r4")->AddEventListener(boo::dom::DOMStringAtom(u8"click"), clicks, false);
     press(pal::GamepadButton::South, 2s);
     CHECK(clicks->Count == 1);
 

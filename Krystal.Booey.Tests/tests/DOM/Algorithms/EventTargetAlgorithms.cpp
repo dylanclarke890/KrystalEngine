@@ -21,7 +21,7 @@ namespace krys::boo::dom::tests
     KRYS_NODISCARD Ref<EventListener> Listener(DOMStringAtom type, Ref<EventListenerCallback> callback,
                                                AddEventListenerOptions options = {})
     {
-      return CreateRef<EventListener>(type, RefPtr<EventListenerCallback>(callback), krys::move(options));
+      return CreateRef<EventListener>(type, callback, krys::move(options));
     }
 
     KRYS_NODISCARD AddEventListenerOptions WithCapture(bool capture)

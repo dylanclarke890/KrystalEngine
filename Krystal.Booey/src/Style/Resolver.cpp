@@ -213,13 +213,13 @@ namespace krys::boo::style
   void Resolver::AddUserAgentKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept
   {
     const auto animationName = rule->Name();
-    UserAgentKeyframes().insert_or_assign(animationName, RefPtr<css::KeyframesRule> {krys::move(rule)});
+    UserAgentKeyframes().insert_or_assign(animationName, krys::move(rule));
   }
 
   void Resolver::AddKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept
   {
     const auto animationName = rule->Name();
-    _keyframesRuleMap.insert_or_assign(animationName, RefPtr<css::KeyframesRule> {krys::move(rule)});
+    _keyframesRuleMap.insert_or_assign(animationName, krys::move(rule));
     Document().KeyframesRuleDidChange(css::CSSOMString(animationName.View()));
   }
 

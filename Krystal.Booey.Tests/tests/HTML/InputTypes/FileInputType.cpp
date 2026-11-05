@@ -106,7 +106,7 @@ namespace krys::boo::html::tests
     auto &form = fixture.Get<HTMLFormElement>(u8"form");
     auto &input = fixture.Get<HTMLInputElement>(u8"f");
     auto entries = CreateRef<FormDataEntries>();
-    form.AddEventListener(dom::DOMStringAtom(u8"formdata"), Ref<dom::EventListenerCallback> {entries}, false);
+    form.AddEventListener(dom::DOMStringAtom(u8"formdata"), entries, false);
 
     SECTION("Without files, an empty file")
     {

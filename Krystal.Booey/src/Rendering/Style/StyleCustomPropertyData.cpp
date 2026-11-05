@@ -78,8 +78,7 @@ namespace krys::boo::style
 
     _mayHaveAnimatableProperties = _mayHaveAnimatableProperties || value->IsAnimatable();
 
-    auto [it, isNewEntry] =
-      _ownValues.insert_or_assign(name, RefPtr<const CustomProperty> {krys::move(value)});
+    auto [it, isNewEntry] = _ownValues.insert_or_assign(name, krys::move(value));
 
     bool isNewProperty = isNewEntry && (!_parentValues || !_parentValues->Get(name));
     if (isNewProperty)

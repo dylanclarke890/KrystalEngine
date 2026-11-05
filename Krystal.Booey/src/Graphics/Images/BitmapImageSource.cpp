@@ -581,7 +581,7 @@ namespace krys::boo
 
     if (RefPtr<NativeImage> nativeImage = FrameAtIndex(index).GetNativeImage())
     {
-      return Ref<NativeImage>(krys::move(nativeImage));
+      return krys::move(nativeImage);
     }
 
     return Unexpected(DecodingStatus::Invalid);

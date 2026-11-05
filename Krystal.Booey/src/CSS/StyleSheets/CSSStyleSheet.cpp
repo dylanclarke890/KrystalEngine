@@ -421,7 +421,7 @@ namespace krys::boo::css
                                     DynamicDowncast<KeyframesRule>(rule.get()));
 
     bool isNamespace = rule->IsNamespaceRule();
-    bool success = _contents->WrapperInsertRule(Ref<Rule>(krys::move(rule)), index);
+    bool success = _contents->WrapperInsertRule(krys::move(rule), index);
     if (!success)
     {
       if (isNamespace)
@@ -646,7 +646,7 @@ namespace krys::boo::css
       if (cachedContents)
       {
         _contents->UnregisterClient(this);
-        _contents = Ref<StyleSheetContents>(krys::move(cachedContents));
+        _contents = krys::move(cachedContents);
         _contents->RegisterClient(this);
       }
       else

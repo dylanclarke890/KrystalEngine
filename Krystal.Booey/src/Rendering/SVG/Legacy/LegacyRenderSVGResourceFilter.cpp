@@ -151,8 +151,8 @@ namespace krys::boo
     filterData->Filter->ClampFilterRegionIfNeeded();
 
     auto &results = filterData->Filter->EnsureResults([] { return CreateUnique<FilterResults>(); });
-    filterData->TargetSwitcher = GraphicsContextSwitcher::Create(
-      *context, filterData->SourceImageRect, RefPtr<Filter>(filterData->Filter), &results);
+    filterData->TargetSwitcher =
+      GraphicsContextSwitcher::Create(*context, filterData->SourceImageRect, filterData->Filter, &results);
     if (!filterData->TargetSwitcher)
     {
       _rendererFilterDataMap.erase(&renderer);

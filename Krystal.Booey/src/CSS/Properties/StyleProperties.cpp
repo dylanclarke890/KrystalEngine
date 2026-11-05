@@ -420,7 +420,7 @@ namespace krys::boo::css
     {
       if (auto value = GetPropertyCSSValue(property))
       {
-        list.emplace_back(property, Ref<Value>(krys::move(value)));
+        list.emplace_back(property, krys::move(value));
       }
     }
 

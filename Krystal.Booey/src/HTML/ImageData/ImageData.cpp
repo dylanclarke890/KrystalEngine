@@ -58,7 +58,7 @@ namespace krys::boo::html
     {
       return nullptr;
     }
-    return Create(Ref<ByteArrayPixelBuffer>(krys::move(pixelBuffer)), overridingPixelFormat);
+    return Create(krys::move(pixelBuffer), overridingPixelFormat);
   }
 
   RefPtr<ImageData> ImageData::Create(Ref<PixelBuffer> &&pixelBuffer,

@@ -236,10 +236,8 @@ namespace krys::boo::tests
 
     auto beforeInput = CreateRef<InputTypeListener>();
     auto input = CreateRef<InputTypeListener>();
-    fixture.Document->AddEventListener(dom::DOMStringAtom(EventNames::BeforeInput),
-                                       Ref<dom::EventListenerCallback> {beforeInput}, true);
-    fixture.Document->AddEventListener(dom::DOMStringAtom(EventNames::Input),
-                                       Ref<dom::EventListenerCallback> {input}, true);
+    fixture.Document->AddEventListener(dom::DOMStringAtom(EventNames::BeforeInput), beforeInput, true);
+    fixture.Document->AddEventListener(dom::DOMStringAtom(EventNames::Input), input, true);
     auto textInput = fixture.Listen(EventNames::TextInput);
 
     SECTION("Typing fires textInput, beforeinput and input")

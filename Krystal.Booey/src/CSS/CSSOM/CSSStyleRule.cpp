@@ -294,11 +294,11 @@ namespace krys::boo::css
         styleRuleWithNesting = StyleRuleWithNesting::Create(krys::move(*_styleRule));
       }
       krys_debug_assert(styleRuleWithNesting);
-      _styleRule = Ref<StyleRule>(krys::move(styleRuleWithNesting));
+      _styleRule = krys::move(styleRuleWithNesting);
     }
 
     auto &nestedRules = Downcast<StyleRuleWithNesting>(*_styleRule).NestedRules();
-    nestedRules.insert(nestedRules.begin() + index, Ref<Rule>(krys::move(newRule)));
+    nestedRules.insert(nestedRules.begin() + index, krys::move(newRule));
     _childRuleCSSOMWrappers.insert(_childRuleCSSOMWrappers.begin() + index, RefPtr<CSSRule>());
     return index;
   }

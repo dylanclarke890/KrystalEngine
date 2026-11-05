@@ -552,7 +552,7 @@ namespace krys::boo::style
     ExtractorState state {
       .ValueType = valueType,
       .Style = style,
-      .Element = Ref<dom::Element>(_element),
+      .Element = _element,
       .PseudoElementIdentifier = _pseudoElementIdentifier,
       .Renderer = renderer,
       .Pool = pool,
@@ -574,7 +574,7 @@ namespace krys::boo::style
     ExtractorState state {
       .ValueType = valueType,
       .Style = style,
-      .Element = Ref<dom::Element>(_element),
+      .Element = _element,
       .PseudoElementIdentifier = _pseudoElementIdentifier,
       .Renderer = renderer,
       .Pool = pool,
@@ -620,7 +620,7 @@ namespace krys::boo::style
     {
       if (auto value = PropertyValue(property))
       {
-        list.emplace_back(property, Ref<css::Value>(krys::move(value)));
+        list.emplace_back(property, krys::move(value));
       }
     }
     return css::MutableStyleProperties::Create(krys::move(list));
@@ -633,7 +633,7 @@ namespace krys::boo::style
     {
       if (auto value = PropertyValue(property))
       {
-        list.emplace_back(property, Ref<css::Value>(krys::move(value)));
+        list.emplace_back(property, krys::move(value));
       }
     }
     return css::MutableStyleProperties::Create(krys::move(list));

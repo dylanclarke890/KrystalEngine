@@ -120,7 +120,7 @@ namespace krys::boo::tests
       auto log = CreateRef<EventLog>();
       for (auto type : types)
       {
-        target.AddEventListener(dom::DOMStringAtom(type), Ref<dom::EventListenerCallback> {log}, false);
+        target.AddEventListener(dom::DOMStringAtom(type), log, false);
       }
       return log;
     }

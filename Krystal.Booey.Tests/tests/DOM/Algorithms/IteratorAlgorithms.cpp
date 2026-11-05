@@ -67,8 +67,7 @@ namespace krys::boo::dom::tests
     FilterTestData data;
     auto filter = CreateRef<RecordingNodeFilter>();
     // Only comments: the nth bit is the node type minus one.
-    auto iterator =
-      data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_COMMENT, RefPtr<NodeFilter> {filter});
+    auto iterator = data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_COMMENT, filter);
     CHECK(iterator->NextNode().ReleaseValue() == data.Comment.get());
     CHECK(iterator->NextNode().ReleaseValue() == nullptr);
     REQUIRE(filter->Calls.size() == 1uz);
@@ -104,8 +103,7 @@ namespace krys::boo::dom::tests
     FilterTestData data;
     auto filter = CreateRef<RecordingNodeFilter>();
     filter->Result = FilterResult::FILTER_SKIP;
-    auto iterator =
-      data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, RefPtr<NodeFilter> {filter});
+    auto iterator = data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, filter);
     CHECK(iterator->NextNode().ReleaseValue() == nullptr);
     REQUIRE(filter->Calls.size() == 4uz);
     CHECK(filter->Calls[0] == data.Div.get());
@@ -120,8 +118,7 @@ namespace krys::boo::dom::tests
 
     SECTION("NodeIterator")
     {
-      auto iterator =
-        data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, RefPtr<NodeFilter> {filter});
+      auto iterator = data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, filter);
       filter->Reenter = [&]
       {
         return iterator->NextNode();
@@ -138,8 +135,7 @@ namespace krys::boo::dom::tests
 
     SECTION("TreeWalker")
     {
-      auto walker =
-        data.Document->CreateTreeWalker(*data.Div, WhatToShow::SHOW_ALL, RefPtr<NodeFilter> {filter});
+      auto walker = data.Document->CreateTreeWalker(*data.Div, WhatToShow::SHOW_ALL, filter);
       filter->Reenter = [&]() -> ExceptionOr<RefPtr<Node>>
       {
         auto result = walker->FirstChild();
@@ -162,8 +158,7 @@ namespace krys::boo::dom::tests
     FilterTestData data;
     auto filter = CreateRef<RecordingNodeFilter>();
     filter->Throws = ExceptionCode::NotSupportedError;
-    auto iterator =
-      data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, RefPtr<NodeFilter> {filter});
+    auto iterator = data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, filter);
     auto result = iterator->NextNode();
     REQUIRE(result.HasException());
     CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);

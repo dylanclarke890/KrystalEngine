@@ -177,14 +177,14 @@ namespace krys::boo
 
       if (blendedOp)
       {
-        operations.push_back(Ref<FilterOperation> {krys::move(blendedOp)});
+        operations.push_back(krys::move(blendedOp));
       }
       else
       {
         RefPtr<FilterOperation> fallback = context.Progress > 0.5 ? toOp : fromOp;
         if (fallback)
         {
-          operations.push_back(Ref<FilterOperation> {krys::move(fallback)});
+          operations.push_back(krys::move(fallback));
         }
         else
         {

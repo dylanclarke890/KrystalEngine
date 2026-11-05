@@ -254,8 +254,8 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       value=Go><button id=other name=other value=o></button></form>)");
     auto &form = fixture.Get<HTMLFormElement>(u8"f");
     auto events = CreateRef<SubmissionEvents>();
-    form.AddEventListener(dom::DOMStringAtom(u8"submit"), Ref<dom::EventListenerCallback> {events}, false);
-    form.AddEventListener(dom::DOMStringAtom(u8"formdata"), Ref<dom::EventListenerCallback> {events}, false);
+    form.AddEventListener(dom::DOMStringAtom(u8"submit"), events, false);
+    form.AddEventListener(dom::DOMStringAtom(u8"formdata"), events, false);
 
     SECTION("submit() skips the submit event and validation")
     {

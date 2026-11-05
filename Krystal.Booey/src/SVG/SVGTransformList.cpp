@@ -28,9 +28,9 @@ namespace krys::boo::svg
     auto newItem = SVGTransform::Create(Concatenate());
     ClearItems();
 
-    auto item = Append(krys::move(newItem));
+    RefPtr<SVGTransform> item = Append(krys::move(newItem));
     CommitChange();
-    return RefPtr<SVGTransform> {item};
+    return item;
   }
 
   AffineTransform SVGTransformList::Concatenate() const noexcept
@@ -84,7 +84,7 @@ namespace krys::boo::svg
           return false;
         }
 
-        Append(Ref<SVGTransform> {krys::move(parsedTransform)});
+        Append(krys::move(parsedTransform));
       }
 
       SkipOptionalSVGSpaces(buffer);

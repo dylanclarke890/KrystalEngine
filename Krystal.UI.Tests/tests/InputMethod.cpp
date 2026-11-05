@@ -64,8 +64,7 @@ namespace krys::ui::tests
                       boo::EventNames::CompositionEnd, boo::EventNames::Input, boo::EventNames::KeyDown,
                       boo::EventNames::KeyPress})
     {
-      view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
-                                       Ref<boo::dom::EventListenerCallback> {log}, true);
+      view.Document().AddEventListener(boo::dom::DOMStringAtom(type), log, true);
     }
     int32 discarded = 0;
     view.SetCompositionDiscardedHandler([&discarded] { ++discarded; });

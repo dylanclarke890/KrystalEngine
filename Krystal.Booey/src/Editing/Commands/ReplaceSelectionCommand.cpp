@@ -285,7 +285,7 @@ namespace krys::boo
       Ref<dom::Element> list = ShareRef(topLevelList);
       while (auto childList = SingleChildList(*list))
       {
-        list = Ref<dom::Element>(childList);
+        list = childList;
       }
       return list;
     }

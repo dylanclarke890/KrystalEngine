@@ -11,10 +11,10 @@ namespace krys::boo::css
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-keywordish-value
     return krys::SwitchOn(
       keywordish, [](const CSSOMString &string) { return AdoptRef(*new CSSKeywordValue(string)); },
-      [](RefPtr<CSSKeywordValue> &value)
+      [](RefPtr<CSSKeywordValue> &value) -> Ref<CSSKeywordValue>
       {
         krys_assert(value);
-        return Ref<CSSKeywordValue> {krys::move(value)};
+        return krys::move(value);
       });
   }
 

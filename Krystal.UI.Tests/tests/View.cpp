@@ -1968,8 +1968,7 @@ namespace krys::ui::tests
       }
     };
     Ref<ScrollCounter> counter = CreateRef<ScrollCounter>();
-    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"scroll"),
-                                     Ref<boo::dom::EventListenerCallback> {counter}, false);
+    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"scroll"), counter, false);
 
     CHECK(view.ScrollPosition() == boo::IntPoint());
     view.ScrollTo({0, 150});
@@ -2392,8 +2391,7 @@ namespace krys::ui::tests
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
-    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
-                           Ref<boo::dom::EventListenerCallback> {changes}, false);
+    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
     auto open = [&]
     {
       view.MousePressed(inside, pal::MouseButton::Left);
@@ -2518,8 +2516,7 @@ namespace krys::ui::tests
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
-    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
-                           Ref<boo::dom::EventListenerCallback> {changes}, false);
+    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
     auto open = [&]
     {
       view.MousePressed(inside, pal::MouseButton::Left);

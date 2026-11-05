@@ -878,8 +878,7 @@ namespace krys::boo
 
     if (_lastTextNodeEndedWithCollapsedSpace)
     {
-      EmitCharacter(' ', ShareRefPtr<dom::Node>(_lastTextNode->ParentNode()),
-                    RefPtr<dom::Node>(_lastTextNode), 1, 1);
+      EmitCharacter(' ', ShareRefPtr<dom::Node>(_lastTextNode->ParentNode()), _lastTextNode, 1, 1);
       return false;
     }
 

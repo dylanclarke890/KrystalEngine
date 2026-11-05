@@ -1681,8 +1681,7 @@ namespace krys::boo::style
       return nullptr;
     }
 
-    return css::ValuePair::Create(Ref<css::Value>(krys::move(startValue)),
-                                  Ref<css::Value>(krys::move(endValue)));
+    return css::ValuePair::Create(krys::move(startValue), krys::move(endValue));
   }
 
   inline void ExtractCoalescingPairShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
@@ -1745,18 +1744,18 @@ namespace krys::boo::style
     bool showRight = !CompareCSSValuePtr(topValue, rightValue) || showBottom;
 
     css::ValueListBuilder list;
-    list.push_back(Ref<css::Value>(krys::move(topValue)));
+    list.push_back(krys::move(topValue));
     if (showRight)
     {
-      list.push_back(Ref<css::Value>(krys::move(rightValue)));
+      list.push_back(krys::move(rightValue));
     }
     if (showBottom)
     {
-      list.push_back(Ref<css::Value>(krys::move(bottomValue)));
+      list.push_back(krys::move(bottomValue));
     }
     if (showLeft)
     {
-      list.push_back(Ref<css::Value>(krys::move(leftValue)));
+      list.push_back(krys::move(leftValue));
     }
     return css::ValueList::CreateSpaceSeparated(krys::move(list));
   }
@@ -2926,7 +2925,7 @@ namespace krys::boo::style
       {
         continue;
       }
-      list.push_back(Ref<css::Value>(krys::move(value)));
+      list.push_back(krys::move(value));
     }
     if (list.empty())
     {

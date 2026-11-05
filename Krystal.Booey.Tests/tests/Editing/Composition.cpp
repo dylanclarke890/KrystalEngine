@@ -52,8 +52,7 @@ namespace krys::boo::tests
                         EventNames::CompositionEnd, EventNames::BeforeInput, EventNames::Input,
                         EventNames::TextInput, EventNames::KeyDown, EventNames::KeyPress})
       {
-        fixture.Document->AddEventListener(dom::DOMStringAtom(type), Ref<dom::EventListenerCallback> {log},
-                                           true);
+        fixture.Document->AddEventListener(dom::DOMStringAtom(type), log, true);
       }
       return log;
     }

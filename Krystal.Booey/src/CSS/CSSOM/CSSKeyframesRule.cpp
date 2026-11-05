@@ -57,7 +57,7 @@ namespace krys::boo::css
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
 
-    _keyframesRule->WrapperAppendKeyframe(Ref<KeyframeRule>(krys::move(keyframe)));
+    _keyframesRule->WrapperAppendKeyframe(krys::move(keyframe));
 
     _childRuleCSSOMWrappers.resize(Length());
   }

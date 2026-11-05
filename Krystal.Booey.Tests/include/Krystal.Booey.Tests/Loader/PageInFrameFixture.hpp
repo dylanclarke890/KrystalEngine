@@ -97,9 +97,8 @@ namespace krys::boo::tests
     KRYS_NODISCARD static Ref<LoadEvents> ListenTo(dom::Element &element) noexcept
     {
       auto events = CreateRef<LoadEvents>();
-      element.AddEventListener(dom::DOMStringAtom(u8"load"), Ref<dom::EventListenerCallback> {events}, false);
-      element.AddEventListener(dom::DOMStringAtom(u8"error"), Ref<dom::EventListenerCallback> {events},
-                               false);
+      element.AddEventListener(dom::DOMStringAtom(u8"load"), events, false);
+      element.AddEventListener(dom::DOMStringAtom(u8"error"), events, false);
       return events;
     }
   };

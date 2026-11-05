@@ -1795,12 +1795,12 @@ namespace krys::boo
 
     bool shouldUpdateStart = start.GetContainerNode() == endNode;
     uint32 endOffset = nextChild ? nextChild->ComputeNodeIndex() : nextElement->CountChildNodes();
-    UpdateStartEnd(shouldUpdateStart ? dom::Position(RefPtr<dom::Node>(nextElement),
-                                                     static_cast<uint32>(start.OffsetInContainerNode()),
-                                                     dom::Position::AnchorType::PositionIsOffsetInAnchor)
-                                     : start,
-                   dom::Position(RefPtr<dom::Node>(nextElement), endOffset,
-                                 dom::Position::AnchorType::PositionIsOffsetInAnchor));
+    UpdateStartEnd(
+      shouldUpdateStart
+        ? dom::Position(RefPtr<dom::Node>(nextElement), static_cast<uint32>(start.OffsetInContainerNode()),
+                        dom::Position::AnchorType::PositionIsOffsetInAnchor)
+        : start,
+      dom::Position(nextElement, endOffset, dom::Position::AnchorType::PositionIsOffsetInAnchor));
     return true;
   }
 

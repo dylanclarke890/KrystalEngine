@@ -22,7 +22,7 @@ namespace krys::boo
     {
       return nullptr;
     }
-    return AdoptRef(*new FontCustomPlatformData(Ref<text::FreeTypeFace>(krys::move(face))));
+    return AdoptRef(*new FontCustomPlatformData(krys::move(face)));
   }
 
   FontPlatformData

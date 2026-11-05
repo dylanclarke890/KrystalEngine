@@ -102,27 +102,27 @@ namespace krys::boo::tests
     auto c = CreateLayer(client, u8"c");
     auto d = CreateLayer(client, u8"d");
 
-    root->AddChild(Ref<GraphicsLayer> {a});
-    root->AddChild(Ref<GraphicsLayer> {c});
-    root->AddChildAbove(Ref<GraphicsLayer> {b}, a.get());
+    root->AddChild(a);
+    root->AddChild(c);
+    root->AddChildAbove(b, a.get());
     CHECK(Names(*root) == u8"abc");
-    root->AddChildBelow(Ref<GraphicsLayer> {d}, a.get());
+    root->AddChildBelow(d, a.get());
     CHECK(Names(*root) == u8"dabc");
     CHECK(d->Parent() == root.get());
     CHECK(d->HasAncestor(root.get()));
     CHECK_FALSE(root->HasAncestor(d.get()));
 
     // Adding a child that has a parent moves it.
-    a->AddChild(Ref<GraphicsLayer> {d});
+    a->AddChild(d);
     CHECK(Names(*root) == u8"abc");
     CHECK(Names(*a) == u8"d");
 
     auto e = CreateLayer(client, u8"e");
-    CHECK(root->ReplaceChild(b.get(), Ref<GraphicsLayer> {e}));
+    CHECK(root->ReplaceChild(b.get(), e));
     CHECK(Names(*root) == u8"aec");
     CHECK_FALSE(b->Parent());
 
-    root->AddChildAtIndex(Ref<GraphicsLayer> {b}, 0);
+    root->AddChildAtIndex(b, 0);
     CHECK(Names(*root) == u8"baec");
 
     c->RemoveFromParent();
@@ -133,7 +133,7 @@ namespace krys::boo::tests
     CHECK_FALSE(a->Parent());
 
     auto mask = CreateLayer(client, u8"m");
-    root->SetMaskLayer(Ref<GraphicsLayer> {mask});
+    root->SetMaskLayer(mask);
     CHECK(mask->IsMaskLayer());
     CHECK(mask->Parent() == root.get());
     root->SetMaskLayer(nullptr);
@@ -141,11 +141,11 @@ namespace krys::boo::tests
     CHECK_FALSE(mask->Parent());
 
     auto replica = CreateLayer(client, u8"p");
-    root->SetReplicatedByLayer(Ref<GraphicsLayer> {replica});
+    root->SetReplicatedByLayer(replica);
     CHECK(root->IsReplicated());
     CHECK(root->ReplicaLayer() == replica.get());
 
-    root->SetMaskLayer(Ref<GraphicsLayer> {mask});
+    root->SetMaskLayer(mask);
     utf8_string order;
     GraphicsLayer::Traverse(*root, [&](GraphicsLayer &layer) { order += layer.Name(); });
     // Children, then the replica, then the mask.
@@ -214,11 +214,11 @@ namespace krys::boo::tests
     TransformationMatrix transform;
     transform.Translate(2, 3);
     child->SetTransform(transform);
-    root->AddChild(Ref<GraphicsLayer> {child});
+    root->AddChild(child);
 
     auto mask = CreateLayer(client);
     mask->SetSize({100, 50});
-    child->SetMaskLayer(Ref<GraphicsLayer> {mask});
+    child->SetMaskLayer(mask);
 
     CHECK(root->LayerTreeAsText({LayerTreeAsTextOptions::IncludeClipping}) == u8R"((GraphicsLayer
   (anchor 0.50 0.50)

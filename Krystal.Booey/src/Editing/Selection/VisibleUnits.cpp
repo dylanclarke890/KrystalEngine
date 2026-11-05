@@ -1861,8 +1861,7 @@ namespace krys::boo
     // position to null, even when there's a valid candidate to be had, because the root HTML element
     // is not content editable.  So we construct directly from the valid candidate.
     auto documentElement = node->NodeDocument().DocumentElement();
-    dom::Position firstCandidate =
-      NextCandidate(dom::MakeDeprecatedLegacyPosition(RefPtr<dom::Node>(documentElement), 0));
+    dom::Position firstCandidate = NextCandidate(dom::MakeDeprecatedLegacyPosition(documentElement, 0));
     if (firstCandidate.IsNull())
     {
       return VisiblePosition();
@@ -1886,8 +1885,8 @@ namespace krys::boo
     // when descending from the root element, so we construct the visible position directly from a
     // valid candidate.
     auto documentElement = node->NodeDocument().DocumentElement();
-    dom::Position lastPosition = dom::MakeDeprecatedLegacyPosition(RefPtr<dom::Node>(documentElement),
-                                                                   documentElement->CountChildNodes());
+    dom::Position lastPosition =
+      dom::MakeDeprecatedLegacyPosition(documentElement, documentElement->CountChildNodes());
     dom::Position lastCandidate = PreviousCandidate(lastPosition);
     if (lastCandidate.IsNull())
     {

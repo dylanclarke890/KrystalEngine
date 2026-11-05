@@ -34,12 +34,12 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD CSSNumberish N(Ref<CSSUnitValue> value)
     {
-      return RefPtr<CSSNumericValue> {krys::move(value)};
+      return krys::move(value);
     }
 
     KRYS_NODISCARD CSSNumberish N(Ref<CSSNumericValue> value)
     {
-      return RefPtr<CSSNumericValue> {krys::move(value)};
+      return krys::move(value);
     }
 
     template <typename T>
@@ -243,6 +243,6 @@ namespace krys::boo::css::tests
     // An identifier that isn't a keyword is a custom identifier.
     auto custom = CSSKeywordValue::RectifyKeywordish(CSSOMString(u8"my-name"));
     CHECK(CssText(*custom->ToCSSValue()) == "my-name");
-    CHECK(CSSKeywordValue::RectifyKeywordish(RefPtr<CSSKeywordValue> {keyword}).get() == keyword.get());
+    CHECK(CSSKeywordValue::RectifyKeywordish(keyword).get() == keyword.get());
   }
 }

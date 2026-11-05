@@ -168,8 +168,8 @@ namespace krys::ui::tests
     under->SetBackgroundColor(Rgb(0x073b4c));
     auto over = fixture.CreateLayer(u8"over", {20, 20}, {60, 60});
     over->SetBackgroundColor(Rgb(0xef476f));
-    group->AddChild(Ref<boo::GraphicsLayer> {under});
-    group->AddChild(Ref<boo::GraphicsLayer> {over});
+    group->AddChild(under);
+    group->AddChild(over);
 
     auto turned = fixture.CreateLayer(u8"turned", {250, 30}, {80, 60});
     turned->SetDrawsContent(true);
@@ -189,7 +189,7 @@ namespace krys::ui::tests
     auto clipped = fixture.CreateLayer(u8"clipped", {40, 30}, {80, 60});
     clipped->SetDrawsContent(true);
     client.ContentsByName[u8"clipped"] = {Rgb(0x118ab2), {}, {}};
-    clipping->AddChild(Ref<boo::GraphicsLayer> {clipped});
+    clipping->AddChild(clipped);
 
     auto solid = fixture.CreateLayer(u8"solid", {280, 150}, {60, 50});
     solid->SetContentsToSolidColor(Rgb(0x8338ec));
@@ -245,7 +245,7 @@ namespace krys::ui::tests
     root->SetMasksToBounds(true);
     auto tall = fixture.CreateLayer(u8"tall", {0, -1'500}, {360, 6'000});
     tall->SetDrawsContent(true);
-    root->AddChild(Ref<boo::GraphicsLayer> {tall});
+    root->AddChild(tall);
 
     auto checkStripes = [&](const GoldenImage &image, float offset)
     {
@@ -295,7 +295,7 @@ namespace krys::ui::tests
     auto drawn = fixture.CreateLayer(u8"drawn", {0, 0}, {200, 100});
     drawn->SetDrawsContent(true);
     client.ContentsByName[u8"drawn"] = {Rgb(0x118ab2), {}, {}};
-    root->AddChild(Ref<boo::GraphicsLayer> {drawn});
+    root->AddChild(drawn);
 
     auto image = fixture.Composite(*root);
     CHECK(PixelAt(image, 50, 50) == Array<uint8, 4> {17, 138, 178, 255});

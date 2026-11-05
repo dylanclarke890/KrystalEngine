@@ -36,8 +36,8 @@ namespace krys::boo
           {
             if (auto offsetValue = offset->ToCSSValue())
             {
-              return css::ValuePair::CreateNonCoalescing(Ref<css::Value> {krys::move(consumedRangeName)},
-                                                         Ref<css::Value> {krys::move(offsetValue)});
+              return css::ValuePair::CreateNonCoalescing(krys::move(consumedRangeName),
+                                                         krys::move(offsetValue));
             }
           }
           return consumedRangeName;

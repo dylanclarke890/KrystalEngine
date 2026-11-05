@@ -200,14 +200,14 @@ namespace krys::boo
       {
         auto scrollTimeline = ScrollTimeline::Create(scrollFunction->Scroller, scrollFunction->Axis);
         scrollTimeline->SetSource(*OwningElement());
-        SetTimeline(RefPtr<AnimationTimeline> {krys::move(scrollTimeline)});
+        SetTimeline(krys::move(scrollTimeline));
       },
       [&](const style::ViewFunction &viewFunction)
       {
         auto viewTimeline =
           ViewTimeline::Create(css::CSSOMStringAtom::Null(), viewFunction->Axis, viewFunction->Insets);
         viewTimeline->SetSubject(*OwningElement());
-        SetTimeline(RefPtr<AnimationTimeline> {krys::move(viewTimeline)});
+        SetTimeline(krys::move(viewTimeline));
       });
 
     // If we're not dealing with a named timeline, we should make sure we have no pending attachment operation

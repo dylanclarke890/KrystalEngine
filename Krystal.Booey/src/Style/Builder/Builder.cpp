@@ -452,7 +452,7 @@ namespace krys::boo::style
     {
       if (registeredCustomProperty && registeredCustomProperty->InitialValue)
       {
-        applyValue(Ref<const CustomProperty> {registeredCustomProperty->InitialValue});
+        applyValue(registeredCustomProperty->InitialValue);
         return;
       }
       applyValue(CustomProperty::CreateForGuaranteedInvalid(name));

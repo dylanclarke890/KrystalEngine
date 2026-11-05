@@ -57,7 +57,7 @@ namespace krys::boo::css::tests
       auto customValue = VariableParser::ParseDeclarationValue(CSSOMStringAtom(CSSOMString(name)),
                                                                tokens.Tokenizer.Tokens(), context);
       REQUIRE(customValue);
-      parsed.push_back(Property(PropertyId::Custom, Ref<Value>(krys::move(customValue)), important));
+      parsed.push_back(Property(PropertyId::Custom, krys::move(customValue), important));
     }
     else
     {

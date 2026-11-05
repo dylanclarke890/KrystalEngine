@@ -495,7 +495,7 @@ namespace krys::boo
       {
         _cssAnimationsPendingAttachment.push_back(ShareRef(animation));
       }
-      protectedAnimation->SetTimeline(RefPtr<AnimationTimeline> {krys::move(timeline)});
+      protectedAnimation->SetTimeline(krys::move(timeline));
     }
 
     // Since we have no timeline defined for this name yet, we need to mark this animation as pending

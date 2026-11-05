@@ -96,7 +96,7 @@ namespace krys::boo::css
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
 
-    _groupRule->WrapperInsertRule(index, Ref<Rule>(krys::move(newRule)));
+    _groupRule->WrapperInsertRule(index, krys::move(newRule));
 
     _childRuleCSSOMWrappers.insert(_childRuleCSSOMWrappers.begin() + index, RefPtr<CSSRule>());
     return index;

@@ -577,8 +577,7 @@ namespace krys::boo::tests
       auto canceller = CreateRef<WheelCanceller>();
       dom::AddEventListenerOptions options;
       options.Passive = false;
-      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
-                                         Ref<dom::EventListenerCallback> {canceller}, options);
+      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"), canceller, options);
       CHECK(Wheel(handler, {20, 20}, {0, 100}));
       CHECK(canceller->DeltaY == 100);
       CHECK(box.ScrollTop() == 0);
@@ -588,8 +587,7 @@ namespace krys::boo::tests
     SECTION("a passive listener on the document can't cancel it")
     {
       auto canceller = CreateRef<WheelCanceller>();
-      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
-                                         Ref<dom::EventListenerCallback> {canceller}, false);
+      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"), canceller, false);
       CHECK(Wheel(handler, {20, 20}, {0, 100}));
       CHECK(canceller->DeltaY == 100);
       CHECK(box.ScrollTop() == 100);
@@ -617,8 +615,7 @@ namespace krys::boo::tests
     auto canceller = CreateRef<WheelCanceller>();
     dom::AddEventListenerOptions options;
     options.Passive = false;
-    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
-                                       Ref<dom::EventListenerCallback> {canceller}, options);
+    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"), canceller, options);
 
     SECTION("the box under the touch scrolls, then the view once it reaches its end")
     {

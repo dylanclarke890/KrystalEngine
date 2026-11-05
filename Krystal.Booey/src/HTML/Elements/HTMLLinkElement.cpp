@@ -546,7 +546,7 @@ namespace krys::boo::html
     {
       krys_debug_assert(restoredSheet->IsCacheable());
       krys_debug_assert(!restoredSheet->IsLoading());
-      InitializeStyleSheet(Ref<css::StyleSheetContents>(restoredSheet), parserContext);
+      InitializeStyleSheet(krys::move(restoredSheet), parserContext);
 
       _loading = false;
       (void)SheetLoaded();
