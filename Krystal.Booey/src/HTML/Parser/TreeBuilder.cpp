@@ -16,6 +16,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLScriptElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableCellElement.hpp"
@@ -4580,7 +4581,20 @@ namespace krys::boo::html
     //     insertion target redirection map[the element pointed to by the form element pointer] does not
     //     exist, then associate element with the form element pointed to by the form element pointer and set
     //     element's parser inserted flag.
-    // FIXME: Associating the form owner (see FormAssociatedElement::SetFormSetByParser).
+    // (The element joins the form when it's inserted, instead of resetting its form owner:
+    // SetFormSetByParser. There's no fragment context element here, so a template on the stack of open
+    // elements is what makes the parser parse template contents.)
+    auto *htmlElement = DynamicDowncast<HTMLElement>(*element);
+    auto *formAssociated = htmlElement && !Is<HTMLMaybeFormAssociatedCustomElement>(*htmlElement)
+                             ? htmlElement->AsFormAssociatedElement()
+                             : nullptr;
+    if (formAssociated && _form && !_openElementStack.ContainsTemplateElement() && !_context
+        && (!formAssociated->IsFormListedElement() || !htmlElement->HasAttribute(u8"form"))
+        && &dom::TreeQueries::Root(intendedParent) == &dom::TreeQueries::Root(*_form)
+        && !_insertionTargetRedirectionMap.contains(_form.get()))
+    {
+      formAssociated->SetFormSetByParser(_form.get());
+    }
 
     // 22. Return element.
     return element;

@@ -629,7 +629,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.6.1 Creating and inserting nodes](https://html.spec.whatwg.org/#creating-and-inserting-nodes)
 
 Status: reviewed (2026-11-02)
-> `AppropriatePlaceToInsertNode`, `CreateElement`, `InsertForeignElement`, `InsertCharacters`, `InsertComment`, `InsertProcessingInstruction` and the attribute adjusters; content patching is `InsertionLocationInTemplate`. The xmlns parse errors are skipped (see `DIFFERENCES.md`), a resettable element isn't reset again after its attributes have put it in its reset state, and the parser form owner is missing (see `KNOWN-ISSUES.md`).
+> `AppropriatePlaceToInsertNode`, `CreateElement`, `InsertForeignElement`, `InsertCharacters`, `InsertComment`, `InsertProcessingInstruction` and the attribute adjusters; content patching is `InsertionLocationInTemplate`. The xmlns parse errors are skipped (see `DIFFERENCES.md`), a resettable element isn't reset again after its attributes have put it in its reset state.
 > Fixed: a plain `xmlns` attribute on a foreign element got the `xmlns` prefix.
 <!-- definitions: insertion-location insertion-location-target-parent insertion-location-reference-child foster-parent -->
 

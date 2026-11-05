@@ -12,6 +12,7 @@
 #include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
@@ -737,6 +738,32 @@ namespace krys::boo::html::tests
     auto href = svg->GetAttributeNodeNS(infra::Namespaces::XLink, u8"href");
     REQUIRE(href);
     CHECK(href->Prefix() == infra::NamespacePrefixes::XLink);
+  }
+
+  TEST_CASE("DocumentParser: form controls join the open form even when they aren't inside it",
+            "[HTML][DocumentParser][html:create-an-element-for-the-token][html:form-element-pointer]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    // The form start tag in a table inserts the form and pops it straight away, so the controls in the cell
+    // aren't its descendants.
+    auto parser = CreateParser(*document, utf8_string(u8"<table><form id=f><tr><td><input id=i>"
+                                                      u8"<input id=attr form=elsewhere><template><input id=t>"
+                                                      u8"</template></td></tr></form></table>"));
+    (void)parser->PumpTokenizer();
+
+    auto &form = Downcast<HTMLFormElement>(*document->GetElementById(u8"f"));
+    CHECK_FALSE(form.Contains(document->GetElementById(u8"i").get()));
+    CHECK(Downcast<HTMLInputElement>(*document->GetElementById(u8"i")).Form() == &form);
+
+    // A listed element with a form attribute goes by the attribute.
+    CHECK_FALSE(Downcast<HTMLInputElement>(*document->GetElementById(u8"attr")).Form());
+
+    // Template contents aren't associated.
+    auto &templateElement =
+      Downcast<HTMLTemplateElement>(*document->QuerySelector(u8"template").ReleaseValue());
+    auto *templated = templateElement.Content()->FirstChild();
+    REQUIRE(templated);
+    CHECK_FALSE(Downcast<HTMLInputElement>(*templated).Form());
   }
 
   TEST_CASE("DocumentParser: form controls it creates start out reset",
