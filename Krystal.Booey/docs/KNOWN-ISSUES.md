@@ -291,9 +291,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## Input and events
 
-### Bugs
-
-
 ### Missing
 
 - The window gets no `focus`/`blur` events: `FocusAlgorithms` has FIXMEs for firing them at a document's `Window`, and `FocusEvent`/`UIEvent` have no `view`. `FocusOptions` has no selection restoration mode or focus direction.
