@@ -26,6 +26,7 @@ namespace krys::boo::dom
   class Element;
   class Event;
   class KeyboardEvent;
+  class Range;
   class StaticRange;
   class Text;
   class TextEvent;
@@ -135,9 +136,9 @@ namespace krys::boo
     bool _overwriteModeEnabled {false};
     bool _ignoreSelectionChanges {false};
 
-    RefPtr<dom::Text> _compositionNode;
-    uint32 _compositionStart {0};
-    uint32 _compositionEnd {0};
+    // A live range, so the page's edits move it; once they take its text away, the composition is lost.
+    RefPtr<dom::Range> _compositionRange;
+    // Offsets in the composition's text.
     List<CompositionUnderline> _customCompositionUnderlines;
 
   public:
@@ -371,7 +372,10 @@ namespace krys::boo
     bool InsertTextForConfirmedComposition(utf8_stringview text) noexcept;
 
     // International text input composition.
+    /// @brief Whether there's a composition whose text is still in the document.
     KRYS_NODISCARD bool HasComposition() const noexcept;
+    /// @brief Whether the page's edits took the composition's text away, without the composition ending.
+    KRYS_NODISCARD bool HasLostComposition() const noexcept;
     /// @brief Sets the text an input method composes, replacing the composition (or else the selection) with
     /// @p text, underlined by @p underlines, with @p selectionStart to @p selectionEnd selected (offsets in
     /// @p text's code units); empty @p text cancels the composition. Fires `compositionstart` (with the text
@@ -401,19 +405,15 @@ namespace krys::boo
 
     /// @brief The text node the composition is in, for painting it.
     KRYS_NODISCARD dom::Text *CompositionNode() const noexcept;
-    KRYS_NODISCARD uint32 CompositionStart() const noexcept
-    {
-      return _compositionStart;
-    }
-    KRYS_NODISCARD uint32 CompositionEnd() const noexcept
-    {
-      return _compositionEnd;
-    }
+    /// @brief The composition's start offset in its text node, or 0 if there's none.
+    KRYS_NODISCARD uint32 CompositionStart() const noexcept;
+    /// @brief The composition's end offset in its text node, or 0 if there's none.
+    KRYS_NODISCARD uint32 CompositionEnd() const noexcept;
     KRYS_NODISCARD bool CompositionUsesCustomUnderlines() const noexcept
     {
       return !_customCompositionUnderlines.empty();
     }
-    /// @brief The composition's underlines, with offsets in its text node.
+    /// @brief The composition's underlines, with offsets in its text.
     KRYS_NODISCARD const List<CompositionUnderline> &CustomCompositionUnderlines() const noexcept
     {
       return _customCompositionUnderlines;

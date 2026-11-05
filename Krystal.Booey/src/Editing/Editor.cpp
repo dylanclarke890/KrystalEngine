@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp"
@@ -1497,12 +1498,33 @@ namespace krys::boo
 
   bool Editor::HasComposition() const noexcept
   {
-    return static_cast<bool>(_compositionNode);
+    return CompositionNode();
   }
 
   dom::Text *Editor::CompositionNode() const noexcept
   {
-    return _compositionNode.get();
+    if (!_compositionRange || _compositionRange->Collapsed()
+        || _compositionRange->StartContainer() != _compositionRange->EndContainer())
+    {
+      return nullptr;
+    }
+    auto *node = DynamicDowncast<dom::Text>(_compositionRange->StartContainer());
+    return node && node->IsConnected() ? node : nullptr;
+  }
+
+  uint32 Editor::CompositionStart() const noexcept
+  {
+    return HasComposition() ? static_cast<uint32>(_compositionRange->StartOffset()) : 0;
+  }
+
+  uint32 Editor::CompositionEnd() const noexcept
+  {
+    return HasComposition() ? static_cast<uint32>(_compositionRange->EndOffset()) : 0;
+  }
+
+  bool Editor::HasLostComposition() const noexcept
+  {
+    return _compositionRange && !HasComposition();
   }
 
   bool Editor::InsertTextForConfirmedComposition(utf8_stringview text) noexcept
@@ -1528,13 +1550,16 @@ namespace krys::boo
 
   void Editor::ConfirmComposition() noexcept
   {
-    if (!_compositionNode)
+    auto *node = CompositionNode();
+    if (!node)
     {
+      // A lost composition has no text to confirm.
+      CancelComposition();
       return;
     }
     // A copy: confirming replaces the composition's text in its node.
-    auto text = utf8_string(utf8_stringview(_compositionNode->Data())
-                              .substr(_compositionStart, _compositionEnd - _compositionStart));
+    auto start = CompositionStart();
+    auto text = utf8_string(utf8_stringview(node->Data()).substr(start, CompositionEnd() - start));
     SetComposition(text, SetCompositionMode::ConfirmComposition);
   }
 
@@ -1568,7 +1593,7 @@ namespace krys::boo
 
   void Editor::CancelComposition() noexcept
   {
-    if (!_compositionNode)
+    if (!_compositionRange)
     {
       return;
     }
@@ -1635,24 +1660,30 @@ namespace krys::boo
       SelectComposition();
     }
 
-    _compositionNode = nullptr;
+    _compositionRange = nullptr;
     _customCompositionUnderlines.clear();
 
+    // Without a selection there's nowhere for the text to go, but a cancelled composition still ends.
     if (document->Selection().IsNone())
     {
-      return;
+      if (mode != SetCompositionMode::CancelComposition)
+      {
+        return;
+      }
     }
-
-    // Always delete the current composition before inserting the finalized composition text if we're
-    // confirming our composition. Our default behavior (if the beforeinput event is not prevented) is to
-    // insert the finalized composition text back in. We pass TypingCommand::TextCompositionType::Pending here
-    // to indicate that we are deleting the pending composition.
-    if (mode != SetCompositionMode::CancelComposition)
+    else
     {
-      TypingCommand::DeleteSelection(*document, {}, TypingCommand::TextCompositionType::Pending);
-    }
+      // Always delete the current composition before inserting the finalized composition text if we're
+      // confirming our composition. Our default behavior (if the beforeinput event is not prevented) is to
+      // insert the finalized composition text back in. We pass TypingCommand::TextCompositionType::Pending
+      // here to indicate that we are deleting the pending composition.
+      if (mode != SetCompositionMode::CancelComposition)
+      {
+        TypingCommand::DeleteSelection(*document, {}, TypingCommand::TextCompositionType::Pending);
+      }
 
-    (void)InsertTextForConfirmedComposition(text);
+      (void)InsertTextForConfirmedComposition(text);
+    }
 
     if (RefPtr<dom::Element> target = ShareRefPtr(document->FocusedElement()))
     {
@@ -1677,6 +1708,12 @@ namespace krys::boo
   void Editor::SetComposition(utf8_stringview text, const List<CompositionUnderline> &underlines,
                               uint32 selectionStart, uint32 selectionEnd) noexcept
   {
+    // The page's edits took the composition's text away: that one ends, and this starts another.
+    if (HasLostComposition())
+    {
+      CancelComposition();
+    }
+
     Ref<dom::Document> document = ShareRef(_document);
     SetCompositionScope setCompositionScope(*document);
 
@@ -1718,16 +1755,16 @@ namespace krys::boo
       // 1. Starting a new composition.
       //    Send a compositionstart and a compositionupdate event when this function creates
       //    a new composition node, i.e.
-      //    _compositionNode == 0 && !text.empty().
+      //    !HasComposition() && !text.empty().
       //    Sending a compositionupdate event at this time ensures that at least one
       //    compositionupdate event is dispatched.
       // 2. Updating the existing composition node.
       //    Send a compositionupdate event when this function updates the existing composition
-      //    node, i.e. _compositionNode != 0 && !text.empty().
+      //    node, i.e. HasComposition() && !text.empty().
       // 3. Canceling the ongoing composition.
       //    Send a compositionend event when function deletes the existing composition node, i.e.
-      //    _compositionNode != 0 && text.empty().
-      if (!_compositionNode)
+      //    HasComposition() && text.empty().
+      if (!HasComposition())
       {
         // We should send a compositionstart event only when the given text is not empty because this
         // function doesn't create a composition node when the text is empty.
@@ -1763,7 +1800,7 @@ namespace krys::boo
       }
     }
 
-    _compositionNode = nullptr;
+    _compositionRange = nullptr;
     _customCompositionUnderlines.clear();
 
     if (!text.empty())
@@ -1784,15 +1821,10 @@ namespace krys::boo
       if (auto *baseTextNode = DynamicDowncast<dom::Text>(baseNode.get());
           baseTextNode && baseNode == extentNode && baseOffset + text.size() == extentOffset)
       {
-        _compositionNode = ShareRefPtr(baseTextNode);
-        _compositionStart = baseOffset;
-        _compositionEnd = extentOffset;
+        _compositionRange =
+          CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<dom::Node>(*baseTextNode), baseOffset},
+                                dom::BoundaryPoint {ShareRef<dom::Node>(*baseTextNode), extentOffset});
         _customCompositionUnderlines = underlines;
-        for (auto &underline : _customCompositionUnderlines)
-        {
-          underline.StartOffset += baseOffset;
-          underline.EndOffset += baseOffset;
-        }
 
         if (auto *renderer = baseTextNode->Renderer())
         {
@@ -1825,50 +1857,44 @@ namespace krys::boo
 
   Maybe<dom::SimpleRange> Editor::CompositionRange() const noexcept
   {
-    if (!_compositionNode)
+    if (!HasComposition())
     {
       return {};
     }
-    auto length = static_cast<uint32>(_compositionNode->Length());
-    auto start = std::min(_compositionStart, length);
-    auto end = std::clamp(_compositionEnd, start, length);
-    if (start >= end)
-    {
-      return {};
-    }
-    return dom::SimpleRange {{ShareRef<dom::Node>(*_compositionNode), start},
-                             {ShareRef<dom::Node>(*_compositionNode), end}};
+    return dom::MakeSimpleRange(*_compositionRange);
   }
 
   bool Editor::GetCompositionSelection(uint32 &selectionStart, uint32 &selectionEnd) const noexcept
   {
-    if (!_compositionNode)
+    auto *node = CompositionNode();
+    if (!node)
     {
       return false;
     }
     const auto &selection = _document.Selection().Selection();
     auto start = selection.Start();
-    if (start.DeprecatedNode() != _compositionNode.get())
+    if (start.DeprecatedNode() != node)
     {
       return false;
     }
     auto end = selection.End();
-    if (end.DeprecatedNode() != _compositionNode.get())
+    if (end.DeprecatedNode() != node)
     {
       return false;
     }
 
-    if (static_cast<uint32>(start.DeprecatedEditingOffset()) < _compositionStart)
+    auto compositionStart = CompositionStart();
+    if (static_cast<uint32>(start.DeprecatedEditingOffset()) < compositionStart)
     {
       return false;
     }
-    if (static_cast<uint32>(end.DeprecatedEditingOffset()) > _compositionEnd)
+    if (static_cast<uint32>(end.DeprecatedEditingOffset()) > CompositionEnd())
     {
       return false;
     }
 
-    selectionStart = static_cast<uint32>(start.DeprecatedEditingOffset()) - _compositionStart;
-    selectionEnd = static_cast<uint32>(end.DeprecatedEditingOffset()) - _compositionStart;
+    selectionStart = static_cast<uint32>(start.DeprecatedEditingOffset()) - compositionStart;
+    selectionEnd = static_cast<uint32>(end.DeprecatedEditingOffset()) - compositionStart;
     return true;
   }
 

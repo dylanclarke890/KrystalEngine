@@ -4,7 +4,9 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Editor/PageTextInput.hpp"
@@ -55,7 +57,8 @@ namespace krys::ui::tests
     view.LoadHTML(
       u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } input { position: absolute;"
       u8" left: 10px; width: 200px; font: inherit }</style><input id=field style='top: 20px'>"
-      u8"<input id=password type=password style='top: 60px'><div id=plain tabindex=0>x</div>");
+      u8"<input id=password type=password style='top: 60px'><div id=plain tabindex=0>x</div>"
+      u8"<div id=editable contenteditable style='position: absolute; top: 100px; width: 200px'></div>");
     WaitForLoad(view);
     view.UpdateRendering();
 
@@ -180,6 +183,48 @@ namespace krys::ui::tests
       CHECK(value() == "abcdef");
       CHECK(discarded == 3);
       CHECK_FALSE(view.AcceptsTextInput());
+    }
+
+    SECTION("The selection going ends the composition")
+    {
+      view.SetComposition(u8"ab", {}, 2);
+      log->Events.clear();
+      view.Document().Selection().Clear();
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(value() == "ab");
+      CHECK(log->Events == List<std::string> {"compositionend "});
+      CHECK(discarded == 1);
+    }
+
+    SECTION("The page's edits move and end the composition")
+    {
+      auto &editable = Downcast<boo::html::HTMLElement>(*view.Document().GetElementById(u8"editable"));
+      editable.Focus();
+      view.SetComposition(u8"ab", {}, 2);
+      auto *text = DynamicDowncast<boo::dom::Text>(editable.FirstChild());
+      REQUIRE(text);
+      REQUIRE(editor.CompositionNode() == text);
+
+      // Text after it leaves it be.
+      (void)text->AppendData(u8"z");
+      CHECK(editor.HasComposition());
+      CHECK(editor.CompositionStart() == 0);
+      CHECK(editor.CompositionEnd() == 2);
+
+      // Taking its text away loses it, though the selection moves without a notification; the input
+      // method's next update ends it and starts another.
+      log->Events.clear();
+      (void)text->Remove();
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(editor.HasLostComposition());
+      CHECK_FALSE(editor.CompositionRange());
+      view.SetComposition(u8"cd", {}, 2);
+      CHECK(editor.HasComposition());
+      CHECK(Narrow(editable.TextContent().value_or(u8"")) == "cd");
+      CHECK(log->Events.front() == "keydown 229");
+      CHECK(log->Events[1] == "compositionend ");
+      CHECK(log->Events[2] == "compositionstart ");
+      CHECK(discarded == 0);
     }
   }
 

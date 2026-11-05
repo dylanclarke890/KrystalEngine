@@ -610,9 +610,13 @@ namespace krys::boo
 
   void TextBoxPainter::PaintCompositionUnderlines() noexcept
   {
-    const auto &underlines = _renderer.GetDocument().GetEditor().CustomCompositionUnderlines();
-    for (const auto &underline : underlines)
+    const auto &editor = _renderer.GetDocument().GetEditor();
+    auto compositionStart = editor.CompositionStart();
+    for (auto underline : editor.CustomCompositionUnderlines())
     {
+      // Offsets in the text node, as the text box's are.
+      underline.StartOffset += compositionStart;
+      underline.EndOffset += compositionStart;
       if (underline.EndOffset <= TextBox().Start())
       {
         // Underline is completely before this run. This might be an underline that sits

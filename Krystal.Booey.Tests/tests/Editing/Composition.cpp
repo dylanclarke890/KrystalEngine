@@ -108,10 +108,10 @@ namespace krys::boo::tests
       CHECK(editor.CompositionNode() == &fixture.TextIn(u8"e"));
       CHECK(editor.CompositionStart() == 2);
       CHECK(editor.CompositionEnd() == 5);
-      // The underlines are moved to the composition's place in its text node.
+      // The underlines stay in the composition's text, as its place in the text node can move.
       REQUIRE(editor.CustomCompositionUnderlines().size() == 1);
-      CHECK(editor.CustomCompositionUnderlines()[0].StartOffset == 2);
-      CHECK(editor.CustomCompositionUnderlines()[0].EndOffset == 5);
+      CHECK(editor.CustomCompositionUnderlines()[0].StartOffset == 0);
+      CHECK(editor.CustomCompositionUnderlines()[0].EndOffset == 3);
       CHECK(fixture.Selection().Selection().IsCaret());
       CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 5);
       CHECK(fixture.Client->CompositionUpdates == 1);
@@ -244,7 +244,7 @@ namespace krys::boo::tests
     CHECK(Narrow(fixture.InnerHTML(root)) == "ab kanji");
     CHECK(editor.CompositionStart() == 3);
     CHECK(editor.CompositionEnd() == 8);
-    CHECK(editor.CustomCompositionUnderlines()[0].StartOffset == 3);
+    CHECK(editor.CustomCompositionUnderlines()[0].StartOffset == 0);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: composing text in a text field",

@@ -216,14 +216,12 @@ namespace krys::ui
     }
 
     // Abandon the current inline input session if selection changed for any other reason but an input method
-    // direct action.
-    // FIXME: Many changes that affect composition node do not go through RespondToChangedSelection(). We need
-    // to do something when DOM manipulation affects the composition, because otherwise input method's idea
-    // about it will be different from Editor's.
-    // FIXME: We can't cancel composition when selection changes to NoSelection, but we probably should.
+    // direct action, including to no selection, or if the page's edits took the composition's text away (the
+    // editor's composition is a live range, so it follows them; one that loses its text otherwise ends at the
+    // input method's next update).
     auto &document = *frame->Document();
     auto &editor = document.GetEditor();
-    if (editor.HasComposition() && !editor.IgnoreSelectionChanges() && !document.Selection().IsNone())
+    if ((editor.HasComposition() || editor.HasLostComposition()) && !editor.IgnoreSelectionChanges())
     {
       editor.CancelComposition();
       DiscardedComposition(document);
