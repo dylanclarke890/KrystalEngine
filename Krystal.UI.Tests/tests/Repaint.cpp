@@ -319,6 +319,34 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
+  TEST_CASE("View: composited scrollers at fractional positions paint as the whole page does", "[UI][GPU]")
+  {
+    // The scroller's layers sit at whole pixels, its contents 0.4 pixels into them, scrolled or not.
+    RepaintFixture fixture(120u, 100u);
+    View view({120, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; background: white }"
+      u8"#scroller { position: absolute; left: 10.4px; top: 10.4px; width: 80px; height: 60px; "
+      u8"overflow: auto; scrollbar-width: none; border-radius: 8px; background: #f7f8fb }"
+      u8".row { height: 15.3px; border-bottom: 1px solid #222; background: #06d6a0 }</style>"
+      u8"<div id=scroller><div class=row></div><div class=row></div><div class=row></div>"
+      u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div></div>");
+    WaitForLoad(view);
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    time += 16ms;
+    (void)view.Update(time);
+    auto scroller = view.Document().GetElementById(u8"scroller");
+    REQUIRE(scroller->Renderer()->IsComposited());
+    CheckNoStalePixels(fixture, view, "fractional-scroller");
+
+    // Scrolled so no row's border crosses a rounded corner, whose edge pixels can differ slightly (see
+    // KNOWN-ISSUES.md).
+    scroller->SetScrollTop(34);
+    time += 16ms;
+    (void)view.Update(time);
+    CheckNoStalePixels(fixture, view, "fractional-scroller-scrolled");
+  }
+
   TEST_CASE("View: changes beside filters leave no stale pixels", "[UI][GPU]")
   {
     const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-beside-filters-test";

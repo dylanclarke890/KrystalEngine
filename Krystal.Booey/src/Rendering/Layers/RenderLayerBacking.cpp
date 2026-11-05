@@ -1522,6 +1522,11 @@ namespace krys::boo
             BorderShape::ShapeForBorderRect(Renderer().Style(), _owningLayer.RendererBorderBoxRect());
           auto contentsClippingRect = borderShape.DeprecatedPixelSnappedInnerRoundedRect(deviceScaleFactor);
           contentsClippingRect.Move(-clipLayer->OffsetFromRenderer());
+          // The layer's origin is a whole pixel but its offset from the renderer can be fractional, so snap
+          // the rect again in the layer, where the whole repaint snaps it, or its far edges sit a fraction
+          // short.
+          contentsClippingRect.SetRect(
+            SnapRectToDevicePixelsIfNeeded(contentsClippingRect.Rect(), Renderer()));
           return contentsClippingRect;
         }
 

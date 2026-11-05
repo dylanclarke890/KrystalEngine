@@ -196,7 +196,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- Composited scrollers at fractional positions place their scrolled contents without pixel snapping (FIXME in `RenderLayerBacking.cpp`), so contents can sit a pixel off the whole repaint; it shows in the editor's second list card.
 - `TextureMapperAnimation.cpp` carries two inherited FIXMEs about suspicious handling: `_totalRunningTime` is cleared where it seems it should not be, and `Pause` takes a time offset where it is passed a time.
 
 ### Missing
