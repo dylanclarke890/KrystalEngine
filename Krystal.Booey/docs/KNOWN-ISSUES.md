@@ -119,8 +119,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - `Scope` iterates every element when viewport units change instead of a saved element list (FIXME in `Style/Scope/Scope.cpp`).
-- `scrollContainerSizeForPositionOptions` in `TreeResolver.cpp` tests `IsScrollContainerY` twice (FIXME: the second is likely the x axis).
-- `AnchorScrollAdjuster`'s constructor (`AnchorPositionEvaluator.cpp`) reads `align-self` in both writing modes for the vertical axis' `anchor-center` (FIXME: the vertical writing mode likely means `justify-self`).
 - `Style::Scope::UpdateActiveStyleSheets` doesn't wait for a living render tree or defer the update while style is being resolved (FIXME in `Scope.cpp`).
 - `TreeResolver` has a FIXME that its animation handling is wrong when transitions and animations both run on one element.
 

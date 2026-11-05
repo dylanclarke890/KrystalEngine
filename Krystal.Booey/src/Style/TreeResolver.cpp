@@ -1971,8 +1971,7 @@ namespace krys::boo::style
     {
       return null;
     }
-    // FIXME: The second test is likely meant to be IsScrollContainerX.
-    bool isOverflowScroller = containingBlock.IsScrollContainerY() || containingBlock.IsScrollContainerY();
+    bool isOverflowScroller = containingBlock.IsScrollContainerX() || containingBlock.IsScrollContainerY();
     if (!containingBlock.IsRenderView() && !isOverflowScroller)
     {
       return null;
