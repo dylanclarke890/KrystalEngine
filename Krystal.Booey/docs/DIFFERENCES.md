@@ -260,6 +260,10 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - A pointer lock request needs the window's transient activation, so it may come from a timer up to five seconds after a press or key.
 - Event timestamps aren't coarsened, where High Resolution Time coarsens them (Chrome to 100 µs): without script there are no timing attacks to guard against.
 
+### From Chrome
+
+- After a scroll, the hovered element follows the content under a still mouse when a fake mouse move fires, 100 ms later (250 ms once handling a mouse move has taken over 10 ms), as in WebKit; Chrome updates hover in the next frames. Fake moves carry the modifier keys of the latest mouse or keyboard event and are skipped while the page is hidden, but a page whose view isn't focused still gets them, as it does real mouse moves.
+
 ## Loading, navigation and history
 
 ### From the specs

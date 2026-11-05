@@ -807,6 +807,7 @@ namespace krys::boo
                                                                const PlatformMouseEvent &mouseEvent) noexcept
   {
     _lastPlatformMouseEvent = mouseEvent;
+    _lastKnownModifiers = mouseEvent.Modifiers();
     Ref frame = ShareRef(_frame);
     krys_assert(frame->Document());
     return frame->Document()->PrepareMouseEvent(
@@ -1065,6 +1066,9 @@ namespace krys::boo
   bool EventHandler::InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept
   {
     using Type = PlatformEvent::Type;
+
+    // A modifier key's own event says whether it's now held.
+    _lastKnownModifiers = initialKeyEvent.Modifiers();
 
     if (initialKeyEvent.GetType() == Type::KeyDown && initialKeyEvent.Key() == u8"Escape")
     {
@@ -1587,12 +1591,17 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Not while the page is hidden or its focus controller inactive, once there are those; the current
-    // state of the modifier keys rather than the last mouse event's, once the host reports it.
-    PlatformMouseEvent fakeMouseMoveEvent(
-      *_lastKnownMousePosition, _lastKnownMouseGlobalPosition.value_or(*_lastKnownMousePosition),
-      MouseButton::None, PlatformEvent::Type::MouseMoved, 0, _lastPlatformMouseEvent.Modifiers(),
-      html::EventLoop::Current().Now());
+    // Nothing is shown under the mouse in a hidden page. (Unlike WebKit, a page whose view isn't focused
+    // still gets them, as it does real mouse moves.)
+    if (auto *page = frame->GetPage(); page && !page->IsVisible())
+    {
+      return;
+    }
+
+    PlatformMouseEvent fakeMouseMoveEvent(*_lastKnownMousePosition,
+                                          _lastKnownMouseGlobalPosition.value_or(*_lastKnownMousePosition),
+                                          MouseButton::None, PlatformEvent::Type::MouseMoved, 0,
+                                          _lastKnownModifiers, html::EventLoop::Current().Now());
     (void)MouseMoved(fakeMouseMoveEvent);
   }
 

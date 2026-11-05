@@ -229,6 +229,9 @@ namespace krys::boo
     bool _hasScheduledCursorUpdate {false};
     bool _isHandlingWheelEvent {false};
     PlatformMouseEvent _lastPlatformMouseEvent;
+    /// @brief The modifier keys of the latest mouse or keyboard event: the keys held as far as the page
+    /// knows.
+    EnumSet<PlatformEventModifier> _lastKnownModifiers;
 
     // The element each touch began on, by its id plus one (so no key is 0).
     HashMap<uint32, RefPtr<dom::EventTarget>> _originatingTouchPointTargets;

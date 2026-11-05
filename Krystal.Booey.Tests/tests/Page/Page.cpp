@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -22,6 +23,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -317,6 +319,24 @@ namespace krys::boo::tests
     fixture.Frame(250ms);
     CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"target"));
     CHECK(fixture.ById(u8"target").Hovered());
+
+    // The fake move has the modifier keys of the latest event, a key press here.
+    Maybe<bool> shiftKey;
+    auto listener = fixture.ById(u8"top").AddEventListener(
+      u8"mousemove", [&](dom::Event &event) { shiftKey = Downcast<dom::MouseEvent>(event).ShiftKey(); });
+    (void)fixture.Handler().KeyEvent(
+      PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", u8"", 16,
+                            false, false, false, {PlatformEvent::Modifier::ShiftKey}, MonotonicTime::Now()));
+    fixture.View().SetScrollPosition({0, 0});
+    fixture.Frame(250ms);
+    CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"top"));
+    CHECK(shiftKey == true);
+
+    // A hidden page gets no fake moves.
+    fixture.TestPage->SetIsVisible(false);
+    fixture.View().SetScrollPosition({0, 300});
+    fixture.Frame(250ms);
+    CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"top"));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Page: page scale", "[Page]")
