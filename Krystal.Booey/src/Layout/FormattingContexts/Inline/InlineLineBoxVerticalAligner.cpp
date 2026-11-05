@@ -210,7 +210,7 @@ namespace krys::boo::layout
         // bounds bottom.
         return (inlineLevelBox.Ascent() + inlineLevelBox.LayoutBounds().Descent) - parentInlineBox.Descent();
       },
-      [&](const css::keywords::WebkitBaselineMiddle &) -> InlineLayoutUnit { return height / 2; },
+      [&](const css::keywords::InternalBaselineMiddle &) -> InlineLayoutUnit { return height / 2; },
       [&](const InlineLayoutUnit &baselineOffset) -> InlineLayoutUnit { return baselineOffset + ascent; });
   }
 

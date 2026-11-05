@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/MathML/MathMLOperatorElement.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLOperatorElement.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 #include <cmath>

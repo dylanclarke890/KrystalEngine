@@ -5,11 +5,11 @@
 #include "Krystal.Booey/DOM/DataTransfer/DataTransferItemList.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/Platform/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/PasteboardCustomData.hpp"
-#include "Krystal.Booey/Platform/SelectionData.hpp"
-#include "Krystal.Booey/Platform/StaticPasteboard.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
 
 namespace krys::boo::tests
 {

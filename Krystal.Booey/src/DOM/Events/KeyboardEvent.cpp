@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 
 namespace krys::boo::dom

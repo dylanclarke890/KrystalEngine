@@ -69,19 +69,6 @@ namespace krys::boo::css
     return SetPropertyInternal(PropertyId::FontWeight, value, IsImportant(false));
   }
 
-  // @font-face 'font-stretch'
-  CSSOMString CSSFontFaceDescriptors::FontStretch() const noexcept
-  {
-    return GetPropertyValueInternal(
-      PropertyId::FontWidth); // NOTE: 'font-stretch' is an alias for 'font-width'.
-  }
-
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontStretch(const CSSOMString &value) noexcept
-  {
-    return SetPropertyInternal(PropertyId::FontWidth, value,
-                               IsImportant(false)); // NOTE: 'font-stretch' is an alias for 'font-width'.
-  }
-
   // @font-face 'font-width'
   CSSOMString CSSFontFaceDescriptors::FontWidth() const noexcept
   {

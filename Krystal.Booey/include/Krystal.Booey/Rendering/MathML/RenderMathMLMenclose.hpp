@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/MathML/MathMLMencloseElement.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLMencloseElement.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLRow.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

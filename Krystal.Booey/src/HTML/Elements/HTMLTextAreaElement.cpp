@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
@@ -12,7 +12,7 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/Rendering/RenderTextControlMultiLine.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderTextControlMultiLine.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
@@ -431,16 +431,6 @@ namespace krys::boo::html
 
     // FIXME: Telling accessibility the value changed, and the chrome client's
     // didProgrammaticallyClearTextFormControl, with accessibility and the host's autofill.
-  }
-
-  FormControlState HTMLTextAreaElement::SaveFormControlState() const noexcept
-  {
-    return _isDirty ? FormControlState {Value()} : FormControlState {};
-  }
-
-  void HTMLTextAreaElement::RestoreFormControlState(const FormControlState &state) noexcept
-  {
-    (void)SetValue(state[0]);
   }
 
   // https://html.spec.whatwg.org/#dom-textarea-defaultvalue

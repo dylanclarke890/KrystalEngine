@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/InputType.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -35,9 +34,10 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include <array>
@@ -188,28 +188,6 @@ namespace krys::boo::html
     krys_debug_assert(CanSetStringValue());
     return !TypeMismatchFor(value) && !StepMismatch(value) && !RangeUnderflow(value) && !RangeOverflow(value)
            && !PatternMismatch(value) && !ValueMissing(value);
-  }
-
-  bool InputType::ShouldSaveAndRestoreFormControlState() const noexcept
-  {
-    return true;
-  }
-
-  FormControlState InputType::SaveFormControlState() const noexcept
-  {
-    krys_debug_assert(Element());
-    auto currentValue = Element()->Value();
-    if (currentValue == Element()->GetAttribute(u8"value").value_or(dom::DOMString()))
-    {
-      return {};
-    }
-    return {krys::move(currentValue)};
-  }
-
-  void InputType::RestoreFormControlState(const FormControlState &state) noexcept
-  {
-    krys_debug_assert(Element());
-    (void)Element()->SetValue(state[0]);
   }
 
   bool InputType::IsFormDataAppendable() const noexcept

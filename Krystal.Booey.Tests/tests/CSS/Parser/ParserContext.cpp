@@ -20,7 +20,6 @@ namespace krys::boo::css::tests
       CHECK_FALSE(context.EnclosingRuleType);
       CHECK_FALSE(context.IsHTMLDocument);
       CHECK_FALSE(context.HasDocumentSecurityOrigin);
-      CHECK(context.LoadedFromOpaqueSource == LoadedFromOpaqueSource::No);
       CHECK_FALSE(context.springTimingFunctionEnabled);
       CHECK_FALSE(context.thumbAndTrackPseudoElementsEnabled);
       CHECK(context.PropertySettings == PropertySettings {});
@@ -96,14 +95,6 @@ namespace krys::boo::css::tests
       b.springTimingFunctionEnabled = true;
       CHECK(a != b);
       CHECK(a.Hash() != b.Hash());
-    }
-
-    SECTION("Property settings")
-    {
-      b.PropertySettings.colorFilterEnabled = true;
-      CHECK(a != b);
-      CHECK(a.Hash() != b.Hash());
-      CHECK(a.PropertySettings.Hash() != b.PropertySettings.Hash());
     }
 
     SECTION("Enclosing rule type is compared but not hashed")

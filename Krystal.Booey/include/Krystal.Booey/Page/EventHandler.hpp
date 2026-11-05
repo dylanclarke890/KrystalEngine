@@ -1,24 +1,24 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Editing/TextGranularity.hpp"
-#include "Krystal.Booey/Graphics/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/LayoutSize.hpp"
-#include "Krystal.Booey/Page/DragActions.hpp"
+#include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
-#include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -89,8 +89,8 @@ namespace krys::boo
   /// (`dragstart`, then `drag` as it moves and `dragend` when it ends, at the source), and a drag over the
   /// page gets `dragenter`, `dragover`, `dragleave` and `drop` at its targets.
   // FIXME: The rest of the event handler: the keyboard's other default actions (selection by the keyboard is
-  // with the keyboard and the DOM's Selection), context menus, resizers, subframes, pan scrolling, pointer
-  // lock and touch events.
+  // with the keyboard and the DOM's Selection), context menus, resizers, pan scrolling, pointer lock and
+  // touch events.
 
   // Pointer events from the mouse are dispatched by the elements as they get mouse events
   // (`Element::DispatchMouseEvent`).
@@ -315,7 +315,6 @@ namespace krys::boo
                            MayExtendDragSession mayExtendDragSession = MayExtendDragSession::No) noexcept;
 
     /// @brief Whether a drag of an image may be dropped in the frame as a file.
-    // FIXME: The origin the image's data is restricted to, once there are security origins.
     KRYS_NODISCARD bool CanDropCurrentlyDraggedImageAsFile() const noexcept;
 
     /// @brief Extends the selection to the last known mouse position, as dragging (and autoscrolling) does.
@@ -402,8 +401,8 @@ namespace krys::boo
     /// @brief Handles a turn of the mouse wheel: `wheel` at the element under the mouse, then, unless it's
     /// cancelled, a scroll of the nearest box that can scroll that way, or else the view.
     /// @return Whether the event was cancelled or scrolled something.
-    // FIXME: Latching, the delta filter, scroll snapping, gesture states and asynchronous scrolling come with
-    // touchpad gestures, scroll snapping and a scrolling thread.
+    // FIXME: Latching, the delta filter, scroll snapping and gesture states come with touchpad gestures and
+    // scroll snapping.
     bool HandleWheelEvent(const PlatformWheelEvent &event) noexcept;
     /// @brief The default action of a `wheel` event at @p startNode: scrolls the nearest enclosing box that
     /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops
@@ -447,7 +446,6 @@ namespace krys::boo
     bool LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
                                dom::Node *startingNode = nullptr) noexcept;
     /// @brief As `ScrollOverflow`, or else scrolls the view.
-    // FIXME: Then the parent frame, once there are subframes.
     bool ScrollRecursively(ScrollDirection direction, ScrollGranularity granularity,
                            dom::Node *startingNode = nullptr) noexcept;
     bool LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,

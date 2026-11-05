@@ -151,16 +151,6 @@ namespace krys::boo::css
     constexpr static auto OperationType = boo::FilterOperation::Type::Sepia;
   };
 
-  // Non-standard addition.
-  template <>
-  struct CSSFilterFunctionDescriptor<ValueId::AppleInvertLightness>
-  {
-    constexpr static bool IsPixelFilterFunction = false;
-    constexpr static bool IsColorFilterFunction = true;
-
-    constexpr static auto OperationType = boo::FilterOperation::Type::AppleInvertLightness;
-  };
-
   template <auto FilterFunction>
   KRYS_NODISCARD constexpr bool IsPixelFilterFunction() noexcept
   {

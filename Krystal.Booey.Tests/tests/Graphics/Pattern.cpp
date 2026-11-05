@@ -2,8 +2,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/SourceBrush.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 

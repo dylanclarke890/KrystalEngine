@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/PositionIterator.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Booey/Editing/InlineRunAndOffset.hpp"
+#include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 
 namespace krys::boo::dom::tests
@@ -190,7 +190,7 @@ namespace krys::boo::dom::tests
 
     SECTION("user-select: none")
     {
-      PositionFixture fixture(u8"<p id=p style=-webkit-user-select:none>abc</p>");
+      PositionFixture fixture(u8"<p id=p style=user-select:none>abc</p>");
       CHECK(Position::NodeIsUserSelectNone(&fixture.TextIn(u8"p")));
       CHECK(!At(fixture.TextIn(u8"p"), 1).IsCandidate());
     }

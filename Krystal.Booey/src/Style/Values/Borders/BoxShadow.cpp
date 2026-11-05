@@ -3,8 +3,8 @@
 
 #include "Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Borders/ShadowInterpolation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
@@ -26,7 +26,6 @@ namespace krys::boo::style
       .Blur = ConvertToCSS(value.Blur, style),
       .Spread = ConvertToCSS(value.Spread, style),
       .Inset = ConvertToCSS(value.Inset, style),
-      .IsWebkitBoxShadow = value.IsWebkitBoxShadow,
     };
   }
 
@@ -39,7 +38,6 @@ namespace krys::boo::style
       .Blur = value.Blur ? ConvertToStyle(*value.Blur, state) : 0_css_px,
       .Spread = value.Spread ? ConvertToStyle(*value.Spread, state) : 0_css_px,
       .Inset = ConvertToStyle(value.Inset, state),
-      .IsWebkitBoxShadow = value.IsWebkitBoxShadow,
     };
   }
 
@@ -113,8 +111,7 @@ namespace krys::boo::style
             .Location = krys::boo::style::Blend(a.Location, b.Location, context),
             .Blur = krys::boo::style::Blend(a.Blur, b.Blur, context),
             .Spread = krys::boo::style::Blend(a.Spread, b.Spread, context),
-            .Inset = BlendInset(a.Inset, b.Inset, context),
-            .IsWebkitBoxShadow = b.IsWebkitBoxShadow};
+            .Inset = BlendInset(a.Inset, b.Inset, context)};
   }
 
   struct MatchingBoxShadows
@@ -126,39 +123,15 @@ namespace krys::boo::style
                    .Location = {{0}, {0}},
                    .Blur = {0},
                    .Spread = {0},
-                   .Inset = null,
-                   .IsWebkitBoxShadow = false}};
+                   .Inset = null}};
       static NeverDestroyed<const BoxShadow> defaultInsetShadowData {
         BoxShadow {.Color = {boo::Color::transparentBlack},
                    .Location = {{0}, {0}},
                    .Blur = {0},
                    .Spread = {0},
-                   .Inset = css::keywords::Inset {},
-                   .IsWebkitBoxShadow = false}};
-      static NeverDestroyed<const BoxShadow> defaultWebKitBoxShadowData {
-        BoxShadow {.Color = {boo::Color::transparentBlack},
-                   .Location = {{0}, {0}},
-                   .Blur = {0},
-                   .Spread = {0},
-                   .Inset = null,
-                   .IsWebkitBoxShadow = true}};
-      static NeverDestroyed<const BoxShadow> defaultInsetWebKitBoxShadowData {
-        BoxShadow {.Color = {boo::Color::transparentBlack},
-                   .Location = {{0}, {0}},
-                   .Blur = {0},
-                   .Spread = {0},
-                   .Inset = css::keywords::Inset {},
-                   .IsWebkitBoxShadow = true}};
+                   .Inset = css::keywords::Inset {}}};
 
-      if (IsInset(shadowToMatch))
-      {
-        return shadowToMatch.IsWebkitBoxShadow ? defaultInsetWebKitBoxShadowData.get()
-                                               : defaultInsetShadowData.get();
-      }
-      else
-      {
-        return shadowToMatch.IsWebkitBoxShadow ? defaultWebKitBoxShadowData.get() : defaultShadowData.get();
-      }
+      return IsInset(shadowToMatch) ? defaultInsetShadowData.get() : defaultShadowData.get();
     }
   };
 

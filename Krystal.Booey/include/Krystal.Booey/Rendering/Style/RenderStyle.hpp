@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
-#include "Krystal.Booey/Rendering/PaintPhase.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 
@@ -175,7 +175,6 @@ namespace krys::boo
     KRYS_NODISCARD inline bool HasAnimations() const noexcept;
     KRYS_NODISCARD inline bool HasAnimationsOrTransitions() const noexcept;
     KRYS_NODISCARD inline bool HasAppearance() const noexcept;
-    KRYS_NODISCARD inline bool HasAppleColorFilter() const noexcept;
     KRYS_NODISCARD inline bool HasAspectRatio() const noexcept;
     KRYS_NODISCARD inline bool HasAutoLengthContainIntrinsicSize() const noexcept;
     KRYS_NODISCARD inline bool HasBackdropFilter() const noexcept;
@@ -238,9 +237,6 @@ namespace krys::boo
     KRYS_NODISCARD constexpr bool IsDisplayInlineType() const noexcept;
     KRYS_NODISCARD constexpr bool IsOriginalDisplayInlineType() const noexcept;
     KRYS_NODISCARD constexpr bool IsDisplayFlexibleOrGridFormattingContextBox() const noexcept;
-    KRYS_NODISCARD constexpr bool IsDisplayDeprecatedFlexibleBox() const noexcept;
-    KRYS_NODISCARD constexpr bool
-      IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const noexcept;
     KRYS_NODISCARD constexpr bool IsDisplayRegionType() const noexcept;
     KRYS_NODISCARD constexpr bool IsDisplayBlockLevel() const noexcept;
     KRYS_NODISCARD constexpr bool IsOriginalDisplayBlockType() const noexcept;
@@ -283,22 +279,14 @@ namespace krys::boo
 
     // Resolves the currentColor keyword, but must not be used for the "color" property which has a different
     // semantic.
-    KRYS_NODISCARD Color ColorResolvingCurrentColor(css::PropertyId colorProperty,
-                                                    bool visitedLink) const noexcept;
-    KRYS_NODISCARD Color ColorResolvingCurrentColor(const style::Color &,
-                                                    bool visitedLink = false) const noexcept;
-    KRYS_NODISCARD Color VisitedDependentColor(css::PropertyId, EnumSet<PaintBehavior> = {}) const noexcept;
-    KRYS_NODISCARD Color VisitedDependentColorWithColorFilter(css::PropertyId,
-                                                              EnumSet<PaintBehavior> = {}) const noexcept;
-    KRYS_NODISCARD Color ColorByApplyingColorFilter(const Color &) const noexcept;
-    KRYS_NODISCARD Color ColorWithColorFilter(const style::Color &) const noexcept;
+    KRYS_NODISCARD Color ColorResolvingCurrentColor(css::PropertyId colorProperty) const noexcept;
+    KRYS_NODISCARD Color ColorResolvingCurrentColor(const style::Color &) const noexcept;
 
   private:
     // This constructor is used to implement the replace operation.
     RenderStyle(RenderStyle &, RenderStyle &&) noexcept;
 
-    KRYS_NODISCARD const style::Color &UnresolvedColorForProperty(css::PropertyId,
-                                                                  bool visitedLink = false) const noexcept;
+    KRYS_NODISCARD const style::Color &UnresolvedColorForProperty(css::PropertyId) const noexcept;
     KRYS_NODISCARD css::PropertyId UsedStrokeColorProperty() const noexcept;
 
     KRYS_NODISCARD inline bool HasAutoLeftAndRight() const noexcept;
@@ -311,7 +299,6 @@ namespace krys::boo
     KRYS_NODISCARD constexpr static bool IsDisplayGridBox(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsDisplayGridLanesBox(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsDisplayFlexibleOrGridFormattingContextBox(DisplayType) noexcept;
-    KRYS_NODISCARD constexpr static bool IsDisplayDeprecatedFlexibleBox(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsDisplayListItemType(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsDisplayTableOrTablePart(DisplayType) noexcept;
     KRYS_NODISCARD constexpr static bool IsInternalTableBox(DisplayType) noexcept;

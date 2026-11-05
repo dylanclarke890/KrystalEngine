@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 
 namespace krys::boo::html::tests
 {

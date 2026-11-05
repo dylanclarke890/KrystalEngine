@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo

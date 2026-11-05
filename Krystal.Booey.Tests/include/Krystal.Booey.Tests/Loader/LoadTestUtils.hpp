@@ -23,37 +23,20 @@ namespace krys::boo::tests
     return std::string(reinterpret_cast<const char *>(text.data()), text.size());
   }
 
-  /// @brief Records what the loader tells the host, and allows every navigation.
+  /// @brief Records what the loader tells the host.
   class LoadRecordingClient final : public LocalFrameLoaderClient
   {
   public:
     List<std::string> &Events;
-    PolicyAction Policy {PolicyAction::Use};
-    /// @brief Whether pages may enter the back/forward cache.
-    bool CachePages {true};
 
     explicit LoadRecordingClient(List<std::string> &events) noexcept : Events(events)
     {
     }
 
-    KRYS_NODISCARD PolicyAction DispatchDecidePolicyForNavigationAction(
-      const NavigationAction &action, const ResourceRequest &, const FormSubmission *) noexcept override
+    void DispatchNavigationRequested(const NavigationAction &, const ResourceRequest &request,
+                                     const FormSubmission *) noexcept override
     {
-      Events.push_back(action.IsRequestFromClientOrUserInput() ? "policy (host)" : "policy");
-      return Policy;
-    }
-
-    KRYS_NODISCARD PolicyAction DispatchDecidePolicyForNewWindowAction(const NavigationAction &,
-                                                                       const ResourceRequest &,
-                                                                       const FormSubmission *,
-                                                                       dom::DOMStringView) noexcept override
-    {
-      return PolicyAction::Ignore;
-    }
-
-    KRYS_NODISCARD bool CanCachePage() const noexcept override
-    {
-      return CachePages;
+      Events.push_back("navigation to " + Narrow(request.URL().String()));
     }
 
     void DispatchDidStartProvisionalLoad() noexcept override
@@ -94,42 +77,12 @@ namespace krys::boo::tests
     }
   };
 
-  /// @brief Answers whether to leave a page, and records the alerts shown and print requests.
-  struct LeavingChromeClient final : ChromeClient
-  {
-    bool Leave {true};
-    uint32 ConfirmPanels {0};
-    List<std::string> Alerts;
-    uint32 PrintRequests {0};
-
-    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
-    {
-    }
-
-    KRYS_NODISCARD bool RunBeforeUnloadConfirmPanel(const dom::DOMString &, LocalFrame &) noexcept override
-    {
-      ++ConfirmPanels;
-      return Leave;
-    }
-
-    void RunJavaScriptAlert(LocalFrame &, const dom::DOMString &message) noexcept override
-    {
-      Alerts.push_back(Narrow(message));
-    }
-
-    void Print(LocalFrame &) noexcept override
-    {
-      ++PrintRequests;
-    }
-  };
-
   /// @brief A page whose main frame starts with its initial empty document, and whose loads come from a
   /// test strategy.
   struct LoadFixture : css::tests::ValueFixture, LoaderFixture
   {
     List<std::string> Events;
     LoadRecordingClient *Client {nullptr};
-    LeavingChromeClient *Chrome {nullptr};
     Ref<Page> TestPage {CreatePage()};
 
     LoadFixture() noexcept
@@ -143,9 +96,7 @@ namespace krys::boo::tests
     {
       auto client = CreateUnique<LoadRecordingClient>(Events);
       Client = client.get();
-      auto chrome = CreateUnique<LeavingChromeClient>();
-      Chrome = chrome.get();
-      return Page::Create(krys::move(chrome), nullptr, krys::move(client));
+      return Page::Create(CreateUnique<EmptyChromeClient>(), nullptr, krys::move(client));
     }
 
     KRYS_NODISCARD LocalFrame &Frame() const noexcept

@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLMenclose.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/LayoutRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 #include <numbers>
@@ -235,7 +235,7 @@ namespace krys::boo
 
     paintInfo.Context().SetStrokeThickness(thickness);
     paintInfo.Context().SetStrokeStyle(StrokeStyle::SolidStroke);
-    paintInfo.Context().SetStrokeColor(Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color));
+    paintInfo.Context().SetStrokeColor(Style().ColorResolvingCurrentColor(css::PropertyId::Color));
     paintInfo.Context().SetFillColor(Color::transparentBlack);
     paintInfo.ApplyTransform(AffineTransform().Translate(FloatPoint(paintOffset + Location())));
 

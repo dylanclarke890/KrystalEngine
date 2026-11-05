@@ -9,7 +9,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include <cassert>
+#include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo::dom
 {

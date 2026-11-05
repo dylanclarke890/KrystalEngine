@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
-#include "Krystal.Booey/Graphics/FontBaseline.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontBaseline.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"

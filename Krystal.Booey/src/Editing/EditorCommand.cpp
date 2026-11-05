@@ -2,16 +2,16 @@
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/TypingCommand.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Scrollbar.hpp"
+#include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include <algorithm>
 #include <array>
@@ -36,7 +36,6 @@ namespace krys::boo
     constexpr bool IsNotTextInsertion = false;
     constexpr bool IsTextInsertion = true;
 
-    // FIXME: The frame of the event's target (targetFrame), once there are subframes.
     KRYS_NODISCARD LocalFrame &TargetFrame(LocalFrame &frame, dom::Event *) noexcept
     {
       return frame;
@@ -568,28 +567,24 @@ namespace krys::boo
                                                              : Editor::FromMenuOrKeyBinding::No;
     }
 
-    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
     bool ExecuteCopy(LocalFrame &frame, dom::Event *, EditorCommandSource source, utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().Copy(FromMenuOrKeyBindingFor(source));
       return true;
     }
 
-    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
     bool ExecuteCut(LocalFrame &frame, dom::Event *, EditorCommandSource source, utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().Cut(FromMenuOrKeyBindingFor(source));
       return true;
     }
 
-    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
     bool ExecutePaste(LocalFrame &frame, dom::Event *, EditorCommandSource source, utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().Paste(FromMenuOrKeyBindingFor(source));
       return true;
     }
 
-    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
     bool ExecutePasteAndMatchStyle(LocalFrame &frame, dom::Event *, EditorCommandSource source,
                                    utf8_stringview) noexcept
     {
@@ -597,7 +592,6 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
     bool ExecutePasteAsPlainText(LocalFrame &frame, dom::Event *, EditorCommandSource source,
                                  utf8_stringview) noexcept
     {
@@ -764,13 +758,6 @@ namespace krys::boo
                                                             : dom::TextEventInputType::LineBreak);
     }
 
-    bool ExecuteInsertNewlineInQuotedContent(LocalFrame &frame, dom::Event *, EditorCommandSource,
-                                             utf8_stringview) noexcept
-    {
-      TypingCommand::InsertParagraphSeparatorInQuotedContent(*frame.Document());
-      return true;
-    }
-
     bool ExecuteInsertParagraph(LocalFrame &frame, dom::Event *, EditorCommandSource,
                                 utf8_stringview) noexcept
     {
@@ -849,8 +836,8 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Script access to the clipboard (javaScriptCanAccessClipboard, the clipboard access policy), with
-    // scripting; until then copying and cutting are allowed, as the default policy allows them.
+    // With no script access to the clipboard, copying and cutting are allowed, as the default policy allows
+    // them.
     KRYS_NODISCARD bool DefaultValueForSupportedCopyCut(LocalFrame &) noexcept
     {
       return true;
@@ -869,8 +856,8 @@ namespace krys::boo
       return client ? client->CanCopyCut(frame, defaultValue) : defaultValue;
     }
 
-    // FIXME: Script access to the clipboard (javaScriptCanAccessClipboard and domPasteAllowed), with
-    // scripting; until then pasting from the DOM is disallowed, as the default settings disallow it.
+    // With no script access to the clipboard, pasting from the DOM is disallowed, as the default settings
+    // disallow it.
     bool SupportedPaste(LocalFrame *frame) noexcept
     {
       if (!frame)
@@ -919,21 +906,18 @@ namespace krys::boo
       return CaretBrowsingEnabled(frame) || EnabledVisibleSelection(frame, event, source);
     }
 
-    // FIXME: Script access to the clipboard (allowCopyCutFromDOM), with scripting.
     bool EnabledCopy(LocalFrame &frame, dom::Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
       return editor.CanDHTMLCopy() || editor.CanCopy();
     }
 
-    // FIXME: Script access to the clipboard (allowCopyCutFromDOM), with scripting.
     bool EnabledCut(LocalFrame &frame, dom::Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
       return editor.CanDHTMLCut() || editor.CanCut();
     }
 
-    // FIXME: Script access to the clipboard (allowPasteFromDOM), with scripting.
     bool EnabledPaste(LocalFrame &frame, dom::Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
@@ -1056,9 +1040,6 @@ namespace krys::boo
         DoNotAllowExecutionWhenDisabled}},
       {u8"InsertNewline",
        {ExecuteInsertNewline, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsTextInsertion,
-        DoNotAllowExecutionWhenDisabled}},
-      {u8"InsertNewlineInQuotedContent",
-       {ExecuteInsertNewlineInQuotedContent, Supported, EnabledInRichlyEditableText, IsNotTextInsertion,
         DoNotAllowExecutionWhenDisabled}},
       {u8"InsertParagraph",
        {ExecuteInsertParagraph, Supported, EnabledInEditableText, IsNotTextInsertion,

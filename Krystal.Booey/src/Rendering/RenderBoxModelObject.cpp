@@ -2,17 +2,17 @@
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
-#include "Krystal.Booey/Rendering/BorderEdge.hpp"
-#include "Krystal.Booey/Rendering/ImageQualityController.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/Painting/BorderEdge.hpp"
+#include "Krystal.Booey/Rendering/Painting/ImageQualityController.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
-#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableRow.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
@@ -1036,9 +1036,8 @@ namespace krys::boo
 
   bool RenderBoxModelObject::RequiresLayer() const noexcept
   {
-    // FIXME: Reflections were dropped; view transition captures, once there are view transitions.
     return IsDocumentElementRenderer() || IsPositioned() || CreatesGroup() || HasTransformRelatedProperty()
-           || HasHiddenBackface() || RequiresRenderingConsolidationForViewTransition();
+           || HasHiddenBackface();
   }
 
   void RenderBoxModelObject::ApplyTransform(TransformationMatrix &, const RenderStyle &, const FloatRect &,

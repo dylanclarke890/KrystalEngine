@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 
 namespace krys::boo
 {

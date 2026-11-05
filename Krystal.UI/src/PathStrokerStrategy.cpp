@@ -1,5 +1,5 @@
 ﻿#include "Krystal.UI/PathStrokerStrategy.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.UI/Render2DConversions.hpp"
 #include <algorithm>
 #include <limits>

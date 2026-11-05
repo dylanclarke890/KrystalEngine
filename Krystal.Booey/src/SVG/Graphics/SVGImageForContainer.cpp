@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 
 namespace krys::boo::svg
 {

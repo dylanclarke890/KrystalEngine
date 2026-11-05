@@ -88,7 +88,7 @@ q::after {
 center {
     display: block;
     /* special centering to be able to emulate the html4/netscape behaviour */
-    text-align: -webkit-center;
+    text-align: -internal-center;
 }
 
 hr {
@@ -269,7 +269,7 @@ th {
 
 caption {
     display: table-caption;
-    text-align: -webkit-center;
+    text-align: -internal-center;
 }
 
 /* for table elements with form inside following rules should apply */
@@ -366,7 +366,6 @@ button {
 
 input, textarea, select, button {
     margin: 0__qem;
-    font: -webkit-small-control;
     color: initial;
     letter-spacing: normal;
     word-spacing: normal;
@@ -388,8 +387,8 @@ input {
     background-color: Canvas;
     border: 2px inset gray;
     padding: 1px;
-    -webkit-rtl-ordering: logical;
-    -webkit-user-select: text;
+    -internal-rtl-ordering: logical;
+    user-select: text;
     cursor: auto;
 }
 
@@ -507,7 +506,7 @@ input::-webkit-inner-spin-button {
      * button in layout(). */
     height: 1.5em;
     flex: none;
-    -webkit-user-select: none;
+    user-select: none;
 }
 
 textarea {
@@ -515,17 +514,17 @@ textarea {
     color: CanvasText;
     background-color: Canvas;
     border: 1px solid;
-    -webkit-rtl-ordering: logical;
-    -webkit-user-select: text;
+    -internal-rtl-ordering: logical;
+    user-select: text;
     padding: 2px;
     resize: -internal-textarea-auto;
     cursor: auto;
     white-space: pre-wrap;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 ::placeholder {
-    -webkit-text-security: none;
+    -internal-text-security: none;
     color: darkGray;
     direction: inherit !important;
     pointer-events: none !important;
@@ -536,7 +535,7 @@ textarea {
 
 input::placeholder {
     white-space: pre;
-    word-wrap: normal;
+    overflow-wrap: normal;
     overflow: hidden;
     line-height: initial !important;
 }
@@ -677,7 +676,7 @@ select {
     background-color: Canvas;
     align-items: center;
     white-space: pre;
-    -webkit-rtl-ordering: logical;
+    -internal-rtl-ordering: logical;
     cursor: default;
 }
 
@@ -856,7 +855,7 @@ ruby, rt {
 
 ruby > rt {
     display: ruby-text;
-    font-size: -webkit-ruby-text;
+    font-size: -internal-ruby-text;
     text-align: start;
     line-height: normal;
     text-emphasis: none;
@@ -913,16 +912,6 @@ bdo, bdo[dir] {
 
 slot {
     display: contents;
-}
-
-/* page */
-
-@page {
-    /* FIXME: Define the right default values for page properties. */
-    size: auto;
-    margin: auto;
-    padding: 0px;
-    border-width: 0px;
 }
 
 /* noscript support */

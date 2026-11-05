@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterResults.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterExpression.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 #include "Krystal.Core/Types/Func.hpp"

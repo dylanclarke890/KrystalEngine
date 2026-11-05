@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Math/MathDepth.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
 
 namespace krys::boo::style

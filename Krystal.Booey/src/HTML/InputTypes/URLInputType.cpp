@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/URLInputType.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 
 namespace krys::boo::html

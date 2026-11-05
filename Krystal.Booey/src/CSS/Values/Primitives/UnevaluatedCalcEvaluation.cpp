@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 
 namespace krys::boo::css
 {

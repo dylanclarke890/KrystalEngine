@@ -5,8 +5,8 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCycleSolver.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
 
 namespace krys::boo
 {

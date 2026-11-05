@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFamilyName.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -23,7 +23,7 @@ namespace krys::boo::style
     template <typename... F>
     decltype(auto) SwitchOn(F &&...f) const noexcept
     {
-      using namespace css::WebKitFontFamilyNames;
+      using namespace css::GenericFontFamilyNames;
 
       auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
 
@@ -43,10 +43,6 @@ namespace krys::boo::style
       if (Value == MathFamily())
       {
         return visitor(css::keywords::Math {});
-      }
-      if (Value == PictographFamily())
-      {
-        return visitor(css::keywords::WebkitPictograph {});
       }
       if (Value == SansSerifFamily())
       {

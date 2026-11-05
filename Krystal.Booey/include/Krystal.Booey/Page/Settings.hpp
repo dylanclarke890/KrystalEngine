@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
-#include "Krystal.Booey/Graphics/FontGenericFamilies.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -45,8 +45,6 @@ namespace krys::boo
 
     // Embedder features.
 
-    /// @brief `-apple-color-filter`.
-    bool ColorFilterEnabled {false};
     /// @brief The system `appearance` values (`default-button` and friends).
     bool UseSystemAppearance {false};
     /// @brief Moving a caret through content that isn't editable, with the keys that move one.
@@ -65,10 +63,6 @@ namespace krys::boo
     bool ShouldConvertPositionStyleOnCopy {false};
     /// @brief Whether text areas can be resized (`resize: -internal-textarea-auto` is `both`).
     bool TextAreasAreResizable {false};
-    /// @brief Whether text directives in a URL's fragment (`#:~:text=`) scroll to the text they indicate.
-    bool ScrollToTextFragmentEnabled {true};
-    /// @brief Whether the text a text directive indicates is highlighted (`::target-text`).
-    bool ScrollToTextFragmentMarkingEnabled {true};
     /// @brief Whether form controls show dates and numbers in their element's language (its `lang`), rather
     /// than the user interface's.
     bool LangAttributeAwareFormControlUIEnabled {false};

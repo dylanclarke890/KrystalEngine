@@ -17,23 +17,20 @@ namespace krys::boo::dom
     }
   }
 
-  TextEvent::TextEvent() noexcept
-      : UIEvent(DOMStringAtom(u8"")), _mailBlockquoteHandling(MailBlockquoteHandling::RespectBlockquote)
+  TextEvent::TextEvent() noexcept : UIEvent(DOMStringAtom(u8""))
   {
   }
 
   TextEvent::TextEvent(DOMStringView data, TextEventInputType inputType) noexcept
-      : UIEvent(DOMStringAtom(EventNames::TextInput), TextInputInit()), _inputType(inputType), _data(data),
-        _mailBlockquoteHandling(MailBlockquoteHandling::RespectBlockquote)
+      : UIEvent(DOMStringAtom(EventNames::TextInput), TextInputInit()), _inputType(inputType), _data(data)
   {
   }
 
   TextEvent::TextEvent(DOMStringView data, RefPtr<DocumentFragment> &&pastingFragment,
-                       TextEventInputType inputType, bool shouldSmartReplace, bool shouldMatchStyle,
-                       MailBlockquoteHandling mailBlockquoteHandling) noexcept
+                       TextEventInputType inputType, bool shouldSmartReplace, bool shouldMatchStyle) noexcept
       : UIEvent(DOMStringAtom(EventNames::TextInput), TextInputInit()), _inputType(inputType), _data(data),
         _pastingFragment(krys::move(pastingFragment)), _shouldSmartReplace(shouldSmartReplace),
-        _shouldMatchStyle(shouldMatchStyle), _mailBlockquoteHandling(mailBlockquoteHandling)
+        _shouldMatchStyle(shouldMatchStyle)
   {
   }
 
@@ -48,19 +45,17 @@ namespace krys::boo::dom
 
   Ref<TextEvent> TextEvent::CreateForPlainTextPaste(DOMStringView data, bool shouldSmartReplace) noexcept
   {
-    auto event = CreateRef<TextEvent>(data, nullptr, TextEventInputType::Paste, shouldSmartReplace, false,
-                                      MailBlockquoteHandling::RespectBlockquote);
+    auto event = CreateRef<TextEvent>(data, nullptr, TextEventInputType::Paste, shouldSmartReplace, false);
     event->_isTrusted = true;
     return event;
   }
 
   Ref<TextEvent> TextEvent::CreateForFragmentPaste(RefPtr<DocumentFragment> &&data,
                                                    TextEventInputType inputType, bool shouldSmartReplace,
-                                                   bool shouldMatchStyle,
-                                                   MailBlockquoteHandling mailBlockquoteHandling) noexcept
+                                                   bool shouldMatchStyle) noexcept
   {
     auto event = CreateRef<TextEvent>(DOMStringView(), krys::move(data), inputType, shouldSmartReplace,
-                                      shouldMatchStyle, mailBlockquoteHandling);
+                                      shouldMatchStyle);
     event->_isTrusted = true;
     return event;
   }
@@ -83,7 +78,6 @@ namespace krys::boo::dom
     _pastingFragment = nullptr;
     _shouldSmartReplace = false;
     _shouldMatchStyle = false;
-    _mailBlockquoteHandling = MailBlockquoteHandling::RespectBlockquote;
   }
 
   DocumentFragment *TextEvent::PastingFragment() const noexcept

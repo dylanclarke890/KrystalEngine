@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 
 namespace krys::boo

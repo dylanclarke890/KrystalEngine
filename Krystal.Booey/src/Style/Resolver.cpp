@@ -1,17 +1,16 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
-#include "Krystal.Booey/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
+#include "Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
-#include "Krystal.Booey/DOM/Internals/VisitedLinkState.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -20,22 +19,21 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
-#include "Krystal.Booey/Style/Builder.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/Builder.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
-#include "Krystal.Booey/Style/ElementRuleCollector.hpp"
-#include "Krystal.Booey/Style/FontSizeFunctions.hpp"
-#include "Krystal.Booey/Style/MatchResultCache.hpp"
-#include "Krystal.Booey/Style/PageRuleCollector.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
-#include "Krystal.Booey/Style/RuleSetBuilder.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/UserAgentStyle.hpp"
+#include "Krystal.Booey/Style/Rules/ElementRuleCollector.hpp"
+#include "Krystal.Booey/Style/Rules/MatchResultCache.hpp"
+#include "Krystal.Booey/Style/Rules/RuleSetBuilder.hpp"
+#include "Krystal.Booey/Style/Rules/UserAgentStyle.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Values/Animations/Animation.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp"
 #include "Krystal.Booey/Style/Values/Easing/EasingFunction.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -263,13 +261,9 @@ namespace krys::boo::style
       state.Style()->SetUseSVGZoomRulesForLength(true);
     }
 
-    auto linkState = Document().GetVisitedLinkState().DetermineLinkState(element);
-    if (linkState != InsideLink::NotInside)
+    if (css::IsLink(element))
     {
-      auto &style = *state.Style();
-      style.SetIsLink(true);
-      // FIXME: The inspector can force `:visited` (forcePseudoState); there's no inspector.
-      style.SetInsideLink(linkState);
+      state.Style()->SetIsLink(true);
     }
 
     return state;
@@ -465,15 +459,7 @@ namespace krys::boo::style
 
     auto compositeOperationForKeyframe = [](const css::KeyframeRule &keyframe) -> CompositeOperation
     {
-      if (auto compositeOperationCSSValue =
-            keyframe.Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
-      {
-        if (auto compositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
-        {
-          return *compositeOperation;
-        }
-      }
-      return Animation::InitialCompositeOperation();
+      return KeyframeRuleCompositeOperation(keyframe).value_or(Animation::InitialCompositeOperation());
     };
 
     auto timingFunctionForKeyframe = [&](const css::KeyframeRule &keyframe) -> RefPtr<const TimingFunction>
@@ -616,13 +602,9 @@ namespace krys::boo::style
         {
           blendingKeyframe.SetTimingFunction(CreateTimingFunctionDeprecated(*timingFunctionCSSValue));
         }
-        if (auto compositeOperationCSSValue =
-              keyframeRule->Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
+        if (auto compositeOperation = KeyframeRuleCompositeOperation(*keyframeRule))
         {
-          if (auto compositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
-          {
-            blendingKeyframe.SetCompositeOperation(*compositeOperation);
-          }
+          blendingKeyframe.SetCompositeOperation(*compositeOperation);
         }
         list.Insert(krys::move(blendingKeyframe));
         list.UpdatePropertiesMetadata(keyframeRule->Properties());
@@ -709,31 +691,6 @@ namespace krys::boo::style
     return ResolvedStyle {state.TakeStyle(), nullptr, collector.ReleaseMatchResult()};
   }
 
-  UniquePtr<RenderStyle> Resolver::StyleForPage(int32 pageIndex) noexcept
-  {
-    auto documentElement = Document().DocumentElement();
-    if (!documentElement || !documentElement->GetRenderStyle())
-    {
-      return RenderStyle::CreatePtr();
-    }
-
-    auto state = State(*documentElement, Document().InitialContainingBlockStyle(), nullptr, nullptr);
-
-    state.SetStyle(RenderStyle::CreatePtr());
-    state.Style()->InheritFrom(*state.RootElementStyle());
-
-    PageRuleCollector collector(_ruleSets, documentElement->GetRenderStyle()->GetWritingMode());
-    collector.MatchAllPageRules(pageIndex);
-
-    auto &result = collector.GetMatchResult();
-
-    Builder builder(*state.Style(), GetBuilderContext(state), result);
-    builder.ApplyAllProperties();
-
-    // Now return the style.
-    return state.TakeStyle();
-  }
-
   UniquePtr<RenderStyle> Resolver::DefaultStyleForElement(const dom::Document &document,
                                                           const dom::Element *element) noexcept
   {
@@ -741,7 +698,7 @@ namespace krys::boo::style
       RenderStyle::CreatePtrWithRegisteredInitialValues(document.StyleScope().GetCustomPropertyRegistry());
 
     FontCascadeDescription fontDescription;
-    fontDescription.SetOneFamily(css::WebKitFontFamilyNames::StandardFamily());
+    fontDescription.SetOneFamily(css::GenericFontFamilyNames::StandardFamily());
     fontDescription.SetKeywordSizeFromIdentifier(css::ValueId::Medium);
 
     auto size = FontSizeForKeyword(static_cast<uint32>(css::ValueId::Medium), false, document);
@@ -842,14 +799,10 @@ namespace krys::boo::style
 
       if (inheritedEqual)
       {
-        auto linkStatus = style.GetInsideLink();
         // If the cache item parent style has identical inherited properties to the current parent style then
         // the resulting style will be identical too. We copy the inherited properties over from the cache and
         // are done.
         style.InheritFrom(*cacheEntry.RenderStyle);
-
-        // Link status is treated like an inherited property. We need to explicitly restore it.
-        style.SetInsideLink(linkStatus);
       }
 
       includedProperties = {};
@@ -915,79 +868,4 @@ namespace krys::boo::style
     }
   }
 
-  namespace
-  {
-    KRYS_NODISCARD css::SelectorList ViewTransitionSelector(css::SelectorPseudoElement element,
-                                                            const css::CSSOMStringAtom &name) noexcept
-    {
-      css::MutableSelectorList selectorList;
-
-      auto rootSelector = CreateUnique<css::MutableSelector>();
-      rootSelector->SetMatch(css::SelectorMatch::PseudoClass);
-      rootSelector->SetPseudoClass(css::SelectorPseudoClass::Root);
-      selectorList.push_back(krys::move(rootSelector));
-
-      auto groupSelector = CreateUnique<css::MutableSelector>();
-      groupSelector->SetMatch(css::SelectorMatch::PseudoElement);
-      groupSelector->SetPseudoElement(element);
-
-      auto selectorName = css::CSSOMStringAtom::Null();
-      switch (element)
-      {
-        case css::SelectorPseudoElement::ViewTransitionGroup:
-        {
-          selectorName = css::CSSOMStringAtom(u8"view-transition-group");
-          break;
-        }
-        case css::SelectorPseudoElement::ViewTransitionImagePair:
-        {
-          selectorName = css::CSSOMStringAtom(u8"view-transition-image-pair");
-          break;
-        }
-        case css::SelectorPseudoElement::ViewTransitionNew:
-        {
-          selectorName = css::CSSOMStringAtom(u8"view-transition-new");
-          break;
-        }
-        case css::SelectorPseudoElement::ViewTransitionOld:
-        {
-          selectorName = css::CSSOMStringAtom(u8"view-transition-old");
-          break;
-        }
-        default:
-        {
-          krys_unreachable();
-        }
-      }
-
-      groupSelector->SetValue(selectorName);
-      groupSelector->SetArgumentList(FixedVector<css::CSSOMStringAtom> {name});
-
-      selectorList.front()->PrependComplexSelectorComponent(css::SelectorRelation::Compounding,
-                                                            krys::move(groupSelector));
-
-      return css::SelectorList(krys::move(selectorList));
-    }
-  }
-
-  RefPtr<css::ViewTransitionRule> Resolver::GetViewTransitionRule() const noexcept
-  {
-    return _ruleSets.GetViewTransitionRule();
-  }
-
-  void Resolver::SetViewTransitionStyles(css::SelectorPseudoElement element, const css::CSSOMStringAtom &name,
-                                         Ref<css::MutableStyleProperties> properties) noexcept
-  {
-    if (!_document)
-    {
-      return;
-    }
-
-    auto styleRule =
-      css::StyleRule::Create(krys::move(properties), true, ViewTransitionSelector(element, name));
-
-    auto *viewTransitionsStyle = _ruleSets.DynamicViewTransitionsStyle();
-    RuleSetBuilder builder(*viewTransitionsStyle, MediaQueryEvaluator(), this);
-    builder.AddStyleRule(*styleRule);
-  }
 }

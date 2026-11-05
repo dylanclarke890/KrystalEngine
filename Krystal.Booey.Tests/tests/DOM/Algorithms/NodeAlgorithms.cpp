@@ -19,7 +19,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::dom::tests

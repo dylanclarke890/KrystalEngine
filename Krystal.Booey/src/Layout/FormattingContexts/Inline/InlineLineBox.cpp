@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBox.hpp"
-#include "Krystal.Booey/Graphics/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"

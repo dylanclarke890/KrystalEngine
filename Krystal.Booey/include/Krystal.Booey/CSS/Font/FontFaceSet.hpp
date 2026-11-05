@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Font/FontFace.hpp"
-#include "Krystal.Booey/Graphics/FontCascadeCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascadeCache.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 
 namespace krys::boo::css
@@ -11,8 +11,6 @@ namespace krys::boo::css
 
   /// @brief A document's font faces, looked up by family and by the `@font-face` rule they came from, with
   /// the faces of installed families that share a name with one.
-  // FIXME: Font event clients, `check` and the matching faces, for the `FontFaceSet` interface
-  // (`document.fonts`), once there's scripting.
   class CSSFontFaceSet final : public RefCounted<CSSFontFaceSet>, public CSSFontFaceClient
   {
     KRYS_NON_COPY_MOVABLE(CSSFontFaceSet);

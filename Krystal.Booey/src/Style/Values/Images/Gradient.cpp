@@ -2,13 +2,13 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 #include "Krystal.Booey/Graphics/Color/ColorInterpolation.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GradientColorStop.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
 namespace krys::boo::style
@@ -20,11 +20,7 @@ namespace krys::boo::style
   template <>
   constexpr bool IsRepeatingGradient<css::ValueId::RepeatingLinearGradient> = true;
   template <>
-  constexpr bool IsRepeatingGradient<css::ValueId::WebkitRepeatingLinearGradient> = true;
-  template <>
   constexpr bool IsRepeatingGradient<css::ValueId::RepeatingRadialGradient> = true;
-  template <>
-  constexpr bool IsRepeatingGradient<css::ValueId::WebkitRepeatingRadialGradient> = true;
   template <>
   constexpr bool IsRepeatingGradient<css::ValueId::RepeatingConicGradient> = true;
 
@@ -55,13 +51,6 @@ namespace krys::boo::style
     return ToCSSColorStop<css::GradientLinearColorStop>(stop, style);
   }
 
-  css::GradientDeprecatedColorStop
-    ToCSS<GradientDeprecatedColorStop>::operator()(const GradientDeprecatedColorStop &stop,
-                                                   const RenderStyle &style) noexcept
-  {
-    return ToCSSColorStop<css::GradientDeprecatedColorStop>(stop, style);
-  }
-
   // MARK: - Conversion: CSS -> Style
 
   template <typename T>
@@ -84,34 +73,22 @@ namespace krys::boo::style
     return ToStyleColorStop(stop, state);
   }
 
-  GradientDeprecatedColorStop
-    ToStyle<css::GradientDeprecatedColorStop>::operator()(const css::GradientDeprecatedColorStop &stop,
-                                                          const BuilderState &state) noexcept
-  {
-    return ToStyleColorStop(stop, state);
-  }
-
   // MARK: - Platform Gradient Resolution
 
-  KRYS_NODISCARD static boo::Color ResolveColorStopColor(const Color &styleColor, const RenderStyle &style,
-                                                         bool hasColorFilter) noexcept
+  KRYS_NODISCARD static boo::Color ResolveColorStopColor(const Color &styleColor,
+                                                         const RenderStyle &style) noexcept
   {
-    if (hasColorFilter)
-    {
-      return style.ColorWithColorFilter(styleColor);
-    }
     return style.ColorResolvingCurrentColor(styleColor);
   }
 
   KRYS_NODISCARD static boo::Color ResolveColorStopColor(const Markable<Color> &styleColor,
-                                                         const RenderStyle &style,
-                                                         bool hasColorFilter) noexcept
+                                                         const RenderStyle &style) noexcept
   {
     if (!styleColor)
     {
       return {};
     }
-    return ResolveColorStopColor(*styleColor, style, hasColorFilter);
+    return ResolveColorStopColor(*styleColor, style);
   }
 
   KRYS_NODISCARD static Maybe<float>
@@ -160,12 +137,6 @@ namespace krys::boo::style
       { return static_cast<float>(percentage.Value / 100.0); },
       [&](const typename AnglePercentage<>::Calc &calc) -> Maybe<float>
       { return style::Evaluate<float>(calc, 100.0f, style::ZoomNeeded {}); });
-  }
-
-  KRYS_NODISCARD static float
-    ResolveColorStopPosition(const GradientDeprecatedColorStop::PositionType &position) noexcept
-  {
-    return static_cast<float>(position.Value.Value);
   }
 
   struct ResolvedGradientStop
@@ -425,30 +396,10 @@ namespace krys::boo::style
   };
 
   template <typename GradientAdapter, typename StyleGradient>
-  KRYS_NODISCARD GradientColorStops ComputeStopsForDeprecatedVariants(GradientAdapter &,
-                                                                      const StyleGradient &styleGradient,
-                                                                      const RenderStyle &style) noexcept
-  {
-    bool hasColorFilter = style.HasAppleColorFilter();
-    GradientColorStops::StopVector result;
-    for (const auto &stop : styleGradient.Parameters.Stops)
-    {
-      result.push_back(
-        {ResolveColorStopPosition(stop.Position), ResolveColorStopColor(stop.Color, style, hasColorFilter)});
-    }
-
-    std::ranges::stable_sort(result, {}, &boo::GradientColorStop::Offset);
-
-    return GradientColorStops::Sorted {krys::move(result)};
-  }
-
-  template <typename GradientAdapter, typename StyleGradient>
   KRYS_NODISCARD GradientColorStops ComputeStops(GradientAdapter &gradientAdapter,
                                                  const StyleGradient &styleGradient,
                                                  const RenderStyle &style) noexcept
   {
-    bool hasColorFilter = style.HasAppleColorFilter();
-
     size_t numberOfStops = styleGradient.Parameters.Stops.size();
     List<ResolvedGradientStop> stops(numberOfStops);
 
@@ -458,7 +409,7 @@ namespace krys::boo::style
     {
       auto &stop = styleGradient.Parameters.Stops[i];
 
-      stops[i].Color = ResolveColorStopColor(stop.Color, style, hasColorFilter);
+      stops[i].Color = ResolveColorStopColor(stop.Color, style);
 
       auto offset = ResolveColorStopPosition(stop.Position, gradientLength);
       if (offset)
@@ -884,13 +835,6 @@ namespace krys::boo::style
     return {FloatPoint(halfWidth - endX, halfHeight + endY), FloatPoint(halfWidth + endX, halfHeight - endY)};
   }
 
-  KRYS_NODISCARD static std::pair<FloatPoint, FloatPoint>
-    EndPointsFromAngleForPrefixedVariants(float angleDeg, const FloatSize &size) noexcept
-  {
-    // Prefixed gradients use "polar coordinate" angles, rather than "bearing" angles.
-    return EndPointsFromAngle(90 - angleDeg, size);
-  }
-
   KRYS_NODISCARD static float ResolveRadius(const LengthPercentage<css::NonNegative> &radius,
                                             float widthOrHeight) noexcept
   {
@@ -1043,77 +987,6 @@ namespace krys::boo::style
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 
-  // MARK: - Prefixed Linear create.
-
-  template <css::ValueId Name>
-  KRYS_NODISCARD static Ref<boo::Gradient>
-    CreatePlatformGradient(const css::FunctionNotation<Name, PrefixedLinearGradient> &linear,
-                           const FloatSize &size, const RenderStyle &style) noexcept
-  {
-    krys_debug_assert(!size.IsEmpty());
-
-    auto [point0, point1] = krys::SwitchOn(
-      linear.Parameters.GradientLine, [&](const Angle<> &angle) -> std::pair<FloatPoint, FloatPoint>
-      { return EndPointsFromAngleForPrefixedVariants(static_cast<float>(angle.Value), size); },
-      [&](const Horizontal &horizontal) -> std::pair<FloatPoint, FloatPoint>
-      {
-        return krys::SwitchOn(
-          horizontal, [&](css::keywords::Left) -> std::pair<FloatPoint, FloatPoint>
-          { return {{0, 0}, {size.Width(), 0}}; },
-          [&](css::keywords::Right) -> std::pair<FloatPoint, FloatPoint>
-          { return {{size.Width(), 0}, {0, 0}}; });
-      },
-      [&](const Vertical vertical) -> std::pair<FloatPoint, FloatPoint>
-      {
-        return krys::SwitchOn(
-          vertical, [&](css::keywords::Top) -> std::pair<FloatPoint, FloatPoint>
-          { return {{0, 0}, {0, size.Height()}}; },
-          [&](css::keywords::Bottom) -> std::pair<FloatPoint, FloatPoint>
-          { return {{0, size.Height()}, {0, 0}}; });
-      },
-      [&](const css::SpaceSeparatedTuple<Horizontal, Vertical> &pair) -> std::pair<FloatPoint, FloatPoint>
-      {
-        return std::visit(
-          krys::CreateVisitor(
-            [&](css::keywords::Left, css::keywords::Top) -> std::pair<FloatPoint, FloatPoint>
-            { return {{0, 0}, {size.Width(), size.Height()}}; },
-            [&](css::keywords::Left, css::keywords::Bottom) -> std::pair<FloatPoint, FloatPoint>
-            { return {{0, size.Height()}, {size.Width(), 0}}; },
-            [&](css::keywords::Right, css::keywords::Top) -> std::pair<FloatPoint, FloatPoint>
-            { return {{size.Width(), 0}, {0, size.Height()}}; },
-            [&](css::keywords::Right, css::keywords::Bottom) -> std::pair<FloatPoint, FloatPoint>
-            { return {{size.Width(), size.Height()}, {0, 0}}; }),
-          get<0>(pair), get<1>(pair));
-      });
-
-    boo::Gradient::LinearData data {point0, point1};
-    LinearGradientAdapter adapter {data};
-    auto stops = ComputeStops(adapter, linear, style);
-
-    return boo::Gradient::Create(krys::move(data), linear.Parameters.ColourInterpolationMethod.Method,
-                                 GradientSpreadMethod::Pad, krys::move(stops));
-  }
-
-  // MARK: - Deprecated Linear create.
-
-  template <css::ValueId Name>
-  KRYS_NODISCARD static Ref<boo::Gradient>
-    CreatePlatformGradient(const css::FunctionNotation<Name, DeprecatedLinearGradient> &linear,
-                           const FloatSize &size, const RenderStyle &style) noexcept
-  {
-    krys_debug_assert(!size.IsEmpty());
-
-    auto point0 = ComputeEndPoint(get<0>(linear.Parameters.GradientLine), size);
-    auto point1 = ComputeEndPoint(get<1>(linear.Parameters.GradientLine), size);
-
-    boo::Gradient::LinearData data {point0, point1};
-    LinearGradientAdapter adapter {data};
-    auto stops = ComputeStopsForDeprecatedVariants(adapter, linear, style);
-
-    return boo::Gradient::Create(krys::move(data), linear.Parameters.ColourInterpolationMethod.Method,
-                                 GradientSpreadMethod::Pad, krys::move(stops));
-  }
-
   // MARK: - Radial create.
 
   template <css::ValueId Name>
@@ -1223,165 +1096,6 @@ namespace krys::boo::style
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 
-  // MARK: - Prefixed Radial create.
-
-  template <css::ValueId Name>
-  KRYS_NODISCARD static Ref<boo::Gradient>
-    CreatePlatformGradient(const css::FunctionNotation<Name, PrefixedRadialGradient> &radial,
-                           const FloatSize &size, const RenderStyle &style) noexcept
-  {
-    krys_debug_assert(!size.IsEmpty());
-
-    auto computeCenterPoint = [&](const Maybe<Position> &position) -> FloatPoint
-    {
-      return position ? ComputeEndPoint(*position, size) : FloatPoint {size.Width() / 2, size.Height() / 2};
-    };
-
-    auto computeEllipseRadii = [&](const Variant<PrefixedRadialGradient::Ellipse::SizeType,
-                                                 PrefixedRadialGradient::Extent> &ellipseSizeOrExtent,
-                                   FloatPoint centerPoint) -> std::pair<float, float>
-    {
-      return krys::SwitchOn(
-        ellipseSizeOrExtent,
-        [&](const PrefixedRadialGradient::Ellipse::SizeType &ellipseSize) -> std::pair<float, float>
-        {
-          auto xDist = ResolveRadius(get<0>(ellipseSize), size.Width());
-          auto yDist = ResolveRadius(get<1>(ellipseSize), size.Height());
-          return {xDist, xDist / yDist};
-        },
-        [&](const PrefixedRadialGradient::Extent &extent) -> std::pair<float, float>
-        {
-          return krys::SwitchOn(
-            extent,
-            [&](css::keywords::ClosestSide) -> std::pair<float, float>
-            {
-              float xDist = std::min(centerPoint.X(), size.Width() - centerPoint.X());
-              float yDist = std::min(centerPoint.Y(), size.Height() - centerPoint.Y());
-              return {xDist, xDist / yDist};
-            },
-            [&](css::keywords::Contain) -> std::pair<float, float>
-            {
-              float xDist = std::min(centerPoint.X(), size.Width() - centerPoint.X());
-              float yDist = std::min(centerPoint.Y(), size.Height() - centerPoint.Y());
-              return {xDist, xDist / yDist};
-            },
-            [&](css::keywords::FarthestSide) -> std::pair<float, float>
-            {
-              float xDist = std::max(centerPoint.X(), size.Width() - centerPoint.X());
-              float yDist = std::max(centerPoint.Y(), size.Height() - centerPoint.Y());
-              return {xDist, xDist / yDist};
-            },
-            [&](css::keywords::ClosestCorner) -> std::pair<float, float>
-            {
-              auto [distance, corner] = FindDistanceToClosestCorner(centerPoint, size);
-              // If <shape> is ellipse, the gradient-shape has the same ratio of width to height
-              // that it would if closest-side or farthest-side were specified, as appropriate.
-              float xDist = std::min(centerPoint.X(), size.Width() - centerPoint.X());
-              float yDist = std::min(centerPoint.Y(), size.Height() - centerPoint.Y());
-              return {HorizontalEllipseRadius(corner - centerPoint, xDist / yDist), xDist / yDist};
-            },
-            [&](css::keywords::FarthestCorner) -> std::pair<float, float>
-            {
-              auto [distance, corner] = FindDistanceToFarthestCorner(centerPoint, size);
-              // If <shape> is ellipse, the gradient-shape has the same ratio of width to height
-              // that it would if closest-side or farthest-side were specified, as appropriate.
-              float xDist = std::max(centerPoint.X(), size.Width() - centerPoint.X());
-              float yDist = std::max(centerPoint.Y(), size.Height() - centerPoint.Y());
-              return {HorizontalEllipseRadius(corner - centerPoint, xDist / yDist), xDist / yDist};
-            },
-            [&](css::keywords::Cover) -> std::pair<float, float>
-            {
-              auto [distance, corner] = FindDistanceToFarthestCorner(centerPoint, size);
-              // If <shape> is ellipse, the gradient-shape has the same ratio of width to height
-              // that it would if closest-side or farthest-side were specified, as appropriate.
-              float xDist = std::max(centerPoint.X(), size.Width() - centerPoint.X());
-              float yDist = std::max(centerPoint.Y(), size.Height() - centerPoint.Y());
-              return {HorizontalEllipseRadius(corner - centerPoint, xDist / yDist), xDist / yDist};
-            });
-        });
-    };
-
-    auto computeCircleRadius = [&](const PrefixedRadialGradient::Extent &extent,
-                                   FloatPoint centerPoint) -> std::pair<float, float>
-    {
-      return krys::SwitchOn(
-        extent,
-        [&](css::keywords::ClosestSide) -> std::pair<float, float>
-        {
-          return {std::min({centerPoint.X(), size.Width() - centerPoint.X(), centerPoint.Y(),
-                            size.Height() - centerPoint.Y()}),
-                  1.0f};
-        },
-        [&](css::keywords::Contain) -> std::pair<float, float>
-        {
-          return {std::min({centerPoint.X(), size.Width() - centerPoint.X(), centerPoint.Y(),
-                            size.Height() - centerPoint.Y()}),
-                  1.0f};
-        },
-        [&](css::keywords::FarthestSide) -> std::pair<float, float>
-        {
-          return {std::max({centerPoint.X(), size.Width() - centerPoint.X(), centerPoint.Y(),
-                            size.Height() - centerPoint.Y()}),
-                  1.0f};
-        },
-        [&](css::keywords::ClosestCorner) -> std::pair<float, float>
-        { return {DistanceToClosestCorner(centerPoint, size), 1.0f}; },
-        [&](css::keywords::FarthestCorner) -> std::pair<float, float>
-        { return {DistanceToFarthestCorner(centerPoint, size), 1.0f}; },
-        [&](css::keywords::Cover) -> std::pair<float, float>
-        { return {DistanceToFarthestCorner(centerPoint, size), 1.0f}; });
-    };
-
-    auto data = krys::SwitchOn(
-      radial.Parameters.GradientBox,
-      [&](const PrefixedRadialGradient::Ellipse &ellipse)
-      {
-        auto centerPoint = computeCenterPoint(ellipse.Position);
-        auto [endRadius, aspectRatio] = computeEllipseRadii(
-          ellipse.Size.value_or(PrefixedRadialGradient::Extent {css::keywords::Cover {}}), centerPoint);
-
-        return boo::Gradient::RadialData {centerPoint, centerPoint, 0, endRadius, aspectRatio};
-      },
-      [&](const PrefixedRadialGradient::Circle &circle)
-      {
-        auto centerPoint = computeCenterPoint(circle.Position);
-        auto [endRadius, aspectRatio] = computeCircleRadius(
-          circle.Size.value_or(PrefixedRadialGradient::Extent {css::keywords::Cover {}}), centerPoint);
-
-        return boo::Gradient::RadialData {centerPoint, centerPoint, 0, endRadius, aspectRatio};
-      });
-
-    RadialGradientAdapter adapter {data, size};
-    auto stops = ComputeStops(adapter, radial, style);
-
-    return boo::Gradient::Create(krys::move(data), radial.Parameters.ColourInterpolationMethod.Method,
-                                 GradientSpreadMethod::Pad, krys::move(stops));
-  }
-
-  // MARK: - Deprecated Radial create.
-
-  template <css::ValueId Name>
-  KRYS_NODISCARD static Ref<boo::Gradient>
-    CreatePlatformGradient(const css::FunctionNotation<Name, DeprecatedRadialGradient> &radial,
-                           const FloatSize &size, const RenderStyle &style) noexcept
-  {
-    krys_debug_assert(!size.IsEmpty());
-
-    auto firstPoint = ComputeEndPoint(radial.Parameters.GradientBox.First, size);
-    auto secondPoint = ComputeEndPoint(radial.Parameters.GradientBox.Second, size);
-
-    auto firstRadius = static_cast<float>(radial.Parameters.GradientBox.FirstRadius.Value);
-    auto secondRadius = static_cast<float>(radial.Parameters.GradientBox.SecondRadius.Value);
-    auto aspectRatio = 1.0f;
-
-    boo::Gradient::RadialData data {firstPoint, secondPoint, firstRadius, secondRadius, aspectRatio};
-    RadialGradientAdapter adapter {data, size};
-    auto stops = ComputeStopsForDeprecatedVariants(adapter, radial, style);
-
-    return boo::Gradient::Create(krys::move(data), radial.Parameters.ColourInterpolationMethod.Method,
-                                 GradientSpreadMethod::Pad, krys::move(stops));
-  }
-
   // MARK: - Conic create.
 
   template <css::ValueId Name>
@@ -1448,11 +1162,8 @@ namespace krys::boo::style
   template <typename T>
   KRYS_NODISCARD static bool IsOpaque(const T &gradient, const RenderStyle &style) noexcept
   {
-    bool hasColorFilter = style.HasAppleColorFilter();
-
-    return std::ranges::all_of(
-      gradient.Parameters.Stops,
-      [&](auto &stop) { return ResolveColorStopColor(stop.Color, style, hasColorFilter).IsOpaque(); });
+    return std::ranges::all_of(gradient.Parameters.Stops, [&](auto &stop)
+                               { return ResolveColorStopColor(stop.Color, style).IsOpaque(); });
   }
 
   KRYS_NODISCARD bool IsOpaque(const Gradient &gradient, const RenderStyle &style) noexcept

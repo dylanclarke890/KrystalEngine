@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSPropertyRule.hpp"
-#include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"

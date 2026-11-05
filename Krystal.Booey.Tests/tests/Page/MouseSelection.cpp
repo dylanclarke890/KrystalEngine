@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 
@@ -203,9 +203,9 @@ namespace krys::boo::tests
   TEST_CASE("Mouse selection: what can't be selected", "[Page][EventHandler][Selection]")
   {
     MouseSelectionFixture fixture(
-      u8"<p id=a style='-webkit-user-select:none'>Not selectable</p><p id=b>Selectable text</p>");
+      u8"<p id=a style='user-select:none'>Not selectable</p><p id=b>Selectable text</p>");
 
-    SECTION("-webkit-user-select: none")
+    SECTION("user-select: none")
     {
       fixture.Press(5, 10);
       fixture.Drag(60, 10);

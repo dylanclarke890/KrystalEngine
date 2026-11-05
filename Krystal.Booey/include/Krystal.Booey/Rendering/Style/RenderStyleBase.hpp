@@ -18,9 +18,6 @@ namespace krys::boo
     KRYS_NODISCARD inline bool UseTreeCountingFunctions() const noexcept;
     inline void SetUsesTreeCountingFunctions() noexcept;
 
-    KRYS_NODISCARD inline InsideLink GetInsideLink() const noexcept;
-    inline void SetInsideLink(InsideLink) noexcept;
-
     KRYS_NODISCARD inline bool IsLink() const noexcept;
     inline void SetIsLink(bool) noexcept;
 
@@ -265,13 +262,9 @@ namespace krys::boo
 
     // `caret-color`
     KRYS_NODISCARD inline const style::Color &CaretColor() const noexcept;
-    KRYS_NODISCARD inline const style::Color &VisitedLinkCaretColor() const noexcept;
     KRYS_NODISCARD inline bool HasAutoCaretColor() const noexcept;
-    KRYS_NODISCARD inline bool HasVisitedLinkAutoCaretColor() const noexcept;
     inline void SetCaretColor(style::Color &&) noexcept;
-    inline void SetVisitedLinkCaretColor(style::Color &&) noexcept;
     inline void SetHasAutoCaretColor() noexcept;
-    inline void SetHasVisitedLinkAutoCaretColor() noexcept;
 
     // `cursor`
     KRYS_NODISCARD inline CursorType GetCursorType() const noexcept;
@@ -279,10 +272,6 @@ namespace krys::boo
     // `counter-*`
     KRYS_NODISCARD inline const CounterDirectiveMap &GetCounterDirectives() const noexcept;
     inline CounterDirectiveMap &AccessCounterDirectives() noexcept;
-
-    // `@page size`
-    KRYS_NODISCARD inline const style::PageSize &GetPageSize() const noexcept;
-    inline void SetPageSize(style::PageSize &&) noexcept;
 
     using NonInheritedFlags = style::ComputedStyle::NonInheritedFlags;
     using InheritedFlags = style::ComputedStyle::InheritedFlags;

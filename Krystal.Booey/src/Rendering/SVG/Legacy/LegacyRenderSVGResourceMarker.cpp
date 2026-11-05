@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGMarkerElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGMarkerElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
 namespace krys::boo

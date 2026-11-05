@@ -1,10 +1,10 @@
 ﻿#include "Krystal.UI/Compositing/TextureMapperAnimation.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerAnimationValue.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerFilterAnimationValue.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerFloatAnimationValue.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerFloatAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransformAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperations.hpp"
 #include <algorithm>
 

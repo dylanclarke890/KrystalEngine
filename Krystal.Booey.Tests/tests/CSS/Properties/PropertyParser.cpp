@@ -2,9 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
@@ -153,13 +153,6 @@ namespace krys::boo::css::tests
       CHECK(ParseToText(u8"red", PropertyId::Color, context, RuleType::PositionTry) == "<fail>");
       CHECK(ParseToText(u8"1px", PropertyId::Top, context, RuleType::PositionTry, IsImportant(true))
             == "<fail>");
-    }
-
-    SECTION("@page")
-    {
-      CHECK(ParseToText(u8"a4", PropertyId::Size, RuleType::Page) == "size: a4");
-      CHECK(ParseToText(u8"1px", PropertyId::MarginTop, RuleType::Page) == "margin-top: 1px");
-      CHECK(ParseToText(u8"auto", PropertyId::Page, RuleType::Page) == "<fail>");
     }
 
     SECTION("Descriptors")

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"

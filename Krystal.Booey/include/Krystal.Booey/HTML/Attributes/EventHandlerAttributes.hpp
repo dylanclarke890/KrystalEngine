@@ -129,24 +129,8 @@ namespace krys::boo::html
 /// @brief The event handlers of the window, which the body and frameset elements reflect.
 /// @see https://html.spec.whatwg.org/#windoweventhandlers
 #define KRYS_WINDOW_EVENT_HANDLERS(X)                                                                        \
-  X(AfterPrint, u8"afterprint")                                                                              \
-  X(BeforePrint, u8"beforeprint")                                                                            \
-  X(BeforeUnload, u8"beforeunload")                                                                          \
-  X(GamepadConnected, u8"gamepadconnected")                                                                  \
-  X(GamepadDisconnected, u8"gamepaddisconnected")                                                            \
-  X(HashChange, u8"hashchange")                                                                              \
-  X(LanguageChange, u8"languagechange")                                                                      \
-  X(Message, u8"message")                                                                                    \
-  X(MessageError, u8"messageerror")                                                                          \
-  X(Offline, u8"offline")                                                                                    \
-  X(Online, u8"online")                                                                                      \
   X(PageHide, u8"pagehide")                                                                                  \
-  X(PageReveal, u8"pagereveal")                                                                              \
   X(PageShow, u8"pageshow")                                                                                  \
-  X(PageSwap, u8"pageswap")                                                                                  \
-  X(PopState, u8"popstate")                                                                                  \
-  X(RejectionHandled, u8"rejectionhandled")                                                                  \
-  X(UnhandledRejection, u8"unhandledrejection")                                                              \
   X(Unload, u8"unload")
 
 /// @brief The event handlers of documents and elements.

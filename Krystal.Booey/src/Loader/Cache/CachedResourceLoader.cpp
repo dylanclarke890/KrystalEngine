@@ -167,9 +167,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Content security policy, mixed content and the other checks before a request (canRequest),
-    // once there are network loads.
-
     auto &memoryCache = MemoryCache::Singleton();
     if (request.AllowsCaching() && memoryCache.Disabled())
     {
@@ -183,12 +180,11 @@ namespace krys::boo
       resource = memoryCache.ResourceForRequest(request.GetResourceRequest());
     }
 
-    RevalidationPolicy policy = DetermineRevalidationPolicy(type, request, resource.get(), imageLoading);
+    RevalidationPolicy policy = DetermineRevalidationPolicy(type, resource.get(), imageLoading);
     switch (policy)
     {
-      case Reload:
-      case Revalidate: memoryCache.Remove(*resource); [[fallthrough]];
-      case Load:       resource = LoadResource(type, krys::move(request)); break;
+      case Reload: memoryCache.Remove(*resource); [[fallthrough]];
+      case Load:   resource = LoadResource(type, krys::move(request)); break;
       case Use:
         krys_debug_assert(resource);
         memoryCache.ResourceAccessed(*resource);
@@ -282,8 +278,7 @@ namespace krys::boo
   }
 
   CachedResourceLoader::RevalidationPolicy CachedResourceLoader::DetermineRevalidationPolicy(
-    CachedResource::Type type, CachedResourceRequest &cachedResourceRequest, CachedResource *existingResource,
-    ImageLoading imageLoading) const noexcept
+    CachedResource::Type type, CachedResource *existingResource, ImageLoading imageLoading) const noexcept
   {
     if (!existingResource)
     {
@@ -299,13 +294,6 @@ namespace krys::boo
     // Do not load from cache if images are not enabled. The load for this image will be blocked in
     // CachedImage::load.
     if (imageLoading == ImageLoading::DeferredUntilVisible)
-    {
-      return Reload;
-    }
-
-    // If credentials were sent with the previous request and won't be
-    // with this one, or vice versa, re-fetch the resource.
-    if (existingResource->Options().CredentialsMode != cachedResourceRequest.Options().CredentialsMode)
     {
       return Reload;
     }
@@ -342,14 +330,6 @@ namespace krys::boo
       // For cached subresources that are still loading we ignore the cache policy.
       return Use;
     }
-
-    // Revalidating a resource without cache validators reloads it.
-    // FIXME: Expired resources (HTTP freshness), and revalidating with ETag and Last-Modified validators,
-    // once there are network loads.
-    if (cachePolicy == CachePolicy::Revalidate)
-    {
-      return Reload;
-    }
     return Use;
   }
 
@@ -358,14 +338,14 @@ namespace krys::boo
     auto *frame = Frame();
     if (!frame)
     {
-      return CachePolicy::Verify;
+      return CachePolicy::Use;
     }
 
-    // The host's policy, unless the load type has one (a reload, or going back and forward).
+    // The host's policy, unless the load is a reload.
     // FIXME: Main resources' policy, once main resources go through the memory cache.
     (void)type;
     auto policy = frame->Loader().SubresourceCachePolicy();
-    return policy != CachePolicy::Verify ? policy : frame->SubresourceCachePolicy();
+    return policy != CachePolicy::Use ? policy : frame->SubresourceCachePolicy();
   }
 
   void CachedResourceLoader::SetAutoLoadImages(bool enable) noexcept
@@ -468,8 +448,6 @@ namespace krys::boo
       ResourceLoaderOptions result;
       result.SendLoadCallbacks = SendCallbackPolicy::SendCallbacks;
       result.DataBuffering = DataBufferingPolicy::BufferData;
-      result.CredentialsMode = FetchOptions::Credentials::Include;
-      result.RequestMode = FetchOptions::Mode::NoCors;
       result.ContentSecurityPolicy = ContentSecurityPolicyImposition::DoPolicyCheck;
       result.Caching = CachingPolicy::AllowCaching;
       return result;

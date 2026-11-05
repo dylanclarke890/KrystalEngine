@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Style/ScopedName.hpp"
+#include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 
 namespace krys::boo::style

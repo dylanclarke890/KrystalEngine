@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGRect.hpp"
 
@@ -92,8 +92,6 @@ namespace krys::boo::svg
 
     if (validate)
     {
-      // FIXME: Report the problems below to the document's SVG extensions (reportWarning, reportError), once
-      // there's a console.
       if (!x || !y || !width || !height)
       {
         return {};

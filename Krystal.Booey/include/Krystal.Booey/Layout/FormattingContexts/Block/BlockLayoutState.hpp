@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Layout/Floats/PlacedFloats.hpp"
 #include "Krystal.Booey/Style/Values/Inline/TextBoxEdge.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -18,7 +18,6 @@ namespace krys::boo::layout
     {
       size_t MaximumLines {0};
       bool ShouldDiscardOverflow {false};
-      bool IsLegacy {true};
     };
 
     enum class TextBoxTrimSide : bool

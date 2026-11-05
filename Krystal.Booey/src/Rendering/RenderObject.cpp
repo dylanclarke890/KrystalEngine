@@ -6,10 +6,10 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Booey/Editing/VisiblePosition.hpp"
+#include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -19,22 +19,22 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
+#include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
-#include "Krystal.Booey/Rendering/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -143,8 +143,6 @@ namespace krys::boo
 
   bool RenderObject::IsNonReplacedAtomicInlineLevelBox() const noexcept
   {
-    // FIXME: Check if iframe should really behave like non-replaced here.
-    // FIXME: Inline iframes, once there are iframe renderers.
     return !IsRenderReplaced() && IsAtomicInlineLevelBox();
   }
 
@@ -1471,7 +1469,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool FullRepaintIsScheduled(const RenderObject &renderer) noexcept
     {
-      // FIXME: Documents in frames, once there are frames.
       if (!renderer.View().UsesCompositing())
       {
         return false;
@@ -1645,7 +1642,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Nothing repaints while printing, once there's printing.
     IssueRepaint(null, ClipRepaintToLayer::No, forceRepaint);
   }
 
@@ -1677,7 +1673,6 @@ namespace krys::boo
     {
       return;
     }
-    // FIXME: Nothing repaints while printing, once there's printing.
 
     const auto *repaintContainer = ContainerForRepaint().Renderer;
 
@@ -1969,7 +1964,7 @@ namespace krys::boo
   {
     krys_debug_assert(!_parent);
 
-    // FIXME: The accessibility cache and view transitions, once there are any.
+    // FIXME: The accessibility cache, once there is one.
 
     RemoveRareData();
 
@@ -2082,8 +2077,8 @@ namespace krys::boo
       return false;
     }
 
-    if (style.Width().IsIntrinsicOrLegacyIntrinsicOrAuto()
-        || style.Height().IsIntrinsicOrLegacyIntrinsicOrAuto() || style.Height().IsPercentOrCalculated())
+    if (style.Width().IsIntrinsicOrAuto() || style.Height().IsIntrinsicOrAuto()
+        || style.Height().IsPercentOrCalculated())
     {
       return false;
     }

@@ -1,20 +1,18 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
-#include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
-#include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
+#include "Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp"
+#include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Booey/Core/EncodingRegistry.hpp"
-#include "Krystal.Booey/Core/PlatformLocale.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
-#include "Krystal.Booey/CSS/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
@@ -48,7 +46,6 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
-#include "Krystal.Booey/DOM/Internals/VisitedLinkState.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -64,9 +61,8 @@
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/VisibleSelection.hpp"
-#include "Krystal.Booey/History/HistoryItem.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -95,48 +91,37 @@
 #include "Krystal.Booey/HTML/Elements/HTMLScriptElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTitleElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/BeforeUnloadEvent.hpp"
-#include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
-#include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
-#include "Krystal.Booey/HTML/Events/PopStateEvent.hpp"
-#include "Krystal.Booey/HTML/Forms/FormController.hpp"
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
-#include "Krystal.Booey/HTML/MicroParsers/Refresh.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
-#include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
-#include "Krystal.Booey/Loader/NavigationScheduler.hpp"
-#include "Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
-#include "Krystal.Booey/Page/History.hpp"
-#include "Krystal.Booey/Page/IntersectionObserver.hpp"
+#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Location.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
-#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
-#include "Krystal.Booey/Page/ResizeObserver.hpp"
-#include "Krystal.Booey/Page/ResizeObserverEntry.hpp"
+#include "Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp"
+#include "Krystal.Booey/Page/ResizeObserver/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
-#include "Krystal.Booey/Platform/Scrollbar.hpp"
-#include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
+#include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
-#include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -144,35 +129,52 @@
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
-#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Booey/Style/Values/ColorAdjust/ColorScheme.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGScriptElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTitleElement.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGScriptElement.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
-#include "Krystal.Booey/SVG/SVGTitleElement.hpp"
+#include "Krystal.Booey/Text/EncodingRegistry.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
+#include "Krystal.Core/Utils/Tags.hpp"
 #include <algorithm>
 #include <chrono>
 #include <format>
+#include <random>
 
 namespace krys::boo::dom
 {
   namespace
   {
     constexpr auto IntersectionObserversInitialUpdateDelay = std::chrono::milliseconds(2'000);
+
+    /// @brief A random (version 4) UUID, in its string form.
+    KRYS_NODISCARD DOMString CreateVersion4UUIDString() noexcept
+    {
+      static std::mt19937_64 generator {std::random_device {}()};
+      uint64 high = generator();
+      uint64 low = generator();
+      // The version (4) and the variant (10xx).
+      high = (high & 0xFF'FF'FF'FF'FF'FF'0F'FFull) | 0x00'00'00'00'00'00'40'00ull;
+      low = (low & 0x3F'FF'FF'FF'FF'FF'FF'FFull) | 0x80'00'00'00'00'00'00'00ull;
+      auto string = std::format("{:08x}-{:04x}-{:04x}-{:04x}-{:012x}", high >> 32, (high >> 16) & 0xFFFF,
+                                high & 0xFFFF, low >> 48, low & 0xFF'FF'FF'FF'FF'FFull);
+      return DOMString(string.begin(), string.end());
+    }
 
     void CallbackForContainIntrinsicSize(const List<Ref<ResizeObserverEntry>> &entries,
                                          ResizeObserver &observer) noexcept
@@ -654,17 +656,14 @@ namespace krys::boo::dom
       };
       DOMStringAtom empty(u8"");
 
-      if (matches(u8"beforeunloadevent"))
-      {
-        return CreateRef<html::BeforeUnloadEvent>();
-      }
       if (matches(u8"compositionevent"))
       {
         return CreateRef<CompositionEvent>(empty);
       }
       if (matches(u8"customevent"))
       {
-        return CreateRef<CustomEvent<RefPtr<html::SerializedScriptValue>>>(empty);
+        // (Without script, there's no detail type to give it.)
+        return CreateRef<CustomEvent<EmptyTag>>(empty);
       }
       if (matches(u8"dragevent"))
       {
@@ -678,17 +677,9 @@ namespace krys::boo::dom
       {
         return CreateRef<FocusEvent>(empty);
       }
-      if (matches(u8"hashchangeevent"))
-      {
-        return CreateRef<html::HashChangeEvent>(empty);
-      }
       if (matches(u8"keyboardevent"))
       {
         return CreateRef<KeyboardEvent>(empty);
-      }
-      if (matches(u8"messageevent"))
-      {
-        return CreateRef<html::MessageEvent>(empty);
       }
       if (matches(u8"mouseevent") || matches(u8"mouseevents"))
       {
@@ -1353,9 +1344,6 @@ namespace krys::boo::dom
   {
     url::URL newURL = url.IsEmpty() ? url::AboutBlankURL() : krys::move(url);
 
-    // https://wicg.github.io/scroll-to-text-fragment/#process-and-consume-fragment-directive
-    _fragmentDirective = newURL.ConsumeFragmentDirective();
-
     if (newURL == _url)
     {
       return;
@@ -1563,7 +1551,6 @@ namespace krys::boo::dom
       return false;
     }
 
-    // FIXME: Child frames (allowsAnyFrameContent: updating their layout too) come with frames.
     (void)UpdateLayout();
     if (!GetRenderView())
     {
@@ -1648,8 +1635,6 @@ namespace krys::boo::dom
     List<RefPtr<Element>> elementsToClearHover;
     List<RefPtr<Element>> elementsToSetHover;
 
-    // FIXME: Update the hover and active state of the subframe documents the element is in, once there are
-    // frames.
     RefPtr<Element> innerElementInDocument = ShareRefPtr(innerElement);
     if (innerElementInDocument && &innerElementInDocument->NodeDocument() != this)
     {
@@ -1734,7 +1719,6 @@ namespace krys::boo::dom
         }
         elementsToClearHover.push_back(ShareRefPtr(element));
       }
-      // FIXME: Unset the hovered nodes in the subframe document of a frame owner, once there are frames.
     }
 
     bool sawCommonAncestor = false;
@@ -2421,10 +2405,7 @@ namespace krys::boo::dom
     if (HasSkippedResizeObservations())
     {
       SetHasSkippedResizeObservations(false);
-      if (RefPtr<LocalDOMWindow> window = ShareRefPtr(Window()))
-      {
-        window->ReportError(u8"ResizeObserver loop completed with undelivered notifications.");
-      }
+      // (The loop error isn't reported, as there's no script error reporting.)
       // Starting a new schedule the next round of notify.
       ScheduleRenderingUpdate({RenderingUpdateStep::ResizeObservations});
     }
@@ -3090,13 +3071,6 @@ namespace krys::boo::dom
                                          });
   }
 
-  void Document::EnqueueHashchangeEvent(USVString oldURL, USVString newURL) noexcept
-  {
-    // FIXME: popstate event and hashchange event are supposed to fire in a single task.
-    QueueTaskToDispatchEventOnWindow(html::TaskSource::DOMManipulation,
-                                     html::HashChangeEvent::Create(krys::move(oldURL), krys::move(newURL)));
-  }
-
   LocalDOMWindow *Document::Window() const noexcept
   {
     return _domWindow.get();
@@ -3109,55 +3083,23 @@ namespace krys::boo::dom
     return _frame && _frame->Document() == this;
   }
 
-  void Document::StatePopped(RefPtr<html::SerializedScriptValue> &&stateObject) noexcept
+  DocumentTimerHandle Document::StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept
   {
-    if (!Frame())
-    {
-      return;
-    }
-
-    RefPtr<LocalDOMWindow> window = _domWindow;
-    auto event =
-      html::PopStateEvent::Create(krys::move(stateObject), window ? &window->GetHistory() : nullptr);
-    DispatchWindowEvent(*event);
+    auto &timer = _timers.emplace_back(AdoptRef(*new DocumentTimer(*this, krys::move(action), delay, false)));
+    return DocumentTimerHandle(*timer);
   }
 
-  void Document::UpdateURLForPushOrReplaceState(const url::URL &url) noexcept
+  DocumentTimerHandle Document::StartRepeatingTimer(MonotonicTime::duration interval,
+                                                    Func<void()> action) noexcept
   {
-    if (!Frame())
-    {
-      return;
-    }
-
-    SetURL(url);
-    // FIXME: The outgoing referrer and the document loader's request URL.
+    auto &timer =
+      _timers.emplace_back(AdoptRef(*new DocumentTimer(*this, krys::move(action), interval, true)));
+    return DocumentTimerHandle(*timer);
   }
 
-  int32 Document::CircularSequentialID() noexcept
+  void Document::RemoveTimer(DocumentTimer &timer) noexcept
   {
-    ++_circularSequentialID;
-    if (_circularSequentialID <= 0)
-    {
-      _circularSequentialID = 1;
-    }
-    return _circularSequentialID;
-  }
-
-  bool Document::AddTimeout(int32 timeoutId, DOMTimer &timer) noexcept
-  {
-    return _timeouts.emplace(timeoutId, ShareRef(timer)).second;
-  }
-
-  RefPtr<DOMTimer> Document::TakeTimeout(int32 timeoutId) noexcept
-  {
-    auto it = _timeouts.find(timeoutId);
-    if (it == _timeouts.end())
-    {
-      return nullptr;
-    }
-    RefPtr<DOMTimer> timer = it->second;
-    _timeouts.erase(it);
-    return timer;
+    std::erase_if(_timers, [&](const Ref<DocumentTimer> &each) { return each.get() == &timer; });
   }
 
   int32 Document::RequestAnimationFrame(FrameRequestCallback &&callback) noexcept
@@ -3207,29 +3149,6 @@ namespace krys::boo::dom
     }
   }
 
-  int32 Document::RequestIdleCallback(IdleRequestCallback &&callback,
-                                      MonotonicTime::duration timeout) noexcept
-  {
-    if (!_idleCallbackController)
-    {
-      _idleCallbackController = CreateUnique<IdleCallbackController>(*this);
-    }
-    return _idleCallbackController->QueueIdleCallback(krys::move(callback), timeout);
-  }
-
-  void Document::CancelIdleCallback(int32 id) noexcept
-  {
-    if (_idleCallbackController)
-    {
-      _idleCallbackController->RemoveIdleCallback(id);
-    }
-  }
-
-  bool Document::HasPendingIdleCallback() const noexcept
-  {
-    return _idleCallbackController && _idleCallbackController->HasPendingIdleCallback();
-  }
-
   void Document::Suspend(ReasonForSuspension reason) noexcept
   {
     if (_isSuspended)
@@ -3245,8 +3164,8 @@ namespace krys::boo::dom
       }
     }
 
-    // FIXME: View transitions, the page's overlay scrollbars, the composited layers' pending update and font
-    // loading, once there are those.
+    // FIXME: The page's overlay scrollbars, the composited layers' pending update and font loading, once
+    // there are those.
     SuspendScheduledTasks(reason);
 
     // The frame's timers: the layout, the animations and autoscrolling stop.
@@ -3345,11 +3264,10 @@ namespace krys::boo::dom
 
     _activeDOMObjectsAreSuspended = true;
     _reasonForSuspendingActiveDOMObjects = reason;
-    for (auto &[id, timer] : _timeouts)
+    for (auto &timer : _timers)
     {
       timer->Suspend();
     }
-    StopGamepadHapticEffects();
   }
 
   void Document::ResumeActiveDOMObjects(ReasonForSuspension reason) noexcept
@@ -3360,55 +3278,9 @@ namespace krys::boo::dom
     }
 
     _activeDOMObjectsAreSuspended = false;
-    for (auto &[id, timer] : _timeouts)
+    for (auto &timer : _timers)
     {
       timer->Resume();
-    }
-  }
-
-  void Document::SetBackForwardCacheState(BackForwardCacheState state) noexcept
-  {
-    if (_backForwardCacheState == state)
-    {
-      return;
-    }
-
-    _backForwardCacheState = state;
-
-    switch (state)
-    {
-      case BackForwardCacheState::InBackForwardCache:
-        if (RefPtr<LocalFrameView> frameView = ShareRefPtr(View()))
-        {
-          frameView->CacheCurrentScrollState();
-        }
-        ExitPointerLock();
-        // FIXME: The shared object pool, once there's one.
-        StyleScope().ClearResolver();
-        _styleRecalcTimer.Stop();
-        break;
-      case BackForwardCacheState::NotInBackForwardCache:
-        if (ChildNeedsStyleRecalc())
-        {
-          ScheduleStyleRecalc();
-        }
-        break;
-      case BackForwardCacheState::AboutToEnterBackForwardCache: break;
-    }
-  }
-
-  void Document::DetachFromCachedFrame() noexcept
-  {
-    krys_debug_assert(_backForwardCacheState == BackForwardCacheState::InBackForwardCache);
-    _frame = nullptr;
-  }
-
-  void Document::StopGamepadHapticEffects() noexcept
-  {
-    auto *navigator = _domWindow ? _domWindow->NavigatorIfExists() : nullptr;
-    if (auto *gamepads = navigator ? navigator->GamepadsIfExists() : nullptr)
-    {
-      gamepads->StopHapticEffects();
     }
   }
 
@@ -3417,21 +3289,18 @@ namespace krys::boo::dom
     _activeDOMObjectsAreStopped = true;
 
     // Stopping a timer releases its action, which may hold the document's nodes.
-    auto timeouts = std::exchange(_timeouts, {});
-    for (auto &[id, timer] : timeouts)
+    auto timers = std::exchange(_timers, {});
+    for (auto &timer : timers)
     {
       timer->Stop();
     }
     _scriptedAnimationController = nullptr;
-    _idleCallbackController = nullptr;
 
     // Its close watchers are destroyed.
     if (auto *closeWatcherManager = _domWindow ? _domWindow->CloseWatcherManagerIfExists() : nullptr)
     {
       closeWatcherManager->DestroyAll();
     }
-
-    StopGamepadHapticEffects();
   }
 
   LocalDOMWindow *Document::DefaultView() const noexcept
@@ -3657,33 +3526,6 @@ namespace krys::boo::dom
                                          });
   }
 
-  html::FormController &Document::GetFormController() noexcept
-  {
-    if (!_formController)
-    {
-      _formController = CreateUnique<html::FormController>();
-    }
-    return *_formController;
-  }
-
-  List<DOMString> Document::FormElementsState() const noexcept
-  {
-    if (!_formController)
-    {
-      return {};
-    }
-    return _formController->FormElementsState(*this);
-  }
-
-  void Document::SetStateForNewFormElements(const List<DOMString> &stateVector) noexcept
-  {
-    if (stateVector.empty() && !_formController)
-    {
-      return;
-    }
-    GetFormController().SetStateForNewFormElements(stateVector);
-  }
-
   void Document::ImplicitClose() noexcept
   {
     Ref<Document> protectedThis = ShareRef(*this);
@@ -3699,16 +3541,6 @@ namespace krys::boo::dom
     DispatchPageshowEvent(false);
 
     // An event handler may have removed the frame.
-    if (!Frame())
-    {
-      return;
-    }
-
-    // Print if print() asked to while the document was loading.
-    if (RefPtr<LocalDOMWindow> window = _domWindow)
-    {
-      window->FinishedLoading();
-    }
     if (!Frame())
     {
       return;
@@ -3804,54 +3636,9 @@ namespace krys::boo::dom
       return;
     }
 
-    if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"refresh")))
-    {
-      // https://html.spec.whatwg.org/#attr-meta-http-equiv-refresh
-      // 1. If the meta element has no content attribute, or if that attribute's value is the empty string,
-      //    then return.
-      // 2. Let input be the value of the element's content attribute.
-      // 3. Run the shared declarative refresh steps with the meta element's node document, input, and the
-      //    meta element.
-      // https://html.spec.whatwg.org/#shared-declarative-refresh-steps
-      // 1. If document's will declaratively refresh is true, then return.
-      auto *frame = Frame();
-      if (_willDeclarativelyRefresh || !frame || content.empty())
-      {
-        return;
-      }
-
-      // 2. to 11j. are ParseRefresh.
-      auto directive = html::ParseRefresh(content);
-      if (!directive)
-      {
-        return;
-      }
-
-      // 11k. Parse: Set urlRecord to the result of encoding-parsing a URL given urlString, relative to
-      //      document.
-      auto url = directive->URL.empty() ? GetURL() : CompleteURL(directive->URL);
-
-      // 11l. If urlRecord is failure, then return.
-      // 11m. If urlRecord's scheme is "javascript", then return.
-      if (!url.IsValid() || url.ProtocolIsJavaScript())
-      {
-        return;
-      }
-
-      // 12. Set document's will declaratively refresh to true.
-      _willDeclarativelyRefresh = true;
-
-      // 13. Perform one or more of the following steps: After the refresh has come due, if the user has not
-      //     canceled the redirect and, if meta is given, document's active sandboxing flag set does not have
-      //     the sandboxed automatic features browsing context flag set, then navigate document's node
-      //     navigable to urlRecord using document, with historyHandling set to "replace".
-      // (There's no sandboxing, and nothing to cancel the redirect with.)
-      frame->GetNavigationScheduler().ScheduleRedirect(*this, directive->Delay, url, IsMetaRefresh::Yes);
-      return;
-    }
-
-    // FIXME: Content-Security-Policy and the other pragmas, once there's a security policy; Set-Cookie is
-    // obsolete and ignored, as are X-UA-Compatible and Content-Type (the parser reads the charset).
+    // Refresh is ignored, as Booey doesn't navigate by itself; so are Content-Security-Policy (there's no
+    // security policy), Set-Cookie (obsolete), X-UA-Compatible and Content-Type (the parser reads the
+    // charset).
   }
 
   void Document::SetContentLanguage(DOMString language) noexcept
@@ -3864,12 +3651,6 @@ namespace krys::boo::dom
 
     // Recalculate style so language is used when selecting the initial font, and :lang() matches.
     StyleScope().DidChangeStyleSheetEnvironment();
-  }
-
-  boo::Location *Document::GetLocation() const noexcept
-  {
-    // Return this's relevant global object's Location object, if this is fully active, and null otherwise.
-    return Frame() && _domWindow ? &_domWindow->GetLocation() : nullptr;
   }
 
   void Document::DispatchPagehideEvent(bool persisted) noexcept
@@ -4099,8 +3880,7 @@ namespace krys::boo::dom
 
   void Document::WillBeRemovedFromFrame() noexcept
   {
-    // FIXME: Unload, page hide and the other steps of unloading the document; the back/forward cache suspends
-    // the document's active objects rather than stopping them.
+    // FIXME: Unload, page hide and the other steps of unloading the document.
     StopActiveDOMObjects();
     _selection->WillBeRemovedFromFrame();
 
@@ -4522,11 +4302,10 @@ namespace krys::boo::dom
   }
 
   RefPtr<FontLoadRequest> Document::GetFontLoadRequest(utf8_stringview url, bool isSVG,
-                                                       bool isInitiatingElementInUserAgentShadowTree,
-                                                       LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept
+                                                       bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
-    CachedResourceHandle<CachedFont> cachedFont = GetFontLoader().GetCachedFont(
-      CompleteURL(url), isSVG, isInitiatingElementInUserAgentShadowTree, loadedFromOpaqueSource);
+    CachedResourceHandle<CachedFont> cachedFont =
+      GetFontLoader().GetCachedFont(CompleteURL(url), isSVG, isInitiatingElementInUserAgentShadowTree);
     if (!cachedFont)
     {
       return nullptr;
@@ -4579,8 +4358,7 @@ namespace krys::boo::dom
 
   void Document::ScheduleStyleRecalc() noexcept
   {
-    if (_styleRecalcTimer.IsActive()
-        || _backForwardCacheState != BackForwardCacheState::NotInBackForwardCache)
+    if (_styleRecalcTimer.IsActive())
     {
       return;
     }
@@ -4927,15 +4705,6 @@ namespace krys::boo::dom
     return krys::move(elementStyle.Style);
   }
 
-  VisitedLinkState &Document::GetVisitedLinkState() const noexcept
-  {
-    if (!_visitedLinkState)
-    {
-      _visitedLinkState = CreateUnique<VisitedLinkState>(const_cast<Document &>(*this));
-    }
-    return *_visitedLinkState;
-  }
-
   boo::Color Document::LinkColor(const RenderStyle &style) const noexcept
   {
     if (_linkColor.IsValid())
@@ -4943,16 +4712,6 @@ namespace krys::boo::dom
       return _linkColor;
     }
     return css::ColorFromKeyword(css::ValueId::WebkitLink, StyleColorOptions(&style));
-  }
-
-  boo::Color Document::VisitedLinkColor(const RenderStyle &style) const noexcept
-  {
-    if (_visitedLinkColor.IsValid())
-    {
-      return _visitedLinkColor;
-    }
-    return css::ColorFromKeyword(css::ValueId::WebkitLink,
-                                 StyleColorOptions(&style) | style::ColorOptions::ForVisitedLink);
   }
 
   boo::Color Document::ActiveLinkColor(const RenderStyle &style) const noexcept
@@ -4967,11 +4726,6 @@ namespace krys::boo::dom
   void Document::ResetLinkColor() noexcept
   {
     _linkColor = {};
-  }
-
-  void Document::ResetVisitedLinkColor() noexcept
-  {
-    _visitedLinkColor = {};
   }
 
   void Document::ResetActiveLinkColor() noexcept

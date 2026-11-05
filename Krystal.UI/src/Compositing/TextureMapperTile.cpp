@@ -1,5 +1,5 @@
 ﻿#include "Krystal.UI/Compositing/TextureMapperTile.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 
 namespace krys::ui

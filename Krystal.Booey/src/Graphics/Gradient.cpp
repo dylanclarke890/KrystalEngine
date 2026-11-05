@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"

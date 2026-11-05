@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/HTML/InputTypes/BaseButtonInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/InputTypeNames.hpp"
 

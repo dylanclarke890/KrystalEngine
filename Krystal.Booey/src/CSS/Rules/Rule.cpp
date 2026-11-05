@@ -13,14 +13,12 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSPageRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSPropertyRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStartingStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
@@ -29,8 +27,7 @@
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <functional>
 #include <memory>
@@ -67,10 +64,6 @@ namespace krys::boo::css
       case RuleType::NestedDeclarations:
       {
         return std::invoke(std::forward<Visitor>(visitor), static_cast<NestedDeclarationsRule &>(*this));
-      }
-      case RuleType::Page:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<PageRule &>(*this));
       }
       case RuleType::FontFace:
       {
@@ -140,10 +133,6 @@ namespace krys::boo::css
       case RuleType::StartingStyle:
       {
         return std::invoke(std::forward<Visitor>(visitor), static_cast<StartingStyleRule &>(*this));
-      }
-      case RuleType::ViewTransition:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<ViewTransitionRule &>(*this));
       }
       case RuleType::PositionTry:
       {
@@ -230,10 +219,6 @@ namespace krys::boo::css
         {
           return CSSNestedDeclarations::Create(rule, parentSheet);
         }
-        else if constexpr (SameType<TRule, PageRule>)
-        {
-          return CSSPageRule::Create(rule, parentSheet);
-        }
         else if constexpr (SameType<TRule, FontFaceRule>)
         {
           return CSSFontFaceRule::Create(rule, parentSheet);
@@ -297,10 +282,6 @@ namespace krys::boo::css
         else if constexpr (SameType<TRule, StartingStyleRule>)
         {
           return CSSStartingStyleRule::Create(rule, parentSheet);
-        }
-        else if constexpr (SameType<TRule, ViewTransitionRule>)
-        {
-          return CSSViewTransitionRule::Create(rule, parentSheet);
         }
         else if constexpr (SameType<TRule, PositionTryRule>)
         {
@@ -662,37 +643,6 @@ namespace krys::boo::css
   Ref<FontFeatureValuesRule> FontFeatureValuesRule::Copy() const noexcept
   {
     return AdoptRef(*new FontFeatureValuesRule(*this));
-  }
-
-#pragma endregion
-
-#pragma region PageRule
-
-  PageRule::PageRule(Ref<StyleProperties> &&properties, SelectorList &&selectors) noexcept
-      : Rule(RuleType::Page), _properties(krys::move(properties)), _selectorList(krys::move(selectors))
-  {
-  }
-
-  PageRule::PageRule(const PageRule &other) noexcept
-      : Rule(other), _properties(other._properties->MutableCopy()), _selectorList(other._selectorList)
-  {
-  }
-
-  PageRule::~PageRule() noexcept = default;
-
-  Ref<PageRule> PageRule::Create(Ref<StyleProperties> &&properties, SelectorList &&selectors) noexcept
-  {
-    return AdoptRef(*new PageRule(krys::move(properties), krys::move(selectors)));
-  }
-
-  Ref<PageRule> PageRule::Copy() const noexcept
-  {
-    return AdoptRef(*new PageRule(*this));
-  }
-
-  MutableStyleProperties &PageRule::MutableProperties() noexcept
-  {
-    return EnsureMutable(_properties);
   }
 
 #pragma endregion

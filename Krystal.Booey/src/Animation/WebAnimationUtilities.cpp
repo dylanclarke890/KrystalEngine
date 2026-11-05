@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Booey/Animation/AnimationPlaybackEvent.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
-#include "Krystal.Booey/Animation/CSSAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
-#include "Krystal.Booey/Animation/CSSTransitionEvent.hpp"
+#include "Krystal.Booey/Animation/Events/AnimationPlaybackEvent.hpp"
+#include "Krystal.Booey/Animation/Events/CSSAnimationEvent.hpp"
+#include "Krystal.Booey/Animation/Events/CSSTransitionEvent.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
@@ -47,11 +47,6 @@ namespace krys::boo
         TargetText,
         Checkmark,
         After,
-        ViewTransition,
-        ViewTransitionGroup,
-        ViewTransitionImagePair,
-        ViewTransitionOld,
-        ViewTransitionNew,
         Other
       };
 
@@ -65,30 +60,23 @@ namespace krys::boo
 
         switch (pseudoElementIdentifier->Type)
         {
-          case PseudoElementType::Marker:                  return Marker;
-          case PseudoElementType::Before:                  return Before;
-          case PseudoElementType::FirstLetter:             return FirstLetter;
-          case PseudoElementType::FirstLine:               return FirstLine;
-          case PseudoElementType::GrammarError:            return GrammarError;
-          case PseudoElementType::Highlight:               return Highlight;
-          case PseudoElementType::Selection:               return Selection;
-          case PseudoElementType::SpellingError:           return SpellingError;
-          case PseudoElementType::TargetText:              return TargetText;
-          case PseudoElementType::After:                   return After;
-          case PseudoElementType::Checkmark:               return Checkmark;
-          case PseudoElementType::ViewTransition:          return ViewTransition;
-          case PseudoElementType::ViewTransitionGroup:     return ViewTransitionGroup;
-          case PseudoElementType::ViewTransitionImagePair: return ViewTransitionImagePair;
-          case PseudoElementType::ViewTransitionOld:       return ViewTransitionOld;
-          case PseudoElementType::ViewTransitionNew:       return ViewTransitionNew;
-          default:                                         krys_debug_assert(false); return Other;
+          case PseudoElementType::Marker:        return Marker;
+          case PseudoElementType::Before:        return Before;
+          case PseudoElementType::FirstLetter:   return FirstLetter;
+          case PseudoElementType::FirstLine:     return FirstLine;
+          case PseudoElementType::GrammarError:  return GrammarError;
+          case PseudoElementType::Highlight:     return Highlight;
+          case PseudoElementType::Selection:     return Selection;
+          case PseudoElementType::SpellingError: return SpellingError;
+          case PseudoElementType::TargetText:    return TargetText;
+          case PseudoElementType::After:         return After;
+          case PseudoElementType::Checkmark:     return Checkmark;
+          default:                               krys_debug_assert(false); return Other;
         }
       };
 
       if (&a.Element == &b.Element)
       {
-        // FIXME: Ordering the named view transition pseudo-elements of an element by the active view
-        // transition's named elements, once there are view transitions.
         auto aSortingIndex = sortingIndex(a.PseudoElementIdentifier);
         auto bSortingIndex = sortingIndex(b.PseudoElementIdentifier);
         krys_debug_assert(aSortingIndex != bSortingIndex);
@@ -355,23 +343,18 @@ namespace krys::boo
 
     switch (pseudoElementIdentifier->Type)
     {
-      case PseudoElementType::After:                   return u8"::after";
-      case PseudoElementType::Before:                  return u8"::before";
-      case PseudoElementType::FirstLetter:             return u8"::first-letter";
-      case PseudoElementType::FirstLine:               return u8"::first-line";
-      case PseudoElementType::GrammarError:            return u8"::grammar-error";
-      case PseudoElementType::Highlight:               return withName(u8"::highlight");
-      case PseudoElementType::Marker:                  return u8"::marker";
-      case PseudoElementType::Selection:               return u8"::selection";
-      case PseudoElementType::SpellingError:           return u8"::spelling-error";
-      case PseudoElementType::TargetText:              return u8"::target-text";
-      case PseudoElementType::Checkmark:               return u8"::checkmark";
-      case PseudoElementType::ViewTransition:          return u8"::view-transition";
-      case PseudoElementType::ViewTransitionGroup:     return withName(u8"::view-transition-group");
-      case PseudoElementType::ViewTransitionImagePair: return withName(u8"::view-transition-image-pair");
-      case PseudoElementType::ViewTransitionOld:       return withName(u8"::view-transition-old");
-      case PseudoElementType::ViewTransitionNew:       return withName(u8"::view-transition-new");
-      default:                                         return {};
+      case PseudoElementType::After:         return u8"::after";
+      case PseudoElementType::Before:        return u8"::before";
+      case PseudoElementType::FirstLetter:   return u8"::first-letter";
+      case PseudoElementType::FirstLine:     return u8"::first-line";
+      case PseudoElementType::GrammarError:  return u8"::grammar-error";
+      case PseudoElementType::Highlight:     return withName(u8"::highlight");
+      case PseudoElementType::Marker:        return u8"::marker";
+      case PseudoElementType::Selection:     return u8"::selection";
+      case PseudoElementType::SpellingError: return u8"::spelling-error";
+      case PseudoElementType::TargetText:    return u8"::target-text";
+      case PseudoElementType::Checkmark:     return u8"::checkmark";
+      default:                               return {};
     }
   }
 

@@ -426,8 +426,6 @@ namespace krys::boo::layout
                                                                floatingContext, marginState);
       marginState.ContentOffsetAfterSelfCollapsingBlock = LayoutUnit {};
     }
-    InlineDisplayLineBuilder::AddLegacyLineClampTrailingLinkBoxIfApplicable(*this, inlineLayoutState,
-                                                                            layoutResult.DisplayContent);
     HandleAfterSideMargin(marginState, layoutResult.DisplayContent);
 
     return layoutResult;
@@ -543,18 +541,9 @@ namespace krys::boo::layout
         // When a block line is clamped, its content gets clamped and not this line itself.
         return;
       }
-      auto isLegacyLineClamp = lineClamp && lineClamp->IsLegacy;
       auto truncationPolicy = InlineFormattingUtils::GetLineEndingTruncationPolicy(
         Root().Style(), numberOfLinesWithInlineContent, numberOfVisibleLinesAllowed, lineBox.HasContent());
-      InlineDisplayLineBuilder::ApplyEllipsisIfNeeded(truncationPolicy, displayLine, boxes,
-                                                      isLegacyLineClamp);
-      auto lineHasLegacyLineClamp =
-        isLegacyLineClamp && displayLine.HasEllipsis()
-        && truncationPolicy == LineEndingTruncationPolicy::WhenContentOverflowsInBlockDirection;
-      if (lineHasLegacyLineClamp)
-      {
-        inlineLayoutState.SetLegacyClampedLineIndex(lineBox.LineIndex());
-      }
+      InlineDisplayLineBuilder::ApplyEllipsisIfNeeded(truncationPolicy, displayLine, boxes);
     };
     addTrailingEllipsisIfApplicable();
 

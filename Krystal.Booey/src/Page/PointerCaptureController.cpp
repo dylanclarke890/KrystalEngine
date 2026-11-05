@@ -4,14 +4,14 @@
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/TaskSource.hpp"
+#include "Krystal.Booey/HTML/EventLoop/TaskSource.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
-#include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include <algorithm>
 
 namespace krys::boo

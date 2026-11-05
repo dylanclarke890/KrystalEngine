@@ -16,8 +16,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/Editing/Markup/Markup.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
@@ -26,19 +26,16 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/NavigateEvent.hpp"
-#include "Krystal.Booey/Page/Navigation.hpp"
-#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
+#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Platform/SelectionData.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
-#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Editor/PageAnimations.hpp"
@@ -212,9 +209,6 @@ namespace krys::ui::tests
 
   TEST_CASE("View: frees a page's document when it loads another, or goes", "[UI]")
   {
-    // The pages left aren't kept for going back.
-    BackForwardCacheDisabler noCache;
-
     // A page with style, layout, composited layers, a running animation, a transition and a hovered element:
     // all of it goes with the document.
     const utf8_string page =
@@ -360,7 +354,6 @@ namespace krys::ui::tests
 
   TEST_CASE("View: the editor page's bean rating", "[UI]")
   {
-    BackForwardCacheDisabler noCache;
     View view({1'200, 1'600});
     REQUIRE(view
               .DefineCustomElement(
@@ -428,74 +421,54 @@ namespace krys::ui::tests
   TEST_CASE("View: the editor's pages link to each other, and route the guide", "[UI]")
   {
     View view({1'200, 1'600});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
     REQUIRE(
       view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
         .has_value());
     WaitForLoad(view);
     RefPtr<boo::dom::Document> index = ShareRefPtr<boo::dom::Document>(&view.Document());
 
-    SECTION("the settings page, and back from the cache")
+    SECTION("the settings page, and back to a new first page")
     {
+      FollowLinks(view);
       auto link = view.Document().QuerySelector(u8"a[href='settings.html']").ReleaseValue();
       REQUIRE(link);
       link->DispatchSimulatedClick(nullptr);
       WaitForLoad(view);
       CHECK(view.Document().GetURL().LastPathComponent() == u8"settings.html");
-      auto name = view.Document().QuerySelector(u8"input[name=name]").ReleaseValue();
-      REQUIRE(name);
-      (void)Downcast<boo::html::HTMLInputElement>(*name).SetValue(u8"Ada");
 
-      REQUIRE(view.GoBack());
+      link = view.Document().QuerySelector(u8"a[href='index.html']").ReleaseValue();
+      REQUIRE(link);
+      link->DispatchSimulatedClick(nullptr);
       WaitForLoad(view);
-      CHECK(&view.Document() == index.get());
-
-      REQUIRE(view.GoForward());
-      WaitForLoad(view);
-      name = view.Document().QuerySelector(u8"input[name=name]").ReleaseValue();
-      REQUIRE(name);
-      CHECK(Downcast<boo::html::HTMLInputElement>(*name).Value() == u8"Ada");
+      CHECK(view.Document().GetURL().LastPathComponent() == u8"index.html");
+      CHECK(&view.Document() != index.get());
     }
 
-    SECTION("the guide's links can be intercepted")
+    SECTION("the guide's links can be handled in place")
     {
-      // As the editor's router does: the guide's links stay in the page.
+      // As the editor's navigation handler does: the guide's links stay in the page.
       List<std::string> routed;
-      auto router = view.Document().Window()->GetNavigation().AddEventListener<boo::NavigateEvent>(
-        u8"navigate",
-        [&](boo::NavigateEvent &event)
+      view.SetNavigationHandler(
+        [&](const NavigationRequest &request)
         {
-          CHECK(event.CanIntercept());
-          boo::NavigateEvent::NavigationInterceptOptions options;
-          options.Handler = [&, url = event.Destination()->URL()](auto &&completion)
-          {
-            routed.push_back(std::string(url.Query().begin(), url.Query().end()));
-            completion({});
-          };
-          (void)event.Intercept(view.Document(), krys::move(options));
+          boo::url::URL url(request.URL);
+          routed.push_back(std::string(url.Query().begin(), url.Query().end()));
         });
-      auto topic = view.Document().GetElementById(u8"topic-history");
+      auto topic = view.Document().GetElementById(u8"topic-routing");
       REQUIRE(topic);
       topic->DispatchSimulatedClick(nullptr);
-      WaitForLoad(view);
       boo::html::EventLoop::Current().RunUntilIdle();
-      CHECK(&view.Document() == index.get());
-      CHECK(view.Document().GetURL().Query() == u8"guide=history");
-      CHECK(view.CanGoBack());
-
-      REQUIRE(view.GoBack());
-      WaitForLoad(view);
-      boo::html::EventLoop::Current().RunUntilIdle();
+      CHECK_FALSE(view.IsLoading());
       CHECK(&view.Document() == index.get());
       CHECK(view.Document().GetURL().Query().empty());
-      CHECK(routed == List<std::string> {"guide=history", ""});
+      CHECK(routed == List<std::string> {"guide=routing"});
     }
   }
 
   TEST_CASE("View: the editor page's dialogs, popovers and details", "[UI]")
   {
     View view({1'200, 1'600});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    FollowLinks(view);
     REQUIRE(
       view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
         .has_value());
@@ -584,12 +557,6 @@ namespace krys::ui::tests
       CHECK_FALSE(secret.Open());
       click(u8"a[href='#secret']");
       CHECK(secret.Open());
-      // The text fragment link opens the question whose answer it finds, which closes the other.
-      click(u8"details[name=faq]:not([open]) summary");
-      CHECK(fresh.Open());
-      click(u8"a[href^='#:~:text=From']");
-      CHECK(local.Open());
-      CHECK_FALSE(fresh.Open());
     }
 
     SECTION("the header's menu is anchored to its button")
@@ -662,7 +629,7 @@ namespace krys::ui::tests
     // Images that other cases loaded load at once, from the memory cache.
     boo::MemoryCache::Singleton().EvictResources();
     View view({1'200, 300});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    FollowLinks(view);
     REQUIRE(
       view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
         .has_value());
@@ -766,7 +733,7 @@ namespace krys::ui::tests
     using namespace std::chrono_literals;
     boo::MemoryCache::Singleton().EvictResources();
     View view({1'200, 300});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    FollowLinks(view);
     REQUIRE(
       view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
         .has_value());
@@ -875,7 +842,7 @@ namespace krys::ui::tests
   {
     boo::MemoryCache::Singleton().EvictResources();
     View view({1'200, 600});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    FollowLinks(view);
     REQUIRE(
       view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
         .has_value());
@@ -1006,9 +973,7 @@ namespace krys::ui::tests
         if (request.IsFormSubmission)
         {
           submissions.push_back(request);
-          return NavigationPolicy::Ignore;
         }
-        return NavigationPolicy::Allow;
       });
     REQUIRE(
       view
@@ -1060,7 +1025,9 @@ namespace krys::ui::tests
     CHECK_FALSE(dialog.Open());
     REQUIRE(submissions.size() == 1);
     CHECK(submissions[0].SourceElement.get() == &form);
-    CHECK(submissions[0].URL.starts_with(u8"https://example.com/settings?"));
+    CHECK(submissions[0].URL == u8"https://example.com/settings");
+    REQUIRE(submissions[0].Entries);
+    CHECK_FALSE(submissions[0].Entries->Items().empty());
 
     // Escape after a save doesn't save again.
     click(u8".settings button[command=show-modal]");
@@ -1457,23 +1424,20 @@ namespace krys::ui::tests
                                   "touchcancel:b/0,1", "pointercancel:a/touch3/0/0", "touchcancel:a/0,1"});
     }
 
-    SECTION("the pointing devices: media features and maxTouchPoints")
+    SECTION("the pointing devices: media features")
     {
       auto &window = *view.Document().Window();
       CHECK(window.MatchMedia(u8"(pointer: fine) and (hover: hover)")->Matches());
-      CHECK(window.GetNavigator().MaxTouchPoints() == 0);
 
       view.SetPointingDevices({.Mouse = false, .Pen = false, .Touch = true, .MaxTouchPoints = 10});
       CHECK(window.MatchMedia(u8"(pointer: coarse) and (hover: none)")->Matches());
       CHECK(window.MatchMedia(u8"(any-pointer: coarse) and (any-hover: none)")->Matches());
       CHECK_FALSE(window.MatchMedia(u8"(any-pointer: fine)")->Matches());
-      CHECK(window.GetNavigator().MaxTouchPoints() == 10);
 
       view.SetPointingDevices({.Mouse = true, .Pen = true, .Touch = true, .MaxTouchPoints = 5});
       CHECK(
         window.MatchMedia(u8"(pointer: fine) and (any-pointer: coarse) and (any-pointer: fine)")->Matches());
       CHECK(window.MatchMedia(u8"(any-hover: hover)")->Matches());
-      CHECK(window.GetNavigator().MaxTouchPoints() == 5);
     }
   }
 
@@ -2179,7 +2143,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     (void)view.Update(boo::html::EventLoop::Current().Now());
     CHECK(WidthOf(view, u8"box") == 30);
-    REQUIRE(view.LoadFile(directory / "page.html", boo::CachePolicy::Revalidate).has_value());
+    REQUIRE(view.LoadFile(directory / "page.html", boo::CachePolicy::Reload).has_value());
     WaitForLoad(view);
     (void)view.Update(boo::html::EventLoop::Current().Now());
     CHECK(WidthOf(view, u8"box") == 50);
@@ -2198,12 +2162,7 @@ namespace krys::ui::tests
     view.UpdateRendering();
 
     List<NavigationRequest> requests;
-    view.SetNavigationHandler(
-      [&](const NavigationRequest &request)
-      {
-        requests.push_back(request);
-        return NavigationPolicy::Ignore;
-      });
+    view.SetNavigationHandler([&](const NavigationRequest &request) { requests.push_back(request); });
 
     // The required field is empty, so clicking the button doesn't submit.
     auto go = view.Document().GetElementById(u8"go");
@@ -2219,20 +2178,25 @@ namespace krys::ui::tests
     empty.Value()->RemoveAttribute(u8"required");
     view.MousePressed({10, 30}, pal::MouseButton::Left);
     view.MouseReleased({10, 30}, pal::MouseButton::Left);
-    // The submission is scheduled: it reaches the host on a later task.
+    // The submission is planned: it reaches the host on a later task.
     CHECK(requests.empty());
     (void)view.Update(boo::html::EventLoop::Current().Now());
     REQUIRE(requests.size() == 1);
     CHECK(requests[0].IsFormSubmission);
-    CHECK_FALSE(requests[0].IsSameDocument);
     CHECK(requests[0].SourceElement.get() == view.Document().QuerySelector(u8"form").Value().get());
     CHECK(requests[0].Method == u8"POST");
     CHECK(requests[0].URL == u8"https://example.com/order");
-    CHECK(requests[0].ContentType == u8"application/x-www-form-urlencoded");
-    CHECK(requests[0].Body == u8"size=large&empty=&go=1");
+    CHECK(requests[0].EncodingType == u8"application/x-www-form-urlencoded");
+    REQUIRE(requests[0].Entries);
+    List<utf8_string> entries;
+    for (auto &item : requests[0].Entries->Items())
+    {
+      entries.push_back(item.Name + u8"=" + std::get<boo::dom::DOMString>(item.Data));
+    }
+    CHECK(entries == List<utf8_string> {u8"size=large", u8"empty=", u8"go=1"});
   }
 
-  TEST_CASE("View: asks the host about links", "[UI]")
+  TEST_CASE("View: hands links to the host", "[UI]")
   {
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } a { display: block; height: 40px }</style>"
@@ -2242,34 +2206,22 @@ namespace krys::ui::tests
     view.UpdateRendering();
 
     List<NavigationRequest> requests;
-    auto policy = NavigationPolicy::Ignore;
-    view.SetNavigationHandler(
-      [&](const NavigationRequest &request)
-      {
-        requests.push_back(request);
-        return policy;
-      });
+    view.SetNavigationHandler([&](const NavigationRequest &request) { requests.push_back(request); });
 
     // A link to another page: the host decides, and the page stays.
     view.MousePressed({10, 10}, pal::MouseButton::Left);
     view.MouseReleased({10, 10}, pal::MouseButton::Left);
     REQUIRE(requests.size() == 1);
     CHECK(requests[0].URL == u8"https://example.com/away");
-    CHECK_FALSE(requests[0].IsSameDocument);
     CHECK_FALSE(requests[0].IsFormSubmission);
     CHECK(requests[0].Button == boo::MouseButton::Left);
     CHECK(requests[0].SourceElement.get() == view.Document().GetElementById(u8"away").get());
+    CHECK_FALSE(view.IsLoading());
 
-    // A link within the page, ignored and then allowed.
+    // A link within the page scrolls to its fragment, without asking the host.
     view.MousePressed({10, 50}, pal::MouseButton::Left);
     view.MouseReleased({10, 50}, pal::MouseButton::Left);
-    REQUIRE(requests.size() == 2);
-    CHECK(requests[1].IsSameDocument);
-    CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html");
-
-    policy = NavigationPolicy::Allow;
-    view.MousePressed({10, 50}, pal::MouseButton::Left);
-    view.MouseReleased({10, 50}, pal::MouseButton::Left);
+    CHECK(requests.size() == 1);
     CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html#here");
   }
 
@@ -2661,92 +2613,22 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
-  TEST_CASE("View: the page's window asks the host to focus and close it", "[UI]")
+  TEST_CASE("View: the page's window asks the host to focus it", "[UI]")
   {
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html>");
     WaitForLoad(view);
 
     uint32 focusRequests = 0;
-    uint32 closeRequests = 0;
     auto &window = *view.Document().Window();
 
     // Without a handler, nothing happens.
     window.Focus();
 
     view.SetFocusRequestHandler([&] { ++focusRequests; });
-    view.SetCloseRequestHandler([&] { ++closeRequests; });
 
     view.Document().Window()->Focus();
     CHECK(focusRequests == 1);
-    view.Document().Window()->Close();
-    CHECK(closeRequests == 0);
-    boo::html::EventLoop::Current().RunUntilIdle();
-    CHECK(closeRequests == 1);
-  }
-
-  TEST_CASE("View: the page's window geometry is the host's", "[UI]")
-  {
-    View view({400, 300});
-    view.LoadHTML(u8"<!DOCTYPE html>");
-    WaitForLoad(view);
-    auto &window = *view.Document().Window();
-
-    // Until the host says, the window is the viewport at the screen's origin.
-    CHECK(window.OuterWidth() == 400);
-    CHECK(window.OuterHeight() == 300);
-    CHECK(window.ScreenX() == 0);
-
-    view.SetWindowRect(boo::FloatRect(10, 20, 800, 600));
-    CHECK(window.ScreenX() == 10);
-    CHECK(window.ScreenY() == 20);
-    CHECK(window.OuterWidth() == 800);
-
-    auto environment = view.Frame().GetMediaEnvironment();
-    environment.ScreenSize = boo::FloatSize(1'920, 1'080);
-    view.Frame().SetMediaEnvironment(environment);
-
-    List<boo::FloatRect> requests;
-    view.SetWindowRectRequestHandler([&](const boo::FloatRect &rect) { requests.push_back(rect); });
-    window.MoveTo(100, 200);
-    REQUIRE(requests.size() == 1);
-    CHECK(requests[0] == boo::FloatRect(100, 200, 800, 600));
-  }
-
-  TEST_CASE("View: the page's prompts and console messages reach the host's handlers", "[UI]")
-  {
-    View view({400, 300});
-    view.LoadHTML(u8"<!DOCTYPE html>", boo::url::URL(u8"https://example.com/page.html"));
-    WaitForLoad(view);
-    auto &window = *view.Document().Window();
-
-    // Without handlers, prompts show nothing and are cancelled.
-    window.Alert(u8"Hi");
-    CHECK_FALSE(window.Confirm(u8"Sure?"));
-    CHECK_FALSE(window.Prompt(u8"Name?"));
-
-    List<std::string> shown;
-    view.SetAlertHandler([&](const utf8_string &message)
-                         { shown.push_back(std::string(message.begin(), message.end())); });
-    view.SetConfirmHandler([](const utf8_string &) { return true; });
-    view.SetPromptHandler([](const utf8_string &, const utf8_string &defaultValue)
-                          { return Maybe<utf8_string>(defaultValue + u8"!"); });
-    List<ConsoleMessage> messages;
-    view.SetConsoleMessageHandler([&](const ConsoleMessage &message) { messages.push_back(message); });
-
-    window.Alert(u8"Hi");
-    CHECK(shown == List<std::string> {"Hi"});
-    CHECK(window.Confirm(u8"Sure?"));
-    CHECK(window.Prompt(u8"Name?", u8"Ada") == boo::dom::DOMString(u8"Ada!"));
-
-    window.ReportError(u8"Something broke");
-    REQUIRE(messages.size() == 1);
-    CHECK(messages[0].Level == boo::MessageLevel::Error);
-    CHECK(messages[0].Message == u8"Something broke");
-    CHECK(messages[0].SourceURL == u8"https://example.com/page.html");
-
-    view.SetUserAgent(u8"KrystalGame/1.0");
-    CHECK(window.GetNavigator().UserAgent() == u8"KrystalGame/1.0");
   }
 
   TEST_CASE("View: loads pages on a later task, and tells the host", "[UI]")
@@ -2787,7 +2669,7 @@ namespace krys::ui::tests
       CHECK(events == List<std::string> {"started", "failed"});
     }
 
-    SECTION("a link the handler allows loads its page")
+    SECTION("a link the handler loads")
     {
       events.clear();
       List<std::string> asked;
@@ -2795,7 +2677,7 @@ namespace krys::ui::tests
         [&](const NavigationRequest &request)
         {
           asked.push_back(std::string(request.URL.begin(), request.URL.end()));
-          return NavigationPolicy::Allow;
+          view.Load(boo::url::URL(request.URL));
         });
       view.Document().GetElementById(u8"next")->DispatchSimulatedClick(nullptr);
       CHECK(asked == List<std::string> {"https://example.com/next.html"});
@@ -2803,115 +2685,6 @@ namespace krys::ui::tests
       WaitForLoad(view);
       CHECK(events == List<std::string> {"started", "failed"});
       CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html");
-    }
-  }
-
-  TEST_CASE("View: goes back and forward through its pages", "[UI]")
-  {
-    View view({400, 300});
-    CHECK_FALSE(view.CanGoBack());
-    CHECK_FALSE(view.CanGoForward());
-
-    view.LoadHTML(u8"<!DOCTYPE html><p id=first>First</p><input id=field>",
-                  boo::url::URL(u8"https://example.com/first.html"));
-    WaitForLoad(view);
-    auto *field =
-      DynamicDowncast<boo::html::HTMLInputElement>(view.Document().GetElementById(u8"field").get());
-    REQUIRE(field);
-    (void)field->SetValue(u8"typed");
-    RefPtr<boo::dom::Document> first = ShareRefPtr<boo::dom::Document>(&view.Document());
-    view.LoadHTML(u8"<!DOCTYPE html><p id=second>Second</p>",
-                  boo::url::URL(u8"https://example.com/second.html"));
-    WaitForLoad(view);
-
-    CHECK(view.CanGoBack());
-    CHECK_FALSE(view.CanGoForward());
-    REQUIRE(view.GetBackForwardList().Entries().size() == 2);
-
-    auto shows = [&](utf8_stringview id)
-    {
-      return view.Document().GetElementById(id) != nullptr;
-    };
-
-    SECTION("GoBack and GoForward")
-    {
-      // A page from the back/forward cache commits once it's the view's again.
-      List<bool> committedFirst;
-      view.SetLoadHandler(
-        [&](const LoadEvent &event)
-        {
-          if (event.Type == LoadEventType::Committed)
-          {
-            committedFirst.push_back(&view.Document() == first.get() && event.FromBackForwardCache);
-          }
-        });
-      REQUIRE(view.GoBack());
-      WaitForLoad(view);
-      CHECK(committedFirst == List<bool> {true});
-      CHECK(shows(u8"first"));
-      // The back/forward cache kept the page, with its form filled in.
-      CHECK(&view.Document() == first.get());
-      field = DynamicDowncast<boo::html::HTMLInputElement>(view.Document().GetElementById(u8"field").get());
-      REQUIRE(field);
-      CHECK(field->Value() == u8"typed");
-      CHECK(view.CanGoForward());
-
-      REQUIRE(view.GoForward());
-      WaitForLoad(view);
-      CHECK(shows(u8"second"));
-      CHECK_FALSE(view.GoForward());
-    }
-
-    SECTION("the mouse's back and forward buttons")
-    {
-      view.MousePressed({10, 10}, pal::MouseButton::Thumb1);
-      view.MouseReleased({10, 10}, pal::MouseButton::Thumb1);
-      WaitForLoad(view);
-      CHECK(shows(u8"first"));
-
-      view.MousePressed({10, 10}, pal::MouseButton::Thumb2);
-      view.MouseReleased({10, 10}, pal::MouseButton::Thumb2);
-      WaitForLoad(view);
-      CHECK(shows(u8"second"));
-    }
-
-    SECTION("Alt+Left and Alt+Right")
-    {
-      CHECK(view.KeyPressed(pal::Key::LeftArrow, {pal::KeyModifier::Alt}));
-      (void)view.KeyReleased(pal::Key::LeftArrow, {pal::KeyModifier::Alt});
-      WaitForLoad(view);
-      CHECK(shows(u8"first"));
-
-      CHECK(view.KeyPressed(pal::Key::RightArrow, {pal::KeyModifier::Alt}));
-      (void)view.KeyReleased(pal::Key::RightArrow, {pal::KeyModifier::Alt});
-      WaitForLoad(view);
-      CHECK(shows(u8"second"));
-    }
-
-    SECTION("a page that handles the key keeps it")
-    {
-      auto listener =
-        view.Document().AddEventListener(u8"keydown", [](boo::dom::Event &event) { event.PreventDefault(); });
-      CHECK(view.KeyPressed(pal::Key::LeftArrow, {pal::KeyModifier::Alt}));
-      CHECK_FALSE(view.IsLoading());
-      CHECK(shows(u8"second"));
-    }
-
-    SECTION("going to an item of the list")
-    {
-      view.GoToItem(*view.GetBackForwardList().Entries()[0]);
-      WaitForLoad(view);
-      CHECK(shows(u8"first"));
-    }
-
-    SECTION("reloading keeps the item")
-    {
-      RefPtr<boo::dom::Document> before = ShareRefPtr<boo::dom::Document>(&view.Document());
-      view.Reload();
-      WaitForLoad(view);
-      CHECK(&view.Document() != before.get());
-      CHECK(shows(u8"second"));
-      CHECK(view.GetBackForwardList().Entries().size() == 2);
     }
   }
 

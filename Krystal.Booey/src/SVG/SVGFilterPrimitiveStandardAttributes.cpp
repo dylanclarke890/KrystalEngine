@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilterPrimitive.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
-#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGParsingError.hpp"
 

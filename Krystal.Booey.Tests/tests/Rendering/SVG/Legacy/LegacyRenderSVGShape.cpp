@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGPath.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRect.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <numbers>
 

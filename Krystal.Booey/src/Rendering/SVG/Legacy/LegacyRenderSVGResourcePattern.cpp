@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGPatternElement.hpp"
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGPatternElement.hpp"
 
 namespace krys::boo
 {

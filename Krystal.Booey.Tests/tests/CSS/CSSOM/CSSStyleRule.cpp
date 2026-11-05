@@ -4,7 +4,7 @@
 #include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 
 namespace krys::boo::css::tests

@@ -24,8 +24,8 @@ namespace krys::boo::style
   // clang-format off
 #define KRYS_FOR_EACH_MASK_LAYER_REFERENCE(macro)                                \
   macro(MaskLayer, MaskImage, ImageOrNone, image, Image)                         \
-  macro(MaskLayer, WebkitMaskPositionX, PositionX, positionX, PositionX)         \
-  macro(MaskLayer, WebkitMaskPositionY, PositionY, positionY, PositionY)         \
+  macro(MaskLayer, InternalMaskPositionX, PositionX, positionX, PositionX)         \
+  macro(MaskLayer, InternalMaskPositionY, PositionY, positionY, PositionY)         \
   macro(MaskLayer, MaskSize, BackgroundSize, size, Size)                         \
   macro(MaskLayer, MaskRepeat, RepeatStyle, repeat, Repeat)
 

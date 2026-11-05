@@ -1,18 +1,18 @@
 ﻿#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
-#include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -97,7 +97,7 @@ namespace krys::boo
   {
     RenderBoxModelObject::UpdateFromStyle();
 
-    // FIXME: Support transforms and reflections on inline flows someday.
+    // FIXME: Support transforms on inline flows someday.
     SetHasTransformRelatedProperty(false);
   }
 
@@ -808,8 +808,7 @@ namespace krys::boo
   bool RenderInline::RequiresLayer() const noexcept
   {
     return IsInFlowPositioned() || CreatesGroup() || HasClipPath()
-           || Style().GetWillChange().CanCreateStackingContext() || HasRunningAcceleratedAnimations()
-           || RequiresRenderingConsolidationForViewTransition();
+           || Style().GetWillChange().CanCreateStackingContext() || HasRunningAcceleratedAnimations();
   }
 
   void RenderInline::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept

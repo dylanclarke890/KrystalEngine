@@ -21,7 +21,6 @@ namespace krys::boo::style
   using WeakStyleOriginatedAnimations = List<WeakPtr<StyleOriginatedAnimation>>;
 
   /// @brief An element, or one of its pseudo-elements: something that is styled.
-  // FIXME: View transitions, once there are any.
   struct Styleable
   {
     dom::Element &Element;

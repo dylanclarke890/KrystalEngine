@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
@@ -23,7 +23,7 @@ namespace krys::boo::tests
     return std::string(reinterpret_cast<const char *>(text.data()), text.size());
   }
 
-  /// @brief A navigation as the host was asked about it.
+  /// @brief A navigation the page asked the host for.
   struct ReceivedNavigation
   {
     NavigationAction Action;
@@ -35,42 +35,31 @@ namespace krys::boo::tests
     RefPtr<FormSubmission> Submission;
   };
 
-  /// @brief A frame loader client that records the navigations it's asked about and answers each with
-  /// `Policy`.
+  /// @brief A frame loader client that records the navigations the page asks for.
   class RecordingFrameLoaderClient final : public LocalFrameLoaderClient
   {
   public:
     List<ReceivedNavigation> Navigations;
-    PolicyAction Policy {PolicyAction::Use};
     uint32 DidNavigateWithinPageCount {0};
-    uint32 DidChangeLocationWithinPageCount {0};
     /// @brief Called with each navigation as it's recorded.
     Func<void(const ReceivedNavigation &)> OnRecord;
 
-    KRYS_NODISCARD PolicyAction
-      DispatchDecidePolicyForNavigationAction(const NavigationAction &action, const ResourceRequest &request,
-                                              const FormSubmission *formSubmission) noexcept final
+    void DispatchNavigationRequested(const NavigationAction &action, const ResourceRequest &request,
+                                     const FormSubmission *formSubmission) noexcept final
     {
       Record(action, request, formSubmission, false, {});
-      return Policy;
     }
 
-    KRYS_NODISCARD PolicyAction DispatchDecidePolicyForNewWindowAction(
-      const NavigationAction &action, const ResourceRequest &request, const FormSubmission *formSubmission,
-      dom::DOMStringView frameName) noexcept final
+    void DispatchNewWindowRequested(const NavigationAction &action, const ResourceRequest &request,
+                                    const FormSubmission *formSubmission,
+                                    dom::DOMStringView frameName) noexcept final
     {
       Record(action, request, formSubmission, true, frameName);
-      return Policy;
     }
 
     void DispatchDidNavigateWithinPage() noexcept final
     {
       ++DidNavigateWithinPageCount;
-    }
-
-    void DispatchDidChangeLocationWithinPage() noexcept final
-    {
-      ++DidChangeLocationWithinPageCount;
     }
 
   private:
@@ -95,8 +84,8 @@ namespace krys::boo::tests
     }
   };
 
-  /// @brief A document at `https://example.com/dir/page.html`, in a page whose host records navigations and
-  /// answers them with its `Policy` (`Use` to begin with).
+  /// @brief A document at `https://example.com/dir/page.html`, in a page whose host records the navigations
+  /// it asks for.
   struct NavigationFixture : style::tests::ResolverFixture
   {
     RecordingFrameLoaderClient *Client {nullptr};
@@ -120,8 +109,8 @@ namespace krys::boo::tests
       return Downcast<T>(Downcast<html::HTMLElement>(ById(id)));
     }
 
-    /// @brief The navigations the host was asked about, after running the tasks that start them (form
-    /// submissions are scheduled).
+    /// @brief The navigations the page asked for, after running the tasks that start them (form submissions
+    /// are planned for a later task).
     KRYS_NODISCARD const List<ReceivedNavigation> &Navigations() const noexcept
     {
       html::EventLoop::Current().RunUntilIdle();

@@ -3,14 +3,14 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+SettersInlines.hpp"
 
-#include "Krystal.Booey/Animation/ScrollAxis.hpp"
+#include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Style/Values/Text/TextTransform.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 
 namespace krys::boo::style

@@ -129,17 +129,17 @@ namespace krys::boo::style::tests
 
   TEST_CASE_METHOD(BuilderFixture, "Style non-standard values", "[Style][Values][NonStandard]")
   {
-    CHECK(Convert<WebkitLocale>(PropertyId::WebkitLocale, u8"auto").IsAuto());
-    auto locale = Convert<WebkitLocale>(PropertyId::WebkitLocale, u8"\"en-GB\"");
+    CHECK(Convert<WebkitLocale>(PropertyId::InternalLocale, u8"auto").IsAuto());
+    auto locale = Convert<WebkitLocale>(PropertyId::InternalLocale, u8"\"en-GB\"");
     CHECK_FALSE(locale.IsAuto());
     CHECK(ConvertToPlatform(locale) == css::CSSOMStringAtom {u8"en-GB"});
     // Serialised as a custom ident, although it parses as a string.
     CHECK(Serialised(locale) == "en-GB");
 
-    CHECK(Convert<WebkitLineBoxContain>(PropertyId::WebkitLineBoxContain, u8"none").IsNone());
-    CHECK(Serialised(Convert<WebkitLineBoxContain>(PropertyId::WebkitLineBoxContain, u8"block inline"))
+    CHECK(Convert<WebkitLineBoxContain>(PropertyId::InternalLineBoxContain, u8"none").IsNone());
+    CHECK(Serialised(Convert<WebkitLineBoxContain>(PropertyId::InternalLineBoxContain, u8"block inline"))
           == "block inline");
 
-    CHECK(Convert<WebkitBorderSpacing>(PropertyId::WebkitBorderHorizontalSpacing, u8"4px") == 4_css_px);
+    CHECK(Convert<WebkitBorderSpacing>(PropertyId::InternalBorderHorizontalSpacing, u8"4px") == 4_css_px);
   }
 }

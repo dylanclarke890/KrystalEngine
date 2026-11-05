@@ -71,6 +71,8 @@ target_precompile_headers(Krystal.Booey.Tests
     <Krystal.Booey/HTML/Parser/CharacterReference.hpp>
     <Krystal.Booey/HTML/Parser/Tokenizer.hpp>
     <Krystal.Booey/CSS/Values/ValuePool.hpp>
+	<Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp>
+	<Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp>
 
     <Krystal.Booey.Tests/Style/ResolverTestUtils.hpp>
 )
@@ -97,10 +99,6 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/Style/ResolverTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
-		# Core
-		tests/Core/LayoutUnit.cpp
-		tests/Core/NumberFormatting.cpp
-
 		# CSS
 		tests/CSS/CSSOM/CSSContainerRule.cpp
 		tests/CSS/CSSOM/CSSCounterStyleRule.cpp
@@ -115,7 +113,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSOM/CSSLayerStatementRule.cpp
 		tests/CSS/CSSOM/CSSMediaRule.cpp
 		tests/CSS/CSSOM/CSSNamespaceRule.cpp
-		tests/CSS/CSSOM/CSSPageRule.cpp
 		tests/CSS/CSSOM/CSSPositionTryRule.cpp
 		tests/CSS/CSSOM/CSSPropertyRule.cpp
 		tests/CSS/CSSOM/CSSRule.cpp
@@ -124,13 +121,12 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSOM/CSSStartingStyleRule.cpp
 		tests/CSS/CSSOM/CSSStyleRule.cpp
 		tests/CSS/CSSOM/CSSSupportsRule.cpp
-		tests/CSS/CSSOM/CSSViewTransitionRule.cpp
 		tests/CSS/Counter/CounterStyle.cpp
-		tests/CSS/CSSComputedStyleDeclaration.cpp
-		tests/CSS/CSSStyleProperties.cpp
-		tests/CSS/CSSStyleSheet.cpp
-		tests/CSS/DOMMatrix.cpp
-		tests/CSS/CSSStyleSheetObservableArray.cpp
+		tests/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
+		tests/CSS/CSSOM/CSSStyleProperties.cpp
+		tests/CSS/StyleSheets/CSSStyleSheet.cpp
+		tests/CSS/DOMMatrix/DOMMatrix.cpp
+		tests/CSS/StyleSheets/CSSStyleSheetObservableArray.cpp
 		tests/CSS/Descriptors/PropertySetCSSDescriptors.cpp
 		tests/CSS/Media/MediaList.cpp
 		tests/CSS/Media/MediaQueryList.cpp
@@ -196,7 +192,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/UI.cpp
 		tests/CSS/Properties/Consumers/URL.cpp
 		tests/CSS/Properties/Consumers/UnicodeRange.cpp
-		tests/CSS/Properties/Consumers/ViewTransition.cpp
 		tests/CSS/Properties/Consumers/WillChange.cpp
 		tests/CSS/Properties/Property.cpp
 		tests/CSS/Properties/PropertyInitialValues.cpp
@@ -219,7 +214,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/Borders/BoxShadow.cpp
 		tests/CSS/Values/Color/Color.cpp
 		tests/CSS/Values/Easing/EasingFunction.cpp
-		tests/CSS/Values/FilterEffects/AppleColorFilter.cpp
 		tests/CSS/Values/FilterEffects/Filter.cpp
 		tests/CSS/Values/Motion/RayFunction.cpp
 		tests/CSS/Values/VariableData.cpp
@@ -275,7 +269,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/PathValue.cpp
 		tests/CSS/Values/BasicShapeValue.cpp
 		tests/CSS/Values/FilterValue.cpp
-		tests/CSS/Values/AppleColorFilterValue.cpp
 		tests/CSS/Values/RayValue.cpp
 		tests/CSS/Values/ScrollValue.cpp
 		tests/CSS/Values/ViewValue.cpp
@@ -284,8 +277,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/ColorValue.cpp
 		tests/CSS/Values/ColorSchemeValue.cpp
 		tests/CSS/Values/DynamicRangeLimitValue.cpp
-		tests/CSS/Values/NamedImageValue.cpp
-		tests/CSS/Values/CanvasValue.cpp
 		tests/CSS/Values/PaintImageValue.cpp
 		tests/CSS/Values/ImageSetOptionValue.cpp
 		tests/CSS/Values/ImageValue.cpp
@@ -303,109 +294,112 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Selectors/SelectorParser.cpp
 		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
 		tests/CSS/Selectors/UserAgentParts.cpp
-		tests/CSS/PrimitiveValueMappings.cpp
-		tests/CSS/StyleSheetContents.cpp
+		tests/CSS/Values/NumberFormatting.cpp
+		tests/CSS/Values/PrimitiveValueMappings.cpp
+		tests/CSS/StyleSheets/StyleSheetContents.cpp
 
 		# Graphics
-		tests/Graphics/WOFFFileFormat.cpp
-		tests/Graphics/DoublePoint.cpp
-		tests/Graphics/FloatPoint.cpp
-		tests/Graphics/Pattern.cpp
-		tests/Graphics/FloatPoint3D.cpp
-		tests/Graphics/FloatQuad.cpp
-		tests/Graphics/FloatRect.cpp
-		tests/Graphics/FloatSize.cpp
-		tests/Graphics/FontCustomPlatformData.cpp
-		tests/Graphics/FontFeatureValues.cpp
-		tests/Graphics/FontPaletteValues.cpp
-		tests/Graphics/FontTaggedSettings.cpp
-		tests/Graphics/Transforms/TransformOperations.cpp
+		tests/Graphics/DisplayLists/DisplayListRecorder.cpp
 		tests/Graphics/Filters/FilterEffect.cpp
 		tests/Graphics/Filters/FilterOperations.cpp
+		tests/Graphics/Fonts/FontCustomPlatformData.cpp
+		tests/Graphics/Fonts/FontFeatureValues.cpp
+		tests/Graphics/Fonts/FontPaletteValues.cpp
+		tests/Graphics/Fonts/FontTaggedSettings.cpp
+		tests/Graphics/Fonts/WOFFFileFormat.cpp
+		tests/Graphics/Geometry/DoublePoint.cpp
+		tests/Graphics/Geometry/FloatPoint.cpp
+		tests/Graphics/Geometry/FloatPoint3D.cpp
+		tests/Graphics/Geometry/FloatQuad.cpp
+		tests/Graphics/Geometry/FloatRect.cpp
+		tests/Graphics/Geometry/FloatSize.cpp
+		tests/Graphics/Geometry/LayoutUnit.cpp
+		tests/Graphics/Geometry/RoundedRect.cpp
 		tests/Graphics/Gradient.cpp
-		tests/Graphics/RoundedRect.cpp
-		tests/Graphics/Path.cpp
-		tests/Graphics/DisplayLists/DisplayListRecorder.cpp
-		tests/Graphics/BitmapImage.cpp
 		tests/Graphics/GraphicsContext.cpp
-		tests/Graphics/GraphicsLayer.cpp
-		tests/Graphics/ImageBuffer.cpp
-		tests/Graphics/ImageBufferUtilities.cpp
-		tests/Graphics/PixelBuffer.cpp
-		tests/Style/Values/Shapes/Shapes.cpp
+		tests/Graphics/ImageBuffers/ImageBuffer.cpp
+		tests/Graphics/ImageBuffers/ImageBufferUtilities.cpp
+		tests/Graphics/ImageBuffers/PixelBuffer.cpp
+		tests/Graphics/Images/BitmapImage.cpp
+		tests/Graphics/Layers/GraphicsLayer.cpp
+		tests/Graphics/Paths/Path.cpp
+		tests/Graphics/Pattern.cpp
+		tests/Graphics/Transforms/TransformOperations.cpp
+		tests/Rendering/Style/BorderValues.cpp
+		tests/Rendering/Style/RenderStyle.cpp
+		tests/Rendering/Style/StyleDataGroups.cpp
+		tests/Style/Computed/ComputedStyleInitial.cpp
+		tests/Style/CustomProperty.cpp
+		tests/Style/Interpolation/Interpolation.cpp
+		tests/Style/Scope/NameScope.cpp
 		tests/Style/Values/Masking/Masking.cpp
 		tests/Style/Values/Motion/Motion.cpp
+		tests/Style/Values/Shapes/Shapes.cpp
 		tests/Style/Values/SVG/SVG.cpp
-		tests/Rendering/Style/BorderValues.cpp
-		tests/Style/Interpolation.cpp
-		tests/Style/CustomProperty.cpp
-		tests/Rendering/Style/StyleDataGroups.cpp
-		tests/Rendering/Style/RenderStyle.cpp
-		tests/Style/Computed/ComputedStyleInitial.cpp
-		tests/Style/NameScope.cpp
 		tests/Graphics/Animation/TimingFunction.cpp
-		tests/Graphics/FontDescription.cpp
-		tests/Graphics/FontSelectionAlgorithm.cpp
-		tests/Graphics/GeometryUtilities.cpp
-		tests/Graphics/IntPoint.cpp
-		tests/Graphics/IntRect.cpp
-		tests/Graphics/IntSize.cpp
-		tests/Graphics/LayoutPoint.cpp
-		tests/Graphics/LayoutRect.cpp
-		tests/Graphics/LayoutSize.cpp
-		tests/Graphics/Region.cpp
-		tests/Graphics/Transforms/AffineTransform.cpp
 		tests/Graphics/Color/Color.cpp
 		tests/Graphics/Color/ColorBlending.cpp
 		tests/Graphics/Color/ColorInterpolation.cpp
 		tests/Graphics/Color/ColorSerialisation.cpp
 		tests/Graphics/Color/NamedColors.cpp
+		tests/Graphics/Fonts/FontDescription.cpp
+		tests/Graphics/Fonts/FontSelectionAlgorithm.cpp
+		tests/Graphics/Geometry/GeometryUtilities.cpp
+		tests/Graphics/Geometry/IntPoint.cpp
+		tests/Graphics/Geometry/IntRect.cpp
+		tests/Graphics/Geometry/IntSize.cpp
+		tests/Graphics/Geometry/LayoutPoint.cpp
+		tests/Graphics/Geometry/LayoutRect.cpp
+		tests/Graphics/Geometry/LayoutSize.cpp
+		tests/Graphics/Geometry/Region.cpp
+		tests/Graphics/Transforms/AffineTransform.cpp
 		tests/Graphics/Transforms/Quaternion.cpp
-		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Graphics/Transforms/TransformationMatrix.cpp
-		tests/Core/DateTimeFormat.cpp
-		tests/Core/LocaleICU.cpp
-		tests/Core/LocaleToScriptMapping.cpp
-		tests/Core/TextBreakIterator.cpp
-		tests/Core/TextFlags.cpp
-		tests/Core/TextSpacing.cpp
+		tests/Graphics/Transforms/TransformExtras.cpp
+		tests/Platform/Locale/DateTimeFormat.cpp
+		tests/Platform/Locale/LocaleICU.cpp
+		tests/Text/LocaleToScriptMapping.cpp
+		tests/Text/TextBreakIterator.cpp
+		tests/Text/TextFlags.cpp
+		tests/Text/TextSpacing.cpp
 		tests/Rendering/Style/GridSpan.cpp
 		tests/Rendering/Style/RenderStyleConstants.cpp
 
 		# Style
-		tests/Graphics/FloatPointGraph.cpp
-		tests/Graphics/Font.cpp
-		tests/Graphics/FontCache.cpp
-		tests/Graphics/ComplexTextController.cpp
-		tests/Graphics/FontCascade.cpp
+		tests/Graphics/Fonts/Font.cpp
+		tests/Graphics/Fonts/FontCache.cpp
+		tests/Graphics/Fonts/FontCascade.cpp
+		tests/Graphics/Geometry/FloatPointGraph.cpp
+		tests/Graphics/TextRuns/ComplexTextController.cpp
 		tests/Animation/Animatable.cpp
 		tests/Animation/AnimationEffect.cpp
-		tests/Animation/AnimationEffectTiming.cpp
-		tests/Animation/BlendingKeyframes.cpp
 		tests/Animation/CSSAnimation.cpp
 		tests/Animation/CSSTransition.cpp
 		tests/Animation/KeyframeEffect.cpp
-		tests/Animation/KeyframeInterpolation.cpp
-		tests/Animation/ScrollTimeline.cpp
-		tests/Animation/StyleOriginatedTimelinesController.cpp
-		tests/Animation/ViewTimeline.cpp
+		tests/Animation/Keyframes/BlendingKeyframes.cpp
+		tests/Animation/Keyframes/KeyframeInterpolation.cpp
+		tests/Animation/Timelines/ScrollTimeline.cpp
+		tests/Animation/Timelines/StyleOriginatedTimelinesController.cpp
+		tests/Animation/Timelines/ViewTimeline.cpp
+		tests/Animation/Timing/AnimationEffectTiming.cpp
 		tests/Animation/WebAnimation.cpp
-		tests/CSS/CSSFontSelector.cpp
+		tests/CSS/Font/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp
-		tests/Graphics/FontDatabase.cpp
-		tests/Graphics/TextRunIterator.cpp
-		tests/Graphics/WidthIterator.cpp
+		tests/Graphics/Fonts/FontDatabase.cpp
+		tests/Graphics/TextRuns/TextRunIterator.cpp
+		tests/Graphics/TextRuns/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
 		tests/Page/LocalFrameViewScrolling.cpp
+		tests/Rendering/GeneratedContent/RenderCounter.cpp
+		tests/Rendering/HitTesting/HitTestResult.cpp
+		tests/Rendering/Iterators/RenderIterator.cpp
+		tests/Rendering/Layers/RenderLayer.cpp
+		tests/Rendering/Painting/ImageQualityController.cpp
+		tests/Rendering/PaintTestUtils.cpp
 		tests/Rendering/RenderBox.cpp
 		tests/Rendering/RenderElement.cpp
-		tests/Rendering/RenderImage.cpp
-		tests/Rendering/RenderIterator.cpp
-		tests/Rendering/RenderCounter.cpp
-		tests/Rendering/RenderLayer.cpp
-		tests/Rendering/RenderHTMLCanvas.cpp
-		tests/Rendering/ImageQualityController.cpp
-		tests/Rendering/HitTestResult.cpp
+		tests/Rendering/Replaced/RenderHTMLCanvas.cpp
+		tests/Rendering/Replaced/RenderImage.cpp
 		tests/DOM/Events/CustomEvent.cpp
 		tests/DOM/Events/Event.cpp
 		tests/DOM/Events/EventListenerHandle.cpp
@@ -421,61 +415,54 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/PenAndTouch.cpp
 		tests/Page/PointerLockController.cpp
 		tests/Page/SpatialNavigation.cpp
-		tests/Modules/Gamepad/Gamepad.cpp
 		tests/FileAPI/Blob.cpp
 		tests/DOM/DataTransfer/DataTransfer.cpp
 		tests/Page/PointerCaptureController.cpp
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp
-		tests/Page/DragController.cpp
-		tests/Graphics/StringTruncator.cpp
-		tests/Platform/DragImage.cpp
-		tests/Page/IntersectionObserver.cpp
-		tests/Page/ResizeObserver.cpp
+		tests/Page/Drag/DragController.cpp
+		tests/Graphics/TextRuns/StringTruncator.cpp
+		tests/Platform/Pasteboard/DragImage.cpp
+		tests/Page/IntersectionObserver/IntersectionObserver.cpp
+		tests/Page/ResizeObserver/ResizeObserver.cpp
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
-		tests/Loader/HistoryController.cpp
-		tests/History/BackForwardList.cpp
 		tests/HTML/Forms/Autofill.cpp
-		tests/HTML/Forms/FormController.cpp
 		tests/HTML/Forms/FormListedElement.cpp
 		tests/HTML/Forms/ValidatedFormListedElement.cpp
 		tests/DOM/DocumentColorScheme.cpp
 		tests/DOM/DocumentSuspension.cpp
-		tests/History/BackForwardCache.cpp
-		tests/Page/History.cpp
-		tests/Page/Navigation.cpp
-		tests/HTML/MicroParsers/Refresh.cpp
-		tests/Rendering/BackgroundPainter.cpp
-		tests/Rendering/CSSFilterRenderer.cpp
-		tests/Rendering/LayerOverlapMap.cpp
-		tests/Rendering/RenderLayerCompositor.cpp
-		tests/Rendering/BorderPainter.cpp
-		tests/Rendering/InlineBoxPainter.cpp
-		tests/Rendering/MarkedText.cpp
-		tests/Rendering/TextBoxPainter.cpp
-		tests/Rendering/EllipsisBoxPainter.cpp
-		tests/Rendering/TextDecorationPainter.cpp
-		tests/Rendering/OutlinePainter.cpp
-		tests/Rendering/RenderLayerScrollableArea.cpp
+		tests/Rendering/FloatingObjects.cpp
+		tests/Rendering/GeneratedContent/RenderListItem.cpp
+		tests/Rendering/GeneratedContent/RenderListMarker.cpp
+		tests/Rendering/Layers/LayerOverlapMap.cpp
+		tests/Rendering/Layers/RenderLayerCompositor.cpp
+		tests/Rendering/Layers/RenderLayerScrollableArea.cpp
+		tests/Rendering/Painting/BackgroundPainter.cpp
+		tests/Rendering/Painting/BorderPainter.cpp
+		tests/Rendering/Painting/CSSFilterRenderer.cpp
+		tests/Rendering/Painting/EllipsisBoxPainter.cpp
+		tests/Rendering/Painting/InlineBoxPainter.cpp
+		tests/Rendering/Painting/MarkedText.cpp
+		tests/Rendering/Painting/OutlinePainter.cpp
+		tests/Rendering/Painting/TextBoxPainter.cpp
+		tests/Rendering/Painting/TextDecorationPainter.cpp
+		tests/Rendering/PositionedLayoutConstraints.cpp
+		tests/Rendering/RenderBlockFlow.cpp
 		tests/Rendering/RenderTreeAsText.cpp
+		tests/Rendering/Shapes/ShapeOutsideInfo.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGContainer.cpp
-		tests/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
-		tests/Rendering/SVG/Legacy/LegacyRenderSVGShape.cpp
-		tests/Rendering/SVG/RenderSVGText.cpp
-		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.cpp
-		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.cpp
-		tests/Rendering/RenderBlockFlow.cpp
-		tests/Rendering/PositionedLayoutConstraints.cpp
-		tests/Rendering/FloatingObjects.cpp
-		tests/Rendering/Shapes/ShapeOutsideInfo.cpp
-		tests/Rendering/RenderListItem.cpp
-		tests/Rendering/RenderListMarker.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGShape.cpp
+		tests/Rendering/SVG/RenderSVGText.cpp
+		tests/Layout/LayoutTestUtils.cpp
 		tests/Layout/LayoutState.cpp
 		tests/Layout/LayoutTree/LayoutBoxGeometry.cpp
 		tests/Layout/Floats/FloatingContext.cpp
@@ -489,22 +476,20 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/FormattingContexts/Inline/InlineContentConstrainer.cpp
 		tests/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.cpp
 		tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
-		tests/Rendering/TextBoxTrimmer.cpp
-		tests/Rendering/RenderFlexibleBox.cpp
-		tests/Rendering/RenderGrid.cpp
-		tests/Rendering/RenderTable.cpp
-		tests/Rendering/RenderObject.cpp
-		tests/Platform/ScrollAlignment.cpp
-		tests/Platform/Timer.cpp
-		tests/Platform/Decimal.cpp
 		tests/Platform/DateComponents.cpp
+		tests/Platform/Decimal.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Platform/Network/DataURLDecoder.cpp
+		tests/Platform/Scrolling/ScrollAlignment.cpp
+		tests/Platform/Timer.cpp
+		tests/Rendering/Grid/RenderGrid.cpp
+		tests/Rendering/RenderFlexibleBox.cpp
+		tests/Rendering/RenderObject.cpp
+		tests/Rendering/Tables/RenderTable.cpp
+		tests/Rendering/TextBoxTrimmer.cpp
 		tests/Loader/Cache/CachedFont.cpp
 		tests/Loader/Cache/CachedResourceLoader.cpp
 		tests/Loader/FragmentNavigation.cpp
-		tests/DOM/FragmentDirective/FragmentDirectiveParser.cpp
-		tests/DOM/FragmentDirective/FragmentDirectiveRangeFinder.cpp
 		tests/DOM/Highlights/Highlight.cpp
 		tests/Loader/FrameLoader.cpp
 		tests/HTML/Parser/SrcsetParser.cpp
@@ -551,69 +536,66 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Canvas/Path2D.cpp
 		tests/HTML/Images/LazyLoadImageObserver.cpp
 		tests/DOM/ContentVisibility/ContentVisibilityDocumentState.cpp
+		tests/Rendering/FormControls/RenderButton.cpp
+		tests/Rendering/FormControls/RenderFileUploadControl.cpp
+		tests/Rendering/FormControls/RenderListBox.cpp
+		tests/Rendering/FormControls/RenderMenuList.cpp
+		tests/Rendering/FormControls/RenderProgress.cpp
+		tests/Rendering/FormControls/RenderSlider.cpp
+		tests/Rendering/FormControls/RenderTextControl.cpp
+		tests/Rendering/Line/BreakablePositions.cpp
 		tests/Rendering/LineClampUpdater.cpp
-		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
-		tests/Rendering/BreakablePositions.cpp
 		tests/Rendering/RenderText.cpp
-		tests/Rendering/RenderButton.cpp
-		tests/Rendering/RenderListBox.cpp
-		tests/Rendering/RenderMenuList.cpp
-		tests/Rendering/RenderProgress.cpp
-		tests/Rendering/RenderSlider.cpp
-		tests/Rendering/RenderFileUploadControl.cpp
-		tests/Rendering/RenderTextControl.cpp
 		tests/Rendering/RenderTheme.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
+		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Page/Settings.cpp
 		tests/Style/Adjuster.cpp
 		tests/Style/AnchorPositionEvaluator.cpp
-		tests/Style/AttributeChangeInvalidation.cpp
-		tests/Style/Builder.cpp
-		tests/Style/BuilderState.cpp
-		tests/Style/FontSizeFunctions.cpp
-		tests/Style/BuilderGenerated.cpp
-		tests/Style/BuilderCustom.cpp
-		tests/Style/CustomPropertyRegistry.cpp
+		tests/Style/Builder/Builder.cpp
+		tests/Style/Builder/BuilderCustom.cpp
+		tests/Style/Builder/BuilderGenerated.cpp
+		tests/Style/Builder/BuilderState.cpp
+		tests/Style/Builder/FontSizeFunctions.cpp
 		tests/Style/Calc/Tree.cpp
-		tests/Style/ChildChangeInvalidation.cpp
-		tests/Style/ElementRuleCollector.cpp
-		tests/Style/Extractor.cpp
-		tests/Style/Invalidator.cpp
-		tests/Style/MatchedDeclarationsCache.cpp
-		tests/Style/MatchResultCache.cpp
+		tests/Style/ContainerQueryEvaluator.cpp
+		tests/Style/CustomPropertyRegistry.cpp
+		tests/Style/Difference.cpp
+		tests/Style/Extractor/Extractor.cpp
+		tests/Style/Invalidation/AttributeChangeInvalidation.cpp
+		tests/Style/Invalidation/ChildChangeInvalidation.cpp
+		tests/Style/Invalidation/Invalidator.cpp
+		tests/Style/Invalidation/PseudoClassChangeInvalidation.cpp
 		tests/Style/PropertyCascade.cpp
-		tests/Style/PseudoClassChangeInvalidation.cpp
 		tests/Style/ResolveForDocument.cpp
 		tests/Style/Resolver.cpp
-		tests/Style/RuleSet.cpp
-		tests/Style/Scope.cpp
+		tests/Style/Rules/ElementRuleCollector.cpp
+		tests/Style/Rules/MatchedDeclarationsCache.cpp
+		tests/Style/Rules/MatchResultCache.cpp
+		tests/Style/Rules/RuleSet.cpp
+		tests/Style/Rules/StyleSheetContentsCache.cpp
+		tests/Style/Rules/UserAgentStyle.cpp
+		tests/Style/Scope/Scope.cpp
+		tests/Style/Scope/ScopedName.cpp
 		tests/Style/TreeResolver.cpp
-		tests/Style/ContainerQueryEvaluator.cpp
-		tests/Style/Difference.cpp
-		tests/Style/UserAgentStyle.cpp
-		tests/Style/ScopedName.cpp
-		tests/Style/StyleSheetContentsCache.cpp
-		tests/Style/Values/Box/Box.cpp
-		tests/Style/Values/CSSValueConversion.cpp
 		tests/Style/Values/AlignInlineTextGroups.cpp
-		tests/Style/Values/KeywordAndLengthGroups.cpp
-		tests/Style/Values/Sizing/Sizing.cpp
+		tests/Style/Values/AnchorPosition/AnchorPosition.cpp
+		tests/Style/Values/Animations/AnimationGroups.cpp
+		tests/Style/Values/Backgrounds/Backgrounds.cpp
+		tests/Style/Values/Borders/Borders.cpp
+		tests/Style/Values/Box/Box.cpp
 		tests/Style/Values/Color/Color.cpp
 		tests/Style/Values/Color/ColorConversion.cpp
 		tests/Style/Values/Color/DynamicRangeLimit.cpp
-		tests/Style/Values/Fonts/Fonts.cpp
-		tests/Style/Values/Transforms/Transforms.cpp
-		tests/Style/Values/FilterEffects/Filters.cpp
-		tests/Style/Values/AnchorPosition/AnchorPosition.cpp
-		tests/Style/Values/Images/Images.cpp
 		tests/Style/Values/Content/Content.cpp
-		tests/Style/Values/Backgrounds/Backgrounds.cpp
-		tests/Style/Values/Borders/Borders.cpp
-		tests/Style/Values/TextDecoration/TextDecoration.cpp
-		tests/Style/Values/Animations/AnimationGroups.cpp
+		tests/Style/Values/CSSValueConversion.cpp
+		tests/Style/Values/FilterEffects/Filters.cpp
+		tests/Style/Values/Fonts/Fonts.cpp
 		tests/Style/Values/Grid/GridPosition.cpp
 		tests/Style/Values/Grid/GridTemplate.cpp
+		tests/Style/Values/Images/Images.cpp
+		tests/Style/Values/KeywordAndLengthGroups.cpp
 		tests/Style/Values/Primitives/CoordinatedValueList.cpp
 		tests/Style/Values/Primitives/LengthResolution.cpp
 		tests/Style/Values/Primitives/LengthWrapper.cpp
@@ -622,6 +604,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Primitives/Position.cpp
 		tests/Style/Values/Primitives/PrimitiveNumeric.cpp
 		tests/Style/Values/Primitives/Url.cpp
+		tests/Style/Values/Sizing/Sizing.cpp
+		tests/Style/Values/TextDecoration/TextDecoration.cpp
+		tests/Style/Values/Transforms/Transforms.cpp
 		tests/Style/Values/Types.cpp
 
 		# DOM
@@ -657,6 +642,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Ranges/Range.cpp
 		tests/DOM/Ranges/SimpleRange.cpp
 		tests/DOM/Ranges/StaticRange.cpp
+		tests/DOM/Scheduling/DocumentTimer.cpp
 		tests/DOM/Nodes/Attr.cpp
 		tests/DOM/Nodes/CDATASection.cpp
 		tests/DOM/Nodes/CharacterData.cpp
@@ -687,17 +673,17 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/MutationObservers/MutationRecord.cpp
 		tests/DOM/NodeLifetime.cpp
 		tests/DOM/TopLayer.cpp
-		tests/Editing/TextIterator.cpp
-		tests/Editing/VisiblePosition.cpp
-		tests/Editing/VisibleSelection.cpp
-		tests/Editing/ApplyStyleCommand.cpp
+		tests/Editing/Commands/ApplyStyleCommand.cpp
+		tests/Editing/Commands/TypingCommand.cpp
 		tests/Editing/Composition.cpp
 		tests/Editing/Editor.cpp
-		tests/Editing/Markup.cpp
-		tests/Editing/TypingCommand.cpp
-		tests/Editing/FrameSelection.cpp
-		tests/Rendering/RenderSelection.cpp
-		tests/Editing/VisibleUnits.cpp
+		tests/Editing/Markup/Markup.cpp
+		tests/Editing/Selection/FrameSelection.cpp
+		tests/Editing/Selection/VisiblePosition.cpp
+		tests/Editing/Selection/VisibleSelection.cpp
+		tests/Editing/TextIterator.cpp
+		tests/Rendering/Selection/RenderSelection.cpp
+		tests/Editing/Selection/VisibleUnits.cpp
 		tests/DOM/Traversal/NodeFilter.cpp
 		tests/DOM/Traversal/NodeIterator.cpp
 		tests/DOM/Traversal/TreeWalker.cpp
@@ -717,7 +703,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/CustomElement/CustomElementRegistry.cpp
 		tests/HTML/CloseWatcher/CloseWatcher.cpp
 		tests/HTML/CustomElement/ElementInternals.cpp
-		tests/HTML/EventLoop.cpp
+		tests/HTML/EventLoop/EventLoop.cpp
 		tests/HTML/Sanitizer/Sanitizer.cpp
 		tests/HTML/Popover.cpp
 		tests/HTML/Collections/RadioNodeList.cpp
@@ -726,8 +712,8 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/MicroParsers/Dimensions.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/Internals/PresentationalHints.cpp
-		tests/MathML/MathMLElement.cpp
-		tests/Graphics/OpenType/OpenTypeMathData.cpp
+		tests/MathML/Elements/MathMLElement.cpp
+		tests/Graphics/Fonts/OpenTypeMathData.cpp
 		tests/Rendering/MathML/MathVariant.cpp
 		tests/Rendering/MathML/RenderMathMLBlock.cpp
 		tests/Rendering/MathML/RenderMathMLFraction.cpp
@@ -741,8 +727,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/MathML/RenderMathMLToken.cpp
 		tests/Rendering/MathML/RenderMathMLUnderOver.cpp
 		tests/MathML/Internals/MathMLElementFactory.cpp
-		tests/MathML/MathMLOperatorElement.cpp
-		tests/MathML/MathMLPresentationElement.cpp
+		tests/MathML/Elements/MathMLOperatorElement.cpp
+		tests/MathML/Elements/MathMLPresentationElement.cpp
 		tests/HTML/Parser/CharacterReference.cpp
 		tests/HTML/Parser/DocumentParser.cpp
 		tests/HTML/Parser/OpenElementStack.cpp
@@ -761,35 +747,35 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/Properties/SVGPropertyOwnerRegistry.cpp
 		tests/SVG/Properties/SVGPropertyTraits.cpp
 		tests/SVG/SVGAngleValue.cpp
-		tests/SVG/SVGAnimateMotionElement.cpp
-		tests/SVG/SVGAnimateTransformElement.cpp
-		tests/SVG/SVGAnimationElement.cpp
-		tests/SVG/SVGElement.cpp
+		tests/SVG/Elements/SVGAnimateMotionElement.cpp
+		tests/SVG/Elements/SVGAnimateTransformElement.cpp
+		tests/SVG/Elements/SVGAnimationElement.cpp
+		tests/SVG/Elements/SVGElement.cpp
 		tests/SVG/SVGLength.cpp
 		tests/SVG/SVGLengthList.cpp
 		tests/SVG/SVGLengthValue.cpp
-		tests/SVG/SVGMarkerElement.cpp
+		tests/SVG/Elements/SVGMarkerElement.cpp
 		tests/SVG/SVGNumberList.cpp
 		tests/SVG/SVGPointList.cpp
 		tests/SVG/SVGPreserveAspectRatioValue.cpp
 		tests/SVG/SVGStringList.cpp
-		tests/SVG/SVGAElement.cpp
-		tests/SVG/SVGForeignObjectElement.cpp
-		tests/SVG/SVGGeometryElement.cpp
-		tests/SVG/SVGImageElement.cpp
-		tests/SVG/SVGPathElement.cpp
-		tests/SVG/SVGStyleElement.cpp
-		tests/SVG/SVGSvgElement.cpp
-		tests/SVG/SVGTextContentElement.cpp
-		tests/SVG/SVGViewElement.cpp
+		tests/SVG/Elements/SVGAElement.cpp
+		tests/SVG/Elements/SVGForeignObjectElement.cpp
+		tests/SVG/Elements/SVGGeometryElement.cpp
+		tests/SVG/Elements/SVGImageElement.cpp
+		tests/SVG/Elements/SVGPathElement.cpp
+		tests/SVG/Elements/SVGStyleElement.cpp
+		tests/SVG/Elements/SVGSvgElement.cpp
+		tests/SVG/Elements/SVGTextContentElement.cpp
+		tests/SVG/Elements/SVGViewElement.cpp
 		tests/SVG/SVGTests.cpp
 		tests/SVG/SVGTransformList.cpp
 		tests/SVG/SVGURIReference.cpp
 		tests/SVG/Graphics/SVGImage.cpp
 		tests/SVG/Graphics/Filters/SVGFilterRenderer.cpp
 		tests/SVG/SVGFilterPrimitiveStandardAttributes.cpp
-		tests/SVG/SVGUseElement.cpp
-		tests/SVG/SVGGradientElement.cpp
+		tests/SVG/Elements/SVGUseElement.cpp
+		tests/SVG/Elements/SVGGradientElement.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 		tests/XML/PseudoAttributes.cpp

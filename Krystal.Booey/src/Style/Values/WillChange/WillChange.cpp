@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include <algorithm>
 
 namespace krys::boo::style
@@ -53,9 +53,8 @@ namespace krys::boo::style
       case css::PropertyId::BackdropFilter:
       case css::PropertyId::MaskImage:
       case css::PropertyId::MaskBorder:
-      case css::PropertyId::ViewTransitionName:
-      case css::PropertyId::Contain:            return true;
-      default:                                  return false;
+      case css::PropertyId::Contain:        return true;
+      default:                              return false;
     }
   }
 
@@ -140,8 +139,7 @@ namespace krys::boo::style
   {
     return ContainsProperty(css::PropertyId::Opacity) || ContainsProperty(css::PropertyId::BackdropFilter)
            || ContainsProperty(css::PropertyId::ClipPath) || ContainsProperty(css::PropertyId::Filter)
-           || ContainsProperty(css::PropertyId::MixBlendMode) || ContainsProperty(css::PropertyId::Mask)
-           || ContainsProperty(css::PropertyId::ViewTransitionName);
+           || ContainsProperty(css::PropertyId::MixBlendMode) || ContainsProperty(css::PropertyId::Mask);
   }
 
   void WillChangeAnimatableFeatures::Data::AddFeature(Feature feature, css::PropertyId propertyId) noexcept

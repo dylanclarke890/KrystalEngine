@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/Adwaita/RenderThemeAdwaita.hpp"
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
 #include "Krystal.Booey/Graphics/Adwaita/Adwaita.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Platform/ThemeAdwaita.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -327,8 +327,7 @@ namespace krys::boo
                                                            const style::PreferredSizePair &zoomedSize,
                                                            float zoomFactor) const noexcept
   {
-    if (!zoomedSize.Width().IsIntrinsicOrLegacyIntrinsicOrAuto()
-        && !zoomedSize.Height().IsIntrinsicOrLegacyIntrinsicOrAuto())
+    if (!zoomedSize.Width().IsIntrinsicOrAuto() && !zoomedSize.Height().IsIntrinsicOrAuto())
     {
       return RenderTheme::ControlSize(appearance, fontCascade, zoomedSize, zoomFactor);
     }
@@ -340,11 +339,11 @@ namespace krys::boo
       {
         auto buttonSizeWidth = zoomedSize.Width();
         auto buttonSizeHeight = zoomedSize.Height();
-        if (buttonSizeWidth.IsIntrinsicOrLegacyIntrinsicOrAuto())
+        if (buttonSizeWidth.IsIntrinsicOrAuto())
         {
           buttonSizeWidth = style::PreferredSize::Fixed {12 * zoomFactor};
         }
-        if (buttonSizeHeight.IsIntrinsicOrLegacyIntrinsicOrAuto())
+        if (buttonSizeHeight.IsIntrinsicOrAuto())
         {
           buttonSizeHeight = style::PreferredSize::Fixed {12 * zoomFactor};
         }
@@ -354,12 +353,12 @@ namespace krys::boo
       {
         auto spinButtonSizeWidth = zoomedSize.Width();
         auto spinButtonSizeHeight = zoomedSize.Height();
-        if (spinButtonSizeWidth.IsIntrinsicOrLegacyIntrinsicOrAuto())
+        if (spinButtonSizeWidth.IsIntrinsicOrAuto())
         {
           spinButtonSizeWidth =
             style::PreferredSize::Fixed {static_cast<float>(static_cast<int32>(ArrowSize * zoomFactor))};
         }
-        if (spinButtonSizeHeight.IsIntrinsicOrLegacyIntrinsicOrAuto() || fontCascade.Size() > ArrowSize)
+        if (spinButtonSizeHeight.IsIntrinsicOrAuto() || fontCascade.Size() > ArrowSize)
         {
           spinButtonSizeHeight = style::PreferredSize::Fixed {fontCascade.Size()};
         }
@@ -375,19 +374,18 @@ namespace krys::boo
                                                                 const style::MinimumSizePair &zoomedSize,
                                                                 float) const noexcept
   {
-    if (!zoomedSize.Width().IsIntrinsicOrLegacyIntrinsicOrAuto()
-        && !zoomedSize.Height().IsIntrinsicOrLegacyIntrinsicOrAuto())
+    if (!zoomedSize.Width().IsIntrinsicOrAuto() && !zoomedSize.Height().IsIntrinsicOrAuto())
     {
       return zoomedSize;
     }
 
     auto resultWidth = zoomedSize.Width();
     auto resultHeight = zoomedSize.Height();
-    if (resultWidth.IsIntrinsicOrLegacyIntrinsicOrAuto())
+    if (resultWidth.IsIntrinsicOrAuto())
     {
       resultWidth = style::MinimumSize::Fixed {0};
     }
-    if (resultHeight.IsIntrinsicOrLegacyIntrinsicOrAuto())
+    if (resultHeight.IsIntrinsicOrAuto())
     {
       resultHeight = style::MinimumSize::Fixed {0};
     }

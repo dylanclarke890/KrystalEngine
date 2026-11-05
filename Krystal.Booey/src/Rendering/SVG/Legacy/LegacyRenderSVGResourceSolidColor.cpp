@@ -29,7 +29,7 @@ namespace krys::boo
       {
         context->SetAlpha(1);
       }
-      context->SetFillColor(style.ColorByApplyingColorFilter(_color));
+      context->SetFillColor(_color);
       if (isRenderingMask)
       {
         context->SetFillRule(style.ClipRule());
@@ -49,7 +49,7 @@ namespace krys::boo
       // When rendering the mask for a LegacyRenderSVGResourceClipper, the stroke code path is never hit.
       krys_debug_assert(!isRenderingMask);
       context->SetAlpha(style.StrokeOpacity().Value.Value);
-      context->SetStrokeColor(style.ColorByApplyingColorFilter(_color));
+      context->SetStrokeColor(_color);
 
       SVGRenderSupport::ApplyStrokeStyleToContext(*context, style, renderer);
 

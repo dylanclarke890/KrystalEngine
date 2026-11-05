@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLPadded.hpp"
-#include "Krystal.Booey/MathML/MathMLPaddedElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLPaddedElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 

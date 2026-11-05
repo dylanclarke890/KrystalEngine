@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Core/Colour/BlendMode.hpp"
 #include "Krystal.Core/Colour/GradientSpreadMethod.hpp"
 #include "Krystal.Core/Enum.hpp"

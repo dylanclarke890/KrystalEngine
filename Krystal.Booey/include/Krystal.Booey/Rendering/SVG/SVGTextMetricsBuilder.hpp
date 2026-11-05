@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextMetrics.hpp"
 #include "Krystal.Core/Macros.hpp"

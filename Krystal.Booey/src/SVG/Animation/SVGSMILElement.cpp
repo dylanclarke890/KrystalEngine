@@ -9,11 +9,11 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
-#include "Krystal.Booey/SVG/SVGUseElement.hpp"
 #include "Krystal.Core/Text/StringToIntegerConversion.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>

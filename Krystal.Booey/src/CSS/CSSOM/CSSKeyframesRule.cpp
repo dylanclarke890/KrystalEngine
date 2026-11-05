@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSKeyframeRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo::css

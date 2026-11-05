@@ -66,10 +66,6 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleBackgroundSize(TokenRange &tokens,
                                                              PropertyParserState &state) noexcept;
 
-    // Non-standard.
-    KRYS_NODISCARD RefPtr<Value> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
-                                                                   PropertyParserState &state) noexcept;
-
     // <single-mask-size> = <bg-size>
     // https://drafts.fxtf.org/css-masking/#the-mask-size
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleMaskSize(TokenRange &tokens,

@@ -1,18 +1,18 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
-#include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlStyle.hpp"
-#include "Krystal.Booey/Graphics/DashArray.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItem.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/FloatSegment.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/GlyphBufferMembers.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/Paths/DashArray.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
 namespace krys::boo::display_list

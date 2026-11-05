@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -33,10 +33,8 @@ namespace krys::boo
       CursorImage,
       ImageSet,
       FilterImage,
-      CanvasImage,
       CrossfadeImage,
       GradientImage,
-      NamedImage,
       InvalidImage,
       PaintImage,
     };
@@ -161,16 +159,11 @@ namespace krys::boo
     }
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsGeneratedImage() const noexcept
     {
-      return IsFilterImage() || IsCanvasImage() || IsCrossfadeImage() || IsGradientImage() || IsNamedImage()
-             || IsPaintImage() || IsInvalidImage();
+      return IsFilterImage() || IsCrossfadeImage() || IsGradientImage() || IsPaintImage() || IsInvalidImage();
     }
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsFilterImage() const noexcept
     {
       return _type == Type::FilterImage;
-    }
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsCanvasImage() const noexcept
-    {
-      return _type == Type::CanvasImage;
     }
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsCrossfadeImage() const noexcept
     {
@@ -179,10 +172,6 @@ namespace krys::boo
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsGradientImage() const noexcept
     {
       return _type == Type::GradientImage;
-    }
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsNamedImage() const noexcept
-    {
-      return _type == Type::NamedImage;
     }
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsPaintImage() const noexcept
     {

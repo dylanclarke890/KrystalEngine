@@ -1,31 +1,25 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
+#include "Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/History/BackForwardCache.hpp"
-#include "Krystal.Booey/History/BackForwardController.hpp"
-#include "Krystal.Booey/History/BackForwardList.hpp"
-#include "Krystal.Booey/History/HistoryItem.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Loader/HistoryController.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
-#include "Krystal.Booey/Page/DragController.hpp"
+#include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Navigation.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -35,7 +29,6 @@ namespace krys::boo
   namespace
   {
     constexpr EnumSet<RenderingUpdateStep> AllRenderingUpdateSteps {
-      RenderingUpdateStep::RestoreScrollPositionAndViewState,
       RenderingUpdateStep::FlushAutofocusCandidates,
       RenderingUpdateStep::Resize,
       RenderingUpdateStep::Scroll,
@@ -52,11 +45,8 @@ namespace krys::boo
   }
 
   Page::Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-             RefPtr<BackForwardClient> &&backForwardClient, UniquePtr<DragClient> dragClient) noexcept
+             UniquePtr<DragClient> dragClient) noexcept
       : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient)),
-        _backForwardController(CreateUnique<BackForwardController>(
-          *this, backForwardClient ? ShareRef(*backForwardClient)
-                                   : Ref<BackForwardClient>(BackForwardList::Create()))),
         _pointerCaptureController(CreateUnique<PointerCaptureController>(*this)),
         _pointerLockController(CreateUnique<PointerLockController>(*this)),
         _dragController(CreateUnique<DragController>(
@@ -91,7 +81,6 @@ namespace krys::boo
     {
       _pageScaleFactor = scale;
 
-      // FIXME: Every root frame, once there are subframes.
       if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
       {
         view->LayoutContext().SetNeedsLayoutAfterViewConfigurationChange();
@@ -130,60 +119,16 @@ namespace krys::boo
     _pointerCaptureController->Reset();
   }
 
-  Page::~Page() noexcept
-  {
-    BackForwardCache::Singleton().RemoveAllItemsForPage(*this);
-    _backForwardController->Close();
-  }
-
-  void Page::DestroyRenderTrees() noexcept
-  {
-    ForEachDocument(
-      [](dom::Document &document)
-      {
-        if (document.HasLivingRenderTree())
-        {
-          document.DestroyRenderTree();
-        }
-      });
-  }
+  Page::~Page() noexcept = default;
 
   Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
                          UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient,
-                         RefPtr<BackForwardClient> backForwardClient,
                          UniquePtr<DragClient> dragClient) noexcept
   {
-    Ref<Page> page = AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient),
-                                        krys::move(backForwardClient), krys::move(dragClient)));
+    Ref<Page> page =
+      AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient), krys::move(dragClient)));
     page->_mainFrame = LocalFrame::Create(page.get(), krys::move(mainFrameLoaderClient));
     return page;
-  }
-
-  void Page::GoToItem(LocalFrame &frame, HistoryItem &item, FrameLoadType type) noexcept
-  {
-    // stopAllLoaders may end up running onload handlers, which could cause further history traversals that
-    // may lead to the passed in HistoryItem being deref()-ed. Make sure we can still use it with
-    // HistoryController::goToItem later.
-    Ref<HistoryItem> protectedItem = ShareRef(item);
-
-    if (frame.Loader().History().ShouldStopLoadingForHistoryItem(item))
-    {
-      frame.Loader().StopAllLoadersAndCheckCompleteness();
-    }
-    frame.Loader().History().GoToItem(item, type);
-  }
-
-  void Page::GoToItemForNavigationAPI(LocalFrame &frame, HistoryItem &item, FrameLoadType type,
-                                      LocalFrame &triggeringFrame,
-                                      NavigationAPIMethodTracker *tracker) noexcept
-  {
-    Ref<HistoryItem> protectedItem = ShareRef(item);
-
-    if (frame.Loader().History().ShouldStopLoadingForHistoryItem(item))
-    {
-      frame.Loader().StopAllLoadersAndCheckCompleteness();
-    }
-    frame.Loader().History().GoToItemForNavigationAPI(item, type, triggeringFrame, tracker);
   }
 
   EnumSet<FilterRenderingMode> Page::PreferredFilterRenderingModes(const GraphicsContext &) const noexcept
@@ -237,15 +182,6 @@ namespace krys::boo
 
     LayoutIfNeeded();
 
-    RunProcessingStep(RenderingUpdateStep::RestoreScrollPositionAndViewState,
-                      [](dom::Document &document)
-                      {
-                        if (RefPtr<LocalFrame> frame = ShareRefPtr(document.Frame()))
-                        {
-                          frame->Loader().RestoreScrollPositionAndViewStateNowIfNeeded();
-                        }
-                      });
-
     // FIXME: Revealing documents, once there's visibility.
 
     ForEachDocument(
@@ -294,28 +230,20 @@ namespace krys::boo
                       [](dom::Document &document)
                       {
                         // If the focused area of the document is not a focusable area, run the focusing steps
-                        // for the document's viewport, and set the document's relevant global object's
-                        // navigation API's focus changed during ongoing navigation to false.
+                        // for the document's viewport.
+                        // (There's no navigation API, whose focus changed during ongoing navigation would be
+                        // set to false.)
                         if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement()))
                         {
                           if (!html::FocusAlgorithms::IsFocusableArea(*focusedElement))
                           {
                             html::FocusAlgorithms::FocusingSteps(document);
-                            if (auto *window = document.Window())
-                            {
-                              if (auto *navigation = window->NavigationIfExists())
-                              {
-                                navigation->SetFocusChanged(FocusDidChange::No);
-                              }
-                            }
                           }
                         }
                       });
 
     RunProcessingStep(RenderingUpdateStep::UpdateContentRelevancy, [](dom::Document &document)
                       { (void)document.UpdateRelevancyOfContentVisibilityElements(); });
-
-    // FIXME: View transitions, once there are any.
 
     RunProcessingStep(RenderingUpdateStep::IntersectionObservations,
                       [](dom::Document &document) { document.UpdateIntersectionObservations(); });
@@ -350,37 +278,6 @@ namespace krys::boo
     FinalizeRenderingUpdate();
   }
 
-  void Page::NetworkStateChanged(bool isOnLine) noexcept
-  {
-    List<Ref<dom::Document>> documents;
-    ForEachDocument([&](dom::Document &document) { documents.push_back(ShareRef(document)); });
-
-    auto eventName = dom::DOMStringAtom(isOnLine ? EventNames::Online : EventNames::Offline);
-    for (auto &document : documents)
-    {
-      Ref<dom::Event> event = dom::Event::Create(eventName, false, false);
-      document->DispatchWindowEvent(*event);
-    }
-  }
-
-  void Page::OpportunisticallyRunIdleCallbacks(MonotonicTime::duration deadline) noexcept
-  {
-    if (MonotonicTime::Now() >= deadline)
-    {
-      return;
-    }
-
-    ForEachDocument(
-      [deadline](dom::Document &document)
-      {
-        if (auto *controller = document.GetIdleCallbackController();
-            controller && controller->HasPendingIdleCallback())
-        {
-          controller->StartIdlePeriod(deadline);
-        }
-      });
-  }
-
   void Page::FinalizeRenderingUpdate() noexcept
   {
     // FIXME: Images with asynchronous decodes, once there are any.
@@ -388,7 +285,7 @@ namespace krys::boo
 
     if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
     {
-      view->FlushCompositingStateIncludingSubframes();
+      view->FlushCompositingState();
     }
 
     // FIXME: The scrolling tree, once there's asynchronous scrolling.
@@ -429,7 +326,6 @@ namespace krys::boo
 
   void Page::LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions) noexcept
   {
-    // FIXME: Child frames, once there are frames.
     if (RefPtr<dom::Document> document = ShareRefPtr(_mainFrame->Document()); document && _mainFrame->View())
     {
       (void)document->UpdateLayout(layoutOptions);
@@ -438,7 +334,6 @@ namespace krys::boo
 
   void Page::ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept
   {
-    // FIXME: Child frames, once there are frames.
     if (RefPtr<dom::Document> document = ShareRefPtr(_mainFrame->Document()))
     {
       functor(*document);
@@ -526,7 +421,7 @@ namespace krys::boo
     // to kickstart the animation loop.
     if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
     {
-      view->ResumeVisibleImageAnimationsIncludingSubframes();
+      view->ResumeVisibleImageAnimations();
     }
   }
 

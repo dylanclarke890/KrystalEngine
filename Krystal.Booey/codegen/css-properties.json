@@ -67,13 +67,6 @@
     "The custom code for the property should be located in css/StyleBuilderCustom.h",
     "and named applyValue[CSSPropertyName]().",
     "",
-    "* visited-link-color-support:",
-    "Indicates that this CSS property is a color property with a",
-    "\"setVisitedLinkXXX()\" setter on RenderStyle to be called when",
-    "StyleResolver::applyPropertyToVisitedLinkStyle() return true.",
-    "The regular setter on RenderStyle will only be called if",
-    "StyleResolver::applyPropertyToRegularStyle() returns true.",
-    "",
     "* color-property:",
     "Indicates that this CSS property is color-related (populates",
     "CSSProperty::isColorProperty().",
@@ -347,7 +340,6 @@
       "codegen-properties": {
         "animation-wrapper": "CaretColorWrapper",
         "animation-wrapper-requires-override-parameters": [],
-        "visited-link-color-support": true,
         "color-property": true,
         "style-builder-custom": "All",
         "skip-render-style-getter": true,
@@ -368,8 +360,7 @@
       "initial": "Canvastext",
       "codegen-properties": {
         "accepts-quirky-color": true,
-        "animation-wrapper": "VisitedAffectedColorWrapper",
-        "visited-link-color-support": true,
+        "animation-wrapper": "ColorWrapper",
         "color-property": true,
         "style-builder-custom": "All",
         "style-extractor-custom": true,
@@ -383,7 +374,6 @@
         "render-style-storage-path": ["_inheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "WebCore::Color",
-        "render-style-visited-link-storage-path": ["_inheritedData"],
         "parser-grammar": "<color>"
       },
       "status": {
@@ -489,24 +479,6 @@
         "contents",
         "none",
         {
-          "value": "-webkit-box",
-          "status": "obsolete",
-          "url": "https://compat.spec.whatwg.org/#css-keyword-mappings"
-        },
-        {
-          "value": "-webkit-inline-box",
-          "status": "obsolete",
-          "url": "https://compat.spec.whatwg.org/#css-keyword-mappings"
-        },
-        {
-          "value": "-webkit-flex",
-          "status": "obsolete"
-        },
-        {
-          "value": "-webkit-inline-flex",
-          "status": "obsolete"
-        },
-        {
           "value": "compact",
           "status": "removed",
           "url": "https://www.w3.org/TR/REC-CSS2/visuren.html#compact",
@@ -531,7 +503,7 @@
         "render-style-storage-kind": "enum",
         "render-style-type": "DisplayType",
         "parser-function": "ConsumeDisplay",
-        "parser-grammar": "[ <display-outside> || <display-inside> ] | <display-listitem> | <display-internal> | <display-box> | <display-legacy> | <-webkit-display>",
+        "parser-grammar": "[ <display-outside> || <display-inside> ] | <display-listitem> | <display-internal> | <display-box> | <display-legacy>",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for transforming parsed input to minimal form."
       },
@@ -595,10 +567,6 @@
         {
           "value": "ui-rounded",
           "status": "unimplemented"
-        },
-        {
-          "value": "-webkit-body",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -614,7 +582,7 @@
         ],
         "render-style-type": "Style::FontFamilies",
         "parser-function": "ConsumeFontFamily",
-        "parser-grammar": "[ <family-name> | <generic-family> | <-webkit-generic-family> ]#",
+        "parser-grammar": "[ <family-name> | <generic-family> ]#",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for primitive <family-name>."
       },
@@ -640,12 +608,8 @@
         "larger",
         "math",
         {
-          "value": "-webkit-xxx-large",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-ruby-text",
-          "status": "non-standard"
+          "value": "-internal-ruby-text",
+          "status": "internal"
         }
       ],
       "codegen-properties": {
@@ -664,7 +628,7 @@
           "fontCascade"
         ],
         "render-style-type": "float",
-        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math | <-webkit-absolute-size> | <-webkit-relative-size>",
+        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math | -internal-ruby-text",
         "parser-exported": true
       },
       "specification": {
@@ -778,7 +742,6 @@
       "codegen-properties": [
         {
           "enable-if": "ENABLE_VARIATION_FONTS",
-          "aliases": ["font-stretch"],
           "font-description-name-for-methods": "Width",
           "font-property": true,
           "high-priority": true,
@@ -794,7 +757,6 @@
         },
         {
           "enable-if": "!ENABLE_VARIATION_FONTS",
-          "aliases": ["font-stretch"],
           "font-description-name-for-methods": "Width",
           "font-property": true,
           "high-priority": true,
@@ -960,7 +922,6 @@
       "initial": "auto",
       "values": ["auto", "normal", "none"],
       "codegen-properties": {
-        "aliases": ["-webkit-font-kerning"],
         "font-description-name-for-methods": "Kerning",
         "font-property": true,
         "high-priority": true,
@@ -1002,26 +963,6 @@
         "module": "css-fonts",
         "url": "https://drafts.csswg.org/css-fonts/#font-palette-prop"
       }
-    },
-    "-webkit-font-smoothing": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto", "none", "antialiased", "subpixel-antialiased"],
-      "codegen-properties": {
-        "font-property": true,
-        "high-priority": true,
-        "render-style-storage-container": "opaque",
-        "render-style-storage-path": [
-          "_inheritedData",
-          "fontData",
-          "fontCascade"
-        ],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "FontSmoothingMode",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
     },
     "font-variant-ligatures": {
       "animation-type": "discrete",
@@ -1417,12 +1358,13 @@
         "url": "https://drafts.csswg.org/css-fonts-4/#propdef-font-variant"
       }
     },
-    "-webkit-locale": {
+    "-internal-locale": {
       "animation-type": "not animatable (legacy)",
       "inherited": true,
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
+        "internal-only": true,
         "font-description-name-for-methods": "SpecifiedLocale",
         "font-property": true,
         "high-priority": true,
@@ -1583,7 +1525,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-writing-mode", "-epub-writing-mode"],
         "style-builder-custom": "Value",
         "style-extractor-custom": true,
         "render-style-has-explicitly-set-storage-path": [
@@ -1661,33 +1602,6 @@
         "url": "https://drafts.csswg.org/css-ruby-1/#rubypos"
       }
     },
-    "-webkit-ruby-position": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "before",
-      "values": [
-        {
-          "value": "before",
-          "status": "deprecated"
-        },
-        {
-          "value": "after",
-          "status": "deprecated"
-        },
-        "inter-character"
-      ],
-      "codegen-properties": {
-        "cascade-alias": "ruby-position",
-        "skip-style-builder": true,
-        "style-extractor-custom": true,
-        "parser-grammar": "before | after | inter-character@(aliased-to=legacy-inter-character)",
-        "parser-grammar-comment": "Current spec grammar is '[ alternate || [ over | under ] ] | inter-character'."
-      },
-      "specification": {
-        "module": "css-ruby",
-        "url": "https://www.w3.org/TR/css-ruby-1/#rubypos"
-      }
-    },
     "alignment-baseline": {
       "animation-type": "discrete",
       "initial": "baseline",
@@ -1754,7 +1668,6 @@
     },
     "animation": {
       "codegen-properties": {
-        "aliases": ["-webkit-animation"],
         "longhands": [
           "animation-duration",
           "animation-timing-function",
@@ -1803,7 +1716,6 @@
       "animation-type": "not animatable",
       "initial": "0s",
       "codegen-properties": {
-        "aliases": ["-webkit-animation-delay"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Delay",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationDelay",
@@ -1826,7 +1738,6 @@
       "initial": "normal",
       "values": ["normal", "reverse", "alternate", "alternate-reverse"],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-direction"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Direction",
         "coordinated-value-list-property-item-type": "AnimationDirection",
@@ -1848,7 +1759,6 @@
       "animation-type": "not animatable",
       "initial": "auto",
       "codegen-properties": {
-        "aliases": ["-webkit-animation-duration"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Duration",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationDuration",
@@ -1873,7 +1783,6 @@
       "initial": "none",
       "values": ["none", "forwards", "backwards", "both"],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-fill-mode"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "FillMode",
         "coordinated-value-list-property-item-type": "AnimationFillMode",
@@ -1895,7 +1804,6 @@
       "animation-type": "not animatable",
       "initial": "1",
       "codegen-properties": {
-        "aliases": ["-webkit-animation-iteration-count"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "IterationCount",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationIterationCount",
@@ -1918,7 +1826,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-name"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Name",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationName",
@@ -1941,7 +1848,6 @@
       "initial": "running",
       "values": ["running", "paused"],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-play-state"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "PlayState",
         "coordinated-value-list-property-item-type": "AnimationPlayState",
@@ -2068,7 +1974,6 @@
         "step-end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-timing-function"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "TimingFunction",
         "coordinated-value-list-property-item-type": "Style::EasingFunction",
@@ -2199,10 +2104,6 @@
         {
           "value": "text",
           "url": "https://drafts.csswg.org/css-backgrounds-4/#background-clip"
-        },
-        {
-          "value": "-webkit-text",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -2229,17 +2130,11 @@
       "initial": "transparent",
       "codegen-properties": {
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": ["_nonInheritedData", "backgroundData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor"
-        ],
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -2406,23 +2301,6 @@
         "url": "https://www.w3.org/TR/css3-background/#background-size"
       }
     },
-    "-webkit-background-size": {
-      "codegen-properties": {
-        "longhands": ["background-size"],
-        "shorthand-pattern": "Single",
-        "parser-function": "ConsumeWebkitBackgroundSizeShorthand",
-        "parser-grammar": "<single-webkit-background-size>#",
-        "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
-      },
-      "status": {
-        "comment": "FIXME: Should be a cascade-alias like the other -webkit-background-* properties, rather than a shorthand. Differs from background-size only in the interpretation of a single value: '-webkit-background-size: l;' is equivalent to 'background-size: l l;' whereas 'background-size: l;' is equivalent to 'background-size: l auto;'"
-      },
-      "specification": {
-        "module": "css-backgrounds",
-        "url": "https://www.w3.org/TR/css3-background/#background-size"
-      }
-    },
     "baseline-shift": {
       "animation-type": "by computed value",
       "initial": "baseline",
@@ -2463,42 +2341,14 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-logical-height"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "size",
@@ -2577,7 +2427,6 @@
     },
     "border-block-end": {
       "codegen-properties": {
-        "aliases": ["-webkit-border-after"],
         "longhands": [
           "border-block-end-width",
           "border-block-end-style",
@@ -2597,7 +2446,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-border-after-color"],
         "logical-property-group": {
           "name": "border-color",
           "resolver": "block-end"
@@ -2628,7 +2476,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-border-after-style"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -2647,7 +2494,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-border-after-width"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -2663,7 +2509,6 @@
     },
     "border-block-start": {
       "codegen-properties": {
-        "aliases": ["-webkit-border-before"],
         "longhands": [
           "border-block-start-width",
           "border-block-start-style",
@@ -2683,7 +2528,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-border-before-color"],
         "logical-property-group": {
           "name": "border-color",
           "resolver": "block-start"
@@ -2714,7 +2558,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-border-before-style"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -2733,7 +2576,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-border-before-width"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -2799,7 +2641,6 @@
           "resolver": "bottom"
         },
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": [
@@ -2810,13 +2651,6 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor",
-          "visitedLinkBorderColors"
-        ],
-        "render-style-visited-link-storage-container": "physical-group",
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -2828,7 +2662,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-border-bottom-left-radius"],
         "logical-property-group": {
           "name": "border-radius",
           "resolver": "bottom-left"
@@ -2858,7 +2691,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-border-bottom-right-radius"],
         "logical-property-group": {
           "name": "border-radius",
           "resolver": "bottom-right"
@@ -3201,7 +3033,6 @@
     },
     "border-inline-end": {
       "codegen-properties": {
-        "aliases": ["-webkit-border-end"],
         "longhands": [
           "border-inline-end-width",
           "border-inline-end-style",
@@ -3221,7 +3052,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-border-end-color"],
         "logical-property-group": {
           "name": "border-color",
           "resolver": "inline-end"
@@ -3252,7 +3082,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-border-end-style"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -3271,7 +3100,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-border-end-width"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -3287,7 +3115,6 @@
     },
     "border-inline-start": {
       "codegen-properties": {
-        "aliases": ["-webkit-border-start"],
         "longhands": [
           "border-inline-start-width",
           "border-inline-start-style",
@@ -3307,7 +3134,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-border-start-color"],
         "logical-property-group": {
           "name": "border-color",
           "resolver": "inline-start"
@@ -3338,7 +3164,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-border-start-style"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -3357,7 +3182,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-border-start-width"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -3423,7 +3247,6 @@
           "resolver": "left"
         },
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": [
@@ -3434,13 +3257,6 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor",
-          "visitedLinkBorderColors"
-        ],
-        "render-style-visited-link-storage-container": "physical-group",
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -3559,7 +3375,6 @@
           "resolver": "right"
         },
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": [
@@ -3570,13 +3385,6 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor",
-          "visitedLinkBorderColors"
-        ],
-        "render-style-visited-link-storage-container": "physical-group",
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -3657,8 +3465,8 @@
       "initial": "0px 0px",
       "codegen-properties": {
         "longhands": [
-          "-webkit-border-horizontal-spacing",
-          "-webkit-border-vertical-spacing"
+          "-internal-border-horizontal-spacing",
+          "-internal-border-vertical-spacing"
         ],
         "accepts-quirky-length": true,
         "shorthand-pattern": "CoalescingPair",
@@ -3673,11 +3481,12 @@
         "url": "https://www.w3.org/TR/CSS22/tables.html#separated-borders"
       }
     },
-    "-webkit-border-horizontal-spacing": {
+    "-internal-border-horizontal-spacing": {
       "animation-type": "by computed value",
       "inherited": true,
       "initial": "0px",
       "codegen-properties": {
+        "internal-only": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_inheritedData"],
         "render-style-storage-kind": "value",
@@ -3686,11 +3495,12 @@
       },
       "status": "non-standard"
     },
-    "-webkit-border-vertical-spacing": {
+    "-internal-border-vertical-spacing": {
       "animation-type": "by computed value",
       "inherited": true,
       "initial": "0px",
       "codegen-properties": {
+        "internal-only": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_inheritedData"],
         "render-style-storage-kind": "value",
@@ -3777,7 +3587,6 @@
           "resolver": "top"
         },
         "accepts-quirky-color": true,
-        "visited-link-color-support": true,
         "color-property": true,
         "disables-native-appearance": true,
         "render-style-storage-path": [
@@ -3788,13 +3597,6 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor",
-          "visitedLinkBorderColors"
-        ],
-        "render-style-visited-link-storage-container": "physical-group",
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -3806,7 +3608,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-border-top-left-radius"],
         "logical-property-group": {
           "name": "border-radius",
           "resolver": "top-left"
@@ -3836,7 +3637,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-border-top-right-radius"],
         "logical-property-group": {
           "name": "border-radius",
           "resolver": "top-right"
@@ -3997,7 +3797,6 @@
       "initial": "content-box",
       "values": ["border-box", "content-box"],
       "codegen-properties": {
-        "aliases": ["-webkit-box-sizing"],
         "render-style-storage-path": ["_nonInheritedData", "boxData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "BoxSizing",
@@ -4138,7 +3937,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-epub-caption-side"],
         "render-style-storage-path": ["m_inheritedFlags"],
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "enum",
@@ -4209,7 +4007,6 @@
         "padding-box"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-clip-path"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ClipPath",
@@ -4615,23 +4412,7 @@
         "row-resize",
         "all-scroll",
         "zoom-in",
-        "zoom-out",
-        {
-          "value": "-webkit-grab",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-grabbing",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-zoom-in",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-zoom-out",
-          "status": "non-standard"
-        }
+        "zoom-out"
       ],
       "codegen-properties": {
         "render-style-changed-for-animation-custom": true,
@@ -4649,21 +4430,6 @@
         "module": "css-ui",
         "url": "https://drafts.csswg.org/css-ui-4/#cursor"
       }
-    },
-    "-webkit-cursor-visibility": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto", "auto-hide"],
-      "codegen-properties": {
-        "enable-if": "ENABLE_CURSOR_VISIBILITY",
-        "render-style-storage-path": ["m_inheritedFlags"],
-        "render-style-storage-container": "struct",
-        "render-style-storage-kind": "enum",
-        "render-style-type": "CursorVisibility",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
     },
     "cx": {
       "animation-type": "by computed value",
@@ -4790,19 +4556,16 @@
         }
       ],
       "codegen-properties": {
-        "animation-wrapper": "VisitedAffectedStyleTypeWrapper<SVGPaint>",
+        "animation-wrapper": "StyleTypeWrapper",
         "animation-wrapper-requires-override-parameters": [
           "css::PropertyId::Fill",
           "&RenderStyle::Fill",
-          "&RenderStyle::SetFill",
-          "&RenderStyle::VisitedLinkFill",
-          "&RenderStyle::SetVisitedLinkFill"
+          "&RenderStyle::SetFill"
         ],
         "style-builder-custom": "All",
         "render-style-storage-path": ["m_svgStyle", "fillData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::SVGPaint",
-        "render-style-visited-link-storage-path": ["m_svgStyle", "fillData"],
         "color-property": true,
         "parser-grammar": "none | <color> | [ <url> [ none | <color> ]? ]",
         "parser-grammar-comment": "Current spec grammar is 'none | <color> | [ <url> [ none | <color> ]? ] | context-fill | context-stroke'",
@@ -4966,38 +4729,11 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -5057,14 +4793,6 @@
         {
           "value": "optimizeQuality",
           "url": "https://svgwg.org/svg2-draft/painting.html#ImageRenderingProperty"
-        },
-        {
-          "value": "-webkit-crisp-edges",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-optimize-contrast",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -5085,42 +4813,14 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-logical-width"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "size",
@@ -5364,28 +5064,14 @@
       "inherited": true,
       "initial": "normal",
       "values": ["normal"],
-      "codegen-properties": [
-        {
-          "enable-if": "ENABLE_TEXT_AUTOSIZING",
-          "animation-wrapper-requires-getter": "SpecifiedLineHeight",
-          "style-builder-custom": "All",
-          "style-extractor-custom": true,
-          "render-style-storage-path": ["_inheritedData"],
-          "render-style-storage-kind": "reference",
-          "render-style-type": "Style::LineHeight",
-          "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
-          "parser-exported": true
-        },
-        {
-          "enable-if": "!ENABLE_TEXT_AUTOSIZING",
-          "style-extractor-custom": true,
-          "render-style-storage-path": ["_inheritedData"],
-          "render-style-storage-kind": "reference",
-          "render-style-type": "Style::LineHeight",
-          "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
-          "parser-exported": true
-        }
-      ],
+      "codegen-properties": {
+        "style-extractor-custom": true,
+        "render-style-storage-path": ["_inheritedData"],
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::LineHeight",
+        "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
+        "parser-exported": true
+      },
       "specification": {
         "module": "css-inline",
         "url": "https://www.w3.org/TR/css-inline-3/#line-height-property"
@@ -5593,7 +5279,6 @@
       "initial": "0px",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-margin-after"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "margin",
@@ -5610,7 +5295,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-margin-before"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "margin",
@@ -5667,7 +5351,6 @@
       "initial": "0px",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-margin-end"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "margin",
@@ -5685,7 +5368,6 @@
       "initial": "0px",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-margin-start"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "margin",
@@ -5868,8 +5550,8 @@
       "codegen-properties": {
         "longhands": [
           "mask-image",
-          "-webkit-mask-position-x",
-          "-webkit-mask-position-y",
+          "-internal-mask-position-x",
+          "-internal-mask-position-y",
           "mask-size",
           "mask-repeat",
           "mask-origin",
@@ -5915,7 +5597,6 @@
       "animation-type": "by computed value",
       "initial": "0",
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-outset"],
         "render-style-storage-name": "outset",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -5938,7 +5619,6 @@
       "initial": "stretch",
       "values": ["stretch", "repeat", "space", "round"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-repeat"],
         "render-style-storage-name": "repeat",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -5961,7 +5641,6 @@
       "initial": "0",
       "values": ["fill"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-slice"],
         "render-style-storage-name": "slice",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -5988,7 +5667,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-source"],
         "render-style-storage-name": "source",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -6011,7 +5689,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-width"],
         "render-style-storage-name": "width",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -6088,7 +5765,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-image"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Image",
         "coordinated-value-list-property-item-type": "Style::ImageOrNone",
@@ -6149,14 +5825,9 @@
         {
           "value": "padding",
           "status": "non-standard"
-        },
-        {
-          "value": "-webkit-text",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-origin"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Origin",
         "coordinated-value-list-property-item-type": "FillBox",
@@ -6171,7 +5842,7 @@
     },
     "mask-position": {
       "codegen-properties": {
-        "longhands": ["-webkit-mask-position-x", "-webkit-mask-position-y"],
+        "longhands": ["-internal-mask-position-x", "-internal-mask-position-y"],
         "parser-function": "ConsumeMaskPositionShorthand",
         "parser-grammar": "<position>#",
         "parser-grammar-unused": true,
@@ -6182,24 +5853,11 @@
         "url": "https://drafts.fxtf.org/css-masking-1/#propdef-mask-position"
       }
     },
-    "-webkit-mask-position": {
-      "codegen-properties": {
-        "longhands": ["-webkit-mask-position-x", "-webkit-mask-position-y"],
-        "parser-function": "ConsumeBackgroundPositionShorthand",
-        "parser-grammar": "<bg-position>#",
-        "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
-      },
-      "status": "non-standard",
-      "specification": {
-        "module": "css-masking",
-        "url": "https://drafts.fxtf.org/css-masking-1/#propdef-mask-position"
-      }
-    },
-    "-webkit-mask-position-x": {
+    "-internal-mask-position-x": {
       "animation-type": "repeatable list",
       "initial": "0%",
       "codegen-properties": {
+        "internal-only": true,
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "PositionX",
         "coordinated-value-list-property-item-type": "Style::PositionX",
@@ -6216,10 +5874,11 @@
         "url": "https://drafts.fxtf.org/css-masking-1/#propdef-mask-position"
       }
     },
-    "-webkit-mask-position-y": {
+    "-internal-mask-position-y": {
       "animation-type": "repeatable list",
       "initial": "0%",
       "codegen-properties": {
+        "internal-only": true,
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "PositionY",
         "coordinated-value-list-property-item-type": "Style::PositionY",
@@ -6248,7 +5907,6 @@
         "no-repeat"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-repeat"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Repeat",
         "coordinated-value-list-property-item-type": "Style::RepeatStyle",
@@ -6266,7 +5924,6 @@
       "initial": "auto",
       "values": ["auto", "cover", "contain"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-size"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Size",
         "coordinated-value-list-property-item-type": "Style::BackgroundSize",
@@ -6353,42 +6010,14 @@
         "none",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-max-logical-height"],
         "logical-property-group": {
           "name": "max-size",
           "resolver": "block"
@@ -6408,38 +6037,11 @@
         "none",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6466,42 +6068,14 @@
         "none",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-max-logical-width"],
         "logical-property-group": {
           "name": "max-size",
           "resolver": "inline"
@@ -6540,38 +6114,11 @@
         "none",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6598,42 +6145,14 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-min-logical-height"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "min-size",
@@ -6653,38 +6172,11 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6711,42 +6203,14 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-min-logical-width"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "min-size",
@@ -6766,38 +6230,11 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -6952,7 +6389,6 @@
       "animation-type": "by computed value",
       "initial": "1",
       "codegen-properties": {
-        "aliases": ["-webkit-opacity"],
         "animation-wrapper-acceleration": "always",
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
@@ -7004,7 +6440,6 @@
       "initial": "currentcolor",
       "initial-comment": "Current spec initial value is 'auto'.",
       "codegen-properties": {
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -7014,11 +6449,6 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor"
-        ],
         "parser-grammar": "-webkit-focus-ring-color | <color>",
         "parser-grammar-comment": "Current spec grammar is 'auto | <color> | <image-1D>'"
       },
@@ -7142,7 +6572,6 @@
       "initial": "normal",
       "values": ["normal", "break-word", "anywhere"],
       "codegen-properties": {
-        "aliases": ["word-wrap"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "OverflowWrap",
@@ -7194,14 +6623,6 @@
         "auto",
         {
           "value": "overlay",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-paged-x",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-paged-y",
           "status": "non-standard"
         }
       ],
@@ -7383,7 +6804,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-padding-after"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "padding",
@@ -7400,7 +6820,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-padding-before"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "padding",
@@ -7460,7 +6879,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-padding-end"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "padding",
@@ -7477,7 +6895,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-padding-start"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "padding",
@@ -7580,22 +6997,6 @@
         "url": "https://www.w3.org/TR/CSS22/box.html#propdef-padding-top"
       }
     },
-    "page": {
-      "animation-type": "not animatable (needs triage)",
-      "animation-type-comment": "Current spec animation type is 'discrete'",
-      "initial": "0",
-      "values": ["auto"],
-      "codegen-properties": {
-        "skip-style-builder": true,
-        "skip-style-extractor": true,
-        "skip-render-style": true,
-        "parser-grammar": "auto | <custom-ident>"
-      },
-      "specification": {
-        "module": "css-page",
-        "url": "https://www.w3.org/TR/css-page-3/#propdef-page"
-      }
-    },
     "page-break-after": {
       "codegen-properties": {
         "longhands": ["break-after"],
@@ -7696,11 +7097,7 @@
         "relative",
         "absolute",
         "sticky",
-        "fixed",
-        {
-          "value": "-webkit-sticky",
-          "status": "deprecated"
-        }
+        "fixed"
       ],
       "codegen-properties": {
         "render-style-storage-path": ["m_nonInheritedFlags"],
@@ -7928,19 +7325,16 @@
         }
       ],
       "codegen-properties": {
-        "animation-wrapper": "VisitedAffectedStyleTypeWrapper<SVGPaint>",
+        "animation-wrapper": "StyleTypeWrapper",
         "animation-wrapper-requires-override-parameters": [
           "css::PropertyId::Stroke",
           "&RenderStyle::Stroke",
-          "&RenderStyle::SetStroke",
-          "&RenderStyle::VisitedLinkStroke",
-          "&RenderStyle::SetVisitedLinkStroke"
+          "&RenderStyle::SetStroke"
         ],
         "style-builder-custom": "All",
         "render-style-storage-path": ["m_svgStyle", "strokeData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::SVGPaint",
-        "render-style-visited-link-storage-path": ["m_svgStyle", "strokeData"],
         "color-property": true,
         "parser-grammar": "none | <color> | [ <url> [ none | <color> ]? ]",
         "parser-grammar-comment": "Current spec grammar is 'none | <color> | [ <url> [ none | <color> ]? ] | context-fill | context-stroke'",
@@ -8068,7 +7462,6 @@
       "initial": "transparent",
       "codegen-properties": {
         "animation-wrapper": "StyleTypeWrapper",
-        "animation-wrapper-comment": "FIXME: Why doesn't this use VisitedAffectedStyleTypeWrapper?",
         "animation-wrapper-requires-override-parameters": [
           "css::PropertyId::StrokeColor",
           "&RenderStyle::StrokeColor",
@@ -8079,8 +7472,6 @@
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": ["m_rareInheritedData"],
-        "visited-link-color-support": true,
         "color-property": true,
         "parser-grammar": "<color>"
       },
@@ -8183,24 +7574,16 @@
           "status": "unimplemented"
         },
         {
-          "value": "-webkit-auto",
-          "status": "non-standard"
+          "value": "-internal-left",
+          "status": "internal"
         },
         {
-          "value": "-webkit-left",
-          "status": "non-standard"
+          "value": "-internal-right",
+          "status": "internal"
         },
         {
-          "value": "-webkit-right",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-center",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-match-parent",
-          "status": "non-standard"
+          "value": "-internal-center",
+          "status": "internal"
         },
         {
           "value": "-internal-th-center",
@@ -8373,7 +7756,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-epub-text-transform"],
         "render-style-storage-path": ["m_inheritedFlags"],
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "raw",
@@ -8473,7 +7855,6 @@
     },
     "transition": {
       "codegen-properties": {
-        "aliases": ["-webkit-transition"],
         "longhands": [
           "transition-property",
           "transition-duration",
@@ -8518,7 +7899,6 @@
       "animation-type": "not animatable",
       "initial": "0s",
       "codegen-properties": {
-        "aliases": ["-webkit-transition-delay"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Delay",
         "coordinated-value-list-property-item-type": "Style::SingleTransitionDelay",
@@ -8540,7 +7920,6 @@
       "animation-type": "not animatable",
       "initial": "0s",
       "codegen-properties": {
-        "aliases": ["-webkit-transition-duration"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Duration",
         "coordinated-value-list-property-item-type": "Style::SingleTransitionDuration",
@@ -8563,7 +7942,6 @@
       "initial": "all",
       "values": ["none", "all"],
       "codegen-properties": {
-        "aliases": ["-webkit-transition-property"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Property",
         "coordinated-value-list-property-item-type": "Style::SingleTransitionProperty",
@@ -8593,7 +7971,6 @@
         "step-end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-transition-timing-function"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "TimingFunction",
         "coordinated-value-list-property-item-type": "Style::EasingFunction",
@@ -8619,19 +7996,7 @@
         "isolate",
         "bidi-override",
         "isolate-override",
-        "plaintext",
-        {
-          "value": "-webkit-isolate",
-          "status": "deprecated"
-        },
-        {
-          "value": "-webkit-isolate-override",
-          "status": "deprecated"
-        },
-        {
-          "value": "-webkit-plaintext",
-          "status": "deprecated"
-        }
+        "plaintext"
       ],
       "codegen-properties": {
         "render-style-storage-path": ["m_nonInheritedFlags"],
@@ -8689,8 +8054,8 @@
         "bottom",
         "text-bottom",
         {
-          "value": "-webkit-baseline-middle",
-          "status": "non-standard"
+          "value": "-internal-baseline-middle",
+          "status": "internal"
         }
       ],
       "codegen-properties": {
@@ -8796,38 +8161,11 @@
         "auto",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
@@ -8881,7 +8219,6 @@
         "break-word"
       ],
       "codegen-properties": {
-        "aliases": ["-epub-word-break"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "WordBreak",
@@ -9011,7 +8348,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-appearance"],
         "render-style-setter-custom": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "enum",
@@ -9227,7 +8563,6 @@
       "initial": "visible",
       "values": ["visible", "hidden"],
       "codegen-properties": {
-        "aliases": ["-webkit-backface-visibility"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "BackfaceVisibility",
@@ -9243,7 +8578,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-count"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9265,7 +8599,6 @@
       "initial": "balance",
       "values": ["auto", "balance"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-fill"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9284,7 +8617,6 @@
       "animation-type": "by computed value",
       "initial": "normal",
       "codegen-properties": {
-        "aliases": ["grid-column-gap", "-webkit-column-gap"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::GapGutter",
@@ -9300,7 +8632,6 @@
       "animation-type": "by computed value",
       "initial": "normal",
       "codegen-properties": {
-        "aliases": ["grid-row-gap"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::GapGutter",
@@ -9314,7 +8645,6 @@
     },
     "gap": {
       "codegen-properties": {
-        "aliases": ["grid-gap"],
         "longhands": ["row-gap", "column-gap"],
         "shorthand-pattern": "CoalescingPair",
         "parser-function": "ConsumeAlignShorthand",
@@ -9327,28 +8657,8 @@
         "url": "https://drafts.csswg.org/css-align/#gap-shorthand"
       }
     },
-    "-webkit-column-progression": {
-      "animation-type": "not animatable (legacy)",
-      "initial": "normal",
-      "values": ["normal", "reverse"],
-      "codegen-properties": {
-        "render-style-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "multiCol"
-        ],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "ColumnProgression",
-        "parser-grammar": "<<values>>"
-      },
-      "status": {
-        "status": "non-standard",
-        "comment": "Added in https://bugs.webkit.org/show_bug.cgi?id=89315"
-      }
-    },
     "column-rule": {
       "codegen-properties": {
-        "aliases": ["-webkit-column-rule"],
         "longhands": [
           "column-rule-width",
           "column-rule-style",
@@ -9368,8 +8678,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-column-rule-color"],
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-name": "color",
         "render-style-storage-path": [
@@ -9381,11 +8689,6 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "multiCol"
-        ],
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -9409,7 +8712,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-column-rule-style"],
         "render-style-storage-name": "style",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9432,7 +8734,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-rule-width"],
         "style-builder-custom": "Initial",
         "render-style-initial-constexpr": true,
         "render-style-initial-custom": true,
@@ -9459,7 +8760,6 @@
       "initial": "none",
       "values": ["none", "all"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-span"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9479,7 +8779,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-width"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9498,7 +8797,6 @@
     },
     "columns": {
       "codegen-properties": {
-        "aliases": ["-webkit-columns"],
         "longhands": ["column-width", "column-count"],
         "parser-function": "ConsumeColumnsShorthand",
         "parser-grammar": "<'column-width'> || <'column-count'>",
@@ -9585,7 +8883,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-filter"],
         "animation-wrapper-acceleration": "always",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9602,28 +8899,6 @@
       "specification": {
         "module": "css-filters",
         "url": "https://www.w3.org/TR/filter-effects/#FilterProperty"
-      }
-    },
-    "-apple-color-filter": {
-      "animation-type": "see prose",
-      "inherited": true,
-      "initial": "none",
-      "values": ["none"],
-      "codegen-properties": {
-        "settings-flag": "colorFilterEnabled",
-        "render-style-storage-path": [
-          "m_rareInheritedData",
-          "appleColorFilter"
-        ],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::AppleColorFilter",
-        "parser-function": "ConsumeAppleColorFilter",
-        "parser-grammar": "none | <-apple-color-filter-value-list>",
-        "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for the strong value representation."
-      },
-      "status": {
-        "status": "non-standard"
       }
     },
     "align-content": {
@@ -9647,7 +8922,6 @@
         "end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-align-content"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -9683,7 +8957,6 @@
         "self-end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-align-items"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -9720,7 +8993,6 @@
         "self-end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-align-self"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -9738,7 +9010,6 @@
     },
     "flex": {
       "codegen-properties": {
-        "aliases": ["-webkit-flex"],
         "longhands": ["flex-grow", "flex-shrink", "flex-basis"],
         "shorthand-pattern": "StandardSpaceSeparated",
         "parser-function": "ConsumeFlexShorthand",
@@ -9759,42 +9030,14 @@
         "content",
         "min-content",
         "max-content",
-        {
-          "value": "stretch",
-          "status": "unimplemented"
-        },
+        "stretch",
         "fit-content",
         {
           "value": "contain",
           "status": "unimplemented"
-        },
-        {
-          "value": "intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "min-intrinsic",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-min-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-max-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fit-content",
-          "status": "non-standard"
-        },
-        {
-          "value": "-webkit-fill-available",
-          "status": "non-standard"
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-flex-basis"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9814,7 +9057,6 @@
       "initial": "row",
       "values": ["row", "row-reverse", "column", "column-reverse"],
       "codegen-properties": {
-        "aliases": ["-webkit-flex-direction"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9831,7 +9073,6 @@
     },
     "flex-flow": {
       "codegen-properties": {
-        "aliases": ["-webkit-flex-flow"],
         "longhands": ["flex-direction", "flex-wrap"],
         "shorthand-parser-pattern": "StandardSpaceSeparated",
         "parser-grammar": "<'flex-direction'> || <'flex-wrap'>",
@@ -9847,7 +9088,6 @@
       "animation-type": "by computed value",
       "initial": "0",
       "codegen-properties": {
-        "aliases": ["-webkit-flex-grow"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9867,7 +9107,6 @@
       "animation-type": "by computed value",
       "initial": "1",
       "codegen-properties": {
-        "aliases": ["-webkit-flex-shrink"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9888,7 +9127,6 @@
       "initial": "nowrap",
       "values": ["nowrap", "wrap", "wrap-reverse"],
       "codegen-properties": {
-        "aliases": ["-webkit-flex-wrap"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9923,7 +9161,6 @@
         "right"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-justify-content"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -9986,7 +9223,6 @@
       "animation-type": "discrete",
       "initial": "legacy",
       "codegen-properties": {
-        "aliases": ["-webkit-justify-items"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -10334,7 +9570,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-hyphenate-character"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::HyphenateCharacter",
@@ -10345,8 +9580,9 @@
         "url": "https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character"
       }
     },
-    "-webkit-hyphenate-limit-after": {
-      "animation-type": "not animatable (legacy)",
+    "hyphenate-limit-chars": {
+      "animation-type": "discrete",
+      "animation-type-comment": "Current spec animation type is 'by computed value type'",
       "inherited": true,
       "initial": "auto",
       "values": ["auto"],
@@ -10354,27 +9590,17 @@
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "value",
-        "render-style-type": "Style::HyphenateLimitEdge",
-        "parser-grammar": "auto | <number [0,inf]>"
+        "render-style-type": "Style::HyphenateLimitChars",
+        "parser-grammar": "[ auto | <integer [0,inf]> ]{1,3}"
       },
-      "status": "non-standard"
+      "specification": {
+        "module": "css-text",
+        "url": "https://www.w3.org/TR/css-text-4/#propdef-hyphenate-limit-chars"
+      }
     },
-    "-webkit-hyphenate-limit-before": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto"],
-      "codegen-properties": {
-        "render-style-initial-constexpr": true,
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "value",
-        "render-style-type": "Style::HyphenateLimitEdge",
-        "parser-grammar": "auto | <number [0,inf]>"
-      },
-      "status": "non-standard"
-    },
-    "-webkit-hyphenate-limit-lines": {
-      "animation-type": "not animatable (legacy)",
+    "hyphenate-limit-lines": {
+      "animation-type": "discrete",
+      "animation-type-comment": "Current spec animation type is 'by computed value type'",
       "inherited": true,
       "initial": "no-limit",
       "values": ["no-limit"],
@@ -10383,10 +9609,7 @@
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "value",
         "render-style-type": "Style::HyphenateLimitLines",
-        "parser-grammar": "no-limit | <number [0,inf]>"
-      },
-      "status": {
-        "status": "experimental"
+        "parser-grammar": "no-limit | <integer [0,inf]>"
       },
       "specification": {
         "module": "css-text",
@@ -10399,7 +9622,6 @@
       "initial": "manual",
       "values": ["none", "manual", "auto"],
       "codegen-properties": {
-        "aliases": ["-epub-hyphens", "-webkit-hyphens"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "Hyphens",
@@ -10410,7 +9632,7 @@
         "url": "https://drafts.csswg.org/css-text-3/"
       }
     },
-    "-webkit-initial-letter": {
+    "initial-letter": {
       "animation-type": "discrete",
       "initial": "normal",
       "values": ["normal"],
@@ -10422,15 +9644,12 @@
         "parser-grammar": "normal | <number [0,inf]>{1,2}@(type=ValuePair default=previous)",
         "parser-grammar-comment": "Spec does not match our implementation. Spec is 'normal | [ <number [1,inf]> <integer [1,inf]> ] | [ <number [1,inf]> && [ drop | raise ]? ]'"
       },
-      "status": {
-        "status": "experimental"
-      },
       "specification": {
         "module": "css-inline",
         "url": "https://www.w3.org/TR/css-inline/#propdef-initial-letter"
       }
     },
-    "-webkit-line-box-contain": {
+    "-internal-line-box-contain": {
       "animation-type": "not animatable (legacy)",
       "inherited": true,
       "initial": "block inline replaced",
@@ -10445,6 +9664,7 @@
         "initial-letter"
       ],
       "codegen-properties": {
+        "internal-only": true,
         "render-style-initial-custom": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "raw",
@@ -10454,26 +9674,6 @@
       "status": {
         "status": "obsolete",
         "comment": "Added in https://trac.webkit.org/changeset/81684"
-      }
-    },
-    "-webkit-line-align": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "none",
-      "values": ["none", "edges"],
-      "codegen-properties": {
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "LineAlign",
-        "parser-grammar": "<<values>>"
-      },
-      "status": {
-        "status": "obsolete",
-        "comment": "Added in https://trac.webkit.org/changeset/108133"
-      },
-      "specification": {
-        "module": "css-line-grid",
-        "url": "https://www.w3.org/TR/css-line-grid-1/"
       }
     },
     "line-break": {
@@ -10493,7 +9693,6 @@
         "anywhere"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-line-break"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "LineBreak",
@@ -10523,7 +9722,6 @@
       "initial": "normal",
       "values": ["normal", "light", "dark", "only"],
       "codegen-properties": {
-        "aliases": ["supported-color-schemes"],
         "enable-if": "ENABLE_DARK_MODE_CSS",
         "style-builder-custom": "Value",
         "render-style-has-explicitly-set-storage-path": [
@@ -10552,7 +9750,6 @@
       "animation-type": "by computed value",
       "initial": "0",
       "codegen-properties": {
-        "aliases": ["-webkit-order"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -10582,7 +9779,6 @@
     },
     "perspective-origin": {
       "codegen-properties": {
-        "aliases": ["-webkit-perspective-origin"],
         "longhands": ["perspective-origin-x", "perspective-origin-y"],
         "parser-function": "ConsumePerspectiveOriginShorthand",
         "parser-grammar": "<position>",
@@ -10598,7 +9794,6 @@
       "animation-type": "by computed value",
       "initial": "50%",
       "codegen-properties": {
-        "aliases": ["-webkit-perspective-origin-x"],
         "skip-style-extractor": true,
         "render-style-storage-name": "x",
         "render-style-storage-path": [
@@ -10620,7 +9815,6 @@
       "animation-type": "by computed value",
       "initial": "50%",
       "codegen-properties": {
-        "aliases": ["-webkit-perspective-origin-y"],
         "skip-style-extractor": true,
         "render-style-storage-name": "y",
         "render-style-storage-path": [
@@ -10644,7 +9838,6 @@
       "initial": "economy",
       "values": ["exact", "economy"],
       "codegen-properties": {
-        "aliases": ["-webkit-print-color-adjust", "color-adjust"],
         "render-style-storage-path": ["m_inheritedFlags"],
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "enum",
@@ -10656,12 +9849,13 @@
         "url": "https://www.w3.org/TR/css-color-adjust/#print-color-adjust"
       }
     },
-    "-webkit-rtl-ordering": {
+    "-internal-rtl-ordering": {
       "animation-type": "not animatable (legacy)",
       "inherited": true,
       "initial": "logical",
       "values": ["logical", "visual"],
       "codegen-properties": {
+        "internal-only": true,
         "render-style-initial": "initialRTLOrdering",
         "render-style-setter": "setRTLOrdering",
         "render-style-storage-path": ["m_inheritedFlags"],
@@ -10671,23 +9865,6 @@
         "parser-grammar": "<<values>>"
       },
       "status": "non-standard"
-    },
-    "-webkit-text-combine": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "none",
-      "values": ["none", "horizontal"],
-      "codegen-properties": {
-        "aliases": ["-epub-text-combine"],
-        "cascade-alias": "text-combine-upright",
-        "skip-style-builder": true,
-        "style-extractor-custom": true,
-        "parser-grammar": "<<values>>"
-      },
-      "status": {
-        "status": "obsolete",
-        "comment": "Use text-combine-upright instead."
-      }
     },
     "text-combine-upright": {
       "animation-type": "not animatable",
@@ -10714,7 +9891,6 @@
           "text-decoration-style",
           "text-decoration-color"
         ],
-        "aliases": ["-webkit-text-decoration"],
         "shorthand-pattern": "StandardSpaceSeparated",
         "style-extractor-custom": true,
         "parser-grammar": "<'text-decoration-line'> || <'text-decoration-style'> || <'text-decoration-color'>",
@@ -10745,7 +9921,6 @@
         "grammar-error"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-text-decoration-line"],
         "render-style-storage-path": ["m_nonInheritedFlags"],
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "raw",
@@ -10763,7 +9938,6 @@
       "initial": "solid",
       "values": ["solid", "double", "dotted", "dashed", "wavy"],
       "codegen-properties": {
-        "aliases": ["-webkit-text-decoration-style"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "TextDecorationStyle",
@@ -10778,17 +9952,10 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-text-decoration-color"],
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": [
-          "_nonInheritedData",
-          "miscData",
-          "visitedLinkColor"
-        ],
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -10799,7 +9966,6 @@
     "text-decoration-skip": {
       "inherited": true,
       "codegen-properties": {
-        "aliases": ["-webkit-text-decoration-skip"],
         "longhands": ["text-decoration-skip-ink"],
         "parser-function": "ConsumeTextDecorationSkipShorthand",
         "parser-grammar": "none | auto | ink@(aliased-to=auto)",
@@ -10833,7 +9999,6 @@
       "initial": "auto",
       "values": ["auto", "under", "from-font", "left", "right"],
       "codegen-properties": {
-        "aliases": ["-webkit-text-underline-position"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "raw",
         "render-style-type": "Style::TextUnderlinePosition",
@@ -10874,11 +10039,12 @@
         "url": "https://drafts.csswg.org/css-text-decor-4/#text-decoration-thickness-property"
       }
     },
-    "-webkit-text-decorations-in-effect": {
+    "-internal-text-decorations-in-effect": {
       "animation-type": "not animatable (internal)",
       "inherited": true,
       "initial": "none",
       "codegen-properties": {
+        "internal-only": true,
         "skip-style-builder": true,
         "render-style-name-for-methods": "TextDecorationLineInEffect",
         "render-style-storage-path": ["m_inheritedFlags"],
@@ -10890,22 +10056,9 @@
       },
       "status": "non-standard"
     },
-    "-internal-text-autosizing-status": {
-      "animation-type": "not animatable (internal)",
-      "inherited": true,
-      "codegen-properties": {
-        "enable-if": "ENABLE_TEXT_AUTOSIZING",
-        "skip-style-builder": true,
-        "skip-parser": true,
-        "skip-render-style": true,
-        "internal-only": true
-      },
-      "status": "non-standard"
-    },
     "text-emphasis": {
       "inherited": true,
       "codegen-properties": {
-        "aliases": ["-epub-text-emphasis", "-webkit-text-emphasis"],
         "longhands": ["text-emphasis-style", "text-emphasis-color"],
         "shorthand-pattern": "StandardSpaceSeparated",
         "parser-grammar": "<'text-emphasis-style'> || <'text-emphasis-color'>",
@@ -10922,13 +10075,10 @@
       "inherited": true,
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-epub-text-emphasis-color", "-webkit-text-emphasis-color"],
-        "visited-link-color-support": true,
         "color-property": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": ["m_rareInheritedData"],
         "parser-grammar": "<color>"
       },
       "specification": {
@@ -10941,7 +10091,6 @@
       "inherited": true,
       "initial": "over right",
       "codegen-properties": {
-        "aliases": ["-webkit-text-emphasis-position"],
         "render-style-initial-custom": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "raw",
@@ -10958,7 +10107,6 @@
       "inherited": true,
       "initial": "none",
       "codegen-properties": {
-        "aliases": ["-epub-text-emphasis-style", "-webkit-text-emphasis-style"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::TextEmphasisStyle",
@@ -10969,30 +10117,13 @@
         "url": "https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style"
       }
     },
-    "-webkit-text-fill-color": {
-      "animation-type": "by computed value",
-      "inherited": true,
-      "initial": "currentcolor",
-      "codegen-properties": {
-        "visited-link-color-support": true,
-        "color-property": true,
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::Color",
-        "render-style-visited-link-storage-path": ["m_rareInheritedData"],
-        "parser-grammar": "<color>"
-      },
-      "status": {
-        "status": "non-standard",
-        "comment": "Obsoleted by fill-color"
-      }
-    },
-    "-webkit-text-security": {
+    "-internal-text-security": {
       "animation-type": "not animatable (legacy)",
       "inherited": true,
       "initial": "none",
-      "values": ["disc", "circle", "square", "none"],
+      "values": ["disc", "none"],
       "codegen-properties": {
+        "internal-only": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "TextSecurity",
@@ -11004,7 +10135,6 @@
       "animation-type": "see prose",
       "initial": "none",
       "codegen-properties": {
-        "aliases": ["-webkit-transform"],
         "animation-wrapper-acceleration": "always",
         "style-extractor-custom": true,
         "render-style-storage-path": [
@@ -11049,7 +10179,6 @@
     },
     "transform-origin": {
       "codegen-properties": {
-        "aliases": ["-webkit-transform-origin"],
         "longhands": [
           "transform-origin-x",
           "transform-origin-y",
@@ -11069,7 +10198,6 @@
       "animation-type": "by computed value",
       "initial": "50%",
       "codegen-properties": {
-        "aliases": ["-webkit-transform-origin-x"],
         "skip-style-extractor": true,
         "render-style-storage-name": "x",
         "render-style-storage-path": [
@@ -11092,7 +10220,6 @@
       "animation-type": "by computed value",
       "initial": "50%",
       "codegen-properties": {
-        "aliases": ["-webkit-transform-origin-y"],
         "skip-style-extractor": true,
         "render-style-storage-name": "y",
         "render-style-storage-path": [
@@ -11115,7 +10242,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-transform-origin-z"],
         "skip-style-extractor": true,
         "render-style-storage-name": "z",
         "render-style-storage-path": [
@@ -11148,7 +10274,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-transform-style"],
         "render-style-name-for-methods": "TransformStyle3D",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
@@ -11220,11 +10345,12 @@
         "url": "https://drafts.csswg.org/css-transforms-2/#propdef-rotate"
       }
     },
-    "-webkit-user-drag": {
-      "animation-type": "not animatable (legacy)",
+    "-internal-user-drag": {
+      "animation-type": "not animatable (internal)",
       "initial": "auto",
       "values": ["auto", "none", "element"],
       "codegen-properties": {
+        "internal-only": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "UserDrag",
@@ -11232,12 +10358,13 @@
       },
       "status": "non-standard"
     },
-    "-webkit-user-modify": {
-      "animation-type": "not animatable (legacy)",
+    "-internal-user-modify": {
+      "animation-type": "not animatable (internal)",
       "inherited": true,
       "initial": "read-only",
       "values": ["read-only", "read-write", "read-write-plaintext-only"],
       "codegen-properties": {
+        "internal-only": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "UserModify",
@@ -11245,7 +10372,7 @@
       },
       "status": "non-standard"
     },
-    "-webkit-user-select": {
+    "user-select": {
       "animation-type": "not animatable (needs triage)",
       "animation-type-comment": "Current spec for standard 'user-select' animation type is 'discrete'",
       "inherited": true,
@@ -11266,9 +10393,6 @@
         "render-style-storage-kind": "enum",
         "render-style-type": "UserSelect",
         "parser-grammar": "<<values>>"
-      },
-      "status": {
-        "status": "experimental"
       },
       "specification": {
         "module": "css-ui",
@@ -11299,7 +10423,6 @@
           "scroll-margin-bottom",
           "scroll-margin-left"
         ],
-        "aliases": ["scroll-snap-margin"],
         "shorthand-pattern": "CoalescingQuad",
         "parser-grammar": "<'scroll-margin-top'>{1,4}",
         "parser-grammar-unused": true,
@@ -11315,7 +10438,6 @@
       "animation-type-comment": "Current spec animation type is 'by computed value'",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["scroll-snap-margin-bottom"],
         "logical-property-group": {
           "name": "scroll-margin",
           "resolver": "bottom"
@@ -11340,7 +10462,6 @@
       "animation-type-comment": "Current spec animation type is 'by computed value'",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["scroll-snap-margin-left"],
         "logical-property-group": {
           "name": "scroll-margin",
           "resolver": "left"
@@ -11365,7 +10486,6 @@
       "animation-type-comment": "Current spec animation type is 'by computed value'",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["scroll-snap-margin-right"],
         "logical-property-group": {
           "name": "scroll-margin",
           "resolver": "right"
@@ -11390,7 +10510,6 @@
       "animation-type-comment": "Current spec animation type is 'by computed value'",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["scroll-snap-margin-top"],
         "logical-property-group": {
           "name": "scroll-margin",
           "resolver": "top"
@@ -11892,7 +11011,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-shape-outside"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ShapeOutside",
@@ -11910,7 +11028,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-shape-margin"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ShapeMargin",
@@ -11925,7 +11042,6 @@
       "animation-type": "by computed value",
       "initial": "0",
       "codegen-properties": {
-        "aliases": ["-webkit-shape-image-threshold"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "value",
@@ -12019,37 +11135,6 @@
       "specification": {
         "module": "scroll-animations",
         "url": "https://drafts.csswg.org/scroll-animations-1/#view-timeline-name"
-      }
-    },
-    "view-transition-class": {
-      "animation-type": "discrete",
-      "initial": "none",
-      "values": ["none"],
-      "codegen-properties": {
-        "render-style-name-for-methods": "ViewTransitionClasses",
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::ViewTransitionClasses",
-        "parser-grammar": "none | <custom-ident excluding=none>+@(no-single-item-opt)"
-      },
-      "specification": {
-        "module": "css-view-transitions",
-        "url": "https://drafts.csswg.org/css-view-transitions-2/#view-transition-class-prop"
-      }
-    },
-    "view-transition-name": {
-      "animation-type": "discrete",
-      "initial": "none",
-      "values": ["none", "auto", "match-element"],
-      "codegen-properties": {
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::ViewTransitionName",
-        "parser-grammar": "none | auto | match-element | <custom-ident>"
-      },
-      "specification": {
-        "module": "css-view-transitions",
-        "url": "https://drafts.csswg.org/css-view-transitions/#view-transition-name-prop"
       }
     },
     "anchor-name": {
@@ -12184,37 +11269,6 @@
         "url": "https://drafts.csswg.org/css-anchor-position/#position-visibility"
       }
     },
-    "-webkit-tap-highlight-color": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "@TapHighlightColor",
-      "codegen-properties": {
-        "enable-if": "ENABLE_TOUCH_EVENTS",
-        "color-property": true,
-        "render-style-initial-custom": true,
-        "render-style-initial-inline": false,
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "reference",
-        "render-style-type": "Style::Color",
-        "parser-grammar": "<color>"
-      },
-      "status": "non-standard"
-    },
-    "-webkit-overflow-scrolling": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto", "touch"],
-      "codegen-properties": {
-        "enable-if": "ENABLE_WEBKIT_OVERFLOW_SCROLLING_CSS_PROPERTY",
-        "settings-flag": "legacyOverflowScrollingTouchEnabled",
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "Style::WebkitOverflowScrolling",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
     "touch-action": {
       "animation-type": "discrete",
       "initial": "auto",
@@ -12261,135 +11315,6 @@
         "module": "pointerevents",
         "url": "https://www.w3.org/TR/pointerevents/#the-touch-action-css-property"
       }
-    },
-    "-webkit-touch-callout": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "default",
-      "values": ["default", "none"],
-      "codegen-properties": {
-        "enable-if": "ENABLE_WEBKIT_TOUCH_CALLOUT_CSS_PROPERTY",
-        "render-style-storage-path": ["m_rareInheritedData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "Style::WebkitTouchCallout",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
-    "-apple-visual-effect": {
-      "animation-type": "discrete",
-      "initial": "none",
-      "values": [
-        "none",
-        "-apple-system-blur-material-ultra-thin",
-        "-apple-system-blur-material-thin",
-        "-apple-system-blur-material",
-        "-apple-system-blur-material-thick",
-        "-apple-system-blur-material-chrome",
-        {
-          "value": "-apple-system-glass-material",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        {
-          "value": "-apple-system-glass-material-clear",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        {
-          "value": "-apple-system-glass-material-subdued",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        {
-          "value": "-apple-system-glass-material-media-controls",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        {
-          "value": "-apple-system-glass-material-media-controls-subdued",
-          "enable-if": "HAVE_MATERIAL_HOSTING"
-        },
-        "-apple-system-vibrancy-label",
-        "-apple-system-vibrancy-secondary-label",
-        "-apple-system-vibrancy-tertiary-label",
-        "-apple-system-vibrancy-quaternary-label",
-        "-apple-system-vibrancy-fill",
-        "-apple-system-vibrancy-secondary-fill",
-        "-apple-system-vibrancy-tertiary-fill",
-        "-apple-system-vibrancy-separator"
-      ],
-      "codegen-properties": {
-        "enable-if": "HAVE_CORE_MATERIAL",
-        "settings-flag": "useSystemAppearance",
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "AppleVisualEffect",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
-    "-apple-pay-button-style": {
-      "animation-type": "not animatable (legacy)",
-      "initial": "black",
-      "values": ["white", "white-outline", "black"],
-      "codegen-properties": {
-        "enable-if": "ENABLE_APPLE_PAY",
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "ApplePayButtonStyle",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
-    "-apple-pay-button-type": {
-      "animation-type": "not animatable (legacy)",
-      "initial": "plain",
-      "values": [
-        "plain",
-        "buy",
-        "set-up",
-        "donate",
-        "check-out",
-        "book",
-        "subscribe",
-        {
-          "value": "reload",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "add-money",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "top-up",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "order",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "rent",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "support",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "contribute",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        },
-        {
-          "value": "tip",
-          "enable-if": "ENABLE_APPLE_PAY_NEW_BUTTON_TYPES"
-        }
-      ],
-      "codegen-properties": {
-        "enable-if": "ENABLE_APPLE_PAY",
-        "render-style-storage-path": ["_nonInheritedData", "rareData"],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "ApplePayButtonType",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
     }
   },
   "descriptors": {
@@ -12550,14 +11475,12 @@
         "codegen-properties": [
           {
             "enable-if": "ENABLE_VARIATION_FONTS",
-            "aliases": ["font-stretch"],
             "parser-grammar": "<font-width-absolute> | <percentage [0,inf]>{1,2}",
             "parser-grammar-comment": "Current spec grammar is 'auto | <'font-width'>{1,2}'",
             "parser-exported": true
           },
           {
             "enable-if": "!ENABLE_VARIATION_FONTS",
-            "aliases": ["font-stretch"],
             "parser-grammar": "<font-width-absolute> | <percentage [0,inf]>",
             "parser-exported": true
           }
@@ -12686,17 +11609,6 @@
         }
       }
     },
-    "@page": {
-      "size": {
-        "codegen-properties": {
-          "parser-grammar": "<length [0,inf]>{1,2}@(type=ValuePair) | auto | [ <page-size> || [ portrait | landscape ] ]@(type=ValuePair)"
-        },
-        "specification": {
-          "module": "css-page",
-          "url": "https://www.w3.org/TR/css3-page/#page-size-prop"
-        }
-      }
-    },
     "@property": {
       "syntax": {
         "codegen-properties": {
@@ -12734,32 +11646,6 @@
         "specification": {
           "module": "css-mixins",
           "url": "https://www.w3.org/TR/css-mixins-1/#descdef-function-result"
-        }
-      }
-    },
-    "@view-transition": {
-      "navigation": {
-        "values": ["none", "auto"],
-        "codegen-properties": {
-          "parser-grammar": "<<values>>",
-          "parser-exported": true
-        },
-        "specification": {
-          "module": "css-view-transitions",
-          "url": "https://www.w3.org/TR/css-view-transitions-2/#view-transition-navigation-descriptor"
-        }
-      },
-      "types": {
-        "values": ["none"],
-        "codegen-properties": {
-          "parser-function": "ConsumeViewTransitionTypes",
-          "parser-grammar": "none | <custom-ident excluding=none>+",
-          "parser-grammar-unused": true,
-          "parser-grammar-unused-reason": "Needs support for excluding from <custom-ident> based on prefixes."
-        },
-        "specification": {
-          "module": "css-view-transitions",
-          "url": "https://www.w3.org/TR/css-view-transitions-2/#view-transition-navigation-descriptor"
         }
       }
     }
@@ -13020,11 +11906,6 @@
       "longname": "CSS Viewport Module",
       "url": "https://drafts.csswg.org/css-viewport/"
     },
-    "css-view-transitions": {
-      "shortname": "CSS View Transitions",
-      "longname": "CSS View Transitions Module",
-      "url": "https://drafts.csswg.org/css-view-transitions/"
-    },
     "css-will-change": {
       "shortname": "CSS Will Change",
       "longname": "CSS Will Change Module",
@@ -13073,20 +11954,12 @@
         "url": "https://drafts.csswg.org/css-fonts-4/#valdef-font-size-absolute-size"
       }
     },
-    "<-webkit-absolute-size>": {
-      "grammar": "-webkit-xxx-large@(aliased-to=xxx-large)",
-      "status": "non-standard"
-    },
     "<relative-size>": {
       "grammar": "larger | smaller",
       "specification": {
         "module": "css-fonts-4",
         "url": "https://drafts.csswg.org/css-fonts-4/#valdef-font-size-relative-size"
       }
-    },
-    "<-webkit-relative-size>": {
-      "grammar": "-webkit-ruby-text",
-      "status": "non-standard"
     },
     "<font-weight-absolute>": {
       "grammar": "normal | bold | <number [1,1000]>",
@@ -13173,10 +12046,6 @@
         "url": "https://drafts.csswg.org/css-fonts-4/#generic-font-families"
       }
     },
-    "<-webkit-generic-family>": {
-      "grammar": "-webkit-body",
-      "status": "non-standard"
-    },
     "<gap-gutter>": {
       "grammar": "normal | <length-percentage [0,inf]>",
       "specification": {
@@ -13185,7 +12054,7 @@
       }
     },
     "<width-or-height-keyword>": {
-      "grammar": "intrinsic | min-intrinsic | min-content | -webkit-min-content | max-content | -webkit-max-content | -webkit-fill-available | fit-content | -webkit-fit-content"
+      "grammar": "min-content | max-content | stretch | fit-content"
     },
     "<width-or-height>": {
       "grammar": "auto | <width-or-height-keyword> | <length-percentage [0,inf] anchor-size=allowed>",
@@ -13338,22 +12207,6 @@
         "url": "https://drafts.fxtf.org/css-masking-1/#funcdef-clip-rect"
       }
     },
-    "<-webkit-origin-box>": {
-      "grammar": "<box> | border | content | padding | -webkit-text",
-      "status": "non-standard"
-    },
-    "<-webkit-clip-box>": {
-      "grammar": "<-webkit-origin-box> | text",
-      "status": "non-standard"
-    },
-    "<-webkit-compositing-operator>": {
-      "grammar": "clear | copy | source-over | source-in | source-out | source-atop | destination-over | destination-in | destination-out | destination-atop | xor | plus-darker | plus-lighter",
-      "status": "non-standard"
-    },
-    "<-webkit-masking-source-type>": {
-      "grammar": "auto | alpha | luminance",
-      "status": "non-standard"
-    },
     "<single-background-blend-mode>": {
       "grammar": "<blend-mode>",
       "exported": true,
@@ -13371,7 +12224,7 @@
       }
     },
     "<single-background-clip>": {
-      "grammar": "<box> | border-area | text | -webkit-text",
+      "grammar": "<box> | border-area | text",
       "exported": true,
       "specification": {
         "module": "css-backgrounds",
@@ -13425,7 +12278,7 @@
       "comment": "Out of spec. 'mask-clip' is currently defined to '[ <coord-box> | no-clip ]#'."
     },
     "<single-mask-origin>": {
-      "grammar": "<box> | border | content | padding | -webkit-text",
+      "grammar": "<box> | border | content | padding",
       "exported": true,
       "specification": {
         "module": "css-masking",
@@ -13465,26 +12318,6 @@
         "url": "https://drafts.fxtf.org/css-masking-1/#propdef-mask-mode"
       }
     },
-    "<single-webkit-background-clip>": {
-      "grammar": "<-webkit-clip-box>",
-      "exported": true,
-      "status": "non-standard"
-    },
-    "<single-webkit-background-origin>": {
-      "grammar": "<-webkit-origin-box>",
-      "exported": true,
-      "status": "non-standard"
-    },
-    "<single-webkit-mask-composite>": {
-      "grammar": "<-webkit-compositing-operator>",
-      "exported": true,
-      "status": "non-standard"
-    },
-    "<single-webkit-mask-clip>": {
-      "grammar": "<-webkit-clip-box>",
-      "exported": true,
-      "status": "non-standard"
-    },
     "<single-webkit-mask-position-x>": {
       "grammar": "<position-x>",
       "exported": true,
@@ -13492,11 +12325,6 @@
     },
     "<single-webkit-mask-position-y>": {
       "grammar": "<position-y>",
-      "exported": true,
-      "status": "non-standard"
-    },
-    "<single-webkit-mask-source-type>": {
-      "grammar": "<-webkit-masking-source-type>",
       "exported": true,
       "status": "non-standard"
     },
@@ -13571,13 +12399,6 @@
         "url": "https://drafts.csswg.org/css-transitions-2/#typedef-transition-behavior-value"
       }
     },
-    "<page-size>": {
-      "grammar": "A5 | A4 | A3 | B5 | B4 | jis-B5 | jis-B4 | letter | legal | ledger",
-      "specification": {
-        "module": "css-page",
-        "url": "https://www.w3.org/TR/css-page-3/#typedef-page-size-page-size"
-      }
-    },
     "<filter-value-list>": {
       "grammar": "[ <filter-function> | <url> ]+",
       "specification": {
@@ -13591,14 +12412,6 @@
         "module": "css-filters",
         "url": "https://www.w3.org/TR/filter-effects/#typedef-filter-function"
       }
-    },
-    "<color-filter-value-list>": {
-      "grammar": "<color-filter-function>+",
-      "status": "non-standard"
-    },
-    "<color-filter-function>": {
-      "grammar": "<brightness()> | <contrast()> | <grayscale()> | <hue-rotate()> | <invert()> | <opacity()> | <sepia()> | <saturate()> | <-apple-invert-lightness()>",
-      "status": "non-standard"
     },
     "<blur()>": {
       "grammar": "blur( <length [0,inf]>? )",
@@ -13669,10 +12482,6 @@
         "module": "css-filters",
         "url": "https://www.w3.org/TR/filter-effects/#funcdef-filter-sepia"
       }
-    },
-    "<-apple-invert-lightness()>": {
-      "grammar": "-apple-invert-lightness()",
-      "status": "non-standard"
     },
     "<baseline-position>": {
       "grammar": "[ first | last ]? && baseline",
@@ -14037,10 +12846,6 @@
         "module": "css-display",
         "url": "https://www.w3.org/TR/css-display-3/#typedef-display-legacy"
       }
-    },
-    "<-webkit-display>": {
-      "grammar": "-webkit-inline-flex | -webkit-box | -webkit-inline-box | -webkit-flex",
-      "status": "non-standard"
     },
     "<single-scroll-timeline-name>": {
       "grammar": "none | <dashed-ident>",

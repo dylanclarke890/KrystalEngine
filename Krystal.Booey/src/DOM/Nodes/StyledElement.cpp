@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
@@ -9,10 +9,10 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Style/AttributeChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/AttributeChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
 namespace krys::boo::dom
 {

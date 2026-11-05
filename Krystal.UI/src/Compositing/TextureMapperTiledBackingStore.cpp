@@ -1,7 +1,7 @@
 ﻿#include "Krystal.UI/Compositing/TextureMapperTiledBackingStore.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
-#include "Krystal.Booey/Graphics/ImageObserver.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 #include <algorithm>
 

@@ -59,8 +59,7 @@ namespace krys::boo::css::PropertyParserHelpers
       tokens.Discard();
       tokens.DiscardWhitespace();
     }
-    else if ((id >= ValueId::Auto && id <= ValueId::WebkitZoomOut) || id == ValueId::Copy
-             || id == ValueId::None)
+    else if ((id >= ValueId::Auto && id <= ValueId::ZoomOut) || id == ValueId::Copy || id == ValueId::None)
     {
       cursorType = ConsumeIdent(tokens);
     }

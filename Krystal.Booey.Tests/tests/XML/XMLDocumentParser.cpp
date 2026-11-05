@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Nodes/Comment.hpp"
@@ -13,13 +13,13 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
-#include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/SVG/SVGCircleElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGCircleElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 
 namespace krys::boo::tests
 {

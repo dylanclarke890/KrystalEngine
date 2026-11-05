@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
+#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/ImageBufferBackend.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferBackend.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 
 namespace krys::boo::tests

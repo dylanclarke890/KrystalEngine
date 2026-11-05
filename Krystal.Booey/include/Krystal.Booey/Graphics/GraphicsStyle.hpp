@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
@@ -12,7 +12,7 @@ namespace krys
 
 namespace krys::boo
 {
-  // Legacy shadow blur radius is used for canvas, and -webkit-box-shadow.
+  // Legacy shadow blur radius is used for canvas.
   // It has different treatment of radii > 8px.
   enum class ShadowRadiusMode : bool
   {

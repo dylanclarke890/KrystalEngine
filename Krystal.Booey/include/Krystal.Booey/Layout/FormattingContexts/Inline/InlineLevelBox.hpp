@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineRect.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Layout/LayoutUnits.hpp"
@@ -64,7 +64,7 @@ namespace krys::boo::layout
     using VerticalAlignment =
       Variant<css::keywords::Baseline, css::keywords::Sub, css::keywords::Super, css::keywords::Top,
               css::keywords::TextTop, css::keywords::Middle, css::keywords::Bottom, css::keywords::TextBottom,
-              css::keywords::WebkitBaselineMiddle, InlineLayoutUnit>;
+              css::keywords::InternalBaselineMiddle, InlineLayoutUnit>;
 
     enum class Type : uint8
     {

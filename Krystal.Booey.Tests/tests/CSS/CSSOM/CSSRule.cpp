@@ -16,15 +16,13 @@ namespace krys::boo::css::tests
                                u8"b { } "
                                u8"@media screen { } "
                                u8"@font-face { } "
-                               u8"@page { } "
                                u8"@keyframes c { } "
                                u8"@counter-style d { system: cyclic; symbols: x; } "
                                u8"@supports (color: red) { } "
                                u8"@font-feature-values e { } "
                                u8"@layer f; "
                                u8"@container (min-width: 1px) { } "
-                               u8"@property --g { syntax: \"*\"; inherits: false; } "
-                               u8"@view-transition { } ");
+                               u8"@property --g { syntax: \"*\"; inherits: false; } ");
 
     auto typeAt = [&](uint32 index)
     {
@@ -32,22 +30,20 @@ namespace krys::boo::css::tests
       return sheet->Item(index)->TypeForCSSOM();
     };
 
-    REQUIRE(sheet->Length() == 14);
+    REQUIRE(sheet->Length() == 12);
     CHECK(typeAt(0) == 3);  // IMPORT_RULE
     CHECK(typeAt(1) == 10); // NAMESPACE_RULE
     CHECK(typeAt(2) == 1);  // STYLE_RULE
     CHECK(typeAt(3) == 4);  // MEDIA_RULE
     CHECK(typeAt(4) == 5);  // FONT_FACE_RULE
-    CHECK(typeAt(5) == 6);  // PAGE_RULE
-    CHECK(typeAt(6) == 7);  // KEYFRAMES_RULE
-    CHECK(typeAt(7) == 11); // COUNTER_STYLE_RULE
-    CHECK(typeAt(8) == 12); // SUPPORTS_RULE
-    CHECK(typeAt(9) == 14); // FONT_FEATURE_VALUES_RULE
+    CHECK(typeAt(5) == 7);  // KEYFRAMES_RULE
+    CHECK(typeAt(6) == 11); // COUNTER_STYLE_RULE
+    CHECK(typeAt(7) == 12); // SUPPORTS_RULE
+    CHECK(typeAt(8) == 14); // FONT_FEATURE_VALUES_RULE
     // Rules added after the enumeration was frozen are 0.
+    CHECK(typeAt(9) == 0);
     CHECK(typeAt(10) == 0);
     CHECK(typeAt(11) == 0);
-    CHECK(typeAt(12) == 0);
-    CHECK(typeAt(13) == 0);
   }
 
   TEST_CASE("CSSRule: parents", "[CSS][CSSOM][CSSRule]")

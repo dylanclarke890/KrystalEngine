@@ -2,12 +2,12 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::tests

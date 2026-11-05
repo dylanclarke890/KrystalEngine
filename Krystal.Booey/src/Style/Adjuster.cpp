@@ -8,7 +8,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
-#include "Krystal.Booey/MathML/MathMLElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
@@ -16,8 +16,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGForeignObjectElement.hpp"
 
 namespace krys::boo::style
 {
@@ -40,7 +40,6 @@ namespace krys::boo::style
       {
         case DisplayType::Block:
         case DisplayType::Table:
-        case DisplayType::Box:
         case DisplayType::Flex:
         case DisplayType::Grid:
         case DisplayType::GridLanes:
@@ -48,7 +47,6 @@ namespace krys::boo::style
         case DisplayType::ListItem:
         case DisplayType::RubyBlock:        return display;
         case DisplayType::InlineTable:      return DisplayType::Table;
-        case DisplayType::InlineBox:        return DisplayType::Box;
         case DisplayType::InlineFlex:       return DisplayType::Flex;
         case DisplayType::InlineGrid:       return DisplayType::Grid;
         case DisplayType::InlineGridLanes:  return DisplayType::GridLanes;
@@ -81,7 +79,6 @@ namespace krys::boo::style
       {
         case DisplayType::Block:            return DisplayType::InlineBlock;
         case DisplayType::Table:            return DisplayType::InlineTable;
-        case DisplayType::Box:              return DisplayType::InlineBox;
         case DisplayType::Flex:             return DisplayType::InlineFlex;
         case DisplayType::Grid:             return DisplayType::InlineGrid;
         case DisplayType::GridLanes:        return DisplayType::InlineGridLanes;
@@ -90,7 +87,6 @@ namespace krys::boo::style
         case DisplayType::Inline:
         case DisplayType::InlineBlock:
         case DisplayType::InlineTable:
-        case DisplayType::InlineBox:
         case DisplayType::InlineFlex:
         case DisplayType::InlineGrid:
         case DisplayType::InlineGridLanes:
@@ -140,8 +136,7 @@ namespace krys::boo::style
         case DisplayType::InlineBlock:
         case DisplayType::InlineGrid:
         case DisplayType::InlineGridLanes:
-        case DisplayType::InlineFlex:
-        case DisplayType::InlineBox:       return false;
+        case DisplayType::InlineFlex:      return false;
         default:                           break;
       };
 
@@ -537,19 +532,6 @@ namespace krys::boo::style
         }
       }
 
-      if (style.IsDisplayDeprecatedFlexibleBox())
-      {
-        // FIXME: Since we don't support block-flow on flexible boxes yet, disallow setting
-        // of block-flow to anything other than StyleWritingMode::HorizontalTb.
-        // https://bugs.webkit.org/show_bug.cgi?id=46418 - Flexible box support.
-        style.SetWritingMode(StyleWritingMode::HorizontalTb);
-      }
-
-      if (_parentBoxStyle.IsDisplayDeprecatedFlexibleBox())
-      {
-        style.SetFloating(Float::None);
-      }
-
       // https://www.w3.org/TR/css-display/#transformations
       // "A parent with a grid or flex display value blockifies the box’s display type."
       if (_parentBoxStyle.IsDisplayFlexibleOrGridFormattingContextBox())
@@ -712,9 +694,6 @@ namespace krys::boo::style
     }
     else if (!IsOverflowClipOrVisible(style.OverflowY()))
     {
-      // FIXME: Once we implement pagination controls, overflow-x should default to hidden
-      // if overflow-y is set to -webkit-paged-x or -webkit-page-y. For now, we'll let it
-      // default to auto so we can at least scroll through the pages.
       // Values of 'clip' and 'visible' can only be used with 'clip' and 'visible'.
       // If they aren't, 'clip' and 'visible' is reset.
       if (style.OverflowX() == Overflow::Visible)
@@ -740,26 +719,18 @@ namespace krys::boo::style
       }
     }
 
-    // FIXME: Paged overflow (`-webkit-paged-x`/`-webkit-paged-y`) on elements other than <html> and <body>
-    // sets the column styles from the pagination mode (`setColumnStylesFromPaginationMode`); there is no
-    // frame view.
-
     // Let the theme also have a crack at adjusting the style.
     if (style.HasAppearance())
     {
       AdjustThemeStyle(style, _parentStyle);
     }
 
-    // This should be kept in sync with requiresRenderingConsolidationForViewTransition
     if (style.Preserves3D())
     {
       bool forceToFlat = style.OverflowX() != Overflow::Visible || style.HasOpacity()
                          || style.OverflowY() != Overflow::Visible || style.HasClip() || style.HasClipPath()
                          || style.HasFilter() || style.HasIsolation() || style.HasMask()
-                         || style.HasBackdropFilter() || style.HasBlendMode()
-                         || !style.GetViewTransitionName().IsNone();
-      // FIXME: An element captured in an active view transition is forced to flat; there are no view
-      // transitions.
+                         || style.HasBackdropFilter() || style.HasBlendMode();
       style.SetTransformStyleForcedToFlat(forceToFlat);
     }
 
@@ -974,7 +945,6 @@ namespace krys::boo::style
       auto newRootStyle = RenderStyle::ClonePtr(renderViewStyle);
       newRootStyle->SetWritingMode(writingMode);
       newRootStyle->SetDirection(direction);
-      // FIXME: setColumnStylesFromPaginationMode, once documents have a view with a pagination mode.
       update.AddInitialContainingBlockUpdate(krys::move(newRootStyle));
     }
 

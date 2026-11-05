@@ -1,7 +1,7 @@
 ﻿#define KRYS_GL_OVERRIDE_FUNCTIONS 0
 #include "Krystal.Gfx/OpenGL/Hooks/gl.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include <cassert>
 #include <cstring>
 
 #ifdef MemoryBarrier
@@ -780,7 +780,7 @@ namespace
       }
       else
       {
-        assert(false && "Failed to load OpenGL module.");
+        krys_debug_assert_msg(false, "Failed to load OpenGL module.");
         p = nullptr;
       }
     }

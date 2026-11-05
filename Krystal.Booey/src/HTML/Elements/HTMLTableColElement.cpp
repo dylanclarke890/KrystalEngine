@@ -2,7 +2,7 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCol.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCol.hpp"
 
 namespace krys::boo::html
 {

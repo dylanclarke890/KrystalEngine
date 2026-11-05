@@ -31,7 +31,6 @@ namespace krys::boo::style
     _inheritedFlags.RtlOrdering = static_cast<unsigned>(ComputedStyle::InitialRTLOrdering());
     _inheritedFlags.PrintColorAdjust = static_cast<unsigned>(ComputedStyle::InitialPrintColorAdjust());
     _inheritedFlags.PointerEvents = static_cast<unsigned>(ComputedStyle::InitialPointerEvents());
-    _inheritedFlags.InsideLink = static_cast<unsigned>(boo::InsideLink::NotInside);
 
     _nonInheritedFlags.EffectiveDisplay = static_cast<unsigned>(ComputedStyle::InitialDisplay());
     _nonInheritedFlags.OriginalDisplay = static_cast<unsigned>(ComputedStyle::InitialDisplay());

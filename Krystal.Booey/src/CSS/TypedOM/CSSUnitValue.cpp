@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
-#include "Krystal.Booey/Core/NumberFormatting.hpp"
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
+#include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include <cmath>

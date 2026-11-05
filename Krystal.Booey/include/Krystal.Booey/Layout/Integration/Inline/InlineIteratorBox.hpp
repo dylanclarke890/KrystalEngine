@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxLegacyPath.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
-#include "Krystal.Booey/Rendering/RenderObjectHighlightState.hpp"
+#include "Krystal.Booey/Rendering/Selection/RenderObjectHighlightState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Visitor.hpp"

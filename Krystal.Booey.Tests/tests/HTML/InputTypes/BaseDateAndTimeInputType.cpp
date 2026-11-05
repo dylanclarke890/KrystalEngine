@@ -10,11 +10,11 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/DateTimeChooser.hpp"
-#include "Krystal.Booey/Platform/DateTimeChooserClient.hpp"
-#include "Krystal.Booey/Platform/DateTimeChooserParameters.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
+#include "Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 
 namespace krys::boo::tests
 {

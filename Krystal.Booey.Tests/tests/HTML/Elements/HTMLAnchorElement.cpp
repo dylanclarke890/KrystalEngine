@@ -78,13 +78,10 @@ namespace krys::boo::html::tests
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].IsNewWindow);
       CHECK(fixture.Navigations()[0].NewWindowName == "_blank");
-      // `_blank` gets no opener unless the link asks for one.
-      CHECK(fixture.Navigations()[0].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
 
       Click(fixture.ById(u8"named"));
       REQUIRE(fixture.Navigations().size() == 2);
       CHECK(fixture.Navigations()[1].NewWindowName == "results");
-      CHECK(fixture.Navigations()[1].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
     }
 
     SECTION("a download ignores the target")
@@ -118,7 +115,7 @@ namespace krys::boo::html::tests
 
   TEST_CASE("HTMLAnchorElement: Enter follows a focused link", "[HTML][HTMLAnchorElement]")
   {
-    NavigationFixture fixture(u8R"(<a id=a href="#section">Section</a>)");
+    NavigationFixture fixture(u8R"(<a id=a href="other.html">Other</a>)");
     auto &a = fixture.Get<HTMLAnchorElement>(u8"a");
     (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
     a.Focus();
@@ -133,7 +130,7 @@ namespace krys::boo::html::tests
 
     REQUIRE(fixture.Navigations().size() == 1);
     auto &navigation = fixture.Navigations()[0];
-    CHECK(navigation.URL == "https://example.com/dir/page.html#section");
+    CHECK(navigation.URL == "https://example.com/dir/other.html");
     // The simulated click's underlying key press has the modifiers.
     REQUIRE(navigation.Action.KeyStateEventData());
     CHECK(navigation.Action.KeyStateEventData()->ShiftKey);
@@ -152,15 +149,12 @@ namespace krys::boo::html::tests
     CHECK(fixture.Navigations().size() == 1);
   }
 
-  TEST_CASE("HTMLAnchorElement: following a link to its URL with a suffix and its opener",
-            "[HTML][HTMLAnchorElement][html:the-a-element][html:following-hyperlinks-2]"
-            "[html:get-an-element's-noopener][html:hyperlink-referrer-policy]")
+  TEST_CASE("HTMLAnchorElement: following a link to its URL with a suffix",
+            "[HTML][HTMLAnchorElement][html:the-a-element][html:following-hyperlinks-2]")
   {
     NavigationFixture fixture(
       u8R"(<style>body { margin: 0 } img { display: block; width: 100px; height: 50px }</style>
-      <a id=map href="map.html#f"><img id=image ismap></a><a id=bad href="http://[bad">Bad</a>
-      <a id=opener href="o.html" target=_BLANK rel=opener>Opener</a>
-      <a id=noreferrer href="o.html" rel="noreferrer">No referrer</a>)");
+      <a id=map href="map.html#f"><img id=image ismap></a><a id=bad href="http://[bad">Bad</a>)");
     (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
 
     SECTION("a URL that doesn't parse isn't followed")
@@ -188,17 +182,6 @@ namespace krys::boo::html::tests
       Click(fixture.ById(u8"image"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/map.html#f?0,0");
-    }
-
-    SECTION("rel=opener keeps the opener of a _blank target, and rel=noreferrer drops the referrer")
-    {
-      Click(fixture.ById(u8"opener"));
-      REQUIRE(fixture.Navigations().size() == 1);
-      CHECK(fixture.Navigations()[0].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Allow);
-
-      Click(fixture.ById(u8"noreferrer"));
-      REQUIRE(fixture.Navigations().size() == 2);
-      CHECK(fixture.Navigations()[1].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
     }
   }
 

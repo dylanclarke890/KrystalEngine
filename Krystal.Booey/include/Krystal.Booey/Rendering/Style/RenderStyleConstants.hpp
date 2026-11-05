@@ -34,38 +34,20 @@ namespace krys::boo
     SpellingError,
     TargetText,
     Checkmark,
-    ViewTransition,
-    ViewTransitionGroup,
-    ViewTransitionImagePair,
-    ViewTransitionOld,
-    ViewTransitionNew,
 
-    HighestEnumValue = ViewTransitionNew
+    HighestEnumValue = Checkmark
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PseudoElementType, 17uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PseudoElementType, 12uz);
 
 namespace krys::boo
 {
   constexpr EnumSet<PseudoElementType> AllPublicPseudoElementTypes {
-    PseudoElementType::FirstLine,
-    PseudoElementType::FirstLetter,
-    PseudoElementType::GrammarError,
-    PseudoElementType::Highlight,
-    PseudoElementType::Marker,
-    PseudoElementType::Before,
-    PseudoElementType::After,
-    PseudoElementType::Selection,
-    PseudoElementType::Backdrop,
-    PseudoElementType::SpellingError,
-    PseudoElementType::TargetText,
-    PseudoElementType::Checkmark,
-    PseudoElementType::ViewTransition,
-    PseudoElementType::ViewTransitionGroup,
-    PseudoElementType::ViewTransitionImagePair,
-    PseudoElementType::ViewTransitionOld,
-    PseudoElementType::ViewTransitionNew,
+    PseudoElementType::FirstLine,     PseudoElementType::FirstLetter, PseudoElementType::GrammarError,
+    PseudoElementType::Highlight,     PseudoElementType::Marker,      PseudoElementType::Before,
+    PseudoElementType::After,         PseudoElementType::Selection,   PseudoElementType::Backdrop,
+    PseudoElementType::SpellingError, PseudoElementType::TargetText,  PseudoElementType::Checkmark,
   };
 
   constexpr EnumSet<PseudoElementType> AllPseudoElementTypes = AllPublicPseudoElementTypes;
@@ -75,12 +57,8 @@ namespace krys::boo
   {
     switch (pseudoElementType)
     {
-      case PseudoElementType::FirstLetter:             return PseudoElementType::FirstLine;
-      case PseudoElementType::ViewTransitionGroup:     return PseudoElementType::ViewTransition;
-      case PseudoElementType::ViewTransitionImagePair: return PseudoElementType::ViewTransitionGroup;
-      case PseudoElementType::ViewTransitionNew:       return PseudoElementType::ViewTransitionImagePair;
-      case PseudoElementType::ViewTransitionOld:       return PseudoElementType::ViewTransitionImagePair;
-      default:                                         return null;
+      case PseudoElementType::FirstLetter: return PseudoElementType::FirstLine;
+      default:                             return null;
     }
   }
 
@@ -191,8 +169,6 @@ namespace krys::boo
     Clip,
     Scroll,
     Auto,
-    PagedX,
-    PagedY
   };
 
   enum class Clear : uint8
@@ -359,12 +335,10 @@ namespace krys::boo
     Stretch
   };
 
-  enum class TextSecurity : uint8
+  enum class TextSecurity : bool
   {
     None,
-    Disc,
-    Circle,
-    Square
+    Disc
   };
 
   enum class InputSecurity : bool
@@ -649,8 +623,6 @@ namespace krys::boo
     TableColumn,
     TableCell,
     TableCaption,
-    Box,
-    InlineBox,
     Flex,
     InlineFlex,
     Contents,
@@ -664,13 +636,6 @@ namespace krys::boo
     RubyBase,
     RubyAnnotation,
     None
-  };
-
-  enum class InsideLink : uint8
-  {
-    NotInside,
-    InsideUnvisited,
-    InsideVisited
   };
 
   enum class PointerEvents : uint8
@@ -774,24 +739,11 @@ namespace krys::boo
     Visual
   };
 
-  enum class ColumnProgression : bool
-  {
-    Normal,
-    Reverse
-  };
-
-  enum class LineAlign : bool
-  {
-    None,
-    Edges
-  };
-
   enum class RubyPosition : uint8
   {
     Over,
     Under,
-    InterCharacter,
-    LegacyInterCharacter
+    InterCharacter
   };
 
   enum class RubyAlign : uint8

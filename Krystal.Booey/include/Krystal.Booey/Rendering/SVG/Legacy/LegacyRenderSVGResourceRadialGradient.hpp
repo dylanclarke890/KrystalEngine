@@ -43,7 +43,7 @@ namespace krys::boo
     {
       return _attributes.GradientTransform();
     }
-    KRYS_NODISCARD Ref<Gradient> BuildGradient(const RenderStyle &) const noexcept final;
+    KRYS_NODISCARD Ref<Gradient> BuildGradient() const noexcept final;
 
     void GradientElement() const = delete;
 

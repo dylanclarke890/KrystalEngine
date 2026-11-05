@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 
 namespace krys::boo::dom
@@ -356,7 +356,6 @@ namespace krys::boo::dom
     krys_debug_assert(_isCSS);
     css::ParserContext parserContext(*document, baseURL, charset);
 
-    // FIXME: Whether the cached sheet is CORS-same-origin, once there are origins.
     auto cssSheet = css::CSSStyleSheet::Create(
       css::StyleSheetContents::Create(css::CSSOMString(href), parserContext), *this, true);
     cssSheet->SetDisabled(_alternate);

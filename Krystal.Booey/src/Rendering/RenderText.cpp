@@ -1,13 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/RenderText.hpp"
-#include "Krystal.Booey/Core/Hyphenation.hpp"
-#include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/Editing/VisiblePosition.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
@@ -18,9 +16,9 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
-#include "Krystal.Booey/Rendering/BreakablePositions.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
-#include "Krystal.Booey/Rendering/LegacyInlineTextBox.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Line/BreakablePositions.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
 #include "Krystal.Booey/Rendering/MathML/MathVariant.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -29,6 +27,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
+#include "Krystal.Booey/Text/Hyphenation.hpp"
+#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
@@ -593,14 +593,9 @@ namespace krys::boo
 
     // At rendering time, if certain fonts are used, these characters get swapped out with higher-quality PUA
     // characters. See RenderBlock::updateSecurityDiscCharacters().
-    switch (style.GetTextSecurity())
+    if (style.GetTextSecurity() == TextSecurity::Disc)
     {
-      case TextSecurity::None:   break;
-      // We use the same characters here as for list markers.
-      // See the listMarkerText function in RenderListMarker.cpp.
-      case TextSecurity::Circle: SecureText(text::WhiteBullet); break;
-      case TextSecurity::Disc:   SecureText(text::Bullet); break;
-      case TextSecurity::Square: SecureText(text::BlackSquare); break;
+      SecureText(text::Bullet);
     }
 
     _containsOnlyASCII = text::IsASCII(utf8_stringview {_text});
@@ -1586,10 +1581,10 @@ namespace krys::boo
     {
       maxWordWidth = 0;
 
-      // Map 'hyphenate-limit-{before,after}: auto;' to 2.
-      auto before = style.HyphenateLimitBefore().TryValue();
+      // Map `auto` before and after limits (`hyphenate-limit-chars`) to 2.
+      auto before = style.GetHyphenateLimitChars().Before.TryValue();
       minimumPrefixLength = before ? static_cast<size_t>(before->Value) : 2;
-      auto after = style.HyphenateLimitAfter().TryValue();
+      auto after = style.GetHyphenateLimitChars().After.TryValue();
       minimumSuffixLength = after ? static_cast<size_t>(after->Value) : 2;
     }
 

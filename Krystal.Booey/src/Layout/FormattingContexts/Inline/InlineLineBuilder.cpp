@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBuilder.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
-#include "Krystal.Booey/Graphics/ComplexTextController.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/ComplexTextController.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentAligner.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"
@@ -12,6 +11,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <ranges>
 #include <unicode/ubidi.h>

@@ -58,7 +58,6 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/UI.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/ViewTransition.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp"
 #include "Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp"
 #include "Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp"
@@ -436,9 +435,9 @@ namespace krys::boo::css
         return false;
       }
 
-      result.AddPropertyForCurrentShorthand(state, PropertyId::WebkitBorderHorizontalSpacing,
+      result.AddPropertyForCurrentShorthand(state, PropertyId::InternalBorderHorizontalSpacing,
                                             krys::move(horizontalSpacing));
-      result.AddPropertyForCurrentShorthand(state, PropertyId::WebkitBorderVerticalSpacing,
+      result.AddPropertyForCurrentShorthand(state, PropertyId::InternalBorderVerticalSpacing,
                                             krys::move(verticalSpacing));
 
       return true;
@@ -787,11 +786,11 @@ namespace krys::boo::css
           }
 
           // -webkit-mask-*
-          case PropertyId::WebkitMaskPositionX:
+          case PropertyId::InternalMaskPositionX:
           {
             return PropertyParsing::ConsumeSingleWebkitMaskPositionX(tokens, state);
           }
-          case PropertyId::WebkitMaskPositionY:
+          case PropertyId::InternalMaskPositionY:
           {
             return PropertyParsing::ConsumeSingleWebkitMaskPositionY(tokens, state);
           }
@@ -836,7 +835,7 @@ namespace krys::boo::css
             RefPtr<Value> valueY;
             PropertyId property = shorthandProperties[i];
 
-            if (property == PropertyId::BackgroundPositionX || property == PropertyId::WebkitMaskPositionX)
+            if (property == PropertyId::BackgroundPositionX || property == PropertyId::InternalMaskPositionX)
             {
               // Note: This assumes y properties (for example background-position-y) follow the x properties
               // in the shorthand array.
@@ -887,7 +886,7 @@ namespace krys::boo::css
               }
             }
             else if (property == PropertyId::BackgroundPositionY
-                     || property == PropertyId::WebkitMaskPositionY)
+                     || property == PropertyId::InternalMaskPositionY)
             {
               continue;
             }
@@ -1026,25 +1025,6 @@ namespace krys::boo::css
       return true;
     }
 
-    KRYS_NODISCARD static bool ConsumeWebkitBackgroundSizeShorthand(TokenRange &tokens,
-                                                                    PropertyParserState &state,
-                                                                    const PropertyShorthand &,
-                                                                    PropertyParserResult &result) noexcept
-    {
-      auto backgroundSize = ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(
-        tokens, [](auto &tokens, auto &state) { return ConsumeSingleWebkitBackgroundSize(tokens, state); },
-        state);
-
-      if (!backgroundSize || !tokens.IsAtEnd())
-      {
-        return false;
-      }
-
-      result.AddPropertyForCurrentShorthand(state, PropertyId::BackgroundSize, krys::move(backgroundSize));
-
-      return true;
-    }
-
     KRYS_NODISCARD static bool ConsumeMaskShorthand(TokenRange &tokens, PropertyParserState &state,
                                                     const PropertyShorthand &shorthand,
                                                     PropertyParserResult &result) noexcept
@@ -1122,15 +1102,6 @@ namespace krys::boo::css
       if (tokens.IsAtEnd())
       {
         yValueId = xValueId;
-
-        // FIXME: -webkit-paged-x or -webkit-paged-y only apply to overflow-y. If this value has been
-        // set using the shorthand, then for now overflow-x will default to auto, but once we implement
-        // pagination controls, it should default to hidden. If the overflow-y value is anything but
-        // paged-x or paged-y, then overflow-x and overflow-y should have the same value.
-        if (xValueId == ValueId::WebkitPagedX || xValueId == ValueId::WebkitPagedY)
-        {
-          xValueId = ValueId::Auto;
-        }
       }
       else
       {
@@ -2130,15 +2101,10 @@ namespace krys::boo::css
         {
           case ValueId::Auto:
           case ValueId::Content:
-          case ValueId::Intrinsic:
-          case ValueId::MinIntrinsic:
           case ValueId::MinContent:
-          case ValueId::WebkitMinContent:
           case ValueId::MaxContent:
-          case ValueId::WebkitMaxContent:
-          case ValueId::WebkitFillAvailable:
+          case ValueId::Stretch:
           case ValueId::FitContent:
-          case ValueId::WebkitFitContent:
           {
             return true;
           }

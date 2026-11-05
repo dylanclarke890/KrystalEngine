@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
-#include "Krystal.Booey/CSS/CSSStyleDeclaration.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
@@ -9,47 +9,32 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Scheduling/IdleDeadline.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/ErrorEvent.hpp"
-#include "Krystal.Booey/HTML/Events/MessageEvent.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/BarProp.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
-#include "Krystal.Booey/Page/External.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Page/Screen.hpp"
-#include "Krystal.Booey/Page/UserActivation.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
-#include "Krystal.Booey/Platform/Language.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Plugins/DOMMimeTypeArray.hpp"
-#include "Krystal.Booey/Plugins/DOMPluginArray.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::tests
 {
   namespace
   {
-    /// @brief Counts what the page asks of its host.
+    /// @brief Counts the page's requests to be brought to the front.
     struct WindowChromeClient final : ChromeClient
     {
       uint32 &FocusRequests;
-      uint32 &CloseRequests;
 
-      WindowChromeClient(uint32 &focusRequests, uint32 &closeRequests) noexcept
-          : FocusRequests(focusRequests), CloseRequests(closeRequests)
+      explicit WindowChromeClient(uint32 &focusRequests) noexcept : FocusRequests(focusRequests)
       {
       }
 
@@ -61,79 +46,12 @@ namespace krys::boo::tests
       {
         ++FocusRequests;
       }
-
-      void CloseWindow() noexcept override
-      {
-        ++CloseRequests;
-      }
-
-      FloatRect Rect {100, 50, 640, 480};
-      List<std::string> Dialogs;
-      bool ConfirmAnswer {true};
-      Maybe<dom::DOMString> PromptAnswer;
-      uint32 PrintRequests {0};
-      List<std::string> ConsoleMessages;
-      List<std::string> ProtocolHandlers;
-
-      void RegisterProtocolHandler(const dom::DOMString &scheme, const dom::DOMString &url) noexcept override
-      {
-        ProtocolHandlers.push_back("+" + Str(scheme) + " " + Str(url));
-      }
-
-      void UnregisterProtocolHandler(const dom::DOMString &scheme,
-                                     const dom::DOMString &url) noexcept override
-      {
-        ProtocolHandlers.push_back("-" + Str(scheme) + " " + Str(url));
-      }
-
-      void RunJavaScriptAlert(LocalFrame &, const dom::DOMString &message) noexcept override
-      {
-        Dialogs.push_back("alert:" + Str(message));
-      }
-
-      KRYS_NODISCARD bool RunJavaScriptConfirm(LocalFrame &, const dom::DOMString &message) noexcept override
-      {
-        Dialogs.push_back("confirm:" + Str(message));
-        return ConfirmAnswer;
-      }
-
-      KRYS_NODISCARD Maybe<dom::DOMString>
-        RunJavaScriptPrompt(LocalFrame &, const dom::DOMString &message,
-                            const dom::DOMString &defaultValue) noexcept override
-      {
-        Dialogs.push_back("prompt:" + Str(message) + ":" + Str(defaultValue));
-        return PromptAnswer;
-      }
-
-      void Print(LocalFrame &) noexcept override
-      {
-        ++PrintRequests;
-      }
-
-      void AddMessageToConsole(MessageSource, MessageLevel level, const dom::DOMString &message, uint32,
-                               uint32, const dom::DOMString &) noexcept override
-      {
-        ConsoleMessages.push_back((level == MessageLevel::Error ? "error:" : "other:") + Str(message));
-      }
-
-      KRYS_NODISCARD FloatRect WindowRect() const noexcept override
-      {
-        return Rect;
-      }
-
-      void SetWindowRect(const FloatRect &rect) noexcept override
-      {
-        Rect = rect;
-      }
     };
 
     /// @brief A page with a 200x100 view, and @p markup parsed into its main frame's document.
     struct WindowFixture
     {
       uint32 FocusRequests {0};
-      uint32 CloseRequests {0};
-      WindowChromeClient *Chrome {nullptr};
-      RecordingFrameLoaderClient *Loader {nullptr};
       Ref<Page> TestPage {CreatePage()};
       RefPtr<dom::HTMLDocument> Document;
 
@@ -152,11 +70,8 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD Ref<Page> CreatePage() noexcept
       {
-        auto chrome = CreateUnique<WindowChromeClient>(FocusRequests, CloseRequests);
-        Chrome = chrome.get();
-        auto loader = CreateUnique<RecordingFrameLoaderClient>();
-        Loader = loader.get();
-        return Page::Create(krys::move(chrome), nullptr, krys::move(loader));
+        return Page::Create(CreateUnique<WindowChromeClient>(FocusRequests), nullptr,
+                            CreateUnique<RecordingFrameLoaderClient>());
       }
 
       KRYS_NODISCARD LocalDOMWindow &Window() const noexcept
@@ -194,59 +109,14 @@ namespace krys::boo::tests
     CHECK(Is<LocalDOMWindow>(static_cast<dom::EventTarget &>(*window)));
     CHECK_FALSE(Is<LocalDOMWindow>(static_cast<dom::EventTarget &>(*document)));
 
-    // The browsing context members: the window is the only one in its tree.
-    CHECK(&window->Window() == window);
-    CHECK(&window->Self() == window);
-    CHECK(&window->Frames() == window);
-    CHECK(window->Top() == window);
-    CHECK(window->Parent() == window);
-    CHECK(window->Opener() == nullptr);
-    CHECK(window->FrameElement() == nullptr);
-    CHECK(window->Length() == 0);
-    CHECK_FALSE(window->Closed());
-
     // The window's custom element registry is the document's.
     CHECK(&window->CustomElements() == document->CustomElementRegistry().get());
-
-    // The bars are visible, as no window is a popup; status is only kept.
-    CHECK(window->Locationbar().Visible());
-    CHECK(window->Menubar().Visible());
-    CHECK(window->Personalbar().Visible());
-    CHECK(window->Scrollbars().Visible());
-    CHECK(window->Statusbar().Visible());
-    CHECK(window->Toolbar().Visible());
-    CHECK(&window->Toolbar() == &window->Toolbar());
-    window->SetStatus(u8"Ready");
-    CHECK(window->Status() == u8"Ready");
-    CHECK(window->GetExternal().IsSearchProviderInstalled() == 0);
-    CHECK_FALSE(window->OriginAgentCluster());
 
     // Leaving the frame, the document keeps its window, which has no browsing context.
     frame->SetDocument(nullptr);
     CHECK(document->Window() == window);
     CHECK(document->DefaultView() == nullptr);
     CHECK(window->Frame() == nullptr);
-    CHECK(window->Closed());
-    CHECK(window->Top() == nullptr);
-    CHECK(window->Parent() == nullptr);
-  }
-
-  TEST_CASE("A window's name is its frame's, which links can target", "[Page][LocalDOMWindow]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-    auto &loader = fixture.TestPage->MainFrame().Loader();
-
-    CHECK(window.Name().empty());
-    CHECK(loader.FindFrameForNavigation(u8"main") == nullptr);
-
-    window.SetName(u8"main");
-    CHECK(window.Name() == u8"main");
-    CHECK(fixture.TestPage->MainFrame().SpecifiedName() == u8"main");
-    CHECK(loader.FindFrameForNavigation(u8"main") == &fixture.TestPage->MainFrame());
-    // Names are matched exactly.
-    CHECK(loader.FindFrameForNavigation(u8"Main") == nullptr);
-    CHECK(loader.FindFrameForNavigation(u8"_blank") == nullptr);
   }
 
   TEST_CASE("Events bubble from the document to the window, except load", "[Page][LocalDOMWindow]")
@@ -315,70 +185,6 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Window.event: the window's current event, the event its listeners handle",
-            "[Page][LocalDOMWindow][dom:dom-window-event][dom:window-current-event]")
-  {
-    WindowFixture fixture(u8"<!DOCTYPE html><div id=host></div><p id=text>Text</p>");
-    auto &window = fixture.Window();
-    CHECK(window.CurrentEvent() == nullptr);
-
-    dom::Event *inText = nullptr;
-    dom::Event *inWindow = nullptr;
-    auto textListener = fixture.ById(u8"text").AddEventListener(u8"click", [&](dom::Event &)
-                                                                { inText = window.CurrentEvent(); });
-    auto windowListener =
-      window.AddEventListener(u8"click", [&](dom::Event &) { inWindow = window.CurrentEvent(); });
-
-    fixture.ById(u8"text").DispatchSimulatedClick(nullptr);
-    CHECK(inText != nullptr);
-    CHECK(inWindow == inText);
-    CHECK(window.CurrentEvent() == nullptr);
-
-    SECTION("but not for listeners in shadow trees")
-    {
-      auto shadow = fixture.ById(u8"host").AttachShadow({}).ReleaseValue();
-      auto inner = fixture.Document->CreateElement(u8"span").ReleaseValue();
-      (void)shadow->AppendChild(*inner);
-
-      bool shadowHeard = false;
-      dom::Event *inShadow = nullptr;
-      auto innerListener = inner->AddEventListener(u8"click",
-                                                   [&](dom::Event &)
-                                                   {
-                                                     shadowHeard = true;
-                                                     inShadow = window.CurrentEvent();
-                                                   });
-      inWindow = nullptr;
-
-      inner->DispatchSimulatedClick(nullptr);
-      CHECK(shadowHeard);
-      CHECK(inShadow == nullptr);
-      CHECK(inWindow != nullptr);
-    }
-
-    SECTION("and an event dispatched from a listener is current only while its own listeners run")
-    {
-      auto nested = dom::Event::Create(dom::DOMStringAtom(u8"nested"), false, false);
-      dom::Event *inNested = nullptr;
-      dom::Event *afterNested = nullptr;
-      auto nestedListener = fixture.ById(u8"text").AddEventListener(u8"nested", [&](dom::Event &)
-                                                                    { inNested = window.CurrentEvent(); });
-      auto outerListener =
-        fixture.ById(u8"host").AddEventListener(u8"click",
-                                                [&](dom::Event &)
-                                                {
-                                                  (void)fixture.ById(u8"text").DispatchEvent(*nested);
-                                                  afterNested = window.CurrentEvent();
-                                                });
-
-      fixture.ById(u8"host").DispatchSimulatedClick(nullptr);
-      CHECK(inNested == nested.get());
-      CHECK(afterNested != nullptr);
-      CHECK(afterNested != nested.get());
-      CHECK(window.CurrentEvent() == nullptr);
-    }
-  }
-
   TEST_CASE("resize fires at the window when the viewport resizes", "[Page][LocalDOMWindow]")
   {
     WindowFixture fixture;
@@ -411,61 +217,13 @@ namespace krys::boo::tests
     CHECK(resizes == 2);
   }
 
-  TEST_CASE("A window asks its host to focus and close it",
-            "[Page][LocalDOMWindow][html:dom-window-close][html:dom-window-closed]")
+  TEST_CASE("A window asks its host to focus it", "[Page][LocalDOMWindow][html:dom-window-focus]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
 
     window.Focus();
     CHECK(fixture.FocusRequests == 1);
-    window.Blur();
-    CHECK(fixture.FocusRequests == 1);
-
-    window.Close();
-    CHECK(window.Closed());
-    // Closing is a task after the request.
-    CHECK(fixture.CloseRequests == 0);
-    html::EventLoop::Current().RunUntilIdle();
-    CHECK(fixture.CloseRequests == 1);
-
-    // A page that's closing doesn't ask again.
-    window.Close();
-    html::EventLoop::Current().RunUntilIdle();
-    CHECK(fixture.CloseRequests == 1);
-  }
-
-  TEST_CASE("A window's related windows and browser interface elements",
-            "[Page][LocalDOMWindow][html:the-window-object][html:dom-window][html:dom-self][html:dom-frames]"
-            "[html:dom-document-defaultview][html:concept-document-window][html:dom-length][html:dom-top]"
-            "[html:dom-parent][html:dom-opener][html:dom-frameelement][html:browser-interface-elements]"
-            "[html:dom-barprop-visible][html:dom-window-status]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-
-    CHECK(&window.Window() == &window);
-    CHECK(&window.Self() == &window);
-    CHECK(&window.Frames() == &window);
-    CHECK(fixture.Document->DefaultView() == &window);
-    CHECK(window.Document() == fixture.Document.get());
-
-    // A frame is the only one in its tree.
-    CHECK(window.Length() == 0);
-    CHECK(window.Top() == &window);
-    CHECK(window.Parent() == &window);
-    CHECK(window.Opener() == nullptr);
-    CHECK(window.FrameElement() == nullptr);
-
-    // The bars are all visible, and the status does nothing but keep its value.
-    CHECK(window.Locationbar().Visible());
-    CHECK(window.Menubar().Visible());
-    CHECK(window.Personalbar().Visible());
-    CHECK(window.Scrollbars().Visible());
-    CHECK(window.Statusbar().Visible());
-    CHECK(window.Toolbar().Visible());
-    window.SetStatus(u8"Loading");
-    CHECK(window.Status() == u8"Loading");
   }
 
   TEST_CASE("A window's named objects",
@@ -598,52 +356,6 @@ namespace krys::boo::tests
     CHECK(window.ScrollX() == 0);
   }
 
-  TEST_CASE("A window's screen and the host's window", "[Page][LocalDOMWindow]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-
-    auto environment = fixture.TestPage->MainFrame().GetMediaEnvironment();
-    environment.ScreenSize = FloatSize(1'920, 1'080);
-    fixture.TestPage->MainFrame().SetMediaEnvironment(environment);
-
-    auto &screen = window.GetScreen();
-    CHECK(&screen == &window.GetScreen());
-    CHECK(screen.Width() == 1'920);
-    CHECK(screen.Height() == 1'080);
-    // The whole screen is available unless the host says otherwise.
-    CHECK(screen.AvailWidth() == 1'920);
-    CHECK(screen.AvailHeight() == 1'080);
-    CHECK(screen.ColorDepth() == 24);
-    CHECK(screen.PixelDepth() == 24);
-
-    environment.ScreenAvailableRect = FloatRect(0, 0, 1'920, 1'040);
-    fixture.TestPage->MainFrame().SetMediaEnvironment(environment);
-    CHECK(screen.AvailHeight() == 1'040);
-
-    CHECK(window.ScreenX() == 100);
-    CHECK(window.ScreenY() == 50);
-    CHECK(window.ScreenLeft() == 100);
-    CHECK(window.ScreenTop() == 50);
-    CHECK(window.OuterWidth() == 640);
-    CHECK(window.OuterHeight() == 480);
-
-    window.MoveTo(200, 300);
-    CHECK(fixture.Chrome->Rect == FloatRect(200, 300, 640, 480));
-    window.MoveBy(-50, 10);
-    CHECK(fixture.Chrome->Rect == FloatRect(150, 310, 640, 480));
-    window.ResizeTo(800, 600);
-    CHECK(fixture.Chrome->Rect == FloatRect(150, 310, 800, 600));
-    window.ResizeBy(-10, -20);
-    CHECK(fixture.Chrome->Rect == FloatRect(150, 310, 790, 580));
-
-    // The window stays on the available screen, and at least its minimum size.
-    window.MoveTo(5'000, -100);
-    CHECK(fixture.Chrome->Rect == FloatRect(1'130, 0, 790, 580));
-    window.ResizeTo(10, 5'000);
-    CHECK(fixture.Chrome->Rect == FloatRect(1'130, 0, 100, 1'040));
-  }
-
   TEST_CASE("A window's visual viewport is its layout viewport", "[Page][LocalDOMWindow]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><style>body { margin: 0 } div { width: 1000px; height: 1000px }"
@@ -703,105 +415,18 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE(
-    "A window's timers",
-    "[Page][LocalDOMWindow][html:timers][html:dom-settimeout][html:dom-setinterval][html:dom-cleartimeout]"
-    "[html:dom-clearinterval][html:timer-initialisation-steps][html:run-steps-after-a-timeout]"
-    "[html:timer-nesting-level][html:map-of-settimeout-and-setinterval-ids][html:microtask-queuing]"
-    "[html:dom-queuemicrotask]")
+  TEST_CASE("A window's microtasks run before the next task",
+            "[Page][LocalDOMWindow][html:microtask-queuing][html:dom-queuemicrotask]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
     html::EventLoop::Current().RunUntilIdle();
 
     List<std::string> order;
-
-    SECTION("timeouts run as tasks after their delay, in order")
-    {
-      auto late = window.SetTimeout([&] { order.push_back("late"); }, 20);
-      auto early = window.SetTimeout([&] { order.push_back("early"); }, 10);
-      auto now = window.SetTimeout([&] { order.push_back("now"); }, -5);
-      CHECK(late > 0);
-      CHECK(early > 0);
-      CHECK(now > 0);
-      CHECK(late != early);
-      CHECK(order.empty());
-
-      Advance(0ms);
-      CHECK(order == List<std::string> {"now"});
-      Advance(10ms);
-      CHECK(order == List<std::string> {"now", "early"});
-      Advance(10ms);
-      CHECK(order == List<std::string> {"now", "early", "late"});
-    }
-
-    SECTION("a cleared timeout doesn't run")
-    {
-      auto id = window.SetTimeout([&] { order.push_back("cleared"); }, 5);
-      window.ClearTimeout(id);
-      window.ClearTimeout(0);
-      window.ClearTimeout(12'345);
-      Advance(10ms);
-      CHECK(order.empty());
-    }
-
-    SECTION("intervals repeat until cleared, even from their own handler")
-    {
-      int32 id = 0;
-      int32 count = 0;
-      id = window.SetInterval(
-        [&]
-        {
-          if (++count == 3)
-          {
-            window.ClearInterval(id);
-          }
-        },
-        10);
-      for (int32 i = 0; i < 6; ++i)
-      {
-        Advance(10ms);
-      }
-      CHECK(count == 3);
-    }
-
-    SECTION("deeply nested timeouts are clamped to 4ms")
-    {
-      int32 runs = 0;
-      Func<void()> nest;
-      nest = [&]
-      {
-        ++runs;
-        (void)window.SetTimeout(Func<void()>(nest), 0);
-      };
-      (void)window.SetTimeout(Func<void()>(nest), 0);
-
-      // Ten levels run at once; the eleventh waits for the minimum interval.
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(runs == 10);
-      Advance(4ms);
-      CHECK(runs == 11);
-      Advance(4ms);
-      CHECK(runs == 12);
-      fixture.TestPage->MainFrame().SetDocument(nullptr);
-    }
-
-    SECTION("microtasks run before the next task")
-    {
-      window.SetTimeout([&] { order.push_back("task"); }, 0);
-      window.QueueMicrotask([&] { order.push_back("microtask"); });
-      Advance(0ms);
-      CHECK(order == List<std::string> {"microtask", "task"});
-    }
-
-    SECTION("a document leaving its frame stops its timers")
-    {
-      (void)window.SetTimeout([&] { order.push_back("timeout"); }, 5);
-      (void)window.SetInterval([&] { order.push_back("interval"); }, 5);
-      fixture.TestPage->MainFrame().SetDocument(nullptr);
-      Advance(10ms);
-      CHECK(order.empty());
-    }
+    auto timer = fixture.Document->StartTimer(0ms, [&] { order.push_back("task"); });
+    window.QueueMicrotask([&] { order.push_back("microtask"); });
+    Advance(0ms);
+    CHECK(order == List<std::string> {"microtask", "task"});
   }
 
   TEST_CASE(
@@ -843,110 +468,11 @@ namespace krys::boo::tests
     CHECK(timestamps.size() == 2);
   }
 
-  TEST_CASE("A window's idle callbacks run in idle periods, or after their timeout", "[Page][LocalDOMWindow]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-    auto &page = *fixture.TestPage;
-
-    double remaining = -1;
-    bool timedOut = true;
-    int32 calls = 0;
-    (void)window.RequestIdleCallback(
-      [&](dom::IdleDeadline &deadline)
-      {
-        ++calls;
-        remaining = deadline.TimeRemaining();
-        timedOut = deadline.DidTimeoutValue();
-      });
-    auto cancelled = window.RequestIdleCallback([&](dom::IdleDeadline &) { calls += 100; });
-    window.CancelIdleCallback(cancelled);
-
-    // An idle period that's already over runs nothing.
-    page.OpportunisticallyRunIdleCallbacks(MonotonicTime::Now());
-    CHECK(calls == 0);
-
-    page.OpportunisticallyRunIdleCallbacks(MonotonicTime::Now() + 1s);
-    CHECK(calls == 1);
-    CHECK(remaining > 0);
-    CHECK(remaining <= 1'000);
-    CHECK_FALSE(timedOut);
-
-    SECTION("a timeout calls it without an idle period")
-    {
-      (void)window.RequestIdleCallback(
-        [&](dom::IdleDeadline &deadline)
-        {
-          ++calls;
-          remaining = deadline.TimeRemaining();
-          timedOut = deadline.DidTimeoutValue();
-        },
-        {50});
-      Advance(40ms);
-      CHECK(calls == 1);
-      Advance(10ms);
-      CHECK(calls == 2);
-      CHECK(timedOut);
-      CHECK(remaining == 0);
-    }
-  }
-
-  namespace
-  {
-    /// @brief A value the host passes as a message or an error.
-    struct TestValue final : html::SerializedScriptValue
-    {
-      std::string Text;
-
-      explicit TestValue(std::string text) noexcept : Text(krys::move(text))
-      {
-      }
-    };
-  }
-
-  TEST_CASE(
-    "A window's user prompts go to the host",
-    "[Page][LocalDOMWindow][html:simple-dialogs][html:dom-alert][html:dom-alert-noargs][html:dom-confirm]"
-    "[html:dom-prompt][html:cannot-show-simple-dialogs][html:printing][html:dom-print]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-
-    window.Alert(u8"Hello\r\nthere\rfriend");
-    CHECK(window.Confirm(u8"Sure?"));
-    fixture.Chrome->ConfirmAnswer = false;
-    CHECK_FALSE(window.Confirm());
-    CHECK_FALSE(window.Prompt(u8"Name?", u8"Ada"));
-    fixture.Chrome->PromptAnswer = dom::DOMString(u8"Grace");
-    CHECK(window.Prompt(u8"Name?") == dom::DOMString(u8"Grace"));
-    // Newlines are normalised.
-    CHECK(fixture.Chrome->Dialogs
-          == List<std::string> {"alert:Hello\nthere\nfriend", "confirm:Sure?", "confirm:", "prompt:Name?:Ada",
-                                "prompt:Name?:"});
-
-    List<std::string> events;
-    auto before = window.AddEventListener(u8"beforeprint", [&](dom::Event &) { events.push_back("before"); });
-    auto after = window.AddEventListener(u8"afterprint", [&](dom::Event &) { events.push_back("after"); });
-    // The document was parsed rather than loaded, so it prints once it finishes loading.
-    window.Print();
-    CHECK(fixture.Chrome->PrintRequests == 0);
-    fixture.Document->ImplicitClose();
-    CHECK(fixture.Chrome->PrintRequests == 1);
-    CHECK(events == List<std::string> {"before", "after"});
-
-    // A window without a browsing context shows nothing.
-    fixture.TestPage->MainFrame().SetDocument(nullptr);
-    window.Alert(u8"Gone");
-    CHECK(fixture.Chrome->Dialogs.size() == 5);
-  }
-
   TEST_CASE("A window's user activation",
             "[Page][LocalDOMWindow][html:user-activation-data-model]"
             "[html:activation-expiry][html:activation-notification]"
             "[html:activation-triggering-input-event][html:consume-user-activation]"
-            "[html:consume-history-action-user-activation]"
-            "[html:dom-navigator-useractivation][html:dom-useractivation-hasbeenactive]"
-            "[html:dom-useractivation-isactive]")
+            "[html:consume-history-action-user-activation]")
   {
     WindowFixture fixture(
       u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style><div></div>");
@@ -955,11 +481,6 @@ namespace krys::boo::tests
 
     CHECK_FALSE(window.HasStickyActivation());
     CHECK_FALSE(window.HasTransientActivation());
-    CHECK_FALSE(window.HasHistoryActionActivation());
-    auto &userActivation = window.GetNavigator().GetUserActivation();
-    CHECK(&userActivation == &window.GetNavigator().GetUserActivation());
-    CHECK_FALSE(userActivation.HasBeenActive());
-    CHECK_FALSE(userActivation.IsActive());
 
     SECTION("a press activates the window, transiently for 5s")
     {
@@ -968,18 +489,12 @@ namespace krys::boo::tests
       (void)handler.HandleMousePressEvent(press);
       CHECK(window.HasStickyActivation());
       CHECK(window.HasTransientActivation());
-      CHECK(window.HasHistoryActionActivation());
-
-      CHECK(userActivation.HasBeenActive());
-      CHECK(userActivation.IsActive());
 
       Advance(4s);
       CHECK(window.HasTransientActivation());
       Advance(1s);
       CHECK_FALSE(window.HasTransientActivation());
       CHECK(window.HasStickyActivation());
-      CHECK_FALSE(userActivation.IsActive());
-      CHECK(userActivation.HasBeenActive());
     }
 
     SECTION("a key press activates it, but not Escape")
@@ -1003,313 +518,10 @@ namespace krys::boo::tests
       CHECK(window.HasStickyActivation());
       CHECK_FALSE(window.ConsumeTransientActivation());
 
+      // Close watchers consume the history-action activation.
       CHECK(window.ConsumeHistoryActionUserActivation());
       CHECK_FALSE(window.HasHistoryActionActivation());
       CHECK_FALSE(window.ConsumeHistoryActionUserActivation());
-    }
-  }
-
-  TEST_CASE(
-    "A window opens windows through the host",
-    "[Page][LocalDOMWindow][html:dom-open][html:window-open-steps][html:dom-name]"
-    "[html:the-rules-for-choosing-a-navigable][html:find-a-navigable-by-target-name][html:nav-target]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-    fixture.Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
-    auto &navigations = fixture.Loader->Navigations;
-
-    // Without transient activation, popups are blocked.
-    auto blocked = window.Open(u8"other.html");
-    REQUIRE_FALSE(blocked.HasException());
-    CHECK(blocked.Value() == nullptr);
-    CHECK(navigations.empty());
-
-    window.NotifyActivated();
-    auto opened =
-      window.Open(u8"other.html", dom::DOMStringAtom(u8"_blank"), u8"width=300,height=200,noopener");
-    REQUIRE_FALSE(opened.HasException());
-    CHECK(opened.Value() == nullptr);
-    REQUIRE(navigations.size() == 1);
-    CHECK(navigations[0].IsNewWindow);
-    CHECK(navigations[0].URL == "https://example.com/dir/other.html");
-    CHECK(navigations[0].NewWindowName == "_blank");
-    REQUIRE(navigations[0].Action.GetWindowFeatures());
-    CHECK(navigations[0].Action.GetWindowFeatures()->Width == 300.f);
-    CHECK(navigations[0].Action.GetWindowFeatures()->WantsPopup());
-    CHECK(navigations[0].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
-    // Opening a window consumes the activation.
-    CHECK_FALSE(window.HasTransientActivation());
-    CHECK(window.HasStickyActivation());
-
-    // An existing browsing context is navigated, without activation.
-    auto self = window.Open(u8"#here", dom::DOMStringAtom(u8"_self"));
-    REQUIRE_FALSE(self.HasException());
-    CHECK(self.Value() == &window);
-    REQUIRE(navigations.size() == 2);
-    CHECK_FALSE(navigations[1].IsNewWindow);
-    CHECK(navigations[1].URL == "https://example.com/dir/page.html#here");
-
-    // With noopener, an existing browsing context is returned only for _self, _parent and _top.
-    window.SetName(u8"main");
-    auto named = window.Open(u8"#named", dom::DOMStringAtom(u8"main"), u8"noopener");
-    REQUIRE_FALSE(named.HasException());
-    CHECK(named.Value() == nullptr);
-    CHECK(navigations.size() == 3);
-    auto selfNoOpener = window.Open(u8"", dom::DOMStringAtom(u8"_SELF"), u8"noopener");
-    REQUIRE_FALSE(selfNoOpener.HasException());
-    CHECK(selfNoOpener.Value() == &window);
-
-    // A URL that can't be parsed is a SyntaxError.
-    auto invalid = window.Open(u8"https://exa mple.com/", dom::DOMStringAtom(u8"_self"));
-    CHECK(invalid.HasException());
-  }
-
-  TEST_CASE(
-    "Window features",
-    "[Page][LocalDOMWindow][html:concept-window-open-features-tokenize][html:popup-window-is-requested]"
-    "[html:concept-window-open-features-parse-boolean][html:feature-separator]"
-    "[html:get-noopener-for-window-open]")
-  {
-    auto features = ParseWindowFeatures(u8" left = 10 , top=20,width=300 height=200, popup");
-    CHECK(features.X == 10.f);
-    CHECK(features.Y == 20.f);
-    CHECK(features.Width == 300.f);
-    CHECK(features.Height == 200.f);
-    CHECK(features.Popup == true);
-    CHECK(features.WantsPopup());
-
-    CHECK_FALSE(ParseWindowFeatures(u8"").WantsPopup());
-    CHECK_FALSE(ParseWindowFeatures(u8"noopener,noreferrer").WantsPopup());
-    CHECK(ParseWindowFeatures(u8"noopener").WantsNoOpener());
-    CHECK(ParseWindowFeatures(u8"noreferrer").WantsNoReferrer());
-    CHECK(ParseWindowFeatures(u8"noreferrer").WantsNoOpener());
-    CHECK_FALSE(ParseWindowFeatures(u8"noopener=0").WantsNoOpener());
-    // A window with its bars isn't a popup; one without them is.
-    CHECK_FALSE(ParseWindowFeatures(u8"location,menubar,resizable,scrollbars,status").WantsPopup());
-    CHECK(ParseWindowFeatures(u8"location,menubar").WantsPopup());
-    CHECK(ParseWindowFeatures(u8"popup=yes").Popup == true);
-    CHECK(ParseWindowFeatures(u8"popup=no").Popup == false);
-  }
-
-  TEST_CASE(
-    "A window's global scope",
-    "[Page][LocalDOMWindow][html:windoworworkerglobalscope-mixin][html:dom-origin][html:dom-issecurecontext]"
-    "[html:dom-crossoriginisolated][html:secure-contexts][html:atob][html:dom-btoa][html:dom-atob]"
-    "[html:runtime-script-errors][html:dom-reporterror][html:report-an-exception][html:the-messageevent-"
-    "interface]"
-    "[html:dom-messageevent-data][html:dom-messageevent-origin][html:dom-messageevent-source]"
-    "[html:posting-messages][html:window-post-message-steps][html:dom-window-postmessage]"
-    "[html:dom-window-postmessage-options][html:posted-message-task-source]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-
-    SECTION("origin and secure contexts")
-    {
-      fixture.Document->SetURL(url::URL(u8"https://example.com:8080/page.html"));
-      CHECK(window.Origin() == u8"https://example.com:8080");
-      CHECK(window.IsSecureContext());
-      CHECK_FALSE(window.CrossOriginIsolated());
-
-      fixture.Document->SetURL(url::URL(u8"http://example.com/"));
-      CHECK_FALSE(window.IsSecureContext());
-      fixture.Document->SetURL(url::URL(u8"http://localhost/"));
-      CHECK(window.IsSecureContext());
-      fixture.Document->SetURL(url::URL(u8"file:///C:/game/ui.html"));
-      CHECK(window.Origin() == u8"file://");
-      CHECK(window.IsSecureContext());
-      fixture.Document->SetURL(url::URL(u8"data:text/html,hi"));
-      CHECK(window.Origin() == u8"null");
-      CHECK_FALSE(window.IsSecureContext());
-    }
-
-    SECTION("btoa() and atob()")
-    {
-      CHECK(window.Btoa(u8"Hello").Value() == u8"SGVsbG8=");
-      CHECK(window.Btoa(u8"").Value() == u8"");
-      // Code points up to U+00FF are bytes.
-      CHECK(window.Btoa(u8"\u00ff").Value() == u8"/w==");
-      CHECK(window.Btoa(u8"\u0100").HasException());
-
-      CHECK(window.Atob(u8"SGVsbG8=").Value() == u8"Hello");
-      // Forgiving: whitespace and missing padding.
-      CHECK(window.Atob(u8" SGVs\tbG8 ").Value() == u8"Hello");
-      CHECK(window.Atob(u8"/w==").Value() == u8"\u00ff");
-      CHECK(window.Atob(u8"SGVsbG8=?").HasException());
-      CHECK(window.Atob(u8"SGVsbG8==").HasException());
-      CHECK(window.Atob(u8"S").HasException());
-    }
-
-    SECTION("reportError() fires error, and reaches the console unless cancelled")
-    {
-      std::string seen;
-      bool cancel = true;
-      auto listener = window.AddEventListener<html::ErrorEvent>(u8"error",
-                                                                [&](html::ErrorEvent &event)
-                                                                {
-                                                                  seen = Str(event.Message());
-                                                                  CHECK(event.IsTrusted());
-                                                                  CHECK(event.Cancelable());
-                                                                  REQUIRE(event.Error());
-                                                                  if (cancel)
-                                                                  {
-                                                                    event.PreventDefault();
-                                                                  }
-                                                                  // Reporting from a report does nothing.
-                                                                  window.ReportError(u8"Nested");
-                                                                });
-      window.ReportError(u8"Broken", CreateRef<TestValue>("value"));
-      CHECK(seen == "Broken");
-      CHECK(fixture.Chrome->ConsoleMessages.empty());
-
-      cancel = false;
-      window.ReportError(u8"Unhandled", CreateRef<TestValue>("value"));
-      CHECK(fixture.Chrome->ConsoleMessages == List<std::string> {"error:Unhandled"});
-    }
-
-    SECTION("postMessage() queues a message from the window")
-    {
-      fixture.Document->SetURL(url::URL(u8"https://example.com/page.html"));
-      List<std::string> messages;
-      auto listener = window.AddEventListener<html::MessageEvent>(
-        u8"message",
-        [&](html::MessageEvent &event)
-        {
-          CHECK(event.IsTrusted());
-          CHECK(event.Source() == &window);
-          CHECK(event.Origin() == u8"https://example.com");
-          messages.push_back(event.Data() ? static_cast<TestValue *>(event.Data())->Text : "null");
-        });
-
-      REQUIRE_FALSE(window.PostMessage(CreateRef<TestValue>("first")).HasException());
-      REQUIRE_FALSE(window.PostMessage(nullptr, u8"*").HasException());
-      REQUIRE_FALSE(
-        window.PostMessage(CreateRef<TestValue>("same"), u8"https://example.com/other").HasException());
-      // Another origin isn't the window's: the message is dropped.
-      REQUIRE_FALSE(
-        window.PostMessage(CreateRef<TestValue>("other"), u8"https://other.example").HasException());
-      CHECK(window.PostMessage(nullptr, u8"not a url").HasException());
-      CHECK(messages.empty());
-
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(messages == List<std::string> {"first", "null", "same"});
-    }
-
-    SECTION("postMessage() gives the message the origin the window had as it was posted")
-    {
-      fixture.Document->SetURL(url::URL(u8"https://example.com/page.html"));
-      List<std::string> origins;
-      auto listener = window.AddEventListener<html::MessageEvent>(
-        u8"message", [&](html::MessageEvent &event) { origins.push_back(Str(event.Origin())); });
-      REQUIRE_FALSE(window.PostMessage(nullptr, u8"*").HasException());
-      fixture.Document->SetURL(url::URL(u8"https://other.example/page.html"));
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(origins == List<std::string> {"https://example.com"});
-    }
-  }
-
-  TEST_CASE(
-    "A window's navigator",
-    "[Page][LocalDOMWindow][html:the-navigator-object][html:dom-navigator][html:dom-clientinformation]"
-    "[html:client-identification][html:dom-navigator-appcodename][html:dom-navigator-appname]"
-    "[html:dom-navigator-appversion][html:dom-navigator-platform][html:dom-navigator-product]"
-    "[html:dom-navigator-productsub][html:dom-navigator-useragent][html:dom-navigator-vendor]"
-    "[html:dom-navigator-vendorsub][html:dom-navigator-taintenabled][html:language-preferences]"
-    "[html:dom-navigator-language][html:dom-navigator-languages][html:navigator.online]"
-    "[html:dom-navigator-online][html:custom-handlers][html:dom-navigator-registerprotocolhandler]"
-    "[html:dom-navigator-unregisterprotocolhandler][html:normalize-protocol-handler-parameters]"
-    "[html:safelisted-scheme][html:cookies][html:dom-navigator-cookieenabled][html:pdf-viewing-support]"
-    "[html:dom-navigator-plugins][html:dom-navigator-mimetypes][html:dom-navigator-javaenabled]"
-    "[html:dom-navigator-pdfviewerenabled][html:dom-pluginarray-length][html:dom-pluginarray-nameditem]"
-    "[html:dom-mimetypearray-length][html:navigator.hardwareconcurrency][html:dom-navigator-"
-    "hardwareconcurrency]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-    auto &navigator = window.GetNavigator();
-    CHECK(&window.ClientInformation() == &navigator);
-
-    SECTION("NavigatorID")
-    {
-      CHECK(navigator.AppCodeName() == u8"Mozilla");
-      CHECK(navigator.AppName() == u8"Netscape");
-      CHECK(navigator.Product() == u8"Gecko");
-      CHECK(navigator.ProductSub() == u8"20030107");
-      CHECK(navigator.Platform() == u8"Win32");
-      CHECK(navigator.Vendor().empty());
-      CHECK_FALSE(navigator.TaintEnabled());
-      CHECK(navigator.UserAgent() == LocalFrameLoaderClient::DefaultUserAgent);
-      CHECK(navigator.AppVersion()
-            == utf8_stringview(LocalFrameLoaderClient::DefaultUserAgent)
-                 .substr(utf8_stringview(u8"Mozilla/").size()));
-    }
-
-    SECTION("NavigatorLanguage, with languagechange")
-    {
-      uint32 changes = 0;
-      auto listener = window.AddEventListener(u8"languagechange", [&](dom::Event &) { ++changes; });
-      OverrideUserPreferredLanguages({u8"fr-CA", u8"en-GB"});
-      CHECK(navigator.Language() == u8"fr-CA");
-      // Only the most preferred language is exposed.
-      CHECK(navigator.Languages() == List<dom::DOMString> {u8"fr-CA"});
-      CHECK(changes == 0);
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(changes == 1);
-      OverrideUserPreferredLanguages({});
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(changes == 2);
-      CHECK_FALSE(navigator.Language().empty());
-    }
-
-    SECTION("NavigatorOnLine, with online and offline")
-    {
-      CHECK(navigator.OnLine());
-      List<std::string> events;
-      auto online = window.AddEventListener(u8"online", [&](dom::Event &) { events.push_back("online"); });
-      auto offline = window.AddEventListener(u8"offline", [&](dom::Event &) { events.push_back("offline"); });
-      fixture.TestPage->NetworkStateChanged(false);
-      fixture.TestPage->NetworkStateChanged(true);
-      CHECK(events == List<std::string> {"offline", "online"});
-    }
-
-    SECTION("plugins, cookies, hardware and activation")
-    {
-      CHECK(navigator.Plugins().Length() == 0);
-      CHECK(&navigator.Plugins() == &navigator.Plugins());
-      CHECK_FALSE(navigator.Plugins().HasNamedItem(u8"PDF Viewer"));
-      CHECK(navigator.MimeTypes().Length() == 0);
-      CHECK_FALSE(navigator.PdfViewerEnabled());
-      CHECK_FALSE(navigator.JavaEnabled());
-      CHECK_FALSE(navigator.CookieEnabled());
-      CHECK((navigator.HardwareConcurrency() == 4 || navigator.HardwareConcurrency() == 8));
-
-      auto &activation = navigator.GetUserActivation();
-      CHECK_FALSE(activation.HasBeenActive());
-      CHECK_FALSE(activation.IsActive());
-      window.NotifyActivated();
-      CHECK(activation.HasBeenActive());
-      CHECK(activation.IsActive());
-    }
-
-    SECTION("protocol handlers")
-    {
-      fixture.Document->SetURL(url::URL(u8"https://example.com/app/page.html"));
-      REQUIRE_FALSE(navigator.RegisterProtocolHandler(u8"MAILTO", u8"compose?to=%s").HasException());
-      REQUIRE_FALSE(navigator.RegisterProtocolHandler(u8"web+game", u8"/play?u=%s").HasException());
-      REQUIRE_FALSE(navigator.UnregisterProtocolHandler(u8"web+game", u8"/play?u=%s").HasException());
-      CHECK(fixture.Chrome->ProtocolHandlers
-            == List<std::string> {"+mailto https://example.com/app/compose?to=%s",
-                                  "+web+game https://example.com/play?u=%s",
-                                  "-web+game https://example.com/play?u=%s"});
-
-      // Schemes must be safelisted or web+ and letters; the URL must have %s and be the page's origin.
-      CHECK(navigator.RegisterProtocolHandler(u8"http", u8"x?%s").HasException());
-      CHECK(navigator.RegisterProtocolHandler(u8"web+", u8"x?%s").HasException());
-      CHECK(navigator.RegisterProtocolHandler(u8"web+1", u8"x?%s").HasException());
-      CHECK(navigator.RegisterProtocolHandler(u8"mailto", u8"x").HasException());
-      CHECK(navigator.RegisterProtocolHandler(u8"mailto", u8"https://other.example/?%s").HasException());
-      CHECK(fixture.Chrome->ProtocolHandlers.size() == 3);
     }
   }
 
@@ -1374,10 +586,10 @@ namespace krys::boo::tests
     {
       auto &body = *fixture.Document->Body();
       body.SetOnResize([&](dom::Event &) { order.push_back("resize"); });
-      body.SetOnHashChange([&](dom::Event &) {});
+      body.SetOnPageShow([&](dom::Event &) {});
       CHECK(window.OnResize() == body.OnResize());
       CHECK(window.OnResize() != nullptr);
-      CHECK(window.OnHashChange() != nullptr);
+      CHECK(window.OnPageShow() != nullptr);
       // Other handlers are the body's own.
       body.SetOnClick([&](dom::Event &) {});
       CHECK(window.OnClick() == nullptr);

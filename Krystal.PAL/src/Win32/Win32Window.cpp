@@ -1,4 +1,5 @@
 ﻿#include "Krystal.PAL/Win32/Win32Window.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.PAL/IWindow.hpp"
@@ -6,7 +7,6 @@
 #include "Krystal.PAL/Win32/DropTarget.hpp"
 #include "Krystal.PAL/Win32/Utils.hpp"
 #include <algorithm>
-#include <cassert>
 #include <hidusage.h>
 #include <imm.h>
 #include <string>
@@ -1113,7 +1113,7 @@ namespace krys::pal
                          rect->bottom - rect->top, SWP_NOZORDER);
           if (_callbacks.OnDPIChange)
           {
-            assert(HIWORD(wParam) == LOWORD(wParam) && "Unexpected dpi");
+            krys_debug_assert_msg(HIWORD(wParam) == LOWORD(wParam), "Unexpected dpi");
             _callbacks.OnDPIChange(handle, HIWORD(wParam));
           }
           return 0;
@@ -1126,7 +1126,7 @@ namespace krys::pal
     void Win32Window::SetTitle(const string &title) noexcept
     {
       auto result = ::SetWindowTextW(_handle, ToWideString(title).c_str());
-      assert(result);
+      krys_debug_assert(result);
       if (result)
       {
         _settings.Title = title;

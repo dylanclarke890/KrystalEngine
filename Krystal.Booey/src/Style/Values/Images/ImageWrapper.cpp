@@ -46,8 +46,8 @@ namespace krys::boo::style
       {
         return ImageWrapper {krys::move(toStyleImage)};
       }
-      return ImageWrapper {StyleCrossfadeImage::Create(krys::move(fromStyleImage), krys::move(toStyleImage),
-                                                       context.Progress, false)};
+      return ImageWrapper {
+        StyleCrossfadeImage::Create(krys::move(fromStyleImage), krys::move(toStyleImage), context.Progress)};
     }
 
     KRYS_NODISCARD ImageWrapper FilterBlend(RefPtr<StyleImage> inputImage, const style::Filter &from,

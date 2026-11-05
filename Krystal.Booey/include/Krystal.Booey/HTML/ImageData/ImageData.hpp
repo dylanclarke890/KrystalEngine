@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/ByteArrayPixelBuffer.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/HTML/Canvas/PredefinedColorSpace.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageDataArray.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp"

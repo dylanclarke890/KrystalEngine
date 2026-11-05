@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -450,7 +451,7 @@ namespace krys::boo::dom
 
   Node *TreeQueries::NextAncestorSibling(const Node &current) noexcept
   {
-    assert(!current.NextSibling());
+    krys_debug_assert(!current.NextSibling());
 
     for (const Node &ancestor : ConstAncestorRange(current))
     {
@@ -465,8 +466,8 @@ namespace krys::boo::dom
 
   Node *TreeQueries::NextAncestorSibling(const Node &current, const Node *stayWithin) noexcept
   {
-    assert(!current.NextSibling());
-    assert(&current != stayWithin);
+    krys_debug_assert(!current.NextSibling());
+    krys_debug_assert(&current != stayWithin);
 
     for (const Node &ancestor : ConstAncestorRange(current))
     {
@@ -1020,7 +1021,7 @@ namespace krys::boo::dom
 
   Node *TreeQueries::PreviousAncestorSiblingPostOrder(const Node &current) noexcept
   {
-    assert(!current.PreviousSibling());
+    krys_debug_assert(!current.PreviousSibling());
 
     for (const auto &ancestor : ConstAncestorRange(current))
     {
@@ -1035,7 +1036,7 @@ namespace krys::boo::dom
 
   Node *TreeQueries::PreviousAncestorSiblingPostOrder(const Node &current, const Node *stayWithin) noexcept
   {
-    assert(!current.PreviousSibling());
+    krys_debug_assert(!current.PreviousSibling());
 
     for (const auto &ancestor : ConstAncestorRange(current))
     {

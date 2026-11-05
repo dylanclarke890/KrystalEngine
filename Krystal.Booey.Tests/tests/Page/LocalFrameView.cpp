@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -318,8 +318,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: media type and pagination",
-                   "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: media type", "[Page][LocalFrameView]")
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @media print { p { color: rgb(0, 0, 255) } }
@@ -336,12 +335,12 @@ namespace krys::boo::tests
     CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
     CHECK(document.GetMediaQueryMatcher().MediaType() == css::CSSOMStringAtom {u8"print"});
 
-    fixture.View().SetMediaType(css::CSSOMStringAtom {u8"screen"});
-    fixture.View().SetPagination({.Mode = PaginationMode::TopToBottomPaginated});
-    document.UpdateStyleIfNeeded();
-    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
     document.EvaluateMediaQueriesAndReportChanges();
     CHECK(paged->Matches());
+
+    fixture.View().SetMediaType(css::CSSOMStringAtom {u8"screen"});
+    document.UpdateStyleIfNeeded();
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrame: media environment", "[Page][LocalFrame]")

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Font/SegmentedFontFace.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontDescription.hpp"
-#include "Krystal.Booey/Graphics/FontFeatureValues.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css

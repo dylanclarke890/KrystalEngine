@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasFilterContextSwitcher.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasLayerContextSwitcher.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
 

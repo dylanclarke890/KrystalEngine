@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/RayValue.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 
 namespace krys::boo::css

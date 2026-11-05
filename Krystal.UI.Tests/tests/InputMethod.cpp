@@ -188,7 +188,7 @@ namespace krys::ui::tests
   {
     boo::MemoryCache::Singleton().EvictResources();
     View view({1'200, 600});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    FollowLinks(view);
     REQUIRE(
       view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
         .has_value());

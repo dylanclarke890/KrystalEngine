@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
-#include "Krystal.Booey/Rendering/BreakablePositions.hpp"
-#include "Krystal.Booey/Rendering/LegacyInlineIterator.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/Line/BreakablePositions.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyInlineIterator.hpp"
 #include "Krystal.Booey/Rendering/Line/LineBreaker.hpp"
 #include "Krystal.Booey/Rendering/Line/LineInfo.hpp"
 #include "Krystal.Booey/Rendering/Line/LineInlineHeaders.hpp"
@@ -10,7 +11,6 @@
 #include "Krystal.Booey/Rendering/Line/TrailingObjects.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
-#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include <unicode/uchar.h>

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
@@ -53,11 +53,6 @@ namespace krys::boo::css
     }
 
     _styleSheet = StyleSheetContents::Create(this, CSSOMString(href), context);
-    // FIXME: Sheets that aren't CORS-same-origin load from an opaque source too, once there are origins.
-    if (_parentStyleSheet && _parentStyleSheet->LoadedFromOpaqueSource() == LoadedFromOpaqueSource::Yes)
-    {
-      _styleSheet->SetAsLoadedFromOpaqueSource();
-    }
 
     bool parseSucceeded = _styleSheet->ParseAuthorStyleSheet(cachedStyleSheet);
 
@@ -142,9 +137,7 @@ namespace krys::boo::css
       rootSheet = sheet;
     }
 
-    // FIXME: Skip Content Security Policy check when stylesheet is in a user agent shadow tree.
     auto options = CachedResourceLoader::DefaultCachedResourceOptions();
-    options.IsLoadedFromOpaqueSource = _parentStyleSheet->LoadedFromOpaqueSource();
     CachedResourceRequest request(ResourceRequest(krys::move(absURL)), options);
     request.SetCharset(utf8_string(_parentStyleSheet->Charset()));
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);

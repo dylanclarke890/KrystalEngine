@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/MotionPath.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
-#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Values/Motion/OffsetPath.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 

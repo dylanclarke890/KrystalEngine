@@ -15,7 +15,6 @@ namespace krys::boo::css
     Markable<Length<NonNegativeUnzoomed>> Blur;
     Markable<Length<AllUnzoomed>> Spread;
     Maybe<keywords::Inset> Inset;
-    bool IsWebkitBoxShadow {false};
 
     KRYS_NODISCARD bool operator==(const BoxShadow &) const noexcept = default;
   };

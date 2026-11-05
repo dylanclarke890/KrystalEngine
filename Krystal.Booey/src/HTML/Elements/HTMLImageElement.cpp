@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
@@ -18,7 +18,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
-#include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <limits>
@@ -765,7 +765,6 @@ namespace krys::boo::html
         LoadDeferredImage();
       }
     }
-    // FIXME: referrerpolicy and crossorigin, once there are network loads.
   }
 
   // https://html.spec.whatwg.org/#the-img-element:html-element-insertion-steps

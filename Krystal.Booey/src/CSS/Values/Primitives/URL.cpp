@@ -60,11 +60,7 @@ namespace krys::boo::css
   Maybe<CSSURL> CompleteURL(const CSSOMString &string, const ParserContext &context) noexcept
   {
     // Upstream also rejects non-`data:` URLs in WebVTT mode, which isn't supported.
-    auto result = CompleteURL(string, context.BaseURL);
-
-    result.Modifiers.LoadedFromOpaqueSource = context.LoadedFromOpaqueSource;
-
-    return result;
+    return CompleteURL(string, context.BaseURL);
   }
 
   CSSURL Resolve(CSSURL &&url) noexcept

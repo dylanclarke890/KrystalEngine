@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
@@ -147,7 +147,6 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Unsuccessful HTTP responses can't be used, once responses have a status.
     (void)hasHTTPStatusOK;
 
     if (!MimeTypeAllowedByNosniff())

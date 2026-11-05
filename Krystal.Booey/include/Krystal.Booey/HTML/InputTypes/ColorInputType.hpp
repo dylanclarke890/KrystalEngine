@@ -3,8 +3,8 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/InputTypeNames.hpp"
-#include "Krystal.Booey/Platform/ColorChooser.hpp"
-#include "Krystal.Booey/Platform/ColorChooserClient.hpp"
+#include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/ColorChooserClient.hpp"
 
 namespace krys::boo::html
 {

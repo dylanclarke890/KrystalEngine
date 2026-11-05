@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/EditAction.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
-#include "Krystal.Booey/Editing/TemporarySelectionChange.hpp"
+#include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -69,21 +69,13 @@ namespace krys::boo
     p
   };
 
-  enum class MailBlockquoteHandling : bool
-  {
-    RespectBlockquote,
-    IgnoreBlockquote,
-  };
-
   enum class EditorPasteOption : uint8
   {
     AllowPlainText,
-    IgnoreMailBlockquote,
-    AsQuotation,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::EditorPasteOption, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::EditorPasteOption, 1uz);
 
 namespace krys::boo
 {
@@ -118,7 +110,6 @@ namespace krys::boo
     Cut,
     Paste,
     PasteAsPlainText,
-    PasteAsQuotation,
     PasteFont,
     BeforeCopy,
     BeforeCut,
@@ -225,10 +216,8 @@ namespace krys::boo
     /// @brief Fires `textInput` for pasting @p pastingText at the selection's target; its default action
     /// replaces the selection.
     void PasteAsPlainText(utf8_stringview pastingText, bool smartReplace) noexcept;
-    void PasteAsFragment(
-      Ref<dom::DocumentFragment> &&pastingFragment, bool smartReplace, bool matchStyle,
-      MailBlockquoteHandling respectsMailBlockquote = MailBlockquoteHandling::RespectBlockquote,
-      EditAction action = EditAction::Paste) noexcept;
+    void PasteAsFragment(Ref<dom::DocumentFragment> &&pastingFragment, bool smartReplace, bool matchStyle,
+                         EditAction action = EditAction::Paste) noexcept;
     KRYS_NODISCARD bool IsPastingFromMenuOrKeyBinding() const noexcept
     {
       return _pastingFromMenuOrKeyBinding;
@@ -323,7 +312,6 @@ namespace krys::boo
                                            dom::TextEvent *triggeringEvent) noexcept;
     bool InsertLineBreak() noexcept;
     bool InsertParagraphSeparator() noexcept;
-    bool InsertParagraphSeparatorInQuotedContent() noexcept;
     /// @brief The default action of a `textInput` event: inserts its text, or pastes its fragment.
     /// @return Whether it was handled.
     bool HandleTextEvent(dom::TextEvent &event) noexcept;
@@ -334,10 +322,9 @@ namespace krys::boo
                                         EditAction editingAction = EditAction::Delete) noexcept;
     void PerformDelete() noexcept;
 
-    void ReplaceSelectionWithFragment(
-      dom::DocumentFragment &fragment, bool selectReplacement, bool smartReplace, bool matchStyle,
-      EditAction editingAction = EditAction::Insert,
-      MailBlockquoteHandling mailBlockquoteHandling = MailBlockquoteHandling::RespectBlockquote) noexcept;
+    void ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
+                                      bool smartReplace, bool matchStyle,
+                                      EditAction editingAction = EditAction::Insert) noexcept;
     void ReplaceSelectionWithText(utf8_stringview text, bool selectReplacement, bool smartReplace,
                                   EditAction editingAction = EditAction::Insert) noexcept;
 

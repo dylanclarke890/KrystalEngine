@@ -48,15 +48,15 @@ namespace krys::boo::html
       if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"middle")
           || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"center"))
       {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitCenter);
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::InternalCenter);
       }
       else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"left"))
       {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitLeft);
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::InternalLeft);
       }
       else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"right"))
       {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitRight);
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::InternalRight);
       }
       else
       {

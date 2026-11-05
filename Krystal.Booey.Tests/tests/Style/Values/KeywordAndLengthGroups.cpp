@@ -1,7 +1,7 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Values/Break/Orphans.hpp"
@@ -23,7 +23,6 @@
 #include "Krystal.Booey/Style/Values/Overflow/MaximumLines.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollbarGutter.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp"
-#include "Krystal.Booey/Style/Values/Page/PageSize.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
@@ -36,8 +35,6 @@
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
 #include "Krystal.Booey/Style/Values/Speech/SpeakAs.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/Zoom.hpp"
-#include "Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionClass.hpp"
-#include "Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionName.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
 
 namespace krys::boo::style::tests
@@ -103,30 +100,6 @@ namespace krys::boo::style::tests
       CHECK(Serialised(Convert<StrokeWidth>(PropertyId::StrokeWidth, u8"2")) == "2px");
       CHECK(Serialised(Convert<StrokeWidth>(PropertyId::StrokeWidth, u8"5%")) == "5%");
       CHECK(Convert<StrokeMiterlimit>(PropertyId::StrokeMiterlimit, u8"6").Value.Value == 6.f);
-    }
-
-    SECTION("page size")
-    {
-      auto a4 = ConvertCSSValueToStyle<PageSize>(*State, *css::PrimitiveValue::Create(ValueId::A4));
-      CHECK(Serialised(a4) == "793.700806px 1122.519653px");
-
-      auto landscape = ConvertCSSValueToStyle<PageSize>(
-        *State, *css::ValuePair::Create(css::PrimitiveValue::Create(ValueId::Letter),
-                                        css::PrimitiveValue::Create(ValueId::Landscape)));
-      CHECK(Serialised(landscape) == "1056px 816px");
-
-      auto lengths = ConvertCSSValueToStyle<PageSize>(
-        *State, *css::ValuePair::Create(css::PrimitiveValue::Create(1, css::UnitType::in),
-                                        css::PrimitiveValue::Create(2, css::UnitType::in)));
-      CHECK(Serialised(lengths) == "96px 192px");
-
-      CHECK(
-        Serialised(ConvertCSSValueToStyle<PageSize>(*State, *css::PrimitiveValue::Create(ValueId::Portrait)))
-        == "portrait");
-      CHECK_FALSE(IsInvalid());
-
-      std::ignore = ConvertCSSValueToStyle<PageSize>(*State, *css::PrimitiveValue::Create(ValueId::Red));
-      CHECK(IsInvalid());
     }
   }
 
@@ -226,24 +199,6 @@ namespace krys::boo::style::tests
       CHECK(Serialised(string) == "\"...\"");
       CHECK(Convert<MaximumLines>(PropertyId::MaxLines, u8"none").IsNone());
       CHECK(Convert<MaximumLines>(PropertyId::MaxLines, u8"3") == MaximumLines {MaximumLines::Value {3}});
-    }
-
-    SECTION("view transitions")
-    {
-      auto viewTransitionName = [&](utf8_stringview value)
-      {
-        Build(PropertyId::ViewTransitionName, value, ScopeOrdinal::Shadow);
-        return Style.GetViewTransitionName();
-      };
-
-      CHECK(viewTransitionName(u8"none").IsNone());
-      // Names are scoped to the declaration's style scope.
-      auto named = viewTransitionName(u8"hero");
-      CHECK(named.IsCustomIdentifier());
-      CHECK(named.GetScopeOrdinal() == ScopeOrdinal::Shadow);
-      CHECK(Serialised(named) == "hero");
-      CHECK(viewTransitionName(u8"auto").IsAuto());
-      CHECK(viewTransitionName(u8"match-element").IsMatchElement());
     }
 
     SECTION("color-scheme")

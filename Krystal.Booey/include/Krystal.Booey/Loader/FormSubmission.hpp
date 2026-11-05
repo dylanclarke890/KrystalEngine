@@ -2,7 +2,6 @@
 
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Platform/Network/FormData.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -17,13 +16,13 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
+  class DOMFormData;
   class HTMLFormControlElement;
   class HTMLFormElement;
 }
 
 namespace krys::boo
 {
-  class FormData;
   class FrameLoadRequest;
 
   enum class FormSubmissionTrigger : uint8
@@ -32,10 +31,9 @@ namespace krys::boo
     NotSubmittedByJavaScript,
   };
 
-  /// @brief A form's submission: its method, action, target and encoded data, which the host navigates to.
+  /// @brief A form's submission: its method, action, target, encoding type and entry list, which the host
+  /// handles. Booey doesn't encode the entries: the host turns them into a request if it wants one.
   /// @see https://html.spec.whatwg.org/#form-submission-algorithm
-  // FIXME: The form state (FormState, the text field values the host's autofill reads), the referrer, origin
-  // and opener policies, and history locking.
   class FormSubmission : public RefCounted<FormSubmission>, public CanMakeWeakPtr<FormSubmission>
   {
   public:
@@ -51,7 +49,6 @@ namespace krys::boo
     {
     private:
       Method _method {Method::Get};
-      bool _isMultiPartForm {false};
       dom::DOMString _action;
       dom::DOMString _target;
       dom::DOMString _encodingType {u8"application/x-www-form-urlencoded"};
@@ -92,11 +89,6 @@ namespace krys::boo
       KRYS_NODISCARD static utf8_stringview ParseEncodingType(utf8_stringview type) noexcept;
       void UpdateEncodingType(utf8_stringview type) noexcept;
 
-      KRYS_NODISCARD bool IsMultiPartForm() const noexcept
-      {
-        return _isMultiPartForm;
-      }
-
       KRYS_NODISCARD const dom::DOMString &AcceptCharset() const noexcept
       {
         return _acceptCharset;
@@ -113,9 +105,8 @@ namespace krys::boo
     bool _wasCancelled {false};
     url::URL _action;
     dom::DOMString _target;
-    dom::DOMString _contentType;
-    RefPtr<FormData> _formData;
-    utf8_string _boundary;
+    dom::DOMString _encodingType;
+    RefPtr<html::DOMFormData> _entryList;
     RefPtr<dom::Event> _event;
     Maybe<dom::DOMString> _returnValue; // for form[method=dialog]
     RefPtr<html::HTMLFormElement> _form;
@@ -123,22 +114,20 @@ namespace krys::boo
     FormSubmissionTrigger _trigger {FormSubmissionTrigger::NotSubmittedByJavaScript};
 
   public:
-    // dialog form submissions
-    FormSubmission(Method method, Maybe<dom::DOMString> returnValue, const url::URL &action,
-                   dom::DOMStringView target, dom::DOMStringView contentType, dom::Event *event) noexcept;
+    /// @brief A dialog's submission, with the submitter's result.
+    FormSubmission(Maybe<dom::DOMString> returnValue, const url::URL &action, dom::DOMStringView target,
+                   dom::DOMStringView encodingType, dom::Event *event) noexcept;
 
-    // get/post form submissions
+    /// @brief A `GET` or `POST` submission of @p entryList.
     FormSubmission(Method method, const url::URL &action, dom::DOMStringView target,
-                   dom::DOMStringView contentType, Ref<FormData> &&data, utf8_stringview boundary,
+                   dom::DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
                    dom::Event *event) noexcept;
+    ~FormSubmission() noexcept;
 
     KRYS_NODISCARD static Ref<FormSubmission> Create(html::HTMLFormElement &form,
                                                      html::HTMLFormControlElement *overrideSubmitter,
                                                      const Attributes &attributes, dom::Event *event,
                                                      FormSubmissionTrigger trigger) noexcept;
-
-    /// @brief The URL to navigate to: the action, with the data as its query for a GET.
-    KRYS_NODISCARD url::URL RequestURL() const noexcept;
 
     KRYS_NODISCARD Method GetMethod() const noexcept
     {
@@ -155,21 +144,15 @@ namespace krys::boo
       return _target;
     }
 
-    KRYS_NODISCARD const dom::DOMString &ContentType() const noexcept
+    /// @brief The form's encoding type (`enctype`, or the submitter's `formenctype`), for the host to encode
+    /// the entries with: `application/x-www-form-urlencoded`, `multipart/form-data` or `text/plain`.
+    KRYS_NODISCARD const dom::DOMString &EncodingType() const noexcept
     {
-      return _contentType;
+      return _encodingType;
     }
 
-    /// @brief The request body; empty for a dialog.
-    KRYS_NODISCARD FormData *Data() const noexcept
-    {
-      return _formData.get();
-    }
-
-    KRYS_NODISCARD const utf8_string &Boundary() const noexcept
-    {
-      return _boundary;
-    }
+    /// @brief The entries submitted, in tree order; null for a dialog.
+    KRYS_NODISCARD html::DOMFormData *EntryList() const noexcept;
 
     KRYS_NODISCARD dom::Event *Event() const noexcept
     {
@@ -192,7 +175,7 @@ namespace krys::boo
       return _trigger;
     }
 
-    /// @brief Gives @p frameRequest the submission's target, method and URL.
+    /// @brief Gives @p frameRequest the submission's target, method and action.
     void PopulateFrameLoadRequest(FrameLoadRequest &frameRequest) const noexcept;
 
     void ClearTarget() noexcept

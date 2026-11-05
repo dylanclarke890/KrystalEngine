@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Shapes/BoxLayoutShape.hpp"
-#include "Krystal.Booey/Rendering/BorderShape.hpp"
+#include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <cmath>

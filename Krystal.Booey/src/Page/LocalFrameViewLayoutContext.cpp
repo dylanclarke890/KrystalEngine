@@ -2,13 +2,13 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
@@ -199,7 +199,6 @@ namespace krys::boo
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPreLayout);
       layoutRoot = CreateWeakPtr(SubtreeLayoutRoot() ? SubtreeLayoutRoot()
                                                      : static_cast<RenderElement *>(GetRenderView()));
-      // FIXME: Printing repaints everything too, once there's printing.
       _needsFullRepaint = Is<RenderView>(*layoutRoot) && _firstLayout;
       _frameView.WillDoLayout(*layoutRoot);
       _firstLayout = false;
@@ -216,7 +215,6 @@ namespace krys::boo
 
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InViewSizeAdjust);
-      // FIXME: Not while printing, once there's printing.
       if (Is<RenderView>(*layoutRoot))
       {
         // This is to protect _needsFullRepaint's value when layout() is getting re-entered through
@@ -244,14 +242,9 @@ namespace krys::boo
     }
 
     // The post-layout tasks: the animations layout brought into view resume, the fragment's target is
-    // scrolled back into view, the window is told if the viewport resized, and the loader of the first
-    // layout.
-    if (!IsLayoutNested() && Document()->DocumentElement())
-    {
-      _frameView.FireLayoutRelatedMilestonesIfNeeded();
-    }
+    // scrolled back into view, and the window is told if the viewport resized.
     _frameView.ViewportContentsChanged();
-    _frameView.ScheduleScrollToAnchorAndTextFragment();
+    _frameView.ScheduleScrollToAnchor();
     _frameView.ScheduleResizeEventIfNeeded();
     _frameView.LayoutOrVisualViewportChanged();
   }
@@ -270,8 +263,6 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: The repaint rect environment (device scale factor, printing, fixed layout), once there's
-    // printing.
     view->Layer()->UpdateLayerPositionsAfterStyleChange(false);
 
     return view->Compositor().DidRecalcStyleWithNoPendingLayout();

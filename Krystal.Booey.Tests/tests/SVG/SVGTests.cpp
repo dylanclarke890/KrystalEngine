@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey.Tests/SVG/TestSVGElement.hpp"
-#include "Krystal.Booey/Core/PlatformLocale.hpp"
+#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 
 namespace krys::boo::svg::tests
 {

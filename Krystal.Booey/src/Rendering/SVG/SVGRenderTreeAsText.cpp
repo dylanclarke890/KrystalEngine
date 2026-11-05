@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
@@ -27,20 +27,20 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGCircleElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGEllipseElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGLinearGradientElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGLineElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGPolyElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGRadialGradientElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGRectElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGStopElement.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
-#include "Krystal.Booey/SVG/SVGCircleElement.hpp"
-#include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
-#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
-#include "Krystal.Booey/SVG/SVGLineElement.hpp"
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
-#include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPointList.hpp"
-#include "Krystal.Booey/SVG/SVGPolyElement.hpp"
-#include "Krystal.Booey/SVG/SVGRadialGradientElement.hpp"
-#include "Krystal.Booey/SVG/SVGRectElement.hpp"
-#include "Krystal.Booey/SVG/SVGStopElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
@@ -563,12 +563,12 @@ namespace krys::boo
       ts << u8" contains 1 chunk(s)";
 
       if (text.Parent()
-          && (text.Parent()->Style().VisitedDependentColor(css::PropertyId::Color)
-              != text.Style().VisitedDependentColor(css::PropertyId::Color)))
+          && (text.Parent()->Style().ColorResolvingCurrentColor(css::PropertyId::Color)
+              != text.Style().ColorResolvingCurrentColor(css::PropertyId::Color)))
       {
         WriteNameValuePair(
           ts, u8"color",
-          SerialisationForRenderTreeAsText(text.Style().VisitedDependentColor(css::PropertyId::Color)));
+          SerialisationForRenderTreeAsText(text.Style().ColorResolvingCurrentColor(css::PropertyId::Color)));
       }
     }
 

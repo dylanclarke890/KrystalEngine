@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGTextQuery.hpp"
-#include "Krystal.Booey/Rendering/LegacyInlineFlowBox.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

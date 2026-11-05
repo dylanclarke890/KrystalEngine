@@ -9,11 +9,11 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
-#include "Krystal.Booey/Style/Builder.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
-#include "Krystal.Booey/Style/MatchResult.hpp"
+#include "Krystal.Booey/Style/Builder/Builder.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Rules/MatchResult.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <string>
@@ -58,11 +58,10 @@ namespace krys::boo::style::tests
                                                                 .PositionTryFallback = PositionTryFallback});
     }
 
-    /// @brief A parser context with every settings-gated property the value tests use enabled.
+    /// @brief A parser context with every settings-gated feature the value tests use enabled.
     KRYS_NODISCARD static css::ParserContext ParseContext() noexcept
     {
       auto context = css::tests::DeclarationTestContext();
-      context.PropertySettings.colorFilterEnabled = true;
       context.springTimingFunctionEnabled = true;
       return context;
     }

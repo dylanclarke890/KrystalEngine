@@ -1,6 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
-#include "Krystal.Booey/Core/UnicodeHelpers.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -12,7 +10,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
-#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 
 namespace krys::boo::dom
 {

@@ -5,17 +5,25 @@
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
-#include "Krystal.Booey/CSS/Selectors/Types/DisallowPseudoElements.hpp"
-#include "Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp"
-#include "Krystal.Booey/CSS/Selectors/Types/IsForgivingSelectorList.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 
 namespace krys::boo::css
 {
+  struct DisallowPseudoElements : public StronglyTypedBool<DisallowPseudoElements>
+  {
+    using Base::Base;
+  };
+
+  struct IsForgivingSelectorList : public StronglyTypedBool<IsForgivingSelectorList>
+  {
+    using Base::Base;
+  };
+
   /// @brief Parses selectors into MutableSelectors.
   /// @see https://drafts.csswg.org/selectors/
   class SelectorParser

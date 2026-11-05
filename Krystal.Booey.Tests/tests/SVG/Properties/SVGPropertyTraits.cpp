@@ -1,10 +1,9 @@
 ﻿#include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
-#include "Krystal.Booey/SVG/SVGZoomAndPanType.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::svg::tests
@@ -85,10 +84,5 @@ namespace krys::boo::svg::tests
     CHECK(Orient::FromString(element, u8"sideways").second == SVGMarkerOrientUnknown);
     CHECK(SVGPropertyTraits<SVGMarkerOrientType>::ToString(SVGMarkerOrientAutoStartReverse)
           == u8"auto-start-reverse");
-
-    using ZoomAndPan = SVGPropertyTraits<SVGZoomAndPanType>;
-    CHECK(ZoomAndPan::InitialValue() == SVGZoomAndPanMagnify);
-    CHECK(ZoomAndPan::FromString(element, u8"disable") == SVGZoomAndPanDisable);
-    CHECK(ZoomAndPan::FromString(element, u8"zoom") == SVGZoomAndPanUnknown);
   }
 }

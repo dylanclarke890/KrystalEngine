@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLFraction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
-#include "Krystal.Booey/MathML/MathMLFractionElement.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLFractionElement.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 #include <cmath>
@@ -319,7 +319,7 @@ namespace krys::boo
 
     info.Context().SetStrokeThickness(thickness);
     info.Context().SetStrokeStyle(StrokeStyle::SolidStroke);
-    info.Context().SetStrokeColor(Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color));
+    info.Context().SetStrokeColor(Style().ColorResolvingCurrentColor(css::PropertyId::Color));
     // MathML Core says the fraction bar takes the full width of the content box.
     auto endPoint = RoundPointToDevicePixels(
       LayoutPoint(LayoutUnit(adjustedPaintOffset.X()) + LogicalWidth() - BorderAndPaddingLogicalWidth(),

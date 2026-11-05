@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleFontData.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Inline/LineHeight.hpp"
@@ -31,7 +31,6 @@ namespace krys::boo
 
     DataRef<StyleFontData> FontData;
     boo::Color Color;
-    boo::Color VisitedLinkColor;
 
   private:
     StyleInheritedData() noexcept;

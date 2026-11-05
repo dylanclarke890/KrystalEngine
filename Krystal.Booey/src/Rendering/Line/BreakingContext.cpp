@@ -14,7 +14,7 @@ namespace krys::boo
         _blockStyle(block.Style()), _lineInfo(inLineInfo), _renderTextInfo(inRenderTextInfo),
         _width(lineWidth), _appliedStartWidth(appliedStartWidth),
         _allowImagesToBreak(!block.GetDocument().InQuirksMode() || !block.IsRenderTableCell()
-                            || !_blockStyle.LogicalWidth().IsIntrinsicOrLegacyIntrinsicOrAuto()),
+                            || !_blockStyle.LogicalWidth().IsIntrinsicOrAuto()),
         _lineWhitespaceCollapsingState(resolver.GetWhitespaceCollapsingState())
   {
   }

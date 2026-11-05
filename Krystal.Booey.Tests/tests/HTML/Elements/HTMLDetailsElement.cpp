@@ -10,7 +10,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -68,9 +68,9 @@ namespace krys::boo::html::tests
 
     void Navigate(NavigationFixture &fixture, utf8_stringview url) noexcept
     {
-      fixture.Frame->Loader().ChangeLocation(
-        url::URL(fixture.Document->GetURL(), url), dom::DOMStringAtom::Empty(), nullptr,
-        ReferrerPolicy::EmptyString, std::nullopt, dom::DOMStringAtom::Null());
+      fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url),
+                                             dom::DOMStringAtom::Empty(), nullptr,
+                                             ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
       html::EventLoop::Current().RunUntilIdle();
     }
   }
@@ -323,13 +323,6 @@ namespace krys::boo::html::tests
       Navigate(fixture, u8"#never");
       CHECK(Downcast<HTMLElement>(fixture.ById(u8"plain")).HasAttribute(u8"hidden"));
       CHECK(events.empty());
-    }
-
-    SECTION("A text fragment opens the details its text is in")
-    {
-      Navigate(fixture, u8"#:~:text=answer%20is%20here");
-      CHECK(document.CSSTarget() == &fixture.ById(u8"answer"));
-      CHECK(details.Open());
     }
   }
 }

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Adwaita/Adwaita.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Platform/ThemeAdwaita.hpp"
 
 namespace krys::boo::adwaita

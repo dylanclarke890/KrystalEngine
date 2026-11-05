@@ -138,7 +138,6 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &Y1Attr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &Y2Attr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &YAttr() noexcept;
-    KRYS_NODISCARD static const dom::QualifiedName &ZoomAndPanAttr() noexcept;
 
     // Filters
     KRYS_NODISCARD static const dom::QualifiedName &AmplitudeAttr() noexcept;

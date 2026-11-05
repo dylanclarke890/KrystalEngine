@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignContent.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignItems.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignSelf.hpp"
@@ -30,7 +30,6 @@ namespace krys::boo
   class StyleFlexibleBoxData;
   class StyleMultiColData;
   class StyleTransformData;
-  class StyleVisitedLinkColorData;
   class StyleMiscNonInheritedData : public RefCounted<StyleMiscNonInheritedData>
   {
   public:
@@ -52,7 +51,6 @@ namespace krys::boo
     DataRef<StyleMultiColData> MultiCol;   // CSS3 multicol properties
     DataRef<StyleFilterData> Filter;       // Filter operations (url, sepia, blur, etc.)
     DataRef<StyleTransformData> Transform; // Transform properties (rotate, scale, skew, etc.)
-    DataRef<StyleVisitedLinkColorData> VisitedLinkColor;
 
     style::MaskLayers Mask;
     style::Animations Animations;

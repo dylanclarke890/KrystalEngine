@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/Node.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -29,7 +28,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
-#include "Krystal.Booey/SVG/SVGUseElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include <tuple>
 
 namespace krys::boo::dom

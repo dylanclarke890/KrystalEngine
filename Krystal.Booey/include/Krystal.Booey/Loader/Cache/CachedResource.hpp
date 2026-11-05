@@ -27,10 +27,8 @@ namespace krys::boo
 
   // A resource that is held in the cache. Classes who want to use this object should derive
   // from CachedResourceClient, to get the function calls in case the requested data has arrived.
-  // This class also does the actual communication with the loader to obtain the resource from the network.
+  // This class also does the actual communication with the loader strategy to obtain the resource.
   /// @note Reference counted: handles (`CachedResourceHandle`) and the memory cache keep a resource alive.
-  // FIXME: HTTP revalidation, preloads, cross-origin checks, priorities, redirects and cryptographic
-  // digests, once there are network loads.
   class CachedResource : public RefCounted<CachedResource>, public CanMakeWeakPtr<CachedResource>
   {
     friend class MemoryCache;
@@ -206,13 +204,11 @@ namespace krys::boo
     }
 
     // Computes the status of an object after loading.
-    // Updates the expire date on the cache entry file
     void Finish() noexcept;
 
     // Called by the cache if the object has been removed from the cache
     // while still being referenced. This means the object should delete itself
     // if the number of clients observing it ever drops to 0.
-    // The resource can be brought back to cache after successful revalidation.
     void SetInCache(bool inCache) noexcept
     {
       _inCache = inCache;

@@ -53,7 +53,6 @@ namespace krys::boo::css::tests
       mq::MediaEnvironment Environment {};
       IntSize ViewSize {800, 600};
       CSSOMStringAtom ViewMediaType {Screen()};
-      bool Paginated {false};
 
       EvaluationFixture()
       {
@@ -70,7 +69,6 @@ namespace krys::boo::css::tests
         auto &view = *Frame->View();
         view.Resize(ViewSize);
         view.SetMediaType(ViewMediaType);
-        view.SetPagination({Paginated ? PaginationMode::LeftToRightPaginated : PaginationMode::Unpaginated});
         return mq::MediaQueryEvaluator {mediaType, *Document, &RootStyle}.Evaluate(Parse(text));
       }
     };
@@ -363,10 +361,6 @@ namespace krys::boo::css::tests
       CHECK(fixture.Matches(u8"(overflow-inline: scroll)"));
       CHECK_FALSE(fixture.Matches(u8"(overflow-inline: none)"));
 
-      fixture.Paginated = true;
-      CHECK(fixture.Matches(u8"(overflow-block: paged)"));
-
-      fixture.Paginated = false;
       fixture.ViewMediaType = Print();
       CHECK(fixture.Matches(u8"(update: none)", Print()));
       CHECK_FALSE(fixture.Matches(u8"(update)", Print()));

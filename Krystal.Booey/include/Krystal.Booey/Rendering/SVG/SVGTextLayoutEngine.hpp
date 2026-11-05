@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextChunkBuilder.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"

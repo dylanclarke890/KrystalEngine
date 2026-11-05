@@ -3,13 +3,13 @@
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
-#include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Booey/Style/Builder.hpp"
+#include "Krystal.Booey/Style/Builder/Builder.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
-#include "Krystal.Booey/Style/MatchResult.hpp"
+#include "Krystal.Booey/Style/Rules/MatchResult.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::css::cq

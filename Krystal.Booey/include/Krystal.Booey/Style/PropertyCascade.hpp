@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
-#include "Krystal.Booey/Style/MatchResult.hpp"
+#include "Krystal.Booey/Style/Rules/MatchResult.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -86,9 +86,7 @@ namespace krys::boo::style
       ScopeOrdinal StyleScopeOrdinal {ScopeOrdinal::Element};
       style::CascadeLayerPriority CascadeLayerPriority {0};
       style::FromStyleAttribute FromStyleAttribute {style::FromStyleAttribute::No};
-      // Values for link match states MatchDefault, MatchLink and MatchVisited
-      Array<const css::Value *, 3> CssValue {};
-      Array<PropertyCascade::Origin, 3> Origins {};
+      const css::Value *CssValue {nullptr};
     };
 
   private:

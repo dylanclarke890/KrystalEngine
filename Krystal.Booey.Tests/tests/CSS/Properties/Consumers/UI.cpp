@@ -26,7 +26,8 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"none", Cursor) == "none");
     CHECK(ConsumeToText(u8"copy", Cursor) == "copy");
     CHECK(ConsumeToText(u8"zoom-in", Cursor) == "zoom-in");
-    CHECK(ConsumeToText(u8"-webkit-zoom-out", Cursor) == "-webkit-zoom-out");
+    CHECK(ConsumeToText(u8"zoom-out", Cursor) == "zoom-out");
+    CHECK(ConsumeToText(u8"-webkit-zoom-out", Cursor) == "<null>");
     CHECK(ConsumeToText(u8"inherit", Cursor) == "<null>");
     CHECK(ConsumeToText(u8"10px", Cursor) == "<null>");
 

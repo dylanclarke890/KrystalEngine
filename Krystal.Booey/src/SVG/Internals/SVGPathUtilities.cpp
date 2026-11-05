@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
-#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathAbsoluteConverter.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathBlender.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathBuilder.hpp"

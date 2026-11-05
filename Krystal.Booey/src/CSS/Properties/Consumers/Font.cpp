@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
@@ -6,7 +7,6 @@
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
@@ -26,13 +26,13 @@
 #include "Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp"
 #include "Krystal.Booey/CSS/Values/FontVariationValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
@@ -162,35 +162,31 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       case ValueId::Serif:
       {
-        return WebKitFontFamilyNames::SerifFamily();
+        return GenericFontFamilyNames::SerifFamily();
       }
       case ValueId::SansSerif:
       {
-        return WebKitFontFamilyNames::SansSerifFamily();
+        return GenericFontFamilyNames::SansSerifFamily();
       }
       case ValueId::Cursive:
       {
-        return WebKitFontFamilyNames::CursiveFamily();
+        return GenericFontFamilyNames::CursiveFamily();
       }
       case ValueId::Fantasy:
       {
-        return WebKitFontFamilyNames::FantasyFamily();
+        return GenericFontFamilyNames::FantasyFamily();
       }
       case ValueId::Monospace:
       {
-        return WebKitFontFamilyNames::MonospaceFamily();
-      }
-      case ValueId::WebkitPictograph:
-      {
-        return WebKitFontFamilyNames::PictographFamily();
+        return GenericFontFamilyNames::MonospaceFamily();
       }
       case ValueId::SystemUi:
       {
-        return WebKitFontFamilyNames::SystemUiFamily();
+        return GenericFontFamilyNames::SystemUiFamily();
       }
       case ValueId::Math:
       {
-        return WebKitFontFamilyNames::MathFamily();
+        return GenericFontFamilyNames::MathFamily();
       }
       default:
       {
@@ -199,46 +195,42 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  WebKitFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept
+  GenericFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept
   {
     switch (ident)
     {
       case ValueId::Serif:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::SerifFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::SerifFamily;
       }
       case ValueId::SansSerif:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::SansSerifFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::SansSerifFamily;
       }
       case ValueId::Cursive:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::CursiveFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::CursiveFamily;
       }
       case ValueId::Fantasy:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::FantasyFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::FantasyFamily;
       }
       case ValueId::Monospace:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::MonospaceFamily;
-      }
-      case ValueId::WebkitPictograph:
-      {
-        return WebKitFontFamilyNames::FamilyNamesIndex::PictographFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::MonospaceFamily;
       }
       case ValueId::SystemUi:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::SystemUiFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::SystemUiFamily;
       }
       case ValueId::Math:
       {
-        return WebKitFontFamilyNames::FamilyNamesIndex::MathFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::MathFamily;
       }
       default:
       {
         krys_debug_assert(false);
-        return WebKitFontFamilyNames::FamilyNamesIndex::StandardFamily;
+        return GenericFontFamilyNames::FamilyNamesIndex::StandardFamily;
       }
     }
   }
@@ -283,8 +275,7 @@ namespace krys::boo::css::PropertyParserHelpers
   KRYS_NODISCARD static Maybe<ValueId> ConsumeGenericFamilyUnresolved(TokenRange &tokens) noexcept
   {
     return ConsumeIdentRaw<ValueId::Serif, ValueId::SansSerif, ValueId::Cursive, ValueId::Fantasy,
-                           ValueId::Monospace, ValueId::WebkitBody, ValueId::WebkitPictograph,
-                           ValueId::SystemUi, ValueId::Math>(tokens);
+                           ValueId::Monospace, ValueId::SystemUi, ValueId::Math>(tokens);
   }
 
   KRYS_NODISCARD static RefPtr<Value> ConsumeGenericFamily(TokenRange &tokens,
@@ -364,19 +355,9 @@ namespace krys::boo::css::PropertyParserHelpers
     // <'font-size> = <absolute-size> | <relative-size> | <length-percentage [0,∞]> | math
     // https://drafts.csswg.org/css-fonts-4/#propdef-font-size
 
-    // Additionally supports non-standard productions: <-webkit-absolute-size> | <-webkit-relative-size>
+    // Additionally supports the user agent's `-internal-ruby-text`.
 
     // FIXME: Add a way to export this "raw" version from the generated PropertyParsing.
-
-    // -webkit-xxx-large is a parse-time alias.
-    if (tokens.Peek().ValueId() == ValueId::WebkitXxxLarge)
-    {
-      if (auto ident = ConsumeIdentRaw(tokens); ident && *ident == ValueId::WebkitXxxLarge)
-      {
-        return UnresolvedFontSize {ValueId::XxxLarge};
-      }
-      return null;
-    }
 
     if ((tokens.Peek().ValueId() >= ValueId::XxSmall && tokens.Peek().ValueId() <= ValueId::Larger)
         || tokens.Peek().ValueId() == ValueId::Math)

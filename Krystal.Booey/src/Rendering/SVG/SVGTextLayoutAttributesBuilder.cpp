@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributesBuilder.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTextPositioningElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGTextPositioningElement.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include <algorithm>
 

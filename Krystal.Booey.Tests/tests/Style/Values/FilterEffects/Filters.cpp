@@ -4,7 +4,6 @@
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"
-#include "Krystal.Booey/Style/Values/FilterEffects/AppleColorFilter.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 
 namespace krys::boo::style::tests
@@ -66,22 +65,5 @@ namespace krys::boo::style::tests
     {
       CHECK(Serialised(Convert<Filter>(PropertyId::BackdropFilter, u8"blur(2px)")) == "blur(2px)");
     }
-  }
-
-  TEST_CASE_METHOD(BuilderFixture, "Style AppleColorFilter", "[Style][Values][FilterEffects]")
-  {
-    CHECK(Convert<AppleColorFilter>(PropertyId::AppleColorFilter, u8"none").IsNone());
-
-    auto filter =
-      Convert<AppleColorFilter>(PropertyId::AppleColorFilter, u8"apple-invert-lightness() brightness(50%)");
-    CHECK(Serialised(filter) == "apple-invert-lightness() brightness(0.5)");
-    CHECK(Created(filter) == "apple-invert-lightness() brightness(0.5)");
-
-    // Light grey becomes dark grey, then halves in brightness.
-    boo::Color color {SRGBA<float> {0.8f, 0.8f, 0.8f, 1.0f}};
-    CHECK(filter.TransformColor(color));
-    auto transformed = color.ToColorTypeLossy<SRGBA<float>>().Resolved();
-    CHECK(transformed.Red == Approx(0.18).margin(0.01));
-    CHECK(transformed.Red == Approx(transformed.Blue).margin(0.01));
   }
 }

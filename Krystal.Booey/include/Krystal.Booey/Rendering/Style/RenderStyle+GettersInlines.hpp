@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
 #define RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP 1
@@ -220,19 +220,19 @@ namespace krys::boo
 
   constexpr bool RenderStyle::IsDisplayBlockType(DisplayType display) noexcept
   {
-    return display == DisplayType::Block || display == DisplayType::Box || display == DisplayType::Flex
-           || display == DisplayType::FlowRoot || display == DisplayType::Grid
-           || display == DisplayType::GridLanes || display == DisplayType::ListItem
-           || display == DisplayType::Table || display == DisplayType::RubyBlock;
+    return display == DisplayType::Block || display == DisplayType::Flex || display == DisplayType::FlowRoot
+           || display == DisplayType::Grid || display == DisplayType::GridLanes
+           || display == DisplayType::ListItem || display == DisplayType::Table
+           || display == DisplayType::RubyBlock;
   }
 
   constexpr bool RenderStyle::IsDisplayInlineType(DisplayType display) noexcept
   {
     return display == DisplayType::Inline || display == DisplayType::InlineBlock
-           || display == DisplayType::InlineBox || display == DisplayType::InlineFlex
-           || display == DisplayType::InlineGrid || display == DisplayType::InlineGridLanes
-           || display == DisplayType::InlineTable || display == DisplayType::Ruby
-           || display == DisplayType::RubyBase || display == DisplayType::RubyAnnotation;
+           || display == DisplayType::InlineFlex || display == DisplayType::InlineGrid
+           || display == DisplayType::InlineGridLanes || display == DisplayType::InlineTable
+           || display == DisplayType::Ruby || display == DisplayType::RubyBase
+           || display == DisplayType::RubyAnnotation;
   }
 
   constexpr bool RenderStyle::IsDisplayRegionType() const noexcept
@@ -341,8 +341,7 @@ namespace krys::boo
 
   inline bool RenderStyle::IsInterCharacterRubyPosition() const noexcept
   {
-    auto rubyPosition = GetRubyPosition();
-    return rubyPosition == RubyPosition::InterCharacter || rubyPosition == RubyPosition::LegacyInterCharacter;
+    return GetRubyPosition() == RubyPosition::InterCharacter;
   }
 
   KRYS_NODISCARD inline bool GeneratesBox(const RenderStyle &style) noexcept
@@ -378,11 +377,6 @@ namespace krys::boo
     return Appearance() != StyleAppearance::None && Appearance() != StyleAppearance::Base;
   }
 
-  inline bool RenderStyle::HasAppleColorFilter() const noexcept
-  {
-    return !GetAppleColorFilter().IsNone();
-  }
-
   inline bool RenderStyle::HasAspectRatio() const noexcept
   {
     return GetAspectRatio().HasRatio();
@@ -410,7 +404,7 @@ namespace krys::boo
 
   inline bool RenderStyle::HasBackground() const noexcept
   {
-    return VisitedDependentColor(css::PropertyId::BackgroundColor).IsVisible() || HasBackgroundImage();
+    return ColorResolvingCurrentColor(css::PropertyId::BackgroundColor).IsVisible() || HasBackgroundImage();
   }
 
   inline bool RenderStyle::HasBackgroundImage() const noexcept
@@ -655,25 +649,9 @@ namespace krys::boo
     return IsDisplayBlockType(Display());
   }
 
-  constexpr bool RenderStyle::IsDisplayDeprecatedFlexibleBox(DisplayType display) noexcept
-  {
-    return display == DisplayType::Box || display == DisplayType::InlineBox;
-  }
-
   constexpr bool RenderStyle::IsDisplayFlexibleBox(DisplayType display) noexcept
   {
     return display == DisplayType::Flex || display == DisplayType::InlineFlex;
-  }
-
-  constexpr bool RenderStyle::IsDisplayDeprecatedFlexibleBox() const noexcept
-  {
-    return IsDisplayDeprecatedFlexibleBox(Display());
-  }
-
-  constexpr bool
-    RenderStyle::IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const noexcept
-  {
-    return IsDisplayFlexibleOrGridFormattingContextBox() || IsDisplayDeprecatedFlexibleBox();
   }
 
   constexpr bool RenderStyle::IsDisplayFlexibleOrGridFormattingContextBox() const noexcept

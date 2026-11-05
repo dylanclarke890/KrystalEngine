@@ -1,21 +1,20 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
-#include "Krystal.Booey/Graphics/Region.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
-#include "Krystal.Booey/Platform/ScrollableArea.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
-#include "Krystal.Booey/Rendering/Pagination.hpp"
-#include "Krystal.Booey/Rendering/PaintPhase.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -35,7 +34,7 @@ namespace krys::boo
   class RenderView;
 
   /// @brief The view a frame's document is laid out in: its frame rect, the size content is laid out at, the
-  /// media type, pagination, the sizes viewport units resolve against, the layout context, and its scroll
+  /// media type, the sizes viewport units resolve against, the layout context, and its scroll
   /// position within the document (the scrolling half of a scroll view).
   /// @note FIXME: No obscured insets, visual viewport or auto-sizing, and views
   /// aren't widgets in a widget tree (there's no `Widget` or `ScrollView`): the visible content is the frame
@@ -78,7 +77,6 @@ namespace krys::boo
     bool _useFixedLayout {false};
     bool _hasFlippedBlockRenderers {false};
     css::CSSOMStringAtom _mediaType;
-    boo::Pagination _pagination;
     Maybe<OverrideViewportSize> _defaultViewportSizeOverride;
     Maybe<OverrideViewportSize> _smallViewportSizeOverride;
     Maybe<OverrideViewportSize> _largeViewportSizeOverride;
@@ -108,23 +106,9 @@ namespace krys::boo
     WeakPtr<dom::ContainerNode> _maintainScrollPositionAnchor;
     WeakPtr<dom::ContainerNode> _scheduledMaintainScrollPositionAnchor;
     bool _scheduledToScrollToAnchor {false};
-    /// @brief Tries the URL's text directives again while the page may still be loading their text.
-    Timer _scrollToTextFragmentRetryTimer;
-    Maybe<MonotonicTime::duration> _scrollToTextFragmentInitialAttemptTime;
-    /// @brief The scroll position as the document entered the back/forward cache.
-    ScrollPosition _cachedScrollPosition;
-    /// @brief Whether the frame's loader is still to hear of the first layout.
-    bool _firstLayoutCallbackPending {false};
     /// @brief How the user last scrolled the view, if they did.
     Maybe<UserScrollType> _lastUserScrollType;
     bool _wasEverScrolledExplicitlyByUser {false};
-    /// @brief The text a text directive indicated, kept in view as layout changes, while its text stays the
-    /// same.
-    Maybe<dom::SimpleRange> _pendingTextFragmentIndicatorRange;
-    utf8_string _pendingTextFragmentIndicatorText;
-    /// @brief Where the pending range's ends were when it was last revealed.
-    Maybe<IntRect> _lastRevealedTextFragmentRect;
-    bool _skipScrollResetOfScrollToTextFragmentRange {false};
     IntSize _contentsSize;
     bool _inUpdateScrollbars {false};
     RefPtr<Scrollbar> _horizontalScrollbar;
@@ -166,7 +150,6 @@ namespace krys::boo
     }
 
     /// @brief Whether the view is actually visible.
-    // FIXME: And its parent is visible, once there are subframes.
     KRYS_NODISCARD bool IsVisible() const noexcept
     {
       return _selfVisible;
@@ -298,9 +281,8 @@ namespace krys::boo
     void WillRecalcStyle() noexcept;
     void SetIsInWindow(bool isInWindow) noexcept;
 
-    bool FlushCompositingStateForThisFrame(const LocalFrame &rootFrameForFlush) noexcept;
     /// @brief Returns true if the flush was completed.
-    bool FlushCompositingStateIncludingSubframes() noexcept;
+    bool FlushCompositingState() noexcept;
 
     // Sometimes (for plug-ins) we need to eagerly go into compositing mode.
     void EnterCompositingMode() noexcept;
@@ -493,9 +475,6 @@ namespace krys::boo
     /// (or the body) for layout if the size content is laid out at changed.
     void WillDoLayout(const RenderElement &layoutRoot) noexcept;
 
-    /// @brief After a layout: tells the frame's loader of its first layout, once.
-    void FireLayoutRelatedMilestonesIfNeeded() noexcept;
-
     /// @brief Whether the user can scroll the view: it has overflow, and `overflow` doesn't hide both axes.
     KRYS_NODISCARD bool IsScrollable() const noexcept;
     /// @brief Scrolls the view by a step of @p granularity in a direction relative to the document's writing
@@ -534,7 +513,7 @@ namespace krys::boo
     // FIXME: The visible viewport rect, once there's one.
     void ViewportContentsChanged() noexcept;
     void ResumeVisibleImageAnimations(const IntRect &visibleRect) noexcept;
-    void ResumeVisibleImageAnimationsIncludingSubframes() noexcept;
+    void ResumeVisibleImageAnimations() noexcept;
 
     // Conversions between the view's coordinates (its frame's, at the origin, as there's no widget tree) and
     // the contents'.
@@ -551,8 +530,7 @@ namespace krys::boo
 
     /// @brief Paints the view's part of @p rect (in the view's coordinates): its visible contents, scrolled
     /// by the scroll position.
-    // FIXME: The overhang areas, scrollbars and pan scroll icon, once there's rubber-banding, scrollbars and
-    // pan scrolling.
+    // FIXME: The scrollbars and pan scroll icon, once there are scrollbars and pan scrolling.
     void Paint(GraphicsContext &context, const IntRect &rect) noexcept;
 
     /// @brief Damages @p rect of the contents (in the contents' coordinates): the host paints it again.
@@ -666,13 +644,6 @@ namespace krys::boo
     /// @brief Sets the view's media type, and re-evaluates the document's style sheets if it changed.
     void SetMediaType(const css::CSSOMStringAtom &mediaType) noexcept;
 
-    KRYS_NODISCARD const boo::Pagination &GetPagination() const noexcept
-    {
-      return _pagination;
-    }
-
-    void SetPagination(const boo::Pagination &pagination) noexcept;
-
     void SetOverrideSizeForCSSDefaultViewportUnits(OverrideViewportSize size) noexcept;
 
     KRYS_NODISCARD Maybe<OverrideViewportSize> OverrideSizeForCSSDefaultViewportUnits() const noexcept
@@ -720,17 +691,6 @@ namespace krys::boo
     /// @brief Cancels a scroll to the focused element that hasn't happened yet.
     void CancelScheduledScrolls() noexcept;
 
-    /// @brief Keeps the scroll position, as the view's document enters the back/forward cache.
-    void CacheCurrentScrollState() noexcept
-    {
-      _cachedScrollPosition = GetScrollPosition();
-    }
-
-    KRYS_NODISCARD const ScrollPosition &CachedScrollPosition() const noexcept
-    {
-      return _cachedScrollPosition;
-    }
-
     /// @brief Whether the user scrolled the view (since the view was made, or its last user scroll type was
     /// cleared).
     KRYS_NODISCARD bool WasScrolledByUser() const noexcept
@@ -753,13 +713,6 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier
     bool ScrollToFragment(const url::URL &url) noexcept;
 
-    /// @brief Highlights the text the document's text directives indicate, makes its nearest element the
-    /// document's target and scrolls it into view, trying again every 500ms for 3s (until the user scrolls)
-    /// if it isn't there yet.
-    /// @return Whether there was text to scroll to.
-    /// @see https://wicg.github.io/scroll-to-text-fragment/#invoking-text-directives
-    bool ScrollToTextFragment(bool isRetry = false) noexcept;
-
     /// @brief Scrolls to the element the fragment @p fragmentIdentifier indicates.
     /// @return Whether there was something to scroll to.
     bool ScrollToAnchorFragment(dom::DOMStringView fragmentIdentifier) noexcept;
@@ -777,7 +730,7 @@ namespace krys::boo
     }
 
     /// @brief Scrolls to the maintained anchor in a task, as layout may have moved it.
-    void ScheduleScrollToAnchorAndTextFragment() noexcept;
+    void ScheduleScrollToAnchor() noexcept;
 
     /// @brief @p value, in layout units, in CSS pixels: less the page zoom.
     KRYS_NODISCARD int32 MapFromLayoutToCSSUnits(LayoutUnit value) const noexcept;
@@ -796,7 +749,7 @@ namespace krys::boo
     void LayoutOrVisualViewportChanged() noexcept;
 
     /// @brief Scrolls to the maintained anchor if a scroll to it is scheduled.
-    void ScrollToAnchorAndTextFragmentNowIfNeeded() noexcept;
+    void ScrollToAnchorNowIfNeeded() noexcept;
 
     /// @brief The scale from document coordinates to absolute ones: @p usedZoom (which already includes the
     /// page zoom) if given, or else the page zoom.
@@ -885,13 +838,5 @@ namespace krys::boo
     void ScrollToFocusedElementInternal() noexcept;
     /// @brief Scrolls the maintained anchor into view: to its top and closest side.
     void ScrollToAnchor() noexcept;
-    void ScrollToTextFragmentRetryTimerFired() noexcept;
-    /// @brief Keeps @p range in view as layout changes, scrolling to it now.
-    void MaintainScrollPositionAtScrollToTextFragmentRange(const dom::SimpleRange &range) noexcept;
-    /// @brief Scrolls the pending text fragment range back into view, unless its text changed or the user
-    /// scrolled.
-    void ScrollToPendingTextFragmentRange() noexcept;
-    /// @brief Forgets the pending text fragment range, unless a scroll to it is in progress.
-    void CancelScheduledTextFragmentIndicatorTimer() noexcept;
   };
 }

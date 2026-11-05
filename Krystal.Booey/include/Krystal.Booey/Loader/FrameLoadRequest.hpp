@@ -4,7 +4,6 @@
 #include "Krystal.Booey/Loader/FetchOptions.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
-#include "Krystal.Booey/Page/WindowFeatures.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -20,33 +19,10 @@ namespace krys::boo
   class FrameLoadRequestBase
   {
   private:
-    NewFrameOpenerPolicy _newFrameOpenerPolicy {NewFrameOpenerPolicy::Allow};
     dom::DOMStringAtom _downloadAttribute {dom::DOMStringAtom::Null()};
     RefPtr<dom::Element> _sourceElement;
-    Maybe<WindowFeatures> _windowFeatures;
-    bool _isRequestFromClientOrUserInput {false};
-    bool _isFromNavigationAPI {false};
 
   public:
-    /// @brief Whether the Navigation API started the navigation (`navigation.navigate()`, `reload()`).
-    KRYS_NODISCARD bool IsFromNavigationAPI() const noexcept
-    {
-      return _isFromNavigationAPI;
-    }
-    void SetIsFromNavigationAPI(bool isFromNavigationAPI) noexcept
-    {
-      _isFromNavigationAPI = isFromNavigationAPI;
-    }
-
-    KRYS_NODISCARD NewFrameOpenerPolicy GetNewFrameOpenerPolicy() const noexcept
-    {
-      return _newFrameOpenerPolicy;
-    }
-    void SetNewFrameOpenerPolicy(NewFrameOpenerPolicy policy) noexcept
-    {
-      _newFrameOpenerPolicy = policy;
-    }
-
     /// @brief The `download` attribute of the link followed; null if it has none.
     KRYS_NODISCARD dom::DOMStringAtom DownloadAttribute() const noexcept
     {
@@ -59,26 +35,6 @@ namespace krys::boo
       return _sourceElement.get();
     }
     void SetSourceElement(dom::Element *sourceElement) noexcept;
-
-    /// @brief The features `window.open()` asked a new window to have, if it opened one.
-    KRYS_NODISCARD const Maybe<WindowFeatures> &GetWindowFeatures() const noexcept
-    {
-      return _windowFeatures;
-    }
-    void SetWindowFeatures(Maybe<WindowFeatures> &&features) noexcept
-    {
-      _windowFeatures = krys::move(features);
-    }
-
-    /// @brief Whether the host or the user asked for the navigation, rather than the page.
-    KRYS_NODISCARD bool IsRequestFromClientOrUserInput() const noexcept
-    {
-      return _isRequestFromClientOrUserInput;
-    }
-    void SetIsRequestFromClientOrUserInput(bool value) noexcept
-    {
-      _isRequestFromClientOrUserInput = value;
-    }
 
   protected:
     FrameLoadRequestBase() noexcept;
@@ -96,7 +52,6 @@ namespace krys::boo
 
   /// @brief A request to load a URL into a frame: what's loaded, from which document, into which browsing
   /// context.
-  // FIXME: History locking, client redirects and the security origin.
   class FrameLoadRequest : public FrameLoadRequestBase
   {
   private:
@@ -104,7 +59,6 @@ namespace krys::boo
     ResourceRequest _resourceRequest;
     dom::DOMStringAtom _frameName;
     ReferrerPolicy _referrerPolicy {ReferrerPolicy::EmptyString};
-    NavigationHistoryBehavior _navigationHistoryBehavior {NavigationHistoryBehavior::Auto};
     Maybe<SubstituteData> _substituteData;
 
   public:
@@ -165,15 +119,6 @@ namespace krys::boo
     void SetReferrerPolicy(ReferrerPolicy referrerPolicy) noexcept
     {
       _referrerPolicy = referrerPolicy;
-    }
-
-    KRYS_NODISCARD NavigationHistoryBehavior GetNavigationHistoryBehavior() const noexcept
-    {
-      return _navigationHistoryBehavior;
-    }
-    void SetNavigationHistoryBehavior(NavigationHistoryBehavior historyHandling) noexcept
-    {
-      _navigationHistoryBehavior = historyHandling;
     }
   };
 }

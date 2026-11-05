@@ -237,13 +237,6 @@ namespace krys::boo::style
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontSmoothing(FontSmoothingMode value) noexcept
-  {
-    auto description = GetFontDescription();
-    description.SetFontSmoothing(value);
-    SetFontDescription(krys::move(description));
-  }
-
   inline void ComputedStyleProperties::SetFontSynthesisSmallCaps(FontSynthesisLonghandValue value) noexcept
   {
     auto description = GetFontDescription();

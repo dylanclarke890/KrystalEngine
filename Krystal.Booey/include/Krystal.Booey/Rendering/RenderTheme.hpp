@@ -1,14 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlStyle.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
-#include "Krystal.Booey/Platform/PopupMenuStyle.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/LineWidth.hpp"
 #include "Krystal.Booey/Style/Values/Box/Padding.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
@@ -64,7 +64,6 @@ namespace krys::boo
 
       Color SystemLinkColor;
       Color SystemActiveLinkColor;
-      Color SystemVisitedLinkColor;
       Color SystemFocusRingColor;
       Color SystemControlAccentColor;
 

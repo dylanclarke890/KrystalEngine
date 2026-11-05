@@ -20,7 +20,6 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
     {
-      // FIXME: A plug-in replacement that creates a renderer makes the element not replaced.
       return true;
     }
 

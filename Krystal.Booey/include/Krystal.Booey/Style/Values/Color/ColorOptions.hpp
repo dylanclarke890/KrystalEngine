@@ -8,11 +8,10 @@ namespace krys::boo::style
   enum class ColorOptions : uint8
   {
     None = 0,
-    ForVisitedLink = 1 << 0,
-    UseSystemAppearance = 1 << 1,
-    UseDarkAppearance = 1 << 2,
-    UseElevatedUserInterfaceLevel = 1 << 3
+    UseSystemAppearance = 1 << 0,
+    UseDarkAppearance = 1 << 1,
+    UseElevatedUserInterfaceLevel = 1 << 2
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::style::ColorOptions, 4uz)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::style::ColorOptions, 3uz)

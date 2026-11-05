@@ -19,7 +19,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
 #include <numeric>
@@ -83,13 +83,6 @@ namespace krys::boo::html
       }
       return dom::DOMString(target);
     }
-
-    struct FormRelAttributes
-    {
-      bool Noopener {false};
-      bool Noreferrer {false};
-      bool Opener {false};
-    };
   }
 
   HTMLFormElement::HTMLFormElement(dom::Document &document) noexcept
@@ -99,11 +92,6 @@ namespace krys::boo::html
 
   HTMLFormElement::~HTMLFormElement() noexcept
   {
-    if (auto *formController = NodeDocument().FormControllerIfExists())
-    {
-      formController->WillDeleteForm(*this);
-    }
-
     // FormWillBeDestroyed below would try to update the validity of every radio button in a group.
     _radioButtonGroups.Clear();
     _defaultButton = nullptr;
@@ -554,9 +542,6 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: Finding the frame the target names and telling its loader client the submit event is coming
-    // (FrameLoaderClient::dispatchWillSendSubmitEvent), with subframes and navigation.
-
     Ref<HTMLFormElement> protectedThis = ShareRef(*this);
 
     auto submitEvent = SubmitEvent::Create(ShareRefPtr(static_cast<HTMLElement *>(submitter)));
@@ -650,9 +635,6 @@ namespace krys::boo::html
     {
       return;
     }
-
-    // FIXME: The rel attribute's noopener, noreferrer and opener, which set the submission's opener and
-    // referrer policies.
 
     _plannedFormSubmission = CreateWeakPtr(formSubmission.get());
 
@@ -750,8 +732,6 @@ namespace krys::boo::html
     {
       _attributes.SetAcceptCharset(newValue);
     }
-    // FIXME: Resetting the controls when the document is restored from the back/forward cache with
-    // autocomplete off (registerForDocumentSuspensionCallbacks), once there's a back/forward cache.
   }
 
   uint32 HTMLFormElement::FormElementIndexWithFormAttribute(dom::Element &element, uint32 rangeStart,
@@ -1129,12 +1109,6 @@ namespace krys::boo::html
   bool HTMLFormElement::IsSupportedPropertyName(dom::DOMStringView name) noexcept
   {
     return !name.empty() && Elements()->NamedItem(name);
-  }
-
-  void HTMLFormElement::FinishParsingChildren() noexcept
-  {
-    HTMLElement::FinishParsingChildren();
-    NodeDocument().GetFormController().RestoreControlStateIn(*this);
   }
 
   bool HTMLFormElement::ShouldAutocomplete() const noexcept

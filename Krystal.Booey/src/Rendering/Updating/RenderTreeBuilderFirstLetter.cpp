@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp"
-#include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Graphics/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
@@ -11,6 +10,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include <unicode/uchar.h>

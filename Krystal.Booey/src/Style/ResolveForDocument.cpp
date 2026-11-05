@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/Style/ResolveForDocument.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
-#include "Krystal.Booey/Style/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -33,16 +33,13 @@ namespace krys::boo::style
 
     Adjuster::AdjustEventListenerRegionTypesForRootStyle(documentStyle, document);
 
-    // FIXME: Paginated views set the column styles from their pagination mode
-    // (setColumnStylesFromPaginationMode), which needs the dropped `-webkit-column-axis`.
-
     auto fontDescription = [&]()
     {
       auto &settings = document.GetSettings().Values;
 
       FontCascadeDescription fontDescription;
       fontDescription.SetSpecifiedLocale(StringAtom(document.ContentLanguage()));
-      fontDescription.SetOneFamily(css::WebKitFontFamilyNames::StandardFamily());
+      fontDescription.SetOneFamily(css::GenericFontFamilyNames::StandardFamily());
       // FIXME: The settings' shouldAllowUserInstalledFonts comes with Settings (its default, Yes, is the
       // description's).
       // FIXME: We need evaluationTimeZoomEnabled to be accessible from FontDescription, not only from

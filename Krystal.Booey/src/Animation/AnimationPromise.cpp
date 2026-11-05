@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Animation/AnimationPromise.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 
-namespace krys::boo
+namespace krys::boo::detail
 {
   AnimationPromise::AnimationPromise(WebAnimation &animation) noexcept : _animation(CreateWeakPtr(&animation))
   {
@@ -15,12 +15,7 @@ namespace krys::boo
     return AdoptRef(*new AnimationPromise(animation));
   }
 
-  WebAnimation *AnimationPromise::Animation() const noexcept
-  {
-    return _animation.get();
-  }
-
-  void AnimationPromise::Then(FulfilledCallback &&onFulfilled, RejectedCallback &&onRejected) noexcept
+  void AnimationPromise::Then(FulfilledCallback onFulfilled, RejectedCallback onRejected) noexcept
   {
     _callbacks.emplace_back(krys::move(onFulfilled), krys::move(onRejected));
     if (_status != Status::Pending)
@@ -39,7 +34,7 @@ namespace krys::boo
     Settle();
   }
 
-  void AnimationPromise::Reject(dom::Exception &&exception) noexcept
+  void AnimationPromise::Reject(dom::Exception exception) noexcept
   {
     if (_status != Status::Pending)
     {

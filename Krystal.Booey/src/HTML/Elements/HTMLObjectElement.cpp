@@ -16,7 +16,6 @@ namespace krys::boo::html
 
   bool HTMLObjectElement::AppendFormData(DOMFormData &) noexcept
   {
-    // FIXME: A plug-in's form value (PluginViewBase::getFormValue), once there are plug-ins.
     return false;
   }
 

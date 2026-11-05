@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
@@ -14,31 +14,31 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
-#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
-#include "Krystal.Booey/Rendering/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderAncestorIterator.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
-#include "Krystal.Booey/Rendering/LegacyLineLayout.hpp"
-#include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
+#include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyLineLayout.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
-#include "Krystal.Booey/Rendering/LogicalSelectionOffsetCachesInlines.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
-#include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
+#include "Krystal.Booey/Rendering/Selection/LogicalSelectionOffsetCachesInlines.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/TextBoxTrimmer.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 
@@ -677,7 +677,6 @@ namespace krys::boo
       if (!repaintRect.IsEmpty())
       {
         RepaintRectangle(repaintRect); // We need to do a partial repaint of our content.
-        // FIXME: Reflections (`-webkit-box-reflect` was dropped).
       }
     }
   }
@@ -4130,8 +4129,8 @@ namespace krys::boo
     // Firefox and Opera will allow a table cell to grow to fit an image inside it under
     // very specific cirucumstances (in order to match common WinIE renderings).
     // Not supporting the quirk has caused us to mis-render some real sites.
-    bool allowImagesToBreak = !GetDocument().InQuirksMode() || !IsRenderTableCell()
-                              || !styleToUse.LogicalWidth().IsIntrinsicOrLegacyIntrinsicOrAuto();
+    bool allowImagesToBreak =
+      !GetDocument().InQuirksMode() || !IsRenderTableCell() || !styleToUse.LogicalWidth().IsIntrinsicOrAuto();
 
     bool oldAutoWrap = styleToUse.AutoWrap();
 

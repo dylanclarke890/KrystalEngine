@@ -6,16 +6,15 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
-#include "Krystal.Booey/Rendering/RenderListItem.hpp"
-#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -28,6 +27,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/HexNumber.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
@@ -155,7 +155,6 @@ namespace krys::boo
       if (!tagName.empty())
       {
         ts << " {" << tagName << '}';
-        // FIXME: Flag empty or unstyled Apple-style-spans (an editing artifact).
       }
     }
 
@@ -204,32 +203,22 @@ namespace krys::boo
 
       if (renderElement->Parent())
       {
-        Color color = renderElement->Style().VisitedDependentColor(css::PropertyId::Color);
+        Color color = renderElement->Style().ColorResolvingCurrentColor(css::PropertyId::Color);
         if (!EqualIgnoringSemanticColor(
-              renderElement->Parent()->Style().VisitedDependentColor(css::PropertyId::Color), color))
+              renderElement->Parent()->Style().ColorResolvingCurrentColor(css::PropertyId::Color), color))
         {
           ts << " [color=" << SerialisationForRenderTreeAsText(color) << ']';
         }
 
         // Do not dump invalid or transparent backgrounds, since that is the default.
         Color backgroundColor =
-          renderElement->Style().VisitedDependentColor(css::PropertyId::BackgroundColor);
+          renderElement->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
         if (!EqualIgnoringSemanticColor(
-              renderElement->Parent()->Style().VisitedDependentColor(css::PropertyId::BackgroundColor),
+              renderElement->Parent()->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor),
               backgroundColor)
             && backgroundColor != Color(Color::transparentBlack))
         {
           ts << " [bgcolor=" << SerialisationForRenderTreeAsText(backgroundColor) << ']';
-        }
-
-        Color textFillColor =
-          renderElement->Style().VisitedDependentColor(css::PropertyId::WebkitTextFillColor);
-        if (!EqualIgnoringSemanticColor(
-              renderElement->Parent()->Style().VisitedDependentColor(css::PropertyId::WebkitTextFillColor),
-              textFillColor)
-            && textFillColor != color && textFillColor != Color(Color::transparentBlack))
-        {
-          ts << " [textFillColor=" << SerialisationForRenderTreeAsText(textFillColor) << ']';
         }
 
         // The text stroke properties (-webkit-text-stroke-*) were dropped.
@@ -844,8 +833,6 @@ namespace krys::boo
     auto *document = frame->Document();
     if (!behavior.Contains(RenderAsTextFlag::DontUpdateLayout))
     {
-      // FIXME: Update the layout of the subframes too (updateLayoutAndStyleIfNeededRecursive), once there are
-      // frames.
       (void)document->UpdateLayout();
     }
 
@@ -854,8 +841,6 @@ namespace krys::boo
     {
       return {};
     }
-
-    // FIXME: Lay out for printing (PrintingMode), once there's printing.
 
     return ExternalRepresentation(*renderer, behavior);
   }

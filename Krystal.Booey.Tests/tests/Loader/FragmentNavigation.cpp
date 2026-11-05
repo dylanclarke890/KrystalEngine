@@ -2,9 +2,8 @@
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Events/HashChangeEvent.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -29,8 +28,7 @@ namespace krys::boo::tests
       void Navigate(utf8_stringview url) noexcept
       {
         Frame->Loader().ChangeLocation(url::URL(Document->GetURL(), url), dom::DOMStringAtom::Empty(),
-                                       nullptr, ReferrerPolicy::EmptyString, std::nullopt,
-                                       dom::DOMStringAtom::Null());
+                                       nullptr, ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
         html::EventLoop::Current().RunUntilIdle();
       }
 
@@ -66,22 +64,13 @@ namespace krys::boo::tests
     CHECK(document.FindAnchor(u8"missing") == nullptr);
   }
 
-  TEST_CASE(
-    "Fragment navigation",
-    "[Loader][FragmentNavigation][html:the-hashchangeevent-interface][html:dom-hashchangeevent-oldurl]"
-    "[html:dom-hashchangeevent-newurl]")
+  TEST_CASE("Fragment navigation", "[Loader][FragmentNavigation]")
   {
     FragmentFixture fixture;
-    List<std::pair<std::string, std::string>> hashChanges;
-    // hashchange fires at the window, trusted.
-    auto handle = fixture.Document->Window()->AddEventListener<html::HashChangeEvent>(
-      u8"hashchange",
-      [&](html::HashChangeEvent &event)
-      {
-        CHECK(event.IsTrusted());
-        CHECK(event.Target().get() == fixture.Document->Window());
-        hashChanges.emplace_back(Str(event.OldURL()), Str(event.NewURL()));
-      });
+    // There's no hashchange: Booey has no session history.
+    uint32 hashChanges = 0;
+    auto handle =
+      fixture.Document->Window()->AddEventListener(u8"hashchange", [&](dom::Event &) { ++hashChanges; });
 
     SECTION("a link to a fragment scrolls its target into view and makes it the target")
     {
@@ -98,10 +87,7 @@ namespace krys::boo::tests
       // The heading isn't focusable: the viewport is focused, and navigation starts from the heading.
       CHECK(fixture.Document->FocusedElement() == nullptr);
       CHECK(fixture.Document->SequentialFocusNavigationStartingPoint() == &fixture.ById(u8"section"));
-
-      REQUIRE(hashChanges.size() == 1);
-      CHECK(hashChanges[0].first == "https://example.com/dir/page.html");
-      CHECK(hashChanges[0].second == "https://example.com/dir/page.html#section");
+      CHECK(hashChanges == 0);
     }
 
     SECTION("a focusable target is focused")
@@ -124,7 +110,6 @@ namespace krys::boo::tests
       fixture.Navigate(u8"#section");
       fixture.Navigate(u8"#");
       CHECK(fixture.ScrollY() == 0);
-      CHECK(hashChanges.size() == 4);
     }
 
     SECTION("names and percent-encoded IDs")
@@ -144,16 +129,14 @@ namespace krys::boo::tests
       CHECK(fixture.DocumentURL() == "https://example.com/dir/page.html#nothing");
       CHECK(fixture.Target() == nullptr);
       CHECK(fixture.ScrollY() == scrollY);
-      CHECK(hashChanges.size() == 2);
     }
 
-    SECTION("the same fragment again scrolls again, without a hashchange")
+    SECTION("the same fragment again scrolls again")
     {
       fixture.Navigate(u8"#section");
       fixture.Frame->View()->SetScrollPosition({0, 0});
       fixture.Navigate(u8"#section");
       CHECK(fixture.TopOf(u8"section") == 0);
-      CHECK(hashChanges.size() == 1);
     }
   }
 
@@ -199,66 +182,5 @@ namespace krys::boo::tests
     (void)document->UpdateLayoutIgnorePendingStylesheets();
     CHECK(section->GetBoundingClientRect()->Y() == 0);
     frame.SetDocument(nullptr);
-  }
-
-  TEST_CASE("Text fragments", "[Loader][FragmentNavigation]")
-  {
-    FragmentFixture fixture;
-    using namespace std::chrono_literals;
-
-    SECTION("a text directive highlights its text, makes its element the target and scrolls it into view")
-    {
-      fixture.Navigate(u8"#:~:text=Caf%C3%A9");
-      // The directive is taken from the URL, and with it the fragment, which it was all of.
-      CHECK(fixture.DocumentURL() == "https://example.com/dir/page.html");
-      CHECK(fixture.Document->FragmentDirective() == u8"text=Caf%C3%A9");
-      CHECK(fixture.Target() == &fixture.ById(u8"café"));
-      REQUIRE(fixture.Document->FragmentHighlightRegistryIfExists());
-      CHECK_FALSE(fixture.Document->FragmentHighlightRegistryIfExists()->IsEmpty());
-      // Centred in the view.
-      auto top = fixture.TopOf(u8"café");
-      CHECK(top > 0);
-      CHECK(top < 300);
-      // The selection isn't changed.
-      CHECK(fixture.Document->Selection().IsNone());
-
-      // A fragment without a directive goes to its element, and the text isn't highlighted any more.
-      fixture.Navigate(u8"#section");
-      CHECK(fixture.Target() == &fixture.ById(u8"section"));
-      CHECK(fixture.Document->FragmentDirective().empty());
-      CHECK(fixture.Document->FragmentHighlightRegistryIfExists()->IsEmpty());
-    }
-
-    SECTION("text that isn't there yet is tried again while the page loads")
-    {
-      fixture.Navigate(u8"#:~:text=late%20arrival");
-      CHECK(fixture.Target() == nullptr);
-
-      auto paragraph = fixture.Document->CreateElement(u8"p").ReleaseValue();
-      (void)paragraph->SetAttribute(u8"id", u8"late");
-      (void)paragraph->TextContent(u8"A late arrival");
-      REQUIRE_FALSE(fixture.ById(u8"section").ParentNode()->AppendChild(*paragraph).HasException());
-      (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
-
-      auto &loop = html::EventLoop::Current();
-      loop.Run(loop.Now() + 600ms);
-      CHECK(fixture.Target() == &fixture.ById(u8"late"));
-    }
-
-    SECTION("the retries stop after three seconds")
-    {
-      fixture.Navigate(u8"#:~:text=never");
-      auto &loop = html::EventLoop::Current();
-      for (int32 step = 0; step < 8; ++step)
-      {
-        loop.Run(loop.Now() + 500ms);
-      }
-      auto paragraph = fixture.Document->CreateElement(u8"p").ReleaseValue();
-      (void)paragraph->TextContent(u8"never");
-      REQUIRE_FALSE(fixture.ById(u8"section").ParentNode()->AppendChild(*paragraph).HasException());
-      (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
-      loop.Run(loop.Now() + 600ms);
-      CHECK(fixture.Target() == nullptr);
-    }
   }
 }

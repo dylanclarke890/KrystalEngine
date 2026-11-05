@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/TreeResolver.hpp"
-#include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
-#include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
+#include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
@@ -21,11 +21,11 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
-#include "Krystal.Booey/Style/Builder.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
-#include "Krystal.Booey/Style/MatchResultCache.hpp"
+#include "Krystal.Booey/Style/Builder/Builder.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Rules/MatchResultCache.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include <ranges>
 
@@ -397,7 +397,7 @@ namespace krys::boo::style
     // FIXME: We shouldn't mutate document when resolving style.
     if (&element == _document->Body().get())
     {
-      _document->SetTextColor(update.Style->VisitedDependentColor(css::PropertyId::Color));
+      _document->SetTextColor(update.Style->ColorResolvingCurrentColor(css::PropertyId::Color));
     }
 
     // FIXME: These elements should not change renderer based on appearance property.
@@ -469,9 +469,6 @@ namespace krys::boo::style
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::After});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Backdrop});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Checkmark});
-
-    // FIXME: The view transition pseudo-elements of the document element, once documents have active view
-    // transitions.
 
     return {krys::move(update), descendantsToResolve};
   }
@@ -826,12 +823,8 @@ namespace krys::boo::style
     {
       if (auto parentPseudoId = ParentPseudoElement(pseudoElementIdentifier.Type))
       {
-        auto nameArgument = (*parentPseudoId == PseudoElementType::ViewTransitionGroup
-                             || *parentPseudoId == PseudoElementType::ViewTransitionImagePair)
-                              ? pseudoElementIdentifier.NameArgument
-                              : css::CSSOMStringAtom::Null();
-        if (auto *parentPseudoStyle = elementUpdate.Style->GetCachedPseudoStyle(
-              PseudoElementIdentifier {*parentPseudoId, nameArgument}))
+        if (auto *parentPseudoStyle =
+              elementUpdate.Style->GetCachedPseudoStyle(PseudoElementIdentifier {*parentPseudoId}))
         {
           return parentPseudoStyle;
         }
@@ -938,8 +931,6 @@ namespace krys::boo::style
 
     auto updateAnimations = [&]
     {
-      // FIXME: Not updating animations in the back/forward cache or while printing, once there are those.
-
       if (hasUnresolvedAnchorPosition)
       {
         return;

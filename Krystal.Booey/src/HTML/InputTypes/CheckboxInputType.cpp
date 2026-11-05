@@ -2,7 +2,7 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 
 namespace krys::boo::html
 {

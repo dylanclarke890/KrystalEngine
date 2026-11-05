@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
-#include "Krystal.Booey/Style/Extractor.hpp"
+#include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
 
 namespace krys::boo::style
@@ -34,7 +34,7 @@ namespace krys::boo::style
     }
     // If our width is auto and left or right is specified then this
     // is not just a movement - we need to resize to our container.
-    if ((!a.Left().IsAuto() || !a.Right().IsAuto()) && width.IsIntrinsicOrLegacyIntrinsicOrAuto())
+    if ((!a.Left().IsAuto() || !a.Right().IsAuto()) && width.IsIntrinsicOrAuto())
     {
       return false;
     }
@@ -169,10 +169,7 @@ namespace krys::boo::style
     if (!a.StrokeData->Stroke.HasSameType(b.StrokeData->Stroke)
         || a.StrokeData->Stroke.UrlDisregardingType() != b.StrokeData->Stroke.UrlDisregardingType()
         || a.StrokeData->StrokeDashArray != b.StrokeData->StrokeDashArray
-        || a.StrokeData->StrokeDashOffset != b.StrokeData->StrokeDashOffset
-        || !a.StrokeData->VisitedLinkStroke.HasSameType(b.StrokeData->VisitedLinkStroke)
-        || a.StrokeData->VisitedLinkStroke.UrlDisregardingType()
-             != b.StrokeData->VisitedLinkStroke.UrlDisregardingType())
+        || a.StrokeData->StrokeDashOffset != b.StrokeData->StrokeDashOffset)
     {
       return true;
     }
@@ -413,12 +410,11 @@ namespace krys::boo::style
         || a.TextBoxEdge != b.TextBoxEdge || a.LineFitEdge != b.LineFitEdge || a.UsedZoom != b.UsedZoom
         || a.WordBreak != b.WordBreak || a.OverflowWrap != b.OverflowWrap || a.LineBreak != b.LineBreak
         || a.TextSecurity != b.TextSecurity || a.Hyphens != b.Hyphens
-        || a.HyphenateLimitBefore != b.HyphenateLimitBefore || a.HyphenateLimitAfter != b.HyphenateLimitAfter
-        || a.HyphenateCharacter != b.HyphenateCharacter || a.RubyPosition != b.RubyPosition
-        || a.RubyAlign != b.RubyAlign || a.RubyOverhang != b.RubyOverhang || a.TextCombine != b.TextCombine
-        || a.TextEmphasisStyle != b.TextEmphasisStyle || a.TextEmphasisPosition != b.TextEmphasisPosition
-        || a.TabSize != b.TabSize || a.LineBoxContain != b.LineBoxContain
-        || a.ImageOrientation != b.ImageOrientation || a.LineAlign != b.LineAlign
+        || a.HyphenateLimitChars != b.HyphenateLimitChars || a.HyphenateCharacter != b.HyphenateCharacter
+        || a.RubyPosition != b.RubyPosition || a.RubyAlign != b.RubyAlign || a.RubyOverhang != b.RubyOverhang
+        || a.TextCombine != b.TextCombine || a.TextEmphasisStyle != b.TextEmphasisStyle
+        || a.TextEmphasisPosition != b.TextEmphasisPosition || a.TabSize != b.TabSize
+        || a.LineBoxContain != b.LineBoxContain || a.ImageOrientation != b.ImageOrientation
         || a.HangingPunctuation != b.HangingPunctuation || a.UsedContentVisibility != b.UsedContentVisibility
         || a.ListStyleType != b.ListStyleType || a.ListStyleImage != b.ListStyleImage
         || a.BlockEllipsis != b.BlockEllipsis)
@@ -888,20 +884,13 @@ namespace krys::boo::style
     if (&a == &b)
     {
       krys_debug_assert(currentColorDiffers);
-      return ContainsCurrentColor(a.StrokeData->Stroke)
-             || ContainsCurrentColor(a.StrokeData->VisitedLinkStroke)
-             || a.MiscData->FloodColor.ContainsCurrentColor()
-             || a.MiscData->LightingColor.ContainsCurrentColor()
-             || ContainsCurrentColor(
-               a.FillData->Fill); // FIXME: Should this be checking fillData->visitedLinkFill as well?
+      return ContainsCurrentColor(a.StrokeData->Stroke) || a.MiscData->FloodColor.ContainsCurrentColor()
+             || a.MiscData->LightingColor.ContainsCurrentColor() || ContainsCurrentColor(a.FillData->Fill);
     }
 
     if (a.StrokeData->StrokeOpacity != b.StrokeData->StrokeOpacity
         || ColorChangeRequiresRepaint(a.StrokeData->Stroke.ColorDisregardingType(),
-                                      b.StrokeData->Stroke.ColorDisregardingType(), currentColorDiffers)
-        || ColorChangeRequiresRepaint(a.StrokeData->VisitedLinkStroke.ColorDisregardingType(),
-                                      b.StrokeData->VisitedLinkStroke.ColorDisregardingType(),
-                                      currentColorDiffers))
+                                      b.StrokeData->Stroke.ColorDisregardingType(), currentColorDiffers))
     {
       return true;
     }
@@ -997,10 +986,9 @@ namespace krys::boo::style
                                                      const StyleRareInheritedData &b) noexcept
   {
     return a.EffectiveInert != b.EffectiveInert || a.UserModify != b.UserModify
-           || a.UserSelect != b.UserSelect || a.AppleColorFilter != b.AppleColorFilter
-           || a.ImageRendering != b.ImageRendering || a.AccentColor != b.AccentColor
-           || a.InsideDefaultButton != b.InsideDefaultButton || a.InsideSubmitButton != b.InsideSubmitButton
-           || a.ColorScheme != b.ColorScheme;
+           || a.UserSelect != b.UserSelect || a.ImageRendering != b.ImageRendering
+           || a.AccentColor != b.AccentColor || a.InsideDefaultButton != b.InsideDefaultButton
+           || a.InsideSubmitButton != b.InsideSubmitButton || a.ColorScheme != b.ColorScheme;
   }
 
   static bool ChangedCustomPaintWatchedProperty(const RenderStyle &a, const StyleRareNonInheritedData &aData,
@@ -1068,8 +1056,7 @@ namespace krys::boo::style
     }
 
     if (a.UsedVisibility() != b.UsedVisibility()
-        || a.GetInheritedFlags().PrintColorAdjust != b.GetInheritedFlags().PrintColorAdjust
-        || a.GetInheritedFlags().InsideLink != b.GetInheritedFlags().InsideLink)
+        || a.GetInheritedFlags().PrintColorAdjust != b.GetInheritedFlags().PrintColorAdjust)
     {
       return true;
     }
@@ -1151,7 +1138,6 @@ namespace krys::boo::style
     if (&a.RareInheritedData() != &b.RareInheritedData())
     {
       if (a.RareInheritedData().TextDecorationSkipInk != b.RareInheritedData().TextDecorationSkipInk
-          || a.RareInheritedData().TextFillColor != b.RareInheritedData().TextFillColor
           || a.RareInheritedData().TextEmphasisColor != b.RareInheritedData().TextEmphasisColor
           || a.RareInheritedData().TextEmphasisStyle != b.RareInheritedData().TextEmphasisStyle
           || a.RareInheritedData().StrokeColor != b.RareInheritedData().StrokeColor

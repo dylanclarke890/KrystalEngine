@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheetObservableArray.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheetObservableArray.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
@@ -14,10 +14,10 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 

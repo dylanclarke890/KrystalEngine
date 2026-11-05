@@ -25,7 +25,6 @@ namespace krys::boo::css
       {u8"media"sv, AtRuleId::Media},
       {u8"namespace"sv, AtRuleId::Namespace},
       {u8"ornaments"sv, AtRuleId::Ornaments},
-      {u8"page"sv, AtRuleId::Page},
       {u8"position-try"sv, AtRuleId::PositionTry},
       {u8"property"sv, AtRuleId::Property},
       {u8"scope"sv, AtRuleId::Scope},
@@ -34,7 +33,6 @@ namespace krys::boo::css
       {u8"stylistic"sv, AtRuleId::Stylistic},
       {u8"supports"sv, AtRuleId::Supports},
       {u8"swash"sv, AtRuleId::Swash},
-      {u8"view-transition"sv, AtRuleId::ViewTransition},
     }};
 
     for (const auto &[ruleName, id] : mappings)

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/BaseButtonInputType.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/Rendering/RenderButton.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
 
 namespace krys::boo::html
 {

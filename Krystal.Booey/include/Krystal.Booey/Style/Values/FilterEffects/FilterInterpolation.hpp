@@ -6,8 +6,8 @@
 
 namespace krys::boo::style
 {
-  // Generic implementation of interpolation for filter lists for use by both `style::Filter` and
-  // `style::AppleColorFilter`. https://drafts.fxtf.org/filter-effects/#interpolation-of-filters
+  // Interpolation of filter lists, for `style::Filter`.
+  // https://drafts.fxtf.org/filter-effects/#interpolation-of-filters
 
   template <typename FilterList>
   KRYS_NODISCARD bool CanBlendFilterLists(const FilterList &from, const FilterList &to,

@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/IterationStatus.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/UnitCategory.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/IterationStatus.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
@@ -111,11 +111,6 @@ namespace krys::boo::css
 
 #pragma region Type Checks
 
-    KRYS_NODISCARD bool IsAppleColorFilterValue() const noexcept
-    {
-      return _type == ValueType::AppleColorFilter;
-    }
-
     KRYS_NODISCARD bool IsAttrValue() const noexcept
     {
       return _type == ValueType::Attr;
@@ -144,11 +139,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsBoxShadowPropertyValue() const noexcept
     {
       return _type == ValueType::BoxShadowProperty;
-    }
-
-    KRYS_NODISCARD bool IsCanvasValue() const noexcept
-    {
-      return _type == ValueType::Canvas;
     }
 
     KRYS_NODISCARD bool IsColorValue() const noexcept
@@ -286,11 +276,6 @@ namespace krys::boo::css
       return _type == ValueType::ImageSetOption;
     }
 
-    KRYS_NODISCARD bool IsNamedImageValue() const noexcept
-    {
-      return _type == ValueType::NamedImage;
-    }
-
     KRYS_NODISCARD bool IsOffsetRotateValue() const noexcept
     {
       return _type == ValueType::OffsetRotate;
@@ -413,7 +398,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsImageGeneratorValue() const noexcept
     {
-      return _type >= ValueType::Canvas && _type <= ValueType::Gradient;
+      return _type >= ValueType::PaintImage && _type <= ValueType::Gradient;
     }
 
     /// @brief True for all image-like values except CursorImageValues; these are the values that correspond

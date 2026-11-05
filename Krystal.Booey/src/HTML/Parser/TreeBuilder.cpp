@@ -22,10 +22,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/SVG/SVGScriptElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGScriptElement.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
@@ -4309,7 +4309,6 @@ namespace krys::boo::html
     if (willExecuteScript)
     {
       // 14a. Increment document's throw-on-dynamic-markup-insertion counter.
-      // FIXME: The counter, once there's document.write().
       // 14b. If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
       EventLoop::Current().PerformMicrotaskCheckpoint();
       // 14c. Push a new element queue onto document's relevant agent's custom element reactions stack.
@@ -4326,10 +4325,6 @@ namespace krys::boo::html
     if (sanitizerAction == SanitizerAction::ReplaceWithChildren)
     {
       element->SetCustomElementRegistry(krys::move(registry));
-    }
-    if (auto *input = DynamicDowncast<HTMLInputElement>(element.get()))
-    {
-      input->SetCreatedByParser();
     }
     // 17. For each attribute of token's attributes:
     for (auto &attr : attributes)

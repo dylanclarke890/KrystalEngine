@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/EditingStyle.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
@@ -9,27 +10,26 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
-#include "Krystal.Booey/Editing/ApplyStyleCommand.hpp"
+#include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/HTMLInterchange.hpp"
-#include "Krystal.Booey/Editing/VisibleSelection.hpp"
-#include "Krystal.Booey/Editing/VisibleUnits.hpp"
+#include "Krystal.Booey/Editing/Markup/HTMLInterchange.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
-#include "Krystal.Booey/Graphics/FontCache.hpp"
-#include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFontElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Style/Extractor.hpp"
-#include "Krystal.Booey/Style/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/ResolveForFont.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include <algorithm>
@@ -59,8 +59,7 @@ namespace krys::boo
       PropertyId::WhiteSpaceCollapse,
       PropertyId::Widows,
       PropertyId::WordSpacing,
-      PropertyId::WebkitTextDecorationsInEffect,
-      PropertyId::WebkitTextFillColor,
+      PropertyId::InternalTextDecorationsInEffect,
 
       // Non-inheritable properties
       PropertyId::BackgroundColor,
@@ -71,7 +70,7 @@ namespace krys::boo
     };
 
     constexpr std::array PostLayoutEditingProperties {
-      PropertyId::FontWeight, PropertyId::FontStyle, PropertyId::WebkitTextDecorationsInEffect,
+      PropertyId::FontWeight, PropertyId::FontStyle, PropertyId::InternalTextDecorationsInEffect,
       PropertyId::Direction,  PropertyId::TextAlign, PropertyId::Color,
     };
 
@@ -304,7 +303,7 @@ namespace krys::boo
       }
 
       auto &mutableStyle = *style._mutableStyle;
-      return mutableStyle.GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect)
+      return mutableStyle.GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect)
              || mutableStyle.GetPropertyCSSValue(PropertyId::TextDecorationLine);
     }
 
@@ -322,7 +321,7 @@ namespace krys::boo
       }
       auto *mutableStyle = style.Style();
       RefPtr<css::Value> styleValue =
-        mutableStyle->GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect);
+        mutableStyle->GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect);
       if (!styleValue)
       {
         styleValue = mutableStyle->GetPropertyCSSValue(PropertyId::TextDecorationLine);
@@ -602,15 +601,15 @@ namespace krys::boo
       switch (textAlign)
       {
         case ValueId::Center:
-        case ValueId::WebkitCenter: return ValueId::Center;
-        case ValueId::Justify:      return ValueId::Justify;
+        case ValueId::InternalCenter: return ValueId::Center;
+        case ValueId::Justify:        return ValueId::Justify;
         case ValueId::Left:
-        case ValueId::WebkitLeft:   return ValueId::Left;
+        case ValueId::InternalLeft:   return ValueId::Left;
         case ValueId::Right:
-        case ValueId::WebkitRight:  return ValueId::Right;
-        case ValueId::Start:        return direction != ValueId::Rtl ? ValueId::Left : ValueId::Right;
-        case ValueId::End:          return direction == ValueId::Rtl ? ValueId::Right : ValueId::Left;
-        default:                    break;
+        case ValueId::InternalRight:  return ValueId::Right;
+        case ValueId::Start:          return direction != ValueId::Rtl ? ValueId::Left : ValueId::Right;
+        case ValueId::End:            return direction == ValueId::Rtl ? ValueId::Right : ValueId::Left;
+        default:                      break;
       }
       return ValueId::Invalid;
     }
@@ -652,14 +651,14 @@ namespace krys::boo
                                        value->CssText(css::DefaultSerialisationContext()));
       }
       if (RefPtr<css::Value> value =
-            computedStyleAtPosition.PropertyValue(PropertyId::WebkitTextDecorationsInEffect))
+            computedStyleAtPosition.PropertyValue(PropertyId::InternalTextDecorationsInEffect))
       {
         (void)mutableStyle.SetProperty(PropertyId::TextDecorationLine,
                                        value->CssText(css::DefaultSerialisationContext()));
         (void)mutableStyle.SetProperty(PropertyId::TextDecorationThickness, ValueId::Auto);
         (void)mutableStyle.SetProperty(PropertyId::TextDecorationStyle, ValueId::Solid);
         (void)mutableStyle.SetProperty(PropertyId::TextDecorationColor, ValueId::Currentcolor);
-        (void)mutableStyle.RemoveProperty(PropertyId::WebkitTextDecorationsInEffect);
+        (void)mutableStyle.RemoveProperty(PropertyId::InternalTextDecorationsInEffect);
       }
     }
 
@@ -668,7 +667,6 @@ namespace krys::boo
       bool shouldSetFontSize = false;
       {
         auto *renderStyle = node->ComputedStyle();
-        RemoveTextFillAndStrokeColorsIfNeeded(renderStyle);
         shouldSetFontSize = renderStyle->GetFontDescription().KeywordSize();
       }
 
@@ -684,14 +682,6 @@ namespace krys::boo
 
     _shouldUseFixedDefaultFontSize = computedStyleAtPosition.UseFixedFontDefaultSize();
     ExtractFontSizeDelta();
-  }
-
-  void EditingStyle::RemoveTextFillAndStrokeColorsIfNeeded(const RenderStyle *renderStyle) noexcept
-  {
-    if (renderStyle->TextFillColor().IsCurrentColor())
-    {
-      (void)_mutableStyle->RemoveProperty(PropertyId::WebkitTextFillColor);
-    }
   }
 
   void EditingStyle::SetProperty(PropertyId propertyID, const dom::DOMString &value,
@@ -839,7 +829,8 @@ namespace krys::boo
 
     auto underline = css::PrimitiveValue::Create(ValueId::Underline);
     auto lineThrough = css::PrimitiveValue::Create(ValueId::LineThrough);
-    RefPtr<css::Value> value = _mutableStyle->GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect);
+    RefPtr<css::Value> value =
+      _mutableStyle->GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect);
     css::ValueListBuilder valueList;
     if (auto *list = DynamicDowncast<css::ValueList>(value.get()))
     {
@@ -858,7 +849,7 @@ namespace krys::boo
         valueList.push_back(krys::move(lineThrough));
       }
     }
-    _mutableStyle->SetProperty(PropertyId::WebkitTextDecorationsInEffect,
+    _mutableStyle->SetProperty(PropertyId::InternalTextDecorationsInEffect,
                                css::ValueList::CreateSpaceSeparated(krys::move(valueList)));
   }
 
@@ -980,7 +971,7 @@ namespace krys::boo
 
     auto &mutableStyle = *_mutableStyle;
     RefPtr<css::Value> textDecorationsInEffect =
-      mutableStyle.GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect);
+      mutableStyle.GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect);
     if (!textDecorationsInEffect)
     {
       return;
@@ -997,7 +988,7 @@ namespace krys::boo
     {
       (void)mutableStyle.RemoveProperty(PropertyId::TextDecoration);
     }
-    (void)mutableStyle.RemoveProperty(PropertyId::WebkitTextDecorationsInEffect);
+    (void)mutableStyle.RemoveProperty(PropertyId::InternalTextDecorationsInEffect);
   }
 
   namespace
@@ -1005,7 +996,7 @@ namespace krys::boo
     // CSS properties that create a visual difference only when applied to text.
     constexpr std::array TextOnlyProperties {
       PropertyId::TextDecorationLine,
-      PropertyId::WebkitTextDecorationsInEffect,
+      PropertyId::InternalTextDecorationsInEffect,
       PropertyId::FontStyle,
       PropertyId::FontWeight,
       PropertyId::Color,
@@ -1197,7 +1188,7 @@ namespace krys::boo
         continue;
       }
 
-      if (propertyID == PropertyId::WebkitTextDecorationsInEffect
+      if (propertyID == PropertyId::InternalTextDecorationsInEffect
           && inlineStyle->GetPropertyCSSValue(PropertyId::TextDecorationLine))
       {
         if (!newInlineStyle)
@@ -1445,11 +1436,6 @@ namespace krys::boo
       return false; // element is not a span, a html element equivalent, or font element.
     }
 
-    if (element.GetAttribute(dom::DOMStringAtom(u8"class")) == dom::DOMString(AppleStyleSpanClass))
-    {
-      matchedAttributes++;
-    }
-
     if (element.HasAttribute(dom::DOMStringAtom(u8"style")))
     {
       if (auto *styledElement = DynamicDowncast<dom::StyledElement>(element))
@@ -1659,14 +1645,6 @@ namespace krys::boo
     {
       auto wrappingStyle = EditingStyle::Create(&context, PropertiesToInclude::EditingPropertiesInEffect);
 
-      // Styles that Mail blockquotes contribute should only be placed on the Mail blockquote,
-      // to help us differentiate those styles from ones that the user has applied.
-      // This helps us get the color of content pasted into blockquotes right.
-      wrappingStyle->RemoveStyleAddedByNode(
-        EnclosingNodeOfType(FirstPositionInOrBeforeNode(&context), IsMailBlockquote,
-                            EditingBoundaryCrossingRule::CanCrossEditingBoundary)
-          .get());
-
       // Call CollapseTextDecorationProperties first or otherwise it'll copy the value over from in-effect to
       // text-decorations.
       wrappingStyle->CollapseTextDecorationProperties();
@@ -1679,7 +1657,7 @@ namespace krys::boo
     // When not annotating for interchange, we only preserve inline style declarations.
     for (auto *node = &context; node && !Is<dom::Document>(*node); node = node->ParentNode())
     {
-      if (auto *element = DynamicDowncast<dom::StyledElement>(*node); element && !IsMailBlockquote(*element))
+      if (auto *element = DynamicDowncast<dom::StyledElement>(*node))
       {
         wrappingStyle->MergeInlineAndImplicitStyleOfElement(
           *element, CSSPropertyOverrideMode::DoNotOverrideValues,
@@ -1727,7 +1705,7 @@ namespace krys::boo
 
       // text decorations never override values.
       if ((property.Id() == PropertyId::TextDecorationLine
-           || property.Id() == PropertyId::WebkitTextDecorationsInEffect)
+           || property.Id() == PropertyId::InternalTextDecorationsInEffect)
           && value)
       {
         if (auto *propertyValueList = DynamicDowncast<css::ValueList>(*property.Value()))
@@ -1835,7 +1813,7 @@ namespace krys::boo
           auto familyName = LoneFontFamilyName(value);
           if (FontCache::IsSystemFontForbiddenForEditing(familyName)
               || (standardFontFamilySerializationMode == StandardFontFamilySerializationMode::Strip
-                  && familyName == css::WebKitFontFamilyNames::StandardFamily().View()))
+                  && familyName == css::GenericFontFamilyNames::StandardFamily().View()))
           {
             shouldRemoveFontFamily = true;
           }
@@ -2192,7 +2170,7 @@ namespace krys::boo
     {
       return false;
     }
-    auto value = ExtractPropertyValue(*_mutableStyle, PropertyId::WebkitTextDecorationsInEffect);
+    auto value = ExtractPropertyValue(*_mutableStyle, PropertyId::InternalTextDecorationsInEffect);
     auto *textDecorations = DynamicDowncast<css::ValueList>(value.get());
     if (!textDecorations)
     {
@@ -2366,18 +2344,11 @@ namespace krys::boo
     return foundDirection;
   }
 
-  // Colours are only inverted for -apple-color-filter, which isn't supported, so the style never changes.
-  Ref<EditingStyle> EditingStyle::InverseTransformColorIfNeeded(dom::Element &element) noexcept
-  {
-    (void)element;
-    return ShareRef(*this);
-  }
-
   namespace
   {
     void ReconcileTextDecorationProperties(css::MutableStyleProperties &style) noexcept
     {
-      auto textDecorationsInEffect = style.GetPropertyCSSValue(PropertyId::WebkitTextDecorationsInEffect);
+      auto textDecorationsInEffect = style.GetPropertyCSSValue(PropertyId::InternalTextDecorationsInEffect);
       auto textDecoration = style.GetPropertyCSSValue(PropertyId::TextDecorationLine);
       // We shouldn't have both text-decoration and -webkit-text-decorations-in-effect because that wouldn't
       // make sense.
@@ -2386,7 +2357,7 @@ namespace krys::boo
       {
         (void)style.SetProperty(PropertyId::TextDecoration,
                                 textDecorationsInEffect->CssText(css::DefaultSerialisationContext()));
-        (void)style.RemoveProperty(PropertyId::WebkitTextDecorationsInEffect);
+        (void)style.RemoveProperty(PropertyId::InternalTextDecorationsInEffect);
         textDecoration = textDecorationsInEffect;
       }
 
@@ -2432,7 +2403,7 @@ namespace krys::boo
     bool shouldAddStrikeThrough = style->StrikeThroughChange() == TextDecorationChange::Add;
     if (shouldAddUnderline || shouldAddStrikeThrough)
     {
-      RefPtr<css::Value> value = computedStyle.PropertyValue(PropertyId::WebkitTextDecorationsInEffect);
+      RefPtr<css::Value> value = computedStyle.PropertyValue(PropertyId::InternalTextDecorationsInEffect);
       if (!value || !Is<css::ValueList>(*value))
       {
         value = computedStyle.PropertyValue(PropertyId::TextDecorationLine);
@@ -2647,9 +2618,9 @@ namespace krys::boo
       Ref<css::MutableStyleProperties> mutableStyle = ShareRef(*result->Style());
 
       auto baseTextDecorationsInEffect =
-        ExtractPropertyValue(baseStyle, PropertyId::WebkitTextDecorationsInEffect);
+        ExtractPropertyValue(baseStyle, PropertyId::InternalTextDecorationsInEffect);
       DiffTextDecorations(*mutableStyle, PropertyId::TextDecorationLine, baseTextDecorationsInEffect.get());
-      DiffTextDecorations(*mutableStyle, PropertyId::WebkitTextDecorationsInEffect,
+      DiffTextDecorations(*mutableStyle, PropertyId::InternalTextDecorationsInEffect,
                           baseTextDecorationsInEffect.get());
 
       if (ExtractPropertyValue(baseStyle, PropertyId::FontWeight)

@@ -1218,9 +1218,6 @@ namespace krys::boo::css
         case ValueId::InlineFlex:
         case ValueId::InlineGrid:
         case ValueId::InlineTable:
-        // Prefixed values
-        case ValueId::WebkitInlineBox:
-        case ValueId::WebkitBox:
         // No layout support for the full <display-listitem> syntax, so treat it as <display-legacy>
         case ValueId::ListItem:
         {

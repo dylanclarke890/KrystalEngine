@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
@@ -12,9 +12,9 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
-#include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGClipPathElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Booey/SVG/SVGUseElement.hpp"
 
 namespace krys::boo
 {

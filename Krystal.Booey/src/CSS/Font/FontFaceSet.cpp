@@ -1,17 +1,17 @@
 ﻿#include "Krystal.Booey/CSS/Font/FontFaceSet.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Font/FontFaceSource.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Font/SegmentedFontFace.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
-#include "Krystal.Booey/Graphics/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include <algorithm>
 
 namespace krys::boo::css
 {
-  using namespace WebKitFontFamilyNames;
+  using namespace GenericFontFamilyNames;
 
   size_t
     CSSFontFaceSet::FontSelectionRequestHash::operator()(const FontSelectionRequest &request) const noexcept
@@ -122,15 +122,14 @@ namespace krys::boo::css
     // defining what font to use for those types.
     switch (value.ValueId())
     {
-      case ValueId::Serif:            return SerifFamily();
-      case ValueId::SansSerif:        return SansSerifFamily();
-      case ValueId::Cursive:          return CursiveFamily();
-      case ValueId::Fantasy:          return FantasyFamily();
-      case ValueId::Monospace:        return MonospaceFamily();
-      case ValueId::WebkitPictograph: return PictographFamily();
-      case ValueId::SystemUi:         return SystemUiFamily();
-      case ValueId::Math:             return MathFamily();
-      default:                        return StringAtom::Null();
+      case ValueId::Serif:     return SerifFamily();
+      case ValueId::SansSerif: return SansSerifFamily();
+      case ValueId::Cursive:   return CursiveFamily();
+      case ValueId::Fantasy:   return FantasyFamily();
+      case ValueId::Monospace: return MonospaceFamily();
+      case ValueId::SystemUi:  return SystemUiFamily();
+      case ValueId::Math:      return MathFamily();
+      default:                 return StringAtom::Null();
     }
   }
 

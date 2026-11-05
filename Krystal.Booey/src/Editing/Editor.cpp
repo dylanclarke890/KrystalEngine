@@ -13,22 +13,22 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Editing/ApplyStyleCommand.hpp"
-#include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
-#include "Krystal.Booey/Editing/DeleteSelectionCommand.hpp"
+#include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
+#include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
+#include "Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp"
+#include "Krystal.Booey/Editing/Commands/ReplaceSelectionCommand.hpp"
+#include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/Markup.hpp"
-#include "Krystal.Booey/Editing/RenderedPosition.hpp"
-#include "Krystal.Booey/Editing/ReplaceSelectionCommand.hpp"
+#include "Krystal.Booey/Editing/Markup/Markup.hpp"
+#include "Krystal.Booey/Editing/Markup/WebContentReader.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/RenderedPosition.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Editing/TypingCommand.hpp"
-#include "Krystal.Booey/Editing/VisibleUnits.hpp"
-#include "Krystal.Booey/Editing/WebContentReader.hpp"
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLEmbedElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
@@ -42,14 +42,14 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/ScrollAlignment.hpp"
-#include "Krystal.Booey/Platform/StaticPasteboard.hpp"
-#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
-#include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
-#include "Krystal.Booey/SVG/SVGImageElement.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 
 namespace krys::boo
 {
@@ -64,7 +64,6 @@ namespace krys::boo
         case ClipboardEventKind::Cut:              return EventNames::Cut;
         case ClipboardEventKind::Paste:
         case ClipboardEventKind::PasteAsPlainText:
-        case ClipboardEventKind::PasteAsQuotation:
         case ClipboardEventKind::PasteFont:        return EventNames::Paste;
         case ClipboardEventKind::BeforeCopy:       return EventNames::BeforeCopy;
         case ClipboardEventKind::BeforeCut:        return EventNames::BeforeCut;
@@ -193,7 +192,6 @@ namespace krys::boo
                                                           krys::move(pasteboard));
         }
         case ClipboardEventKind::Paste:
-        case ClipboardEventKind::PasteAsQuotation:
         case ClipboardEventKind::PasteFont:
           return dom::DataTransfer::CreateForCopyAndPaste(document, StoreMode::Readonly,
                                                           Pasteboard::CreateForCopyAndPaste());
@@ -464,17 +462,15 @@ namespace krys::boo
 
   // FIXME: The edit action of the paste (the event's input type), with removing backgrounds.
   void Editor::PasteAsFragment(Ref<dom::DocumentFragment> &&pastingFragment, bool smartReplace,
-                               bool matchStyle, MailBlockquoteHandling respectsMailBlockquote,
-                               EditAction) noexcept
+                               bool matchStyle, EditAction) noexcept
   {
     RefPtr<dom::Element> target = FindEventTargetFromSelection();
     if (!target)
     {
       return;
     }
-    auto event =
-      dom::TextEvent::CreateForFragmentPaste(krys::move(pastingFragment), dom::TextEventInputType::Paste,
-                                             smartReplace, matchStyle, respectsMailBlockquote);
+    auto event = dom::TextEvent::CreateForFragmentPaste(
+      krys::move(pastingFragment), dom::TextEventInputType::Paste, smartReplace, matchStyle);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -491,7 +487,6 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Quoting the fragment (quoteFragmentForPasting), with mail blockquotes.
   void Editor::PasteWithPasteboard(Pasteboard *pasteboard, EnumSet<PasteOption> options) noexcept
   {
     auto range = SelectedRange();
@@ -504,10 +499,7 @@ namespace krys::boo
                                              options.Contains(PasteOption::AllowPlainText), chosePlainText);
     if (fragment && ShouldInsertFragment(*fragment, range))
     {
-      PasteAsFragment(ShareRef(*fragment), CanSmartReplaceWithPasteboard(*pasteboard), chosePlainText,
-                      options.Contains(PasteOption::IgnoreMailBlockquote)
-                        ? MailBlockquoteHandling::IgnoreBlockquote
-                        : MailBlockquoteHandling::RespectBlockquote);
+      PasteAsFragment(ShareRef(*fragment), CanSmartReplaceWithPasteboard(*pasteboard), chosePlainText);
     }
   }
 
@@ -1330,14 +1322,6 @@ namespace krys::boo
     return true;
   }
 
-  bool Editor::InsertParagraphSeparatorInQuotedContent() noexcept
-  {
-    // FIXME: Why is this missing calls to canEdit, canEditRichly, etc.?
-    TypingCommand::InsertParagraphSeparatorInQuotedContent(_document);
-    RevealSelectionAfterEditingOperation();
-    return true;
-  }
-
   bool Editor::HandleTextEvent(dom::TextEvent &event) noexcept
   {
     // Default event handling for Drag and Drop will be handled by DragController
@@ -1353,7 +1337,7 @@ namespace krys::boo
       if (event.PastingFragment())
       {
         ReplaceSelectionWithFragment(*event.PastingFragment(), false, event.ShouldSmartReplace(),
-                                     event.ShouldMatchStyle(), action, event.GetMailBlockquoteHandling());
+                                     event.ShouldMatchStyle(), action);
       }
       else
       {
@@ -1454,8 +1438,8 @@ namespace krys::boo
   // accessibility's notifications of the pasted text, with accessibility; and checking the spelling of the
   // editable root, with text checking.
   void Editor::ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
-                                            bool smartReplace, bool matchStyle, EditAction editingAction,
-                                            MailBlockquoteHandling mailBlockquoteHandling) noexcept
+                                            bool smartReplace, bool matchStyle,
+                                            EditAction editingAction) noexcept
   {
     VisibleSelection selection = _document.Selection().Selection();
     if (selection.IsNone() || !selection.IsContentEditable())
@@ -1477,10 +1461,6 @@ namespace krys::boo
     if (matchStyle)
     {
       options.Add(ReplaceSelectionCommand::CommandOption::MatchStyle);
-    }
-    if (mailBlockquoteHandling == MailBlockquoteHandling::IgnoreBlockquote)
-    {
-      options.Add(ReplaceSelectionCommand::CommandOption::IgnoreMailBlockquote);
     }
 
     auto command = ReplaceSelectionCommand::Create(_document, ShareRefPtr(&fragment), options, editingAction);

@@ -37,18 +37,4 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"blur(1px) none", ConsumeFilter) == "<null>");
     CHECK(ConsumeToText(u8"apple-invert-lightness()", ConsumeFilter) == "<null>");
   }
-
-  TEST_CASE("PropertyParserHelpers(ConsumeAppleColorFilter)", "[CSS][Properties][Consumers]")
-  {
-    CHECK(ConsumeToText(u8"none", ConsumeAppleColorFilter) == "none");
-    CHECK(ConsumeToText(u8"apple-invert-lightness()", ConsumeAppleColorFilter) == "apple-invert-lightness()");
-    CHECK(ConsumeToText(u8"apple-invert-lightness() sepia(50%)", ConsumeAppleColorFilter)
-          == "apple-invert-lightness() sepia(50%)");
-
-    CHECK(ConsumeToText(u8"apple-invert-lightness(1)", ConsumeAppleColorFilter) == "<null>");
-    CHECK(ConsumeToText(u8"-apple-invert-lightness()", ConsumeAppleColorFilter) == "<null>");
-    CHECK(ConsumeToText(u8"blur(1px)", ConsumeAppleColorFilter) == "<null>");
-    CHECK(ConsumeToText(u8"drop-shadow(1px 2px)", ConsumeAppleColorFilter) == "<null>");
-    CHECK(ConsumeToText(u8"url(#a)", ConsumeAppleColorFilter) == "<null>");
-  }
 }

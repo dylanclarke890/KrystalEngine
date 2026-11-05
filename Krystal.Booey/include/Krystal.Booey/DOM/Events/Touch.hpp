@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/DoubleSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoubleSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

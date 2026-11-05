@@ -5,29 +5,28 @@
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
-#include "Krystal.Booey/Rendering/InlineWalker.hpp"
-#include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderTextControlMultiLine.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
-#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
-#include "Krystal.Booey/Rendering/RenderGrid.hpp"
-#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
-#include "Krystal.Booey/Rendering/RenderListItem.hpp"
-#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
-#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
-#include "Krystal.Booey/Rendering/RenderTextControlMultiLine.hpp"
-#include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 
 namespace krys::boo::layout_integration
 {
@@ -258,8 +257,8 @@ namespace krys::boo::layout_integration
         return null;
       }
 
-      // FIXME: Iframes, embedded objects and view transition captures have no baseline; images,
-      // attachments, buttons, list boxes, file upload controls and sliders have their own.
+      // FIXME: Images, attachments, buttons, list boxes, file upload controls and sliders have their own
+      // baseline.
       if (Is<LegacyRenderSVGRoot>(renderBox) || Is<RenderHTMLCanvas>(renderBox)
           || Is<RenderTextControlMultiLine>(renderBox))
       {
@@ -384,22 +383,6 @@ namespace krys::boo::layout_integration
         }
       }
 
-      if (auto *deprecatedFlexBox = DynamicDowncast<RenderDeprecatedFlexibleBox>(renderBox))
-      {
-        // Historically, we did this check for all baselines. But we can't remove this code from deprecated
-        // flexbox, because it effectively breaks -webkit-line-clamp, which is used in the wild -- we would
-        // calculate the baseline as if -webkit-line-clamp wasn't used. For simplicity, we use this for all
-        // uses of deprecated flexbox.
-        auto bottomOfContent = deprecatedFlexBox->BorderBefore() + deprecatedFlexBox->PaddingBefore()
-                               + deprecatedFlexBox->ContentBoxLogicalHeight();
-        auto baseline = LastInflowBoxBaseline(*deprecatedFlexBox);
-        if (baseline && *baseline <= bottomOfContent)
-        {
-          return *baseline;
-        }
-        return null;
-      }
-
       if (auto *listMarker = DynamicDowncast<RenderListMarker>(renderBox))
       {
         if (listMarker->ListItem() && !listMarker->IsImage())
@@ -474,7 +457,7 @@ namespace krys::boo::layout_integration
         if ((Is<RenderReplaced>(renderBox) && renderBox.Style().Display() == DisplayType::Inline)
             || Is<RenderTextControlMultiLine>(renderBox) || Is<RenderTable>(renderBox)
             || Is<RenderGrid>(renderBox) || Is<RenderFlexibleBox>(renderBox)
-            || Is<RenderDeprecatedFlexibleBox>(renderBox) || renderBox.IsRenderMathMLBlock())
+            || renderBox.IsRenderMathMLBlock())
         {
           // These are special RenderBlock renderers that override the default baseline position behavior of
           // the inline block box.

@@ -78,12 +78,6 @@ namespace krys::boo
     return nullptr;
   }
 
-  UniquePtr<PlatformControl>
-    ControlFactoryAdwaita::CreatePlatformSearchFieldResults(SearchFieldResultsPart &) noexcept
-  {
-    return nullptr;
-  }
-
   UniquePtr<PlatformControl> ControlFactoryAdwaita::CreatePlatformSliderThumb(SliderThumbPart &part) noexcept
   {
     return CreateUnique<SliderThumbAdwaita>(part, *this);

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 
 namespace krys::boo::style::tests
@@ -16,7 +16,7 @@ namespace krys::boo::style::tests
     CHECK(style.GetUserModify() == UserModify::ReadOnly);
     CHECK(style.ComputedFontSize() == 16);
     CHECK(style.GetFontDescription().SpecifiedSize() == 16);
-    CHECK(style.GetFontDescription().FirstFamily() == css::WebKitFontFamilyNames::StandardFamily());
+    CHECK(style.GetFontDescription().FirstFamily() == css::GenericFontFamilyNames::StandardFamily());
     CHECK(style.GetFontDescription().KeywordSizeAsIdentifier() == css::ValueId::Medium);
 
     SECTION("The document's initial containing block style")

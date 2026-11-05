@@ -140,60 +140,6 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"conic-gradient(at left top from 90deg, red, blue)", Image) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeImage prefixed gradients)", "[CSS][Properties][Consumers]")
-  {
-    // The gradient line is always serialised.
-    CHECK(ConsumeToText(u8"-webkit-linear-gradient(red, blue)", Image)
-          == "-webkit-linear-gradient(top, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-linear-gradient(left, red, blue)", Image)
-          == "-webkit-linear-gradient(left, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-linear-gradient(top left, red, blue)", Image)
-          == "-webkit-linear-gradient(left top, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-repeating-linear-gradient(90deg, red, blue)", Image)
-          == "-webkit-repeating-linear-gradient(90deg, red, blue)");
-
-    // Colour hints and `to` aren't part of the old syntax.
-    CHECK(ConsumeToText(u8"-webkit-linear-gradient(red, 50%, blue)", Image) == "<null>");
-    CHECK(ConsumeToText(u8"-webkit-linear-gradient(to left, red, blue)", Image) == "<null>");
-
-    CHECK(ConsumeToText(u8"-webkit-radial-gradient(red, blue)", Image)
-          == "-webkit-radial-gradient(center, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-radial-gradient(left top, circle cover, red, blue)", Image)
-          == "-webkit-radial-gradient(left top, circle cover, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-radial-gradient(cover circle, red, blue)", Image)
-          == "-webkit-radial-gradient(center, circle cover, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-radial-gradient(center, 10px 20px, red, blue)", Image)
-          == "-webkit-radial-gradient(center center, 10px 20px, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-repeating-radial-gradient(contain, red, blue)", Image)
-          == "-webkit-repeating-radial-gradient(center, ellipse contain, red, blue)");
-
-    // A leading length is a position, not a size.
-    CHECK(ConsumeToText(u8"-webkit-radial-gradient(10px, red, blue)", Image)
-          == "-webkit-radial-gradient(10px center, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-radial-gradient(10px 20px, red, blue)", Image)
-          == "-webkit-radial-gradient(10px 20px, red, blue)");
-    CHECK(ConsumeToText(u8"-webkit-radial-gradient(left top circle, red, blue)", Image) == "<null>");
-  }
-
-  TEST_CASE("PropertyParserHelpers(ConsumeImage -webkit-gradient)", "[CSS][Properties][Consumers]")
-  {
-    CHECK(ConsumeToText(u8"-webkit-gradient(linear, left top, right top, from(red), to(blue))", Image)
-          == "-webkit-gradient(linear, 0% 0%, 100% 0%, from(red), to(blue))");
-    CHECK(ConsumeToText(
-            u8"-webkit-gradient(linear, 0 0, 10 center, color-stop(50%, red), color-stop(0.25, blue))", Image)
-          == "-webkit-gradient(linear, 0 0, 10 50%, color-stop(0.5, red), color-stop(0.25, blue))");
-    CHECK(ConsumeToText(u8"-webkit-gradient(linear, 0 0, 1 1)", Image)
-          == "-webkit-gradient(linear, 0 0, 1 1)");
-    CHECK(ConsumeToText(u8"-webkit-gradient(radial, 0 0, 0, 10 10, 20, from(red), to(blue))", Image)
-          == "-webkit-gradient(radial, 0 0, 0, 10 10, 20, from(red), to(blue))");
-
-    CHECK(ConsumeToText(u8"-webkit-gradient(linear, 0 0, 1 1, from(currentcolor))", Image) == "<null>");
-    CHECK(ConsumeToText(u8"-webkit-gradient(linear, 0 0, 1 1, color-stop(red))", Image) == "<null>");
-    CHECK(ConsumeToText(u8"-webkit-gradient(linear, top left, 1 1)", Image) == "<null>");
-    CHECK(ConsumeToText(u8"-webkit-gradient(radial, 0 0, -1, 10 10, 20)", Image) == "<null>");
-    CHECK(ConsumeToText(u8"-webkit-gradient(conic, 0 0, 1 1)", Image) == "<null>");
-  }
-
   TEST_CASE("PropertyParserHelpers(ConsumeImage url and image-set)", "[CSS][Properties][Consumers]")
   {
     auto context = Context();
@@ -207,8 +153,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
 
     CHECK(ConsumeToText(u8"image-set(\"a.png\" 1x, url(b.png) 2x)", Image, context)
           == "image-set(url(\"a.png\") 1x, url(\"b.png\") 2x)");
-    CHECK(ConsumeToText(u8"-webkit-image-set(url(a.png) 2dppx)", Image, context)
-          == "image-set(url(\"a.png\") 2dppx)");
+    CHECK(ConsumeToText(u8"-webkit-image-set(url(a.png) 2dppx)", Image, context) == "<null>");
     CHECK(ConsumeToText(u8"image-set(url(a.png) type(\"image/png\") 2x)", Image, context)
           == "image-set(url(\"a.png\") 2x type(\"image/png\"))");
     CHECK(ConsumeToText(u8"image-set(linear-gradient(red, blue) 1x)", Image, context)
@@ -239,18 +184,17 @@ namespace krys::boo::css::PropertyParserHelpers::tests
 
     CHECK(ConsumeToText(u8"cross-fade(url(a.png), url(b.png), 50%)", Image, context)
           == "cross-fade(url(\"a.png\"), url(\"b.png\"), 0.5)");
-    CHECK(ConsumeToText(u8"-webkit-cross-fade(none, url(b.png), 2)", Image, context)
-          == "-webkit-cross-fade(none, url(\"b.png\"), 1)");
+    CHECK(ConsumeToText(u8"cross-fade(none, url(b.png), 2)", Image, context)
+          == "cross-fade(none, url(\"b.png\"), 1)");
     CHECK(ConsumeToText(u8"cross-fade(url(a.png), url(b.png))", Image, context) == "<null>");
 
-    CHECK(ConsumeToText(u8"-webkit-canvas(foo)", Image, context) == "-webkit-canvas(foo)");
-    CHECK(ConsumeToText(u8"-webkit-canvas(\"foo\")", Image, context) == "<null>");
-    CHECK(ConsumeToText(u8"-webkit-named-image(apple-pay-logo-black)", Image, context)
-          == "-webkit-named-image(apple-pay-logo-black)");
+    // The prefixed generators are gone.
+    CHECK(ConsumeToText(u8"-webkit-canvas(foo)", Image, context) == "<null>");
+    CHECK(ConsumeToText(u8"-webkit-named-image(apple-pay-logo-black)", Image, context) == "<null>");
 
     CHECK(ConsumeToText(u8"filter(url(a.png), blur(2px))", Image, context)
           == "filter(url(\"a.png\"), blur(2px))");
-    CHECK(ConsumeToText(u8"-webkit-filter(none, sepia())", Image, context) == "filter(none, sepia())");
+    CHECK(ConsumeToText(u8"filter(none, sepia())", Image, context) == "filter(none, sepia())");
     CHECK(ConsumeToText(u8"filter(url(a.png))", Image, context) == "<null>");
 
     CHECK(ConsumeToText(u8"paint(foo, 1px)", Image, context) == "paint(foo)");

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/PlatformImage.hpp"
+#include "Krystal.Booey/Graphics/Images/PlatformImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Gfx/Handles.hpp"
 

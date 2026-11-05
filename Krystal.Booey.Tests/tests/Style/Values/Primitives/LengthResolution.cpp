@@ -2,9 +2,9 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 
 namespace krys::boo::style::tests
 {

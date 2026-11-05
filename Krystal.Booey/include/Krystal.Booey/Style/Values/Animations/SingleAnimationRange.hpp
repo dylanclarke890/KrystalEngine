@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/TimelineRangeValue.hpp"
+#include "Krystal.Booey/Animation/Timelines/TimelineRangeValue.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"

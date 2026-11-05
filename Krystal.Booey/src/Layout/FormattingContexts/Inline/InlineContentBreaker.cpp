@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentBreaker.hpp"
-#include "Krystal.Booey/Core/Hyphenation.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Text/Hyphenation.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
@@ -282,22 +282,27 @@ namespace krys::boo::layout
                                       static_cast<uint32>(left), static_cast<uint32>(right), runLogicalLeft)};
     }
 
+    KRYS_NODISCARD size_t LimitValue(const style::HyphenateLimitEdge &edge) noexcept
+    {
+      auto value = edge.TryValue();
+      return value ? static_cast<size_t>(value->Value) : 0;
+    }
+
     KRYS_NODISCARD size_t LimitBeforeValue(const RenderStyle &style) noexcept
     {
-      auto value = style.HyphenateLimitBefore().TryValue();
-      return value ? static_cast<size_t>(value->Value) : 0;
+      return LimitValue(style.GetHyphenateLimitChars().Before);
     }
 
     KRYS_NODISCARD size_t LimitAfterValue(const RenderStyle &style) noexcept
     {
-      auto value = style.HyphenateLimitAfter().TryValue();
-      return value ? static_cast<size_t>(value->Value) : 0;
+      return LimitValue(style.GetHyphenateLimitChars().After);
     }
 
     KRYS_NODISCARD inline bool HasEnoughContentForHyphenation(size_t contentLength,
                                                               const RenderStyle &style) noexcept
     {
-      return LimitBeforeValue(style) + LimitAfterValue(style) <= contentLength;
+      return LimitValue(style.GetHyphenateLimitChars().Word) <= contentLength
+             && LimitBeforeValue(style) + LimitAfterValue(style) <= contentLength;
     }
 
     KRYS_NODISCARD Maybe<size_t> FirstHyphenPosition(utf8_stringview content,

@@ -7,13 +7,13 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include <string>
 
 namespace krys::boo::tests

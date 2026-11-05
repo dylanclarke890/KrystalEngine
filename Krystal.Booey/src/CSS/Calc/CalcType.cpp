@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Calc/CalcType.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 
 namespace krys::boo::css::calc
 {

@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -17,9 +17,9 @@
 #include "Krystal.Booey/Style/Values/SVG/SVGStrokeDasharray.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGStrokeDashoffset.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>
 

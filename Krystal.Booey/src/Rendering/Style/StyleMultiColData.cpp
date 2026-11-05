@@ -9,15 +9,13 @@ namespace krys::boo
       : ColumnWidth(style::ComputedStyle::InitialColumnWidth()),
         ColumnCount(style::ComputedStyle::InitialColumnCount()),
         ColumnFill(static_cast<unsigned>(style::ComputedStyle::InitialColumnFill())),
-        ColumnSpan(static_cast<unsigned>(style::ComputedStyle::InitialColumnSpan())),
-        ColumnProgression(static_cast<unsigned>(style::ComputedStyle::InitialColumnProgression()))
+        ColumnSpan(static_cast<unsigned>(style::ComputedStyle::InitialColumnSpan()))
   {
   }
 
   inline StyleMultiColData::StyleMultiColData(const StyleMultiColData &other) noexcept
       : RefCounted<StyleMultiColData>(), ColumnWidth(other.ColumnWidth), ColumnCount(other.ColumnCount),
-        ColumnRule(other.ColumnRule), VisitedLinkColumnRuleColor(other.VisitedLinkColumnRuleColor),
-        ColumnFill(other.ColumnFill), ColumnSpan(other.ColumnSpan), ColumnProgression(other.ColumnProgression)
+        ColumnRule(other.ColumnRule), ColumnFill(other.ColumnFill), ColumnSpan(other.ColumnSpan)
   {
   }
 
@@ -29,9 +27,8 @@ namespace krys::boo
   bool StyleMultiColData::operator==(const StyleMultiColData &other) const noexcept
   {
     return ColumnWidth == other.ColumnWidth && ColumnCount == other.ColumnCount
-           && ColumnRule == other.ColumnRule && VisitedLinkColumnRuleColor == other.VisitedLinkColumnRuleColor
-           && ColumnFill == other.ColumnFill && ColumnSpan == other.ColumnSpan
-           && ColumnProgression == other.ColumnProgression;
+           && ColumnRule == other.ColumnRule && ColumnFill == other.ColumnFill
+           && ColumnSpan == other.ColumnSpan;
   }
 
   style::LineWidth StyleMultiColData::ColumnRuleWidth() const noexcept

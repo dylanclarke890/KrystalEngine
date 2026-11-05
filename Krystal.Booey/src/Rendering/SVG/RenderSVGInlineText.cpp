@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextBoxPainter.hpp"
-#include "Krystal.Booey/Style/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include <cmath>
 #include <limits>
 

@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/Graphics/GraphicsStyle.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Graphics/SourceBrush.hpp"
-#include "Krystal.Booey/Graphics/WindRule.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys

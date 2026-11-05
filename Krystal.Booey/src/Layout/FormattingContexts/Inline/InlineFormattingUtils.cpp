@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLevelBox.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
@@ -831,7 +831,6 @@ namespace krys::boo::layout
     {
       return false;
     }
-    krys_debug_assert(!lineClamp->IsLegacy);
     return lineClamp->MaximumLines == inlineLayoutState.LineCountWithInlineContentIncludingNestedBlocks();
   }
 

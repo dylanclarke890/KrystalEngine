@@ -20,10 +20,7 @@ namespace krys::boo::style
     PseudoElementRequest(PseudoElementType type, const css::CSSOMStringAtom &nameArgument) noexcept
         : _identifier({type, nameArgument})
     {
-      krys_debug_assert(type == PseudoElementType::Highlight || type == PseudoElementType::ViewTransitionGroup
-                        || type == PseudoElementType::ViewTransitionImagePair
-                        || type == PseudoElementType::ViewTransitionOld
-                        || type == PseudoElementType::ViewTransitionNew);
+      krys_debug_assert(type == PseudoElementType::Highlight);
     }
 
     explicit PseudoElementRequest(const PseudoElementIdentifier &pseudoElementIdentifier) noexcept

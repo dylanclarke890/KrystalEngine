@@ -8,7 +8,7 @@
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
-#include "Krystal.Booey/DOM/Scheduling/IdleCallbackController.hpp"
+#include "Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp"
 #include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
@@ -16,17 +16,15 @@
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/FontSelector.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
-#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
-#include "Krystal.Booey/Page/DOMTimer.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
@@ -69,7 +67,6 @@ namespace krys::boo
   class IntersectionObserver;
   class LocalDOMWindow;
   class LocalFrame;
-  class Location;
   class LocalFrameView;
   class Locale;
   class RenderElement;
@@ -116,7 +113,6 @@ namespace krys::boo::html
   class CustomElementAlgorithms;
   class CustomElementRegistry;
   class FocusAlgorithms;
-  class FormController;
   class HTMLBaseElement;
   class HTMLDialogElement;
   class HTMLBodyElement;
@@ -129,7 +125,6 @@ namespace krys::boo::html
   class TreeBuilder;
   class LazyLoadImageObserver;
   class RenderBlocking;
-  class SerializedScriptValue;
 
   enum class TaskSource : uint8;
 }
@@ -137,14 +132,6 @@ namespace krys::boo::html
 namespace krys::boo::dom
 {
   enum class PopoverState : uint8;
-  /// @brief Where a document is in entering the back/forward cache.
-  enum class BackForwardCacheState : uint8
-  {
-    NotInBackForwardCache,
-    /// @brief Its page is leaving it: `pagehide` fires before it's cached.
-    AboutToEnterBackForwardCache,
-    InBackForwardCache
-  };
 
   /// @brief Various flags used for optimizations in the Document class.
   enum class DocumentFlags : uint16
@@ -180,8 +167,6 @@ namespace krys::boo::dom
   {
     JavaScriptDebuggerPaused,
     WillDeferLoading,
-    /// @brief The document is in the back/forward cache.
-    BackForwardCache,
     /// @brief The host suspended the page.
     PageWillBeSuspended
   };
@@ -208,7 +193,6 @@ namespace krys::boo::dom
   class Text;
   class TreeWalker;
   class UserActionElementSet;
-  class VisitedLinkState;
 
   enum class DidUpdateAnyContentRelevancy : bool;
 
@@ -326,7 +310,6 @@ namespace krys::boo::dom
     // The element the pointer was pressed on: the chain of its ancestors stays `:active` until it's released.
     RefPtr<Element> _activeElement;
     bool _isFocusedAndActive {true};
-    BackForwardCacheState _backForwardCacheState {BackForwardCacheState::NotInBackForwardCache};
     Maybe<ReasonForSuspension> _reasonForSuspendingActiveDOMObjects;
     bool _isSuspended {false};
     List<WeakPtr<Element>> _documentSuspensionCallbackElements;
@@ -335,7 +318,6 @@ namespace krys::boo::dom
     bool _activeDOMObjectsAreStopped {false};
     UniquePtr<FrameSelection> _selection;
     UniquePtr<boo::Editor> _editor;
-    UniquePtr<html::FormController> _formController;
     RefPtr<DOMSelection> _domSelection;
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
@@ -382,8 +364,6 @@ namespace krys::boo::dom
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
     RefPtr<HighlightRegistry> _highlightRegistry;
     RefPtr<HighlightRegistry> _fragmentHighlightRegistry;
-    // The text directives taken from the URL's fragment (after `:~:`).
-    utf8_string _fragmentDirective;
     SequentialFocusNavigationStartingPointPosition _sequentialFocusNavigationStartingPointPosition {
       SequentialFocusNavigationStartingPointPosition::At};
 
@@ -418,18 +398,11 @@ namespace krys::boo::dom
     uint32 _loadEventDelayCount {0};
     /// @see https://html.spec.whatwg.org/#unload-counter
     uint32 _unloadCounter {0};
-    /// @see https://html.spec.whatwg.org/#will-declaratively-refresh
-    bool _willDeclarativelyRefresh {false};
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
     DOMString _contentLanguage;
-    /// @brief The document's timers (`setTimeout()`, `setInterval()`), by ID.
-    /// @see https://html.spec.whatwg.org/#map-of-settimeout-and-setinterval-ids
-    HashMap<int32, Ref<DOMTimer>> _timeouts;
-    int32 _circularSequentialID {0};
-    /// @see https://html.spec.whatwg.org/#timer-nesting-level
-    int32 _timerNestingLevel {0};
+    /// @brief The document's active timers.
+    List<Ref<DocumentTimer>> _timers;
     UniquePtr<ScriptedAnimationController> _scriptedAnimationController;
-    UniquePtr<IdleCallbackController> _idleCallbackController;
     DocumentLoadTimingInfo _loadTiming;
     // The [SameObject] collections of the DOM tree accessors, while something holds them.
     WeakPtr<HTMLCollection> _images;
@@ -445,7 +418,6 @@ namespace krys::boo::dom
     // Renderer updates (of text) that the next style resolution applies.
     UniquePtr<style::Update> _pendingRenderTreeUpdate;
 
-    mutable UniquePtr<VisitedLinkState> _visitedLinkState;
     mutable UniquePtr<RenderStyle> _initialContainingBlockStyle;
     // The style the render view would have, for a document without one; `RenderTreeUpdater` keeps it here.
     UniquePtr<RenderStyle> _renderViewStyle;
@@ -472,7 +444,6 @@ namespace krys::boo::dom
 
     boo::Color _textColor {boo::Color::black};
     boo::Color _linkColor;
-    boo::Color _visitedLinkColor;
     boo::Color _activeLinkColor;
     // The colour schemes from the document's `<meta name="color-scheme">`.
     EnumSet<boo::ColorScheme> _colorScheme;
@@ -643,9 +614,6 @@ namespace krys::boo::dom
     // FIXME: Check - do we need to implement these?
     // resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
 
-    /// @see https://html.spec.whatwg.org/#dom-document-location
-    // [ PutForwards = href, LegacyUnforgeable ] readonly attribute Location? location;
-
     /// @see https://html.spec.whatwg.org/#dom-document-domain
     // attribute USVString domain;
 
@@ -761,24 +729,6 @@ namespace krys::boo::dom
     /// @brief An empty collection, for historical reasons.
     /// @see https://html.spec.whatwg.org/#dom-document-applets
     KRYS_NODISCARD Ref<HTMLCollection> Applets() noexcept;
-
-    /// @brief Does nothing.
-    /// @see https://html.spec.whatwg.org/#dom-document-clear
-    void Clear() const noexcept
-    {
-    }
-
-    /// @brief Does nothing.
-    /// @see https://html.spec.whatwg.org/#dom-document-captureevents
-    void CaptureEvents() const noexcept
-    {
-    }
-
-    /// @brief Does nothing.
-    /// @see https://html.spec.whatwg.org/#dom-document-releaseevents
-    void ReleaseEvents() const noexcept
-    {
-    }
 
 #pragma endregion
 
@@ -947,7 +897,6 @@ namespace krys::boo::dom
 
     /// @brief The identifier of the document's origin on pasteboards: a unique identifier, as documents have
     /// opaque origins.
-    // FIXME: The origin's serialisation when it isn't opaque, with security origins.
     KRYS_NODISCARD const DOMString &OriginIdentifierForPasteboard() const noexcept;
 
     /// @brief The script's view of the selection; null unless the document is fully active (shown in a
@@ -1279,25 +1228,17 @@ namespace krys::boo::dom
     /// it.
     void DidRemoveAllPendingStylesheet() noexcept;
 
-    /// @brief Queues a task to fire `hashchange` from @p oldURL to @p newURL.
-    void EnqueueHashchangeEvent(dom::USVString oldURL, dom::USVString newURL) noexcept;
-
     /// @brief Whether the document is its frame's (its navigable's active document).
     /// @see https://html.spec.whatwg.org/#fully-active
     KRYS_NODISCARD bool IsFullyActive() const noexcept;
-
-    /// @brief The frame went to a history entry of the document with @p stateObject: fires `popstate`.
-    void StatePopped(RefPtr<html::SerializedScriptValue> &&stateObject) noexcept;
-
-    /// @brief Gives the document @p url, which `pushState()` or `replaceState()` set.
-    void UpdateURLForPushOrReplaceState(const url::URL &url) noexcept;
 
     /// @brief The document's custom highlights, which `::highlight()` styles.
     /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-css-highlights
     KRYS_NODISCARD HighlightRegistry &GetHighlightRegistry() noexcept;
     KRYS_NODISCARD HighlightRegistry *HighlightRegistryIfExists() const noexcept;
 
-    /// @brief The highlights of the text the URL's text directives indicate, which `::target-text` styles.
+    /// @brief The highlights of the target text, which `::target-text` styles: the host marks it, as there
+    /// are no text directives.
     KRYS_NODISCARD HighlightRegistry &FragmentHighlightRegistry() noexcept;
     KRYS_NODISCARD HighlightRegistry *FragmentHighlightRegistryIfExists() const noexcept;
 
@@ -1307,14 +1248,6 @@ namespace krys::boo::dom
     /// @brief Works out where each highlight range's painting starts and ends, repainting what moved; run at
     /// each rendering update.
     void UpdateHighlightPositions() noexcept;
-
-    /// @brief The fragment directive of the document's URL (what followed `:~:`), which `SetURL` takes from
-    /// the URL.
-    /// @see https://wicg.github.io/scroll-to-text-fragment/#fragment-directive
-    KRYS_NODISCARD const utf8_string &FragmentDirective() const noexcept
-    {
-      return _fragmentDirective;
-    }
 
     /// @brief Run when the parser stops parsing the document: its frame's loader scrolls to the fragment.
     void FinishedParsing() noexcept;
@@ -1485,20 +1418,6 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#pragma-directives
     void ProcessMetaHttpEquiv(DOMStringView equiv, DOMStringView content) noexcept;
 
-    /// @brief Saves and restores the state of the document's form controls, made on first use.
-    KRYS_NODISCARD html::FormController &GetFormController() noexcept;
-
-    KRYS_NODISCARD html::FormController *FormControllerIfExists() const noexcept
-    {
-      return _formController.get();
-    }
-
-    /// @brief The state of the document's form controls, saved to its history item as it's left.
-    KRYS_NODISCARD List<DOMString> FormElementsState() const noexcept;
-
-    /// @brief The form state the document's controls are given as they're parsed: their history item's.
-    void SetStateForNewFormElements(const List<DOMString> &stateVector) noexcept;
-
     /// @brief The document's language from its `content-language` pragma, for elements without a language of
     /// their own; empty if it has none.
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
@@ -1517,10 +1436,6 @@ namespace krys::boo::dom
     {
       _isDirAttributeDirty = true;
     }
-
-    /// @brief The window's `Location`, while the document is fully active; null otherwise.
-    /// @see https://html.spec.whatwg.org/#dom-document-location
-    KRYS_NODISCARD boo::Location *GetLocation() const noexcept;
 
     /// @brief Fires `pagehide` at the window if the document is showing.
     /// @see https://html.spec.whatwg.org/#unload-a-document
@@ -1543,22 +1458,14 @@ namespace krys::boo::dom
       --_unloadCounter;
     }
 
-    /// @brief The next ID for a timer: positive, wrapping around.
-    KRYS_NODISCARD int32 CircularSequentialID() noexcept;
-    /// @brief Adds @p timer as the timer @p timeoutId.
-    /// @return False, adding nothing, if there's a timer @p timeoutId already.
-    bool AddTimeout(int32 timeoutId, DOMTimer &timer) noexcept;
-    /// @brief Removes the timer @p timeoutId, if there is one, and returns it.
-    RefPtr<DOMTimer> TakeTimeout(int32 timeoutId) noexcept;
-    /// @brief How deeply nested the timer whose action is running is; 0 outside a timer.
-    KRYS_NODISCARD int32 TimerNestingLevel() const noexcept
-    {
-      return _timerNestingLevel;
-    }
-    void SetTimerNestingLevel(int32 level) noexcept
-    {
-      _timerNestingLevel = level;
-    }
+    /// @brief Starts a timer that runs @p action once, after @p delay, as a task on the timer task source.
+    /// @return The timer's handle, which stops it when it's destroyed.
+    DocumentTimerHandle StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept;
+    /// @brief Starts a timer that runs @p action every @p interval, as a task on the timer task source.
+    /// @return The timer's handle, which stops it when it's destroyed.
+    DocumentTimerHandle StartRepeatingTimer(MonotonicTime::duration interval, Func<void()> action) noexcept;
+    /// @brief Drops @p timer, which stopped.
+    void RemoveTimer(DocumentTimer &timer) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe
     int32 RequestAnimationFrame(FrameRequestCallback &&callback) noexcept;
@@ -1572,17 +1479,7 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#run-the-animation-frame-callbacks
     void ServiceRequestAnimationFrameCallbacks() noexcept;
 
-    /// @see https://w3c.github.io/requestidlecallback/#the-requestidlecallback-method
-    int32 RequestIdleCallback(IdleRequestCallback &&callback, MonotonicTime::duration timeout) noexcept;
-    /// @see https://w3c.github.io/requestidlecallback/#the-cancelidlecallback-method
-    void CancelIdleCallback(int32 id) noexcept;
-    KRYS_NODISCARD bool HasPendingIdleCallback() const noexcept;
-    KRYS_NODISCARD IdleCallbackController *GetIdleCallbackController() const noexcept
-    {
-      return _idleCallbackController.get();
-    }
-
-    /// @brief Stops the document's timers and drops its animation frame and idle callbacks and its tasks:
+    /// @brief Stops the document's timers and drops its animation frame callbacks and its tasks:
     /// it's leaving its frame.
     void StopActiveDOMObjects() noexcept;
 
@@ -1591,7 +1488,7 @@ namespace krys::boo::dom
       return _activeDOMObjectsAreStopped;
     }
 
-    /// @brief Suspends the document (as it enters the back/forward cache): its tasks wait, and its timers,
+    /// @brief Suspends the document (as the host hides it): its tasks wait, and its timers,
     /// animation frame callbacks, animations and layout stop, until it's resumed for the same @p reason.
     void Suspend(ReasonForSuspension reason) noexcept;
     void Resume(ReasonForSuspension reason) noexcept;
@@ -1629,17 +1526,6 @@ namespace krys::boo::dom
       return _reasonForSuspendingActiveDOMObjects;
     }
 
-    KRYS_NODISCARD BackForwardCacheState GetBackForwardCacheState() const noexcept
-    {
-      return _backForwardCacheState;
-    }
-
-    /// @brief Notes where the document is in entering the back/forward cache: as it's cached, its view's
-    /// scroll position is kept, and its style resolver and pending style update go.
-    void SetBackForwardCacheState(BackForwardCacheState state) noexcept;
-
-    /// @brief Detaches the document, now in the back/forward cache, from its frame.
-    void DetachFromCachedFrame() noexcept;
     /// @brief Queues a task on @p source that fires @p event at the document's window, if it has one then.
     void QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<Event> &&event) noexcept;
     /// @brief Queues a task on @p source that fires @p event at the document.
@@ -1707,7 +1593,7 @@ namespace krys::boo::dom
     void WillBeRemovedFromFrame() noexcept;
 
     /// @brief Whether the document is being printed.
-    // FIXME: Always false: frames don't print.
+    // Always false: there's no printing.
     KRYS_NODISCARD bool Printing() const noexcept
     {
       return false;
@@ -1777,8 +1663,8 @@ namespace krys::boo::dom
     /// @brief A request for the web font file at @p url (resolved against the document), or null if it can't
     /// be requested. The file doesn't load until `BeginLoadingFontSoon`.
     KRYS_NODISCARD RefPtr<FontLoadRequest>
-      GetFontLoadRequest(utf8_stringview url, bool isSVG, bool isInitiatingElementInUserAgentShadowTree,
-                         LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept;
+      GetFontLoadRequest(utf8_stringview url, bool isSVG,
+                         bool isInitiatingElementInUserAgentShadowTree) noexcept;
     void BeginLoadingFontSoon(FontLoadRequest &request) noexcept;
     void SuspendFontLoading() noexcept;
 
@@ -1819,9 +1705,6 @@ namespace krys::boo::dom
     /// @brief Recomputes the keyframes of the document's CSS animations of the `@keyframes` rule @p name.
     void KeyframesRuleDidChange(const css::CSSOMString &name) noexcept;
 
-    /// @brief Determines whether links are visited, for `:visited` and the link styles.
-    KRYS_NODISCARD VisitedLinkState &GetVisitedLinkState() const noexcept;
-
     void SetHasStyleWithViewportUnits() noexcept
     {
       _hasStyleWithViewportUnits = true;
@@ -1849,8 +1732,6 @@ namespace krys::boo::dom
 
     /// @brief The colour of `-webkit-link`: the `<body link>` colour, or the keyword's.
     KRYS_NODISCARD boo::Color LinkColor(const RenderStyle &style) const noexcept;
-    /// @brief The colour of visited `-webkit-link`: the `<body vlink>` colour, or the keyword's.
-    KRYS_NODISCARD boo::Color VisitedLinkColor(const RenderStyle &style) const noexcept;
     /// @brief The colour of `-webkit-activelink`: the `<body alink>` colour, or the keyword's.
     KRYS_NODISCARD boo::Color ActiveLinkColor(const RenderStyle &style) const noexcept;
 
@@ -1859,18 +1740,12 @@ namespace krys::boo::dom
       _linkColor = color;
     }
 
-    void SetVisitedLinkColor(const boo::Color &color) noexcept
-    {
-      _visitedLinkColor = color;
-    }
-
     void SetActiveLinkColor(const boo::Color &color) noexcept
     {
       _activeLinkColor = color;
     }
 
     void ResetLinkColor() noexcept;
-    void ResetVisitedLinkColor() noexcept;
     void ResetActiveLinkColor() noexcept;
 
     /// @brief The colour schemes @p style uses: its `color-scheme`, or the document's (from
@@ -2151,9 +2026,6 @@ namespace krys::boo::dom
     }
 
   private:
-    /// @brief Stops the effects the gamepads' haptic actuators are playing, as the document is suspended or
-    /// stopped.
-    void StopGamepadHapticEffects() noexcept;
   };
 }
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatPolygon.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPolygon.hpp"
 #include "Krystal.Booey/Rendering/Shapes/LayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeInterval.hpp"
 #include "Krystal.Core/Macros.hpp"

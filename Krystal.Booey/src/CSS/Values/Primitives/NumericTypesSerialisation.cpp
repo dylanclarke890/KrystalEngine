@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Booey/Core/NumberFormatting.hpp"
+#include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <cmath>

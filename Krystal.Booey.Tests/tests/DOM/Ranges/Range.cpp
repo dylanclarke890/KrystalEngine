@@ -1338,20 +1338,6 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
   }
 
-  TEST_CASE("Range.detach(): does nothing", "[DOM][Range][dom:dom-range-detach]")
-  {
-    // Does nothing and is kept for legacy reasons, so just test that it doesn't throw an exception or modify
-    // the range
-
-    CommonTestData data;
-    data.Range->Detach();
-
-    REQUIRE(data.Range->StartContainer() == data.Document);
-    REQUIRE(data.Range->StartOffset() == 0uz);
-    REQUIRE(data.Range->EndContainer() == data.Document);
-    REQUIRE(data.Range->EndOffset() == 0uz);
-  }
-
   TEST_CASE("Range.isPointInRange(): whether the point is between its start and end, inclusive",
             "[DOM][Range][dom:dom-range-ispointinrange]")
   {

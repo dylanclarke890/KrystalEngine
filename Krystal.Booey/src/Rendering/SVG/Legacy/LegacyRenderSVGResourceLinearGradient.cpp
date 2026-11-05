@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceLinearGradient.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
 
 namespace krys::boo
 {
@@ -37,11 +37,11 @@ namespace krys::boo
                                                attributes.X2(), attributes.Y2());
   }
 
-  Ref<Gradient> LegacyRenderSVGResourceLinearGradient::BuildGradient(const RenderStyle &style) const noexcept
+  Ref<Gradient> LegacyRenderSVGResourceLinearGradient::BuildGradient() const noexcept
   {
     return Gradient::Create(Gradient::LinearData {StartPoint(_attributes), EndPoint(_attributes)},
                             {ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Unpremultiplied},
                             PlatformSpreadMethodFromSVGType(_attributes.SpreadMethod()),
-                            StopsByApplyingColorFilter(_attributes.Stops(), style), false);
+                            GradientColorStops {_attributes.Stops()}, false);
   }
 }

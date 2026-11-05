@@ -9,8 +9,8 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/UndoStep.hpp"
+#include "Krystal.Booey/Editing/Commands/UndoStep.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
@@ -18,11 +18,11 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/PasteboardCustomData.hpp"
-#include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
+#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 
 namespace krys::boo::tests
 {

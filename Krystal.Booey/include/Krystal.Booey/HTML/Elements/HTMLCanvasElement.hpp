@@ -1,16 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasBase.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DSettings.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
-  class Blob;
   class GraphicsContext;
 }
 
@@ -111,12 +109,6 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-canvas-todataurl
     KRYS_NODISCARD dom::DOMString ToDataURL(dom::DOMStringView mimeType = {},
                                             Maybe<double> quality = {}) noexcept;
-    /// @brief Encodes the canvas's pixels as ToDataURL does, and calls @p callback with them as a `Blob`
-    /// (null if the canvas has no pixels) in a task.
-    /// @see https://html.spec.whatwg.org/#dom-canvas-toblob
-    void ToBlob(Func<void(RefPtr<Blob> &&)> &&callback, dom::DOMStringView mimeType = {},
-                Maybe<double> quality = {}) noexcept;
-
     // transferControlToOffscreen() isn't planned.
 
 #pragma endregion

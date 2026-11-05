@@ -4,10 +4,10 @@
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/Style/MatchedDeclarationsCache.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
-#include "Krystal.Booey/Style/ScopeRuleSets.hpp"
+#include "Krystal.Booey/Style/Rules/MatchedDeclarationsCache.hpp"
+#include "Krystal.Booey/Style/Rules/ScopeRuleSets.hpp"
 #include "Krystal.Booey/Style/TreeResolutionState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -147,8 +147,6 @@ namespace krys::boo::style
       StyleForPseudoElement(dom::Element &element, const PseudoElementRequest &pseudoElementRequest,
                             const ResolutionContext &context) noexcept;
 
-    KRYS_NODISCARD UniquePtr<RenderStyle> StyleForPage(int32 pageIndex) noexcept;
-
     KRYS_NODISCARD dom::Document &Document() noexcept;
     KRYS_NODISCARD const dom::Document &Document() const noexcept;
 
@@ -189,9 +187,6 @@ namespace krys::boo::style
                                                            const css::KeyframeRule &keyframe,
                                                            BlendingKeyframe &blendingKeyframe) const noexcept;
 
-    void SetViewTransitionStyles(css::SelectorPseudoElement element, const css::CSSOMStringAtom &name,
-                                 Ref<css::MutableStyleProperties> properties) noexcept;
-
     KRYS_NODISCARD List<RefPtr<const css::StyleRule>>
       StyleRulesForElement(const dom::Element *element, uint32 rulesToInclude = AllButEmptyCSSRules) noexcept;
     KRYS_NODISCARD List<RefPtr<const css::StyleRule>>
@@ -212,8 +207,6 @@ namespace krys::boo::style
     KRYS_NODISCARD List<Ref<css::KeyframeRule>>
       KeyframeRulesForName(const css::CSSOMStringAtom &animationName,
                            const TimingFunction *defaultTimingFunction) const noexcept;
-
-    KRYS_NODISCARD RefPtr<css::ViewTransitionRule> GetViewTransitionRule() const noexcept;
 
     /// @brief A style with the initial values and the document's default font (`medium`), for @p element
     /// (which may be null).

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/OffsetRotateValue.hpp"
 
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 
 namespace krys::boo::style

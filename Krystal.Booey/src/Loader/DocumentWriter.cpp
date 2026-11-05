@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/Loader/DocumentWriter.hpp"
-#include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Booey/Text/EncodingRegistry.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
@@ -119,8 +119,6 @@ namespace krys::boo
     }
 
     // Create a new document before clearing the frame.
-    // FIXME: Reusing the initial empty document's window for a document of the same origin
-    // (takeDOMWindowFrom), once there are origins.
     auto document = dom::DOMImplementation::CreateDocument(_mimeType, url);
     // A document created by navigation allows declarative shadow roots.
     document->SetAllowDeclarativeShadowRoots(true);
@@ -137,15 +135,12 @@ namespace krys::boo
     // Showing the document in the frame makes its window; the host then sets up the window before the
     // document is parsed (its custom element definitions, say).
     // The previous document is kept alive too, so the new window can take over its navigation entries.
-    RefPtr<dom::Document> previousDocument = ShareRefPtr(frame->Document());
-    RefPtr<LocalDOMWindow> previousWindow =
-      previousDocument ? ShareRefPtr(previousDocument->Window()) : nullptr;
     frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
     if (frame->Document() != document.get())
     {
       return false;
     }
-    frame->Loader().DidBeginDocument(previousWindow.get());
+    frame->Loader().DidBeginDocument();
 
     // The document is loading until its parser finishes.
     document->SetParsing(true);

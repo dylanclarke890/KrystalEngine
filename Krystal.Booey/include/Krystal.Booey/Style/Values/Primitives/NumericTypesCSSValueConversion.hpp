@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"

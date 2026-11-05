@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableRow.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include <utility>
 

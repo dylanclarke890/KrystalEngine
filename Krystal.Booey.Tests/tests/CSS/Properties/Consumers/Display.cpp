@@ -11,7 +11,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"none", ConsumeDisplay) == "none");
     CHECK(ConsumeToText(u8"table-cell", ConsumeDisplay) == "table-cell");
     CHECK(ConsumeToText(u8"list-item", ConsumeDisplay) == "list-item");
-    CHECK(ConsumeToText(u8"-webkit-box", ConsumeDisplay) == "-webkit-box");
+    CHECK(ConsumeToText(u8"-webkit-box", ConsumeDisplay) == "<null>");
 
     // Two-value syntax maps to the short values.
     CHECK(ConsumeToText(u8"block", ConsumeDisplay) == "block");
@@ -22,8 +22,8 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"flow-root inline", ConsumeDisplay) == "inline-block");
     CHECK(ConsumeToText(u8"grid", ConsumeDisplay) == "grid");
     CHECK(ConsumeToText(u8"inline table", ConsumeDisplay) == "inline-table");
-    CHECK(ConsumeToText(u8"-webkit-inline-flex", ConsumeDisplay) == "inline-flex");
-    CHECK(ConsumeToText(u8"-webkit-flex", ConsumeDisplay) == "flex");
+    CHECK(ConsumeToText(u8"-webkit-inline-flex", ConsumeDisplay) == "<null>");
+    CHECK(ConsumeToText(u8"-webkit-flex", ConsumeDisplay) == "<null>");
 
     CHECK(ConsumeToText(u8"block inline", ConsumeDisplay) == "<null>");
     CHECK(ConsumeToText(u8"flex grid", ConsumeDisplay) == "<null>");

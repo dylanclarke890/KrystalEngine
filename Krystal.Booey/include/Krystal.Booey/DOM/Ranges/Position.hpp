@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
-#include "Krystal.Booey/Editing/EditingBoundary.hpp"
-#include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
+#include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

@@ -17,18 +17,18 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Editing/VisibleSelection.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
-#include "Krystal.Booey/Page/DragController.hpp"
-#include "Krystal.Booey/Page/DragState.hpp"
+#include "Krystal.Booey/Page/Drag/DragController.hpp"
+#include "Krystal.Booey/Page/Drag/DragState.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -37,18 +37,18 @@
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/Scrollbar.hpp"
-#include "Krystal.Booey/Platform/StaticPasteboard.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
+#include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
-#include "Krystal.Booey/Rendering/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/UI/Cursor.hpp"
@@ -63,7 +63,7 @@ namespace krys::boo
     constexpr int32 CompositionEventKeyCode = 229;
 
     /// @brief The element key events go to in @p document: its focused element, or its body.
-    // FIXME: A fullscreen video and a plugin document's plugin, once there are any.
+    // FIXME: A fullscreen video, once there is one.
     // https://html.spec.whatwg.org/#focus-processing-model
     // (The target node of a routed key event.)
     KRYS_NODISCARD dom::Element *EventTargetElementForDocument(dom::Document *document) noexcept
@@ -264,8 +264,6 @@ namespace krys::boo
   {
     Ref frame = ShareRef(_frame);
 
-    // FIXME: Hit testing in the root frame (the frames above can obscure this one), once there are subframes.
-
     auto result = HitTestResult {point};
     RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
     if (!document)
@@ -274,7 +272,6 @@ namespace krys::boo
     }
 
     // We should always start hit testing a clean tree.
-    // FIXME: The subframes' too (updateLayoutAndStyleIfNeededRecursive), once there are subframes.
     (void)document->UpdateLayout();
 
     HitTestRequest request(hitType);
@@ -437,7 +434,7 @@ namespace krys::boo
     UpdateLastScrollbarUnderMouse(scrollbar.get(), SetOrClearLastScrollbar::Set);
     bool passedToScrollbar = scrollbar && PassMousePressEventToScrollbar(mouseEvent, scrollbar.get());
 
-    // FIXME: Subframes and pan scrolling.
+    // FIXME: Pan scrolling.
 
     _clickCount = platformMouseEvent.ClickCount();
     _clickNode = ShareRefPtr(mouseEvent.TargetNode());
@@ -590,8 +587,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Subframes and remote frames.
-
     if (auto *view = frame->View())
     {
       UpdateCursor(*view, mouseEvent.GetHitTestResult(), platformMouseEvent.ShiftKey());
@@ -725,7 +720,7 @@ namespace krys::boo
                                                     HitTestRequest::Type::DisallowUserAgentShadowContent}),
       platformMouseEvent);
 
-    // FIXME: Mouse capture, subframes and remote frames.
+    // FIXME: Mouse capture.
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
     bool swallowMouseUpEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseUp), targetNode.get(),
@@ -1072,7 +1067,6 @@ namespace krys::boo
     if (initialKeyEvent.GetType() == Type::RawKeyDown)
     {
       (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
-      // FIXME: Also when the focused frame changed, once there are subframes.
       return keydown->DefaultPrevented() || keydown->DefaultHandled()
              || DefaultKeyboardEventHandler(*keydown);
     }
@@ -1103,8 +1097,7 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Also when the focused frame changed, once there are subframes; the backward compatibility mode,
-    // which dispatches a cancelled keypress anyway.
+    // FIXME: The backward compatibility mode, which dispatches a cancelled keypress anyway.
     bool keydownResult =
       keydown->DefaultPrevented() || keydown->DefaultHandled() || DefaultKeyboardEventHandler(*keydown);
     if (keydownResult)
@@ -1823,7 +1816,7 @@ namespace krys::boo
 
     RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement());
 
-    // FIXME: Widgets and subframes (isOverWidget, passWheelEventToWidget), once there are subframes.
+    // FIXME: Widgets (isOverWidget, passWheelEventToWidget), once there are any.
 
     if (element)
     {
@@ -1958,8 +1951,6 @@ namespace krys::boo
     {
       return true;
     }
-    // FIXME: A scroll that overscroll-behavior blocks rubber-bands (overscrollBehaviorAllowsRubberBand), once
-    // there's rubber-banding.
 
     return false;
   }
@@ -3260,8 +3251,6 @@ namespace krys::boo
     GetDragState().Source = ShareRefPtr(element);
   }
 
-  // FIXME: The origin the dragged image's data is restricted to (restrictedOriginForImageData), once there
-  // are security origins.
   bool EventHandler::CanDropCurrentlyDraggedImageAsFile() const noexcept
   {
     return true;
@@ -3374,7 +3363,6 @@ namespace krys::boo
     return {accept, null};
   }
 
-  // FIXME: Subframes' drags (contentFrameForNode), once there are subframes.
   EventHandler::DragTargetResponse
     EventHandler::UpdateDragAndDrop(const PlatformMouseEvent &event,
                                     const Func<UniquePtr<Pasteboard>()> &makePasteboard,
@@ -3411,10 +3399,7 @@ namespace krys::boo
     DragTargetResponse response;
     if (_dragTarget != newTarget)
     {
-      // FIXME: this ordering was explicitly chosen to match WinIE. However,
-      // it is sometimes incorrect when dragging within subframes.
-      //
-      // Moreover, this ordering conforms to the HTML spec's drag-and-drop processing model.
+      // This ordering matches the HTML spec's drag-and-drop processing model.
       if (newTarget)
       {
         // As per the HTML spec, we must always fire a drag event before firing a dragenter, dragleave, or
@@ -3620,9 +3605,6 @@ namespace krys::boo
            && !_frame.Document()->Selection().Selection().IsInPasswordField();
   }
 
-  // FIXME: The event loop's handling of the drag (eventLoopHandleMouseDragged) and the view activated by the
-  // press (eventActivatedView), which are the Mac's; images' origins (restrictedOriginForImageData), once
-  // there are security origins.
   bool EventHandler::HandleDrag(const MouseEventWithHitTestResults &event,
                                 CheckDragHysteresis checkDragHysteresis) noexcept
   {

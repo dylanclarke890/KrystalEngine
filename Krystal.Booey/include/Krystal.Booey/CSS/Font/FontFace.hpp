@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
-#include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -39,7 +39,6 @@ namespace krys::boo::css
 
   /// @brief A font face from an `@font-face` rule (or a face of an installed family that shares its name
   /// with one): its descriptors, its sources in order, and its loading state.
-  // FIXME: The `FontFace` wrapper, once there's scripting.
   class CSSFontFace final : public RefCounted<CSSFontFace>, public CanMakeWeakPtr<CSSFontFace>
   {
     KRYS_NON_COPY_MOVABLE(CSSFontFace);

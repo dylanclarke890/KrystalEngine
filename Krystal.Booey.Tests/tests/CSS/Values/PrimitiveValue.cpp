@@ -2,7 +2,7 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include <numbers>
 
 namespace krys::boo::css::tests

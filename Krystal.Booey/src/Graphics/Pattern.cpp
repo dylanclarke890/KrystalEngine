@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/Pattern.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo

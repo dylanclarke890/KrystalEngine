@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/WebAnimationTime.hpp"
+#include "Krystal.Booey/Animation/Timing/WebAnimationTime.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTime.hpp"

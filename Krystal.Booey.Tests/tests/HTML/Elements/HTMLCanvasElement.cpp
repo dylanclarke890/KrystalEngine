@@ -2,12 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FakeEngineTexture.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
-#include "Krystal.Booey/FileAPI/Blob.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
 
 namespace krys::boo::tests
 {
@@ -180,36 +179,6 @@ namespace krys::boo::tests
       CHECK(canvas.ToDataURL(u8"image/gif").starts_with(u8"data:image/png;base64,"));
       // A canvas without pixels has none to encode.
       CHECK(fixture.Canvas(u8"empty").ToDataURL() == u8"data:,");
-    }
-
-    SECTION("blobs, in a task")
-    {
-      RefPtr<Blob> blob;
-      bool called = false;
-      canvas.ToBlob(
-        [&](RefPtr<Blob> &&result)
-        {
-          called = true;
-          blob = krys::move(result);
-        },
-        u8"image/jpeg");
-      CHECK_FALSE(called);
-      html::EventLoop::Current().RunUntilIdle();
-      REQUIRE(called);
-      REQUIRE(blob);
-      CHECK(blob->Type() == u8"image/jpeg");
-      CHECK(blob->Size() > 0u);
-
-      called = false;
-      fixture.Canvas(u8"empty").ToBlob(
-        [&](RefPtr<Blob> &&result)
-        {
-          called = true;
-          blob = krys::move(result);
-        });
-      html::EventLoop::Current().RunUntilIdle();
-      CHECK(called);
-      CHECK_FALSE(blob);
     }
   }
 }

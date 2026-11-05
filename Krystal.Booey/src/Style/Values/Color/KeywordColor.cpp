@@ -14,10 +14,8 @@ namespace krys::boo::style
     switch (unresolved.Value)
     {
       case css::ValueId::InternalDocumentTextColor: return {protectedDocument->TextColor()};
-      case css::ValueId::WebkitLink:
-        return {state.ForVisitedLink == ForVisitedLink::Yes ? protectedDocument->VisitedLinkColor(state.Style)
-                                                            : protectedDocument->LinkColor(state.Style)};
-      case css::ValueId::WebkitActivelink: return {protectedDocument->ActiveLinkColor(state.Style)};
+      case css::ValueId::WebkitLink:                return {protectedDocument->LinkColor(state.Style)};
+      case css::ValueId::WebkitActivelink:          return {protectedDocument->ActiveLinkColor(state.Style)};
       case css::ValueId::WebkitFocusRingColor:
         return {RenderTheme::Singleton().FocusRingColor(protectedDocument->StyleColorOptions(&state.Style))};
       case css::ValueId::Currentcolor: return {CurrentColor()};

@@ -26,7 +26,6 @@ namespace krys::boo::dom
 
 namespace krys::boo::style
 {
-  enum class ForVisitedLink : bool;
 
   // The following style color kinds are forward declared and stored in
   // UniquePtrs to avoid unnecessarily growing the size of Color for the
@@ -164,10 +163,8 @@ namespace krys::boo::style
   KRYS_NODISCARD Color ToStyleColor(const css::Color &value, ColorResolutionState &state) noexcept;
   KRYS_NODISCARD Color ToStyleColor(const css::Color &value, Ref<const dom::Document> document,
                                     const RenderStyle &style,
-                                    const css::ToLengthConversionData &conversionData,
-                                    style::ForVisitedLink forVisitedLink) noexcept;
-  KRYS_NODISCARD Color ToStyleColor(const css::Color &value, const BuilderState &builderState,
-                                    style::ForVisitedLink forVisitedLink) noexcept;
+                                    const css::ToLengthConversionData &conversionData) noexcept;
+  KRYS_NODISCARD Color ToStyleColor(const css::Color &value, const BuilderState &builderState) noexcept;
 
   template <>
   struct ToCSS<Color>
@@ -178,16 +175,12 @@ namespace krys::boo::style
   template <>
   struct ToStyle<css::Color>
   {
-    KRYS_NODISCARD Color operator()(const css::Color &value, const BuilderState &builderState,
-                                    style::ForVisitedLink forVisitedLink) noexcept;
     KRYS_NODISCARD Color operator()(const css::Color &value, const BuilderState &builderState) noexcept;
   };
 
   template <>
   struct CSSValueConversion<Color>
   {
-    KRYS_NODISCARD Color operator()(BuilderState &builderState, const css::Value &value,
-                                    style::ForVisitedLink forVisitedLink) noexcept;
     KRYS_NODISCARD Color operator()(BuilderState &builderState, const css::Value &value) noexcept;
   };
 

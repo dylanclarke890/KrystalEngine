@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSKeyframeRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Core/Assert.hpp"

@@ -4,48 +4,10 @@
 #include "Krystal.Booey/CSS/Rules/FunctionRule.hpp"
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 
 namespace krys::boo::css::tests
 {
-  TEST_CASE_METHOD(ValueFixture, "ViewTransitionRule", "[CSS][Rules][ViewTransitionRule]")
-  {
-    SECTION("No descriptors")
-    {
-      auto rule = ViewTransitionRule::Create(MutableStyleProperties::Create(ParserMode::HTMLStandard));
-      CHECK(rule->Type() == RuleType::ViewTransition);
-      CHECK(rule->IsViewTransitionRule());
-      CHECK_FALSE(rule->Navigation());
-      CHECK(rule->ComputedNavigation() == ViewTransitionNavigation::None);
-      CHECK(rule->Types().empty());
-    }
-
-    SECTION("navigation and types")
-    {
-      auto rule = ViewTransitionRule::Create(
-        ParseDescriptors(u8"navigation: auto; types: slide forwards", RuleType::ViewTransition));
-      CHECK(rule->Navigation() == ViewTransitionNavigation::Auto);
-      CHECK(rule->ComputedNavigation() == ViewTransitionNavigation::Auto);
-      REQUIRE(rule->Types().size() == 2);
-      CHECK(rule->Types()[0] == CSSOMStringAtom(u8"slide"));
-      CHECK(rule->Types()[1] == CSSOMStringAtom(u8"forwards"));
-
-      auto copied = static_cast<const Rule &>(*rule).Copy();
-      auto &copy = Downcast<ViewTransitionRule>(*copied);
-      CHECK(copy.Navigation() == ViewTransitionNavigation::Auto);
-      CHECK(copy.Types().size() == 2);
-    }
-
-    SECTION("navigation: none and types: none")
-    {
-      auto rule = ViewTransitionRule::Create(
-        ParseDescriptors(u8"navigation: none; types: none", RuleType::ViewTransition));
-      CHECK(rule->Navigation() == ViewTransitionNavigation::None);
-      CHECK(rule->Types().empty());
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "PositionTryRule", "[CSS][Rules][PositionTryRule]")
   {
     auto rule = PositionTryRule::Create(CSSOMStringAtom(u8"--flip"), ImmutableDeclarations(u8"top: 1px"));

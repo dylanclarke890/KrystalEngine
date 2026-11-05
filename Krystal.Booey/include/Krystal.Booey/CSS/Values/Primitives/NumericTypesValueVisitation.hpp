@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/IterationStatus.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/IterationStatus.hpp"
 
 namespace krys::boo::css
 {

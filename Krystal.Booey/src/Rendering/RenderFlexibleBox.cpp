@@ -1,21 +1,21 @@
 ﻿#include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
-#include "Krystal.Booey/Graphics/FontBaseline.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontBaseline.hpp"
 #include "Krystal.Booey/Layout/Integration/Flex/LayoutIntegrationFlexLayout.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BaselineAlignment.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
-#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleContentAlignmentData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -1744,7 +1744,7 @@ namespace krys::boo
         return false;
       }
     }
-    if (!MainAxisIsFlexItemInlineAxis(flexItem) && (size.IsIntrinsic() || size.IsIntrinsicKeyword()))
+    if (!MainAxisIsFlexItemInlineAxis(flexItem) && size.IsIntrinsic())
     {
       return false;
     }

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Maths/Matrix.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
-#include <cassert>
 #include <limits>
 
 namespace krys
@@ -431,7 +431,7 @@ namespace krys
     /// @param scalar the scalar.
     KRYS_NODISCARD constexpr Quaternion<T> operator/(const T scalar) const noexcept
     {
-      assert(scalar != 0);
+      krys_debug_assert(scalar != 0);
       return Quaternion<T>(w / scalar, x / scalar, y / scalar, z / scalar);
     }
 
@@ -439,7 +439,7 @@ namespace krys
     /// @param scalar the scalar.
     constexpr Quaternion<T> &operator/=(const T scalar) noexcept
     {
-      assert(scalar != 0);
+      krys_debug_assert(scalar != 0);
       *this = *this / scalar;
       return *this;
     }
@@ -468,7 +468,7 @@ namespace krys
     /// @brief Converts this quaternion to a 3x3 rotation matrix.
     KRYS_NODISCARD constexpr Matrix3x3<T> ToMat3x3() const noexcept
     {
-      assert(IsNormalized());
+      krys_debug_assert(IsNormalized());
 
       const auto x2 = x + x;
       const auto y2 = y + y;
@@ -490,7 +490,7 @@ namespace krys
     /// @brief Converts this quaternion to a 3x4 rotation matrix.
     KRYS_NODISCARD constexpr Matrix3x4<T> ToMat3x4() const noexcept
     {
-      assert(IsNormalized());
+      krys_debug_assert(IsNormalized());
 
       const auto x2 = x + x;
       const auto y2 = y + y;
@@ -512,7 +512,7 @@ namespace krys
     /// @brief Converts this quaternion to a 4x4 rotation matrix.
     KRYS_NODISCARD constexpr Matrix4x4<T> ToMat4x4() const noexcept
     {
-      assert(IsNormalized());
+      krys_debug_assert(IsNormalized());
 
       const auto x2 = x + x;
       const auto y2 = y + y;
@@ -535,7 +535,7 @@ namespace krys
     /// @param translation the translation vector.
     KRYS_NODISCARD constexpr Matrix4x4<T> ToMat4x4(const Vector3<T> &translation) const noexcept
     {
-      assert(IsNormalized());
+      krys_debug_assert(IsNormalized());
 
       const auto x2 = x + x;
       const auto y2 = y + y;
@@ -558,7 +558,7 @@ namespace krys
     /// @param translation the translation vector. The w component of the vector is ignored.
     KRYS_NODISCARD constexpr Matrix4x4<T> ToMat4x4(const Vector4<T> &translation) const noexcept
     {
-      assert(IsNormalized());
+      krys_debug_assert(IsNormalized());
       return ToMat4x4(Vector3<T>(translation.x, translation.y, translation.z));
     }
 
@@ -600,7 +600,7 @@ namespace krys
     /// @note (q^-1 = q^* / (q * q))
     KRYS_NODISCARD constexpr Quaternion<T> Inverse() const noexcept
     {
-      assert(Dot(*this) != 0);
+      krys_debug_assert(Dot(*this) != 0);
       return Conjugate() / Dot(*this);
     }
 
@@ -613,7 +613,7 @@ namespace krys
     /// @brief Normalize this quaternion.
     constexpr Quaternion<T> &Normalize() noexcept
     {
-      assert(Length() != 0);
+      krys_debug_assert(Length() != 0);
 
       *this /= Length();
       return *this;

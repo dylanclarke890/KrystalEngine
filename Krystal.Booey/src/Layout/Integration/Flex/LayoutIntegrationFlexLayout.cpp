@@ -8,8 +8,8 @@
 #include "Krystal.Booey/Layout/LayoutTree/FormattingContextBoxIterator.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle.hpp"
@@ -234,7 +234,7 @@ namespace krys::boo::layout_integration
         return false;
       }
 
-      if (flexItem.IsFlexibleBoxIncludingDeprecated())
+      if (flexItem.IsRenderFlexibleBox())
       {
         return false;
       }

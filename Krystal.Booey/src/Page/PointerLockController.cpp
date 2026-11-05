@@ -3,14 +3,14 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/TaskSource.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/TaskSource.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
-#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include <utility>
 
 namespace krys::boo
@@ -76,9 +76,6 @@ namespace krys::boo
              dom::Exception {dom::ExceptionCode::NotAllowedError, u8"Pointer lock requires a user gesture."});
       return;
     }
-
-    // FIXME: The sandboxed pointer lock browsing context flag (a SecurityError), once there are sandboxed
-    // frames.
 
     if (options && options->UnadjustedMovement && !SupportsUnadjustedMovement())
     {

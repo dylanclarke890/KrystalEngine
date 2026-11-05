@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/PredefinedColorSpace.hpp"
-#include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
+#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo::html

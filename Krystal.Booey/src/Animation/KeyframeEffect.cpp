@@ -1,12 +1,11 @@
 ﻿#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
-#include "Krystal.Booey/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
-#include "Krystal.Booey/Animation/ViewTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Animations.hpp"
@@ -21,23 +20,23 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerAnimation.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperationsSharedPrimitivesPrefix.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
-#include "Krystal.Booey/Style/Extractor.hpp"
-#include "Krystal.Booey/Style/Interpolation.hpp"
+#include "Krystal.Booey/Style/Extractor/Extractor.hpp"
+#include "Krystal.Booey/Style/Interpolation/Interpolation.hpp"
 #include "Krystal.Booey/Style/PendingResources.hpp"
-#include "Krystal.Booey/Style/PropertyAllowlist.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Rules/PropertyAllowlist.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
@@ -1067,7 +1066,7 @@ namespace krys::boo
     const auto *lastStyleChangeEventStyle = TargetStyleable()->LastStyleChangeEventStyle();
     const auto &elementStyle = lastStyleChangeEventStyle ? *lastStyleChangeEventStyle : CurrentStyle();
 
-    style::Extractor computedStyleExtractor {target.get(), false, _pseudoElementIdentifier};
+    style::Extractor computedStyleExtractor {target.get(), _pseudoElementIdentifier};
 
     BlendingKeyframes computedBlendingKeyframes(_blendingKeyframes.Identifier());
     computedBlendingKeyframes.CopyKeyframes(_blendingKeyframes);
@@ -1123,15 +1122,7 @@ namespace krys::boo
 
       auto compositeOperationForStyleRuleKeyframe = [&](const Ref<css::KeyframeRule> &styleRuleKeyframe)
       {
-        if (auto compositeOperationCSSValue =
-              styleRuleKeyframe->Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
-        {
-          if (auto keyframeCompositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
-          {
-            return *keyframeCompositeOperation;
-          }
-        }
-        return defaultCompositeOperation;
+        return KeyframeRuleCompositeOperation(*styleRuleKeyframe).value_or(defaultCompositeOperation);
       };
 
       auto timingFunctionForStyleRuleKeyframe =
@@ -3529,9 +3520,6 @@ namespace krys::boo
        && _blendingKeyframes.ContainsProperty(css::PropertyId::Width))
       || (_blendingKeyframes.HasHeightDependentTransform()
           && _blendingKeyframes.ContainsProperty(css::PropertyId::Height));
-
-    // FIXME: View transition group pseudo-elements' size and transform animations, once there are view
-    // transitions.
   }
 
   void KeyframeEffect::EffectStackNoLongerPreventsAcceleration() noexcept
@@ -3619,13 +3607,7 @@ namespace krys::boo
 
   bool KeyframeEffect::IsPropertyAdditiveOrCumulative(KeyframeInterpolation::Property property) const noexcept
   {
-    if (const auto *animatableCSSProperty = std::get_if<AnimatableCSSProperty>(&property))
-    {
-      return style::interpolation::IsAdditiveOrCumulative(*animatableCSSProperty);
-    }
-
-    krys_debug_assert(false);
-    return false;
+    return style::interpolation::IsAdditiveOrCumulative(property);
   }
 
   RefPtr<const ViewTimeline> KeyframeEffect::ActiveViewTimeline() const noexcept

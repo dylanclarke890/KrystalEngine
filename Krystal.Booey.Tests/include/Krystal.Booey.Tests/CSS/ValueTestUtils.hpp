@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
@@ -28,6 +29,12 @@ namespace krys::boo::css::tests
   KRYS_NODISCARD inline std::string CssText(const Value &value) noexcept
   {
     return ToNarrow(value.CssText(DefaultSerialisationContext()));
+  }
+
+  /// @brief An image value for `https://example.com/<name>.png`, for tests that need some image.
+  KRYS_NODISCARD inline Ref<ImageValue> TestImage(utf8_stringview name) noexcept
+  {
+    return ImageValue::Create(url::URL {u8"https://example.com/" + utf8_string {name} + u8".png"});
   }
 
   /// @brief Collects the values `VisitChildren` visits, in order.

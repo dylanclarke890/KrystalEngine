@@ -1,22 +1,123 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Selectors/Enums/SelectorMatch.hpp"
-#include "Krystal.Booey/CSS/Selectors/Enums/SelectorPagePseudoClass.hpp"
-#include "Krystal.Booey/CSS/Selectors/Enums/SelectorRelation.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorFlag.hpp"
-#include "Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp"
-#include "Krystal.Booey/CSS/Selectors/Types/MatchLowercase.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo::css
+{
+  enum class SelectorMatch : uint8
+  {
+    None = 0,
+    /// @brief Matches the type (i.e. tag name) of the element. Includes the universal selector `*`.
+    Type,
+    /// @brief Matches the ID of the element.
+    Id,
+    /// @brief Matches the class of the element.
+    Class,
+    /// @brief Matches a pseudo-class of the element.
+    PseudoClass,
+    /// @brief Matches a pseudo-element of the element.
+    PseudoElement,
+    /// @brief Matches an element when it has a specific attribute, regardless of the value of that attribute.
+    AttributeExists,
+    /// @brief Matches an element when it has a specific attribute with a specific value.
+    AttributeEquals,
+    /// @brief Matches an element when it has an attribute whose value either exactly matches or begins with a
+    /// specific value immediately followed by "-" (U+002D).
+    AttributeDash,
+    /// @brief Matches an element when it has an attribute whose value is a whitespace-separated list of
+    /// words, one of which is exactly a specific value.
+    AttributeIncludes,
+    /// @brief Matches an element when it has an attribute whose value starts with a specific value.
+    AttributePrefix,
+    /// @brief Matches an element when it has an attribute whose value ends with a specific value.
+    AttributeSuffix,
+    /// @brief Matches an element when it has an attribute whose value contains a specific value.
+    AttributeSubstring,
+    /// @brief Matches a nesting selector of the element.
+    NestingParent,
+    /// @brief Matches the :has() scope of the element.
+    HasScope,
+    /// @brief The selector is invalid or not supported. This is used for forgiving parsing of selectors that
+    /// are not supported by the browser but need to be preserved for serialization.
+    ForgivingUnknown,
+    /// @brief The selector is invalid or not supported but contains a nesting combinator (&). This is used
+    /// for forgiving parsing of selectors that are not supported by the browser but need to be preserved for
+    /// serialization.
+    ForgivingUnknownNestContaining,
+  };
+
+  /// @brief The relationship between two selectors in a SelectorList. From the perspective of the second
+  /// (rightmost) selector, so the relationship of `p` in the selector `div > p` is `SelectorRelation::Child`,
+  /// and the relationship of `p` in the selector `div p` is `SelectorRelation::Descendant` (`div` does not
+  /// have a relationship to any selector in both cases).
+  enum class SelectorRelation : uint8
+  {
+    /// @brief The selector forms a compound selector with the preceding selector. (e.g. `div.class`).
+    Compounding,
+    /// @brief The selector is a direct child of the preceding selector. (e.g. `div > p`).
+    Child,
+    /// @brief The selector is a descendant of the preceding selector. (e.g. `div p`).
+    Descendant,
+    /// @brief The selector is the direct next sibling of the preceding selector. (e.g. `div + p`).
+    NextSibling,
+    /// @brief The selector is one of the following siblings of the preceding selector. (e.g. `div ~ p`).
+    SubsequentSibling,
+    /// @brief The selector is in the shadow tree of the preceding selector's element.
+    ShadowDescendant,
+    /// @brief The selector is a part (`::part()`) exposed by the shadow tree of the preceding selector's
+    /// element.
+    ShadowPartDescendant,
+    /// @brief The selector is slotted (`::slotted()`) into the preceding selector's element.
+    ShadowSlotted,
+  };
+
+  enum class SelectorFlag : uint8
+  {
+    None = 0,
+    /// @brief Set when an attribute selector has a case-insensitive matching flag (e.g. `[attr=value i]`).
+    CaseInsensitiveAttributeValueMatching = 1 << 0,
+    /// @brief Set when a selector is the last selector in a selector list.
+    IsLastInSelectorList = 1 << 1,
+    /// @brief Set when a selector is the first component of a complex selector (e.g. `div` in `div > p`).
+    IsFirstInComplexSelector = 1 << 2,
+    /// @brief Set when a selector is the last component of a complex selector (e.g. `p` in `div > p`).
+    IsLastInComplexSelector = 1 << 3,
+    /// @brief Set when a selector has rare data.
+    HasRareData = 1 << 4,
+    /// @brief Set when the type selector is for a namespace rule (e.g. `@namespace svg
+    /// url(http://www.w3.org/2000/svg);`).
+    TagIsForNamespaceRule = 1 << 5,
+    /// @brief Set when a selector is implicit (it isn't written by a UA or author but is implied by the
+    /// CSSOM, e.g. `:root`).
+    IsImplicit = 1 << 6,
+  };
+
+  struct IsCaseSensitive : public StronglyTypedBool<IsCaseSensitive>
+  {
+    using Base::Base;
+  };
+
+  struct MatchLowercase : public StronglyTypedBool<MatchLowercase>
+  {
+    using Base::Base;
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorMatch, 17uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorRelation, 8uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::SelectorFlag, 8uz);
 
 namespace krys::boo::css
 {
@@ -78,8 +179,7 @@ namespace krys::boo::css
       // Used for :contains and :nth-*
       CSSOMStringAtom Argument {CSSOMStringAtom::Null()};
 
-      // Used for :active-view-transition-type, ::highlight, ::view-transition-{group, image-pair, new, old},
-      // ::part arguments.
+      // Used for ::highlight and ::part arguments.
       FixedVector<CSSOMStringAtom> ArgumentList;
 
       // Used for :lang arguments.
@@ -123,7 +223,7 @@ namespace krys::boo::css
   private:
     SelectorRelation _relation {SelectorRelation::Descendant};
     SelectorMatch _match {SelectorMatch::None};
-    // A SelectorPseudoClass, SelectorPseudoElement or SelectorPagePseudoClass, depending on _match.
+    // A SelectorPseudoClass or SelectorPseudoElement, depending on _match.
     uint8 _pseudoType {0};
     SelectorFlag _flags {SelectorFlag::IsFirstInComplexSelector | SelectorFlag::IsLastInComplexSelector};
 
@@ -154,7 +254,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD uint32 ComputeSpecificity() const noexcept;
     KRYS_NODISCARD Array<uint8, 3> ComputeSpecificityTuple() const noexcept;
-    KRYS_NODISCARD uint32 SpecificityForPage() const noexcept;
 
     bool VisitSimpleSelectors(
       VisitFunc &&func,
@@ -261,12 +360,6 @@ namespace krys::boo::css
       return static_cast<SelectorPseudoElement>(_pseudoType);
     }
 
-    KRYS_NODISCARD SelectorPagePseudoClass PagePseudoClass() const noexcept
-    {
-      krys_debug_assert(Match() == SelectorMatch::PagePseudoClass);
-      return static_cast<SelectorPagePseudoClass>(_pseudoType);
-    }
-
     KRYS_NODISCARD bool MatchesPseudoElement() const noexcept
     {
       return Match() == SelectorMatch::PseudoElement;
@@ -306,11 +399,6 @@ namespace krys::boo::css
     void SetLastInSelectorList() noexcept
     {
       SetFlag(SelectorFlag::IsLastInSelectorList, true);
-    }
-
-    KRYS_NODISCARD bool IsForPage() const noexcept
-    {
-      return HasFlag(_flags, SelectorFlag::IsForPage);
     }
 
     /// @brief Whether this selector is not author/UA written.
@@ -353,11 +441,6 @@ namespace krys::boo::css
       _pseudoType = ToUnderlying(pseudoElement);
     }
 
-    void SetPagePseudoClass(SelectorPagePseudoClass pagePseudoClass) noexcept
-    {
-      _pseudoType = ToUnderlying(pagePseudoClass);
-    }
-
     void SetRelation(SelectorRelation relation) noexcept
     {
       _relation = relation;
@@ -366,11 +449,6 @@ namespace krys::boo::css
     void SetMatch(SelectorMatch match) noexcept
     {
       _match = match;
-    }
-
-    void SetForPage() noexcept
-    {
-      SetFlag(SelectorFlag::IsForPage, true);
     }
 
     void SetImplicit() noexcept

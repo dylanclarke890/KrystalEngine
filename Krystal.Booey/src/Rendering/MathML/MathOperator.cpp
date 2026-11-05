@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/MathOperator.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 
@@ -836,7 +836,7 @@ namespace krys::boo
     // Make a copy of the PaintInfo because ApplyTransform will modify its rect.
     PaintInfo paintInfo(info);
     GraphicsContextStateSaver stateSaver(paintInfo.Context());
-    paintInfo.Context().SetFillColor(style.VisitedDependentColorWithColorFilter(css::PropertyId::Color));
+    paintInfo.Context().SetFillColor(style.ColorResolvingCurrentColor(css::PropertyId::Color));
 
     // For a radical character, we may need some scale transform to stretch it vertically or mirror it.
     if (_baseCharacter == RadicalOperator)

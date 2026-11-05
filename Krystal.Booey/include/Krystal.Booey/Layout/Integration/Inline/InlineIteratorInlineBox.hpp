@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/RectEdges.hpp"
+#include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"

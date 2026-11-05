@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Transforms/RotateTransformOperation.hpp"
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 
 namespace krys::boo

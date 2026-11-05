@@ -1,0 +1,501 @@
+﻿#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include <cmath>
+#include <limits>
+#include <numbers>
+
+namespace krys
+{
+  namespace detail_math
+  {
+    KRYS_NODISCARD constexpr uint64 ipow_impl(uint64 base, uint64 exp, uint64 result) noexcept
+    {
+      return exp < 1u ? result : ipow_impl(base * base, exp / 2, (exp % 2) ? result * base : result);
+    }
+  }
+
+  template <typename T>
+  using Limits = std::numeric_limits<T>;
+
+  template <Number T>
+  KRYS_NODISCARD constexpr bool IsNaN(T value) noexcept
+  {
+    if constexpr (FloatingPoint<T>)
+    {
+      return value != value;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  KRYS_NODISCARD constexpr uint16 FastMultiplyBy255(uint16 value) noexcept
+  {
+    return (value << 8) - value;
+  }
+
+  /// @brief While this is an approximate algorithm for division by 255, it gives perfectly accurate results
+  /// for 16-bit values.
+  KRYS_NODISCARD constexpr uint16 FastDivideBy255(uint16 value) noexcept
+  {
+    uint16 approximation = value >> 8;
+    uint16 remainder = value - (approximation * 255) + 1;
+    return approximation + (remainder >> 8);
+  }
+
+  KRYS_NODISCARD constexpr uint64 ipow(uint64 base, uint64 exp) noexcept
+  {
+    return detail_math::ipow_impl(base, exp, 1);
+  }
+
+#pragma region Angle Utils
+
+  constexpr double radiansPerDegreeDouble = std::numbers::pi / 180.0;
+  constexpr double degreesPerRadianDouble = 180.0 / std::numbers::pi;
+  constexpr double gradientsPerDegreeDouble = 400.0 / 360.0;
+  constexpr double degreesPerGradientDouble = 360.0 / 400.0;
+  constexpr double turnsPerDegreeDouble = 1.0 / 360.0;
+  constexpr double degreesPerTurnDouble = 360.0;
+  constexpr double radiansPerTurnDouble = 2.0 * std::numbers::pi;
+
+  KRYS_NODISCARD constexpr double deg2rad(double d) noexcept
+  {
+    return d * radiansPerDegreeDouble;
+  }
+
+  KRYS_NODISCARD constexpr double rad2deg(double r) noexcept
+  {
+    return r * degreesPerRadianDouble;
+  }
+
+  KRYS_NODISCARD constexpr double deg2grad(double d) noexcept
+  {
+    return d * gradientsPerDegreeDouble;
+  }
+
+  KRYS_NODISCARD constexpr double grad2deg(double g) noexcept
+  {
+    return g * degreesPerGradientDouble;
+  }
+
+  KRYS_NODISCARD constexpr double deg2turn(double d) noexcept
+  {
+    return d * turnsPerDegreeDouble;
+  }
+
+  KRYS_NODISCARD constexpr double turn2deg(double t) noexcept
+  {
+    return t * degreesPerTurnDouble;
+  }
+
+  // Note that these differ from the casting the double values above in their rounding errors.
+  constexpr float radiansPerDegreeFloat = std::numbers::pi_v<float> / 180.0f;
+  constexpr float degreesPerRadianFloat = 180.0f / std::numbers::pi_v<float>;
+  constexpr float gradientsPerDegreeFloat = 400.0f / 360.0f;
+  constexpr float degreesPerGradientFloat = 360.0f / 400.0f;
+  constexpr float turnsPerDegreeFloat = 1.0f / 360.0f;
+  constexpr float degreesPerTurnFloat = 360.0f;
+  constexpr float radiansPerTurnFloat = 2.0f * std::numbers::pi_v<float>;
+  constexpr float piOverTwoFloat = static_cast<float>(std::numbers::pi / 2);
+
+  KRYS_NODISCARD constexpr float deg2rad(float d) noexcept
+  {
+    return d * radiansPerDegreeFloat;
+  }
+
+  KRYS_NODISCARD constexpr float rad2deg(float r) noexcept
+  {
+    return r * degreesPerRadianFloat;
+  }
+
+  KRYS_NODISCARD constexpr float deg2grad(float d) noexcept
+  {
+    return d * gradientsPerDegreeFloat;
+  }
+
+  KRYS_NODISCARD constexpr float grad2deg(float g) noexcept
+  {
+    return g * degreesPerGradientFloat;
+  }
+
+  KRYS_NODISCARD constexpr float deg2turn(float d) noexcept
+  {
+    return d * turnsPerDegreeFloat;
+  }
+
+  KRYS_NODISCARD constexpr float turn2deg(float t) noexcept
+  {
+    return t * degreesPerTurnFloat;
+  }
+
+  // Treat these as conversions through the canonical unit for angles, which is degrees.
+  KRYS_NODISCARD constexpr double rad2grad(double r) noexcept
+  {
+    return deg2grad(rad2deg(r));
+  }
+
+  KRYS_NODISCARD constexpr double grad2rad(double g) noexcept
+  {
+    return deg2rad(grad2deg(g));
+  }
+
+  KRYS_NODISCARD constexpr double turn2grad(double t) noexcept
+  {
+    return deg2grad(turn2deg(t));
+  }
+
+  KRYS_NODISCARD constexpr double grad2turn(double g) noexcept
+  {
+    return deg2turn(grad2deg(g));
+  }
+
+  KRYS_NODISCARD constexpr double turn2rad(double t) noexcept
+  {
+    return deg2rad(turn2deg(t));
+  }
+
+  KRYS_NODISCARD constexpr double rad2turn(double r) noexcept
+  {
+    return deg2turn(rad2deg(r));
+  }
+
+  KRYS_NODISCARD constexpr float rad2grad(float r) noexcept
+  {
+    return deg2grad(rad2deg(r));
+  }
+
+  KRYS_NODISCARD constexpr float grad2rad(float g) noexcept
+  {
+    return deg2rad(grad2deg(g));
+  }
+
+  KRYS_NODISCARD constexpr float turn2grad(float t) noexcept
+  {
+    return deg2grad(turn2deg(t));
+  }
+
+  KRYS_NODISCARD constexpr float grad2turn(float g) noexcept
+  {
+    return deg2turn(grad2deg(g));
+  }
+
+  KRYS_NODISCARD constexpr float turn2rad(float t) noexcept
+  {
+    return deg2rad(turn2deg(t));
+  }
+
+  KRYS_NODISCARD constexpr float rad2turn(float r) noexcept
+  {
+    return deg2turn(rad2deg(r));
+  }
+
+#pragma endregion
+
+#pragma region ClampTo
+
+  KRYS_NODISCARD inline double RoundTowardsPositiveInfinity(double value) noexcept
+  {
+    return std::floor(value + 0.5);
+  }
+
+  KRYS_NODISCARD inline float RoundTowardsPositiveInfinity(float value) noexcept
+  {
+    return std::floor(value + 0.5f);
+  }
+
+  // Limits<T>::min() returns the smallest positive value for floating point types
+  template <typename T>
+  KRYS_NODISCARD consteval T DefaultMinimumForClamp() noexcept
+  {
+    return Limits<T>::min();
+  }
+
+  template <>
+  KRYS_NODISCARD consteval float DefaultMinimumForClamp() noexcept
+  {
+    return -Limits<float>::max();
+  }
+
+  template <>
+  KRYS_NODISCARD consteval double DefaultMinimumForClamp() noexcept
+  {
+    return -Limits<double>::max();
+  }
+
+  template <typename T>
+  KRYS_NODISCARD consteval T DefaultMaximumForClamp() noexcept
+  {
+    return Limits<T>::max();
+  }
+
+  // Same type in and out.
+  template <typename TargetType, typename SourceType>
+  requires SameType<TargetType, SourceType>
+  KRYS_NODISCARD constexpr TargetType ClampTo(SourceType value,
+                                              TargetType min = DefaultMinimumForClamp<TargetType>(),
+                                              TargetType max = DefaultMaximumForClamp<TargetType>()) noexcept
+  {
+    if (value >= max)
+    {
+      return max;
+    }
+
+    if (value <= min)
+    {
+      return min;
+    }
+
+    return value;
+  }
+
+  // Floating point source.
+  template <typename TargetType, typename SourceType>
+  requires(!SameType<TargetType, SourceType> && FloatingPoint<SourceType>
+           && !(FloatingPoint<TargetType> && sizeof(TargetType) > sizeof(SourceType)))
+  KRYS_NODISCARD constexpr TargetType ClampTo(SourceType value,
+                                              TargetType min = DefaultMinimumForClamp<TargetType>(),
+                                              TargetType max = DefaultMaximumForClamp<TargetType>()) noexcept
+  {
+    if (value >= static_cast<SourceType>(max))
+    {
+      return max;
+    }
+
+    // This will return min if value is NaN.
+    if (!(value > static_cast<SourceType>(min)))
+    {
+      return min;
+    }
+
+    return static_cast<TargetType>(value);
+  }
+
+  template <typename TargetType, typename SourceType>
+  requires(!SameType<TargetType, SourceType> && FloatingPoint<SourceType> && FloatingPoint<TargetType>
+           && sizeof(TargetType) > sizeof(SourceType))
+  KRYS_NODISCARD constexpr TargetType ClampTo(SourceType value,
+                                              TargetType min = DefaultMinimumForClamp<TargetType>(),
+                                              TargetType max = DefaultMaximumForClamp<TargetType>()) noexcept
+  {
+    TargetType convertedValue = static_cast<TargetType>(value);
+    if (convertedValue >= max)
+    {
+      return max;
+    }
+
+    if (convertedValue <= min)
+    {
+      return min;
+    }
+
+    return convertedValue;
+  }
+
+  // Source and Target have the same sign and Source is larger or equal to Target
+  template <typename TargetType, typename SourceType>
+  requires(!SameType<TargetType, SourceType> && Integral<SourceType> && Integral<TargetType>
+           && SignedIntegral<TargetType> == SignedIntegral<SourceType>
+           && sizeof(SourceType) >= sizeof(TargetType))
+  KRYS_NODISCARD constexpr TargetType ClampTo(SourceType value,
+                                              TargetType min = DefaultMinimumForClamp<TargetType>(),
+                                              TargetType max = DefaultMaximumForClamp<TargetType>()) noexcept
+  {
+    if (value >= static_cast<SourceType>(max))
+    {
+      return max;
+    }
+
+    if (value <= static_cast<SourceType>(min))
+    {
+      return min;
+    }
+
+    return static_cast<TargetType>(value);
+  }
+
+  // Clamping a unsigned integer to the max signed value.
+  template <typename TargetType, typename SourceType>
+  requires(!SameType<TargetType, SourceType> && UnsignedIntegral<SourceType> && SignedIntegral<TargetType>
+           && sizeof(SourceType) >= sizeof(TargetType))
+  KRYS_NODISCARD constexpr TargetType ClampTo(SourceType value) noexcept
+  {
+    TargetType max = Limits<TargetType>::max();
+    if (value >= static_cast<SourceType>(max))
+    {
+      return max;
+    }
+
+    return static_cast<TargetType>(value);
+  }
+
+  // Clamping a signed integer into a valid unsigned integer.
+  template <typename TargetType, typename SourceType>
+  requires(!SameType<TargetType, SourceType> && UnsignedIntegral<TargetType> && SignedIntegral<SourceType>
+           && sizeof(SourceType) == sizeof(TargetType))
+  KRYS_NODISCARD constexpr TargetType ClampTo(SourceType value) noexcept
+  {
+    if (value < 0)
+    {
+      return 0;
+    }
+
+    return static_cast<TargetType>(value);
+  }
+
+  template <typename TargetType, typename SourceType>
+  requires(!SameType<TargetType, SourceType> && UnsignedIntegral<TargetType> && SignedIntegral<SourceType>
+           && sizeof(SourceType) > sizeof(TargetType))
+  KRYS_NODISCARD constexpr TargetType ClampTo(SourceType value,
+                                              TargetType min = DefaultMinimumForClamp<TargetType>(),
+                                              TargetType max = DefaultMaximumForClamp<TargetType>()) noexcept
+  {
+    if (value >= static_cast<SourceType>(max))
+    {
+      return max;
+    }
+
+    if (value <= static_cast<SourceType>(min))
+    {
+      return min;
+    }
+
+    return static_cast<TargetType>(value);
+  }
+
+  KRYS_NODISCARD constexpr int32 ClampToInteger(double value) noexcept
+  {
+    return ClampTo<int32>(value);
+  }
+
+  KRYS_NODISCARD constexpr int32 ClampToInteger(float value) noexcept
+  {
+    return ClampTo<int32>(value);
+  }
+
+  /// @brief Whether `x` lies strictly inside the range of `int32`.
+  KRYS_NODISCARD constexpr bool IsWithinIntRange(float x) noexcept
+  {
+    return x > static_cast<float>(Limits<int32>::min()) && x < static_cast<float>(Limits<int32>::max());
+  }
+
+#pragma endregion
+
+#pragma region Saturated Arithmetic
+
+  /// @brief Adds `a` and `b`, clamping the result to the range of `T` instead of overflowing.
+  template <SignedIntegral T>
+  KRYS_NODISCARD constexpr T SaturatedSum(T a, T b) noexcept
+  {
+    if (b > 0 && a > Limits<T>::max() - b)
+    {
+      return Limits<T>::max();
+    }
+
+    if (b < 0 && a < Limits<T>::min() - b)
+    {
+      return Limits<T>::min();
+    }
+
+    return static_cast<T>(a + b);
+  }
+
+  /// @brief Adds `a` and `b`, clamping the result to the range of `T` instead of overflowing.
+  template <UnsignedIntegral T>
+  KRYS_NODISCARD constexpr T SaturatedSum(T a, T b) noexcept
+  {
+    const T result = static_cast<T>(a + b);
+    return result < a ? Limits<T>::max() : result;
+  }
+
+  /// @brief Subtracts `b` from `a`, clamping the result to the range of `T` instead of overflowing.
+  template <SignedIntegral T>
+  KRYS_NODISCARD constexpr T SaturatedDifference(T a, T b) noexcept
+  {
+    if (b < 0 && a > Limits<T>::max() + b)
+    {
+      return Limits<T>::max();
+    }
+
+    if (b > 0 && a < Limits<T>::min() + b)
+    {
+      return Limits<T>::min();
+    }
+
+    return static_cast<T>(a - b);
+  }
+
+  /// @brief Subtracts `b` from `a`, clamping the result to the range of `T` instead of overflowing.
+  template <UnsignedIntegral T>
+  KRYS_NODISCARD constexpr T SaturatedDifference(T a, T b) noexcept
+  {
+    return a > b ? static_cast<T>(a - b) : T {0};
+  }
+
+#pragma endregion
+
+#pragma region Comparison
+
+  /// @brief Whether `a` is in `[min, max]`.
+  template <typename T>
+  KRYS_NODISCARD constexpr bool IsInRange(const T &a, const T &min, const T &max) noexcept
+  {
+    return a >= min && a <= max;
+  }
+
+  /// @brief Divides `u` by `v`, protecting against overflow and underflow.
+  template <FloatingPoint T>
+  KRYS_NODISCARD constexpr T SafeFPDivision(T u, T v) noexcept
+  {
+    if (v < 1 && u > v * Limits<T>::max())
+    {
+      return Limits<T>::max();
+    }
+
+    if (v > 1 && u < v * Limits<T>::min())
+    {
+      return 0;
+    }
+
+    return u / v;
+  }
+
+  /// @brief Floating point numbers comparison: `u` is "essentially equal" [1][2] to `v` if
+  /// | u - v | / |u| <= e and | u - v | / |v| <= e.
+  ///
+  /// [1] Knuth, D. E. "Accuracy of Floating Point Arithmetic." The Art of Computer Programming. 3rd ed.
+  /// Vol. 2.
+  ///     Boston: Addison-Wesley, 1998. 229-45.
+  /// [2]
+  /// http://www.boost.org/doc/libs/1_34_0/libs/test/doc/components/test_tools/floating_point_comparison.html
+  template <FloatingPoint T>
+  KRYS_NODISCARD constexpr bool AreEssentiallyEqual(T u, T v, T epsilon = Limits<T>::epsilon()) noexcept
+  {
+    if (u == v)
+    {
+      return true;
+    }
+
+    const T delta = std::abs(u - v);
+    return SafeFPDivision(delta, std::abs(u)) <= epsilon && SafeFPDivision(delta, std::abs(v)) <= epsilon;
+  }
+
+#pragma endregion
+
+#pragma region Conversion
+
+  /// @brief Narrows a `double` to a `float`, making the loss of precision explicit at the call site.
+  KRYS_NODISCARD constexpr float NarrowPrecisionToFloat(double number) noexcept
+  {
+    return static_cast<float>(number);
+  }
+
+  // Only `double` can be narrowed; anything else is a mistake.
+  template <typename T>
+  constexpr float NarrowPrecisionToFloat(T) noexcept = delete;
+
+#pragma endregion
+}

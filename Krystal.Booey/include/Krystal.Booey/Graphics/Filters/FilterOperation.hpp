@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxExtents.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
 namespace krys::boo
@@ -24,7 +24,6 @@ namespace krys::boo
       Saturate,
       HueRotate,
       Invert,
-      AppleInvertLightness,
       Opacity,
       Brightness,
       Contrast,
@@ -54,10 +53,6 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual bool TransformColor(SRGBA<float> &) const noexcept
-    {
-      return false;
-    }
-    KRYS_NODISCARD virtual bool InverseTransformColor(SRGBA<float> &) const noexcept
     {
       return false;
     }
@@ -272,33 +267,6 @@ namespace krys::boo
     double _amount;
   };
 
-  class InvertLightnessFilterOperation : public FilterOperation
-  {
-  public:
-    KRYS_NODISCARD static Ref<InvertLightnessFilterOperation> Create() noexcept
-    {
-      return AdoptRef(*new InvertLightnessFilterOperation());
-    }
-
-    KRYS_NODISCARD Ref<FilterOperation> Clone() const noexcept final
-    {
-      return AdoptRef(*new InvertLightnessFilterOperation());
-    }
-
-    KRYS_NODISCARD RefPtr<FilterOperation> Blend(const FilterOperation *from, const BlendingContext &,
-                                                 bool blendToPassthrough = false) noexcept override;
-
-  private:
-    KRYS_NODISCARD bool Equals(const FilterOperation &) const noexcept final;
-
-    InvertLightnessFilterOperation() noexcept : FilterOperation(Type::AppleInvertLightness)
-    {
-    }
-
-    KRYS_NODISCARD bool TransformColor(SRGBA<float> &) const noexcept final;
-    KRYS_NODISCARD bool InverseTransformColor(SRGBA<float> &) const noexcept final;
-  };
-
   class BlurFilterOperation : public FilterOperation
   {
   public:
@@ -437,9 +405,6 @@ KRYS_SPECIALIZE_TYPE_TRAITS_FILTER_OPERATION(krys::boo::BasicColorMatrixFilterOp
                                              IsBasicColorMatrixFilterOperation())
 KRYS_SPECIALIZE_TYPE_TRAITS_FILTER_OPERATION(krys::boo::BasicComponentTransferFilterOperation,
                                              IsBasicComponentTransferFilterOperation())
-KRYS_SPECIALIZE_TYPE_TRAITS_FILTER_OPERATION(krys::boo::InvertLightnessFilterOperation,
-                                             GetType()
-                                               == krys::boo::FilterOperation::Type::AppleInvertLightness)
 KRYS_SPECIALIZE_TYPE_TRAITS_FILTER_OPERATION(krys::boo::BlurFilterOperation,
                                              GetType() == krys::boo::FilterOperation::Type::Blur)
 KRYS_SPECIALIZE_TYPE_TRAITS_FILTER_OPERATION(krys::boo::DropShadowFilterOperation,

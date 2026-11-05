@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include <algorithm>
 #include <cmath>

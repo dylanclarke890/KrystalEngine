@@ -82,11 +82,6 @@ namespace krys::boo::style
     _nonInheritedFlags.UseTreeCountingFunctions = true;
   }
 
-  inline void ComputedStyleBase::SetInsideLink(InsideLink InsideLink) noexcept
-  {
-    _inheritedFlags.InsideLink = static_cast<unsigned>(InsideLink);
-  }
-
   inline void ComputedStyleBase::SetIsLink(bool IsLink) noexcept
   {
     _nonInheritedFlags.IsLink = IsLink;
@@ -368,11 +363,6 @@ namespace krys::boo::style
 
   // FIXME: Support descriptors
 
-  inline void ComputedStyleBase::SetPageSize(PageSize &&pageSize) noexcept
-  {
-    SET_NESTED(_nonInheritedData, RareData, PageSize, krys::move(pageSize));
-  }
-
   // FIXME: Add a type that encapsulates both caretColor() and hasAutoCaretColor().
 
   inline void ComputedStyleBase::SetCaretColor(Color &&color) noexcept
@@ -383,18 +373,6 @@ namespace krys::boo::style
   inline void ComputedStyleBase::SetHasAutoCaretColor() noexcept
   {
     SET_PAIR(_rareInheritedData, HasAutoCaretColor, true, CaretColor, Color::GetCurrentColor());
-  }
-
-  inline void ComputedStyleBase::SetVisitedLinkCaretColor(Color &&value) noexcept
-  {
-    SET_PAIR(_rareInheritedData, VisitedLinkCaretColor, krys::move(value), HasVisitedLinkAutoCaretColor,
-             false);
-  }
-
-  inline void ComputedStyleBase::SetHasVisitedLinkAutoCaretColor() noexcept
-  {
-    SET_PAIR(_rareInheritedData, HasVisitedLinkAutoCaretColor, true, VisitedLinkCaretColor,
-             Color::GetCurrentColor());
   }
 }
 

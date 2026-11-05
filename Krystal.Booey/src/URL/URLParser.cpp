@@ -132,11 +132,6 @@ namespace krys::boo::url
       return c <= 'z' && CharacterClassTable[c] & ValidScheme;
     }
 
-    KRYS_ALWAYS_INLINE bool IsSpecialCharacterForFragmentDirective(char32 c) noexcept
-    {
-      return !text::IsASCII(c) || c == ',' || c == '-';
-    }
-
     KRYS_ALWAYS_INLINE bool ShouldPercentEncodeQueryByte(uint8 byte, bool urlIsSpecial) noexcept
     {
       if (CharacterClassTable[byte] & QueryEncode)
@@ -387,11 +382,6 @@ namespace krys::boo::url
   bool URLParser::IsInUserInfoEncodeSet(char32 c) noexcept
   {
     return url::IsInUserInfoEncodeSet(c);
-  }
-
-  bool URLParser::IsSpecialCharacterForFragmentDirective(char32 c) noexcept
-  {
-    return url::IsSpecialCharacterForFragmentDirective(c);
   }
 
   template <URLParser::ReportSyntaxViolation reportSyntaxViolation>

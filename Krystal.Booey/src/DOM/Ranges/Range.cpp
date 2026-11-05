@@ -16,9 +16,9 @@
 #include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/Markup.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
+#include "Krystal.Booey/Editing/Markup/Markup.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -922,11 +922,6 @@ namespace krys::boo::dom
     auto start = BoundaryPoint {ShareRef(*StartContainer()), StartOffset()};
     auto end = BoundaryPoint {ShareRef(*EndContainer()), EndOffset()};
     return CreateRef<Range>(start, end);
-  }
-
-  void Range::Detach() noexcept
-  {
-    // Do nothing.
   }
 
   ExceptionOr<bool> Range::IsPointInRange(Node &node, uint64 offset) const noexcept

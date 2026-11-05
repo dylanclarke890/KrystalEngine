@@ -7,53 +7,13 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
-#include "Krystal.Booey/Platform/DragData.hpp"
-#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
-#include "Krystal.Booey/Rendering/RenderFileUploadControl.hpp"
+#include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
 
 namespace krys::boo::html
 {
-  FormControlState FileInputType::SaveFormControlState() const noexcept
-  {
-    if (_fileList->IsEmpty())
-    {
-      return {};
-    }
-
-    FormControlState stateVector;
-    stateVector.reserve(_fileList->Files().size() * 2 + 1);
-    for (auto &file : _fileList->Files())
-    {
-      stateVector.emplace_back(file->Path());
-      stateVector.emplace_back(file->Name());
-    }
-    stateVector.push_back(_displayString);
-    return stateVector;
-  }
-
-  void FileInputType::RestoreFormControlState(const FormControlState &state) noexcept
-  {
-    if (state.empty())
-    {
-      return;
-    }
-
-    // The files' paths and names, then the display string.
-    auto size = state.size() - 1;
-    if (!state[size].empty())
-    {
-      _displayString = state[size];
-    }
-    List<Ref<File>> files;
-    files.reserve(size / 2);
-    for (size_t i = 0; i + 1 < size; i += 2)
-    {
-      files.push_back(File::Create(state[i], state[i + 1]));
-    }
-    SetFiles(FileList::Create(krys::move(files)), WasSetByJavaScript::No);
-  }
-
   bool FileInputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());
@@ -116,8 +76,6 @@ namespace krys::boo::html
   void FileInputType::SetValue(dom::DOMStringView, bool valueChanged, TextFieldEventBehavior,
                                TextControlSetValueSelection) noexcept
   {
-    // FIXME: Should we clear the file list, or replace it with a new empty one here? This is observable from
-    // JavaScript through custom properties.
     if (!valueChanged)
     {
       return;

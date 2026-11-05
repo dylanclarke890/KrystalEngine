@@ -22,11 +22,6 @@ namespace krys::boo
     return _computedStyle.UseTreeCountingFunctions();
   }
 
-  inline InsideLink RenderStyleBase::GetInsideLink() const noexcept
-  {
-    return _computedStyle.GetInsideLink();
-  }
-
   inline bool RenderStyleBase::IsLink() const noexcept
   {
     return _computedStyle.IsLink();
@@ -492,11 +487,6 @@ namespace krys::boo
 
   // FIXME: Support descriptors
 
-  inline const style::PageSize &RenderStyleBase::GetPageSize() const noexcept
-  {
-    return _computedStyle.GetPageSize();
-  }
-
   // FIXME: Add a type that encapsulates both caretColor() and hasAutoCaretColor().
 
   inline const style::Color &RenderStyleBase::CaretColor() const noexcept
@@ -507,16 +497,6 @@ namespace krys::boo
   inline bool RenderStyleBase::HasAutoCaretColor() const noexcept
   {
     return _computedStyle.HasAutoCaretColor();
-  }
-
-  inline const style::Color &RenderStyleBase::VisitedLinkCaretColor() const noexcept
-  {
-    return _computedStyle.VisitedLinkCaretColor();
-  }
-
-  inline bool RenderStyleBase::HasVisitedLinkAutoCaretColor() const noexcept
-  {
-    return _computedStyle.HasVisitedLinkAutoCaretColor();
   }
 
   // MARK: - Properties/descriptors that are not yet generated

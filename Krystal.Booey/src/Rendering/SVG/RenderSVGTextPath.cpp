@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"
-#include "Krystal.Booey/SVG/SVGGeometryElement.hpp"
-#include "Krystal.Booey/SVG/SVGTextPathElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
 
 namespace krys::boo
 {

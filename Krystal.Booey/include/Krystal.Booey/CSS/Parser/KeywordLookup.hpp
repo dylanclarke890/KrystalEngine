@@ -12,8 +12,7 @@ namespace krys::boo::css
   /// characters or isn't a known property.
   KRYS_NODISCARD css::PropertyId PropertyIdFromName(CSSOMStringView name) noexcept;
 
-  /// @brief Looks up a value keyword by name, ignoring ASCII case. Legacy `-apple-` keywords are treated
-  /// as their `-webkit-` equivalents.
+  /// @brief Looks up a value keyword by name, ignoring ASCII case.
   /// @return The keyword, or ValueId::Invalid if the name is empty, too long, contains non-ASCII characters
   /// or isn't a known keyword.
   KRYS_NODISCARD css::ValueId ValueIdFromName(CSSOMStringView name) noexcept;

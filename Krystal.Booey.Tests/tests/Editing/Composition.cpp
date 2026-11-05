@@ -4,10 +4,10 @@
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 
 namespace krys::boo::tests
 {

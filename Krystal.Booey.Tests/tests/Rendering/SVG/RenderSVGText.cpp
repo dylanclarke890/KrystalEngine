@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTSpan.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::tests

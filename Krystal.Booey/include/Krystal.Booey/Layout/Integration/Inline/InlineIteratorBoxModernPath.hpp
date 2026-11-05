@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
-#include "Krystal.Booey/Rendering/TextBoxSelectableRange.hpp"
+#include "Krystal.Booey/Rendering/Selection/TextBoxSelectableRange.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 

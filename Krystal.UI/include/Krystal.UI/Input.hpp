@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
-#include "Krystal.Booey/Page/DragActions.hpp"
+#include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

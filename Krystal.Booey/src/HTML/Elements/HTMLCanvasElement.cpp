@@ -1,18 +1,16 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/FileAPI/Blob.hpp"
-#include "Krystal.Booey/Graphics/BitmapImage.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
-#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html
@@ -513,55 +511,5 @@ namespace krys::boo::html
 
     // 5. Return a data: URL representing file.
     return buffer->ToDataURL(encodingMIMEType, QualityInRange(quality));
-  }
-
-  // https://html.spec.whatwg.org/#dom-canvas-toblob
-  void HTMLCanvasElement::ToBlob(Func<void(RefPtr<Blob> &&)> &&callback, dom::DOMStringView mimeType,
-                                 Maybe<double> quality) noexcept
-  {
-    // 1. FIXME: If this canvas element's bitmap's origin-clean flag is set to false, then throw a
-    //    "SecurityError" DOMException, once there are origins.
-
-    // 4. Run these steps in parallel:
-    // 4b. Queue an element task on the canvas blob serialization task source given the canvas element to run
-    //     these steps: [...] Invoke callback with « result » and "report".
-    // (The serialisation isn't in parallel.)
-    auto &document = NodeDocument();
-    auto scheduleCallback = [&](RefPtr<Blob> &&blob)
-    {
-      EventLoop::Current().QueueTask(TaskSource::CanvasBlobSerialization, document,
-                                     [callback = krys::move(callback), blob = krys::move(blob)]() mutable
-                                     { callback(krys::move(blob)); });
-    };
-
-    // 2. Let result be null.
-    // 3. If this canvas element's bitmap has pixels (i.e., neither its horizontal dimension nor its vertical
-    //    dimension is zero), then set result to a copy of this canvas element's bitmap.
-    if (Size().IsEmpty())
-    {
-      scheduleCallback(nullptr);
-      return;
-    }
-
-    auto encodingMIMEType = ToEncodingMimeType(mimeType);
-    auto buffer = MakeRenderingResultsAvailable();
-    if (!buffer)
-    {
-      scheduleCallback(nullptr);
-      return;
-    }
-
-    // 4a. If result is non-null, then set result to a serialization of result as a file with type and quality
-    //     if given.
-    // 4b.i. If result is non-null, then set result to a new Blob object, created in the relevant realm of
-    // this
-    //       canvas element, representing result.
-    auto blobData = buffer->ToData(encodingMIMEType, QualityInRange(quality));
-    RefPtr<Blob> blob;
-    if (!blobData.empty())
-    {
-      blob = Blob::Create(krys::move(blobData), encodingMIMEType);
-    }
-    scheduleCallback(krys::move(blob));
   }
 }

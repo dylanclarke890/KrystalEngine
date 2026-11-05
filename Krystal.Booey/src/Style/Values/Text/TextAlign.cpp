@@ -4,8 +4,8 @@
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 
 namespace krys::boo::style
@@ -39,8 +39,7 @@ namespace krys::boo::style
       return parentStyle.GetTextAlign();
     }
 
-    if (primitiveValue->ValueId() == css::ValueId::WebkitMatchParent
-        || primitiveValue->ValueId() == css::ValueId::MatchParent)
+    if (primitiveValue->ValueId() == css::ValueId::MatchParent)
     {
       const auto *element = state.GetElement();
 

@@ -53,7 +53,7 @@ namespace krys::boo
   }
 
   GradientData *LegacyRenderSVGResourceGradient::GradientDataForRenderer(
-    RenderElement &renderer, const RenderStyle &style, EnumSet<RenderSVGResourceMode> resourceMode) noexcept
+    RenderElement &renderer, EnumSet<RenderSVGResourceMode> resourceMode) noexcept
   {
     // Be sure to synchronize all SVG properties on the gradientElement _before_ processing any further.
     // Otherwhise the call to collectGradientAttributes() in createTileImage(), may cause the SVG DOM property
@@ -93,7 +93,7 @@ namespace krys::boo
 
     if (gradientData.Invalidate(inputs))
     {
-      gradientData.Gradient = BuildGradient(style);
+      gradientData.Gradient = BuildGradient();
       krys_debug_assert(gradientData.UserspaceTransform.IsIdentity());
 
       // CG platforms will handle the gradient space transform for text after applying the
@@ -188,7 +188,7 @@ namespace krys::boo
     krys_debug_assert(context);
     krys_debug_assert(!resourceMode.IsEmpty());
 
-    auto *gradientData = GradientDataForRenderer(renderer, style, resourceMode);
+    auto *gradientData = GradientDataForRenderer(renderer, resourceMode);
     if (!gradientData)
     {
       return {};
@@ -228,18 +228,6 @@ namespace krys::boo
     }
 
     _gradientApplier = nullptr;
-  }
-
-  GradientColorStops
-    LegacyRenderSVGResourceGradient::StopsByApplyingColorFilter(const GradientColorStops &stops,
-                                                                const RenderStyle &style) noexcept
-  {
-    if (!style.HasAppleColorFilter())
-    {
-      return stops;
-    }
-
-    return stops.MapColors([&](const Color &color) { return style.ColorByApplyingColorFilter(color); });
   }
 
   GradientSpreadMethod

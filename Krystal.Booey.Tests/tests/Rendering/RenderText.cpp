@@ -127,18 +127,14 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderText: text transform and security",
-                   "[Rendering][RenderText]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderText: text transform", "[Rendering][RenderText]")
   {
     ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
       #upper { text-transform: uppercase }
       #lower { text-transform: lowercase }
       #capitalize { text-transform: capitalize }
       #kana { text-transform: full-size-kana }
-      #disc { -webkit-text-security: disc }
-      #circle { -webkit-text-security: circle }
-      #square { -webkit-text-security: square }
-    </style><p id=upper>abc straße</p><p id=lower>ABC</p><p id=capitalize>hello world<span id=continued>wide</span> <span id=next>new</span></p><p id=kana>ぁァ</p><p id=disc>ab€</p><p id=circle>ab</p><p id=square>ab</p><p id=none>Plain</p>)"};
+    </style><p id=upper>abc straße</p><p id=lower>ABC</p><p id=capitalize>hello world<span id=continued>wide</span> <span id=next>new</span></p><p id=kana>ぁァ</p><p id=none>Plain</p>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
 
@@ -162,14 +158,6 @@ namespace krys::boo::tests
     SECTION("Small kana")
     {
       CHECK(RenderedText(fixture, u8"kana") == u8"あア");
-    }
-
-    SECTION("Text security masks each code point")
-    {
-      CHECK(RenderedText(fixture, u8"disc") == u8"•••");
-      CHECK(RenderedText(fixture, u8"circle") == u8"◦◦");
-      CHECK(RenderedText(fixture, u8"square") == u8"■■");
-      CHECK(TextChild(fixture, u8"disc").Renderer()->OriginalText() == u8"ab€");
     }
 
     SECTION("A style change reapplies the transform")

@@ -2,11 +2,10 @@
 
 #include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
-#include "Krystal.Booey/History/BackForwardClient.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
-#include "Krystal.Booey/Page/DragClient.hpp"
+#include "Krystal.Booey/Page/Drag/DragClient.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -26,22 +25,18 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
-  class BackForwardController;
   class DragCaretController;
   class DragController;
   class GraphicsContext;
-  class HistoryItem;
   class LocalFrame;
   class PointerCaptureController;
   class PointerLockController;
 
   /// @brief The steps of the rendering update that something asked for.
-  // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, view
-  // transitions, paint and event timing, video frame callbacks, validation messages and the scrolling tree
-  // update.
+  // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, paint and
+  // event timing, video frame callbacks, validation messages and the scrolling tree update.
   enum class RenderingUpdateStep : uint8
   {
-    RestoreScrollPositionAndViewState,
     FlushAutofocusCandidates,
     Resize,
     Scroll,
@@ -60,7 +55,7 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 16uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 15uz);
 
 namespace krys::boo
 {
@@ -68,8 +63,7 @@ namespace krys::boo
   /// before the host paints them (the specification's "update the rendering"). Something that changes what
   /// the page shows schedules a rendering update; the host runs it at its next rendering opportunity.
   /// @see https://html.spec.whatwg.org/#update-the-rendering
-  // FIXME: The rest of the page: settings, the focus controller, the rest of the chrome, page overlays,
-  // frames other than the main frame.
+  // FIXME: The rest of the page: settings, the focus controller, the rest of the chrome, page overlays.
   class Page final : public RefCounted<Page>, public CanMakeWeakPtr<Page>
   {
     KRYS_NON_COPY_MOVABLE(Page);
@@ -77,7 +71,6 @@ namespace krys::boo
   private:
     UniquePtr<ChromeClient> _chromeClient;
     UniquePtr<EditorClient> _editorClient;
-    UniquePtr<BackForwardController> _backForwardController;
     UniquePtr<PointerCaptureController> _pointerCaptureController;
     UniquePtr<PointerLockController> _pointerLockController;
     UniquePtr<DragController> _dragController;
@@ -90,14 +83,12 @@ namespace krys::boo
     uint32 _renderingUpdateDepth {0};
     float _pageScaleFactor {1};
     bool _renderingUpdateIsScheduled {false};
-    bool _isClosing {false};
     bool _isVisible {true};
     bool _scriptedAnimationsSuspended {false};
-    /// @brief The page's session storage (its top-level traversable's), by origin.
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
 
     Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-         RefPtr<BackForwardClient> &&backForwardClient, UniquePtr<DragClient> dragClient) noexcept;
+         UniquePtr<DragClient> dragClient) noexcept;
 
   public:
     ~Page() noexcept;
@@ -108,13 +99,10 @@ namespace krys::boo
     /// client.
     /// @param mainFrameLoaderClient The host's side of the main frame's loader; without one, the main frame
     /// ignores navigations.
-    /// @param backForwardClient The page's back/forward list; without one, the page keeps it in memory (a
-    /// `BackForwardList`).
     /// @param dragClient The host's side of drags in the page; without one, no drag starts in the page.
     KRYS_NODISCARD static Ref<Page> Create(UniquePtr<ChromeClient> chromeClient = nullptr,
                                            UniquePtr<EditorClient> editorClient = nullptr,
                                            UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient = nullptr,
-                                           RefPtr<BackForwardClient> backForwardClient = nullptr,
                                            UniquePtr<DragClient> dragClient = nullptr) noexcept;
 
     KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
@@ -168,12 +156,6 @@ namespace krys::boo
     /// @brief Resumes the paused animated images visible in the main frame's view.
     void ResumeAnimatingImages() noexcept;
 
-    /// @brief The page's session history.
-    KRYS_NODISCARD BackForwardController &BackForward() const noexcept
-    {
-      return *_backForwardController;
-    }
-
     /// @brief The page's pointers and the elements capturing them.
     KRYS_NODISCARD PointerCaptureController &GetPointerCaptureController() const noexcept
     {
@@ -214,39 +196,6 @@ namespace krys::boo
     // there are those.
     void DidChangeMainDocument(dom::Document *newDocument) noexcept;
 
-    /// @brief Goes to @p item in @p frame (back or forward), once the frame's load stops, if it's for another
-    /// document.
-    void GoToItem(LocalFrame &frame, HistoryItem &item, FrameLoadType type) noexcept;
-
-    /// @brief Goes to @p item in @p frame for the Navigation API (`traverseTo()`): if its `navigate` is
-    /// canceled, @p tracker's promises are rejected.
-    void GoToItemForNavigationAPI(LocalFrame &frame, HistoryItem &item, FrameLoadType type,
-                                  LocalFrame &triggeringFrame,
-                                  struct NavigationAPIMethodTracker *tracker) noexcept;
-
-    /// @brief Whether the page's window asked to be closed (its top-level traversable's is closing).
-    /// @see https://html.spec.whatwg.org/#is-closing
-    KRYS_NODISCARD bool IsClosing() const noexcept
-    {
-      return _isClosing;
-    }
-
-    void SetIsClosing() noexcept
-    {
-      _isClosing = true;
-    }
-
-    /// @brief The host's network became reachable (@p isOnLine) or not: `online` or `offline` fires at each
-    /// of the page's windows.
-    /// @see https://html.spec.whatwg.org/#event-online
-    void NetworkStateChanged(bool isOnLine) noexcept;
-
-    /// @brief Starts an idle period in each of the page's documents that has idle callbacks, which runs them
-    /// until @p deadline (in real time). The host calls this after a rendering update, with the time it can
-    /// spare before its next frame.
-    /// @see https://w3c.github.io/requestidlecallback/#start-an-idle-period-algorithm
-    void OpportunisticallyRunIdleCallbacks(MonotonicTime::duration deadline) noexcept;
-
     /// @brief Asks for a rendering update at the next rendering opportunity, which runs (at least) the
     /// @p requestedSteps.
     void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps = {}) noexcept;
@@ -275,13 +224,9 @@ namespace krys::boo
     /// @brief Brings the style and layout of the page's documents up to date.
     void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
 
-    /// @brief Destroys the render trees of the page's documents, as the page enters the back/forward cache.
-    void DestroyRenderTrees() noexcept;
-
     void ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept;
     /// @brief Calls @p functor for each document that's rendered.
-    // FIXME: Documents whose visual updates are suppressed, or that a view transition hides, once there are
-    // any.
+    // FIXME: Documents whose visual updates are suppressed, once there are any.
     void ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept;
 
   private:

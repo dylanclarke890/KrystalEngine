@@ -2,11 +2,12 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Rendering/OutlinePainter.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/Painting/OutlinePainter.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/Painting/TextPainter.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -16,7 +17,6 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
-#include "Krystal.Booey/Rendering/TextPainter.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include <algorithm>
 

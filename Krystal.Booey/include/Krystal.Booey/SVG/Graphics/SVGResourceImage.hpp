@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/GeneratedImage.hpp"
+#include "Krystal.Booey/Graphics/Images/GeneratedImage.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 

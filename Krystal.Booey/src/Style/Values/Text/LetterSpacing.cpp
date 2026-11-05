@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Text/LetterSpacing.hpp"
 
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
 
 namespace krys::boo::style

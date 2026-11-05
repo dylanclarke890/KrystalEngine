@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBDIElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 
 namespace krys::boo::dom::tests
 {

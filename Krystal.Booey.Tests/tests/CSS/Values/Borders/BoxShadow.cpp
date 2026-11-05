@@ -51,11 +51,6 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(
             BoxShadow {.Color = Red(), .Location = {L {1_css_em}, L {2_css_em}}, .Blur = NL {0_css_px}})
           == u8"red 1em 2em 0px");
-
-    // `IsWebkitBoxShadow` doesn't affect serialisation.
-    auto webkit = Full();
-    webkit.IsWebkitBoxShadow = true;
-    CHECK(SerialiseForTest(webkit) == SerialiseForTest(Full()));
   }
 
   TEST_CASE("BoxShadow(Serialise property)", "[CSS][Borders][BoxShadow]")
@@ -81,11 +76,6 @@ namespace krys::boo::css::tests
     auto noColor = Full();
     noColor.Color = {};
     CHECK(noColor != Full());
-
-    // Equal serialisations, different values.
-    auto webkit = Full();
-    webkit.IsWebkitBoxShadow = true;
-    CHECK(webkit != Full());
 
     CHECK(BoxShadowProperty {keywords::None {}} == BoxShadowProperty {keywords::None {}});
     CHECK(BoxShadowProperty {keywords::None {}} != BoxShadowProperty {BoxShadowProperty::List {Full()}});

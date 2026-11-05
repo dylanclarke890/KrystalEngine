@@ -43,14 +43,12 @@
       </ol>
     </nav>
 
-    <!-- A text fragment link finds its text in the page, highlights it with ::target-text and scrolls to it.
-         The settings link loads the editor's second page in place of this one; going back brings this one
-         back from the back/forward cache, as it was left. Links off the editor's pages aren't followed: the
-         editor logs them and shows where they lead below the order form, as it does for submissions (a target
+    <!-- A fragment link makes its card the page's :target and scrolls to it. The settings link loads the editor's second page in place of this one: the view hands links to the
+         editor, which loads its own pages. Links off the editor's pages aren't followed: the editor logs them and shows where they lead below the order form, as it does for submissions (a target
          or Ctrl opens a new window, Shift too; a middle click follows them as well). -->
     <div class="card links" tabindex="0">
       <h2>Links</h2>
-      <p><a href="#:~:text=Booey%20lays%20out,glyphs">A text fragment</a> marks a sentence in the text card;
+      <p><a href="#text">A fragment</a> goes to the text card;
         <a href="settings.html">the settings</a> are another page.</p>
       <p><a href="https://example.com/krystal">Krystal's site</a>, the <a href="https://example.com/docs"
           target="_blank">docs in a new window</a>, and <a href="images/photo.jpg" download="photo.jpg">a
@@ -118,13 +116,12 @@
 
   <div class="row">
     <!-- A guide routed within the page: its links go to this page with a ?guide= query, and the editor's
-         router (C++, listening to the window's navigation) intercepts them, so the URL and the session history
-         change without a load and the router shows the topic. Back and forward move between the topics the
-         same way, and reloading opens the page at its topic. -->
+         navigation handler (C++) shows the topic without a load. Loading the page with a ?guide= query opens
+         it at its topic. -->
     <nav class="card guide" id="guide" tabindex="0">
       <h2>Guide</h2>
-      <p class="topics"><a id="topic-pages" href="?guide=pages">Pages</a><a id="topic-history"
-          href="?guide=history">History</a><a id="topic-routing" href="?guide=routing">Routing</a></p>
+      <p class="topics"><a id="topic-pages" href="?guide=pages">Pages</a><a id="topic-fragments"
+          href="?guide=fragments">Fragments</a><a id="topic-routing" href="?guide=routing">Routing</a></p>
       <p id="guide-view">Pick a topic.</p>
     </nav>
   </div>
@@ -182,8 +179,7 @@
       <details name="faq" open><summary>Is it fresh?</summary>Roasted this week.</details>
       <details name="faq"><summary>Is it local?</summary><span>From down the road.</span></details>
       <details><span id="secret">The house blend is half Colombia Huila.</span></details>
-      <p><a href="#secret">The secret</a> opens the last; <a href="#:~:text=From%20down%20the%20road">where
-          it's from</a> opens the second.</p>
+      <p><a href="#secret">The secret</a> opens the last.</p>
     </div>
   </div>
 
@@ -663,15 +659,6 @@
         <label><input type="radio" name="nav-milk" value="Almond"> Almond</label>
       </div>
       <p class="log" id="nav-log">Nothing pressed yet</p>
-    </div>
-    <!-- Gamepads: the pads the page can see (navigator.getGamepads(); a page sees them once a button is pressed),
-         with their buttons and axes in the standard layout, shown each frame; the button rumbles them
-         (vibrationActuator.playEffect("dual-rumble")). -->
-    <div class="card" id="gamepad-card">
-      <h2>Gamepads</h2>
-      <pre class="pad-readout" id="gamepad-readout"></pre>
-      <button id="rumble">Rumble</button>
-      <span class="log" id="rumble-log"></span>
     </div>
   </div>
 

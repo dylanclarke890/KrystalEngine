@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
@@ -14,9 +14,9 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGForeignObjectElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageClients.hpp"
-#include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 
 namespace krys::boo::svg
 {
@@ -57,9 +57,6 @@ namespace krys::boo::svg
       return false;
     }
 
-    // FIXME: Once foreignObject elements within SVG images are updated to not leak cross-origin data
-    // (e.g., visited links, spellcheck) we can remove the SVGForeignObjectElement check here and
-    // research if we can remove the Image::renderingTaintsOrigin mechanism entirely.
     for (auto *node = dom::TreeQueries::Next(*rootElement, rootElement.get()); node;
          node = dom::TreeQueries::Next(*node, rootElement.get()))
     {
@@ -68,7 +65,6 @@ namespace krys::boo::svg
       {
         return true;
       }
-      // FIXME: <image> and <feImage> elements whose images taint the origin, once there are origins.
     }
 
     // Because SVG image rendering disallows external resources and links,

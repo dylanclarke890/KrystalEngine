@@ -2,7 +2,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
@@ -19,47 +19,46 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
-#include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
-#include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
-#include "Krystal.Booey/Rendering/BorderPainter.hpp"
-#include "Krystal.Booey/Rendering/BorderShape.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
-#include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/Grid/GridLayoutFunctions.hpp"
+#include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderAncestorIterator.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/Painting/BackgroundPainter.hpp"
+#include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
+#include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
-#include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
-#include "Krystal.Booey/Rendering/RenderGrid.hpp"
-#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
-#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
-#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
-#include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGClipPathElement.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <cmath>
 
@@ -375,7 +374,7 @@ namespace krys::boo
     // we need to clear any override content size set by our container, because it would likely be incorrect
     // after the style change.
     if (IsOutOfFlowPositioned() && Parent()
-        && Parent()->Style().IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox())
+        && Parent()->Style().IsDisplayFlexibleOrGridFormattingContextBox())
     {
       ClearOverridingSize();
     }
@@ -464,7 +463,6 @@ namespace krys::boo
     }
 
     SetHasTransformRelatedProperty(ComputeHasTransformRelatedProperty(styleToUse));
-    // FIXME: Reflections (`-webkit-box-reflect` was dropped).
   }
 
   bool RenderBox::ComputeHasTransformRelatedProperty(const RenderStyle &styleToUse) const noexcept
@@ -2104,7 +2102,7 @@ namespace krys::boo
 
   static bool ShouldMarginInlineEndContributeToScrollableOverflow(const RenderBox &renderer) noexcept
   {
-    auto isSupportedContent = renderer.IsGridItem() || renderer.IsFlexItemIncludingDeprecated()
+    auto isSupportedContent = renderer.IsGridItem() || renderer.IsInFlowFlexChild()
                               || (renderer.IsInFlow() && renderer.Parent()->IsBlockContainer());
     if (!isSupportedContent)
     {
@@ -2139,8 +2137,7 @@ namespace krys::boo
     // The parent box is flexing us, so it has increased or decreased our width. Use the width from the style
     // context.
     // FIXME: Account for block-flow in flexible boxes (webkit.org/b/46418)
-    if (auto logicalWidth =
-          Parent()->IsFlexibleBoxIncludingDeprecated() ? OverridingBorderBoxLogicalWidth() : null)
+    if (auto logicalWidth = Parent()->IsRenderFlexibleBox() ? OverridingBorderBoxLogicalWidth() : null)
     {
       computedValues.Extent = *logicalWidth;
       return;
@@ -2153,8 +2150,6 @@ namespace krys::boo
     {
       // FIXME: Account for block-flow in flexible boxes.
       // https://bugs.webkit.org/show_bug.cgi?id=46418
-      // The legacy box properties were dropped, so a -webkit-box is always horizontal: replaced children stay
-      // replaced.
       auto isReplaced = Is<RenderReplaced>(*this);
       if (!isReplaced)
       {
@@ -2254,7 +2249,7 @@ namespace krys::boo
 
     auto shouldIgnoreOverconstrainedMargin = [&]
     {
-      if (IsGridItem() || IsFlexItemIncludingDeprecated())
+      if (IsGridItem() || IsInFlowFlexChild())
       {
         return true;
       }
@@ -2397,11 +2392,6 @@ namespace krys::boo
       return ComputeIntrinsicLogicalWidthUsing(IntrinsicKeyword::WebkitFillAvailable, availableLogicalWidth,
                                                borderAndPadding);
     }
-    if (logicalWidth.IsMinIntrinsic())
-    {
-      return ComputeIntrinsicLogicalWidthUsing(IntrinsicKeyword::MinContent, availableLogicalWidth,
-                                               borderAndPadding);
-    }
     if (logicalWidth.IsMaxContent())
     {
       return ComputeIntrinsicLogicalWidthUsing(IntrinsicKeyword::MaxContent, availableLogicalWidth,
@@ -2471,7 +2461,7 @@ namespace krys::boo
         style::Evaluate<LayoutUnit>(logicalWidth, availableLogicalWidth, Style().UsedZoomForLength()));
     }
 
-    if (logicalWidth.IsIntrinsic() || logicalWidth.IsMinIntrinsic())
+    if (logicalWidth.IsIntrinsic())
     {
       return ComputeIntrinsicLogicalWidthUsing(logicalWidth, availableLogicalWidth,
                                                BorderAndPaddingLogicalWidth());
@@ -2549,9 +2539,6 @@ namespace krys::boo
 
   bool RenderBox::IsStretchingColumnFlexItem() const noexcept
   {
-    // The legacy box properties were dropped, so a -webkit-box is always horizontal and never stretches its
-    // children's widths.
-
     // We don't stretch multiline flexboxes because they need to apply line spacing (align-content) first.
     if (Is<RenderFlexibleBox>(*Parent()) && Parent()->Style().GetFlexWrap() == FlexWrap::NoWrap
         && Parent()->Style().IsColumnFlexDirection() && ColumnFlexItemHasStretchAlignment())
@@ -2693,14 +2680,6 @@ namespace krys::boo
              || !HasStretchedLogicalWidth();
     }
 
-    // This code may look a bit strange.  Basically width:intrinsic should clamp the size when testing both
-    // min-width and width.  max-width is only clamped if it is also intrinsic.
-    const auto &logicalWidth = Style().LogicalWidth();
-    if (logicalWidth.IsIntrinsicKeyword())
-    {
-      return true;
-    }
-
     // Children of a horizontal marquee do not fill the container by default.
     // FIXME: Need to deal with MarqueeDirection::Auto value properly. It could be vertical.
     // FIXME: Think about block-flow here.  Need to find out how marquee direction relates to
@@ -2734,21 +2713,11 @@ namespace krys::boo
       }
     }
 
-    // Flexible horizontal boxes lay out children at their intrinsic widths.  Also vertical boxes
-    // that don't stretch their kids lay out their children at their intrinsic widths.
-    // FIXME: Think about block-flow here.
-    // https://bugs.webkit.org/show_bug.cgi?id=46473
-    // The legacy box properties were dropped, so a -webkit-box is always horizontal.
-    if (Parent()->IsRenderDeprecatedFlexibleBox())
-    {
-      return true;
-    }
-
     // Button, input, select, textarea, and legend treat width value of 'auto' as 'intrinsic' unless it's in a
     // stretching column flexbox.
     // FIXME: Think about block-flow here.
     // https://bugs.webkit.org/show_bug.cgi?id=46473
-    if (logicalWidth.IsAuto() && !IsStretchingColumnFlexItem())
+    if (Style().LogicalWidth().IsAuto() && !IsStretchingColumnFlexItem())
     {
       if (auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
           element
@@ -2923,24 +2892,6 @@ namespace krys::boo
         return null;
       }
 
-      if (auto *deprecatedFlexBox = DynamicDowncast<RenderDeprecatedFlexibleBox>(parent))
-      {
-        if (auto overridingLogicalHeight = OverridingBorderBoxLogicalHeight())
-        {
-          return *overridingLogicalHeight;
-        }
-
-        // The legacy box properties were dropped, so a -webkit-box is horizontal and stretches: its replaced
-        // children aren't treated as replaced.
-
-        // Block children of horizontal flexible boxes fill the height of the box.
-        if (Style().LogicalHeight().IsAuto() && deprecatedFlexBox->IsStretchingChildren())
-        {
-          return deprecatedFlexBox->ContentBoxLogicalHeight() - MarginBefore() - MarginAfter();
-        }
-
-        return null;
-      }
       if (Is<RenderGrid>(parent))
       {
         if (auto overridingLogicalHeight = OverridingBorderBoxLogicalHeight())
@@ -3043,7 +2994,6 @@ namespace krys::boo
     // specified. When we're printing, we also need this quirk if the body or root has a percentage height
     // since we don't set a height in RenderView when we're printing. So without this quirk, the height has
     // nothing to be a percentage of, and it ends up being 0. That is bad.
-    // FIXME: The paginated content when printing, once there's printing.
     if (StretchesToViewport())
     {
       auto margins = CollapsedMarginBefore() + CollapsedMarginAfter();
@@ -3223,7 +3173,7 @@ namespace krys::boo
     {
       return minMaxContent();
     }
-    if (logicalHeight.IsIntrinsic() || logicalHeight.IsMinIntrinsic() || logicalHeight.IsFitContent())
+    if (logicalHeight.IsIntrinsic() || logicalHeight.IsFitContent())
     {
       return intrinsic();
     }
@@ -3292,7 +3242,7 @@ namespace krys::boo
       return ComputePercentageLogicalHeight(logicalHeight);
     }
     if (logicalHeight.IsMinContent() || logicalHeight.IsMaxContent() || logicalHeight.IsFitContent()
-        || logicalHeight.IsFillAvailable() || logicalHeight.IsIntrinsic() || logicalHeight.IsMinIntrinsic())
+        || logicalHeight.IsFillAvailable() || logicalHeight.IsIntrinsic())
     {
       return intrinsic();
     }
@@ -3353,8 +3303,7 @@ namespace krys::boo
     // percentages.
     return GetDocument().InQuirksMode() && !containingBlock.IsRenderTableCell()
            && !containingBlock.IsOutOfFlowPositioned() && !containingBlock.IsRenderGrid()
-           && !containingBlock.IsFlexibleBoxIncludingDeprecated()
-           && containingBlock.Style().LogicalHeight().IsAuto();
+           && !containingBlock.IsRenderFlexibleBox() && containingBlock.Style().LogicalHeight().IsAuto();
   }
 
   static bool TableCellShouldHaveZeroInitialSize(const RenderTableCell &tableCell, const RenderBox &child,
@@ -3523,9 +3472,7 @@ namespace krys::boo
   {
     auto logicalWidth = OverridingLogicalWidthForFlexBasisComputation().value_or(Style().LogicalWidth());
     auto fixedLogicalWidth = logicalWidth.TryFixed();
-    return fixedLogicalWidth && fixedLogicalWidth->IsPositiveOrZero()
-           && !(IsDeprecatedFlexItem()
-                && !static_cast<int32>(fixedLogicalWidth->ResolveZoom(Style().UsedZoomForLength())));
+    return fixedLogicalWidth && fixedLogicalWidth->IsPositiveOrZero();
   }
 
   void RenderBox::ComputePreferredLogicalWidths() noexcept
@@ -3936,8 +3883,7 @@ namespace krys::boo
 
     // We need the containing block to have a definite block-size in order to resolve the block-size of the
     // descendant, except when in quirks mode. Flexboxes follow strict behavior even in quirks mode, though.
-    if (!containingBlock
-        || (GetDocument().InQuirksMode() && !containingBlock->IsFlexibleBoxIncludingDeprecated()))
+    if (!containingBlock || (GetDocument().InQuirksMode() && !containingBlock->IsRenderFlexibleBox()))
     {
       return false;
     }
@@ -3958,7 +3904,7 @@ namespace krys::boo
 
   bool RenderBox::HasIntrinsicAspectRatio() const noexcept
   {
-    // FIXME: Video and view transition captures, once they have renderers.
+    // FIXME: Video, once it has renderers.
     return IsBlockLevelReplacedOrAtomicInline() && (IsRenderImage() || IsRenderHTMLCanvas());
   }
 
@@ -4174,7 +4120,6 @@ namespace krys::boo
     return windowAutoscrollPoint - windowPoint;
   }
 
-  // FIXME: Subframes' owner elements (ownerElement), once there are frames.
   RenderBox *RenderBox::FindAutoscrollable(RenderObject *renderer) noexcept
   {
     while (renderer)
@@ -4517,7 +4462,6 @@ namespace krys::boo
     }
 
     auto adjustedRects = rects;
-    // FIXME: Reflections (`-webkit-box-reflect` was dropped).
 
     if (container == this)
     {
@@ -5781,14 +5725,6 @@ namespace krys::boo
     {
       return intrinsic();
     }
-    if (logicalWidth.IsIntrinsicKeyword() || logicalWidth.IsMinIntrinsic())
-    {
-      if (ShouldComputeLogicalWidthFromAspectRatio())
-      {
-        return inlineConstraints.ContainingSize();
-      }
-      return fallback();
-    }
     if constexpr (std::same_as<SizeType, style::MaximumSize>)
     {
       krys_debug_assert(logicalWidth.IsNone());
@@ -6304,7 +6240,7 @@ namespace krys::boo
     // If there is only one layer and no image, check whether the background color is opaque.
     if (Style().GetBackgroundLayers().UsedLength() == 1 && !topLayer.HasImage())
     {
-      Color bgColor = Style().VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+      Color bgColor = Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
       if (bgColor.IsOpaque())
       {
         return true;

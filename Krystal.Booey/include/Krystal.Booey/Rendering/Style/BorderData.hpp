@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/RectCorners.hpp"
-#include "Krystal.Booey/Core/RectEdges.hpp"
+#include "Krystal.Booey/Graphics/Geometry/RectCorners.hpp"
+#include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Booey/Rendering/Style/BorderValue.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleBorderImageData.hpp"
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"

@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Color/AbsoluteColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorLayers.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorMix.hpp"
@@ -292,23 +292,20 @@ namespace krys::boo::style
   }
 
   Color ToStyleColor(const css::Color &value, Ref<const dom::Document> document, const RenderStyle &style,
-                     const css::ToLengthConversionData &conversionData,
-                     style::ForVisitedLink forVisitedLink) noexcept
+                     const css::ToLengthConversionData &conversionData) noexcept
   {
     auto resolutionState = ColorResolutionState {
       .Document = krys::move(document),
       .Style = style,
       .ConversionData = conversionData,
-      .ForVisitedLink = forVisitedLink,
     };
     return ToStyleColor(value, resolutionState);
   }
 
-  Color ToStyleColor(const css::Color &value, const BuilderState &builderState,
-                     style::ForVisitedLink forVisitedLink) noexcept
+  Color ToStyleColor(const css::Color &value, const BuilderState &builderState) noexcept
   {
     return ToStyleColor(value, Ref<const dom::Document>::WithRef(builderState.GetDocument()),
-                        builderState.Style(), builderState.CssToLengthConversionData(), forVisitedLink);
+                        builderState.Style(), builderState.CssToLengthConversionData());
   }
 
   css::Color ToCSS<Color>::operator()(const Color &value, const RenderStyle &style) noexcept
@@ -316,42 +313,25 @@ namespace krys::boo::style
     return css::Color {css::ResolvedColor {style.ColorResolvingCurrentColor(value)}};
   }
 
-  Color ToStyle<css::Color>::operator()(const css::Color &value, const BuilderState &builderState,
-                                        style::ForVisitedLink forVisitedLink) noexcept
-  {
-    return ToStyleColor(value, builderState, forVisitedLink);
-  }
-
   Color ToStyle<css::Color>::operator()(const css::Color &value, const BuilderState &builderState) noexcept
   {
-    return ConvertToStyle(value, builderState, style::ForVisitedLink::No);
-  }
-
-  Color CSSValueConversion<Color>::operator()(BuilderState &builderState, const css::Value &value,
-                                              style::ForVisitedLink forVisitedLink) noexcept
-  {
-    if (!builderState.GetElement() || !css::IsLink(*builderState.GetElement()))
-    {
-      forVisitedLink = style::ForVisitedLink::No;
-    }
-
-    if (auto *color = DynamicDowncast<css::ColorValue>(value))
-    {
-      return ConvertToStyle(color->GetColor(), builderState, forVisitedLink);
-    }
-
-    if (css::IsColorKeyword(value.ValueId()))
-    {
-      return ConvertToStyle(css::Color {css::KeywordColor {value.ValueId()}}, builderState, forVisitedLink);
-    }
-
-    builderState.SetCurrentPropertyInvalidAtComputedValueTime();
-    return Color {boo::Color {}};
+    return ToStyleColor(value, builderState);
   }
 
   Color CSSValueConversion<Color>::operator()(BuilderState &builderState, const css::Value &value) noexcept
   {
-    return (*this)(builderState, value, style::ForVisitedLink::No);
+    if (auto *color = DynamicDowncast<css::ColorValue>(value))
+    {
+      return ConvertToStyle(color->GetColor(), builderState);
+    }
+
+    if (css::IsColorKeyword(value.ValueId()))
+    {
+      return ConvertToStyle(css::Color {css::KeywordColor {value.ValueId()}}, builderState);
+    }
+
+    builderState.SetCurrentPropertyInvalidAtComputedValueTime();
+    return Color {boo::Color {}};
   }
 
   Ref<css::Value> CSSValueCreation<Color>::operator()(css::ValuePool &pool, const RenderStyle &style,

@@ -23,7 +23,6 @@ namespace krys::boo::svg
 
   /// @brief What a document keeps for its SVG content: its resources, the elements whose references wait to
   /// be rebuilt, and its `<svg>` elements' time containers.
-  /// FIXME: reportWarning and reportError, once there's a console.
   class SVGDocumentExtensions final
   {
     KRYS_NON_COPY_MOVABLE(SVGDocumentExtensions);

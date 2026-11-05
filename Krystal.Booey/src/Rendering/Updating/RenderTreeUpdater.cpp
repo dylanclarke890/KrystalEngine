@@ -6,12 +6,12 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -418,7 +418,6 @@ namespace krys::boo
     auto *renderer = element.Renderer();
     if (!renderer)
     {
-      // FIXME: View transitions, once there are any.
       return;
     }
 
@@ -429,7 +428,7 @@ namespace krys::boo
     }
 
     GetGeneratedContent().UpdateBackdropRenderer(*renderer, minimalStyleDifference);
-    // FIXME: Writing suggestions and view transitions, once there are any.
+    // FIXME: Writing suggestions, once there are any.
 
     _builder->UpdateAfterDescendants(*renderer);
 

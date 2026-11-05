@@ -312,12 +312,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
     if (!vertical)
     {
-      if constexpr (property == PropertyId::WebkitBackgroundSize)
-      {
-        // Legacy syntax: "-webkit-background-size: 10px" is equivalent to "background-size: 10px 10px".
-        vertical = horizontal;
-      }
-      else if constexpr (property == PropertyId::BackgroundSize)
+      if constexpr (property == PropertyId::BackgroundSize)
       {
         vertical = PrimitiveValue::Create(ValueId::Auto);
       }
@@ -341,12 +336,6 @@ namespace krys::boo::css::PropertyParserHelpers
     // https://drafts.csswg.org/css-backgrounds/#background-size
 
     return ConsumeBackgroundSize<PropertyId::BackgroundSize>(tokens, state);
-  }
-
-  RefPtr<Value> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
-  {
-    // Non-standard.
-    return ConsumeBackgroundSize<PropertyId::WebkitBackgroundSize>(tokens, state);
   }
 
   RefPtr<Value> ConsumeSingleMaskSize(TokenRange &tokens, PropertyParserState &state) noexcept

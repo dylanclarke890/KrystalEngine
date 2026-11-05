@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Style/Values/SVG/SVGPaintOrder.hpp"
 #include "Krystal.Booey/Style/Values/Text/HangingPunctuation.hpp"
 #include "Krystal.Booey/Style/Values/Text/HyphenateCharacter.hpp"
-#include "Krystal.Booey/Style/Values/Text/HyphenateLimitEdge.hpp"
+#include "Krystal.Booey/Style/Values/Text/HyphenateLimitChars.hpp"
 #include "Krystal.Booey/Style/Values/Text/HyphenateLimitLines.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextAlignLast.hpp"
@@ -45,7 +45,6 @@
 
 namespace krys::boo
 {
-  class StyleAppleColorFilterData;
   class StyleImage;
 
   // This struct is for rarely used inherited CSS3, CSS2 and non-standard properties.
@@ -63,17 +62,11 @@ namespace krys::boo
 
     bool operator==(const StyleRareInheritedData &) const noexcept;
 
-    KRYS_NODISCARD bool HasColorFilters() const noexcept;
-
     float UsedZoom;
     float DeviceScaleFactor {1.0f};
 
-    style::Color TextFillColor;
     style::Color TextEmphasisColor;
-    style::Color VisitedLinkTextFillColor;
-    style::Color VisitedLinkTextEmphasisColor;
     style::Color CaretColor;
-    style::Color VisitedLinkCaretColor;
 
     style::AccentColor AccentColor;
 
@@ -84,7 +77,6 @@ namespace krys::boo
     style::Quotes Quotes;
 
     style::Color StrokeColor;
-    style::Color VisitedLinkStrokeColor;
 
     style::ColorScheme ColorScheme;
 
@@ -103,7 +95,6 @@ namespace krys::boo
     EnumSet<EventListenerRegionType> EventListenerRegionTypes;
     style::StrokeWidth StrokeWidth;
     style::TextUnderlineOffset TextUnderlineOffset;
-    DataRef<StyleAppleColorFilterData> AppleColorFilter;
     style::TabSize TabSize;
 
     style::StrokeMiterlimit StrokeMiterLimit;
@@ -115,8 +106,7 @@ namespace krys::boo
 
     style::Widows Widows;
     style::Orphans Orphans;
-    style::HyphenateLimitEdge HyphenateLimitBefore;
-    style::HyphenateLimitEdge HyphenateLimitAfter;
+    style::HyphenateLimitChars HyphenateLimitChars;
     style::HyphenateLimitLines HyphenateLimitLines;
 
     style::TouchAction UsedTouchAction;
@@ -135,7 +125,6 @@ namespace krys::boo
     unsigned LineBoxContain : 7;
     unsigned ImageOrientation : 1;
     unsigned ImageRendering : 3;
-    unsigned LineAlign : 1;
     unsigned TextAlignLast : 3;
     unsigned TextJustify : 2;
     unsigned TextDecorationSkipInk : 2;
@@ -151,7 +140,6 @@ namespace krys::boo
     unsigned HasExplicitlySetStrokeWidth : 1;
     unsigned HasExplicitlySetStrokeColor : 1;
     unsigned HasAutoCaretColor : 1;
-    unsigned HasVisitedLinkAutoCaretColor : 1;
     unsigned EffectiveInert : 1;
     unsigned EffectivelyTransparent : 1;
     unsigned IsInSubtreeWithBlendMode : 1;

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix.hpp"
-#include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
+#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -10,23 +10,23 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/BitmapImage.hpp"
-#include "Krystal.Booey/Graphics/ByteArrayPixelBuffer.hpp"
-#include "Krystal.Booey/Graphics/DashArray.hpp"
-#include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
+#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/GraphicsLayerContentsDisplayDelegate.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferConversion.hpp"
+#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/Images/SourceImage.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp"
+#include "Krystal.Booey/Graphics/Paths/DashArray.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/Pattern.hpp"
-#include "Krystal.Booey/Graphics/PixelBufferConversion.hpp"
-#include "Krystal.Booey/Graphics/SourceImage.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasFilterContextSwitcher.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
@@ -36,10 +36,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
-#include "Krystal.Booey/SVG/SVGImageElement.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <cmath>
@@ -2582,7 +2582,6 @@ namespace krys::boo::html
     RefPtr<PixelBuffer> pixelBuffer = buffer->GetPixelBuffer(format, imageDataRect);
     if (!pixelBuffer)
     {
-      // FIXME: A console message: "Unable to get image data from canvas. Requested size was w x h".
       return dom::Exception {dom::ExceptionCode::InvalidStateError};
     }
 
@@ -3022,9 +3021,11 @@ namespace krys::boo::html
     for (uint32 i = 0; i < font.FamilyCount(); ++i)
     {
       auto family = font.FamilyAt(i).View();
-      if (family.starts_with(u8"-webkit-"))
+      // The generic families' internal names serialise as their keywords.
+      constexpr utf8_stringview internalPrefix = u8"-internal-";
+      if (family.starts_with(internalPrefix))
       {
-        family = family.substr(8);
+        family = family.substr(internalPrefix.size());
       }
 
       auto separator = i ? utf8_stringview {u8", "} : utf8_stringview {u8" "};

@@ -1,19 +1,19 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/ScrollAxis.hpp"
-#include "Krystal.Booey/Core/BoxExtents.hpp"
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
-#include "Krystal.Booey/Core/TextFlags.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
+#include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/CSS/Values/Aggregates.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridAutoFlow.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumericForward.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Types/DataRef.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
@@ -76,7 +76,6 @@ namespace krys::boo
     struct AlignSelf;
     struct Animation;
     struct AnchorNames;
-    struct AppleColorFilter;
     struct AspectRatio;
     struct BackgroundLayer;
     struct BackgroundSize;
@@ -125,7 +124,7 @@ namespace krys::boo
     struct GridTrackSizes;
     struct HangingPunctuation;
     struct HyphenateCharacter;
-    struct HyphenateLimitEdge;
+    struct HyphenateLimitChars;
     struct HyphenateLimitLines;
     struct ImageOrNone;
     struct InsetEdge;
@@ -160,7 +159,6 @@ namespace krys::boo
     struct Opacity;
     struct Orphans;
     struct PaddingEdge;
-    struct PageSize;
     struct Perspective;
     struct Position;
     struct PositionAnchor;
@@ -222,8 +220,6 @@ namespace krys::boo
     struct VerticalAlign;
     struct ViewTimelineInsets;
     struct ViewTimelines;
-    struct ViewTransitionClasses;
-    struct ViewTransitionName;
     struct WebkitInitialLetter;
     struct WebkitLineBoxContain;
     struct WebkitLocale;
@@ -278,7 +274,7 @@ namespace krys::boo
     using Transitions = CoordinatedValueList<Transition>;
     using WebkitBorderSpacing = Length<css::NonNegativeUnzoomed>;
 
-    constexpr auto PublicPseudoIDBits = 17;
+    constexpr auto PublicPseudoIDBits = 12;
     constexpr auto TextDecorationLineBits = 5;
     constexpr auto TextTransformBits = 6;
     constexpr auto PseudoElementTypeBits = 5;
@@ -323,9 +319,6 @@ namespace krys::boo
 
       KRYS_NODISCARD inline bool UseTreeCountingFunctions() const noexcept;
       inline void SetUsesTreeCountingFunctions() noexcept;
-
-      KRYS_NODISCARD inline InsideLink GetInsideLink() const noexcept;
-      inline void SetInsideLink(InsideLink) noexcept;
 
       KRYS_NODISCARD inline bool IsLink() const noexcept;
       inline void SetIsLink(bool) noexcept;
@@ -569,13 +562,9 @@ namespace krys::boo
 
       // `caret-color`
       inline const Color &CaretColor() const;
-      inline const Color &VisitedLinkCaretColor() const;
       KRYS_NODISCARD inline bool HasAutoCaretColor() const noexcept;
-      KRYS_NODISCARD inline bool HasVisitedLinkAutoCaretColor() const noexcept;
       inline void SetCaretColor(Color &&) noexcept;
-      inline void SetVisitedLinkCaretColor(Color &&) noexcept;
       inline void SetHasAutoCaretColor() noexcept;
-      inline void SetHasVisitedLinkAutoCaretColor() noexcept;
 
       // `cursor`
       KRYS_NODISCARD inline CursorType GetCursorType() const noexcept;
@@ -583,10 +572,6 @@ namespace krys::boo
       // `counter-*`
       KRYS_NODISCARD const CounterDirectiveMap &GetCounterDirectives() const noexcept;
       KRYS_NODISCARD CounterDirectiveMap &AccessCounterDirectives() noexcept;
-
-      // `@page size`
-      inline const PageSize &GetPageSize() const;
-      inline void SetPageSize(PageSize &&) noexcept;
 
       struct NonInheritedFlags
       {
@@ -659,12 +644,11 @@ namespace krys::boo
         // -webkit- Stuff = 1 bit
         uint8 RtlOrdering : 1;
 
-        // Color Stuff = 4 bits
+        // Color Stuff = 2 bits
         uint8 HasExplicitlySetColor : 1;
         uint8 PrintColorAdjust : 1;
-        uint8 InsideLink : 2;
 
-        // Total = 56 bits (fits in 8 bytes)
+        // Total = 54 bits (fits in 8 bytes)
       };
 
       const StyleNonInheritedData &NonInheritedData() const

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/Style/MatchResult.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
+#include "Krystal.Booey/Style/Rules/MatchResult.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 

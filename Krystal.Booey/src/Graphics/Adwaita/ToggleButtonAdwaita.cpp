@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Graphics/Adwaita/ToggleButtonAdwaita.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
 
 namespace krys::boo
 {

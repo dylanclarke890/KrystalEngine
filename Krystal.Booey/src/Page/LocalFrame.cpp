@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Booey/Editing/VisiblePosition.hpp"
+#include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -16,8 +16,7 @@ namespace krys::boo
   LocalFrame::LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept
       : _page(page ? WeakPtr<Page>::WithRef(*page) : WeakPtr<Page>()),
         _eventHandler(CreateUnique<EventHandler>(*this)),
-        _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient))),
-        _navigationScheduler(CreateUnique<NavigationScheduler>(*this))
+        _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient)))
   {
   }
 
@@ -49,9 +48,7 @@ namespace krys::boo
 
     _view = krys::move(view);
 
-    // A document in the back/forward cache has no render tree until it's shown again.
-    if (_document && _view
-        && _document->GetBackForwardCacheState() == dom::BackForwardCacheState::NotInBackForwardCache)
+    if (_document && _view)
     {
       _document->CreateRenderTree();
     }
@@ -131,11 +128,7 @@ namespace krys::boo
     // The mouse's state refers to the old document's nodes.
     _eventHandler->Clear();
 
-    // A document entering the back/forward cache keeps its state, and is destroyed only if the cache drops
-    // it.
-    if (RefPtr<dom::Document> previousDocument = _document;
-        previousDocument
-        && previousDocument->GetBackForwardCacheState() != dom::BackForwardCacheState::InBackForwardCache)
+    if (RefPtr<dom::Document> previousDocument = _document)
     {
       previousDocument->WillBeRemovedFromFrame();
     }
@@ -195,8 +188,6 @@ namespace krys::boo
     {
       return;
     }
-
-    // FIXME: Respect zoomAndPan="disabled" in standalone SVG documents, once SVG elements have it.
 
     document->ResolveStyle(dom::Document::ResolveStyleType::Rebuild);
 

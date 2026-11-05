@@ -1,16 +1,16 @@
 ﻿#include "Krystal.Booey/Style/ResolveForFont.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/FontSelectionValueInlines.hpp"
-#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/FontSelectionValueInlines.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesEvaluateCalc.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Style/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
@@ -299,11 +299,11 @@ namespace krys::boo::style
           // FIXME: Treat system-ui like other generic font families
           if (ident == css::ValueId::SystemUi)
           {
-            return {css::WebKitFontFamilyNames::SystemUiFamily(), true};
+            return {css::GenericFontFamilyNames::SystemUiFamily(), true};
           }
-          return {
-            css::WebKitFontFamilyNames::FamilyName(css::PropertyParserHelpers::GenericFontFamilyIndex(ident)),
-            true};
+          return {css::GenericFontFamilyNames::FamilyName(
+                    css::PropertyParserHelpers::GenericFontFamilyIndex(ident)),
+                  true};
         },
         [&](const css::CSSOMStringAtom &familyString) -> std::pair<StringAtom, bool>
         { return {familyString, false}; });

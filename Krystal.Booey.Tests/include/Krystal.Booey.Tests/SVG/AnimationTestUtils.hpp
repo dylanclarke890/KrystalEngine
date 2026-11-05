@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::svg::tests

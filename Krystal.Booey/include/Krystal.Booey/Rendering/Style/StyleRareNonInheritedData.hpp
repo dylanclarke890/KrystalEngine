@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/CounterDirectives.hpp"
-#include "Krystal.Booey/Style/NameScope.hpp"
-#include "Krystal.Booey/Style/ScopedName.hpp"
+#include "Krystal.Booey/Style/Scope/NameScope.hpp"
+#include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/Align/GapGutter.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/AnchorName.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionAnchor.hpp"
@@ -28,7 +28,6 @@
 #include "Krystal.Booey/Style/Values/Overflow/MaximumLines.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollbarGutter.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp"
-#include "Krystal.Booey/Style/Values/Page/PageSize.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Rhythm/BlockStepSize.hpp"
@@ -53,8 +52,6 @@
 #include "Krystal.Booey/Style/Values/Transforms/Scale.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Translate.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/Zoom.hpp"
-#include "Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionClass.hpp"
-#include "Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionName.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
 #include "Krystal.Core/Types/DataRef.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -123,8 +120,6 @@ namespace krys::boo
 
     style::WillChange WillChange;
 
-    style::PageSize PageSize;
-
     style::ShapeOutside ShapeOutside;
     style::ShapeMargin ShapeMargin;
     style::ShapeImageThreshold ShapeImageThreshold;
@@ -142,9 +137,6 @@ namespace krys::boo
     style::Translate Translate;
 
     style::ContainerNames ContainerNames;
-
-    style::ViewTransitionClasses ViewTransitionClasses;
-    style::ViewTransitionName ViewTransitionName;
 
     style::GapGutter ColumnGap;
     style::GapGutter RowGap;

@@ -6,24 +6,8 @@ namespace krys::boo::css
   void ApplyModifiersToLoaderOptions(const URLModifiers &modifiers,
                                      ResourceLoaderOptions &loaderOptions) noexcept
   {
-    if (modifiers.CrossOrigin)
-    {
-      // https://www.w3.org/TR/css-values-5/#typedef-request-url-modifier-cross-origin-modifier
-      //
-      // The URL request modifier steps for this modifier given request req are:
-      // 1. Set request's mode to "cors".
-      loaderOptions.RequestMode = FetchOptions::Mode::Cors;
-
-      // 2. If the given value is use-credentials, set request's credentials mode to "include"
-      if (std::holds_alternative<keywords::UseCredentials>(modifiers.CrossOrigin->Parameters))
-      {
-        loaderOptions.CredentialsMode = FetchOptions::Credentials::Include;
-      }
-      else
-      {
-        loaderOptions.CredentialsMode = FetchOptions::Credentials::SameOrigin;
-      }
-    }
+    // https://www.w3.org/TR/css-values-5/#typedef-request-url-modifier-cross-origin-modifier
+    // (Skipped: there's no request mode or credentials mode without a network.)
 
     if (modifiers.Integrity)
     {
@@ -51,7 +35,5 @@ namespace krys::boo::css
         { return boo::ReferrerPolicy::StrictOriginWhenCrossOrigin; },
         [](keywords::UnsafeUrl) { return boo::ReferrerPolicy::UnsafeUrl; });
     }
-
-    loaderOptions.IsLoadedFromOpaqueSource = modifiers.LoadedFromOpaqueSource;
   }
 }

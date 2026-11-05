@@ -46,7 +46,6 @@ target_sources(Krystal.UI
       include/Krystal.UI/EditorClient.hpp
       include/Krystal.UI/FileLoaderStrategy.hpp
       include/Krystal.UI/FontFaceCache.hpp
-      include/Krystal.UI/GamepadProvider.hpp
       include/Krystal.UI/FilterGraph2DBuilder.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
       include/Krystal.UI/EngineTexture.hpp
@@ -76,7 +75,6 @@ target_sources(Krystal.UI
     src/EditorClient.cpp
     src/FileLoaderStrategy.cpp
     src/FontFaceCache.cpp
-    src/GamepadProvider.cpp
     src/FilterGraph2DBuilder.cpp
     src/GraphicsContextRender2D.cpp
     src/EngineTexture.cpp

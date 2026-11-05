@@ -3,9 +3,9 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include <algorithm>
 

@@ -22,18 +22,18 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
-#include "Krystal.Booey/Rendering/InlineWalker.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
-#include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
-#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
-#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
@@ -251,7 +251,6 @@ namespace krys::boo::layout_integration
     KRYS_NODISCARD inline Maybe<layout::BlockLayoutState::LineClamp>
       LineClamp(const RenderBlockFlow &rootRenderer) noexcept
     {
-      // The legacy line clamp (-webkit-line-clamp) was dropped.
       auto *layoutState = rootRenderer.View().FrameView().LayoutContext().LayoutState();
       if (!layoutState)
       {
@@ -259,8 +258,8 @@ namespace krys::boo::layout_integration
       }
       if (auto lineClamp = layoutState->GetLineClamp())
       {
-        return layout::BlockLayoutState::LineClamp {lineClamp->MaximumLines, lineClamp->ShouldDiscardOverflow,
-                                                    false};
+        return layout::BlockLayoutState::LineClamp {lineClamp->MaximumLines,
+                                                    lineClamp->ShouldDiscardOverflow};
       }
       return null;
     }

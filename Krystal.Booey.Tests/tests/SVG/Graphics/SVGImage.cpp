@@ -7,8 +7,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
-#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::svg::tests

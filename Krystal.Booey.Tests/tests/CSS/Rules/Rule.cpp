@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Queries/ContainerQueryParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::tests
@@ -42,7 +42,6 @@ namespace krys::boo::css::tests
     CHECK(static_cast<int>(RuleType::Import) == 3);
     CHECK(static_cast<int>(RuleType::Media) == 4);
     CHECK(static_cast<int>(RuleType::FontFace) == 5);
-    CHECK(static_cast<int>(RuleType::Page) == 6);
     CHECK(static_cast<int>(RuleType::Keyframes) == 7);
     CHECK(static_cast<int>(RuleType::Keyframe) == 8);
     CHECK(static_cast<int>(RuleType::Margin) == 9);
@@ -50,8 +49,8 @@ namespace krys::boo::css::tests
     CHECK(static_cast<int>(RuleType::CounterStyle) == 11);
     CHECK(static_cast<int>(RuleType::Supports) == 12);
     CHECK(static_cast<int>(RuleType::FontFeatureValues) == 14);
-    CHECK(FirstUnexposedRuleType == RuleType::ViewTransition);
-    CHECK(static_cast<int>(RuleType::FunctionDeclarations) == 28);
+    CHECK(FirstUnexposedRuleType == RuleType::LayerBlock);
+    CHECK(static_cast<int>(RuleType::FunctionDeclarations) == 27);
   }
 
   TEST_CASE_METHOD(ValueFixture, "StyleRule", "[CSS][Rules][Rule]")
@@ -349,20 +348,6 @@ namespace krys::boo::css::tests
       auto copy = rule->Copy();
       CHECK(&copy->Properties() != &rule->Properties());
       CHECK(AsText(copy->Properties()) == "font-family: foo; font-display: swap;");
-    }
-
-    SECTION("PageRule")
-    {
-      auto rule = PageRule::Create(ImmutableDeclarations(u8"margin: 1px"), {});
-      CHECK(rule->Type() == RuleType::Page);
-      CHECK(rule->IsPageRule());
-      CHECK(rule->Selector() == nullptr);
-      CHECK_FALSE(rule->Properties().IsMutable());
-      // Copy-on-write: the immutable declarations are replaced, not cast.
-      AddDeclaration(rule->MutableProperties(), u8"color: red", DeclarationTestContext());
-      CHECK(rule->Properties().IsMutable());
-      CHECK(AsText(rule->Properties()) == "margin: 1px; color: red;");
-      CHECK(AsText(rule->Copy()->Properties()) == "margin: 1px; color: red;");
     }
 
     SECTION("PropertyRule")

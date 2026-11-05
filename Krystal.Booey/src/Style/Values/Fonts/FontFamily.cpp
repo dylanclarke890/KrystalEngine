@@ -2,9 +2,9 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/Graphics/SystemFontDatabase.hpp"
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo::style
@@ -32,11 +32,6 @@ namespace krys::boo::style
       }
 
       auto valueID = primitiveValue->ValueId();
-      if (valueID == css::ValueId::WebkitBody)
-      {
-        return {StandardFontFamily(state), FontFamilyKind::Specified};
-      }
-
       if (auto family = css::PropertyParserHelpers::GenericFontFamily(valueID);
           family != css::CSSOMStringAtom::Null())
       {
@@ -74,11 +69,6 @@ namespace krys::boo::style
         }
 
         auto valueID = contentValue.ValueId();
-        if (valueID == css::ValueId::WebkitBody)
-        {
-          return {StandardFontFamily(state), FontFamilyKind::Specified};
-        }
-
         return {css::PropertyParserHelpers::GenericFontFamily(valueID), FontFamilyKind::Generic};
       }();
 

@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
@@ -12,16 +12,16 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderCounter.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
 
@@ -128,13 +128,6 @@ namespace krys::boo
     // RenderViews should never be called to paint with an offset not on device pixels.
     krys_debug_assert(LayoutPoint(IntPoint(paintOffset.X().ToInt(), paintOffset.Y().ToInt())) == paintOffset);
 
-    // This avoids painting garbage between columns if there is a column gap.
-    if (FrameView().GetPagination().Mode != PaginationMode::Unpaginated
-        && paintInfo.ShouldPaintWithinRoot(*this))
-    {
-      paintInfo.Context().FillRect(FloatRect(paintInfo.Rect), FrameView().BaseBackgroundColor());
-    }
-
     PaintObject(paintInfo, paintOffset);
   }
 
@@ -221,9 +214,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Frames whose enclosing layers can't blit to the window (cannotBlitToWindow), once there are
-    // subframes.
-
     if (!ShouldPaintBaseBackground())
     {
       return;
@@ -304,8 +294,7 @@ namespace krys::boo
   bool RenderView::ShouldPaintBaseBackground() const noexcept
   {
     // Fill with a base color if we're the root document.
-    // FIXME: Subframes (frames, iframes whose colour scheme differs from their owner's, transparent SVG
-    // documents), once there are any; every view is its page's main frame.
+    // Every view is its page's main frame.
     return !FrameView().IsTransparent();
   }
 
@@ -351,8 +340,6 @@ namespace krys::boo
 
   void RenderView::Layout() noexcept
   {
-    // FIXME: Printing (the page size and the preferred widths it sets), once there is any.
-
     // Use calcWidth/Height to get the new width/height, since this will take the full page zoom factor into
     // account.
     bool relayoutChildren =
@@ -379,7 +366,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The page height when printing and whether it changed, once there's printing.
     LayoutStateMaintainer statePusher(*this, {}, false);
 
     // FIXME: This should be called only when frame view (or the canvas we render onto) size changes.
@@ -405,7 +391,6 @@ namespace krys::boo
 
   void RenderView::UpdateLogicalWidth() noexcept
   {
-    // FIXME: The page width when printing, once there is any.
     SetLogicalWidth(LayoutUnit(ViewLogicalWidth()));
   }
 
@@ -421,8 +406,6 @@ namespace krys::boo
 
   LayoutUnit RenderView::PageOrViewLogicalHeight() const noexcept
   {
-    // FIXME: The page height when printing, and the pagination's page length in a multi-column view, once
-    // there are any.
     return LayoutUnit(ViewLogicalHeight());
   }
 
@@ -629,7 +612,6 @@ namespace krys::boo
 
   bool RenderView::ShouldRepaint(const LayoutRect &rect) const noexcept
   {
-    // FIXME: Nothing repaints while printing, once there's printing.
     return !rect.IsEmpty();
   }
 
@@ -658,8 +640,6 @@ namespace krys::boo
     // size/position.
     auto enclosingRect = EnclosingIntRect(repaintRect);
     auto viewRect = ViewRect();
-
-    // FIXME: A frame inside another frame repaints its owner's box, once there are iframes.
 
     if (_accumulatedRepaintRegion)
     {
@@ -703,8 +683,6 @@ namespace krys::boo
 
   void RenderView::FlushAccumulatedRepaintRegion() const noexcept
   {
-    // FIXME: A frame inside another frame repaints its owner's box, once there are iframes.
-
     krys_debug_assert(_accumulatedRepaintRegion);
     auto repaintRects = _accumulatedRepaintRegion->Rects();
     for (const auto &rect : repaintRects)
@@ -774,8 +752,6 @@ namespace krys::boo
     // If a container was specified, and was not nullptr or the RenderView,
     // then we should have found it by now.
     krys_debug_assert(!container || container == this);
-
-    // FIXME: Rects stay as they are while printing, once there's printing.
 
     auto adjustedRects = rects;
     if (GetWritingMode().IsBlockFlipped())

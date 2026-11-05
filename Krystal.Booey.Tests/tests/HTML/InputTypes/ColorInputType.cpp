@@ -6,8 +6,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Platform/ColorChooser.hpp"
-#include "Krystal.Booey/Platform/ColorChooserClient.hpp"
+#include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/ColorChooserClient.hpp"
 
 namespace krys::boo::tests
 {
@@ -113,7 +113,7 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
     REQUIRE(swatch.Renderer());
     CHECK(SerialisationForCSS(
-            swatch.Renderer()->Style().VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor))
+            swatch.Renderer()->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor))
           == u8"rgb(0, 0, 255)");
   }
 

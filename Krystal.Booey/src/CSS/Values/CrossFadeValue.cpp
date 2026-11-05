@@ -1,22 +1,21 @@
 ﻿#include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 
 namespace krys::boo::css
 {
   CrossFadeValue::CrossFadeValue(Ref<Value> &&fromValueOrNone, Ref<Value> &&toValueOrNone,
-                                 Ref<PrimitiveValue> &&percentageValue, bool isPrefixed) noexcept
+                                 Ref<PrimitiveValue> &&percentageValue) noexcept
       : Value(ValueType::CrossFade), _fromValueOrNone(krys::move(fromValueOrNone)),
-        _toValueOrNone(krys::move(toValueOrNone)), _percentageValue(krys::move(percentageValue)),
-        _isPrefixed(isPrefixed)
+        _toValueOrNone(krys::move(toValueOrNone)), _percentageValue(krys::move(percentageValue))
   {
   }
 
   Ref<CrossFadeValue> CrossFadeValue::Create(Ref<Value> &&fromValueOrNone, Ref<Value> &&toValueOrNone,
-                                             Ref<PrimitiveValue> &&percentageValue, bool isPrefixed) noexcept
+                                             Ref<PrimitiveValue> &&percentageValue) noexcept
   {
     return AdoptRef(*new CrossFadeValue(krys::move(fromValueOrNone), krys::move(toValueOrNone),
-                                        krys::move(percentageValue), isPrefixed));
+                                        krys::move(percentageValue)));
   }
 
   bool CrossFadeValue::Equals(const CrossFadeValue &other) const noexcept
@@ -32,7 +31,7 @@ namespace krys::boo::css
 
   CSSOMString CrossFadeValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString result {_isPrefixed ? u8"-webkit-cross-fade(" : u8"cross-fade("};
+    CSSOMString result {u8"cross-fade("};
     result.append(_fromValueOrNone->CssText(context));
     result.append(u8", ");
     result.append(_toValueOrNone->CssText(context));
@@ -47,7 +46,6 @@ namespace krys::boo::css
     return StyleCrossfadeImage::Create(
       state.CreateStyleImage(*_fromValueOrNone), state.CreateStyleImage(*_toValueOrNone),
       std::clamp(_percentageValue->ValueDividingBy100IfPercentage<double>(state.CssToLengthConversionData()),
-                 0.0, 1.0),
-      _isPrefixed);
+                 0.0, 1.0));
   }
 }

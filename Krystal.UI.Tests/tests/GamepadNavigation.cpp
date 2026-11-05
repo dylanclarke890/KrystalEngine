@@ -4,17 +4,16 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Core/Events/EventManager.hpp"
-#include "Krystal.Editor/PageGamepads.hpp"
+#include "Krystal.Editor/PageSpatialNavigation.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.PAL/Gamepad.hpp"
 #include "Krystal.PAL/Input.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
-#include "Krystal.UI/GamepadProvider.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
 #include "Krystal.UI/View.hpp"
 #include <chrono>
@@ -53,27 +52,6 @@ namespace krys::ui::tests
         Strong = strong;
         Weak = weak;
         return true;
-      }
-    };
-
-    /// @brief Makes @p provider the shared gamepad provider for as long as it lives.
-    class SharedProviderScope
-    {
-      KRYS_NON_COPY_MOVABLE(SharedProviderScope);
-
-    private:
-      boo::GamepadProvider &_previous;
-
-    public:
-      explicit SharedProviderScope(boo::GamepadProvider &provider) noexcept
-          : _previous(boo::GamepadProvider::Singleton())
-      {
-        boo::GamepadProvider::SetSharedProvider(provider);
-      }
-
-      ~SharedProviderScope() noexcept
-      {
-        boo::GamepadProvider::SetSharedProvider(_previous);
       }
     };
 
@@ -264,7 +242,7 @@ namespace krys::ui::tests
     press(pal::GamepadButton::RightShoulder, 7s);
     CHECK(focused() != byId(u8"inner").get());
   }
-  TEST_CASE("View: the editor page's gamepads", "[UI]")
+  TEST_CASE("View: the editor page's spatial navigation", "[UI]")
   {
     EventManager events;
     auto backend = CreateUnique<FakeGamepad>();
@@ -272,22 +250,20 @@ namespace krys::ui::tests
     fake.Slot = pal::GamepadReading {};
     pal::Input input(&events, krys::move(backend));
     auto &reading = *fake.Slot;
-    GamepadProvider provider(input);
-    SharedProviderScope providerScope(provider);
     // The editor's input has read the pads before the page loads.
     input.BeginFrame();
     events.DispatchAll();
 
     boo::MemoryCache::Singleton().EvictResources();
     View view({1'200, 600});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    FollowLinks(view);
     REQUIRE(
       view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
         .has_value());
     WaitForLoad(view);
     auto &document = view.Document();
     // As the editor makes it once the page has loaded.
-    editor::PageGamepads gamepads(document);
+    editor::PageSpatialNavigation spatialNavigation(document);
     auto byId = [&](utf8_stringview id)
     {
       auto element = document.GetElementById(id);
@@ -308,13 +284,12 @@ namespace krys::ui::tests
       return narrow(document.FocusedElement());
     };
 
-    // The editor's frame: the pads reach the page's Gamepad API and drive the page, then the page runs.
+    // The editor's frame: the pads drive the page, then the page runs.
     auto start = std::max(MonotonicTime::Now(), boo::html::EventLoop::Current().Now());
     auto frame = [&](MonotonicTime::duration time)
     {
       input.BeginFrame();
       events.DispatchAll();
-      provider.Update(start + time);
       view.GamepadInput(input.GetGamepads(), start + time);
       (void)view.Update(start + time);
     };
@@ -331,20 +306,7 @@ namespace krys::ui::tests
       frame(time + 16ms);
     };
 
-    // The pad is there, but the page can't see it until a button is pressed.
     frame(0ms);
-    CHECK(textOf(u8"gamepad-readout") == "Connect a pad and press a button on it to show it here.");
-    set(pal::GamepadButton::North, 1);
-    reading.Axes[static_cast<size_t>(pal::GamepadAxis::LeftX)] = -0.25f;
-    frame(16ms);
-    frame(32ms);
-    CHECK(textOf(u8"gamepad-readout") == "Pad 0: pad (standard)\n  Pressed: Y\n  Axes: -0.25 0.00 0.00 0.00");
-    set(pal::GamepadButton::North, 0);
-    reading.Axes[static_cast<size_t>(pal::GamepadAxis::LeftX)] = 0;
-    frame(48ms);
-    frame(64ms);
-    CHECK(textOf(u8"gamepad-readout")
-          == "Pad 0: pad (standard)\n  Pressed: nothing\n  Axes: 0.00 0.00 0.00 0.00");
 
     // The grid, at the top of the view: the D-pad moves through it, and A presses.
     auto gridRect = byId(u8"nav-grid")->GetBoundingClientRect();
@@ -367,22 +329,5 @@ namespace krys::ui::tests
     CHECK(document.FocusedElement()->GetAttribute(u8"value") == u8"Almond");
     press(pal::GamepadButton::South, 300ms);
     CHECK(textOf(u8"nav-log") == "Chose “Almond”");
-
-    // The rumble button rumbles the pad, until the effect ends.
-    Downcast<boo::html::HTMLElement>(*byId(u8"rumble")).Focus();
-    press(pal::GamepadButton::South, 400ms);
-    CHECK(textOf(u8"rumble-log") == "Rumbling…");
-    CHECK(fake.Strong == 1);
-    CHECK(fake.Weak == 0.5f);
-    frame(1'016ms);
-    frame(1'032ms);
-    CHECK(fake.Strong == 0);
-    CHECK(textOf(u8"rumble-log") == "Pad 0: rumbled");
-
-    // The pad going away leaves the readout empty again.
-    fake.Slot = null;
-    frame(2s);
-    frame(2s + 16ms);
-    CHECK(textOf(u8"gamepad-readout") == "Connect a pad and press a button on it to show it here.");
   }
 }

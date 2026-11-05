@@ -218,12 +218,6 @@ namespace krys::boo::html::tests
       REQUIRE(renamed);
       CHECK(std::get<RefPtr<File>>(*renamed)->Name() == u8"renamed.png");
       CHECK(std::get<RefPtr<File>>(*renamed)->Path() == u8"C:/dir/photo.png");
-
-      // Files aren't saved with the state.
-      auto *element = Downcast<HTMLMaybeFormAssociatedCustomElement>(ById(u8"a"))
-                        .FormAssociatedCustomElementForElementInternals();
-      REQUIRE(element);
-      CHECK(element->SaveFormControlState().empty());
     }
 
     SECTION("they set their validity")

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
-#include "Krystal.Booey/SVG/SVGGradientElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGradientElement.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -88,8 +88,6 @@ namespace krys::boo
   protected:
     LegacyRenderSVGResourceGradient(Type, svg::SVGGradientElement &, RenderStyle &&) noexcept;
 
-    KRYS_NODISCARD static GradientColorStops StopsByApplyingColorFilter(const GradientColorStops &,
-                                                                        const RenderStyle &) noexcept;
     KRYS_NODISCARD static GradientSpreadMethod
       PlatformSpreadMethodFromSVGType(svg::SVGSpreadMethodType) noexcept;
 
@@ -98,12 +96,12 @@ namespace krys::boo
 
     KRYS_NODISCARD GradientData::Inputs ComputeInputs(RenderElement &,
                                                       EnumSet<RenderSVGResourceMode>) noexcept;
-    KRYS_NODISCARD GradientData *GradientDataForRenderer(RenderElement &, const RenderStyle &,
+    KRYS_NODISCARD GradientData *GradientDataForRenderer(RenderElement &,
                                                          EnumSet<RenderSVGResourceMode>) noexcept;
 
     KRYS_NODISCARD virtual svg::SVGUnitTypes::SVGUnitType GradientUnits() const noexcept = 0;
     KRYS_NODISCARD virtual AffineTransform GradientTransform() const noexcept = 0;
     virtual bool CollectGradientAttributes() noexcept = 0;
-    KRYS_NODISCARD virtual Ref<Gradient> BuildGradient(const RenderStyle &) const noexcept = 0;
+    KRYS_NODISCARD virtual Ref<Gradient> BuildGradient() const noexcept = 0;
   };
 }

@@ -64,12 +64,6 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-nodeiterator-previousnode
     KRYS_NODISCARD ExceptionOr<RefPtr<Node>> PreviousNode() noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#dom-nodeiterator-detach
-    void Detach() const noexcept
-    {
-      // Does nothing as per the spec.
-    }
-
 #pragma endregion
   };
 }

@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Core/BidiResolver.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/Image.hpp"
-#include "Krystal.Booey/Graphics/Path.hpp"
-#include "Krystal.Booey/Graphics/TextRunIterator.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp"
+#include "Krystal.Booey/Text/BidiResolver.hpp"
 #include <cmath>
 
 namespace krys::boo

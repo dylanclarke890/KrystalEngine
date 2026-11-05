@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Values/Grid/GridTemplateAreas.hpp"
 
 #include "Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp"
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <algorithm>
 

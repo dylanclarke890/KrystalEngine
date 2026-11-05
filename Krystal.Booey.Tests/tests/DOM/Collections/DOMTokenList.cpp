@@ -18,8 +18,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/SVG/SVGAElement.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGAElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

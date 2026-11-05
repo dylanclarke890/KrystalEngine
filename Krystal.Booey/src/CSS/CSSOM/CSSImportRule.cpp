@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSLayerBlockRule.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Media/MediaList.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
@@ -107,7 +107,6 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    // FIXME: Pass whether the cached sheet is CORS-same-origin, once there are origins.
     Maybe<bool> isOriginClean;
 
     if (!_styleSheetCSSOMWrapper)

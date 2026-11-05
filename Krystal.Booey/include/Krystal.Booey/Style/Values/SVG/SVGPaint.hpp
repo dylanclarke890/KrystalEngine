@@ -5,7 +5,6 @@
 
 namespace krys::boo::style
 {
-  enum class ForVisitedLink : bool;
 
   // <paint> = none | <color> | <url> [none | <color>]? | context-fill | context-stroke
   // NOTE: `context-fill` and `context-stroke` are not implemented.
@@ -194,7 +193,7 @@ namespace krys::boo::style
   template <>
   struct CSSValueConversion<SVGPaint>
   {
-    KRYS_NODISCARD SVGPaint operator()(BuilderState &, const css::Value &, ForVisitedLink) noexcept;
+    KRYS_NODISCARD SVGPaint operator()(BuilderState &, const css::Value &) noexcept;
   };
 
   // MARK: - Blending

@@ -58,17 +58,6 @@ namespace krys::boo::dom::tests
     REQUIRE(nodeIterator->PointerBeforeReferenceNode());
   }
 
-  TEST_CASE("NodeIterator.detach(): does nothing", "[DOM][NodeIterator][dom:dom-nodeiterator-detach]")
-  {
-    CommonTestData data;
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
-    nodeIterator->Detach();
-
-    // Detach does nothing as per the spec, so the state should be unchanged.
-    REQUIRE(&nodeIterator->ReferenceNode() == data.Node);
-    REQUIRE(nodeIterator->PointerBeforeReferenceNode());
-  }
-
   TEST_CASE("NodeIterator.nextNode() and previousNode(): traverse its iterator collection in tree order",
             "[DOM][NodeIterator][dom:dom-nodeiterator-nextnode][dom:dom-nodeiterator-previousnode]"
             "[dom:concept-nodeiterator-traverse][dom:iterator-collection]")

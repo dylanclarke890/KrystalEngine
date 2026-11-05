@@ -7,11 +7,11 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
-#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::tests
@@ -391,6 +391,8 @@ namespace krys::boo::tests
 
     // The text is drawn masked, one disc per character.
     CHECK(text.Style().GetTextSecurity() == TextSecurity::Disc);
+    CHECK(Downcast<RenderText>(text).Text() == u8"••••••");
+    CHECK(Downcast<RenderText>(text).OriginalText() == u8"secret");
     field.Focus();
     CHECK(fixture.Selection().Selection().IsInPasswordField());
 

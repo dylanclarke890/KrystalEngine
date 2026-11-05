@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
-#include "Krystal.Booey/Style/ScopeOrdinal.hpp"
+#include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -96,7 +96,6 @@ namespace krys::boo::css
       RefPtr<const dom::ContainerNode> Scope;
       const dom::Element *HasScope {nullptr};
       bool MatchesAllHasScopes {false};
-      bool IsEvaluatingScopingRoot {false};
       style::ScopeOrdinal StyleScopeOrdinal {style::ScopeOrdinal::Element};
       style::SelectorMatchingState *SelectorMatchingState {nullptr};
 
@@ -105,7 +104,6 @@ namespace krys::boo::css
       EnumSet<PseudoElementType> PublicPseudoElements;
       bool MatchedInsideScope {false};
       bool DisallowHasPseudoClass {false};
-      bool ScopingRootMatchesVisited {false};
 
       explicit CheckingContext(Mode resolvingMode) noexcept : ResolvingMode(resolvingMode)
       {
@@ -120,14 +118,6 @@ namespace krys::boo::css
       {
         return _requestedPseudoElement;
       }
-    };
-
-    enum LinkMatchMask : uint32
-    {
-      MatchDefault = 0,
-      MatchLink = 1,
-      MatchVisited = 2,
-      MatchAll = MatchLink | MatchVisited
     };
 
     struct LocalContext;
@@ -151,9 +141,6 @@ namespace krys::boo::css
                                                         const CSSOMStringAtom &attributeValue,
                                                         const Selector &selector) noexcept;
 
-    KRYS_NODISCARD static uint32 DetermineLinkMatchType(const Selector *selector,
-                                                        const ScopeRule *scopeRule = nullptr) noexcept;
-
   private:
     KRYS_NODISCARD MatchResult
       MatchRecursively(CheckingContext &checkingContext, LocalContext &context,
@@ -165,10 +152,6 @@ namespace krys::boo::css
                                           const SelectorList &selectorList) const noexcept;
     KRYS_NODISCARD bool MatchHasPseudoClass(CheckingContext &checkingContext, const dom::Element &element,
                                             const Selector &hasSelector) const noexcept;
-
-    KRYS_NODISCARD bool CheckViewTransitionPseudoClass(const CheckingContext &checkingContext,
-                                                       const dom::Element &element,
-                                                       const Selector &selector) const noexcept;
   };
 
   inline bool SelectorChecker::IsCommonPseudoClassSelector(const Selector *selector) noexcept

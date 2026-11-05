@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
@@ -48,7 +48,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include <initializer_list>
 
 namespace krys::boo::html
@@ -1679,13 +1679,13 @@ namespace krys::boo::html
     if (!value.empty())
     {
       // Have to quote so the locale id is treated as a string instead of as a CSS keyword.
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitLocale,
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale,
                                            css::SerialiseString(css::CSSOMString(value)));
     }
     else
     {
       // The empty string means the language is explicitly unknown.
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitLocale, css::ValueId::Auto);
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale, css::ValueId::Auto);
     }
   }
 
@@ -1763,7 +1763,7 @@ namespace krys::boo::html
           break;
         }
       }
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserModify, userModifyValue);
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalUserModify, userModifyValue);
     }
     else if (localName == u8"hidden")
     {
@@ -1783,12 +1783,13 @@ namespace krys::boo::html
       {
         case DraggableAttributeState::True:
         {
-          AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::Element);
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalUserDrag,
+                                               css::ValueId::Element);
           break;
         }
         case DraggableAttributeState::False:
         {
-          AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::None);
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalUserDrag, css::ValueId::None);
           break;
         }
         case DraggableAttributeState::Auto: break;
@@ -1910,7 +1911,7 @@ namespace krys::boo::html
     }
     else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"middle"))
     {
-      verticalAlignValue = css::ValueId::WebkitBaselineMiddle;
+      verticalAlignValue = css::ValueId::InternalBaselineMiddle;
     }
     else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"center"))
     {

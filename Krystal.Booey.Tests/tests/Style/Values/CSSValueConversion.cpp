@@ -237,9 +237,6 @@ namespace krys::boo::style::tests
       CHECK(Convert<ConversionTestSize>(PropertyId::Width, u8"auto").HoldsAlternative<css::keywords::Auto>());
       CHECK(Convert<ConversionTestSize>(PropertyId::Width, u8"min-content")
               .HoldsAlternative<css::keywords::MinContent>());
-      CHECK(ConvertCSSValueToStyle<ConversionTestSize>(
-              *State, *css::PrimitiveValue::Create(ValueId::WebkitMinContent))
-              .HoldsAlternative<css::keywords::MinContent>());
       CHECK_FALSE(IsInvalid());
     }
 

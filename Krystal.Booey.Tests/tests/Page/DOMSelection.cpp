@@ -7,8 +7,8 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 
 namespace krys::boo::tests
 {

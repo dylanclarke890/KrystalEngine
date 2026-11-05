@@ -21,7 +21,6 @@ namespace krys::boo
   // -------|-----+++++++++++++++|+++++
   /// @note Resources are kept in one list, least recently accessed first, rather than in lists by size and
   /// access count; live resources (those with clients) aren't kept in a list of their own.
-  // FIXME: Sessions, cache partitions, origins and revalidation, once there are network loads.
   class MemoryCache final
   {
     friend class NeverDestroyed<MemoryCache>;

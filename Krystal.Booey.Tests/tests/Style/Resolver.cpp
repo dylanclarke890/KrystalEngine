@@ -4,23 +4,23 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
-#include "Krystal.Booey/Style/RuleSet.hpp"
-#include "Krystal.Booey/Style/RuleSetBuilder.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/UserAgentStyle.hpp"
+#include "Krystal.Booey/Style/Rules/RuleSet.hpp"
+#include "Krystal.Booey/Style/Rules/RuleSetBuilder.hpp"
+#include "Krystal.Booey/Style/Rules/UserAgentStyle.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::style::tests
 {
@@ -158,21 +158,19 @@ namespace krys::boo::style::tests
             == "y");
     REQUIRE(resolver.IsAnimationNameValid(u8"spin"));
     REQUIRE_FALSE(resolver.IsAnimationNameValid(u8"nope"));
-    REQUIRE_FALSE(resolver.GetViewTransitionRule());
 
-    SECTION("@view-transition and @position-try")
+    SECTION("@position-try")
     {
       css::ParserContext context(css::ParserMode::HTMLStandard);
       auto sheet = css::StyleSheetContents::Create(context);
-      sheet->ParseString(u8"@view-transition { navigation: auto; } @position-try --p { top: 0; }"
+      sheet->ParseString(u8"@position-try --p { top: 0; }"
                          u8"@layer a { @position-try --q { top: 0; } } @position-try --p { top: 1px; }");
-      REQUIRE(sheet->ChildRules().size() == 4uz);
+      REQUIRE(sheet->ChildRules().size() == 3uz);
       auto ruleSet = RuleSet::Create();
       {
         RuleSetBuilder builder(*ruleSet, resolver.MediaQueryEvaluator(), &resolver);
         builder.AddRulesFromSheet(*sheet);
       }
-      REQUIRE(ruleSet->GetViewTransitionRule());
       REQUIRE(ruleSet->RuleCount() == 0u);
       REQUIRE(ruleSet->PositionTryRuleForName(Atom(u8"--q")));
       // The last rule with a name wins.
@@ -284,8 +282,6 @@ namespace krys::boo::style::tests
               div:first-child { height: 3px }
               p::before { content: "x"; width: 3px }
               #anchor::before { content: attr(data-x) }
-              @page { margin-top: 7px }
-              @page :first { margin-left: 9px }
             </style><body><div id=a class=a></div><div id=b class=a style="height: 4px"></div>
             <a id=link href="x"></a><a id=self href=""></a><a id=anchor></a><p id=p></p>
             <svg><a id=svglink xlink:href="x"></a><svg id=inner></svg></svg>)",
@@ -358,18 +354,16 @@ namespace krys::boo::style::tests
     {
       auto link = Resolve(ById(u8"link"));
       CHECK(link.Style->IsLink());
-      CHECK(link.Style->GetInsideLink() == InsideLink::InsideUnvisited);
 
-      // A link to the document itself is visited.
+      // A link to the document itself is a link like any other: none are visited.
       auto self = Resolve(ById(u8"self"));
-      CHECK(self.Style->GetInsideLink() == InsideLink::InsideVisited);
+      CHECK(self.Style->IsLink());
 
       auto anchor = Resolve(ById(u8"anchor"));
       CHECK_FALSE(anchor.Style->IsLink());
-      CHECK(anchor.Style->GetInsideLink() == InsideLink::NotInside);
 
       auto svgLink = Resolve(ById(u8"svglink"));
-      CHECK(svgLink.Style->GetInsideLink() == InsideLink::InsideUnvisited);
+      CHECK(svgLink.Style->IsLink());
     }
 
     SECTION("SVG zoom rules")
@@ -397,28 +391,6 @@ namespace krys::boo::style::tests
       auto after = GetResolver().StyleForPseudoElement(
         ById(u8"p"), PseudoElementRequest {PseudoElementType::After}, {.ParentStyle = p.Style.get()});
       CHECK_FALSE(after);
-    }
-
-    SECTION("Pages")
-    {
-      // Without a resolved document element style there's no writing mode to resolve pages against.
-      auto unresolved = GetResolver().StyleForPage(0);
-      CHECK(Serialised(*unresolved, unresolved->MarginTop()) == "0px");
-
-      // The document element's style is the one it's rendered with.
-      auto frame = LocalFrame::Create();
-      frame->CreateView({800, 600});
-      frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-      auto first = GetResolver().StyleForPage(0);
-      CHECK(Serialised(*first, first->MarginTop()) == "7px");
-      CHECK(Serialised(*first, first->MarginLeft()) == "9px");
-      // Inherited from the initial containing block.
-      CHECK(first->ComputedFontSize() == 16);
-
-      auto second = GetResolver().StyleForPage(1);
-      CHECK(Serialised(*second, second->MarginTop()) == "7px");
-      // From the user agent's @page rule.
-      CHECK(Serialised(*second, second->MarginLeft()) == "auto");
     }
 
     SECTION("Matched rules")
@@ -465,20 +437,6 @@ namespace krys::boo::style::tests
       CHECK(GetResolver().RuleSets().Features().ContentAttributeNamesInRules.contains(
         css::CSSOMStringAtom(u8"data-x")));
     }
-  }
-
-  TEST_CASE_METHOD(ElementStyleFixture, "Resolver: view transition styles", "[Style][Resolver]")
-  {
-    auto &resolver = GetResolver();
-    auto *dynamicStyle = resolver.RuleSets().DynamicViewTransitionsStyle();
-    REQUIRE(dynamicStyle);
-    auto before = dynamicStyle->RuleCount();
-
-    auto properties = css::MutableStyleProperties::Create(css::ParserMode::HTMLStandard);
-    REQUIRE(properties->SetProperty(css::PropertyId::Width, u8"5px"));
-    resolver.SetViewTransitionStyles(css::SelectorPseudoElement::ViewTransitionGroup,
-                                     css::CSSOMStringAtom(u8"x"), properties);
-    CHECK(dynamicStyle->RuleCount() == before + 1);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Resolver: random() base values", "[Style][Resolver]")

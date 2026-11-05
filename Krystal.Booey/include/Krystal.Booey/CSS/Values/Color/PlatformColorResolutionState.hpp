@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -27,11 +26,8 @@ namespace krys::boo::css
     /// @brief For `ValueId::InternalDocumentTextColor`.
     KRYS_NODISCARD virtual boo::Color InternalDocumentTextColor() const noexcept;
 
-    /// @brief For `ValueId::WebkitLink` [`style::ForVisitedLink::No`].
+    /// @brief For `ValueId::WebkitLink`.
     KRYS_NODISCARD virtual boo::Color WebkitLink() const noexcept;
-
-    /// @brief For `ValueId::WebkitLink` [`style::ForVisitedLink::Yes`].
-    KRYS_NODISCARD virtual boo::Color WebkitLinkVisited() const noexcept;
 
     /// @brief For `ValueId::WebkitActivelink`.
     KRYS_NODISCARD virtual boo::Color WebkitActiveLink() const noexcept;
@@ -52,9 +48,6 @@ namespace krys::boo::css
     // If unset, colors that require conversion data will return the invalid Color.
     Maybe<ToLengthConversionData> ConversionData {};
 
-    // Whether links should be resolved to the visited style.
-    style::ForVisitedLink ForVisitedLink {style::ForVisitedLink::No};
-
     // Options to pass when resolving any other keyword with css::ColorFromKeyword()
     style::ColorOptions KeywordOptions {style::ColorOptions::None};
 
@@ -70,7 +63,6 @@ namespace krys::boo::css
     mutable Maybe<boo::Color> ResolvedCurrentColor {};
     mutable Maybe<boo::Color> ResolvedInternalDocumentTextColor {};
     mutable Maybe<boo::Color> ResolvedWebkitLink {};
-    mutable Maybe<boo::Color> ResolvedWebkitLinkVisited {};
     mutable Maybe<boo::Color> ResolvedWebkitActiveLink {};
     mutable Maybe<boo::Color> ResolvedWebkitFocusRingColor {};
 
@@ -88,11 +80,6 @@ namespace krys::boo::css
     KRYS_NODISCARD boo::Color WebkitLink() const noexcept
     {
       return ResolveColor(ResolvedWebkitLink, &PlatformColorResolutionDelegate::WebkitLink);
-    }
-
-    KRYS_NODISCARD boo::Color WebkitLinkVisited() const noexcept
-    {
-      return ResolveColor(ResolvedWebkitLinkVisited, &PlatformColorResolutionDelegate::WebkitLinkVisited);
     }
 
     KRYS_NODISCARD boo::Color WebkitActiveLink() const noexcept

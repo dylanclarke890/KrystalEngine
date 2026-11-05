@@ -138,7 +138,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Log/ILogger.hpp
 
       # Maths
-      include/Krystal.Core/Maths/Base.hpp
+      include/Krystal.Core/Maths/Extras.hpp
       include/Krystal.Core/Maths/Clamp.hpp
       include/Krystal.Core/Maths/Clipspace.hpp
       include/Krystal.Core/Maths/Compare.hpp
@@ -242,6 +242,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/ListHashSet.hpp
       include/Krystal.Core/Types/RedBlackTree.hpp
       include/Krystal.Core/Types/IntervalTree.hpp
+      include/Krystal.Core/Types/IterationStatus.hpp
       include/Krystal.Core/Types/Markable.hpp
       include/Krystal.Core/Types/Maybe.hpp
       include/Krystal.Core/Types/NTTPMaybe.hpp

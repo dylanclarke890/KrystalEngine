@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLBlock.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
-#include "Krystal.Booey/MathML/MathMLPresentationElement.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLPresentationElement.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 

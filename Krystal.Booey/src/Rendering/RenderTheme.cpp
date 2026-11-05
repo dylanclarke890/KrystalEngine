@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Values/Color/ContrastColorResolver.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
@@ -17,16 +17,15 @@
 #include "Krystal.Booey/Graphics/Controls/ProgressBarPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/SearchFieldCancelButtonPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/SearchFieldPart.hpp"
-#include "Krystal.Booey/Graphics/Controls/SearchFieldResultsPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/SliderThumbPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/SliderTrackPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/TextAreaPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/TextFieldPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/ToggleButtonPart.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
-#include "Krystal.Booey/Graphics/StringTruncator.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/StringTruncator.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
@@ -38,13 +37,13 @@
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
-#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
-#include "Krystal.Booey/Rendering/BorderShape.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
+#include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
-#include "Krystal.Booey/Rendering/RenderMeter.hpp"
-#include "Krystal.Booey/Rendering/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -532,7 +531,7 @@ namespace krys::boo
       case StyleAppearance::SearchFieldDecoration:        break;
 
       case StyleAppearance::SearchFieldResultsDecoration:
-      case StyleAppearance::SearchFieldResultsButton:     return SearchFieldResultsPart::Create(appearance);
+      case StyleAppearance::SearchFieldResultsButton:     break;
 
       case StyleAppearance::SearchFieldCancelButton:      return SearchFieldCancelButtonPart::Create();
 
@@ -704,7 +703,7 @@ namespace krys::boo
       style.ComputedFontSize(),
       style.UsedZoom(),
       style.UsedAccentColor(renderObject.StyleColorOptions()),
-      style.VisitedDependentColorWithColorFilter(css::PropertyId::Color),
+      style.ColorResolvingCurrentColor(css::PropertyId::Color),
       style::Evaluate<FloatBoxExtent>(style.BorderWidth(), style::ZoomNeeded {}),
     };
   }
@@ -1211,11 +1210,11 @@ namespace krys::boo
     // Other StyleAppearance types are composed controls with shadow subtree.
     if (appearance == StyleAppearance::Radio || appearance == StyleAppearance::Checkbox)
     {
-      if (minSize.Width().IsIntrinsicOrLegacyIntrinsicOrAuto())
+      if (minSize.Width().IsIntrinsicOrAuto())
       {
         resultWidth = preferredSize.Width().AsMinimumSize();
       }
-      if (minSize.Height().IsIntrinsicOrLegacyIntrinsicOrAuto())
+      if (minSize.Height().IsIntrinsicOrAuto())
       {
         resultHeight = preferredSize.Height().AsMinimumSize();
       }
@@ -1559,9 +1558,7 @@ namespace krys::boo
 
   RenderTheme::ColorCache &RenderTheme::GetColorCache(style::ColorOptions options) const noexcept
   {
-    auto optionsIgnoringVisitedLink =
-      static_cast<uint8>(options) & ~static_cast<uint8>(style::ColorOptions::ForVisitedLink);
-    return _colorCacheMap[static_cast<uint8>(optionsIgnoringVisitedLink)];
+    return _colorCacheMap[static_cast<uint8>(options)];
   }
 
   namespace
@@ -1580,7 +1577,6 @@ namespace krys::boo
   Color RenderTheme::SystemColor(ValueId cssValueId, style::ColorOptions options) const noexcept
   {
     auto useDarkAppearance = HasFlag(options, style::ColorOptions::UseDarkAppearance);
-    auto forVisitedLink = HasFlag(options, style::ColorOptions::ForVisitedLink);
 
     switch (cssValueId)
     {
@@ -1608,75 +1604,68 @@ namespace krys::boo
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-buttonface
       // The face background color for push buttons.
-      case ValueId::Buttonface:       return Color::lightGray;
+      case ValueId::Buttonface:          return Color::lightGray;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-buttontext
       // Text on push buttons.
-      case ValueId::Buttontext:       return Color::black;
+      case ValueId::Buttontext:          return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-buttonborder
       // The base border color for push buttons.
-      case ValueId::Buttonborder:     return Color::white;
+      case ValueId::Buttonborder:        return Color::white;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-field
       // Background of input fields.
-      case ValueId::Field:            return Color::white;
+      case ValueId::Field:               return Color::white;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-fieldtext
       // Text in input fields.
-      case ValueId::Fieldtext:        return Color::black;
+      case ValueId::Fieldtext:           return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-highlight
       // Background of selected text, for example from ::selection.
-      case ValueId::Highlight:        return SRGBA<uint8> {181, 213, 255};
+      case ValueId::Highlight:           return SRGBA<uint8> {181, 213, 255};
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-highlighttext
       // Text of selected text.
-      case ValueId::Highlighttext:    return Color::black;
+      case ValueId::Highlighttext:       return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-selecteditem
       // Background of selected items, for example a selected checkbox.
-      case ValueId::Selecteditem:     return Color::lightGray;
+      case ValueId::Selecteditem:        return Color::lightGray;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-selecteditemtext
       // Text of selected items.
-      case ValueId::Selecteditemtext: return Color::black;
+      case ValueId::Selecteditemtext:    return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-mark
       // Background of text that has been specially marked (such as by the HTML mark element).
-      case ValueId::Mark:             return Color::yellow;
+      case ValueId::Mark:                return Color::yellow;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-marktext
       // Text that has been specially marked (such as by the HTML mark element).
-      case ValueId::Marktext:         return Color::black;
+      case ValueId::Marktext:            return Color::black;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-graytext
       // Disabled text. (Often, but not necessarily, gray.)
-      case ValueId::Graytext:         return Color::darkGray;
+      case ValueId::Graytext:            return Color::darkGray;
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-accentcolor
       // Background of accented user interface controls.
-      case ValueId::Accentcolor:      return SRGBA<uint8> {0, 122, 255};
+      case ValueId::Accentcolor:         return SRGBA<uint8> {0, 122, 255};
 
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-accentcolortext
       // Text of accented user interface controls.
-      case ValueId::Accentcolortext:  return Color::black;
+      case ValueId::Accentcolortext:     return Color::black;
 
       // Non-standard addition.
-      case ValueId::Activebuttontext: return Color::black;
+      case ValueId::Activebuttontext:    return Color::black;
 
       // Non-standard addition.
-      case ValueId::Text:             return Color::black;
+      case ValueId::Text:                return Color::black;
 
       // Non-standard addition.
-      case ValueId::WebkitLink:
-      {
-        if (forVisitedLink)
-        {
-          return DefaultVisitedLinkColor(useDarkAppearance);
-        }
-        return DefaultLinkColor(useDarkAppearance);
-      }
+      case ValueId::WebkitLink:          return DefaultLinkColor(useDarkAppearance);
 
       // Deprecated system-colors:
       // https://drafts.csswg.org/css-color-4/#deprecated-system-colors

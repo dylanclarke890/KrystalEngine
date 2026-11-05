@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGPathStringBuilder.hpp"
-#include "Krystal.Booey/Core/NumberFormatting.hpp"
+#include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::svg

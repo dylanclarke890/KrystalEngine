@@ -1,32 +1,25 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/History/BackForwardCache.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.UI/View.hpp"
 
 namespace krys::ui::tests
 {
-  /// @brief Turns the back/forward cache off for as long as it lives, so the pages a view leaves are freed.
-  class BackForwardCacheDisabler
+  /// @brief Makes @p view load the links the page follows (into the view itself), as a host that follows
+  /// every link would; form submissions and new windows are ignored.
+  inline void FollowLinks(View &view) noexcept
   {
-    KRYS_NON_COPY_MOVABLE(BackForwardCacheDisabler);
-
-  private:
-    uint32 _previousMaxSize;
-
-  public:
-    BackForwardCacheDisabler() noexcept : _previousMaxSize(boo::BackForwardCache::Singleton().MaxSize())
-    {
-      boo::BackForwardCache::Singleton().SetMaxSize(0);
-    }
-
-    ~BackForwardCacheDisabler() noexcept
-    {
-      boo::BackForwardCache::Singleton().SetMaxSize(_previousMaxSize);
-    }
-  };
+    view.SetNavigationHandler(
+      [&view](const NavigationRequest &request)
+      {
+        if (!request.IsFormSubmission && !request.OpensNewWindow)
+        {
+          view.Load(boo::url::URL(request.URL));
+        }
+      });
+  }
 
   /// @brief Runs the event loop's tasks until @p view's load has committed and finished (or failed), as a
   /// host's frames would.

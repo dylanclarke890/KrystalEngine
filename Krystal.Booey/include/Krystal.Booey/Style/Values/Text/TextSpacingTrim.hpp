@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/TextSpacing.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Booey/Text/TextSpacing.hpp"
 
 namespace krys::boo::style
 {

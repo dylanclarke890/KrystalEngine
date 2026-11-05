@@ -56,17 +56,17 @@ namespace krys::boo::html::tests
     CHECK(Hints(u8"<span id=e dir=auto></span>") == "unicode-bidi: isolate;");
     CHECK(Hints(u8"<pre id=e dir=auto></pre>") == "unicode-bidi: plaintext;");
     CHECK(Hints(u8"<span id=e dir=sideways></span>").empty());
-    CHECK(Hints(u8"<span id=e draggable=true></span>") == "-webkit-user-drag: element;");
-    CHECK(Hints(u8"<span id=e draggable=false></span>") == "-webkit-user-drag: none;");
+    CHECK(Hints(u8"<span id=e draggable=true></span>") == "-internal-user-drag: element;");
+    CHECK(Hints(u8"<span id=e draggable=false></span>") == "-internal-user-drag: none;");
     CHECK(Hints(u8"<span id=e contenteditable></span>")
-          == "overflow-wrap: break-word; line-break: after-white-space; -webkit-user-modify: read-write;");
+          == "overflow-wrap: break-word; line-break: after-white-space; -internal-user-modify: read-write;");
     CHECK(Hints(u8"<span id=e contenteditable=plaintext-only></span>")
-          == "overflow-wrap: break-word; line-break: after-white-space; -webkit-user-modify: "
+          == "overflow-wrap: break-word; line-break: after-white-space; -internal-user-modify: "
              "read-write-plaintext-only;");
-    CHECK(Hints(u8"<span id=e contenteditable=false></span>") == "-webkit-user-modify: read-only;");
+    CHECK(Hints(u8"<span id=e contenteditable=false></span>") == "-internal-user-modify: read-only;");
     CHECK(Hints(u8"<span id=e contenteditable=maybe></span>").empty());
-    CHECK(Hints(u8"<span id=e lang=en></span>") == "-webkit-locale: \"en\";");
-    CHECK(Hints(u8"<span id=e lang></span>") == "-webkit-locale: auto;");
+    CHECK(Hints(u8"<span id=e lang=en></span>") == "-internal-locale: \"en\";");
+    CHECK(Hints(u8"<span id=e lang></span>") == "-internal-locale: auto;");
 
     SECTION("Attribute changes rebuild the hints")
     {
@@ -81,8 +81,8 @@ namespace krys::boo::html::tests
 
   TEST_CASE_METHOD(HintFixture, "Presentational hints: text elements", "[HTML][PresentationalHints]")
   {
-    CHECK(Hints(u8"<div id=e align=center></div>") == "text-align: -webkit-center;");
-    CHECK(Hints(u8"<p id=e align=left></p>") == "text-align: -webkit-left;");
+    CHECK(Hints(u8"<div id=e align=center></div>") == "text-align: -internal-center;");
+    CHECK(Hints(u8"<p id=e align=left></p>") == "text-align: -internal-left;");
     CHECK(Hints(u8"<p id=e align=justify></p>") == "text-align: justify;");
     CHECK(Hints(u8"<br id=e clear=all>") == "clear: both;");
     CHECK(Hints(u8"<br id=e clear=left>") == "clear: left;");
@@ -209,7 +209,7 @@ namespace krys::boo::html::tests
     CHECK(Hints(u8"<table><tr><td id=e nowrap width=0 height=5 valign=middle align=center "
                 u8"bgcolor=red></td></tr></table>")
           == "white-space: nowrap; height: 5px; vertical-align: middle; "
-             "text-align: -webkit-center; background-color: rgb(255, 0, 0);");
+             "text-align: -internal-center; background-color: rgb(255, 0, 0);");
     CHECK(Hints(u8"<table><colgroup id=e width=10%></colgroup></table>") == "width: 10%;");
     CHECK(Hints(u8"<table><caption id=e align=bottom></caption></table>") == "caption-side: bottom;");
 
@@ -260,13 +260,10 @@ namespace krys::boo::html::tests
       auto document = ResolverFixture::Parse(u8"<body link=red vlink=#00f alink=lime>");
       auto style = RenderStyle::Create();
       CHECK(document->LinkColor(style) == boo::Color(SRGBA<uint8> {255, 0, 0}));
-      CHECK(document->VisitedLinkColor(style) == boo::Color(SRGBA<uint8> {0, 0, 255}));
       CHECK(document->ActiveLinkColor(style) == boo::Color(SRGBA<uint8> {0, 255, 0}));
 
       document->Body()->RemoveAttribute(u8"link");
       CHECK(document->LinkColor(style) == css::ColorFromKeyword(css::ValueId::WebkitLink, {}));
-      REQUIRE_FALSE(document->Body()->SetAttribute(u8"vlink", u8"transparent").HasException());
-      CHECK(document->VisitedLinkColor(style) != boo::Color(SRGBA<uint8> {0, 0, 255}));
     }
   }
 

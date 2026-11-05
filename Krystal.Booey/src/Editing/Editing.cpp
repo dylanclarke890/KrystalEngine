@@ -10,13 +10,13 @@
 #include "Krystal.Booey/DOM/Ranges/PositionIterator.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/HTMLInterchange.hpp"
+#include "Krystal.Booey/Editing/Markup/HTMLInterchange.hpp"
+#include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Editing/VisiblePosition.hpp"
-#include "Krystal.Booey/Editing/VisibleSelection.hpp"
-#include "Krystal.Booey/Editing/VisibleUnits.hpp"
-#include "Krystal.Booey/Graphics/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDListElement.hpp"
@@ -27,13 +27,13 @@
 #include "Krystal.Booey/HTML/Elements/HTMLUListElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
-#include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <unicode/uchar.h>
 
@@ -1310,29 +1310,6 @@ namespace krys::boo
   dom::Element *ParentTabSpanNode(dom::Node *node) noexcept
   {
     return Is<dom::Text>(node) ? TabSpanNode(node->ParentNode()) : nullptr;
-  }
-
-  bool IsMailBlockquote(const dom::Node &node) noexcept
-  {
-    if (!IsHTMLElementOfType(&node, html::TagName::blockquote))
-    {
-      return false;
-    }
-    return Downcast<dom::Element>(node).GetAttribute(dom::DOMStringAtom(u8"type"))
-           == dom::DOMString(u8"cite");
-  }
-
-  uint32 NumEnclosingMailBlockquotes(const dom::Position &position) noexcept
-  {
-    uint32 count = 0;
-    for (auto *node = position.DeprecatedNode(); node; node = node->ParentNode())
-    {
-      if (IsMailBlockquote(*node))
-      {
-        ++count;
-      }
-    }
-    return count;
   }
 
   RefPtr<dom::Element> EnclosingList(dom::Node *node) noexcept

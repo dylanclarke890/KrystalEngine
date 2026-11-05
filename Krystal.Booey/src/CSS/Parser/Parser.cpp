@@ -27,11 +27,10 @@
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/ColorValue.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
@@ -302,66 +301,6 @@ namespace krys::boo::css
     styleSheet.ShrinkToFit();
   }
 
-  SelectorList Parser::ParsePageSelector(TokenRange tokens, StyleSheetContents *styleSheet) noexcept
-  {
-    // We only support a small subset of the css-page spec.
-    tokens.DiscardWhitespace();
-    Maybe<CSSOMStringAtom> typeSelector;
-    if (tokens.Peek().Type() == TokenType::Ident)
-    {
-      typeSelector = CSSOMStringAtom(tokens.Consume().IdentCodePoints());
-    }
-
-    Maybe<CSSOMStringView> pseudo;
-    if (tokens.Peek().Type() == TokenType::Colon)
-    {
-      tokens.Discard();
-      if (tokens.Peek().Type() != TokenType::Ident)
-      {
-        return {};
-      }
-      pseudo = tokens.Consume().IdentCodePoints();
-    }
-
-    tokens.DiscardWhitespace();
-    if (!tokens.IsAtEnd())
-    {
-      return {}; // Parse error; extra tokens in @page selector
-    }
-
-    // Upstream dereferences the sheet unconditionally; without one, use a sheet's initial default namespace.
-    auto defaultNamespace = styleSheet ? styleSheet->DefaultNamespace() : dom::StarAtom();
-
-    UniquePtr<MutableSelector> selector;
-    if (typeSelector && !pseudo)
-    {
-      selector = CreateUnique<MutableSelector>(
-        dom::QualifiedName(defaultNamespace, CSSOMStringAtom::Null(), *typeSelector));
-    }
-    else
-    {
-      selector = CreateUnique<MutableSelector>();
-      if (pseudo)
-      {
-        selector = MutableSelector::ParsePagePseudoSelector(*pseudo);
-        if (!selector || selector->Match() != SelectorMatch::PagePseudoClass)
-        {
-          return {};
-        }
-      }
-      if (typeSelector)
-      {
-        selector->AppendTagInComplexSelector(
-          dom::QualifiedName(defaultNamespace, CSSOMStringAtom::Null(), *typeSelector));
-      }
-    }
-
-    selector->SetForPage();
-    MutableSelectorList selectors;
-    selectors.push_back(krys::move(selector));
-    return SelectorList(krys::move(selectors));
-  }
-
   bool Parser::SupportsDeclaration(TokenRange &tokens) noexcept
   {
     bool result = false;
@@ -540,14 +479,12 @@ namespace krys::boo::css
                  : nullptr;
       case AtRuleId::FontPaletteValues: return ConsumeFontPaletteValuesRule(prelude, block);
       case AtRuleId::Keyframes:         return ConsumeKeyframesRule(prelude, block);
-      case AtRuleId::Page:              return ConsumePageRule(prelude, block);
       case AtRuleId::CounterStyle:      return ConsumeCounterStyleRule(prelude, block);
       case AtRuleId::Layer:             return ConsumeLayerRule(prelude, block);
       case AtRuleId::Container:         return ConsumeContainerRule(prelude, block);
       case AtRuleId::Property:          return ConsumePropertyRule(prelude, block);
       case AtRuleId::Scope:             return ConsumeScopeRule(prelude, block);
       case AtRuleId::StartingStyle:     return ConsumeStartingStyleRule(prelude, block);
-      case AtRuleId::ViewTransition:    return ConsumeViewTransitionRule(prelude, block);
       case AtRuleId::PositionTry:       return ConsumePositionTryRule(prelude, block);
       case AtRuleId::Function:          return ConsumeFunctionRule(prelude, block);
       default:                          return nullptr; // Parse error, unrecognised at-rule with block
@@ -615,7 +552,7 @@ namespace krys::boo::css
     }
 
     auto prelude = preludeStart.RangeUntil(tokens);
-    TokenRange block = ConsumeBlockCheckingForEditability(tokens);
+    TokenRange block = tokens.ConsumeBlock();
 
     if (allowedRules <= AllowedRules::RegularRules)
     {
@@ -628,29 +565,6 @@ namespace krys::boo::css
     }
 
     return nullptr;
-  }
-
-  TokenRange Parser::ConsumeBlockCheckingForEditability(TokenRange &tokens) noexcept
-  {
-    krys_debug_assert(tokens.Peek().IsBlockStart());
-
-    auto *styleSheet = _styleSheet.get();
-    if (styleSheet && !styleSheet->UsesStyleBasedEditability())
-    {
-      auto blockRange = tokens;
-      std::ignore = blockRange.ConsumeBlock();
-      for (const auto &token : tokens.RangeUntil(blockRange))
-      {
-        if (token.Type() == TokenType::Ident
-            && text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"-webkit-user-modify")))
-        {
-          styleSheet->ParserSetUsesStyleBasedEditability();
-          break;
-        }
-      }
-    }
-
-    return tokens.ConsumeBlock();
   }
 
   namespace
@@ -1164,19 +1078,6 @@ namespace krys::boo::css
     return keyframeRule;
   }
 
-  RefPtr<PageRule> Parser::ConsumePageRule(TokenRange prelude, TokenRange block) noexcept
-  {
-    auto selectorList = ParsePageSelector(prelude, _styleSheet.get());
-    if (selectorList.IsEmpty())
-    {
-      return nullptr; // Parse error, invalid @page selector
-    }
-
-    auto declarations = ConsumeDeclarationListInNewNestingContext(block, RuleType::Page);
-
-    return PageRule::Create(CreateStyleProperties(declarations, _context.Mode), krys::move(selectorList));
-  }
-
   RefPtr<CounterStyleRule> Parser::ConsumeCounterStyleRule(TokenRange prelude, TokenRange block) noexcept
   {
     auto rangeCopy = prelude;
@@ -1194,17 +1095,6 @@ namespace krys::boo::css
       return nullptr;
     }
     return CounterStyleRule::Create(name, krys::move(descriptors));
-  }
-
-  RefPtr<ViewTransitionRule> Parser::ConsumeViewTransitionRule(TokenRange prelude, TokenRange block) noexcept
-  {
-    if (!prelude.IsAtEnd())
-    {
-      return nullptr; // Parse error; @view-transition prelude should be empty
-    }
-
-    auto declarations = ConsumeDeclarationListInNewNestingContext(block, RuleType::ViewTransition);
-    return ViewTransitionRule::Create(CreateStyleProperties(declarations, _context.Mode));
   }
 
   RefPtr<PositionTryRule> Parser::ConsumePositionTryRule(TokenRange prelude, TokenRange block) noexcept
@@ -1909,8 +1799,7 @@ namespace krys::boo::css
     {
       return type == RuleType::CounterStyle || type == RuleType::FontFace
              || type == RuleType::FontPaletteValues || type == RuleType::Keyframe
-             || type == RuleType::PositionTry || type == RuleType::ViewTransition
-             || type == RuleType::Function;
+             || type == RuleType::PositionTry || type == RuleType::Function;
     }
   }
 
@@ -1939,7 +1828,9 @@ namespace krys::boo::css
       return TopContext().ParsedProperties.size() != oldPropertiesCount;
     };
 
-    if (!IsExposed(property, &_context.PropertySettings))
+    // Internal properties are only for the user agent's style sheets.
+    if (!IsExposed(property, &_context.PropertySettings)
+        && !(IsInternal(property) && IsUASheetBehavior(_context.Mode)))
     {
       property = PropertyId::Invalid;
     }

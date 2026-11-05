@@ -2,7 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/SVG/SVGImageElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 
 namespace krys::boo::svg
 {

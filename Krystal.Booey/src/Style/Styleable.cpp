@@ -3,21 +3,21 @@
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
-#include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
-#include "Krystal.Booey/Animation/ViewTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/StyleOriginatedTimelinesController.hpp"
+#include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/Rendering/RenderListItem.hpp"
-#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCustomPropertyData.hpp"
-#include "Krystal.Booey/Style/ChangedAnimatableProperties.hpp"
-#include "Krystal.Booey/Style/Interpolation.hpp"
+#include "Krystal.Booey/Style/Interpolation/ChangedAnimatableProperties.hpp"
+#include "Krystal.Booey/Style/Interpolation/Interpolation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 
 namespace krys::boo::style
@@ -70,9 +70,7 @@ namespace krys::boo::style
           }
         }
         break;
-      default:
-        // FIXME: The view transition pseudo-elements' renderers, once there are those.
-        return null;
+      default: return null;
     }
 
     return null;
@@ -211,9 +209,7 @@ namespace krys::boo::style
           return hostRenderer->BackdropRenderer();
         }
         break;
-      default:
-        // FIXME: The view transition pseudo-elements' renderers, once there are those.
-        break;
+      default: break;
     }
 
     return nullptr;
@@ -319,7 +315,6 @@ namespace krys::boo::style
 
   void Styleable::CancelStyleOriginatedAnimations() const noexcept
   {
-    // FIXME: Not canceling style-originated animations when entering the back/forward cache.
     CancelStyleOriginatedAnimations({});
     if (auto *styleOriginatedTimelinesController =
           Element.NodeDocument().GetStyleOriginatedTimelinesController())

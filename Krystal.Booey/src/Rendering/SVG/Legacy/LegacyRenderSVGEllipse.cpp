@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGEllipse.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Booey/SVG/SVGCircleElement.hpp"
-#include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGCircleElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGEllipseElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 
 namespace krys::boo

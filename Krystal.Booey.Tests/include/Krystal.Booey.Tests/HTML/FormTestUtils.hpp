@@ -6,12 +6,12 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/Network/FormData.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -22,9 +22,9 @@ namespace krys::boo::tests
     FormSubmission::Method Method {FormSubmission::Method::Get};
     std::string URL;
     std::string Target;
-    std::string ContentType;
-    std::string Boundary;
-    std::string Body;
+    std::string EncodingType;
+    /// @brief The entries, unencoded, as `name=value` joined by `&` (a file by its name).
+    std::string Entries;
     std::string Submitter;
   };
 
@@ -37,13 +37,20 @@ namespace krys::boo::tests
     };
     ReceivedSubmission received;
     received.Method = submission.GetMethod();
-    received.URL = narrow(submission.RequestURL().String());
+    received.URL = narrow(submission.Action().String());
     received.Target = narrow(submission.Target());
-    received.ContentType = narrow(submission.ContentType());
-    received.Boundary = narrow(submission.Boundary());
-    if (auto *data = submission.Data(); data && submission.GetMethod() == FormSubmission::Method::Post)
+    received.EncodingType = narrow(submission.EncodingType());
+    if (auto *entries = submission.EntryList())
     {
-      received.Body = narrow(data->FlattenToString());
+      for (auto &item : entries->Items())
+      {
+        auto *value = std::get_if<dom::DOMString>(&item.Data);
+        auto *file = std::get_if<RefPtr<File>>(&item.Data);
+        received.Entries += (received.Entries.empty() ? "" : "&") + narrow(item.Name) + "="
+                            + (value   ? narrow(*value)
+                               : *file ? narrow((*file)->Name())
+                                       : std::string());
+      }
     }
     if (auto *submitter = submission.Submitter())
     {
@@ -52,7 +59,7 @@ namespace krys::boo::tests
     return received;
   }
 
-  /// @brief A document in a page whose host records form submissions (and ignores them).
+  /// @brief A document in a page whose host records form submissions.
   struct FormFixture : style::tests::ResolverFixture
   {
     RecordingFrameLoaderClient *LoaderClient {nullptr};
@@ -63,7 +70,6 @@ namespace krys::boo::tests
         : ResolverFixture(u8"<!DOCTYPE html>" + utf8_string(markup), style::tests::WithView::No)
     {
       auto loaderClient = CreateUnique<RecordingFrameLoaderClient>();
-      loaderClient->Policy = PolicyAction::Ignore;
       loaderClient->OnRecord = [this](const ReceivedNavigation &navigation)
       {
         if (navigation.Submission)

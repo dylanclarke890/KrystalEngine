@@ -7,7 +7,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
-#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo::html
 {
@@ -191,8 +191,6 @@ namespace krys::boo::html
 
   void ValidatedFormListedElement::ReportNonFocusableControlError() noexcept
   {
-    // FIXME: The console message ("An invalid form control with name='...' is not focusable."), once there's
-    // a console.
   }
 
   bool ValidatedFormListedElement::IsShowingValidationMessage() const noexcept
@@ -510,22 +508,6 @@ namespace krys::boo::html
     {
       UpdateValidity();
     }
-  }
-
-  bool ValidatedFormListedElement::IsCandidateForSavingAndRestoringState() const noexcept
-  {
-    // We don't save/restore control state in a form with autocomplete=off.
-    return ShouldSaveAndRestoreFormControlState() && AsHTMLElement().IsConnected() && ShouldAutocomplete();
-  }
-
-  FormControlState ValidatedFormListedElement::SaveFormControlState() const noexcept
-  {
-    return {};
-  }
-
-  void ValidatedFormListedElement::RestoreFormControlStateIfNecessary() noexcept
-  {
-    AsHTMLElement().NodeDocument().GetFormController().RestoreControlStateFor(*this);
   }
 
   bool ValidatedFormListedElement::ShouldAutocomplete() const noexcept

@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/IterationStatus.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Aggregates.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/IterationStatus.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
 #include "Krystal.Core/Visitor.hpp"

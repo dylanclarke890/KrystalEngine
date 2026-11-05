@@ -22,11 +22,6 @@ namespace krys::boo
     _computedStyle.SetUsesTreeCountingFunctions();
   }
 
-  inline void RenderStyleBase::SetInsideLink(InsideLink insideLink) noexcept
-  {
-    _computedStyle.SetInsideLink(insideLink);
-  }
-
   inline void RenderStyleBase::SetIsLink(bool isLink) noexcept
   {
     _computedStyle.SetIsLink(isLink);
@@ -316,11 +311,6 @@ namespace krys::boo
 
   // FIXME: Support descriptors
 
-  inline void RenderStyleBase::SetPageSize(style::PageSize &&pageSize) noexcept
-  {
-    _computedStyle.SetPageSize(krys::move(pageSize));
-  }
-
   // FIXME: Add a type that encapsulates both caretColor() and hasAutoCaretColor().
 
   inline void RenderStyleBase::SetCaretColor(style::Color &&color) noexcept
@@ -333,13 +323,4 @@ namespace krys::boo
     _computedStyle.SetHasAutoCaretColor();
   }
 
-  inline void RenderStyleBase::SetVisitedLinkCaretColor(style::Color &&value) noexcept
-  {
-    _computedStyle.SetVisitedLinkCaretColor(krys::move(value));
-  }
-
-  inline void RenderStyleBase::SetHasVisitedLinkAutoCaretColor() noexcept
-  {
-    _computedStyle.SetHasVisitedLinkAutoCaretColor();
-  }
 }

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/GraphicsLayerContentsDisplayDelegate.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.UI/Compositing/TextureMapperPlatformLayer.hpp"
 
 namespace krys::ui

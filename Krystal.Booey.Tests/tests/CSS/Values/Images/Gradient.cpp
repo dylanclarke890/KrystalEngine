@@ -67,12 +67,6 @@ namespace krys::boo::css::tests
               GradientAngularColorStop {.Color = Blue(), .Position = {}}};
     }
 
-    GradientDeprecatedColorStopList DeprecatedRedBlue()
-    {
-      return {GradientDeprecatedColorStop {.Color = Red(), .Position = Number<> {0.0}},
-              GradientDeprecatedColorStop {.Color = Blue(), .Position = Number<> {1.0}}};
-    }
-
     Gradient Linear(LinearGradient::GradientLineType line, Method method = Standard(),
                     GradientLinearColorStopList stops = RedBlue())
     {
@@ -86,21 +80,10 @@ namespace krys::boo::css::tests
         .ColourInterpolationMethod = method, .GradientBox = krys::move(box), .Stops = RedBlue()}};
     }
 
-    Gradient PrefixedRadial(PrefixedRadialGradient::GradientBoxType box)
-    {
-      return FunctionNotation<ValueId::WebkitRadialGradient, PrefixedRadialGradient> {PrefixedRadialGradient {
-        .ColourInterpolationMethod = Legacy(), .GradientBox = krys::move(box), .Stops = RedBlue()}};
-    }
-
     Gradient Conic(ConicGradient::GradientBoxType box, Method method = Standard())
     {
       return FunctionNotation<ValueId::ConicGradient, ConicGradient> {ConicGradient {
         .ColourInterpolationMethod = method, .GradientBox = krys::move(box), .Stops = AngularRedBlue()}};
-    }
-
-    DeprecatedGradientPosition Point(double x, double y)
-    {
-      return {NumberOrPercentage<> {Number<> {x}}, NumberOrPercentage<> {Number<> {y}}};
     }
   }
 
@@ -149,42 +132,6 @@ namespace krys::boo::css::tests
           == u8"repeating-linear-gradient(45deg, red, blue)");
   }
 
-  TEST_CASE("Gradient(Serialise prefixed and deprecated linear)", "[CSS][Images][Gradient]")
-  {
-    CHECK(SerialiseForTest(Gradient {FunctionNotation<ValueId::WebkitLinearGradient, PrefixedLinearGradient> {
-            PrefixedLinearGradient {.ColourInterpolationMethod = Legacy(),
-                                    .GradientLine = Horizontal {keywords::Left {}},
-                                    .Stops = RedBlue()}}})
-          == u8"-webkit-linear-gradient(left, red, blue)");
-    CHECK(SerialiseForTest(
-            Gradient {FunctionNotation<ValueId::WebkitRepeatingLinearGradient, PrefixedLinearGradient> {
-              PrefixedLinearGradient {.ColourInterpolationMethod = Legacy(),
-                                      .GradientLine = Angle<> {90_css_deg},
-                                      .Stops = RedBlue()}}})
-          == u8"-webkit-repeating-linear-gradient(90deg, red, blue)");
-
-    // `from()` at 0, `to()` at 1 and `color-stop()` otherwise; percentages are written as numbers.
-    CHECK(SerialiseForTest(Gradient {FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient> {
-            DeprecatedLinearGradient {.ColourInterpolationMethod = Legacy(),
-                                      .GradientLine = {Point(0, 0), Point(100, 0)},
-                                      .Stops = DeprecatedRedBlue()}}})
-          == u8"-webkit-gradient(linear, 0 0, 100 0, from(red), to(blue))");
-    CHECK(SerialiseForTest(Gradient {
-            FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient> {DeprecatedLinearGradient {
-              .ColourInterpolationMethod = Legacy(),
-              .GradientLine = {Point(0, 0), Point(0, 100)},
-              .Stops = {GradientDeprecatedColorStop {.Color = Red(),
-                                                     .Position = Percentage<> {50_css_percentage}},
-                        GradientDeprecatedColorStop {.Color = Blue(), .Position = Number<> {0.25}}}}}})
-          == u8"-webkit-gradient(linear, 0 0, 0 100, color-stop(0.5, red), color-stop(0.25, blue))");
-    // No stops: nothing is written after the line.
-    CHECK(
-      SerialiseForTest(Gradient {
-        FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient> {DeprecatedLinearGradient {
-          .ColourInterpolationMethod = Legacy(), .GradientLine = {Point(0, 0), Point(1, 1)}, .Stops = {}}}})
-      == u8"-webkit-gradient(linear, 0 0, 1 1)");
-  }
-
   TEST_CASE("Gradient(Serialise radial)", "[CSS][Images][Gradient]")
   {
     using Ellipse = RadialGradient::Ellipse;
@@ -221,35 +168,6 @@ namespace krys::boo::css::tests
             Radial(Circle {.Size = RadialGradient::Extent {keywords::FarthestCorner {}}},
                    Standard({ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
           == u8"radial-gradient(circle in srgb, red, blue)");
-  }
-
-  TEST_CASE("Gradient(Serialise prefixed and deprecated radial)", "[CSS][Images][Gradient]")
-  {
-    using Ellipse = PrefixedRadialGradient::Ellipse;
-    using Circle = PrefixedRadialGradient::Circle;
-
-    CHECK(SerialiseForTest(PrefixedRadial(Ellipse {})) == u8"-webkit-radial-gradient(center, red, blue)");
-    CHECK(SerialiseForTest(PrefixedRadial(
-            Ellipse {.Size = PrefixedRadialGradient::Extent {keywords::Contain {}}, .Position = LeftTop()}))
-          == u8"-webkit-radial-gradient(left top, ellipse contain, red, blue)");
-    CHECK(
-      SerialiseForTest(PrefixedRadial(Ellipse {.Size = Ellipse::SizeType {NLP {10_css_px}, NLP {20_css_px}}}))
-      == u8"-webkit-radial-gradient(center, 10px 20px, red, blue)");
-    // A circle without a size is `cover`.
-    CHECK(SerialiseForTest(PrefixedRadial(Circle {}))
-          == u8"-webkit-radial-gradient(center, circle cover, red, blue)");
-    CHECK(SerialiseForTest(PrefixedRadial(Circle {
-            .Size = PrefixedRadialGradient::Extent {keywords::ClosestSide {}}, .Position = LeftTop()}))
-          == u8"-webkit-radial-gradient(left top, circle closest-side, red, blue)");
-
-    CHECK(SerialiseForTest(Gradient {FunctionNotation<ValueId::WebkitGradient, DeprecatedRadialGradient> {
-            DeprecatedRadialGradient {.ColourInterpolationMethod = Legacy(),
-                                      .GradientBox = {.First = Point(0, 0),
-                                                      .FirstRadius = Number<NonNegative> {0.0},
-                                                      .Second = Point(10, 10),
-                                                      .SecondRadius = Number<NonNegative> {20.0}},
-                                      .Stops = DeprecatedRedBlue()}}})
-          == u8"-webkit-gradient(radial, 0 0, 0, 10 10, 20, from(red), to(blue))");
   }
 
   TEST_CASE("Gradient(Serialise conic)", "[CSS][Images][Gradient]")

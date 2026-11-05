@@ -37,11 +37,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Selector(enum traits)", "[CSS][Selectors][Selector]")
   {
-    STATIC_CHECK(EnumTraits<SelectorMatch>::DistinctValues == 18uz);
+    STATIC_CHECK(EnumTraits<SelectorMatch>::DistinctValues == 17uz);
     STATIC_CHECK(EnumTraits<SelectorRelation>::DistinctValues == 8uz);
-    STATIC_CHECK(EnumTraits<SelectorPagePseudoClass>::DistinctValues == 3uz);
-    STATIC_CHECK(EnumTraits<PseudoElementType>::DistinctValues == 17uz);
-    STATIC_CHECK(ToUnderlying(SelectorMatch::ForgivingUnknownNestContaining) == 17u);
+    STATIC_CHECK(EnumTraits<PseudoElementType>::DistinctValues == 12uz);
+    STATIC_CHECK(ToUnderlying(SelectorMatch::ForgivingUnknownNestContaining) == 16u);
     STATIC_CHECK(ToUnderlying(SelectorRelation::ShadowSlotted) == 7u);
   }
 
@@ -148,10 +147,6 @@ namespace krys::boo::css::tests
     auto lang = B::PseudoClass(SelectorPseudoClass::Lang);
     lang->SetLangList({{CSSOMStringAtom(u8"en"), true}, {CSSOMStringAtom(u8"fr"), false}});
     CHECK(Text(krys::move(lang)) == u8":lang(\"en\", fr)");
-
-    CHECK(Text(WithArguments(B::PseudoClass(SelectorPseudoClass::ActiveViewTransitionType),
-                             {CSSOMStringAtom(u8"a"), CSSOMStringAtom(u8"b")}))
-          == u8":active-view-transition-type(a, b)");
   }
 
   TEST_CASE("Selector::SelectorText(An+B)", "[CSS][Selectors][Selector]")
@@ -191,10 +186,6 @@ namespace krys::boo::css::tests
     CHECK(Text(WithArguments(B::PseudoElement(SelectorPseudoElement::Highlight, u8"highlight"),
                              {CSSOMStringAtom(u8"x")}))
           == u8"::highlight(x)");
-    CHECK(Text(WithArguments(
-            B::PseudoElement(SelectorPseudoElement::ViewTransitionGroup, u8"view-transition-group"),
-            {dom::StarAtom(), CSSOMStringAtom(u8"a"), CSSOMStringAtom(u8"b")}))
-          == u8"::view-transition-group(*.a.b)");
 
     auto slotted = B::PseudoElement(SelectorPseudoElement::Slotted, u8"slotted");
     slotted->AdoptSelectorVector(B::MutableList(B::Class(u8"a")));
@@ -204,16 +195,6 @@ namespace krys::boo::css::tests
     auto cue = B::PseudoElement(SelectorPseudoElement::Cue, u8"cue");
     cue->AdoptSelectorVector(B::MutableList(B::Type(u8"b")));
     CHECK(Text(krys::move(cue)) == u8"::cue(b)");
-  }
-
-  TEST_CASE("Selector::SelectorText(page)", "[CSS][Selectors][Selector]")
-  {
-    auto first = MutableSelector::ParsePagePseudoSelector(u8"first");
-    REQUIRE(first);
-    CHECK(Text(krys::move(first)) == u8":first");
-    CHECK(Text(MutableSelector::ParsePagePseudoSelector(u8"LEFT")) == u8":left");
-    CHECK(Text(MutableSelector::ParsePagePseudoSelector(u8"right")) == u8":right");
-    CHECK(!MutableSelector::ParsePagePseudoSelector(u8"blank"));
   }
 
   TEST_CASE("Selector::SetValue(match lowercase)", "[CSS][Selectors][Selector]")
@@ -276,19 +257,6 @@ namespace krys::boo::css::tests
     slotted->AdoptSelectorVector(B::MutableList(B::Class(u8"a")));
     CHECK(Specificity(krys::move(slotted)) == B_);
 
-    CHECK(Specificity(
-            WithArguments(B::PseudoElement(SelectorPseudoElement::ViewTransitionNew, u8"view-transition-new"),
-                          {dom::StarAtom()}))
-          == 0);
-    CHECK(Specificity(
-            WithArguments(B::PseudoElement(SelectorPseudoElement::ViewTransitionNew, u8"view-transition-new"),
-                          {dom::StarAtom(), CSSOMStringAtom(u8"a")}))
-          == C);
-    CHECK(Specificity(
-            WithArguments(B::PseudoElement(SelectorPseudoElement::ViewTransitionNew, u8"view-transition-new"),
-                          {CSSOMStringAtom(u8"x")}))
-          == C);
-
     auto implicitParent = B::NestingParent();
     implicitParent->SetImplicit();
     CHECK(Specificity(B::Combine(krys::move(implicitParent), SelectorRelation::Child, B::Id(u8"a"))) == A);
@@ -308,27 +276,6 @@ namespace krys::boo::css::tests
     CHECK(tuple[0] == 1);
     CHECK(tuple[1] == 0xFF);
     CHECK(tuple[2] == 1);
-  }
-
-  TEST_CASE("Selector::SpecificityForPage", "[CSS][Selectors][Selector]")
-  {
-    auto pageSelector = [](UniquePtr<MutableSelector> selector)
-    {
-      for (auto *current = selector.get(); current; current = current->PrecedingComplexSelectorComponent())
-      {
-        current->SetForPage();
-      }
-      return B::List(krys::move(selector));
-    };
-
-    auto named =
-      pageSelector(B::Compound(B::Type(u8"toc"), MutableSelector::ParsePagePseudoSelector(u8"first")));
-    CHECK(named.FirstSelectorComponent()->IsForPage());
-    CHECK(named.FirstSelectorComponent()->SpecificityForPage() == 6);
-    CHECK(named.SelectorsText() == u8"toc:first");
-
-    auto left = pageSelector(MutableSelector::ParsePagePseudoSelector(u8"left"));
-    CHECK(left.FirstSelectorComponent()->SpecificityForPage() == 1);
   }
 
   TEST_CASE("Selector::MatchNth", "[CSS][Selectors][Selector]")
@@ -474,8 +421,6 @@ namespace krys::boo::css::tests
     CHECK(Selector::StylePseudoElementTypeFor(SelectorPseudoElement::Before) == PseudoElementType::Before);
     CHECK(Selector::StylePseudoElementTypeFor(SelectorPseudoElement::FirstLetter)
           == PseudoElementType::FirstLetter);
-    CHECK(Selector::StylePseudoElementTypeFor(SelectorPseudoElement::ViewTransitionNew)
-          == PseudoElementType::ViewTransitionNew);
     CHECK(Selector::StylePseudoElementTypeFor(SelectorPseudoElement::Checkmark)
           == PseudoElementType::Checkmark);
     CHECK(!Selector::StylePseudoElementTypeFor(SelectorPseudoElement::Part));
@@ -495,8 +440,7 @@ namespace krys::boo::css::tests
     CHECK(!Selector::ParsePseudoElementName(u8"thumb", context));
 
     context.thumbAndTrackPseudoElementsEnabled = true;
-    CHECK(Selector::ParsePseudoElementName(u8"view-transition", context)
-          == SelectorPseudoElement::ViewTransition);
+    CHECK(!Selector::ParsePseudoElementName(u8"view-transition", context));
     CHECK(Selector::ParsePseudoElementName(u8"thumb", context) == SelectorPseudoElement::UserAgentPart);
   }
 

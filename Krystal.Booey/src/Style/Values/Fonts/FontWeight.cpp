@@ -3,10 +3,10 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
-#include "Krystal.Booey/Graphics/SystemFontDatabase.hpp"
-#include "Krystal.Booey/Style/BuilderChecking.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
+#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
 

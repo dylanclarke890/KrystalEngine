@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
@@ -31,6 +30,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
@@ -40,9 +40,8 @@
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
@@ -86,17 +85,9 @@ namespace krys::boo::css
   KRYS_NODISCARD static bool ConsumeKeyframeDescriptor(TokenRange &, const ParserContext &, PropertyId,
                                                        IsImportant, PropertyParserResult &) noexcept;
 
-  // @page descriptors.
-  KRYS_NODISCARD static bool ConsumePageDescriptor(TokenRange &, const ParserContext &, PropertyId,
-                                                   IsImportant, PropertyParserResult &) noexcept;
-
   // @property descriptors.
   KRYS_NODISCARD static bool ConsumePropertyDescriptor(TokenRange &, const ParserContext &, PropertyId,
                                                        PropertyParserResult &) noexcept;
-
-  // @view-transition descriptors.
-  KRYS_NODISCARD static bool ConsumeViewTransitionDescriptor(TokenRange &, const ParserContext &, PropertyId,
-                                                             PropertyParserResult &) noexcept;
 
   // @position-try descriptors.
   KRYS_NODISCARD static bool ConsumePositionTryDescriptor(TokenRange &, const ParserContext &, PropertyId,
@@ -256,19 +247,9 @@ namespace krys::boo::css
         parseSuccess = ConsumeKeyframeDescriptor(range, context, property, important, result);
         break;
       }
-      case RuleType::Page:
-      {
-        parseSuccess = ConsumePageDescriptor(range, context, property, important, result);
-        break;
-      }
       case RuleType::Property:
       {
         parseSuccess = ConsumePropertyDescriptor(range, context, property, result);
-        break;
-      }
-      case RuleType::ViewTransition:
-      {
-        parseSuccess = ConsumeViewTransitionDescriptor(range, context, property, result);
         break;
       }
       case RuleType::PositionTry:
@@ -684,7 +665,7 @@ namespace krys::boo::css
           return style::ConvertCSSValueToStyle<style::Resolution<>>(builderState,
                                                                     Downcast<PrimitiveValue>(value));
         case CustomPropertySyntax::Type::Color:
-          return style::ConvertCSSValueToStyle<style::Color>(builderState, value, style::ForVisitedLink::No);
+          return style::ConvertCSSValueToStyle<style::Color>(builderState, value);
         case CustomPropertySyntax::Type::Image:
         {
           auto styleImage = builderState.CreateStyleImage(value);
@@ -894,36 +875,6 @@ namespace krys::boo::css
     }
   }
 
-  bool ConsumePageDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                             IsImportant important, PropertyParserResult &result) noexcept
-  {
-    // Does not apply in @page per-spec.
-    if (property == PropertyId::Page)
-    {
-      return false;
-    }
-
-    auto state = PropertyParserState {
-      .Context = context,
-      .CurrentRule = RuleType::Page,
-      .CurrentProperty = property,
-      .Important = IsImportant(false),
-    };
-
-    if (RefPtr parsedValue = PropertyParsing::ParsePageDescriptor(range, property, state))
-    {
-      if (!range.IsAtEnd())
-      {
-        return false;
-      }
-
-      result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
-      return true;
-    }
-
-    return ConsumeStyleProperty(range, context, property, important, RuleType::Page, result);
-  }
-
   bool ConsumePropertyDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
                                  PropertyParserResult &result) noexcept
   {
@@ -935,26 +886,6 @@ namespace krys::boo::css
     };
 
     RefPtr parsedValue = PropertyParsing::ParsePropertyDescriptor(range, property, state);
-    if (!parsedValue || !range.IsAtEnd())
-    {
-      return false;
-    }
-
-    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
-    return true;
-  }
-
-  bool ConsumeViewTransitionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                       PropertyParserResult &result) noexcept
-  {
-    auto state = PropertyParserState {
-      .Context = context,
-      .CurrentRule = RuleType::ViewTransition,
-      .CurrentProperty = property,
-      .Important = IsImportant(false),
-    };
-
-    RefPtr parsedValue = PropertyParsing::ParseViewTransitionDescriptor(range, property, state);
     if (!parsedValue || !range.IsAtEnd())
     {
       return false;

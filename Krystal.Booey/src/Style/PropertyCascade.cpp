@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/Style/PropertyCascade.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/Style/PropertyAllowlist.hpp"
+#include "Krystal.Booey/Style/Rules/PropertyAllowlist.hpp"
 #include <algorithm>
 
 namespace krys::boo::style
@@ -95,29 +95,12 @@ namespace krys::boo::style
                                             const MatchedProperties &matchedProperties,
                                             Origin origin) noexcept
   {
-    krys_debug_assert(matchedProperties.LinkMatchType <= css::SelectorChecker::MatchAll);
     property.Id = id;
     property.Origin = origin;
     property.StyleScopeOrdinal = matchedProperties.StyleScopeOrdinal;
     property.CascadeLayerPriority = matchedProperties.CascadeLayerPriority;
     property.FromStyleAttribute = matchedProperties.FromStyleAttribute;
-
-    if (matchedProperties.LinkMatchType == css::SelectorChecker::MatchAll)
-    {
-      property.Origins[css::SelectorChecker::MatchDefault] = origin;
-      property.CssValue[css::SelectorChecker::MatchDefault] = &cssValue;
-
-      property.Origins[css::SelectorChecker::MatchLink] = origin;
-      property.CssValue[css::SelectorChecker::MatchLink] = &cssValue;
-
-      property.Origins[css::SelectorChecker::MatchVisited] = origin;
-      property.CssValue[css::SelectorChecker::MatchVisited] = &cssValue;
-    }
-    else
-    {
-      property.Origins[matchedProperties.LinkMatchType] = origin;
-      property.CssValue[matchedProperties.LinkMatchType] = &cssValue;
-    }
+    property.CssValue = &cssValue;
   }
 
   void PropertyCascade::Set(css::PropertyId id, const css::Value &cssValue,

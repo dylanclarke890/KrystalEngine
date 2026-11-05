@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
-#include "Krystal.Booey/Animation/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
+#include "Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/ContentVisibilityAutoStateChangeEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/Page/IntersectionObserverEntry.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo::dom

@@ -14,7 +14,6 @@ namespace krys::boo::css
     Import = 3,
     Media = 4,
     FontFace = 5,
-    Page = 6,
     Keyframes = 7,
     Keyframe = 8,
     Margin = 9,
@@ -23,8 +22,7 @@ namespace krys::boo::css
     Supports = 12,
     FontFeatureValues = 14,
     // Numbers above 14 are not exposed to the web.
-    ViewTransition = 15,
-    LayerBlock,
+    LayerBlock = 15,
     LayerStatement,
     Container,
     FontPaletteValues,
@@ -39,7 +37,7 @@ namespace krys::boo::css
     FunctionDeclarations,
   };
 
-  constexpr auto FirstUnexposedRuleType = RuleType::ViewTransition;
+  constexpr auto FirstUnexposedRuleType = RuleType::LayerBlock;
 }
 
-KRYS_DEFINE_ENUM_TRAITS(krys::boo::css::RuleType, 27uz, false, false);
+KRYS_DEFINE_ENUM_TRAITS(krys::boo::css::RuleType, 25uz, false, false);

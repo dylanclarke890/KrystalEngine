@@ -27,9 +27,6 @@ namespace krys::boo::html
       return InputTypeNames::File;
     }
 
-    /// @brief The files' paths and names, and the display string.
-    KRYS_NODISCARD FormControlState SaveFormControlState() const noexcept final;
-    void RestoreFormControlState(const FormControlState &state) noexcept final;
     bool AppendFormData(DOMFormData &formData) const noexcept final;
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
     KRYS_NODISCARD dom::DOMString ValueMissingText() const noexcept final;

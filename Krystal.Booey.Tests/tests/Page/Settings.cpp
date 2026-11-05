@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/Page/Settings.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
@@ -34,22 +34,15 @@ namespace krys::boo::tests
       settings->SpringTimingFunctionEnabled = true;
       settings->CSSColorLayersEnabled = true;
       settings->ThumbAndTrackPseudoElementsEnabled = true;
-      settings->ColorFilterEnabled = true;
       document.SetSettings(Ref<Settings>(settings));
 
       auto &context = document.CssParserContext();
       CHECK(context.springTimingFunctionEnabled);
       CHECK(context.colorLayersEnabled);
       CHECK(context.thumbAndTrackPseudoElementsEnabled);
-      CHECK(context.PropertySettings.colorFilterEnabled);
       CHECK(css::SelectorParserContext(document).thumbAndTrackPseudoElementsEnabled);
 
-      // Embedder properties are exposed in computed style only when their setting is on.
-      auto &exposed = document.ExposedComputedCSSPropertyIds();
-      CHECK(std::ranges::find(exposed, css::PropertyId::AppleColorFilter) != exposed.end());
       document.SetSettings(Settings::Create());
-      auto &hidden = document.ExposedComputedCSSPropertyIds();
-      CHECK(std::ranges::find(hidden, css::PropertyId::AppleColorFilter) == hidden.end());
       CHECK_FALSE(document.CssParserContext().springTimingFunctionEnabled);
     }
 
@@ -92,7 +85,6 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "Settings: standard features are always on", "[Page][Settings]")
   {
     ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
-      @view-transition { navigation: auto }
       @position-try --a { top: 0 }
       #p { display: grid-lanes; width: calc(random(1px, 1px)); color: contrast-color(black);
            text-box: trim-both cap alphabetic; overflow-anchor: none }
@@ -102,7 +94,7 @@ namespace krys::boo::tests
     auto &document = *fixture.Document;
     auto &contents = document.StyleScope().ActiveStyleSheets().front()->Contents();
     // Every rule parsed.
-    CHECK(contents.RuleCount() == 5);
+    CHECK(contents.RuleCount() == 4);
 
     document.UpdateStyleIfNeeded();
     auto *style = fixture.ById(u8"p").GetRenderStyle();

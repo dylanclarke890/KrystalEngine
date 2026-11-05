@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCaption.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCol.hpp"
-#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
-#include "Krystal.Booey/Rendering/RenderTableSection.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCaption.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCol.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableRow.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableSection.hpp"
 
 namespace krys::boo
 {

@@ -15,9 +15,9 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidation/ChildChangeInvalidation.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
-#include "Krystal.Booey/SVG/SVGUseElement.hpp"
 #include <algorithm>
 
 namespace krys::boo::dom

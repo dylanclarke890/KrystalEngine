@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Graphics/BitmapImage.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"

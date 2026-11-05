@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLRow.hpp"
-#include "Krystal.Booey/MathML/MathMLRowElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLRowElement.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>

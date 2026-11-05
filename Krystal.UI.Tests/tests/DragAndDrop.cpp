@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Events/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -404,7 +404,7 @@ namespace krys::ui::tests
   {
     boo::MemoryCache::Singleton().EvictResources();
     View view({1'200, 600});
-    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    FollowLinks(view);
     auto page = gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html";
     REQUIRE(view.LoadFile(page).has_value());
     WaitForLoad(view);

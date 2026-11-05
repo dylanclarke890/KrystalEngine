@@ -24,9 +24,9 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Rendering/RenderListBox.hpp"
-#include "Krystal.Booey/Rendering/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include <climits>
 #include <unicode/uchar.h>
@@ -97,97 +97,6 @@ namespace krys::boo::html
   dom::DOMString HTMLSelectElement::FormControlType() const noexcept
   {
     return _multiple ? u8"select-multiple" : u8"select-one";
-  }
-
-  FormControlState HTMLSelectElement::SaveFormControlState() const noexcept
-  {
-    FormControlState state;
-    auto &items = ListItems();
-    state.reserve(items.size());
-    for (auto &element : items)
-    {
-      auto *option = DynamicDowncast<HTMLOptionElement>(element.get());
-      if (!option || !option->Selected())
-      {
-        continue;
-      }
-      state.push_back(option->Value());
-      if (!Multiple())
-      {
-        break;
-      }
-    }
-    return state;
-  }
-
-  Maybe<size_t> HTMLSelectElement::SearchOptionsForValue(dom::DOMStringView value, size_t listIndexStart,
-                                                         size_t listIndexEnd) const noexcept
-  {
-    auto &items = ListItems();
-    auto loopEndIndex = std::min(items.size(), listIndexEnd);
-    for (auto i = listIndexStart; i < loopEndIndex; ++i)
-    {
-      auto *option = DynamicDowncast<HTMLOptionElement>(items[i].get());
-      if (!option)
-      {
-        continue;
-      }
-      if (option->Value() == value)
-      {
-        return i;
-      }
-    }
-    return null;
-  }
-
-  void HTMLSelectElement::RestoreFormControlState(const FormControlState &state) noexcept
-  {
-    RecalcListItems();
-
-    auto &items = ListItems();
-    auto itemsSize = items.size();
-    if (!itemsSize)
-    {
-      return;
-    }
-
-    for (auto &element : items)
-    {
-      if (RefPtr<HTMLOptionElement> option = ShareRefPtr(DynamicDowncast<HTMLOptionElement>(element.get())))
-      {
-        option->SetSelectedState(false);
-      }
-    }
-
-    if (!Multiple())
-    {
-      if (auto foundIndex = SearchOptionsForValue(state[0], 0, itemsSize))
-      {
-        Downcast<HTMLOptionElement>(*items[*foundIndex]).SetSelectedState(true);
-      }
-    }
-    else
-    {
-      size_t startIndex = 0;
-      for (auto &value : state)
-      {
-        auto foundIndex = SearchOptionsForValue(value, startIndex, itemsSize);
-        if (!foundIndex)
-        {
-          foundIndex = SearchOptionsForValue(value, 0, startIndex);
-        }
-        if (!foundIndex)
-        {
-          continue;
-        }
-        Downcast<HTMLOptionElement>(*items[*foundIndex]).SetSelectedState(true);
-        startIndex = *foundIndex + 1;
-      }
-    }
-
-    InvalidateSelectedItems();
-    SetOptionsChangedOnRenderer();
-    UpdateValidity();
   }
 
   void HTMLSelectElement::OptionSelectedByUser(int32 optionIndex, bool fireOnChangeNow,

@@ -249,7 +249,7 @@ namespace krys::boo::layout
     // Block level elements generate block level boxes.
     auto display = _style.Display();
     return display == DisplayType::Block || display == DisplayType::ListItem || display == DisplayType::Table
-           || display == DisplayType::Flex || display == DisplayType::Box || display == DisplayType::Grid
+           || display == DisplayType::Flex || display == DisplayType::Grid
            || display == DisplayType::GridLanes || display == DisplayType::FlowRoot;
   }
 
@@ -263,11 +263,10 @@ namespace krys::boo::layout
   {
     // Inline level elements generate inline level boxes.
     auto display = _style.Display();
-    return display == DisplayType::Inline || display == DisplayType::InlineBox
-           || display == DisplayType::InlineFlex || display == DisplayType::InlineGrid
-           || display == DisplayType::InlineGridLanes || display == DisplayType::Ruby
-           || display == DisplayType::RubyBase || display == DisplayType::RubyAnnotation || IsInlineBlockBox()
-           || IsInlineTableBox();
+    return display == DisplayType::Inline || display == DisplayType::InlineFlex
+           || display == DisplayType::InlineGrid || display == DisplayType::InlineGridLanes
+           || display == DisplayType::Ruby || display == DisplayType::RubyBase
+           || display == DisplayType::RubyAnnotation || IsInlineBlockBox() || IsInlineTableBox();
   }
 
   bool Box::IsInlineBox() const noexcept

@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
-#include "Krystal.Booey/SVG/SVGZoomAndPan.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -10,10 +9,10 @@ namespace krys::boo::svg
   class SVGElement;
   class SVGTransformList;
 
-  /// @brief The view an `svgView(...)` fragment identifier gives an `<svg>`: its view box, aspect ratio, zoom
-  /// and pan, transform and target.
+  /// @brief The view an `svgView(...)` fragment identifier gives an `<svg>`: its view box, aspect ratio,
+  /// transform and target.
   /// @see https://svgwg.org/svg2-draft/linking.html#SVGFragmentIdentifiers
-  class SVGViewSpec final : public RefCounted<SVGViewSpec>, public SVGFitToViewBox, public SVGZoomAndPan
+  class SVGViewSpec final : public RefCounted<SVGViewSpec>, public SVGFitToViewBox
   {
   private:
     WeakPtr<SVGElement> _contextElement;

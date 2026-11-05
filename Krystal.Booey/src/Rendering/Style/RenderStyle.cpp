@@ -1,16 +1,16 @@
 ﻿#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-#include "Krystal.Booey/Animation/ScrollAxis.hpp"
+#include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
-#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Style/Values/Text/TextTransform.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>
 
@@ -219,60 +219,48 @@ namespace krys::boo
 
   // MARK: - Color
 
-  const style::Color &RenderStyle::UnresolvedColorForProperty(css::PropertyId colorProperty,
-                                                              bool visitedLink) const noexcept
+  const style::Color &RenderStyle::UnresolvedColorForProperty(css::PropertyId colorProperty) const noexcept
   {
     switch (colorProperty)
     {
-      case css::PropertyId::AccentColor: return GetAccentColor().ColorOrCurrentColor();
-      case css::PropertyId::BackgroundColor:
-        return visitedLink ? VisitedLinkBackgroundColor() : BackgroundColor();
-      case css::PropertyId::BorderBottomColor:
-        return visitedLink ? VisitedLinkBorderBottomColor() : BorderBottomColor();
-      case css::PropertyId::BorderLeftColor:
-        return visitedLink ? VisitedLinkBorderLeftColor() : BorderLeftColor();
-      case css::PropertyId::BorderRightColor:
-        return visitedLink ? VisitedLinkBorderRightColor() : BorderRightColor();
-      case css::PropertyId::BorderTopColor:
-        return visitedLink ? VisitedLinkBorderTopColor() : BorderTopColor();
-      case css::PropertyId::Fill:          return Fill().ColorDisregardingType();
-      case css::PropertyId::FloodColor:    return FloodColor();
-      case css::PropertyId::LightingColor: return LightingColor();
-      case css::PropertyId::OutlineColor:  return visitedLink ? VisitedLinkOutlineColor() : OutlineColor();
-      case css::PropertyId::StopColor:     return StopColor();
-      case css::PropertyId::Stroke:        return Stroke().ColorDisregardingType();
-      case css::PropertyId::StrokeColor:   return visitedLink ? VisitedLinkStrokeColor() : StrokeColor();
+      case css::PropertyId::AccentColor:       return GetAccentColor().ColorOrCurrentColor();
+      case css::PropertyId::BackgroundColor:   return BackgroundColor();
+      case css::PropertyId::BorderBottomColor: return BorderBottomColor();
+      case css::PropertyId::BorderLeftColor:   return BorderLeftColor();
+      case css::PropertyId::BorderRightColor:  return BorderRightColor();
+      case css::PropertyId::BorderTopColor:    return BorderTopColor();
+      case css::PropertyId::Fill:              return Fill().ColorDisregardingType();
+      case css::PropertyId::FloodColor:        return FloodColor();
+      case css::PropertyId::LightingColor:     return LightingColor();
+      case css::PropertyId::OutlineColor:      return OutlineColor();
+      case css::PropertyId::StopColor:         return StopColor();
+      case css::PropertyId::Stroke:            return Stroke().ColorDisregardingType();
+      case css::PropertyId::StrokeColor:       return StrokeColor();
       case css::PropertyId::BorderBlockEndColor:
       case css::PropertyId::BorderBlockStartColor:
       case css::PropertyId::BorderInlineEndColor:
       case css::PropertyId::BorderInlineStartColor:
         return UnresolvedColorForProperty(
           css::Property::ResolveDirectionAwareProperty(colorProperty, GetWritingMode()));
-      case css::PropertyId::ColumnRuleColor:
-        return visitedLink ? VisitedLinkColumnRuleColor() : ColumnRuleColor();
-      case css::PropertyId::TextEmphasisColor:
-        return visitedLink ? VisitedLinkTextEmphasisColor() : TextEmphasisColor();
-      case css::PropertyId::WebkitTextFillColor:
-        return visitedLink ? VisitedLinkTextFillColor() : TextFillColor();
-      case css::PropertyId::TextDecorationColor:
-        return visitedLink ? VisitedLinkTextDecorationColor() : TextDecorationColor();
-      case css::PropertyId::CaretColor: return visitedLink ? VisitedLinkCaretColor() : CaretColor();
-      default:                          krys_debug_assert_msg(false, "Unreachable"); break;
+      case css::PropertyId::ColumnRuleColor:     return ColumnRuleColor();
+      case css::PropertyId::TextEmphasisColor:   return TextEmphasisColor();
+      case css::PropertyId::TextDecorationColor: return TextDecorationColor();
+      case css::PropertyId::CaretColor:          return CaretColor();
+      default:                                   krys_debug_assert_msg(false, "Unreachable"); break;
     }
 
     static NeverDestroyed<style::Color> defaultColor {};
     return defaultColor;
   }
 
-  Color RenderStyle::ColorResolvingCurrentColor(css::PropertyId colorProperty,
-                                                bool visitedLink) const noexcept
+  Color RenderStyle::ColorResolvingCurrentColor(css::PropertyId colorProperty) const noexcept
   {
     if (colorProperty == css::PropertyId::Color)
     {
-      return visitedLink ? VisitedLinkColor() : GetColor();
+      return GetColor();
     }
 
-    auto &result = UnresolvedColorForProperty(colorProperty, visitedLink);
+    auto &result = UnresolvedColorForProperty(colorProperty);
     if (result.IsCurrentColor())
     {
       if (colorProperty == css::PropertyId::TextDecorationColor)
@@ -280,83 +268,23 @@ namespace krys::boo
         if (HasPositiveStrokeWidth())
         {
           // Prefer stroke color if possible but not if it's fully transparent.
-          auto strokeColor = ColorResolvingCurrentColor(UsedStrokeColorProperty(), visitedLink);
+          auto strokeColor = ColorResolvingCurrentColor(UsedStrokeColorProperty());
           if (strokeColor.IsVisible())
           {
             return strokeColor;
           }
         }
-
-        return ColorResolvingCurrentColor(css::PropertyId::WebkitTextFillColor, visitedLink);
       }
 
-      return visitedLink ? VisitedLinkColor() : GetColor();
+      return GetColor();
     }
 
-    return ColorResolvingCurrentColor(result, visitedLink);
+    return ColorResolvingCurrentColor(result);
   }
 
-  Color RenderStyle::ColorResolvingCurrentColor(const style::Color &color, bool visitedLink) const noexcept
+  Color RenderStyle::ColorResolvingCurrentColor(const style::Color &color) const noexcept
   {
-    return color.ResolveColor(visitedLink ? VisitedLinkColor() : this->GetColor());
-  }
-
-  Color RenderStyle::VisitedDependentColor(css::PropertyId colorProperty,
-                                           EnumSet<PaintBehavior> paintBehavior) const noexcept
-  {
-    auto unvisitedColor = ColorResolvingCurrentColor(colorProperty, false);
-    if (GetInsideLink() != InsideLink::InsideVisited)
-    {
-      return unvisitedColor;
-    }
-
-    if (paintBehavior.Contains(PaintBehavior::DontShowVisitedLinks))
-    {
-      return unvisitedColor;
-    }
-
-    if (IsInSubtreeWithBlendMode())
-    {
-      return unvisitedColor;
-    }
-
-    auto visitedColor = ColorResolvingCurrentColor(colorProperty, true);
-
-    // FIXME: Technically someone could explicitly specify the color transparent, but for now we'll just
-    // assume that if the background color is transparent that it wasn't set. Note that it's weird that
-    // we're returning unvisited info for a visited link, but given our restriction that the alpha values
-    // have to match, it makes more sense to return the unvisited background color if specified than it
-    // does to return black. This behavior matches what Firefox 4 does as well.
-    if (colorProperty == css::PropertyId::BackgroundColor && visitedColor == Color::transparentBlack)
-    {
-      return unvisitedColor;
-    }
-
-    // Take the alpha from the unvisited color, but get the RGB values from the visited color.
-    return visitedColor.ColorWithAlpha(unvisitedColor.AlphaAsFloat());
-  }
-
-  Color RenderStyle::VisitedDependentColorWithColorFilter(css::PropertyId colorProperty,
-                                                          EnumSet<PaintBehavior> paintBehavior) const noexcept
-  {
-    if (!HasAppleColorFilter())
-    {
-      return VisitedDependentColor(colorProperty, paintBehavior);
-    }
-
-    return ColorByApplyingColorFilter(VisitedDependentColor(colorProperty, paintBehavior));
-  }
-
-  Color RenderStyle::ColorByApplyingColorFilter(const Color &color) const noexcept
-  {
-    auto transformedColor = color;
-    std::ignore = GetAppleColorFilter().TransformColor(transformedColor);
-    return transformedColor;
-  }
-
-  Color RenderStyle::ColorWithColorFilter(const style::Color &color) const noexcept
-  {
-    return ColorByApplyingColorFilter(ColorResolvingCurrentColor(color));
+    return color.ResolveColor(GetColor());
   }
 
   // MARK: - Used Values
@@ -423,7 +351,7 @@ namespace krys::boo
 
   Color RenderStyle::UsedStrokeColor() const noexcept
   {
-    return VisitedDependentColor(UsedStrokeColorProperty());
+    return ColorResolvingCurrentColor(UsedStrokeColorProperty());
   }
 
   css::PropertyId RenderStyle::UsedStrokeColorProperty() const noexcept
@@ -468,28 +396,14 @@ namespace krys::boo
   {
     return krys::SwitchOn(
       GetScrollbarColor(), [&](const css::keywords::Auto &) -> Color { return {}; },
-      [&](const auto &parts) -> Color
-      {
-        if (HasAppleColorFilter())
-        {
-          return ColorByApplyingColorFilter(ColorResolvingCurrentColor(parts.Thumb));
-        }
-        return ColorResolvingCurrentColor(parts.Thumb);
-      });
+      [&](const auto &parts) -> Color { return ColorResolvingCurrentColor(parts.Thumb); });
   }
 
   Color RenderStyle::UsedScrollbarTrackColor() const noexcept
   {
     return krys::SwitchOn(
       GetScrollbarColor(), [&](const css::keywords::Auto &) -> Color { return {}; },
-      [&](const auto &parts) -> Color
-      {
-        if (HasAppleColorFilter())
-        {
-          return ColorByApplyingColorFilter(ColorResolvingCurrentColor(parts.Track));
-        }
-        return ColorResolvingCurrentColor(parts.Track);
-      });
+      [&](const auto &parts) -> Color { return ColorResolvingCurrentColor(parts.Track); });
   }
 
   Color RenderStyle::UsedAccentColor(style::ColorOptions styleColorOptions) const noexcept
@@ -504,11 +418,6 @@ namespace krys::boo
         {
           auto computedCanvasColor = css::ColorFromKeyword(css::ValueId::Canvas, styleColorOptions);
           resolvedAccentColor = BlendSourceOver(computedCanvasColor, resolvedAccentColor);
-        }
-
-        if (HasAppleColorFilter())
-        {
-          return ColorByApplyingColorFilter(resolvedAccentColor);
         }
 
         return resolvedAccentColor;

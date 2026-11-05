@@ -83,14 +83,12 @@ namespace krys::boo::css::tests
     SECTION("mask with a position")
     {
       CHECK(ShorthandToText(u8"url(a.png) 10px 20px", PropertyId::Mask)
-              .contains("-webkit-mask-position-x: 10px; -webkit-mask-position-y: 20px"));
+              .contains("-internal-mask-position-x: 10px; -internal-mask-position-y: 20px"));
     }
 
     SECTION("overflow")
     {
       CHECK(ShorthandToText(u8"hidden", PropertyId::Overflow) == "overflow-x: hidden; overflow-y: hidden");
-      CHECK(ShorthandToText(u8"-webkit-paged-x", PropertyId::Overflow)
-            == "overflow-x: auto; overflow-y: -webkit-paged-x");
     }
 
     SECTION("grid-template")
@@ -126,8 +124,8 @@ namespace krys::boo::css::tests
 
     SECTION("flex")
     {
-      CHECK(ShorthandToText(u8"-webkit-fill-available", PropertyId::Flex)
-            == "flex-grow: 1; flex-shrink: 1; flex-basis: -webkit-fill-available");
+      CHECK(ShorthandToText(u8"stretch", PropertyId::Flex)
+            == "flex-grow: 1; flex-shrink: 1; flex-basis: stretch");
     }
 
     SECTION("view-timeline")

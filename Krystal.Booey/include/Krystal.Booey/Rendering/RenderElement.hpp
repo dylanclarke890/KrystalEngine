@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/ImageOrientation.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -186,7 +186,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsAnonymousForPercentageResolution() const noexcept
     {
-      // FIXME: View transition pseudo-elements, once there are view transitions.
       return IsAnonymous();
     }
 
@@ -310,16 +309,9 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool IsDeprecatedFlexItem() const noexcept
+    KRYS_NODISCARD bool IsInFlowFlexChild() const noexcept
     {
-      return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent()
-             && Parent()->IsRenderDeprecatedFlexibleBox();
-    }
-
-    KRYS_NODISCARD bool IsFlexItemIncludingDeprecated() const noexcept
-    {
-      return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent()
-             && Parent()->IsFlexibleBoxIncludingDeprecated();
+      return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent() && Parent()->IsRenderFlexibleBox();
     }
 
     // block-level boxes are boxes that participate in a block formatting context.
@@ -409,9 +401,6 @@ namespace krys::boo
     {
       return CreatesGroupForStyle(Style());
     }
-    KRYS_NODISCARD bool HasViewTransitionName() const noexcept;
-    KRYS_NODISCARD bool IsViewTransitionRoot() const noexcept;
-    KRYS_NODISCARD bool RequiresRenderingConsolidationForViewTransition() const noexcept;
 
     KRYS_NODISCARD FloatRect TransformReferenceBoxRect() const noexcept;
     KRYS_NODISCARD FloatRect TransformReferenceBoxRect(const RenderStyle &style) const noexcept;

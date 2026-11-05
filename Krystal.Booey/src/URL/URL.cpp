@@ -511,34 +511,6 @@ namespace krys::boo::url
     return utf8_stringview {_string}.substr(_queryEnd + 1);
   }
 
-  utf8_string URL::ConsumeFragmentDirective() noexcept
-  {
-    constexpr utf8_stringview fragmentDirectiveDelimiter = u8":~:";
-    auto fragment = FragmentIdentifier();
-
-    auto fragmentDirectiveStart = fragment.find(fragmentDirectiveDelimiter);
-
-    if (fragmentDirectiveStart == utf8_stringview::npos)
-    {
-      return {};
-    }
-
-    utf8_string fragmentDirective {
-      fragment.substr(fragmentDirectiveStart + fragmentDirectiveDelimiter.size())};
-
-    utf8_string remainingFragment {fragment.substr(0, fragmentDirectiveStart)};
-    if (remainingFragment.empty())
-    {
-      RemoveFragmentIdentifier();
-    }
-    else
-    {
-      SetFragmentIdentifier(remainingFragment);
-    }
-
-    return fragmentDirective;
-  }
-
   URL URL::TruncatedForUseAsBase() const noexcept
   {
     return URL(utf8_stringview {_string}.substr(0, _pathAfterLastSlash));
@@ -1055,11 +1027,6 @@ namespace krys::boo::url
   utf8_string EncodeWithURLEscapeSequences(utf8_stringview input) noexcept
   {
     return PercentEncodeCharacters(input, URLParser::IsInUserInfoEncodeSet);
-  }
-
-  utf8_string PercentEncodeFragmentDirectiveSpecialCharacters(utf8_stringview input) noexcept
-  {
-    return PercentEncodeCharacters(input, URLParser::IsSpecialCharacterForFragmentDirective);
   }
 
   bool ProtocolIs(utf8_stringview url, utf8_stringview protocol) noexcept

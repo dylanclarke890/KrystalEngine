@@ -32,7 +32,6 @@ namespace krys::boo::css::tests
       REQUIRE(url);
       CHECK(S(url->Specified) == "../images/a.png");
       CHECK(S(url->Resolved.String()) == "https://example.com/images/a.png");
-      CHECK(url->Modifiers.LoadedFromOpaqueSource == LoadedFromOpaqueSource::No);
     }
 
     SECTION("doesn't resolve empty or fragment-only URLs")
@@ -57,14 +56,6 @@ namespace krys::boo::css::tests
       auto aboutBlank = CompleteURL(u8"a.png", ContextWithBase(u8"about:blank"));
       REQUIRE(aboutBlank);
       CHECK(aboutBlank->Resolved.IsNull());
-    }
-
-    SECTION("carries the context's opaque-source flag")
-    {
-      context.LoadedFromOpaqueSource = LoadedFromOpaqueSource::Yes;
-      auto url = CompleteURL(u8"a.png", context);
-      REQUIRE(url);
-      CHECK(url->Modifiers.LoadedFromOpaqueSource == LoadedFromOpaqueSource::Yes);
     }
   }
 

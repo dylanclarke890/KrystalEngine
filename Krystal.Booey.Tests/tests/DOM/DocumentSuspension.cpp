@@ -3,9 +3,9 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::tests
 {
@@ -34,7 +34,7 @@ namespace krys::boo::tests
       }
     };
 
-    constexpr auto Reason = dom::ReasonForSuspension::BackForwardCache;
+    constexpr auto Reason = dom::ReasonForSuspension::PageWillBeSuspended;
   }
 
   TEST_CASE("A suspended document's tasks wait until it resumes", "[DOM][Document][Suspension]")
@@ -63,7 +63,7 @@ namespace krys::boo::tests
 
     SECTION("resuming for another reason doesn't resume it")
     {
-      document.ResumeScheduledTasks(dom::ReasonForSuspension::PageWillBeSuspended);
+      document.ResumeScheduledTasks(dom::ReasonForSuspension::WillDeferLoading);
       CHECK(document.ScheduledTasksAreSuspended());
       eventLoop.RunUntilIdle();
       CHECK(fired == 0);
@@ -92,17 +92,16 @@ namespace krys::boo::tests
   {
     SuspensionFixture fixture;
     auto &document = fixture.Document();
-    auto &window = fixture.Window();
     List<std::string> fired;
-    (void)window.SetTimeout([&] { fired.push_back("timeout"); }, 100);
-    (void)window.SetInterval([&] { fired.push_back("interval"); }, 40);
+    auto timeout = document.StartTimer(100ms, [&] { fired.push_back("timeout"); });
+    auto interval = document.StartRepeatingTimer(40ms, [&] { fired.push_back("interval"); });
 
     Advance(50ms);
     CHECK(fired == List<std::string> {"interval"});
 
     document.Suspend(Reason);
     // A timer installed while the document is suspended waits too.
-    (void)window.SetTimeout([&] { fired.push_back("installed"); }, 10);
+    auto installed = document.StartTimer(10ms, [&] { fired.push_back("installed"); });
     Advance(200ms);
     CHECK(fired == List<std::string> {"interval"});
 
@@ -133,35 +132,4 @@ namespace krys::boo::tests
     CHECK(frames == 1);
   }
 
-  TEST_CASE("A document's back/forward cache state", "[DOM][Document][Suspension]")
-  {
-    SuspensionFixture fixture;
-    auto &document = fixture.Document();
-    CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::NotInBackForwardCache);
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::AboutToEnterBackForwardCache);
-    CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::AboutToEnterBackForwardCache);
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::InBackForwardCache);
-    CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::InBackForwardCache);
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::NotInBackForwardCache);
-    CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::NotInBackForwardCache);
-  }
-
-  TEST_CASE("A document in the back/forward cache doesn't recalculate its style",
-            "[DOM][Document][Suspension]")
-  {
-    SuspensionFixture fixture;
-    auto &document = fixture.Document();
-    auto &eventLoop = html::EventLoop::Current();
-    document.UpdateStyleIfNeeded();
-
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::InBackForwardCache);
-    (void)document.Body()->FirstElementChild()->SetAttribute(u8"style", u8"color: blue");
-    eventLoop.RunUntilIdle();
-    CHECK(document.HasPendingStyleRecalc());
-
-    // Leaving the cache schedules it.
-    document.SetBackForwardCacheState(dom::BackForwardCacheState::NotInBackForwardCache);
-    eventLoop.RunUntilIdle();
-    CHECK_FALSE(document.HasPendingStyleRecalc());
-  }
 }

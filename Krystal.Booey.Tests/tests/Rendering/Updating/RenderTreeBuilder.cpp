@@ -2,13 +2,13 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
-#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
-#include "Krystal.Booey/Rendering/RenderTableSection.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableRow.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableSection.hpp"
 
 namespace krys::boo::tests
 {

@@ -21,8 +21,8 @@
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
 #include "Krystal.Booey/Graphics/Filters/SpotLightSource.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
 #include <algorithm>

@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
-#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
-#include "Krystal.Booey/MathML/MathMLRootElement.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLRootElement.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 
@@ -347,7 +347,7 @@ namespace krys::boo
 
     info.Context().SetStrokeThickness(ruleThickness);
     info.Context().SetStrokeStyle(StrokeStyle::SolidStroke);
-    info.Context().SetStrokeColor(Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color));
+    info.Context().SetStrokeColor(Style().ColorResolvingCurrentColor(css::PropertyId::Color));
     LayoutPoint ruleOffsetFrom =
       paintOffset + Location() + LayoutPoint(0_lu, _radicalOperatorTop + ruleThickness / 2);
     LayoutPoint ruleOffsetTo = ruleOffsetFrom;

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Path.hpp"
-#include "Krystal.Booey/Graphics/PathElement.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Booey/Graphics/Paths/PathElement.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include <array>
 #include <cmath>

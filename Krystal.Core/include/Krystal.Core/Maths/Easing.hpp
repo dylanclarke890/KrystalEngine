@@ -1,36 +1,36 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include <cassert>
 
 namespace krys
 {
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T LinearInterpolation(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return value;
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuadraticEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return value * value;
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuadraticEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return -(value * (value - T(2)));
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuadraticEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
       return T(2) * value * value;
@@ -41,14 +41,14 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T CubicEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return value * value * value;
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T CubicEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     const T f = value - One<T>();
     return f * f * f + One<T>();
   }
@@ -56,7 +56,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T CubicEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
       return T(4) * value * value * value;
@@ -70,14 +70,14 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuarticEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return value * value * value * value;
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuarticEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     const T f = (value - One<T>());
     return f * f * f * (One<T>() - value) + One<T>();
   }
@@ -85,7 +85,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuarticEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
       return T(8) * value * value * value * value;
@@ -99,14 +99,14 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuinticEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return value * value * value * value * value;
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuinticEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     const T f = (value - One<T>());
     return f * f * f * f * f + One<T>();
   }
@@ -114,7 +114,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T QuinticEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
       return T(16) * value * value * value * value * value;
@@ -128,42 +128,42 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T SineEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return Sin((value - One<T>()) * HalfPi<T>()) + One<T>();
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T SineEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return Sin(value * HalfPi<T>());
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T SineEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return T(0.5) * (One<T>() - Cos(value * Pi<T>()));
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T CircularEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return One<T>() - Sqrt(One<T>() - (value * value));
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T CircularEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return Sqrt((T(2) - value) * value);
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T CircularEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
       return T(0.5) * (One<T>() - Sqrt(One<T>() - T(4) * (value * value)));
@@ -174,7 +174,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T ExponentialEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value <= Zero<T>())
       return value;
@@ -189,7 +189,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T ExponentialEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value >= One<T>())
       return value;
@@ -200,7 +200,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T ExponentialEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
       return T(0.5) * Pow(T(2), (T(20) * value) - T(10));
@@ -211,21 +211,21 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T ElasticEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return Sin(T(13) * HalfPi<T>() * value) * Pow(T(2), T(10) * (value - One<T>()));
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T ElasticEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return Sin(-T(13) * HalfPi<T>() * (value + One<T>())) * Pow(T(2), -T(10) * value) + One<T>();
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T ElasticEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
       return T(0.5) * Sin(T(13) * HalfPi<T>() * (T(2) * value))
@@ -240,7 +240,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T BackEaseIn(const T value, const T o) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     T z = ((o + One<T>()) * value) - o;
     return (value * value * z);
   }
@@ -248,7 +248,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T BackEaseOut(const T value, const T o) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     T n = value - One<T>();
     T z = ((o + One<T>()) * n) + o;
@@ -258,7 +258,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T BackEaseInOut(const T value, const T o) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     T s = o * T(1.525);
     T x = T(0.5);
@@ -300,7 +300,7 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T BounceEaseOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(4.0 / 11.0))
       return (T(121) * value * value) / T(16);
@@ -315,14 +315,14 @@ namespace krys
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T BounceEaseIn(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
     return One<T>() - BounceEaseOut(One<T>() - value);
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T BounceEaseInOut(const T value) noexcept
   {
-    assert(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
+    krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
       return T(0.5) * (One<T>() - BounceEaseOut(One<T>() - value * T(2)));

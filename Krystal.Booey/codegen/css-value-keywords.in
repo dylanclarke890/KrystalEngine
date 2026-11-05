@@ -138,10 +138,9 @@ large
 x-large
 xx-large
 xxx-large
--webkit-ruby-text
+-internal-ruby-text
 smaller
 larger
--webkit-xxx-large
 //math
 
 //
@@ -166,8 +165,6 @@ sans-serif
 cursive
 fantasy
 monospace
--webkit-body
--webkit-pictograph
 system-ui
 math
 //
@@ -287,6 +284,7 @@ plus-lighter
 //
 baseline
 middle
+-internal-baseline-middle
 sub
 super
 text-top
@@ -294,21 +292,18 @@ text-bottom
 top
 bottom
 // HTML alignment MIDDLE has no corresponding CSS alignment
--webkit-baseline-middle
 //
 // CSS_PROP_TEXT_ALIGN:
 // The order here must match the order of the Style::TextAlign enum in StyleTextAlign.h.
 //
--webkit-auto
 left
 right
 center
 justify
--webkit-left
--webkit-right
--webkit-center
+-internal-left
+-internal-right
+-internal-center
 match-parent
--webkit-match-parent
 -internal-th-center
 //start
 //end
@@ -450,8 +445,6 @@ table-column-group
 table-column
 table-cell
 table-caption
--webkit-box
--webkit-inline-box
 flex
 inline-flex
 contents
@@ -461,8 +454,6 @@ grid-lanes
 inline-grid-lanes
 flow-root
 flow
--webkit-inline-flex
--webkit-flex
 // ruby
 block-ruby
 ruby-base
@@ -508,10 +499,6 @@ row-resize
 all-scroll
 zoom-in
 zoom-out
--webkit-grab
--webkit-grabbing
--webkit-zoom-in
--webkit-zoom-out
 //
 // CSS_PROP_CURSOR_VISIBILITY:
 // auto
@@ -574,9 +561,6 @@ invert
 inverted
 isolate-override
 plaintext
--webkit-isolate
--webkit-isolate-override
--webkit-plaintext
 level
 line-through
 local
@@ -744,21 +728,11 @@ element
 ignore
 
 //
-// CSS_PROP_WIDTH/MIN_WIDTH/MAX_WIDTH
-//
-intrinsic
-min-intrinsic
-
-//
 // CSS3 intrinsic dimension keywords
 //
 min-content
--webkit-min-content
 max-content
--webkit-max-content
--webkit-fill-available
 fit-content
--webkit-fit-content
 
 //
 // CSS_PROP_TEXT_OVERFLOW
@@ -877,7 +851,6 @@ content-box
 padding
 padding-box
 // text
--webkit-text
 
 //
 // Corner-shape
@@ -1045,14 +1018,6 @@ digits
 literal-punctuation
 no-punctuation
 
-//
-// -webkit-font-smoothing
-//
-// auto
-// none
-antialiased
-subpixel-antialiased
-
 // text-box-edge
 leading
 // text
@@ -1101,11 +1066,8 @@ sideways-rl
 // Non-standard
 horizontal-bt
 
-// -webkit-ruby-position
-after
-before
+// ruby-position
 inter-character
-legacy-inter-character
 
 // -webkit-text-combine
 // horizontal
@@ -1161,8 +1123,6 @@ off
 optimizeQuality // ( deprecated)
 crisp-edges
 pixelated
--webkit-crisp-edges
--webkit-optimize-contrast
 
 // shape-outside
 nonzero
@@ -1185,14 +1145,10 @@ break
 
 wrap
 
-// -webkit-line-align
-edges
-
 alphabetic
 
 // position
 sticky
--webkit-sticky
 
 // (pointer:) media feature
 // none
@@ -1262,17 +1218,7 @@ conic-gradient
 repeating-linear-gradient
 repeating-radial-gradient
 repeating-conic-gradient
--webkit-canvas
--webkit-cross-fade
--webkit-gradient
--webkit-linear-gradient
--webkit-radial-gradient
--webkit-repeating-linear-gradient
--webkit-repeating-radial-gradient
--webkit-image-set
--webkit-named-image
 filter
--webkit-filter
 paint
 
 // image-set's MIME type
@@ -1355,7 +1301,6 @@ url
 cubic-bezier
 spring
 steps
-apple-invert-lightness
 
 // colors
 rgb
@@ -1423,7 +1368,6 @@ path
 xywh
 
 calc
--webkit-calc
 min
 max
 clamp
@@ -1459,8 +1403,6 @@ NaN
 from-image
 
 // overflow
--webkit-paged-x
--webkit-paged-y
 
 // paint-order
 // normal
@@ -1800,9 +1742,6 @@ span-self-inline-end
 anchors-valid
 anchors-visible
 no-overflow
-
-// view-transition-name
-match-element
 
 // <url>
 // url

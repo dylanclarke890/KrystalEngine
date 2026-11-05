@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/SVGViewSpec.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
 #include "Krystal.Core/Text/ParsingUtilities.hpp"
@@ -43,7 +43,6 @@ namespace krys::boo::svg
     _viewTargetString = {};
     _transform->ClearItems();
     SVGFitToViewBox::Reset();
-    SVGZoomAndPan::Reset();
   }
 
   bool SVGViewSpec::ParseViewSpec(dom::DOMStringView string) noexcept
@@ -116,12 +115,12 @@ namespace krys::boo::svg
         {
           return false;
         }
-        auto zoomAndPan = SVGZoomAndPan::ParseZoomAndPan(buffer);
-        if (!zoomAndPan)
+        // `zoomAndPan` is deprecated and not supported: its value is checked and ignored.
+        if (!text::SkipCharactersExactly(buffer, u8"disable")
+            && !text::SkipCharactersExactly(buffer, u8"magnify"))
         {
           return false;
         }
-        SetZoomAndPan(*zoomAndPan);
         if (!text::SkipExactly(buffer, u8')'))
         {
           return false;

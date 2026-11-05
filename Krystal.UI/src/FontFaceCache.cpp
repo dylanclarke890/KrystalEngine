@@ -1,5 +1,5 @@
 ﻿#include "Krystal.UI/FontFaceCache.hpp"
-#include "Krystal.Booey/Graphics/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 
 namespace krys::ui
 {

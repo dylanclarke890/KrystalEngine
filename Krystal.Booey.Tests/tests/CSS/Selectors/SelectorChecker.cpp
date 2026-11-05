@@ -322,20 +322,4 @@ namespace krys::boo::css::tests
     REQUIRE(Matches(ById(*document, u8"b"), u8":dir(ltr)"));
     REQUIRE_FALSE(Matches(s, u8":dir(ltr)"));
   }
-
-  TEST_CASE("SelectorChecker: link match type", "[CSS][Selectors][SelectorChecker]")
-  {
-    auto linkMatchType = [](dom::DOMStringView text)
-    {
-      auto list = SelectorParser::ParseSelectorList(text, {});
-      REQUIRE(list);
-      return SelectorChecker::DetermineLinkMatchType(list->FirstSelectorComponent());
-    };
-    REQUIRE(linkMatchType(u8"a") == SelectorChecker::MatchAll);
-    REQUIRE(linkMatchType(u8"a:link") == SelectorChecker::MatchLink);
-    REQUIRE(linkMatchType(u8"a:visited") == SelectorChecker::MatchVisited);
-    REQUIRE(linkMatchType(u8":link:visited") == SelectorChecker::MatchDefault);
-    REQUIRE(linkMatchType(u8":visited span") == SelectorChecker::MatchVisited);
-    REQUIRE(linkMatchType(u8":visited + span") == SelectorChecker::MatchAll);
-  }
 }

@@ -1,10 +1,10 @@
 ﻿#define KRYS_WGL_OVERRIDE_FUNCTIONS 0
 #include "Krystal.Gfx/OpenGL/Hooks/wgl.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include <algorithm>
-#include <cassert>
 
 namespace
 {
@@ -57,7 +57,7 @@ namespace
       }
       else
       {
-        assert(false && "Failed to load OpenGL module.");
+        krys_debug_assert_msg(false, "Failed to load OpenGL module.");
         p = nullptr;
       }
     }
@@ -178,7 +178,7 @@ namespace krys::gfx::opengl
     SupportedExtensions = SplitStringOnWhitespace(wglGetExtensionsStringARB(deviceContext));
     if (!RequiredExtensionsAreSupported())
     {
-      assert(false && "Required WGL extensions are not supported by the system.");
+      krys_debug_assert_msg(false, "Required WGL extensions are not supported by the system.");
       return false;
     }
 

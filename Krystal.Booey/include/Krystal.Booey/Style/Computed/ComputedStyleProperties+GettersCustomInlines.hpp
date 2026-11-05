@@ -3,16 +3,13 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyleBase+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyleProperties.hpp"
 
-#include "Krystal.Booey/Animation/ViewTimeline.hpp"
+#include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Booey/Core/ScrollTypes.hpp"
-#include "Krystal.Booey/Core/StyleAppearance.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/PositionTryOrder.hpp"
-#include "Krystal.Booey/Rendering/Style/StyleAppleColorFilterData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleBackdropFilterData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleBackgroundData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleBoxData.hpp"
@@ -29,8 +26,8 @@
 #include "Krystal.Booey/Rendering/Style/StyleRareNonInheritedData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSurroundData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleTransformData.hpp"
-#include "Krystal.Booey/Rendering/Style/StyleVisitedLinkColorData.hpp"
 #include "Krystal.Booey/Rendering/Style/SVGRenderStyle.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFamily.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFeatureSettings.hpp"
@@ -51,6 +48,7 @@
 #include "Krystal.Booey/Style/Values/Text/TextSpacingTrim.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextTransform.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
 
 namespace krys::boo::style
 {
@@ -167,11 +165,6 @@ namespace krys::boo::style
   inline Kerning ComputedStyleProperties::FontKerning() const noexcept
   {
     return GetFontDescription().GetKerning();
-  }
-
-  inline FontSmoothingMode ComputedStyleProperties::FontSmoothing() const noexcept
-  {
-    return GetFontDescription().FontSmoothing();
   }
 
   inline FontSynthesisLonghandValue ComputedStyleProperties::FontSynthesisSmallCaps() const noexcept

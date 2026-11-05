@@ -1,7 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
@@ -27,7 +26,7 @@ namespace krys::boo::style::tests
     {
       auto parsed = fixture.Parse(PropertyId::Fill, value);
       fixture.ResetState();
-      return ConvertCSSValueToStyle<SVGPaint>(*fixture.State, *parsed, ForVisitedLink::No);
+      return ConvertCSSValueToStyle<SVGPaint>(*fixture.State, *parsed);
     }
   }
 

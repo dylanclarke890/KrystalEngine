@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -24,7 +23,6 @@ namespace krys::boo::style
     Ref<const dom::Document> Document;
     const RenderStyle &Style;
     css::ToLengthConversionData ConversionData;
-    style::ForVisitedLink ForVisitedLink;
     uint32 NestingLevel {0};
   };
 

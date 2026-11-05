@@ -2,10 +2,9 @@
 
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -36,13 +35,10 @@ namespace krys::boo
     RefPtr<LocalFrameView> _view;
     UniquePtr<EventHandler> _eventHandler;
     UniquePtr<FrameLoader> _loader;
-    UniquePtr<NavigationScheduler> _navigationScheduler;
     css::mq::MediaEnvironment _mediaEnvironment;
-    /// @see https://html.spec.whatwg.org/#nav-target
-    dom::DOMString _specifiedName;
     float _pageZoomFactor {1};
     float _textZoomFactor {1};
-    CachePolicy _subresourceCachePolicy {CachePolicy::Verify};
+    CachePolicy _subresourceCachePolicy {CachePolicy::Use};
     bool _documentIsBeingReplaced {false};
 
     LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept;
@@ -55,21 +51,14 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<LocalFrame>
       Create(Page *page = nullptr, UniquePtr<LocalFrameLoaderClient> loaderClient = nullptr) noexcept;
 
-    /// @brief Navigates the frame: links and form submissions go through it.
+    /// @brief Loads documents into the frame; links and form submissions go through it to the host.
     KRYS_NODISCARD FrameLoader &Loader() const noexcept
     {
       return *_loader;
     }
 
-    /// @brief The frame's navigations to come (redirects, location changes, form submissions).
-    KRYS_NODISCARD NavigationScheduler &GetNavigationScheduler() const noexcept
-    {
-      return *_navigationScheduler;
-    }
-
-    /// @brief How the document's subresources use the memory cache, unless the load type has a policy (a
-    /// reload, or going back and forward): the host sets `Revalidate` when it loads a page again, so edited
-    /// files load again.
+    /// @brief How the document's subresources use the memory cache, unless the load is a reload: the host
+    /// sets `Reload` when it loads a page again, so edited files load again.
     KRYS_NODISCARD CachePolicy SubresourceCachePolicy() const noexcept
     {
       return _subresourceCachePolicy;
@@ -95,18 +84,6 @@ namespace krys::boo
     KRYS_NODISCARD LocalDOMWindow *Window() const noexcept
     {
       return _document ? _document->Window() : nullptr;
-    }
-
-    /// @brief The frame's name (its navigable's target name), which links and forms can target.
-    /// @see https://html.spec.whatwg.org/#nav-target
-    KRYS_NODISCARD const dom::DOMString &SpecifiedName() const noexcept
-    {
-      return _specifiedName;
-    }
-
-    void SetSpecifiedName(dom::DOMString name) noexcept
-    {
-      _specifiedName = krys::move(name);
     }
 
     /// @brief The view the frame's document is laid out in, if any.
@@ -137,7 +114,6 @@ namespace krys::boo
     /// @brief The caret position nearest @p framePoint (in the frame's contents).
     KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const IntPoint &framePoint) const noexcept;
     /// @brief The document under @p point (in the window).
-    // FIXME: A subframe's document, once there are subframes.
     KRYS_NODISCARD dom::Document *DocumentAtPoint(const IntPoint &point) noexcept;
 
     /// @brief The zoom applied to the whole document (the root style's `zoom`).
@@ -157,10 +133,8 @@ namespace krys::boo
     void SetPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor) noexcept;
 
     /// @brief How much the frame's content is scaled: the page's scale.
-    // FIXME: A subframe's is its owner's zoom relative to the root frame's, once there are subframes.
     KRYS_NODISCARD float FrameScaleFactor() const noexcept;
     /// @brief Tells the frame's compositor the device or page scale changed.
-    // FIXME: And the child frames, once there are subframes.
     void DeviceOrPageScaleFactorChanged() noexcept;
 
     /// @brief The device and user state the frame's document is presented with.

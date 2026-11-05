@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
-#include "Krystal.Booey/Core/IterationStatus.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
@@ -15,6 +14,7 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Core/Types/IterationStatus.hpp"
 #include <bitset>
 #include <print>
 
@@ -219,18 +219,16 @@ namespace krys::boo::css
     switch (shorthandId)
     {
       // We are not yet using the font shorthand here because our editing code is currently incompatible.
-      case PropertyId::Font:                 return false;
+      case PropertyId::Font:               return false;
 
       // Avoid legacy shorthands according to https://www.w3.org/TR/css-cascade-5/#legacy-shorthand
       case PropertyId::PageBreakAfter:
       case PropertyId::PageBreakBefore:
-      case PropertyId::PageBreakInside:
-      case PropertyId::WebkitBackgroundSize:
-      case PropertyId::WebkitMaskPosition:   return false;
+      case PropertyId::PageBreakInside:    return false;
 
       // No other browser currently supports text-decoration-skip, so it's currently more web
       // compatible to avoid collapsing text-decoration-skip-ink, its only longhand.
-      case PropertyId::TextDecorationSkip:   return false;
+      case PropertyId::TextDecorationSkip: return false;
 
       // FIXME: more mask nonsense.
       case PropertyId::Mask:

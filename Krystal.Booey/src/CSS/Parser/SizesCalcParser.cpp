@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/Parser/SizesAttributeParser.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 
 namespace krys::boo::css

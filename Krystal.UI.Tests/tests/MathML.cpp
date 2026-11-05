@@ -1,6 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLFraction.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLRoot.hpp"

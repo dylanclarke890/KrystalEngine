@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
 #include "Krystal.Booey/Animation/AnimationEffect.hpp"
-#include "Krystal.Booey/Animation/DocumentTimeline.hpp"
+#include "Krystal.Booey/Animation/Events/StyleOriginatedAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
-#include "Krystal.Booey/Animation/StyleOriginatedAnimationEvent.hpp"
+#include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -130,16 +130,17 @@ namespace krys::boo
     return WebAnimation::BindingsPending();
   }
 
-  AnimationPromise &StyleOriginatedAnimation::BindingsReady() noexcept
+  void StyleOriginatedAnimation::BindingsWhenReady(ReadyCallback onReady, ErrorCallback onError) noexcept
   {
     FlushPendingStyleChanges();
-    return WebAnimation::BindingsReady();
+    WebAnimation::BindingsWhenReady(krys::move(onReady), krys::move(onError));
   }
 
-  AnimationPromise &StyleOriginatedAnimation::BindingsFinished() noexcept
+  void StyleOriginatedAnimation::BindingsWhenFinished(ReadyCallback onFinished,
+                                                      ErrorCallback onError) noexcept
   {
     FlushPendingStyleChanges();
-    return WebAnimation::BindingsFinished();
+    WebAnimation::BindingsWhenFinished(krys::move(onFinished), krys::move(onError));
   }
 
   dom::ExceptionOr<void> StyleOriginatedAnimation::BindingsPlay() noexcept

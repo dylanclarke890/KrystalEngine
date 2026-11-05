@@ -16,8 +16,8 @@ namespace krys::boo::style
 
 namespace krys::boo::css
 {
-  /// @brief The value of a gradient function (`linear-gradient()`, `radial-gradient()`, `conic-gradient()`,
-  /// their repeating and prefixed forms, and `-webkit-gradient()`).
+  /// @brief The value of a gradient function (`linear-gradient()`, `radial-gradient()`, `conic-gradient()`
+  /// and their repeating forms).
   class GradientValue final : public Value
   {
   private:

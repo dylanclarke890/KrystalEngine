@@ -22,7 +22,7 @@ namespace krys::boo::css::tests
       CHECK(AtRuleIdFromName(u8"media") == AtRuleId::Media);
       CHECK(AtRuleIdFromName(u8"namespace") == AtRuleId::Namespace);
       CHECK(AtRuleIdFromName(u8"ornaments") == AtRuleId::Ornaments);
-      CHECK(AtRuleIdFromName(u8"page") == AtRuleId::Page);
+      CHECK(AtRuleIdFromName(u8"page") == AtRuleId::Invalid);
       CHECK(AtRuleIdFromName(u8"position-try") == AtRuleId::PositionTry);
       CHECK(AtRuleIdFromName(u8"property") == AtRuleId::Property);
       CHECK(AtRuleIdFromName(u8"scope") == AtRuleId::Scope);
@@ -31,7 +31,6 @@ namespace krys::boo::css::tests
       CHECK(AtRuleIdFromName(u8"stylistic") == AtRuleId::Stylistic);
       CHECK(AtRuleIdFromName(u8"supports") == AtRuleId::Supports);
       CHECK(AtRuleIdFromName(u8"swash") == AtRuleId::Swash);
-      CHECK(AtRuleIdFromName(u8"view-transition") == AtRuleId::ViewTransition);
     }
 
     SECTION("ASCII case-insensitive")

@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Editing/EditingBoundary.hpp"
+#include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
-#include "Krystal.Booey/Graphics/IntRect.hpp"
-#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
@@ -236,9 +236,6 @@ namespace krys::boo
 
   KRYS_NODISCARD dom::Element *TabSpanNode(dom::Node *node) noexcept;
   KRYS_NODISCARD dom::Element *ParentTabSpanNode(dom::Node *node) noexcept;
-
-  KRYS_NODISCARD bool IsMailBlockquote(const dom::Node &node) noexcept;
-  KRYS_NODISCARD uint32 NumEnclosingMailBlockquotes(const dom::Position &position) noexcept;
 
   KRYS_NODISCARD RefPtr<dom::Element> EnclosingList(dom::Node *node) noexcept;
   KRYS_NODISCARD RefPtr<dom::Node> EnclosingListChild(dom::Node *node) noexcept;

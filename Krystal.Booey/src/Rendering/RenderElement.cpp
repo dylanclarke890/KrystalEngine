@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableCellElement.hpp"
@@ -17,39 +17,38 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Rendering/BorderShape.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
-#include "Krystal.Booey/Rendering/InlineWalker.hpp"
-#include "Krystal.Booey/Rendering/OutlinePainter.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
+#include "Krystal.Booey/Rendering/Painting/OutlinePainter.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderCounter.hpp"
-#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
-#include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
-#include "Krystal.Booey/Rendering/RenderGrid.hpp"
-#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderListItem.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCaption.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
-#include "Krystal.Booey/Rendering/RenderTableCol.hpp"
-#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
-#include "Krystal.Booey/Rendering/RenderTableSection.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCaption.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableCol.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableRow.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTableSection.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
 #include "Krystal.Booey/Style/PendingResources.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
@@ -58,8 +57,8 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 
 namespace krys::boo
@@ -161,9 +160,6 @@ namespace krys::boo
       case DisplayType::InlineGrid:
       case DisplayType::GridLanes:
       case DisplayType::InlineGridLanes: return CreateRenderer<RenderGrid>(element, krys::move(style));
-      case DisplayType::Box:
-      case DisplayType::InlineBox:
-        return CreateRenderer<RenderDeprecatedFlexibleBox>(element, krys::move(style));
       case DisplayType::RubyBase:
         return CreateRenderer<RenderInline>(Type::Inline, element, krys::move(style));
       case DisplayType::RubyAnnotation:
@@ -332,8 +328,8 @@ namespace krys::boo
     _hasInitializedStyle = true;
     StyleDidChange(style::DifferenceResult::NewStyle, nullptr);
 
-    // FIXME: We shouldn't have any text children that would need styleDidChange at this point, once there
-    // are text renderers; the view transition capture state, once there are view transitions.
+    // FIXME: We shouldn't have any text children that would need styleDidChange at this point, once there are
+    // text renderers.
   }
 
   void RenderElement::SetStyle(RenderStyle &&style, style::DifferenceResult minimalStyleDifference) noexcept
@@ -642,8 +638,6 @@ namespace krys::boo
                                                  const RepaintRects &oldRects,
                                                  const RepaintRects &newRects) noexcept
   {
-    // FIXME: Nothing repaints while printing, once there's printing.
-
     auto oldClippedOverflowRect = oldRects.ClippedOverflowRect;
     auto newClippedOverflowRect = newRects.ClippedOverflowRect;
     bool haveOutlinesBoundsRects = oldRects.OutlineBoundsRect && newRects.OutlineBoundsRect;
@@ -1119,8 +1113,6 @@ namespace krys::boo
     {
       frameView.AddSlowRepaintObject(*this);
     }
-
-    // FIXME: The extended background, once there's rubber-banding.
   }
 
   const RenderStyle *
@@ -1400,8 +1392,7 @@ namespace krys::boo
     // FIXME: We could save this call when the change only affected non-inherited properties.
     for (auto &elementChild : ChildrenOfType<RenderElement>(*this))
     {
-      if (!elementChild.IsAnonymous() || elementChild.Style().GetPseudoElementType()
-          || elementChild.IsViewTransitionContainingBlock())
+      if (!elementChild.IsAnonymous() || elementChild.Style().GetPseudoElementType())
       {
         continue;
       }
@@ -1618,10 +1609,9 @@ namespace krys::boo
   bool RenderElement::IsAnonymousBlock() const noexcept
   {
     // FIXME: Multi-column sets, once there are any.
-    return IsAnonymous() && (Style().Display() == DisplayType::Block || Style().Display() == DisplayType::Box)
-           && !Style().GetPseudoElementType() && IsRenderBlock() && !IsRenderMathMLBlock()
-           && !IsRenderListMarker() && !IsRenderFragmentedFlow() && !IsRenderView()
-           && !IsViewTransitionContainingBlock();
+    return IsAnonymous() && Style().Display() == DisplayType::Block && !Style().GetPseudoElementType()
+           && IsRenderBlock() && !IsRenderMathMLBlock() && !IsRenderListMarker() && !IsRenderFragmentedFlow()
+           && !IsRenderView();
   }
 
   bool RenderElement::IsBlockContainer() const noexcept
@@ -1726,10 +1716,10 @@ namespace krys::boo
 
     if (auto pseudoStyle = SelectionPseudoStyle())
     {
-      Color color = pseudoStyle->VisitedDependentColorWithColorFilter(colorProperty);
+      Color color = pseudoStyle->ColorResolvingCurrentColor(colorProperty);
       if (!color.IsValid())
       {
-        color = pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::Color);
+        color = pseudoStyle->ColorResolvingCurrentColor(css::PropertyId::Color);
       }
       return color;
     }
@@ -1819,7 +1809,7 @@ namespace krys::boo
 
   Color RenderElement::SelectionForegroundColor() const noexcept
   {
-    return SelectionColor(css::PropertyId::WebkitTextFillColor);
+    return SelectionColor(css::PropertyId::Color);
   }
 
   Color RenderElement::SelectionEmphasisMarkColor() const noexcept
@@ -1839,7 +1829,7 @@ namespace krys::boo
     if (selection.ShouldShowBlockCursor() && selection.IsCaret())
     {
       return RenderTheme::Singleton().TransformSelectionBackgroundColor(
-        Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color), options);
+        Style().ColorResolvingCurrentColor(css::PropertyId::Color), options);
     }
 
     const RenderElement *pseudoStyleCandidate = this;
@@ -1851,11 +1841,10 @@ namespace krys::boo
     if (pseudoStyleCandidate)
     {
       auto pseudoStyle = pseudoStyleCandidate->SelectionPseudoStyle();
-      if (pseudoStyle
-          && pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor).IsValid())
+      if (pseudoStyle && pseudoStyle->ColorResolvingCurrentColor(css::PropertyId::BackgroundColor).IsValid())
       {
         return RenderTheme::Singleton().TransformSelectionBackgroundColor(
-          pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor), options);
+          pseudoStyle->ColorResolvingCurrentColor(css::PropertyId::BackgroundColor), options);
       }
     }
 
@@ -1955,8 +1944,7 @@ namespace krys::boo
                && (styleToUse ? styleToUse->HasTransformRelatedProperty() : HasTransformRelatedProperty()))
            || (style.HasBackdropFilter() && !IsDocumentElementRenderer())
            || (style.HasFilter() && !IsDocumentElementRenderer()) || IsLegacyRenderSVGForeignObject()
-           || ShouldApplyLayoutContainment(styleToUse) || ShouldApplyPaintContainment(styleToUse)
-           || IsViewTransitionContainingBlock();
+           || ShouldApplyLayoutContainment(styleToUse) || ShouldApplyPaintContainment(styleToUse);
   }
 
   bool RenderElement::CanContainAbsolutelyPositionedObjects(const RenderStyle *styleToUse) const noexcept
@@ -2296,22 +2284,6 @@ namespace krys::boo
   {
     return style.HasOpacity() || style.HasMask() || style.HasClipPath() || style.HasFilter()
            || style.HasBackdropFilter() || style.HasBlendMode();
-  }
-
-  bool RenderElement::HasViewTransitionName() const noexcept
-  {
-    return !Style().GetViewTransitionName().IsNone();
-  }
-
-  bool RenderElement::IsViewTransitionRoot() const noexcept
-  {
-    return Style().GetPseudoElementType() == PseudoElementType::ViewTransition;
-  }
-
-  bool RenderElement::RequiresRenderingConsolidationForViewTransition() const noexcept
-  {
-    // FIXME: Renderers captured in a view transition too, once there are view transitions.
-    return HasViewTransitionName();
   }
 
   FloatRect RenderElement::TransformReferenceBoxRect() const noexcept

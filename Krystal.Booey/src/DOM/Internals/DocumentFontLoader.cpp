@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Internals/DocumentFontLoader.hpp"
-#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
@@ -18,15 +18,12 @@ namespace krys::boo::dom
   }
 
   CachedFont *DocumentFontLoader::GetCachedFont(url::URL url, bool isSVG,
-                                                bool isInitiatingElementInUserAgentShadowTree,
-                                                LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept
+                                                bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();
     options.ContentSecurityPolicy = isInitiatingElementInUserAgentShadowTree
                                       ? ContentSecurityPolicyImposition::SkipPolicyCheck
                                       : ContentSecurityPolicyImposition::DoPolicyCheck;
-    options.IsLoadedFromOpaqueSource = loadedFromOpaqueSource;
-    // FIXME: The same-origin data URL flag, once there are origins.
 
     CachedResourceRequest request(ResourceRequest(krys::move(url)), options);
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);

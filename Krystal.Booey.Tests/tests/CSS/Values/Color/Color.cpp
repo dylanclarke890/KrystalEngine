@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Color/Color.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorLayers.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorMix.hpp"
@@ -12,6 +11,7 @@
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
 #include "Krystal.Booey/CSS/Values/Color/RelativeColor.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
@@ -129,11 +129,8 @@ namespace krys::boo::css::tests
       PlatformColorResolutionState state;
       state.ResolvedCurrentColor = boo::Color::blue;
       state.ResolvedWebkitLink = boo::Color::red;
-      state.ResolvedWebkitLinkVisited = boo::Color::green;
       CHECK(Resolve(Keyword(ValueId::Currentcolor), state) == boo::Color::blue);
       CHECK(Resolve(Keyword(ValueId::WebkitLink), state) == boo::Color::red);
-      state.ForVisitedLink = style::ForVisitedLink::Yes;
-      CHECK(Resolve(Keyword(ValueId::WebkitLink), state) == boo::Color::green);
 
       state.KeywordOptions = style::ColorOptions::UseDarkAppearance;
       CHECK(Resolve(Keyword(ValueId::Linktext), state) == boo::Color {SRGBA<uint8> {158, 158, 255}});

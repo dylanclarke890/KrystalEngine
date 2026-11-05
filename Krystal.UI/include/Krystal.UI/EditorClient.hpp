@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Editing/UndoStep.hpp"
+#include "Krystal.Booey/Editing/Commands/UndoStep.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Func.hpp"

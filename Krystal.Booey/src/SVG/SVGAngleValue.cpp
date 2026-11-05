@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/SVGAngleValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::svg

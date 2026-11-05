@@ -33,7 +33,6 @@ namespace krys::boo
 
     style::Opacity FillOpacity;
     style::SVGPaint Fill;
-    style::SVGPaint VisitedLinkFill;
 
   private:
     StyleFillData() noexcept;
@@ -52,7 +51,6 @@ namespace krys::boo
 
     style::Opacity StrokeOpacity;
     style::SVGPaint Stroke;
-    style::SVGPaint VisitedLinkStroke;
     style::SVGStrokeDashoffset StrokeDashOffset;
     style::SVGStrokeDasharray StrokeDashArray;
 

@@ -5,7 +5,6 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
-#include "Krystal.Booey/Platform/Network/FormData.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -98,24 +97,6 @@ namespace krys::boo::html::tests
       CHECK(Str(input.Value()).empty());
       CHECK_FALSE(input.CheckValidity());
     }
-
-    SECTION("The files are saved and restored with their names")
-    {
-      CHECK(input.SaveFormControlState().empty());
-      List<Ref<File>> files;
-      files.push_back(File::Create(u8"C:/dir/a.txt", u8"shown.txt"));
-      input.SetFiles(FileList::Create(krys::move(files)));
-      auto state = input.SaveFormControlState();
-      CHECK(state == FormControlState {u8"C:/dir/a.txt", u8"shown.txt", u8""});
-
-      input.SetFiles(FileList::Create());
-      log->Types.clear();
-      input.RestoreFormControlState(state);
-      CHECK(log->Joined() == "input change");
-      REQUIRE(input.Files()->Length() == 1);
-      CHECK(input.Files()->GetFile(0).Path() == u8"C:/dir/a.txt");
-      CHECK(input.Files()->GetFile(0).Name() == u8"shown.txt");
-    }
   }
 
   TEST_CASE("FileInputType: form data", "[HTML][Forms][Input]")
@@ -141,30 +122,12 @@ namespace krys::boo::html::tests
             == List<std::string> {"up=file:a.txt:text/plain", "up=file:b.png:image/png", "t=v"});
     }
 
-    SECTION("Multipart bodies carry the files; the others their names")
+    SECTION("The submission hands the files to the host")
     {
       input.SetFiles(Files({u8"C:/a.txt"}));
-      auto entryList = DOMFormData::Create(&form, nullptr);
-      REQUIRE_FALSE(entryList.HasException());
-
-      auto multipart = FormData::CreateMultiPart(*entryList.Value());
-      auto &elements = multipart->Elements();
-      REQUIRE(elements.size() == 3);
-      auto *header = std::get_if<List<uint8>>(&elements[0].Data);
-      REQUIRE(header);
-      auto headerText = std::string(header->begin(), header->end());
-      CHECK(headerText.ends_with("Content-Disposition: form-data; name=\"up\"; filename=\"a.txt\"\r\n"
-                                 "Content-Type: text/plain\r\n\r\n"));
-      auto *file = std::get_if<FormDataElement::EncodedFileData>(&elements[1].Data);
-      REQUIRE(file);
-      CHECK(file->Filename == u8"C:/a.txt");
-      CHECK(file->FileStart == 0);
-      CHECK(file->FileLength == BlobDataItem::ToEndOfFile);
-      // The flattened body leaves the file out.
-      CHECK(Str(multipart->FlattenToString()).find("name=\"t\"\r\n\r\nv\r\n") != std::string::npos);
-
-      auto urlEncoded = FormData::Create(*entryList.Value());
-      CHECK(Str(urlEncoded->FlattenToString()) == "up=a.txt&t=v");
+      form.Submit();
+      REQUIRE(fixture.Submissions().size() == 1);
+      CHECK(fixture.Submissions()[0].Entries == "up=a.txt&t=v");
     }
 
     SECTION("Blobs that aren't on disk are their bytes")
@@ -179,11 +142,6 @@ namespace krys::boo::html::tests
       REQUIRE(items.size() == 2);
       CHECK(std::get<RefPtr<File>>(items[0].Data)->Name() == u8"blob");
       CHECK(std::get<RefPtr<File>>(items[1].Data)->Name() == u8"named.bin");
-
-      auto multipart = FormData::CreateMultiPart(*formData);
-      auto body = Str(multipart->FlattenToString());
-      CHECK(body.find("filename=\"blob\"\r\nContent-Type: application/octet-stream\r\n\r\nbytes\r\n")
-            != std::string::npos);
 
       // Setting replaces the entries of that name.
       formData->Set(u8"b", *File::Create(u8"C:/c.txt"));

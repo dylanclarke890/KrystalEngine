@@ -131,6 +131,7 @@ namespace krys::boo::dom
         {
           // 5. Let special error event handling be true if event is an ErrorEvent object, event's type is
           //    "error", and event's currentTarget implements the WindowOrWorkerGlobalScope mixin.
+          // (There are no ErrorEvents.)
           // 6. Process the Event object event: let return value be the result of invoking callback with
           //    « event ».
           // 7. Process return value.

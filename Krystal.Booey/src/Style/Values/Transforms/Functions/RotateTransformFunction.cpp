@@ -5,7 +5,7 @@
 
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 
 namespace krys::boo::style

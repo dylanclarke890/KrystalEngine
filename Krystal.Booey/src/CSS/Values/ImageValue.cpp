@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 
 namespace krys::boo::css
 {
@@ -76,7 +76,6 @@ namespace krys::boo::css
       {
         request.SetInitiatorType(_initiatorType.View());
       }
-      // FIXME: Update the request for access control (CORS mode), once there are cross-origin checks.
       auto requested = loader.RequestImage(krys::move(request));
       _cachedImage = requested ? *requested : CachedResourceHandle<CachedImage>();
       _didRequestImage = true;
@@ -97,11 +96,6 @@ namespace krys::boo::css
   bool ImageValue::KnownToBeOpaque(const RenderElement &renderer) const noexcept
   {
     return _cachedImage && _cachedImage->CurrentFrameKnownToBeOpaque(&renderer);
-  }
-
-  bool ImageValue::IsLoadedFromOpaqueSource() const noexcept
-  {
-    return _location.Modifiers.LoadedFromOpaqueSource == LoadedFromOpaqueSource::Yes;
   }
 
   bool ImageValue::CustomTraverseSubresources(

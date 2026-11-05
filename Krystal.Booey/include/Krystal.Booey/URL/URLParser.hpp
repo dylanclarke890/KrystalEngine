@@ -50,7 +50,6 @@ namespace krys::boo::url
 
     KRYS_NODISCARD static const UIDNA &InternationalDomainNameTranscoder() noexcept;
     KRYS_NODISCARD static bool IsInUserInfoEncodeSet(char32 c) noexcept;
-    KRYS_NODISCARD static bool IsSpecialCharacterForFragmentDirective(char32 c) noexcept;
 
     KRYS_NODISCARD static Maybe<uint16> DefaultPortForProtocol(utf8_stringview scheme) noexcept;
     KRYS_NODISCARD static Maybe<utf8_string> FormURLDecode(utf8_stringview input) noexcept;

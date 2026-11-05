@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp"
-#include "Krystal.Booey/MathML/MathMLTokenElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLTokenElement.hpp"
 
 namespace krys::boo
 {

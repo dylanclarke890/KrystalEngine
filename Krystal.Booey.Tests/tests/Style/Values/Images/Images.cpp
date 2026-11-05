@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/ImageOrientation.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleFilterImage.hpp"
@@ -98,17 +98,6 @@ namespace krys::boo::style::tests
       REQUIRE(filter.IsImage());
       CHECK(ImageOf(filter)->IsFilterImage());
       CHECK(Serialised(filter) == "filter(url(\"https://example.com/a.png\"), blur(2px))");
-
-      auto canvas = Convert<ImageOrNone>(PropertyId::ListStyleImage, u8"-webkit-canvas(drawing)");
-      REQUIRE(canvas.IsImage());
-      CHECK(ImageOf(canvas)->IsCanvasImage());
-      CHECK(Serialised(canvas) == "-webkit-canvas(drawing)");
-
-      auto named =
-        Convert<ImageOrNone>(PropertyId::ListStyleImage, u8"-webkit-named-image(apple-pay-logo-white)");
-      REQUIRE(named.IsImage());
-      CHECK(ImageOf(named)->IsNamedImage());
-      CHECK(Serialised(named) == "-webkit-named-image(apple-pay-logo-white)");
     }
 
     SECTION("image sets")

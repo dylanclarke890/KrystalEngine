@@ -4,8 +4,8 @@
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
-#include "Krystal.Booey/Graphics/FontDatabase.hpp"
-#include "Krystal.Booey/Graphics/WOFFFileFormat.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
+#include "Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include <cmath>

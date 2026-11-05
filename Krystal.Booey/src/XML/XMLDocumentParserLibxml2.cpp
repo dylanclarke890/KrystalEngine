@@ -14,11 +14,11 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/CharacterReference.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParserScope.hpp"
@@ -139,8 +139,7 @@ namespace krys::boo::xml
         return false;
       }
 
-      // FIXME: Same-origin loads of external entities and DTDs (upstream allows them through a synchronous
-      // load), once there are origins and synchronous loads.
+      // External entities and DTDs aren't loaded: there are no network loads.
       return false;
     }
 
@@ -148,8 +147,7 @@ namespace krys::boo::xml
     {
       krys_debug_assert(XMLDocumentParserScope::CurrentCachedResourceLoader());
 
-      // FIXME: Load the resource synchronously through the scope's loader, once there are origins and
-      // synchronous loads; until then every load libxml2 asks for reads nothing.
+      // Every load libxml2 asks for reads nothing: there are no network loads.
       return &globalDescriptor;
     }
 
@@ -520,7 +518,6 @@ namespace krys::boo::xml
       element->FinishParsingChildren();
     }
 
-    // FIXME: Run the scripts the parser inserts, once there's scripting.
     PopCurrentNode();
   }
 

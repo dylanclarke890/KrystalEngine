@@ -8,7 +8,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Visitor.hpp"

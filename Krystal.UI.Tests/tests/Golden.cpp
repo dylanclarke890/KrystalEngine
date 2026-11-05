@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
@@ -14,9 +14,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
-#include "Krystal.Booey/SVG/SVGImageElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -1007,7 +1007,7 @@ namespace krys::ui::tests
     // FIXME: A page whose @font-face font comes from the memory cache keeps table cells' preferred widths
     // from before the font applied, so its table is sized differently from a page whose font loads (by a
     // fifth of a pixel a cell here); setting the cells' text again fixes it. "Golden: bidi layout" fails when
-    // any page was loaded before it in the process. See docs/booey/KNOWN-ISSUES.md.
+    // any page was loaded before it in the process. See Krystal.Booey/docs/KNOWN-ISSUES.md.
     auto td3 = []
     {
       View view({360, 240});

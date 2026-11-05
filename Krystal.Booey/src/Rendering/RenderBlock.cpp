@@ -1,35 +1,34 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlock.hpp"
-#include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Booey/Editing/FrameSelection.hpp"
-#include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
-#include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
-#include "Krystal.Booey/Rendering/LogicalSelectionOffsetCachesInlines.hpp"
-#include "Krystal.Booey/Rendering/PaintInfo.hpp"
-#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
-#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
-#include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
-#include "Krystal.Booey/Rendering/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
-#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
-#include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Selection/LogicalSelectionOffsetCachesInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
+#include "Krystal.Booey/Text/UnicodeBidi.hpp"
 
 namespace krys::boo
 {
@@ -760,7 +759,7 @@ namespace krys::boo
       {
         break;
       }
-      else if (current.IsFlexibleBoxIncludingDeprecated() || current.IsRenderGrid())
+      else if (current.IsRenderFlexibleBox() || current.IsRenderGrid())
       {
         return {};
       }
@@ -879,11 +878,10 @@ namespace krys::boo
     {
       return true;
     }
-    return IsNonReplacedAtomicInlineLevelBox()
-           || style.IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox()
-           || IsFlexItemIncludingDeprecated() || IsRenderTable() || IsRenderTableCell()
-           || IsRenderTableCaption() || IsFieldset() || IsDocumentElementRenderer()
-           || IsRenderFragmentedFlow() || IsLegacyRenderSVGForeignObject() || style.SpecifiesColumns()
+    return IsNonReplacedAtomicInlineLevelBox() || style.IsDisplayFlexibleOrGridFormattingContextBox()
+           || IsInFlowFlexChild() || IsRenderTable() || IsRenderTableCell() || IsRenderTableCaption()
+           || IsFieldset() || IsDocumentElementRenderer() || IsRenderFragmentedFlow()
+           || IsLegacyRenderSVGForeignObject() || style.SpecifiesColumns()
            || style.GetColumnSpan() == ColumnSpan::All || style.Display() == DisplayType::FlowRoot
            || EstablishesIndependentFormattingContext();
   }
@@ -1761,9 +1759,7 @@ namespace krys::boo
     const auto &styleToUse = Style();
     auto logicalWidth = OverridingLogicalWidthForFlexBasisComputation().value_or(styleToUse.LogicalWidth());
     if (auto fixedLogicalWidth = logicalWidth.TryFixed();
-        !IsRenderTableCell() && fixedLogicalWidth && fixedLogicalWidth->IsPositiveOrZero()
-        && !(IsDeprecatedFlexItem()
-             && !static_cast<int32>(fixedLogicalWidth->ResolveZoom(Style().UsedZoomForLength()))))
+        !IsRenderTableCell() && fixedLogicalWidth && fixedLogicalWidth->IsPositiveOrZero())
     {
       _minPreferredLogicalWidth = AdjustContentBoxLogicalWidthForBoxSizing(
         LayoutUnit {fixedLogicalWidth->ResolveZoom(styleToUse.UsedZoomForLength())});
@@ -2443,13 +2439,6 @@ namespace krys::boo
           krys_debug_assert(false);
           break;
 
-        case PseudoElementType::ViewTransition:
-        case PseudoElementType::ViewTransitionGroup:
-        case PseudoElementType::ViewTransitionImagePair:
-          // The view transition pseudo-elements should hit-test to their originating element (the document
-          // element).
-          return GetDocument().DocumentElement().get();
-
         default: break;
       }
     }
@@ -2698,7 +2687,7 @@ namespace krys::boo
         return CreatePositionWithAffinity(CaretMaxOffset(), Affinity::Downstream);
       }
     }
-    if (IsFlexibleBoxIncludingDeprecated() || IsRenderGrid())
+    if (IsRenderFlexibleBox() || IsRenderGrid())
     {
       return RenderBox::PositionForPoint(point, source);
     }
@@ -2813,7 +2802,6 @@ namespace krys::boo
            && IsSelectionRoot();
   }
 
-  // FIXME: Reflections (hasReflection), once there are any.
   bool RenderBlock::IsSelectionRoot() const noexcept
   {
     if (IsPseudoElement())
@@ -2832,7 +2820,7 @@ namespace krys::boo
     if (IsBody() || IsDocumentElementRenderer() || HasNonVisibleOverflow() || IsPositioned() || IsFloating()
         || IsRenderTableCell() || IsNonReplacedAtomicInlineLevelBox() || IsTransformed() || HasMask()
         || IsWritingModeRoot() || IsRenderFragmentedFlow() || Style().GetColumnSpan() == ColumnSpan::All
-        || IsFlexItemIncludingDeprecated() || IsGridItem())
+        || IsInFlowFlexChild() || IsGridItem())
     {
       return true;
     }
@@ -2958,7 +2946,7 @@ namespace krys::boo
       return {};
     }
 
-    if (IsFlexItem() || IsGridItem() || IsDeprecatedFlexItem())
+    if (IsFlexItem() || IsGridItem())
     {
       // FIXME: Adding a selection gap to these blocks would produce correct (visual) result only if we could
       // also paint selection gaps between them, as we do for blocks in a BFC. Returning an empty gap rect
@@ -3062,8 +3050,8 @@ namespace krys::boo
       }
 
       // FIXME: Eventually we won't special-case table and other layout roots like this.
-      auto propagatesSelectionToChildren = Is<RenderTable>(*curr) || Is<RenderFlexibleBox>(*curr)
-                                           || Is<RenderDeprecatedFlexibleBox>(*curr) || Is<RenderGrid>(*curr);
+      auto propagatesSelectionToChildren =
+        Is<RenderTable>(*curr) || Is<RenderFlexibleBox>(*curr) || Is<RenderGrid>(*curr);
       auto paintsOwnSelection = curr->ShouldPaintSelectionGaps() || propagatesSelectionToChildren;
       bool fillBlockGaps =
         paintsOwnSelection || (curr->CanBeSelectionLeaf() && childState != HighlightState::None);

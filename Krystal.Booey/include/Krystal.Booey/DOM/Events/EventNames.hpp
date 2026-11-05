@@ -51,18 +51,10 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview LostPointerCapture = u8"lostpointercapture";
   constexpr utf8_stringview PointerLockChange = u8"pointerlockchange";
   constexpr utf8_stringview PointerLockError = u8"pointerlockerror";
-  constexpr utf8_stringview GamepadConnected = u8"gamepadconnected";
-  constexpr utf8_stringview GamepadDisconnected = u8"gamepaddisconnected";
   constexpr utf8_stringview KeyDown = u8"keydown";
   constexpr utf8_stringview KeyPress = u8"keypress";
   constexpr utf8_stringview KeyUp = u8"keyup";
   constexpr utf8_stringview Resize = u8"resize";
-  constexpr utf8_stringview Message = u8"message";
-  constexpr utf8_stringview LanguageChange = u8"languagechange";
-  constexpr utf8_stringview Online = u8"online";
-  constexpr utf8_stringview Offline = u8"offline";
-  constexpr utf8_stringview BeforePrint = u8"beforeprint";
-  constexpr utf8_stringview AfterPrint = u8"afterprint";
   constexpr utf8_stringview Scroll = u8"scroll";
   constexpr utf8_stringview ScrollEnd = u8"scrollend";
   constexpr utf8_stringview BeforeCopy = u8"beforecopy";
@@ -97,7 +89,6 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview TouchCancel = u8"touchcancel";
   constexpr utf8_stringview Wheel = u8"wheel";
   constexpr utf8_stringview MouseWheel = u8"mousewheel";
-  constexpr utf8_stringview BeforeUnload = u8"beforeunload";
   constexpr utf8_stringview AnimationCancel = u8"animationcancel";
   constexpr utf8_stringview AnimationEnd = u8"animationend";
   constexpr utf8_stringview AnimationIteration = u8"animationiteration";

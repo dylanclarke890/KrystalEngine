@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -18,7 +18,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
@@ -373,8 +373,6 @@ namespace krys::boo::html
         UnblockRendering();
       }
 
-      // FIXME: Load stylesheets that are not needed for the rendering immediately with low priority, the
-      // nonce, integrity, referrer policy and fetch priority, once there are network loads.
       CachedResourceRequest request(ResourceRequest(_url),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       request.SetCharset(krys::move(charset));
@@ -507,17 +505,11 @@ namespace krys::boo::html
       _sheet->ClearOwnerNode();
     }
 
-    // FIXME: Whether the cached sheet is CORS-same-origin, once there are origins.
     _sheet = css::CSSStyleSheet::Create(krys::move(styleSheet), *this, true);
     _sheet->SetMediaQueries(css::mq::MediaQueryParser::Parse(_media, context));
     if (!dom::TreeQueries::IsInShadowTree(*this))
     {
       _sheet->SetTitle(css::CSSOMString(Title()));
-    }
-
-    if (!_sheet->CanAccessRules())
-    {
-      _sheet->Contents().SetAsLoadedFromOpaqueSource();
     }
   }
 

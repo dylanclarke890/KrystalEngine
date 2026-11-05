@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/BoxSides.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyFlag.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImplicit.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsSetFromShorthand.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
@@ -192,8 +192,6 @@ namespace krys::boo::css
     KRYS_NODISCARD static bool IsMarginProperty(PropertyId id) noexcept;
 
     KRYS_NODISCARD static bool IsPaddingProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static SmallList<CSSOMString> AliasesForProperty(PropertyId id) noexcept;
 
     KRYS_NODISCARD static bool DisablesNativeAppearance(PropertyId id) noexcept;
 

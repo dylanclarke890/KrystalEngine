@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Rendering/LegacyInlineFlowBox.hpp"
+#include "Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 
 namespace krys::boo

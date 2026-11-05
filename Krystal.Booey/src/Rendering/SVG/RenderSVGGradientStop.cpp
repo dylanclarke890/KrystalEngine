@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
-#include "Krystal.Booey/SVG/SVGGradientElement.hpp"
-#include "Krystal.Booey/SVG/SVGStopElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGradientElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGStopElement.hpp"
 
 namespace krys::boo
 {

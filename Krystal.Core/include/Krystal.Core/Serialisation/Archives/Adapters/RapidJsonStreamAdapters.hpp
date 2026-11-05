@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/IO/Streams/Stream.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include <cassert>
 
 namespace krys::Serialisation
 {
@@ -30,14 +30,12 @@ namespace krys::Serialisation
 
     Ch *PutBegin()
     {
-      assert(false && "Not implemented!");
-      return 0;
+      krys_not_implemented();
     }
 
     size_t PutEnd(Ch *)
     {
-      assert(false && "Not implemented!");
-      return 0;
+      krys_not_implemented();
     }
 
     void Flush()
@@ -86,19 +84,17 @@ namespace krys::Serialisation
 
     void Put(Ch)
     {
-      assert(false && "Not implemented!");
+      krys_not_implemented();
     }
 
     Ch *PutBegin()
     {
-      assert(false && "Not implemented!");
-      return 0;
+      krys_not_implemented();
     }
 
     size_t PutEnd(Ch *)
     {
-      assert(false && "Not implemented!");
-      return 0;
+      krys_not_implemented();
     }
   };
 }

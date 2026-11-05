@@ -6,10 +6,10 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGMarkerResource.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Booey/SVG/SVGUseElement.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 
 namespace krys::boo::svg

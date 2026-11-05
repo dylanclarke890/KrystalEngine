@@ -3,7 +3,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStreamBuilder.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathStringBuilder.hpp"
-#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>
 

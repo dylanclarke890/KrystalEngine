@@ -9,11 +9,11 @@
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix.hpp"
+#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
-#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/ImageBufferDisplayListBackend.hpp"
-#include "Krystal.Booey/Graphics/SourceImage.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferDisplayListBackend.hpp"
+#include "Krystal.Booey/Graphics/Images/SourceImage.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
 #include "Krystal.Booey/HTML/Canvas/Path2D.hpp"
@@ -23,7 +23,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/SVG/SVGImageElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include <cmath>
 #include <limits>
 #include <numbers>

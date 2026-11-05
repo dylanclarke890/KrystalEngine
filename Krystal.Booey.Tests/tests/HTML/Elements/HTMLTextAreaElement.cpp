@@ -83,13 +83,13 @@ namespace krys::boo::html::tests
     auto &textarea = fixture.Get<HTMLTextAreaElement>(u8"t");
     form.Submit();
     REQUIRE(fixture.Submissions().size() == 1);
-    CHECK(fixture.Submissions()[0].URL.find("%0D%0A") != std::string::npos);
+    CHECK(fixture.Submissions()[0].Entries.find('\n') != std::string::npos);
 
     // The legacy aliases of hard are not keywords.
     textarea.Wrap(u8"physical");
     form.Submit();
     REQUIRE(fixture.Submissions().size() == 2);
-    CHECK(fixture.Submissions()[1].URL == "https://example.com/s?t=aaaa+aaaa+aaaa");
+    CHECK(fixture.Submissions()[1].Entries == "t=aaaa aaaa aaaa");
   }
 
   TEST_CASE("HTMLTextAreaElement: a readonly textarea is barred from constraint validation and not missing",

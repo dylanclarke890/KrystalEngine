@@ -35,7 +35,6 @@ namespace krys::boo::css
   class MutableStyleProperties;
   class PositionTryRule;
   class StyleSheetContents;
-  class ViewTransitionRule;
   struct ParserContext;
 
   /// @brief Parses style sheets, rules and declaration lists into the internal rule model.
@@ -129,8 +128,6 @@ namespace krys::boo::css
                                                                  const ParserContext &context) noexcept;
     static void ParseStyleSheet(CSSOMStringView string, const ParserContext &context,
                                 StyleSheetContents &styleSheet) noexcept;
-    KRYS_NODISCARD static SelectorList ParsePageSelector(TokenRange tokens,
-                                                         StyleSheetContents *styleSheet) noexcept;
 
     KRYS_NODISCARD bool SupportsDeclaration(TokenRange &tokens) noexcept;
 
@@ -180,7 +177,6 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<FontPaletteValuesRule> ConsumeFontPaletteValuesRule(TokenRange prelude,
                                                                               TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<KeyframesRule> ConsumeKeyframesRule(TokenRange prelude, TokenRange block) noexcept;
-    KRYS_NODISCARD RefPtr<PageRule> ConsumePageRule(TokenRange prelude, TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<CounterStyleRule> ConsumeCounterStyleRule(TokenRange prelude,
                                                                     TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<LayerRule> ConsumeLayerRule(TokenRange prelude, Maybe<TokenRange> block) noexcept;
@@ -189,8 +185,6 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<ScopeRule> ConsumeScopeRule(TokenRange prelude, TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<StartingStyleRule> ConsumeStartingStyleRule(TokenRange prelude,
                                                                       TokenRange block) noexcept;
-    KRYS_NODISCARD RefPtr<ViewTransitionRule> ConsumeViewTransitionRule(TokenRange prelude,
-                                                                        TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<PositionTryRule> ConsumePositionTryRule(TokenRange prelude,
                                                                   TokenRange block) noexcept;
     KRYS_NODISCARD RefPtr<FunctionRule> ConsumeFunctionRule(TokenRange prelude, TokenRange block) noexcept;
@@ -214,8 +208,6 @@ namespace krys::boo::css
                                  RuleType ruleType) noexcept;
     void ConsumeCustomPropertyValue(TokenRange tokens, const CSSOMStringAtom &propertyName,
                                     IsImportant important) noexcept;
-
-    KRYS_NODISCARD TokenRange ConsumeBlockCheckingForEditability(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD Ref<Rule> CreateNestedDeclarationsRule() noexcept;
 

@@ -551,9 +551,7 @@ namespace krys::boo::url::tests
     url.SetHostAndPort(u8"example.org:81");
     CHECK(S(url.HostAndPort()) == "example.org:81");
 
-    CHECK(S(url.ConsumeFragmentDirective()).empty());
-    url.SetFragmentIdentifier(u8"top:~:text=hello");
-    CHECK(S(url.ConsumeFragmentDirective()) == "text=hello");
+    url.SetFragmentIdentifier(u8"top");
     CHECK(S(url.FragmentIdentifier()) == "top");
 
     url.RemoveFragmentIdentifier();

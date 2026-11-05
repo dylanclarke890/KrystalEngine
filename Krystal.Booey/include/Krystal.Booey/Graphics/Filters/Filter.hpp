@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Filters/FilterFunction.hpp"
-#include "Krystal.Booey/Graphics/FloatPoint3D.hpp"
-#include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
+#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

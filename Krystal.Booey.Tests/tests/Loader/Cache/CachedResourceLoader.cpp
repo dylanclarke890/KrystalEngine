@@ -6,7 +6,7 @@
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -14,7 +14,7 @@
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::tests
 {
@@ -242,10 +242,10 @@ namespace krys::boo::tests
       RunNetworkingTasks();
       CHECK(loader.Strategy.Requests.size() == 1u);
     }
-    // Revalidating loads it again (a file has no validators), once for the document.
+    // Reloading loads it again, once for the document.
     loader.Strategy.AddText(u8"file:///a.css", u8"#box { width: 20px }");
     {
-      PageInFrameFixture reloaded {utf8_string(markup), {200, 100}, CachePolicy::Revalidate};
+      PageInFrameFixture reloaded {utf8_string(markup), {200, 100}, CachePolicy::Reload};
       RunNetworkingTasks();
       CHECK(loader.Strategy.Requests.size() == 2u);
       CHECK(reloaded.RendererSize(u8"box") == IntSize(20, 0));

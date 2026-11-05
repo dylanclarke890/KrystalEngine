@@ -1,18 +1,18 @@
 ﻿#pragma once
 
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Animation/AnimationEventBase.hpp"
-#include "Krystal.Booey/Animation/CSSAnimationEvent.hpp"
-#include "Krystal.Booey/Animation/CSSTransitionEvent.hpp"
+#include "Krystal.Booey/Animation/Events/AnimationEventBase.hpp"
+#include "Krystal.Booey/Animation/Events/CSSAnimationEvent.hpp"
+#include "Krystal.Booey/Animation/Events/CSSTransitionEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include <string>
 
 namespace krys::boo::tests
