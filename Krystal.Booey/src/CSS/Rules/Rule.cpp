@@ -750,14 +750,15 @@ namespace krys::boo::css
 
 #pragma region ContainerRule
 
-  ContainerRule::ContainerRule(cq::ContainerQuery &&query, List<Ref<Rule>> &&rules) noexcept
-      : GroupRule(RuleType::Container, krys::move(rules)), _containerQuery(krys::move(query))
+  ContainerRule::ContainerRule(cq::ContainerQueryList &&queries, List<Ref<Rule>> &&rules) noexcept
+      : GroupRule(RuleType::Container, krys::move(rules)), _containerQueries(krys::move(queries))
   {
+    krys_debug_assert(!_containerQueries.empty());
   }
 
-  Ref<ContainerRule> ContainerRule::Create(cq::ContainerQuery &&query, List<Ref<Rule>> &&rules) noexcept
+  Ref<ContainerRule> ContainerRule::Create(cq::ContainerQueryList &&queries, List<Ref<Rule>> &&rules) noexcept
   {
-    return AdoptRef(*new ContainerRule(krys::move(query), krys::move(rules)));
+    return AdoptRef(*new ContainerRule(krys::move(queries), krys::move(rules)));
   }
 
   Ref<ContainerRule> ContainerRule::Copy() const noexcept

@@ -58,6 +58,37 @@ namespace krys::boo::css::cq
     return ContainerQuery {name, krys::move(*condition), requiredAxes, containsUnknownFeature};
   }
 
+  Maybe<ContainerQueryList>
+    ContainerQueryParser::ConsumeContainerQueryList(TokenRange &tokens,
+                                                    const MediaQueryParserContext &context) noexcept
+  {
+    ContainerQueryList queries;
+    while (true)
+    {
+      auto begin = tokens;
+      while (!tokens.IsAtEnd() && tokens.Peek().Type() != TokenType::Comma)
+      {
+        tokens.DiscardComponentValue();
+      }
+
+      auto subrange = begin.RangeUntil(tokens);
+      subrange.DiscardWhitespace();
+      auto query = ConsumeContainerQuery(subrange, context);
+      subrange.DiscardWhitespace();
+      if (!query || !subrange.IsAtEnd())
+      {
+        return {};
+      }
+      queries.push_back(krys::move(*query));
+
+      if (tokens.IsAtEnd())
+      {
+        return queries;
+      }
+      tokens.Discard();
+    }
+  }
+
   bool ContainerQueryParser::IsValidFunctionId(ValueId functionId) noexcept
   {
     return functionId == ValueId::Style;

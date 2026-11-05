@@ -10,6 +10,9 @@ namespace krys::boo::css::cq
   {
     KRYS_NODISCARD static Maybe<ContainerQuery>
       ConsumeContainerQuery(TokenRange &tokens, const MediaQueryParserContext &context) noexcept;
+    /// @brief `<container-condition>#`, each a query.
+    KRYS_NODISCARD static Maybe<ContainerQueryList>
+      ConsumeContainerQueryList(TokenRange &tokens, const MediaQueryParserContext &context) noexcept;
 
     KRYS_NODISCARD static bool IsValidFunctionId(ValueId functionId) noexcept;
     KRYS_NODISCARD static const mq::FeatureSchema *

@@ -44,4 +44,16 @@ namespace krys::boo::css::cq
 
     mq::Serialise(builder, query.Condition);
   }
+
+  void Serialise(StringBuilder &builder, const ContainerQueryList &queries) noexcept
+  {
+    for (const auto &query : queries)
+    {
+      if (&query != &queries.front())
+      {
+        builder.Append(u8", ");
+      }
+      Serialise(builder, query);
+    }
+  }
 }

@@ -53,7 +53,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- Range syntax in `style()` container queries and lists of container queries (css-conditional-5) aren't supported. Two cases in `tests/CSS/Queries/ContainerQueryParser.cpp` (`[!shouldfail]`).
+- Range syntax in `style()` container queries (css-conditional-5) isn't supported. Two cases in `tests/CSS/Queries/ContainerQueryParser.cpp` (`[!shouldfail]`).
 
 ### Missing
 

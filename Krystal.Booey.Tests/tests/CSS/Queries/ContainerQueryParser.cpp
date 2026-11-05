@@ -38,6 +38,23 @@ namespace krys::boo::css::tests
       return query;
     }
 
+    /// @brief Parses `prelude` as a whole `@container` prelude: a list of container queries.
+    KRYS_NODISCARD Maybe<cq::ContainerQueryList> ParseContainerQueryList(utf8_stringview prelude)
+    {
+      InputStream inputStream {CSSOMString(prelude)};
+      Tokenizer tokenizer(inputStream);
+      std::ignore = tokenizer.PumpTokenizer();
+      auto tokens = tokenizer.Tokens();
+      tokens.DiscardWhitespace();
+      auto queries = cq::ContainerQueryParser::ConsumeContainerQueryList(tokens, MediaQueryParserContext());
+      tokens.DiscardWhitespace();
+      if (!queries || !tokens.IsAtEnd())
+      {
+        return {};
+      }
+      return queries;
+    }
+
     enum class ConditionResult
     {
       Invalid,
@@ -279,15 +296,35 @@ namespace krys::boo::css::tests
     CHECK(feature->RightComparison->Value->IsCustomPropertyValue());
   }
 
-  // FIXME: Range syntax in style queries and lists of container queries (css-conditional-5) aren't supported
-  // (WPT at-container-style-parsing.html and at-container-parsing.html).
-  TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() ranges and query lists",
+  // FIXME: Range syntax in style queries (css-conditional-5) isn't supported (WPT
+  // at-container-style-parsing.html).
+  TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() ranges",
                    "[CSS][Queries][ContainerQueryParser][!shouldfail]")
   {
     CHECK(ClassifyCondition(u8"style(--foo >= --bar)") == ConditionResult::Known);
     CHECK(ClassifyCondition(u8"style(10px < --foo <= 10em)") == ConditionResult::Known);
-    CHECK(ParseContainerQuery(u8"(width: 100px), (height: 100px)"));
-    CHECK(ParseContainerQuery(u8"container, container2"));
+  }
+
+  // Cases from WPT at-container-parsing.html.
+  TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: query lists", "[CSS][Queries][ContainerQueryParser]")
+  {
+    auto queries = ParseContainerQueryList(u8"(width: 100px), (height: 100px)");
+    REQUIRE(queries);
+    CHECK(queries->size() == 2u);
+
+    queries = ParseContainerQueryList(u8"container, container2");
+    REQUIRE(queries);
+    REQUIRE(queries->size() == 2u);
+    CHECK(queries->at(1).Name == CSSOMStringAtom(u8"container2"));
+
+    queries = ParseContainerQueryList(u8"a (width > 1px) , style(--x: 1)");
+    REQUIRE(queries);
+    StringBuilder text;
+    cq::Serialise(text, *queries);
+    CHECK(ToNarrow(text) == "a (width > 1px), style(--x: 1)");
+
+    CHECK_FALSE(ParseContainerQueryList(u8"(width: 100px),"));
+    CHECK_FALSE(ParseContainerQueryList(u8", (width: 100px)"));
   }
 
   // Cases from WPT css/css-conditional/container-queries/at-container-serialization.html and

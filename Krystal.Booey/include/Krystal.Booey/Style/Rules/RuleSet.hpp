@@ -310,7 +310,9 @@ namespace krys::boo::style
       return !_containerQueries.empty();
     }
 
-    KRYS_NODISCARD List<const css::cq::ContainerQuery *>
+    /// @brief The query lists of the `@container` rules around @p ruleData, innermost first: each must have a
+    /// true query for the rule to apply.
+    KRYS_NODISCARD List<const css::cq::ContainerQueryList *>
       ContainerQueriesFor(const RuleData &ruleData) const noexcept;
     KRYS_NODISCARD List<Ref<const css::ContainerRule>> ContainerQueryRules() const noexcept;
 
@@ -393,7 +395,7 @@ namespace krys::boo::style
     return CascadeLayerPriorityForIdentifier(identifier);
   }
 
-  inline List<const css::cq::ContainerQuery *>
+  inline List<const css::cq::ContainerQueryList *>
     RuleSet::ContainerQueriesFor(const RuleData &ruleData) const noexcept
   {
     if (_containerQueryIdentifierForRulePosition.size() <= ruleData.Position())
@@ -401,13 +403,13 @@ namespace krys::boo::style
       return {};
     }
 
-    List<const css::cq::ContainerQuery *> queries;
+    List<const css::cq::ContainerQueryList *> queries;
 
     auto identifier = _containerQueryIdentifierForRulePosition[ruleData.Position()];
     while (identifier)
     {
       auto &query = _containerQueries[identifier - 1];
-      queries.push_back(&query.ContainerRule->ContainerQuery());
+      queries.push_back(&query.ContainerRule->ContainerQueries());
       identifier = query.Parent;
     };
 

@@ -293,7 +293,7 @@ namespace krys::boo::css::tests
       REQUIRE(sheet->RuleCount() == 1);
       auto &container = Downcast<ContainerRule>(*sheet->RuleAt(0));
       StringBuilder text;
-      cq::Serialise(text, container.ContainerQuery());
+      cq::Serialise(text, container.ContainerQueries());
       CHECK(ToNarrow(text) == "sidebar (min-width: 400px)");
       CHECK(container.ChildRules().size() == 1);
     }

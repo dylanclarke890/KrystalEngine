@@ -279,12 +279,12 @@ namespace krys::boo::css::tests
 
     SECTION("ContainerRule")
     {
-      auto rule = ContainerRule::Create(ParseContainerQuery(u8"card (min-width: 10px)"), {});
+      auto rule = ContainerRule::Create({ParseContainerQuery(u8"card (min-width: 10px)")}, {});
       CHECK(rule->Type() == RuleType::Container);
       CHECK(rule->IsContainerRule());
       CHECK(rule->IsGroupRule());
-      CHECK(rule->ContainerQuery().Name == CSSOMStringAtom(u8"card"));
-      CHECK(rule->Copy()->ContainerQuery().Name == CSSOMStringAtom(u8"card"));
+      CHECK(rule->ContainerQueries().front().Name == CSSOMStringAtom(u8"card"));
+      CHECK(rule->Copy()->ContainerQueries().front().Name == CSSOMStringAtom(u8"card"));
     }
 
     SECTION("ScopeRule")

@@ -1391,8 +1391,8 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    auto query = cq::ContainerQueryParser::ConsumeContainerQuery(prelude, _context);
-    if (!query)
+    auto queries = cq::ContainerQueryParser::ConsumeContainerQueryList(prelude, _context);
+    if (!queries)
     {
       return nullptr;
     }
@@ -1405,7 +1405,7 @@ namespace krys::boo::css
 
     auto rules = ConsumeNestedGroupRules(block);
 
-    return ContainerRule::Create(krys::move(*query), krys::move(rules));
+    return ContainerRule::Create(krys::move(*queries), krys::move(rules));
   }
 
   RefPtr<PropertyRule> Parser::ConsumePropertyRule(TokenRange prelude, TokenRange block) noexcept

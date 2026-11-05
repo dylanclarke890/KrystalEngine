@@ -286,6 +286,8 @@ namespace krys::boo::style::tests
       @container (width > 0px) { #p { height: 5px } }
       @container foo style(--y: a) { #q { color: rgb(255, 0, 0) } }
       @container bar style(--y: a) { #q { width: 5px } }
+      @container bar style(--y: a), foo style(--y: a) { #q { height: 7px } }
+      @container bar, style(--y: b) { #q { min-width: 3px } }
     </style><div id=c><p id=p></p></div><div id=n><p id=q></p></div>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
@@ -300,6 +302,9 @@ namespace krys::boo::style::tests
     auto &q = Rendered(fixture.ById(u8"q"));
     CHECK(q.GetColor() == Red);
     CHECK(ResolverFixture::Serialised(q, q.Width()) == "auto");
+    // A list applies if any of its queries is true, each against its own container.
+    CHECK(ResolverFixture::Serialised(q, q.Height()) == "7px");
+    CHECK(ResolverFixture::Serialised(q, q.MinWidth()) == "auto");
 
     SECTION("Selecting containers")
     {

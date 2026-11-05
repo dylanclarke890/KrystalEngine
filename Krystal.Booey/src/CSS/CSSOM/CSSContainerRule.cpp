@@ -25,7 +25,7 @@ namespace krys::boo::css
   {
     StringBuilder builder;
     builder.Append(u8"@container ");
-    cq::Serialise(builder, GetContainerRule().ContainerQuery());
+    cq::Serialise(builder, GetContainerRule().ContainerQueries());
     AppendCSSTextForItems(builder);
     return krys::move(builder).ToString();
   }
@@ -33,25 +33,38 @@ namespace krys::boo::css
   CSSOMString CSSContainerRule::ConditionText() const noexcept
   {
     StringBuilder builder;
-    cq::Serialise(builder, GetContainerRule().ContainerQuery());
+    cq::Serialise(builder, GetContainerRule().ContainerQueries());
     return krys::move(builder).ToString();
   }
 
   CSSOMString CSSContainerRule::ContainerName() const noexcept
   {
-    StringBuilder builder;
-    auto name = GetContainerRule().ContainerQuery().Name;
-    if (name != CSSOMStringAtom::Null() && !name.View().empty())
-    {
-      SerialiseIdentifier(CSSOMString(name.View()), builder);
-    }
-    return krys::move(builder).ToString();
+    // If conditions has exactly one item, return that item's name; otherwise the empty string.
+    auto conditions = Conditions();
+    return conditions.size() == 1 ? krys::move(conditions.front().Name) : CSSOMString();
   }
 
   CSSOMString CSSContainerRule::ContainerQuery() const noexcept
   {
-    StringBuilder builder;
-    mq::Serialise(builder, GetContainerRule().ContainerQuery().Condition);
-    return krys::move(builder).ToString();
+    // If conditions has exactly one item, return that item's query; otherwise the empty string.
+    auto conditions = Conditions();
+    return conditions.size() == 1 ? krys::move(conditions.front().Query) : CSSOMString();
+  }
+
+  List<CSSContainerCondition> CSSContainerRule::Conditions() const noexcept
+  {
+    List<CSSContainerCondition> conditions;
+    for (const auto &query : GetContainerRule().ContainerQueries())
+    {
+      StringBuilder name;
+      if (query.Name != CSSOMStringAtom::Null() && !query.Name.View().empty())
+      {
+        SerialiseIdentifier(CSSOMString(query.Name.View()), name);
+      }
+      StringBuilder condition;
+      mq::Serialise(condition, query.Condition);
+      conditions.push_back({krys::move(name).ToString(), krys::move(condition).ToString()});
+    }
+    return conditions;
   }
 }
