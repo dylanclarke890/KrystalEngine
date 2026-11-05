@@ -1914,6 +1914,17 @@ namespace krys::ui::tests
     CHECK(a.KeyIdentifier() == u8"U+0041");
     CHECK(a.Key() == u8"a");
 
+    // A dead key types nothing, so its key is "Dead", whatever the key would type unmodified; its release
+    // keeps the key its press had.
+    auto dead = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, pal::Key::Quote, {},
+                                     {.Text = {}, .UnmodifiedText = u8"'", .DeadKey = true}, false);
+    CHECK(dead.Key() == u8"Dead");
+    CHECK(dead.KeyIdentifier() == u8"Unidentified");
+    CHECK(dead.Code() == u8"Quote");
+    auto deadUp =
+      input::KeyboardEvent(boo::PlatformEvent::Type::KeyUp, pal::Key::Quote, {}, {}, false, u8"Dead");
+    CHECK(deadUp.Key() == u8"Dead");
+
     CHECK(input::ToBooey(pal::MouseButton::Thumb1) == boo::MouseButton::Back);
     auto modifiers = input::ToBooey(pal::KeyModifiers {pal::KeyModifier::Alt, pal::KeyModifier::Meta});
     CHECK(modifiers.Contains(boo::PlatformEvent::Modifier::AltKey));

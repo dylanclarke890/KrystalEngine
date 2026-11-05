@@ -219,6 +219,12 @@ namespace krys::ui::input
     {
       keyValue = utf8_string(description.NamedKey);
     }
+    else if (text.DeadKey)
+    {
+      // A dead key types nothing itself; its accent joins the next key's text.
+      // https://w3c.github.io/uievents-key/#key-Dead
+      keyValue = u8"Dead";
+    }
     else if (!text.Text.empty())
     {
       keyValue = text.Text;
@@ -229,12 +235,12 @@ namespace krys::ui::input
     }
     else
     {
-      // FIXME: Dead keys ("Dead"), which the platform layer marks with KeyText::DeadKey.
       keyValue = u8"Unidentified";
     }
 
-    utf8_string keyIdentifier = !description.KeyIdentifier.empty()
-                                  ? utf8_string(description.KeyIdentifier)
+    utf8_string keyIdentifier = !description.KeyIdentifier.empty() ? utf8_string(description.KeyIdentifier)
+                                : text.DeadKey
+                                  ? utf8_string(u8"Unidentified")
                                   : KeyIdentifierForText(!text.UnmodifiedText.empty() ? text.UnmodifiedText
                                                          : !text.Text.empty()         ? text.Text
                                                                                       : keyValue);
