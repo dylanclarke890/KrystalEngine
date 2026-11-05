@@ -29,6 +29,7 @@ namespace krys::boo::vk
   constexpr int32 Up = 0x26;
   constexpr int32 Right = 0x27;
   constexpr int32 Down = 0x28;
+  constexpr int32 Snapshot = 0x2C;
   constexpr int32 Insert = 0x2D;
   constexpr int32 Delete = 0x2E;
   constexpr int32 Help = 0x2F;

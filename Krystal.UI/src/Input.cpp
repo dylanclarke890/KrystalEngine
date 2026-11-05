@@ -132,7 +132,14 @@ namespace krys::ui::input
       case Key::RightArrow: return named(u8"ArrowRight", u8"ArrowRight", u8"Right", boo::vk::Right);
       case Key::DownArrow:  return named(u8"ArrowDown", u8"ArrowDown", u8"Down", boo::vk::Down);
       case Key::UpArrow:    return named(u8"ArrowUp", u8"ArrowUp", u8"Up", boo::vk::Up);
-      default:              return named({}, u8"Unidentified", u8"Unidentified", 0);
+      case Key::Insert:     return named(u8"Insert", u8"Insert", u8"Insert", boo::vk::Insert);
+      case Key::PrintScreen:
+        return named(u8"PrintScreen", u8"PrintScreen", u8"PrintScreen", boo::vk::Snapshot);
+      case Key::Pause:       return named(u8"Pause", u8"Pause", u8"Pause", boo::vk::Pause);
+      case Key::ScrollLock:  return named(u8"ScrollLock", u8"ScrollLock", u8"Scroll", boo::vk::Scroll);
+      case Key::NumLock:     return named(u8"NumLock", u8"NumLock", u8"NumLock", boo::vk::NumLock);
+      case Key::ContextMenu: return named(u8"ContextMenu", u8"ContextMenu", u8"Apps", boo::vk::Apps);
+      default:               return named({}, u8"Unidentified", u8"Unidentified", 0);
     }
   }
 

@@ -1908,6 +1908,16 @@ namespace krys::ui::tests
     CHECK(input::Describe(pal::Key::Del).NamedKey == u8"Backspace");
     CHECK(input::Describe(pal::Key::Option).WindowsVirtualKeyCode == boo::vk::LMenu);
     CHECK(input::Describe(pal::Key::KeypadEnter).IsKeypad);
+    auto contextMenu = input::Describe(pal::Key::ContextMenu);
+    CHECK(contextMenu.Code == u8"ContextMenu");
+    CHECK(contextMenu.NamedKey == u8"ContextMenu");
+    CHECK(contextMenu.WindowsVirtualKeyCode == boo::vk::Apps);
+    CHECK(input::Describe(pal::Key::Insert).NamedKey == u8"Insert");
+    CHECK(input::Describe(pal::Key::PrintScreen).WindowsVirtualKeyCode == boo::vk::Snapshot);
+    CHECK(input::Describe(pal::Key::Pause).Code == u8"Pause");
+    CHECK(input::Describe(pal::Key::ScrollLock).NamedKey == u8"ScrollLock");
+    CHECK(input::Describe(pal::Key::NumLock).Code == u8"NumLock");
+    CHECK_FALSE(input::Describe(pal::Key::NumLock).IsKeypad);
 
     // A key that types text has a key identifier from it.
     auto a = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, pal::Key::A, {}, {u8"a", u8"a"}, false);

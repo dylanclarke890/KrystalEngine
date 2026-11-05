@@ -266,7 +266,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - The window gets no `focus`/`blur` events: `FocusAlgorithms` has FIXMEs for firing them at a document's `Window`, and `FocusEvent`/`UIEvent` have no `view`.
-- Keys the platform layer has no code for: Insert, Print Screen, Pause, Scroll Lock, Num Lock and the context menu key (FIXME in `Win32Window.cpp`). There is no keyboard route to `contextmenu` (`sendContextMenuEventForKey`), and no menu controller beyond the `contextmenu` event.
+- There is no keyboard route to `contextmenu` (`sendContextMenuEventForKey`), and no menu controller beyond the `contextmenu` event.
 - Access keys: `HTMLElement::AccessKeyAction` exists but nothing calls it (FIXME in `EventHandler.cpp`), `accessKeyLabel` is empty, and a legend has no accesskey delegatee.
 - Custom cursors (`cursor: url()`) are absent (`Cursor` has no images; FIXME in `EventHandler::SelectCursor`), as are pan-scrolling and auto-hiding cursors.
 - Wheel: `PlatformWheelEvent` has no phases, velocities, precise deltas or inverted directions, so there is no scroll latching, wheel delta filter or precision touchpad gesture support (pinching, swiping, DirectManipulation). Pan gestures chain on to the next scroll box mid-gesture, as the wheel does.

@@ -51,8 +51,6 @@ namespace
 
   /// @brief The engine key for a key message's virtual key code and `lParam` (its scan code and extended
   /// bit, which tell the left and right modifiers and the keypad's Enter apart).
-  // FIXME: Insert, Print Screen, Pause, Scroll Lock, Num Lock and the context menu key, once the engine has
-  // keys for them.
   static krys::pal::Key KeyCodeToEngineKey(const WPARAM keyCode, const LPARAM lParam) noexcept
   {
     using krys::pal::Key;
@@ -175,6 +173,13 @@ namespace
       case VK_DOWN:        return Key::DownArrow;
       case VK_UP:          return Key::UpArrow;
       case VK_RETURN:      return extended ? Key::KeypadEnter : Key::Enter;
+      case VK_INSERT:      return Key::Insert;
+      // Windows sends only the key up of Print Screen; it takes the key down for itself.
+      case VK_SNAPSHOT:    return Key::PrintScreen;
+      case VK_PAUSE:       return Key::Pause;
+      case VK_SCROLL:      return Key::ScrollLock;
+      case VK_NUMLOCK:     return Key::NumLock;
+      case VK_APPS:        return Key::ContextMenu;
       default:             return Key::UNKNOWN;
     }
   }
