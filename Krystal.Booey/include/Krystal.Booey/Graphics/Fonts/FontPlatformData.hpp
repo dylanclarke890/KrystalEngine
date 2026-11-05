@@ -13,6 +13,8 @@
 
 namespace krys::boo
 {
+  struct FontSizeAdjust;
+
   /// @brief A face at a size: what a font is made from. Whether bold and oblique are synthesized, the
   /// orientation, the width variant (for `text-combine-upright`) and the text rendering mode come with it.
   class FontPlatformData
@@ -45,6 +47,10 @@ namespace krys::boo
     KRYS_NODISCARD static FontPlatformData CloneWithSyntheticOblique(const FontPlatformData &source,
                                                                      bool syntheticOblique) noexcept;
     KRYS_NODISCARD static FontPlatformData CloneWithSize(const FontPlatformData &source, float size) noexcept;
+
+    /// @brief Resizes the font so that the metric @p fontSizeAdjust names is its aspect value times
+    /// @p computedSize. Nothing changes without a value, or if the font lacks the metric.
+    void UpdateSizeWithFontSizeAdjust(const FontSizeAdjust &fontSizeAdjust, float computedSize) noexcept;
 
     /// @brief The face, or null for an empty or deleted value.
     KRYS_NODISCARD text::FreeTypeFace *Face() const noexcept

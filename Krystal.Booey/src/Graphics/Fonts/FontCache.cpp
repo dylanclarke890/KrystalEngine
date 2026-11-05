@@ -333,7 +333,7 @@ namespace krys::boo
     }
 
     auto platformData = CreateUnique<FontPlatformData>(PlatformDataForFace(*face, description, options));
-    // FIXME: Adjust the size for font-size-adjust (FontPlatformData::updateSizeWithFontSizeAdjust).
+    platformData->UpdateSizeWithFontSizeAdjust(description.GetFontSizeAdjust(), description.ComputedSize());
     return platformData;
   }
 

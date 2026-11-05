@@ -33,7 +33,7 @@ namespace krys::boo
     auto size = description.AdjustedSizeForFontFace(fontCreationContext.SizeAdjust());
     FontPlatformData platformData(Face, size, bold, italic, description.Orientation(),
                                   description.WidthVariant(), description.GetTextRenderingMode());
-    // FIXME: Adjust the size for font-size-adjust (updateSizeWithFontSizeAdjust), as FontCache does.
+    platformData.UpdateSizeWithFontSizeAdjust(description.GetFontSizeAdjust(), description.ComputedSize());
     return platformData;
   }
 

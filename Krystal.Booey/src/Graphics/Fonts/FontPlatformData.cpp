@@ -1,4 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontPlatformData.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <hb-ot.h>
@@ -47,6 +51,32 @@ namespace krys::boo
     FontPlatformData copy(source);
     copy.UpdateSize(size);
     return copy;
+  }
+
+  void FontPlatformData::UpdateSizeWithFontSizeAdjust(const FontSizeAdjust &fontSizeAdjust,
+                                                      float computedSize) noexcept
+  {
+    if (!fontSizeAdjust.Value || !_size)
+    {
+      return;
+    }
+
+    // The metric scales with the size, so the size that gives it the wanted value follows from its value at
+    // this size.
+    auto font = FontCache::Singleton().FontForPlatformData(*this);
+    auto aspectValue = fontSizeAdjust.Resolve(_size, font->GetFontMetrics());
+    // FIXME: The behavior for missing metrics has yet to be defined.
+    // https://github.com/w3c/csswg-drafts/issues/6384
+    if (!aspectValue || !*aspectValue)
+    {
+      return;
+    }
+
+    auto adjustedSize = computedSize * *fontSizeAdjust.Value / *aspectValue;
+    if (adjustedSize != _size)
+    {
+      UpdateSize(std::min(adjustedSize, MaximumAllowedFontSize));
+    }
   }
 
   void FontPlatformData::UpdateSize(float size) noexcept

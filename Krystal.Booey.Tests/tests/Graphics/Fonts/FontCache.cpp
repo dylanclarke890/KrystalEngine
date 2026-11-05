@@ -2,7 +2,12 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
+#include "Krystal.Booey/Platform/SharedBuffer.hpp"
+#include <fstream>
+#include <iterator>
 
 namespace krys::boo::tests
 {
@@ -169,6 +174,35 @@ namespace krys::boo::tests
       CHECK(lower.Glyph == cascade.PrimaryFont()->GlyphForCharacter(U'A'));
       CHECK(lower.Font->PlatformData().Size() == Catch::Approx(14.f));
       CHECK(cascade.GlyphDataForCharacter(U'A', false).Font.get() == cascade.PrimaryFont().get());
+    }
+
+    SECTION("font-size-adjust scales the font to give its metric the aspect value")
+    {
+      // Ahem's x-height is 0.8em, so an aspect value of 0.4 halves a 20px font.
+      auto description = Description({Ahem}, 20);
+      description.SetFontSizeAdjust({.Value = 0.4f});
+      FontCascade cascade {FontCascadeDescription {description}};
+      cascade.Update();
+      CHECK(cascade.PrimaryFont()->PlatformData().Size() == Catch::Approx(10.f));
+      CHECK(*cascade.PrimaryFont()->GetFontMetrics().XHeight() == Catch::Approx(8.f));
+
+      // Cap height, and loaded fonts.
+      description.SetFontSizeAdjust({.MetricType = FontSizeAdjust::Metric::CapHeight, .Value = 0.4f});
+      std::ifstream stream(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts" / "Ahem.ttf",
+                           std::ios::binary);
+      REQUIRE(stream);
+      List<uint8> bytes {std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
+      Ref<SharedBuffer> buffer = SharedBuffer::Create(krys::move(bytes));
+      auto data = FontCustomPlatformData::Create(*buffer, {});
+      REQUIRE(data);
+      CHECK(data->GetFontPlatformData(description, false, false, FontCreationContext {}).Size()
+            == Catch::Approx(10.f));
+
+      // Without a value (from-font before it's resolved), the size is unchanged.
+      description.SetFontSizeAdjust({.Type = FontSizeAdjust::ValueType::FromFont});
+      FontCascade fromFont {FontCascadeDescription {description}};
+      fromFont.Update();
+      CHECK(fromFont.PrimaryFont()->PlatformData().Size() == Catch::Approx(20.f));
     }
 
     SECTION("Cascades with equal descriptions share their fonts")
