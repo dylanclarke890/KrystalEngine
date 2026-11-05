@@ -293,7 +293,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- The XInput gamepad backend never reports the Guide button (it stays released).
 - Drag events' modifier keys are always none: `DragController` makes their mouse event without keys (FIXME in `DragController.cpp`).
 
 ### Missing

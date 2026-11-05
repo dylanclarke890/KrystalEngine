@@ -1,4 +1,5 @@
-﻿#include "Krystal.PAL/Gamepad.hpp"
+﻿#include "Krystal.Core/Macros.hpp"
+#include "Krystal.PAL/Gamepad.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -31,10 +32,47 @@ namespace krys::pal
       y = std::clamp(fy / magnitude * scaled, -1.0f, 1.0f);
     }
 
+    // XInputGetStateEx, XInput 1.3's and 1.4's undocumented export (ordinal 100), reports the Guide button,
+    // which XInputGetState leaves out. Its state has padding after the gamepad.
+    constexpr WORD GuideButton = 0x0400;
+
+    struct XInputStateEx
+    {
+      DWORD PacketNumber;
+      XINPUT_GAMEPAD Gamepad;
+      DWORD Padding;
+    };
+
+    using XInputGetStateExFunction = DWORD(WINAPI *)(DWORD, XInputStateEx *);
+
     /// @brief Xbox-style pads through XInput, in its four slots.
     class XInputGamepadBackend final : public GamepadBackend
     {
+      KRYS_NON_COPY_MOVABLE(XInputGamepadBackend);
+
+    private:
+      HMODULE _module {nullptr};
+      XInputGetStateExFunction _getStateEx {nullptr};
+
     public:
+      XInputGamepadBackend() noexcept
+      {
+        _module = ::LoadLibraryW(L"xinput1_4.dll");
+        if (_module)
+        {
+          _getStateEx = reinterpret_cast<XInputGetStateExFunction>(
+            reinterpret_cast<void *>(::GetProcAddress(_module, MAKEINTRESOURCEA(100))));
+        }
+      }
+
+      ~XInputGamepadBackend() noexcept override
+      {
+        if (_module)
+        {
+          ::FreeLibrary(_module);
+        }
+      }
+
       KRYS_NODISCARD uint32 SlotCount() const noexcept override
       {
         return XUSER_MAX_COUNT;
@@ -42,14 +80,27 @@ namespace krys::pal
 
       KRYS_NODISCARD Maybe<GamepadReading> Read(uint32 slot) noexcept override
       {
-        XINPUT_STATE state {};
-        if (::XInputGetState(slot, &state) != ERROR_SUCCESS)
+        XInputStateEx state {};
+        if (_getStateEx)
         {
-          return null;
+          if (_getStateEx(slot, &state) != ERROR_SUCCESS)
+          {
+            return null;
+          }
+        }
+        else
+        {
+          XINPUT_STATE basicState {};
+          if (::XInputGetState(slot, &basicState) != ERROR_SUCCESS)
+          {
+            return null;
+          }
+          state.PacketNumber = basicState.dwPacketNumber;
+          state.Gamepad = basicState.Gamepad;
         }
 
         GamepadReading reading;
-        reading.PacketNumber = state.dwPacketNumber;
+        reading.PacketNumber = state.PacketNumber;
         const auto &pad = state.Gamepad;
         auto set = [&](GamepadButton button, WORD flag)
         {
@@ -69,7 +120,8 @@ namespace krys::pal
         set(GamepadButton::DPadDown, XINPUT_GAMEPAD_DPAD_DOWN);
         set(GamepadButton::DPadLeft, XINPUT_GAMEPAD_DPAD_LEFT);
         set(GamepadButton::DPadRight, XINPUT_GAMEPAD_DPAD_RIGHT);
-        // XInput doesn't report the Guide button, which stays released.
+        // Released without XInputGetStateEx.
+        set(GamepadButton::Guide, GuideButton);
         reading.Buttons[static_cast<size_t>(GamepadButton::LeftTrigger)] =
           static_cast<float>(pad.bLeftTrigger) / 255.0f;
         reading.Buttons[static_cast<size_t>(GamepadButton::RightTrigger)] =
