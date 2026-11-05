@@ -17,7 +17,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `Element` doesn't run the rest of `didMoveToNewDocument` (FIXME in `Element.cpp`): nodes aren't told they have moved. Observer data does move (`Element::OnAdopt`), but a canvas moved to another document doesn't move its context's preparation (FIXME in `HTMLCanvasElement.hpp`), and lazy-image moves are untested.
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
 - Failed custom element constructions and upgrades, exceptions thrown by listeners and parse errors are not reported anywhere (there's no console).
-- `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `document.open()`/`write()`, `nonce`).
+- `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `nonce`).
 - `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
 - The backup custom element queue is global rather than one per agent.
@@ -35,8 +35,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- There is no `document.open()`, `document.write()`, `document.writeln()` or `document.close()`, so there's no script-created parser and no insertion point.
-- There is no `DOMParser` (`Document.parseHTMLUnsafe()` and `Document.parseHTML()` parse HTML into a new document) and no `XMLSerializer`.
 - Serializing XML (`innerHTML` and `outerHTML` in an XML document) doesn't check the specification's error cases, so a comment containing `--`, a processing instruction containing `?>` and the rest are written as markup that isn't well-formed rather than throwing an `InvalidStateError` (FIXMEs in `MarkupAccumulator.cpp`). Test: `The XML fragment serialization algorithm refuses a DOM that isn't well-formed` (`[!shouldfail]`, `tests/DOM/DOMParsing.cpp`).
 
 ## HTML elements and forms
