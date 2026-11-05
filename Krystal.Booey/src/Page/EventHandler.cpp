@@ -578,7 +578,7 @@ namespace krys::boo
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
-    // FIXME: Synthetic touch events, hover timers, fake mouse moves, SVG panning and frame set resizing.
+    // FIXME: Synthetic touch events, hover timers, fake mouse moves and frame set resizing.
 
     if (auto *page = frame->GetPage())
     {
@@ -761,7 +761,7 @@ namespace krys::boo
     _mousePressed = false;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
 
-    // FIXME: SVG panning, frame set resizing and immediate actions.
+    // FIXME: Frame set resizing and immediate actions.
 
     if (RefPtr<Scrollbar> lastScrollbarUnderMouse = _lastScrollbarUnderMouse)
     {
@@ -2902,7 +2902,7 @@ namespace krys::boo
     return _mouseDownMayStartSelect;
   }
 
-  // FIXME: Widgets, SVG panning and the scrollbar corner (isPointInScrollbarCorner); image overlays' text,
+  // FIXME: Widgets and the scrollbar corner (isPointInScrollbarCorner); image overlays' text,
   // once there are image overlays.
   bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
   {
