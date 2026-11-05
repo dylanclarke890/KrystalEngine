@@ -41,6 +41,11 @@ namespace krys::boo::css
         return krys::SwitchOn(
           queryInParens, [&](const Condition &condition) { return EvaluateCondition(condition, context); },
           [&](const mq::Feature &feature) { return AsConcreteEvaluator().EvaluateFeature(feature, context); },
+          [&](const mq::StyleRange &range)
+          {
+            return range.Schema ? range.Schema->EvaluateStyleRange(range, context)
+                                : mq::EvaluationResult::Unknown;
+          },
           [&](const mq::GeneralEnclosed &) { return mq::EvaluationResult::Unknown; });
       }
 

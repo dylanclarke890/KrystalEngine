@@ -51,10 +51,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## CSS parsing and CSSOM
 
-### Bugs
-
-- Range syntax in `style()` container queries (css-conditional-5) isn't supported. Two cases in `tests/CSS/Queries/ContainerQueryParser.cpp` (`[!shouldfail]`).
-
 ### Missing
 
 - Typed OM has only numeric values and `CSSKeywordValue` (`CSS/TypedOM/`). There is no `CSSStyleValue::Parse()`/`ParseAll()`, `CSSStyleValueFactory`, `StylePropertyMap` (`styleMap`, `attributeStyleMap`, `computedStyleMap()`), `CSSUnparsedValue`, image, transform or colour values. `CSSNumericFactory` is a struct of static functions (`CSSNumericFactory::Px(10)`) and there is no `CSS` namespace object.

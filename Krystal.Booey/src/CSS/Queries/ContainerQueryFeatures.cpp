@@ -1,6 +1,17 @@
 ﻿#include "Krystal.Booey/CSS/Queries/ContainerQueryFeatures.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/FrequencyDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/TimeDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
@@ -238,24 +249,9 @@ namespace krys::boo::css::cq
           return mq::ToEvaluationResult(customPropertyValue && !customPropertyValue->IsGuaranteedInvalid());
         }
 
-        auto resolvedFeatureValue = [&]() -> RefPtr<const style::CustomProperty>
-        {
-          auto *featureValue = DynamicDowncast<CustomPropertyValue>(feature.RightComparison->Value.get());
-          krys_debug_assert(featureValue);
-
-          // Resolve the queried custom property value for var() references, css-wide keywords and registered
-          // properties.
-          auto builderContext =
-            style::BuilderContext {ShareRefPtr(context.Document.get()), context.ConversionData.ParentStyle(),
-                                   context.ConversionData.RootStyle(),
-                                   ShareRefPtr(context.ConversionData.ElementForContainerUnitResolution())};
-
-          auto dummyStyle = RenderStyle::Clone(style);
-          auto dummyMatchResult = style::MatchResult::Create();
-
-          auto styleBuilder = style::Builder {dummyStyle, krys::move(builderContext), *dummyMatchResult};
-          return styleBuilder.ResolveCustomPropertyForContainerQueries(*featureValue);
-        }();
+        auto *featureValue = DynamicDowncast<CustomPropertyValue>(feature.RightComparison->Value.get());
+        krys_debug_assert(featureValue);
+        auto resolvedFeatureValue = ResolveQueriedValue(*featureValue, context);
 
         if (!resolvedFeatureValue)
         {
@@ -270,6 +266,146 @@ namespace krys::boo::css::cq
 
         krys_debug_assert(feature.RightComparison->Op == mq::ComparisonOperator::Equal);
         return mq::ToEvaluationResult(customPropertyValue && *customPropertyValue == *resolvedFeatureValue);
+      }
+
+      // https://drafts.csswg.org/css-conditional-5/#evaluate-a-style-range
+      KRYS_NODISCARD mq::EvaluationResult
+        EvaluateStyleRange(const mq::StyleRange &range,
+                           const mq::FeatureEvaluationContext &context) const noexcept override
+      {
+        if (!context.ConversionData.Style() || !context.ConversionData.ParentStyle())
+        {
+          return mq::EvaluationResult::False;
+        }
+
+        List<RefPtr<PrimitiveValue>> values;
+        for (auto &rangeValue : range.Values)
+        {
+          // A custom property name is substituted as if it were var(), and other values have their
+          // substitution functions replaced.
+          auto substituted = [&]() -> RefPtr<const style::CustomProperty>
+          {
+            if (!rangeValue.Value)
+            {
+              return ShareRefPtr(
+                context.ConversionData.Style()->CustomPropertyValue(rangeValue.CustomPropertyName));
+            }
+            return ResolveQueriedValue(Downcast<CustomPropertyValue>(*rangeValue.Value), context);
+          }();
+          if (!substituted || substituted->IsGuaranteedInvalid())
+          {
+            return mq::EvaluationResult::False;
+          }
+
+          // Then each must parse as a <number>, <percentage>, <length>, <angle>, <time>, <frequency> or
+          // <resolution>.
+          TokenRange tokens {Span<const Token>(substituted->Tokens())};
+          tokens.DiscardWhitespace();
+          auto state = PropertyParserState {.Context = StrictParserContext()};
+          auto value = PrimitiveValueResolver<Number<>, Percentage<>, Length<>, Angle<>, Time<>, Frequency<>,
+                                              Resolution<>>::ConsumeAndResolve(tokens, state);
+          tokens.DiscardWhitespace();
+          if (!value || !tokens.IsAtEnd())
+          {
+            return mq::EvaluationResult::False;
+          }
+          values.push_back(krys::move(value));
+        }
+
+        auto category = [](const PrimitiveValue &value)
+        {
+          return value.IsNumberOrInteger() ? UnitCategory::Number
+                                           : UnitCategoryForType(value.PrimitiveType());
+        };
+
+        // A unitless zero is a zero length when compared against lengths.
+        bool hasLength = std::ranges::any_of(values, [](auto &value) { return value->IsLength(); });
+
+        Maybe<UnitCategory> commonCategory;
+        List<double> numbers;
+        auto &conversionData = context.ConversionData;
+        for (auto &value : values)
+        {
+          auto valueCategory = category(*value);
+          if (hasLength && valueCategory == UnitCategory::Number && !value->ResolveAsNumber(conversionData))
+          {
+            numbers.push_back(0.0);
+            valueCategory = UnitCategoryForType(UnitType::px);
+          }
+          else
+          {
+            switch (valueCategory)
+            {
+              case UnitCategory::Number: numbers.push_back(value->ResolveAsNumber(conversionData)); break;
+              case UnitCategory::Percent:
+                numbers.push_back(value->ResolveAsPercentage(conversionData));
+                break;
+              case UnitCategory::Angle: numbers.push_back(value->ResolveAsAngle(conversionData)); break;
+              case UnitCategory::Time:  numbers.push_back(value->ResolveAsTime(conversionData)); break;
+              case UnitCategory::Resolution:
+                numbers.push_back(value->ResolveAsResolution(conversionData));
+                break;
+              case UnitCategory::Frequency:
+                numbers.push_back(PrimitiveValue::ComputeFrequency<FrequencyUnit::Hz>(
+                  value->PrimitiveType(), value->Value<double>(conversionData)));
+                break;
+              default:
+                if (!value->IsLength())
+                {
+                  return mq::EvaluationResult::False;
+                }
+                numbers.push_back(value->ResolveAsLength<double>(conversionData));
+                valueCategory = UnitCategoryForType(UnitType::px);
+                break;
+            }
+          }
+
+          if (commonCategory && *commonCategory != valueCategory)
+          {
+            return mq::EvaluationResult::False;
+          }
+          commonCategory = valueCategory;
+        }
+
+        for (auto i = 0uz; i < range.Operators.size(); ++i)
+        {
+          if (!Compare(range.Operators[i], numbers[i], numbers[i + 1uz]))
+          {
+            return mq::EvaluationResult::False;
+          }
+        }
+        return mq::EvaluationResult::True;
+      }
+
+    private:
+      KRYS_NODISCARD static bool Compare(mq::ComparisonOperator op, double left, double right) noexcept
+      {
+        switch (op)
+        {
+          case mq::ComparisonOperator::LessThan:           return left < right;
+          case mq::ComparisonOperator::LessThanOrEqual:    return left <= right;
+          case mq::ComparisonOperator::Equal:              return left == right;
+          case mq::ComparisonOperator::GreaterThan:        return left > right;
+          case mq::ComparisonOperator::GreaterThanOrEqual: return left >= right;
+        }
+        krys_unreachable();
+      }
+
+      /// @brief Resolves a queried value for var() references, CSS-wide keywords and registered properties.
+      KRYS_NODISCARD static RefPtr<const style::CustomProperty>
+        ResolveQueriedValue(const CustomPropertyValue &value,
+                            const mq::FeatureEvaluationContext &context) noexcept
+      {
+        auto builderContext =
+          style::BuilderContext {ShareRefPtr(context.Document.get()), context.ConversionData.ParentStyle(),
+                                 context.ConversionData.RootStyle(),
+                                 ShareRefPtr(context.ConversionData.ElementForContainerUnitResolution())};
+
+        auto dummyStyle = RenderStyle::Clone(*context.ConversionData.Style());
+        auto dummyMatchResult = style::MatchResult::Create();
+
+        auto styleBuilder = style::Builder {dummyStyle, krys::move(builderContext), *dummyMatchResult};
+        return styleBuilder.ResolveCustomPropertyForContainerQueries(value);
       }
     };
 

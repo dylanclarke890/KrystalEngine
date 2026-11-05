@@ -22,6 +22,8 @@ namespace krys::boo::css::mq
                                                              const MediaQueryParserContext &context) noexcept;
     KRYS_NODISCARD static RefPtr<Value> ConsumeValue(TokenRange &tokens,
                                                      const MediaQueryParserContext &context) noexcept;
+    /// @brief Consumes an `<mf-comparison>` and the whitespace after it.
+    KRYS_NODISCARD static Maybe<ComparisonOperator> ConsumeComparisonOperator(TokenRange &tokens) noexcept;
 
     /// @brief Checks the feature's syntax and values against the schema, and sets `Feature::Schema` if they
     /// match. A `<number>` given for a ratio feature is replaced by the ratio `<number> / 1`.
@@ -162,6 +164,13 @@ namespace krys::boo::css::mq
         return QueryInParens {krys::move(*feature)};
       }
 
+      auto styleRangeRange = blockRange;
+      if (auto range = TConcreteParser::ConsumeStyleRange(styleRangeRange, context, state))
+      {
+        range->FunctionId = functionId;
+        return QueryInParens {krys::move(*range)};
+      }
+
       return GeneralEnclosed {functionId ? CSSOMString(ToString(*functionId)) : CSSOMString {},
                               originalBlockRange.Serialise(TokenSerialisationMode::Normal)};
     }
@@ -187,6 +196,12 @@ namespace krys::boo::css::mq
     KRYS_NODISCARD static bool IsValidFunctionId(ValueId) noexcept
     {
       return false;
+    }
+
+    KRYS_NODISCARD static Maybe<StyleRange> ConsumeStyleRange(TokenRange &, const MediaQueryParserContext &,
+                                                              State &) noexcept
+    {
+      return {};
     }
 
     KRYS_NODISCARD static const FeatureSchema *

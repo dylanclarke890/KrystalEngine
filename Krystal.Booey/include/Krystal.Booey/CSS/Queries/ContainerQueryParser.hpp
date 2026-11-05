@@ -15,6 +15,9 @@ namespace krys::boo::css::cq
       ConsumeContainerQueryList(TokenRange &tokens, const MediaQueryParserContext &context) noexcept;
 
     KRYS_NODISCARD static bool IsValidFunctionId(ValueId functionId) noexcept;
+    /// @brief A `<style-range>`, inside `style()`.
+    KRYS_NODISCARD static Maybe<mq::StyleRange>
+      ConsumeStyleRange(TokenRange &tokens, const MediaQueryParserContext &context, State &state) noexcept;
     KRYS_NODISCARD static const mq::FeatureSchema *
       SchemaForFeatureName(const CSSOMStringAtom &name, const MediaQueryParserContext &context,
                            State &state) noexcept;

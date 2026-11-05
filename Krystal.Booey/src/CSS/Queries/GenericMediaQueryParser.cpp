@@ -135,46 +135,9 @@ namespace krys::boo::css::mq
   Maybe<Feature> FeatureParser::ConsumeRangeFeature(TokenRange &tokens,
                                                     const MediaQueryParserContext &context) noexcept
   {
-    auto consumeRangeOperator = [&]() -> Maybe<ComparisonOperator>
+    auto consumeRangeOperator = [&]
     {
-      if (tokens.IsAtEnd())
-      {
-        return {};
-      }
-      auto &opToken = tokens.Consume();
-      if (tokens.IsAtEnd() || opToken.Type() != TokenType::Delim)
-      {
-        return {};
-      }
-
-      auto isEqualsDelimiter = [&]
-      {
-        return tokens.Peek().Type() == TokenType::Delim && tokens.Peek().Delimiter() == U'=';
-      };
-
-      switch (opToken.Delimiter())
-      {
-        case U'=': tokens.DiscardWhitespace(); return ComparisonOperator::Equal;
-        case U'<':
-          if (isEqualsDelimiter())
-          {
-            tokens.Discard();
-            tokens.DiscardWhitespace();
-            return ComparisonOperator::LessThanOrEqual;
-          }
-          tokens.DiscardWhitespace();
-          return ComparisonOperator::LessThan;
-        case U'>':
-          if (isEqualsDelimiter())
-          {
-            tokens.Discard();
-            tokens.DiscardWhitespace();
-            return ComparisonOperator::GreaterThanOrEqual;
-          }
-          tokens.DiscardWhitespace();
-          return ComparisonOperator::GreaterThan;
-        default: return {};
-      }
+      return ConsumeComparisonOperator(tokens);
     };
 
     bool didFailParsing = false;
@@ -260,6 +223,48 @@ namespace krys::boo::css::mq
     }
 
     return Feature {featureName, Syntax::Range, krys::move(leftComparison), krys::move(rightComparison)};
+  }
+
+  Maybe<ComparisonOperator> FeatureParser::ConsumeComparisonOperator(TokenRange &tokens) noexcept
+  {
+    if (tokens.IsAtEnd())
+    {
+      return {};
+    }
+    auto &opToken = tokens.Consume();
+    if (tokens.IsAtEnd() || opToken.Type() != TokenType::Delim)
+    {
+      return {};
+    }
+
+    auto isEqualsDelimiter = [&]
+    {
+      return tokens.Peek().Type() == TokenType::Delim && tokens.Peek().Delimiter() == U'=';
+    };
+
+    switch (opToken.Delimiter())
+    {
+      case U'=': tokens.DiscardWhitespace(); return ComparisonOperator::Equal;
+      case U'<':
+        if (isEqualsDelimiter())
+        {
+          tokens.Discard();
+          tokens.DiscardWhitespace();
+          return ComparisonOperator::LessThanOrEqual;
+        }
+        tokens.DiscardWhitespace();
+        return ComparisonOperator::LessThan;
+      case U'>':
+        if (isEqualsDelimiter())
+        {
+          tokens.Discard();
+          tokens.DiscardWhitespace();
+          return ComparisonOperator::GreaterThanOrEqual;
+        }
+        tokens.DiscardWhitespace();
+        return ComparisonOperator::GreaterThan;
+      default: return {};
+    }
   }
 
   RefPtr<Value> FeatureParser::ConsumeValue(TokenRange &tokens,

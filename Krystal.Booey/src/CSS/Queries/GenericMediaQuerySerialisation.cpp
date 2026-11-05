@@ -47,20 +47,45 @@ namespace krys::boo::css::mq
     }
   }
 
+  static void SerialiseRangeComparisonOperator(StringBuilder &builder, ComparisonOperator op) noexcept
+  {
+    builder.Append(u8' ');
+    switch (op)
+    {
+      case ComparisonOperator::LessThan:           builder.Append(u8'<'); break;
+      case ComparisonOperator::LessThanOrEqual:    builder.Append(u8"<="); break;
+      case ComparisonOperator::Equal:              builder.Append(u8'='); break;
+      case ComparisonOperator::GreaterThan:        builder.Append(u8'>'); break;
+      case ComparisonOperator::GreaterThanOrEqual: builder.Append(u8">="); break;
+    }
+    builder.Append(u8' ');
+  }
+
+  void Serialise(StringBuilder &builder, const StyleRange &range) noexcept
+  {
+    for (auto i = 0uz; i < range.Values.size(); ++i)
+    {
+      if (i)
+      {
+        SerialiseRangeComparisonOperator(builder, range.Operators[i - 1uz]);
+      }
+      auto &value = range.Values[i];
+      if (value.Value)
+      {
+        builder.Append(value.Value->CssText(DefaultSerialisationContext()));
+      }
+      else
+      {
+        SerialiseIdentifier(CSSOMString {value.CustomPropertyName.View()}, builder);
+      }
+    }
+  }
+
   void Serialise(StringBuilder &builder, const Feature &feature) noexcept
   {
     auto serialiseRangeComparisonOperator = [&](ComparisonOperator op)
     {
-      builder.Append(u8' ');
-      switch (op)
-      {
-        case ComparisonOperator::LessThan:           builder.Append(u8'<'); break;
-        case ComparisonOperator::LessThanOrEqual:    builder.Append(u8"<="); break;
-        case ComparisonOperator::Equal:              builder.Append(u8'='); break;
-        case ComparisonOperator::GreaterThan:        builder.Append(u8'>'); break;
-        case ComparisonOperator::GreaterThanOrEqual: builder.Append(u8">="); break;
-      }
-      builder.Append(u8' ');
+      SerialiseRangeComparisonOperator(builder, op);
     };
 
     CSSOMString name {feature.Name.View()};

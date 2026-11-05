@@ -288,7 +288,16 @@ namespace krys::boo::style::tests
       @container bar style(--y: a) { #q { width: 5px } }
       @container bar style(--y: a), foo style(--y: a) { #q { height: 7px } }
       @container bar, style(--y: b) { #q { min-width: 3px } }
-    </style><div id=c><p id=p></p></div><div id=n><p id=q></p></div>)"};
+      #r { --len: 20px; --num: 3; --zero: 0; --deg: 90deg; --word: a }
+      @container style(--len > 10px) { #s { width: 1px } }
+      @container style(1em < --len < 2em) { #s { height: 2px } }
+      @container style(--num >= 3) { #s { min-width: 3px } }
+      @container style(--zero < --len) { #s { min-height: 4px } }
+      @container style(0.25turn = --deg) { #s { max-width: 5px } }
+      @container style(--len > 1) { #s { max-height: 6px } }
+      @container style(--word > 1) { #s { padding-top: 7px } }
+      @container style(--missing < 1) { #s { margin-left: 8px } }
+    </style><div id=c><p id=p></p></div><div id=n><p id=q></p></div><div id=r><p id=s></p></div>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
 
@@ -305,6 +314,19 @@ namespace krys::boo::style::tests
     // A list applies if any of its queries is true, each against its own container.
     CHECK(ResolverFixture::Serialised(q, q.Height()) == "7px");
     CHECK(ResolverFixture::Serialised(q, q.MinWidth()) == "auto");
+
+    // Style ranges compare numeric values of the same type.
+    auto &s = Rendered(fixture.ById(u8"s"));
+    CHECK(ResolverFixture::Serialised(s, s.Width()) == "1px");
+    CHECK(ResolverFixture::Serialised(s, s.Height()) == "2px");
+    CHECK(ResolverFixture::Serialised(s, s.MinWidth()) == "3px");
+    // A unitless zero is a zero length against a length.
+    CHECK(ResolverFixture::Serialised(s, s.MinHeight()) == "4px");
+    CHECK(ResolverFixture::Serialised(s, s.MaxWidth()) == "5px");
+    // Mismatched types, values that aren't numeric and missing properties are false.
+    CHECK(ResolverFixture::Serialised(s, s.MaxHeight()) == "none");
+    CHECK(ResolverFixture::Serialised(s, s.PaddingTop()) == "0px");
+    CHECK(ResolverFixture::Serialised(s, s.MarginLeft()) == "0px");
 
     SECTION("Selecting containers")
     {

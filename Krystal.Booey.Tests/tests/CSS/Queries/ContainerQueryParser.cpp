@@ -296,13 +296,51 @@ namespace krys::boo::css::tests
     CHECK(feature->RightComparison->Value->IsCustomPropertyValue());
   }
 
-  // FIXME: Range syntax in style queries (css-conditional-5) isn't supported (WPT
-  // at-container-style-parsing.html).
+  // Cases from WPT at-container-style-parsing.html.
   TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() ranges",
-                   "[CSS][Queries][ContainerQueryParser][!shouldfail]")
+                   "[CSS][Queries][ContainerQueryParser]")
   {
-    CHECK(ClassifyCondition(u8"style(--foo >= --bar)") == ConditionResult::Known);
-    CHECK(ClassifyCondition(u8"style(10px < --foo <= 10em)") == ConditionResult::Known);
+    for (auto condition : {
+           u8"style(--foo >= --bar)",
+           u8"style(10px < --foo <= 10em)",
+           u8"style(--foo = 1)",
+           u8"style(10 > --foo > 1)",
+           u8"style(1 < 2)",
+           u8"style(var(--x) < calc(1px + 1em))",
+           u8"style((--a < 1) and (--b > 2))",
+         })
+    {
+      INFO(ToNarrow(condition));
+      CHECK(ClassifyCondition(condition) == ConditionResult::Known);
+    }
+
+    for (auto condition : {
+           u8"style(--foo <)",
+           u8"style(--foo < 1 < 2 < 3)",
+           u8"style(1 < --foo > 2)",
+           u8"style(1 = --foo = 2)",
+           u8"style(1 < --foo = 2)",
+         })
+    {
+      INFO(ToNarrow(condition));
+      CHECK(ClassifyCondition(condition) == ConditionResult::Unknown);
+    }
+
+    auto query = ParseContainerQuery(u8"style(10px < --foo <= 10em)");
+    REQUIRE(query);
+    auto *range = std::get_if<mq::StyleRange>(&query->Condition.Queries[0]);
+    REQUIRE(range);
+    CHECK(range->Schema == &cq::Features::Style());
+    CHECK(range->FunctionId == ValueId::Style);
+    REQUIRE(range->Values.size() == 3uz);
+    CHECK(range->Values[1].CustomPropertyName == CSSOMStringAtom(u8"--foo"));
+    CHECK(range->Values[0].Value);
+    CHECK(range->Operators
+          == List {mq::ComparisonOperator::LessThan, mq::ComparisonOperator::LessThanOrEqual});
+
+    CHECK(ConditionText(u8"style(10px<--foo<=10em)") == "style(10px < --foo <= 10em)");
+    CHECK(ConditionText(u8"style(  --a   >=   --b  )") == "style(--a >= --b)");
+    CHECK(ConditionText(u8"style((--a = 1) or (--b > 2))") == "style((--a = 1) or (--b > 2))");
   }
 
   // Cases from WPT at-container-parsing.html.

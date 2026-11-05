@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Queries/ContainerQueryParser.hpp"
+#include "Krystal.Booey/CSS/Parser/VariableParser.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Queries/ContainerQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
@@ -92,6 +93,113 @@ namespace krys::boo::css::cq
   bool ContainerQueryParser::IsValidFunctionId(ValueId functionId) noexcept
   {
     return functionId == ValueId::Style;
+  }
+
+  // https://drafts.csswg.org/css-conditional-5/#typedef-style-range
+  Maybe<mq::StyleRange> ContainerQueryParser::ConsumeStyleRange(TokenRange &tokens,
+                                                                const MediaQueryParserContext &context,
+                                                                State &state) noexcept
+  {
+    if (state.InFunctionId != ValueId::Style)
+    {
+      return {};
+    }
+
+    auto isComparisonDelimiter = [](const Token &token)
+    {
+      return token.Type() == TokenType::Delim
+             && (token.Delimiter() == U'<' || token.Delimiter() == U'>' || token.Delimiter() == U'=');
+    };
+
+    // <style-range-value> = <custom-property-name> | <style-feature-value>
+    auto consumeValue = [&]() -> Maybe<mq::StyleRangeValue>
+    {
+      auto begin = tokens;
+      while (!tokens.IsAtEnd() && !isComparisonDelimiter(tokens.Peek()))
+      {
+        tokens.DiscardComponentValue();
+      }
+      auto valueRange = begin.RangeUntil(tokens);
+      valueRange.DiscardTrailingWhitespace();
+      if (valueRange.IsAtEnd())
+      {
+        return {};
+      }
+
+      auto nameRange = valueRange;
+      if (nameRange.Peek().Type() == TokenType::Ident
+          && IsCustomPropertyName(nameRange.Peek().IdentCodePoints()))
+      {
+        CSSOMStringAtom name {nameRange.Consume().IdentCodePoints()};
+        if (nameRange.IsAtEnd())
+        {
+          return mq::StyleRangeValue {krys::move(name)};
+        }
+      }
+
+      // Parsed as a custom property value, so the var() and other substitutions are resolved like those of a
+      // style feature's value. The name has a NUL, which no CSS can give, so it's never a registered
+      // property.
+      static const CSSOMStringAtom valueName {CSSOMStringView {u8"--\0", 3uz}};
+      auto value = VariableParser::ParseDeclarationValue(valueName, valueRange, context.Context);
+      if (!value)
+      {
+        return {};
+      }
+      return mq::StyleRangeValue {CSSOMStringAtom::Null(), krys::move(value)};
+    };
+
+    mq::StyleRange range;
+    while (true)
+    {
+      auto value = consumeValue();
+      if (!value)
+      {
+        return {};
+      }
+      range.Values.push_back(krys::move(*value));
+      if (tokens.IsAtEnd())
+      {
+        break;
+      }
+      if (range.Values.size() == 3uz)
+      {
+        return {};
+      }
+      auto op = mq::FeatureParser::ConsumeComparisonOperator(tokens);
+      if (!op)
+      {
+        return {};
+      }
+      range.Operators.push_back(*op);
+    }
+
+    if (range.Values.size() < 2uz)
+    {
+      return {};
+    }
+
+    // Three values compare both ways with <mf-lt> or both with <mf-gt>.
+    if (range.Values.size() == 3uz)
+    {
+      auto isLess = [](mq::ComparisonOperator op)
+      {
+        return op == mq::ComparisonOperator::LessThan || op == mq::ComparisonOperator::LessThanOrEqual;
+      };
+      auto isGreater = [](mq::ComparisonOperator op)
+      {
+        return op == mq::ComparisonOperator::GreaterThan || op == mq::ComparisonOperator::GreaterThanOrEqual;
+      };
+      bool bothLess = isLess(range.Operators[0]) && isLess(range.Operators[1]);
+      bool bothGreater = isGreater(range.Operators[0]) && isGreater(range.Operators[1]);
+      if (!bothLess && !bothGreater)
+      {
+        return {};
+      }
+    }
+
+    range.Schema = &Features::Style();
+    return range;
   }
 
   const mq::FeatureSchema *ContainerQueryParser::SchemaForFeatureName(const CSSOMStringAtom &name,
