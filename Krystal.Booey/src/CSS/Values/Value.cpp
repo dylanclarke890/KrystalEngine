@@ -6,7 +6,6 @@
 #include "Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp"
 #include "Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp"
 #include "Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp"
-#include "Krystal.Booey/CSS/Values/CanvasValue.hpp"
 #include "Krystal.Booey/CSS/Values/ColorSchemeValue.hpp"
 #include "Krystal.Booey/CSS/Values/ColorValue.hpp"
 #include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
@@ -34,7 +33,6 @@
 #include "Krystal.Booey/CSS/Values/ImageSetOptionValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/OffsetRotateValue.hpp"
 #include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PathValue.hpp"
@@ -93,10 +91,6 @@ namespace krys::boo::css
       case ValueType::BoxShadowProperty:
       {
         return std::invoke(std::forward<Visitor>(visitor), Downcast<BoxShadowPropertyValue>(*this));
-      }
-      case ValueType::Canvas:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), Downcast<CanvasValue>(*this));
       }
       case ValueType::Color:
       {
@@ -205,10 +199,6 @@ namespace krys::boo::css
       case ValueType::ImageSet:
       {
         return std::invoke(std::forward<Visitor>(visitor), Downcast<ImageSetValue>(*this));
-      }
-      case ValueType::NamedImage:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), Downcast<NamedImageValue>(*this));
       }
       case ValueType::OffsetRotate:
       {

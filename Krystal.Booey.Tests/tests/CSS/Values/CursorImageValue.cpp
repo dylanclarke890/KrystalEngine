@@ -2,8 +2,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
@@ -38,7 +38,10 @@ namespace krys::boo::css::tests
 
     SECTION("Values other than images have no original URL")
     {
-      auto value = CursorImageValue::Create(NamedImageValue::Create(u8"name"), nullptr);
+      auto value =
+        CursorImageValue::Create(CrossFadeValue::Create(TestImage(u8"a"), TestImage(u8"b"),
+                                                        PrimitiveValue::Create(0.5, UnitType::Number)),
+                                 nullptr);
       CHECK(value->OriginalURL().IsNone());
     }
 

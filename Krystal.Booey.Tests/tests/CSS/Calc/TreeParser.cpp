@@ -96,7 +96,6 @@ namespace krys::boo::css::calc::tests
   TEST_CASE("TreeParser(IsCalcFunction)", "[CSS][Calc][TreeParser]")
   {
     CHECK(IsCalcFunction(ValueId::Calc));
-    CHECK(IsCalcFunction(ValueId::WebkitCalc));
     CHECK(IsCalcFunction(ValueId::Clamp));
     CHECK(IsCalcFunction(ValueId::AnchorSize));
     CHECK_FALSE(IsCalcFunction(ValueId::Rgb));
@@ -110,7 +109,6 @@ namespace krys::boo::css::calc::tests
     CHECK(Serialise(u8"calc(10px / 4)") == "calc(2.5px)");
     CHECK(Serialise(u8"calc((1px + 2px) * 2)") == "calc(6px)");
     CHECK(Serialise(u8"calc(1in + 4px)") == "calc(100px)");
-    CHECK(Serialise(u8"-webkit-calc(1px + 1px)") == "calc(2px)");
     CHECK(Serialise(u8"calc(2 * 3)", WithCategory(css::Category::Number)) == "calc(6)");
     CHECK(Serialise(u8"calc(1px + 2em)") == "calc(2em + 1px)");
     CHECK(Serialise(u8"calc(50% + 10px)", WithCategory(css::Category::LengthPercentage))

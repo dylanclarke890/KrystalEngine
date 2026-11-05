@@ -6,14 +6,12 @@
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/CSS/Values/CanvasValue.hpp"
 #include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
 #include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/FilterImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/GradientValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -86,14 +84,6 @@ namespace krys::boo::style
     if (const auto *imageValue = DynamicDowncast<css::CursorImageValue>(value))
     {
       return imageValue->CreateStyleImage(*this);
-    }
-    if (const auto *imageValue = DynamicDowncast<css::NamedImageValue>(value))
-    {
-      return imageValue->CreateStyleImage(*this);
-    }
-    if (const auto *cssCanvasValue = DynamicDowncast<css::CanvasValue>(value))
-    {
-      return cssCanvasValue->CreateStyleImage(*this);
     }
     if (const auto *crossfadeValue = DynamicDowncast<css::CrossFadeValue>(value))
     {

@@ -3,7 +3,6 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::tests
@@ -61,8 +60,8 @@ namespace krys::boo::css::tests
 
     SECTION("Image generators are accepted")
     {
-      auto option = ImageSetOptionValue::Create(NamedImageValue::Create(u8"name"));
-      CHECK(CssText(*option) == "-webkit-named-image(name) 1x");
+      auto option = ImageSetOptionValue::Create(TestImage(u8"name"));
+      CHECK(CssText(*option) == "url(\"https://example.com/name.png\") 1x");
     }
   }
 

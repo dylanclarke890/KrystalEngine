@@ -1224,17 +1224,7 @@ conic-gradient
 repeating-linear-gradient
 repeating-radial-gradient
 repeating-conic-gradient
--webkit-canvas
--webkit-cross-fade
--webkit-gradient
--webkit-linear-gradient
--webkit-radial-gradient
--webkit-repeating-linear-gradient
--webkit-repeating-radial-gradient
--webkit-image-set
--webkit-named-image
 filter
--webkit-filter
 paint
 
 // image-set's MIME type
@@ -1384,7 +1374,6 @@ path
 xywh
 
 calc
--webkit-calc
 min
 max
 clamp

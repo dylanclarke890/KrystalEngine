@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp"
-#include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::tests
@@ -21,7 +20,7 @@ namespace krys::boo::css::tests
 
     Ref<FilterImageValue> FilterImage(utf8_stringview name, Filter filter)
     {
-      return FilterImageValue::Create(NamedImageValue::Create(CSSOMString {name}), krys::move(filter));
+      return FilterImageValue::Create(TestImage(name), krys::move(filter));
     }
   }
 
@@ -35,8 +34,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "FilterImageValue serialisation", "[CSS][Values][FilterImageValue]")
   {
-    CHECK(CssText(*FilterImage(u8"a", SepiaFilter())) == "filter(-webkit-named-image(a), sepia())");
-    CHECK(CssText(*FilterImage(u8"a", BlurFilter(2_css_px))) == "filter(-webkit-named-image(a), blur(2px))");
+    CHECK(CssText(*FilterImage(u8"a", SepiaFilter()))
+          == "filter(url(\"https://example.com/a.png\"), sepia())");
+    CHECK(CssText(*FilterImage(u8"a", BlurFilter(2_css_px)))
+          == "filter(url(\"https://example.com/a.png\"), blur(2px))");
 
     // The image can be `none`.
     CHECK(CssText(*FilterImageValue::Create(PrimitiveValue::Create(ValueId::None), SepiaFilter()))
@@ -64,7 +65,7 @@ namespace krys::boo::css::tests
     auto value = FilterImage(u8"a", BlurFilter(2_css_px));
     auto children = Children(*value);
     REQUIRE(children.size() == 1uz);
-    CHECK(CssText(*children[0uz]) == "-webkit-named-image(a)");
+    CHECK(CssText(*children[0uz]) == "url(\"https://example.com/a.png\")");
 
     CHECK_FALSE(value->MayDependOnBaseUrl());
   }

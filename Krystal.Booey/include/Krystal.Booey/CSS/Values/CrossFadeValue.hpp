@@ -23,25 +23,18 @@ namespace krys::boo::css
     const Ref<Value> _fromValueOrNone;
     const Ref<Value> _toValueOrNone;
     const Ref<PrimitiveValue> _percentageValue;
-    bool _isPrefixed;
 
     CrossFadeValue(Ref<Value> &&fromValueOrNone, Ref<Value> &&toValueOrNone,
-                   Ref<PrimitiveValue> &&percentageValue, bool isPrefixed) noexcept;
+                   Ref<PrimitiveValue> &&percentageValue) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<CrossFadeValue> Create(Ref<Value> &&fromValueOrNone, Ref<Value> &&toValueOrNone,
-                                                     Ref<PrimitiveValue> &&percentageValue,
-                                                     bool isPrefixed = false) noexcept;
+                                                     Ref<PrimitiveValue> &&percentageValue) noexcept;
 
     KRYS_NODISCARD bool Equals(const CrossFadeValue &other) const noexcept;
     KRYS_NODISCARD bool EqualInputImages(const CrossFadeValue &other) const noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD bool IsPrefixed() const noexcept
-    {
-      return _isPrefixed;
-    }
 
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
 

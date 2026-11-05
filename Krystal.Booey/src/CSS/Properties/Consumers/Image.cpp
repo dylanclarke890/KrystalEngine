@@ -19,7 +19,6 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CanvasValue.hpp"
 #include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
 #include "Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/CSS/Values/FilterImageValue.hpp"
@@ -28,7 +27,6 @@
 #include "Krystal.Booey/CSS/Values/ImageSetOptionValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
@@ -129,312 +127,6 @@ namespace krys::boo::css
         default:
         {
           return null;
-        }
-      }
-    }
-
-    KRYS_NODISCARD static Maybe<PrefixedRadialGradient::Extent>
-      PrefixedRadialGradientExtentFromValueId(ValueId id) noexcept
-    {
-      switch (id)
-      {
-        case ValueId::Contain:
-        {
-          return PrefixedRadialGradient::Extent {keywords::Contain {}};
-        }
-        case ValueId::Cover:
-        {
-          return PrefixedRadialGradient::Extent {keywords::Cover {}};
-        }
-        case ValueId::ClosestSide:
-        {
-          return PrefixedRadialGradient::Extent {keywords::ClosestSide {}};
-        }
-        case ValueId::ClosestCorner:
-        {
-          return PrefixedRadialGradient::Extent {keywords::ClosestCorner {}};
-        }
-        case ValueId::FarthestSide:
-        {
-          return PrefixedRadialGradient::Extent {keywords::FarthestSide {}};
-        }
-        case ValueId::FarthestCorner:
-        {
-          return PrefixedRadialGradient::Extent {keywords::FarthestCorner {}};
-        }
-        default:
-        {
-          return null;
-        }
-      }
-    }
-
-    // MARK: Deprecated <gradient> values
-
-    template <ValueId ZeroValue, ValueId OneHundredValue>
-    KRYS_NODISCARD static Maybe<NumberOrPercentage<>>
-      ConsumeDeprecatedGradientPositionComponent(TokenRange &tokens, PropertyParserState &state) noexcept
-    {
-      if (tokens.Peek().Type() == TokenType::Ident)
-      {
-        if (ConsumeIdentRaw<ZeroValue>(tokens))
-        {
-          return NumberOrPercentage<> {PercentageRaw<> {0}};
-        }
-
-        if (ConsumeIdentRaw<OneHundredValue>(tokens))
-        {
-          return NumberOrPercentage<> {PercentageRaw<> {100}};
-        }
-
-        if (ConsumeIdentRaw<ValueId::Center>(tokens))
-        {
-          return NumberOrPercentage<> {PercentageRaw<> {50}};
-        }
-
-        return null;
-      }
-
-      return MetaConsumer<Number<>, Percentage<>>::Consume(tokens, state);
-    }
-
-    KRYS_NODISCARD static Maybe<DeprecatedGradientPosition>
-      ConsumeDeprecatedGradientPosition(TokenRange &tokens, PropertyParserState &state) noexcept
-    {
-      auto horizontal =
-        ConsumeDeprecatedGradientPositionComponent<ValueId::Left, ValueId::Right>(tokens, state);
-      if (!horizontal)
-      {
-        return null;
-      }
-
-      auto vertical =
-        ConsumeDeprecatedGradientPositionComponent<ValueId::Top, ValueId::Bottom>(tokens, state);
-      if (!vertical)
-      {
-        return null;
-      }
-
-      return DeprecatedGradientPosition {krys::move(*horizontal), krys::move(*vertical)};
-    }
-
-    KRYS_NODISCARD static Maybe<Color> ConsumeDeprecatedGradientStopColor(TokenRange &tokens,
-                                                                          PropertyParserState &state) noexcept
-    {
-      if (tokens.Peek().ValueId() == ValueId::Currentcolor)
-      {
-        return null;
-      }
-
-      return ConsumeUnresolvedColor(tokens, state);
-    }
-
-    KRYS_NODISCARD static Maybe<GradientDeprecatedColorStop>
-      ConsumeDeprecatedGradientColorStop(TokenRange &tokens, PropertyParserState &state) noexcept
-    {
-      auto id = tokens.Peek().FunctionId();
-      switch (id)
-      {
-        case ValueId::From:
-        case ValueId::To:
-        case ValueId::ColorStop:
-        {
-          break;
-        }
-        default:
-        {
-          return null;
-        }
-      }
-
-      auto args = ConsumeFunction(tokens);
-      Maybe<GradientDeprecatedColorStopPosition> position;
-      switch (id)
-      {
-        case ValueId::From:
-        {
-          position = GradientDeprecatedColorStopPosition {NumberRaw<> {0}};
-          break;
-        }
-        case ValueId::To:
-        {
-          position = GradientDeprecatedColorStopPosition {NumberRaw<> {1}};
-          break;
-        }
-        case ValueId::ColorStop:
-        {
-          auto numberOrPercentage = MetaConsumer<Number<>, Percentage<>>::Consume(args, state);
-          if (!numberOrPercentage)
-          {
-            return null;
-          }
-
-          if (!ConsumeComma(args))
-          {
-            return null;
-          }
-
-          position = GradientDeprecatedColorStopPosition {krys::move(*numberOrPercentage)};
-          break;
-        }
-        default:
-        {
-          krys_debug_assert(false);
-          return null;
-        }
-      }
-
-      auto color = ConsumeDeprecatedGradientStopColor(args, state);
-      if (!color || !args.IsAtEnd())
-      {
-        return null;
-      }
-
-      return GradientDeprecatedColorStop {.Color = krys::move(*color), .Position = krys::move(*position)};
-    }
-
-    KRYS_NODISCARD static Maybe<GradientDeprecatedColorStopList>
-      ConsumeDeprecatedGradientColorStops(TokenRange &tokens, PropertyParserState &state) noexcept
-    {
-      GradientDeprecatedColorStopList::Container stops;
-      while (ConsumeComma(tokens))
-      {
-        auto stop = ConsumeDeprecatedGradientColorStop(tokens, state);
-        if (!stop)
-        {
-          return null;
-        }
-
-        stops.push_back(krys::move(*stop));
-      }
-
-      return GradientDeprecatedColorStopList {krys::move(stops)};
-    }
-
-    KRYS_NODISCARD static RefPtr<Value> ConsumeDeprecatedLinearGradient(TokenRange &tokens,
-                                                                        PropertyParserState &state) noexcept
-    {
-      if (!ConsumeComma(tokens))
-      {
-        return nullptr;
-      }
-
-      auto first = ConsumeDeprecatedGradientPosition(tokens, state);
-      if (!first)
-      {
-        return nullptr;
-      }
-
-      if (!ConsumeComma(tokens))
-      {
-        return nullptr;
-      }
-
-      auto second = ConsumeDeprecatedGradientPosition(tokens, state);
-      if (!second)
-      {
-        return nullptr;
-      }
-
-      auto stops = ConsumeDeprecatedGradientColorStops(tokens, state);
-      if (!stops)
-      {
-        return nullptr;
-      }
-
-      return GradientValue::Create(
-        FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient> {DeprecatedLinearGradient {
-          .ColourInterpolationMethod =
-            GradientColorInterpolationMethod::LegacyMethod(AlphaPremultiplication::Premultiplied),
-          .GradientLine = {krys::move(*first), krys::move(*second)},
-          .Stops = krys::move(*stops),
-        }});
-    }
-
-    KRYS_NODISCARD static RefPtr<Value> ConsumeDeprecatedRadialGradient(TokenRange &tokens,
-                                                                        PropertyParserState &state) noexcept
-    {
-      if (!ConsumeComma(tokens))
-      {
-        return nullptr;
-      }
-
-      auto first = ConsumeDeprecatedGradientPosition(tokens, state);
-      if (!first)
-      {
-        return nullptr;
-      }
-
-      if (!ConsumeComma(tokens))
-      {
-        return nullptr;
-      }
-
-      auto firstRadius = MetaConsumer<Number<NonNegative>>::Consume(tokens, state);
-      if (!firstRadius)
-      {
-        return nullptr;
-      }
-
-      if (!ConsumeComma(tokens))
-      {
-        return nullptr;
-      }
-
-      auto second = ConsumeDeprecatedGradientPosition(tokens, state);
-      if (!second)
-      {
-        return nullptr;
-      }
-
-      if (!ConsumeComma(tokens))
-      {
-        return nullptr;
-      }
-
-      auto secondRadius = MetaConsumer<Number<NonNegative>>::Consume(tokens, state);
-      if (!secondRadius)
-      {
-        return nullptr;
-      }
-
-      auto stops = ConsumeDeprecatedGradientColorStops(tokens, state);
-      if (!stops)
-      {
-        return nullptr;
-      }
-
-      return GradientValue::Create(
-        FunctionNotation<ValueId::WebkitGradient, DeprecatedRadialGradient> {DeprecatedRadialGradient {
-          .ColourInterpolationMethod =
-            GradientColorInterpolationMethod::LegacyMethod(AlphaPremultiplication::Premultiplied),
-          .GradientBox =
-            {
-              .First = krys::move(*first),
-              .FirstRadius = krys::move(*firstRadius),
-              .Second = krys::move(*second),
-              .SecondRadius = krys::move(*secondRadius),
-            },
-          .Stops = krys::move(*stops),
-        }});
-    }
-
-    KRYS_NODISCARD static RefPtr<Value> ConsumeDeprecatedGradient(TokenRange &tokens,
-                                                                  PropertyParserState &state) noexcept
-    {
-      switch (tokens.ConsumeIncludingWhitespace().ValueId())
-      {
-        case ValueId::Linear:
-        {
-          return ConsumeDeprecatedLinearGradient(tokens, state);
-        }
-        case ValueId::Radial:
-        {
-          return ConsumeDeprecatedRadialGradient(tokens, state);
-        }
-        default:
-        {
-          return nullptr;
         }
       }
     }
@@ -587,268 +279,6 @@ namespace krys::boo::css
       krys_debug_assert(false);
       return {{ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied},
               defaultColorInterpolationMethod};
-    }
-
-    // MARK: Compat <gradient> values
-    // https://compat.spec.whatwg.org/#css-gradient-fns
-
-    // MARK: <-webkit-linear-gradient()> | <-webkit-repeating-linear-gradient()>
-    // https://compat.spec.whatwg.org/#css-gradients-webkit-linear-gradient
-
-    template <ValueId Name>
-    KRYS_NODISCARD static RefPtr<Value> ConsumePrefixedLinearGradient(TokenRange &tokens,
-                                                                      PropertyParserState &state) noexcept
-    {
-      // https://compat.spec.whatwg.org/#css-gradients-webkit-linear-gradient/ states that
-      // -webkit-linear-gradient() and -webkit-repeating-linear-gradient() must be "treated as an alias of
-      // linear-gradient as defined in [css3-images-20110217]." In [css3-images-20110217] the grammar was
-      // defined as:
-      //
-      //   <linear-gradient> = linear-gradient([ [ [top | bottom] || [left | right] ] | <angle> ,]?
-      //   <color-stop>[, <color-stop>]+);
-      //
-      // see https://www.w3.org/TR/2011/WD-css3-images-20110217/#linear-gradients.
-
-      using GradientLine = PrefixedLinearGradient::GradientLineType;
-
-      auto consumeKeywordGradientLineKnownHorizontal = [&](TokenRange &tokens,
-                                                           Horizontal knownHorizontal) -> GradientLine
-      {
-        if (auto vertical = ConsumeIdentUsingMapping(tokens, VerticalFromValueId))
-        {
-          return SpaceSeparatedTuple<Horizontal, Vertical> {knownHorizontal, *vertical};
-        }
-        return knownHorizontal;
-      };
-
-      auto consumeKeywordGradientLineKnownVertical = [&](TokenRange &tokens,
-                                                         Vertical knownVertical) -> GradientLine
-      {
-        if (auto horizontal = ConsumeIdentUsingMapping(tokens, HorizontalFromValueId))
-        {
-          return SpaceSeparatedTuple<Horizontal, Vertical> {*horizontal, knownVertical};
-        }
-        return knownVertical;
-      };
-
-      auto consumeKeywordGradientLine = [&](TokenRange &tokens) -> Maybe<GradientLine>
-      {
-        switch (tokens.Peek().ValueId())
-        {
-          case ValueId::Left:
-          {
-            tokens.Discard();
-            tokens.DiscardWhitespace();
-            return consumeKeywordGradientLineKnownHorizontal(tokens, Horizontal {keywords::Left {}});
-          }
-          case ValueId::Right:
-          {
-            tokens.Discard();
-            tokens.DiscardWhitespace();
-            return consumeKeywordGradientLineKnownHorizontal(tokens, Horizontal {keywords::Right {}});
-          }
-          case ValueId::Top:
-          {
-            tokens.Discard();
-            tokens.DiscardWhitespace();
-            return consumeKeywordGradientLineKnownVertical(tokens, Vertical {keywords::Top {}});
-          }
-          case ValueId::Bottom:
-          {
-            tokens.Discard();
-            tokens.DiscardWhitespace();
-            return consumeKeywordGradientLineKnownVertical(tokens, Vertical {keywords::Bottom {}});
-          }
-          default:
-          {
-            return null;
-          }
-        }
-      };
-
-      Maybe<GradientLine> gradientLine;
-
-      // NOTE: Linear gradient <angle> specifiers accept unitless zero values.
-      // https://drafts.csswg.org/css-images-4/#typedef-linear-gradient-syntax
-
-      if (auto angle =
-            MetaConsumer<Angle<>>::Consume(tokens, state, {.UnitlessZeroAngle = AllowUnitlessZero(true)}))
-      {
-        gradientLine = GradientLine {krys::move(*angle)};
-        if (!ConsumeComma(tokens))
-        {
-          return nullptr;
-        }
-      }
-      else if (auto keywordGradientLine = consumeKeywordGradientLine(tokens))
-      {
-        gradientLine = krys::move(*keywordGradientLine);
-        if (!ConsumeComma(tokens))
-        {
-          return nullptr;
-        }
-      }
-
-      auto stops = ConsumeLinearColorStopList<SupportsColorHints::No>(tokens, state);
-      if (!stops)
-      {
-        return nullptr;
-      }
-
-      return GradientValue::Create(FunctionNotation<Name, PrefixedLinearGradient> {PrefixedLinearGradient {
-        .ColourInterpolationMethod =
-          GradientColorInterpolationMethod::LegacyMethod(AlphaPremultiplication::Premultiplied),
-        .GradientLine = gradientLine.value_or(GradientLine {Vertical {keywords::Top {}}}),
-        .Stops = krys::move(*stops),
-      }});
-    }
-
-    // MARK: <-webkit-radial-gradient()> | <-webkit-repeating-radial-gradient()>
-    // https://compat.spec.whatwg.org/#css-gradients-webkit-radial-gradient
-
-    template <ValueId Name>
-    KRYS_NODISCARD static RefPtr<Value> ConsumePrefixedRadialGradient(TokenRange &tokens,
-                                                                      PropertyParserState &state) noexcept
-    {
-      // https://compat.spec.whatwg.org/#css-gradients-webkit-radial-gradient/ states that
-      // -webkit-radial-gradient() and -webkit-repeating-radial-gradient() must be "treated as an alias of
-      // radial-gradient as defined in [css3-images-20110217]." In [css3-images-20110217] the grammar was
-      // defined as:
-      //
-      //   <radial-gradient> = radial-gradient([<bg-position>,]? [ [<shape> || <size>] | [<length> |
-      //   <percentage>]{2} ,]? <color-stop>[, <color-stop>]+);
-      //   <shape> = [ circle | ellipse ]
-      //   <size> = [ closest-side | closest-corner | farthest-side | farthest-corner | contain | cover ]
-      //
-      //      defaults to ‘ellipse cover’.
-      //
-      // see https://www.w3.org/TR/2011/WD-css3-images-20110217/#radial-gradients.
-
-      auto position = ConsumeOneOrTwoComponentPositionUnresolved(tokens, state);
-      if (position)
-      {
-        if (!ConsumeComma(tokens))
-        {
-          return nullptr;
-        }
-      }
-
-      Maybe<ShapeKeyword> shapeKeyword;
-      Maybe<PrefixedRadialGradient::Extent> extentKeyword;
-      if (tokens.Peek().Type() == TokenType::Ident)
-      {
-        shapeKeyword = ConsumeIdentUsingMapping(tokens, ShapeKeywordFromValueId);
-        extentKeyword = ConsumeIdentUsingMapping(tokens, PrefixedRadialGradientExtentFromValueId);
-        if (!shapeKeyword)
-        {
-          shapeKeyword = ConsumeIdentUsingMapping(tokens, ShapeKeywordFromValueId);
-        }
-
-        if (shapeKeyword || extentKeyword)
-        {
-          if (!ConsumeComma(tokens))
-          {
-            return nullptr;
-          }
-        }
-      }
-
-      auto consumeGradientBox = [&] -> Maybe<PrefixedRadialGradient::GradientBoxType>
-      {
-        if (shapeKeyword && extentKeyword)
-        {
-          switch (*shapeKeyword)
-          {
-            case ShapeKeyword::Ellipse:
-            {
-              return PrefixedRadialGradient::Ellipse {
-                .Size = *extentKeyword,
-                .Position = krys::move(position),
-              };
-            }
-            case ShapeKeyword::Circle:
-            {
-              return PrefixedRadialGradient::Circle {
-                .Size = *extentKeyword,
-                .Position = krys::move(position),
-              };
-            }
-          }
-        }
-
-        if (shapeKeyword)
-        {
-          switch (*shapeKeyword)
-          {
-            case ShapeKeyword::Ellipse:
-            {
-              return PrefixedRadialGradient::Ellipse {
-                .Size = null,
-                .Position = krys::move(position),
-              };
-            }
-            case ShapeKeyword::Circle:
-            {
-              return PrefixedRadialGradient::Circle {
-                .Size = null,
-                .Position = krys::move(position),
-              };
-            }
-          }
-        }
-
-        if (extentKeyword)
-        {
-          return PrefixedRadialGradient::Ellipse {
-            .Size = *extentKeyword,
-            .Position = krys::move(position),
-          };
-        }
-
-        if (auto length1 = MetaConsumer<LengthPercentage<NonNegative>>::Consume(tokens, state))
-        {
-          auto length2 = MetaConsumer<LengthPercentage<NonNegative>>::Consume(tokens, state);
-          if (!length2)
-          {
-            return null;
-          }
-
-          if (!ConsumeComma(tokens))
-          {
-            return null;
-          }
-
-          return PrefixedRadialGradient::Ellipse {
-            .Size = PrefixedRadialGradient::Ellipse::SizeType {krys::move(*length1), krys::move(*length2)},
-            .Position = krys::move(position),
-          };
-        }
-
-        // If no size is provided, default to an ellipse.
-        return PrefixedRadialGradient::Ellipse {
-          .Size = null,
-          .Position = krys::move(position),
-        };
-      };
-
-      auto gradientBox = consumeGradientBox();
-      if (!gradientBox)
-      {
-        return nullptr;
-      }
-
-      auto stops = ConsumeLinearColorStopList<SupportsColorHints::No>(tokens, state);
-      if (!stops)
-      {
-        return nullptr;
-      }
-
-      return GradientValue::Create(FunctionNotation<Name, PrefixedRadialGradient> {PrefixedRadialGradient {
-        .ColourInterpolationMethod =
-          GradientColorInterpolationMethod::LegacyMethod(AlphaPremultiplication::Premultiplied),
-        .GradientBox = krys::move(*gradientBox),
-        .Stops = krys::move(*stops),
-      }});
     }
 
     // MARK: Standard <gradient> values
@@ -1342,8 +772,8 @@ namespace krys::boo::css
 
     // MARK: <cross-fade()>
 
-    KRYS_NODISCARD static RefPtr<Value> ConsumeCrossFade(TokenRange &args, PropertyParserState &state,
-                                                         ValueId functionId) noexcept
+    KRYS_NODISCARD static RefPtr<Value> ConsumeCrossFade(TokenRange &args,
+                                                         PropertyParserState &state) noexcept
     {
       // FIXME: The current CSS Images spec has a pretty different construction than is being parsed here:
       //
@@ -1380,31 +810,7 @@ namespace krys::boo::css
       }
 
       return CrossFadeValue::Create(krys::move(fromImageValueOrNone), krys::move(toImageValueOrNone),
-                                    krys::move(value), functionId == ValueId::WebkitCrossFade);
-    }
-
-    // MARK: <-webkit-canvas()>
-
-    KRYS_NODISCARD static RefPtr<Value> ConsumeWebkitCanvas(TokenRange &args) noexcept
-    {
-      if (args.Peek().Type() != TokenType::Ident)
-      {
-        return nullptr;
-      }
-
-      return CanvasValue::Create(CSSOMString(args.ConsumeIncludingWhitespace().IdentCodePoints()));
-    }
-
-    // MARK: <-webkit-named-image()>
-
-    KRYS_NODISCARD static RefPtr<Value> ConsumeWebkitNamedImage(TokenRange &args) noexcept
-    {
-      if (args.Peek().Type() != TokenType::Ident)
-      {
-        return nullptr;
-      }
-
-      return NamedImageValue::Create(CSSOMString(args.ConsumeIncludingWhitespace().IdentCodePoints()));
+                                    krys::move(value));
     }
 
     // MARK: <filter()>
@@ -1674,18 +1080,6 @@ namespace krys::boo::css
               [&](TokenRange &args)
               { return ConsumeRadialGradient<ValueId::RepeatingRadialGradient>(args, state); });
           }
-          case ValueId::WebkitLinearGradient:
-          {
-            return consumeGeneratedImage(
-              [&](TokenRange &args)
-              { return ConsumePrefixedLinearGradient<ValueId::WebkitLinearGradient>(args, state); });
-          }
-          case ValueId::WebkitRepeatingLinearGradient:
-          {
-            return consumeGeneratedImage(
-              [&](TokenRange &args)
-              { return ConsumePrefixedLinearGradient<ValueId::WebkitRepeatingLinearGradient>(args, state); });
-          }
           case ValueId::RepeatingLinearGradient:
           {
             return consumeGeneratedImage(
@@ -1696,23 +1090,6 @@ namespace krys::boo::css
           {
             return consumeGeneratedImage(
               [&](TokenRange &args) { return ConsumeLinearGradient<ValueId::LinearGradient>(args, state); });
-          }
-          case ValueId::WebkitGradient:
-          {
-            return consumeGeneratedImage([&](TokenRange &args)
-                                         { return ConsumeDeprecatedGradient(args, state); });
-          }
-          case ValueId::WebkitRadialGradient:
-          {
-            return consumeGeneratedImage(
-              [&](TokenRange &args)
-              { return ConsumePrefixedRadialGradient<ValueId::WebkitRadialGradient>(args, state); });
-          }
-          case ValueId::WebkitRepeatingRadialGradient:
-          {
-            return consumeGeneratedImage(
-              [&](TokenRange &args)
-              { return ConsumePrefixedRadialGradient<ValueId::WebkitRepeatingRadialGradient>(args, state); });
           }
           case ValueId::ConicGradient:
           {
@@ -1725,21 +1102,10 @@ namespace krys::boo::css
               [&](TokenRange &args)
               { return ConsumeConicGradient<ValueId::RepeatingConicGradient>(args, state); });
           }
-          case ValueId::WebkitCrossFade:
           case ValueId::CrossFade:
           {
-            return consumeGeneratedImage([&](TokenRange &args)
-                                         { return ConsumeCrossFade(args, state, functionId); });
+            return consumeGeneratedImage([&](TokenRange &args) { return ConsumeCrossFade(args, state); });
           }
-          case ValueId::WebkitCanvas:
-          {
-            return consumeGeneratedImage([&](TokenRange &args) { return ConsumeWebkitCanvas(args); });
-          }
-          case ValueId::WebkitNamedImage:
-          {
-            return consumeGeneratedImage([&](TokenRange &args) { return ConsumeWebkitNamedImage(args); });
-          }
-          case ValueId::WebkitFilter:
           case ValueId::Filter:
           {
             return consumeGeneratedImage([&](TokenRange &args) { return ConsumeFilterImage(args, state); });
@@ -1749,7 +1115,6 @@ namespace krys::boo::css
             return consumeGeneratedImage([&](TokenRange &args) { return ConsumeCustomPaint(args, state); });
           }
           case ValueId::ImageSet:
-          case ValueId::WebkitImageSet:
           {
             return consumeImageSetImage(
               [&](TokenRange &args)

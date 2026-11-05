@@ -1178,7 +1178,6 @@ namespace krys::boo::css::calc
 
     switch (functionId)
     {
-      case ValueId::WebkitCalc:
       case ValueId::Calc:
       {
         // <calc()>  = calc( <calc-sum> )

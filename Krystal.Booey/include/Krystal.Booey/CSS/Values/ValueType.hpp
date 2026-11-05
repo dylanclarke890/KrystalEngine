@@ -14,9 +14,7 @@ namespace krys::boo::css
     ImageSetOption,
     CursorImage,
     // Image generator classes.
-    Canvas,
     PaintImage,
-    NamedImage,
     CrossFade,
     FilterImage,
     Gradient,

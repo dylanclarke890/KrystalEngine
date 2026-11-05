@@ -522,7 +522,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Borders/BoxShadow.hpp
   include/Krystal.Booey/CSS/Values/Borders/BoxShadowProperty.hpp
   include/Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp
-  include/Krystal.Booey/CSS/Values/CanvasValue.hpp
   include/Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp
   include/Krystal.Booey/CSS/Values/Color/AbsoluteColorResolver.hpp
   include/Krystal.Booey/CSS/Values/Color/Color.hpp
@@ -598,7 +597,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/ImageSetValue.hpp
   include/Krystal.Booey/CSS/Values/ImageValue.hpp
   include/Krystal.Booey/CSS/Values/Motion/RayFunction.hpp
-  include/Krystal.Booey/CSS/Values/NamedImageValue.hpp
   include/Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp
   include/Krystal.Booey/CSS/Values/OffsetRotateValue.hpp
   include/Krystal.Booey/CSS/Values/PaintImageValue.hpp
@@ -850,7 +848,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Borders/BorderImage.cpp
   src/CSS/Values/Borders/BorderRadius.cpp
   src/CSS/Values/BoxShadowPropertyValue.cpp
-  src/CSS/Values/CanvasValue.cpp
   src/CSS/Values/Color/Color.cpp
   src/CSS/Values/Color/ColorLayers.cpp
   src/CSS/Values/Color/ColorLayersResolver.cpp
@@ -894,7 +891,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/ImageSetValue.cpp
   src/CSS/Values/ImageValue.cpp
   src/CSS/Values/Motion/RayFunction.cpp
-  src/CSS/Values/NamedImageValue.cpp
   src/CSS/Values/OffsetRotateValue.cpp
   src/CSS/Values/PaintImageValue.cpp
   src/CSS/Values/PathValue.cpp
@@ -2747,7 +2743,6 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/Style/StyleBorderImageData.hpp
   include/Krystal.Booey/Rendering/Style/StyleBoxData.hpp
   include/Krystal.Booey/Rendering/Style/StyleCachedImage.hpp
-  include/Krystal.Booey/Rendering/Style/StyleCanvasImage.hpp
   include/Krystal.Booey/Rendering/Style/StyleContentAlignmentData.hpp
   include/Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp
   include/Krystal.Booey/Rendering/Style/StyleCursorImage.hpp
@@ -2768,7 +2763,6 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/Style/StyleMiscNonInheritedData.hpp
   include/Krystal.Booey/Rendering/Style/StyleMultiColData.hpp
   include/Krystal.Booey/Rendering/Style/StyleMultiImage.hpp
-  include/Krystal.Booey/Rendering/Style/StyleNamedImage.hpp
   include/Krystal.Booey/Rendering/Style/StyleNonInheritedData.hpp
   include/Krystal.Booey/Rendering/Style/StylePaintImage.hpp
   include/Krystal.Booey/Rendering/Style/StyleRareInheritedData.hpp
@@ -2998,7 +2992,6 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Style/StyleBorderImageData.cpp
   src/Rendering/Style/StyleBoxData.cpp
   src/Rendering/Style/StyleCachedImage.cpp
-  src/Rendering/Style/StyleCanvasImage.cpp
   src/Rendering/Style/StyleContentAlignmentData.cpp
   src/Rendering/Style/StyleCrossfadeImage.cpp
   src/Rendering/Style/StyleCursorImage.cpp
@@ -3018,7 +3011,6 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Style/StyleMiscNonInheritedData.cpp
   src/Rendering/Style/StyleMultiColData.cpp
   src/Rendering/Style/StyleMultiImage.cpp
-  src/Rendering/Style/StyleNamedImage.cpp
   src/Rendering/Style/StyleNonInheritedData.cpp
   src/Rendering/Style/StylePaintImage.cpp
   src/Rendering/Style/StyleRareInheritedData.cpp

@@ -7,9 +7,9 @@
 namespace krys::boo
 {
   StyleCrossfadeImage::StyleCrossfadeImage(RefPtr<StyleImage> &&from, RefPtr<StyleImage> &&to,
-                                           double percentage, bool isPrefixed) noexcept
+                                           double percentage) noexcept
       : StyleGeneratedImage {Type::CrossfadeImage, StyleCrossfadeImage::IsFixedSize},
-        _from {krys::move(from)}, _to {krys::move(to)}, _percentage {percentage}, _isPrefixed {isPrefixed}
+        _from {krys::move(from)}, _to {krys::move(to)}, _percentage {percentage}
   {
   }
 
@@ -48,7 +48,7 @@ namespace krys::boo
     auto toComputedValue = _to ? _to->ComputedStyleValue(style)
                                : Ref<css::Value> {css::PrimitiveValue::Create(css::ValueId::None)};
     return css::CrossFadeValue::Create(krys::move(fromComputedValue), krys::move(toComputedValue),
-                                       css::PrimitiveValue::Create(_percentage), _isPrefixed);
+                                       css::PrimitiveValue::Create(_percentage));
   }
 
   void StyleCrossfadeImage::Load(CachedResourceLoader &loader, const ResourceLoaderOptions &options) noexcept

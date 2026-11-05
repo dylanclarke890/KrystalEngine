@@ -15,16 +15,11 @@ namespace krys::boo::css
 {
   // MARK: - Common Types
 
-  using DeprecatedGradientPosition = SpaceSeparatedArray<NumberOrPercentage<>, 2>;
-
   using Horizontal = Variant<keywords::Left, keywords::Right>;
   using Vertical = Variant<keywords::Top, keywords::Bottom>;
 
   using RadialGradientExtent =
     Variant<keywords::ClosestCorner, keywords::ClosestSide, keywords::FarthestCorner, keywords::FarthestSide>;
-  using PrefixedRadialGradientExtent =
-    Variant<keywords::ClosestCorner, keywords::ClosestSide, keywords::FarthestCorner, keywords::FarthestSide,
-            keywords::Contain, keywords::Cover>;
 
   // MARK: - Gradient Color Interpolation Definitions.
 
@@ -109,12 +104,6 @@ namespace krys::boo::css
     GradientColorStop<GradientLinearColorStopColor, GradientLinearColorStopPosition>;
   using GradientLinearColorStopList = GradientColorStopList<GradientLinearColorStop>;
 
-  using GradientDeprecatedColorStopColor = Color;
-  using GradientDeprecatedColorStopPosition = NumberOrPercentageResolvedToNumber<>;
-  using GradientDeprecatedColorStop =
-    GradientColorStop<GradientDeprecatedColorStopColor, GradientDeprecatedColorStopPosition>;
-  using GradientDeprecatedColorStopList = GradientColorStopList<GradientDeprecatedColorStop>;
-
   template <>
   struct Serialiser<GradientAngularColorStop>
   {
@@ -127,13 +116,6 @@ namespace krys::boo::css
   {
     void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const GradientLinearColorStop &stop) noexcept;
-  };
-
-  template <>
-  struct Serialiser<GradientDeprecatedColorStop>
-  {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const GradientDeprecatedColorStop &stop) noexcept;
   };
 
   // MARK: - LinearGradient
@@ -159,81 +141,6 @@ namespace krys::boo::css
 
   template <size_t I>
   KRYS_NODISCARD const auto &get(const LinearGradient &gradient) noexcept
-  {
-    if constexpr (!I)
-    {
-      return gradient.ColourInterpolationMethod;
-    }
-    else if constexpr (I == 1)
-    {
-      return gradient.GradientLine;
-    }
-    else if constexpr (I == 2)
-    {
-      return gradient.Stops;
-    }
-  }
-
-  // MARK: - PrefixedLinearGradient
-
-  struct PrefixedLinearGradient
-  {
-    using GradientLineType =
-      Variant<Angle<>, Horizontal, Vertical, SpaceSeparatedTuple<Horizontal, Vertical>>;
-
-    GradientColorInterpolationMethod ColourInterpolationMethod;
-    GradientLineType GradientLine;
-    GradientLinearColorStopList Stops;
-
-    KRYS_NODISCARD bool operator==(const PrefixedLinearGradient &) const noexcept = default;
-  };
-
-  template <>
-  struct Serialiser<PrefixedLinearGradient>
-  {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const PrefixedLinearGradient &gradient) noexcept;
-  };
-
-  template <size_t I>
-  KRYS_NODISCARD const auto &get(const PrefixedLinearGradient &gradient) noexcept
-  {
-    if constexpr (!I)
-    {
-      return gradient.ColourInterpolationMethod;
-    }
-    else if constexpr (I == 1)
-    {
-      return gradient.GradientLine;
-    }
-    else if constexpr (I == 2)
-    {
-      return gradient.Stops;
-    }
-  }
-
-  // MARK: - DeprecatedLinearGradient
-
-  struct DeprecatedLinearGradient
-  {
-    using GradientLineType = CommaSeparatedArray<DeprecatedGradientPosition, 2>;
-
-    GradientColorInterpolationMethod ColourInterpolationMethod;
-    GradientLineType GradientLine;
-    GradientDeprecatedColorStopList Stops;
-
-    KRYS_NODISCARD bool operator==(const DeprecatedLinearGradient &) const noexcept = default;
-  };
-
-  template <>
-  struct Serialiser<DeprecatedLinearGradient>
-  {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const DeprecatedLinearGradient &gradient) noexcept;
-  };
-
-  template <size_t I>
-  KRYS_NODISCARD const auto &get(const DeprecatedLinearGradient &gradient) noexcept
   {
     if constexpr (!I)
     {
@@ -348,176 +255,6 @@ namespace krys::boo::css
     }
   }
 
-  // MARK: - PrefixedRadialGradient
-
-  struct PrefixedRadialGradient
-  {
-    using Extent = PrefixedRadialGradientExtent;
-
-    struct Ellipse
-    {
-      using SizeType = SpaceSeparatedArray<LengthPercentage<NonNegative>, 2>;
-
-      Maybe<Variant<SizeType, Extent>> Size;
-      Maybe<boo::css::Position> Position;
-
-      KRYS_NODISCARD bool operator==(const Ellipse &) const noexcept = default;
-    };
-
-    struct Circle
-    {
-      Maybe<Extent> Size;
-      Maybe<boo::css::Position> Position;
-
-      KRYS_NODISCARD bool operator==(const Circle &) const noexcept = default;
-    };
-
-    using GradientBoxType = Variant<Ellipse, Circle>;
-
-    GradientColorInterpolationMethod ColourInterpolationMethod;
-    GradientBoxType GradientBox;
-    GradientLinearColorStopList Stops;
-
-    KRYS_NODISCARD bool operator==(const PrefixedRadialGradient &) const noexcept = default;
-  };
-
-  template <>
-  struct Serialiser<PrefixedRadialGradient::Ellipse>
-  {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const PrefixedRadialGradient::Ellipse &ellipse) noexcept;
-  };
-
-  template <>
-  struct Serialiser<PrefixedRadialGradient::Circle>
-  {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const PrefixedRadialGradient::Circle &circle) noexcept;
-  };
-
-  template <>
-  struct Serialiser<PrefixedRadialGradient>
-  {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const PrefixedRadialGradient &gradient) noexcept;
-  };
-
-  template <size_t I>
-  KRYS_NODISCARD const auto &get(const PrefixedRadialGradient::Ellipse &ellipse) noexcept
-  {
-    if constexpr (!I)
-    {
-      return ellipse.Size;
-    }
-    else if constexpr (I == 1)
-    {
-      return ellipse.Position;
-    }
-  }
-
-  template <size_t I>
-  KRYS_NODISCARD const auto &get(const PrefixedRadialGradient::Circle &circle) noexcept
-  {
-    if constexpr (!I)
-    {
-      return circle.Size;
-    }
-    else if constexpr (I == 1)
-    {
-      return circle.Position;
-    }
-  }
-
-  template <size_t I>
-  KRYS_NODISCARD const auto &get(const PrefixedRadialGradient &gradient) noexcept
-  {
-    if constexpr (!I)
-    {
-      return gradient.ColourInterpolationMethod;
-    }
-    else if constexpr (I == 1)
-    {
-      return gradient.GradientBox;
-    }
-    else if constexpr (I == 2)
-    {
-      return gradient.Stops;
-    }
-  }
-
-  // MARK: - DeprecatedRadialGradient
-
-  struct DeprecatedRadialGradient
-  {
-    struct GradientBoxType
-    {
-      DeprecatedGradientPosition First;
-      Number<NonNegative> FirstRadius;
-      DeprecatedGradientPosition Second;
-      Number<NonNegative> SecondRadius;
-
-      KRYS_NODISCARD bool operator==(const GradientBoxType &) const noexcept = default;
-    };
-
-    GradientColorInterpolationMethod ColourInterpolationMethod;
-    GradientBoxType GradientBox;
-    GradientDeprecatedColorStopList Stops;
-
-    KRYS_NODISCARD bool operator==(const DeprecatedRadialGradient &) const noexcept = default;
-  };
-
-  template <>
-  struct Serialiser<DeprecatedRadialGradient::GradientBoxType>
-  {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const DeprecatedRadialGradient::GradientBoxType &gradientBox) noexcept;
-  };
-
-  template <>
-  struct Serialiser<DeprecatedRadialGradient>
-  {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const DeprecatedRadialGradient &gradient) noexcept;
-  };
-
-  template <size_t I>
-  KRYS_NODISCARD const auto &get(const DeprecatedRadialGradient::GradientBoxType &gradientBox) noexcept
-  {
-    if constexpr (!I)
-    {
-      return gradientBox.First;
-    }
-    else if constexpr (I == 1)
-    {
-      return gradientBox.FirstRadius;
-    }
-    else if constexpr (I == 2)
-    {
-      return gradientBox.Second;
-    }
-    else if constexpr (I == 3)
-    {
-      return gradientBox.SecondRadius;
-    }
-  }
-
-  template <size_t I>
-  KRYS_NODISCARD const auto &get(const DeprecatedRadialGradient &gradient) noexcept
-  {
-    if constexpr (!I)
-    {
-      return gradient.ColourInterpolationMethod;
-    }
-    else if constexpr (I == 1)
-    {
-      return gradient.GradientBox;
-    }
-    else if constexpr (I == 2)
-    {
-      return gradient.Stops;
-    }
-  }
-
   // MARK: - ConicGradient
 
   struct ConicGradient
@@ -587,16 +324,10 @@ namespace krys::boo::css
     // Linear
     FunctionNotation<ValueId::LinearGradient, LinearGradient>,
     FunctionNotation<ValueId::RepeatingLinearGradient, LinearGradient>,
-    FunctionNotation<ValueId::WebkitLinearGradient, PrefixedLinearGradient>,
-    FunctionNotation<ValueId::WebkitRepeatingLinearGradient, PrefixedLinearGradient>,
-    FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient>,
 
     // Radial
     FunctionNotation<ValueId::RadialGradient, RadialGradient>,
     FunctionNotation<ValueId::RepeatingRadialGradient, RadialGradient>,
-    FunctionNotation<ValueId::WebkitRadialGradient, PrefixedRadialGradient>,
-    FunctionNotation<ValueId::WebkitRepeatingRadialGradient, PrefixedRadialGradient>,
-    FunctionNotation<ValueId::WebkitGradient, DeprecatedRadialGradient>,
 
     // Conic
     FunctionNotation<ValueId::ConicGradient, ConicGradient>,
@@ -604,16 +335,9 @@ namespace krys::boo::css
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearGradient, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::PrefixedLinearGradient, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::DeprecatedLinearGradient, 3)
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient::Ellipse, 2)
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient::Circle, 2)
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::PrefixedRadialGradient::Ellipse, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::PrefixedRadialGradient::Circle, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::PrefixedRadialGradient, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::DeprecatedRadialGradient::GradientBoxType, 4)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::DeprecatedRadialGradient, 3)
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ConicGradient::GradientBoxType, 2)
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ConicGradient, 3)
 

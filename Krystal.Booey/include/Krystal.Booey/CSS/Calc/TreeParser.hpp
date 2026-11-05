@@ -48,7 +48,6 @@ namespace krys::boo::css::calc
     switch (functionId)
     {
       case ValueId::Calc:
-      case ValueId::WebkitCalc:
       case ValueId::Min:
       case ValueId::Max:
       case ValueId::Clamp:

@@ -141,11 +141,6 @@ namespace krys::boo::css
       return _type == ValueType::BoxShadowProperty;
     }
 
-    KRYS_NODISCARD bool IsCanvasValue() const noexcept
-    {
-      return _type == ValueType::Canvas;
-    }
-
     KRYS_NODISCARD bool IsColorValue() const noexcept
     {
       return _type == ValueType::Color;
@@ -281,11 +276,6 @@ namespace krys::boo::css
       return _type == ValueType::ImageSetOption;
     }
 
-    KRYS_NODISCARD bool IsNamedImageValue() const noexcept
-    {
-      return _type == ValueType::NamedImage;
-    }
-
     KRYS_NODISCARD bool IsOffsetRotateValue() const noexcept
     {
       return _type == ValueType::OffsetRotate;
@@ -408,7 +398,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsImageGeneratorValue() const noexcept
     {
-      return _type >= ValueType::Canvas && _type <= ValueType::Gradient;
+      return _type >= ValueType::PaintImage && _type <= ValueType::Gradient;
     }
 
     /// @brief True for all image-like values except CursorImageValues; these are the values that correspond

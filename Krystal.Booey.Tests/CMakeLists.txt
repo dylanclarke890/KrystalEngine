@@ -277,8 +277,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/ColorValue.cpp
 		tests/CSS/Values/ColorSchemeValue.cpp
 		tests/CSS/Values/DynamicRangeLimitValue.cpp
-		tests/CSS/Values/NamedImageValue.cpp
-		tests/CSS/Values/CanvasValue.cpp
 		tests/CSS/Values/PaintImageValue.cpp
 		tests/CSS/Values/ImageSetOptionValue.cpp
 		tests/CSS/Values/ImageValue.cpp

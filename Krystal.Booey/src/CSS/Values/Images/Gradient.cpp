@@ -43,58 +43,6 @@ namespace krys::boo::css
     ColorStopSerialisationForCSS(builder, context, stop);
   }
 
-  void Serialiser<GradientDeprecatedColorStop>::operator()(StringBuilder &builder,
-                                                           const SerialisationContext &context,
-                                                           const GradientDeprecatedColorStop &stop) noexcept
-  {
-    auto appendRaw = [&](const auto &color, NumberRaw<> raw)
-    {
-      if (!raw.Value)
-      {
-        builder.Append(u8"from(");
-        Serialise(builder, context, color);
-        builder.Append(u8')');
-      }
-      else if (raw.Value == 1)
-      {
-        builder.Append(u8"to(");
-        Serialise(builder, context, color);
-        builder.Append(u8')');
-      }
-      else
-      {
-        builder.Append(u8"color-stop(");
-        Serialise(builder, context, raw);
-        builder.Append(u8", ");
-        Serialise(builder, context, color);
-        builder.Append(u8')');
-      }
-    };
-
-    auto appendCalc = [&](const auto &color, const auto &calc)
-    {
-      builder.Append(u8"color-stop(");
-      Serialise(builder, context, calc);
-      builder.Append(u8", ");
-      Serialise(builder, context, color);
-      builder.Append(u8')');
-    };
-
-    stop.Position.SwitchOn(
-      [&](const Number<> &number)
-      {
-        krys::SwitchOn(
-          number, [&](const Number<>::Raw &raw) { appendRaw(stop.Color, raw); },
-          [&](const Number<>::Calc &calc) { appendCalc(stop.Color, calc); });
-      },
-      [&](const Percentage<> &percentage)
-      {
-        krys::SwitchOn(
-          percentage, [&](const Percentage<>::Raw &raw) { appendRaw(stop.Color, {raw.Value / 100.0}); },
-          [&](const Percentage<>::Calc &calc) { appendCalc(stop.Color, calc); });
-      });
-  }
-
   // MARK: - Gradient Color Interpolation
 
   namespace
@@ -202,34 +150,6 @@ namespace krys::boo::css
     Serialise(builder, context, gradient.Stops);
   }
 
-  // MARK: - PrefixedLinearGradient
-
-  void Serialiser<PrefixedLinearGradient>::operator()(StringBuilder &builder,
-                                                      const SerialisationContext &context,
-                                                      const PrefixedLinearGradient &gradient) noexcept
-  {
-    Serialise(builder, context, gradient.GradientLine);
-    builder.Append(u8", ");
-    Serialise(builder, context, gradient.Stops);
-  }
-
-  // MARK: - DeprecatedLinearGradient
-
-  void Serialiser<DeprecatedLinearGradient>::operator()(StringBuilder &builder,
-                                                        const SerialisationContext &context,
-                                                        const DeprecatedLinearGradient &gradient) noexcept
-  {
-    builder.Append(u8"linear, ");
-
-    Serialise(builder, context, gradient.GradientLine);
-
-    if (!gradient.Stops.isEmpty())
-    {
-      builder.Append(u8", ");
-      Serialise(builder, context, gradient.Stops);
-    }
-  }
-
   // MARK: - RadialGradient
 
   void Serialiser<RadialGradient::Ellipse>::operator()(StringBuilder &builder,
@@ -311,102 +231,6 @@ namespace krys::boo::css
     }
 
     Serialise(builder, context, gradient.Stops);
-  }
-
-  // MARK: - PrefixedRadialGradient
-
-  void Serialiser<PrefixedRadialGradient::Ellipse>::operator()(
-    StringBuilder &builder, const SerialisationContext &context,
-    const PrefixedRadialGradient::Ellipse &ellipse) noexcept
-  {
-    if (ellipse.Position)
-    {
-      Serialise(builder, context, *ellipse.Position);
-    }
-    else
-    {
-      builder.Append(u8"center");
-    }
-
-    if (ellipse.Size)
-    {
-      krys::SwitchOn(
-        *ellipse.Size,
-        [&](const PrefixedRadialGradient::Ellipse::SizeType &size)
-        {
-          builder.Append(u8", ");
-          Serialise(builder, context, size);
-        },
-        [&](const PrefixedRadialGradient::Extent &extent)
-        {
-          builder.Append(u8", ellipse ");
-          Serialise(builder, context, extent);
-        });
-    }
-  }
-
-  void Serialiser<PrefixedRadialGradient::Circle>::operator()(
-    StringBuilder &builder, const SerialisationContext &context,
-    const PrefixedRadialGradient::Circle &circle) noexcept
-  {
-    if (circle.Position)
-    {
-      Serialise(builder, context, *circle.Position);
-    }
-    else
-    {
-      builder.Append(u8"center");
-    }
-
-    builder.Append(u8", circle ");
-    Serialise(builder, context,
-              circle.Size ? *circle.Size : PrefixedRadialGradient::Extent {keywords::Cover {}});
-  }
-
-  void Serialiser<PrefixedRadialGradient>::operator()(StringBuilder &builder,
-                                                      const SerialisationContext &context,
-                                                      const PrefixedRadialGradient &gradient) noexcept
-  {
-    auto lengthBefore = builder.Length();
-    Serialise(builder, context, gradient.GradientBox);
-    bool wroteSomething = builder.Length() != lengthBefore;
-
-    if (wroteSomething)
-    {
-      builder.Append(u8", ");
-    }
-
-    Serialise(builder, context, gradient.Stops);
-  }
-
-  // MARK: - DeprecatedRadialGradient
-
-  void Serialiser<DeprecatedRadialGradient::GradientBoxType>::operator()(
-    StringBuilder &builder, const SerialisationContext &context,
-    const DeprecatedRadialGradient::GradientBoxType &gradientBox) noexcept
-  {
-    Serialise(builder, context, gradientBox.First);
-    builder.Append(u8", ");
-    Serialise(builder, context, gradientBox.FirstRadius);
-    builder.Append(u8", ");
-    Serialise(builder, context, gradientBox.Second);
-    builder.Append(u8", ");
-    Serialise(builder, context, gradientBox.SecondRadius);
-  }
-
-  void Serialiser<DeprecatedRadialGradient>::operator()(StringBuilder &builder,
-                                                        const SerialisationContext &context,
-                                                        const DeprecatedRadialGradient &gradient) noexcept
-  {
-    builder.Append(u8"radial, ");
-
-    Serialise(builder, context, gradient.GradientBox);
-
-    if (!gradient.Stops.isEmpty())
-    {
-      builder.Append(u8", ");
-      Serialise(builder, context, gradient.Stops);
-    }
   }
 
   // MARK: - ConicGradient
