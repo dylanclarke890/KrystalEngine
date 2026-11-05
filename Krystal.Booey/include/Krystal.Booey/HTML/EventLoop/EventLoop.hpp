@@ -63,8 +63,8 @@ namespace krys::boo::html
     EventLoop() noexcept;
     ~EventLoop() noexcept;
 
-    /// @brief The event loop of the surrounding agent.
-    /// FIXME: process-wide until there are agents.
+    /// @brief The event loop of the surrounding agent: the process's, as there are no agents (see
+    /// DIFFERENCES.md).
     KRYS_NODISCARD static EventLoop &Current() noexcept;
 
     /// @see https://html.spec.whatwg.org/#queue-a-task

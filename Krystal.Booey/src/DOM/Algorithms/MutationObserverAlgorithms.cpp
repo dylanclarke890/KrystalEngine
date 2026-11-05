@@ -23,9 +23,9 @@ namespace krys::boo::dom
       DOMStringAtom OldValue;
     };
 
-    /// @brief The surrounding agent's mutation observer state.
+    /// @brief The surrounding agent's mutation observer state, which is process-wide, as there are no agents
+    /// (see DIFFERENCES.md).
     /// @see https://dom.spec.whatwg.org/#mutation-observers
-    // FIXME: Process-wide until there are agents.
     struct MutationObserverAgent
     {
       /// @see https://dom.spec.whatwg.org/#mutation-observer-compound-microtask-queued-flag
