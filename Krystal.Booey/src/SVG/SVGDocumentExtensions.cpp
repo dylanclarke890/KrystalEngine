@@ -96,6 +96,14 @@ namespace krys::boo::svg
     _areAnimationsPaused = false;
   }
 
+  void SVGDocumentExtensions::ServiceAnimations() noexcept
+  {
+    for (auto &container : TimeContainers())
+    {
+      container->TimeContainer().ServiceAnimations();
+    }
+  }
+
   void SVGDocumentExtensions::DispatchLoadEventToOutermostSVGElements() noexcept
   {
     for (auto &container : TimeContainers())

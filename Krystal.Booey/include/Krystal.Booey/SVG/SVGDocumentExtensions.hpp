@@ -57,6 +57,8 @@ namespace krys::boo::svg
     void StartAnimations() noexcept;
     void PauseAnimations() noexcept;
     void UnpauseAnimations() noexcept;
+    /// @brief Samples the animations of the time containers that asked for this rendering update.
+    void ServiceAnimations() noexcept;
     void DispatchLoadEventToOutermostSVGElements() noexcept;
 
     KRYS_NODISCARD bool AreAnimationsPaused() const noexcept

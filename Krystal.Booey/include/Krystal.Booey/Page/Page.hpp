@@ -44,6 +44,7 @@ namespace krys::boo
     Animations,
     AnimationFrameCallbacks,
     CaretAnimation,
+    Images,
     ResizeObservations,
     FocusFixup,
     UpdateContentRelevancy,
@@ -55,7 +56,7 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 15uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 16uz);
 
 namespace krys::boo
 {

@@ -29,8 +29,11 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -609,5 +612,27 @@ namespace krys::boo::tests
     CHECK(svg.AnimationsPaused());
     fixture.TestPage->SetIsVisible(true);
     CHECK_FALSE(svg.AnimationsPaused());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: SMIL animations are sampled in the rendering update",
+                   "[Page][SVG]")
+  {
+    PageFixture fixture {
+      u8"<!DOCTYPE html><svg id=svg><rect id=r width=10 height=10><animate attributeName=x "
+      u8"from=0 to=100 dur=1s></animate></rect></svg>"};
+    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(fixture.ById(u8"svg")));
+    auto &rect = Downcast<svg::SVGRectElement>(Downcast<svg::SVGElement>(fixture.ById(u8"r")));
+    // As the document's load does.
+    fixture.Document->SVGExtensions().StartAnimations();
+    REQUIRE(svg.TimeContainer().IsActive());
+
+    // An animation changing every frame asks for each rendering update, and is sampled in it.
+    for (int i = 0; i < 2; ++i)
+    {
+      CHECK(fixture.TestPage->IsRenderingUpdateScheduled());
+      auto x = rect.X().ValueInSpecifiedUnits();
+      fixture.TestPage->UpdateRendering();
+      CHECK(rect.X().ValueInSpecifiedUnits() > x);
+    }
   }
 }

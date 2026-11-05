@@ -6,7 +6,11 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -116,6 +120,44 @@ namespace krys::boo::svg::tests
     CHECK(root->CurrentViewBoxRect() == FloatRect(0, 0, 40, 20));
     CHECK(IsInSVGImage(root.get()));
     CHECK_FALSE(IsInSVGImage(&ImageById(fixture, u8"i")));
+  }
+
+  TEST_CASE("SVGImage: an SVG image's animations run in the rendering update of the page showing it",
+            "[SVG][SVGImage]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddText(
+      u8"file:///moving.svg",
+      u8R"svg(<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect id="r" width="10")svg"
+      u8R"svg( height="10"><animate attributeName="x" from="0" to="100" dur="1s"/></rect></svg>)svg",
+      u8"image/svg+xml");
+    auto testPage = Page::Create();
+    PageInFrameFixture fixture(*testPage, u8R"html(<img id=i src="file:///moving.svg">)html");
+    RunNetworkingTasks();
+
+    auto *svgImage = SVGImageOf(ImageById(fixture, u8"i"));
+    REQUIRE(svgImage);
+    auto root = svgImage->RootElement();
+    REQUIRE(root);
+    auto *page = fixture.Frame->GetPage();
+    REQUIRE(page);
+    (void)fixture.Document->UpdateLayout();
+    page->UpdateRendering();
+    svgImage->StartAnimation();
+    html::EventLoop::Current().RunUntilIdle();
+    REQUIRE(root->TimeContainer().IsActive());
+    auto rectElement = root->NodeDocument().GetElementById(u8"r");
+    REQUIRE(rectElement);
+    auto &rect = Downcast<SVGRectElement>(Downcast<SVGElement>(*rectElement));
+
+    // The image's page asks the page showing it for its rendering updates, and is updated in them.
+    for (int i = 0; i < 2; ++i)
+    {
+      CHECK(page->IsRenderingUpdateScheduled());
+      auto x = rect.X().ValueInSpecifiedUnits();
+      page->UpdateRendering();
+      CHECK(rect.X().ValueInSpecifiedUnits() > x);
+    }
   }
 
   TEST_CASE("SVGImage: an SVG image loads nothing but data: URLs and has no links", "[SVG][SVGImage]")

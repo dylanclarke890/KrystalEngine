@@ -1346,7 +1346,8 @@ namespace krys::boo::svg
         }
         return _intervalEnd;
       }
-      return elapsed + _timeContainer->AnimationFrameDelay().count();
+      // It changes continuously: it's sampled in every frame.
+      return elapsed;
     }
     return _intervalBegin >= elapsed ? _intervalBegin : SMILTime::Unresolved();
   }

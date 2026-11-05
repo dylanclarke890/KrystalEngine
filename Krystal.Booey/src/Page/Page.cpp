@@ -7,6 +7,8 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
@@ -21,6 +23,7 @@
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -37,6 +40,7 @@ namespace krys::boo
       RenderingUpdateStep::Animations,
       RenderingUpdateStep::AnimationFrameCallbacks,
       RenderingUpdateStep::CaretAnimation,
+      RenderingUpdateStep::Images,
       RenderingUpdateStep::ResizeObservations,
       RenderingUpdateStep::FocusFixup,
       RenderingUpdateStep::SnapshottedScrollOffsets,
@@ -217,6 +221,27 @@ namespace krys::boo
     RunProcessingStep(RenderingUpdateStep::CaretAnimation,
                       [](dom::Document &document) { document.ServiceCaretAnimation(); });
 
+    // An SVG image's page is updated with the page that shows it, which its updates are scheduled with.
+    RunProcessingStep(
+      RenderingUpdateStep::Images,
+      [](dom::Document &document)
+      {
+        List<Ref<Page>> imagePages;
+        for (const auto &[url, resource] : document.GetCachedResourceLoader().AllCachedResources())
+        {
+          auto *cachedImage = DynamicDowncast<CachedImage>(resource.get());
+          auto *image = cachedImage ? DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()) : nullptr;
+          if (auto *page = image ? image->InternalPage() : nullptr)
+          {
+            imagePages.push_back(ShareRef(*page));
+          }
+        }
+        for (auto &page : imagePages)
+        {
+          page->UpdateRendering();
+        }
+      });
+
     LayoutIfNeeded();
 
     ForEachDocument([](dom::Document &document) { document.ProcessTopLayerRemovals(); });
@@ -322,8 +347,9 @@ namespace krys::boo
     // A render-blocked document is updated once it's unblocked, or the block times out.
     if (!_unfulfilledRequestedSteps.IsEmpty() || _skippedRenderBlockedDocument)
     {
-      _renderingUpdateIsScheduled = true;
       _unfulfilledRequestedSteps = {};
+      // As any request between updates is, so the chrome client hears of it.
+      ScheduleRenderingUpdate();
     }
   }
 

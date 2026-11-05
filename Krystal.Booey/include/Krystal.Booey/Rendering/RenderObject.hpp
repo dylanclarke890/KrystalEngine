@@ -441,9 +441,9 @@ namespace krys::boo
     virtual void ImageContentChanged(CachedImage &) noexcept
     {
     }
-    virtual void ScheduleRenderingUpdateForImage(CachedImage &) noexcept
-    {
-    }
+    /// @brief Schedules the page's rendering update for @p image's own, as an SVG image's page is updated
+    /// with the page that shows it.
+    virtual void ScheduleRenderingUpdateForImage(CachedImage &image) noexcept;
     /// @brief The client the renderer is to the cached images it uses.
     KRYS_NODISCARD CachedImageClient &GetCachedImageClient() const noexcept;
 

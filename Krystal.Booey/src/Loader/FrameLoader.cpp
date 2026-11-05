@@ -269,6 +269,9 @@ namespace krys::boo
 
   void FrameLoader::DidBeginDocument() noexcept
   {
+    // A document written into the frame (as an SVG image's is, after its initial empty one) completes anew.
+    _isComplete = false;
+    _didCallImplicitClose = false;
     _client->DispatchDidClearWindowObject();
     if (_state == FrameState::CommittedPage)
     {

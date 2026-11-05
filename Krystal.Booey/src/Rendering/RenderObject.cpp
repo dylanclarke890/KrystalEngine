@@ -1445,6 +1445,14 @@ namespace krys::boo
     _renderer.ScheduleRenderingUpdateForImage(image);
   }
 
+  void RenderObject::ScheduleRenderingUpdateForImage(CachedImage &) noexcept
+  {
+    if (auto *page = GetDocument().GetPage())
+    {
+      page->ScheduleRenderingUpdate({RenderingUpdateStep::Images});
+    }
+  }
+
   VisibleInViewportState RenderObject::ImageFrameAvailable(CachedImage &image, ImageAnimatingState,
                                                            const IntRect *changeRect) noexcept
   {

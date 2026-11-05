@@ -72,7 +72,8 @@ How each area of Booey is put together, by area. `DIFFERENCES.md` and `KNOWN-ISS
 - `ScrollTimeline::Create(document, options)` and `ViewTimeline::Create(document, options)` are made from C++ or from style (`scroll()`, `view()`, `scroll-timeline`, `view-timeline`, `timeline-scope` via the document's `StyleOriginatedTimelinesController`); timelines are brought up to date after the rendering update's resize observations.
 - The accelerated halves of `KeyframeEffect`, `KeyframeEffectStack`, `DocumentTimeline`, `WebAnimation`, `BlendingKeyframes` and `Styleable` hand transform and opacity animations to graphics layers (see Compositing).
 - A document leaving its frame stops its timers; suspended documents pause animations, `requestAnimationFrame` callbacks and layout.
-- SMIL (`SVG/Animation/SMILTimeContainer.cpp`) runs on its own timer rather than the rendering update.
+- SMIL (`SVG/Animation/SMILTimeContainer.cpp`) is sampled in the rendering update's animations step while an animation changes within a frame (the document timeline's `AnimationInterval`), and otherwise sleeps on a timer until a frame before its next change, as the document timeline does.
+- An SVG image's page is updated in the `Images` step of the rendering update of the page showing it: its requests for updates reach that page through the image's renderers (`RenderObject::ScheduleRenderingUpdateForImage`).
 - The golden `animations` uses animations paused at negative delays, so neither it nor Chrome's capture depends on capture time.
 
 ## Layout

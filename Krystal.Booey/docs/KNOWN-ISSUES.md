@@ -111,7 +111,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - SMIL animations don't pause for the image-animation setting (FIXME in `SVGDocumentExtensions.cpp`).
-- `SMILTimeContainer` runs on a fixed 1/60 s timer (`SMILAnimationFrameDelay`, no throttled delay) and mutates the DOM while updating animations, as there is no `EventQueueScope` (FIXMEs in `SMILTimeContainer.cpp`).
 - `KeyframeEffect::TimeToNextTick` wakes for the next iteration whether or not the document has `animationiteration` listeners (FIXME).
 - `DocumentTimeline::AnimationInterval` is always 15 ms (`FullSpeedAnimationInterval`), as there is no frame rate alignment (FIXME: the host's display refresh).
 

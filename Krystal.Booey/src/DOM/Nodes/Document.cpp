@@ -4085,6 +4085,11 @@ namespace krys::boo::dom
 
   void Document::UpdateAnimationsAndSendEvents() noexcept
   {
+    if (auto *svgExtensions = SVGExtensionsIfExists())
+    {
+      svgExtensions->ServiceAnimations();
+    }
+
     auto *window = Window();
     if (!window)
     {
