@@ -8,7 +8,7 @@
 namespace krys::boo::css
 {
   CSSStyleSheetObservableArray::CSSStyleSheetObservableArray(dom::ContainerNode &treeScope) noexcept
-      : _treeScope(WeakPtr<dom::ContainerNode>::WithRef(treeScope))
+      : _treeScope(CreateWeakPtr(&treeScope))
   {
     krys_debug_assert(Is<dom::Document>(treeScope) || Is<dom::ShadowRoot>(treeScope));
   }

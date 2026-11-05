@@ -603,7 +603,7 @@ namespace krys::boo
 
   bool TextIterator::HandleTextNode() noexcept
   {
-    Ref textNode = ShareRef(Downcast<dom::Text>(*_currentNode));
+    Ref<dom::Text> textNode = Downcast<dom::Text>(_currentNode);
 
     if (_fullyClippedStack.Top() && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
     {
@@ -678,7 +678,7 @@ namespace krys::boo
 
   void TextIterator::HandleTextRun() noexcept
   {
-    Ref textNode = ShareRef(Downcast<dom::Text>(*_currentNode));
+    Ref<dom::Text> textNode = Downcast<dom::Text>(_currentNode);
 
     const RenderText &renderer = _firstLetterText ? *_firstLetterText : *textNode->Renderer();
     if (renderer.Style().GetVisibility() != Visibility::Visible

@@ -3861,7 +3861,7 @@ namespace krys::boo::dom
 
   void Document::DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept
   {
-    _frame = WeakPtr<LocalFrame>::WithRef(frame);
+    _frame = CreateWeakPtr(&frame);
 
     // FIXME: The document loader's writer makes the window as it makes the document, reusing the initial
     // empty document's (takeDOMWindowFrom).
@@ -4434,7 +4434,7 @@ namespace krys::boo::dom
   {
     krys_debug_assert(&element.NodeDocument() == this);
     krys_debug_assert(!HasElementWithPendingUserAgentShadowTreeUpdate(element));
-    _elementsWithPendingUserAgentShadowTreeUpdates.push_back(WeakPtr<Element>::WithRef(element));
+    _elementsWithPendingUserAgentShadowTreeUpdates.push_back(CreateWeakPtr(&element));
   }
 
   void Document::RemoveElementWithPendingUserAgentShadowTreeUpdate(Element &element) noexcept

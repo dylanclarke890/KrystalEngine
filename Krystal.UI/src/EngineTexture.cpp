@@ -47,7 +47,7 @@ namespace krys::ui
     auto platformImage = CreateRefPtr<boo::PlatformImage>(_size, krys::move(external),
                                                           _alpha == AlphaPremultiplication::Premultiplied);
     auto image = boo::NativeImage::Create(krys::move(platformImage));
-    _image = WeakPtr<boo::NativeImage>::WithRef(*image);
+    _image = CreateWeakPtr(image.get());
     return image;
   }
 }

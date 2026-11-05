@@ -748,22 +748,22 @@ namespace krys::boo
 
   void RenderLayer::SetNextSibling(RenderLayer *next) noexcept
   {
-    _next = next ? CreateWeakPtr(next) : nullptr;
+    _next = CreateWeakPtr(next);
   }
 
   void RenderLayer::SetPreviousSibling(RenderLayer *prev) noexcept
   {
-    _previous = prev ? CreateWeakPtr(prev) : nullptr;
+    _previous = CreateWeakPtr(prev);
   }
 
   void RenderLayer::SetFirstChild(RenderLayer *first) noexcept
   {
-    _first = first ? CreateWeakPtr(first) : nullptr;
+    _first = CreateWeakPtr(first);
   }
 
   void RenderLayer::SetLastChild(RenderLayer *last) noexcept
   {
-    _last = last ? CreateWeakPtr(last) : nullptr;
+    _last = CreateWeakPtr(last);
   }
 
 #pragma region Tree
@@ -2251,7 +2251,7 @@ namespace krys::boo
         return nullptr;
       }
       auto *paginationLayer = layer.EnclosingPaginationLayer(IncludeCompositedPaginatedLayers);
-      return paginationLayer ? CreateWeakPtr(paginationLayer) : nullptr;
+      return CreateWeakPtr(paginationLayer);
     };
 
     if (IsNormalFlowOnly())

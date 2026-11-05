@@ -36,13 +36,12 @@ namespace krys::boo::inline_iterator
     /// @brief An iterator at the end, with no content.
     BoxModernPath() noexcept = default;
     explicit BoxModernPath(const layout_integration::InlineContent &inlineContent) noexcept
-        : _inlineContent(WeakPtr<const layout_integration::InlineContent>::WithRef(inlineContent))
+        : _inlineContent(CreateWeakPtr(&inlineContent))
     {
       SetAtEnd();
     }
     BoxModernPath(const layout_integration::InlineContent &inlineContent, size_t startIndex) noexcept
-        : _inlineContent(WeakPtr<const layout_integration::InlineContent>::WithRef(inlineContent)),
-          _boxIndex(startIndex)
+        : _inlineContent(CreateWeakPtr(&inlineContent)), _boxIndex(startIndex)
     {
     }
 

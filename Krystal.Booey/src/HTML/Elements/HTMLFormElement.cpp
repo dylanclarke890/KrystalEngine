@@ -272,7 +272,7 @@ namespace krys::boo::html
   RefPtr<HTMLElement> HTMLFormElement::Item(size_t index) noexcept
   {
     RefPtr<dom::Element> item = Elements()->Item(index);
-    return ShareRefPtr(DynamicDowncast<HTMLElement>(item.get()));
+    return DynamicDowncast<HTMLElement>(krys::move(item));
   }
 
   Maybe<Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>>>

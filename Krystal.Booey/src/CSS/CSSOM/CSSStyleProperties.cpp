@@ -478,7 +478,7 @@ namespace krys::boo::css
   StyleRuleCSSStyleProperties::StyleRuleCSSStyleProperties(MutableStyleProperties &propertySet,
                                                            CSSRule &parentRule) noexcept
       : PropertySetCSSStyleProperties(propertySet), _parentRuleType(parentRule.StyleRuleType()),
-        _parentRule(WeakPtr<CSSRule>::WithRef(parentRule))
+        _parentRule(CreateWeakPtr(&parentRule))
   {
     _propertySet->AddRef();
   }

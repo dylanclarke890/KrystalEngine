@@ -131,11 +131,10 @@ namespace krys::boo::style
     switch (_operation->GetType())
     {
       case PathOperation::Type::Reference:
-        return visitor(ReferencePath {ShareRef(Downcast<ReferencePathOperation>(*_operation))});
+        return visitor(ReferencePath {Downcast<ReferencePathOperation>(_operation)});
       case PathOperation::Type::Shape:
-        return visitor(BasicShapePath {ShareRef(Downcast<ShapePathOperation>(*_operation))});
-      case PathOperation::Type::Box:
-        return visitor(BoxPath {ShareRef(Downcast<BoxPathOperation>(*_operation))});
+        return visitor(BasicShapePath {Downcast<ShapePathOperation>(_operation)});
+      case PathOperation::Type::Box: return visitor(BoxPath {Downcast<BoxPathOperation>(_operation)});
       case PathOperation::Type::Ray: break;
     }
     krys_unreachable();

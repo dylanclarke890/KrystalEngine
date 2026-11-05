@@ -14,7 +14,7 @@
 namespace krys::boo::style
 {
   MatchedDeclarationsCache::MatchedDeclarationsCache(const Resolver &owner) noexcept
-      : _owner(WeakPtr<const Resolver>::WithRef(owner)), _sweepTimer(*this, &MatchedDeclarationsCache::Sweep)
+      : _owner(CreateWeakPtr(&owner)), _sweepTimer(*this, &MatchedDeclarationsCache::Sweep)
   {
   }
 

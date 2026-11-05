@@ -269,7 +269,7 @@ namespace krys::boo::html
     auto valueElement = CreateRef<HTMLDivElement>(document);
     valueElement->Id(u8"value");
     (void)bar->AppendChild(*valueElement);
-    _valueElement = WeakPtr<HTMLElement>::WithRef(*valueElement);
+    _valueElement = CreateWeakPtr(valueElement.get());
 
     DidElementStateChange();
   }

@@ -1020,7 +1020,7 @@ namespace krys::boo::html
     RefPtr<HTMLOptionElement> foundSelected;
     auto handleOptionElement = [&](HTMLOptionElement &option)
     {
-      _listItems.push_back(WeakPtr<HTMLElement>::WithRef(option));
+      _listItems.push_back(CreateWeakPtr(&option));
       if (updateSelectedStates && !_multiple)
       {
         if (option.SelectedWithoutUpdate())
@@ -1056,7 +1056,7 @@ namespace krys::boo::html
       }
       if (Is<HTMLOptGroupElement>(*descendant))
       {
-        _listItems.push_back(WeakPtr<HTMLElement>::WithRef(*descendant));
+        _listItems.push_back(CreateWeakPtr(descendant));
         for (auto *optGroupNode = dom::TreeQueries::Next(*descendant, descendant); optGroupNode;)
         {
           auto *optGroupDescendant = DynamicDowncast<HTMLElement>(*optGroupNode);
@@ -1084,7 +1084,7 @@ namespace krys::boo::html
       }
       if (Is<HTMLHRElement>(*descendant))
       {
-        _listItems.push_back(WeakPtr<HTMLElement>::WithRef(*descendant));
+        _listItems.push_back(CreateWeakPtr(descendant));
         node = dom::TreeQueries::NextSkippingChildren(*node, &select);
         continue;
       }

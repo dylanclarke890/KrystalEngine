@@ -226,7 +226,7 @@ namespace krys::boo
   {
     krys_debug_assert(
       std::ranges::none_of(_clients, [&](auto &existing) { return existing.get() == &client; }));
-    _clients.push_back(WeakPtr<FontSelector>::WithRef(client));
+    _clients.push_back(CreateWeakPtr(&client));
   }
 
   void FontCache::RemoveClient(FontSelector &client) noexcept

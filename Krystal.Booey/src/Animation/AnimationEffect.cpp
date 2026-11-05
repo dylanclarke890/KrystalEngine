@@ -521,7 +521,7 @@ namespace krys::boo
         return null;
       }
 
-      if (RefPtr scrollTimeline = ShareRefPtr(DynamicDowncast<ScrollTimeline>(timeline.get())))
+      if (RefPtr scrollTimeline = DynamicDowncast<ScrollTimeline>(timeline))
       {
         auto interval = scrollTimeline->IntervalForAttachmentRange(animation->Range());
         return interval.second - interval.first;

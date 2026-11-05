@@ -98,7 +98,7 @@ namespace krys::boo::html::tests
       {
         REQUIRE_FALSE(element->SetAttribute(u8"translate", dom::DOMString(translate)).HasException());
       }
-      return ShareRef(Downcast<HTMLElement>(*element));
+      return Downcast<HTMLElement>(krys::move(element));
     };
 
     // Translate-enabled without a parent, and an empty value is yes.

@@ -501,7 +501,7 @@ namespace krys::boo
     if (layer && layer->IsPointInResizeControl(localPoint))
     {
       layer->SetInResizeMode(true);
-      _resizeLayer = WeakPtr<RenderLayer>::WithRef(*layer);
+      _resizeLayer = CreateWeakPtr(layer);
       _offsetFromResizeCorner = LayoutSize(layer->OffsetFromResizeCorner(localPoint));
       RefPtr<dom::Node> resizedNode = ShareRefPtr(mouseEvent.TargetNode());
       (void)DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), resizedNode.get(), _clickCount,

@@ -304,8 +304,8 @@ namespace krys::boo::style
 
   Color ToStyleColor(const css::Color &value, const BuilderState &builderState) noexcept
   {
-    return ToStyleColor(value, Ref<const dom::Document>::WithRef(builderState.GetDocument()),
-                        builderState.Style(), builderState.CssToLengthConversionData());
+    return ToStyleColor(value, ShareRef(builderState.GetDocument()), builderState.Style(),
+                        builderState.CssToLengthConversionData());
   }
 
   css::Color ToCSS<Color>::operator()(const Color &value, const RenderStyle &style) noexcept

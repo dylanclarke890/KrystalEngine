@@ -49,7 +49,7 @@
 namespace krys::boo
 {
   LocalFrameView::LocalFrameView(LocalFrame &frame) noexcept
-      : _frame(WeakPtr<LocalFrame>::WithRef(frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
+      : _frame(CreateWeakPtr(&frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
         _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired)
   {
   }

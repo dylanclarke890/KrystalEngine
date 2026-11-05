@@ -387,7 +387,7 @@ namespace krys::boo
   RefPtr<dom::Element> EnclosingBlock(RefPtr<dom::Node> node, EditingBoundaryCrossingRule rule) noexcept
   {
     auto block = EnclosingNodeOfType(FirstPositionInOrBeforeNode(node.get()), IsBlock, rule);
-    return ShareRefPtr(DynamicDowncast<dom::Element>(block.get()));
+    return DynamicDowncast<dom::Element>(krys::move(block));
   }
 
   dom::Node *AncestorNodeInThisScope(const dom::Node &scopeRoot, dom::Node *node) noexcept
@@ -1281,7 +1281,7 @@ namespace krys::boo
     auto clone = dom::NodeAlgorithms::CloneNode(element, &element.NodeDocument(), false);
     krys_debug_assert(!clone.HasException());
     auto node = clone.ReleaseValue();
-    return ShareRef(Downcast<dom::Element>(*node));
+    return Downcast<dom::Element>(krys::move(node));
   }
 
   void CloneDataFromElement(dom::Element &target, const dom::Element &source) noexcept

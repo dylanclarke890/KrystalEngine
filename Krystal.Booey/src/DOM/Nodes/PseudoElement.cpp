@@ -16,7 +16,7 @@ namespace krys::boo::dom
 
   PseudoElement::PseudoElement(Element &host, PseudoElementType pseudoElementType) noexcept
       : Element(host.NodeDocument(), PseudoElementTagName(), NodeFlags::IsPseudoElement),
-        _hostElement(WeakPtr<Element>::WithRef(host)), _pseudoElementType(pseudoElementType)
+        _hostElement(CreateWeakPtr(&host)), _pseudoElementType(pseudoElementType)
   {
     SetNodeFlag(NodeFlags::IsConnected);
     krys_debug_assert(pseudoElementType == PseudoElementType::Before

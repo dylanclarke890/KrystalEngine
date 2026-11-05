@@ -784,7 +784,7 @@ namespace krys::boo
       // FIXME: <rdar://problem/5371536> Style rules that match pasted content can change it's appearance
 
       next = ShareRefPtr(TreeQueries::Next(*node));
-      RefPtr<dom::StyledElement> element = ShareRefPtr(DynamicDowncast<dom::StyledElement>(*node));
+      RefPtr<dom::StyledElement> element = DynamicDowncast<dom::StyledElement>(node);
       if (!element)
       {
         continue;
@@ -794,7 +794,7 @@ namespace krys::boo
       auto newInlineStyle = EditingStyle::Create(inlineStyle.get());
       if (inlineStyle)
       {
-        if (RefPtr<html::HTMLElement> htmlElement = ShareRefPtr(DynamicDowncast<html::HTMLElement>(*element)))
+        if (RefPtr<html::HTMLElement> htmlElement = DynamicDowncast<html::HTMLElement>(element))
         {
           List<dom::DOMStringAtom> attributes;
 
@@ -870,7 +870,7 @@ namespace krys::boo
     {
       next = ShareRefPtr(TreeQueries::Next(*node));
 
-      RefPtr<html::HTMLElement> element = ShareRefPtr(DynamicDowncast<html::HTMLElement>(*node));
+      RefPtr<html::HTMLElement> element = DynamicDowncast<html::HTMLElement>(node);
       if (!element)
       {
         continue;

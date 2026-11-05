@@ -390,7 +390,7 @@ namespace krys::boo::css
 
   void CSSFontFace::AddClient(CSSFontFaceClient &client) noexcept
   {
-    _clients.push_back(WeakPtr<CSSFontFaceClient>::WithRef(client));
+    _clients.push_back(CreateWeakPtr(&client));
   }
 
   void CSSFontFace::RemoveClient(CSSFontFaceClient &client) noexcept

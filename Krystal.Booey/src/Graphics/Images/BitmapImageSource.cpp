@@ -50,7 +50,7 @@ namespace krys::boo
 
   BitmapImageSource::BitmapImageSource(BitmapImage &bitmapImage, AlphaOption alphaOption,
                                        GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
-      : _bitmapImage(WeakPtr<BitmapImage>::WithRef(bitmapImage)), _alphaOption(alphaOption),
+      : _bitmapImage(CreateWeakPtr(&bitmapImage)), _alphaOption(alphaOption),
         _gammaAndColorProfileOption(gammaAndColorProfileOption), _descriptor(*this)
   {
   }

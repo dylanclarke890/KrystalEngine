@@ -21,7 +21,7 @@ namespace krys::boo::css
   }
 
   CSSFontFaceSet::CSSFontFaceSet(CSSFontSelector *owningFontSelector) noexcept
-      : _owningFontSelector(WeakPtr<CSSFontSelector>::WithRef(owningFontSelector))
+      : _owningFontSelector(CreateWeakPtr(owningFontSelector))
   {
   }
 

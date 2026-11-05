@@ -9,7 +9,7 @@
 
 namespace krys::boo
 {
-  Image::Image(ImageObserver *observer) noexcept : _imageObserver(WeakPtr<ImageObserver>::WithRef(observer))
+  Image::Image(ImageObserver *observer) noexcept : _imageObserver(CreateWeakPtr(observer))
   {
   }
 

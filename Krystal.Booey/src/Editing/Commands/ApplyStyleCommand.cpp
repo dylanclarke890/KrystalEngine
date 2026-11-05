@@ -377,8 +377,7 @@ namespace krys::boo
           }
         }
         krys_debug_assert(!block || Is<dom::Element>(*block));
-        if (RefPtr<html::HTMLElement> htmlBlock =
-              ShareRefPtr(DynamicDowncast<html::HTMLElement>(block.get())))
+        if (RefPtr<html::HTMLElement> htmlBlock = DynamicDowncast<html::HTMLElement>(block))
         {
           RemoveCSSStyle(style, *htmlBlock);
           if (!_removeOnly)
@@ -670,7 +669,7 @@ namespace krys::boo
     if (allowedDirection != WritingDirection::Natural && highestAncestorUnicodeBidi != ValueId::BidiOverride)
     {
       if (RefPtr<html::HTMLElement> highestAncestorElementWithUnicodeBidi =
-            ShareRefPtr(DynamicDowncast<html::HTMLElement>(*highestAncestorWithUnicodeBidi)))
+            DynamicDowncast<html::HTMLElement>(highestAncestorWithUnicodeBidi))
       {
         auto highestAncestorDirection = EditingStyle::Create(highestAncestorElementWithUnicodeBidi.get(),
                                                              EditingStyle::PropertiesToInclude::AllProperties)
@@ -721,7 +720,7 @@ namespace krys::boo
          ancestor != block && ancestor != unsplitAncestor; ancestor = parent)
     {
       parent = ShareRefPtr(ancestor->ParentNode());
-      RefPtr<dom::StyledElement> element = ShareRefPtr(DynamicDowncast<dom::StyledElement>(*ancestor));
+      RefPtr<dom::StyledElement> element = DynamicDowncast<dom::StyledElement>(ancestor);
       if (!element)
       {
         continue;
@@ -1522,7 +1521,7 @@ namespace krys::boo
         next = ShareRefPtr(TreeQueries::Next(*node));
       }
 
-      if (RefPtr<html::HTMLElement> element = ShareRefPtr(DynamicDowncast<html::HTMLElement>(*node));
+      if (RefPtr<html::HTMLElement> element = DynamicDowncast<html::HTMLElement>(node);
           element && NodeFullySelected(*element, start, end))
       {
         RefPtr<dom::Node> prev = ShareRefPtr(TreeQueries::PreviousPostOrder(*element));
@@ -1718,7 +1717,7 @@ namespace krys::boo
       startNode = ShareRefPtr(startNode->ParentNode());
     }
 
-    RefPtr<dom::Element> element = ShareRefPtr(DynamicDowncast<dom::Element>(*startNode));
+    RefPtr<dom::Element> element = DynamicDowncast<dom::Element>(startNode);
     if (!element)
     {
       return false;
@@ -1773,7 +1772,7 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Element> element = ShareRefPtr(DynamicDowncast<dom::Element>(*endNode));
+    RefPtr<dom::Element> element = DynamicDowncast<dom::Element>(endNode);
     if (!element)
     {
       return false;

@@ -950,7 +950,7 @@ namespace krys::boo
       {
         return timeline;
       }
-      if (RefPtr scrollTimeline = ShareRefPtr(DynamicDowncast<ScrollTimeline>(_timeline.get())))
+      if (RefPtr scrollTimeline = DynamicDowncast<ScrollTimeline>(_timeline))
       {
         if (RefPtr source = scrollTimeline->Source())
         {
@@ -1726,7 +1726,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr scrollTimeline = ShareRefPtr(DynamicDowncast<ScrollTimeline>(_timeline.get()));
+    RefPtr scrollTimeline = DynamicDowncast<ScrollTimeline>(_timeline);
     krys_debug_assert(scrollTimeline);
     auto interval = scrollTimeline->IntervalForAttachmentRange(Range());
 

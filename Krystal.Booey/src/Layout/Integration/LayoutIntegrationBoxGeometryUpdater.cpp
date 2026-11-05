@@ -514,8 +514,7 @@ namespace krys::boo::layout_integration
 
   BoxGeometryUpdater::BoxGeometryUpdater(layout::LayoutState &layoutState,
                                          const layout::ElementBox &rootLayoutBox) noexcept
-      : _layoutState(WeakPtr<layout::LayoutState>::WithRef(layoutState)),
-        _rootLayoutBox(ShareCheckedPtr(&rootLayoutBox))
+      : _layoutState(CreateWeakPtr(&layoutState)), _rootLayoutBox(ShareCheckedPtr(&rootLayoutBox))
   {
   }
 

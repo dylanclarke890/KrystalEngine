@@ -10,7 +10,7 @@ namespace krys::boo::svg
 {
   SVGViewSpec::SVGViewSpec(SVGElement &contextElement) noexcept
       : SVGFitToViewBox(&contextElement, SVGPropertyAccess::ReadOnly),
-        _contextElement(WeakPtr<SVGElement>::WithRef(contextElement)),
+        _contextElement(CreateWeakPtr(&contextElement)),
         _transform(SVGTransformList::Create(&contextElement, SVGPropertyAccess::ReadOnly))
   {
     static bool didRegistration = false;
@@ -30,7 +30,7 @@ namespace krys::boo::svg
     }
     auto element = dom::mixins::NonElementParentNode::GetElementById(contextElement->TreeScope().RootNode(),
                                                                      _viewTargetString);
-    return element ? ShareRefPtr(DynamicDowncast<SVGElement>(*element)) : nullptr;
+    return DynamicDowncast<SVGElement>(krys::move(element));
   }
 
   dom::DOMString SVGViewSpec::TransformString() const noexcept

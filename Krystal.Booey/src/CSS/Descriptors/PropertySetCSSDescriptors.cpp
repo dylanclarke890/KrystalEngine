@@ -14,7 +14,7 @@ namespace krys::boo::css
 {
   PropertySetCSSDescriptors::PropertySetCSSDescriptors(MutableStyleProperties &propertySet,
                                                        CSSRule &parentRule) noexcept
-      : _parentRule(WeakPtr<CSSRule>::WithRef(parentRule)), _propertySet(ShareRef(propertySet))
+      : _parentRule(CreateWeakPtr(&parentRule)), _propertySet(ShareRef(propertySet))
   {
   }
 

@@ -1116,7 +1116,7 @@ namespace krys::boo::html
     {
       EventLoop::Current().QueueTask(
         TaskSource::UserInteraction, NodeDocument(),
-        [weakThis = WeakPtr<HTMLInputElement>::WithRef(*this)]
+        [weakThis = CreateWeakPtr(this)]
         {
           RefPtr<HTMLInputElement> protectedThis = ShareRefPtr(weakThis.get());
           if (!protectedThis || protectedThis->NodeDocument().FocusedElement() != protectedThis)

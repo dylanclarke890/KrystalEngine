@@ -406,7 +406,7 @@ namespace krys::boo
     {
       if (function->FilterType() == filterType)
       {
-        effects.push_back(ShareRef(Downcast<FilterEffect>(*function)));
+        effects.push_back(Downcast<FilterEffect>(function));
         continue;
       }
 

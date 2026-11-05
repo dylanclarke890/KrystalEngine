@@ -4,21 +4,6 @@
 
 namespace krys::boo::css
 {
-  namespace
-  {
-    // FIXME: Use Downcast<PrimitiveValue>(RefPtr&&) once Krystal.Core's IntrusivePtr overloads are fixed:
-    // they can't be called with an explicit target type, and they assert that the pointer is non-null (WTF's
-    // allow null).
-    KRYS_NODISCARD RefPtr<PrimitiveValue> DowncastToPrimitive(RefPtr<Value> &&value) noexcept
-    {
-      if (!value)
-      {
-        return nullptr;
-      }
-      return RefPtr<PrimitiveValue>::NoRef(Downcast<PrimitiveValue>(value.release()));
-    }
-  }
-
   OffsetRotateValue::OffsetRotateValue(RefPtr<PrimitiveValue> &&modifier,
                                        RefPtr<PrimitiveValue> &&angle) noexcept
       : Value(ValueType::OffsetRotate), _modifier(krys::move(modifier)), _angle(krys::move(angle))
@@ -38,8 +23,8 @@ namespace krys::boo::css
 
   Ref<OffsetRotateValue> OffsetRotateValue::Create(RefPtr<Value> modifier, RefPtr<Value> angle) noexcept
   {
-    return AdoptRef(*new OffsetRotateValue(DowncastToPrimitive(krys::move(modifier)),
-                                           DowncastToPrimitive(krys::move(angle))));
+    return AdoptRef(*new OffsetRotateValue(Downcast<PrimitiveValue>(krys::move(modifier)),
+                                           Downcast<PrimitiveValue>(krys::move(angle))));
   }
 
   CSSOMString OffsetRotateValue::CustomCSSText(const SerialisationContext &context) const noexcept

@@ -68,11 +68,11 @@ namespace krys::boo::html
     auto defaultSummary = dom::ElementFactory::CreateHTMLElement<HTMLSummaryElement>(document, u8"summary");
     (void)defaultSummary->AppendChild(
       *CreateRef<dom::Text>(document, dom::DOMString(DefaultDetailsSummaryText())));
-    _defaultSummary = WeakPtr<HTMLSummaryElement>::WithRef(*defaultSummary);
+    _defaultSummary = CreateWeakPtr(defaultSummary.get());
 
     (void)summarySlot->AppendChild(*defaultSummary);
     (void)root.AppendChild(*summarySlot);
-    _summarySlot = WeakPtr<HTMLSlotElement>::WithRef(*summarySlot);
+    _summarySlot = CreateWeakPtr(summarySlot.get());
 
     auto defaultSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     defaultSlot->SetUserAgentPart(css::UserAgentParts::DetailsContent());

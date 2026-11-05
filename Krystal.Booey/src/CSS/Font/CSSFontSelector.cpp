@@ -41,7 +41,7 @@ namespace krys::boo::css
   }
 
   CSSFontSelector::CSSFontSelector(dom::Document &document) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document)), _cssFontFaceSet(CSSFontFaceSet::Create(this)),
+      : _document(CreateWeakPtr(&document)), _cssFontFaceSet(CSSFontFaceSet::Create(this)),
         _fontFaceClient(*this), _uniqueId(++FontSelectorId)
   {
     FontCache::Singleton().AddClient(*this);

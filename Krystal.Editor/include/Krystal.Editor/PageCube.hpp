@@ -89,7 +89,7 @@ void main()
 
   public:
     PageCube(boo::dom::Document &document, gfx::Device &device) noexcept
-        : _device(device), _document(WeakPtr<boo::dom::Document>::WithRef(document))
+        : _device(device), _document(CreateWeakPtr(&document))
     {
       auto cube = document.GetElementById(u8"cube");
       if (!cube || !CreateResources())

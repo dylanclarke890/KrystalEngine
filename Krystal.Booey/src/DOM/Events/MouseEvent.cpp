@@ -24,7 +24,7 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD RefPtr<Node> AsNode(RefPtr<EventTarget> target) noexcept
     {
-      return ShareRefPtr(DynamicDowncast<Node>(target.get()));
+      return DynamicDowncast<Node>(krys::move(target));
     }
   }
 

@@ -27,7 +27,7 @@ namespace krys::editor
 
   public:
     explicit PageSpatialNavigation(boo::dom::Document &document) noexcept
-        : _document(WeakPtr<boo::dom::Document>::WithRef(document))
+        : _document(CreateWeakPtr(&document))
     {
       RefPtr<boo::dom::EventTarget> grid = document.GetElementById(u8"nav-grid");
       if (!grid)

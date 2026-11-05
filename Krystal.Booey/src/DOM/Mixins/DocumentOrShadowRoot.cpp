@@ -480,7 +480,7 @@ namespace krys::boo::dom
       node = RetargetToScope(*node, _rootNode);
     }
 
-    return ShareRefPtr(DynamicDowncast<Element>(node.get()));
+    return DynamicDowncast<Element>(krys::move(node));
   }
 
   List<RefPtr<Element>> DocumentOrShadowRoot::ElementsFromPoint(double clientX, double clientY,
@@ -541,7 +541,7 @@ namespace krys::boo::dom
         continue;
       }
 
-      elements.push_back(ShareRefPtr(DynamicDowncast<Element>(node.get())));
+      elements.push_back(DynamicDowncast<Element>(node));
       lastNode = node;
     }
 

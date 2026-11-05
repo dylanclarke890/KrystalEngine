@@ -1303,7 +1303,7 @@ namespace krys::boo::style
     {
       auto anchor =
         FindLastAcceptableAnchorWithName(anchorName, anchorPositionedElement, anchorsForAnchorName);
-      anchorElements.try_emplace(anchorName, anchor ? CreateWeakPtr(anchor.get()) : WeakPtr<dom::Element> {});
+      anchorElements.try_emplace(anchorName, CreateWeakPtr(anchor.get()));
     }
 
     return anchorElements;

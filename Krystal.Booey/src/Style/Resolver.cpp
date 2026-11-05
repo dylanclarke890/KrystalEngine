@@ -130,7 +130,7 @@ namespace krys::boo::style
   }
 
   Resolver::Resolver(dom::Document &document, ScopeType scopeType) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document)), _scopeType(scopeType), _ruleSets(*this),
+      : _document(CreateWeakPtr(&document)), _scopeType(scopeType), _ruleSets(*this),
         _matchedDeclarationsCache(*this)
   {
     // FIXME: Settings: authorAndUserStylesEnabled (on by default).

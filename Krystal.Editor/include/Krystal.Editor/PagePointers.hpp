@@ -43,8 +43,7 @@ namespace krys::editor
     double _lockedY {0};
 
   public:
-    explicit PagePointers(boo::dom::Document &document) noexcept
-        : _document(WeakPtr<boo::dom::Document>::WithRef(document))
+    explicit PagePointers(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       if (!document.GetElementById(u8"pointer-pad"))
       {

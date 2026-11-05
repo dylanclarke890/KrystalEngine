@@ -43,7 +43,7 @@ namespace krys::boo::svg
       auto element = dom::ElementFactory::Create(
         document, dom::QualifiedName(infra::Namespaces::SVG, dom::DOMStringAtom::Null(),
                                      dom::DOMStringAtom(localName), tagName, html::Namespace::SVG));
-      return ShareRef(Downcast<SVGElement>(*element));
+      return Downcast<SVGElement>(krys::move(element));
     }
 
     // Calls @p function with each descendant of @p root that is a @p T, in tree order; the function returns
@@ -583,7 +583,7 @@ namespace krys::boo::svg
         *targetID = dom::DOMStringAtom::Null();
       }
     }
-    RefPtr<SVGElement> target = ShareRefPtr(DynamicDowncast<SVGElement>(targetResult.Element.get()));
+    RefPtr<SVGElement> target = DynamicDowncast<SVGElement>(targetResult.Element);
     if (!target)
     {
       return nullptr;

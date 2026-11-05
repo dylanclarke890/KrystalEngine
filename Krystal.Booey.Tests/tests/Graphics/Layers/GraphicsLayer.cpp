@@ -74,7 +74,7 @@ namespace krys::boo::tests
       static TestFactory factory;
       Ref<GraphicsLayer> layer = GraphicsLayer::Create(&factory, client, type);
       layer->SetName(utf8_string(name));
-      return ShareRef(Downcast<TestGraphicsLayer>(*layer));
+      return Downcast<TestGraphicsLayer>(krys::move(layer));
     }
 
     KRYS_NODISCARD utf8_string Names(const GraphicsLayer &layer) noexcept

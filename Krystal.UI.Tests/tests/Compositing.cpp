@@ -101,7 +101,7 @@ namespace krys::ui::tests
         layer->SetAnchorPoint({0.5f, 0.5f, 0});
         layer->SetPosition(position);
         layer->SetSize(size);
-        return ShareRef(Downcast<GraphicsLayerTextureMapper>(*layer));
+        return Downcast<GraphicsLayerTextureMapper>(krys::move(layer));
       }
 
       /// @brief Flushes the tree, paints what's dirty of its layers and composites it.

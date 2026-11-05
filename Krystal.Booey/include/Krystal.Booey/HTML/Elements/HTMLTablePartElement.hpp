@@ -52,7 +52,7 @@ namespace krys::boo::html
                                                   dom::DOMStringView localName) noexcept
   {
     auto element = detail::CreateTableElement(document, localName);
-    return ShareRef(Downcast<TElement>(*element));
+    return Downcast<TElement>(krys::move(element));
   }
 }
 

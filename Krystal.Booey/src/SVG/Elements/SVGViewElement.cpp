@@ -17,7 +17,7 @@ namespace krys::boo::svg
 
   void SVGViewElement::SetTargetElement(const SVGSvgElement &targetElement) noexcept
   {
-    _targetElement = WeakPtr<SVGSvgElement>::WithRef(targetElement);
+    _targetElement = CreateWeakPtr(&targetElement);
   }
 
   void SVGViewElement::ResetTargetElement() noexcept

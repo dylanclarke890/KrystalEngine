@@ -122,7 +122,7 @@ namespace krys::boo::dom
   void MouseRelatedEvent::ComputeRelativePosition() const noexcept
   {
     RefPtr<EventTarget> target = Target();
-    RefPtr<Node> targetNode = ShareRefPtr(DynamicDowncast<Node>(target.get()));
+    RefPtr<Node> targetNode = DynamicDowncast<Node>(target);
     if (!targetNode)
     {
       return;

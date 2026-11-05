@@ -134,7 +134,7 @@ namespace krys::boo
   void EditCommand::SetParent(CompositeEditCommand *parent) noexcept
   {
     krys_debug_assert((parent && !_parent) || (!parent && _parent));
-    _parent = parent ? WeakPtr<CompositeEditCommand>::WithRef(*parent) : WeakPtr<CompositeEditCommand>();
+    _parent = CreateWeakPtr(parent);
     if (_parent)
     {
       _startingSelection = _parent->_endingSelection;

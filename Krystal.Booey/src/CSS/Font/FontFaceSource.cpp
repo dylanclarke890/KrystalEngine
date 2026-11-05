@@ -30,7 +30,7 @@ namespace krys::boo::css
 
   CSSFontFaceSource::CSSFontFaceSource(CSSFontFace &owner, CSSFontSelector &fontSelector,
                                        Ref<FontLoadRequest> &&request) noexcept
-      : _owningCSSFontFace(owner), _fontSelector(WeakPtr<CSSFontSelector>::WithRef(fontSelector)),
+      : _owningCSSFontFace(owner), _fontSelector(CreateWeakPtr(&fontSelector)),
         _fontRequest(krys::move(request))
   {
     // This may synchronously call fontLoaded().

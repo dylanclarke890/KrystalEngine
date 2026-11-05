@@ -51,7 +51,7 @@ namespace krys::boo
   void RenderMenuList::SetInnerRenderer(RenderBlock &innerRenderer) noexcept
   {
     krys_debug_assert(!_innerBlock.get());
-    _innerBlock = WeakPtr<RenderBlock>::WithRef(innerRenderer);
+    _innerBlock = CreateWeakPtr(&innerRenderer);
     AdjustInnerStyle();
   }
 
@@ -248,7 +248,7 @@ namespace krys::boo
     else
     {
       auto newButtonText = CreateRenderer<RenderText>(Type::Text, GetDocument(), krys::move(textToUse));
-      _buttonText = WeakPtr<RenderText>::WithRef(*newButtonText);
+      _buttonText = CreateWeakPtr(newButtonText.get());
       // FIXME: This mutation should go through the normal RenderTreeBuilder path.
       if (RenderTreeBuilder::Current())
       {

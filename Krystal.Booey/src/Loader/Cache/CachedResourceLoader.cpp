@@ -46,7 +46,7 @@ namespace krys::boo
   }
 
   CachedResourceLoader::CachedResourceLoader(dom::Document *document) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document)),
+      : _document(CreateWeakPtr(document)),
         _garbageCollectDocumentResourcesTimer(*this, &CachedResourceLoader::GarbageCollectDocumentResources)
   {
   }
@@ -82,7 +82,7 @@ namespace krys::boo
 
   void CachedResourceLoader::SetDocument(dom::Document *document) noexcept
   {
-    _document = WeakPtr<dom::Document>::WithRef(document);
+    _document = CreateWeakPtr(document);
   }
 
   ResourceErrorOr<CachedResourceHandle<CachedImage>>

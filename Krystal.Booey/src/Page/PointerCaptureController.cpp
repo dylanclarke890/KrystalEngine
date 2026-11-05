@@ -16,8 +16,7 @@
 
 namespace krys::boo
 {
-  PointerCaptureController::PointerCaptureController(Page &page) noexcept
-      : _page(WeakPtr<Page>::WithRef(page))
+  PointerCaptureController::PointerCaptureController(Page &page) noexcept : _page(CreateWeakPtr(&page))
   {
     Reset();
   }
@@ -550,7 +549,7 @@ namespace krys::boo
     // If the event is pointerdown, pointermove, or pointerup set active document for the event's pointerId to
     // targetDocument.
     auto capturingData = EnsureCapturingDataForPointerEvent(event);
-    capturingData->ActiveDocument = WeakPtr<dom::Document>::WithRef(element->NodeDocument());
+    capturingData->ActiveDocument = CreateWeakPtr(&element->NodeDocument());
 
     if (isPointermove)
     {

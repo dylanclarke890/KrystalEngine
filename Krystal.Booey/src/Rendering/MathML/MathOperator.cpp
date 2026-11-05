@@ -78,7 +78,7 @@ namespace krys::boo
       if (fallbackGlyph)
       {
         fallback.Glyph = fallbackGlyph;
-        fallback.Font = WeakPtr<const Font>::WithRef(style.GetFontCascade().PrimaryFont().get());
+        fallback.Font = CreateWeakPtr(style.GetFontCascade().PrimaryFont().get());
       }
 
       return fallback;

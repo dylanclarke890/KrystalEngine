@@ -374,7 +374,7 @@ namespace krys::boo::layout_integration
   LineLayout::LineLayout(RenderBlockFlow &flow) noexcept
       : _rootLayoutBox(ShareCheckedPtr(BoxTreeUpdater {flow}.Build().get())),
         _document(ShareCheckedPtr(&flow.GetDocument())),
-        _layoutState(WeakPtr<layout::LayoutState>::WithRef(flow.View().GetLayoutState())),
+        _layoutState(CreateWeakPtr(&flow.View().GetLayoutState())),
         _blockFormattingState(GetLayoutState().EnsureBlockFormattingState(RootLayoutBox())),
         _inlineContentCache(GetLayoutState().GetInlineContentCache(RootLayoutBox())),
         _boxGeometryUpdater(flow.View().GetLayoutState(), RootLayoutBox())

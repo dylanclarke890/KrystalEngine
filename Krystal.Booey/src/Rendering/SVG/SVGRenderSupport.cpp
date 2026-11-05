@@ -422,7 +422,7 @@ namespace krys::boo
       {
         if (auto *childElement = DynamicDowncast<RenderElement>(child))
         {
-          elementsThatDidNotReceiveLayout.push_back(WeakPtr<RenderElement>::WithRef(*childElement));
+          elementsThatDidNotReceiveLayout.push_back(CreateWeakPtr(childElement));
         }
       }
 

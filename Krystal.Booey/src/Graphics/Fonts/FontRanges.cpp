@@ -100,7 +100,7 @@ namespace krys::boo
       GlyphData result = resultFont->GlyphDataForCharacter(character);
       if (!result.Font)
       {
-        result.Font = WeakPtr<const Font>::WithRef(resultFont);
+        result.Font = CreateWeakPtr(resultFont);
       }
       return result;
     }

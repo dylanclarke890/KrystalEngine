@@ -198,7 +198,7 @@ namespace krys::boo
     }
 
     auto element = ElementForResourceID(treeScope, referenceFilter.Fragment(), html::TagName::filter);
-    return ShareRefPtr(DynamicDowncast<svg::SVGFilterElement>(element.get()));
+    return DynamicDowncast<svg::SVGFilterElement>(krys::move(element));
   }
 
   LegacyRenderSVGResourceClipper *

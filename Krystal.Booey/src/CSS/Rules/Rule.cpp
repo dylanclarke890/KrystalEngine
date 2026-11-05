@@ -440,10 +440,9 @@ namespace krys::boo::css
       if (componentsInThisSelector.size() + componentsSinceLastSplit.size() > maxCount
           && !componentsSinceLastSplit.empty())
       {
-        rules.push_back(
-          CreateForSplitting(componentsSinceLastSplit,
-                             Ref<StyleProperties>::WithRef(const_cast<StyleProperties &>(Properties())),
-                             HasDocumentSecurityOrigin()));
+        rules.push_back(CreateForSplitting(componentsSinceLastSplit,
+                                           ShareRef(const_cast<StyleProperties &>(Properties())),
+                                           HasDocumentSecurityOrigin()));
         componentsSinceLastSplit.clear();
       }
 
@@ -453,9 +452,9 @@ namespace krys::boo::css
 
     if (!componentsSinceLastSplit.empty())
     {
-      rules.push_back(CreateForSplitting(
-        componentsSinceLastSplit, Ref<StyleProperties>::WithRef(const_cast<StyleProperties &>(Properties())),
-        HasDocumentSecurityOrigin()));
+      rules.push_back(CreateForSplitting(componentsSinceLastSplit,
+                                         ShareRef(const_cast<StyleProperties &>(Properties())),
+                                         HasDocumentSecurityOrigin()));
     }
 
     if (!rules.empty())
@@ -817,7 +816,7 @@ namespace krys::boo::css
 
   void ScopeRule::SetStyleSheetContents(const StyleSheetContents &sheet) noexcept
   {
-    _styleSheetOwner = WeakPtr<const StyleSheetContents>::WithRef(sheet);
+    _styleSheetOwner = CreateWeakPtr(&sheet);
   }
 
 #pragma endregion

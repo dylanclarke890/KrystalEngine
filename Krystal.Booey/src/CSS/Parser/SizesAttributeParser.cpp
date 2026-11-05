@@ -33,7 +33,7 @@ namespace krys::boo::css
 
   SizesAttributeParser::SizesAttributeParser(CSSOMStringView attribute,
                                              const dom::Document &document) noexcept
-      : _document(WeakPtr<const dom::Document>::WithRef(document))
+      : _document(CreateWeakPtr(&document))
   {
     InputStream inputStream {CSSOMString(attribute)};
     Tokenizer tokenizer(inputStream);

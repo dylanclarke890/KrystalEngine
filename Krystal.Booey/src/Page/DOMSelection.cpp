@@ -58,8 +58,7 @@ namespace krys::boo
     }
   }
 
-  DOMSelection::DOMSelection(dom::Document &document) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document))
+  DOMSelection::DOMSelection(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
   {
   }
 

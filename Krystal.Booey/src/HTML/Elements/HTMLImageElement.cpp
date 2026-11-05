@@ -527,8 +527,7 @@ namespace krys::boo::html
 
   void HTMLImageElement::SetPictureElement(HTMLPictureElement *pictureElement) noexcept
   {
-    _pictureElement =
-      pictureElement ? WeakPtr<HTMLPictureElement>::WithRef(*pictureElement) : WeakPtr<HTMLPictureElement>();
+    _pictureElement = CreateWeakPtr(pictureElement);
   }
 
   HTMLSourceElement *HTMLImageElement::SourceElement() const noexcept
@@ -542,8 +541,7 @@ namespace krys::boo::html
     {
       return;
     }
-    _sourceElement =
-      sourceElement ? WeakPtr<HTMLSourceElement>::WithRef(*sourceElement) : WeakPtr<HTMLSourceElement>();
+    _sourceElement = CreateWeakPtr(sourceElement);
     InvalidateAttributeMapping();
   }
 

@@ -976,7 +976,7 @@ namespace krys::boo::style
         resolverScopes.emplace_back(ShareRef(resolver), List<WeakPtr<Scope>> {});
         it = std::prev(resolverScopes.end());
       }
-      it->second.push_back(WeakPtr<Scope>::WithRef(scope));
+      it->second.push_back(CreateWeakPtr(&scope));
     };
 
     if (auto *resolver = ResolverIfExists())

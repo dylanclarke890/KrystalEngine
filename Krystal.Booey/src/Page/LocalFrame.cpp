@@ -14,8 +14,7 @@
 namespace krys::boo
 {
   LocalFrame::LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept
-      : _page(page ? WeakPtr<Page>::WithRef(*page) : WeakPtr<Page>()),
-        _eventHandler(CreateUnique<EventHandler>(*this)),
+      : _page(CreateWeakPtr(page)), _eventHandler(CreateUnique<EventHandler>(*this)),
         _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient)))
   {
   }

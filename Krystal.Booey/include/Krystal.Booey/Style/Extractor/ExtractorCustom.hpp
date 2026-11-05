@@ -2876,7 +2876,7 @@ namespace krys::boo::style
     }
 
     auto size = CreateCSSValue(state.Pool, state.Style, Length<> {description.ComputedSize()});
-    computedFont->Size = ShareRefPtr(DynamicDowncast<css::PrimitiveValue>(size.get()));
+    computedFont->Size = DynamicDowncast<css::PrimitiveValue>(krys::move(size));
 
     auto lineHeight = ExtractorGenerated::ExtractValue(state, css::PropertyId::LineHeight);
     auto *computedLineHeight = DynamicDowncast<css::PrimitiveValue>(lineHeight.get());

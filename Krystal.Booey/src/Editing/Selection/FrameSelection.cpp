@@ -464,7 +464,7 @@ namespace krys::boo
       _hasScheduledSelectionChangeEventOnDocument = true;
       html::EventLoop::Current().QueueTask(
         html::TaskSource::UserInteraction, *document,
-        [weakDocument = WeakPtr<dom::Document>::WithRef(*document)]
+        [weakDocument = CreateWeakPtr(document)]
         {
           if (RefPtr<dom::Document> document = ShareRefPtr(weakDocument.get()))
           {

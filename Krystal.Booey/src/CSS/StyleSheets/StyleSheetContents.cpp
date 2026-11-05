@@ -203,7 +203,7 @@ namespace krys::boo::css
     {
       if (layerRule->IsStatement())
       {
-        _layerRulesBeforeImportRules.push_back(Ref<LayerRule>::WithRef(*layerRule));
+        _layerRulesBeforeImportRules.push_back(ShareRef(*layerRule));
         return;
       }
     }
@@ -212,7 +212,7 @@ namespace krys::boo::css
     {
       // Parser enforces that @import rules come before anything else except @charset.
       krys_debug_assert(_childRules.empty());
-      _importRules.push_back(Ref<ImportRule>::WithRef(*importRule));
+      _importRules.push_back(ShareRef(*importRule));
       _importRules.back()->SetParentStyleSheet(this);
       _importRules.back()->RequestStyleSheet();
       return;
@@ -224,7 +224,7 @@ namespace krys::boo::css
       // import/charset rules
       krys_debug_assert(_childRules.empty());
       ParserAddNamespace(namespaceRule->Prefix(), namespaceRule->Uri());
-      _namespaceRules.push_back(Ref<NamespaceRule>::WithRef(*namespaceRule));
+      _namespaceRules.push_back(ShareRef(*namespaceRule));
       return;
     }
 
@@ -359,7 +359,7 @@ namespace krys::boo::css
       if (layerRule->IsStatement())
       {
         _layerRulesBeforeImportRules.insert(_layerRulesBeforeImportRules.begin() + childVectorIndex,
-                                            Ref<LayerRule>::WithRef(*layerRule));
+                                            ShareRef(*layerRule));
         return true;
       }
       if (childVectorIndex < _layerRulesBeforeImportRules.size())
@@ -378,7 +378,7 @@ namespace krys::boo::css
       {
         return false;
       }
-      _importRules.insert(_importRules.begin() + childVectorIndex, Ref<ImportRule>::WithRef(*importRule));
+      _importRules.insert(_importRules.begin() + childVectorIndex, ShareRef(*importRule));
       _importRules[childVectorIndex]->SetParentStyleSheet(this);
       _importRules[childVectorIndex]->RequestStyleSheet();
       // FIXME: Stylesheet doesn't actually change meaningfully before the imported sheets are loaded.
@@ -408,8 +408,7 @@ namespace krys::boo::css
         return false;
       }
 
-      _namespaceRules.insert(_namespaceRules.begin() + childVectorIndex,
-                             Ref<NamespaceRule>::WithRef(*namespaceRule));
+      _namespaceRules.insert(_namespaceRules.begin() + childVectorIndex, ShareRef(*namespaceRule));
 
       // For now to be compatible with IE and Firefox if a namespace rule with the same
       // prefix is added, it overwrites previous ones.
@@ -569,7 +568,7 @@ namespace krys::boo::css
       return;
     }
 
-    auto protectedThis = Ref<StyleSheetContents>::WithRef(*this);
+    auto protectedThis = ShareRef(*this);
     if (auto *parentSheet = ParentStyleSheet())
     {
       parentSheet->CheckLoaded();
@@ -632,7 +631,7 @@ namespace krys::boo::css
       {
         return true;
       }
-      auto importedStyleSheet = RefPtr<StyleSheetContents>::WithRef(importRule->StyleSheet());
+      auto importedStyleSheet = ShareRefPtr(importRule->StyleSheet());
       if (importedStyleSheet && importedStyleSheet->TraverseRules(handler))
       {
         return true;

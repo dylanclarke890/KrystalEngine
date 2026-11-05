@@ -636,7 +636,7 @@ namespace krys::boo::html
       //      event target be that Document object's relevant global object. Otherwise, let blur event target
       //      be null.
       // FIXME: Fire blur at a document's Window.
-      RefPtr<dom::Element> blurEventTarget = ShareRefPtr(DynamicDowncast<dom::Element>(*entry));
+      RefPtr<dom::Element> blurEventTarget = DynamicDowncast<dom::Element>(entry);
 
       // 2.3. If entry is the last entry in old chain, and entry is an Element, and the last entry in new
       // chain
@@ -804,7 +804,7 @@ namespace krys::boo::html
     auto &candidates = topDocument.AutofocusCandidates();
     std::erase_if(candidates,
                   [&](const WeakPtr<dom::Element> &candidate) { return candidate.get() == &element; });
-    candidates.push_back(WeakPtr<dom::Element>::WithRef(element));
+    candidates.push_back(CreateWeakPtr(&element));
     topDocument.ScheduleRenderingUpdate({RenderingUpdateStep::FlushAutofocusCandidates});
   }
 
