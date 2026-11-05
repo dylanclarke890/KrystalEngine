@@ -88,6 +88,7 @@ namespace krys::boo
     /// tries again.
     mutable bool _skippedRenderBlockedDocument {false};
     bool _isVisible {true};
+    bool _imageAnimationEnabled {true};
     bool _scriptedAnimationsSuspended {false};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
     uint32 _displayNominalFramesPerSecond {FullSpeedFramesPerSecond};
@@ -215,6 +216,15 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderingUpdateScheduled() const noexcept
     {
       return _renderingUpdateIsScheduled;
+    }
+
+    /// @brief Lets animated images and SMIL animations play (true), or holds them (false): animated images
+    /// stop at the frame they show, and SMIL animations pause, in the page's documents and its SVG images. A
+    /// page starts with them playing.
+    void SetImageAnimationEnabled(bool enabled) noexcept;
+    KRYS_NODISCARD bool ImageAnimationEnabled() const noexcept
+    {
+      return _imageAnimationEnabled;
     }
 
     /// @brief The rate the page is shown at when nothing tells it otherwise.

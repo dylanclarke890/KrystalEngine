@@ -615,6 +615,24 @@ namespace krys::boo::tests
     CHECK_FALSE(svg.AnimationsPaused());
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: holding image animations pauses SMIL animations",
+                   "[Page][SVG]")
+  {
+    PageFixture fixture {u8"<!DOCTYPE html><svg id=svg><rect width=10 height=10><animate attributeName=x "
+                         u8"from=0 to=10 dur=1s></animate></rect></svg>"};
+    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(fixture.ById(u8"svg")));
+    fixture.TestPage->SetImageAnimationEnabled(false);
+    CHECK(svg.AnimationsPaused());
+
+    // Shown again, a page keeps them held.
+    fixture.TestPage->SetIsVisible(false);
+    fixture.TestPage->SetIsVisible(true);
+    CHECK(svg.AnimationsPaused());
+
+    fixture.TestPage->SetImageAnimationEnabled(true);
+    CHECK_FALSE(svg.AnimationsPaused());
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Page: animations follow the host's frame rate",
                    "[Page][Animation]")
   {

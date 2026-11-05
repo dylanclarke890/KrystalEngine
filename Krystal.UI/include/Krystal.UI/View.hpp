@@ -574,6 +574,10 @@ namespace krys::ui
     /// vsync, or the rate it caps its frames to. Animations align their updates to it. A page starts at 60.
     void SetFramesPerSecond(uint32 framesPerSecond) noexcept;
 
+    /// @brief Lets the page's animated images and SMIL animations play (true), or holds them (false), as a
+    /// setting to reduce motion would. A page starts with them playing.
+    void SetImageAnimationEnabled(bool enabled) noexcept;
+
     /// @brief Calls @p handler with each navigation the page asks for (links followed and forms submitted),
     /// other than a link to a fragment of the page, which scrolls to it. The view doesn't navigate: the
     /// handler loads what it wants (`Load`, `LoadFile`, `LoadHTML`).

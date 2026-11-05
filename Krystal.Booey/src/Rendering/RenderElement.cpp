@@ -2209,9 +2209,10 @@ namespace krys::boo
 
   bool RenderElement::AllowsAnimation() const noexcept
   {
-    // FIXME: An image element's own animation control (HTMLImageElement::allowsAnimation) and the page's
-    // (imageAnimationEnabled), once there are animation controls.
-    return true;
+    // FIXME: An image element's own animation control (HTMLImageElement::allowsAnimation), once there are
+    // per-element animation controls.
+    auto *page = GetDocument().GetPage();
+    return !page || page->ImageAnimationEnabled();
   }
 
   void RenderElement::DidRemoveCachedImageClient(CachedImage &cachedImage) noexcept

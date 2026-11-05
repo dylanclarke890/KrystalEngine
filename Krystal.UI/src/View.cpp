@@ -2081,6 +2081,11 @@ namespace krys::ui
     _page->SetDisplayNominalFramesPerSecond(framesPerSecond);
   }
 
+  void View::SetImageAnimationEnabled(bool enabled) noexcept
+  {
+    _page->SetImageAnimationEnabled(enabled);
+  }
+
   void View::SetNavigationHandler(Func<void(const NavigationRequest &)> &&handler) noexcept
   {
     _frameLoaderClient->SetNavigationHandler(krys::move(handler));

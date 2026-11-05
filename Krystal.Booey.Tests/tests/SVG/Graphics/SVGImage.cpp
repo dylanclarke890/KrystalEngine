@@ -158,6 +158,13 @@ namespace krys::boo::svg::tests
       page->UpdateRendering();
       CHECK(rect.X().ValueInSpecifiedUnits() > x);
     }
+
+    // Held by the page showing it, the image's animations pause, and play again after.
+    page->SetImageAnimationEnabled(false);
+    CHECK(root->AnimationsPaused());
+    CHECK_FALSE(SVGImageOf(ImageById(fixture, u8"i"))->GetImageObserver()->AllowsAnimation(*svgImage));
+    page->SetImageAnimationEnabled(true);
+    CHECK_FALSE(root->AnimationsPaused());
   }
 
   TEST_CASE("SVGImage: an SVG image loads nothing but data: URLs and has no links", "[SVG][SVGImage]")

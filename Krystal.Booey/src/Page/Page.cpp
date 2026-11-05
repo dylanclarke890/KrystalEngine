@@ -32,6 +32,21 @@ namespace krys::boo
 {
   namespace
   {
+    /// @brief The SVG images @p document has loaded, each with its own page.
+    KRYS_NODISCARD List<Ref<svg::SVGImage>> SVGImagesOf(dom::Document &document) noexcept
+    {
+      List<Ref<svg::SVGImage>> images;
+      for (const auto &[url, resource] : document.GetCachedResourceLoader().AllCachedResources())
+      {
+        auto *cachedImage = DynamicDowncast<CachedImage>(resource.get());
+        if (auto *image = cachedImage ? DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()) : nullptr)
+        {
+          images.push_back(ShareRef(*image));
+        }
+      }
+      return images;
+    }
+
     constexpr EnumSet<RenderingUpdateStep> AllRenderingUpdateSteps {
       RenderingUpdateStep::FlushAutofocusCandidates,
       RenderingUpdateStep::Resize,
@@ -167,6 +182,50 @@ namespace krys::boo
     }
   }
 
+  void Page::SetImageAnimationEnabled(bool enabled) noexcept
+  {
+    if (_imageAnimationEnabled == enabled)
+    {
+      return;
+    }
+    _imageAnimationEnabled = enabled;
+
+    ForEachDocument(
+      [enabled](dom::Document &document)
+      {
+        if (auto *svgExtensions = document.SVGExtensionsIfExists())
+        {
+          if (enabled)
+          {
+            svgExtensions->UnpauseAnimations();
+          }
+          else
+          {
+            svgExtensions->PauseAnimations();
+          }
+        }
+
+        // An SVG image's animations are its page's SMIL animations.
+        for (auto &image : SVGImagesOf(document))
+        {
+          if (enabled)
+          {
+            image->ResumeAnimation();
+          }
+          else
+          {
+            image->StopAnimation();
+          }
+        }
+
+        // Animated images stop at their next frame, and start again as they're drawn.
+        if (auto *renderView = enabled ? document.GetRenderView() : nullptr)
+        {
+          renderView->RepaintRootContents();
+        }
+      });
+  }
+
   void Page::SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept
   {
     krys_debug_assert(framesPerSecond);
@@ -234,25 +293,17 @@ namespace krys::boo
                       [](dom::Document &document) { document.ServiceCaretAnimation(); });
 
     // An SVG image's page is updated with the page that shows it, which its updates are scheduled with.
-    RunProcessingStep(
-      RenderingUpdateStep::Images,
-      [](dom::Document &document)
-      {
-        List<Ref<Page>> imagePages;
-        for (const auto &[url, resource] : document.GetCachedResourceLoader().AllCachedResources())
-        {
-          auto *cachedImage = DynamicDowncast<CachedImage>(resource.get());
-          auto *image = cachedImage ? DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()) : nullptr;
-          if (auto *page = image ? image->InternalPage() : nullptr)
-          {
-            imagePages.push_back(ShareRef(*page));
-          }
-        }
-        for (auto &page : imagePages)
-        {
-          page->UpdateRendering();
-        }
-      });
+    RunProcessingStep(RenderingUpdateStep::Images,
+                      [](dom::Document &document)
+                      {
+                        for (auto &image : SVGImagesOf(document))
+                        {
+                          if (RefPtr<Page> page = ShareRefPtr(image->InternalPage()))
+                          {
+                            page->UpdateRendering();
+                          }
+                        }
+                      });
 
     LayoutIfNeeded();
 

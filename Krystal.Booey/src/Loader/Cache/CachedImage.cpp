@@ -379,10 +379,8 @@ namespace krys::boo
 
   bool CachedImage::CachedImageObserver::AllowsAnimation(const Image &image) const noexcept
   {
-    // FIXME: Ask the cached images once there are system animation controls
-    // (Image::systemAllowsAnimationControls).
-    (void)image;
-    return true;
+    return std::ranges::any_of(_cachedImages, [&image](const CachedImage *cachedImage)
+                               { return cachedImage->AllowsAnimation(image); });
   }
 
   void CachedImage::ClearImage() noexcept
@@ -637,7 +635,15 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Ask the clients once there are system animation controls.
+    // An image animates while every client showing it allows it.
+    CachedResourceClientWalker<CachedImageClient> walker(*this);
+    while (auto *client = walker.Next())
+    {
+      if (!client->AllowsAnimation())
+      {
+        return false;
+      }
+    }
     return true;
   }
 
