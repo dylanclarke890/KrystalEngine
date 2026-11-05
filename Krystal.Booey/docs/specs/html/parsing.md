@@ -545,12 +545,12 @@ Status: reviewed (2026-11-02)
 ##### [13.2.5.72 Processing instruction open state](https://html.spec.whatwg.org/#processing-instruction-open-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 ##### [13.2.5.73 Processing instruction target state](https://html.spec.whatwg.org/#processing-instruction-target-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 - [x] [If target is an ASCII case-insensitive match for "xml" or "xml-stylesheet"](https://html.spec.whatwg.org/#processing-instruction-target-state) — If target is an ASCII case-insensitive match for "xml" or "xml-stylesheet":
   - 1. This is a disallowed-processing-instruction-target parse error.
@@ -560,17 +560,17 @@ Status: reviewed (2026-11-02)
 ##### [13.2.5.74 After processing instruction target state](https://html.spec.whatwg.org/#after-processing-instruction-target-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 ##### [13.2.5.75 Processing instruction data state](https://html.spec.whatwg.org/#processing-instruction-data-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 ##### [13.2.5.76 Processing instruction questionable state](https://html.spec.whatwg.org/#processing-instruction-questionable-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 ##### [13.2.5.77 Character reference state](https://html.spec.whatwg.org/#character-reference-state)
 
@@ -629,7 +629,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.6.1 Creating and inserting nodes](https://html.spec.whatwg.org/#creating-and-inserting-nodes)
 
 Status: reviewed (2026-11-02)
-> `AppropriatePlaceToInsertNode`, `CreateElement`, `InsertForeignElement`, `InsertCharacters`, `InsertComment` and the attribute adjusters; content patching, the xmlns parse errors, resetting resettable elements and the parser form owner are missing (see `KNOWN-ISSUES.md`).
+> `AppropriatePlaceToInsertNode`, `CreateElement`, `InsertForeignElement`, `InsertCharacters`, `InsertComment`, `InsertProcessingInstruction` and the attribute adjusters; content patching is `InsertionLocationInTemplate`. The xmlns parse errors are skipped (see `DIFFERENCES.md`), a resettable element isn't reset again after its attributes have put it in its reset state, and the parser form owner is missing (see `KNOWN-ISSUES.md`).
 > Fixed: a plain `xmlns` attribute on a foreign element got the `xmlns` prefix.
 <!-- definitions: insertion-location insertion-location-target-parent insertion-location-reference-child foster-parent -->
 

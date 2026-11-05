@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -129,6 +130,13 @@ namespace krys::boo::html::tests
         {
           krys::boo::tests::Indent(output, depth);
           output += u8"<!-- " + Downcast<dom::Comment>(node).Data() + u8" -->\n";
+          break;
+        }
+        case dom::NodeType::PROCESSING_INSTRUCTION_NODE:
+        {
+          auto &instruction = Downcast<dom::ProcessingInstruction>(node);
+          krys::boo::tests::Indent(output, depth);
+          output += u8"<?" + instruction.Target() + u8" " + instruction.Data() + u8">\n";
           break;
         }
         case dom::NodeType::DOCUMENT_TYPE_NODE:

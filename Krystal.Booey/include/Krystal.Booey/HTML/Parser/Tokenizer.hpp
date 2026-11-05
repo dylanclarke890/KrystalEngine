@@ -19,7 +19,6 @@ namespace krys::boo::html
   enum class ParseError : uint8
   {
     UnexpectedNullCharacter,
-    UnexpectedQuestionMarkInsteadOfTagName,
     EOFBeforeTagName,
     InvalidFirstCharacterOfTagName,
     MissingEndTagName,
@@ -53,6 +52,10 @@ namespace krys::boo::html
     AbruptDOCTYPESystemIdentifier,
     UnexpectedCharacterAfterDOCTYPESystemIdentifier,
     EOFInCDATA,
+    EOFInProcessingInstruction,
+    InvalidFirstCharacterOfProcessingInstructionTarget,
+    InvalidProcessingInstructionTarget,
+    DisallowedProcessingInstructionTarget,
     UnknownNamedCharacterReference,
     AbsenceOfDigitsInNumericCharacterReference,
     MissingSemicolonAfterCharacterReference,
@@ -136,6 +139,11 @@ namespace krys::boo::html
     CDATASection,
     CDATASectionBracket,
     CDATASectionEnd,
+    ProcessingInstructionOpen,
+    ProcessingInstructionTarget,
+    AfterProcessingInstructionTarget,
+    ProcessingInstructionData,
+    ProcessingInstructionQuestionable,
     CharacterReference,
     NamedCharacterReference,
     AmbiguousAmpersand,
@@ -148,8 +156,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParseError, 43uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TokenizerState, 80u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParseError, 46uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TokenizerState, 85u)
 
 namespace krys::boo::html
 {
@@ -503,6 +511,31 @@ namespace krys::boo::html
       return true;
     }
 
+    KRYS_NODISCARD bool EmitProcessingInstructionToken() noexcept
+    {
+      krys_debug_assert(_token.Type() == TokenType::ProcessingInstruction);
+      _state = TokenizerState::Data;
+      _input.Advance();
+      return true;
+    }
+
+    /// @see https://html.spec.whatwg.org/#convert-the-temporary-buffer-to-a-comment
+    void ConvertTemporaryBufferToComment() noexcept
+    {
+      _token.BeginComment();
+      _token.AppendToComment(U'?');
+      if (!_temporaryBuffer.empty())
+      {
+        _token.AppendToComment(_temporaryBuffer);
+      }
+    }
+
+    KRYS_NODISCARD bool IsTemporaryBufferASCIICaseInsensitiveMatch(utf32_stringview value) const noexcept
+    {
+      return std::ranges::equal(_temporaryBuffer, value,
+                                [](char32 a, char32 b) { return krys::text::ToASCIILower(a) == b; });
+    }
+
     KRYS_NODISCARD bool EmitEOFToken() noexcept
     {
       _state = TokenizerState::Data;
@@ -658,6 +691,7 @@ namespace krys::boo::html
       constexpr char32 QuestionMark = U'?';
       constexpr char32 ExclamationMark = U'!';
       constexpr char32 HyphenMinus = U'-';
+      constexpr char32 LowLine = U'_';
       constexpr char32 EqualSign = U'=';
       constexpr char32 QuotationMark = U'"';
       constexpr char32 Apostrophe = U'\'';
@@ -795,9 +829,8 @@ namespace krys::boo::html
           }
           if (character == QuestionMark)
           {
-            ParserError(ParseError::UnexpectedQuestionMarkInsteadOfTagName);
-            _token.BeginComment();
-            RECONSUME_IN(BogusComment);
+            _temporaryBuffer.clear();
+            ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionOpen);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
@@ -2413,6 +2446,95 @@ namespace krys::boo::html
           _token.AppendToCharacters(RightSquareBracket);
           _token.AppendToCharacters(RightSquareBracket);
           RECONSUME_IN(CDATASection);
+        END_STATE()
+
+        BEGIN_STATE(ProcessingInstructionOpen)
+          if (krys::text::IsASCIIAlpha(character) || character == LowLine)
+          {
+            RECONSUME_IN(ProcessingInstructionTarget);
+          }
+          if (character == EndOfFile) KRYS_UNLIKELY
+          {
+            ParserError(ParseError::EOFInProcessingInstruction);
+            return EmitEOFToken();
+          }
+
+          ParserError(ParseError::InvalidFirstCharacterOfProcessingInstructionTarget);
+          ConvertTemporaryBufferToComment();
+          RECONSUME_IN(BogusComment);
+        END_STATE()
+
+        BEGIN_STATE(ProcessingInstructionTarget)
+          if (IsTokenizerWhitespace(character) || character == QuestionMark || character == GreaterThanSign)
+          {
+            if (IsTemporaryBufferASCIICaseInsensitiveMatch(U"xml")
+                || IsTemporaryBufferASCIICaseInsensitiveMatch(U"xml-stylesheet"))
+            {
+              ParserError(ParseError::DisallowedProcessingInstructionTarget);
+              ConvertTemporaryBufferToComment();
+              RECONSUME_IN(BogusComment);
+            }
+
+            _token.BeginProcessingInstruction(_temporaryBuffer);
+            RECONSUME_IN(AfterProcessingInstructionTarget);
+          }
+          if (krys::text::IsASCIIAlphanumeric(character) || character == HyphenMinus || character == LowLine)
+          {
+            _temporaryBuffer.push_back(character);
+            ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionTarget);
+          }
+          if (character == EndOfFile) KRYS_UNLIKELY
+          {
+            ParserError(ParseError::EOFInProcessingInstruction);
+            return EmitEOFToken();
+          }
+
+          ParserError(ParseError::InvalidProcessingInstructionTarget);
+          ConvertTemporaryBufferToComment();
+          RECONSUME_IN(BogusComment);
+        END_STATE()
+
+        BEGIN_STATE(AfterProcessingInstructionTarget)
+          if (IsTokenizerWhitespace(character))
+          {
+            ADVANCE_TO(AfterProcessingInstructionTarget);
+          }
+
+          RECONSUME_IN(ProcessingInstructionData);
+        END_STATE()
+
+        BEGIN_STATE(ProcessingInstructionData)
+          if (character == QuestionMark)
+          {
+            ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionQuestionable);
+          }
+          if (character == GreaterThanSign)
+          {
+            return EmitProcessingInstructionToken();
+          }
+          if (character == EndOfFile) KRYS_UNLIKELY
+          {
+            ParserError(ParseError::EOFInProcessingInstruction);
+            return EmitEOFToken();
+          }
+
+          _token.AppendToProcessingInstructionData(character);
+          ADVANCE_TO(ProcessingInstructionData);
+        END_STATE()
+
+        BEGIN_STATE(ProcessingInstructionQuestionable)
+          if (character == GreaterThanSign)
+          {
+            return EmitProcessingInstructionToken();
+          }
+          if (character == EndOfFile) KRYS_UNLIKELY
+          {
+            ParserError(ParseError::EOFInProcessingInstruction);
+            return EmitEOFToken();
+          }
+
+          _token.AppendToProcessingInstructionData(QuestionMark);
+          RECONSUME_IN(ProcessingInstructionData);
         END_STATE()
 
         BEGIN_STATE(CharacterReference)

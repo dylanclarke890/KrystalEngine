@@ -13,6 +13,11 @@ namespace krys::boo::html
   private:
     Ref<dom::DocumentFragment> _content;
 
+    // The content patching state, while the parser has the template open (processing instruction markers).
+    RefPtr<dom::ContainerNode> _insertionTarget;
+    RefPtr<dom::Node> _insertionStartMarker;
+    RefPtr<dom::Node> _insertionEndMarker;
+
   public:
     HTMLTemplateElement(dom::Document &document) noexcept;
 
@@ -31,6 +36,34 @@ namespace krys::boo::html
 
     /// @brief Sets the template contents to the declarative shadow root @p shadow.
     void SetTemplateContents(dom::ShadowRoot &shadow) noexcept;
+
+    /// @brief Where the parser puts this template's children instead of its template contents, when it
+    /// patches content in: the parent of the markers its for attribute names.
+    /// @see https://html.spec.whatwg.org/#insertion-target
+    KRYS_NODISCARD dom::ContainerNode *InsertionTarget() const noexcept
+    {
+      return _insertionTarget.get();
+    }
+
+    /// @see https://html.spec.whatwg.org/#insertion-start-marker
+    KRYS_NODISCARD dom::Node *InsertionStartMarker() const noexcept
+    {
+      return _insertionStartMarker.get();
+    }
+
+    /// @see https://html.spec.whatwg.org/#insertion-end-marker
+    KRYS_NODISCARD dom::Node *InsertionEndMarker() const noexcept
+    {
+      return _insertionEndMarker.get();
+    }
+
+    /// @brief Sets the insertion target and markers to null, once the parser has closed the template.
+    void ClearInsertionTarget() noexcept;
+
+    /// @brief Finds the markers named by the for attribute in @p scope, and makes their parent the insertion
+    /// target, removing what's between them; false if there aren't any.
+    /// @see https://html.spec.whatwg.org/#prepare-content-patching
+    KRYS_NODISCARD bool PrepareContentPatching(dom::ContainerNode &scope) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-htmlfor
     KRYS_NODISCARD dom::DOMString HtmlFor() const noexcept;

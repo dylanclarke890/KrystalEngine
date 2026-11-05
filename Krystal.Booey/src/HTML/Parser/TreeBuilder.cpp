@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Nodes/Comment.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
@@ -201,7 +202,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -436,7 +441,7 @@ namespace krys::boo::html
 
   void TreeBuilder::ParseError(const TokenAtom &token) noexcept
   {
-    // FIXME: Implement parse error handling/logging.
+    // Parse errors aren't reported (see DIFFERENCES.md).
     (void)token;
   }
 
@@ -609,7 +614,11 @@ namespace krys::boo::html
         AppendCommentToDocument(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token, InsertionLocation {&_document, nullptr});
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         auto &docTypeData = *token.DOCTYPEData();
@@ -688,7 +697,11 @@ namespace krys::boo::html
         AppendCommentToDocument(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token, InsertionLocation {&_document, nullptr});
+        return;
+      }
       case TokenType::Character:
       {
         if (SkipLeadingWhitespace(token))
@@ -753,7 +766,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -818,7 +835,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -963,6 +984,39 @@ namespace krys::boo::html
               ParseError(token);
             }
 
+            // 3. Let template be the last template element in the stack of open elements.
+            // 4. If template's insertion target is not null:
+            auto templateIt = std::ranges::find_if(_openElementStack.rbegin(), _openElementStack.rend(),
+                                                   [](const StackItem &item)
+                                                   { return Is<HTMLTemplateElement>(item.Element()); });
+            krys_debug_assert(templateIt != _openElementStack.rend());
+            auto &templateElement = Downcast<HTMLTemplateElement>(templateIt->Element());
+            if (templateElement.InsertionTarget())
+            {
+              // 4a. Let start be template's insertion start marker.
+              // 4b. Let end be template's insertion end marker.
+              // 4c. Assert: start is not null.
+              Ref<dom::Node> start = ShareRef(*templateElement.InsertionStartMarker());
+              RefPtr<dom::Node> end = ShareRefPtr(templateElement.InsertionEndMarker());
+
+              // 4d. If start's parent is not null, then remove start.
+              if (start->ParentNode())
+              {
+                (void)dom::MutationAlgorithms::Remove(*start);
+              }
+
+              // 4e. If end is not null and end's parent is not null, then remove end.
+              if (end && end->ParentNode())
+              {
+                (void)dom::MutationAlgorithms::Remove(*end);
+              }
+
+              // 4f. Set template's insertion target to null.
+              // 4g. Set template's insertion start marker to null.
+              // 4h. Set template's insertion end marker to null.
+              templateElement.ClearInsertionTarget();
+            }
+
             _openElementStack.PopUntilPopped(TagName::template_, Namespace::HTML);
             _activeFormattingElements.ClearUpToLastMarker();
 
@@ -1004,6 +1058,7 @@ namespace krys::boo::html
         return;
       }
       case TokenType::Comment:
+      case TokenType::ProcessingInstruction:
       {
         InHeadMode(krys::move(token));
         return;
@@ -1081,7 +1136,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -1204,7 +1263,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -2278,7 +2341,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -2640,7 +2707,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3081,6 +3152,7 @@ namespace krys::boo::html
     {
       case TokenType::Character:
       case TokenType::Comment:
+      case TokenType::ProcessingInstruction:
       case TokenType::DOCTYPE:
       {
         InBodyMode(krys::move(token));
@@ -3215,7 +3287,11 @@ namespace krys::boo::html
         InsertComment(token.Comment(), InsertionLocation {&_openElementStack.Top().Element(), nullptr});
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token, InsertionLocation {&_openElementStack.Top().Element(), nullptr});
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3279,7 +3355,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3374,7 +3454,11 @@ namespace krys::boo::html
         InsertComment(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token);
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3427,7 +3511,11 @@ namespace krys::boo::html
         AppendCommentToDocument(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token, InsertionLocation {&_document, nullptr});
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         InBodyMode(krys::move(token));
@@ -3476,7 +3564,11 @@ namespace krys::boo::html
         AppendCommentToDocument(token.Comment());
         return;
       }
-      // FIXME: Processing instruction tokens, once the tokenizer makes them.
+      case TokenType::ProcessingInstruction:
+      {
+        InsertProcessingInstruction(token, InsertionLocation {&_document, nullptr});
+        return;
+      }
       case TokenType::DOCTYPE:
       {
         InBodyMode(krys::move(token));
@@ -3712,6 +3804,35 @@ namespace krys::boo::html
 
 #pragma region Insertion Algorithms
 
+  namespace
+  {
+    // https://html.spec.whatwg.org/#appropriate-place-for-inserting-a-node (steps 5 to 8, where targetParent
+    // is a template element)
+    KRYS_NODISCARD InsertionLocation
+      InsertionLocationInTemplate(const HTMLTemplateElement &targetParent) noexcept
+    {
+      // 5. Let patchInsertionTarget be targetParent's insertion target.
+      auto *patchInsertionTarget = targetParent.InsertionTarget();
+
+      // 6. If patchInsertionTarget is null, then return (targetParent's template contents, null).
+      if (!patchInsertionTarget)
+      {
+        return {.Parent = &targetParent.TemplateContents(), .BeforeSibling = nullptr};
+      }
+
+      // 7. If targetParent's insertion end marker is not null and its parent is patchInsertionTarget, then
+      //    return (patchInsertionTarget, targetParent's insertion end marker).
+      auto *endMarker = targetParent.InsertionEndMarker();
+      if (endMarker && endMarker->ParentNode() == patchInsertionTarget)
+      {
+        return {.Parent = patchInsertionTarget, .BeforeSibling = endMarker};
+      }
+
+      // 8. Return (patchInsertionTarget, null).
+      return {.Parent = patchInsertionTarget, .BeforeSibling = nullptr};
+    }
+  }
+
   // https://html.spec.whatwg.org/#appropriate-place-for-inserting-a-node
   InsertionLocation TreeBuilder::AppropriatePlaceToInsertNode(dom::ContainerNode *targetOverride) noexcept
   {
@@ -3776,12 +3897,10 @@ namespace krys::boo::html
       }
 
       // 3c. If lastTemplateOrTable is a template element, then set targetParent to lastTemplateOrTable.
-      // 4.-6. If targetParent is not a template element, then return (targetParent, referenceChild). [...] If
-      //       patchInsertionTarget is null, then return (targetParent's template contents, null).
-      // FIXME: Content patching (steps 5, 7 and 8: the template's insertion target and end marker).
+      // (Steps 4 to 8 then give the place in the template.)
       if (HasTemplate() && (!HasTable() || lastTemplateIt < lastTableIt))
       {
-        return {.Parent = &Downcast<HTMLTemplateElement>(lastTemplateIt->Element()).TemplateContents()};
+        return InsertionLocationInTemplate(Downcast<HTMLTemplateElement>(lastTemplateIt->Element()));
       }
 
       // 3b. If lastTemplateOrTable is null, then return (the first element in the stack of open elements (the
@@ -3813,12 +3932,10 @@ namespace krys::boo::html
     }
 
     // 4. If targetParent is not a template element, then return (targetParent, referenceChild).
-    // 5. Let patchInsertionTarget be targetParent's insertion target.
-    // 6. If patchInsertionTarget is null, then return (targetParent's template contents, null).
-    // FIXME: Content patching (steps 5, 7 and 8).
+    // 5.-8. (InsertionLocationInTemplate.)
     if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(adjustedInsertionLocation.Parent))
     {
-      adjustedInsertionLocation = {.Parent = &templateElement->TemplateContents(), .BeforeSibling = nullptr};
+      adjustedInsertionLocation = InsertionLocationInTemplate(*templateElement);
     }
 
     return adjustedInsertionLocation;
@@ -4021,8 +4138,27 @@ namespace krys::boo::html
     auto mode = DeclarativeShadowRootMode(templateElement);
     if (!mode)
     {
-      // 13b. Otherwise, if template has a for attribute: [...]
-      // FIXME: Content patching, once there's any.
+      // 13b. Otherwise, if template has a for attribute:
+      if (templateElement.HasAttribute(u8"for"))
+      {
+        // 13b.i. Let scope be the target parent of the adjusted insertion location given insertionLocation.
+        Ref<dom::ContainerNode> scope = ShareRef(*AdjustedInsertionLocation(insertionLocation).Parent);
+
+        // 13b.ii. If scope is the body element of its node document, then set scope to its parent.
+        if (auto *body = scope->NodeDocument().BodyOrFrameset(); body == scope.get() && body->ParentNode())
+        {
+          scope = ShareRef(*body->ParentNode());
+        }
+
+        // 13b.iii. Let success be the result of preparing content patching given scope and template.
+        // 13b.iv. If success is false, then insert an element at the adjusted insertion location with
+        //         template, insertionLocation, and true.
+        if (!templateElement.PrepareContentPatching(*scope))
+        {
+          InsertElementAtAdjustedInsertionLocation(templateElement, insertionLocation, true);
+        }
+        return;
+      }
 
       // 13c. Otherwise, insert an element at the adjusted insertion location with template,
       //      insertionLocation, and true.
@@ -4204,6 +4340,36 @@ namespace krys::boo::html
     // 5. Insert comment into targetParent before referenceChild.
     // We purposely ignore the error here if it happens.
     (void)dom::MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
+  }
+
+  // https://html.spec.whatwg.org/#insert-a-processing-instruction
+  void TreeBuilder::InsertProcessingInstruction(const TokenAtom &token,
+                                                Maybe<InsertionLocation> position) noexcept
+  {
+    // 1. Let piTarget be the target given in the processing instruction token being processed.
+    auto piTarget = token.ProcessingInstructionTarget();
+
+    // 2. If the parser's parser sanitizer configuration is non-null and the parser's parser sanitizer
+    //    configuration does not allow processing instruction target piTarget, then return.
+    if (_sanitizerConfig
+        && !SanitizerAlgorithms::AllowsProcessingInstructionTarget(piTarget.View(), *_sanitizerConfig))
+    {
+      return;
+    }
+
+    // 3. Let data be the data given in the processing instruction token being processed.
+    // 4. Let (targetParent, referenceChild) be the adjusted insertion location given insertionLocation.
+    auto [parent, beforeSibling] = AdjustedInsertionLocation(position);
+
+    // 5. Let pi be the result of creating a processing instruction node given targetParent's node document,
+    //    piTarget, and data.
+    // (The tokenizer only makes targets that are XML names, and data without "?>", so this can't throw.)
+    auto pi = dom::ProcessingInstruction::Create(parent->NodeDocument(), dom::DOMString(piTarget.View()),
+                                                 dom::DOMString(token.ProcessingInstructionData()))
+                .ReleaseValue();
+
+    // 6. Insert pi into targetParent before referenceChild.
+    (void)dom::MutationAlgorithms::Insert(*pi, *parent, beforeSibling);
   }
 
   void TreeBuilder::AppendCommentToDocument(dom::DOMStringView data) noexcept

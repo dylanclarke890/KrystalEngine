@@ -35,10 +35,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- Parse errors aren't reported (no console, FIXME in `TreeBuilder.cpp`).
-- Content patching isn't implemented (FIXMEs in `TreeBuilder.cpp`): a `<template for>` is inserted as a plain template, as there are no template insertion targets, and the template element's prepare content patching and find markers aren't implemented.
 - A `<meta charset>` or `http-equiv="Content-Type"` met while parsing doesn't change the encoding (FIXME in `TreeBuilder.cpp`), and there's no prescan for one, as documents decode UTF-8 only (see Loading).
-- The tokenizer has no processing instruction tokens (`<?target data?>` is still a bogus comment, as before the specification added them), so the parser never creates processing instructions and a sanitizer configuration's processing instruction lists only affect its own methods.
 - The tree builder does not give form-associated elements their parser form owner on creation: `FormAssociatedElement::SetFormSetByParser` exists but nothing calls it (FIXME in `TreeBuilder.cpp`).
 - There is no `document.open()`, `document.write()`, `document.writeln()` or `document.close()`, so there's no script-created parser and no insertion point.
 - There is no `DOMParser` (`Document.parseHTMLUnsafe()` and `Document.parseHTML()` parse HTML into a new document) and no `XMLSerializer`.

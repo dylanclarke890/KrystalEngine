@@ -39,16 +39,14 @@ TagName
 #tokens
 
 #name
-Switches to BogusComment after parsing QuestionMark
+Switches to ProcessingInstructionOpen after parsing QuestionMark
 #data
 ?
 #initial-state
 TagOpen
 #expected-state
-BogusComment
+ProcessingInstructionOpen
 #tokens
-#errors
-1:1 UnexpectedQuestionMarkInsteadOfTagName
 
 #name
 Emits LessThanSign if first character invalid
