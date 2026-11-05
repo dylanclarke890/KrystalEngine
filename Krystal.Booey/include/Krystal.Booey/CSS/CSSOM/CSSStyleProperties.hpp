@@ -49,13 +49,6 @@ namespace krys::boo::css
                                                                      const CSSOMString &value) noexcept;
 
     // Shared implementation for all properties that match
-    // https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-webkit_cased_attribute.
-    KRYS_NODISCARD CSSOMString
-      GetPropertyValueForWebKitCasedIDLAttribute(const CSSOMStringAtom &attribute) noexcept;
-    dom::ExceptionOr<void> SetPropertyValueForWebKitCasedIDLAttribute(const CSSOMStringAtom &attribute,
-                                                                      const CSSOMString &value) noexcept;
-
-    // Shared implementation for all properties that match
     // https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-dashed_attribute.
     KRYS_NODISCARD CSSOMString
       GetPropertyValueForDashedIDLAttribute(const CSSOMStringAtom &attribute) noexcept;

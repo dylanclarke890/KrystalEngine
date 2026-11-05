@@ -521,7 +521,7 @@ textarea {
     resize: -internal-textarea-auto;
     cursor: auto;
     white-space: pre-wrap;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 ::placeholder {
@@ -536,7 +536,7 @@ textarea {
 
 input::placeholder {
     white-space: pre;
-    word-wrap: normal;
+    overflow-wrap: normal;
     overflow: hidden;
     line-height: initial !important;
 }

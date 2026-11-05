@@ -89,10 +89,6 @@ namespace krys::boo::css::tests
     CHECK(ToNarrow(style.FontWeight()) == "bold");
     REQUIRE_FALSE(style.SetFontWidth(u8"condensed").HasException());
     CHECK(ToNarrow(style.FontWidth()) == "condensed");
-    // `font-stretch` is an alias for `font-width`.
-    CHECK(ToNarrow(style.FontStretch()) == "condensed");
-    REQUIRE_FALSE(style.SetFontStretch(u8"expanded").HasException());
-    CHECK(ToNarrow(style.FontWidth()) == "expanded");
     REQUIRE_FALSE(style.SetSizeAdjust(u8"50%").HasException());
     CHECK(ToNarrow(style.SizeAdjust()) == "50%");
     REQUIRE_FALSE(style.SetUnicodeRange(u8"U+0-7F").HasException());

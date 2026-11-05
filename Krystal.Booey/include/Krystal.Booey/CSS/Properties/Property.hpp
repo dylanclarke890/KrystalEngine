@@ -193,8 +193,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool IsPaddingProperty(PropertyId id) noexcept;
 
-    KRYS_NODISCARD static SmallList<CSSOMString> AliasesForProperty(PropertyId id) noexcept;
-
     KRYS_NODISCARD static bool DisablesNativeAppearance(PropertyId id) noexcept;
 
     KRYS_NODISCARD static char32 ListValuedPropertySeparator(PropertyId id) noexcept;

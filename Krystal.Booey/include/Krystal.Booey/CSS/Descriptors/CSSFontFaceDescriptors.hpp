@@ -34,8 +34,6 @@ namespace krys::boo::css
     dom::ExceptionOr<void> SetFontStyle(const CSSOMString &value) noexcept;
     KRYS_NODISCARD CSSOMString FontWeight() const noexcept;
     dom::ExceptionOr<void> SetFontWeight(const CSSOMString &value) noexcept;
-    KRYS_NODISCARD CSSOMString FontStretch() const noexcept;
-    dom::ExceptionOr<void> SetFontStretch(const CSSOMString &value) noexcept;
     KRYS_NODISCARD CSSOMString FontWidth() const noexcept;
     dom::ExceptionOr<void> SetFontWidth(const CSSOMString &value) noexcept;
     KRYS_NODISCARD CSSOMString SizeAdjust() const noexcept;

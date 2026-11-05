@@ -758,7 +758,6 @@
       "codegen-properties": [
         {
           "enable-if": "ENABLE_VARIATION_FONTS",
-          "aliases": ["font-stretch"],
           "font-description-name-for-methods": "Width",
           "font-property": true,
           "high-priority": true,
@@ -774,7 +773,6 @@
         },
         {
           "enable-if": "!ENABLE_VARIATION_FONTS",
-          "aliases": ["font-stretch"],
           "font-description-name-for-methods": "Width",
           "font-property": true,
           "high-priority": true,
@@ -940,7 +938,6 @@
       "initial": "auto",
       "values": ["auto", "normal", "none"],
       "codegen-properties": {
-        "aliases": ["-webkit-font-kerning"],
         "font-description-name-for-methods": "Kerning",
         "font-property": true,
         "high-priority": true,
@@ -1544,7 +1541,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-writing-mode", "-epub-writing-mode"],
         "style-builder-custom": "Value",
         "style-extractor-custom": true,
         "render-style-has-explicitly-set-storage-path": [
@@ -1688,7 +1684,6 @@
     },
     "animation": {
       "codegen-properties": {
-        "aliases": ["-webkit-animation"],
         "longhands": [
           "animation-duration",
           "animation-timing-function",
@@ -1737,7 +1732,6 @@
       "animation-type": "not animatable",
       "initial": "0s",
       "codegen-properties": {
-        "aliases": ["-webkit-animation-delay"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Delay",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationDelay",
@@ -1760,7 +1754,6 @@
       "initial": "normal",
       "values": ["normal", "reverse", "alternate", "alternate-reverse"],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-direction"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Direction",
         "coordinated-value-list-property-item-type": "AnimationDirection",
@@ -1782,7 +1775,6 @@
       "animation-type": "not animatable",
       "initial": "auto",
       "codegen-properties": {
-        "aliases": ["-webkit-animation-duration"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Duration",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationDuration",
@@ -1807,7 +1799,6 @@
       "initial": "none",
       "values": ["none", "forwards", "backwards", "both"],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-fill-mode"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "FillMode",
         "coordinated-value-list-property-item-type": "AnimationFillMode",
@@ -1829,7 +1820,6 @@
       "animation-type": "not animatable",
       "initial": "1",
       "codegen-properties": {
-        "aliases": ["-webkit-animation-iteration-count"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "IterationCount",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationIterationCount",
@@ -1852,7 +1842,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-name"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Name",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationName",
@@ -1875,7 +1864,6 @@
       "initial": "running",
       "values": ["running", "paused"],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-play-state"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "PlayState",
         "coordinated-value-list-property-item-type": "AnimationPlayState",
@@ -2002,7 +1990,6 @@
         "step-end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-animation-timing-function"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "TimingFunction",
         "coordinated-value-list-property-item-type": "Style::EasingFunction",
@@ -2409,7 +2396,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-logical-height"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "size",
@@ -2488,7 +2474,6 @@
     },
     "border-block-end": {
       "codegen-properties": {
-        "aliases": ["-webkit-border-after"],
         "longhands": [
           "border-block-end-width",
           "border-block-end-style",
@@ -2508,7 +2493,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-border-after-color"],
         "logical-property-group": {
           "name": "border-color",
           "resolver": "block-end"
@@ -2539,7 +2523,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-border-after-style"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -2558,7 +2541,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-border-after-width"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -2574,7 +2556,6 @@
     },
     "border-block-start": {
       "codegen-properties": {
-        "aliases": ["-webkit-border-before"],
         "longhands": [
           "border-block-start-width",
           "border-block-start-style",
@@ -2594,7 +2575,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-border-before-color"],
         "logical-property-group": {
           "name": "border-color",
           "resolver": "block-start"
@@ -2625,7 +2605,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-border-before-style"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -2644,7 +2623,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-border-before-width"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -2731,7 +2709,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-border-bottom-left-radius"],
         "logical-property-group": {
           "name": "border-radius",
           "resolver": "bottom-left"
@@ -2761,7 +2738,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-border-bottom-right-radius"],
         "logical-property-group": {
           "name": "border-radius",
           "resolver": "bottom-right"
@@ -3104,7 +3080,6 @@
     },
     "border-inline-end": {
       "codegen-properties": {
-        "aliases": ["-webkit-border-end"],
         "longhands": [
           "border-inline-end-width",
           "border-inline-end-style",
@@ -3124,7 +3099,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-border-end-color"],
         "logical-property-group": {
           "name": "border-color",
           "resolver": "inline-end"
@@ -3155,7 +3129,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-border-end-style"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -3174,7 +3147,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-border-end-width"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -3190,7 +3162,6 @@
     },
     "border-inline-start": {
       "codegen-properties": {
-        "aliases": ["-webkit-border-start"],
         "longhands": [
           "border-inline-start-width",
           "border-inline-start-style",
@@ -3210,7 +3181,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-border-start-color"],
         "logical-property-group": {
           "name": "border-color",
           "resolver": "inline-start"
@@ -3241,7 +3211,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-border-start-style"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -3260,7 +3229,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-border-start-width"],
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "logical-property-group": {
@@ -3687,7 +3655,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-border-top-left-radius"],
         "logical-property-group": {
           "name": "border-radius",
           "resolver": "top-left"
@@ -3717,7 +3684,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-border-top-right-radius"],
         "logical-property-group": {
           "name": "border-radius",
           "resolver": "top-right"
@@ -3878,7 +3844,6 @@
       "initial": "content-box",
       "values": ["border-box", "content-box"],
       "codegen-properties": {
-        "aliases": ["-webkit-box-sizing"],
         "render-style-storage-path": ["_nonInheritedData", "boxData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "BoxSizing",
@@ -4019,7 +3984,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-epub-caption-side"],
         "render-style-storage-path": ["m_inheritedFlags"],
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "enum",
@@ -4090,7 +4054,6 @@
         "padding-box"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-clip-path"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ClipPath",
@@ -4983,7 +4946,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-logical-width"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "size",
@@ -5442,7 +5404,6 @@
       "initial": "0px",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-margin-after"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "margin",
@@ -5459,7 +5420,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-margin-before"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "margin",
@@ -5516,7 +5476,6 @@
       "initial": "0px",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-margin-end"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "margin",
@@ -5534,7 +5493,6 @@
       "initial": "0px",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-margin-start"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "margin",
@@ -5764,7 +5722,6 @@
       "animation-type": "by computed value",
       "initial": "0",
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-outset"],
         "render-style-storage-name": "outset",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -5787,7 +5744,6 @@
       "initial": "stretch",
       "values": ["stretch", "repeat", "space", "round"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-repeat"],
         "render-style-storage-name": "repeat",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -5810,7 +5766,6 @@
       "initial": "0",
       "values": ["fill"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-slice"],
         "render-style-storage-name": "slice",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -5837,7 +5792,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-source"],
         "render-style-storage-name": "source",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -5860,7 +5814,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-box-image-width"],
         "render-style-storage-name": "width",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -5937,7 +5890,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-image"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Image",
         "coordinated-value-list-property-item-type": "Style::ImageOrNone",
@@ -6005,7 +5957,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-origin"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Origin",
         "coordinated-value-list-property-item-type": "FillBox",
@@ -6085,7 +6036,6 @@
         "no-repeat"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-repeat"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Repeat",
         "coordinated-value-list-property-item-type": "Style::RepeatStyle",
@@ -6103,7 +6053,6 @@
       "initial": "auto",
       "values": ["auto", "cover", "contain"],
       "codegen-properties": {
-        "aliases": ["-webkit-mask-size"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Size",
         "coordinated-value-list-property-item-type": "Style::BackgroundSize",
@@ -6225,7 +6174,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-max-logical-height"],
         "logical-property-group": {
           "name": "max-size",
           "resolver": "block"
@@ -6338,7 +6286,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-max-logical-width"],
         "logical-property-group": {
           "name": "max-size",
           "resolver": "inline"
@@ -6470,7 +6417,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-min-logical-height"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "min-size",
@@ -6583,7 +6529,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-min-logical-width"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "min-size",
@@ -6789,7 +6734,6 @@
       "animation-type": "by computed value",
       "initial": "1",
       "codegen-properties": {
-        "aliases": ["-webkit-opacity"],
         "animation-wrapper-acceleration": "always",
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
@@ -6973,7 +6917,6 @@
       "initial": "normal",
       "values": ["normal", "break-word", "anywhere"],
       "codegen-properties": {
-        "aliases": ["word-wrap"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "OverflowWrap",
@@ -7206,7 +7149,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-padding-after"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "padding",
@@ -7223,7 +7165,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-padding-before"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "padding",
@@ -7283,7 +7224,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-padding-end"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "padding",
@@ -7300,7 +7240,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-padding-start"],
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "padding",
@@ -8174,7 +8113,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-epub-text-transform"],
         "render-style-storage-path": ["m_inheritedFlags"],
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "raw",
@@ -8274,7 +8212,6 @@
     },
     "transition": {
       "codegen-properties": {
-        "aliases": ["-webkit-transition"],
         "longhands": [
           "transition-property",
           "transition-duration",
@@ -8319,7 +8256,6 @@
       "animation-type": "not animatable",
       "initial": "0s",
       "codegen-properties": {
-        "aliases": ["-webkit-transition-delay"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Delay",
         "coordinated-value-list-property-item-type": "Style::SingleTransitionDelay",
@@ -8341,7 +8277,6 @@
       "animation-type": "not animatable",
       "initial": "0s",
       "codegen-properties": {
-        "aliases": ["-webkit-transition-duration"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Duration",
         "coordinated-value-list-property-item-type": "Style::SingleTransitionDuration",
@@ -8364,7 +8299,6 @@
       "initial": "all",
       "values": ["none", "all"],
       "codegen-properties": {
-        "aliases": ["-webkit-transition-property"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Property",
         "coordinated-value-list-property-item-type": "Style::SingleTransitionProperty",
@@ -8394,7 +8328,6 @@
         "step-end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-transition-timing-function"],
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "TimingFunction",
         "coordinated-value-list-property-item-type": "Style::EasingFunction",
@@ -8682,7 +8615,6 @@
         "break-word"
       ],
       "codegen-properties": {
-        "aliases": ["-epub-word-break"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "WordBreak",
@@ -8812,7 +8744,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-appearance"],
         "render-style-setter-custom": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "enum",
@@ -9028,7 +8959,6 @@
       "initial": "visible",
       "values": ["visible", "hidden"],
       "codegen-properties": {
-        "aliases": ["-webkit-backface-visibility"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "BackfaceVisibility",
@@ -9044,7 +8974,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-count"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9066,7 +8995,6 @@
       "initial": "balance",
       "values": ["auto", "balance"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-fill"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9085,7 +9013,6 @@
       "animation-type": "by computed value",
       "initial": "normal",
       "codegen-properties": {
-        "aliases": ["grid-column-gap", "-webkit-column-gap"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::GapGutter",
@@ -9101,7 +9028,6 @@
       "animation-type": "by computed value",
       "initial": "normal",
       "codegen-properties": {
-        "aliases": ["grid-row-gap"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::GapGutter",
@@ -9115,7 +9041,6 @@
     },
     "gap": {
       "codegen-properties": {
-        "aliases": ["grid-gap"],
         "longhands": ["row-gap", "column-gap"],
         "shorthand-pattern": "CoalescingPair",
         "parser-function": "ConsumeAlignShorthand",
@@ -9130,7 +9055,6 @@
     },
     "column-rule": {
       "codegen-properties": {
-        "aliases": ["-webkit-column-rule"],
         "longhands": [
           "column-rule-width",
           "column-rule-style",
@@ -9150,7 +9074,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-column-rule-color"],
         "color-property": true,
         "render-style-storage-name": "color",
         "render-style-storage-path": [
@@ -9185,7 +9108,6 @@
         "double"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-column-rule-style"],
         "render-style-storage-name": "style",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9208,7 +9130,6 @@
       "initial": "medium",
       "values": ["thin", "medium", "thick"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-rule-width"],
         "style-builder-custom": "Initial",
         "render-style-initial-constexpr": true,
         "render-style-initial-custom": true,
@@ -9235,7 +9156,6 @@
       "initial": "none",
       "values": ["none", "all"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-span"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9255,7 +9175,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-column-width"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9274,7 +9193,6 @@
     },
     "columns": {
       "codegen-properties": {
-        "aliases": ["-webkit-columns"],
         "longhands": ["column-width", "column-count"],
         "parser-function": "ConsumeColumnsShorthand",
         "parser-grammar": "<'column-width'> || <'column-count'>",
@@ -9361,7 +9279,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-filter"],
         "animation-wrapper-acceleration": "always",
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9401,7 +9318,6 @@
         "end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-align-content"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -9437,7 +9353,6 @@
         "self-end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-align-items"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -9474,7 +9389,6 @@
         "self-end"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-align-self"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -9492,7 +9406,6 @@
     },
     "flex": {
       "codegen-properties": {
-        "aliases": ["-webkit-flex"],
         "longhands": ["flex-grow", "flex-shrink", "flex-basis"],
         "shorthand-pattern": "StandardSpaceSeparated",
         "parser-function": "ConsumeFlexShorthand",
@@ -9548,7 +9461,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-flex-basis"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9568,7 +9480,6 @@
       "initial": "row",
       "values": ["row", "row-reverse", "column", "column-reverse"],
       "codegen-properties": {
-        "aliases": ["-webkit-flex-direction"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9585,7 +9496,6 @@
     },
     "flex-flow": {
       "codegen-properties": {
-        "aliases": ["-webkit-flex-flow"],
         "longhands": ["flex-direction", "flex-wrap"],
         "shorthand-parser-pattern": "StandardSpaceSeparated",
         "parser-grammar": "<'flex-direction'> || <'flex-wrap'>",
@@ -9601,7 +9511,6 @@
       "animation-type": "by computed value",
       "initial": "0",
       "codegen-properties": {
-        "aliases": ["-webkit-flex-grow"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9621,7 +9530,6 @@
       "animation-type": "by computed value",
       "initial": "1",
       "codegen-properties": {
-        "aliases": ["-webkit-flex-shrink"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
           "_nonInheritedData",
@@ -9642,7 +9550,6 @@
       "initial": "nowrap",
       "values": ["nowrap", "wrap", "wrap-reverse"],
       "codegen-properties": {
-        "aliases": ["-webkit-flex-wrap"],
         "render-style-storage-path": [
           "_nonInheritedData",
           "miscData",
@@ -9677,7 +9584,6 @@
         "right"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-justify-content"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -9740,7 +9646,6 @@
       "animation-type": "discrete",
       "initial": "legacy",
       "codegen-properties": {
-        "aliases": ["-webkit-justify-items"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -10088,7 +9993,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "aliases": ["-webkit-hyphenate-character"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::HyphenateCharacter",
@@ -10141,7 +10045,6 @@
       "initial": "manual",
       "values": ["none", "manual", "auto"],
       "codegen-properties": {
-        "aliases": ["-epub-hyphens", "-webkit-hyphens"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "Hyphens",
@@ -10213,7 +10116,6 @@
         "anywhere"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-line-break"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "LineBreak",
@@ -10243,7 +10145,6 @@
       "initial": "normal",
       "values": ["normal", "light", "dark", "only"],
       "codegen-properties": {
-        "aliases": ["supported-color-schemes"],
         "enable-if": "ENABLE_DARK_MODE_CSS",
         "style-builder-custom": "Value",
         "render-style-has-explicitly-set-storage-path": [
@@ -10272,7 +10173,6 @@
       "animation-type": "by computed value",
       "initial": "0",
       "codegen-properties": {
-        "aliases": ["-webkit-order"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "value",
@@ -10302,7 +10202,6 @@
     },
     "perspective-origin": {
       "codegen-properties": {
-        "aliases": ["-webkit-perspective-origin"],
         "longhands": ["perspective-origin-x", "perspective-origin-y"],
         "parser-function": "ConsumePerspectiveOriginShorthand",
         "parser-grammar": "<position>",
@@ -10318,7 +10217,6 @@
       "animation-type": "by computed value",
       "initial": "50%",
       "codegen-properties": {
-        "aliases": ["-webkit-perspective-origin-x"],
         "skip-style-extractor": true,
         "render-style-storage-name": "x",
         "render-style-storage-path": [
@@ -10340,7 +10238,6 @@
       "animation-type": "by computed value",
       "initial": "50%",
       "codegen-properties": {
-        "aliases": ["-webkit-perspective-origin-y"],
         "skip-style-extractor": true,
         "render-style-storage-name": "y",
         "render-style-storage-path": [
@@ -10364,7 +10261,6 @@
       "initial": "economy",
       "values": ["exact", "economy"],
       "codegen-properties": {
-        "aliases": ["-webkit-print-color-adjust", "color-adjust"],
         "render-style-storage-path": ["m_inheritedFlags"],
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "enum",
@@ -10418,7 +10314,6 @@
           "text-decoration-style",
           "text-decoration-color"
         ],
-        "aliases": ["-webkit-text-decoration"],
         "shorthand-pattern": "StandardSpaceSeparated",
         "style-extractor-custom": true,
         "parser-grammar": "<'text-decoration-line'> || <'text-decoration-style'> || <'text-decoration-color'>",
@@ -10449,7 +10344,6 @@
         "grammar-error"
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-text-decoration-line"],
         "render-style-storage-path": ["m_nonInheritedFlags"],
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "raw",
@@ -10467,7 +10361,6 @@
       "initial": "solid",
       "values": ["solid", "double", "dotted", "dashed", "wavy"],
       "codegen-properties": {
-        "aliases": ["-webkit-text-decoration-style"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "TextDecorationStyle",
@@ -10482,7 +10375,6 @@
       "animation-type": "by computed value",
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-webkit-text-decoration-color"],
         "color-property": true,
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -10497,7 +10389,6 @@
     "text-decoration-skip": {
       "inherited": true,
       "codegen-properties": {
-        "aliases": ["-webkit-text-decoration-skip"],
         "longhands": ["text-decoration-skip-ink"],
         "parser-function": "ConsumeTextDecorationSkipShorthand",
         "parser-grammar": "none | auto | ink@(aliased-to=auto)",
@@ -10531,7 +10422,6 @@
       "initial": "auto",
       "values": ["auto", "under", "from-font", "left", "right"],
       "codegen-properties": {
-        "aliases": ["-webkit-text-underline-position"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "raw",
         "render-style-type": "Style::TextUnderlinePosition",
@@ -10592,7 +10482,6 @@
     "text-emphasis": {
       "inherited": true,
       "codegen-properties": {
-        "aliases": ["-epub-text-emphasis", "-webkit-text-emphasis"],
         "longhands": ["text-emphasis-style", "text-emphasis-color"],
         "shorthand-pattern": "StandardSpaceSeparated",
         "parser-grammar": "<'text-emphasis-style'> || <'text-emphasis-color'>",
@@ -10609,7 +10498,6 @@
       "inherited": true,
       "initial": "currentcolor",
       "codegen-properties": {
-        "aliases": ["-epub-text-emphasis-color", "-webkit-text-emphasis-color"],
         "color-property": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
@@ -10626,7 +10514,6 @@
       "inherited": true,
       "initial": "over right",
       "codegen-properties": {
-        "aliases": ["-webkit-text-emphasis-position"],
         "render-style-initial-custom": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "raw",
@@ -10643,7 +10530,6 @@
       "inherited": true,
       "initial": "none",
       "codegen-properties": {
-        "aliases": ["-epub-text-emphasis-style", "-webkit-text-emphasis-style"],
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::TextEmphasisStyle",
@@ -10672,7 +10558,6 @@
       "animation-type": "see prose",
       "initial": "none",
       "codegen-properties": {
-        "aliases": ["-webkit-transform"],
         "animation-wrapper-acceleration": "always",
         "style-extractor-custom": true,
         "render-style-storage-path": [
@@ -10717,7 +10602,6 @@
     },
     "transform-origin": {
       "codegen-properties": {
-        "aliases": ["-webkit-transform-origin"],
         "longhands": [
           "transform-origin-x",
           "transform-origin-y",
@@ -10737,7 +10621,6 @@
       "animation-type": "by computed value",
       "initial": "50%",
       "codegen-properties": {
-        "aliases": ["-webkit-transform-origin-x"],
         "skip-style-extractor": true,
         "render-style-storage-name": "x",
         "render-style-storage-path": [
@@ -10760,7 +10643,6 @@
       "animation-type": "by computed value",
       "initial": "50%",
       "codegen-properties": {
-        "aliases": ["-webkit-transform-origin-y"],
         "skip-style-extractor": true,
         "render-style-storage-name": "y",
         "render-style-storage-path": [
@@ -10783,7 +10665,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-transform-origin-z"],
         "skip-style-extractor": true,
         "render-style-storage-name": "z",
         "render-style-storage-path": [
@@ -10816,7 +10697,6 @@
         }
       ],
       "codegen-properties": {
-        "aliases": ["-webkit-transform-style"],
         "render-style-name-for-methods": "TransformStyle3D",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
@@ -10966,7 +10846,6 @@
           "scroll-margin-bottom",
           "scroll-margin-left"
         ],
-        "aliases": ["scroll-snap-margin"],
         "shorthand-pattern": "CoalescingQuad",
         "parser-grammar": "<'scroll-margin-top'>{1,4}",
         "parser-grammar-unused": true,
@@ -10982,7 +10861,6 @@
       "animation-type-comment": "Current spec animation type is 'by computed value'",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["scroll-snap-margin-bottom"],
         "logical-property-group": {
           "name": "scroll-margin",
           "resolver": "bottom"
@@ -11007,7 +10885,6 @@
       "animation-type-comment": "Current spec animation type is 'by computed value'",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["scroll-snap-margin-left"],
         "logical-property-group": {
           "name": "scroll-margin",
           "resolver": "left"
@@ -11032,7 +10909,6 @@
       "animation-type-comment": "Current spec animation type is 'by computed value'",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["scroll-snap-margin-right"],
         "logical-property-group": {
           "name": "scroll-margin",
           "resolver": "right"
@@ -11057,7 +10933,6 @@
       "animation-type-comment": "Current spec animation type is 'by computed value'",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["scroll-snap-margin-top"],
         "logical-property-group": {
           "name": "scroll-margin",
           "resolver": "top"
@@ -11559,7 +11434,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "aliases": ["-webkit-shape-outside"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ShapeOutside",
@@ -11577,7 +11451,6 @@
       "animation-type": "by computed value",
       "initial": "0px",
       "codegen-properties": {
-        "aliases": ["-webkit-shape-margin"],
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ShapeMargin",
@@ -11592,7 +11465,6 @@
       "animation-type": "by computed value",
       "initial": "0",
       "codegen-properties": {
-        "aliases": ["-webkit-shape-image-threshold"],
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "value",
@@ -12026,14 +11898,12 @@
         "codegen-properties": [
           {
             "enable-if": "ENABLE_VARIATION_FONTS",
-            "aliases": ["font-stretch"],
             "parser-grammar": "<font-width-absolute> | <percentage [0,inf]>{1,2}",
             "parser-grammar-comment": "Current spec grammar is 'auto | <'font-width'>{1,2}'",
             "parser-exported": true
           },
           {
             "enable-if": "!ENABLE_VARIATION_FONTS",
-            "aliases": ["font-stretch"],
             "parser-grammar": "<font-width-absolute> | <percentage [0,inf]>",
             "parser-exported": true
           }

@@ -22,55 +22,6 @@ namespace krys::boo::css
 {
   namespace
   {
-    enum class PropertyNamePrefix : uint8
-    {
-      None,
-      WebKit
-    };
-
-    KRYS_NODISCARD bool MatchesCSSPropertyNamePrefix(CSSOMStringView propertyName,
-                                                     CSSOMStringView prefix) noexcept
-    {
-      krys_debug_assert(text::ToASCIILower(propertyName[0]) == prefix[0]);
-      constexpr auto offset = 1uz;
-
-      // The prefix within the property name must be followed by a capital letter.
-      // Other characters in the prefix within the property name must be lowercase.
-      if (propertyName.size() < prefix.size() + 1)
-      {
-        return false;
-      }
-
-      for (auto i = offset; i < prefix.size(); ++i)
-      {
-        if (propertyName[i] != prefix[i])
-        {
-          return false;
-        }
-      }
-
-      if (!text::IsASCIIUpper(propertyName[prefix.size()]))
-      {
-        return false;
-      }
-
-      return true;
-    }
-
-    KRYS_NODISCARD PropertyNamePrefix GetPropertyNamePrefix(CSSOMStringView propertyName) noexcept
-    {
-      krys_debug_assert(!propertyName.empty());
-
-      // First character of the prefix within the property name may be upper or lowercase.
-      if (text::ToASCIILower(propertyName[0]) == u8'w'
-          && MatchesCSSPropertyNamePrefix(propertyName, u8"webkit"))
-      {
-        return PropertyNamePrefix::WebKit;
-      }
-
-      return PropertyNamePrefix::None;
-    }
-
     KRYS_NODISCARD PropertyId ParseJavaScriptCSSPropertyName(const CSSOMStringAtom &propertyName) noexcept
     {
       static MainThreadNeverDestroyed<HashMap<CSSOMStringAtom, PropertyId>> propertyIdCache;
@@ -97,24 +48,9 @@ namespace krys::boo::css
       auto outputLength = 0uz;
       auto i = 0uz;
 
-      switch (GetPropertyNamePrefix(name))
+      if (text::IsASCIIUpper(name[0]))
       {
-        case PropertyNamePrefix::None:
-        {
-          if (text::IsASCIIUpper(name[0]))
-          {
-            return PropertyId::Invalid;
-          }
-          break;
-        }
-        case PropertyNamePrefix::WebKit:
-        {
-          constexpr CSSOMStringView webkitPrefix = u8"-webkit-";
-          std::copy(webkitPrefix.begin(), webkitPrefix.end(), buffer.begin());
-          outputLength = webkitPrefix.size();
-          i += 6;
-          break;
-        }
+        return PropertyId::Invalid;
       }
 
       buffer[outputLength++] = text::ToASCIILower(name[i++]);
@@ -164,7 +100,6 @@ namespace krys::boo::css
 
     enum class PropertyLookupMode : uint8
     {
-      ConvertUsingDashPrefix,
       ConvertUsingNoDashPrefix,
       NoConversion
     };
@@ -181,16 +116,10 @@ namespace krys::boo::css
       }
 
       CSSOMString output;
-      if constexpr (Mode == PropertyLookupMode::ConvertUsingDashPrefix
-                    || Mode == PropertyLookupMode::ConvertUsingNoDashPrefix)
+      if constexpr (Mode == PropertyLookupMode::ConvertUsingNoDashPrefix)
       {
         // Conversion is implementing the "IDL attribute to CSS property algorithm"
         // from https://drafts.csswg.org/cssom/#idl-attribute-to-css-property.
-        if constexpr (Mode == PropertyLookupMode::ConvertUsingDashPrefix)
-        {
-          output.push_back(u8'-');
-        }
-
         for (auto c : attribute.View())
         {
           krys_debug_assert(text::IsASCII(c));
@@ -246,21 +175,6 @@ namespace krys::boo::css
   {
     auto property =
       LookupCSSPropertyFromIDLAttribute<PropertyLookupMode::ConvertUsingNoDashPrefix>(attribute);
-    return SetPropertyInternal(property, value, IsImportant(false));
-  }
-
-  CSSOMString
-    CSSStyleProperties::GetPropertyValueForWebKitCasedIDLAttribute(const CSSOMStringAtom &attribute) noexcept
-  {
-    auto property = LookupCSSPropertyFromIDLAttribute<PropertyLookupMode::ConvertUsingDashPrefix>(attribute);
-    return GetPropertyValueInternal(property);
-  }
-
-  dom::ExceptionOr<void>
-    CSSStyleProperties::SetPropertyValueForWebKitCasedIDLAttribute(const CSSOMStringAtom &attribute,
-                                                                   const CSSOMString &value) noexcept
-  {
-    auto property = LookupCSSPropertyFromIDLAttribute<PropertyLookupMode::ConvertUsingDashPrefix>(attribute);
     return SetPropertyInternal(property, value, IsImportant(false));
   }
 

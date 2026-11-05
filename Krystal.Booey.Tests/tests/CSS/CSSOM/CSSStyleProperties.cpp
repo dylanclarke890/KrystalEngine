@@ -114,12 +114,6 @@ namespace krys::boo::css::tests
       REQUIRE_FALSE(
         properties.SetPropertyValueForDashedIDLAttribute(u8"margin-left", u8"6px").HasException());
       CHECK(ToNarrow(properties.GetPropertyValueForCamelCasedIDLAttribute(u8"marginLeft")) == "6px");
-
-      REQUIRE_FALSE(
-        properties.SetPropertyValueForWebKitCasedIDLAttribute(u8"webkitWritingMode", u8"vertical-rl")
-          .HasException());
-      CHECK(ToNarrow(properties.GetPropertyValueForWebKitCasedIDLAttribute(u8"webkitWritingMode"))
-            == "vertical-rl");
     }
 
     SECTION("copyProperties")
@@ -185,8 +179,9 @@ namespace krys::boo::css::tests
     CHECK(id(u8"color") == Color);
     CHECK(id(u8"backgroundColor") == BackgroundColor);
     CHECK(id(u8"borderTopLeftRadius") == BorderTopLeftRadius);
-    CHECK(id(u8"webkitWritingMode") == WritingMode);
-    CHECK(id(u8"WebkitWritingMode") == WritingMode);
+    // There are no prefixed properties.
+    CHECK(id(u8"webkitWritingMode") == Invalid);
+    CHECK(id(u8"WebkitWritingMode") == Invalid);
     CHECK(id(u8"cssFloat") == Invalid);
     CHECK(id(u8"BackgroundColor") == Invalid);
     CHECK(id(u8"background-color") == BackgroundColor);

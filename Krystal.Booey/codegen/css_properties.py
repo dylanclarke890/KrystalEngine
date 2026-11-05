@@ -7840,16 +7840,6 @@ class GeneratePropertyId:
                 default="return id;",
             )
 
-            self.generation_context.generate_property_id_switch_function(
-                to=writer,
-                signature="SmallList<CSSOMString> Property::AliasesForProperty(PropertyId id) noexcept",
-                iterable=(
-                    p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.aliases
-                ),
-                mapping=lambda p: f"return {{{', '.join(f'u8\"{alias}\"' for alias in p.codegen_properties.aliases)}}};",
-                default="return {};",
-            )
-
             physical_properties = []
             for _, property_group in sorted(
                 self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
