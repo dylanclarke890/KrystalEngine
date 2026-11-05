@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include <string>
@@ -117,7 +118,8 @@ namespace krys::boo::tests
         // Capturing at the document sees the events that don't bubble too.
         Ref<dom::EventListenerCallback> recorder = CreateRef<Recorder>(Records);
         for (auto type : {u8"pointerlockchange", u8"pointerlockerror", u8"pointerdown", u8"pointermove",
-                          u8"pointerup", u8"mousedown", u8"mousemove", u8"mouseup", u8"click", u8"wheel"})
+                          u8"pointerup", u8"mousedown", u8"mousemove", u8"mouseup", u8"click", u8"wheel",
+                          u8"gotpointercapture", u8"lostpointercapture"})
         {
           Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
         }
@@ -298,6 +300,27 @@ namespace krys::boo::tests
   {
     LockFixture fixture;
     auto &a = fixture.ById(u8"a");
+
+    SECTION("locking releases pointer capture")
+    {
+      auto &b = fixture.ById(u8"b");
+      (void)fixture.Handler().HandleMousePressEvent(LockFixture::Mouse(Type::MousePressed, 50, 75, {}, 1));
+      REQUIRE_FALSE(b.SetPointerCapture(MousePointerID).HasException());
+      (void)fixture.Handler().MouseMoved(LockFixture::Mouse(Type::MouseMoved, 50, 25, {}, 1));
+      (void)fixture.Take();
+      CHECK(fixture.TestPage->GetPointerCaptureController().PointerCaptureElement(fixture.Document.get(),
+                                                                                  MousePointerID)
+            == &b);
+
+      // As if releasePointerCapture() were called, but the locked pointer's events don't process the release,
+      // so lostpointercapture fires as the lock is applied.
+      fixture.Activate();
+      CHECK(fixture.Lock(a) == "ok");
+      CHECK(fixture.Take() == Strings {"lostpointercapture:b", "pointerlockchange:document"});
+      CHECK_FALSE(b.HasPointerCapture(MousePointerID));
+      CHECK_FALSE(fixture.TestPage->GetPointerCaptureController().PointerCaptureElement(
+        fixture.Document.get(), MousePointerID));
+    }
 
     SECTION("a host that doesn't lock the pointer")
     {

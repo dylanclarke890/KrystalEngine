@@ -150,10 +150,20 @@ namespace krys::boo
     // When a pointer lock is successfully applied on an element, a user agent MUST run the steps as if the
     // releasePointerCapture() method has been called if any element is set to be captured or pending to be
     // captured.
+    // (The locked pointer's events don't run the process pending pointer capture steps, so they run now, to
+    // fire lostpointercapture and clear the pointer capture target override.)
+    List<PointerID> capturedPointers;
     for (auto &[pointerId, capturingData] : _activePointerIdsToCapturingData)
     {
-      capturingData->PendingTargetOverride = nullptr;
-      capturingData->TargetOverride = nullptr;
+      if (capturingData->PendingTargetOverride || capturingData->TargetOverride)
+      {
+        capturingData->PendingTargetOverride = nullptr;
+        capturedPointers.push_back(static_cast<PointerID>(pointerId));
+      }
+    }
+    for (auto pointerId : capturedPointers)
+    {
+      ProcessPendingPointerCapture(pointerId);
     }
 
     UpdateHaveAnyCapturingElement();
