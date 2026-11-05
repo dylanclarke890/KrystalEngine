@@ -182,7 +182,7 @@ namespace krys
   }
 
   // FIXME: Enable if asserts are enabled
-#if 0
+#if KRYS_DEBUG
 
   template <typename ColourType>
   constexpr void AssertInRange(ColourType color) noexcept
@@ -200,7 +200,7 @@ namespace krys
       krys_assert(components[i] >= ColourType::Model::ComponentInfo[i].Min);
       
       // "Component at index %d is %f and is greater than the allowed maximum %f", i, components[i], ColourType::Model::ComponentInfo[i].Max)
-      krys_assert(components[i] <= ColourType::Model::ComponentInfo[i].Max;
+      krys_assert(components[i] <= ColourType::Model::ComponentInfo[i].Max);
     }
 
     if (!IsNaN(components[3]))
