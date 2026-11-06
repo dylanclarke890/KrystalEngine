@@ -457,6 +457,7 @@ namespace krys::boo::svg
     void UpdateRelativeLengthsInformation() noexcept;
     void UpdateRelativeLengthsInformationForChild(bool hasRelativeLengths, SVGElement &element) noexcept;
 
+  public:
 #pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
 
     KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
@@ -464,6 +465,7 @@ namespace krys::boo::svg
 
 #pragma endregion
 
+  protected:
 #pragma region Type Checks
 
     KRYS_NODISCARD bool IsSVGAElement() const noexcept

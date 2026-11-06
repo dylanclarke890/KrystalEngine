@@ -15,6 +15,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -24,6 +25,7 @@
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
 namespace krys::boo::tests
 {
@@ -580,6 +582,67 @@ namespace krys::boo::tests
       CHECK(fixture.Document->OnCopy() != nullptr);
       button.DispatchSimulatedClick(nullptr);
       CHECK(order == List<std::string> {"document", "window"});
+    }
+
+    SECTION("pointer and touch events have handlers")
+    {
+      uint32 calls = 0;
+      auto count = [&](dom::Event &)
+      {
+        ++calls;
+      };
+      button.SetOnGotPointerCapture(count);
+      button.SetOnLostPointerCapture(count);
+      button.SetOnPointerCancel(count);
+      button.SetOnPointerDown(count);
+      button.SetOnPointerEnter(count);
+      button.SetOnPointerLeave(count);
+      button.SetOnPointerMove(count);
+      button.SetOnPointerOut(count);
+      button.SetOnPointerOver(count);
+      button.SetOnPointerRawUpdate(count);
+      button.SetOnPointerUp(count);
+      button.SetOnTouchCancel(count);
+      button.SetOnTouchEnd(count);
+      button.SetOnTouchMove(count);
+      button.SetOnTouchStart(count);
+      for (auto type :
+           {EventNames::GotPointerCapture, EventNames::LostPointerCapture, EventNames::PointerCancel,
+            EventNames::PointerDown, EventNames::PointerEnter, EventNames::PointerLeave,
+            EventNames::PointerMove, EventNames::PointerOut, EventNames::PointerOver,
+            utf8_stringview(u8"pointerrawupdate"), EventNames::PointerUp, EventNames::TouchCancel,
+            EventNames::TouchEnd, EventNames::TouchMove, EventNames::TouchStart})
+      {
+        dom::EventDispatcher::FireEvent(type, button);
+      }
+      CHECK(calls == 15);
+    }
+
+    SECTION("the document's own handlers")
+    {
+      uint32 calls = 0;
+      auto count = [&](dom::Event &)
+      {
+        ++calls;
+      };
+      fixture.Document->SetOnReadyStateChange(count);
+      fixture.Document->SetOnPointerLockChange(count);
+      fixture.Document->SetOnPointerLockError(count);
+      for (auto type :
+           {EventNames::ReadyStateChange, EventNames::PointerLockChange, EventNames::PointerLockError})
+      {
+        dom::EventDispatcher::FireEvent(type, *fixture.Document);
+      }
+      CHECK(calls == 3);
+    }
+
+    SECTION("an svg element's handlers are its own")
+    {
+      auto svg = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+      auto &svgElement = Downcast<svg::SVGElement>(*svg);
+      svgElement.SetOnResize([](dom::Event &) {});
+      CHECK(svgElement.OnResize() != nullptr);
+      CHECK(window.OnResize() == nullptr);
     }
 
     SECTION("the body's window handlers are the window's")

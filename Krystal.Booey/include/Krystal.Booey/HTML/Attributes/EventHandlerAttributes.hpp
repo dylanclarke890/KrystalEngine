@@ -45,6 +45,8 @@ namespace krys::boo::html
 
 /// @brief The event handlers of every HTML, SVG and MathML element, document and window.
 /// @see https://html.spec.whatwg.org/#globaleventhandlers
+/// @see https://w3c.github.io/pointerevents/#extensions-to-the-globaleventhandlers-mixin
+/// @see https://w3c.github.io/touch-events/#extensions-to-the-globaleventhandlers-mixin
 #define KRYS_GLOBAL_EVENT_HANDLERS(X)                                                                        \
   X(Abort, u8"abort")                                                                                        \
   X(AnimationCancel, u8"animationcancel")                                                                    \
@@ -81,6 +83,7 @@ namespace krys::boo::html
   X(Error, u8"error")                                                                                        \
   X(Focus, u8"focus")                                                                                        \
   X(FormData, u8"formdata")                                                                                  \
+  X(GotPointerCapture, u8"gotpointercapture")                                                                \
   X(Input, u8"input")                                                                                        \
   X(Invalid, u8"invalid")                                                                                    \
   X(KeyDown, u8"keydown")                                                                                    \
@@ -90,6 +93,7 @@ namespace krys::boo::html
   X(LoadedData, u8"loadeddata")                                                                              \
   X(LoadedMetadata, u8"loadedmetadata")                                                                      \
   X(LoadStart, u8"loadstart")                                                                                \
+  X(LostPointerCapture, u8"lostpointercapture")                                                              \
   X(MouseDown, u8"mousedown")                                                                                \
   X(MouseEnter, u8"mouseenter")                                                                              \
   X(MouseLeave, u8"mouseleave")                                                                              \
@@ -100,6 +104,15 @@ namespace krys::boo::html
   X(Pause, u8"pause")                                                                                        \
   X(Play, u8"play")                                                                                          \
   X(Playing, u8"playing")                                                                                    \
+  X(PointerCancel, u8"pointercancel")                                                                        \
+  X(PointerDown, u8"pointerdown")                                                                            \
+  X(PointerEnter, u8"pointerenter")                                                                          \
+  X(PointerLeave, u8"pointerleave")                                                                          \
+  X(PointerMove, u8"pointermove")                                                                            \
+  X(PointerOut, u8"pointerout")                                                                              \
+  X(PointerOver, u8"pointerover")                                                                            \
+  X(PointerRawUpdate, u8"pointerrawupdate")                                                                  \
+  X(PointerUp, u8"pointerup")                                                                                \
   X(Progress, u8"progress")                                                                                  \
   X(RateChange, u8"ratechange")                                                                              \
   X(Reset, u8"reset")                                                                                        \
@@ -118,6 +131,10 @@ namespace krys::boo::html
   X(Suspend, u8"suspend")                                                                                    \
   X(TimeUpdate, u8"timeupdate")                                                                              \
   X(Toggle, u8"toggle")                                                                                      \
+  X(TouchCancel, u8"touchcancel")                                                                            \
+  X(TouchEnd, u8"touchend")                                                                                  \
+  X(TouchMove, u8"touchmove")                                                                                \
+  X(TouchStart, u8"touchstart")                                                                              \
   X(TransitionCancel, u8"transitioncancel")                                                                  \
   X(TransitionEnd, u8"transitionend")                                                                        \
   X(TransitionRun, u8"transitionrun")                                                                        \

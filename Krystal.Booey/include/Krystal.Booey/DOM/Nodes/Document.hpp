@@ -785,7 +785,7 @@ namespace krys::boo::dom
     void UnregisterForVisibilityStateChangedCallbacks(VisibilityChangeClient &client) noexcept;
 
     // special event handler IDL attributes that only apply to Document objects
-    // [LegacyLenientThis] attribute EventHandler onreadystatechange;
+    KRYS_DECLARE_EVENT_HANDLER(ReadyStateChange, u8"readystatechange")
     KRYS_DECLARE_EVENT_HANDLER(VisibilityChange, u8"visibilitychange")
 
 #pragma endregion
@@ -795,6 +795,9 @@ namespace krys::boo::dom
     /// @brief Unlocks the pointer, if an element of this document has it.
     /// @see https://w3c.github.io/pointerlock/#dom-document-exitpointerlock
     void ExitPointerLock() noexcept;
+
+    KRYS_DECLARE_EVENT_HANDLER(PointerLockChange, u8"pointerlockchange")
+    KRYS_DECLARE_EVENT_HANDLER(PointerLockError, u8"pointerlockerror")
 
 #pragma endregion
 

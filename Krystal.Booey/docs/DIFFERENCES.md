@@ -211,6 +211,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 - The deprecated `zoomAndPan` attribute and `SVGZoomAndPan` interface aren't supported; `zoomAndPan()` in an `svgView(...)` fragment is parsed and ignored. So, as in Chrome and Firefox, a standalone SVG document isn't zoomed or panned by the user (WebKit pans it with an Alt-drag); the host can set `currentScale` and `currentTranslate`.
 - `getComputedTextLength` sums the fragments' unstretched widths, so `lengthAdjust="spacingAndGlyphs"` doesn't change it.
+- An `<svg>` element doesn't expose the window's event handlers, where SVG 2 includes `WindowEventHandlers` on it: as in Chrome and HTML's target algorithm, only the body and frameset elements reach the window, and `SetOnResize()` and the like on an `<svg>` are the element's own. Chrome forwards `onunload`, `onresize` and `onscroll` content attributes of an outermost `<svg>` to the window, but event handler content attributes are inert here. Set these on the window instead.
 - A `mask-image: url()` that references a `<mask>` draws the mask's content as an image (`SVGResourceImage`), so it masks by alpha rather than by luminance.
 
 ### From Chrome
