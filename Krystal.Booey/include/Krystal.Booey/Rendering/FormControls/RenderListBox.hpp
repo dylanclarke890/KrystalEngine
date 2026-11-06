@@ -135,6 +135,7 @@ namespace krys::boo
     }
 
     void Autoscroll(const IntPoint &positionInWindow) noexcept override;
+    void PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept override;
     void StopAutoscroll() noexcept override;
 
     KRYS_NODISCARD int32 VerticalScrollbarWidth() const noexcept override;

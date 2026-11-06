@@ -361,6 +361,9 @@ namespace krys::boo
       _mouseDownMayStartAutoscroll = true;
     }
     KRYS_NODISCARD bool AutoscrollInProgress() const noexcept;
+    KRYS_NODISCARD bool PanScrollInProgress() const noexcept;
+    /// @brief Starts pan scrolling @p renderer from the mouse's position.
+    void StartPanScrolling(RenderBox &renderer) noexcept;
     void StopAutoscrollTimer(bool rendererIsBeingDestroyed = false) noexcept;
 
     KRYS_NODISCARD static DragState &GetDragState() noexcept;
@@ -372,6 +375,11 @@ namespace krys::boo
     }
 
     /// @brief The cursor to show, as chosen by the last mouse move or cursor update.
+    void SetCurrentMouseCursor(Cursor cursor) noexcept
+    {
+      _currentMouseCursor = cursor;
+    }
+
     KRYS_NODISCARD Cursor CurrentMouseCursor() const noexcept
     {
       return _currentMouseCursor;

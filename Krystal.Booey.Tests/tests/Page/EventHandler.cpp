@@ -8,7 +8,9 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -635,6 +637,138 @@ namespace krys::boo::tests
       REQUIRE(selection.IsRange());
       CHECK(selection.Start().DeprecatedEditingOffset() == 0);
       CHECK(selection.End().DeprecatedEditingOffset() == 5);
+    }
+  }
+
+  TEST_CASE("EventHandler: pan scrolling", "[Page][EventHandler][PanScroll]")
+  {
+    auto wait = []
+    {
+      auto &loop = html::EventLoop::Current();
+      loop.Run(loop.Now() + std::chrono::milliseconds(120));
+    };
+
+    SECTION("the page")
+    {
+      MouseFixture fixture(u8"<div id=a style=height:1000px></div>");
+      auto *view = fixture.Frame->View();
+      REQUIRE(view->ScrollY() == 0);
+
+      (void)fixture.Move(100, 20);
+      (void)fixture.Press(100, 20, MouseButton::Middle);
+      REQUIRE(fixture.Handler().PanScrollInProgress());
+
+      SECTION("doesn't scroll over the icon, and goes on after the release")
+      {
+        (void)fixture.Release(100, 20, MouseButton::Middle);
+        wait();
+        CHECK(view->ScrollY() == 0);
+        CHECK(fixture.Handler().PanScrollInProgress());
+        CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::MiddlePanning);
+      }
+
+      SECTION("scrolls towards the mouse")
+      {
+        (void)fixture.Move(100, 80);
+        wait();
+        CHECK(view->ScrollY() > 0);
+        CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::SouthPanning);
+      }
+
+      SECTION("a press stops it, and is swallowed")
+      {
+        (void)fixture.Move(100, 80);
+        wait();
+        (void)fixture.Take();
+        CHECK(fixture.Press(100, 80));
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+        CHECK(fixture.Take().empty());
+        CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Pointer);
+
+        auto scrollY = view->ScrollY();
+        wait();
+        CHECK(view->ScrollY() == scrollY);
+      }
+
+      SECTION("releasing the button after moving away stops it")
+      {
+        (void)fixture.Move(100, 80);
+        wait();
+        (void)fixture.Release(100, 80, MouseButton::Middle);
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      }
+
+      SECTION("a key stops it, and is swallowed")
+      {
+        CHECK(fixture.Handler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"",
+                                                               u8"a", u8"KeyA", u8"U+0041", 65, false, false,
+                                                               false, {}, {})));
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      }
+
+      SECTION("the icon is painted until it stops")
+      {
+        auto painted = [&]
+        {
+          (void)fixture.Document->UpdateLayout();
+          display_list::RecorderImpl recorder(FloatSize(200, 100));
+          view->Paint(recorder, IntRect(0, 0, 200, 100));
+          return recorder.TakeDisplayList()->AsText({});
+        };
+        CHECK(painted().find(u8"ellipse") != utf8_string::npos);
+        (void)fixture.Press(100, 20);
+        CHECK(painted().find(u8"ellipse") == utf8_string::npos);
+      }
+    }
+
+    SECTION("a box inside the page")
+    {
+      MouseFixture fixture(
+        u8"<div id=a style=height:50px;overflow:auto><div style=height:500px></div></div>");
+      auto &box = fixture.ById(u8"a");
+      (void)fixture.Move(50, 10);
+      (void)fixture.Press(50, 10, MouseButton::Middle);
+      REQUIRE(fixture.Handler().PanScrollInProgress());
+      (void)fixture.Move(50, 45);
+      wait();
+      CHECK(box.ScrollTop() > 0);
+    }
+
+    SECTION("a list box")
+    {
+      utf8_string options;
+      for (int32 i = 0; i < 20; ++i)
+      {
+        options += u8"<option>o</option>";
+      }
+      MouseFixture fixture(u8"<select id=a size=3 style=display:block;width:100px>" + options
+                           + u8"</select>");
+      auto &box = fixture.ById(u8"a");
+      (void)fixture.Move(50, 10);
+      (void)fixture.Press(50, 10, MouseButton::Middle);
+      REQUIRE(fixture.Handler().PanScrollInProgress());
+      (void)fixture.Move(50, 60);
+      wait();
+      CHECK(box.ScrollTop() > 0);
+    }
+
+    SECTION("not from a link, or with nothing to scroll")
+    {
+      SECTION("a link")
+      {
+        MouseFixture fixture(u8"<a href=x style=display:block;height:1000px>x</a>");
+        (void)fixture.Move(10, 10);
+        (void)fixture.Press(10, 10, MouseButton::Middle);
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      }
+
+      SECTION("nothing to scroll")
+      {
+        MouseFixture fixture(u8"<div style=height:10px></div>");
+        (void)fixture.Move(10, 5);
+        (void)fixture.Press(10, 5, MouseButton::Middle);
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      }
     }
   }
 }

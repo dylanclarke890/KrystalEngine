@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -7,6 +8,8 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
@@ -23,6 +26,9 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -903,6 +909,43 @@ namespace krys::boo::dom
       }
     }
     return result;
+  }
+
+  void Node::DefaultEventHandler(Event &event) noexcept
+  {
+    // A middle button press pans the nearest box that can scroll, unless it's on a link.
+    if (event.Type() != EventNames::MouseDown)
+    {
+      return;
+    }
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
+    if (!mouseEvent || mouseEvent->Button() != static_cast<int16>(MouseButton::Middle))
+    {
+      return;
+    }
+
+    // From the target: this runs on the nodes above the link too.
+    auto target = event.Target();
+    for (auto *node = DynamicDowncast<Node>(target.get()); node; node = node->ParentOrShadowHostNode())
+    {
+      if (auto *element = DynamicDowncast<Element>(*node); element && css::IsLink(*element))
+      {
+        return;
+      }
+    }
+
+    for (auto *renderer = Renderer(); renderer; renderer = renderer->Parent())
+    {
+      auto *renderBox = DynamicDowncast<RenderBox>(*renderer);
+      if (renderBox && renderBox->CanBeScrolledAndHasScrollableArea())
+      {
+        if (auto *frame = NodeDocument().Frame())
+        {
+          frame->GetEventHandler().StartPanScrolling(*renderBox);
+        }
+        break;
+      }
+    }
   }
 
   bool Node::CanStartSelection() const noexcept

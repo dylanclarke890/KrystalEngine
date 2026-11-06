@@ -771,6 +771,9 @@ namespace krys::boo
     virtual void StopAutoscroll() noexcept
     {
     }
+    /// @brief Scrolls the box towards @p mousePosition, the further from @p source the faster (both in the
+    /// window).
+    virtual void PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept;
     /// @brief Scrolls the box, or else its nearest containing block that scrolls, by @p stepCount steps of
     /// @p granularity in @p direction; the render view's isn't one.
     /// @param stopElement If given and set, the scroll goes no further than that element; it's set to the

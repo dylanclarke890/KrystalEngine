@@ -88,6 +88,7 @@ namespace krys::boo
     bool _isTransparent {false};
     bool _contentIsOpaque {false};
     ScrollPosition _scrollPosition;
+    Maybe<IntPoint> _panScrollIconPosition;
     /// @brief What needs painting again, in the view's coordinates, since the host last took it.
     Region _damage;
     /// @brief The painted contents the host moves before it paints the damage, as scrolling moved them.
@@ -529,9 +530,15 @@ namespace krys::boo
     // Painting
 
     /// @brief Paints the view's part of @p rect (in the view's coordinates): its visible contents, scrolled
-    /// by the scroll position.
-    // FIXME: The scrollbars and pan scroll icon, once there are scrollbars and pan scrolling.
+    /// by the scroll position, its scrollbars and the pan scroll icon.
     void Paint(GraphicsContext &context, const IntRect &rect) noexcept;
+
+    /// @brief How far (in pixels) the mouse can be from the start of pan scrolling without it scrolling.
+    static constexpr int32 NoPanScrollRadius = 15;
+
+    /// @brief Shows the icon marking the start of pan scrolling, centred on @p iconPosition (in the window).
+    void AddPanScrollIcon(const IntPoint &iconPosition) noexcept;
+    void RemovePanScrollIcon() noexcept;
 
     /// @brief Damages @p rect of the contents (in the contents' coordinates): the host paints it again.
     /// @see `ScrollView::repaintContentRectangle`, which tells the host window
@@ -834,6 +841,10 @@ namespace krys::boo
       CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept;
 
   private:
+    static constexpr int32 PanScrollIconSize = 16;
+
+    void InvalidatePanScrollIcon(const IntPoint &iconPosition) noexcept;
+
     void ScrollToFocusedElementTimerFired() noexcept;
     void ScrollToFocusedElementInternal() noexcept;
     /// @brief Scrolls the maintained anchor into view: to its top and closest side.

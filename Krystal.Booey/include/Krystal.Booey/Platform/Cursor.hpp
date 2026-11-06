@@ -42,6 +42,15 @@ namespace krys::boo
     ZoomOut,
     Grab,
     Grabbing,
+    MiddlePanning,
+    EastPanning,
+    NorthPanning,
+    NorthEastPanning,
+    NorthWestPanning,
+    SouthPanning,
+    SouthEastPanning,
+    SouthWestPanning,
+    WestPanning,
   };
 
   /// @brief The mouse cursor the page asks the host to show.

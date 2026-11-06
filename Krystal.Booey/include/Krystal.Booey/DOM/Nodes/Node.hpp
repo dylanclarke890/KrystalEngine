@@ -636,10 +636,7 @@ namespace krys::boo::dom
     /// @brief Handles @p event after its dispatch when no listener canceled it: called for the event's
     /// target, then for the nodes on its path until one handles it (`Event::SetDefaultHandled`), if it
     /// bubbles.
-    virtual void DefaultEventHandler(Event &event) noexcept
-    {
-      (void)event;
-    }
+    virtual void DefaultEventHandler(Event &event) noexcept;
     /// @brief Whether a position can be inside the node; the content of nodes it can't be inside (images,
     /// `<br>`, form controls) is ignored by editing.
     KRYS_NODISCARD virtual bool CanContainRangeEndPoint() const noexcept

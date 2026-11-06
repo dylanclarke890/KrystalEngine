@@ -13,12 +13,14 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class LocalFrame;
+  class PlatformMouseEvent;
   class RenderBox;
   class RenderObject;
 
   /// @brief Scrolls the box a mouse drag that's selecting is in, while the mouse is held near or past its
-  /// edge, and the box a drag and drop is over, while it's held near its edge.
-  // FIXME: Pan scrolling (the middle button), with it.
+  /// edge, the box a drag and drop is over, while it's held near its edge, and the box a middle button press
+  /// was in, towards wherever the mouse goes from the press (pan scrolling).
   class AutoscrollController
   {
     KRYS_NON_COPY_MOVABLE(AutoscrollController);
@@ -28,6 +30,10 @@ namespace krys::boo
       None,
       Selection,
       DragAndDrop,
+      /// Panning with the mouse still on the icon: releasing the button that started it doesn't stop it.
+      Pan,
+      /// Panning, and any release of a mouse button stops it.
+      PanCanStop,
     };
 
   private:
@@ -36,6 +42,8 @@ namespace krys::boo
     AutoscrollType _autoscrollType {AutoscrollType::None};
     IntPoint _dragAndDropAutoscrollReferencePosition;
     MonotonicTime::duration _dragAndDropAutoscrollStartTime {};
+    IntPoint _panScrollStartPosition;
+    IntPoint _panScrollMousePosition;
 
   public:
     AutoscrollController() noexcept;
@@ -46,6 +54,11 @@ namespace krys::boo
     KRYS_NODISCARD bool PanScrollInProgress() const noexcept;
 
     void StartAutoscrollForSelection(RenderObject *renderer) noexcept;
+    /// @brief Starts panning @p scrollable from @p lastKnownMousePosition (in the window).
+    void StartPanScrolling(RenderBox &scrollable, const IntPoint &lastKnownMousePosition) noexcept;
+    /// @brief A mouse button was released: stops panning, unless it's the release of the press that started
+    /// it and the mouse hasn't moved away.
+    void HandleMouseReleaseEvent(const PlatformMouseEvent &mouseEvent) noexcept;
     /// @brief A drag and drop moved over @p targetNode at @p eventPosition (in the window): scrolls the box
     /// it's near the edge of, after a moment.
     void UpdateDragAndDrop(dom::Node *targetNode, const IntPoint &eventPosition,
@@ -55,5 +68,6 @@ namespace krys::boo
   private:
     void AutoscrollTimerFired() noexcept;
     void StartAutoscrollTimer() noexcept;
+    void UpdatePanScrollState(LocalFrame &frame, const IntPoint &lastKnownMousePosition) noexcept;
   };
 }

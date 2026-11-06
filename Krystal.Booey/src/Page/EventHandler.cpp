@@ -446,6 +446,8 @@ namespace krys::boo
       }
     }
 
+    CancelFakeMouseMoveEvent();
+
     _mousePressed = true;
     _capturesDragging = true;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
@@ -492,6 +494,15 @@ namespace krys::boo
     bool passedToScrollbar = scrollbar && PassMousePressEventToScrollbar(mouseEvent, scrollbar.get());
 
     // FIXME: Pan scrolling.
+
+    // A press while panning only stops it: the click mustn't go on to do what it would, like follow a link.
+    bool isPanScrollInProgress = PanScrollInProgress();
+    StopAutoscrollTimer();
+    if (isPanScrollInProgress)
+    {
+      InvalidateClick();
+      return true;
+    }
 
     _clickCount = platformMouseEvent.ClickCount();
     _clickNode = ShareRefPtr(mouseEvent.TargetNode());
@@ -575,6 +586,8 @@ namespace krys::boo
   bool EventHandler::HandleMouseMoveEvent(const PlatformMouseEvent &platformMouseEvent,
                                           HitTestResult *hitTestResult) noexcept
   {
+    CancelFakeMouseMoveEvent();
+
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
@@ -756,7 +769,9 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Page overlays, synthetic touch events, user gestures and pan scrolling.
+    // FIXME: Page overlays, synthetic touch events and user gestures.
+
+    _autoscrollController->HandleMouseReleaseEvent(platformMouseEvent);
 
     _mousePressed = false;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
@@ -1069,6 +1084,16 @@ namespace krys::boo
 
     // A modifier key's own event says whether it's now held.
     _lastKnownModifiers = initialKeyEvent.Modifiers();
+
+    if (PanScrollInProgress())
+    {
+      // A key pressed while panning stops it, and panning swallows the keys.
+      if (initialKeyEvent.GetType() == Type::KeyDown || initialKeyEvent.GetType() == Type::RawKeyDown)
+      {
+        StopAutoscrollTimer();
+      }
+      return true;
+    }
 
     if (initialKeyEvent.GetType() == Type::KeyDown && initialKeyEvent.Key() == u8"Escape")
     {
@@ -1660,6 +1685,12 @@ namespace krys::boo
 
   Maybe<Cursor> EventHandler::SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept
   {
+    // Panning sets its own cursor.
+    if (PanScrollInProgress())
+    {
+      return null;
+    }
+
     if (auto *resizeLayer = _resizeLayer.get(); resizeLayer && resizeLayer->InResizeMode())
     {
       return null;
@@ -3296,6 +3327,20 @@ namespace krys::boo
   RenderBox *EventHandler::AutoscrollRenderer() const noexcept
   {
     return _autoscrollController->AutoscrollRenderer();
+  }
+
+  bool EventHandler::PanScrollInProgress() const noexcept
+  {
+    return _autoscrollController->PanScrollInProgress();
+  }
+
+  void EventHandler::StartPanScrolling(RenderBox &renderer) noexcept
+  {
+    if (_lastKnownMousePosition)
+    {
+      _autoscrollController->StartPanScrolling(renderer, FlooredIntPoint(*_lastKnownMousePosition));
+      InvalidateClick();
+    }
   }
 
   bool EventHandler::AutoscrollInProgress() const noexcept

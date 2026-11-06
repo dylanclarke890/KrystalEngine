@@ -336,20 +336,29 @@ namespace krys::ui::input
       case Type::Help:                     return pal::CursorShape::Help;
       case Type::NoDrop:
       case Type::NotAllowed:               return pal::CursorShape::NotAllowed;
-      case Type::Move:                     return pal::CursorShape::Move;
+      case Type::Move:
+      case Type::MiddlePanning:            return pal::CursorShape::Move;
       case Type::NorthResize:
       case Type::SouthResize:
+      case Type::NorthPanning:
+      case Type::SouthPanning:
       case Type::NorthSouthResize:
       case Type::RowResize:                return pal::CursorShape::ResizeNS;
       case Type::EastResize:
       case Type::WestResize:
+      case Type::EastPanning:
+      case Type::WestPanning:
       case Type::EastWestResize:
       case Type::ColumnResize:             return pal::CursorShape::ResizeEW;
       case Type::NorthEastResize:
       case Type::SouthWestResize:
+      case Type::NorthEastPanning:
+      case Type::SouthWestPanning:
       case Type::NorthEastSouthWestResize: return pal::CursorShape::ResizeNESW;
       case Type::NorthWestResize:
       case Type::SouthEastResize:
+      case Type::NorthWestPanning:
+      case Type::SouthEastPanning:
       case Type::NorthWestSouthEastResize: return pal::CursorShape::ResizeNWSE;
       case Type::None:                     return pal::CursorShape::Hidden;
       default:                             return pal::CursorShape::Arrow;

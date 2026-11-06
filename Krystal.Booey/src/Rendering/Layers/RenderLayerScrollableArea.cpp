@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
+#include <cmath>
 
 namespace krys::boo
 {
@@ -109,6 +110,27 @@ namespace krys::boo
   ScrollOffset RenderLayerScrollableArea::ClampScrollOffset(const ScrollOffset &scrollOffset) const noexcept
   {
     return scrollOffset.ConstrainedBetween(MinimumScrollOffset(), MaximumScrollOffset());
+  }
+
+  void RenderLayerScrollableArea::PanScrollFromPoint(const IntPoint &sourcePoint,
+                                                     const IntPoint &mousePosition) noexcept
+  {
+    // The speed grows faster than the distance, as in WebKit.
+    auto adjustedDelta = [](int32 delta)
+    {
+      if (std::abs(delta) <= LocalFrameView::NoPanScrollRadius)
+      {
+        return 0;
+      }
+      constexpr int32 speedReducer = 12;
+      int32 adjusted = delta / speedReducer;
+      return std::abs(adjusted) > 1
+               ? static_cast<int32>(adjusted * std::sqrt(static_cast<double>(std::abs(adjusted))))
+               : adjusted;
+    };
+
+    ScrollByRecursively(IntSize(adjustedDelta(mousePosition.X() - sourcePoint.X()),
+                                adjustedDelta(mousePosition.Y() - sourcePoint.Y())));
   }
 
   void RenderLayerScrollableArea::ScrollByRecursively(const IntSize &delta,

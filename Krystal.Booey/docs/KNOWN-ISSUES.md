@@ -32,7 +32,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Opening a date or colour picker by clicking the control isn't checked against a user gesture (`showPicker()` is); FIXMEs in `BaseDateAndTimeInputType.cpp` and `ColorInputType.cpp`.
 - No autofill (`:autofill`), caps lock indicator or strong password fields on password fields, validation message bubble, `RenderSearchField` (search fields have no recent searches), or input purpose hints (`inputmode`, `autocapitalize`, spell checking). Numbers aren't localised (FIXMEs in `NumberInputType.cpp`); dates are, through ICU.
 - Form submission has no `rel=noreferrer` handling (FIXME in `HTMLFormElement.cpp`).
-- `<select>`: list boxes have no pan scrolling, and there is no customizable `<select>` (`appearance: base-select`; a `<button>` in a select isn't inert, FIXME in `HTMLButtonElement.cpp`).
+- `<select>`: there is no customizable `<select>` (`appearance: base-select`; a `<button>` in a select isn't inert, FIXME in `HTMLButtonElement.cpp`).
 - Fieldset legends are not placed in the border (see *Layout*).
 - `<input type=image>` doesn't load or show its image (FIXMEs in `ImageInputType.cpp`), so its dimensions come only from its box or its `width` and `height` attributes.
 - `<img>` lacks `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` fires no events for video posters and has no `<object>` fallback (FIXMEs); `ImageLoader`'s reuse of available images has no preloads (FIXME).
@@ -255,9 +255,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - The window gets no `focus`/`blur` events: `FocusAlgorithms` has FIXMEs for firing them at a document's `Window`, and `FocusEvent`/`UIEvent` have no `view`.
 - There is no keyboard route to `contextmenu` (`sendContextMenuEventForKey`), and no menu controller beyond the `contextmenu` event.
 - Access keys: `HTMLElement::AccessKeyAction` exists but nothing calls it (FIXME in `EventHandler.cpp`), `accessKeyLabel` is empty, and a legend has no accesskey delegatee.
-- Custom cursors (`cursor: url()`) are absent (`Cursor` has no images; FIXME in `EventHandler::SelectCursor`), as are pan-scrolling and auto-hiding cursors.
+- Custom cursors (`cursor: url()`) are absent (`Cursor` has no images; FIXME in `EventHandler::SelectCursor`), as are auto-hiding cursors.
 - Wheel: `PlatformWheelEvent` has no phases, velocities, precise deltas or inverted directions, so there is no scroll latching, wheel delta filter or precision touchpad gesture support (pinching, swiping, DirectManipulation). Pan gestures chain on to the next scroll box mid-gesture, as the wheel does.
-- Pan scrolling (middle-button autoscroll) and its icon are absent; selection autoscroll works.
 - Drag and drop: colour drags and drops are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
 - Sequential focus navigation does not handle moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
 - Keyboard: caps lock handling in text fields, Escape hiding validation messages, the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs.

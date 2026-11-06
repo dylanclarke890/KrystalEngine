@@ -74,6 +74,9 @@ namespace krys::boo
     /// (or the view, if the layer has no overflow clip), setting @p scrolledArea to the last area scrolled.
     void ScrollByRecursively(const IntSize &delta, ScrollableArea **scrolledArea = nullptr) noexcept;
 
+    /// @brief Scrolls towards @p mousePosition, the further from @p sourcePoint the faster.
+    void PanScrollFromPoint(const IntPoint &sourcePoint, const IntPoint &mousePosition) noexcept;
+
     /// @brief Scrolls so the absolute rect is aligned as asked.
     /// @return The rect in absolute coordinates after scrolling.
     LayoutRect ScrollRectToVisible(const LayoutRect &absoluteRect,

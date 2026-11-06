@@ -4072,6 +4072,14 @@ namespace krys::boo
     }
   }
 
+  void RenderBox::PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept
+  {
+    if (Layer())
+    {
+      Layer()->EnsureLayerScrollableArea()->PanScrollFromPoint(source, mousePosition);
+    }
+  }
+
   bool RenderBox::CanAutoscroll() const noexcept
   {
     if (IsRenderView())

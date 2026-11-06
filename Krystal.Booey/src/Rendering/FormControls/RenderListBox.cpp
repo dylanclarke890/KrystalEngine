@@ -778,6 +778,41 @@ namespace krys::boo
     return ListIndexAtOffset(LayoutSize(positionOffset));
   }
 
+  void RenderListBox::PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept
+  {
+    // FIXME: This does not support vertical writing mode or flipped block directions.
+    constexpr int32 maxSpeed = 20;
+    constexpr int32 iconRadius = 7;
+    constexpr int32 speedReducer = 4;
+
+    // FIXME: This doesn't work correctly with transforms.
+    FloatPoint absOffset = LocalToAbsolute();
+
+    // If the point is too far from the center we limit the speed.
+    int32 yDelta = std::clamp(mousePosition.Y() - source.Y(), -maxSpeed, maxSpeed);
+
+    // At the center we leave the space for the icon.
+    if (std::abs(yDelta) < iconRadius)
+    {
+      return;
+    }
+
+    if (yDelta > 0)
+    {
+      absOffset.Move(0, static_cast<float>(ListLogicalHeight()));
+    }
+    else
+    {
+      --yDelta;
+    }
+
+    // Let's attenuate the speed.
+    yDelta /= speedReducer;
+
+    // Only scrolling, where WebKit also selects the option it reaches, which no press has asked for.
+    (void)ScrollToward(IntPoint(0, static_cast<int32>(absOffset.Y()) + yDelta));
+  }
+
   void RenderListBox::Autoscroll(const IntPoint &) noexcept
   {
     auto *frame = GetDocument().Frame();

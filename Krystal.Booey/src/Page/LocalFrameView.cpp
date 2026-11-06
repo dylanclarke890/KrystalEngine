@@ -876,7 +876,51 @@ namespace krys::boo
       PaintScrollbars(context, scrollViewDirtyRect);
     }
 
-    // FIXME: The pan scroll icon, once there's pan scrolling.
+    if (_panScrollIconPosition)
+    {
+      GraphicsContextStateSaver stateSaver(context);
+      // A light disc with a dot: the place the mouse pans the page from.
+      auto disc = [&](float radius, const Color &color)
+      {
+        context.SetFillColor(color);
+        context.FillEllipse(FloatRect(static_cast<float>(_panScrollIconPosition->X()) - radius,
+                                      static_cast<float>(_panScrollIconPosition->Y()) - radius, radius * 2,
+                                      radius * 2));
+      };
+      disc(PanScrollIconSize / 2.0f, Color::black);
+      disc(PanScrollIconSize / 2.0f - 1, Color::white);
+      disc(2, Color::black);
+    }
+  }
+
+  void LocalFrameView::AddPanScrollIcon(const IntPoint &iconPosition) noexcept
+  {
+    _panScrollIconPosition = iconPosition;
+    InvalidatePanScrollIcon(iconPosition);
+  }
+
+  void LocalFrameView::RemovePanScrollIcon() noexcept
+  {
+    if (auto position = std::exchange(_panScrollIconPosition, null))
+    {
+      InvalidatePanScrollIcon(*position);
+    }
+  }
+
+  void LocalFrameView::InvalidatePanScrollIcon(const IntPoint &iconPosition) noexcept
+  {
+    auto *frame = _frame.get();
+    auto *page = frame ? frame->GetPage() : nullptr;
+    if (page)
+    {
+      page->GetChromeClient().InvalidateContentsAndRootView(IntRect(iconPosition.X() - PanScrollIconSize / 2,
+                                                                    iconPosition.Y() - PanScrollIconSize / 2,
+                                                                    PanScrollIconSize, PanScrollIconSize));
+    }
+    if (auto *document = frame ? frame->Document() : nullptr)
+    {
+      document->ScheduleRenderingUpdate({});
+    }
   }
 
   void LocalFrameView::PaintScrollbars(GraphicsContext &context, const IntRect &rect) noexcept
