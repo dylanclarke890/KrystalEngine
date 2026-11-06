@@ -21,7 +21,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).
 - A task's document is not checked for being fully active (documents never in a frame, such as `createHTMLDocument()`, run their tasks). Subresource loads, `close()`, the scroll to the anchor and `AbortSignal.timeout()` are not tagged with a document, so suspension does not hold them.
 - Suspension covers only the document's timers and animation frame callbacks: no media, font loading, service workers or IndexedDB, and animations aren't suspended (FIXME in `WebAnimation.hpp`).
-- There is no ID map per tree scope: `getElementById` and selector fast paths walk the tree, live collections re-walk on every access, and `HTMLImageElement::AssociatedMapElement` walks the tree too. A node in a shadow tree finds its tree scope by walking to its root on every call.
+- Live collections (`LiveHTMLCollection`, `LiveNodeList`) re-walk their root on every access: `Item()`, `Length()` and `NamedItem()` have no cache.
 - `FirstChild()`, `ParentNode()` and friends return raw pointers rather than `RefPtr`; `NodeFilter` is clunky from C++.
 
 ## HTML elements and forms
