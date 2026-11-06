@@ -15,7 +15,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsMoveEventType(DOMStringAtom eventType) noexcept
     {
       return eventType == EventNames::MouseMove || eventType == EventNames::PointerMove
-             || eventType == EventNames::TouchMove;
+             || eventType == EventNames::PointerRawUpdate || eventType == EventNames::TouchMove;
     }
 
     KRYS_NODISCARD double FiniteValue(double value) noexcept

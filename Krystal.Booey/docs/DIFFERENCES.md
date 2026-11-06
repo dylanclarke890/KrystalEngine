@@ -264,6 +264,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - The old focused element loses focus before the `blur` events fire, as in browsers (the specification designates the new area only before `focus`), so blur handlers see the viewport focused.
 - `:focus-visible` uses a heuristic: `focus()` shows it unless the latest focus change was a click or `focusVisible` says otherwise, and text fields, selects and editable elements always show it.
 - Transient user activation lasts 5 s (`LocalDOMWindow::TransientActivationDuration`) of the host's time, so it pauses with the engine.
+- `pointerrawupdate` fires in every document, where it's only for secure contexts, as there are no origins. It fires just before the `pointermove` of each move, not sooner or more often, since the host's moves aren't delayed or coalesced into `pointermove`s.
 - A pointer lock request needs the window's transient activation, so it may come from a timer up to five seconds after a press or key.
 - Event timestamps aren't coarsened, where High Resolution Time coarsens them (Chrome to 100 µs): without script there are no timing attacks to guard against.
 

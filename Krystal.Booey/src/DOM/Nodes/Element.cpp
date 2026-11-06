@@ -997,6 +997,16 @@ namespace krys::boo::dom
         if (auto pointerEvent = pointerCaptureController.PointerEventForMouseEvent(
               mouseEvent, platformEvent.PointerId(), platformEvent.PointerType()))
         {
+          // https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
+          // The user agent MUST dispatch the pointerrawupdate event before the corresponding pointermove.
+          if (pointerEvent->Type() == EventNames::PointerMove)
+          {
+            pointerCaptureController.DispatchEvent(
+              *PointerEvent::Create(DOMStringAtom(EventNames::PointerRawUpdate), pointerEvent->ButtonType(),
+                                    mouseEvent, platformEvent.PointerId(), platformEvent.PointerType()),
+              &element);
+          }
+
           pointerCaptureController.DispatchEvent(*pointerEvent, &element);
           if (IsCompatibilityMouseEvent(mouseEvent)
               && pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(

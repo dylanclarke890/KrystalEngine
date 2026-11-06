@@ -204,8 +204,15 @@ namespace krys::boo::tests
 
       // The touch is captured implicitly, before its next pointer event, and keeps its target as it moves
       // onto b.
+      fixture.On(a, u8"pointerrawupdate",
+                 [&](dom::Event &event)
+                 {
+                   CHECK_FALSE(event.Cancelable());
+                   fixture.Records.push_back("raw:a");
+                 });
       (void)fixture.Touch(Type::TouchMove, {TouchFixture::Point(0, State::TouchMoved, 10, 70)});
-      CHECK(fixture.Take() == Strings {"gotpointercapture3:a", "pointermove3:a", "touchmove[1,1,1]:a"});
+      CHECK(fixture.Take()
+            == Strings {"gotpointercapture3:a", "raw:a", "pointermove3:a", "touchmove[1,1,1]:a"});
       CHECK(a.HasPointerCapture(3));
 
       (void)fixture.Touch(Type::TouchEnd, {TouchFixture::Point(0, State::TouchReleased, 10, 70)});
@@ -260,9 +267,16 @@ namespace krys::boo::tests
                  [&](dom::Event &event) { aPrimary = Downcast<dom::PointerEvent>(event).GetIsPrimary(); });
       fixture.On(b, u8"pointermove",
                  [&](dom::Event &event) { bPrimary = Downcast<dom::PointerEvent>(event).GetIsPrimary(); });
-      // A stationary touch has a pointermove, but isn't among the changed touches.
+      uint32 aRawUpdates = 0;
+      uint32 bRawUpdates = 0;
+      fixture.On(a, u8"pointerrawupdate", [&](dom::Event &) { ++aRawUpdates; });
+      fixture.On(b, u8"pointerrawupdate", [&](dom::Event &) { ++bRawUpdates; });
+      // A stationary touch has a pointermove, but isn't among the changed touches, and has no
+      // pointerrawupdate.
       (void)fixture.Touch(Type::TouchMove, {TouchFixture::Point(0, State::TouchStationary, 10, 10),
                                             TouchFixture::Point(1, State::TouchMoved, 20, 70)});
+      CHECK(aRawUpdates == 0);
+      CHECK(bRawUpdates == 1);
       CHECK(fixture.Take()
             == Strings {"gotpointercapture3:a", "pointermove3:a", "gotpointercapture4:b", "pointermove4:b",
                         "touchmove[2,1,1]:b"});

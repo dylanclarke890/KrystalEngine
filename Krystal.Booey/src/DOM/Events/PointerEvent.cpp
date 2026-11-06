@@ -55,7 +55,7 @@ namespace krys::boo::dom
       CreateCoalescedPointerEvents(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent,
                                    PointerID pointerId, const DOMString &pointerType) noexcept
     {
-      if (type != EventNames::PointerMove)
+      if (type != EventNames::PointerMove && type != EventNames::PointerRawUpdate)
       {
         return {};
       }
@@ -214,6 +214,16 @@ namespace krys::boo::dom
                                          LocalFrameView *view, const DoublePoint &touchDelta) noexcept
   {
     auto type = PointerEventType(event.TouchPoints()[index].GetState());
+    return AdoptRef(*new PointerEvent(type, event, coalescedEvents, predictedEvents, canBubble, isCancelable,
+                                      index, isPrimary, view, touchDelta));
+  }
+
+  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, const PlatformTouchEvent &event,
+                                         const List<Ref<PointerEvent>> &coalescedEvents,
+                                         const List<Ref<PointerEvent>> &predictedEvents, bool canBubble,
+                                         bool isCancelable, uint32 index, bool isPrimary,
+                                         LocalFrameView *view, const DoublePoint &touchDelta) noexcept
+  {
     return AdoptRef(*new PointerEvent(type, event, coalescedEvents, predictedEvents, canBubble, isCancelable,
                                       index, isPrimary, view, touchDelta));
   }
@@ -407,15 +417,17 @@ namespace krys::boo::dom
 #if KRYS_DEBUG
     if (IsTrusted())
     {
-      if (Type() == EventNames::PointerMove)
+      if (Type() == EventNames::PointerMove || Type() == EventNames::PointerRawUpdate)
       {
-        krys_debug_assert_msg(!_coalescedEvents.empty(),
-                              "Trusted pointermove events must have more than zero coalesced events.");
+        krys_debug_assert_msg(
+          !_coalescedEvents.empty(),
+          "Trusted pointermove and pointerrawupdate events must have more than zero coalesced events.");
       }
       else
       {
-        krys_debug_assert_msg(_coalescedEvents.empty(),
-                              "Trusted non-pointermove events must have zero coalesced events.");
+        krys_debug_assert_msg(
+          _coalescedEvents.empty(),
+          "Trusted events other than pointermove and pointerrawupdate must have zero coalesced events.");
       }
 
       auto timestampsAreMonotonicallyIncreasing =

@@ -194,6 +194,41 @@ namespace krys::boo::tests
       CHECK(click->ClientX() == 10);
     }
 
+    SECTION("pointerrawupdate comes before each pointermove, and can't be cancelled")
+    {
+      List<Ref<dom::PointerEvent>> rawUpdates;
+      fixture.On(a, u8"pointerrawupdate",
+                 [&](dom::Event &event)
+                 {
+                   fixture.Records.push_back("raw:a");
+                   rawUpdates.push_back(ShareRef(Downcast<dom::PointerEvent>(event)));
+                   event.PreventDefault();
+                 });
+
+      fixture.Move(10, 10);
+      CHECK(fixture.Take()
+            == Strings {"pointerover!:a", "mouseover:a", "pointerenter!:a", "mouseenter:a", "raw:a",
+                        "pointermove!:a", "mousemove:a"});
+      REQUIRE(rawUpdates.size() == 1uz);
+      auto &rawUpdate = *rawUpdates[0];
+      CHECK(rawUpdate.IsTrusted());
+      CHECK(rawUpdate.Bubbles());
+      CHECK(rawUpdate.Composed());
+      CHECK_FALSE(rawUpdate.Cancelable());
+      CHECK_FALSE(rawUpdate.DefaultPrevented());
+      CHECK(rawUpdate.ClientX() == 10);
+      auto coalesced = rawUpdate.GetCoalescedEvents();
+      REQUIRE(coalesced.size() == 1uz);
+      CHECK(coalesced[0]->Type() == EventNames::PointerRawUpdate);
+      CHECK(rawUpdate.GetPredictedEvents().empty());
+
+      // Pressing and releasing the only button have none; a chorded button is a move, and has one.
+      fixture.Press(10, 10);
+      CHECK(fixture.Take() == Strings {"pointerdown!:a", "mousedown:a"});
+      fixture.Press(10, 10, MouseButton::Right, 3);
+      CHECK(fixture.Take() == Strings {"raw:a", "pointermove!:a", "mousedown:a"});
+    }
+
     SECTION("a cancelled pointerdown stops the compatibility mouse events until the release")
     {
       fixture.Move(10, 10);

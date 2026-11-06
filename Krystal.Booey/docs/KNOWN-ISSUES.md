@@ -16,7 +16,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `nonce`).
 - `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
-- `pointerrawupdate` is never fired: `onpointerrawupdate` can be set but isn't called.
 - `DocumentTouch` (`createTouch`, `createTouchList`) is not implemented; `Touch` has no constructor and there is no `TouchInit`.
 - `DataTransferItem` has no `getAsEntry` (no file system API).
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).

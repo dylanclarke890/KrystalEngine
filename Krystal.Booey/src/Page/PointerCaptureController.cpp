@@ -367,19 +367,26 @@ namespace krys::boo
     auto *targetElement = targetNode ? DynamicDowncast<dom::Element>(targetNode) : nullptr;
     krys_assert(targetElement);
 
-    auto mapToPointerEvents = [&](const List<PlatformTouchEvent> &events) -> List<Ref<dom::PointerEvent>>
+    auto mapToPointerEvents = [&](const List<PlatformTouchEvent> &events,
+                                  const dom::DOMStringAtom *type = nullptr) -> List<Ref<dom::PointerEvent>>
     {
+      auto create = [&](const PlatformTouchEvent &event)
+      {
+        return type
+                 ? dom::PointerEvent::Create(*type, event, {}, {}, false, false, index, isPrimary, view,
+                                             touchDelta)
+                 : dom::PointerEvent::Create(event, {}, {}, false, false, index, isPrimary, view, touchDelta);
+      };
+
       if (index)
       {
-        return {dom::PointerEvent::Create(platformTouchEvent, {}, {}, false, false, index, isPrimary, view,
-                                          touchDelta)};
+        return {create(platformTouchEvent)};
       }
 
       List<Ref<dom::PointerEvent>> result;
       for (auto &event : events)
       {
-        result.push_back(
-          dom::PointerEvent::Create(event, {}, {}, false, false, index, isPrimary, view, touchDelta));
+        result.push_back(create(event));
       }
       return result;
     };
@@ -495,6 +502,19 @@ namespace krys::boo
         view ? view->WindowToContents(FlooredIntPoint(location)) : FlooredIntPoint(location);
       CancelPointer(pointerEvent->PointerId(), documentPoint, pointerEvent.get());
       return;
+    }
+
+    // https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
+    // The user agent MUST dispatch the pointerrawupdate event before the corresponding pointermove.
+    // (A stationary touch has a pointermove, but nothing about it changed.)
+    if (platformTouchEvent.TouchPoints()[index].GetState() == PlatformTouchPoint::TouchMoved)
+    {
+      const dom::DOMStringAtom rawUpdateType(EventNames::PointerRawUpdate);
+      DispatchEvent(
+        *dom::PointerEvent::Create(rawUpdateType, platformTouchEvent,
+                                   mapToPointerEvents(platformTouchEvent.CoalescedEvents(), &rawUpdateType),
+                                   {}, index, isPrimary, view, touchDelta),
+        &target);
     }
 
     DispatchEvent(*pointerEvent, &target);

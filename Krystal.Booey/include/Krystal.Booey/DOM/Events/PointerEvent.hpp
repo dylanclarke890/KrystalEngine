@@ -135,6 +135,12 @@ namespace krys::boo::dom
     KRYS_NODISCARD static Ref<PointerEvent> Create(DOMStringAtom type, const PlatformTouchEvent &event,
                                                    const List<Ref<PointerEvent>> &coalescedEvents,
                                                    const List<Ref<PointerEvent>> &predictedEvents,
+                                                   bool canBubble, bool isCancelable, uint32 touchIndex,
+                                                   bool isPrimary, LocalFrameView *view,
+                                                   const DoublePoint &touchDelta = {}) noexcept;
+    KRYS_NODISCARD static Ref<PointerEvent> Create(DOMStringAtom type, const PlatformTouchEvent &event,
+                                                   const List<Ref<PointerEvent>> &coalescedEvents,
+                                                   const List<Ref<PointerEvent>> &predictedEvents,
                                                    uint32 touchIndex, bool isPrimary, LocalFrameView *view,
                                                    const DoublePoint &touchDelta = {}) noexcept;
 
@@ -286,7 +292,7 @@ namespace krys::boo::dom
     }
     KRYS_NODISCARD static bool TypeIsCancelable(DOMStringAtom type) noexcept
     {
-      return !TypeIsEnterOrLeave(type);
+      return !TypeIsEnterOrLeave(type) && type != EventNames::PointerRawUpdate;
     }
     KRYS_NODISCARD static bool TypeIsComposed(DOMStringAtom type) noexcept
     {
