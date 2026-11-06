@@ -160,6 +160,8 @@ namespace krys::boo::html
     if (!_formAssociatedCustomElement)
     {
       _formAssociatedCustomElement = CreateUnique<FormAssociatedCustomElement>(*this);
+      // It's now a listed element if it's defined.
+      InvalidateLiveCollectionCachesInAncestors();
     }
   }
 

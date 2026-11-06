@@ -288,6 +288,11 @@ namespace krys::boo::html
     }
 
     _isSelected = selected;
+
+    if (auto *select = _ownerSelect.get())
+    {
+      select->InvalidateSelectedItems();
+    }
   }
 
   bool HTMLOptionElement::AccessKeyAction(bool) noexcept
@@ -314,6 +319,7 @@ namespace krys::boo::html
           HTMLSelectElement::FindOwnerSelect(ParentNode(), HTMLSelectElement::ExcludeOptGroup::No)))
     {
       _ownerSelect = select;
+      select->InvalidateLiveCollectionCaches();
       select->SetRecalcListItems();
       select->OptionInserted(*this);
     }
@@ -388,6 +394,7 @@ namespace krys::boo::html
     // 6b. Let hasChanged be the result of running the selectedness setting algorithm given select.
     RefPtr<HTMLSelectElement> select = ShareRefPtr(_ownerSelect.get());
     _ownerSelect = nullptr;
+    select->InvalidateLiveCollectionCaches();
     select->SetRecalcListItems();
     return select;
   }

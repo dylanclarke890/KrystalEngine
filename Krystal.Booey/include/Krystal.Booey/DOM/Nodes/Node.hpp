@@ -181,6 +181,7 @@ namespace krys::boo::dom
     friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
+    friend class LiveCollection;
     friend class MutationAlgorithms;
     friend class MutationObserver;
     friend class MutationObserverAlgorithms;
@@ -709,6 +710,21 @@ namespace krys::boo::dom
     }
 
 #pragma endregion
+
+    /// @brief Clears the caches of the live collections rooted at the node, as what their filters read has
+    /// changed.
+    void InvalidateLiveCollectionCaches() noexcept;
+
+    /// @brief Clears the caches of the live collections rooted at the node and its ancestors, as a change to
+    /// the node has changed what their filters read.
+    void InvalidateLiveCollectionCachesInAncestors() noexcept;
+
+    /// @brief Clears the caches that the insertion, removal or move of @p child, a child of the node,
+    /// affects.
+    void InvalidateLiveCollectionCachesForChildChange(const Node &child) noexcept;
+
+    /// @brief Clears the caches that a change to the attribute called @p localName of the node affects.
+    void InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept;
 
   protected:
     /// @brief The node's rare data, if it has any; an element's is an `ElementRareData`.

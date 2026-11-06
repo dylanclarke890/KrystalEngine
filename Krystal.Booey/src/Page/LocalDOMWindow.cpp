@@ -186,7 +186,8 @@ namespace krys::boo
     // named objects of window with the name name.
     RefPtr<dom::HTMLCollection> collection = CreateRef<dom::LiveHTMLCollection>(
       *document, [name = dom::DOMString(name)](const dom::Element &element)
-      { return IsNamedObject(element, name) && element.IsInDocumentTree(); });
+      { return IsNamedObject(element, name) && element.IsInDocumentTree(); },
+      dom::LiveCollectionInvalidation::IdOrName);
     return Variant<RefPtr<dom::Element>, RefPtr<dom::HTMLCollection>>(krys::move(collection));
   }
 

@@ -303,4 +303,18 @@ namespace krys::boo::html::tests
     CHECK(InternalsOf(u8"a").Form().Value().get() == &form);
     CHECK(ById(u8"a").Matches(u8":disabled").ReleaseValue());
   }
+
+  TEST_CASE_METHOD(InternalsFixture,
+                   "ElementInternals: a fieldset's elements gain an element upgraded to be form-associated",
+                   "[HTML][CustomElement][ElementInternals][html:dom-fieldset-elements]")
+  {
+    Parse(u8"<fieldset id=f><x-field id=a></x-field></fieldset>");
+    auto &fieldset = Downcast<HTMLFieldSetElement>(ById(u8"f"));
+    auto elements = fieldset.Elements();
+    CHECK(elements->Length() == 0);
+
+    DefineInternals(u8"x-field", {.FormAssociated = true});
+    CHECK(elements->Length() == 1);
+    CHECK(elements->Item(0).get() == &ById(u8"a"));
+  }
 }

@@ -1027,16 +1027,16 @@ namespace krys::boo::dom
     }
 
     /// @brief The document's collection that @p cache holds, or a new one that it holds from now on.
-    KRYS_NODISCARD Ref<HTMLCollection>
-      CachedDocumentCollection(WeakPtr<HTMLCollection> &cache, Document &document,
-                               LiveHTMLCollectionFilterFunc &&filter) noexcept
+    KRYS_NODISCARD Ref<HTMLCollection> CachedDocumentCollection(
+      WeakPtr<HTMLCollection> &cache, Document &document, LiveHTMLCollectionFilterFunc &&filter,
+      LiveCollectionInvalidation invalidation = LiveCollectionInvalidation::TreeOnly) noexcept
     {
       if (auto collection = cache.lock())
       {
         return ShareRef(*collection.get());
       }
 
-      auto collection = CreateRef<LiveHTMLCollection>(document, krys::move(filter));
+      auto collection = CreateRef<LiveHTMLCollection>(document, krys::move(filter), invalidation);
       cache = CreateWeakPtr(collection.get());
       return collection;
     }
@@ -1127,13 +1127,15 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Document::Links() noexcept
   {
-    return CachedDocumentCollection(_links, *this,
-                                    [](const Element &element)
-                                    {
-                                      return (IsHTMLElementOfType<html::HTMLAnchorElement>(element)
-                                              || IsHTMLElementOfType<html::HTMLAreaElement>(element))
-                                             && element.HasAttribute(u8"href");
-                                    });
+    return CachedDocumentCollection(
+      _links, *this,
+      [](const Element &element)
+      {
+        return (IsHTMLElementOfType<html::HTMLAnchorElement>(element)
+                || IsHTMLElementOfType<html::HTMLAreaElement>(element))
+               && element.HasAttribute(u8"href");
+      },
+      LiveCollectionInvalidation::Href);
   }
 
   Ref<HTMLCollection> Document::Forms() noexcept
@@ -1227,7 +1229,8 @@ namespace krys::boo::dom
   {
     return CachedDocumentCollection(
       _anchors, *this, [](const Element &element)
-      { return IsHTMLElementOfType<html::HTMLAnchorElement>(element) && element.HasAttribute(u8"name"); });
+      { return IsHTMLElementOfType<html::HTMLAnchorElement>(element) && element.HasAttribute(u8"name"); },
+      LiveCollectionInvalidation::Name);
   }
 
   Ref<HTMLCollection> Document::Applets() noexcept
@@ -1237,14 +1240,34 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+  bool Document::HasLiveCollectionCaches() const noexcept
+  {
+    return std::ranges::any_of(_liveCollectionCacheCounts, [](uint32 count) { return count != 0; });
+  }
+
+  bool Document::HasLiveCollectionCachesForAttribute(DOMStringAtom localName) const noexcept
+  {
+    for (size_t i = 0; i < _liveCollectionCacheCounts.size(); ++i)
+    {
+      if (_liveCollectionCacheCounts[i]
+          && LiveCollectionDependsOnAttribute(static_cast<LiveCollectionInvalidation>(i), localName))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
   {
-    return CreateRef<LiveNodeList>(*this,
-                                   [name = DOMString(elementName)](const Node &node)
-                                   {
-                                     auto *element = DynamicDowncast<html::HTMLElement>(node);
-                                     return element && element->GetAttribute(u8"name") == name;
-                                   });
+    return CreateRef<LiveNodeList>(
+      *this,
+      [name = DOMString(elementName)](const Node &node)
+      {
+        auto *element = DynamicDowncast<html::HTMLElement>(node);
+        return element && element->GetAttribute(u8"name") == name;
+      },
+      LiveCollectionInvalidation::Name);
   }
 
   DOMString Document::LastModified() const noexcept

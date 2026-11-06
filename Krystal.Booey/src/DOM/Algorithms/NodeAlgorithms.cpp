@@ -710,7 +710,8 @@ namespace krys::boo::dom
           return std::ranges::all_of(classesQuery,
                                      [elementClasses = krys::move(elementClasses)](const DOMString &className)
                                      { return std::ranges::contains(elementClasses, className); });
-        });
+        },
+        LiveCollectionInvalidation::Class);
     }
 
     return CreateRef<LiveHTMLCollection>(
@@ -726,6 +727,7 @@ namespace krys::boo::dom
         auto &classList = const_cast<Element &>(element).ClassList();
         return std::ranges::all_of(classes,
                                    [&](const DOMString &className) { return classList.Contains(className); });
-      });
+      },
+      LiveCollectionInvalidation::Class);
   }
 }

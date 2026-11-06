@@ -246,8 +246,8 @@ namespace krys::boo::html
     }
 
     Ref<dom::HTMLCollection> tBodies = CreateRef<dom::LiveHTMLCollection>(
-      *this, [this](const dom::Element &element)
-      { return element.ParentNode() == this && IsTableChildWithTagName(element, TagName::tbody); });
+      *this, [](const dom::Element &element) { return IsTableChildWithTagName(element, TagName::tbody); },
+      dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _tBodies = CreateWeakPtr(tBodies.get());
     return tBodies;
   }

@@ -114,6 +114,8 @@ namespace krys::boo::dom
 
   void ExtensibilityHooks::SubtreeInserted(Node &node, ContainerNode &parent) noexcept
   {
+    parent.InvalidateLiveCollectionCachesForChildChange(node);
+
     if (IsInTreeScope(parent))
     {
       auto &scope = parent.TreeScope();
@@ -125,6 +127,8 @@ namespace krys::boo::dom
 
   void ExtensibilityHooks::SubtreeRemoved(Node &node, ContainerNode &parent) noexcept
   {
+    parent.InvalidateLiveCollectionCachesForChildChange(node);
+
     if (IsInTreeScope(parent))
     {
       auto &scope = parent.TreeScope();
@@ -137,6 +141,9 @@ namespace krys::boo::dom
   void ExtensibilityHooks::SubtreeMoved(Node &node, ContainerNode &oldParent,
                                         ContainerNode &newParent) noexcept
   {
+    oldParent.InvalidateLiveCollectionCachesForChildChange(node);
+    newParent.InvalidateLiveCollectionCachesForChildChange(node);
+
     auto *oldScope = IsInTreeScope(oldParent) ? &oldParent.TreeScope() : nullptr;
     auto *newScope = IsInTreeScope(newParent) ? &newParent.TreeScope() : nullptr;
     if (oldScope == newScope)

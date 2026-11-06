@@ -145,6 +145,8 @@ namespace krys::boo::dom
                                                            state == CustomElementState::Custom
                                                              || state == CustomElementState::Uncustomized);
     _customElementState = state;
+    // Whether it's a listed element can depend on it.
+    InvalidateLiveCollectionCachesInAncestors();
   }
 
   html::CustomElement *Element::GetCustomElement() const noexcept
@@ -2904,8 +2906,8 @@ namespace krys::boo::dom
     // 1. If localName is id, namespace is null, and value is null or the empty string, then unset element's
     //    ID.
     // 2. Otherwise, if localName is id, namespace is null, then set element's ID to value.
-    // The ID is read from the attribute (an empty one is no ID), so only the tree scope and the ID's observers
-    // need telling.
+    // The ID is read from the attribute (an empty one is no ID), so only the tree scope and the ID's
+    // observers need telling.
     if (localName == u8"id")
     {
       if (oldValue != value && (IsConnected() || IsInShadowTree()))

@@ -15,13 +15,12 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
 - `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `nonce`).
 - `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
-- `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
+- `RadioNodeList`, `HTMLFormControlsCollection`, `HTMLTableRowsCollection` and `LabelsNodeList` are not cached: unlike `LiveHTMLCollection` and `LiveNodeList`, they walk the tree on every access.
 - `DocumentTouch` (`createTouch`, `createTouchList`) is not implemented; `Touch` has no constructor and there is no `TouchInit`.
 - `DataTransferItem` has no `getAsEntry` (no file system API).
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).
 - A task's document is not checked for being fully active (documents never in a frame, such as `createHTMLDocument()`, run their tasks). Subresource loads, `close()`, the scroll to the anchor and `AbortSignal.timeout()` are not tagged with a document, so suspension does not hold them.
 - Suspension covers only the document's timers and animation frame callbacks: no media, font loading, service workers or IndexedDB, and animations aren't suspended (FIXME in `WebAnimation.hpp`).
-- Live collections (`LiveHTMLCollection`, `LiveNodeList`) re-walk their root on every access: `Item()`, `Length()` and `NamedItem()` have no cache.
 - `FirstChild()`, `ParentNode()` and friends return raw pointers rather than `RefPtr`; `NodeFilter` is clunky from C++.
 
 ## HTML elements and forms

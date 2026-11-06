@@ -57,6 +57,51 @@ namespace krys::boo::dom
     }
   }
 
+  void Node::InvalidateLiveCollectionCaches() noexcept
+  {
+    if (_nodeRareData)
+    {
+      _nodeRareData->InvalidateLiveCollectionCaches();
+    }
+  }
+
+  void Node::InvalidateLiveCollectionCachesInAncestors() noexcept
+  {
+    if (NodeDocument().HasLiveCollectionCaches())
+    {
+      for (auto *node = this; node; node = node->ParentNode())
+      {
+        node->InvalidateLiveCollectionCaches();
+      }
+    }
+  }
+
+  void Node::InvalidateLiveCollectionCachesForChildChange(const Node &child) noexcept
+  {
+    if (Is<Element>(child))
+    {
+      InvalidateLiveCollectionCachesInAncestors();
+    }
+    else if (_nodeRareData)
+    {
+      _nodeRareData->InvalidateChildNodeListCache();
+    }
+  }
+
+  void Node::InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept
+  {
+    if (NodeDocument().HasLiveCollectionCachesForAttribute(localName))
+    {
+      for (auto *node = this; node; node = node->ParentNode())
+      {
+        if (node->_nodeRareData)
+        {
+          node->_nodeRareData->InvalidateLiveCollectionCachesForAttribute(localName);
+        }
+      }
+    }
+  }
+
   void Node::SetNodeDocument(Document &document) noexcept
   {
     krys_debug_assert(!IsDocumentNode());
@@ -64,6 +109,8 @@ namespace krys::boo::dom
     {
       return;
     }
+    // The old document counts them.
+    InvalidateLiveCollectionCaches();
     // The new document is counted first: dropping the old one's count may delete it.
     document.IncrementReferencingNodeCount();
     std::exchange(_nodeDocument, &document)->DecrementReferencingNodeCount();

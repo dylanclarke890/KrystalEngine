@@ -35,6 +35,34 @@ namespace krys::boo::html
 {
   namespace
   {
+    /// @brief A select's selected options.
+    class SelectedOptionsCollection final : public dom::LiveHTMLCollection
+    {
+    private:
+      HTMLSelectElement &_select;
+
+    public:
+      explicit SelectedOptionsCollection(HTMLSelectElement &select) noexcept
+          : LiveHTMLCollection(select,
+                               [&select](const dom::Element &element)
+                               {
+                                 auto *option = DynamicDowncast<HTMLOptionElement>(element);
+                                 return option && option->OwnerSelectElement() == &select
+                                        && option->Selected();
+                               }),
+            _select(select)
+      {
+      }
+
+    protected:
+      void WillValidateIndexCache() const noexcept override
+      {
+        // Reading whether an option is selected can update what's selected, invalidating the cache.
+        _select.UpdateListItemSelectedStates();
+        LiveHTMLCollection::WillValidateIndexCache();
+      }
+    };
+
     // Upper limit agreed upon with representatives of Opera and Mozilla.
     constexpr uint32 MaxSelectItems = 100'000u;
 
@@ -435,13 +463,7 @@ namespace krys::boo::html
     {
       return ShareRef(*selectedOptions);
     }
-    Ref<dom::HTMLCollection> selectedOptions = CreateRef<dom::LiveHTMLCollection>(
-      *this,
-      [this](const dom::Element &element)
-      {
-        auto *option = DynamicDowncast<HTMLOptionElement>(element);
-        return option && option->OwnerSelectElement() == this && option->Selected();
-      });
+    Ref<dom::LiveHTMLCollection> selectedOptions = CreateRef<SelectedOptionsCollection>(*this);
     _selectedOptions = CreateWeakPtr<dom::HTMLCollection>(selectedOptions.get());
     return selectedOptions;
   }
@@ -957,7 +979,10 @@ namespace krys::boo::html
 
   void HTMLSelectElement::InvalidateSelectedItems() noexcept
   {
-    // Collections don't cache their items, so there is nothing to invalidate.
+    if (auto *selectedOptions = _selectedOptions.get())
+    {
+      static_cast<dom::LiveHTMLCollection *>(selectedOptions)->InvalidateCache();
+    }
   }
 
   void HTMLSelectElement::ResetSelectedness(bool hasChanged) noexcept
@@ -998,10 +1023,7 @@ namespace krys::boo::html
     _activeSelectionAnchorIndex = -1;
     SetOptionsChangedOnRenderer();
     InvalidateStyleForSubtree();
-    if (!IsConnected())
-    {
-      InvalidateSelectedItems();
-    }
+    InvalidateSelectedItems();
 
     // FIXME: Tell the chrome client the focused select's options changed
     // (focusedSelectElementDidChangeOptions), for its popup.

@@ -962,9 +962,11 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp
   include/Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp
   include/Krystal.Booey/DOM/Algorithms/TreeQueries.hpp
+  include/Krystal.Booey/DOM/Collections/CollectionIndexCache.hpp
   include/Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp
   include/Krystal.Booey/DOM/Collections/DOMTokenList.hpp
   include/Krystal.Booey/DOM/Collections/HTMLCollection.hpp
+  include/Krystal.Booey/DOM/Collections/LiveCollection.hpp
   include/Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp
   include/Krystal.Booey/DOM/Collections/LiveNodeList.hpp
   include/Krystal.Booey/DOM/Collections/NodeList.hpp
@@ -1121,6 +1123,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Algorithms/TreeQueries.cpp
   src/DOM/Collections/DatasetDOMStringMap.cpp
   src/DOM/Collections/DOMTokenList.cpp
+  src/DOM/Collections/LiveCollection.cpp
   src/DOM/Collections/LiveHTMLCollection.cpp
   src/DOM/Collections/LiveNodeList.cpp
   src/DOM/Collections/StaticHTMLCollection.cpp

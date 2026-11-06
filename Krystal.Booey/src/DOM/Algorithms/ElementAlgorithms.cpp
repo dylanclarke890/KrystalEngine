@@ -159,6 +159,8 @@ namespace krys::boo::dom
                                                  Maybe<DOMStringView> oldValue,
                                                  Maybe<DOMStringView> newValue) noexcept
   {
+    element.InvalidateLiveCollectionCachesForAttribute(attribute.LocalName());
+
     // 1. Queue a mutation record of "attributes" for element with attribute's local name, attribute's
     //    namespace, oldValue, « », « », null, and null.
     MutationObserverAlgorithms::QueueMutationRecord(

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
@@ -33,6 +34,7 @@
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/BoolOr.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -456,6 +458,8 @@ namespace krys::boo::dom
     /// @brief The nodes that refer to this document (all of them but the document itself): it lives while any
     /// do, even with no references left.
     uint32 _referencingNodeCount {0};
+    /// @brief How many live collections in the document have cached their items, by what invalidates them.
+    Array<uint32, static_cast<size_t>(LiveCollectionInvalidation::Count)> _liveCollectionCacheCounts {};
 
   protected:
     Document(DocumentFlags flags) noexcept;
@@ -1707,6 +1711,24 @@ namespace krys::boo::dom
     {
       return _hasPointerMoveListener;
     }
+    void LiveCollectionCacheAdded(LiveCollectionInvalidation invalidation) noexcept
+    {
+      ++_liveCollectionCacheCounts[static_cast<size_t>(invalidation)];
+    }
+
+    void LiveCollectionCacheRemoved(LiveCollectionInvalidation invalidation) noexcept
+    {
+      --_liveCollectionCacheCounts[static_cast<size_t>(invalidation)];
+    }
+
+    /// @brief Whether a live collection in the document has cached its items, which a change to the tree
+    /// could affect.
+    KRYS_NODISCARD bool HasLiveCollectionCaches() const noexcept;
+
+    /// @brief Whether a live collection in the document has cached something that depends on the attribute
+    /// called @p localName.
+    KRYS_NODISCARD bool HasLiveCollectionCachesForAttribute(DOMStringAtom localName) const noexcept;
+
     /// @brief Whether a `pointerrawupdate` listener was ever added to the document's nodes or window; without
     /// one, moves don't create the event.
     KRYS_NODISCARD bool HasPointerRawUpdateListener() const noexcept

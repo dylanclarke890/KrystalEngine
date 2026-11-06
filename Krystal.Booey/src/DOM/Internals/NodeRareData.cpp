@@ -25,7 +25,9 @@ namespace krys::boo::dom
       return ShareRef(*childNodes);
     }
 
-    auto childNodes = CreateRef<LiveNodeList>(node, [&](const Node &n) { return n.ParentNode() == &node; });
+    auto childNodes = CreateRef<LiveNodeList>(
+      node, [](const Node &) { return true; }, LiveCollectionInvalidation::TreeOnly,
+      LiveCollectionTraversal::Children);
     _childNodeList = CreateWeakPtr<NodeList>(childNodes.get());
 
     return childNodes;
@@ -38,8 +40,9 @@ namespace krys::boo::dom
       return ShareRef(*children.get());
     }
 
-    auto children =
-      CreateRef<LiveHTMLCollection>(parent, [&](const Element &n) { return n.ParentNode() == &parent; });
+    auto children = CreateRef<LiveHTMLCollection>(
+      parent, [](const Element &) { return true; }, LiveCollectionInvalidation::TreeOnly,
+      LiveCollectionTraversal::Children);
     _children = CreateWeakPtr(children.get());
 
     return children;
@@ -48,6 +51,45 @@ namespace krys::boo::dom
   WeakPtr<NodeList> &NodeRareData::LabelsNodeList() noexcept
   {
     return _labelsNodeList;
+  }
+
+  void NodeRareData::AddLiveCollectionCache(LiveCollection &collection) noexcept
+  {
+    _liveCollectionCaches.push_back(&collection);
+  }
+
+  void NodeRareData::RemoveLiveCollectionCache(LiveCollection &collection) noexcept
+  {
+    auto it = std::ranges::find(_liveCollectionCaches, &collection);
+    krys_debug_assert(it != _liveCollectionCaches.end());
+    *it = _liveCollectionCaches.back();
+    _liveCollectionCaches.pop_back();
+  }
+
+  void NodeRareData::InvalidateLiveCollectionCaches() noexcept
+  {
+    // Last first: each removes itself, which moves the last into its place.
+    for (auto i = _liveCollectionCaches.size(); i-- > 0;)
+    {
+      _liveCollectionCaches[i]->InvalidateCache();
+    }
+  }
+
+  void NodeRareData::InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept
+  {
+    // Last first: each that forgets its items removes itself, which moves the last into its place.
+    for (auto i = _liveCollectionCaches.size(); i-- > 0;)
+    {
+      _liveCollectionCaches[i]->InvalidateCacheForAttribute(localName);
+    }
+  }
+
+  void NodeRareData::InvalidateChildNodeListCache() noexcept
+  {
+    if (auto *childNodes = _childNodeList.get())
+    {
+      Downcast<LiveNodeList>(*childNodes).InvalidateCache();
+    }
   }
 
   List<Ref<RegisteredObserver>> &NodeRareData::RegisteredObservers() noexcept

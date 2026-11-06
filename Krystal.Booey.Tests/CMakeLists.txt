@@ -665,6 +665,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Collections/DatasetDOMStringMap.cpp
 		tests/DOM/Collections/DOMTokenList.cpp
 		tests/DOM/Collections/HTMLCollection.cpp
+		tests/DOM/Collections/LiveCollection.cpp
 		tests/DOM/Collections/NodeList.cpp
 		tests/DOM/DOMParsing.cpp
 		tests/DOM/HTMLInsertionMethods.cpp
