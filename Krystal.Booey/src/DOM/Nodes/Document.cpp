@@ -599,13 +599,15 @@ namespace krys::boo::dom
     }
 
     // 3. Adopt node into this.
+    // (Removing node from its parent may drop its last reference.)
+    Ref protectedNode = ShareRef(node);
     if (auto adoptResult = DocumentAlgorithms::AdoptNode(node, *this); adoptResult.HasException())
     {
       return adoptResult.ReleaseException();
     }
 
     // 4. Return node.
-    return ShareRef(node);
+    return protectedNode;
   }
 
   // NOTE: VS says this method can be made const but it's lying, Attr constructor needs a non-const Document

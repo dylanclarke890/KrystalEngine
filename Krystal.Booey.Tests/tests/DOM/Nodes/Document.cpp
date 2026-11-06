@@ -665,6 +665,15 @@ namespace krys::boo::dom::tests
       CHECK(&child->NodeDocument() == document.get());
     }
 
+    SECTION("a node kept only by its parent is kept while it's adopted")
+    {
+      auto parent = source->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(parent->AppendChild(*source->CreateElement(u8"p").ReleaseValue()).HasException());
+      auto result = document->AdoptNode(*parent->FirstChild()).ReleaseValue();
+      CHECK(parent->FirstChild() == nullptr);
+      CHECK(&result->NodeDocument() == document.get());
+    }
+
     SECTION("a template's contents are adopted too")
     {
       auto templateElement = source->CreateElement(u8"template").ReleaseValue();
