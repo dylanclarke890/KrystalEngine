@@ -111,7 +111,8 @@ namespace krys::boo::dom
   {
     ContainerNode::OnAdopt(oldDocument);
 
-    // FIXME: The rest of moving to a new document (didMoveToNewDocument), as it's needed.
+    // Intersection observers watching the element move to its new document. (Class names and IDs are folded
+    // for quirks mode as they're read, so there's nothing to refresh.)
     if (auto *observerData = IntersectionObserverDataIfExists())
     {
       auto &newDocument = NodeDocument();

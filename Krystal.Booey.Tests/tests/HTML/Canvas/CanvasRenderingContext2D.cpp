@@ -563,6 +563,18 @@ namespace krys::boo::tests
       fixture.Document->PrepareCanvasesForDisplayOrFlushIfNeeded();
       CHECK_FALSE(context.HasDeferredOperations());
       CHECK_FALSE(context.IsInPreparationForDisplayOrFlush());
+
+      // A canvas moved to another document is flushed in that document's update.
+      context.FillRect(5, 5, 5, 5);
+      auto other = fixture.Document->Implementation().CreateHTMLDocument(u8"other").ReleaseValue();
+      auto adopted = other->AdoptNode(fixture.Canvas());
+      REQUIRE_FALSE(adopted.HasException());
+      fixture.Document->PrepareCanvasesForDisplayOrFlushIfNeeded();
+      CHECK(context.HasDeferredOperations());
+      CHECK(context.IsInPreparationForDisplayOrFlush());
+      other->PrepareCanvasesForDisplayOrFlushIfNeeded();
+      CHECK_FALSE(context.HasDeferredOperations());
+      CHECK_FALSE(context.IsInPreparationForDisplayOrFlush());
     }
 
     SECTION("the host's accelerated buffer is prepared in the rendering update")

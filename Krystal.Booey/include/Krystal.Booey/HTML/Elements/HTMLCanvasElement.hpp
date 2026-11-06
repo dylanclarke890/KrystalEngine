@@ -119,8 +119,6 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::Document *CanvasDocument() const noexcept final;
 
     /// @brief Whether the context has work to do before its pixels are composited.
-    // FIXME: A canvas moved to another document moves its context's preparation with it, once nodes are told
-    // they've moved.
     KRYS_NODISCARD bool NeedsPreparationForDisplay() const noexcept;
     void PrepareForDisplay() noexcept;
 
@@ -140,6 +138,7 @@ namespace krys::boo::html
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
+    void OnAdopt(dom::Document &oldDocument) noexcept override;
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;

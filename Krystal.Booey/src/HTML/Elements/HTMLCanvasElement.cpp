@@ -419,6 +419,18 @@ namespace krys::boo::html
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
   }
 
+  void HTMLCanvasElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    HTMLElement::OnAdopt(oldDocument);
+
+    // The context's pending preparation moves with the canvas, to be done in its new document's update.
+    if (auto *context = RenderingContext(); context && context->IsInPreparationForDisplayOrFlush())
+    {
+      oldDocument.RemoveCanvasNeedingPreparationForDisplayOrFlush(*context);
+      AddCanvasNeedingPreparationForDisplayOrFlush();
+    }
+  }
+
   RenderPtr<RenderElement> HTMLCanvasElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
     return CreateRenderer<RenderHTMLCanvas>(*this, krys::move(style));

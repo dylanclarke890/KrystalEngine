@@ -12,7 +12,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `title` is never shown: there's no advisory information, no `HitTestResult::Title`, no tooltip hook on the chrome client, and Krystal.UI draws no tooltips.
 - No Fullscreen API (`:fullscreen`).
 - No Event Timing or Long Animation Frames timing: inner invoke doesn't record timing info for event listeners, and firing an event doesn't record task time (FIXMEs in `EventDispatcher.cpp` and `EventDispatcher.hpp`).
-- `Element` doesn't run the rest of `didMoveToNewDocument` (FIXME in `Element.cpp`): nodes aren't told they have moved. Observer data does move (`Element::OnAdopt`), but a canvas moved to another document doesn't move its context's preparation (FIXME in `HTMLCanvasElement.hpp`), and lazy-image moves are untested.
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
 - `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `nonce`).
 - `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
