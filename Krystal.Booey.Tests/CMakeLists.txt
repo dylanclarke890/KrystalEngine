@@ -631,6 +631,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Internals/ElementFactory.cpp
 		tests/DOM/Internals/EventFactory.cpp
 		tests/DOM/Internals/QualifiedNameCache.cpp
+		tests/DOM/Internals/TreeScopeOrderedMap.cpp
 		tests/DOM/Mixins/ChildNode.cpp
 		tests/DOM/Mixins/DocumentOrShadowRoot.cpp
 		tests/DOM/Mixins/NonDocumentTypeChildNode.cpp

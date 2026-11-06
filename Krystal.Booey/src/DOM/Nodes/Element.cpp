@@ -2904,11 +2904,22 @@ namespace krys::boo::dom
     // 1. If localName is id, namespace is null, and value is null or the empty string, then unset element's
     //    ID.
     // 2. Otherwise, if localName is id, namespace is null, then set element's ID to value.
-    // The ID is read from the attribute (an empty one is no ID), so only the ID's observers need telling.
+    // The ID is read from the attribute (an empty one is no ID), so only the tree scope and the ID's observers
+    // need telling.
     if (localName == u8"id")
     {
       if (oldValue != value && (IsConnected() || IsInShadowTree()))
       {
+        auto &scope = TreeScope();
+        if (oldValue && !oldValue->empty())
+        {
+          scope.RemoveElementById(DOMStringAtom(*oldValue), *this);
+        }
+        if (value && !value->empty())
+        {
+          scope.AddElementById(DOMStringAtom(*value), *this);
+        }
+
         auto &registry = TreeScope().IdTargetObserverRegistry();
         if (oldValue && !oldValue->empty())
         {

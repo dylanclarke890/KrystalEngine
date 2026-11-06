@@ -427,6 +427,8 @@ namespace krys::boo::dom
       // 7f. Run assign slottables for a tree with node's root.
       SlotAlgorithms::AssignSlottablesForTree(Downcast<ContainerNode>(TreeQueries::Root(*target)));
 
+      ExtensibilityHooks::SubtreeInserted(*target, parent);
+
       // 7g. For each shadow-including inclusive descendant inclusiveDescendant of node, in shadow-including
       // tree
       //     order:
@@ -750,6 +752,8 @@ namespace krys::boo::dom
       // 24. Run assign slottables for a tree with node's root.
       SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(node));
 
+      ExtensibilityHooks::SubtreeMoved(node, oldParent, newParent);
+
       // 25. For each shadow-including inclusive descendant inclusiveDescendant of node, in shadow-including
       // tree
       //     order:
@@ -1008,6 +1012,8 @@ namespace krys::boo::dom
         // 10b. Run assign slottables for a tree with node.
         SlotAlgorithms::AssignSlottablesForTree(node);
       }
+
+      ExtensibilityHooks::SubtreeRemoved(node, parent);
 
       // 11. Run the removing steps with node, true, and parent.
       ExtensibilityHooks::NodeRemoved(node, true, parent);

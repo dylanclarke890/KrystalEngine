@@ -1021,6 +1021,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Internals/EventFactory.hpp
   include/Krystal.Booey/DOM/Internals/IdTargetObserver.hpp
   include/Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp
+  include/Krystal.Booey/DOM/Internals/TreeScopeOrderedMap.hpp
   include/Krystal.Booey/DOM/Internals/LayoutOptions.hpp
   include/Krystal.Booey/DOM/Internals/NodeRareData.hpp
   include/Krystal.Booey/DOM/Internals/PopoverData.hpp
@@ -1163,6 +1164,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Internals/ElementRareData.cpp
   src/DOM/Internals/IdTargetObserver.cpp
   src/DOM/Internals/IdTargetObserverRegistry.cpp
+  src/DOM/Internals/TreeScopeOrderedMap.cpp
   src/DOM/Internals/NodeRareData.cpp
   src/DOM/Internals/PopoverData.cpp
   src/DOM/Internals/QualifiedNameCache.cpp

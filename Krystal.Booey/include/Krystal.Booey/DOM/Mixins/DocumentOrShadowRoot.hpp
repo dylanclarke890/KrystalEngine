@@ -45,6 +45,7 @@ namespace krys::boo::dom
   class DocumentAlgorithms;
   class Element;
   class IdTargetObserverRegistry;
+  class TreeScopeOrderedMap;
   class NodeAlgorithms;
   struct SVGResourcesMap;
 
@@ -70,6 +71,7 @@ namespace krys::boo::dom
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
     UniquePtr<css::CSSStyleSheetObservableArray> _adoptedStyleSheets;
     UniquePtr<dom::IdTargetObserverRegistry> _idTargetObserverRegistry;
+    UniquePtr<TreeScopeOrderedMap> _elementsById;
     UniquePtr<html::RadioButtonGroups> _radioButtonGroups;
     mutable UniquePtr<SVGResourcesMap> _svgResourcesMap;
 
@@ -159,6 +161,20 @@ namespace krys::boo::dom
     {
       return *_idTargetObserverRegistry;
     }
+
+    /// @brief Notes that @p element, in this tree, has @p id.
+    void AddElementById(DOMStringAtom id, Element &element) noexcept;
+    /// @brief Notes that @p element no longer has @p id, or has left this tree.
+    void RemoveElementById(DOMStringAtom id, Element &element) noexcept;
+    /// @brief Notes that the elements with @p id may be in a different order, as one has moved.
+    void ElementsWithIdChangedOrder(DOMStringAtom id) noexcept;
+
+    /// @brief How many elements in this tree have @p id.
+    KRYS_NODISCARD uint32 ElementCountWithId(DOMStringView id) const noexcept;
+    /// @brief The first element in this tree with @p id, or null if there's none.
+    KRYS_NODISCARD Element *FirstElementWithId(DOMStringView id) const noexcept;
+    /// @brief The elements in this tree with @p id, in tree order; valid until the tree next changes.
+    KRYS_NODISCARD Span<Element *const> AllElementsWithId(DOMStringView id) const noexcept;
 
     /// @brief The groups of the radio buttons in this tree that have no form owner.
     KRYS_NODISCARD html::RadioButtonGroups &RadioButtonGroups() const noexcept

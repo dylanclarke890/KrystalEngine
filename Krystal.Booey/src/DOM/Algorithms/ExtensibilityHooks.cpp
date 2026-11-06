@@ -69,6 +69,77 @@ namespace krys::boo::dom
     }
   }
 
+  namespace
+  {
+    KRYS_NODISCARD bool IsInTreeScope(const Node &node) noexcept
+    {
+      return node.IsConnected() || node.IsInShadowTree();
+    }
+
+    template <typename TFunction>
+    void ForEachIdInSubtree(Node &subtreeRoot, TFunction function) noexcept
+    {
+      // The nodes in shadow trees below stay in their own scopes.
+      for (auto &node : InclusiveDescendantRange(subtreeRoot))
+      {
+        if (auto *element = DynamicDowncast<Element>(node))
+        {
+          if (auto id = element->Id(); !id.empty())
+          {
+            function(*element, DOMStringAtom(id));
+          }
+        }
+      }
+    }
+  }
+
+  void ExtensibilityHooks::SubtreeInserted(Node &node, ContainerNode &parent) noexcept
+  {
+    if (IsInTreeScope(parent))
+    {
+      auto &scope = parent.TreeScope();
+      ForEachIdInSubtree(node,
+                         [&](Element &element, DOMStringAtom id) { scope.AddElementById(id, element); });
+    }
+  }
+
+  void ExtensibilityHooks::SubtreeRemoved(Node &node, ContainerNode &parent) noexcept
+  {
+    if (IsInTreeScope(parent))
+    {
+      auto &scope = parent.TreeScope();
+      ForEachIdInSubtree(node,
+                         [&](Element &element, DOMStringAtom id) { scope.RemoveElementById(id, element); });
+    }
+  }
+
+  void ExtensibilityHooks::SubtreeMoved(Node &node, ContainerNode &oldParent,
+                                        ContainerNode &newParent) noexcept
+  {
+    auto *oldScope = IsInTreeScope(oldParent) ? &oldParent.TreeScope() : nullptr;
+    auto *newScope = IsInTreeScope(newParent) ? &newParent.TreeScope() : nullptr;
+    ForEachIdInSubtree(node,
+                       [&](Element &element, DOMStringAtom id)
+                       {
+                         if (oldScope == newScope)
+                         {
+                           if (oldScope)
+                           {
+                             oldScope->ElementsWithIdChangedOrder(id);
+                           }
+                           return;
+                         }
+                         if (oldScope)
+                         {
+                           oldScope->RemoveElementById(id, element);
+                         }
+                         if (newScope)
+                         {
+                           newScope->AddElementById(id, element);
+                         }
+                       });
+  }
+
   void ExtensibilityHooks::NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept
   {
     // NOTE: a shadow root has no parent: it's connected when its host is, and it's always in a shadow tree

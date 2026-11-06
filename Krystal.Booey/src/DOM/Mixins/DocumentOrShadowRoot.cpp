@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
+#include "Krystal.Booey/DOM/Internals/TreeScopeOrderedMap.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
@@ -283,6 +284,63 @@ namespace krys::boo::dom
   }
 
   DocumentOrShadowRoot::~DocumentOrShadowRoot() noexcept = default;
+
+  namespace
+  {
+    KRYS_NODISCARD bool ElementHasId(const Element &element, DOMStringView id) noexcept
+    {
+      return element.Id() == id;
+    }
+  }
+
+  void DocumentOrShadowRoot::AddElementById(DOMStringAtom id, Element &element) noexcept
+  {
+    if (!_elementsById)
+    {
+      _elementsById = CreateUnique<TreeScopeOrderedMap>();
+    }
+    _elementsById->Add(id, element);
+  }
+
+  void DocumentOrShadowRoot::RemoveElementById(DOMStringAtom id, Element &element) noexcept
+  {
+    krys_debug_assert(_elementsById);
+    if (_elementsById)
+    {
+      _elementsById->Remove(id, element);
+    }
+  }
+
+  void DocumentOrShadowRoot::ElementsWithIdChangedOrder(DOMStringAtom id) noexcept
+  {
+    if (_elementsById)
+    {
+      _elementsById->OrderChanged(id);
+    }
+  }
+
+  uint32 DocumentOrShadowRoot::ElementCountWithId(DOMStringView id) const noexcept
+  {
+    return _elementsById && !id.empty() ? _elementsById->Count(DOMStringAtom(id)) : 0;
+  }
+
+  Element *DocumentOrShadowRoot::FirstElementWithId(DOMStringView id) const noexcept
+  {
+    if (!_elementsById || id.empty())
+    {
+      return nullptr;
+    }
+    return _elementsById->First(DOMStringAtom(id), _rootNode, ElementHasId);
+  }
+
+  Span<Element *const> DocumentOrShadowRoot::AllElementsWithId(DOMStringView id) const noexcept
+  {
+    if (!_elementsById || id.empty())
+    {
+      return {};
+    }
+    return _elementsById->All(DOMStringAtom(id), _rootNode, ElementHasId);
+  }
 
 #pragma region DocumentOrShadowRoot Mixin (DOM)
 
