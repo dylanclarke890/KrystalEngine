@@ -100,6 +100,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
 		# CSS
+		tests/CSS/CSSOM/DOMCSSNamespace.cpp
 		tests/CSS/CSSOM/CSSContainerRule.cpp
 		tests/CSS/CSSOM/CSSCounterStyleRule.cpp
 		tests/CSS/CSSOM/CSSFontFaceRule.cpp

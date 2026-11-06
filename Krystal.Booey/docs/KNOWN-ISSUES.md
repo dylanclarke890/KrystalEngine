@@ -49,9 +49,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Typed OM has only numeric values and `CSSKeywordValue` (`CSS/TypedOM/`). There is no `CSSStyleValue::Parse()`/`ParseAll()`, `CSSStyleValueFactory`, `StylePropertyMap` (`styleMap`, `attributeStyleMap`, `computedStyleMap()`), `CSSUnparsedValue`, image, transform or colour values. `CSSNumericFactory` is a struct of static functions (`CSSNumericFactory::Px(10)`) and there is no `CSS` namespace object.
-- No `CSS.registerProperty` or `CSS.escape`. `CSSStyleSheet` has `ReplaceSync` only; the async `replace()` needs promises.
+- No `CSS.registerProperty` or `CSS.supports`. `CSSStyleSheet` has `ReplaceSync` only; the async `replace()` needs promises.
 - `SingleAnimationRangeStart/End::ToTimelineRangeValue()` returns a null `CSSNumericValue` for a calculated offset (FIXME).
-- The `color-layers()` function doesn't parse a blend mode (FIXME in `Consumers/Color.cpp`), so only normal blending is reachable from CSS.
 - The `FontFace` string parsers (`ParseFontFaceSrc`, `ParseFontFaceFontWeight` and the rest, FIXME in `Consumers/Font.hpp`) aren't written.
 - `@font-face`'s features and variations aren't applied to loaded fonts (FIXME in `FontCustomPlatformData.cpp`). `@font-palette-values` and `@font-feature-values` are parsed but have no effect on fonts (FIXME in `CSSFontSelector.cpp`).
 - `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).

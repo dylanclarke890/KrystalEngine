@@ -302,6 +302,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Counter/CounterStyle.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyleDescriptors.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp
+  include/Krystal.Booey/CSS/CSSOM/DOMCSSNamespace.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp
   include/Krystal.Booey/CSS/Font/CSSFontSelector.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp
@@ -687,6 +688,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Counter/CounterStyle.cpp
   src/CSS/Counter/CounterStyleDescriptors.cpp
   src/CSS/Counter/CounterStyleRegistry.cpp
+  src/CSS/CSSOM/DOMCSSNamespace.cpp
   src/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
   src/CSS/Font/CSSFontSelector.cpp
   src/CSS/CSSOM/CSSConditionRule.cpp
