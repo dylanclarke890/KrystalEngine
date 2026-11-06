@@ -41,6 +41,11 @@ namespace krys::boo::html
     KRYS_NODISCARD Ref<dom::HTMLCollection> Areas() noexcept;
 
 #pragma endregion
+
+  protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
   };
 }
 

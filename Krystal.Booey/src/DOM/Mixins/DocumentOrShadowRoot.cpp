@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -291,6 +292,12 @@ namespace krys::boo::dom
     {
       return element.Id() == id;
     }
+
+    KRYS_NODISCARD bool ElementIsImageMapNamed(const Element &element, DOMStringView name) noexcept
+    {
+      auto *map = DynamicDowncast<html::HTMLMapElement>(element);
+      return map && (map->Id() == name || map->Name() == name);
+    }
   }
 
   void DocumentOrShadowRoot::AddElementById(DOMStringAtom id, Element &element) noexcept
@@ -331,6 +338,42 @@ namespace krys::boo::dom
       return nullptr;
     }
     return _elementsById->First(DOMStringAtom(id), _rootNode, ElementHasId);
+  }
+
+  void DocumentOrShadowRoot::AddImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept
+  {
+    if (!_imageMapsByName)
+    {
+      _imageMapsByName = CreateUnique<TreeScopeOrderedMap>();
+    }
+    _imageMapsByName->Add(name, map);
+  }
+
+  void DocumentOrShadowRoot::RemoveImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept
+  {
+    krys_debug_assert(_imageMapsByName);
+    if (_imageMapsByName)
+    {
+      _imageMapsByName->Remove(name, map);
+    }
+  }
+
+  void DocumentOrShadowRoot::ImageMapsChangedOrder(DOMStringAtom name) noexcept
+  {
+    if (_imageMapsByName)
+    {
+      _imageMapsByName->OrderChanged(name);
+    }
+  }
+
+  html::HTMLMapElement *DocumentOrShadowRoot::FirstImageMap(DOMStringView name) const noexcept
+  {
+    if (!_imageMapsByName || name.empty())
+    {
+      return nullptr;
+    }
+    return static_cast<html::HTMLMapElement *>(
+      _imageMapsByName->First(DOMStringAtom(name), _rootNode, ElementIsImageMapNamed));
   }
 
   Span<Element *const> DocumentOrShadowRoot::AllElementsWithId(DOMStringView id) const noexcept

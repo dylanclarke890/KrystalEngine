@@ -143,6 +143,12 @@ namespace krys::boo::html
     // 3. Return the first element of type type in scope's tree, in tree order, that has an id or name
     // attribute
     //    whose value is s, or null if there is no such element.
+    // The tree scope maps them; a tree outside one has to look.
+    if (IsConnected() || IsInShadowTree())
+    {
+      return TreeScope().FirstImageMap(name);
+    }
+
     auto &root = dom::TreeQueries::Root(const_cast<HTMLImageElement &>(*this));
     for (auto &node : dom::DescendantRange(root))
     {
@@ -151,9 +157,7 @@ namespace krys::boo::html
       {
         continue;
       }
-      auto id = map->GetAttribute(u8"id");
-      auto mapName = map->GetAttribute(u8"name");
-      if ((id && *id == name) || (mapName && *mapName == name))
+      if (map->Id() == name || map->Name() == name)
       {
         return map;
       }

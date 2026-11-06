@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
@@ -76,17 +77,35 @@ namespace krys::boo::dom
       return node.IsConnected() || node.IsInShadowTree();
     }
 
-    template <typename TFunction>
-    void ForEachIdInSubtree(Node &subtreeRoot, TFunction function) noexcept
+    /// @brief Calls @p onId with each element of the subtree that has an ID, and @p onMapName with each name
+    /// a map in it goes by.
+    template <typename TOnId, typename TOnMapName>
+    void ForEachTreeScopeKeyInSubtree(Node &subtreeRoot, TOnId onId, TOnMapName onMapName) noexcept
     {
       // The nodes in shadow trees below stay in their own scopes.
       for (auto &node : InclusiveDescendantRange(subtreeRoot))
       {
-        if (auto *element = DynamicDowncast<Element>(node))
+        auto *element = DynamicDowncast<Element>(node);
+        if (!element)
         {
-          if (auto id = element->Id(); !id.empty())
+          continue;
+        }
+
+        auto id = element->Id();
+        if (!id.empty())
+        {
+          onId(*element, DOMStringAtom(id));
+        }
+
+        if (auto *map = DynamicDowncast<html::HTMLMapElement>(*element))
+        {
+          if (!id.empty())
           {
-            function(*element, DOMStringAtom(id));
+            onMapName(*map, DOMStringAtom(id));
+          }
+          if (auto name = map->Name(); !name.empty())
+          {
+            onMapName(*map, DOMStringAtom(name));
           }
         }
       }
@@ -98,8 +117,9 @@ namespace krys::boo::dom
     if (IsInTreeScope(parent))
     {
       auto &scope = parent.TreeScope();
-      ForEachIdInSubtree(node,
-                         [&](Element &element, DOMStringAtom id) { scope.AddElementById(id, element); });
+      ForEachTreeScopeKeyInSubtree(
+        node, [&](Element &element, DOMStringAtom id) { scope.AddElementById(id, element); },
+        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.AddImageMap(name, map); });
     }
   }
 
@@ -108,8 +128,9 @@ namespace krys::boo::dom
     if (IsInTreeScope(parent))
     {
       auto &scope = parent.TreeScope();
-      ForEachIdInSubtree(node,
-                         [&](Element &element, DOMStringAtom id) { scope.RemoveElementById(id, element); });
+      ForEachTreeScopeKeyInSubtree(
+        node, [&](Element &element, DOMStringAtom id) { scope.RemoveElementById(id, element); },
+        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.RemoveImageMap(name, map); });
     }
   }
 
@@ -118,26 +139,25 @@ namespace krys::boo::dom
   {
     auto *oldScope = IsInTreeScope(oldParent) ? &oldParent.TreeScope() : nullptr;
     auto *newScope = IsInTreeScope(newParent) ? &newParent.TreeScope() : nullptr;
-    ForEachIdInSubtree(node,
-                       [&](Element &element, DOMStringAtom id)
-                       {
-                         if (oldScope == newScope)
-                         {
-                           if (oldScope)
-                           {
-                             oldScope->ElementsWithIdChangedOrder(id);
-                           }
-                           return;
-                         }
-                         if (oldScope)
-                         {
-                           oldScope->RemoveElementById(id, element);
-                         }
-                         if (newScope)
-                         {
-                           newScope->AddElementById(id, element);
-                         }
-                       });
+    if (oldScope == newScope)
+    {
+      if (oldScope)
+      {
+        ForEachTreeScopeKeyInSubtree(
+          node, [&](Element &, DOMStringAtom id) { oldScope->ElementsWithIdChangedOrder(id); },
+          [&](html::HTMLMapElement &, DOMStringAtom name) { oldScope->ImageMapsChangedOrder(name); });
+      }
+      return;
+    }
+
+    if (oldScope)
+    {
+      SubtreeRemoved(node, oldParent);
+    }
+    if (newScope)
+    {
+      SubtreeInserted(node, newParent);
+    }
   }
 
   void ExtensibilityHooks::NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept
