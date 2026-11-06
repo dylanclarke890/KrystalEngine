@@ -59,10 +59,13 @@ namespace krys::boo::dom
     /// filter reads: anything that would invalidate the cache must be done by now.
     virtual void WillValidateIndexCache() const noexcept;
 
-  private:
-    KRYS_NODISCARD Element *CollectionBegin() const noexcept;
-    KRYS_NODISCARD Element *CollectionNext(Element &element) const noexcept;
+    /// @brief The first item, for a subclass whose items aren't found by filtering nodes.
+    KRYS_NODISCARD virtual Element *CollectionBegin() const noexcept;
 
+    /// @brief The item after @p element.
+    KRYS_NODISCARD virtual Element *CollectionNext(Element &element) const noexcept;
+
+  private:
     /// @brief The first element to match the filter from @p node on, if any.
     KRYS_NODISCARD Element *FirstMatchFrom(Node *node) const noexcept;
 

@@ -460,6 +460,8 @@ namespace krys::boo::dom
     uint32 _referencingNodeCount {0};
     /// @brief How many live collections in the document have cached their items, by what invalidates them.
     Array<uint32, static_cast<size_t>(LiveCollectionInvalidation::Count)> _liveCollectionCacheCounts {};
+    /// @brief Those with a cache that a change anywhere in the document could affect.
+    List<LiveCollection *> _ownerTreeLiveCollectionCaches;
 
   protected:
     Document(DocumentFlags flags) noexcept;
@@ -1720,6 +1722,15 @@ namespace krys::boo::dom
     {
       --_liveCollectionCacheCounts[static_cast<size_t>(invalidation)];
     }
+
+    void AddOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept;
+    void RemoveOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept;
+
+    /// @brief Clears the caches of the live collections rooted at the trees of their owners.
+    void InvalidateOwnerTreeLiveCollectionCaches() noexcept;
+
+    /// @brief Clears what those collections cached that depends on the attribute called @p localName.
+    void InvalidateOwnerTreeLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept;
 
     /// @brief Whether a live collection in the document has cached its items, which a change to the tree
     /// could affect.

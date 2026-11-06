@@ -181,6 +181,9 @@ namespace krys::boo::dom
     //    attribute's namespace.
     ExtensibilityHooks::ElementAttributeChanged(element, attribute.LocalName(), oldValue, newValue,
                                                 attribute.NamespaceURI());
+
+    // Again, as the steps update what filters read, such as an input's type, and could have read them.
+    element.InvalidateLiveCollectionCachesForAttribute(attribute.LocalName());
   }
 
   void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString value) noexcept

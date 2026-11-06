@@ -107,7 +107,8 @@ namespace krys::boo::html
     }
   }
 
-  HTMLTableRowsCollection::HTMLTableRowsCollection(HTMLTableElement &table) noexcept : _table(ShareRef(table))
+  HTMLTableRowsCollection::HTMLTableRowsCollection(HTMLTableElement &table) noexcept
+      : LiveHTMLCollection(table, [](const dom::Element &) { return true; }), _table(ShareRef(table))
   {
   }
 
@@ -242,90 +243,13 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  RefPtr<dom::Element> HTMLTableRowsCollection::Item(size_t index) noexcept
+  dom::Element *HTMLTableRowsCollection::CollectionBegin() const noexcept
   {
-    auto *row = RowAfter(*_table, nullptr);
-    for (size_t i = 0; row && i < index; ++i)
-    {
-      row = RowAfter(*_table, row);
-    }
-    return ShareRefPtr<dom::Element>(row);
+    return RowAfter(*_table, nullptr);
   }
 
-  RefPtr<const dom::Element> HTMLTableRowsCollection::Item(size_t index) const noexcept
+  dom::Element *HTMLTableRowsCollection::CollectionNext(dom::Element &element) const noexcept
   {
-    return const_cast<HTMLTableRowsCollection *>(this)->Item(index);
-  }
-
-  RefPtr<dom::Element> HTMLTableRowsCollection::operator[](size_t index) noexcept
-  {
-    return Item(index);
-  }
-
-  RefPtr<const dom::Element> HTMLTableRowsCollection::operator[](size_t index) const noexcept
-  {
-    return Item(index);
-  }
-
-  RefPtr<dom::Element> HTMLTableRowsCollection::NamedItem(dom::DOMStringView name) noexcept
-  {
-    if (name.empty())
-    {
-      return nullptr;
-    }
-
-    for (auto *row = RowAfter(*_table, nullptr); row; row = RowAfter(*_table, row))
-    {
-      if (row->Id() == name || dom::ElementAlgorithms::GetAttributeValue(*row, u8"name") == name)
-      {
-        return ShareRefPtr<dom::Element>(row);
-      }
-    }
-    return nullptr;
-  }
-
-  RefPtr<const dom::Element> HTMLTableRowsCollection::NamedItem(dom::DOMStringView name) const noexcept
-  {
-    return const_cast<HTMLTableRowsCollection *>(this)->NamedItem(name);
-  }
-
-  RefPtr<dom::Element> HTMLTableRowsCollection::operator[](dom::DOMStringView name) noexcept
-  {
-    return NamedItem(name);
-  }
-
-  RefPtr<const dom::Element> HTMLTableRowsCollection::operator[](dom::DOMStringView name) const noexcept
-  {
-    return NamedItem(name);
-  }
-
-  size_t HTMLTableRowsCollection::Length() const noexcept
-  {
-    size_t length = 0uz;
-    for (auto *row = RowAfter(*_table, nullptr); row; row = RowAfter(*_table, row))
-    {
-      ++length;
-    }
-    return length;
-  }
-
-  List<dom::DOMString> HTMLTableRowsCollection::SupportedPropertyNames() const noexcept
-  {
-    List<dom::DOMString> supportedNames;
-    for (auto *row = RowAfter(*_table, nullptr); row; row = RowAfter(*_table, row))
-    {
-      auto id = row->Id();
-      if (!id.empty() && !std::ranges::contains(supportedNames, id))
-      {
-        supportedNames.push_back(id);
-      }
-
-      auto name = dom::ElementAlgorithms::GetAttributeValue(*row, u8"name");
-      if (!name.empty() && !std::ranges::contains(supportedNames, name))
-      {
-        supportedNames.push_back(name);
-      }
-    }
-    return supportedNames;
+    return RowAfter(*_table, &static_cast<HTMLTableRowElement &>(element));
   }
 }

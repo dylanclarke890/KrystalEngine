@@ -19,6 +19,10 @@ namespace krys::boo::dom
     IdOrName,
     Name,
     Href,
+    /// @brief Reads a label's `for`, the ID that names and whether an input is labelable.
+    Labels,
+    /// @brief Reads a control's ID, name and whether it's listed and enumeratable.
+    FormControls,
     Count
   };
 
@@ -26,7 +30,10 @@ namespace krys::boo::dom
   enum class LiveCollectionTraversal : uint8
   {
     Descendants,
-    Children
+    Children,
+    /// @brief The descendants of the root of the node's tree, which changes as the node moves. As a change
+    /// anywhere in that tree matters, the document holds the collection as well as the node.
+    OwnerTree
   };
 
   /// @brief Whether a change to the attribute called @p localName can change the items of a collection with
@@ -37,6 +44,7 @@ namespace krys::boo::dom
   /// @brief The part of a live collection that keeps its cache valid: while it has a cache it's registered
   /// with its root, which clears it on a change to the root's descendants, and counted by the document, which
   /// spares changes the walk to the root if nothing could need it.
+  /// @see LiveNodeList and HTMLCollection in WebKit.
   class LiveCollection
   {
     KRYS_NON_COPY_MOVABLE(LiveCollection);

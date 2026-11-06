@@ -7,47 +7,55 @@
 namespace krys::boo::html
 {
   HTMLFormControlsCollection::HTMLFormControlsCollection(HTMLFormElement &ownerNode) noexcept
-      : _ownerNode(ShareRef(ownerNode))
+      : LiveHTMLCollection(
+          ownerNode, [](const dom::Element &) { return true; }, dom::LiveCollectionInvalidation::FormControls,
+          // Its controls can be anywhere in the form's tree.
+          dom::LiveCollectionTraversal::OwnerTree),
+        _ownerNode(ShareRef(ownerNode))
   {
   }
 
-  List<Ref<HTMLElement>> HTMLFormControlsCollection::Elements() const noexcept
+  void HTMLFormControlsCollection::InvalidateCache() noexcept
   {
-    List<Ref<HTMLElement>> elements;
-    for (auto &element : _ownerNode->CopyListedElementsVector())
+    _cachedElement = nullptr;
+    _hasNamedItemMaps = false;
+    _itemsById.clear();
+    _itemsByName.clear();
+    LiveHTMLCollection::InvalidateCache();
+  }
+
+  HTMLElement *HTMLFormControlsCollection::EnumeratableFrom(size_t offset) const noexcept
+  {
+    auto &elements = _ownerNode->ListedElements();
+    for (size_t i = offset; i < elements.size(); ++i)
     {
-      if (element->AsFormListedElement()->IsEnumeratable())
+      auto *element = elements[i].get();
+      if (element && element->AsFormListedElement()->IsEnumeratable())
       {
-        elements.push_back(element);
+        _cachedElement = element;
+        _cachedElementOffset = i;
+        return element;
       }
     }
-    return elements;
+    return nullptr;
   }
 
-  RefPtr<dom::Element> HTMLFormControlsCollection::Item(size_t index) noexcept
+  dom::Element *HTMLFormControlsCollection::CollectionBegin() const noexcept
   {
-    auto elements = Elements();
-    return index < elements.size() ? RefPtr<dom::Element>(elements[index]) : nullptr;
+    return EnumeratableFrom(0);
   }
 
-  RefPtr<const dom::Element> HTMLFormControlsCollection::Item(size_t index) const noexcept
+  dom::Element *HTMLFormControlsCollection::CollectionNext(dom::Element &element) const noexcept
   {
-    return const_cast<HTMLFormControlsCollection *>(this)->Item(index);
-  }
+    if (_cachedElement == &element)
+    {
+      return EnumeratableFrom(_cachedElementOffset + 1);
+    }
 
-  RefPtr<dom::Element> HTMLFormControlsCollection::operator[](size_t index) noexcept
-  {
-    return Item(index);
-  }
-
-  RefPtr<const dom::Element> HTMLFormControlsCollection::operator[](size_t index) const noexcept
-  {
-    return Item(index);
-  }
-
-  size_t HTMLFormControlsCollection::Length() const noexcept
-  {
-    return Elements().size();
+    auto &elements = _ownerNode->ListedElements();
+    auto position = std::ranges::find_if(elements, [&](auto &listed) { return listed.get() == &element; });
+    krys_debug_assert(position != elements.end());
+    return EnumeratableFrom(static_cast<size_t>(position - elements.begin()) + 1);
   }
 
   List<Ref<dom::Element>> HTMLFormControlsCollection::NamedItems(dom::DOMStringView name) const noexcept
@@ -59,20 +67,34 @@ namespace krys::boo::html
     }
 
     // FIXME: The form's image elements, which follow its listed elements, once images register with forms.
-    auto elements = Elements();
-    for (auto &element : elements)
+    if (!_hasNamedItemMaps)
     {
-      if (element->GetAttribute(u8"id") == name)
+      for (size_t i = 0, length = Length(); i < length; ++i)
       {
-        result.push_back(element);
+        auto element = Item(i);
+        auto id = element->GetAttribute(u8"id");
+        if (id && !id->empty())
+        {
+          _itemsById[*id].push_back(const_cast<dom::Element *>(element.get()));
+        }
+        auto elementName = element->GetAttribute(u8"name");
+        if (elementName && !elementName->empty() && id != elementName)
+        {
+          _itemsByName[*elementName].push_back(const_cast<dom::Element *>(element.get()));
+        }
       }
+      _hasNamedItemMaps = true;
     }
-    for (auto &element : elements)
+
+    auto key = dom::DOMString(name);
+    for (auto *items : {&_itemsById, &_itemsByName})
     {
-      auto id = element->GetAttribute(u8"id");
-      if (element->GetAttribute(u8"name") == name && id != name)
+      if (auto it = items->find(key); it != items->end())
       {
-        result.push_back(element);
+        for (auto *element : it->second)
+        {
+          result.push_back(ShareRef(*element));
+        }
       }
     }
     return result;
@@ -82,21 +104,6 @@ namespace krys::boo::html
   {
     auto namedItems = NamedItems(name);
     return namedItems.empty() ? nullptr : RefPtr<dom::Element>(namedItems.front());
-  }
-
-  RefPtr<const dom::Element> HTMLFormControlsCollection::NamedItem(dom::DOMStringView name) const noexcept
-  {
-    return const_cast<HTMLFormControlsCollection *>(this)->NamedItem(name);
-  }
-
-  RefPtr<dom::Element> HTMLFormControlsCollection::operator[](dom::DOMStringView name) noexcept
-  {
-    return NamedItem(name);
-  }
-
-  RefPtr<const dom::Element> HTMLFormControlsCollection::operator[](dom::DOMStringView name) const noexcept
-  {
-    return NamedItem(name);
   }
 
   Maybe<Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>>>
@@ -124,26 +131,8 @@ namespace krys::boo::html
     //    object are those that have either an id attribute or a name attribute equal to name. The nodes in
     //    the RadioNodeList object must be sorted in tree order.
     // 5. Return that RadioNodeList object.
-    // (The form keeps one per name, which is as good as new without script.)
+    // (The form keeps one per name, so the same one is returned while it lives.)
     return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {
       RefPtr<RadioNodeList>(_ownerNode->RadioNodeListForName(name))};
-  }
-
-  List<dom::DOMString> HTMLFormControlsCollection::SupportedPropertyNames() const noexcept
-  {
-    List<dom::DOMString> names;
-    auto append = [&](Maybe<dom::DOMString> name)
-    {
-      if (name && !name->empty() && std::ranges::find(names, *name) == names.end())
-      {
-        names.push_back(krys::move(*name));
-      }
-    };
-    for (auto &element : Elements())
-    {
-      append(element->GetAttribute(u8"id"));
-      append(element->GetAttribute(u8"name"));
-    }
-    return names;
   }
 }

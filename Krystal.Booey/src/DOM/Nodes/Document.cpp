@@ -1240,6 +1240,37 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+  void Document::AddOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept
+  {
+    _ownerTreeLiveCollectionCaches.push_back(&collection);
+  }
+
+  void Document::RemoveOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept
+  {
+    auto it = std::ranges::find(_ownerTreeLiveCollectionCaches, &collection);
+    krys_debug_assert(it != _ownerTreeLiveCollectionCaches.end());
+    *it = _ownerTreeLiveCollectionCaches.back();
+    _ownerTreeLiveCollectionCaches.pop_back();
+  }
+
+  void Document::InvalidateOwnerTreeLiveCollectionCaches() noexcept
+  {
+    // Last first: each removes itself, which moves the last into its place.
+    for (auto i = _ownerTreeLiveCollectionCaches.size(); i-- > 0;)
+    {
+      _ownerTreeLiveCollectionCaches[i]->InvalidateCache();
+    }
+  }
+
+  void Document::InvalidateOwnerTreeLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept
+  {
+    // Last first: each that forgets its items removes itself, which moves the last into its place.
+    for (auto i = _ownerTreeLiveCollectionCaches.size(); i-- > 0;)
+    {
+      _ownerTreeLiveCollectionCaches[i]->InvalidateCacheForAttribute(localName);
+    }
+  }
+
   bool Document::HasLiveCollectionCaches() const noexcept
   {
     return std::ranges::any_of(_liveCollectionCacheCounts, [](uint32 count) { return count != 0; });

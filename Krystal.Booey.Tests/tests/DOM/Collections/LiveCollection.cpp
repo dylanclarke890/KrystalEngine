@@ -6,10 +6,16 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Collections/HTMLFormControlsCollection.hpp"
 #include "Krystal.Booey/HTML/Collections/HTMLOptionsCollection.hpp"
+#include "Krystal.Booey/HTML/Collections/RadioNodeList.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -466,6 +472,360 @@ namespace krys::boo::dom::tests
       CHECK(singleSelected->Item(0).get() == option.get());
       REQUIRE_FALSE(single->RemoveChild(*option).HasException());
       CHECK(singleSelected->Length() == 0uz);
+    }
+  }
+
+  TEST_CASE_METHOD(LiveCollectionFixture, "LabelsNodeList: follows what decides an element's labels",
+                   "[DOM][LiveCollection][html:dom-lfe-labels]")
+  {
+    Connect();
+    auto holder = Add(*Root, u8"div");
+    auto input = Add(*holder, u8"input");
+    REQUIRE_FALSE(input->SetAttribute(u8"id", u8"x").HasException());
+    auto elsewhere = Add(*Root, u8"section");
+    auto label = Add(*elsewhere, u8"label");
+    REQUIRE_FALSE(label->SetAttribute(u8"for", u8"x").HasException());
+    auto labels = Downcast<html::HTMLElement>(*input).Labels();
+    REQUIRE(labels);
+    CHECK(labels->Length() == 1uz);
+    CHECK(labels->Item(0).get() == label.get());
+
+    SECTION("a label added or removed outside the element's ancestors")
+    {
+      auto second = Add(*elsewhere, u8"label");
+      REQUIRE_FALSE(second->SetAttribute(u8"for", u8"x").HasException());
+      CHECK(labels->Length() == 2uz);
+      CHECK(labels->Item(1).get() == second.get());
+
+      REQUIRE_FALSE(elsewhere->RemoveChild(*label).HasException());
+      CHECK(labels->Length() == 1uz);
+      CHECK(labels->Item(0).get() == second.get());
+    }
+
+    SECTION("the label's for attribute")
+    {
+      REQUIRE_FALSE(label->SetAttribute(u8"for", u8"y").HasException());
+      CHECK(labels->Length() == 0uz);
+      label->RemoveAttribute(u8"for");
+      CHECK(labels->Length() == 0uz);
+    }
+
+    SECTION("the ID that the for attribute names")
+    {
+      REQUIRE_FALSE(input->SetAttribute(u8"id", u8"y").HasException());
+      CHECK(labels->Length() == 0uz);
+      REQUIRE_FALSE(input->SetAttribute(u8"id", u8"x").HasException());
+      CHECK(labels->Length() == 1uz);
+    }
+
+    SECTION("an earlier element taking the ID")
+    {
+      auto earlier = Create(u8"input");
+      REQUIRE_FALSE(earlier->SetAttribute(u8"id", u8"x").HasException());
+      REQUIRE_FALSE(holder->InsertBefore(*earlier, input.get()).HasException());
+      CHECK(labels->Length() == 0uz);
+    }
+
+    SECTION("whether the element is labelable")
+    {
+      REQUIRE_FALSE(input->SetAttribute(u8"type", u8"hidden").HasException());
+      CHECK(labels->Length() == 0uz);
+      REQUIRE_FALSE(input->SetAttribute(u8"type", u8"text").HasException());
+      CHECK(labels->Length() == 1uz);
+    }
+
+    SECTION("a label's descendants, for a label with no for attribute")
+    {
+      auto wrapping = Add(*elsewhere, u8"label");
+      auto other = Add(*wrapping, u8"input");
+      auto otherLabels = Downcast<html::HTMLElement>(*other).Labels();
+      CHECK(otherLabels->Length() == 1uz);
+
+      auto earlier = Create(u8"button");
+      REQUIRE_FALSE(wrapping->InsertBefore(*earlier, other.get()).HasException());
+      CHECK(otherLabels->Length() == 0uz);
+    }
+
+    SECTION("the element moving to a tree without the label")
+    {
+      auto other = Create(u8"div");
+      REQUIRE_FALSE(other->AppendChild(*input).HasException());
+      CHECK(labels->Length() == 0uz);
+      REQUIRE_FALSE(holder->AppendChild(*input).HasException());
+      CHECK(labels->Length() == 1uz);
+    }
+
+    SECTION("a tree that isn't connected")
+    {
+      auto tree = Create(u8"div");
+      auto wrapping = Add(*tree, u8"label");
+      auto inner = Add(*wrapping, u8"input");
+      auto innerLabels = Downcast<html::HTMLElement>(*inner).Labels();
+      CHECK(innerLabels->Length() == 1uz);
+      auto outer = Add(*tree, u8"label");
+      CHECK(innerLabels->Length() == 1uz);
+      REQUIRE_FALSE(outer->AppendChild(*wrapping).HasException());
+      CHECK(innerLabels->Length() == 2uz);
+      CHECK(innerLabels->Item(0).get() == outer.get());
+    }
+
+    SECTION("the element's adoption into another document")
+    {
+      auto other = CreateRef<HTMLDocument>();
+      REQUIRE_FALSE(other->AdoptNode(*input).HasException());
+      CHECK(labels->Length() == 0uz);
+      CHECK(other->HasLiveCollectionCaches());
+      CHECK_FALSE(Document->HasLiveCollectionCaches());
+
+      auto tree = other->CreateElement(u8"label").ReleaseValue();
+      auto holderThere = other->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(holderThere->AppendChild(*tree).HasException());
+      REQUIRE_FALSE(tree->AppendChild(*input).HasException());
+      CHECK(labels->Length() == 1uz);
+      CHECK(labels->Item(0).get() == tree.get());
+    }
+  }
+
+  TEST_CASE_METHOD(LiveCollectionFixture, "HTMLFormControlsCollection: follows the form's listed elements",
+                   "[DOM][LiveCollection][html:htmlformcontrolscollection]")
+  {
+    Connect();
+    auto formElement = Add(*Root, u8"form");
+    REQUIRE_FALSE(formElement->SetAttribute(u8"id", u8"f").HasException());
+    auto &form = Downcast<html::HTMLFormElement>(*formElement);
+    auto first = Add(form, u8"input");
+    auto second = Add(form, u8"input");
+    auto outside = Add(*Root, u8"input");
+    auto elements = form.Elements();
+    CHECK(elements->Length() == 2uz);
+    CHECK(elements->Item(1).get() == second.get());
+
+    SECTION("a control joining and leaving by its form attribute")
+    {
+      REQUIRE_FALSE(outside->SetAttribute(u8"form", u8"f").HasException());
+      CHECK(elements->Length() == 3uz);
+      CHECK(elements->Item(2).get() == outside.get());
+      outside->RemoveAttribute(u8"form");
+      CHECK(elements->Length() == 2uz);
+    }
+
+    SECTION("the ID of the form that a control names")
+    {
+      REQUIRE_FALSE(outside->SetAttribute(u8"form", u8"f").HasException());
+      CHECK(elements->Length() == 3uz);
+      REQUIRE_FALSE(formElement->SetAttribute(u8"id", u8"g").HasException());
+      CHECK(elements->Length() == 2uz);
+    }
+
+    SECTION("insertion and removal, in tree order")
+    {
+      auto wrapper = Create(u8"div");
+      auto inner = Add(*wrapper, u8"input");
+      REQUIRE_FALSE(form.InsertBefore(*wrapper, second.get()).HasException());
+      CHECK(elements->Length() == 3uz);
+      CHECK(elements->Item(0).get() == first.get());
+      CHECK(elements->Item(1).get() == inner.get());
+      CHECK(elements->Item(2).get() == second.get());
+
+      REQUIRE_FALSE(form.RemoveChild(*wrapper).HasException());
+      CHECK(elements->Length() == 2uz);
+      CHECK(elements->Item(1).get() == second.get());
+    }
+
+    SECTION("a control that stops being enumeratable, outside the form too")
+    {
+      REQUIRE_FALSE(first->SetAttribute(u8"type", u8"image").HasException());
+      CHECK(elements->Length() == 1uz);
+      CHECK(elements->Item(0).get() == second.get());
+      REQUIRE_FALSE(first->SetAttribute(u8"type", u8"text").HasException());
+      CHECK(elements->Length() == 2uz);
+
+      REQUIRE_FALSE(outside->SetAttribute(u8"form", u8"f").HasException());
+      CHECK(elements->Length() == 3uz);
+      REQUIRE_FALSE(outside->SetAttribute(u8"type", u8"image").HasException());
+      CHECK(elements->Length() == 2uz);
+    }
+
+    SECTION("named items: those by ID, then those by name")
+    {
+      REQUIRE_FALSE(first->SetAttribute(u8"name", u8"n").HasException());
+      REQUIRE_FALSE(second->SetAttribute(u8"id", u8"n").HasException());
+      CHECK(elements->NamedItem(u8"n").get() == second.get());
+      auto named = elements->NamedItems(u8"n");
+      REQUIRE(named.size() == 2uz);
+      CHECK(named[0].get() == second.get());
+      CHECK(named[1].get() == first.get());
+      CHECK(elements->NamedItems(u8"").empty());
+
+      REQUIRE_FALSE(second->SetAttribute(u8"id", u8"m").HasException());
+      CHECK(elements->NamedItem(u8"n").get() == first.get());
+      CHECK(elements->NamedItem(u8"m").get() == second.get());
+
+      REQUIRE_FALSE(outside->SetAttribute(u8"form", u8"f").HasException());
+      REQUIRE_FALSE(outside->SetAttribute(u8"name", u8"o").HasException());
+      CHECK(elements->NamedItem(u8"o").get() == outside.get());
+      REQUIRE_FALSE(outside->SetAttribute(u8"name", u8"p").HasException());
+      CHECK(elements->NamedItem(u8"o").get() == nullptr);
+      CHECK(elements->SupportedPropertyNames() == List<DOMString> {u8"n", u8"m", u8"p"});
+    }
+  }
+
+  TEST_CASE_METHOD(LiveCollectionFixture, "RadioNodeList: follows the form's controls with its name",
+                   "[DOM][LiveCollection][html:radionodelist]")
+  {
+    Connect();
+    auto formElement = Add(*Root, u8"form");
+    REQUIRE_FALSE(formElement->SetAttribute(u8"id", u8"f").HasException());
+    auto &form = Downcast<html::HTMLFormElement>(*formElement);
+    auto first = Add(form, u8"input");
+    auto second = Add(form, u8"input");
+    auto outside = Add(*Root, u8"input");
+    REQUIRE_FALSE(first->SetAttribute(u8"name", u8"r").HasException());
+    REQUIRE_FALSE(second->SetAttribute(u8"name", u8"r").HasException());
+    auto list = form.RadioNodeListForName(u8"r");
+    CHECK(list->Length() == 2uz);
+    CHECK(list->Item(1).get() == second.get());
+
+    SECTION("one per name, for as long as it lives")
+    {
+      CHECK(form.RadioNodeListForName(u8"r").get() == list.get());
+      CHECK(form.RadioNodeListForName(u8"s").get() != list.get());
+
+      auto *old = list.get();
+      auto length = form.RadioNodeListForName(u8"s")->Length();
+      CHECK(length == 0uz);
+      CHECK(form.RadioNodeListForName(u8"r").get() == old);
+    }
+
+    SECTION("is what the form's elements return for several")
+    {
+      auto item = form.Elements()->NamedItemOrItems(u8"r");
+      REQUIRE(item);
+      REQUIRE(std::holds_alternative<RefPtr<html::RadioNodeList>>(*item));
+      CHECK(std::get<RefPtr<html::RadioNodeList>>(*item).get() == list.get());
+    }
+
+    SECTION("names and IDs")
+    {
+      REQUIRE_FALSE(second->SetAttribute(u8"name", u8"other").HasException());
+      CHECK(list->Length() == 1uz);
+      REQUIRE_FALSE(second->SetAttribute(u8"id", u8"r").HasException());
+      CHECK(list->Length() == 2uz);
+    }
+
+    SECTION("a control outside the form that joins it, and what happens to it there")
+    {
+      REQUIRE_FALSE(outside->SetAttribute(u8"name", u8"r").HasException());
+      CHECK(list->Length() == 2uz);
+      REQUIRE_FALSE(outside->SetAttribute(u8"form", u8"f").HasException());
+      CHECK(list->Length() == 3uz);
+      CHECK(list->Item(2).get() == outside.get());
+
+      REQUIRE_FALSE(outside->SetAttribute(u8"type", u8"image").HasException());
+      CHECK(list->Length() == 2uz);
+      REQUIRE_FALSE(outside->SetAttribute(u8"type", u8"text").HasException());
+      CHECK(list->Length() == 3uz);
+
+      REQUIRE_FALSE(formElement->SetAttribute(u8"id", u8"g").HasException());
+      CHECK(list->Length() == 2uz);
+    }
+
+    SECTION("removal, and an insertion in tree order")
+    {
+      REQUIRE_FALSE(form.RemoveChild(*first).HasException());
+      CHECK(list->Length() == 1uz);
+      CHECK(list->Item(0).get() == second.get());
+
+      REQUIRE_FALSE(form.InsertBefore(*first, second.get()).HasException());
+      CHECK(list->Length() == 2uz);
+      CHECK(list->Item(0).get() == first.get());
+    }
+
+    SECTION("value")
+    {
+      REQUIRE_FALSE(first->SetAttribute(u8"type", u8"radio").HasException());
+      REQUIRE_FALSE(second->SetAttribute(u8"type", u8"radio").HasException());
+      REQUIRE_FALSE(first->SetAttribute(u8"value", u8"a").HasException());
+      REQUIRE_FALSE(second->SetAttribute(u8"value", u8"b").HasException());
+      CHECK(list->Value() == u8"");
+
+      list->SetValue(u8"b");
+      CHECK(Downcast<html::HTMLInputElement>(*second).Checked());
+      CHECK(list->Value() == u8"b");
+    }
+
+    SECTION("goes on working when the form is adopted, with the document knowing")
+    {
+      auto other = CreateRef<HTMLDocument>();
+      REQUIRE_FALSE(other->AdoptNode(form).HasException());
+      CHECK(list->Length() == 2uz);
+      CHECK(other->HasLiveCollectionCaches());
+      CHECK_FALSE(Document->HasLiveCollectionCaches());
+      REQUIRE_FALSE(second->SetAttribute(u8"name", u8"other").HasException());
+      CHECK(list->Length() == 1uz);
+    }
+  }
+
+  TEST_CASE_METHOD(LiveCollectionFixture, "HTMLTableRowsCollection: follows the table's sections and rows",
+                   "[DOM][LiveCollection][html:dom-table-rows]")
+  {
+    auto tableElement = Add(*Root, u8"table");
+    auto &table = Downcast<html::HTMLTableElement>(Downcast<html::HTMLElement>(*tableElement));
+    auto foot = Add(table, u8"tfoot");
+    auto footRow = Add(*foot, u8"tr");
+    auto body = Add(table, u8"tbody");
+    auto bodyRow = Add(*body, u8"tr");
+    auto head = Add(table, u8"thead");
+    auto headRow = Add(*head, u8"tr");
+    auto rows = table.Rows();
+
+    // Heads, then bodies and the table's own rows, then feet.
+    CHECK(rows->Length() == 3uz);
+    CHECK(rows->Item(0).get() == headRow.get());
+    CHECK(rows->Item(1).get() == bodyRow.get());
+    CHECK(rows->Item(2).get() == footRow.get());
+    CHECK(rows->Item(3).get() == nullptr);
+
+    SECTION("a row in a section and in the table")
+    {
+      auto added = Add(*body, u8"tr");
+      CHECK(rows->Item(2).get() == added.get());
+      auto own = Add(table, u8"tr");
+      CHECK(rows->Length() == 5uz);
+      CHECK(rows->Item(3).get() == own.get());
+      CHECK(rows->Item(4).get() == footRow.get());
+    }
+
+    SECTION("removing a row and a section")
+    {
+      REQUIRE_FALSE(body->RemoveChild(*bodyRow).HasException());
+      CHECK(rows->Length() == 2uz);
+      REQUIRE_FALSE(table.RemoveChild(*head).HasException());
+      CHECK(rows->Length() == 1uz);
+      CHECK(rows->Item(0).get() == footRow.get());
+    }
+
+    SECTION("a row nested in a cell isn't the table's, but doesn't upset it")
+    {
+      auto cell = Add(*bodyRow, u8"td");
+      auto inner = Add(*cell, u8"table");
+      (void)Add(*inner, u8"tr");
+      CHECK(rows->Length() == 3uz);
+    }
+
+    SECTION("named rows")
+    {
+      REQUIRE_FALSE(bodyRow->SetAttribute(u8"id", u8"a").HasException());
+      REQUIRE_FALSE(footRow->SetAttribute(u8"name", u8"b").HasException());
+      CHECK(rows->NamedItem(u8"a").get() == bodyRow.get());
+      CHECK(rows->NamedItem(u8"b").get() == footRow.get());
+      CHECK(rows->NamedItem(u8"").get() == nullptr);
+
+      REQUIRE_FALSE(headRow->SetAttribute(u8"id", u8"b").HasException());
+      CHECK(rows->NamedItem(u8"b").get() == headRow.get());
+      REQUIRE_FALSE(bodyRow->SetAttribute(u8"id", u8"c").HasException());
+      CHECK(rows->NamedItem(u8"a").get() == nullptr);
+      CHECK(rows->SupportedPropertyNames() == List<DOMString> {u8"b", u8"c"});
     }
   }
 }

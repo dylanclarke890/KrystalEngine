@@ -838,6 +838,7 @@ namespace krys::boo::html
 
   void HTMLFormElement::RegisterFormListedElement(FormListedElement &element) noexcept
   {
+    InvalidateLiveCollectionCaches();
     _listedElements.insert(_listedElements.begin() + FormElementIndex(element),
                            CreateWeakPtr(&element.AsHTMLElement()));
 
@@ -859,6 +860,7 @@ namespace krys::boo::html
 
   void HTMLFormElement::UnregisterFormListedElement(FormListedElement &element) noexcept
   {
+    InvalidateLiveCollectionCaches();
     auto *htmlElement = &element.AsHTMLElement();
     auto position =
       std::ranges::find_if(_listedElements, [&](auto &listed) { return listed.get() == htmlElement; });
@@ -1158,7 +1160,20 @@ namespace krys::boo::html
 
   Ref<RadioNodeList> HTMLFormElement::RadioNodeListForName(dom::DOMStringView name) noexcept
   {
-    return CreateRef<RadioNodeList>(*this, name);
+    auto &cached = _radioNodeLists[dom::DOMString(name)];
+    if (auto *list = cached.get())
+    {
+      return ShareRef(static_cast<RadioNodeList &>(*list));
+    }
+
+    auto list = CreateRef<RadioNodeList>(*this, name);
+    cached = CreateWeakPtr<dom::NodeList>(list.get());
+    return list;
+  }
+
+  void HTMLFormElement::RadioNodeListDestroyed(dom::DOMStringView name) noexcept
+  {
+    _radioNodeLists.erase(dom::DOMString(name));
   }
 
   RefPtr<DOMFormData>

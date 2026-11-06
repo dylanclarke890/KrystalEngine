@@ -35,6 +35,8 @@ namespace krys::boo::html
     html::RadioButtonGroups _radioButtonGroups;
     mutable WeakPtr<HTMLFormControlElement> _defaultButton;
     List<WeakPtr<HTMLElement>> _listedElements;
+    /// @brief The form's RadioNodeLists by name, which remove themselves as they're destroyed.
+    HashMap<dom::DOMString, WeakPtr<dom::NodeList>> _radioNodeLists;
     List<WeakPtr<HTMLElement>> _invalidFormControls;
     WeakPtr<FormSubmission> _plannedFormSubmission;
     uint32 _listedElementsBeforeIndex {0};
@@ -213,6 +215,15 @@ namespace krys::boo::html
     }
 
     /// @brief The form's elements with the ID or name @p name.
+    /// @brief The form's listed elements, in tree order.
+    KRYS_NODISCARD const List<WeakPtr<HTMLElement>> &ListedElements() const noexcept
+    {
+      return _listedElements;
+    }
+
+    /// @brief Forgets the RadioNodeList for @p name, as it's being destroyed.
+    void RadioNodeListDestroyed(dom::DOMStringView name) noexcept;
+
     KRYS_NODISCARD Ref<RadioNodeList> RadioNodeListForName(dom::DOMStringView name) noexcept;
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept final;

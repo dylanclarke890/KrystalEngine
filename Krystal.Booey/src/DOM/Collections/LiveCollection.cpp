@@ -15,7 +15,11 @@ namespace krys::boo::dom
       case LiveCollectionInvalidation::IdOrName: return localName == u8"id" || localName == u8"name";
       case LiveCollectionInvalidation::Name:     return localName == u8"name";
       case LiveCollectionInvalidation::Href:     return localName == u8"href";
-      case LiveCollectionInvalidation::Count:    break;
+      case LiveCollectionInvalidation::Labels:
+        return localName == u8"for" || localName == u8"id" || localName == u8"type";
+      case LiveCollectionInvalidation::FormControls:
+        return localName == u8"id" || localName == u8"name" || localName == u8"form" || localName == u8"type";
+      case LiveCollectionInvalidation::Count: break;
     }
     return false;
   }
@@ -41,13 +45,18 @@ namespace krys::boo::dom
 
   Node *LiveCollection::FirstNode() const noexcept
   {
-    return _root->FirstChild();
+    return _traversal == LiveCollectionTraversal::OwnerTree ? TreeQueries::Root(*_root).FirstChild()
+                                                            : _root->FirstChild();
   }
 
   Node *LiveCollection::NextNode(const Node &node) const noexcept
   {
-    return _traversal == LiveCollectionTraversal::Children ? node.NextSibling()
-                                                           : TreeQueries::Next(node, _root.get());
+    switch (_traversal)
+    {
+      case LiveCollectionTraversal::Children:  return node.NextSibling();
+      case LiveCollectionTraversal::OwnerTree: return TreeQueries::Next(node);
+      default:                                 return TreeQueries::Next(node, _root.get());
+    }
   }
 
   Node &LiveCollection::Root() const noexcept
@@ -61,7 +70,12 @@ namespace krys::boo::dom
     {
       _isRegistered = true;
       _root->EnsureNodeRareData().AddLiveCollectionCache(const_cast<LiveCollection &>(*this));
-      _root->NodeDocument().LiveCollectionCacheAdded(_invalidation);
+      auto &document = _root->NodeDocument();
+      document.LiveCollectionCacheAdded(_invalidation);
+      if (_traversal == LiveCollectionTraversal::OwnerTree)
+      {
+        document.AddOwnerTreeLiveCollectionCache(const_cast<LiveCollection &>(*this));
+      }
     }
   }
 
@@ -71,7 +85,12 @@ namespace krys::boo::dom
     {
       _isRegistered = false;
       _root->RareData()->RemoveLiveCollectionCache(const_cast<LiveCollection &>(*this));
-      _root->NodeDocument().LiveCollectionCacheRemoved(_invalidation);
+      auto &document = _root->NodeDocument();
+      document.LiveCollectionCacheRemoved(_invalidation);
+      if (_traversal == LiveCollectionTraversal::OwnerTree)
+      {
+        document.RemoveOwnerTreeLiveCollectionCache(const_cast<LiveCollection &>(*this));
+      }
     }
   }
 }

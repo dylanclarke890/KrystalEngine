@@ -67,12 +67,13 @@ namespace krys::boo::dom
 
   void Node::InvalidateLiveCollectionCachesInAncestors() noexcept
   {
-    if (NodeDocument().HasLiveCollectionCaches())
+    if (auto &document = NodeDocument(); document.HasLiveCollectionCaches())
     {
       for (auto *node = this; node; node = node->ParentNode())
       {
         node->InvalidateLiveCollectionCaches();
       }
+      document.InvalidateOwnerTreeLiveCollectionCaches();
     }
   }
 
@@ -90,7 +91,7 @@ namespace krys::boo::dom
 
   void Node::InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept
   {
-    if (NodeDocument().HasLiveCollectionCachesForAttribute(localName))
+    if (auto &document = NodeDocument(); document.HasLiveCollectionCachesForAttribute(localName))
     {
       for (auto *node = this; node; node = node->ParentNode())
       {
@@ -99,6 +100,7 @@ namespace krys::boo::dom
           node->_nodeRareData->InvalidateLiveCollectionCachesForAttribute(localName);
         }
       }
+      document.InvalidateOwnerTreeLiveCollectionCachesForAttribute(localName);
     }
   }
 
