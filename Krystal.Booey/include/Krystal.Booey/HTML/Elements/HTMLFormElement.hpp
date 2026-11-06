@@ -15,7 +15,9 @@ namespace krys::boo::dom
 namespace krys::boo::html
 {
   class DOMFormData;
+  enum class RadioNodeListCandidates : uint8;
   class FormAssociatedElement;
+  class HTMLImageElement;
   class FormListedElement;
   class HTMLFormControlElement;
   class HTMLFormControlsCollection;
@@ -37,6 +39,10 @@ namespace krys::boo::html
     List<WeakPtr<HTMLElement>> _listedElements;
     /// @brief The form's RadioNodeLists by name, which remove themselves as they're destroyed.
     HashMap<dom::DOMString, WeakPtr<dom::NodeList>> _radioNodeLists;
+    /// @brief The same for images, which are candidates only if no listed element is.
+    HashMap<dom::DOMString, WeakPtr<dom::NodeList>> _imageRadioNodeLists;
+    /// @brief The images whose form owner this is, in no particular order.
+    List<WeakPtr<HTMLImageElement>> _imageElements;
     List<WeakPtr<HTMLElement>> _invalidFormControls;
     WeakPtr<FormSubmission> _plannedFormSubmission;
     uint32 _listedElementsBeforeIndex {0};
@@ -153,6 +159,12 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool ShouldAutocomplete() const noexcept;
 
+    void RegisterImageElement(HTMLImageElement &element) noexcept;
+    void UnregisterImageElement(HTMLImageElement &element) noexcept;
+
+    /// @brief The images whose form owner this is with an ID or name of @p name, in tree order.
+    KRYS_NODISCARD List<Ref<dom::Element>> NamedImages(dom::DOMStringView name) const noexcept;
+
     void RegisterFormListedElement(FormListedElement &element) noexcept;
     void UnregisterFormListedElement(FormListedElement &element) noexcept;
 
@@ -222,9 +234,11 @@ namespace krys::boo::html
     }
 
     /// @brief Forgets the RadioNodeList for @p name, as it's being destroyed.
-    void RadioNodeListDestroyed(dom::DOMStringView name) noexcept;
+    void RadioNodeListDestroyed(dom::DOMStringView name, RadioNodeListCandidates candidates) noexcept;
 
     KRYS_NODISCARD Ref<RadioNodeList> RadioNodeListForName(dom::DOMStringView name) noexcept;
+    KRYS_NODISCARD Ref<RadioNodeList> RadioNodeListForName(dom::DOMStringView name,
+                                                           RadioNodeListCandidates candidates) noexcept;
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept final;
     KRYS_NODISCARD bool MatchesInvalidPseudoClass() const noexcept final;

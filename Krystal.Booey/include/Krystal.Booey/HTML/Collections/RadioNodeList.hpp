@@ -12,6 +12,13 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
+  /// @brief Which of a form's elements a RadioNodeList holds.
+  enum class RadioNodeListCandidates : uint8
+  {
+    ListedElements,
+    Images
+  };
+
   /// @brief The listed elements of a form with an ID or name, as its named getter returns them when there are
   /// several.
   /// @see https://html.spec.whatwg.org/#radionodelist
@@ -20,9 +27,11 @@ namespace krys::boo::html
   private:
     Ref<dom::ContainerNode> _ownerNode;
     dom::DOMString _name;
+    RadioNodeListCandidates _candidates;
 
   public:
-    RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name) noexcept;
+    RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name,
+                  RadioNodeListCandidates candidates = RadioNodeListCandidates::ListedElements) noexcept;
     ~RadioNodeList() noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-radionodelist-value

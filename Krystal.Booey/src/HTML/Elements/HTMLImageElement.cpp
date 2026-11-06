@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLPictureElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSourceElement.hpp"
@@ -62,7 +63,36 @@ namespace krys::boo::html
   {
   }
 
-  HTMLImageElement::~HTMLImageElement() noexcept = default;
+  HTMLImageElement::~HTMLImageElement() noexcept
+  {
+    SetForm(nullptr);
+  }
+
+  void HTMLImageElement::ResetFormOwner() noexcept
+  {
+    SetForm(HTMLFormElement::FindClosestFormAncestor(*this));
+  }
+
+  void HTMLImageElement::SetFormInternal(HTMLFormElement *newForm) noexcept
+  {
+    if (auto *form = Form())
+    {
+      form->UnregisterImageElement(*this);
+    }
+    FormAssociatedElement::SetFormInternal(newForm);
+    if (newForm)
+    {
+      newForm->RegisterImageElement(*this);
+    }
+  }
+
+  void HTMLImageElement::FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept
+  {
+    if (&dom::TreeQueries::Root(*this) != &formRoot)
+    {
+      SetForm(nullptr);
+    }
+  }
 
 #pragma region HTMLImageElement
 
@@ -772,6 +802,12 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#the-img-element:html-element-insertion-steps
   void HTMLImageElement::OnInsert() noexcept
   {
+    FormAssociatedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    if (!Form())
+    {
+      ResetFormOwner();
+    }
+
     // Insert needs to complete first, before we start updating the loader. Loader dispatches events which
     // could result in callbacks back to this node.
     HTMLElement::OnInsert();
@@ -806,6 +842,8 @@ namespace krys::boo::html
       SelectImageSource(RelevantMutation::Yes);
     }
 
+    FormAssociatedElement::ElementRemovedFromAncestor(*this, !IsConnected());
+
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
   }
 
@@ -813,6 +851,8 @@ namespace krys::boo::html
   void HTMLImageElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+
+    ResetFormOwner();
 
     // 1. If isSubtreeRoot is true and oldAncestor is a picture element, then count this as a relevant
     //    mutation for movedNode.

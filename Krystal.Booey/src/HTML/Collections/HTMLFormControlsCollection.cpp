@@ -66,7 +66,7 @@ namespace krys::boo::html
       return result;
     }
 
-    // FIXME: The form's image elements, which follow its listed elements, once images register with forms.
+    // (A form's images are among its named items, but not those of its elements.)
     if (!_hasNamedItemMaps)
     {
       for (size_t i = 0, length = Length(); i < length; ++i)

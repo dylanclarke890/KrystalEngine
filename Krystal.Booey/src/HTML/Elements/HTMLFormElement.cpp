@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Events/SubmitEvent.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
@@ -102,6 +103,13 @@ namespace krys::boo::html
       if (element)
       {
         element->AsFormListedElement()->FormWillBeDestroyed();
+      }
+    }
+    for (auto &image : _imageElements)
+    {
+      if (auto *element = image.get())
+      {
+        element->FormWillBeDestroyed();
       }
     }
   }
@@ -287,8 +295,10 @@ namespace krys::boo::html
     {
       return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {RefPtr<dom::Element>(namedItems[0])};
     }
-    return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {
-      RefPtr<RadioNodeList>(RadioNodeListForName(name))};
+    // Images are candidates only if no listed element is.
+    return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {RefPtr<RadioNodeList>(RadioNodeListForName(
+      name, Elements()->NamedItems(name).empty() ? RadioNodeListCandidates::Images
+                                                 : RadioNodeListCandidates::ListedElements))};
   }
 
   void HTMLFormElement::Submit() noexcept
@@ -690,7 +700,14 @@ namespace krys::boo::html
       element->AsFormListedElement()->FormOwnerRemovedFromTree(root);
     }
 
-    // FIXME: The form's image elements, once images register with forms.
+    auto images = _imageElements;
+    for (auto &image : images)
+    {
+      if (RefPtr<HTMLImageElement> element = ShareRefPtr(image.get()))
+      {
+        element->FormOwnerRemovedFromTree(root);
+      }
+    }
 
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
   }
@@ -1094,6 +1111,10 @@ namespace krys::boo::html
 
     // https://html.spec.whatwg.org/#dom-form-nameditem
     auto namedItems = Elements()->NamedItems(name);
+    if (namedItems.empty())
+    {
+      namedItems = NamedImages(name);
+    }
 
     auto *elementFromPast = ElementFromPastNamesMap(name);
     if (namedItems.size() == 1 && namedItems.front().get() != elementFromPast)
@@ -1110,7 +1131,8 @@ namespace krys::boo::html
 
   bool HTMLFormElement::IsSupportedPropertyName(dom::DOMStringView name) noexcept
   {
-    return !name.empty() && Elements()->NamedItem(name);
+    return !name.empty()
+           && (Elements()->NamedItem(name) || !NamedImages(name).empty() || ElementFromPastNamesMap(name));
   }
 
   bool HTMLFormElement::ShouldAutocomplete() const noexcept
@@ -1160,20 +1182,68 @@ namespace krys::boo::html
 
   Ref<RadioNodeList> HTMLFormElement::RadioNodeListForName(dom::DOMStringView name) noexcept
   {
-    auto &cached = _radioNodeLists[dom::DOMString(name)];
+    return RadioNodeListForName(name, RadioNodeListCandidates::ListedElements);
+  }
+
+  Ref<RadioNodeList> HTMLFormElement::RadioNodeListForName(dom::DOMStringView name,
+                                                           RadioNodeListCandidates candidates) noexcept
+  {
+    auto &lists = candidates == RadioNodeListCandidates::Images ? _imageRadioNodeLists : _radioNodeLists;
+    auto &cached = lists[dom::DOMString(name)];
     if (auto *list = cached.get())
     {
       return ShareRef(static_cast<RadioNodeList &>(*list));
     }
 
-    auto list = CreateRef<RadioNodeList>(*this, name);
+    auto list = CreateRef<RadioNodeList>(*this, name, candidates);
     cached = CreateWeakPtr<dom::NodeList>(list.get());
     return list;
   }
 
-  void HTMLFormElement::RadioNodeListDestroyed(dom::DOMStringView name) noexcept
+  void HTMLFormElement::RadioNodeListDestroyed(dom::DOMStringView name,
+                                               RadioNodeListCandidates candidates) noexcept
   {
-    _radioNodeLists.erase(dom::DOMString(name));
+    auto &lists = candidates == RadioNodeListCandidates::Images ? _imageRadioNodeLists : _radioNodeLists;
+    lists.erase(dom::DOMString(name));
+  }
+
+  void HTMLFormElement::RegisterImageElement(HTMLImageElement &element) noexcept
+  {
+    InvalidateLiveCollectionCaches();
+    _imageElements.push_back(CreateWeakPtr<HTMLImageElement>(&element));
+  }
+
+  void HTMLFormElement::UnregisterImageElement(HTMLImageElement &element) noexcept
+  {
+    InvalidateLiveCollectionCaches();
+    RemoveFromPastNamesMap(element);
+    auto position =
+      std::ranges::find_if(_imageElements, [&](auto &image) { return image.get() == &element; });
+    krys_debug_assert(position != _imageElements.end());
+    if (position != _imageElements.end())
+    {
+      _imageElements.erase(position);
+    }
+  }
+
+  List<Ref<dom::Element>> HTMLFormElement::NamedImages(dom::DOMStringView name) const noexcept
+  {
+    List<Ref<dom::Element>> images;
+    if (name.empty())
+    {
+      return images;
+    }
+    for (auto &image : _imageElements)
+    {
+      auto *element = image.get();
+      if (element && (element->GetAttribute(u8"id") == name || element->GetAttribute(u8"name") == name))
+      {
+        images.push_back(ShareRef<dom::Element>(*element));
+      }
+    }
+    std::ranges::sort(images,
+                      [](const auto &a, const auto &b) { return std::is_lt(dom::TreeOrder(*a, *b)); });
+    return images;
   }
 
   RefPtr<DOMFormData>

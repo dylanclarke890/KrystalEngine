@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp"
 #include "Krystal.Booey/Loader/ImageLoader.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -21,9 +22,9 @@ namespace krys::boo::html
   struct ImageCandidate;
 
   /// @see https://html.spec.whatwg.org/#htmlimageelement
-  // FIXME: Forms (form association), decode(), the legacy Image()
+  // FIXME: decode(), the legacy Image()
   // constructor, and re-selecting the source when the media queries it depends on change.
-  class HTMLImageElement : public HTMLElement
+  class HTMLImageElement : public HTMLElement, public FormAssociatedElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLImageElement);
     friend class HTMLPictureElement;
@@ -256,6 +257,30 @@ namespace krys::boo::html
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
+    KRYS_NODISCARD HTMLElement &AsHTMLElement() noexcept final
+    {
+      return *this;
+    }
+
+    KRYS_NODISCARD const HTMLElement &AsHTMLElement() const noexcept final
+    {
+      return *this;
+    }
+
+    KRYS_NODISCARD bool IsFormListedElement() const noexcept final
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD FormAssociatedElement *AsFormAssociatedElement() noexcept final
+    {
+      return this;
+    }
+
+    /// @brief Leaves the form owner, removed from the tree, unless the image went with it.
+    /// @param formRoot The root of the form's tree.
+    void FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept;
+
     void OnInsert() noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
@@ -281,6 +306,10 @@ namespace krys::boo::html
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
     void CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept override;
+
+  protected:
+    void ResetFormOwner() noexcept override;
+    void SetFormInternal(HTMLFormElement *newForm) noexcept override;
   };
 }
 

@@ -1,11 +1,13 @@
 ﻿#include "Krystal.Booey/HTML/Collections/RadioNodeList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
 
 namespace krys::boo::html
 {
-  RadioNodeList::RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name) noexcept
+  RadioNodeList::RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name,
+                               RadioNodeListCandidates candidates) noexcept
       : LiveNodeList(
           ownerNode,
           [this](const dom::Node &node)
@@ -17,7 +19,7 @@ namespace krys::boo::html
           // A form's list is rooted at its tree, as its controls can be anywhere in it.
           Is<HTMLFormElement>(ownerNode) ? dom::LiveCollectionTraversal::OwnerTree
                                          : dom::LiveCollectionTraversal::Descendants),
-        _ownerNode(ShareRef(ownerNode)), _name(name)
+        _ownerNode(ShareRef(ownerNode)), _name(name), _candidates(candidates)
   {
   }
 
@@ -25,7 +27,7 @@ namespace krys::boo::html
   {
     if (auto *form = DynamicDowncast<HTMLFormElement>(*_ownerNode))
     {
-      form->RadioNodeListDestroyed(_name);
+      form->RadioNodeListDestroyed(_name, _candidates);
     }
   }
 
@@ -79,6 +81,13 @@ namespace krys::boo::html
 
   bool RadioNodeList::ElementMatches(const dom::Element &element) const noexcept
   {
+    if (_candidates == RadioNodeListCandidates::Images)
+    {
+      auto *image = DynamicDowncast<HTMLImageElement>(element);
+      return image && image->Form() == _ownerNode.get()
+             && (element.GetAttribute(u8"id") == _name || element.GetAttribute(u8"name") == _name);
+    }
+
     if (!element.IsFormListedElement())
     {
       return false;
