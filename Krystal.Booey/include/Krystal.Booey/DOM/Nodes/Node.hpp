@@ -166,6 +166,7 @@ namespace krys::boo::dom
   class DocumentOrShadowRoot;
   class Element;
   class NodeList;
+  class ShadowRoot;
 
   /// @see https://dom.spec.whatwg.org/#interface-node
   /// @see https://dom.spec.whatwg.org/#concept-node
@@ -183,6 +184,7 @@ namespace krys::boo::dom
     friend class MutationAlgorithms;
     friend class MutationObserver;
     friend class MutationObserverAlgorithms;
+    friend class ShadowRoot;
     friend class TreeQueries;
 
   private:
@@ -198,6 +200,8 @@ namespace krys::boo::dom
     CheckedPtr<Node> _nextSibling;
     UniquePtr<NodeRareData> _nodeRareData;
     RenderObject *_renderer {nullptr};
+    /// @brief The root of the shadow tree this node is in, if any: its tree scope.
+    ShadowRoot *_containingShadowRoot {nullptr};
 
   protected:
     /// @brief Creates a node whose node document is @p document (a document passes itself).

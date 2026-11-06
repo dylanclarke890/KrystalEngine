@@ -81,12 +81,9 @@ namespace krys::boo::dom
 
   DocumentOrShadowRoot &Node::TreeScope() const noexcept
   {
-    if (IsInShadowTree())
+    if (_containingShadowRoot)
     {
-      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(const_cast<Node &>(*this))))
-      {
-        return *shadowRoot;
-      }
+      return *_containingShadowRoot;
     }
     return NodeDocument();
   }

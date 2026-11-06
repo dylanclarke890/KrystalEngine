@@ -104,6 +104,7 @@ namespace krys::boo::dom
     if (parent->IsInShadowTree())
     {
       insertedNode.SetNodeFlag(NodeFlags::IsInShadowTree);
+      insertedNode._containingShadowRoot = parent->_containingShadowRoot;
     }
 
     insertedNode.InvalidateStyle(style::Validity::SubtreeInvalid,
@@ -166,6 +167,7 @@ namespace krys::boo::dom
     {
       movedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
     }
+    movedNode._containingShadowRoot = parent->_containingShadowRoot;
 
     movedNode.InvalidateStyle(style::Validity::SubtreeInvalid, style::InvalidationMode::InsertedIntoAncestor);
     if (auto &newScope = movedNode.TreeScope(); &newScope != &oldScope)
@@ -242,6 +244,7 @@ namespace krys::boo::dom
     if (!Is<ShadowRoot>(TreeQueries::Root(removedNode)))
     {
       removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+      removedNode._containingShadowRoot = nullptr;
     }
 
     // Nodes in the shadow trees of the removed nodes stay in their trees.
