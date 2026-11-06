@@ -351,6 +351,16 @@ namespace krys::boo::css::tests
       CHECK(Serialised(u8"color-layers(red, blue)", enabled) == "color-layers(red, blue)");
       CHECK_FALSE(Parse(u8"contrast-color(red, blue)", enabled));
       CHECK_FALSE(Parse(u8"color-layers(red blue)", enabled));
+      CHECK(Serialised(u8"color-layers(multiply, red, blue)", enabled)
+            == "color-layers(multiply, red, blue)");
+      CHECK(Serialised(u8"color-layers(HUE, red)", enabled) == "color-layers(hue, red)");
+      CHECK(Serialised(u8"color-layers(color, red)", enabled) == "color-layers(color, red)");
+      CHECK(Serialised(u8"color-layers(normal, red)", enabled) == "color-layers(red)");
+      CHECK_FALSE(Parse(u8"color-layers(multiply)", enabled));
+      CHECK_FALSE(Parse(u8"color-layers(multiply red)", enabled));
+      CHECK_FALSE(Parse(u8"color-layers(red, multiply)", enabled));
+      CHECK_FALSE(Parse(u8"color-layers(plus-lighter, red)", enabled));
+      CHECK_FALSE(Parse(u8"color-layers(plus-darker, red)", enabled));
     }
 
     SECTION("A failed function doesn't consume anything")

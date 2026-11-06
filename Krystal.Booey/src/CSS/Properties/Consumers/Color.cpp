@@ -37,6 +37,7 @@
 #include "Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesEvaluateCalc.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
@@ -602,7 +603,33 @@ namespace krys::boo::css::PropertyParserHelpers
 
       auto args = ConsumeFunction(tokens);
 
-      // FIXME: Parse blend mode.
+      auto blendMode = BlendMode::Normal;
+      switch (args.Peek().ValueId())
+      {
+        case ValueId::Normal:
+        case ValueId::Multiply:
+        case ValueId::Screen:
+        case ValueId::Overlay:
+        case ValueId::Darken:
+        case ValueId::Lighten:
+        case ValueId::ColorDodge:
+        case ValueId::ColorBurn:
+        case ValueId::HardLight:
+        case ValueId::SoftLight:
+        case ValueId::Difference:
+        case ValueId::Exclusion:
+        case ValueId::Hue:
+        case ValueId::Saturation:
+        case ValueId::Color:
+        case ValueId::Luminosity:
+          blendMode = boo::FromValueId<BlendMode>(args.ConsumeIncludingWhitespace().ValueId());
+          if (!ConsumeComma(args))
+          {
+            return null;
+          }
+          break;
+        default: break;
+      }
 
       CommaSeparatedList<Color>::Container colors;
       do
@@ -621,7 +648,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return null;
       }
 
-      return Color {ColorLayers {.BlendMode = BlendMode::Normal, .Colors = {krys::move(colors)}}};
+      return Color {ColorLayers {.BlendMode = blendMode, .Colors = {krys::move(colors)}}};
     }
 
     // MARK: - color-mix()
