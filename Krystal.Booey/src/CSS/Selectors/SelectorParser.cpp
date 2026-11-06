@@ -583,12 +583,20 @@ namespace krys::boo::css
                                               const MutableSelector &compoundPseudoElement) noexcept
     {
       if (compoundPseudoElement.PseudoElement() == SelectorPseudoElement::UserAgentPart
-          && compoundPseudoElement.Value() == UserAgentParts::DetailsContent())
+          && (compoundPseudoElement.Value() == UserAgentParts::DetailsContent()
+              || compoundPseudoElement.Value() == UserAgentParts::InternalSelectPicker()))
       {
         if (simpleSelector.Match() == SelectorMatch::PseudoElement)
         {
           return true;
         }
+      }
+      // The picker is an element as a part is: it has its states, such as :popover-open.
+      if (compoundPseudoElement.PseudoElement() == SelectorPseudoElement::UserAgentPart
+          && compoundPseudoElement.Value() == UserAgentParts::InternalSelectPicker()
+          && simpleSelector.Match() == SelectorMatch::PseudoClass)
+      {
+        return !IsTreeStructuralPseudoClass(simpleSelector.PseudoClass());
       }
       if (compoundPseudoElement.PseudoElement() == SelectorPseudoElement::Part)
       {
@@ -1137,6 +1145,19 @@ namespace krys::boo::css
             return nullptr;
           }
           selector->SetSubSelectors(CreateUnique<SelectorList>(krys::move(selectorList)));
+          return selector;
+        }
+        case SelectorPseudoElement::Picker:
+        {
+          // Only a select has a picker: it's the part of its shadow tree that the selector then matches.
+          const auto &ident = block.ConsumeIncludingWhitespace();
+          if (ident.Type() != TokenType::Ident || !block.IsAtEnd()
+              || !text::IsASCIICaselessEqual(ident.IdentCodePoints(), CSSOMStringView(u8"select")))
+          {
+            return nullptr;
+          }
+          selector->SetPseudoElement(SelectorPseudoElement::UserAgentPart);
+          selector->SetValue(UserAgentParts::InternalSelectPicker());
           return selector;
         }
         case SelectorPseudoElement::Highlight:

@@ -50,10 +50,9 @@ namespace krys::boo::html
       return _isDefault;
     }
 
-    KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
-    {
-      return false;
-    }
+    KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept final;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept final;
+    void DefaultEventHandler(dom::Event &event) noexcept final;
 
 #pragma region HTMLOptionElement - https://html.spec.whatwg.org/#htmloptionelement
 

@@ -86,6 +86,21 @@ namespace krys::boo
       return appearance;
     }
 
+    // Everything but a drop-down box's select and its picker renders as for 'auto'.
+    // https://drafts.csswg.org/css-ui-4/#appearance-switching
+    if (appearance == StyleAppearance::BaseSelect)
+    {
+      auto *select = DynamicDowncast<html::HTMLSelectElement>(*element);
+      if ((select && select->UsesMenuList())
+          || (element->IsInUserAgentShadowTree()
+              && element->UserAgentPart() == css::UserAgentParts::InternalSelectPicker()))
+      {
+        return appearance;
+      }
+      style.SetUsedAppearance(autoAppearance);
+      return autoAppearance;
+    }
+
     // Aliases of 'auto'.
     // https://drafts.csswg.org/css-ui-4/#typedef-appearance-compat-auto
     if (appearance == StyleAppearance::Auto || appearance == StyleAppearance::SearchField
@@ -172,7 +187,8 @@ namespace krys::boo
   {
     auto autoAppearance = AutoAppearanceForElement(style, element);
     auto appearance = AdjustAppearanceForElement(style, parentStyle, element, autoAppearance);
-    if (appearance == StyleAppearance::None || appearance == StyleAppearance::Base)
+    if (appearance == StyleAppearance::None || appearance == StyleAppearance::Base
+        || appearance == StyleAppearance::BaseSelect)
     {
       return;
     }
@@ -490,7 +506,8 @@ namespace krys::boo
     {
       case StyleAppearance::None:
       case StyleAppearance::Auto:
-      case StyleAppearance::Base:                         break;
+      case StyleAppearance::Base:
+      case StyleAppearance::BaseSelect:                   break;
 
       case StyleAppearance::Checkbox:
       case StyleAppearance::Radio:                        return ToggleButtonPart::Create(appearance);

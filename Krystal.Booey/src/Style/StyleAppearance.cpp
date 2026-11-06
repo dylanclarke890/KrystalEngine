@@ -10,6 +10,7 @@ namespace krys::boo
       case StyleAppearance::None:                         ts << "none"; break;
       case StyleAppearance::Auto:                         ts << "auto"; break;
       case StyleAppearance::Base:                         ts << "base"; break;
+      case StyleAppearance::BaseSelect:                   ts << "base-select"; break;
       case StyleAppearance::Checkbox:                     ts << "checkbox"; break;
       case StyleAppearance::Radio:                        ts << "radio"; break;
       case StyleAppearance::PushButton:                   ts << "push-button"; break;

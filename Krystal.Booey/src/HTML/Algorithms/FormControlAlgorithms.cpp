@@ -15,6 +15,9 @@ namespace krys::boo::html
 
   void FormControlAlgorithms::UpdateDescendantSelectedContents(HTMLSelectElement &select) noexcept
   {
+    // Each of the algorithms that update these also clones the selected option into the select button.
+    select.CloneSelectedOptionIntoSelectButton();
+
     // 1. If select has the multiple attribute, then return.
     if (select.HasAttribute(u8"multiple"))
     {

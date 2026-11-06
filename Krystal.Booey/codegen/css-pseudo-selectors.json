@@ -34,6 +34,10 @@
         ]
     },
     "pseudo-classes": {
+        "-internal-select-base-contents": {
+            "comment": "Matches a select whose contents are rendered with base appearance, for the user agent sheet.",
+            "user-agent-sheet-only": true
+        },
         "-internal-html-document": {
             "comment": "Matches elements in HTML documents, for the user agent rules that apply only there.",
             "user-agent-sheet-only": true
@@ -130,6 +134,11 @@
         }
     },
     "pseudo-elements": {
+        "-internal-select-picker": {
+            "comment": "The picker of a select, which ::picker(select) matches.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
         "-internal-color-swatch-overlay": {
             "comment": "The overlay of colour inputs' swatches.",
             "user-agent-part": true,
@@ -323,6 +332,10 @@
         "part": {
             "argument": "required"
         },
+        "picker": {
+            "argument": "required"
+        },
+        "picker-icon": {},
         "placeholder": {
             "user-agent-part": true
         },

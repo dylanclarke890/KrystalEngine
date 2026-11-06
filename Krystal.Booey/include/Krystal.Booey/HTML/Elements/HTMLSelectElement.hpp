@@ -34,6 +34,15 @@ namespace krys::boo::html
     };
 
   private:
+    WeakPtr<HTMLSlotElement> _selectButtonSlot;
+    WeakPtr<dom::Element> _selectFallbackButtonText;
+    WeakPtr<HTMLElement> _selectPopover;
+    WeakPtr<HTMLSlotElement> _selectPopoverSlot;
+    WeakPtr<HTMLSlotElement> _selectListBoxSlot;
+    WeakPtr<dom::Element> _selectButton;
+    bool _slotsAreForMenuList {true};
+    bool _contentsUseBaseAppearance {false};
+
     enum class SelectOptionFlag : uint8
     {
       DeselectOtherOptions,
@@ -69,6 +78,7 @@ namespace krys::boo::html
 
   public:
     explicit HTMLSelectElement(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLSelectElement> Create(dom::Document &document) noexcept;
 
     /// @brief The select whose list of options a child of @p startNode would be in, if any.
     KRYS_NODISCARD static HTMLSelectElement *FindOwnerSelect(dom::ContainerNode *startNode,
@@ -196,6 +206,38 @@ namespace krys::boo::html
                               bool allowMultipleSelection = false) noexcept;
 
     void OptionElementChildrenChanged() noexcept;
+
+    /// @brief The slot of the shadow tree that takes @p child: a first child element that's a button takes
+    /// the select button slot and the other children the select popover's; all of a list box's take its own
+    /// slot.
+    /// @see https://html.spec.whatwg.org/#the-select-element-2
+    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const dom::Node &child) const noexcept;
+
+    /// @brief Whether the select renders as a drop-down box with base appearance (`appearance: base-select`):
+    /// its shadow tree instead of a menu list, and a popover for its picker.
+    KRYS_NODISCARD bool ContentsUseBaseAppearance() const noexcept
+    {
+      return _contentsUseBaseAppearance;
+    }
+    /// @return Whether it changed.
+    bool SetContentsUseBaseAppearance(bool value) noexcept;
+
+    /// @brief Whether the picker of a select with base appearance is showing.
+    KRYS_NODISCARD bool IsPickerOpen() const noexcept;
+
+    /// @brief The select popover, its picker when it has base appearance.
+    KRYS_NODISCARD HTMLElement *SelectPopover() const noexcept
+    {
+      return _selectPopover.get();
+    }
+
+    /// @brief The user picked @p option from the picker of a select with base appearance.
+    /// @see https://html.spec.whatwg.org/#concept-select-pick
+    void PickOption(HTMLOptionElement &option) noexcept;
+
+    /// @brief Sets the text the select shows without a button of its own to its selected option's label.
+    /// @see https://html.spec.whatwg.org/#clone-selected-option-into-select-button
+    void CloneSelectedOptionIntoSelectButton() noexcept;
     void SetRecalcListItems() noexcept;
 
     /// @brief Runs the selectedness setting algorithm, then updates the selectedcontent elements if it or
@@ -283,8 +325,18 @@ namespace krys::boo::html
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
     void DisabledStateChanged() noexcept final;
+    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept final;
 
   private:
+    void BaseAppearanceDefaultEventHandler(dom::Event &event) noexcept;
+    /// @see https://html.spec.whatwg.org/#select-open-picker
+    void OpenPicker(bool byKeyboard) noexcept;
+    void ClosePicker() noexcept;
+    void ReassignSlots() noexcept;
+    /// @brief Moves the focus between the selectable options for an arrow, Home, End or page key.
+    /// @see https://html.spec.whatwg.org/#focus-another-option
+    void FocusOptionForKey(dom::DOMStringView keyIdentifier) noexcept;
+
     /// @see https://html.spec.whatwg.org/#append-new-option-elements
     dom::ExceptionOr<void> AppendNewOptionElements(uint32 count) noexcept;
 

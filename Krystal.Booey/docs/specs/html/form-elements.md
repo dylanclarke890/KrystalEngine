@@ -205,7 +205,7 @@ Status: reviewed (2026-11-01)
 #### [4.10.9 The optgroup element](https://html.spec.whatwg.org/#the-optgroup-element)
 
 Status: reviewed (2026-11-01)
-> `HTMLOptGroupElement`. Its label is only its `label` attribute: a legend child is for customizable selects (FIXME).
+> `HTMLOptGroupElement`. Its label is only its `label` attribute: a legend child shows only with base appearance (`KNOWN-ISSUES.md`).
 > Fixed: changing `disabled` didn't reset its select's selectedness straight away.
 <!-- definitions: attr-optgroup-label -->
 

@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
@@ -562,6 +563,24 @@ namespace krys::ui::tests
   {
     // Drop-downs and list boxes are drawn by the Adwaita theme, so Chrome's golden is only reported.
     CheckPage("selects", 360u, 280u, true);
+  }
+
+  TEST_CASE("Golden: customizable select", "[UI][GPU][Golden]")
+  {
+    // The picker is part of the page, as in Chrome, but capturing Chrome's golden doesn't open it, so there's
+    // none.
+    CheckPage("customizable-select", 320u, 240u, true,
+              [](View &view)
+              {
+                auto select = view.Document().GetElementById(u8"plain");
+                REQUIRE(select);
+                auto box = select->GetBoundingClientRect();
+                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                view.MousePressed(inside, pal::MouseButton::Left);
+                view.MouseReleased(inside, pal::MouseButton::Left);
+                REQUIRE(Downcast<boo::html::HTMLSelectElement>(*select).IsPickerOpen());
+                view.UpdateRendering();
+              });
   }
 
   TEST_CASE("Golden: select popup", "[UI][GPU][Golden]")

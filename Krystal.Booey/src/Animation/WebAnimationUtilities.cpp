@@ -46,6 +46,7 @@ namespace krys::boo
         SpellingError,
         TargetText,
         Checkmark,
+        PickerIcon,
         After,
         Other
       };
@@ -71,6 +72,7 @@ namespace krys::boo
           case PseudoElementType::TargetText:    return TargetText;
           case PseudoElementType::After:         return After;
           case PseudoElementType::Checkmark:     return Checkmark;
+          case PseudoElementType::PickerIcon:    return PickerIcon;
           default:                               krys_debug_assert(false); return Other;
         }
       };
@@ -354,6 +356,7 @@ namespace krys::boo
       case PseudoElementType::SpellingError: return u8"::spelling-error";
       case PseudoElementType::TargetText:    return u8"::target-text";
       case PseudoElementType::Checkmark:     return u8"::checkmark";
+      case PseudoElementType::PickerIcon:    return u8"::picker-icon";
       default:                               return {};
     }
   }

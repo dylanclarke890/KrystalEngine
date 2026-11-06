@@ -1486,13 +1486,19 @@ namespace krys::boo::css
           if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element))
           {
             auto *menuList = DynamicDowncast<RenderMenuList>(select->Renderer());
-            return menuList && menuList->PopupIsVisible();
+            return (menuList && menuList->PopupIsVisible()) || select->IsPickerOpen();
           }
           if (auto *input = DynamicDowncast<html::HTMLInputElement>(element))
           {
             return input->IsPresentingAttachedView();
           }
           return false;
+        }
+
+        case SelectorPseudoClass::InternalSelectBaseContents:
+        {
+          auto *select = DynamicDowncast<html::HTMLSelectElement>(element);
+          return select && select->ContentsUseBaseAppearance();
         }
 
         case SelectorPseudoClass::InternalHtmlDocument: return Is<dom::HTMLDocument>(element.NodeDocument());

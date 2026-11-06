@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorInlines.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
@@ -301,6 +302,10 @@ namespace krys::boo::css
       case SelectorPseudoElement::Checkmark:
       {
         return PseudoElementType::Checkmark;
+      }
+      case SelectorPseudoElement::PickerIcon:
+      {
+        return PseudoElementType::PickerIcon;
       }
       case SelectorPseudoElement::Cue:
       case SelectorPseudoElement::Slotted:
@@ -701,6 +706,12 @@ namespace krys::boo::css
           {
             krys_debug_assert_msg(!PseudoElementMayHaveArgument(selector->PseudoElement()),
                                   "Missing serialisation for pseudo-element argument");
+            if (selector->PseudoElement() == SelectorPseudoElement::UserAgentPart
+                && selector->Value() == UserAgentParts::InternalSelectPicker())
+            {
+              builder.Append(u8"::picker(select)");
+              break;
+            }
             builder.Append(u8"::");
             AppendIdentifier(selector->SerialisingValue(), builder);
             break;

@@ -810,6 +810,7 @@ anywhere
 // The order here must match the order in the StyleAppearance enum in StyleAppearance.h.
 // All appearance values that should be accepted by the parser should be listed between 'base' and 'textarea':
 base
+base-select
 checkbox
 radio
 push-button

@@ -355,7 +355,7 @@ namespace krys::boo::html
       }
       case TagName::select:
       {
-        return CreateRefPtr<HTMLSelectElement>(document);
+        return HTMLSelectElement::Create(document);
       }
       case TagName::selectedcontent:
       {

@@ -1119,7 +1119,8 @@ namespace krys::boo
     {
       ListBuilder().UpdateItemMarker(*listItem);
     }
-    // FIXME: Multi-column flows and form controls (their builders' updateAfterDescendants).
+    FormControlsBuilder().UpdateAfterDescendants(renderer);
+    // FIXME: Multi-column flows (their builder's updateAfterDescendants).
   }
 
   RenderPtr<RenderObject> RenderTreeBuilder::DetachFromRenderGrid(RenderGrid &parent, RenderObject &child,

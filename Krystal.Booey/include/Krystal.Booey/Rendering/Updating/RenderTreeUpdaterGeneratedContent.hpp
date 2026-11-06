@@ -23,6 +23,10 @@ namespace krys::boo
     WeakPtr<RenderQuote> _previousUpdatedQuote;
 
   public:
+    /// @brief Adds the renderers of the `content` of @p style to @p pseudoRenderer.
+    static void CreateContentRenderers(RenderTreeBuilder &builder, RenderElement &pseudoRenderer,
+                                       const RenderStyle &style) noexcept;
+
     explicit GeneratedContent(RenderTreeUpdater &updater) noexcept;
 
     void UpdateBeforeOrAfterPseudoElement(dom::Element &current, const style::ElementUpdate &elementUpdate,

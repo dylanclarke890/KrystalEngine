@@ -258,7 +258,6 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#concept-submit-button
   void HTMLButtonElement::ComputeType(dom::DOMStringView typeAttributeValue) noexcept
   {
-    // FIXME: A button in a select is inert, once there are customizable selects.
     auto oldType = _type;
     if (text::IsASCIICaselessEqual(typeAttributeValue, dom::DOMStringView(u8"reset")))
     {

@@ -274,7 +274,7 @@ namespace krys::boo
     using Transitions = CoordinatedValueList<Transition>;
     using WebkitBorderSpacing = Length<css::NonNegativeUnzoomed>;
 
-    constexpr auto PublicPseudoIDBits = 12;
+    constexpr auto PublicPseudoIDBits = 13;
     constexpr auto TextDecorationLineBits = 5;
     constexpr auto TextTransformBits = 6;
     constexpr auto PseudoElementTypeBits = 5;

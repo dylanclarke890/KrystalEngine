@@ -1,9 +1,15 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Collections/HTMLOptionsCollection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
@@ -11,7 +17,11 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
+#include "Krystal.Booey/Style/StyleAppearance.hpp"
 
 namespace krys::boo::tests
 {
@@ -541,5 +551,272 @@ namespace krys::boo::tests
     auto disabled = select.ShowPicker();
     REQUIRE(disabled.HasException());
     CHECK(disabled.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+  }
+
+  namespace
+  {
+    constexpr utf8_stringview BaseSelectStyle = u8"<style>select{appearance:base-select;width:100px}</style>";
+
+    /// @brief Presses and releases the left button at the centre of @p element.
+    void ClickElement(EditorFixture &fixture, dom::Element &element) noexcept
+    {
+      (void)fixture.Document->UpdateLayout();
+      auto rect = element.Renderer()->AbsoluteBoundingBoxRect();
+      auto position = DoublePoint(rect.X() + rect.Width() / 2.0, rect.Y() + rect.Height() / 2.0);
+      auto &handler = fixture.Frame->GetEventHandler();
+      auto event = [&](PlatformEvent::Type type)
+      {
+        return PlatformMouseEvent(position, position, MouseButton::Left, type, 1, {}, MonotonicTime::Now());
+      };
+      (void)handler.MouseMoved(event(PlatformEvent::Type::MouseMoved));
+      (void)handler.HandleMousePressEvent(event(PlatformEvent::Type::MousePressed));
+      (void)handler.HandleMouseReleaseEvent(event(PlatformEvent::Type::MouseReleased));
+      (void)fixture.Document->UpdateLayout();
+    }
+
+    KRYS_NODISCARD bool Dumps(EditorFixture &fixture, utf8_stringview text) noexcept
+    {
+      (void)fixture.Document->UpdateLayout();
+      return layout::tests::DumpWithIds(fixture).find(text) != utf8_string::npos;
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: appearance: base-select",
+                   "[HTML][HTMLSelectElement][html:the-select-element-2]")
+  {
+    SECTION("the renderer follows the appearance")
+    {
+      EditorFixture fixture(u8"<select id=s><option id=a>Alpha</select>");
+      auto &select = SelectById(fixture, u8"s");
+      CHECK(Is<RenderMenuList>(select.Renderer()));
+      CHECK_FALSE(OptionById(fixture, u8"a").Renderer());
+      CHECK_FALSE(select.ContentsUseBaseAppearance());
+
+      REQUIRE_FALSE(select.SetAttribute(u8"style", u8"appearance:base-select").HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(select.ContentsUseBaseAppearance());
+      CHECK_FALSE(Is<RenderMenuList>(select.Renderer()));
+      CHECK(select.Renderer()->Style().Display() == DisplayType::InlineFlex);
+
+      REQUIRE_FALSE(select.SetAttribute(u8"style", u8"").HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK_FALSE(select.ContentsUseBaseAppearance());
+      CHECK(Is<RenderMenuList>(select.Renderer()));
+    }
+
+    SECTION("elsewhere it's as for auto")
+    {
+      EditorFixture fixture(u8"<select id=l multiple style=appearance:base-select><option>a</select>"
+                            u8"<button id=b style=appearance:base-select>b</button><div id=d "
+                            u8"style=appearance:base-select>d</div>");
+      auto &listBox = SelectById(fixture, u8"l");
+      CHECK(Is<RenderListBox>(listBox.Renderer()));
+      CHECK_FALSE(listBox.ContentsUseBaseAppearance());
+      CHECK(fixture.ById(u8"b").Renderer()->Style().UsedAppearance() != StyleAppearance::BaseSelect);
+      CHECK(fixture.ById(u8"d").Renderer()->Style().UsedAppearance() == StyleAppearance::None);
+    }
+
+    SECTION("the selected option's label shows without a button, and the picker icon")
+    {
+      EditorFixture fixture(utf8_string(BaseSelectStyle)
+                            + u8"<select id=s><option>Alpha<option id=b selected>Beta</select>");
+      CHECK(Dumps(fixture, u8"\"Beta\""));
+      CHECK_FALSE(Dumps(fixture, u8"\"Alpha\""));
+      CHECK(Dumps(fixture, u8"\\x{25BE}"));
+    }
+
+    SECTION("the selectors")
+    {
+      EditorFixture fixture(u8"<style>::picker(select){color:red}select::picker-icon{color:red}"
+                            u8"::picker(select):popover-open{color:red}::picker(select)::backdrop{color:red}"
+                            u8"::picker(other){color:red}</style>");
+      auto *sheet = DynamicDowncast<css::CSSStyleSheet>(fixture.Document->StyleSheets().Item(1));
+      REQUIRE(sheet);
+      REQUIRE(sheet->CssRules()->Length() == 4);
+      CHECK(css::tests::ToNarrow(sheet->CssRules()->Item(0)->CssText())
+            == "::picker(select) { color: red; }");
+      CHECK(css::tests::ToNarrow(sheet->CssRules()->Item(1)->CssText())
+            == "select::picker-icon { color: red; }");
+      CHECK(css::tests::ToNarrow(sheet->CssRules()->Item(2)->CssText())
+            == "::picker(select):popover-open { color: red; }");
+      CHECK(css::tests::ToNarrow(sheet->CssRules()->Item(3)->CssText())
+            == "::picker(select)::backdrop { color: red; }");
+    }
+
+    SECTION("an author's picker, icon and checkmark")
+    {
+      EditorFixture fixture(
+        utf8_string(BaseSelectStyle)
+        + u8"<style>::picker(select){background-color:rgb(1,2,3)}select::picker-icon{content:'v'}"
+          u8"option::checkmark{content:'y'}</style>"
+          u8"<select id=s><optgroup label=Group><option id=a>Alpha</optgroup>"
+          u8"<optgroup><legend>Legend</legend><option>Beta</optgroup><hr><div>Text</div></select>");
+      auto &select = SelectById(fixture, u8"s");
+      CHECK(Dumps(fixture, u8"\"v\""));
+      ClickElement(fixture, select);
+      REQUIRE(select.IsPickerOpen());
+      CHECK(Dumps(fixture, u8"#010203"));
+      CHECK(Dumps(fixture, u8"\"y\""));
+      CHECK(Dumps(fixture, u8"\"Group\""));
+      CHECK(Dumps(fixture, u8"\"Legend\""));
+      CHECK(Dumps(fixture, u8"\"Text\""));
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: the picker of a select with base appearance",
+                   "[HTML][HTMLSelectElement][html:select-open-picker][html:concept-select-pick]")
+  {
+    EditorFixture fixture(utf8_string(BaseSelectStyle)
+                          + u8"<select id=s><option id=a>Alpha<option id=b label=Bee>x<option id=c disabled>C"
+                            u8"<option id=d>Delta</select>");
+    auto &select = SelectById(fixture, u8"s");
+    (void)fixture.Document->UpdateLayout();
+    auto &a = OptionById(fixture, u8"a");
+    auto &b = OptionById(fixture, u8"b");
+    auto &d = OptionById(fixture, u8"d");
+
+    SECTION("a press opens it below the select, on the selected option")
+    {
+      CHECK_FALSE(a.Renderer());
+      ClickElement(fixture, select);
+      REQUIRE(select.IsPickerOpen());
+      CHECK(select.Matches(u8":open").ReleaseValue());
+      REQUIRE(a.Renderer());
+      CHECK(fixture.Document->FocusedElement() == &a);
+      CHECK_FALSE(a.Matches(u8":focus-visible").ReleaseValue());
+      CHECK(a.Renderer()->AbsoluteBoundingBoxRect().Y()
+            >= select.Renderer()->AbsoluteBoundingBoxRect().MaxY());
+      CHECK(a.Renderer()->AbsoluteBoundingBoxRect().Width() >= 98);
+
+      SECTION("the checkmark marks the selected option, and a label replaces the contents")
+      {
+        CHECK(Dumps(fixture, u8"\\x{2713}"));
+        CHECK(Dumps(fixture, u8"\"Bee\""));
+        CHECK_FALSE(Dumps(fixture, u8"\"x\""));
+      }
+
+      SECTION("another press closes it")
+      {
+        ClickElement(fixture, select);
+        CHECK_FALSE(select.IsPickerOpen());
+        CHECK_FALSE(a.Renderer());
+      }
+
+      SECTION("clicking an option picks it, firing events and closing")
+      {
+        auto counter = CreateRef<EventCounter>();
+        select.AddEventListener(dom::DOMStringAtom(EventNames::Change),
+                                ShareRef<dom::EventListenerCallback>(*counter), false);
+        ClickElement(fixture, d);
+        html::EventLoop::Current().RunUntilIdle();
+        CHECK(select.SelectedIndex() == 3);
+        CHECK(counter->Count == 1);
+        CHECK_FALSE(select.IsPickerOpen());
+        CHECK(fixture.Document->FocusedElement() == &select);
+        CHECK(Dumps(fixture, u8"\"Delta\""));
+      }
+
+      SECTION("clicking a disabled option doesn't pick it")
+      {
+        ClickElement(fixture, OptionById(fixture, u8"c"));
+        CHECK(select.SelectedIndex() == 0);
+      }
+
+      SECTION("clicking outside closes it")
+      {
+        auto &handler = fixture.Frame->GetEventHandler();
+        auto position = DoublePoint(390, 290);
+        auto event = [&](PlatformEvent::Type type)
+        {
+          return PlatformMouseEvent(position, position, MouseButton::Left, type, 1, {}, MonotonicTime::Now());
+        };
+        (void)handler.HandleMousePressEvent(event(PlatformEvent::Type::MousePressed));
+        (void)handler.HandleMouseReleaseEvent(event(PlatformEvent::Type::MouseReleased));
+        CHECK_FALSE(select.IsPickerOpen());
+      }
+
+      SECTION("removing the select closes it")
+      {
+        REQUIRE_FALSE(select.Remove().HasException());
+        CHECK_FALSE(select.IsPickerOpen());
+      }
+    }
+
+    SECTION("the keys")
+    {
+      select.Focus();
+      REQUIRE(fixture.Document->FocusedElement() == &select);
+      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", 0x28));
+      REQUIRE(select.IsPickerOpen());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.Document->FocusedElement() == &a);
+      CHECK(a.Matches(u8":focus-visible").ReleaseValue());
+
+      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", 0x28));
+      CHECK(fixture.Document->FocusedElement() == &b);
+      // Past the disabled option.
+      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", 0x28));
+      CHECK(fixture.Document->FocusedElement() == &d);
+      CHECK(PressKey(fixture, u8"Home", u8"Home", 0x24));
+      CHECK(fixture.Document->FocusedElement() == &a);
+      CHECK(PressKey(fixture, u8"End", u8"End", 0x23));
+      CHECK(fixture.Document->FocusedElement() == &d);
+      CHECK(select.SelectedIndex() == 0);
+
+      SECTION("enter picks")
+      {
+        CHECK(PressKey(fixture, u8"Enter", u8"Enter", 0x0D));
+        CHECK(select.SelectedIndex() == 3);
+        CHECK_FALSE(select.IsPickerOpen());
+        CHECK(fixture.Document->FocusedElement() == &select);
+      }
+
+      SECTION("tab closes")
+      {
+        (void)PressKey(fixture, u8"Tab", u8"U+0009", 0x09);
+        CHECK_FALSE(select.IsPickerOpen());
+        CHECK(select.SelectedIndex() == 0);
+      }
+    }
+
+    SECTION("a disabled select doesn't open")
+    {
+      REQUIRE_FALSE(select.SetAttribute(u8"disabled", u8"").HasException());
+      ClickElement(fixture, select);
+      CHECK_FALSE(select.IsPickerOpen());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: a button of a select with base appearance",
+                   "[HTML][HTMLSelectElement][html:the-button-element]")
+  {
+    EditorFixture fixture(utf8_string(BaseSelectStyle)
+                          + u8"<select id=s><button id=b><selectedcontent id=c></selectedcontent></button>"
+                            u8"<option id=a>Alpha<option>Beta<button id=later>later</button></select>");
+    auto &select = SelectById(fixture, u8"s");
+    auto &button = fixture.ById(u8"b");
+    (void)fixture.Document->UpdateLayout();
+
+    SECTION("replaces the fallback text, showing the selected content")
+    {
+      REQUIRE(fixture.ById(u8"c").Renderer());
+      CHECK(Dumps(fixture, u8"\"Alpha\""));
+      CHECK(button.TextContent().value_or(dom::DOMString()) == u8"Alpha");
+    }
+
+    SECTION("is inert, so the press is the select's")
+    {
+      CHECK_FALSE(html::FocusAlgorithms::IsFocusableArea(button));
+      CHECK_FALSE(fixture.ById(u8"later").Renderer());
+      ClickElement(fixture, fixture.ById(u8"c"));
+      CHECK(select.IsPickerOpen());
+    }
+
+    SECTION("a later button is in the picker")
+    {
+      ClickElement(fixture, select);
+      REQUIRE(select.IsPickerOpen());
+      CHECK(fixture.ById(u8"later").Renderer());
+    }
   }
 }

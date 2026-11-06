@@ -1,8 +1,11 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -28,6 +31,35 @@ namespace krys::boo::html
              && (element->NamespaceURI().View() == infra::Namespaces::HTML
                  || element->NamespaceURI().View() == infra::Namespaces::SVG);
     }
+  }
+
+  bool HTMLOptionElement::RendererIsNeeded(const RenderStyle &style) noexcept
+  {
+    auto *select = OwnerSelectElement();
+    return select && select->ContentsUseBaseAppearance() && HTMLElement::RendererIsNeeded(style);
+  }
+
+  bool HTMLOptionElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  {
+    // A label replaces the option's contents; it's rendered as generated content.
+    return Is<dom::PseudoElement>(child) || GetAttribute(u8"label").value_or(dom::DOMString()).empty();
+  }
+
+  void HTMLOptionElement::DefaultEventHandler(dom::Event &event) noexcept
+  {
+    auto *select = OwnerSelectElement();
+    if (select && select->ContentsUseBaseAppearance() && event.Type() == EventNames::MouseUp)
+    {
+      // https://html.spec.whatwg.org/#concept-select-pick
+      // 3. If event is a MouseEvent and event's button attribute is not 0, then return.
+      if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
+      {
+        select->PickOption(*this);
+        event.SetDefaultHandled();
+        return;
+      }
+    }
+    HTMLElement::DefaultEventHandler(event);
   }
 
   HTMLOptionElement::HTMLOptionElement(dom::Document &document) noexcept

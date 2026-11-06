@@ -248,6 +248,7 @@ namespace krys::boo
       case StyleAppearance::None:             return css::ValueId::None;
       case StyleAppearance::Auto:             return css::ValueId::Auto;
       case StyleAppearance::Base:             return css::ValueId::Base;
+      case StyleAppearance::BaseSelect:       return css::ValueId::BaseSelect;
       case StyleAppearance::Checkbox:         return css::ValueId::Checkbox;
       case StyleAppearance::Radio:            return css::ValueId::Radio;
       case StyleAppearance::PushButton:       return css::ValueId::PushButton;

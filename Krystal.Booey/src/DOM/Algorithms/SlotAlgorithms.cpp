@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include <algorithm>
@@ -180,6 +181,11 @@ namespace krys::boo::dom
     {
       return details->SlotForHostChild(slottable);
     }
+    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*parent);
+        select && shadow->Mode() == ShadowRootMode::UserAgent)
+    {
+      return select->SlotForHostChild(slottable);
+    }
 
     // 5. If shadow's slot assignment is "manual", then return the slot in shadow's descendants whose manually
     //    assigned nodes contains slottable, if any; otherwise null.
@@ -342,6 +348,12 @@ namespace krys::boo::dom
     // 2. If slottables and slot's assigned nodes are not identical, then run signal a slot change for slot.
     bool assignedNodesChanged = !std::ranges::equal(
       slottables, slot._assignedNodes, [](const auto &a, const auto &b) { return a.get() == b.get(); });
+    // The slottables that are still the host's: tearing down walks the composed tree through this slot, and a
+    // node being removed no longer has a parent to walk it from.
+    auto previouslyAssignedNodes = slot._assignedNodes;
+    std::erase_if(slot._assignedNodes, [&](const auto &weakNode)
+                  { return !weakNode.get() || !Is<Element>(weakNode.get()->ParentNode()); });
+
     if (assignedNodesChanged)
     {
       SignalSlotChange(slot);
@@ -358,7 +370,7 @@ namespace krys::boo::dom
     }
 
     // A slottable that's no longer assigned to the slot no longer has it as its assigned slot.
-    for (auto &weakNode : slot._assignedNodes)
+    for (auto &weakNode : previouslyAssignedNodes)
     {
       auto *node = weakNode.get();
       if (node && GetAssignedSlot(*node) == &slot

@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -400,12 +401,22 @@ namespace krys::boo::style
       _document->SetTextColor(update.Style->ColorResolvingCurrentColor(css::PropertyId::Color));
     }
 
+    // What the contents of a select match depends on its appearance, so it's known before they're resolved.
+    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element);
+        select
+        && select->SetContentsUseBaseAppearance(update.Style->UsedAppearance()
+                                                == StyleAppearance::BaseSelect))
+    {
+      descendantsToResolve = DescendantsToResolve::All;
+    }
+
     // FIXME: These elements should not change renderer based on appearance property.
     if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
         htmlElement
         && ((Is<html::HTMLInputElement>(*htmlElement)
              && Downcast<html::HTMLInputElement>(*htmlElement).IsSearchField())
-            || Is<html::HTMLMeterElement>(*htmlElement) || Is<html::HTMLProgressElement>(*htmlElement)))
+            || Is<html::HTMLMeterElement>(*htmlElement) || Is<html::HTMLProgressElement>(*htmlElement)
+            || Is<html::HTMLSelectElement>(*htmlElement)))
     {
       if (existingStyle && update.Style->UsedAppearance() != existingStyle->UsedAppearance())
       {
@@ -469,6 +480,10 @@ namespace krys::boo::style
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::After});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Backdrop});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Checkmark});
+    if (Is<html::HTMLSelectElement>(element))
+    {
+      (void)resolveAndAddPseudoElementStyle({PseudoElementType::PickerIcon});
+    }
 
     return {krys::move(update), descendantsToResolve};
   }

@@ -8323,6 +8323,7 @@
         "textfield",
         "textarea",
         "base",
+        "base-select",
         "auto",
         "none",
         {
@@ -8348,6 +8349,7 @@
         }
       ],
       "codegen-properties": {
+        "high-priority": true,
         "render-style-setter-custom": true,
         "render-style-storage-path": ["_nonInheritedData", "miscData"],
         "render-style-storage-kind": "enum",

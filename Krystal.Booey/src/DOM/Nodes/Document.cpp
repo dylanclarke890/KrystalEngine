@@ -90,6 +90,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMetaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLScriptElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTitleElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -3043,6 +3044,12 @@ namespace krys::boo::dom
           && htmlElement->GetPopoverData()->OpenedInPopoverMode() != PopoverState::None)
       {
         clickedPopover = htmlElement;
+      }
+      // A select's picker is as much its target as a button's popover is.
+      if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*htmlElement);
+          select && select->IsPickerOpen() && !targetPopover)
+      {
+        targetPopover = ShareRefPtr(select->SelectPopover());
       }
       // Let targetPopover be currentNode's target popover. If targetPopover is not null and targetPopover's
       // popover attribute is in the Auto state or the Hint state, and targetPopover's popover visibility

@@ -113,6 +113,10 @@ abbr[title], acronym[title] {
     inset: 0;
 }
 
+:popover-open::backdrop {
+    pointer-events: none !important;
+}
+
 /* dialog */
 
 dialog {
@@ -670,14 +674,125 @@ input[type="color"]::-webkit-color-swatch {
 select {
     box-sizing: border-box;
     appearance: auto;
-    border-radius: 5px;
-    border: 1px solid;
-    color: CanvasText;
-    background-color: Canvas;
+    border-radius: -internal-auto-base(5px, 0.5em);
+    border: -internal-auto-base(1px solid, 1px solid currentColor);
+    color: -internal-auto-base(CanvasText, inherit);
+    background-color: -internal-auto-base(Canvas, transparent);
     align-items: center;
-    white-space: pre;
+    white-space: -internal-auto-base(pre, nowrap);
     -internal-rtl-ordering: logical;
     cursor: default;
+    display: -internal-auto-base(inline-block, inline-flex);
+    gap: -internal-auto-base(normal, 0.5em);
+    padding-block: -internal-auto-base(0, 0.25em);
+    padding-inline: -internal-auto-base(0, 0.5em);
+    min-block-size: -internal-auto-base(auto, max(24px, 1lh));
+    min-inline-size: -internal-auto-base(auto, 24px);
+    user-select: -internal-auto-base(auto, none);
+}
+
+select:enabled:hover {
+    background-color: -internal-auto-base(Canvas, color-mix(in srgb, currentColor 10%, transparent));
+}
+
+select:enabled:active {
+    background-color: -internal-auto-base(Canvas, color-mix(in srgb, currentColor 20%, transparent));
+}
+
+select > button:first-child {
+    all: unset;
+    display: contents;
+}
+
+select::picker-icon {
+    content: '\25BE' / '';
+    display: block;
+    margin-inline-start: auto;
+}
+
+::picker(select) {
+    appearance: auto;
+    display: none;
+}
+
+select:-internal-select-base-contents::picker(select) {
+    box-sizing: border-box;
+    position: fixed;
+    border: 1px solid;
+    padding: 0;
+    color: CanvasText;
+    background-color: Canvas;
+    margin: 0;
+    inset: auto;
+    min-inline-size: anchor-size(self-inline);
+    max-block-size: stretch;
+    overflow: auto;
+    position-area: self-block-end span-self-inline-end;
+    position-try-order: most-block-size;
+    position-try-fallbacks:
+      self-block-start span-self-inline-end,
+      self-block-end span-self-inline-start,
+      self-block-start span-self-inline-start;
+}
+
+select:-internal-select-base-contents::picker(select):popover-open {
+    display: block;
+}
+
+select:-internal-select-base-contents option {
+    min-inline-size: 24px;
+    min-block-size: max(24px, 1lh);
+    padding-inline: 0.5em;
+    padding-block-end: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    white-space: nowrap;
+}
+
+select:-internal-select-base-contents option:enabled:hover {
+    background-color: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+select:-internal-select-base-contents option:enabled:active {
+    background-color: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+select:-internal-select-base-contents option:disabled {
+    color: color-mix(in srgb, currentColor 50%, transparent);
+}
+
+select:-internal-select-base-contents option::checkmark {
+    content: '\2713' / '';
+}
+
+select:-internal-select-base-contents option:not(:checked)::checkmark {
+    visibility: hidden;
+}
+
+select:-internal-select-base-contents option[label]:not([label=""])::before {
+    content: attr(label);
+}
+
+select:-internal-select-base-contents optgroup {
+    display: block;
+    font-weight: bolder;
+}
+
+select:-internal-select-base-contents optgroup option {
+    font-weight: normal;
+}
+
+select:-internal-select-base-contents optgroup legend {
+    padding-inline: 0.5em;
+    min-block-size: 1lh;
+}
+
+select:-internal-select-base-contents optgroup[label]:not(:has(> legend))::before {
+    content: attr(label);
+    display: block;
+    padding-inline: 0.5em;
+    min-block-size: 1lh;
 }
 
 select:is([size], [multiple]), select[size][multiple] {

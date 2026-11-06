@@ -10,11 +10,14 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
@@ -88,6 +91,12 @@ namespace krys::boo::html
           }
           default: break;
         }
+      }
+      // The options of a select with base appearance, which the keys move between.
+      if (auto *option = DynamicDowncast<HTMLOptionElement>(element))
+      {
+        auto *select = option->OwnerSelectElement();
+        return select && select->ContentsUseBaseAppearance() && !option->IsDisabledFormControl();
       }
       // FIXME: Elements with a draggable attribute, once a drag can start without a pointing device.
       if (auto *summary = DynamicDowncast<HTMLSummaryElement>(element); summary && summary->IsActiveSummary())
@@ -226,6 +235,13 @@ namespace krys::boo::html
     for (; element; element = element->ParentElementInComposedTree())
     {
       if (Is<HTMLElement>(*element) && element->HasAttribute(u8"inert"))
+      {
+        return true;
+      }
+      // https://html.spec.whatwg.org/#the-button-element
+      // If a button element is the first child which is an element of a select element, then it is inert.
+      if (Is<HTMLButtonElement>(*element) && Is<HTMLSelectElement>(element->ParentNode())
+          && dom::TreeQueries::FirstElementChild(*element->ParentNode()) == element)
       {
         return true;
       }

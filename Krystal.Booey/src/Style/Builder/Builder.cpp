@@ -564,8 +564,10 @@ namespace krys::boo::style
       return ShareRef(value);
     }
 
-    const auto *result =
-      _state->Style().Appearance() == StyleAppearance::Base ? functionValue->Item(1) : functionValue->Item(0);
+    const auto *result = _state->Style().Appearance() == StyleAppearance::Base
+                             || _state->Style().Appearance() == StyleAppearance::BaseSelect
+                           ? functionValue->Item(1)
+                           : functionValue->Item(0);
 
     if (!result)
     {

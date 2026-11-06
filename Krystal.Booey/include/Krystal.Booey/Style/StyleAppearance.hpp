@@ -15,6 +15,7 @@ namespace krys::boo
     None,
     Auto,
     Base,
+    BaseSelect,
     Checkbox,
     Radio,
     PushButton,
