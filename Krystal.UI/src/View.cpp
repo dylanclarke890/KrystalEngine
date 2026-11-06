@@ -580,15 +580,16 @@ namespace krys::ui
 
     // The overlay's page shares the event loop, and updates with the page.
     bool overlayUpdated = false;
-    if (_overlay && _overlay->ContentView().GetPage().IsRenderingUpdateScheduled())
+    if (_overlay && _overlay->ContentView().GetPage().IsVisible()
+        && _overlay->ContentView().GetPage().IsRenderingUpdateScheduled())
     {
       _overlay->ContentView().UpdateRendering();
       overlayUpdated = true;
     }
 
-    // Each frame is a rendering opportunity.
+    // Each frame is a rendering opportunity, except for a hidden page, whose update waits until it's shown.
     bool updated = overlayUpdated;
-    if (_page->IsRenderingUpdateScheduled())
+    if (_page->IsVisible() && _page->IsRenderingUpdateScheduled())
     {
       _page->UpdateRendering();
       _needsPaint = true;

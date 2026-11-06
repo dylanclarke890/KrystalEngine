@@ -2723,9 +2723,17 @@ namespace krys::ui::tests
     boo::html::EventLoop::Current().RunUntilIdle();
     CHECK(changes == 1);
 
+    // A hidden page's update waits, without asking the host to paint each frame.
+    auto now = boo::html::EventLoop::Current().Now();
+    view.GetPage().ScheduleRenderingUpdate();
+    CHECK_FALSE(view.Update(now));
+    CHECK(view.GetPage().IsRenderingUpdateScheduled());
+
     view.SetVisible(true);
     CHECK_FALSE(view.Document().Hidden());
     boo::html::EventLoop::Current().RunUntilIdle();
     CHECK(changes == 2);
+    CHECK(view.Update(now));
+    CHECK_FALSE(view.GetPage().IsRenderingUpdateScheduled());
   }
 }
