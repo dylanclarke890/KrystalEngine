@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp"
 #include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontPlatformData.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
@@ -29,10 +30,27 @@ namespace krys::boo
     FontCustomPlatformData::GetFontPlatformData(const FontDescription &description, bool bold, bool italic,
                                                 const FontCreationContext &fontCreationContext) const noexcept
   {
-    // FIXME: The font face's features (fontFaceFeatures) and variations, once the font backend applies them.
+    // FIXME: The font face's features (fontFaceFeatures), once the font backend applies them.
     auto size = description.AdjustedSizeForFontFace(fontCreationContext.SizeAdjust());
-    FontPlatformData platformData(Face, size, bold, italic, description.Orientation(),
-                                  description.WidthVariant(), description.GetTextRenderingMode());
+    const auto &descriptors = fontCreationContext.FontFaceCapabilities();
+
+    // A face that says nothing of a style it has an axis for reaches it, without synthesis (as Chrome).
+    // Selection took it to be normal; an `ital` axis is always used, as its value isn't a range a descriptor
+    // can limit.
+    if (bold && !descriptors.Weight && Face->HasVariationAxis(FontAxisTag('w', 'g', 'h', 't')))
+    {
+      bold = false;
+    }
+    if (italic
+        && (Face->HasVariationAxis(FontAxisTag('i', 't', 'a', 'l'))
+            || (!descriptors.Slope && Face->HasVariationAxis(FontAxisTag('s', 'l', 'n', 't')))))
+    {
+      italic = false;
+    }
+
+    FontPlatformData platformData(InstanceOfFace(*Face, description, descriptors), size, bold, italic,
+                                  description.Orientation(), description.WidthVariant(),
+                                  description.GetTextRenderingMode());
     platformData.UpdateSizeWithFontSizeAdjust(description.GetFontSizeAdjust(), description.ComputedSize());
     return platformData;
   }

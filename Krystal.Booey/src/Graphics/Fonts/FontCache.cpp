@@ -314,8 +314,8 @@ namespace krys::boo
     bool syntheticOblique = false;
     GetFontPropertiesFromFace(CapabilitiesOfFace(face), description, options, syntheticBold,
                               syntheticOblique);
-    return FontPlatformData(ShareRef(face), description.ComputedSize(), syntheticBold, syntheticOblique,
-                            description.Orientation(), description.WidthVariant(),
+    return FontPlatformData(InstanceOfFace(face, description), description.ComputedSize(), syntheticBold,
+                            syntheticOblique, description.Orientation(), description.WidthVariant(),
                             description.GetTextRenderingMode());
   }
 

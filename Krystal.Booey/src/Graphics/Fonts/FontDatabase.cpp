@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/BundledFonts.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -23,7 +24,75 @@ namespace krys::boo
     capabilities.Weight = FontSelectionRange {FontSelectionValue {style.Weight}};
     capabilities.Width = FontSelectionRange {FontSelectionValue {style.Width}};
     capabilities.Slope = FontSelectionRange {style.Italic ? ItalicValue() : NormalItalicValue()};
+
+    // A variable font covers what its axes reach.
+    for (const auto &axis : face.VariationAxes())
+    {
+      FontSelectionValue minimum {axis.Minimum};
+      FontSelectionValue maximum {axis.Maximum};
+      if (axis.Tag == FontAxisTag('w', 'g', 'h', 't'))
+      {
+        capabilities.Weight = FontSelectionRange {minimum, maximum};
+      }
+      else if (axis.Tag == FontAxisTag('w', 'd', 't', 'h'))
+      {
+        capabilities.Width = FontSelectionRange {minimum, maximum};
+      }
+      else if (axis.Tag == FontAxisTag('s', 'l', 'n', 't'))
+      {
+        // A positive slant axis value leans the other way from a positive oblique angle.
+        capabilities.Slope =
+          FontSelectionRange {FontSelectionValue {-axis.Maximum}, FontSelectionValue {-axis.Minimum}};
+      }
+      else if (axis.Tag == FontAxisTag('i', 't', 'a', 'l'))
+      {
+        capabilities.Slope = FontSelectionRange {NormalItalicValue(), ItalicValue()};
+      }
+    }
     return capabilities;
+  }
+
+  Ref<text::FreeTypeFace> InstanceOfFace(text::FreeTypeFace &face, const FontDescription &description,
+                                         const FontSelectionSpecifiedCapabilities &descriptors) noexcept
+  {
+    if (face.VariationAxes().empty())
+    {
+      return ShareRef(face);
+    }
+
+    auto withinDescriptor = [](float value, const Maybe<FontSelectionRange> &range)
+    {
+      return range ? std::clamp(value, static_cast<float>(range->Minimum), static_cast<float>(range->Maximum))
+                   : value;
+    };
+
+    List<text::FontVariationValue> values;
+    values.push_back({FontAxisTag('w', 'g', 'h', 't'),
+                      withinDescriptor(static_cast<float>(description.Weight()), descriptors.Weight)});
+    values.push_back({FontAxisTag('w', 'd', 't', 'h'),
+                      withinDescriptor(static_cast<float>(description.Width()), descriptors.Width)});
+    if (auto slope = description.FontStyleSlope())
+    {
+      if (description.GetFontStyleAxis() == FontStyleAxis::ital)
+      {
+        values.push_back({FontAxisTag('i', 't', 'a', 'l'), 1});
+      }
+      else
+      {
+        values.push_back({FontAxisTag('s', 'l', 'n', 't'),
+                          -withinDescriptor(static_cast<float>(*slope), descriptors.Slope)});
+      }
+    }
+    if (description.OpticalSizing() == FontOpticalSizing::Auto)
+    {
+      values.push_back({FontAxisTag('o', 'p', 's', 'z'), description.ComputedSize()});
+    }
+    for (const auto &setting : description.VariationSettings())
+    {
+      auto tag = setting.Tag();
+      values.push_back({FontAxisTag(tag[0], tag[1], tag[2], tag[3]), setting.Value()});
+    }
+    return face.WithVariations(values);
   }
 
   KRYS_NODISCARD static Ref<text::FreeTypeFace> CreateBundledFace(Span<const byte> data) noexcept

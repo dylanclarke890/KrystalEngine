@@ -127,8 +127,6 @@ namespace krys::boo
 
       // 1. Font features enabled by default, including features required for a given script.
 
-      // FIXME: optical sizing.
-
       // 2. If the font is defined via an @font-face rule, the font features implied by the
       //    font-feature-settings descriptor in the @font-face rule.
       // FIXME: No @font-face.

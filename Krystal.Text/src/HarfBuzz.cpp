@@ -25,6 +25,20 @@ namespace krys::text
     hb_blob_destroy(ptr);
   }
 
+  void FreeTypeFace::ApplyVariations(hb_font_t *font) const noexcept
+  {
+    if (_variations.empty())
+    {
+      return;
+    }
+    List<hb_variation_t> variations;
+    for (const auto &variation : _variations)
+    {
+      variations.push_back({static_cast<hb_tag_t>(variation.Tag), variation.Value});
+    }
+    hb_font_set_variations(font, variations.data(), static_cast<unsigned>(variations.size()));
+  }
+
   hb_face_t *FreeTypeFace::HarfBuzzFace() const noexcept
   {
     if (!_harfBuzzFace)

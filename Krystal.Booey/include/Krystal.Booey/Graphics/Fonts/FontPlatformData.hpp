@@ -60,7 +60,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasVariations() const noexcept
     {
-      return false;
+      return _face && !_face->Variations().empty();
     }
 
     KRYS_NODISCARD bool IsFixedPitch() const noexcept;

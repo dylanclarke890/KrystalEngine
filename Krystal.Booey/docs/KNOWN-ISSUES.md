@@ -52,7 +52,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No `CSS.registerProperty` or `CSS.supports`. `CSSStyleSheet` has `ReplaceSync` only; the async `replace()` needs promises.
 - `SingleAnimationRangeStart/End::ToTimelineRangeValue()` returns a null `CSSNumericValue` for a calculated offset (FIXME).
 - The `FontFace` string parsers (`ParseFontFaceSrc`, `ParseFontFaceFontWeight` and the rest, FIXME in `Consumers/Font.hpp`) aren't written.
-- `@font-face`'s features and variations aren't applied to loaded fonts (FIXME in `FontCustomPlatformData.cpp`). `@font-palette-values` and `@font-feature-values` are parsed but have no effect on fonts (FIXME in `CSSFontSelector.cpp`).
+- `@font-face`'s features aren't applied to loaded fonts (FIXME in `FontCustomPlatformData.cpp`). `@font-palette-values` and `@font-feature-values` are parsed but have no effect on fonts (FIXME in `CSSFontSelector.cpp`).
 - `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).
 - State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
 - `:lang()` has no document default language or Content-Language header (FIXME in `SelectorCheckerTestFunctions.cpp`); WebVTT elements don't use their cue's language.
@@ -143,7 +143,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `GraphicsLayerTextureMapper` has no contents scaling filters, so composited images and texture canvases with `image-rendering: pixelated` or `crisp-edges` scale smoothly.
 - There's no scroll anchoring, autoscroll timers beyond the scrollbar repeat, wheel latching, kinetic scrolling, touchpad gesture states or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
 - Scroll snapping without gesture phases: each wheel event goes to the next snap position, so a touchpad's small deltas page through a mandatory container. An autoscroll and a pan scroll don't snap, even when they end, until the next layout. Smooth scrolls aren't run for list boxes, whose keyboard and wheel scrolls stay immediate.
-- There are no overlay scrollbars, native scrollbars, scroll corners or resizers. `scrollbar-color` has no effect, and `ScrollableArea` has no animator or scrollbars controller.
+- There are no overlay scrollbars, native scrollbars, scroll corners or resizers. `scrollbar-color` has no effect, and `ScrollableArea` has no scrollbars controller.
 - `VisualViewport` is the layout viewport at the page scale and never scrolls within it, so its `scroll` event never fires (its `resize` does). There are no obscured insets, auto-sizing, base viewport layout size scale factor (FIXME in `VisualViewport.cpp`) or layout viewport separate from the scroll position. Pinch zoom is only the page scale (1 to 5) from the view's gesture recogniser.
 - There is no async scrolling or threaded compositing: no scrolling coordinator or tree, no reconciliation of the composited scroll position after user scrolls, and animations and scrolling run on the main thread. A sticky box stuck to the view therefore repaints its old and new rects on scroll instead of compositing.
 - Only `transform` and `opacity` animations run on layers: `GraphicsLayerTextureMapper::AddAnimation` refuses the rest, so animations of filters, `backdrop-filter` and the individual transform properties run on the page.
@@ -158,7 +158,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Fonts come only from the host and the bundled faces; there is no system font lookup or system fallback. `SystemFontDatabase::PlatformSystemFontShorthandInfo` returns the standard family at 16px, normal weight, for every system font keyword (`caption`, `icon`, `menu`, `message-box`, `small-caption`, `status-bar`).
-- Variable fonts are shaped at their default instance (FIXME in `FontHarfBuzz.cpp`) and optical sizing is not applied (FIXME in `ComplexTextControllerHarfBuzz.cpp`).
 - There are no hyphenation dictionaries, so `hyphens: auto` never hyphenates (FIXME in `Core/Hyphenation.hpp`).
 - Colour glyphs and emoji presentation are not detected (FIXME in `FontHarfBuzz.cpp`), so `font-variant-emoji` only adds a variation selector to fallback clusters. `ResolveEmojiPolicy` cannot return `RequireText` or `RequireEmoji` (FIXME in `FontCascade.cpp`).
 - Colour glyphs from bitmap strikes (`CBDT`) are drawn at their strike's size, unscaled, while COLR glyphs scale. Large colour glyphs stay bitmaps.

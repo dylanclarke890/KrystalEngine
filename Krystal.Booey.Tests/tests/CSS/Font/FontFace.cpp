@@ -7,6 +7,7 @@
 #include "Krystal.Booey/CSS/Font/FontFaceSet.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include <filesystem>
 
@@ -352,5 +353,137 @@ namespace krys::boo::css::tests
       CHECK(selector.GetCSSFontFaceSet().FaceCount() == 0);
       CHECK(Width(fixture, u8"t") == 26);
     }
+  }
+
+  TEST_CASE("CSSFontFace: variable fonts", "[CSS][CSSFontFace][css-fonts:font-variation-settings-def]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddFile(u8"file:///fonts/variable.ttf", FontPath("webfonts", "VariableTest.ttf"),
+                            u8"font/ttf");
+
+    constexpr utf8_stringview ranged =
+      u8"font-weight:100 900;font-width:50% 200%;font-style:oblique -90deg 90deg";
+    struct Case
+    {
+      utf8_stringview Descriptors;
+      utf8_stringview Style;
+      // The width of `a` at 100px: 100 is the default instance, and each axis adds to it.
+      int32 Width;
+      bool SyntheticBold;
+    };
+    auto testCase = GENERATE_COPY(values<Case>({
+      {u8"", u8"", 140, false},
+      {u8"", u8"font-weight:700", 170, false},
+      {ranged, u8"font-weight:700", 170, false},
+      {ranged, u8"font-weight:900", 190, false},
+      {ranged, u8"font-weight:250", 115, false},
+      {ranged, u8"font-weight:950", 190, false},
+      {u8"font-weight:300 500", u8"font-weight:700", 150, true},
+      {ranged, u8"font-width:200%", 240, false},
+      {ranged, u8"font-width:50%", 115, false},
+      {ranged, u8"font-width:300%", 240, false},
+      {u8"", u8"font-width:200%", 240, false},
+      {ranged, u8"font-style:italic", 170, false},
+      {u8"", u8"font-style:italic", 170, false},
+      {u8"font-style:italic", u8"font-style:italic", 170, false},
+      {u8"font-style:normal", u8"font-style:italic", 170, false},
+      {ranged, u8"font-style:oblique 10deg", 150, false},
+      {ranged, u8"font-style:oblique 20deg", 160, false},
+      {ranged, u8"font-style:oblique -10deg", 140, false},
+      {ranged, u8"font-optical-sizing:none", 100, false},
+      {ranged, u8"font-variation-settings:'TEST' 100", 210, false},
+      {ranged, u8"font-variation-settings:'TEST' 50", 175, false},
+      {ranged, u8"font-weight:900;font-variation-settings:'wght' 100", 90, false},
+      {ranged, u8"font-variation-settings:'opsz' 14", 100, false},
+      {ranged, u8"font-variation-settings:'NOPE' 5", 140, false},
+      {ranged, u8"font-variation-settings:'TEST' 500", 210, false},
+      {ranged, u8"font-variation-settings:'slnt' -20", 160, false},
+      {ranged, u8"font-variation-settings:'ital' 1", 170, false},
+    }));
+
+    PageInFrameFixture fixture(u8"<style>@font-face{font-family:Web;src:url(file:///fonts/variable.ttf);"
+                               + utf8_string(testCase.Descriptors)
+                               + u8"}#t{font:100px Web;display:inline-block;" + utf8_string(testCase.Style)
+                               + u8"}</style><body><span id=t>a</span></body>");
+    LoadFonts(fixture);
+
+    INFO(reinterpret_cast<const char *>(utf8_string(testCase.Descriptors).c_str())
+         << " / " << reinterpret_cast<const char *>(utf8_string(testCase.Style).c_str()));
+    CHECK(Width(fixture, u8"t") == testCase.Width);
+    auto font = PrimaryFont(fixture, u8"t");
+    CHECK(font->PlatformData().SyntheticBold() == testCase.SyntheticBold);
+    CHECK_FALSE(font->PlatformData().SyntheticOblique());
+  }
+
+  TEST_CASE("CSSFontFace: a variable font's instances", "[CSS][CSSFontFace]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddFile(u8"file:///fonts/variable.ttf", FontPath("webfonts", "VariableTest.ttf"),
+                            u8"font/ttf");
+
+    PageInFrameFixture fixture(
+      u8"<style>@font-face{font-family:Web;src:url(file:///fonts/variable.ttf)}"
+      u8"span{font-family:Web;display:inline-block}</style><body>"
+      u8"<span id=a style=font-size:40px>a</span><span id=b style=font-size:40px>a</span>"
+      u8"<span id=c style=font-size:20px>a</span><span id=d style='font-size:8px'>a</span>"
+      u8"<span id=e style=font-size:14px>a</span><span id=f style='font:14px/1 "
+      u8"Web;font-optical-sizing:none'>a</span>"
+      u8"</body>");
+    LoadFonts(fixture);
+
+    auto faceOf = [&](dom::DOMStringView id)
+    {
+      return PrimaryFont(fixture, id)->PlatformData().Face();
+    };
+
+    SECTION("optical sizing is the font size in pixels")
+    {
+      REQUIRE(faceOf(u8"a")->Variations().size() == 1);
+      CHECK(faceOf(u8"a")->Variations()[0] == text::FontVariationValue {FontAxisTag('o', 'p', 's', 'z'), 40});
+      CHECK(faceOf(u8"c")->Variations()[0] == text::FontVariationValue {FontAxisTag('o', 'p', 's', 'z'), 20});
+      CHECK(faceOf(u8"d")->Variations()[0] == text::FontVariationValue {FontAxisTag('o', 'p', 's', 'z'), 8});
+      CHECK(PrimaryFont(fixture, u8"c")->PlatformData().HasVariations());
+    }
+
+    SECTION("the same values share a face, and the default instance is the font's own")
+    {
+      CHECK(faceOf(u8"a") == faceOf(u8"b"));
+      CHECK(faceOf(u8"a") != faceOf(u8"c"));
+      CHECK(faceOf(u8"e")->Variations().empty());
+      CHECK(faceOf(u8"e") == faceOf(u8"f"));
+      CHECK_FALSE(PrimaryFont(fixture, u8"e")->PlatformData().HasVariations());
+    }
+
+    SECTION("the axes")
+    {
+      const auto &axes = faceOf(u8"a")->VariationAxes();
+      REQUIRE(axes.size() == 6);
+      CHECK(axes[0].Tag == FontAxisTag('w', 'g', 'h', 't'));
+      CHECK(axes[0].Minimum == 100);
+      CHECK(axes[0].Default == 400);
+      CHECK(axes[0].Maximum == 900);
+    }
+  }
+
+  TEST_CASE("CSSFontFace: a host's variable font covers what its axes reach", "[CSS][CSSFontFace]")
+  {
+    auto &database = FontDatabase::Singleton();
+    (void)database.AddFontFile(FontPath("webfonts", "VariableTest.ttf"));
+    PageInFrameFixture fixture(
+      u8"<style>span{font:100px 'Variable Test';display:inline-block;font-optical-sizing:none}</style><body>"
+      u8"<span id=a>a</span><span id=b style=font-weight:700>a</span><span id=c "
+      u8"style=font-style:italic>a</span>"
+      u8"<span id=d style='font-style:oblique 10deg'>a</span><span id=e "
+      u8"style=font-width:200%>a</span></body>");
+    (void)fixture.Document->UpdateLayout();
+
+    CHECK(Width(fixture, u8"a") == 100);
+    CHECK(Width(fixture, u8"b") == 130);
+    CHECK_FALSE(PrimaryFont(fixture, u8"b")->PlatformData().SyntheticBold());
+    CHECK(Width(fixture, u8"c") == 130);
+    CHECK_FALSE(PrimaryFont(fixture, u8"c")->PlatformData().SyntheticOblique());
+    CHECK(Width(fixture, u8"d") == 110);
+    CHECK_FALSE(PrimaryFont(fixture, u8"d")->PlatformData().SyntheticOblique());
+    CHECK(Width(fixture, u8"e") == 200);
   }
 }

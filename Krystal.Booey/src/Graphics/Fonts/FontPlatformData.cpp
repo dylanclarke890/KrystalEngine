@@ -124,7 +124,9 @@ namespace krys::boo
       return nullptr;
     }
 
-    return text::HbUniquePtr<hb_font_t>(hb_font_create(face));
+    text::HbUniquePtr<hb_font_t> font(hb_font_create(face));
+    _face->ApplyVariations(font.get());
+    return font;
   }
 
   Maybe<List<byte>> FontPlatformData::OpenTypeTable(uint32 table) const noexcept

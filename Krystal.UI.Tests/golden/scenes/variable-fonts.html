@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- The "variable-fonts" page golden: a variable font's axes reach what's drawn. Each glyph is a box that the font's
+     axes widen, so the boxes' edges show which values arrived (see Krystal.Booey.Tests/tools/make_variable_test_font.py). -->
+<html data-width="320" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Variable; src: url("fonts/VariableTest.ttf"); }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 8px; font: 20px/24px Variable; color: #223388; font-optical-sizing: none; }
+  div { height: 24px; }
+  .bold { font-weight: 900; }
+  .light { font-weight: 100; color: #cc3355; }
+  .italic { font-style: italic; }
+  .oblique { font-style: oblique 20deg; }
+  .settings { font-variation-settings: "TEST" 100; }
+  .optical { font-optical-sizing: auto; font-size: 72px; line-height: 48px; height: 48px; }
+</style>
+</head>
+<body>
+  <div>a a</div>
+  <div class="bold">a a</div>
+  <div class="light">a a</div>
+  <div class="italic">a a</div>
+  <div class="oblique">a a</div>
+  <div class="settings">a a</div>
+  <div class="optical">a</div>
+</body>
+</html>
