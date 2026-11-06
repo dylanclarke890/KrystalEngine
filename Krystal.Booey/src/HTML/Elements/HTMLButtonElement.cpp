@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -231,11 +232,33 @@ namespace krys::boo::html
     return IsSubmitButton() && HasAttribute(u8"type");
   }
 
+  void HTMLButtonElement::OnInsert() noexcept
+  {
+    HTMLFormControlElement::OnInsert();
+    UpdateTypeForParent();
+  }
+
+  void HTMLButtonElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLFormControlElement::OnRemove(isSubtreeRoot, oldAncestor);
+    UpdateTypeForParent();
+  }
+
+  void HTMLButtonElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLFormControlElement::OnMove(isSubtreeRoot, oldAncestor);
+    UpdateTypeForParent();
+  }
+
+  void HTMLButtonElement::UpdateTypeForParent() noexcept
+  {
+    ComputeType(GetAttribute(u8"type").value_or(dom::DOMString()));
+  }
+
   // https://html.spec.whatwg.org/#concept-submit-button
   void HTMLButtonElement::ComputeType(dom::DOMStringView typeAttributeValue) noexcept
   {
-    // FIXME: A button whose parent is a select isn't a submit button in the Auto state, once there are
-    // customizable selects.
+    // FIXME: A button in a select is inert, once there are customizable selects.
     auto oldType = _type;
     if (text::IsASCIICaselessEqual(typeAttributeValue, dom::DOMStringView(u8"reset")))
     {
@@ -249,7 +272,7 @@ namespace krys::boo::html
     {
       _type = ButtonType::Submit;
     }
-    else if (HasAttribute(u8"command") || HasAttribute(u8"commandfor"))
+    else if (HasAttribute(u8"command") || HasAttribute(u8"commandfor") || Is<HTMLSelectElement>(ParentNode()))
     {
       _type = ButtonType::Button;
     }
