@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
@@ -38,6 +39,37 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(parent.AppendChild(*link).HasException());
       return link;
     }
+
+    /// @brief An element that calls back while its style is resolved and its renderers are attached.
+    class StyleCallbackElement final : public html::HTMLDivElement
+    {
+      KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(StyleCallbackElement);
+
+    public:
+      explicit StyleCallbackElement(dom::Document &document) noexcept
+          : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      {
+      }
+
+      void WillRecalcStyle(EnumSet<Change>) noexcept override
+      {
+        if (DuringStyleResolution)
+        {
+          std::exchange(DuringStyleResolution, nullptr)();
+        }
+      }
+
+      void DidAttachRenderers() noexcept override
+      {
+        if (DuringRenderTreeUpdate)
+        {
+          std::exchange(DuringRenderTreeUpdate, nullptr)();
+        }
+      }
+
+      Func<void()> DuringStyleResolution;
+      Func<void()> DuringRenderTreeUpdate;
+    };
 
     bool Contains(const List<WeakPtr<dom::ShadowRoot>> &roots, const dom::ShadowRoot &shadowRoot) noexcept
     {
@@ -227,6 +259,102 @@ namespace krys::boo::style::tests
       scope.RemoveStyleSheetCandidateNode(*link);
       REQUIRE(scope.HasPendingUpdate());
       scope.FlushPendingUpdate();
+    }
+  }
+
+  TEST_CASE("Scope: updates while style is being resolved", "[Style][Scope]")
+  {
+    ResolverFixture fixture(u8"<!DOCTYPE html><body><div id=host></div>");
+    (void)fixture.Document->UpdateStyleIfNeeded();
+    auto &scope = fixture.Document->StyleScope();
+    auto element = CreateRef<StyleCallbackElement>(*fixture.Document);
+    bool called = false;
+
+    SECTION("wait until style resolution has finished")
+    {
+      element->DuringStyleResolution = [&]
+      {
+        called = true;
+        CHECK(fixture.Document->InStyleRecalc());
+        scope.DidChangeActiveStyleSheetCandidates();
+        scope.FlushPendingUpdate();
+        CHECK(scope.HasPendingUpdate());
+      };
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*element).HasException());
+      (void)fixture.Document->UpdateStyleIfNeeded();
+      REQUIRE(called);
+      CHECK(scope.HasPendingUpdate());
+
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK_FALSE(scope.HasPendingUpdate());
+    }
+
+    SECTION("wait until the render tree has been updated")
+    {
+      element->DuringRenderTreeUpdate = [&]
+      {
+        called = true;
+        CHECK(fixture.Document->InRenderTreeUpdate());
+        scope.DidChangeActiveStyleSheetCandidates();
+        scope.FlushPendingUpdate();
+        CHECK(scope.HasPendingUpdate());
+      };
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*element).HasException());
+      (void)fixture.Document->UpdateStyleIfNeeded();
+      REQUIRE(called);
+      CHECK(fixture.Document->HasPendingFullStyleRebuild());
+
+      (void)fixture.Document->UpdateStyleIfNeeded();
+      CHECK_FALSE(scope.HasPendingUpdate());
+      CHECK_FALSE(fixture.Document->HasPendingFullStyleRebuild());
+    }
+
+    SECTION("of a shadow root are still flushed with its document's")
+    {
+      auto shadow = fixture.ById(u8"host").AttachShadow({}).ReleaseValue();
+      auto &shadowScope = shadow->StyleScope();
+      element->DuringStyleResolution = [&]
+      {
+        called = true;
+        shadowScope.DidChangeActiveStyleSheetCandidates();
+        scope.FlushPendingUpdate();
+        CHECK(shadowScope.HasPendingUpdate());
+      };
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*element).HasException());
+      (void)fixture.Document->UpdateStyleIfNeeded();
+      REQUIRE(called);
+      CHECK(scope.HasPendingUpdate());
+
+      scope.FlushPendingUpdate();
+      CHECK_FALSE(shadowScope.HasPendingUpdate());
+      CHECK_FALSE(scope.HasPendingUpdate());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Scope: updates without a render tree", "[Style][Scope]")
+  {
+    RunTasks();
+
+    SECTION("still list the sheets")
+    {
+      auto document = CreateRef<dom::HTMLDocument>();
+      REQUIRE_FALSE(document->HasLivingRenderTree());
+      auto style = document->CreateElement(u8"style").ReleaseValue();
+      REQUIRE_FALSE(style->TextContent(u8"a{}").HasException());
+      REQUIRE_FALSE(document->AppendChild(*style).HasException());
+      REQUIRE(document->StyleScope().HasPendingUpdate());
+
+      CHECK(document->StyleScope().StyleSheetsForStyleSheetList().size() == 1);
+      CHECK(document->StyleScope().ActiveStyleSheets().size() == 1);
+    }
+
+    SECTION("leave the resolver to be built from the sheets when it's asked for")
+    {
+      auto document = Parse(u8"<!DOCTYPE html><style>a{}</style><body>");
+      auto &scope = document->StyleScope();
+      scope.FlushPendingUpdate();
+      CHECK_FALSE(scope.ResolverIfExists());
+      CHECK(scope.GetResolver().RuleSets().AuthorStyle().RuleCount() == 1);
     }
   }
 

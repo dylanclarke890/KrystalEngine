@@ -647,7 +647,17 @@ namespace krys::boo::style
   {
     krys_debug_assert(!_pendingUpdate);
 
-    // FIXME: Wait for a living render tree, and defer the update while style is being resolved.
+    if (_document->InStyleRecalc() || _document->InRenderTreeUpdate())
+    {
+      // Protect against deleting the resolver in the middle of a style resolution.
+      _pendingUpdate = UpdateType::ContentsOrInterpretation;
+      if (_shadowRoot)
+      {
+        DocumentScope()._hasDescendantWithPendingUpdate = true;
+      }
+      _document->ScheduleFullStyleRebuild();
+      return;
+    }
 
     auto collection = CollectActiveStyleSheets();
 
@@ -673,7 +683,12 @@ namespace krys::boo::style
       _usesHasPseudoClass = true;
     }
 
-    InvalidateStyleAfterStyleSheetChange(styleSheetChange);
+    // Nothing is styled without a render tree. The sheets are still kept current above: they're listed by
+    // StyleSheets, and a document parsed before it gets its frame styles with them later.
+    if (_document->HasLivingRenderTree())
+    {
+      InvalidateStyleAfterStyleSheetChange(styleSheetChange);
+    }
   }
 
   void Scope::InvalidateStyleAfterStyleSheetChange(const StyleSheetChange &styleSheetChange) noexcept
@@ -844,6 +859,8 @@ namespace krys::boo::style
   {
     krys_debug_assert(_hasDescendantWithPendingUpdate);
     krys_debug_assert(!_shadowRoot);
+    // Cleared first: an update deferred during style resolution sets it again.
+    _hasDescendantWithPendingUpdate = false;
     for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
     {
       if (descendantShadowRoot)
@@ -851,7 +868,6 @@ namespace krys::boo::style
         descendantShadowRoot->StyleScope().FlushPendingUpdate();
       }
     }
-    _hasDescendantWithPendingUpdate = false;
   }
 
   void Scope::ClearPendingUpdate() noexcept
