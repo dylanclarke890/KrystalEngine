@@ -176,7 +176,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Chrome fills selection only over text and line ends; Booey fills selection gaps in blocks.
 - Chrome's wavy underline is taller and its skip-ink gaps a little wider.
 - Chrome tiles `border-image-repeat: repeat` and `space` its own way, so the `border-images` golden is report-only. Stripes sliced at a third of a non-square box skew at tile joins in both.
-- Dashed collapsed table borders start their dashes slightly differently from Chrome's (the `tables` golden); the dash phase is the same as for dashed borders.
+- Dashed collapsed table borders share out the junctions between cells slightly differently from Chrome: an edge after a junction starts a few pixels off, so its gaps differ a little (the `tables` and `dashed-borders` goldens).
 - Chrome draws an SVG `<pattern>`'s content at its final transform; Booey draws the tile into an image buffer at the scale it's painted at and uses it as a brush, so a pattern with a rotating transform has differing tile edges.
 - Chrome antialiases twice where its rounded border is a clip plus a fill (an edge pixel covered 0.38 shows 0.38 squared); Render2D's single coverage is closer to the true area, so golden comparisons differ there.
 - A `box-shadow` is painted by clipping the shadow out of the box a pixel inside an opaque box's edge; without that, a light seam shows along every shadowed box's antialiased edge.

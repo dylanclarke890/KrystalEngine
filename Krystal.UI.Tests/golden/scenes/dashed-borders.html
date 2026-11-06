@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- The "dashed-borders" page golden: dash lengths and how the gaps stretch to fit, across thicknesses and shapes. -->
+<html data-width="640" data-height="360">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 8px; }
+  div { float: left; box-sizing: content-box; width: 100px; height: 30px; margin: 0 12px 12px 0; border: 4px dashed #223388; }
+  .t1 { border-width: 1px; }
+  .t2 { border-width: 2px; }
+  .t3 { border-width: 3px; }
+  .t5 { border-width: 5px; }
+  .t8 { border-width: 8px; }
+  .wide { width: 203px; }
+  .small { width: 10px; height: 10px; }
+  .tiny { width: 5px; height: 5px; border-width: 2px; }
+  .round { border-radius: 10px; }
+  .round8 { border-width: 8px; border-radius: 20px; }
+  .top { border-width: 4px 0 0 0; }
+  .colors { border-color: #cc3355 #223388 #33aa66 #888888; }
+  .widths { border-width: 4px 2px 6px 3px; }
+  .roundwidths { border-width: 4px 2px 6px 3px; border-radius: 12px; }
+  .mixed { border-style: dashed solid; }
+  .outline { border: 0; margin: 4px 16px 16px 4px; outline: 4px dashed #cc3355; }
+  .background { background: #ffdd88; }
+  table { float: left; border-collapse: collapse; margin: 0 12px 12px 0; }
+  td { width: 40px; height: 16px; border: 3px dashed #223388; }
+</style>
+</head>
+<body>
+  <div class="t1"></div>
+  <div class="t2"></div>
+  <div class="t3"></div>
+  <div></div>
+  <div class="t5"></div>
+  <div class="t8"></div>
+  <div class="wide"></div>
+  <div class="small"></div>
+  <div class="tiny"></div>
+  <div class="round"></div>
+  <div class="round8"></div>
+  <div class="top"></div>
+  <div class="colors"></div>
+  <div class="widths"></div>
+  <div class="roundwidths"></div>
+  <div class="mixed"></div>
+  <div class="outline"></div>
+  <div class="background"></div>
+  <table><tr><td></td><td></td></tr></table>
+</body>
+</html>

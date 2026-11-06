@@ -450,6 +450,11 @@ namespace krys::ui::tests
     CheckPage("block-in-inline", 480u, 420u, true);
   }
 
+  TEST_CASE("Golden: dashed borders", "[UI][GPU][Golden]")
+  {
+    CheckPage("dashed-borders", 640u, 360u, true);
+  }
+
   TEST_CASE("Golden: fieldset", "[UI][GPU][Golden]")
   {
     CheckPage("fieldset", 480u, 360u, true);

@@ -881,28 +881,55 @@ namespace krys::boo
         graphicsContext.SetStrokeStyle(borderStyle == BorderStyle::Dashed ? StrokeStyle::DashedStroke
                                                                           : StrokeStyle::DottedStroke);
 
-        // If the number of dashes that fit in the path is odd and non-integral then we
-        // will have an awkwardly-sized dash at the end of the path. To try to avoid that
-        // here, we simply make the whitespace dashes ever so slightly bigger.
-        // FIXME: This could be even better if we tried to manipulate the dash offset
-        // and possibly the gapLength to get the corners dash-symmetrical.
-        float dashLength = thickness * ((borderStyle == BorderStyle::Dashed) ? 3.0f : 1.0f);
-        float gapLength = dashLength;
-        float numberOfDashes = borderPath.Length() / dashLength;
-        // Don't try to show dashes if we have less than 2 dashes + 2 gaps.
-        // FIXME: should do this test per side.
-        if (numberOfDashes >= 4)
+        if (borderStyle == BorderStyle::Dashed)
         {
-          bool evenNumberOfFullDashes = !(static_cast<int32>(numberOfDashes) % 2);
-          bool integralNumberOfDashes =
-            !(numberOfDashes - static_cast<float>(static_cast<int32>(numberOfDashes)));
-          if (!evenNumberOfFullDashes && !integralNumberOfDashes)
+          // Along the middle of the border, where corners are shorter than on its outside edge. The extra
+          // thickness is, as above, so that the clip antialiases the edges.
+          // FIXME: With different widths on each side, Chrome's gaps come out a little different: it has a
+          // longer centerline than this one, by about 4px on a 105x40 box with a radius of 12.
+          auto centerline = borderShape.DeprecatedPixelSnappedRoundedRect(Document().DeviceScaleFactor());
+          const float top = edges.At(BoxSide::Top).WidthForPainting() / 2;
+          const float right = edges.At(BoxSide::Right).WidthForPainting() / 2;
+          const float bottom = edges.At(BoxSide::Bottom).WidthForPainting() / 2;
+          const float left = edges.At(BoxSide::Left).WidthForPainting() / 2;
+          auto centerlineRadii = centerline.GetRadii();
+          centerlineRadii.Shrink(top, bottom, left, right);
+          auto centerlineRect = centerline.Rect();
+          centerlineRect.Contract(FloatBoxExtent {top, right, bottom, left});
+          Path centerlinePath;
+          centerlinePath.AddRoundedRect(FloatRoundedRect(centerlineRect, centerlineRadii));
+          if (auto pattern =
+                GraphicsContext::DashPatternForStrokeLength(centerlinePath.Length(), thickness, true))
           {
-            float numberOfGaps = numberOfDashes / 2;
-            gapLength += (dashLength / numberOfGaps);
+            graphicsContext.SetLineDash(DashArray {pattern->Dash, pattern->Gap}, 0);
           }
+          graphicsContext.SetStrokeThickness(drawThickness * 1.1f);
+          graphicsContext.StrokePath(centerlinePath);
+          return;
+        }
+        else
+        {
+          // If the number of dots that fit in the path is odd and non-integral then we will have an
+          // awkwardly-sized dot at the end of the path. To try to avoid that here, we simply make the
+          // whitespace ever so slightly bigger.
+          float dashLength = thickness;
+          float gapLength = dashLength;
+          float numberOfDashes = borderPath.Length() / dashLength;
+          // Don't try to show dots if we have less than 2 dots + 2 gaps.
+          // FIXME: should do this test per side.
+          if (numberOfDashes >= 4)
+          {
+            bool evenNumberOfFullDashes = !(static_cast<int32>(numberOfDashes) % 2);
+            bool integralNumberOfDashes =
+              !(numberOfDashes - static_cast<float>(static_cast<int32>(numberOfDashes)));
+            if (!evenNumberOfFullDashes && !integralNumberOfDashes)
+            {
+              float numberOfGaps = numberOfDashes / 2;
+              gapLength += (dashLength / numberOfGaps);
+            }
 
-          graphicsContext.SetLineDash(DashArray {dashLength, gapLength}, dashLength);
+            graphicsContext.SetLineDash(DashArray {dashLength, gapLength}, dashLength);
+          }
         }
 
         // FIXME: stroking the border path causes issues with tight corners:

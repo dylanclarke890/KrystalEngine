@@ -64,9 +64,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## Style (cascade and computed values)
 
-### Bugs
-
-
 ### Missing
 
 - `env()` has no values: without the document's `ConstantPropertyMap` an `env()` reference falls back or is invalid at computed-value time (FIXME in `VariableReferenceValue.cpp`).
@@ -110,7 +107,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- Dashed borders have WebKit's dashes, three times the border width long; Chrome's are shorter (seen in the `fieldset` golden).
+- A dashed rounded border with different widths on each side has its dashes drift from Chrome's along the sides, by a few pixels (FIXME in `BorderPainter::DrawBoxSideFromPath`).
 - A mask's `color-interpolation: linearRGB` is drawn in sRGB (`LegacyRenderSVGResourceMasker`, FIXME), because image buffers have no colour space conversion.
 - `Path::ApplyElements` applies nothing for continuous rounded rects, and `Path::Transform` drops them, as there's no platform path (FIXMEs in `Path.cpp`); nothing in Booey makes one yet.
 - A composited mask's or clip path's edge pixels (and those of a turned masked layer) can differ slightly from the whole-page repaint.
@@ -195,7 +192,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Filters on SVG shapes use the border box for the filter region and source image rect rather than the object bounding box (FIXMEs in `RenderLayerFilters.cpp`). Attribute parse errors (`ReportAttributeParsingError`) and filter warnings are not reported, because there is no console.
-- SMIL has no throttled frame delay and updates outside an `EventQueueScope` (see *Animations*).
 - `buffered-rendering: static` is not supported (FIXME in `LegacyRenderSVGImage.cpp`). `setMayHaveRenderedSVGForeignObjects` is not called (FIXME in `SVGForeignObjectElement.cpp`), as its only reader, composited scrolling, is absent.
 - The inline formatting context's SVG text path (`Settings::UseIFCForSVGText`, off) compiles but is untested.
 - SVG `<a>` has no `title` override (`xlink:title`) and no focus overrides (`supportsFocus`, `isMouseFocusable`, `isKeyboardFocusable`, `defaultTabIndex`); `SVGStyleElement` has no load event timer.

@@ -638,6 +638,23 @@ namespace krys::boo
       return _contentfulPaintDetected;
     }
 
+    /// @brief A dash and the gap after it.
+    struct DashPattern
+    {
+      float Dash {0};
+      float Gap {0};
+    };
+
+    /// @brief The dashes of a dashed line or border, as Chrome has them: each twice the thickness and a gap
+    /// of the thickness (three and two times when it's under 3), with the gap then stretched or squeezed so
+    /// that dashes meet both ends of the line.
+    /// @param length The length of the stroke.
+    /// @param thickness The thickness of the line.
+    /// @param closedPath Whether the stroke goes back to its start, with a gap there instead of an end.
+    /// @return The dashes, or null if there's no room for two: the line is then solid.
+    KRYS_NODISCARD static Maybe<DashPattern> DashPatternForStrokeLength(float length, float thickness,
+                                                                        bool closedPath) noexcept;
+
   protected:
     void FillEllipseAsPath(const FloatRect &) noexcept;
     void StrokeEllipseAsPath(const FloatRect &) noexcept;
