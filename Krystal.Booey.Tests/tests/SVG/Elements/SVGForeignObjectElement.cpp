@@ -98,18 +98,93 @@ layer at (0,0) size 200x100
     CHECK(box.LocalToAbsolute() == FloatPoint(55, 27));
   }
 
-  // FIXME: The layers of positioned boxes in a foreign object aren't painted, and are hit tested at their
-  // location in the page rather than in the foreign object.
-  TEST_CASE("SVGForeignObjectElement: positioned content paints and is hit",
-            "[SVG][SVGForeignObjectElement][!shouldfail]")
+  TEST_CASE("SVGForeignObjectElement: positioned content paints and is hit in it",
+            "[SVG][SVGForeignObjectElement]")
   {
-    PageInFrameFixture fixture(
-      u8R"html(<body style="margin: 0"><svg style="display: block" width=200 height=100>)html"
-      u8R"html(<foreignObject x=50 y=20 width=100 height=50>)html"
-      u8R"html(<div id=abs style="position: absolute; left: 5px; top: 7px; width: 10px; height: 10px; background: #00ff00"></div>)html"
-      u8R"html(</foreignObject></svg></body>)html");
+    auto markup = [](utf8_stringview foreignObjectAttributes, utf8_stringview content)
+    {
+      return u8R"html(<body style="margin: 0"><svg style="display: block" width=200 height=100>)html"
+             u8"<foreignObject x=50 y=20 width=100 height=50 "
+             + utf8_string(foreignObjectAttributes) + u8">" + utf8_string(content)
+             + u8"</foreignObject></svg></body>";
+    };
+    constexpr auto box =
+      u8"position: absolute; left: 5px; top: 7px; width: 10px; height: 10px; background: #0f0";
 
-    CHECK(fixture.Painted().find(u8"#00FF00") != utf8_string::npos);
-    CHECK(fixture.Document->ElementFromPoint(57, 29).get() == &fixture.ById(u8"abs"));
+    SECTION("absolutely positioned, inside the foreign object's coordinates")
+    {
+      PageInFrameFixture fixture(markup({}, u8"<div id=abs style=\"" + utf8_string(box) + u8"\"></div>"));
+      auto painted = fixture.Painted();
+      auto fill = painted.find(u8"#00FF00");
+      REQUIRE(fill != utf8_string::npos);
+      // Within the save that moves to the foreign object.
+      auto move = painted.find(u8"t=(50.00,20.00)");
+      REQUIRE(move != utf8_string::npos);
+      CHECK(move < fill);
+      CHECK(painted.find(u8"(restore)", move) > fill);
+
+      CHECK(fixture.Document->ElementFromPoint(57, 29).get() == &fixture.ById(u8"abs"));
+      CHECK(fixture.Document->ElementFromPoint(7, 9).get() != &fixture.ById(u8"abs"));
+    }
+
+    SECTION("with the foreign object's transform")
+    {
+      PageInFrameFixture fixture(markup(u8"transform='translate(20 10)'",
+                                        u8"<div id=abs style=\"" + utf8_string(box) + u8"\"></div>"));
+      CHECK(fixture.Document->ElementFromPoint(77, 39).get() == &fixture.ById(u8"abs"));
+      CHECK(fixture.Document->ElementFromPoint(57, 29).get() != &fixture.ById(u8"abs"));
+    }
+
+    SECTION("relatively positioned and in flow")
+    {
+      PageInFrameFixture fixture(markup(
+        {},
+        u8R"html(<div style="height: 5px"></div>)html"
+        u8R"html(<div id=rel style="position: relative; left: 3px; height: 10px; width: 10px"></div>)html"));
+      CHECK(fixture.Document->ElementFromPoint(55, 29).get() == &fixture.ById(u8"rel"));
+      CHECK(fixture.Document->ElementFromPoint(51, 29).get() != &fixture.ById(u8"rel"));
+    }
+
+    SECTION("with z-index ordering it among the content")
+    {
+      PageInFrameFixture fixture(markup(
+        {},
+        u8R"html(<div id=flow style="height: 30px"></div>)html"
+        u8R"html(<div id=under style="position: absolute; z-index: -1; top: 0; width: 50px; height: 50px"></div>)html"
+        u8R"html(<div id=over style="position: absolute; z-index: 1; top: 0; left: 60px; width: 10px; height: 10px"></div>)html"));
+      // Under the block in flow, and hit where the block isn't.
+      CHECK(fixture.Document->ElementFromPoint(60, 30).get() == &fixture.ById(u8"flow"));
+      CHECK(fixture.Document->ElementFromPoint(60, 60).get() == &fixture.ById(u8"under"));
+      // Over the block in flow.
+      CHECK(fixture.Document->ElementFromPoint(115, 25).get() == &fixture.ById(u8"over"));
+    }
+
+    SECTION("clipped by a foreign object that clips")
+    {
+      PageInFrameFixture fixture(markup(
+        {},
+        u8R"html(<div id=abs style="position: absolute; left: 95px; top: 0; width: 40px; height: 10px"></div>)html"));
+      CHECK(fixture.Document->ElementFromPoint(148, 25).get() == &fixture.ById(u8"abs"));
+      CHECK(fixture.Document->ElementFromPoint(160, 25).get() != &fixture.ById(u8"abs"));
+    }
+
+    SECTION("restyled and removed")
+    {
+      PageInFrameFixture fixture(markup({}, u8"<div id=abs style=\"" + utf8_string(box) + u8"\"></div>"));
+      CHECK(fixture.Document->ElementFromPoint(57, 29).get() == &fixture.ById(u8"abs"));
+      Ref<dom::Element> element = ShareRef(fixture.ById(u8"abs"));
+      REQUIRE_FALSE(
+        element
+          ->SetAttribute(u8"style", u8"position: absolute; left: 20px; top: 7px; width: 10px; height: 10px")
+          .HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.Document->ElementFromPoint(72, 29).get() == element.get());
+      CHECK(fixture.Document->ElementFromPoint(57, 29).get() != element.get());
+
+      REQUIRE_FALSE(element->ParentNode()->RemoveChild(*element).HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.Document->ElementFromPoint(72, 29).get() != element.get());
+      CHECK_FALSE(fixture.Painted().empty());
+    }
   }
 }

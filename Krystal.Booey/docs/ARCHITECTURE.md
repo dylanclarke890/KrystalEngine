@@ -155,7 +155,7 @@ How each area of Booey is put together, by area. `DIFFERENCES.md` and `KNOWN-ISS
 
 - An `<svg>` is one replaced box (`LegacyRenderSVGRoot`) that paints its children itself; nothing inside it gets a layer. Only the legacy renderers exist.
 - `SVGNames` and `XLinkNames` are `dom::QualifiedName` constants containing only names the code uses plus `class`, `id` and `style`. `SVGElementFactory` is a hand-written switch over `html::TagName`.
-- `<use>` instances are shadow trees kept in step with their originals. `<foreignObject>` lays out HTML in SVG coordinates. Pending SVG resources live on the tree scope, so a `<use>` or `<textPath>` finds a target added later. SVG element changes lay their renderer out again at the next rendering update (`updateSVGRenderer`).
+- `<use>` instances are shadow trees kept in step with their originals. `<foreignObject>` lays out HTML in SVG coordinates. Its layer holds those of the positioned boxes in it; layer lists leave it out, and it paints and hit tests them itself, in those coordinates. Pending SVG resources live on the tree scope, so a `<use>` or `<textPath>` finds a target added later. SVG element changes lay their renderer out again at the next rendering update (`updateSVGRenderer`).
 - Shape stroke geometry comes from the host: Krystal.UI implements `PathStrokeStrategy` (`PathStrokerStrategy`) with Render2D's stroker; Booey's tests use a stand-in (`TestPathStrokeStrategy`), and `NullGraphicsContext`'s line style setters can be overridden to collect the stroke style.
 - Filter primitives run on the GPU through Render2D's `FilterGraph2D` and `FilterRenderer2D`; there is no software path.
 

@@ -1063,7 +1063,7 @@ namespace krys::boo
     // "The root element forms the root stacking context." https://www.w3.org/TR/CSS22/visuren.html#z-index
     return !Renderer().Style().UsedZIndex().IsAuto() || Renderer().ShouldApplyLayoutContainment()
            || Renderer().ShouldApplyPaintContainment() || Renderer().IsDocumentElementRenderer()
-           || IsRenderViewLayer();
+           || Renderer().IsLegacyRenderSVGForeignObject() || IsRenderViewLayer();
   }
 
   bool RenderLayer::SetIsNormalFlowOnly(bool isNormalFlowOnly) noexcept
@@ -1390,7 +1390,8 @@ namespace krys::boo
                                   EnumSet<Compositing> &accumulatedDirtyFlags) noexcept
   {
     krys_debug_assert(!DescendantDependentFlagsAreDirty());
-    if (EstablishesTopLayer())
+    // A foreign object paints this layer itself.
+    if (EstablishesTopLayer() || Renderer().IsLegacyRenderSVGForeignObject())
     {
       return;
     }
@@ -6080,6 +6081,24 @@ namespace krys::boo
     context.SetCTM(oldTransform);
   }
 
+  void RenderLayer::PaintForeignObjectLayers(GraphicsContext &context, const LayoutRect &dirtyRect,
+                                             EnumSet<PaintBehavior> paintBehavior, bool above) noexcept
+  {
+    UpdateLayerListsIfNeeded();
+
+    LayerPaintingInfo paintingInfo(this, LayoutRect(EnclosingIntRect(dirtyRect)), paintBehavior, LayoutSize(),
+                                   nullptr);
+    if (above)
+    {
+      PaintList(NormalFlowLayers(), context, paintingInfo, {});
+      PaintList(PositiveZOrderLayers(), context, paintingInfo, {});
+    }
+    else
+    {
+      PaintList(NegativeZOrderLayers(), context, paintingInfo, {});
+    }
+  }
+
   void RenderLayer::PaintList(LayerList layerIterator, GraphicsContext &context,
                               const LayerPaintingInfo &paintingInfo,
                               EnumSet<PaintLayerFlag> paintFlags) noexcept
@@ -6411,6 +6430,24 @@ namespace krys::boo
       LayoutRect(LayoutPoint(currentDocumentPosition), LayoutSize(1_lu, 1_lu)), Renderer(), false,
       {SelectionRevealMode::Reveal, ScrollAlignment::AlignToEdgeIfNeeded,
        ScrollAlignment::AlignToEdgeIfNeeded});
+  }
+
+  bool RenderLayer::HitTestForeignObjectLayers(const HitTestRequest &request, HitTestResult &result,
+                                               const HitTestLocation &hitTestLocation, bool above) noexcept
+  {
+    UpdateLayerListsIfNeeded();
+
+    auto hitTestList = [&](LayerList layers)
+    {
+      return HitTestList(layers, this, request, result, LayoutRect::InfiniteRect(), hitTestLocation, nullptr,
+                         nullptr, false)
+        .Layer;
+    };
+    if (above)
+    {
+      return hitTestList(PositiveZOrderLayers()) || hitTestList(NormalFlowLayers());
+    }
+    return hitTestList(NegativeZOrderLayers());
   }
 
   bool RenderLayer::HitTest(const HitTestRequest &request, HitTestResult &result) noexcept

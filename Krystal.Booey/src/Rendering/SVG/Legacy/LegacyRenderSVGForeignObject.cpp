@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestLocation.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -68,8 +69,13 @@ namespace krys::boo
     if (paintInfo.Phase == PaintPhase::Selection)
     {
       RenderBlock::Paint(childPaintInfo, childPoint);
+      Layer()->PaintForeignObjectLayers(childPaintInfo.Context(), childPaintInfo.Rect,
+                                        childPaintInfo.PaintBehavior, true);
       return;
     }
+
+    Layer()->PaintForeignObjectLayers(childPaintInfo.Context(), childPaintInfo.Rect,
+                                      childPaintInfo.PaintBehavior, false);
 
     // Paint all phases of FO elements atomically, as though the FO element established its
     // own stacking context.
@@ -83,6 +89,9 @@ namespace krys::boo
     RenderBlock::Paint(childPaintInfo, childPoint);
     childPaintInfo.Phase = PaintPhase::Outline;
     RenderBlock::Paint(childPaintInfo, childPoint);
+
+    Layer()->PaintForeignObjectLayers(childPaintInfo.Context(), childPaintInfo.Rect,
+                                      childPaintInfo.PaintBehavior, true);
   }
 
   const AffineTransform &LegacyRenderSVGForeignObject::LocalToParentTransform() const noexcept
@@ -179,10 +188,14 @@ namespace krys::boo
 
     // FOs establish a stacking context, so we need to hit-test all layers.
     HitTestLocation hitTestLocation(FlooredLayoutPoint(localPoint));
-    return RenderBlock::NodeAtPoint(request, result, hitTestLocation, LayoutPoint(), HitTestForeground)
+    // Layers are relative to the block, where its contents are relative to its parent.
+    HitTestLocation layerLocation(FlooredLayoutPoint(localPoint) - LocationOffset());
+    return Layer()->HitTestForeignObjectLayers(request, result, layerLocation, true)
+           || RenderBlock::NodeAtPoint(request, result, hitTestLocation, LayoutPoint(), HitTestForeground)
            || RenderBlock::NodeAtPoint(request, result, hitTestLocation, LayoutPoint(), HitTestFloat)
            || RenderBlock::NodeAtPoint(request, result, hitTestLocation, LayoutPoint(),
-                                       HitTestChildBlockBackgrounds);
+                                       HitTestChildBlockBackgrounds)
+           || Layer()->HitTestForeignObjectLayers(request, result, layerLocation, false);
   }
 
   LayoutSize LegacyRenderSVGForeignObject::OffsetFromContainer(const RenderElement &container,

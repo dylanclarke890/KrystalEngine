@@ -31,9 +31,11 @@ namespace krys::boo
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
 
+    /// @brief Whether it has a layer: not to paint it, which @ref Paint does in SVG coordinates, but to hold
+    /// the layers of the positioned boxes in it, which it paints in turn.
     KRYS_NODISCARD bool RequiresLayer() const noexcept override
     {
-      return false;
+      return true;
     }
     void Layout() noexcept override;
 
