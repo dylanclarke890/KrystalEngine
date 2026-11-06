@@ -8,6 +8,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include <string>
@@ -69,7 +70,7 @@ namespace krys::boo::tests
     {
       List<std::string> Records;
 
-      PointerFixture() noexcept
+      explicit PointerFixture(bool recordPointerMoves = true) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0}div{width:100px;height:50px}</style>"
                          u8"<div id=a></div><div id=b></div>",
                          {200, 100}, true)
@@ -83,7 +84,10 @@ namespace krys::boo::tests
               u8"lostpointercapture", u8"mouseover", u8"mouseout", u8"mouseenter", u8"mouseleave",
               u8"mousedown", u8"mousemove", u8"mouseup", u8"click", u8"auxclick"})
         {
-          Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+          if (recordPointerMoves || type != utf8_stringview(u8"pointermove"))
+          {
+            Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+          }
         }
       }
 
@@ -275,6 +279,96 @@ namespace krys::boo::tests
       CHECK(click->PointerType().empty());
       CHECK_FALSE(click->IsTrusted());
       CHECK(click->ClientX() == 0);
+    }
+  }
+
+  TEST_CASE("PointerCaptureController: moves with no pointermove listener", "[Page][PointerEvent]")
+  {
+    PointerFixture fixture(false);
+    auto &a = fixture.ById(u8"a");
+    CHECK_FALSE(fixture.Document->HasPointerMoveListener());
+    CHECK_FALSE(fixture.Document->HasPointerRawUpdateListener());
+
+    SECTION("the boundary and mouse events still fire")
+    {
+      fixture.Move(10, 10);
+      CHECK(fixture.Take()
+            == Strings {"pointerover!:a", "mouseover:a", "pointerenter!:a", "mouseenter:a", "mousemove:a"});
+    }
+
+    SECTION("a cancelled pointerdown still stops the compatibility mouse events until the release")
+    {
+      fixture.Move(10, 10);
+      (void)fixture.Take();
+      fixture.On(a, u8"pointerdown", [](dom::Event &event) { event.PreventDefault(); });
+      fixture.Press(10, 10);
+      CHECK(fixture.Take() == Strings {"pointerdown!:a"});
+      fixture.Move(20, 20, 1);
+      CHECK(fixture.Take().empty());
+      fixture.Release(20, 20);
+      CHECK(fixture.Take() == Strings {"pointerup!:a", "click!:a"});
+      fixture.Move(30, 20);
+      CHECK(fixture.Take() == Strings {"mousemove:a"});
+    }
+
+    SECTION("a pointer's capture still applies")
+    {
+      fixture.Move(10, 10);
+      fixture.Press(10, 10);
+      (void)fixture.Take();
+      REQUIRE_FALSE(a.SetPointerCapture(MousePointerID).HasException());
+      fixture.Move(10, 70, 1);
+      CHECK(fixture.Take() == Strings {"gotpointercapture!:a", "mousemove:a"});
+    }
+
+    SECTION("a listener however it's added is noticed")
+    {
+      fixture.Move(10, 10);
+      uint32 moves = 0;
+      SECTION("on a node")
+      {
+        fixture.On(a, u8"pointermove", [&](dom::Event &) { ++moves; });
+      }
+      SECTION("as a handler")
+      {
+        Downcast<html::HTMLElement>(a).SetOnPointerMove([&](dom::Event &) { ++moves; });
+      }
+      SECTION("on the window")
+      {
+        fixture.Document->Window()->SetOnPointerMove([&](dom::Event &) { ++moves; });
+      }
+      SECTION("on a node adopted into the document")
+      {
+        auto other = fixture.Document->Implementation().CreateHTMLDocument(u8"other").ReleaseValue();
+        auto div = other->CreateElement(u8"div").ReleaseValue();
+        fixture.On(*div, u8"pointermove", [](dom::Event &) {});
+        REQUIRE_FALSE(a.AppendChild(*div).HasException());
+        CHECK(fixture.Document->HasPointerMoveListener());
+        fixture.On(a, u8"pointermove", [&](dom::Event &) { ++moves; });
+      }
+      CHECK(fixture.Document->HasPointerMoveListener());
+      fixture.Move(20, 10);
+      CHECK(moves == 1);
+    }
+
+    SECTION("pointerrawupdate is noticed on its own, and can add a pointermove listener")
+    {
+      fixture.Move(10, 10);
+      uint32 moves = 0;
+      uint32 rawUpdates = 0;
+      fixture.On(a, u8"pointerrawupdate",
+                 [&](dom::Event &)
+                 {
+                   if (!rawUpdates++)
+                   {
+                     fixture.On(a, u8"pointermove", [&](dom::Event &) { ++moves; });
+                   }
+                 });
+      CHECK(fixture.Document->HasPointerRawUpdateListener());
+      CHECK_FALSE(fixture.Document->HasPointerMoveListener());
+      fixture.Move(20, 10);
+      CHECK(rawUpdates == 1);
+      CHECK(moves == 1);
     }
   }
 

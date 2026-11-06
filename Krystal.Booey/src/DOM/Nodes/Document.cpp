@@ -4091,6 +4091,14 @@ namespace krys::boo::dom
     {
       _hasAnimationIterationListener = true;
     }
+    else if (type == EventNames::PointerMove)
+    {
+      _hasPointerMoveListener = true;
+    }
+    else if (type == EventNames::PointerRawUpdate)
+    {
+      _hasPointerRawUpdateListener = true;
+    }
   }
 
   void Document::UpdateAnimationsAndSendEvents() noexcept

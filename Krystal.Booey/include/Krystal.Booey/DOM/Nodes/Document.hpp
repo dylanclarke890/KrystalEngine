@@ -400,6 +400,8 @@ namespace krys::boo::dom
     uint32 _loadEventDelayCount {0};
     // Whether an `animationiteration` listener was ever added to the document's nodes or window.
     bool _hasAnimationIterationListener {false};
+    bool _hasPointerMoveListener {false};
+    bool _hasPointerRawUpdateListener {false};
     /// @see https://html.spec.whatwg.org/#unload-counter
     uint32 _unloadCounter {0};
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
@@ -1698,6 +1700,18 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool HasAnimationIterationListener() const noexcept
     {
       return _hasAnimationIterationListener;
+    }
+    /// @brief Whether a `pointermove` listener was ever added to the document's nodes or window; without one,
+    /// moves don't create the event.
+    KRYS_NODISCARD bool HasPointerMoveListener() const noexcept
+    {
+      return _hasPointerMoveListener;
+    }
+    /// @brief Whether a `pointerrawupdate` listener was ever added to the document's nodes or window; without
+    /// one, moves don't create the event.
+    KRYS_NODISCARD bool HasPointerRawUpdateListener() const noexcept
+    {
+      return _hasPointerRawUpdateListener;
     }
     /// @brief The relevant animations whose effects target elements in the document (outside shadow trees),
     /// in composite order.

@@ -239,15 +239,9 @@ namespace krys::boo
   RefPtr<dom::PointerEvent> PointerCaptureController::PointerEventForMouseEvent(
     const dom::MouseEvent &mouseEvent, PointerID pointerId, const dom::DOMString &pointerType) noexcept
   {
-    // If we already have known touches then we cannot dispatch a mouse event,
-    // for instance in the case of a long press to initiate a system drag.
-    for (auto &[id, capturingData] : _activePointerIdsToCapturingData)
+    if (HasActiveTouch())
     {
-      if (capturingData->PointerType == dom::TouchPointerEventType()
-          && capturingData->CurrentState == CapturingData::State::Ready)
-      {
-        return nullptr;
-      }
+      return nullptr;
     }
 
     auto type = mouseEvent.Type();
@@ -256,20 +250,7 @@ namespace krys::boo
     bool pointerIsPressed = capturingData ? capturingData->PointerIsPressed : false;
 
     MouseButton newButton = mouseEvent.ButtonType();
-    MouseButton previousMouseButton =
-      capturingData ? capturingData->PreviousMouseButton : MouseButton::PointerHasNotChanged;
-    MouseButton button = [&]
-    {
-      auto pointerEventType = dom::PointerEvent::TypeFromMouseEventType(type);
-      if (!dom::PointerEvent::TypeRequiresResolvedButton(pointerEventType))
-      {
-        if (newButton == previousMouseButton || !pointerIsPressed)
-        {
-          return MouseButton::PointerHasNotChanged;
-        }
-      }
-      return newButton;
-    }();
+    MouseButton button = ButtonForMouseEvent(mouseEvent, pointerId);
 
     // https://w3c.github.io/pointerevents/#chorded-button-interactions
     // Some pointer devices, such as mouse or pen, support multiple buttons. In the Mouse Event model, each
@@ -307,6 +288,91 @@ namespace krys::boo
     }
 
     return pointerEvent;
+  }
+
+  bool PointerCaptureController::HasActiveTouch() const noexcept
+  {
+    // If we already have known touches then we cannot dispatch a mouse event,
+    // for instance in the case of a long press to initiate a system drag.
+    for (auto &[id, capturingData] : _activePointerIdsToCapturingData)
+    {
+      if (capturingData->PointerType == dom::TouchPointerEventType()
+          && capturingData->CurrentState == CapturingData::State::Ready)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  MouseButton PointerCaptureController::ButtonForMouseEvent(const dom::MouseEvent &mouseEvent,
+                                                            PointerID pointerId) const noexcept
+  {
+    auto capturingData = CapturingDataFor(pointerId);
+    bool pointerIsPressed = capturingData ? capturingData->PointerIsPressed : false;
+    MouseButton newButton = mouseEvent.ButtonType();
+    MouseButton previousMouseButton =
+      capturingData ? capturingData->PreviousMouseButton : MouseButton::PointerHasNotChanged;
+
+    auto pointerEventType = dom::PointerEvent::TypeFromMouseEventType(mouseEvent.Type());
+    if (!dom::PointerEvent::TypeRequiresResolvedButton(pointerEventType))
+    {
+      if (newButton == previousMouseButton || !pointerIsPressed)
+      {
+        return MouseButton::PointerHasNotChanged;
+      }
+    }
+    return newButton;
+  }
+
+  void PointerCaptureController::DispatchPointerRawUpdateForMouseEvent(const dom::MouseEvent &mouseEvent,
+                                                                       PointerID pointerId,
+                                                                       const dom::DOMString &pointerType,
+                                                                       dom::Element &target) noexcept
+  {
+    if (!target.NodeDocument().HasPointerRawUpdateListener() || HasActiveTouch())
+    {
+      return;
+    }
+
+    DispatchEvent(*dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerRawUpdate),
+                                             ButtonForMouseEvent(mouseEvent, pointerId), mouseEvent,
+                                             pointerId, pointerType),
+                  &target);
+  }
+
+  bool PointerCaptureController::SkipPointerMoveForMouseEvent(const dom::MouseEvent &mouseEvent,
+                                                              PointerID pointerId,
+                                                              const dom::DOMString &pointerType,
+                                                              dom::Element &target) noexcept
+  {
+    if (mouseEvent.Type() != EventNames::MouseMove || target.NodeDocument().HasPointerMoveListener()
+        || HasActiveTouch())
+    {
+      return false;
+    }
+
+    // As for an event that's dispatched: see DispatchEvent.
+    if (pointerType != dom::MousePointerEventType())
+    {
+      ProcessPendingPointerCapture(pointerId);
+    }
+
+    Ref<CapturingData> capturingData = EnsureCapturingData(pointerId, pointerType);
+    capturingData->PreviousMouseButton = mouseEvent.ButtonType();
+    PointerMoveWasSkipped(*capturingData, target.NodeDocument(), true);
+    return true;
+  }
+
+  void PointerCaptureController::PointerMoveWasSkipped(CapturingData &capturingData, dom::Document &document,
+                                                       bool isPrimary) noexcept
+  {
+    capturingData.ActiveDocument = CreateWeakPtr(&document);
+    capturingData.IsPrimary = isPrimary;
+    if (capturingData.PointerType == dom::MousePointerEventType() && !capturingData.PointerIsPressed)
+    {
+      capturingData.PreventsCompatibilityMouseEvents = false;
+    }
   }
 
   void PointerCaptureController::DispatchOverOrOutEvent(dom::DOMStringAtom type, dom::EventTarget *target,
@@ -391,21 +457,26 @@ namespace krys::boo
       return result;
     };
 
-    auto coalescedEvents = mapToPointerEvents(platformTouchEvent.CoalescedEvents());
-    auto predictedEvents = mapToPointerEvents(platformTouchEvent.PredictedEvents());
+    auto createPointerEvent = [&]
+    {
+      auto coalescedEvents = mapToPointerEvents(platformTouchEvent.CoalescedEvents());
+      auto predictedEvents = mapToPointerEvents(platformTouchEvent.PredictedEvents());
+      return dom::PointerEvent::Create(platformTouchEvent, coalescedEvents, predictedEvents, index, isPrimary,
+                                       view, touchDelta);
+    };
 
-    auto pointerEvent = dom::PointerEvent::Create(platformTouchEvent, coalescedEvents, predictedEvents, index,
-                                                  isPrimary, view, touchDelta);
+    const auto &touchPoint = platformTouchEvent.TouchPoints()[index];
+    auto type = dom::PointerEvent::TypeForTouchPoint(touchPoint);
+    auto pointerId = dom::PointerEvent::PointerIdForTouch(touchPoint);
 
     // A pointer cancelled because its touch now pans or zooms the page fires nothing more.
     // https://w3c.github.io/pointerevents/#the-pointercancel-event
-    if (pointerEvent->Type() != EventNames::PointerDown
-        && HasCancelledPointerEventForIdentifier(pointerEvent->PointerId()))
+    if (type != EventNames::PointerDown && HasCancelledPointerEventForIdentifier(pointerId))
     {
       return;
     }
 
-    Ref<CapturingData> capturingData = EnsureCapturingDataForPointerEvent(*pointerEvent);
+    Ref<CapturingData> capturingData = EnsureCapturingData(pointerId, dom::TouchPointerEventType());
 
     // Check if the target changed, which would require dispatching boundary events.
     RefPtr<dom::Element> previousTarget = capturingData->PreviousTarget;
@@ -413,7 +484,7 @@ namespace krys::boo
 
     capturingData->PreviousTarget = currentTarget;
 
-    if (pointerEvent->Type() == EventNames::PointerMove && previousTarget != currentTarget)
+    if (type == EventNames::PointerMove && previousTarget != currentTarget)
     {
       List<Ref<dom::Element>> leftElementsChain;
       for (dom::Element *element = previousTarget.get(); element;
@@ -463,8 +534,8 @@ namespace krys::boo
       for (auto &chain : leftElementsChain)
       {
         DispatchEvent(*dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerLeave),
-                                                 platformTouchEvent, coalescedEvents, predictedEvents, index,
-                                                 isPrimary, view, touchDelta),
+                                                 platformTouchEvent, {}, {}, index, isPrimary, view,
+                                                 touchDelta),
                       chain.get());
       }
 
@@ -477,13 +548,13 @@ namespace krys::boo
       for (auto it = enteredElementsChain.rbegin(); it != enteredElementsChain.rend(); ++it)
       {
         DispatchEvent(*dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerEnter),
-                                                 platformTouchEvent, coalescedEvents, predictedEvents, index,
-                                                 isPrimary, view, touchDelta),
+                                                 platformTouchEvent, {}, {}, index, isPrimary, view,
+                                                 touchDelta),
                       it->get());
       }
     }
 
-    if (pointerEvent->Type() == EventNames::PointerDown)
+    if (type == EventNames::PointerDown)
     {
       // https://w3c.github.io/pointerevents/#the-pointerdown-event
       // For input devices that do not support hover, a user agent MUST also fire a pointer event named
@@ -495,19 +566,21 @@ namespace krys::boo
                                 platformTouchEvent, index, isPrimary, view, touchDelta);
     }
 
-    if (pointerEvent->Type() == EventNames::PointerCancel)
+    if (type == EventNames::PointerCancel)
     {
-      auto location = platformTouchEvent.TouchPoints()[index].Pos();
+      auto location = touchPoint.Pos();
       IntPoint documentPoint =
         view ? view->WindowToContents(FlooredIntPoint(location)) : FlooredIntPoint(location);
-      CancelPointer(pointerEvent->PointerId(), documentPoint, pointerEvent.get());
+      CancelPointer(pointerId, documentPoint, createPointerEvent().get());
       return;
     }
+
+    auto &document = targetElement->NodeDocument();
 
     // https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
     // The user agent MUST dispatch the pointerrawupdate event before the corresponding pointermove.
     // (A stationary touch has a pointermove, but nothing about it changed.)
-    if (platformTouchEvent.TouchPoints()[index].GetState() == PlatformTouchPoint::TouchMoved)
+    if (touchPoint.GetState() == PlatformTouchPoint::TouchMoved && document.HasPointerRawUpdateListener())
     {
       const dom::DOMStringAtom rawUpdateType(EventNames::PointerRawUpdate);
       DispatchEvent(
@@ -517,9 +590,17 @@ namespace krys::boo
         &target);
     }
 
-    DispatchEvent(*pointerEvent, &target);
+    if (type == EventNames::PointerMove && !document.HasPointerMoveListener())
+    {
+      // As for an event that's dispatched: see DispatchEvent.
+      ProcessPendingPointerCapture(pointerId);
+      PointerMoveWasSkipped(*capturingData, document, isPrimary);
+      return;
+    }
 
-    if (pointerEvent->Type() != EventNames::PointerUp)
+    DispatchEvent(*createPointerEvent(), &target);
+
+    if (type != EventNames::PointerUp)
     {
       return;
     }
@@ -610,17 +691,22 @@ namespace krys::boo
     element->NodeDocument().HandleLightDismiss(event, *element);
   }
 
+  auto PointerCaptureController::EnsureCapturingData(PointerID pointerId,
+                                                     const dom::DOMString &pointerType) noexcept
+    -> Ref<CapturingData>
+  {
+    auto it = _activePointerIdsToCapturingData.find(pointerId);
+    if (it == _activePointerIdsToCapturingData.end())
+    {
+      it = _activePointerIdsToCapturingData.emplace(pointerId, CapturingData::Create(pointerType)).first;
+    }
+    return it->second;
+  }
+
   auto PointerCaptureController::EnsureCapturingDataForPointerEvent(const dom::PointerEvent &event) noexcept
     -> Ref<CapturingData>
   {
-    auto it = _activePointerIdsToCapturingData.find(event.PointerId());
-    if (it == _activePointerIdsToCapturingData.end())
-    {
-      it = _activePointerIdsToCapturingData
-             .emplace(event.PointerId(), CapturingData::Create(event.PointerType()))
-             .first;
-    }
-    return it->second;
+    return EnsureCapturingData(event.PointerId(), event.PointerType());
   }
 
   void PointerCaptureController::PointerEventWasDispatched(const dom::PointerEvent &event) noexcept

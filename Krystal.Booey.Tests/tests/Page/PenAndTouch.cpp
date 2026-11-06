@@ -82,7 +82,7 @@ namespace krys::boo::tests
     {
       List<std::string> Records;
 
-      TouchFixture() noexcept
+      explicit TouchFixture(bool recordPointerMoves = true) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0}div{width:100px;height:50px}</style>"
                          u8"<div id=a></div><div id=b></div>",
                          {200, 100}, true)
@@ -96,7 +96,10 @@ namespace krys::boo::tests
               u8"lostpointercapture", u8"touchstart", u8"touchmove", u8"touchend", u8"touchcancel",
               u8"mousedown", u8"mousemove", u8"mouseup", u8"click"})
         {
-          Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+          if (recordPointerMoves || type != utf8_stringview(u8"pointermove"))
+          {
+            Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+          }
         }
       }
 
@@ -333,6 +336,25 @@ namespace krys::boo::tests
         CHECK_FALSE(record.starts_with("click"));
       }
     }
+  }
+
+  TEST_CASE("EventHandler: touch moves with no pointermove listener", "[Page][TouchEvent]")
+  {
+    TouchFixture fixture(false);
+    auto &a = fixture.ById(u8"a");
+
+    (void)fixture.Touch(Type::TouchStart, {TouchFixture::Point(0, State::TouchPressed, 10, 10)});
+    (void)fixture.Take();
+
+    // The implicit capture still applies, as the move would have applied it.
+    (void)fixture.Touch(Type::TouchMove, {TouchFixture::Point(0, State::TouchMoved, 10, 70)});
+    CHECK(fixture.Take() == Strings {"gotpointercapture3:a", "touchmove[1,1,1]:a"});
+    CHECK(a.HasPointerCapture(3));
+
+    (void)fixture.Touch(Type::TouchEnd, {TouchFixture::Point(0, State::TouchReleased, 10, 70)});
+    auto records = fixture.Take();
+    REQUIRE_FALSE(records.empty());
+    CHECK(records[0] == "pointerup3:a");
   }
 
   TEST_CASE("EventHandler: a pen's pointer events", "[Page][PointerEvent]")

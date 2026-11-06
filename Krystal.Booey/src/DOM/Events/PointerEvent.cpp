@@ -238,6 +238,11 @@ namespace krys::boo::dom
                                       TypeIsCancelable(type), index, isPrimary, view, touchDelta));
   }
 
+  DOMStringAtom PointerEvent::TypeForTouchPoint(const PlatformTouchPoint &point) noexcept
+  {
+    return PointerEventType(point.GetState());
+  }
+
   PointerID PointerEvent::PointerIdForTouch(const PlatformTouchPoint &point) noexcept
   {
     return TouchMinimumPointerID + point.Id();

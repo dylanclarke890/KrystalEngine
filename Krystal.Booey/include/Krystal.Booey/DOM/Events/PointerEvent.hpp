@@ -144,6 +144,9 @@ namespace krys::boo::dom
                                                    uint32 touchIndex, bool isPrimary, LocalFrameView *view,
                                                    const DoublePoint &touchDelta = {}) noexcept;
 
+    /// @brief The type of the event for @p point.
+    KRYS_NODISCARD static DOMStringAtom TypeForTouchPoint(const PlatformTouchPoint &point) noexcept;
+
     /// @brief The pointer id of @p point's touch.
     KRYS_NODISCARD static PointerID PointerIdForTouch(const PlatformTouchPoint &point) noexcept;
 

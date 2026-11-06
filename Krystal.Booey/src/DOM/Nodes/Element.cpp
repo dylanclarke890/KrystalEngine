@@ -994,17 +994,32 @@ namespace krys::boo::dom
           return ShouldIgnoreMouseEvent::No;
         }
 
+        // https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
+        // The user agent MUST dispatch the pointerrawupdate event before the corresponding pointermove.
+        bool isMove = mouseEvent.Type() == EventNames::MouseMove;
+        if (isMove)
+        {
+          pointerCaptureController.DispatchPointerRawUpdateForMouseEvent(
+            mouseEvent, platformEvent.PointerId(), platformEvent.PointerType(), element);
+        }
+
+        if (pointerCaptureController.SkipPointerMoveForMouseEvent(mouseEvent, platformEvent.PointerId(),
+                                                                  platformEvent.PointerType(), element))
+        {
+          return pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
+                   platformEvent.PointerId())
+                   ? ShouldIgnoreMouseEvent::Yes
+                   : ShouldIgnoreMouseEvent::No;
+        }
+
         if (auto pointerEvent = pointerCaptureController.PointerEventForMouseEvent(
               mouseEvent, platformEvent.PointerId(), platformEvent.PointerType()))
         {
-          // https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
-          // The user agent MUST dispatch the pointerrawupdate event before the corresponding pointermove.
-          if (pointerEvent->Type() == EventNames::PointerMove)
+          // A chorded button's press or release is a pointermove.
+          if (!isMove && pointerEvent->Type() == EventNames::PointerMove)
           {
-            pointerCaptureController.DispatchEvent(
-              *PointerEvent::Create(DOMStringAtom(EventNames::PointerRawUpdate), pointerEvent->ButtonType(),
-                                    mouseEvent, platformEvent.PointerId(), platformEvent.PointerType()),
-              &element);
+            pointerCaptureController.DispatchPointerRawUpdateForMouseEvent(
+              mouseEvent, platformEvent.PointerId(), platformEvent.PointerType(), element);
           }
 
           pointerCaptureController.DispatchEvent(*pointerEvent, &element);
