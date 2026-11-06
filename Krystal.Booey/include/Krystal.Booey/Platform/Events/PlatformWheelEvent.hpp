@@ -53,6 +53,7 @@ namespace krys::boo
     float _deltaY {0};
     float _wheelTicksX {0};
     float _wheelTicksY {0};
+    bool _isTouchScroll {false};
 
   public:
     PlatformWheelEvent() noexcept : PlatformEvent(Type::Wheel)
@@ -78,6 +79,18 @@ namespace krys::boo
       std::swap(copy._deltaX, copy._deltaY);
       std::swap(copy._wheelTicksX, copy._wheelTicksY);
       return copy;
+    }
+
+    /// @brief This event, as a step of a touch's pan or fling: a gesture that snaps only once it ends.
+    KRYS_NODISCARD PlatformWheelEvent CopyAsTouchScroll() const noexcept
+    {
+      PlatformWheelEvent copy = *this;
+      copy._isTouchScroll = true;
+      return copy;
+    }
+    KRYS_NODISCARD bool IsTouchScroll() const noexcept
+    {
+      return _isTouchScroll;
     }
 
     KRYS_NODISCARD PlatformWheelEvent CopyWithDelta(FloatSize delta) const noexcept

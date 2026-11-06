@@ -2532,8 +2532,14 @@ namespace krys::boo::dom
 
   void Document::RunScrollSteps() noexcept
   {
-    // FIXME: Deferring the scroll events (shouldDeferScrollEvents), servicing scroll animations and scroll
-    // anchoring, once there are those.
+    // Service the smooth scrolls before dispatching the events for them.
+    if (RefPtr<LocalFrameView> frameView = ShareRefPtr(View()))
+    {
+      frameView->ServiceScrollAnimations(html::EventLoop::Current().Now());
+    }
+
+    // FIXME: Deferring the scroll events (shouldDeferScrollEvents) and scroll anchoring, once there are
+    // those.
 
     // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/66.
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});

@@ -96,6 +96,8 @@ namespace krys::boo
     /// @brief Renderers that paint a background fixed to the viewport (`background-attachment: fixed`): the
     /// contents can't be moved when the view scrolls. Keyed by address; renderers remove themselves.
     HashSet<const RenderElement *> _slowRepaintObjects;
+    /// @brief The areas with a smooth scroll to service.
+    List<WeakPtr<ScrollableArea>> _scrollableAreasForAnimatedScroll;
     /// @brief Renderers fixed or sticky to the viewport, which stay put when the contents move. Keyed by
     /// address; renderers remove themselves.
     HashSet<const RenderLayerModelObject *> _viewportConstrainedObjects;
@@ -475,13 +477,22 @@ namespace krys::boo
     /// @brief Gets the view ready for a layout of @p layoutRoot: its scrollbar modes, and marking the root
     /// (or the body) for layout if the size content is laid out at changed.
     void WillDoLayout(const RenderElement &layoutRoot) noexcept;
+    /// @brief The steps after layout for scroll snapping: finds the view's snap positions, and re-snaps to
+    /// them.
+    void UpdateSnapOffsetsAndResnap() noexcept;
+    /// @brief Has @p area's smooth scroll serviced in the frames to come.
+    void AddScrollableAreaForAnimatedScroll(ScrollableArea &area) noexcept;
+    /// @brief Moves the smooth scrolls to where they are at @p now.
+    void ServiceScrollAnimations(MonotonicTime::duration now) noexcept;
+    void RegisterForAnimatedScroll() noexcept override;
 
     /// @brief Whether the user can scroll the view: it has overflow, and `overflow` doesn't hide both axes.
     KRYS_NODISCARD bool IsScrollable() const noexcept;
     /// @brief Scrolls the view by a step of @p granularity in a direction relative to the document's writing
     /// mode.
     /// @return Whether it scrolled.
-    bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity) noexcept;
+    bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                       ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
     /// @brief Whether the root's writing mode is horizontal (its blocks stack vertically).
     KRYS_NODISCARD bool IsVerticalDocument() const noexcept;
     KRYS_NODISCARD bool IsFlippedDocument() const noexcept;

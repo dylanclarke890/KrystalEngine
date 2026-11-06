@@ -68,10 +68,13 @@
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -3770,8 +3773,7 @@ namespace krys::boo::dom
     auto scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(options, 0, 0);
     *scrollToOptions.Left += ScrollLeft();
     *scrollToOptions.Top += ScrollTop();
-    // FIXME: Directional scroll snapping with the original delta, once there's scroll snapping.
-    ScrollTo(scrollToOptions);
+    ScrollTo(scrollToOptions, ScrollSnapPointSelectionMethod::Directional);
   }
 
   void Element::ScrollBy(double x, double y) noexcept
@@ -3780,6 +3782,12 @@ namespace krys::boo::dom
   }
 
   void Element::ScrollTo(const ScrollToOptions &options) noexcept
+  {
+    ScrollTo(options, ScrollSnapPointSelectionMethod::Closest);
+  }
+
+  void Element::ScrollTo(const ScrollToOptions &options,
+                         ScrollSnapPointSelectionMethod snapPointSelectionMethod) noexcept
   {
     auto &document = NodeDocument();
 
@@ -3804,8 +3812,14 @@ namespace krys::boo::dom
         return false;
       }
 
-      // FIXME: Elements that have ever been smooth-scrolled (hasEverHadSmoothScroll), once there's smooth
-      // scrolling.
+      // A smooth scroll has to be stopped.
+      auto *box = RenderBoxOf(*this);
+      auto *scrollableArea = box && box->Layer() ? box->Layer()->GetScrollableArea() : nullptr;
+      if (scrollableArea && scrollableArea->GetScrollAnimationStatus() == ScrollAnimationStatus::Animating)
+      {
+        return false;
+      }
+
       return SavedLayerScrollPosition().IsZero();
     };
 
@@ -3822,7 +3836,7 @@ namespace krys::boo::dom
       // invoke scroll() on window with options as the only argument, and terminate these steps.
       if (auto *window = document.Window())
       {
-        window->ScrollTo(options);
+        window->ScrollTo(options, snapPointSelectionMethod);
       }
       return;
     }
@@ -3854,8 +3868,11 @@ namespace krys::boo::dom
     IntPoint scrollPosition(ClampToInteger(*scrollToOptions.Left * renderer->Style().UsedZoom()),
                             ClampToInteger(*scrollToOptions.Top * renderer->Style().UsedZoom()));
 
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
-    renderer->SetScrollPosition(scrollPosition, ScrollPositionChangeOptions::CreateProgrammatic());
+    auto animated = UseSmoothScrolling(scrollToOptions.Behavior.value_or(ScrollBehavior::Auto), this)
+                      ? ScrollIsAnimated::Yes
+                      : ScrollIsAnimated::No;
+    renderer->SetScrollPosition(scrollPosition, ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
+                                                  animated, snapPointSelectionMethod));
   }
 
   void Element::ScrollTo(double x, double y) noexcept
@@ -4160,8 +4177,8 @@ namespace krys::boo::dom
                                                    LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
-    auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+    auto options = ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
+      UseSmoothScrolling(ScrollBehavior::Auto, this) ? ScrollIsAnimated::Yes : ScrollIsAnimated::No);
 
     if (document.ScrollingElement() == this)
     {
@@ -4190,8 +4207,8 @@ namespace krys::boo::dom
                                                    LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
-    auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+    auto options = ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
+      UseSmoothScrolling(ScrollBehavior::Auto, this) ? ScrollIsAnimated::Yes : ScrollIsAnimated::No);
 
     if (document.ScrollingElement() == this)
     {

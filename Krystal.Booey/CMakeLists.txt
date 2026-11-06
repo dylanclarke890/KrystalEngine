@@ -2444,6 +2444,7 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp
   include/Krystal.Booey/Page/ScrollBehavior.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp
   include/Krystal.Booey/Page/ScrollOptions.hpp
   include/Krystal.Booey/Page/Settings.hpp
   include/Krystal.Booey/Page/SpatialNavigation.hpp
@@ -2469,6 +2470,7 @@ set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/ResizeObserver/ResizeObserver.cpp
   src/Page/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp
+  src/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   src/Page/Settings.cpp
   src/Page/SpatialNavigation.cpp
   src/Page/VisualViewport.cpp
@@ -2527,6 +2529,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/PathStrokeStrategy.hpp
   include/Krystal.Booey/Platform/PlatformStrategies.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp
+  include/Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp
   include/Krystal.Booey/Platform/Scrolling/Scrollbar.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp
@@ -2572,6 +2575,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Pasteboard/StaticPasteboard.cpp
   src/Platform/PlatformStrategies.cpp
   src/Platform/Scrolling/ScrollableArea.cpp
+  src/Platform/Scrolling/ScrollAnimator.cpp
   src/Platform/Scrolling/ScrollAlignment.cpp
   src/Platform/Scrolling/Scrollbar.cpp
   src/Platform/Scrolling/ScrollbarTheme.cpp

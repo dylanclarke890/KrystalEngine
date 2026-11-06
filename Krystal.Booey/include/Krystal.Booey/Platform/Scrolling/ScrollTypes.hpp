@@ -5,8 +5,6 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
-// FIXME: The snapping types come with scroll snapping.
-
 namespace krys::boo
 {
   // scrollPosition is in content coordinates (0,0 is at scrollOrigin), so may have negative components.
@@ -115,6 +113,8 @@ namespace krys::boo
   {
     Directional,
     Closest,
+    /// @brief It doesn't snap: an autoscroll moves bit by bit, so it would never leave a snap position.
+    None,
   };
 
   enum class ScrollbarMode : uint8
@@ -149,6 +149,14 @@ namespace krys::boo
     KRYS_NODISCARD static ScrollPositionChangeOptions CreateProgrammatic() noexcept
     {
       return {ScrollType::Programmatic};
+    }
+
+    KRYS_NODISCARD static ScrollPositionChangeOptions
+      CreateProgrammaticWithOptions(ScrollIsAnimated animated,
+                                    ScrollSnapPointSelectionMethod snapPointSelectionMethod =
+                                      ScrollSnapPointSelectionMethod::Closest) noexcept
+    {
+      return {ScrollType::Programmatic, ScrollClamping::Clamped, animated, snapPointSelectionMethod};
     }
 
     KRYS_NODISCARD static ScrollPositionChangeOptions CreateUser() noexcept

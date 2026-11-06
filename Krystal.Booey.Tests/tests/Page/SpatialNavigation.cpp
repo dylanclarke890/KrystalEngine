@@ -63,6 +63,22 @@ namespace krys::boo::tests
     };
 
     /// @brief Turns spatial navigation on while it lives (the settings are shared).
+    /// @brief The keyboard scrolling at once, for what's about where it goes rather than how.
+    struct ScrollAnimatorOff
+    {
+      Settings &Value;
+
+      explicit ScrollAnimatorOff(Settings &settings) noexcept : Value(settings)
+      {
+        Value.ScrollAnimatorEnabled = false;
+      }
+
+      ~ScrollAnimatorOff() noexcept
+      {
+        Value.ScrollAnimatorEnabled = true;
+      }
+    };
+
     struct SpatialNavigationOn
     {
       Settings &Value;
@@ -212,6 +228,7 @@ namespace krys::boo::tests
       NavigationFixture fixture {Buttons({{"a", 20, 20}, {"b", 20, 100}})
                                  + u8"<div style=height:1000px></div>"};
       fixture.Focus(u8"a");
+      ScrollAnimatorOff animatorOff {fixture.Document->GetSettings()};
       CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));
       CHECK(fixture.Focused() == "a");
       CHECK(fixture.Frame->View()->GetScrollPosition() == ScrollPosition(0, 40));

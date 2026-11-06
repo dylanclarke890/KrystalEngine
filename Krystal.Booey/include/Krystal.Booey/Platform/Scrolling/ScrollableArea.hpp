@@ -11,15 +11,16 @@
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
   class PlatformWheelEvent;
+  class ScrollAnimator;
   /// @brief Something that scrolls: a scroll position within its contents, its scroll origin, and its
   /// scrollbars.
-  // FIXME: The scroll animator and scrollbars controller, scroll snapping, scroll anchoring and compositing
-  // layers: scrolls are immediate.
+  // FIXME: The scrollbars controller, scroll anchoring and compositing layers.
   class ScrollableArea : public CanMakeWeakPtr<ScrollableArea>, public CanMakeCheckedPtr<ScrollableArea>
   {
     KRYS_NON_COPY_MOVABLE(ScrollableArea);
@@ -57,6 +58,8 @@ namespace krys::boo
     ScrollAnimationStatus _scrollAnimationStatus {ScrollAnimationStatus::NotAnimating};
     bool _scrollOriginChanged {false};
     bool _isAwaitingScrollend {false};
+    bool _isTouchScrollInProgress {false};
+    UniquePtr<ScrollAnimator> _scrollAnimator;
 
   public:
     KRYS_NODISCARD virtual bool IsScrollView() const noexcept
@@ -73,19 +76,52 @@ namespace krys::boo
     void ScrollToOffsetWithoutAnimation(const IntPoint &offset,
                                         ScrollClamping clamping = ScrollClamping::Clamped) noexcept;
     void ScrollToOffsetWithoutAnimation(ScrollbarOrientation orientation, float offset) noexcept;
+    /// @brief Scrolls smoothly to @p position, over the next frames: the area's `AnimatedScrollDidEnd` and
+    /// `ScrollDidEnd` follow. A later call retargets it, and a scroll without animation stops it.
+    void ScrollToPositionWithAnimation(const ScrollPosition &position,
+                                       const ScrollPositionChangeOptions &options) noexcept;
+    /// @brief Stops a smooth scroll where it has got to, without calling `ScrollDidEnd`.
+    /// @return Whether there was one.
+    bool StopAnimatedScroll() noexcept;
+    /// @brief The animation has run to its end.
+    void DidStopAnimatedScroll() noexcept;
 
+    KRYS_NODISCARD ScrollAnimator &GetScrollAnimator() noexcept;
+    KRYS_NODISCARD ScrollAnimator *ExistingScrollAnimator() const noexcept
+    {
+      return _scrollAnimator.get();
+    }
+
+    /// @brief Forgets the area's snap positions: it isn't a scroll snap container.
+    void ClearSnapOffsets() noexcept;
+    /// @brief @p offset, moved to where a scroll to it snaps.
+    KRYS_NODISCARD ScrollOffset ScrollOffsetAdjustedForSnapping(
+      const ScrollOffset &offset, ScrollSnapPointSelectionMethod method) const noexcept;
+    /// @see ScrollAnimator::ResnapAfterLayout
+    void ResnapAfterLayout() noexcept;
+    /// @brief Snaps on the axis of @p orientation's scrollbar, whose thumb was let go.
+    void DoPostThumbMoveSnapping(ScrollbarOrientation orientation) noexcept;
+    /// @brief A touch's pan or fling has ended: snaps to the closest position.
+    void DidEndTouchScroll() noexcept;
+    KRYS_NODISCARD bool IsTouchScrollInProgress() const noexcept
+    {
+      return _isTouchScrollInProgress;
+    }
     /// @brief Scrolls by @p stepCount steps of @p granularity (a line, a page, the document or a pixel of the
     /// scrollbar in @p direction).
     /// @return Whether it scrolled: false without a scrollbar in that direction, or at its end.
-    virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity,
-                        uint32 stepCount = 1) noexcept;
-    /// @brief Scrolls by @p delta pixels on @p axis, as a user scroll.
+    virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
+                        ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
+    /// @brief Scrolls by @p delta pixels on @p axis, as a user scroll, on from where a smooth scroll is
+    /// going, and to the next snap position that way if there is one.
     /// @return Whether it scrolled.
-    bool SingleAxisScroll(ScrollEventAxis axis, float delta) noexcept;
+    bool SingleAxisScroll(ScrollEventAxis axis, float delta,
+                          ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
 
     /// @brief Scrolls by @p wheelEvent's deltas, as a user scroll.
     /// @return Whether it scrolled: false if it can't scroll, or is at its end in the event's direction.
-    // FIXME: Animated scrolling, momentum and scroll snapping, once there are those.
+    // FIXME: Animated scrolling and momentum outside a scroll snap container. Without gesture phases, each
+    // wheel event snaps, even a touchpad's.
     virtual bool HandleWheelEventForScrolling(const PlatformWheelEvent &wheelEvent) noexcept;
     KRYS_NODISCARD virtual bool IsScrollableOrRubberbandable() const noexcept = 0;
 
@@ -363,6 +399,11 @@ namespace krys::boo
       return false;
     }
 
+    /// @brief Has the area's scroll animation serviced in the frames to come.
+    virtual void RegisterForAnimatedScroll() noexcept
+    {
+    }
+
     virtual void AnimatedScrollDidEnd() noexcept
     {
     }
@@ -376,8 +417,8 @@ namespace krys::boo
     }
 
   protected:
-    ScrollableArea() noexcept = default;
-    virtual ~ScrollableArea() noexcept = default;
+    ScrollableArea() noexcept;
+    virtual ~ScrollableArea() noexcept;
 
     void SetScrollOrigin(const IntPoint &origin) noexcept;
     void ResetScrollOriginChanged() noexcept

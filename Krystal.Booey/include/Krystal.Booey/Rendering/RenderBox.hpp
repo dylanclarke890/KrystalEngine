@@ -780,10 +780,12 @@ namespace krys::boo
     /// element of the box that scrolled.
     /// @return Whether something scrolled.
     virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                        dom::Element **stopElement = nullptr) noexcept;
+                        dom::Element **stopElement = nullptr,
+                        ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
     /// @brief As `Scroll`, in a direction relative to the box's writing mode.
     virtual bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                               uint32 stepCount = 1, dom::Element **stopElement = nullptr) noexcept;
+                               uint32 stepCount = 1, dom::Element **stopElement = nullptr,
+                               ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
     KRYS_NODISCARD bool RequiresLayerWithScrollableArea() const noexcept;
     KRYS_NODISCARD virtual int32 ScrollLeft() const noexcept;
     KRYS_NODISCARD virtual int32 ScrollTop() const noexcept;
@@ -1104,7 +1106,7 @@ namespace krys::boo
 
   private:
     bool ScrollLayer(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                     dom::Element **stopElement) noexcept;
+                     dom::Element **stopElement, ScrollIsAnimated animated) noexcept;
 
     void AddOverflowWithRendererOffset(const RenderBox &renderer, LayoutSize offsetFromThis,
                                        EnumSet<ComputeOverflowOptions> options = {}) noexcept;

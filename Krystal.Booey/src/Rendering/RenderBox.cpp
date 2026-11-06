@@ -143,10 +143,13 @@ namespace krys::boo
       frame->GetEventHandler().StopAutoscrollTimer(true);
     }
 
-    // FIXME: Unregister the box's scroll snap positions, once there are any. (Anchors unregister in
-    // RenderBoxModelObject::WillBeDestroyed.)
+    // (Anchors unregister in RenderBoxModelObject::WillBeDestroyed.)
     if (HasInitializedStyle())
     {
+      if (Style().HasSnapPosition())
+      {
+        View().UnregisterBoxWithScrollSnapPositions(*this);
+      }
       if (Style().GetContainerType() != ContainerType::Normal)
       {
         View().UnregisterContainerQueryBox(*this);
@@ -289,7 +292,15 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Scroll snap positions and anchor-positioned boxes, once there are any.
+    // FIXME: Anchor-positioned boxes, once there are any.
+    if (newStyle.HasSnapPosition())
+    {
+      View().RegisterBoxWithScrollSnapPositions(*this);
+    }
+    else if (oldStyle && oldStyle->HasSnapPosition())
+    {
+      View().UnregisterBoxWithScrollSnapPositions(*this);
+    }
     if (newStyle.GetContainerType() != ContainerType::Normal)
     {
       View().RegisterContainerQueryBox(*this);
@@ -3994,10 +4005,10 @@ namespace krys::boo
   }
 
   bool RenderBox::ScrollLayer(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                              dom::Element **stopElement) noexcept
+                              dom::Element **stopElement, ScrollIsAnimated animated) noexcept
   {
     auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr;
-    if (scrollableArea && scrollableArea->Scroll(direction, granularity, stepCount))
+    if (scrollableArea && scrollableArea->Scroll(direction, granularity, stepCount, animated))
     {
       if (stopElement)
       {
@@ -4011,9 +4022,9 @@ namespace krys::boo
   }
 
   bool RenderBox::Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                         dom::Element **stopElement) noexcept
+                         dom::Element **stopElement, ScrollIsAnimated animated) noexcept
   {
-    if (ScrollLayer(direction, granularity, stepCount, stopElement))
+    if (ScrollLayer(direction, granularity, stepCount, stopElement, animated))
     {
       return true;
     }
@@ -4028,20 +4039,21 @@ namespace krys::boo
 
     if (nextScrollBlock && !nextScrollBlock->IsRenderView())
     {
-      return nextScrollBlock->Scroll(direction, granularity, stepCount, stopElement);
+      return nextScrollBlock->Scroll(direction, granularity, stepCount, stopElement, animated);
     }
 
     return false;
   }
 
   bool RenderBox::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                uint32 stepCount, dom::Element **stopElement) noexcept
+                                uint32 stepCount, dom::Element **stopElement,
+                                ScrollIsAnimated animated) noexcept
   {
     if (auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr)
     {
       if (scrollableArea->Scroll(
             LogicalToPhysical(direction, IsHorizontalWritingMode(), GetWritingMode().IsBlockFlipped()),
-            granularity, stepCount))
+            granularity, stepCount, animated))
       {
         if (stopElement)
         {
@@ -4059,7 +4071,7 @@ namespace krys::boo
     RenderBlock *b = ContainingBlock();
     if (b && !b->IsRenderView())
     {
-      return b->LogicalScroll(direction, granularity, stepCount, stopElement);
+      return b->LogicalScroll(direction, granularity, stepCount, stopElement, animated);
     }
     return false;
   }

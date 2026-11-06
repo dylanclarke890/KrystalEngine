@@ -192,7 +192,9 @@ Record a difference here when you make one, and remove it when Booey comes back 
 ### From Chrome
 
 - Scrollbars are classic, not overlay (`ScrollbarThemeAdwaita::UsesOverlayScrollbars` is false; FIXME): they always show and take layout space, 21 px for `auto` and `thin` and 0 for `none`, with a rounded thumb of at least 40 px and no buttons. Chrome's are 15 px, and overlays that fade on some platforms.
-- Wheel scrolling is immediate, with no animation. A notch is the system's lines (or a page) at 100/3 px per line, and Shift turns the vertical wheel horizontal. Keyboard scrolling moves 40 px for an arrow, a page for Page Up and Page Down, Space and Shift+Space, and to the ends for Home and End.
+- Wheel scrolling is immediate outside a scroll snap container, where Chrome animates it. A notch is the system's lines (or a page) at 100/3 px per line, and Shift turns the vertical wheel horizontal. Keyboard scrolling moves 40 px for an arrow, a page for Page Up and Page Down, Space and Shift+Space, and to the ends for Home and End, animated unless `Settings::ScrollAnimatorEnabled` is off, and with the timing of a smooth scroll, which isn't measured against Chrome's keyboard.
+- A smooth scroll takes Chrome's time, the square root of the distance in 60ths of a second up to 1.5 s, on a `cubic-bezier(0.4, 0, 0, 1)` fitted to Chrome's. A smooth scroll that's retargeted starts again from where it has got to, easing out, and its speed isn't carried over.
+- A snap area larger than its snapport snaps to its aligned position when a scroll lands outside it, where Chrome goes to the closest position in which it covers the snapport: both are valid snap positions. A snap position is within 30% of the snapport for `proximity`, which is the user agent's to choose.
 - Wheel events made by script don't scroll, as in Chrome.
 
 ## Text and fonts

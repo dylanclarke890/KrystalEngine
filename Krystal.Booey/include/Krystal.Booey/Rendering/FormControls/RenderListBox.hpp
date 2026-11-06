@@ -84,7 +84,8 @@ namespace krys::boo
     KRYS_NODISCARD uint32 Size() const noexcept;
 
     bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                dom::Element **stopElement = nullptr) noexcept override;
+                dom::Element **stopElement = nullptr,
+                ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept override;
 
     void ScrollDidEnd() noexcept final;
 
@@ -118,7 +119,8 @@ namespace krys::boo
     bool IsPointInOverflowControl(HitTestResult &result, const LayoutPoint &locationInContainer,
                                   const LayoutPoint &accumulatedOffset) noexcept override;
     bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                       dom::Element **stopElement = nullptr) noexcept override;
+                       dom::Element **stopElement = nullptr,
+                       ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept override;
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,

@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
@@ -51,6 +52,22 @@ namespace krys::boo::tests
           FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
         View().Paint(recorder, IntRect(IntPoint(), ViewSize));
         return recorder.TakeDisplayList()->AsText({});
+      }
+    };
+
+    /// @brief The keyboard scrolling at once, for what's about where it goes rather than how.
+    struct ScrollAnimatorOff
+    {
+      Settings &Value;
+
+      explicit ScrollAnimatorOff(Settings &settings) noexcept : Value(settings)
+      {
+        Value.ScrollAnimatorEnabled = false;
+      }
+
+      ~ScrollAnimatorOff() noexcept
+      {
+        Value.ScrollAnimatorEnabled = true;
       }
     };
 
@@ -661,6 +678,7 @@ namespace krys::boo::tests
         u8"<div style=height:200px></div></div>"};
     auto &view = fixture.View();
     auto &handler = fixture.Frame->GetEventHandler();
+    ScrollAnimatorOff animatorOff {fixture.Document->GetSettings()};
     auto down = [&]
     {
       return Key(handler, u8"ArrowDown", u8"Down", vk::Down);

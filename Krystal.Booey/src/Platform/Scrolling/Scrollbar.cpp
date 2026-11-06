@@ -407,6 +407,7 @@ namespace krys::boo
 
   bool Scrollbar::MouseUp(const PlatformMouseEvent &event) noexcept
   {
+    bool wasPressed = _pressedPart != NoPart;
     SetPressedPart(NoPart);
     _pressedPos = 0;
     _draggingDocument = false;
@@ -423,7 +424,10 @@ namespace krys::boo
       scrollableArea.MouseExitedScrollbar(this);
     }
 
-    // FIXME: Snapping after moving the thumb (doPostThumbMoveSnapping), once there's scroll snapping.
+    if (wasPressed)
+    {
+      scrollableArea.DoPostThumbMoveSnapping(_orientation);
+    }
     return true;
   }
 

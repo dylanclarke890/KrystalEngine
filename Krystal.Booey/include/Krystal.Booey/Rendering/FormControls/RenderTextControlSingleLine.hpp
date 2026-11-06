@@ -36,9 +36,11 @@ namespace krys::boo
     void SetScrollPosition(const ScrollPosition &position,
                            const ScrollPositionChangeOptions &options) noexcept override;
     bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                dom::Element **stopElement = nullptr) noexcept final;
+                dom::Element **stopElement = nullptr,
+                ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept final;
     bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                       dom::Element **stopElement = nullptr) noexcept final;
+                       dom::Element **stopElement = nullptr,
+                       ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept final;
 
   protected:
     KRYS_NODISCARD html::HTMLElement *ContainerElement() const noexcept;

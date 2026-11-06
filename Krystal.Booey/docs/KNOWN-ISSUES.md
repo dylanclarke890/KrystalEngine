@@ -79,7 +79,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `Style::PendingResources` has no user agent shadow tree support and no anonymous mode for masks (FIXME).
 - Anchor positioning has no fragmented flows: an anchor's rect isn't the bounding box of its fragments (FIXMEs in `AnchorPositionEvaluator.cpp`). Anchor-positioned viewport-constrained objects need a scrolling coordinator Booey doesn't have.
 - The switch control sheet (`htmlSwitchControl.css`) and the fullscreen sheet are never loaded (FIXMEs in `UserAgentStyle.cpp`).
-- `scroll-behavior` is read by `UseSmoothScrolling`, but nothing acts on it (no scroll animations).
 - `DidChangeViewportSize` doesn't visit pseudo-elements, as they aren't nodes (FIXME in `Scope.cpp`).
 - `RenderStyle::HyphenString()` gives the hyphen-minus for `hyphenate-character: auto` (FIXME: U+2010 when the primary font has the glyph, locale dependent).
 
@@ -142,7 +141,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - `GraphicsLayerTextureMapper` has no contents scaling filters, so composited images and texture canvases with `image-rendering: pixelated` or `crisp-edges` scale smoothly.
-- There are no scroll animations: no smooth scrolling (`scroll-behavior`, `scrollTo()` with `behavior`, animated keyboard scrolling), scroll snapping (including snapping after a thumb move and for wheel scrolling), scroll anchoring, autoscroll timers beyond the scrollbar repeat, wheel latching, kinetic scrolling, touchpad gesture states or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded.
+- There's no scroll anchoring, autoscroll timers beyond the scrollbar repeat, wheel latching, kinetic scrolling, touchpad gesture states or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
+- Scroll snapping without gesture phases: each wheel event goes to the next snap position, so a touchpad's small deltas page through a mandatory container. An autoscroll and a pan scroll don't snap, even when they end, until the next layout. Smooth scrolls aren't run for list boxes, whose keyboard and wheel scrolls stay immediate.
 - There are no overlay scrollbars, native scrollbars, scroll corners or resizers. `scrollbar-color` has no effect, and `ScrollableArea` has no animator or scrollbars controller.
 - `VisualViewport` is the layout viewport at the page scale and never scrolls within it, so its `scroll` event never fires (its `resize` does). There are no obscured insets, auto-sizing, base viewport layout size scale factor (FIXME in `VisualViewport.cpp`) or layout viewport separate from the scroll position. Pinch zoom is only the page scale (1 to 5) from the view's gesture recogniser.
 - There is no async scrolling or threaded compositing: no scrolling coordinator or tree, no reconciliation of the composited scroll position after user scrolls, and animations and scrolling run on the main thread. A sticky box stuck to the view therefore repaints its old and new rects on scroll instead of compositing.

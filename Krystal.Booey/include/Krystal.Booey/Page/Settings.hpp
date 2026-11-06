@@ -56,6 +56,8 @@ namespace krys::boo
     /// @brief Arrow keys moving the focus to the nearest focusable element in their direction, rather than
     /// scrolling.
     bool SpatialNavigationEnabled {false};
+    /// @brief The keyboard's scrolls being animated, as a user's preference may turn off.
+    bool ScrollAnimatorEnabled {true};
     /// @brief Serializing attribute values without escaping `<` and `>`, as before the HTML standard changed.
     bool HTMLLegacyAttributeValueSerializationEnabled {false};
     /// @brief Copying the whole body turning its fixed and absolute positioning into relative positioning, so

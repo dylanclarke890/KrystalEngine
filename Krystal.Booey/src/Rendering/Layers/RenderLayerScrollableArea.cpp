@@ -1,10 +1,14 @@
 ﻿#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
@@ -34,7 +38,8 @@ namespace krys::boo
 
   void RenderLayerScrollableArea::Clear() noexcept
   {
-    // FIXME: Unregister from the frame view's scrollable areas and animated scrolls, once it keeps them.
+    // FIXME: Unregister from the frame view's scrollable areas, once it keeps them.
+    (void)StopAnimatedScroll();
 
     auto &renderer = _layer.Renderer();
     if (auto *element = renderer.GetElement())
@@ -60,7 +65,6 @@ namespace krys::boo
     {
       // We save and restore only the scrollOffset as the other scroll values are recalculated.
       _scrollPosition = element->SavedLayerScrollPosition();
-      // FIXME: Tell the scroll animator the current position, once there is one.
     }
 
     element->SetSavedLayerScrollPosition({});
@@ -145,7 +149,9 @@ namespace krys::boo
     if (renderer.HasNonVisibleOverflow())
     {
       ScrollOffset newScrollOffset = GetScrollOffset() + delta;
-      (void)ScrollToOffset(newScrollOffset);
+      auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+      options.SnapPointSelectionMethod = ScrollSnapPointSelectionMethod::None;
+      (void)ScrollToOffset(newScrollOffset, options);
       if (scrolledArea)
       {
         *scrolledArea = this;
@@ -186,28 +192,53 @@ namespace krys::boo
   ScrollOffset RenderLayerScrollableArea::ScrollToOffset(const ScrollOffset &scrollOffset,
                                                          const ScrollPositionChangeOptions &options) noexcept
   {
-    // FIXME: Cancel running scroll animations, once there are any.
+    // A smooth scroll is retargeted by another, and stopped by any other.
+    bool animated = options.Animated == ScrollIsAnimated::Yes;
+    bool wasAnimating = GetScrollAnimationStatus() == ScrollAnimationStatus::Animating;
+    bool stoppedAnimation = !animated && StopAnimatedScroll();
     ScrollOffset clampedScrollOffset =
       options.Clamping == ScrollClamping::Clamped ? ClampScrollOffset(scrollOffset) : scrollOffset;
-    if (clampedScrollOffset == this->GetScrollOffset())
+    if (clampedScrollOffset == this->GetScrollOffset() && !(animated && wasAnimating))
     {
+      if (stoppedAnimation)
+      {
+        ScrollDidEnd();
+      }
       return clampedScrollOffset;
     }
 
     auto previousScrollType = CurrentScrollType();
     SetCurrentScrollType(options.Type);
 
-    // FIXME: Snap the offset (scrollOffsetAdjustedForSnapping) and scroll with an animation
-    // (ScrollIsAnimated::Yes), once there are scroll snapping and animated scrolls.
-    ScrollOffset snappedOffset = clampedScrollOffset;
+    ScrollOffset snappedOffset =
+      ScrollOffsetAdjustedForSnapping(clampedScrollOffset, options.SnapPointSelectionMethod);
     auto snappedPosition = ScrollPositionFromOffset(snappedOffset);
-    if (!RequestScrollToPosition(snappedPosition, options))
+    if (animated)
+    {
+      ScrollToPositionWithAnimation(snappedPosition, options);
+    }
+    else if (!RequestScrollToPosition(snappedPosition, options))
     {
       (void)ScrollToPositionWithoutAnimation(snappedPosition, options.Clamping);
     }
 
     SetCurrentScrollType(previousScrollType);
     return snappedOffset;
+  }
+
+  void RenderLayerScrollableArea::RegisterForAnimatedScroll() noexcept
+  {
+    _layer.Renderer().View().FrameView().AddScrollableAreaForAnimatedScroll(*this);
+  }
+
+  void RenderLayerScrollableArea::UpdateSnapOffsets() noexcept
+  {
+    auto *box = _layer.GetRenderBox();
+    if (!box || !box->GetElement())
+    {
+      return;
+    }
+    UpdateSnapOffsetsForScrollableArea(*this, *box, box->PaddingBoxRect());
   }
 
   void RenderLayerScrollableArea::ScrollTo(const ScrollPosition &position) noexcept
@@ -1179,7 +1210,7 @@ namespace krys::boo
     ComputeScrollDimensions();
     _layer.UpdateSelfPaintingLayer();
 
-    // FIXME: Update the snap offsets, once there's scroll snapping.
+    UpdateSnapOffsets();
 
     // FIXME: Don't clamp during user scrolls, once there are any.
     if (!box->IsHTMLMarquee())
@@ -1204,7 +1235,9 @@ namespace krys::boo
       (void)ScrollToPositionWithoutAnimation(IntPoint(GetScrollPosition()));
     }
 
-    // FIXME: The compositing updates, resnapping after layout and the inspector, once there are any.
+    ResnapAfterLayout();
+
+    // FIXME: The compositing updates and the inspector, once there are any.
   }
 
   bool RenderLayerScrollableArea::OverflowControlsIntersectRect(const IntRect &localRect) const noexcept
@@ -1300,8 +1333,13 @@ namespace krys::boo
 
     auto revealRect = GetRectToExposeForScrollIntoView(layerBounds, localExposeRect, options.AlignX,
                                                        options.AlignY, localVisiblityRect);
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
     auto scrollPositionOptions = ScrollPositionChangeOptions::CreateProgrammatic();
+    auto *frame = box->GetDocument().Frame();
+    if (frame && !frame->GetEventHandler().AutoscrollInProgress() && box->GetElement()
+        && UseSmoothScrolling(options.Behavior, box->GetElement()))
+    {
+      scrollPositionOptions.Animated = ScrollIsAnimated::Yes;
+    }
     if (auto result =
           UpdateScrollPositionForScrollIntoView(scrollPositionOptions, revealRect, localExposeRect))
     {

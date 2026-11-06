@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include <limits>
 
@@ -334,6 +335,12 @@ namespace krys::boo
 
   void LocalDOMWindow::ScrollTo(const ScrollToOptions &options) const noexcept
   {
+    ScrollTo(options, ScrollSnapPointSelectionMethod::Closest);
+  }
+
+  void LocalDOMWindow::ScrollTo(const ScrollToOptions &options,
+                                ScrollSnapPointSelectionMethod snapPointSelectionMethod) const noexcept
+  {
     if (!IsCurrentlyDisplayedInFrame())
     {
       return;
@@ -363,8 +370,12 @@ namespace krys::boo
     IntPoint layoutPos(view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Left)),
                        view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Top)));
 
-    // FIXME: Smooth scrolling (useSmoothScrolling) and scroll snapping, once there are scroll animations.
-    view->SetContentsScrollPosition(layoutPos, ScrollPositionChangeOptions::CreateProgrammatic());
+    auto animated = UseSmoothScrolling(scrollToOptions.Behavior.value_or(ScrollBehavior::Auto),
+                                       Document()->DocumentElement().get())
+                      ? ScrollIsAnimated::Yes
+                      : ScrollIsAnimated::No;
+    view->SetContentsScrollPosition(layoutPos, ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
+                                                 animated, snapPointSelectionMethod));
   }
 
   void LocalDOMWindow::ScrollBy(double x, double y) const noexcept
@@ -390,7 +401,7 @@ namespace krys::boo
     ScrollToOptions scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(options, 0, 0);
     *scrollToOptions.Left += view->MapFromLayoutToCSSUnits(view->ContentsScrollPosition().X());
     *scrollToOptions.Top += view->MapFromLayoutToCSSUnits(view->ContentsScrollPosition().Y());
-    ScrollTo(scrollToOptions);
+    ScrollTo(scrollToOptions, ScrollSnapPointSelectionMethod::Directional);
   }
 
   double LocalDOMWindow::DevicePixelRatio() const noexcept

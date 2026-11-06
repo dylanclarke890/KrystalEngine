@@ -228,6 +228,8 @@ namespace krys::boo
     Timer _fakeMouseMoveEventTimer;
     bool _hasScheduledCursorUpdate {false};
     bool _isHandlingWheelEvent {false};
+    /// @brief What a touch's pan or fling has scrolled, to snap when it ends.
+    List<WeakPtr<ScrollableArea>> _touchScrolledAreas;
     PlatformMouseEvent _lastPlatformMouseEvent;
     /// @brief The modifier keys of the latest mouse or keyboard event: the keys held as far as the page
     /// knows.
@@ -442,8 +444,7 @@ namespace krys::boo
     /// @brief Handles a turn of the mouse wheel: `wheel` at the element under the mouse, then, unless it's
     /// cancelled, a scroll of the nearest box that can scroll that way, or else the view.
     /// @return Whether the event was cancelled or scrolled something.
-    // FIXME: Latching, the delta filter, scroll snapping and gesture states come with touchpad gestures and
-    // scroll snapping.
+    // FIXME: Latching, the delta filter and gesture states come with touchpad gestures.
     bool HandleWheelEvent(const PlatformWheelEvent &event) noexcept;
     /// @brief The default action of a `wheel` event at @p startNode: scrolls the nearest enclosing box that
     /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops
@@ -456,6 +457,9 @@ namespace krys::boo
     /// event fires.
     /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
     bool HandleTouchScroll(const PlatformWheelEvent &event) noexcept;
+    /// @brief A touch's pan and its fling have ended: what they scrolled snaps.
+    void DidEndTouchScroll() noexcept;
+    KRYS_NODISCARD ScrollIsAnimated KeyboardScrollIsAnimated() const noexcept;
     KRYS_NODISCARD bool IsHandlingWheelEvent() const noexcept
     {
       return _isHandlingWheelEvent;
@@ -485,12 +489,14 @@ namespace krys::boo
     bool ScrollOverflow(ScrollDirection direction, ScrollGranularity granularity,
                         dom::Node *startingNode = nullptr) noexcept;
     bool LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                               dom::Node *startingNode = nullptr) noexcept;
+                               dom::Node *startingNode = nullptr,
+                               ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
     /// @brief As `ScrollOverflow`, or else scrolls the view.
     bool ScrollRecursively(ScrollDirection direction, ScrollGranularity granularity,
                            dom::Node *startingNode = nullptr) noexcept;
     bool LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                  dom::Node *startingNode = nullptr) noexcept;
+                                  dom::Node *startingNode = nullptr,
+                                  ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
 
   private:
     /// @brief Whether @p element has a listener for one of @p types, or its shadow root a capturing one.

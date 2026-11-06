@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -184,6 +185,9 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-window-scroll
     void ScrollTo(double x, double y) const noexcept;
+    /// @brief As `ScrollTo`, choosing the snap position by @p snapPointSelectionMethod.
+    void ScrollTo(const ScrollToOptions &options,
+                  ScrollSnapPointSelectionMethod snapPointSelectionMethod) const noexcept;
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-window-scroll
     void Scroll(const ScrollToOptions &options = {}) const noexcept

@@ -1208,6 +1208,10 @@ namespace krys::ui
         {
           // A touch stops the fling, and can't tap while it does.
           bool stoppedFling = std::exchange(_fling, null).has_value();
+          if (stoppedFling)
+          {
+            _frame->GetEventHandler().DidEndTouchScroll();
+          }
           ResetGesture();
           if (cancelled)
           {
@@ -1315,6 +1319,10 @@ namespace krys::ui
         {
           PanTo(position);
           StartFling();
+          if (!_fling)
+          {
+            _frame->GetEventHandler().DidEndTouchScroll();
+          }
         }
         ResetGesture();
         // A cancelled touchend stops the tap's mouse events, the click among them, and the long press's
@@ -1450,6 +1458,7 @@ namespace krys::ui
     if (!scrolled || std::hypot(velocity.Width(), velocity.Height()) < StopFlingVelocity)
     {
       _fling = null;
+      _frame->GetEventHandler().DidEndTouchScroll();
     }
   }
 

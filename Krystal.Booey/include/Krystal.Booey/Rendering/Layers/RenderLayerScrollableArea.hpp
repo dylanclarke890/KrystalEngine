@@ -15,7 +15,7 @@ namespace krys::boo
 
   /// @brief The scrollable area of a layer whose box can scroll its overflow: its scroll position and
   /// extents, and its scrollbars.
-  // FIXME: Marquees, touch, wheel and keyboard scrolling, animated scrolls, scroll snapping and anchoring,
+  // FIXME: Marquees, touch, wheel and keyboard scrolling, scroll anchoring,
   // composited scrolling, custom scroll corners and resizers, painting and hit testing of the overflow
   // controls, scroll events and scrolling into view come with input, animations, compositing and painting.
   class RenderLayerScrollableArea final : public ScrollableArea
@@ -189,6 +189,9 @@ namespace krys::boo
 
     // NOTE: This should only be called by the overridden setScrollOffset from ScrollableArea.
     void ScrollTo(const ScrollPosition &position) noexcept;
+    void RegisterForAnimatedScroll() noexcept override;
+    /// @brief Finds the snap positions of the boxes that snap in this one.
+    void UpdateSnapOffsets() noexcept;
 
     /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;

@@ -896,13 +896,13 @@ namespace krys::boo
   }
 
   bool RenderListBox::Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                             dom::Element **) noexcept
+                             dom::Element **, ScrollIsAnimated) noexcept
   {
     return ScrollableArea::Scroll(direction, granularity, stepCount);
   }
 
   bool RenderListBox::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                    uint32 stepCount, dom::Element **) noexcept
+                                    uint32 stepCount, dom::Element **, ScrollIsAnimated) noexcept
   {
     return ScrollableArea::Scroll(
       LogicalToPhysical(direction, GetWritingMode().IsHorizontal(), GetWritingMode().IsBlockFlipped()),

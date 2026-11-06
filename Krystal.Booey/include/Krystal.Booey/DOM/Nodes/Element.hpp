@@ -1542,6 +1542,9 @@ namespace krys::boo::dom
 #pragma endregion
 
   private:
+    void ScrollTo(const ScrollToOptions &options,
+                  ScrollSnapPointSelectionMethod snapPointSelectionMethod) noexcept;
+
     /// @brief The element's rare data, if it has any.
     KRYS_NODISCARD ElementRareData *GetElementRareData() const noexcept;
 

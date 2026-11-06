@@ -207,7 +207,8 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Scrollbar steps, and scroll snap containers once there's scroll snapping.
+    // FIXME: Scrollbar steps. (A scroll snap container's changes make it lay out, which finds its snap
+    // positions.)
   }
 
   bool RenderLayerModelObject::ApplyCachedClipAndScrollPosition(RepaintRects &,

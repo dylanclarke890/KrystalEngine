@@ -39,6 +39,7 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -1263,8 +1264,6 @@ namespace krys::boo
 
   bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    // FIXME: keyup stops animated keyboard scrolls, once there are any.
-
     if (event.Type() == EventNames::KeyDown)
     {
       if (_frame.Document()->GetEditor().HandleKeyboardEvent(event))
@@ -1318,8 +1317,7 @@ namespace krys::boo
   bool EventHandler::DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &, ScrollLogicalDirection direction,
                                                        ScrollGranularity granularity) noexcept
   {
-    // FIXME: Animated keyboard scrolling (keyboardScrollRecursively), once there are scroll animations.
-    return LogicalScrollRecursively(direction, granularity);
+    return LogicalScrollRecursively(direction, granularity, nullptr, KeyboardScrollIsAnimated());
   }
 
   bool EventHandler::DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept
@@ -1363,7 +1361,7 @@ namespace krys::boo
 
     ScrollLogicalDirection direction = event.ShiftKey() ? ScrollLogicalDirection::ScrollBlockDirectionBackward
                                                         : ScrollLogicalDirection::ScrollBlockDirectionForward;
-    if (LogicalScrollOverflow(direction, ScrollGranularity::Page))
+    if (LogicalScrollOverflow(direction, ScrollGranularity::Page, nullptr, KeyboardScrollIsAnimated()))
     {
       return true;
     }
@@ -1374,8 +1372,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Animated keyboard scrolling (keyboardScroll), once there are scroll animations.
-    return view->LogicalScroll(direction, ScrollGranularity::Page);
+    return view->LogicalScroll(direction, ScrollGranularity::Page, KeyboardScrollIsAnimated());
   }
 
   bool EventHandler::DefaultArrowEventHandler(dom::FocusDirection focusDirection,
@@ -1446,8 +1443,14 @@ namespace krys::boo
     return false;
   }
 
+  ScrollIsAnimated EventHandler::KeyboardScrollIsAnimated() const noexcept
+  {
+    return _frame.Document()->GetSettings().ScrollAnimatorEnabled ? ScrollIsAnimated::Yes
+                                                                  : ScrollIsAnimated::No;
+  }
+
   bool EventHandler::LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                           dom::Node *startingNode) noexcept
+                                           dom::Node *startingNode, ScrollIsAnimated animated) noexcept
   {
     RefPtr<dom::Node> node = ShareRefPtr(startingNode);
 
@@ -1464,7 +1467,7 @@ namespace krys::boo
     if (node)
     {
       auto *r = node->Renderer();
-      if (r && r->EnclosingBox().LogicalScroll(direction, granularity))
+      if (r && r->EnclosingBox().LogicalScroll(direction, granularity, 1, nullptr, animated))
       {
         SetFrameWasScrolledByUser();
         return true;
@@ -1491,20 +1494,20 @@ namespace krys::boo
   }
 
   bool EventHandler::LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                              dom::Node *startingNode) noexcept
+                                              dom::Node *startingNode, ScrollIsAnimated animated) noexcept
   {
     Ref frame = ShareRef(_frame);
 
     // The layout needs to be up to date to determine if we can scroll. We may be
     // here because of an onLoad event, in which case the final layout hasn't been performed yet.
     (void)frame->Document()->UpdateLayout();
-    if (LogicalScrollOverflow(direction, granularity, startingNode))
+    if (LogicalScrollOverflow(direction, granularity, startingNode, animated))
     {
       return true;
     }
 
     RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
-    return view && view->LogicalScroll(direction, granularity);
+    return view && view->LogicalScroll(direction, granularity, animated);
   }
 
   bool EventHandler::DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept
@@ -1926,7 +1929,6 @@ namespace krys::boo
       if (!element->DispatchWheelEvent(event, handling))
       {
         _isHandlingWheelEvent = false;
-        // FIXME: Scroll snapping (processWheelEventForScrollSnap), once there's scroll snapping.
         return true;
       }
     }
@@ -2062,6 +2064,17 @@ namespace krys::boo
                                                       ScrollableArea &scrollableArea) noexcept
   {
     // FIXME: Gesture states (updateWheelGestureState), with touchpad gestures.
+    if (wheelEvent.IsTouchScroll())
+    {
+      auto isArea = [&](const WeakPtr<ScrollableArea> &area)
+      {
+        return area.get() == &scrollableArea;
+      };
+      if (std::none_of(_touchScrolledAreas.begin(), _touchScrolledAreas.end(), isArea))
+      {
+        _touchScrolledAreas.push_back(CreateWeakPtr<ScrollableArea>(&scrollableArea));
+      }
+    }
     return scrollableArea.HandleWheelEventForScrolling(wheelEvent);
   }
 
@@ -2083,15 +2096,29 @@ namespace krys::boo
     return HandleWheelEventInAppropriateEnclosingBox(startNode, wheelEvent, filteredPlatformDelta);
   }
 
-  bool EventHandler::HandleTouchScroll(const PlatformWheelEvent &event) noexcept
+  void EventHandler::DidEndTouchScroll() noexcept
+  {
+    auto areas = krys::move(_touchScrolledAreas);
+    _touchScrolledAreas.clear();
+    for (auto &area : areas)
+    {
+      if (area)
+      {
+        area->DidEndTouchScroll();
+      }
+    }
+  }
+
+  bool EventHandler::HandleTouchScroll(const PlatformWheelEvent &wheelEvent) noexcept
   {
     Ref frame = ShareRef(_frame);
     RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
     RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
-    if (!document || !view || (!event.DeltaX() && !event.DeltaY()))
+    if (!document || !view || (!wheelEvent.DeltaX() && !wheelEvent.DeltaY()))
     {
       return false;
     }
+    auto event = wheelEvent.CopyAsTouchScroll();
 
     SetFrameWasScrolledByUser();
 

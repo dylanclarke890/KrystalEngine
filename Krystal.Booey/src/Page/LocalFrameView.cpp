@@ -21,9 +21,12 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
@@ -1333,9 +1336,11 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity) noexcept
+  bool LocalFrameView::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                                     ScrollIsAnimated animated) noexcept
   {
-    return Scroll(LogicalToPhysical(direction, IsVerticalDocument(), IsFlippedDocument()), granularity);
+    return Scroll(LogicalToPhysical(direction, IsVerticalDocument(), IsFlippedDocument()), granularity, 1,
+                  animated);
   }
 
   bool LocalFrameView::IsVerticalDocument() const noexcept
@@ -1811,13 +1816,19 @@ namespace krys::boo
       GetPossiblyFixedRectToExpose(viewRect, targetRect, isFixed, options.AlignX, options.AlignY);
 
     // Avoid scrolling to the rounded value of revealRect.location() if we don't actually need to scroll
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations. (Only scrolling
-    // forward, OnlyAllowForwardScrolling, is for find in page, which there isn't; see DIFFERENCES.md.)
+    // (Only scrolling forward, OnlyAllowForwardScrolling, is for find in page, which there isn't; see
+    // DIFFERENCES.md.)
     if (revealRect != viewRect)
     {
       ScrollOffset clampedScrollPosition =
         RoundedIntPoint(revealRect.Location()).ConstrainedBetween(minScrollPosition, maxScrollPosition);
-      SetScrollPosition(clampedScrollPosition, ScrollPositionChangeOptions::CreateProgrammatic());
+      auto scrollPositionOptions = ScrollPositionChangeOptions::CreateProgrammatic();
+      if (!Frame().GetEventHandler().AutoscrollInProgress() && element
+          && UseSmoothScrolling(options.Behavior, element))
+      {
+        scrollPositionOptions.Animated = ScrollIsAnimated::Yes;
+      }
+      SetScrollPosition(clampedScrollPosition, scrollPositionOptions);
     }
 
     // FIXME: Scrolling the client's containing scroll views (scrollContainingScrollViewsToRevealRect).
@@ -1962,12 +1973,19 @@ namespace krys::boo
     _maintainScrollPositionAnchor = nullptr;
     CancelScheduledScrolls();
 
-    // FIXME: Snapping, once there's scroll snapping; animated scrolls (scrollToPositionWithAnimation), once
-    // there are scroll animations.
-    auto position = ScrollPositionFromOffset(scrollOffset);
+    auto position = ScrollPositionFromOffset(
+      ScrollOffsetAdjustedForSnapping(scrollOffset, options.SnapPointSelectionMethod));
+
+    if (options.Animated == ScrollIsAnimated::Yes)
+    {
+      ScrollToPositionWithAnimation(position, options);
+      SetCurrentScrollType(oldScrollType);
+      return;
+    }
 
     // ScrollView::setScrollPosition.
-    // FIXME: Prohibiting scrolling and stopping scroll animations, once there are those.
+    // FIXME: Prohibiting scrolling, once something can.
+    bool stoppedAnimation = StopAnimatedScroll();
     auto newScrollPosition =
       options.Clamping == ScrollClamping::Clamped ? AdjustScrollPositionWithinRange(position) : position;
     bool scrollPositionChanged = newScrollPosition != GetScrollPosition();
@@ -1978,6 +1996,10 @@ namespace krys::boo
       {
         UpdateScrollbars(newScrollPosition);
       }
+    }
+    if (stoppedAnimation && !scrollPositionChanged)
+    {
+      ScrollDidEnd();
     }
 
     SetCurrentScrollType(oldScrollType);
@@ -2346,6 +2368,71 @@ namespace krys::boo
     SetIsAwaitingScrollend(true);
     Frame().GetEventHandler().ScheduleScrollEvent();
     Frame().GetEventHandler().DispatchFakeMouseMoveEventSoon();
+  }
+
+  void LocalFrameView::UpdateSnapOffsetsAndResnap() noexcept
+  {
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    auto *rootRenderer = documentElement ? DynamicDowncast<RenderBox>(documentElement->Renderer()) : nullptr;
+    if (!rootRenderer || rootRenderer->Style().GetScrollSnapType().IsNone())
+    {
+      ClearSnapOffsets();
+      return;
+    }
+
+    // Snap positions are found relative to the scroll container's padding box, but the view's viewport
+    // includes the root's margins.
+    LayoutRect viewport(LayoutPoint(), BaseLayoutViewportSize());
+    viewport.Move(-rootRenderer->MarginLeft(), -rootRenderer->MarginTop());
+    UpdateSnapOffsetsForScrollableArea(*this, *rootRenderer, viewport);
+    ResnapAfterLayout();
+  }
+
+  void LocalFrameView::RegisterForAnimatedScroll() noexcept
+  {
+    AddScrollableAreaForAnimatedScroll(*this);
+  }
+
+  void LocalFrameView::AddScrollableAreaForAnimatedScroll(ScrollableArea &area) noexcept
+  {
+    auto isArea = [&](const WeakPtr<ScrollableArea> &existing)
+    {
+      return existing.get() == &area;
+    };
+    if (std::none_of(_scrollableAreasForAnimatedScroll.begin(), _scrollableAreasForAnimatedScroll.end(),
+                     isArea))
+    {
+      _scrollableAreasForAnimatedScroll.push_back(CreateWeakPtr<ScrollableArea>(&area));
+    }
+    if (auto *document = Frame().Document())
+    {
+      document->ScheduleRenderingUpdate(RenderingUpdateStep::Scroll);
+    }
+  }
+
+  void LocalFrameView::ServiceScrollAnimations(MonotonicTime::duration now) noexcept
+  {
+    auto areas = krys::move(_scrollableAreasForAnimatedScroll);
+    _scrollableAreasForAnimatedScroll.clear();
+    bool inProgress = false;
+    for (auto &weakArea : areas)
+    {
+      auto *area = weakArea.get();
+      auto *animator = area ? area->ExistingScrollAnimator() : nullptr;
+      if (animator && animator->ServiceScrollAnimation(now))
+      {
+        inProgress = true;
+        _scrollableAreasForAnimatedScroll.push_back(krys::move(weakArea));
+      }
+    }
+    if (inProgress)
+    {
+      if (auto *document = Frame().Document())
+      {
+        document->ScheduleRenderingUpdate(RenderingUpdateStep::Scroll);
+      }
+    }
   }
 
   void LocalFrameView::ScrollDidEnd() noexcept

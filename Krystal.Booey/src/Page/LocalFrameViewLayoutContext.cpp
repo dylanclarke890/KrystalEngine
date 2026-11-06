@@ -246,6 +246,7 @@ namespace krys::boo
     _frameView.ScheduleScrollToAnchor();
     _frameView.ScheduleResizeEventIfNeeded();
     _frameView.LayoutOrVisualViewportChanged();
+    _frameView.UpdateSnapOffsetsAndResnap();
   }
 
   bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept

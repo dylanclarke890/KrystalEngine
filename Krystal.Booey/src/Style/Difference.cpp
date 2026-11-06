@@ -346,7 +346,9 @@ namespace krys::boo::style
       return true;
     }
 
-    if (a.ScrollSnapType != b.ScrollSnapType)
+    // These move the snap positions, which are found in layout.
+    if (a.ScrollSnapType != b.ScrollSnapType || a.ScrollSnapAlign != b.ScrollSnapAlign
+        || a.ScrollSnapStop != b.ScrollSnapStop || a.ScrollMargin != b.ScrollMargin)
     {
       return true;
     }
