@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -9,6 +10,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 
 namespace krys::boo::style::tests
 {
@@ -252,5 +255,131 @@ namespace krys::boo::style::tests
     REQUIRE_FALSE(scope.HasPendingSheets());
     REQUIRE(scope.HasPendingUpdate());
     RunTasks();
+  }
+
+  TEST_CASE("Scope: a change of viewport size restyles the elements using viewport units", "[Style][Scope]")
+  {
+    ResolverFixture fixture(
+      u8"<!DOCTYPE html><style>body{margin:0}.v{display:block;width:50vw}.n{display:none}"
+      u8".f{display:block;width:10px}</style><div id=a class=v></div><div id=b class=f></div>"
+      u8"<div id=host></div>");
+    auto width = [&](dom::Element &element) -> int32
+    {
+      (void)fixture.Document->UpdateLayout();
+      return Downcast<html::HTMLElement>(element).OffsetWidth();
+    };
+    auto resize = [&](int32 viewportWidth)
+    {
+      fixture.Frame->View()->Resize({viewportWidth, 600});
+      (void)fixture.Document->UpdateLayout();
+    };
+    auto &a = *fixture.Document->GetElementById(u8"a");
+    auto &b = *fixture.Document->GetElementById(u8"b");
+    REQUIRE(width(a) == 400);
+
+    SECTION("one that has them from the start")
+    {
+      resize(1'000);
+      CHECK(width(a) == 500);
+      CHECK(width(b) == 10);
+      resize(600);
+      CHECK(width(a) == 300);
+    }
+
+    SECTION("one that gains and loses them")
+    {
+      REQUIRE_FALSE(b.SetAttribute(u8"class", u8"v").HasException());
+      CHECK(width(b) == 400);
+      resize(1'000);
+      CHECK(width(b) == 500);
+
+      REQUIRE_FALSE(b.SetAttribute(u8"class", u8"f").HasException());
+      CHECK(width(b) == 10);
+      resize(600);
+      CHECK(width(b) == 10);
+
+      REQUIRE_FALSE(b.SetAttribute(u8"class", u8"v").HasException());
+      CHECK(width(b) == 300);
+      resize(1'000);
+      CHECK(width(b) == 500);
+    }
+
+    SECTION("one that's hidden when the size changes, and shown after")
+    {
+      REQUIRE_FALSE(a.SetAttribute(u8"class", u8"n").HasException());
+      (void)fixture.Document->UpdateLayout();
+      resize(1'000);
+      REQUIRE_FALSE(a.SetAttribute(u8"class", u8"v").HasException());
+      CHECK(width(a) == 500);
+      resize(600);
+      CHECK(width(a) == 300);
+    }
+
+    SECTION("one that leaves the tree and returns")
+    {
+      Ref<dom::Element> kept = ShareRef(a);
+      auto parent = ShareRefPtr(a.ParentNode());
+      REQUIRE_FALSE(parent->RemoveChild(a).HasException());
+      resize(1'000);
+      REQUIRE_FALSE(parent->AppendChild(a).HasException());
+      CHECK(width(a) == 500);
+      resize(600);
+      CHECK(width(a) == 300);
+    }
+
+    SECTION("one that is destroyed")
+    {
+      {
+        Ref<dom::Element> removed = ShareRef(a);
+        REQUIRE_FALSE(a.ParentNode()->RemoveChild(a).HasException());
+      }
+      resize(1'000);
+      CHECK(width(b) == 10);
+    }
+
+    SECTION("more destroyed than the scope lets pile up")
+    {
+      auto &body = *fixture.Document->Body();
+      for (int i = 0; i < 200; ++i)
+      {
+        auto element = fixture.Document->CreateElement(u8"div").ReleaseValue();
+        REQUIRE_FALSE(element->SetAttribute(u8"class", u8"v").HasException());
+        REQUIRE_FALSE(body.AppendChild(*element).HasException());
+        (void)fixture.Document->UpdateLayout();
+        REQUIRE_FALSE(body.RemoveChild(*element).HasException());
+      }
+      resize(1'000);
+      CHECK(width(a) == 500);
+    }
+
+    SECTION("one in a shadow tree, and one moved into and out of it")
+    {
+      auto &host = *fixture.Document->GetElementById(u8"host");
+      auto shadow = host.AttachShadow({}).ReleaseValue();
+      auto style = fixture.Document->CreateElement(u8"style").ReleaseValue();
+      (void)style->TextContent(u8".s{display:block;width:25vw}");
+      REQUIRE_FALSE(shadow->AppendChild(*style).HasException());
+      auto inner = fixture.Document->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(inner->SetAttribute(u8"class", u8"s").HasException());
+      REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+      CHECK(width(*inner) == 200);
+      resize(1'000);
+      CHECK(width(*inner) == 250);
+
+      // In the shadow tree, a has no rule; with the same class as inner, it's using its units there.
+      Ref<dom::Element> kept = ShareRef(a);
+      REQUIRE_FALSE(a.SetAttribute(u8"class", u8"s v").HasException());
+      REQUIRE_FALSE(shadow->AppendChild(a).HasException());
+      CHECK(width(a) == 250);
+      resize(600);
+      CHECK(width(a) == 150);
+
+      REQUIRE_FALSE(a.ParentNode()->RemoveChild(a).HasException());
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(a).HasException());
+      CHECK(width(a) == 300);
+      resize(1'000);
+      CHECK(width(a) == 500);
+      CHECK(width(*inner) == 250);
+    }
   }
 }

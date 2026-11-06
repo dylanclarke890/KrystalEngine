@@ -1076,22 +1076,30 @@ namespace krys::boo::style
       return;
     }
 
-    // FIXME: Ideally, we should save the list of elements that have viewport units and only iterate over
-    // those.
     // FIXME: Pseudo-elements (nextIncludingPseudo), once they're nodes; their styles are in their element's
     // pseudo-style cache.
-    for (auto *node = rootNode->FirstChild(); node; node = dom::TreeQueries::Next(*node, rootNode))
+    std::erase_if(_elementsWithViewportUnits,
+                  [&](const auto &entry)
+                  {
+                    auto *element = entry.second.get();
+                    auto *style = element ? element->GetRenderStyle() : nullptr;
+                    // Those no longer using them, or no longer here, are noted again if they do.
+                    if (!style || !style->UsesViewportUnits() || &ForNode(*element) != this)
+                    {
+                      return true;
+                    }
+                    element->InvalidateStyle();
+                    return false;
+                  });
+  }
+
+  void Scope::AddElementWithViewportUnits(dom::Element &element) noexcept
+  {
+    _elementsWithViewportUnits.insert_or_assign(&element, CreateWeakPtr<dom::Element>(&element));
+    if (_elementsWithViewportUnits.size() >= _elementsWithViewportUnitsPruneSize)
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
-      if (!element)
-      {
-        continue;
-      }
-      auto *style = element->GetRenderStyle();
-      if (style && style->UsesViewportUnits())
-      {
-        element->InvalidateStyle();
-      }
+      std::erase_if(_elementsWithViewportUnits, [](const auto &entry) { return !entry.second.get(); });
+      _elementsWithViewportUnitsPruneSize = std::max(64uz, _elementsWithViewportUnits.size() * 2);
     }
   }
 

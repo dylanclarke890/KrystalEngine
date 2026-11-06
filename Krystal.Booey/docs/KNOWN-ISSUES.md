@@ -69,7 +69,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `Scope` iterates every element when viewport units change instead of a saved element list (FIXME in `Style/Scope/Scope.cpp`).
 - `Style::Scope::UpdateActiveStyleSheets` doesn't wait for a living render tree or defer the update while style is being resolved (FIXME in `Scope.cpp`).
 - `TreeResolver` has a FIXME that its animation handling is wrong when transitions and animations both run on one element.
 

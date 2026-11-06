@@ -142,6 +142,13 @@ namespace krys::boo::style
 
     Maybe<MediaQueryViewportState> _viewportStateOnPreviousMediaQueryEvaluation;
 
+    /// @brief The elements whose styles were resolved using viewport units, by address; the weak pointer
+    /// tells a destroyed element from a new one at the same address. Some may no longer use them or be in the
+    /// scope.
+    HashMap<dom::Element *, WeakPtr<dom::Element>> _elementsWithViewportUnits;
+    /// @brief The size at which to forget the destroyed elements among them.
+    size_t _elementsWithViewportUnitsPruneSize {64};
+
     UniquePtr<MatchResultCache> _matchResultCache;
 
     // Keyed by address; the weak pointer tells a destroyed container from a new one at the same address.
@@ -218,6 +225,9 @@ namespace krys::boo::style
 
     /// @brief Invalidates the styles that use viewport units, after the viewport changed size.
     void DidChangeViewportSize() noexcept;
+
+    /// @brief Notes that @p element, in the scope, has a resolved style that uses viewport units.
+    void AddElementWithViewportUnits(dom::Element &element) noexcept;
 
     KRYS_NODISCARD bool HasPendingUpdate() const noexcept
     {
