@@ -163,8 +163,7 @@ namespace krys::boo::css
     {
       return false;
     }
-    // If the header is valid we are not going to need to check the SecurityOrigin.
-    // FIXME: Valid mime type avoids the check too.
+    // A sheet whose header isn't valid isn't reused.
     if (!_hasSyntacticallyValidCSSHeader)
     {
       return false;
@@ -508,6 +507,7 @@ namespace krys::boo::css
 
   bool StyleSheetContents::ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
+    // Always strict about the sheet's type, in quirks mode too (see DIFFERENCES.md).
     auto mimeTypeCheckHint = CachedCSSStyleSheet::MIMETypeCheckHint::Strict;
     bool hasValidMIMEType = true;
     bool hasHTTPStatusOK = true;

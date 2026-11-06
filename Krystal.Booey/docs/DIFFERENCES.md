@@ -21,7 +21,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - The no-op legacy members are left out: `captureEvents()`/`releaseEvents()` on the window and the document, `document.clear()`, `Range.detach()`, `NodeIterator.detach()` and `window.blur()`.
 - Nodes are equal when their node types match, where the specification asks for the same interfaces: an `HTMLDocument` equals an `XMLDocument` with equal children.
 - Documents have no origin and no base URL override, so cloning a document copies neither: the copy's base URL comes from its own URL and `<base>` element. `new Document()` skips setting its origin, and getting the base URL is the document base URL.
-- With no origins, there's no `document.domain` and nothing is refused as cross-origin: a linked style sheet's rules can always be read, a canvas is always origin-clean (`getImageData()` and `toDataURL()` throw no `SecurityError`), and a dragged image can always be dropped as a file (`EventHandler::CanDropCurrentlyDraggedImageAsFile`).
+- With no origins, there's no `document.domain` and nothing is refused as cross-origin: a linked style sheet's rules can always be read, a canvas and its patterns are always origin-clean (`getImageData()` and `toDataURL()` throw no `SecurityError`), `<use>` can load another file with no same-origin fetch mode, changing `crossorigin` reloads nothing, and a dragged image can always be dropped as a file (`EventHandler::CanDropCurrentlyDraggedImageAsFile`).
 - Adopt sets the node document and registry of every node in the subtree first, then enqueues the `adoptedCallback` reactions, then runs the adopting steps, where the specification does all three for each node in turn; so a node's adopting steps see the whole subtree moved.
 - There are no global objects, so `DocumentFragment`, `Text` and `Comment` are constructed with a document, as is a `ProcessingInstruction` (`ProcessingInstruction::Create`). `new Range()` is `Document::CreateRange`.
 - There's no XPath (`XPathEvaluator`, `XPathExpression`, `XPathResult`, `Document.evaluate()` and `createExpression()`) and no XSLT (`XSLTProcessor`).
@@ -128,6 +128,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `hyphenate-limit-chars` and `hyphenate-limit-lines` animate discretely, not by computed value type.
 - An unknown `::-webkit-*` pseudo-element is a parse error, where Selectors keeps it valid (matching nothing) for compatibility.
 - `CSSOMString` can't be null, so nullable attributes are empty for null (`Href()`, `Title()`), and the rule model can't tell an empty `supports()` from none (so `@import "a" supports()` serialises without it); `CSSPropertyRule` omits an empty `syntax`.
+- Style sheets from `<link>`, `@import` and processing instructions are always strict about their type: they must be `text/css` or have no type, where the specifications take a same-origin sheet of any type in quirks mode.
 
 ## Style (cascade and computed values)
 

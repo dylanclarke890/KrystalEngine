@@ -826,8 +826,8 @@ namespace krys::boo::svg
     }
     else
     {
-      // FIXME: The fetch mode (same origin), destination (image) and content sniffing policy, once requests
-      // carry them.
+      // Requests carry no fetch mode, destination or content sniffing policy: there are no origins or HTTP
+      // semantics (see DIFFERENCES.md).
       CachedResourceRequest request(ResourceRequest(krys::move(externalDocumentURL)),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       auto requested = document->GetCachedResourceLoader().RequestSVGDocument(krys::move(request));

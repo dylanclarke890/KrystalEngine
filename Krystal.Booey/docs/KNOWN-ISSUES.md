@@ -38,8 +38,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `<select>`: list boxes have no pan scrolling, there is no customizable `<select>` (`appearance: base-select`; a `<button>` in a select is still a submit button and isn't inert, FIXME in `HTMLButtonElement.cpp`), and option changes are not reported to the chrome client (FIXME in `HTMLSelectElement.cpp`).
 - Fieldset legends are not placed in the border (see *Layout*).
 - `<input type=image>` doesn't load or show its image (FIXMEs in `ImageInputType.cpp`), so its dimensions come only from its box or its `width` and `height` attributes.
-- `<img>` lacks form association, `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` fires no events for video posters and has no `<object>` fallback (FIXMEs); `ImageLoader`'s reuse of available images has no preloads or origins (FIXMEs).
-- `HTMLLinkElement` recognises only `rel=stylesheet` and `alternate`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, icons, manifests, integrity, CORS, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
+- `<img>` lacks form association, `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` fires no events for video posters and has no `<object>` fallback (FIXMEs); `ImageLoader`'s reuse of available images has no preloads (FIXME).
+- `HTMLLinkElement` recognises only `rel=stylesheet` and `alternate`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, icons, manifests, integrity, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
 - `<a ping>` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported, and `<object>` and `<embed>` don't display their resources (no images, documents or plugins), so an object always shows its fallback content.
 - `<marquee>`'s `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` and `stop()` are not implemented, and marquees don't scroll (FIXME in `HTMLMarqueeElement.hpp`).
 - `autofocus` insertion steps run only for HTML elements, not SVG or MathML elements.
@@ -62,12 +62,11 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
 - `:lang()` has no document default language or Content-Language header (FIXME in `SelectorCheckerTestFunctions.cpp`); WebVTT elements don't use their cue's language.
 - `SelectorQuery` has no ID fast paths (rightmost-ID lookup, filtering the root by an ancestor ID, `[id=...]`; FIXMEs until tree scopes map IDs).
-- No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), user style sheets' `@import`s and load options aren't handled, and `ImportRule` has FIXMEs for opaque CORS sources.
+- No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), and user style sheets' `@import`s and load options aren't handled.
 - `RuleSet` doesn't clone `::cue` rules for the cue background box (no WebVTT cues).
 - `SizesAttributeParser` doesn't clear the font selector for font-relative units (FIXME).
 - `css::calc::Value::DoubleValueDeprecated` doesn't log when the tree needs conversion data (FIXME in `ValueEvaluation.cpp`).
 - There is no inspector: `:hover` can't be forced and there are no observer hooks for source ranges.
-- Imported sheets are always strict about the sheet type; quirks-mode lax loading for same-origin requests needs security origins (FIXME in `StyleSheetContents.cpp`).
 
 ## Style (cascade and computed values)
 
@@ -185,7 +184,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - External reference filters (`filter: url(doc.svg#f)`) are not loaded or watched (FIXME in `RenderLayerFilters.cpp`). `cross-fade()` and filter images load their inputs but do not follow them as clients (FIXMEs in `StyleCrossfadeImage.cpp`, `StyleFilterImage.cpp`), so they do not update when an input loads, and `StyleCrossfadeImage::Blend` always returns null, so `cross-fade()` percentages don't interpolate.
 - Style sheets have no `nosniff` or HTTP status checks (FIXMEs in `CachedCSSStyleSheet.cpp`).
-- `CachedResource` has no preloads, priorities or streaming and partial data; a resource decodes only once all its data has arrived. `CachedResourceLoader` loads images, fonts and style sheets only; other types, request counting, security checks and loads that do not delay the load event are FIXMEs. `MemoryCache` has one LRU list. `SharedBuffer` is one contiguous immutable buffer.
+- `CachedResource` has no preloads, priorities or streaming and partial data; a resource decodes only once all its data has arrived. `CachedResourceLoader` loads images, fonts and style sheets only; other types, request counting and loads that do not delay the load event are FIXMEs. `MemoryCache` has one LRU list. `SharedBuffer` is one contiguous immutable buffer.
 - Images decode synchronously: there is no decoding work queue, so `DecodingMode::Asynchronous` decodes at once and its callbacks run before the call returns (FIXMEs in `BitmapImageSource.cpp`). `HTMLImageElement` and `SVGImageElement` have no `decode()`.
 - Animated images (GIF, APNG, animated WebP) do not decode the next frame ahead, have no `allowsAnimation` override or system animation controls, and no controls for suspended documents or off-screen views.
 - Images are sRGB only: ICC profiles are ignored (FIXME in `PNGImageDecoder.cpp`), and there is no HDR, headroom or gain map support. `NativeImage` has no colour spaces.
@@ -194,7 +193,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `shape-outside: url()` does not use the image's alpha (see *Layout*).
 - `<video>`: `HTMLVideoElement::VideoWidth()` and `VideoHeight()` are unimplemented, a poster has no events or renderer, and there are no video decoders.
 - SVG images keep the light appearance and do not copy the embedding page's settings (generic font families, dark appearance), because image observers cannot reach them (FIXME in `SVGImage.cpp`). The page of an SVG image has no loader strategy, so it loads only `data:` URLs.
-- `SVGImageElement` does not reload when its CORS setting changes. `SVGUseElement` loading another file does not carry the fetch mode, destination or sniffing policy (FIXMEs).
 - Drags: no drag icon for a dragged image's file (`CreateDragImageIconForCachedImageFilename` returns none), the response's suggested filename is not parsed, colours cannot be dragged or dropped, and there are no text indicators or visible paths. `PasteboardImage` and `SelectionData` carry no image, so nothing prefers images' types when pasting.
 - Krystal.UI's `FileLoaderStrategy` reads files synchronously on the main thread (FIXME).
 
@@ -230,7 +228,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Drawing is sRGB with 8 bits a channel. `display-p3` is accepted and drawn as sRGB; `rgba-float16` `ImageData` reads and writes 8 bits a channel (no `Float16Array`); `PixelFormat` has RGBA8, BGRX8 and BGRA8 only. The `alpha` context setting is accepted but ignored (the context is always transparent).
 - `willReadFrequently` is stored but changes nothing: there is no unaccelerated backend to read from (FIXME in `CanvasBase.cpp`).
 - `<video>`, `ImageBitmap` and `OffscreenCanvas` are not `CanvasImageSource`s. `createImageBitmap`, `OffscreenCanvas`, `ImageBitmapRenderingContext`, `PaintRenderingContext2D`, WebGL and WebGPU contexts do not exist, and there are no context loss events.
-- `getImageData` throws no `SecurityError` and canvases and patterns are always origin-clean (FIXME).
 - An image drawn without a renderer uses its own orientation, not its computed style's (FIXME).
 - A canvas copy and every readback wait for the GPU.
 - Image buffers of a resolution scale other than 1 replay their transforms unscaled (FIXME on Krystal.UI's `ImageBufferRender2DBackend`); canvases' buffers are always scale 1.
