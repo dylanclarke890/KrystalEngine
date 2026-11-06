@@ -3698,7 +3698,28 @@ namespace krys::boo::dom
       return null;
     }
 
-    return Pair<RenderElement *, FloatRect> {renderer, UnitedBoundingBoxes(quads)};
+    // The union of the rects that have an area, or else the first.
+    // https://drafts.csswg.org/cssom-view/#dom-element-getboundingclientrect
+    FloatRect bounds;
+    bool hasArea = false;
+    for (const auto &quad : quads)
+    {
+      auto box = quad.BoundingBox();
+      if (box.IsEmpty())
+      {
+        continue;
+      }
+      if (hasArea)
+      {
+        bounds.Unite(box);
+      }
+      else
+      {
+        bounds = box;
+        hasArea = true;
+      }
+    }
+    return Pair<RenderElement *, FloatRect> {renderer, hasArea ? bounds : quads.front().BoundingBox()};
   }
 
   FloatRect Element::BoundingClientRect() noexcept

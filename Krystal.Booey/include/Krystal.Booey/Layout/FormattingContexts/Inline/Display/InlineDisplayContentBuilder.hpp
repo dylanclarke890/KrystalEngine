@@ -116,6 +116,8 @@ namespace krys::boo::layout
       return _constraints;
     }
     KRYS_NODISCARD const ElementBox &Root() const noexcept;
+    KRYS_NODISCARD InlineRect LogicalRectForInlineBoxOnBlockLine(
+      const Box &inlineBox, const LineLayoutResult &lineLayoutResult) const noexcept;
     KRYS_NODISCARD InlineFormattingContext &GetFormattingContext() noexcept
     {
       return _formattingContext;

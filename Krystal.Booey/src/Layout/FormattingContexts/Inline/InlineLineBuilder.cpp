@@ -414,6 +414,11 @@ namespace krys::boo::layout
     Initialize(lineInput.InitialLogicalRect, lineInput.NeedsLayoutRange, previousLine,
                isFirstFormattedLineCandidate);
     auto lineContent = PlaceInlineAndFloatContent(lineInput.NeedsLayoutRange);
+    // Nothing but an inline box's margin, border and padding still makes it a line to come after margins.
+    if (!IsInIntrinsicWidthMode() && !_line.HasContentOrListMarker() && _line.ContentLogicalWidth() > 0.f)
+    {
+      _lineLogicalRect.SetTop(_lineLogicalRect.Top() + TakeMarginInBlockDirection().ToFloat());
+    }
     auto result = _line.Close();
     auto inlineContentEnding =
       result.IsContentful ? InlineFormattingUtils::InlineContentEnding(result) : null;
@@ -1916,6 +1921,27 @@ namespace krys::boo::layout
     }
   }
 
+  LayoutUnit LineBuilder::TakeMarginInBlockDirection() noexcept
+  {
+    // We don't know if margin coming from previous content should be applied or not
+    // until after we managed to put some inline content on the line.
+    // e.g.
+    // <span>text<div style="margin-bottom: 100px;"></div>more text</span> v.s
+    // <span>text<div style="margin-bottom: 100px;"></div> <div></div></span>
+    // where in the first example, the 100px gap is between the block container's edge and "more text"
+    // while in the second case, it is somewhere after the second block container (can't tell).
+    auto &marginState = GetBlockLayoutState().GetMarginState();
+    auto marginValue = marginState.Margin();
+    marginState.ResetMarginValues();
+
+    if (marginState.AtBeforeSideOfBlock)
+    {
+      marginState.ResetBeforeSideOfBlock();
+      return {};
+    }
+    return marginValue;
+  }
+
   LineBuilder::Result LineBuilder::HandleInlineContent(const InlineItemRange &layoutRange,
                                                        LineCandidate &lineCandidate) noexcept
   {
@@ -1925,27 +1951,7 @@ namespace krys::boo::layout
       return result;
     }
 
-    auto applyMarginInBlockDirection = [&]() -> LayoutUnit
-    {
-      // We don't know if margin coming from previous content should be applied or not
-      // until after we managed to put some inline content on the line.
-      // e.g.
-      // <span>text<div style="margin-bottom: 100px;"></div>more text</span> v.s
-      // <span>text<div style="margin-bottom: 100px;"></div> <div></div></span>
-      // where in the first example, the 100px gap is between the block container's edge and "more text"
-      // while in the second case, it is somewhere after the second block container (can't tell).
-      auto &marginState = GetBlockLayoutState().GetMarginState();
-      auto marginValue = marginState.Margin();
-      marginState.ResetMarginValues();
-
-      if (marginState.AtBeforeSideOfBlock)
-      {
-        marginState.ResetBeforeSideOfBlock();
-        return {};
-      }
-      return marginValue;
-    };
-    auto lineOffset = applyMarginInBlockDirection();
+    auto lineOffset = TakeMarginInBlockDirection();
     if (!lineOffset)
     {
       return result;

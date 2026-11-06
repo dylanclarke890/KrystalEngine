@@ -328,6 +328,17 @@ namespace krys::boo::layout
                                                           initialContainingBlockGeometry.ContentBoxHeight()});
   }
 
+  InlineRect InlineDisplayContentBuilder::LogicalRectForInlineBoxOnBlockLine(
+    const Box &inlineBox, const LineLayoutResult &lineLayoutResult) const noexcept
+  {
+    // Like the block, it ignores what floats take from the line.
+    auto &lineBox = GetLineBox();
+    auto logicalRect = lineBox.LogicalContentBoxForInlineBox(inlineBox);
+    logicalRect.SetLeft(lineLayoutResult.Geometry.InitialLogicalLeft - lineBox.LogicalRect().Left());
+    logicalRect.SetWidth(GetConstraints().Horizontal().LogicalWidth.ToFloat());
+    return logicalRect;
+  }
+
   const ElementBox &InlineDisplayContentBuilder::Root() const noexcept
   {
     return _formattingContext.Root();
@@ -348,6 +359,29 @@ namespace krys::boo::layout
       ProcessNonBidiContent(lineLayoutResult, boxes);
     }
     ProcessRubyContent(boxes, lineLayoutResult);
+
+    // The empty inline boxes of a line with nothing on it sit at its start, and nothing on it took up the
+    // margin of a block before it, which they come after.
+    if (!lineLayoutResult.IsBlockContent() && !GetLineBox().HasContent())
+    {
+      auto &marginState = GetFormattingContext().GetLayoutState().ParentBlockLayoutState().GetMarginState();
+      const float margin = marginState.AtBeforeSideOfBlock ? 0.f : marginState.Margin().ToFloat();
+      const bool isHorizontal = Root().GetWritingMode().IsHorizontal();
+      for (auto &box : boxes)
+      {
+        if (box.IsNonRootInlineBox())
+        {
+          if (isHorizontal)
+          {
+            box.SetTop(_displayLine.Top() + margin);
+          }
+          else
+          {
+            box.SetLeft(_displayLine.Left() + margin);
+          }
+        }
+      }
+    }
 
     CollectInkOverflowForTextDecorations(boxes);
     CollectInkOverflowForInlineBoxes(boxes);
@@ -762,7 +796,7 @@ namespace krys::boo::layout
           // Ideally spanning inline boxes on block lines would not have borders and padding.
           if (lineHasBlockContent)
           {
-            return lineBox.LogicalContentBoxForInlineBox(layoutBox);
+            return LogicalRectForInlineBoxOnBlockLine(layoutBox, lineLayoutResult);
           }
           return lineBox.LogicalBorderBoxForInlineBox(layoutBox, boxGeometry);
         }
@@ -1350,17 +1384,25 @@ namespace krys::boo::layout
     };
     handleInlineBoxes();
 
-    // As in non-bidi content, inline boxes on a line of its own for a block go around the line's content.
+    // As in non-bidi content, inline boxes on a line of its own for a block go across the block's line.
     if (lineLayoutResult.IsBlockContent())
     {
       for (size_t index = 1; index < boxes.size(); ++index)
       {
         if (boxes[index].IsNonRootInlineBox())
         {
-          auto visualRect =
-            MapInlineRectLogicalToVisual(lineBox.LogicalContentBoxForInlineBox(boxes[index].LayoutBox()),
-                                         lineBox.LogicalRect(), writingMode);
+          auto logicalRect = LogicalRectForInlineBoxOnBlockLine(boxes[index].LayoutBox(), lineLayoutResult);
+          auto visualRect = MapInlineRectLogicalToVisual(logicalRect, lineBox.LogicalRect(), writingMode);
           visualRect.MoveBy(_displayLine.TopLeft());
+          // A float at the start of the line moved it, but not the block.
+          if (isHorizontalWritingMode)
+          {
+            visualRect.SetLeft(GetConstraints().VisualLeft().ToFloat());
+          }
+          else
+          {
+            visualRect.SetTop(GetConstraints().VisualLeft().ToFloat());
+          }
           boxes[index].SetRect(FloatRect(visualRect), FloatRect(visualRect));
         }
       }

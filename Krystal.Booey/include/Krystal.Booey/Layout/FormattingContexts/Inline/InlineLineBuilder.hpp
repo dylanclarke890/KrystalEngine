@@ -98,6 +98,10 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool TryPlacingFloatBox(const Box &floatBox,
                                            MayOverConstrainLine mayOverConstrainLine) noexcept;
+    /// @brief Takes up the margin that content on this line comes after, or ends the side of the block where
+    /// margins collapse with its own.
+    /// @return How far that moves the line.
+    KRYS_NODISCARD LayoutUnit TakeMarginInBlockDirection() noexcept;
     KRYS_NODISCARD Result HandleInlineContent(const InlineItemRange &needsLayoutRange,
                                               LineCandidate &lineCandidate) noexcept;
     void HandleBlockContent(const InlineItem &blockItem) noexcept;

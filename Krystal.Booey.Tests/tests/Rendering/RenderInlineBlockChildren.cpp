@@ -67,12 +67,11 @@ namespace krys::boo::tests
        u8"<div id=o style='width:300px'><span id=s><div id=b></div></span></div>",
        u8"o: 0,0,300,70 | 0,0,300,70; s: 0,-5,300,80 | 7,-5,8,30 0,20,300,30 0,45,8,30; b: 0,20,100,30 | "
        u8"0,20,100,30"},
-      // FIXME: Chrome has one rect for adjacent blocks: 0,20,300,40.
       {u8"two blocks", u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}",
        u8"<div id=o style='width:300px'><span id=s>bb<div id=b></div><div id=m "
        u8"style='height:10px'></div>cc</span></div>",
-       u8"o: 0,0,300,80 | 0,0,300,80; s: 0,-5,300,90 | 7,-5,48,30 0,20,300,30 0,50,300,10 0,55,48,30; b: "
-       u8"0,20,100,30 | 0,20,100,30; m: 0,50,300,10 | 0,50,300,10"},
+       u8"o: 0,0,300,80 | 0,0,300,80; s: 0,-5,300,90 | 7,-5,48,30 0,20,300,40 0,55,48,30; b: 0,20,100,30 | "
+       u8"0,20,100,30; m: 0,50,300,10 | 0,50,300,10"},
       {u8"nested", u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}",
        u8"<div id=o style='width:300px'><span id=s>bb<em id=e>xx<div id=b></div>yy</em>cc</span></div>",
        u8"o: 0,0,300,70 | 0,0,300,70; s: 0,-5,300,80 | 7,-5,88,30 0,20,300,30 0,45,88,30; e: 0,0,300,70 | "
@@ -139,17 +138,99 @@ namespace krys::boo::tests
        u8"id=a></i></span>dd</div>",
        u8"o: 28,8,300,90 | 28,8,300,90; s: 36,12,300,70 | 76,12,40,20 36,32,300,30 36,62,40,20; b: "
        u8"36,32,100,30 | 36,32,100,30; a: 70,76,6,6 | 70,76,6,6"},
+      {u8"blocks with margin between",
+       u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}#m{margin-top:5px}",
+       u8"<div id=o style='width:300px'><span id=s>bb<div id=b></div><div id=m "
+       u8"style='height:10px'></div>cc</span></div>",
+       u8"o: 0,0,300,85 | 0,0,300,85; s: 0,-5,300,95 | 7,-5,48,30 0,20,300,45 0,60,48,30; b: 0,20,100,30 | "
+       u8"0,20,100,30; m: 0,55,300,10 | 0,55,300,10"},
+      {u8"blocks with collapsing margins",
+       u8"span{border:5px solid #00f;padding:0 3px;margin:0 "
+       u8"7px;background:#ff0}#b{margin-bottom:8px}#m{margin-top:5px}",
+       u8"<div id=o style='width:300px'><span id=s>bb<div id=b></div><div id=m "
+       u8"style='height:10px'></div>cc</span></div>",
+       u8"o: 0,0,300,88 | 0,0,300,88; s: 0,-5,300,98 | 7,-5,48,30 0,20,300,48 0,63,48,30; b: 0,20,100,30 | "
+       u8"0,20,100,30; m: 0,58,300,10 | 0,58,300,10"},
+      {u8"three blocks", u8"",
+       u8"<div id=o style='width:300px'><span id=s>bb<div id=b></div><div id=m "
+       u8"style='height:10px'></div><div style='height:10px'></div>cc</span></div>",
+       u8"o: 0,0,300,90 | 0,0,300,90; s: 0,0,300,90 | 0,0,40,20 0,20,300,50 0,70,40,20; b: 0,20,100,30 | "
+       u8"0,20,100,30; m: 0,50,300,10 | 0,50,300,10"},
+      {u8"blocks in nested inline", u8"",
+       u8"<div id=o style='width:300px'><span id=s><em id=e><div id=b></div></em><div id=m "
+       u8"style='height:10px'></div></span></div>",
+       u8"o: 0,0,300,40 | 0,0,300,40; s: 0,0,300,40 | 0,0,0,0 0,0,300,30 0,30,0,0 0,30,300,10 0,40,0,0; e: "
+       u8"0,0,300,30 | 0,0,0,0 0,0,300,30 0,30,0,0; b: 0,0,100,30 | 0,0,100,30; m: 0,30,300,10 | "
+       u8"0,30,300,10"},
+      {u8"margin block last",
+       u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}#b{margin:10px 0}",
+       u8"<div id=o style='width:300px'><span id=s>bb<div id=b></div></span></div>",
+       u8"o: 0,0,300,90 | 0,0,300,90; s: 0,-5,300,100 | 7,-5,48,30 0,30,300,30 0,65,8,30; b: 0,30,100,30 | "
+       u8"0,30,100,30"},
+      {u8"margin block last plain", u8"#b{margin:10px 0}",
+       u8"<div id=o style='width:300px'><span id=s>bb<div id=b></div></span></div>",
+       u8"o: 0,0,300,60 | 0,0,300,60; s: 0,0,300,60 | 0,0,40,20 0,30,300,30 0,70,0,0; b: 0,30,100,30 | "
+       u8"0,30,100,30"},
+      {u8"margin block first plain", u8"#b{margin:10px 0}",
+       u8"<div id=o style='width:300px'><span id=s><div id=b></div>cc</span></div>",
+       u8"o: 0,10,300,60 | 0,10,300,60; s: 0,10,300,60 | 0,10,0,0 0,10,300,30 0,50,40,20; b: 0,10,100,30 | "
+       u8"0,10,100,30"},
+      {u8"margin only padded o", u8"#o{padding:5px 0}#b{margin:10px 0}",
+       u8"<div id=o style='width:300px'><span id=s><div id=b></div></span></div>",
+       u8"o: 0,0,300,60 | 0,0,300,60; s: 0,15,300,30 | 0,5,0,0 0,15,300,30 0,55,0,0; b: 0,15,100,30 | "
+       u8"0,15,100,30"},
+      {u8"float wider",
+       u8"span{border:5px solid #00f;padding:0 3px;margin:0 "
+       u8"7px;background:#ff0}#f{float:left;width:50px;height:80px}",
+       u8"<div id=o style='width:300px'><div id=f></div>aa<span id=s>bb<div id=b "
+       u8"style='width:auto'></div>cc</span>dd</div>",
+       u8"o: 0,0,300,70 | 0,0,300,70; s: 0,-5,300,80 | 97,-5,48,30 0,20,300,30 50,45,48,30; b: 0,20,300,30 | "
+       u8"0,20,300,30; f: 0,0,50,80 | 0,0,50,80"},
+      {u8"float right",
+       u8"span{border:5px solid #00f;padding:0 3px;margin:0 "
+       u8"7px;background:#ff0}#f{float:right;width:20px;height:50px}",
+       u8"<div id=o style='width:300px'><div id=f></div>aa<span id=s>bb<div id=b></div>cc</span>dd</div>",
+       u8"o: 0,0,300,70 | 0,0,300,70; s: 0,-5,300,80 | 47,-5,48,30 0,20,300,30 0,45,48,30; b: 0,20,100,30 | "
+       u8"0,20,100,30; f: 280,0,20,50 | 280,0,20,50"},
+      {u8"float rtl",
+       u8"span{border:5px solid #00f;padding:0 3px;margin:0 "
+       u8"7px;background:#ff0}#f{float:right;width:20px;height:50px}",
+       u8"<div id=o style='width:300px;direction:rtl'><div id=f></div>aa<span id=s>bb<div "
+       u8"id=b></div>cc</span>dd</div>",
+       u8"o: 0,0,300,70 | 0,0,300,70; s: 0,-5,300,80 | 225,-5,48,30 0,20,300,30 212,45,48,30; b: "
+       u8"200,20,100,30 | 200,20,100,30; f: 280,0,20,50 | 280,0,20,50"},
+      {u8"margin block first",
+       u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}#b{margin:10px 0}",
+       u8"<div id=o style='width:300px'><span id=s><div id=b></div>cc</span></div>",
+       u8"o: 0,0,300,90 | 0,0,300,90; s: 0,-5,300,100 | 7,-5,8,30 0,30,300,30 0,65,48,30; b: 0,30,100,30 | "
+       u8"0,30,100,30"},
+      {u8"margin block only",
+       u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}#b{margin:10px 0}",
+       u8"<div id=o style='width:300px'><span id=s><div id=b></div></span></div>",
+       u8"o: 0,0,300,90 | 0,0,300,90; s: 0,-5,300,100 | 7,-5,8,30 0,30,300,30 0,65,8,30; b: 0,30,100,30 | "
+       u8"0,30,100,30"},
+      {u8"empty span", u8"", u8"<div id=o style='width:300px'><span id=s></span></div>",
+       u8"o: 0,0,300,0 | 0,0,300,0; s: 0,0,0,0 | 0,0,0,0"},
+      {u8"empty nested span", u8"", u8"<div id=o style='width:300px'><span id=s><em id=e></em></span></div>",
+       u8"o: 0,0,300,0 | 0,0,300,0; s: 0,0,0,0 | 0,0,0,0; e: 0,0,0,0 | 0,0,0,0"},
+      {u8"empty span, text after", u8"", u8"<div id=o style='width:300px'><span id=s></span>aa</div>",
+       u8"o: 0,0,300,20 | 0,0,300,20; s: 0,0,0,20 | 0,0,0,20"},
+      {u8"empty span, line break", u8"", u8"<div id=o style='width:300px'><span id=s></span><br>aa</div>",
+       u8"o: 0,0,300,40 | 0,0,300,40; s: 0,0,0,20 | 0,0,0,20"},
+      {u8"empty nested span, block after", u8"",
+       u8"<div id=o style='width:300px'><span id=s><em id=e></em></span><div id=b></div></div>",
+       u8"o: 0,0,300,30 | 0,0,300,30; s: 0,0,0,0 | 0,0,0,0; e: 0,0,0,0 | 0,0,0,0; b: 0,0,100,30 | "
+       u8"0,0,100,30"},
       {u8"percent width block",
        u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}#b{width:50%}",
        u8"<div id=o style='width:300px'>aa<span id=s>bb<div id=b></div>cc</span>dd</div>",
        u8"o: 0,0,300,70 | 0,0,300,70; s: 0,-5,300,80 | 47,-5,48,30 0,20,300,30 0,45,48,30; b: 0,20,150,30 | "
        u8"0,20,150,30"},
-      // FIXME: Chrome has the whole width on the block's line, and so in the bounds: 300.
       {u8"float sibling",
        u8"span{border:5px solid #00f;padding:0 3px;margin:0 "
        u8"7px;background:#ff0}#f{float:left;width:20px;height:50px}",
        u8"<div id=o style='width:300px'><div id=f></div>aa<span id=s>bb<div id=b></div>cc</span>dd</div>",
-       u8"o: 0,0,300,70 | 0,0,300,70; s: 0,-5,280,80 | 67,-5,48,30 0,20,280,30 0,45,48,30; b: 0,20,100,30 | "
+       u8"o: 0,0,300,70 | 0,0,300,70; s: 0,-5,300,80 | 67,-5,48,30 0,20,300,30 0,45,48,30; b: 0,20,100,30 | "
        u8"0,20,100,30; f: 0,0,20,50 | 0,0,20,50"},
       {u8"anon after", u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}",
        u8"<div id=o style='width:300px'><span id=s>bb<div id=b></div></span>dd</div>",
@@ -159,10 +240,9 @@ namespace krys::boo::tests
        u8"<div id=o>aa<span id=s>bb<div id=b></div>cc</span>dd</div>",
        u8"o: 0,0,100,70 | 0,0,100,70; s: 0,-5,100,80 | 47,-5,48,30 0,20,100,30 0,45,48,30; b: 0,20,100,30 | "
        u8"0,20,100,30"},
-      // FIXME: Chrome has the rect after the margin: 0,50,0,0.
       {u8"margin collapse", u8"#o{margin:0}#b{margin-top:10px;margin-bottom:10px}",
        u8"<div id=o style='width:300px'><span id=s><div id=b></div></span></div>",
-       u8"o: 0,10,300,30 | 0,10,300,30; s: 0,10,300,30 | 0,10,0,0 0,10,300,30 0,40,0,0; b: 0,10,100,30 | "
+       u8"o: 0,10,300,30 | 0,10,300,30; s: 0,10,300,30 | 0,10,0,0 0,10,300,30 0,50,0,0; b: 0,10,100,30 | "
        u8"0,10,100,30"},
     }));
 

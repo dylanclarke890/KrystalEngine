@@ -1736,10 +1736,26 @@ namespace krys::boo::layout_integration
 
     auto &layoutBox = *renderInline.LayoutBox();
 
+    // Blocks that follow each other in the inline box are one piece of it.
     List<FloatRect> result;
+    Maybe<size_t> previousBlockLine;
     _inlineContent->TraverseNonRootInlineBoxes(
-      layoutBox, [&](const inline_display::Box &inlineBox)
-      { result.push_back(inlineBox.VisualRectIgnoringBlockDirection()); });
+      layoutBox,
+      [&](const inline_display::Box &inlineBox)
+      {
+        auto rect = inlineBox.VisualRectIgnoringBlockDirection();
+        const auto lineIndex = inlineBox.LineIndex();
+        const bool isBlockLine = _inlineContent->DisplayContent().LineList[lineIndex].HasBlockLevelBox();
+        if (isBlockLine && previousBlockLine && *previousBlockLine + 1 == lineIndex)
+        {
+          result.back().Unite(rect);
+        }
+        else
+        {
+          result.push_back(rect);
+        }
+        previousBlockLine = isBlockLine ? Maybe<size_t> {lineIndex} : null;
+      });
 
     return result;
   }
