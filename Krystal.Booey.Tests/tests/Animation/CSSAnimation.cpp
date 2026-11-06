@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 
@@ -376,6 +377,82 @@ namespace krys::boo::tests
                       .HasException());
       fixture.Frame();
       CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.5f));
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "CSSAnimation: a select's ::picker-icon and ::checkmark",
+                   "[Animation][CSSAnimation]")
+  {
+    constexpr auto styles = u8"<!DOCTYPE html><style>@keyframes "
+                            u8"hold{from,to{opacity:.25}}select,::picker(select){appearance:base-select}";
+    auto generated = [](AnimationPageFixture &fixture, utf8_stringview id,
+                        PseudoElementType type) -> RenderElement *
+    {
+      (void)fixture.Document->UpdateLayout();
+      auto *host = fixture.ById(id).Renderer();
+      for (auto *child = host ? host->FirstChild() : nullptr; child; child = child->NextSibling())
+      {
+        auto *element = DynamicDowncast<RenderElement>(*child);
+        if (element && element->Style().GetPseudoElementType() == type)
+        {
+          return element;
+        }
+      }
+      return nullptr;
+    };
+
+    SECTION("animating an icon")
+    {
+      AnimationPageFixture fixture {utf8_string(styles)
+                                    + u8"select::picker-icon{animation:hold 100s}</style>"
+                                      u8"<select id=s><option>a</select>"};
+      fixture.StartAnimations();
+      fixture.Frame(50ms);
+      auto *icon = generated(fixture, u8"s", PseudoElementType::PickerIcon);
+      REQUIRE(icon);
+      CHECK(icon->Style().GetOpacity().Value.Value == Catch::Approx(0.25f));
+      CHECK(fixture.Document->GetAnimations().size() == 1);
+    }
+
+    SECTION("transitioning an icon")
+    {
+      AnimationPageFixture fixture {utf8_string(styles)
+                                    + u8"select::picker-icon{opacity:0;transition:opacity 1s linear}"
+                                      u8".on::picker-icon{opacity:1}</style><select id=s><option>a</select>"};
+      auto *icon = generated(fixture, u8"s", PseudoElementType::PickerIcon);
+      REQUIRE(icon);
+      REQUIRE_FALSE(fixture.ById(u8"s").SetAttribute(u8"class", u8"on").HasException());
+      fixture.Frame();
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      icon = generated(fixture, u8"s", PseudoElementType::PickerIcon);
+      REQUIRE(icon);
+      CHECK(icon->Style().GetOpacity().Value.Value == Catch::Approx(0.25f));
+    }
+
+    SECTION("animating a checkmark, which ends with the picker")
+    {
+      AnimationPageFixture fixture {utf8_string(styles)
+                                    + u8"option::checkmark{animation:hold 100s}</style>"
+                                      u8"<select id=s><option id=a>a</select>"};
+      auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+      CHECK(fixture.Document->GetAnimations().empty());
+      select.Focus();
+      auto *window = fixture.Document->Window();
+      REQUIRE(window);
+      window->NotifyActivated();
+      REQUIRE_FALSE(select.ShowPicker().HasException());
+      REQUIRE(select.IsPickerOpen());
+      fixture.StartAnimations();
+      fixture.Frame(50ms);
+      auto *checkmark = generated(fixture, u8"a", PseudoElementType::Checkmark);
+      REQUIRE(checkmark);
+      CHECK(checkmark->Style().GetOpacity().Value.Value == Catch::Approx(0.25f));
+      CHECK(fixture.Document->GetAnimations().size() == 1);
+
+      REQUIRE_FALSE(select.SelectPopover()->HidePopover().HasException());
+      fixture.Frame();
+      CHECK(fixture.Document->GetAnimations().empty());
     }
   }
 }

@@ -7,6 +7,8 @@
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -1067,6 +1069,17 @@ namespace krys::boo
               style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::Marker})
                 .CancelStyleOriginatedAnimations();
             }
+          }
+          // Nor can they have a ::checkmark or ::picker-icon.
+          if (Is<html::HTMLOptionElement>(element))
+          {
+            style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::Checkmark})
+              .CancelStyleOriginatedAnimations();
+          }
+          else if (Is<html::HTMLSelectElement>(element))
+          {
+            style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::PickerIcon})
+              .CancelStyleOriginatedAnimations();
           }
         }
 

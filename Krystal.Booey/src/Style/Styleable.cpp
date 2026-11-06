@@ -51,6 +51,13 @@ namespace krys::boo::style
         }
         break;
       }
+      case PseudoElementType::Checkmark:
+      case PseudoElementType::PickerIcon:
+        if (auto *parent = renderer.Parent(); parent && parent->GetElement())
+        {
+          return Styleable(*parent->GetElement(), style::PseudoElementIdentifier {*pseudoElementType});
+        }
+        break;
       case PseudoElementType::After:
       case PseudoElementType::Before:
         if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(renderer.GetElement()))
@@ -207,6 +214,20 @@ namespace krys::boo::style
         if (auto *hostRenderer = Element.Renderer())
         {
           return hostRenderer->BackdropRenderer();
+        }
+        break;
+      case PseudoElementType::Checkmark:
+      case PseudoElementType::PickerIcon:
+        if (auto *hostRenderer = Element.Renderer())
+        {
+          for (auto *child = hostRenderer->FirstChild(); child; child = child->NextSibling())
+          {
+            auto *childElement = DynamicDowncast<RenderElement>(*child);
+            if (childElement && childElement->Style().GetPseudoElementType() == PseudoElementIdentifier->Type)
+            {
+              return childElement;
+            }
+          }
         }
         break;
       default: break;

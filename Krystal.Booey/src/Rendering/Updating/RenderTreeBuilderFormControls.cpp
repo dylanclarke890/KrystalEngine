@@ -107,19 +107,33 @@ namespace krys::boo
       return;
     }
 
+    RenderElement *existing = nullptr;
     for (auto *child = renderer.FirstChild(); child; child = child->NextSibling())
     {
       if (auto *childElement = DynamicDowncast<RenderElement>(*child);
           childElement && childElement->IsAnonymous() && childElement->Style().GetPseudoElementType() == type)
       {
-        _builder.Destroy(*childElement);
+        existing = childElement;
         break;
       }
     }
 
     const auto *style =
       usesBaseAppearance ? renderer.GetCachedPseudoStyle({type}, &renderer.Style()) : nullptr;
-    if (!style || style->Display() == DisplayType::None || style->GetContent().TryData() == nullptr)
+    bool isNeeded =
+      style && style->Display() != DisplayType::None && style->GetContent().TryData() != nullptr;
+
+    // Kept while its content stays: an animation or transition of it goes on from frame to frame.
+    if (existing && isNeeded && existing->Style().GetContent() == style->GetContent())
+    {
+      existing->SetStyle(RenderStyle::Clone(*style));
+      return;
+    }
+    if (existing)
+    {
+      _builder.Destroy(*existing);
+    }
+    if (!isNeeded)
     {
       return;
     }
