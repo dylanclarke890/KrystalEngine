@@ -67,9 +67,9 @@ namespace krys::boo::css
       return _selector->Value();
     }
 
-    void SetAttribute(const dom::QualifiedName &name, IsCaseSensitive caseSensitive) noexcept
+    void SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept
     {
-      _selector->SetAttribute(name, caseSensitive);
+      _selector->SetAttribute(name, caseFlag);
     }
 
     void SetArgument(const CSSOMStringAtom &value) noexcept

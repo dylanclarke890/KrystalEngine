@@ -897,7 +897,8 @@ namespace krys::boo::css
     {
       caseSensitive = false;
     }
-    else if (isHTML && !dom::HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()))
+    else if (isHTML && !selector.IsAttributeValueMatchingCaseSensitive()
+             && !dom::HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()))
     {
       caseSensitive = false;
     }
@@ -960,6 +961,7 @@ namespace krys::boo::css
         caseSensitive = false;
       }
       else if (_documentIsHTML && Is<html::HTMLElement>(element)
+               && !selector.IsAttributeValueMatchingCaseSensitive()
                && !dom::HTMLDocument::IsCaseSensitiveAttribute(attr))
       {
         caseSensitive = false;

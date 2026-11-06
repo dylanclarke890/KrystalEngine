@@ -72,6 +72,8 @@ namespace krys::boo::css::tests
       REQUIRE(Matches(a, u8"[title=Hello]"));
       REQUIRE_FALSE(Matches(a, u8"[title=hello]"));
       REQUIRE(Matches(a, u8"[title=hello i]"));
+      REQUIRE(Matches(a, u8"[title=Hello s]"));
+      REQUIRE_FALSE(Matches(a, u8"[title=hello s]"));
       REQUIRE(Matches(a, u8"[data-v~=bar-baz]"));
       REQUIRE_FALSE(Matches(a, u8"[data-v~=bar]"));
       REQUIRE_FALSE(Matches(a, u8"[data-v~='']"));
@@ -90,6 +92,10 @@ namespace krys::boo::css::tests
       REQUIRE(Matches(b, u8"[type=text]"));
       REQUIRE(Matches(b, u8"[type=TeXt]"));
       REQUIRE(Matches(b, u8"[type=text i]"));
+      // Unless the s flag says otherwise.
+      REQUIRE(Matches(b, u8"[type=TEXT s]"));
+      REQUIRE_FALSE(Matches(b, u8"[type=text s]"));
+      REQUIRE_FALSE(Matches(b, u8"[type=text S]"));
       REQUIRE_FALSE(Matches(b, u8"[id=B]"));
     }
 

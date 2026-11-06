@@ -880,7 +880,7 @@ namespace krys::boo::css
 
     if (block.IsAtEnd())
     {
-      selector->SetAttribute(qualifiedName, IsCaseSensitive(true));
+      selector->SetAttribute(qualifiedName, AttributeCaseFlag::None);
       selector->SetMatch(SelectorMatch::AttributeExists);
       return selector;
     }
@@ -1276,20 +1276,23 @@ namespace krys::boo::css
     return SelectorMatch::AttributeEquals;
   }
 
-  IsCaseSensitive SelectorParser::ConsumeAttributeFlags(TokenRange &tokens) noexcept
+  AttributeCaseFlag SelectorParser::ConsumeAttributeFlags(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() != TokenType::Ident)
     {
-      return IsCaseSensitive(true);
+      return AttributeCaseFlag::None;
     }
     const auto &flag = tokens.ConsumeIncludingWhitespace();
     if (text::IsASCIICaselessEqual(flag.IdentCodePoints(), CSSOMStringView {u8"i"}))
     {
-      return IsCaseSensitive(false);
+      return AttributeCaseFlag::Insensitive;
     }
-    // FIXME: The `s` flag (selectors-4) isn't supported.
+    if (text::IsASCIICaselessEqual(flag.IdentCodePoints(), CSSOMStringView {u8"s"}))
+    {
+      return AttributeCaseFlag::Sensitive;
+    }
     _failedParsing = true;
-    return IsCaseSensitive(true);
+    return AttributeCaseFlag::None;
   }
 
   namespace

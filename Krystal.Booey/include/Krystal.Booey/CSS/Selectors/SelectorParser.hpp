@@ -108,7 +108,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD SelectorRelation ConsumeCombinator(TokenRange &tokens) noexcept;
     KRYS_NODISCARD SelectorMatch ConsumeAttributeMatch(TokenRange &tokens) noexcept;
-    KRYS_NODISCARD IsCaseSensitive ConsumeAttributeFlags(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD AttributeCaseFlag ConsumeAttributeFlags(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &DefaultNamespace() const noexcept;
     KRYS_NODISCARD const CSSOMStringAtom &DetermineNamespace(const CSSOMStringAtom &prefix) const noexcept;

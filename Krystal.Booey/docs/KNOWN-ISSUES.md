@@ -54,7 +54,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - The `color-layers()` function doesn't parse a blend mode (FIXME in `Consumers/Color.cpp`), so only normal blending is reachable from CSS.
 - The `FontFace` string parsers (`ParseFontFaceSrc`, `ParseFontFaceFontWeight` and the rest, FIXME in `Consumers/Font.hpp`) aren't written.
 - `@font-face`'s features and variations aren't applied to loaded fonts (FIXME in `FontCustomPlatformData.cpp`). `@font-palette-values` and `@font-feature-values` are parsed but have no effect on fonts (FIXME in `CSSFontSelector.cpp`).
-- The `s` attribute-selector flag (Selectors 4) is rejected (FIXME in `SelectorParser.cpp`); supporting it needs a selector flag and serialisation.
 - `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).
 - State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
 - `:lang()` has no document default language or Content-Language header (FIXME in `SelectorCheckerTestFunctions.cpp`); WebVTT elements don't use their cue's language.

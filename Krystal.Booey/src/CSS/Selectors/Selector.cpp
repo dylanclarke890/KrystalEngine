@@ -767,6 +767,10 @@ namespace krys::boo::css
           {
             builder.Append(u8" i]");
           }
+          else if (selector->IsAttributeValueMatchingCaseSensitive())
+          {
+            builder.Append(u8" s]");
+          }
           else
           {
             builder.Append(u8']');
@@ -859,11 +863,12 @@ namespace krys::boo::css
 
 #pragma endregion
 
-  void Selector::SetAttribute(const dom::QualifiedName &value, IsCaseSensitive caseSensitive) noexcept
+  void Selector::SetAttribute(const dom::QualifiedName &value, AttributeCaseFlag caseFlag) noexcept
   {
     CreateRareData();
     _data.Rare->Attribute = value;
-    SetFlag(SelectorFlag::CaseInsensitiveAttributeValueMatching, !caseSensitive);
+    SetFlag(SelectorFlag::CaseInsensitiveAttributeValueMatching, caseFlag == AttributeCaseFlag::Insensitive);
+    SetFlag(SelectorFlag::CaseSensitiveAttributeValueMatching, caseFlag == AttributeCaseFlag::Sensitive);
   }
 
   void Selector::SetArgument(const CSSOMStringAtom &value) noexcept
@@ -1171,6 +1176,7 @@ namespace krys::boo::css
     return _match == other._match && _pseudoType == other._pseudoType && sameFlag(SelectorFlag::HasRareData)
            && sameFlag(SelectorFlag::TagIsForNamespaceRule)
            && sameFlag(SelectorFlag::CaseInsensitiveAttributeValueMatching)
+           && sameFlag(SelectorFlag::CaseSensitiveAttributeValueMatching)
            && sameFlag(SelectorFlag::IsImplicit) && valuesEqual();
   }
 

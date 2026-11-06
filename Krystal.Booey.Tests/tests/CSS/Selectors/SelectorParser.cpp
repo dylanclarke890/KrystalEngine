@@ -368,6 +368,10 @@ namespace krys::boo::css::tests
     CHECK(Parse(u8"[ a ~= \"b\" ]") == u8"[a~=\"b\"]");
     CHECK(Parse(u8"[a~ =b]") == u8"<invalid>");
     CHECK(Parse(u8"[a=\"b\" I]") == u8"[a=\"b\" i]");
+    CHECK(Parse(u8"[a=b s]") == u8"[a=\"b\" s]");
+    CHECK(Parse(u8"[a=\"b\" S]") == u8"[a=\"b\" s]");
+    CHECK(Parse(u8"[a=b i s]") == u8"<invalid>");
+    CHECK(Parse(u8"[a s]") == u8"<invalid>");
     CHECK(Parse(u8"[a=b x]") == u8"<invalid>");
     CHECK(Parse(u8"[a=1]") == u8"<invalid>");
     CHECK(Parse(u8"[a=b c]") == u8"<invalid>");
