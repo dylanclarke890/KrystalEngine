@@ -235,7 +235,17 @@ namespace krys::boo
       LayoutUnit borderBottom = box->BorderBottom();
       LayoutUnit borderLeft = box->BorderLeft();
       bool overridden = renderElement->Style().GetBorderImageWidth().OverridesBorderWidths();
-      // FIXME: Subtract a fieldset's intrinsic border (intrinsicBorderForFieldset), once there are fieldsets.
+      if (box->IsFieldset())
+      {
+        auto &block = Downcast<RenderBlock>(*box);
+        switch (o.GetWritingMode().BlockDirection())
+        {
+          case FlowDirection::TopToBottom: borderTop -= block.IntrinsicBorderForFieldset(); break;
+          case FlowDirection::BottomToTop: borderBottom -= block.IntrinsicBorderForFieldset(); break;
+          case FlowDirection::LeftToRight: borderLeft -= block.IntrinsicBorderForFieldset(); break;
+          case FlowDirection::RightToLeft: borderRight -= block.IntrinsicBorderForFieldset(); break;
+        }
+      }
       if (borderTop || borderRight || borderBottom || borderLeft)
       {
         ts << " [border:";

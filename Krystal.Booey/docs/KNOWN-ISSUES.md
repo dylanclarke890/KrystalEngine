@@ -33,7 +33,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No autofill (`:autofill`), caps lock indicator or strong password fields on password fields, validation message bubble, `RenderSearchField` (search fields have no recent searches), or input purpose hints (`inputmode`, `autocapitalize`, spell checking). Numbers aren't localised (FIXMEs in `NumberInputType.cpp`); dates are, through ICU.
 - Form submission has no `rel=noreferrer` handling (FIXME in `HTMLFormElement.cpp`).
 - Customizable `<select>`: `appearance: base-select` on the select alone gives a picker with base appearance, where without `::picker(select)` opting in too it should be the native one, as `RenderMenuList` owns the popup menu. List boxes ignore `appearance: base-select` and stay native. Type-ahead with the picker open changes the selection, where it should move the focus. Page Up and Page Down move ten options, not a viewport's worth. A `legend` in an `optgroup` isn't its label in a native menu.
-- Fieldset legends are not placed in the border (see *Layout*).
 - `<input type=image>` doesn't load or show its image (FIXMEs in `ImageInputType.cpp`), so its dimensions come only from its box or its `width` and `height` attributes.
 - `<img>` lacks `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` fires no events for video posters and has no `<object>` fallback (FIXMEs); `ImageLoader`'s reuse of available images has no preloads (FIXME).
 - `HTMLLinkElement` recognises only `rel=stylesheet` and `alternate`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, icons, manifests, integrity, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
@@ -103,16 +102,16 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - An unstyled XML document (one with no style sheets, hints or HTML, SVG or MathML elements) is rendered as its text, not as a view of its source or tree.
 - There is no multi-column layout or fragmentation: no column renderers, column rules, fragmented flows or pagination. `collectFragments` makes one fragment, paginated layers paint unfragmented, and out-of-flow boxes, `TextBoxTrimmer`, `RenderView::NodeForHitTest`, the highlight range iterator and repaint containers have no column handling (FIXMEs). Multi-column flows don't lay out `content-visibility` skipped content (FIXME in `RenderBlockFlow.cpp`).
 - Continuations do not exist, so `RenderInline` keeps both its start and end borders, margins and padding and always paints its own outline when a block sits inside it. FIXMEs remain in `RenderInline`, `RenderBlock`, `RenderElement`, `OutlinePainter`, `BoxGeometryUpdater` and the render tree builders.
-- Fieldset legends are not placed in the fieldset's border: layout, preferred widths (`ComputePreferredWidthsForExcludedChildren` returns false), painting and hit testing of the legend and the fieldset's intrinsic border are FIXMEs in `RenderBlock.cpp` and `LayoutIntegrationBoxGeometryUpdater.cpp`.
 - Image-based `shape-outside` is not supported: `ShapeOutsideInfo` builds only box, rectangle and polygon shapes (no raster shape, no `shape-image-threshold`), and shapes have no display paths for highlighting (FIXMEs in `LayoutShape.hpp` and `ShapeOutsideInfo.cpp`).
 - `text-combine-upright` is not implemented: there is no combined-text renderer (`RenderCombineText`), so `BoxTreeUpdater`, the inline iterators, `RenderBlockFlow` and `RenderText` treat combined text as ordinary text (FIXMEs).
 - `layout_integration::GridLayout::CanUseFor` accepts only single-track spans at explicit unnamed lines and the self-alignments `start`, `flex-start`, `self-start`, `normal` and `stretch`; other grids fall back to `RenderGrid`. Multi-column spans in `ImplicitGrid` are a FIXME.
-- `RenderTreeAsText` leaves out SVG paint features and visual overflow, file upload control names, and the fieldset's intrinsic border (FIXMEs).
+- `RenderTreeAsText` leaves out SVG paint features and visual overflow, and file upload control names (FIXMEs).
 
 ## Painting
 
 ### Bugs
 
+- Dashed borders have WebKit's dashes, three times the border width long; Chrome's are shorter (seen in the `fieldset` golden).
 - A mask's `color-interpolation: linearRGB` is drawn in sRGB (`LegacyRenderSVGResourceMasker`, FIXME), because image buffers have no colour space conversion.
 - `Path::ApplyElements` applies nothing for continuous rounded rects, and `Path::Transform` drops them, as there's no platform path (FIXMEs in `Path.cpp`); nothing in Booey makes one yet.
 - A composited mask's or clip path's edge pixels (and those of a turned masked layer) can differ slightly from the whole-page repaint.

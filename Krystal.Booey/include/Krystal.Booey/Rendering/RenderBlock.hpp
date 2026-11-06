@@ -52,6 +52,9 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(RenderBlock);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderBlock);
 
+  private:
+    LayoutUnit _intrinsicBorderForFieldset;
+
   public:
     enum ApplyLayoutDeltaMode
     {
@@ -266,6 +269,39 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool CanPerformSimplifiedLayout() const noexcept;
 
     void ClearLayoutOverflow() noexcept;
+
+    /// @brief What a fieldset's legend adds to its border on the block start side, beyond the border's own
+    /// width: how much taller the legend (and its margin after) is than the border.
+    /// @see https://html.spec.whatwg.org/#the-fieldset-and-legend-elements
+    KRYS_NODISCARD LayoutUnit IntrinsicBorderForFieldset() const noexcept
+    {
+      return _intrinsicBorderForFieldset;
+    }
+
+    enum class FieldsetFindLegendOption : bool
+    {
+      IgnoreFloatingOrOutOfFlow,
+      IncludeFloatingOrOutOfFlow
+    };
+    /// @brief A fieldset's rendered legend: its first child that's a legend, and neither floating nor
+    /// positioned out of flow.
+    KRYS_NODISCARD RenderBox *FindFieldsetLegend(
+      FieldsetFindLegendOption option = FieldsetFindLegendOption::IgnoreFloatingOrOutOfFlow) const noexcept;
+
+    KRYS_NODISCARD RectEdges<LayoutUnit> BorderWidths() const noexcept override;
+    KRYS_NODISCARD LayoutUnit BorderTop() const noexcept override;
+    KRYS_NODISCARD LayoutUnit BorderBottom() const noexcept override;
+    KRYS_NODISCARD LayoutUnit BorderLeft() const noexcept override;
+    KRYS_NODISCARD LayoutUnit BorderRight() const noexcept override;
+    KRYS_NODISCARD LayoutUnit BorderBefore() const noexcept override;
+    KRYS_NODISCARD LayoutUnit
+      AdjustBorderBoxLogicalHeightForBoxSizing(LayoutUnit height) const noexcept override;
+    KRYS_NODISCARD LayoutUnit
+      AdjustContentBoxLogicalHeightForBoxSizing(Maybe<LayoutUnit> height) const noexcept override;
+    KRYS_NODISCARD LayoutUnit
+      AdjustIntrinsicLogicalHeightForBoxSizing(LayoutUnit height) const noexcept override;
+    void AdjustBorderBoxRectForPainting(LayoutRect &paintRect) noexcept override;
+    KRYS_NODISCARD LayoutRect PaintRectToClipOutFromBorder(const LayoutRect &paintRect) noexcept override;
 
     /// @brief Lays out the children that normal layout skips: a fieldset's legend.
     virtual void LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept;
@@ -499,6 +535,12 @@ namespace krys::boo
     }
 
   private:
+    void PaintExcludedChildrenInBorder(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+    KRYS_NODISCARD bool HitTestExcludedChildrenInBorder(const HitTestRequest &request, HitTestResult &result,
+                                                        const HitTestLocation &locationInContainer,
+                                                        const LayoutPoint &accumulatedOffset,
+                                                        HitTestAction hitTestAction) noexcept;
+
     KRYS_NODISCARD bool IsSelfCollapsingBlock() const noexcept override;
     KRYS_NODISCARD virtual bool ChildrenPreventSelfCollapsing() const noexcept;
 

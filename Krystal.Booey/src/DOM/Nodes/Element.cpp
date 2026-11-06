@@ -3630,6 +3630,14 @@ namespace krys::boo::dom
       return element.Renderer() && element.Renderer()->IsRenderBoxModelObject();
     }
 
+    /// @brief What a legend adds to a fieldset's border. It's left out of the client box, which script sees
+    /// as inside the border that's specified, as in other browsers.
+    KRYS_NODISCARD LayoutUnit IntrinsicBorderForFieldsetOf(const RenderBox &renderer) noexcept
+    {
+      auto *block = DynamicDowncast<RenderBlock>(renderer);
+      return block ? block->IntrinsicBorderForFieldset() : LayoutUnit {};
+    }
+
     KRYS_NODISCARD RenderBox *RenderBoxOf(const Element &element) noexcept
     {
       return DynamicDowncast<RenderBox>(element.Renderer());
@@ -4006,6 +4014,10 @@ namespace krys::boo::dom
     {
       // The left border, and a vertical scrollbar placed between it and the padding.
       auto clientLeft = LayoutUnit(RoundToInt(renderer->ClientLeft()));
+      if (renderer->GetWritingMode().IsBlockLeftToRight())
+      {
+        clientLeft -= IntrinsicBorderForFieldsetOf(*renderer);
+      }
       if (renderer->Style().ShouldPlaceVerticalScrollbarOnLeft())
       {
         clientLeft += renderer->VerticalScrollbarWidth();
@@ -4025,6 +4037,10 @@ namespace krys::boo::dom
     if (auto *renderer = RenderBoxOf(*this))
     {
       auto clientTop = LayoutUnit(RoundToInt(renderer->ClientTop()));
+      if (renderer->GetWritingMode().IsBlockTopToBottom())
+      {
+        clientTop -= IntrinsicBorderForFieldsetOf(*renderer);
+      }
       return ConvertToNonSubpixelValue(
         AdjustLayoutUnitForAbsoluteZoom(clientTop, renderer->Style()).ToDouble());
     }
@@ -4058,6 +4074,10 @@ namespace krys::boo::dom
     if (auto *renderer = RenderBoxOf(*this))
     {
       auto clientWidth = LayoutUnit(RoundToInt(renderer->ClientWidth()));
+      if (!renderer->GetWritingMode().IsHorizontal())
+      {
+        clientWidth += IntrinsicBorderForFieldsetOf(*renderer);
+      }
       // clientWidth/Height is the visual portion of the box content, not including
       // borders or scroll bars, but includes padding. And per
       // https://www.w3.org/TR/CSS2/tables.html#model,
@@ -4109,6 +4129,10 @@ namespace krys::boo::dom
     if (auto *renderer = RenderBoxOf(*this))
     {
       auto clientHeight = LayoutUnit(RoundToInt(renderer->ClientHeight()));
+      if (renderer->GetWritingMode().IsHorizontal())
+      {
+        clientHeight += IntrinsicBorderForFieldsetOf(*renderer);
+      }
       // See ClientWidth() for why the table's padding and borders are added.
       if (renderer->IsRenderTable())
       {

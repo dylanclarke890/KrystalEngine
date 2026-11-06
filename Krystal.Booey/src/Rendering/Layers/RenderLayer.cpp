@@ -1843,7 +1843,8 @@ namespace krys::boo
     }
     else if (auto *parentLayer = Parent())
     {
-      if (parentLayer->Renderer().HasNonVisibleOverflow())
+      // A legend in the border doesn't scroll with the contents of its fieldset.
+      if (parentLayer->Renderer().HasNonVisibleOverflow() && !Renderer().IsExcludedAndPlacedInBorder())
       {
         if (auto *parentLayerScrollableArea = parentLayer->GetScrollableArea())
         {
@@ -3970,6 +3971,12 @@ namespace krys::boo
     if (clipRectsContext.RootLayer == this || !Parent())
     {
       return nullptr;
+    }
+
+    // A legend in the border is outside what its fieldset clips, whose overflow clip is for the contents.
+    if (Renderer().IsExcludedAndPlacedInBorder())
+    {
+      return containerLayer->ParentClipRects(clipRectsContext);
     }
 
     if (clipRectsContext.Type == PaintingClipRects && _suppressAncestorClippingInsideFilter

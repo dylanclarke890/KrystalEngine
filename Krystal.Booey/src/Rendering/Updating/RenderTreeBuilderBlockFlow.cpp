@@ -11,7 +11,7 @@ namespace krys::boo
   void RenderTreeBuilder::BlockFlow::Attach(RenderBlockFlow &parent, RenderPtr<RenderObject> child,
                                             RenderObject *beforeChild) noexcept
   {
-    // FIXME: Multi-column flows (and fieldset legends, which avoid them), and children moved into the
+    // FIXME: Multi-column flows (and the fieldset legends that avoid them), and children moved into the
     // enclosing fragmented flow, once there are any.
     _builder.BlockBuilder().Attach(parent, krys::move(child), beforeChild);
   }

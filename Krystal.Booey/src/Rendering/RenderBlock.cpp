@@ -893,7 +893,10 @@ namespace krys::boo
     if (oldStyle)
     {
       RemoveOutOfFlowBoxesIfNeededOnStyleChange(*this, *oldStyle, newStyle);
-      // FIXME: A legend that starts floating rejoins normal layout, once there are fieldsets.
+      if (IsLegend() && !oldStyle->IsFloating() && newStyle.IsFloating())
+      {
+        SetIsExcludedFromNormalLayout(false);
+      }
     }
     RenderBox::StyleWillChange(diff, newStyle);
   }
@@ -1573,7 +1576,10 @@ namespace krys::boo
     {
       for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
       {
-        // FIXME: Skip a legend placed in the border, once there are fieldsets.
+        if (child->IsExcludedAndPlacedInBorder())
+        {
+          continue;
+        }
         if (auto baseline = child->FirstLineBaseline())
         {
           // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
@@ -1601,7 +1607,10 @@ namespace krys::boo
     {
       for (auto *child = LastInFlowChildBox(); child; child = child->PreviousInFlowSiblingBox())
       {
-        // FIXME: Skip a legend placed in the border, once there are fieldsets.
+        if (child->IsExcludedAndPlacedInBorder())
+        {
+          continue;
+        }
         if (auto baseline = child->LastLineBaseline())
         {
           // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
@@ -1720,9 +1729,304 @@ namespace krys::boo
     // (takeBoxesNeedingTransformUpdateAfterContainerLayout).
   }
 
-  void RenderBlock::LayoutExcludedChildren(RelayoutChildren) noexcept
+  void RenderBlock::LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept
   {
-    // FIXME: Lay out a fieldset's legend inside its border, once there are fieldsets.
+    if (!IsFieldset())
+    {
+      return;
+    }
+
+    bool hadIntrinsicBorder = _intrinsicBorderForFieldset != 0;
+    _intrinsicBorderForFieldset = 0;
+
+    // Any other legend is laid out like any other child, whatever it was before.
+    auto *box = FindFieldsetLegend();
+    for (auto &child : ChildrenOfType<RenderBox>(*this))
+    {
+      if (&child != box && child.IsLegend())
+      {
+        child.SetIsExcludedFromNormalLayout(false);
+      }
+    }
+
+    if (!box)
+    {
+      // Layout started the contents after a border that's now thinner.
+      if (hadIntrinsicBorder)
+      {
+        SetLogicalHeight(BorderAndPaddingBefore());
+      }
+      return;
+    }
+
+    box->SetIsExcludedFromNormalLayout(true);
+
+    auto &legend = *box;
+    if (relayoutChildren == RelayoutChildren::Yes)
+    {
+      legend.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+    }
+    legend.LayoutIfNeeded();
+
+    // Across the box, as a block would be (its margins, auto ones among them, having been computed), and as
+    // its `text-align` says, which is what `align` maps to.
+    LayoutUnit logicalLeft;
+    auto textAlign = legend.Style().GetTextAlign();
+    if (GetWritingMode().IsBidiLTR())
+    {
+      switch (textAlign)
+      {
+        case style::TextAlign::Center:
+          logicalLeft = (LogicalWidth() - LogicalWidthForChild(legend)) / 2;
+          break;
+        case style::TextAlign::Right:
+          logicalLeft = LogicalWidth() - BorderAndPaddingEnd() - LogicalWidthForChild(legend);
+          break;
+        default: logicalLeft = BorderAndPaddingStart() + MarginStartForChild(legend); break;
+      }
+    }
+    else
+    {
+      switch (textAlign)
+      {
+        case style::TextAlign::Left: logicalLeft = BorderAndPaddingStart(); break;
+        case style::TextAlign::Center:
+        {
+          // The extra pixel goes to the end side in right to left too.
+          LayoutUnit centeredWidth = LogicalWidth() - LogicalWidthForChild(legend);
+          logicalLeft = centeredWidth - centeredWidth / 2;
+          break;
+        }
+        default:
+          logicalLeft = LogicalWidth() - BorderAndPaddingStart() - MarginStartForChild(legend)
+                        - LogicalWidthForChild(legend);
+          break;
+      }
+    }
+    SetLogicalLeftForChild(legend, logicalLeft);
+
+    // Centred on the border, or at its start if it's taller; what's taller adds to the border. The margin
+    // before is ignored, as in other browsers.
+    LayoutUnit fieldsetBorderBefore = BorderBefore();
+    LayoutUnit legendLogicalHeight = LogicalHeightForChild(legend);
+    LayoutUnit topPositionForLegend = std::max(0_lu, (fieldsetBorderBefore - legendLogicalHeight) / 2);
+    LayoutUnit bottomPositionForLegend =
+      topPositionForLegend + legendLogicalHeight + MarginAfterForChild(legend);
+    SetLogicalTopForChild(legend, topPositionForLegend);
+    if (bottomPositionForLegend > fieldsetBorderBefore)
+    {
+      _intrinsicBorderForFieldset = bottomPositionForLegend - fieldsetBorderBefore;
+    }
+
+    // The border now includes the legend, so the contents start after it and the padding.
+    SetLogicalHeight(BorderAndPaddingBefore());
+  }
+
+  RenderBox *RenderBlock::FindFieldsetLegend(FieldsetFindLegendOption option) const noexcept
+  {
+    if (IsSkippedContentRoot(*this))
+    {
+      return nullptr;
+    }
+    for (auto &legend : ChildrenOfType<RenderBox>(*this))
+    {
+      if (option == FieldsetFindLegendOption::IgnoreFloatingOrOutOfFlow
+          && legend.IsFloatingOrOutOfFlowPositioned())
+      {
+        continue;
+      }
+      if (legend.IsLegend())
+      {
+        return const_cast<RenderBox *>(&legend);
+      }
+    }
+    return nullptr;
+  }
+
+  void RenderBlock::AdjustBorderBoxRectForPainting(LayoutRect &paintRect) noexcept
+  {
+    if (!IsFieldset() || !_intrinsicBorderForFieldset)
+    {
+      return;
+    }
+    auto *legend = FindFieldsetLegend();
+    if (!legend)
+    {
+      return;
+    }
+
+    // The border is painted through the middle of the legend.
+    if (GetWritingMode().IsHorizontal())
+    {
+      LayoutUnit yOff = std::max(0_lu, (legend->Height() - RenderBox::BorderBefore()) / 2);
+      paintRect.SetHeight(paintRect.Height() - yOff);
+      if (GetWritingMode().IsBlockTopToBottom())
+      {
+        paintRect.SetY(paintRect.Y() + yOff);
+      }
+    }
+    else
+    {
+      LayoutUnit xOff = std::max(0_lu, (legend->Width() - RenderBox::BorderBefore()) / 2);
+      paintRect.SetWidth(paintRect.Width() - xOff);
+      if (GetWritingMode().IsBlockLeftToRight())
+      {
+        paintRect.SetX(paintRect.X() + xOff);
+      }
+    }
+  }
+
+  LayoutRect RenderBlock::PaintRectToClipOutFromBorder(const LayoutRect &paintRect) noexcept
+  {
+    LayoutRect clipRect;
+    if (!IsFieldset())
+    {
+      return clipRect;
+    }
+    auto *legend = FindFieldsetLegend();
+    if (!legend)
+    {
+      return clipRect;
+    }
+
+    LayoutUnit borderExtent = RenderBox::BorderBefore();
+    if (GetWritingMode().IsHorizontal())
+    {
+      clipRect.SetX(paintRect.X() + legend->X());
+      clipRect.SetY(GetWritingMode().IsBlockTopToBottom()
+                      ? paintRect.Y()
+                      : paintRect.Y() + paintRect.Height() - borderExtent);
+      clipRect.SetWidth(legend->Width());
+      clipRect.SetHeight(borderExtent);
+    }
+    else
+    {
+      clipRect.SetX(GetWritingMode().IsBlockLeftToRight() ? paintRect.X()
+                                                          : paintRect.X() + paintRect.Width() - borderExtent);
+      clipRect.SetY(paintRect.Y() + legend->Y());
+      clipRect.SetWidth(borderExtent);
+      clipRect.SetHeight(legend->Height());
+    }
+    return clipRect;
+  }
+
+  RectEdges<LayoutUnit> RenderBlock::BorderWidths() const noexcept
+  {
+    return {BorderTop(), BorderRight(), BorderBottom(), BorderLeft()};
+  }
+
+  LayoutUnit RenderBlock::BorderTop() const noexcept
+  {
+    if (!GetWritingMode().IsBlockTopToBottom() || !_intrinsicBorderForFieldset)
+    {
+      return RenderBox::BorderTop();
+    }
+    return RenderBox::BorderTop() + _intrinsicBorderForFieldset;
+  }
+
+  LayoutUnit RenderBlock::BorderLeft() const noexcept
+  {
+    if (!GetWritingMode().IsBlockLeftToRight() || !_intrinsicBorderForFieldset)
+    {
+      return RenderBox::BorderLeft();
+    }
+    return RenderBox::BorderLeft() + _intrinsicBorderForFieldset;
+  }
+
+  LayoutUnit RenderBlock::BorderBottom() const noexcept
+  {
+    if (GetWritingMode().BlockDirection() != FlowDirection::BottomToTop || !_intrinsicBorderForFieldset)
+    {
+      return RenderBox::BorderBottom();
+    }
+    return RenderBox::BorderBottom() + _intrinsicBorderForFieldset;
+  }
+
+  LayoutUnit RenderBlock::BorderRight() const noexcept
+  {
+    if (GetWritingMode().BlockDirection() != FlowDirection::RightToLeft || !_intrinsicBorderForFieldset)
+    {
+      return RenderBox::BorderRight();
+    }
+    return RenderBox::BorderRight() + _intrinsicBorderForFieldset;
+  }
+
+  LayoutUnit RenderBlock::BorderBefore() const noexcept
+  {
+    return RenderBox::BorderBefore() + _intrinsicBorderForFieldset;
+  }
+
+  LayoutUnit RenderBlock::AdjustBorderBoxLogicalHeightForBoxSizing(LayoutUnit height) const noexcept
+  {
+    // `height` doesn't count what the legend adds to the border, as in other browsers.
+    LayoutUnit bordersPlusPadding = BorderAndPaddingLogicalHeight();
+    if (Style().GetBoxSizing() == BoxSizing::ContentBox)
+    {
+      return height + bordersPlusPadding - _intrinsicBorderForFieldset;
+    }
+    return std::max(height, bordersPlusPadding);
+  }
+
+  LayoutUnit RenderBlock::AdjustContentBoxLogicalHeightForBoxSizing(Maybe<LayoutUnit> height) const noexcept
+  {
+    if (!height)
+    {
+      return 0;
+    }
+    LayoutUnit result = *height;
+    if (Style().GetBoxSizing() == BoxSizing::BorderBox)
+    {
+      result -= BorderAndPaddingLogicalHeight();
+    }
+    else
+    {
+      result -= _intrinsicBorderForFieldset;
+    }
+    return std::max(0_lu, result);
+  }
+
+  LayoutUnit RenderBlock::AdjustIntrinsicLogicalHeightForBoxSizing(LayoutUnit height) const noexcept
+  {
+    if (Style().GetBoxSizing() == BoxSizing::BorderBox)
+    {
+      return height + BorderAndPaddingLogicalHeight();
+    }
+    return height + _intrinsicBorderForFieldset;
+  }
+
+  void RenderBlock::PaintExcludedChildrenInBorder(PaintInfo &paintInfo,
+                                                  const LayoutPoint &paintOffset) noexcept
+  {
+    if (!IsFieldset())
+    {
+      return;
+    }
+    auto *box = FindFieldsetLegend();
+    if (!box || !box->IsExcludedFromNormalLayout() || box->HasSelfPaintingLayer())
+    {
+      return;
+    }
+    box->PaintAsInlineBlock(paintInfo, FlipForWritingModeForChild(*box, paintOffset));
+  }
+
+  bool RenderBlock::HitTestExcludedChildrenInBorder(const HitTestRequest &request, HitTestResult &result,
+                                                    const HitTestLocation &locationInContainer,
+                                                    const LayoutPoint &accumulatedOffset,
+                                                    HitTestAction hitTestAction) noexcept
+  {
+    if (!IsFieldset())
+    {
+      return false;
+    }
+    auto *legend = FindFieldsetLegend();
+    if (!legend || !legend->IsExcludedFromNormalLayout() || legend->HasSelfPaintingLayer())
+    {
+      return false;
+    }
+    auto childHitTest =
+      hitTestAction == HitTestChildBlockBackgrounds ? HitTestChildBlockBackground : hitTestAction;
+    return legend->NodeAtPoint(request, result, locationInContainer,
+                               FlipForWritingModeForChild(*legend, accumulatedOffset), childHitTest);
   }
 
   void RenderBlock::ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
@@ -1816,8 +2120,7 @@ namespace krys::boo
       // Positioned children don't affect the min/max width. Legends in fieldsets are skipped here
       // since they compute outside of any one layout system. Other children excluded from
       // normal layout are only used with block flows, so it's ok to calculate them here.
-      // FIXME: Skip legends placed in the border, once there are fieldsets.
-      if (childBox.IsOutOfFlowPositioned())
+      if (childBox.IsOutOfFlowPositioned() || childBox.IsExcludedAndPlacedInBorder())
       {
         continue;
       }
@@ -2070,10 +2373,41 @@ namespace krys::boo
     return margin;
   }
 
-  bool RenderBlock::ComputePreferredWidthsForExcludedChildren(LayoutUnit &, LayoutUnit &) const noexcept
+  bool RenderBlock::ComputePreferredWidthsForExcludedChildren(LayoutUnit &minWidth,
+                                                              LayoutUnit &maxWidth) const noexcept
   {
-    // FIXME: The rendered legend of a fieldset, once there are fieldsets.
-    return false;
+    if (!IsFieldset())
+    {
+      return false;
+    }
+    auto *legend = FindFieldsetLegend();
+    if (!legend)
+    {
+      return false;
+    }
+
+    legend->SetIsExcludedFromNormalLayout(true);
+    ComputeChildPreferredLogicalWidths(*legend, minWidth, maxWidth);
+
+    // These are added later, so they're taken out: the legend is outside the scrollable area.
+    auto scrollbarWidth = IntrinsicScrollbarLogicalWidthIncludingGutter();
+    minWidth -= scrollbarWidth;
+    maxWidth -= scrollbarWidth;
+
+    const auto &childStyle = legend->Style();
+    const auto &zoomFactor = childStyle.UsedZoomForLength();
+    LayoutUnit margin;
+    if (auto fixedMarginStart = childStyle.MarginStart(GetWritingMode()).TryFixed())
+    {
+      margin += fixedMarginStart->ResolveZoom(zoomFactor);
+    }
+    if (auto fixedMarginEnd = childStyle.MarginEnd(GetWritingMode()).TryFixed())
+    {
+      margin += fixedMarginEnd->ResolveZoom(zoomFactor);
+    }
+    minWidth += margin;
+    maxWidth += margin;
+    return true;
   }
 
   LayoutUnit RenderBlock::LayoutOverflowLogicalBottom(const RenderBlock &renderer) noexcept
@@ -2262,8 +2596,13 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Fieldset legends painted in the border (paintExcludedChildrenInBorder), once fieldsets are laid
-    // out.
+    // Legends are painted just above the border, before scrolling or clipping.
+    if (shouldPaintContent
+        && (paintPhase == PaintPhase::BlockBackground || paintPhase == PaintPhase::ChildBlockBackground
+            || paintPhase == PaintPhase::Selection))
+    {
+      PaintExcludedChildrenInBorder(paintInfo, paintOffset);
+    }
 
     if (paintPhase == PaintPhase::Mask && Style().UsedVisibility() == Visibility::Visible)
     {
@@ -2519,8 +2858,12 @@ namespace krys::boo
         return true;
       }
 
-      // FIXME: Children painted in the border (hitTestExcludedChildrenInBorder: fieldset legends) come with
-      // fieldsets.
+      if (!checkChildren
+          && HitTestExcludedChildrenInBorder(request, result, locationInContainer, adjustedLocation,
+                                             hitTestAction))
+      {
+        return true;
+      }
     }
 
     if (!HitTestBorderRadius(locationInContainer, accumulatedOffset))

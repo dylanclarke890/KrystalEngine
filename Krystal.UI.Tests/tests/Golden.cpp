@@ -445,6 +445,11 @@ namespace krys::ui::tests
     CheckPage("webfonts", 360u, 240u, true);
   }
 
+  TEST_CASE("Golden: fieldset", "[UI][GPU][Golden]")
+  {
+    CheckPage("fieldset", 480u, 360u, true);
+  }
+
   TEST_CASE("Golden: variable fonts", "[UI][GPU][Golden]")
   {
     CheckPage("variable-fonts", 320u, 200u, true);

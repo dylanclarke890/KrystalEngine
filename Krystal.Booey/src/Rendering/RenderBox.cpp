@@ -1044,7 +1044,9 @@ namespace krys::boo
       offset += TopLeftLocationOffset();
     }
 
-    if (auto *boxContainer = DynamicDowncast<RenderBox>(container))
+    // A legend in the border doesn't scroll with the contents of its fieldset.
+    if (auto *boxContainer = DynamicDowncast<RenderBox>(container);
+        boxContainer && !IsExcludedAndPlacedInBorder())
     {
       offset -= ToLayoutSize(LayoutPoint(boxContainer->GetScrollPosition()));
     }
