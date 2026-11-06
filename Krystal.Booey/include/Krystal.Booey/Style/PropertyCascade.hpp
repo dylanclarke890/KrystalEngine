@@ -39,7 +39,6 @@ namespace krys::boo::style
       Inherited,
       ExplicitlyInherited,
       AfterAnimation,
-      AfterTransition,
       StartingStyle,
       NonCacheable,
     };
@@ -93,12 +92,16 @@ namespace krys::boo::style
     struct AnimationLayer
     {
       const HashSet<AnimatableCSSProperty> &Properties;
+      /// @brief Those of the properties that only transitions animate, which important declarations don't
+      /// override; may be null.
+      const HashSet<AnimatableCSSProperty> *TransitioningProperties;
       HashSet<AnimatableCSSProperty> OverriddenProperties;
       bool HasCustomProperties {false};
       bool HasFontSize {false};
       bool HasLineHeight {false};
 
-      explicit AnimationLayer(const HashSet<AnimatableCSSProperty> &properties) noexcept;
+      AnimationLayer(const HashSet<AnimatableCSSProperty> &properties,
+                     const HashSet<AnimatableCSSProperty> *transitioningProperties) noexcept;
     };
 
     constexpr static size_t LogicalGroupPropertyCount =
@@ -138,7 +141,8 @@ namespace krys::boo::style
   public:
     PropertyCascade(const MatchResult &matchResult, IncludedProperties &&includedProperties,
                     const HashSet<AnimatableCSSProperty> *animatedProperties = nullptr,
-                    const css::StyleProperties *positionTryFallbackProperties = nullptr) noexcept;
+                    const css::StyleProperties *positionTryFallbackProperties = nullptr,
+                    const HashSet<AnimatableCSSProperty> *transitioningProperties = nullptr) noexcept;
     PropertyCascade(const PropertyCascade &parent, Origin maximumOrigin,
                     Maybe<ScopeOrdinal> rollbackScope = {},
                     Maybe<style::CascadeLayerPriority> maximumCascadeLayerPriorityForRollback = {}) noexcept;

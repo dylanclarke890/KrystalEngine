@@ -196,6 +196,25 @@ namespace krys::boo
     return impact;
   }
 
+  AnimatableCSSPropertySet KeyframeEffectStack::PropertiesAnimatedOnlyByTransitions() noexcept
+  {
+    AnimatableCSSPropertySet transitioning;
+    AnimatableCSSPropertySet others;
+    for (const auto &effect : SortedEffects())
+    {
+      if (effect && effect->Animation())
+      {
+        auto &properties = effect->Animation()->IsCSSTransition() ? transitioning : others;
+        properties.insert(effect->AnimatedProperties().begin(), effect->AnimatedProperties().end());
+      }
+    }
+    for (const auto &property : others)
+    {
+      transitioning.erase(property);
+    }
+    return transitioning;
+  }
+
   void KeyframeEffectStack::ClearInvalidCSSAnimationNames() noexcept
   {
     _invalidCSSAnimationNames.clear();

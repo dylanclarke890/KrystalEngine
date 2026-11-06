@@ -1025,11 +1025,11 @@ namespace krys::boo::style
       if (resolvedStyle.MatchResult)
       {
         // The cascade may override animated properties and have dependencies to them.
-        // FIXME: This is wrong if there are both transitions and animations running on the same element.
-        auto overriddenAnimatedProperties =
-          ApplyCascadeAfterAnimation(*animatedStyle, animatedProperties, styleable.HasRunningTransitions(),
-                                     *resolvedStyle.MatchResult, element, resolutionContext);
         krys_debug_assert(styleable.GetKeyframeEffectStack());
+        auto overriddenAnimatedProperties = ApplyCascadeAfterAnimation(
+          *animatedStyle, animatedProperties,
+          styleable.GetKeyframeEffectStack()->PropertiesAnimatedOnlyByTransitions(),
+          *resolvedStyle.MatchResult, element, resolutionContext);
         styleable.GetKeyframeEffectStack()->CascadeDidOverrideProperties(
           AnimatableCSSPropertySet(overriddenAnimatedProperties.begin(), overriddenAnimatedProperties.end()),
           *_document);
@@ -1244,9 +1244,9 @@ namespace krys::boo::style
   }
 
   HashSet<AnimatableCSSProperty> TreeResolver::ApplyCascadeAfterAnimation(
-    RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties, bool isTransition,
-    const MatchResult &matchResult, const dom::Element &element,
-    const ResolutionContext &resolutionContext) noexcept
+    RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties,
+    const AnimatableCSSPropertySet &transitioningProperties, const MatchResult &matchResult,
+    const dom::Element &element, const ResolutionContext &resolutionContext) noexcept
   {
     auto builderContext = BuilderContext {
       .Document = ShareRefPtr<const dom::Document>(_document.get()),
@@ -1257,13 +1257,12 @@ namespace krys::boo::style
     };
 
     HashSet<AnimatableCSSProperty> properties(animatedProperties.begin(), animatedProperties.end());
+    HashSet<AnimatableCSSProperty> transitioning(transitioningProperties.begin(),
+                                                 transitioningProperties.end());
 
-    auto styleBuilder = Builder {animatedStyle,
-                                 krys::move(builderContext),
-                                 matchResult,
-                                 {isTransition ? PropertyCascade::PropertyType::AfterTransition
-                                               : PropertyCascade::PropertyType::AfterAnimation},
-                                 &properties};
+    auto styleBuilder = Builder {animatedStyle, krys::move(builderContext),
+                                 matchResult,   {PropertyCascade::PropertyType::AfterAnimation},
+                                 &properties,   &transitioning};
 
     styleBuilder.ApplyAllProperties();
 

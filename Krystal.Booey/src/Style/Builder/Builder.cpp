@@ -51,9 +51,10 @@ namespace krys::boo::style
 
   Builder::Builder(RenderStyle &style, BuilderContext &&context, const MatchResult &matchResult,
                    PropertyCascade::IncludedProperties &&includedProperties,
-                   const HashSet<AnimatableCSSProperty> *animatedProperties) noexcept
+                   const HashSet<AnimatableCSSProperty> *animatedProperties,
+                   const HashSet<AnimatableCSSProperty> *transitioningProperties) noexcept
       : _cascade(matchResult, krys::move(includedProperties), animatedProperties,
-                 PositionTryFallbackProperties(context)),
+                 PositionTryFallbackProperties(context), transitioningProperties),
         _state(CreateUnique<BuilderState>(style, krys::move(context)))
   {
   }

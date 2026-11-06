@@ -84,6 +84,46 @@ namespace krys::boo::tests
     CHECK_FALSE(fixture.RunningTransition(u8"box", css::PropertyId::Opacity));
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "CSSTransition: important declarations with animations and transitions on one element",
+                   "[Animation][CSSTransition][css-cascade:cascade-origin]")
+  {
+    auto width = [](TransitionFixture &fixture)
+    {
+      (void)fixture.Document->UpdateLayout();
+      return Downcast<html::HTMLElement>(fixture.ById(u8"box")).OffsetWidth();
+    };
+    constexpr auto styles = u8"<!DOCTYPE html><style>@keyframes fade{from,to{opacity:.1}}";
+
+    SECTION("an important declaration overrides an animation while another property transitions")
+    {
+      TransitionFixture fixture {utf8_string(styles)
+                                 + u8"#box{display:block;width:0;opacity:.5 !important;animation:fade 100s;"
+                                   u8"transition:width 1s linear}</style><div id=box></div>"};
+      fixture.SetStyle(u8"box", u8"width:100px");
+      fixture.Frame();
+      REQUIRE(fixture.RunningTransition(u8"box", css::PropertyId::Width));
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.5f));
+      CHECK(width(fixture) == 25);
+    }
+
+    SECTION("a transition overrides an important declaration while another property animates")
+    {
+      TransitionFixture fixture {utf8_string(styles)
+                                 + u8"#box{display:block;width:0;animation:fade 100s;"
+                                   u8"transition:width 1s linear}</style><div id=box></div>"};
+      fixture.SetStyle(u8"box", u8"width:100px !important");
+      fixture.Frame();
+      REQUIRE(fixture.RunningTransition(u8"box", css::PropertyId::Width));
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.1f));
+      CHECK(width(fixture) == 25);
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: transition events", "[Animation][CSSTransition]")
   {
     TransitionFixture fixture {utf8_string(FadingBox)};
