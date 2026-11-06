@@ -3302,11 +3302,6 @@ namespace krys::boo::dom
       }
     }
 
-    if (_timelinesController)
-    {
-      _timelinesController->ResumeAnimations();
-    }
-
     ResumeScheduledTasks(reason);
 
     _isSuspended = false;
@@ -3373,6 +3368,10 @@ namespace krys::boo::dom
     {
       timer->Suspend();
     }
+    if (_timelinesController)
+    {
+      _timelinesController->SuspendAnimations();
+    }
   }
 
   void Document::ResumeActiveDOMObjects(ReasonForSuspension reason) noexcept
@@ -3387,6 +3386,13 @@ namespace krys::boo::dom
     {
       timer->Resume();
     }
+    // A hidden page's animations stay suspended until it's shown.
+    auto *page = GetPage();
+    if (_timelinesController
+        && !(page && !page->IsVisible() && GetSettings().HiddenPageCSSAnimationSuspensionEnabled))
+    {
+      _timelinesController->ResumeAnimations();
+    }
   }
 
   void Document::StopActiveDOMObjects() noexcept
@@ -3400,6 +3406,8 @@ namespace krys::boo::dom
       timer->Stop();
     }
     _scriptedAnimationController = nullptr;
+
+    WebAnimation::StopAnimationsOfDocument(*this);
 
     // Its close watchers are destroyed.
     if (auto *closeWatcherManager = _domWindow ? _domWindow->CloseWatcherManagerIfExists() : nullptr)

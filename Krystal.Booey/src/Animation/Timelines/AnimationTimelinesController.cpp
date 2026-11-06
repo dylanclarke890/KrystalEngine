@@ -27,6 +27,10 @@ namespace krys::boo
         SuspendAnimations();
       }
     }
+    if (document.ActiveDOMObjectsAreSuspended())
+    {
+      SuspendAnimations();
+    }
   }
 
   AnimationTimelinesController::~AnimationTimelinesController() noexcept = default;

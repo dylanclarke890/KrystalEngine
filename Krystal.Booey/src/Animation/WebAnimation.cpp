@@ -14,6 +14,7 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -77,6 +78,23 @@ namespace krys::boo
   {
     krys_debug_assert(Instances().contains(this));
     Instances().erase(this);
+  }
+
+  void WebAnimation::StopAnimationsOfDocument(const dom::Document &document) noexcept
+  {
+    List<Ref<WebAnimation>> animations;
+    for (auto *animation : Instances())
+    {
+      if (animation->_document.get() == &document)
+      {
+        animations.push_back(ShareRef(*animation));
+      }
+    }
+    for (auto &animation : animations)
+    {
+      dom::EventTargetAlgorithms::RemoveAllEventListeners(*animation);
+      animation->SetEffectInternal(nullptr);
+    }
   }
 
   void WebAnimation::Remove() noexcept

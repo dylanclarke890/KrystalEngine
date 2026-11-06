@@ -82,7 +82,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- Animations aren't suspended with their document (FIXME in `WebAnimation.hpp`).
 - Scroll and view timelines have no accelerated representation (no threaded animations), and a change in view timeline metrics doesn't update the timeline (FIXME in `KeyframeEffect.cpp`).
 - Keyframe offsets in named timeline ranges compute to NaN without a view timeline.
 - `TreeResolver` skips the back/forward cache and printing checks on the animated-update path, and has a FIXME to push after-change style into the parent stack.
