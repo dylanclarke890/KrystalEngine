@@ -404,6 +404,7 @@ namespace krys::boo::dom
     bool _hasAnimationIterationListener {false};
     bool _hasPointerMoveListener {false};
     bool _hasPointerRawUpdateListener {false};
+    bool _hasTouchRelatedListener {false};
     /// @see https://html.spec.whatwg.org/#unload-counter
     uint32 _unloadCounter {0};
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
@@ -1740,6 +1741,12 @@ namespace krys::boo::dom
     /// called @p localName.
     KRYS_NODISCARD bool HasLiveCollectionCachesForAttribute(DOMStringAtom localName) const noexcept;
 
+    /// @brief Whether a touch or pointer listener was ever added to the document's nodes or window. Without
+    /// one, touches aren't dispatched in the document.
+    KRYS_NODISCARD bool HasTouchRelatedListener() const noexcept
+    {
+      return _hasTouchRelatedListener;
+    }
     /// @brief Whether a `pointerrawupdate` listener was ever added to the document's nodes or window; without
     /// one, moves don't create the event.
     KRYS_NODISCARD bool HasPointerRawUpdateListener() const noexcept

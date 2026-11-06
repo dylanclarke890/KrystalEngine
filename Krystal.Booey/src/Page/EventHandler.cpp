@@ -2562,8 +2562,10 @@ namespace krys::boo
           _originatingTouchPointDocument = ShareRefPtr(&element->NodeDocument());
           freshTouchEvents = false;
         }
-        // FIXME: Skip documents without touch event listeners (hasTouchEventHandlers), once targets can say
-        // which listeners they have.
+        if (!element->NodeDocument().HasTouchRelatedListener())
+        {
+          continue;
+        }
         _originatingTouchPointTargets.insert_or_assign(touchPointTargetKey, element);
         touchTarget = element;
       }
@@ -2605,6 +2607,10 @@ namespace krys::boo
         continue;
       }
       Ref document = ShareRef(touchTargetNode->NodeDocument());
+      if (!document->HasTouchRelatedListener())
+      {
+        continue;
+      }
       RefPtr<LocalFrame> targetFrame = ShareRefPtr(document->Frame());
       if (!targetFrame || !targetFrame->View())
       {

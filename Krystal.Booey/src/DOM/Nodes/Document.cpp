@@ -4153,6 +4153,18 @@ namespace krys::boo::dom
     {
       _hasPointerRawUpdateListener = true;
     }
+
+    // Touches dispatch pointer events as well as touch events.
+    if (type == EventNames::TouchStart || type == EventNames::TouchMove || type == EventNames::TouchEnd
+        || type == EventNames::TouchCancel || type == EventNames::PointerDown || type == EventNames::PointerUp
+        || type == EventNames::PointerMove || type == EventNames::PointerRawUpdate
+        || type == EventNames::PointerCancel || type == EventNames::PointerOver
+        || type == EventNames::PointerOut || type == EventNames::PointerEnter
+        || type == EventNames::PointerLeave || type == EventNames::GotPointerCapture
+        || type == EventNames::LostPointerCapture)
+    {
+      _hasTouchRelatedListener = true;
+    }
   }
 
   void Document::UpdateAnimationsAndSendEvents() noexcept

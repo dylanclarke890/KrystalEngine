@@ -357,6 +357,71 @@ namespace krys::boo::tests
     CHECK(records[0] == "pointerup3:a");
   }
 
+  TEST_CASE("EventHandler: touches in a document with no touch or pointer listener", "[Page][TouchEvent]")
+  {
+    PaintFixture fixture(u8"<!DOCTYPE html><style>body{margin:0}div{width:100px;height:50px}</style>"
+                         u8"<div id=a></div>",
+                         {200, 100}, true);
+    (void)fixture.Document->UpdateLayout();
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto touch = [&](Type type, State state)
+    {
+      PlatformTouchEvent event(type, {TouchFixture::Point(0, state, 10, 10)}, {}, MonotonicTime::Now());
+      return handler.HandleTouchEvent(event);
+    };
+    int calls = 0;
+    auto listen = [&](dom::EventTarget &target, utf8_stringview type)
+    {
+      auto action = [&calls](dom::Event &)
+      {
+        ++calls;
+      };
+      Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<decltype(action)>>(action);
+      target.AddEventListener(dom::DOMStringAtom(type), krys::move(listener), false);
+    };
+
+    SECTION("nothing is dispatched, and the press still activates what it hits")
+    {
+      CHECK_FALSE(fixture.Document->HasTouchRelatedListener());
+      CHECK_FALSE(touch(Type::TouchStart, State::TouchPressed));
+      CHECK(fixture.ById(u8"a").Matches(u8":active").ReleaseValue());
+      CHECK_FALSE(touch(Type::TouchEnd, State::TouchReleased));
+      CHECK_FALSE(fixture.ById(u8"a").Matches(u8":active").ReleaseValue());
+    }
+
+    SECTION("a touch that began before the first listener isn't dispatched to it")
+    {
+      CHECK_FALSE(touch(Type::TouchStart, State::TouchPressed));
+      listen(fixture.ById(u8"a"), u8"touchend");
+      CHECK_FALSE(touch(Type::TouchEnd, State::TouchReleased));
+      CHECK(calls == 0);
+
+      // The next one is.
+      (void)touch(Type::TouchStart, State::TouchPressed);
+      (void)touch(Type::TouchEnd, State::TouchReleased);
+      CHECK(calls == 1);
+    }
+
+    SECTION("a pointer listener is enough")
+    {
+      listen(fixture.ById(u8"a"), u8"pointerdown");
+      CHECK(fixture.Document->HasTouchRelatedListener());
+      (void)touch(Type::TouchStart, State::TouchPressed);
+      CHECK(calls == 1);
+      (void)touch(Type::TouchEnd, State::TouchReleased);
+    }
+
+    SECTION("a listener on the window is enough")
+    {
+      REQUIRE(fixture.Document->DefaultView());
+      listen(*fixture.Document->DefaultView(), u8"touchstart");
+      CHECK(fixture.Document->HasTouchRelatedListener());
+      (void)touch(Type::TouchStart, State::TouchPressed);
+      CHECK(calls == 1);
+      (void)touch(Type::TouchEnd, State::TouchReleased);
+    }
+  }
+
   TEST_CASE("EventHandler: a pen's pointer events", "[Page][PointerEvent]")
   {
     TouchFixture fixture;

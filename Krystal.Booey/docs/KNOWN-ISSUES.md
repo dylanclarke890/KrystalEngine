@@ -266,7 +266,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Drag and drop: colour drags and drops are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
 - Sequential focus navigation does not handle moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
 - Keyboard: caps lock handling in text fields, Escape hiding validation messages, the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs.
-- Touch: documents without touch event listeners aren't skipped (`hasTouchEventHandlers` is a FIXME), and touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.
+- Touch: touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.
 - `RenderLayer` hit testing lacks SVG resources, fixed container sampling and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area (FIXMEs in `RenderLayer.cpp`).
 - `IsDraggableLink` is a local check (an HTML link with `href`, not editable); the editable-link-behaviour setting is absent.
 - Page overlays and synthetic touch events are FIXMEs in `EventHandler`.
