@@ -1978,7 +1978,6 @@ namespace krys::boo
 
     if (auto *node = GetNode())
     {
-      // FIXME: Continuations should be anonymous.
       krys_debug_assert(!node->Renderer() || node->Renderer() == this);
       if (node->Renderer() == this)
       {

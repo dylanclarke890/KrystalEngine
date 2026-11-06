@@ -131,7 +131,6 @@ namespace krys::boo
         return nullptr;
       }
       auto *rootRenderer = root.Renderer();
-      // FIXME: Renderers inside a continuation, once there are continuations.
       auto isInsideAnonymousFlexItemWithSiblings = [&]
       {
         if (!Is<RenderFlexibleBox>(renderingAncestor->Renderer()))

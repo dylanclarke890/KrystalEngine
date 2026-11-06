@@ -5594,8 +5594,6 @@ namespace krys::boo
     }
 
     // Inline containing blocks are formed by relatively-positioned inline boxes.
-    // FIXME: A block's inline continuation forms the containing block (inlineContinuation), once there are
-    // continuations.
     if (auto *inlineContainer = DynamicDowncast<RenderInline>(container))
     {
       return isContainerInlineAxis ? LayoutRange(startEdge, inlineContainer->InnerPaddingBoxWidth())

@@ -804,7 +804,6 @@ namespace krys::boo::layout_integration
   {
     auto &boxGeometry = GetLayoutState().EnsureGeometryForBox(*renderInline.LayoutBox());
 
-    // FIXME: A continuation keeps only one side's margin, border and padding, once there are continuations.
     auto writingMode = renderInline.GetWritingMode();
 
     auto inlineMargin = HorizontalLogicalMargin(renderInline, availableWidth, writingMode);

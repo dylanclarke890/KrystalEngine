@@ -1350,6 +1350,22 @@ namespace krys::boo::layout
     };
     handleInlineBoxes();
 
+    // As in non-bidi content, inline boxes on a line of its own for a block go around the line's content.
+    if (lineLayoutResult.IsBlockContent())
+    {
+      for (size_t index = 1; index < boxes.size(); ++index)
+      {
+        if (boxes[index].IsNonRootInlineBox())
+        {
+          auto visualRect =
+            MapInlineRectLogicalToVisual(lineBox.LogicalContentBoxForInlineBox(boxes[index].LayoutBox()),
+                                         lineBox.LogicalRect(), writingMode);
+          visualRect.MoveBy(_displayLine.TopLeft());
+          boxes[index].SetRect(FloatRect(visualRect), FloatRect(visualRect));
+        }
+      }
+    }
+
     auto handleTrailingOpenInlineBoxes = [&]
     {
       for (auto &lineRun : lineLayoutResult.Runs | std::views::reverse)

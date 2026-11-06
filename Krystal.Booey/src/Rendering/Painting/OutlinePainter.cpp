@@ -155,6 +155,16 @@ namespace krys::boo
          box.TraverseInlineBoxLineRightward())
     {
       auto lineBox = box->GetLineBox();
+      // A line of its own for a block breaks the outline in two: it doesn't go around the block.
+      if (lineBox->BlockLevelBox())
+      {
+        if (!rects.empty())
+        {
+          PaintOutlineWithLineRects(renderer, paintOffset, rects);
+          rects.clear();
+        }
+        continue;
+      }
       auto logicalTop = std::max(lineBox->ContentLogicalTop(), box->LogicalTop());
       auto logicalBottom = std::min(lineBox->ContentLogicalBottom(), box->LogicalBottom());
       auto enclosingVisualRect = FloatRect {box->LogicalLeftIgnoringInlineDirection(), logicalTop,
@@ -389,8 +399,6 @@ namespace krys::boo
 
     // For blocks inside inlines, we include margins so that we run right up to the inline boxes
     // above and below us (thus getting merged with them to form a single irregular shape).
-    // FIXME: Blocks in inline continuations (inlineContinuation, with their collapsed margins and the
-    // continuation's own rects), once there are continuations.
     if (renderer.Width() && renderer.Height())
     {
       rects.push_back(LayoutRect(additionalOffset, renderer.Size()));

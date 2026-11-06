@@ -1450,9 +1450,11 @@ namespace krys::boo
     // cases, we just always lay out positioned objects that are positioned implicitly like this.  Such
     // objects are rare, and so in typical DHTML menu usage (where everything is positioned explicitly) this
     // should not incur a performance penalty.
+    // Those in an inline box go by where its lines ended up, which can have changed without them.
     if (relayoutChildren == RelayoutChildren::Yes
         || (outOfFlowBox.Style().HasStaticBlockPosition(IsHorizontalWritingMode())
-            && outOfFlowBox.Parent() != this))
+            && outOfFlowBox.Parent() != this)
+        || Is<RenderInline>(outOfFlowBox.Container()))
     {
       outOfFlowBox.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
     }
@@ -2671,7 +2673,6 @@ namespace krys::boo
     {
       // Don't paint focus ring for anonymous block continuation because the
       // inline element having outline-style:auto paints the whole focus ring.
-      // FIXME: Continuations (isContinuation), once there are continuations; no block is one.
       PaintOutline(paintInfo, LayoutRect(paintOffset, Size()));
     }
 
@@ -2782,7 +2783,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Continuations (the enclosing element that was split) come with continuations.
     return GetElement();
   }
 

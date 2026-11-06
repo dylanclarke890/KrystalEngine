@@ -396,6 +396,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/GeneratedContent/RenderCounter.cpp
 		tests/Rendering/HitTesting/HitTestResult.cpp
 		tests/Rendering/RenderFieldset.cpp
+		tests/Rendering/RenderInlineBlockChildren.cpp
 		tests/Rendering/Iterators/RenderIterator.cpp
 		tests/Rendering/Layers/RenderLayer.cpp
 		tests/Rendering/Painting/ImageQualityController.cpp

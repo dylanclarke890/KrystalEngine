@@ -1838,8 +1838,13 @@ namespace krys::boo
           localPoint -= LayoutSize(ToIntSize(positionedParentScrollableArea->GetScrollPosition()));
         }
       }
-      // FIXME: Move out-of-flow boxes inside an in-flow positioned inline with it
-      // (offsetForInFlowPositionedInline).
+      if (positionedParent->Renderer().IsInFlowPositioned())
+      {
+        if (auto *inlinePositionedParent = DynamicDowncast<RenderInline>(positionedParent->Renderer()))
+        {
+          localPoint += inlinePositionedParent->OffsetForInFlowPositionedInline(GetRenderBox());
+        }
+      }
     }
     else if (auto *parentLayer = Parent())
     {
@@ -4715,8 +4720,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The only case where renderer->element()->renderer() != renderer is with continuations. Do they
-    // matter here? If they do it would still be better to deal with them explicitly.
     auto *renderer = Downcast<RenderBox>(styledElement->Renderer());
 
     Ref<dom::Document> document = ShareRef(styledElement->NodeDocument());

@@ -55,7 +55,6 @@ namespace krys::boo
   };
 
   /// @brief A renderer that follows the CSS box model: a box or an inline box.
-  // FIXME: Continuations come with inline painting.
   class RenderBoxModelObject : public RenderLayerModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBoxModelObject);

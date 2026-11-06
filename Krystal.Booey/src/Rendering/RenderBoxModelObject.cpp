@@ -477,13 +477,6 @@ namespace krys::boo
     return {};
   }
 
-  static LayoutSize AccumulateInFlowPositionOffsets(const RenderBoxModelObject &) noexcept
-  {
-    // FIXME: The in-flow offsets of the inline ancestors of an anonymous block's inline continuation, once
-    // there are continuations.
-    return {};
-  }
-
   static bool IsOutOfFlowPositionedWithImplicitHeight(const RenderBoxModelObject &child) noexcept
   {
     return child.IsOutOfFlowPositioned() && !child.Style().InsetBefore().IsAuto()
@@ -592,7 +585,7 @@ namespace krys::boo
     const auto &top = style.Top();
     const auto &bottom = style.Bottom();
 
-    auto offset = AccumulateInFlowPositionOffsets(*this);
+    LayoutSize offset;
     auto topFixed = top.TryFixed();
     auto leftFixed = left.TryFixed();
     if (topFixed && leftFixed && bottom.IsAuto() && right.IsAuto()

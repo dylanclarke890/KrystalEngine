@@ -197,8 +197,6 @@ namespace krys::boo
       FirstLetterBuilder().CleanupOnDestroy(*textFragment);
     }
 
-    // FIXME: The continuation clean-up, once there are continuations.
-
     auto tearDownSubTreeIfApplicable = [&]
     {
       auto *rendererToDelete = DynamicDowncast<RenderElement>(toDestroy.get());

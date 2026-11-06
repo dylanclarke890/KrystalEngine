@@ -445,6 +445,11 @@ namespace krys::ui::tests
     CheckPage("webfonts", 360u, 240u, true);
   }
 
+  TEST_CASE("Golden: block in inline", "[UI][GPU][Golden]")
+  {
+    CheckPage("block-in-inline", 480u, 420u, true);
+  }
+
   TEST_CASE("Golden: fieldset", "[UI][GPU][Golden]")
   {
     CheckPage("fieldset", 480u, 360u, true);

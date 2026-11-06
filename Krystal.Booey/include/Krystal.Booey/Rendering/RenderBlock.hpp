@@ -32,7 +32,7 @@ namespace krys::boo
   };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Continuations (and their outlines), fragmentation and column rules.
+  // FIXME: Fragmentation and column rules.
   KRYS_NODISCARD LayoutUnit BlockDirectionOffset(const RenderBlock &rootBlock,
                                                  const LayoutSize &offsetFromRootBlock) noexcept;
   KRYS_NODISCARD LayoutUnit InlineDirectionOffset(const RenderBlock &rootBlock,

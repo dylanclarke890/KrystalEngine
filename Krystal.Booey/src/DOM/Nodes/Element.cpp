@@ -3025,8 +3025,6 @@ namespace krys::boo::dom
         return;
       }
 
-      // FIXME: The layers of the renderer's continuations (forRendererAndContinuations), once there are
-      // continuations.
       if (layerModelObject->HasLayer())
       {
         function(*layerModelObject->Layer());

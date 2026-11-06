@@ -1008,7 +1008,6 @@ namespace krys::boo
         element->UpdateOutlineAutoAncestor(hasOutlineAuto);
       }
     }
-    // FIXME: Continuations, once there are any.
   }
 
   void RenderElement::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
@@ -1431,9 +1430,6 @@ namespace krys::boo
           newStyle.SetColumnSpan(ColumnSpan::All);
         }
       }
-
-      // FIXME: Preserve the position of anonymous block continuations, which can be relative or sticky
-      // positioned when they contain block descendants of positioned inlines, once there are continuations.
 
       UpdateAnonymousChildStyle(newStyle);
 

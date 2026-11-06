@@ -3463,6 +3463,13 @@ namespace krys::boo
         return false;
       }
 
+      // Lines before it may have ended the side where margins collapse with this block's, which only line
+      // layout knows. Taken for still being at that side, its margin would move this block.
+      if (marginInfo.AtBeforeSideOfBlock() && displayBox->LineIndex())
+      {
+        return false;
+      }
+
       auto logicalTop = blockRenderer->LogicalTop();
       marginInfo = LayoutBlockChildFromInlineLayout(*blockRenderer, logicalTop, marginInfo).ChildMarginInfo;
       auto shouldFallbackToNormalInlineLayout = [&]
