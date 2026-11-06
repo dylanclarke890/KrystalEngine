@@ -202,7 +202,8 @@ namespace krys::boo
     AnimatableCSSPropertySet others;
     for (const auto &effect : SortedEffects())
     {
-      if (effect && effect->Animation())
+      // An effect that isn't in effect, such as an animation in its delay, has no value in the cascade.
+      if (effect && effect->Animation() && effect->GetComputedTiming().Progress)
       {
         auto &properties = effect->Animation()->IsCSSTransition() ? transitioning : others;
         properties.insert(effect->AnimatedProperties().begin(), effect->AnimatedProperties().end());

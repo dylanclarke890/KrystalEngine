@@ -124,6 +124,97 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: a property that is also animated",
+                   "[Animation][CSSTransition][css-transitions:application]")
+  {
+    constexpr auto styles = u8"<!DOCTYPE html><style>@keyframes "
+                            u8"fade{from,to{opacity:.1}}#box{opacity:0;transition:opacity 1s linear}"
+                            u8"</style><div id=box></div>";
+    TransitionFixture fixture {utf8_string(styles)};
+
+    // The after-change style includes running animations, so an animation retargets a transition, which runs
+    // on underneath it.
+    SECTION("an animation added during the transition retargets it and covers it")
+    {
+      auto recorder = CreateRef<AnimationEventRecorder>();
+      recorder->Listen(fixture.ById(u8"box"), TransitionEvents);
+      fixture.SetStyle(u8"box", u8"opacity:1");
+      fixture.Frame();
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.25f));
+
+      fixture.SetStyle(u8"box", u8"opacity:1;animation:fade 100s");
+      fixture.Frame();
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      auto *transition = fixture.RunningTransition(u8"box", css::PropertyId::Opacity);
+      REQUIRE(transition);
+      CHECK(transition->TargetStyle().GetOpacity().Value.Value == Catch::Approx(0.1f));
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.1f));
+      CHECK(std::ranges::find(recorder->Records, "transitioncancel opacity") != recorder->Records.end());
+
+      fixture.Frame(1s);
+      fixture.Frame();
+      CHECK(recorder->Records.back() == "transitionend opacity");
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.1f));
+    }
+
+    SECTION("a new transition runs from the covered value once the animation has ended")
+    {
+      fixture.SetStyle(u8"box", u8"opacity:1;animation:fade 100ms");
+      fixture.Frame();
+      fixture.StartAnimations();
+      fixture.Frame(50ms);
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.1f));
+      fixture.Frame(200ms);
+      fixture.Frame();
+      CHECK(fixture.RunningTransition(u8"box", css::PropertyId::Opacity));
+      CHECK(fixture.Opacity(u8"box") > 0.0f);
+      CHECK(fixture.Opacity(u8"box") < 0.1f);
+
+      fixture.Frame(1s);
+      fixture.Frame();
+      CHECK(fixture.Opacity(u8"box") == 1.0f);
+    }
+
+    SECTION("an animation still in its delay leaves the transition showing")
+    {
+      fixture.SetStyle(u8"box", u8"opacity:1;animation:fade 100s 50s");
+      fixture.Frame();
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.25f));
+    }
+
+    SECTION("an animation filling backwards in its delay covers the transition")
+    {
+      fixture.SetStyle(u8"box", u8"opacity:1;animation:fade 100s 50s backwards");
+      fixture.Frame();
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.1f));
+    }
+
+    SECTION("an important declaration beats the animation covering the transition")
+    {
+      fixture.SetStyle(u8"box", u8"opacity:1 !important;animation:fade 100s");
+      fixture.Frame();
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(1.0f));
+    }
+
+    SECTION("an animation still in its delay doesn't make an important declaration beat the transition")
+    {
+      fixture.SetStyle(u8"box", u8"opacity:1 !important;animation:fade 100s 50s");
+      fixture.Frame();
+      fixture.StartAnimations();
+      fixture.Frame(250ms);
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.25f));
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: transition events", "[Animation][CSSTransition]")
   {
     TransitionFixture fixture {utf8_string(FadingBox)};
