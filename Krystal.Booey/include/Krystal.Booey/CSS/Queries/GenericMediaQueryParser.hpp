@@ -133,7 +133,8 @@ namespace krys::boo::css::mq
           CSSOMString name {tokens.Peek().IdentCodePoints()};
           auto functionRange = tokens.ConsumeBlock();
           tokens.DiscardWhitespace();
-          return GeneralEnclosed {krys::move(name), functionRange.Serialise(TokenSerialisationMode::Normal)};
+          return GeneralEnclosed {krys::move(name),
+                                  functionRange.Serialise(TokenSerialisationMode::CustomProperty)};
         }
       }
 
@@ -172,7 +173,7 @@ namespace krys::boo::css::mq
       }
 
       return GeneralEnclosed {functionId ? CSSOMString(ToString(*functionId)) : CSSOMString {},
-                              originalBlockRange.Serialise(TokenSerialisationMode::Normal)};
+                              originalBlockRange.Serialise(TokenSerialisationMode::CustomProperty)};
     }
 
     KRYS_NODISCARD static Maybe<Feature> ConsumeAndValidateFeature(TokenRange &tokens,

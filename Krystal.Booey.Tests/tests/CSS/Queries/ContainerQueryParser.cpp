@@ -406,10 +406,9 @@ namespace krys::boo::css::tests
     CHECK(ConditionText(u8"style(--foo:2.100  )") == "style(--foo: 2.100)");
   }
 
-  // FIXME: Fails upstream too: the unknown `prop: val` condition is serialised from its tokens in normal
-  // mode, so its whitespace collapses.
+  // WebKit collapses the whitespace, serialising the condition from its tokens in normal mode.
   TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() serialisation of unknown conditions",
-                   "[CSS][Queries][ContainerQueryParser][!shouldfail]")
+                   "[CSS][Queries][ContainerQueryParser]")
   {
     CHECK(ConditionText(u8" style(  ( --FOO: BAR) OR ( prop: val  ) )")
           == "style((--FOO: BAR) or ( prop: val  ))");
