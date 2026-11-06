@@ -134,9 +134,6 @@ namespace krys::boo
           continue;
         }
 
-        // FIXME: Skipping animations whose frame rate doesn't align with this update, once there are
-        // animation frame rates.
-
         // This will notify the animation that timing has changed and will call automatically schedule
         // invalidation if required for this animation.
         animation->Tick();
