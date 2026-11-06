@@ -11,6 +11,11 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo::html
+{
+  class HTMLSelectElement;
+}
+
 namespace krys::boo::svg
 {
   class SVGImageElement;
@@ -103,6 +108,11 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool SelectItemAlignmentFollowsMenuWritingDirection() const noexcept
     {
       return true;
+    }
+
+    /// @brief The options of the focused select changed, for a host showing them in its own picker.
+    virtual void FocusedSelectElementDidChangeOptions(const html::HTMLSelectElement &) noexcept
+    {
     }
 
     /// @brief Makes the popup menu a menu list shows its options in; a host that doesn't override this has no

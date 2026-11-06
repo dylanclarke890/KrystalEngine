@@ -72,6 +72,54 @@ namespace krys::boo::tests
         ++Count;
       }
     };
+
+    /// @brief A chrome client counting the reports of a focused select's options changing.
+    struct SelectChromeClient final : ChromeClient
+    {
+      int32 *OptionChanges {nullptr};
+
+      explicit SelectChromeClient(int32 &optionChanges) noexcept : OptionChanges(&optionChanges)
+      {
+      }
+
+      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      {
+      }
+
+      void FocusedSelectElementDidChangeOptions(const HTMLSelectElement &) noexcept final
+      {
+        ++*OptionChanges;
+      }
+    };
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "HTMLSelectElement: the chrome client hears of a focused select's options changing",
+                   "[HTML][HTMLSelectElement]")
+  {
+    int32 optionChanges = 0;
+    EditorFixture fixture(u8"<select id=s><option>a</select><select id=other><option>b</select>",
+                          CreateUnique<SelectChromeClient>(optionChanges));
+    auto &select = SelectById(fixture, u8"s");
+    auto addOption = [&]
+    {
+      auto option = fixture.Document->CreateElement(u8"option").ReleaseValue();
+      REQUIRE_FALSE(select.AppendChild(*option).HasException());
+    };
+
+    SECTION("not when it isn't focused")
+    {
+      addOption();
+      CHECK(optionChanges == 0);
+    }
+
+    SECTION("when it's focused")
+    {
+      select.Focus();
+      REQUIRE(fixture.Document->FocusedElement() == &select);
+      addOption();
+      CHECK(optionChanges > 0);
+    }
   }
 
   TEST_CASE_METHOD(

@@ -20,9 +20,11 @@
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
@@ -1025,8 +1027,14 @@ namespace krys::boo::html
     InvalidateStyleForSubtree();
     InvalidateSelectedItems();
 
-    // FIXME: Tell the chrome client the focused select's options changed
-    // (focusedSelectElementDidChangeOptions), for its popup.
+    auto &document = NodeDocument();
+    if (this == document.FocusedElement())
+    {
+      if (auto *page = document.GetPage())
+      {
+        page->GetChromeClient().FocusedSelectElementDidChangeOptions(*this);
+      }
+    }
   }
 
   void HTMLSelectElement::RecalcListItems(bool updateSelectedStates,
