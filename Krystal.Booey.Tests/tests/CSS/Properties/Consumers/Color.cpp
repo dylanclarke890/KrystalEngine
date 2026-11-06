@@ -250,6 +250,9 @@ namespace krys::boo::css::tests
       CHECK(Serialised(u8"lch(50% 30 270deg)") == "lch(50 30 270)");
       CHECK(Serialised(u8"oklab(0.5 0.1 -0.1)") == "oklab(0.5 0.1 -0.1)");
       CHECK(Serialised(u8"oklch(50% 0.2 90)") == "oklch(0.5 0.2 90)");
+      // Hues are normalised to [0, 360).
+      CHECK(Serialised(u8"lch(50 30 400)") == "lch(50 30 40)");
+      CHECK(Serialised(u8"oklch(0.5 0.125 -90deg)") == "oklch(0.5 0.125 270)");
       CHECK(Serialised(u8"hwb(120 0% 0%)") == "rgb(0, 255, 0)");
       CHECK(Serialised(u8"lab(none 0 0)") == "lab(none 0 0)");
 
