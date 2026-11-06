@@ -8,6 +8,8 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
@@ -185,6 +187,16 @@ namespace krys::boo::dom
         select && shadow->Mode() == ShadowRootMode::UserAgent)
     {
       return select->SlotForHostChild(slottable);
+    }
+    if (auto *option = DynamicDowncast<html::HTMLOptionElement>(*parent);
+        option && shadow->Mode() == ShadowRootMode::UserAgent)
+    {
+      return option->SlotForHostChild();
+    }
+    if (auto *optgroup = DynamicDowncast<html::HTMLOptGroupElement>(*parent);
+        optgroup && shadow->Mode() == ShadowRootMode::UserAgent)
+    {
+      return optgroup->SlotForHostChild(slottable);
     }
 
     // 5. If shadow's slot assignment is "manual", then return the slot in shadow's descendants whose manually

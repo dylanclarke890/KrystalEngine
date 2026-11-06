@@ -319,7 +319,7 @@ namespace krys::boo::html
       }
       case TagName::optgroup:
       {
-        return CreateRefPtr<HTMLOptGroupElement>(document);
+        return HTMLOptGroupElement::Create(document);
       }
       case TagName::option:
       {

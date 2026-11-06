@@ -21,6 +21,8 @@ namespace krys::boo::html
 
   private:
     WeakPtr<HTMLSelectElement> _ownerSelect;
+    WeakPtr<HTMLSlotElement> _contentsSlot;
+    WeakPtr<dom::Element> _labelElement;
     bool _disabled {false};
     bool _isSelected {false};
     bool _isDefault {false};
@@ -51,7 +53,6 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept final;
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept final;
     void DefaultEventHandler(dom::Event &event) noexcept final;
 
 #pragma region HTMLOptionElement - https://html.spec.whatwg.org/#htmloptionelement
@@ -104,6 +105,10 @@ namespace krys::boo::html
     /// @brief The select whose list of options this option is in, if any.
     KRYS_NODISCARD HTMLSelectElement *OwnerSelectElement() const noexcept;
 
+    /// @brief The slot of the shadow tree that takes the option's children: none, when a label replaces them.
+    /// @see https://html.spec.whatwg.org/#the-select-element-2
+    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild() const noexcept;
+
     /// @brief The label shown for the option: its text, ignoring its `label` attribute, in quirks mode.
     KRYS_NODISCARD dom::DOMString DisplayLabel() const noexcept;
 
@@ -142,6 +147,7 @@ namespace krys::boo::html
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnChildrenChanged() noexcept override;
+    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;

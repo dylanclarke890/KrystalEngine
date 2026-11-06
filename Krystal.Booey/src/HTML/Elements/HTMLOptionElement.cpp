@@ -1,11 +1,12 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -14,6 +15,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSpanElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -39,10 +42,23 @@ namespace krys::boo::html
     return select && select->ContentsUseBaseAppearance() && HTMLElement::RendererIsNeeded(style);
   }
 
-  bool HTMLOptionElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  // https://html.spec.whatwg.org/#the-select-element-2
+  // An option without a label renders as if its contents slot took its children, so only one with a label
+  // makes the tree, which stays if the label goes.
+  void HTMLOptionElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
   {
-    // A label replaces the option's contents; it's rendered as generated content.
-    return Is<dom::PseudoElement>(child) || GetAttribute(u8"label").value_or(dom::DOMString()).empty();
+    auto &document = NodeDocument();
+    auto contentsSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
+    _contentsSlot = CreateWeakPtr(contentsSlot.get());
+    auto labelElement = dom::ElementFactory::CreateHTMLElement<HTMLSpanElement>(document, u8"span");
+    _labelElement = CreateWeakPtr<dom::Element>(labelElement.get());
+    (void)contentsSlot->AppendChild(*labelElement);
+    (void)root.AppendChild(*contentsSlot);
+  }
+
+  HTMLSlotElement *HTMLOptionElement::SlotForHostChild() const noexcept
+  {
+    return GetAttribute(u8"label").value_or(dom::DOMString()).empty() ? _contentsSlot.get() : nullptr;
   }
 
   void HTMLOptionElement::DefaultEventHandler(dom::Event &event) noexcept
@@ -506,6 +522,15 @@ namespace krys::boo::html
     }
     else if (localName == u8"label")
     {
+      if (value && !value->empty())
+      {
+        EnsureUserAgentShadowRoot();
+      }
+      if (auto *root = UserAgentShadowRoot())
+      {
+        (void)_labelElement->TextContent(dom::DOMString(value.value_or(dom::DOMStringView())));
+        dom::SlotAlgorithms::AssignSlottablesForTree(*root);
+      }
       if (RefPtr<HTMLSelectElement> select = ShareRefPtr(OwnerSelectElement()))
       {
         select->OptionElementChildrenChanged();

@@ -770,10 +770,6 @@ select:-internal-select-base-contents option:not(:checked)::checkmark {
     visibility: hidden;
 }
 
-select:-internal-select-base-contents option[label]:not([label=""])::before {
-    content: attr(label);
-}
-
 select:-internal-select-base-contents optgroup {
     display: block;
     font-weight: bolder;
@@ -788,9 +784,7 @@ select:-internal-select-base-contents optgroup legend {
     min-block-size: 1lh;
 }
 
-select:-internal-select-base-contents optgroup[label]:not(:has(> legend))::before {
-    content: attr(label);
-    display: block;
+optgroup::-internal-optgroup-label {
     padding-inline: 0.5em;
     min-block-size: 1lh;
 }

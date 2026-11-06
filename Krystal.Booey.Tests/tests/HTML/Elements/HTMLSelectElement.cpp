@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
@@ -785,6 +786,89 @@ namespace krys::boo::tests
       ClickElement(fixture, select);
       CHECK_FALSE(select.IsPickerOpen());
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: labels with base appearance",
+                   "[HTML][HTMLSelectElement][html:the-select-element-2]")
+  {
+    EditorFixture fixture(
+      utf8_string(BaseSelectStyle)
+      + u8"<style>option::before{content:'[B]'}optgroup::before{content:'[G]'}</style>"
+        u8"<select id=s><optgroup id=g label=Group><option id=a label=Lab>Contents</option>"
+        u8"<option id=p>Plain</option></optgroup>"
+        u8"<optgroup id=l label=Hidden><legend>Legend</legend><option>x</option></optgroup>"
+        u8"</select>");
+    auto &select = SelectById(fixture, u8"s");
+    (void)fixture.Document->UpdateLayout();
+    ClickElement(fixture, select);
+    REQUIRE(select.IsPickerOpen());
+
+    SECTION("an option's label replaces its contents, beside an author's ::before")
+    {
+      CHECK(Dumps(fixture, u8"\"Lab\""));
+      CHECK_FALSE(Dumps(fixture, u8"\"Contents\""));
+      CHECK(Dumps(fixture, u8"\"Plain\""));
+      CHECK(Dumps(fixture, u8"\"[B]\""));
+    }
+
+    SECTION("an option's label follows its attribute")
+    {
+      auto &option = OptionById(fixture, u8"a");
+      REQUIRE_FALSE(option.SetAttribute(u8"label", u8"Changed").HasException());
+      CHECK(Dumps(fixture, u8"\"Changed\""));
+      CHECK_FALSE(Dumps(fixture, u8"\"Lab\""));
+
+      option.RemoveAttribute(u8"label");
+      CHECK(Dumps(fixture, u8"\"Contents\""));
+      CHECK_FALSE(Dumps(fixture, u8"\"Changed\""));
+    }
+
+    SECTION("the select's button follows the selected option's contents")
+    {
+      auto &option = OptionById(fixture, u8"a");
+      option.RemoveAttribute(u8"label");
+      (void)option.TextContent(dom::DOMString(u8"Replaced"));
+      (void)fixture.Document->UpdateLayout();
+      CHECK(layout::tests::DumpWithIds(fixture).find(u8"\"Contents\"") == utf8_string::npos);
+      CHECK(Dumps(fixture, u8"\"Replaced\""));
+    }
+
+    SECTION("a label set later on an option")
+    {
+      REQUIRE_FALSE(OptionById(fixture, u8"p").SetAttribute(u8"label", u8"Late").HasException());
+      CHECK(Dumps(fixture, u8"\"Late\""));
+      CHECK_FALSE(Dumps(fixture, u8"\"Plain\""));
+    }
+
+    SECTION("an optgroup's label is beside an author's ::before, and a legend replaces it")
+    {
+      CHECK(Dumps(fixture, u8"\"Group\""));
+      CHECK(Dumps(fixture, u8"\"[G]\""));
+      CHECK(Dumps(fixture, u8"\"Legend\""));
+      CHECK_FALSE(Dumps(fixture, u8"\"Hidden\""));
+    }
+
+    SECTION("removing a legend brings the label back")
+    {
+      auto &group = fixture.ById(u8"l");
+      REQUIRE_FALSE(group.RemoveChild(*dom::TreeQueries::FirstElementChild(group)).HasException());
+      CHECK(Dumps(fixture, u8"\"Hidden\""));
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: labels follow the appearance",
+                   "[HTML][HTMLSelectElement][html:the-select-element-2]")
+  {
+    EditorFixture fixture(u8"<style>.base,.base::picker(select){appearance:base-select}</style>"
+                          u8"<select id=s><optgroup label=Group><option>a</option></optgroup></select>");
+    auto &select = SelectById(fixture, u8"s");
+    CHECK_FALSE(Dumps(fixture, u8"\"Group\""));
+
+    REQUIRE_FALSE(select.SetAttribute(u8"class", u8"base").HasException());
+    (void)fixture.Document->UpdateLayout();
+    ClickElement(fixture, select);
+    REQUIRE(select.IsPickerOpen());
+    CHECK(Dumps(fixture, u8"\"Group\""));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: a button of a select with base appearance",

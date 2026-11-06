@@ -16,8 +16,20 @@ namespace krys::boo::html
     WeakPtr<HTMLSelectElement> _ownerSelect;
     bool _isDisabled {false};
 
+  private:
+    WeakPtr<HTMLSlotElement> _legendSlot;
+    WeakPtr<HTMLSlotElement> _contentsSlot;
+    WeakPtr<dom::Element> _labelElement;
+    WeakPtr<dom::Element> _slottedLegend;
+
   public:
     explicit HTMLOptGroupElement(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLOptGroupElement> Create(dom::Document &document) noexcept;
+
+    /// @brief The slot of the shadow tree that takes @p child: a first child element that's a legend takes
+    /// the legend slot, which otherwise shows the label, and the other children the contents slot.
+    /// @see https://html.spec.whatwg.org/#the-select-element-2
+    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const dom::Node &child) const noexcept;
 
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final
     {
@@ -57,6 +69,9 @@ namespace krys::boo::html
     void OnInsert() noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnChildrenChanged() noexcept override;
+    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;

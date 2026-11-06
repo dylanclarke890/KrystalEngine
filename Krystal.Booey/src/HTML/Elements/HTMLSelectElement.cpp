@@ -885,6 +885,7 @@ namespace krys::boo::html
     SetOptionsChangedOnRenderer();
     InvalidateStyleForSubtree();
     UpdateValidity();
+    CloneSelectedOptionIntoSelectButton();
   }
 
   HTMLOptionElement *HTMLSelectElement::NamedItem(dom::DOMStringView name) const noexcept

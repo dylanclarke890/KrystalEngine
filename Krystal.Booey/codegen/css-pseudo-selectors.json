@@ -134,6 +134,11 @@
         }
     },
     "pseudo-elements": {
+        "-internal-optgroup-label": {
+            "comment": "The label of an optgroup rendered with base appearance.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
         "-internal-select-picker": {
             "comment": "The picker of a select, which ::picker(select) matches.",
             "user-agent-part": true,
