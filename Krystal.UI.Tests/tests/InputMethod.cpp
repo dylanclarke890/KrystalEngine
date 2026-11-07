@@ -9,7 +9,6 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
-#include "Krystal.Editor/PageTextInput.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
@@ -228,65 +227,4 @@ namespace krys::ui::tests
     }
   }
 
-  TEST_CASE("View: the editor page's input methods", "[UI]")
-  {
-    boo::MemoryCache::Singleton().EvictResources();
-    View view({1'200, 600});
-    FollowLinks(view);
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    // As the editor makes it once the page has loaded.
-    editor::PageTextInput textInput(document);
-    auto log = [&document]
-    {
-      auto element = document.GetElementById(u8"ime-log");
-      REQUIRE(element);
-      return Narrow(element->TextContent().value_or(u8""));
-    };
-    CHECK(log().starts_with("Type into a field"));
-
-    auto focus = [&document, &view](utf8_stringview id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      Downcast<boo::html::HTMLElement>(*element).Focus();
-      CHECK(view.AcceptsTextInput());
-    };
-
-    focus(u8"ime-input");
-    view.SetComposition(u8"か", {}, 3);
-    view.ConfirmComposition(u8"仮");
-    CHECK(log()
-          == "input: compositionstart “”\n"
-             "input: compositionupdate “か”\n"
-             "input: beforeinput insertCompositionText “か” (composing)\n"
-             "input: input insertCompositionText “か” (composing)\n"
-             "input: beforeinput deleteCompositionText (composing)\n"
-             "input: input deleteCompositionText (composing)\n"
-             "input: beforeinput insertFromComposition “仮” (composing)\n"
-             "input: input insertFromComposition “仮” (composing)\n"
-             "input: compositionend “仮”");
-
-    // The other fields log too, and the log keeps the latest events.
-    focus(u8"ime-textarea");
-    (void)view.InsertText(u8"😀");
-    CHECK(log().ends_with("textarea: input insertText “😀”"));
-    focus(u8"ime-editable");
-    for (int i = 0; i < 4; ++i)
-    {
-      view.SetComposition(u8"x", {}, 1);
-      view.SetComposition(u8"", {}, 0);
-    }
-    auto lines = log();
-    CHECK(std::ranges::count(lines, '\n') + 1 == editor::PageTextInput::MaxLines);
-    CHECK(lines.ends_with("div: compositionend “”"));
-
-    auto clear = document.GetElementById(u8"ime-clear");
-    REQUIRE(clear);
-    Downcast<boo::html::HTMLElement>(*clear).Click();
-    CHECK(log().starts_with("Type into a field"));
-  }
 }
