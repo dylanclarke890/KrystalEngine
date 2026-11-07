@@ -167,7 +167,11 @@ namespace krys::boo
   {
     // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
     // FIXME: Remove when devolvable widgets are universally enabled.
-    // FIXME: Also the `::-webkit-list-button` part of user agent shadow trees, with datalists.
+    if (element.IsInUserAgentShadowTree()
+        && element.UserAgentPart() == css::UserAgentParts::WebkitListButton())
+    {
+      return true;
+    }
     if (!Is<html::HTMLElement>(element))
     {
       return false;
@@ -372,8 +376,12 @@ namespace krys::boo
     {
       const auto &part = element.UserAgentPart();
 
-      // FIXME: The list button (webkitListButton), with datalists; the colour swatch parts, with colour
-      // inputs (G14d4).
+      if (part == css::UserAgentParts::WebkitListButton())
+      {
+        return StyleAppearance::ListButton;
+      }
+
+      // FIXME: The colour swatch parts, with colour inputs (G14d4).
 
       if (part == css::UserAgentParts::WebkitSearchCancelButton())
       {
@@ -1181,16 +1189,21 @@ namespace krys::boo
     return renderer.Style().UsedAppearance() == StyleAppearance::DefaultButton;
   }
 
-  bool RenderTheme::HasListButton(const RenderElement &) const noexcept
+  bool RenderTheme::HasListButton(const RenderElement &renderer) const noexcept
   {
-    // FIXME: Inputs with data lists (hasDataList), with datalists.
-    return false;
+    auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GeneratingElement());
+    return input && input->List();
   }
 
-  bool RenderTheme::HasListButtonPressed(const RenderElement &) const noexcept
+  bool RenderTheme::HasListButtonPressed(const RenderElement &renderer) const noexcept
   {
-    // FIXME: The data list button (dataListButtonElement), with datalists.
-    return false;
+    auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GeneratingElement());
+    if (!input)
+    {
+      return false;
+    }
+    auto *button = input->DataListButtonElement();
+    return button && button->Active();
   }
 
   Maybe<FontCascadeDescription> RenderTheme::ControlFont(StyleAppearance, const FontCascade &,

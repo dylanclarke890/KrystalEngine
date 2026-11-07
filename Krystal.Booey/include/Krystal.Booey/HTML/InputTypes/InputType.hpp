@@ -410,6 +410,10 @@ namespace krys::boo::html
     {
       return nullptr;
     }
+    KRYS_NODISCARD virtual HTMLElement *DataListButtonElement() const noexcept
+    {
+      return nullptr;
+    }
     KRYS_NODISCARD virtual HTMLElement *SliderThumbElement() const noexcept
     {
       return nullptr;

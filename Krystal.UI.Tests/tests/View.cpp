@@ -40,6 +40,7 @@
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
+#include "Krystal.UI/DataListSuggestionsOverlay.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/Input.hpp"
@@ -2030,6 +2031,88 @@ namespace krys::ui::tests
       CHECK(picker->Colors()[0] == boo::Color(SRGBA<uint8> {0x12, 0x34, 0x56}));
       CHECK(view.KeyPressed(pal::Key::Escape));
     }
+  }
+
+  TEST_CASE("View: a text field's datalist suggestions", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } input { margin: 10px }"
+                  u8"</style><input id=t list=fruit><p id=after>After</p>"
+                  u8"<datalist id=fruit><option value=Apple><option value=Banana label=Yellow>"
+                  u8"<option value=Pineapple><option value=Cherry disabled></datalist>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
+    auto box = input.GetBoundingClientRect();
+    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    auto changes = CreateRef<EventCounter>();
+    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
+    auto click = [&](boo::IntPoint point)
+    {
+      view.MousePressed(point, pal::MouseButton::Left);
+      view.MouseReleased(point, pal::MouseButton::Left);
+    };
+
+    // The field has a list button.
+    REQUIRE(input.DataListButtonElement());
+    CHECK(input.DataListButtonElement()->Renderer());
+
+    // Clicking the focused field lists the enabled suggestions below it, with their labels.
+    click(inside);
+    click(inside);
+    auto *list = static_cast<DataListSuggestionsOverlay *>(view.ShownOverlay());
+    REQUIRE(list);
+    CHECK_FALSE(list->IsModal());
+    CHECK(list->Suggestions().size() == 3uz);
+    CHECK(list->Suggestions()[1].Label == u8"Yellow");
+    CHECK(list->Rect().Y() == static_cast<int32>(box->Bottom()));
+    CHECK(input.IsPresentingAttachedView());
+
+    // Typing goes to the field, and narrows the list: those starting with the text, then those containing it.
+    CHECK(view.InsertText(u8"app"));
+    CHECK(input.Value() == u8"app");
+    REQUIRE(view.ShownOverlay() == list);
+    REQUIRE(list->Suggestions().size() == 2uz);
+    CHECK(list->Suggestions()[0].Value == u8"Apple");
+    CHECK(list->Suggestions()[1].Value == u8"Pineapple");
+
+    // Down highlights, Enter chooses, firing change.
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(list->HighlightedIndex() == 1);
+    CHECK(view.KeyPressed(pal::Key::Enter));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"Pineapple");
+    CHECK(changes->Count == 1);
+    CHECK_FALSE(input.IsPresentingAttachedView());
+
+    // The list button opens it; Escape closes it.
+    (void)input.SetValue(u8"");
+    auto button = input.DataListButtonElement()->GetBoundingClientRect();
+    click(boo::IntPoint(static_cast<int32>(button->X() + button->Width() / 2),
+                        static_cast<int32>(button->Y() + button->Height() / 2)));
+    list = static_cast<DataListSuggestionsOverlay *>(view.ShownOverlay());
+    REQUIRE(list);
+    CHECK(list->Suggestions().size() == 3uz);
+    CHECK(view.KeyPressed(pal::Key::Escape));
+    CHECK_FALSE(view.ShownOverlay());
+
+    // Clicking a suggestion chooses it; a press elsewhere closes the list and goes on to the page.
+    click(inside);
+    list = static_cast<DataListSuggestionsOverlay *>(view.ShownOverlay());
+    REQUIRE(list);
+    auto banana = list->ContentView().Document().QuerySelector(u8"[data-index='1']");
+    REQUIRE_FALSE(banana.HasException());
+    REQUIRE(banana.Value());
+    click(CentreOf(*banana.Value(), list->Rect().Location()));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"Banana");
+    click(inside);
+    REQUIRE(view.ShownOverlay());
+    click({390, 290});
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(view.Document().FocusedElement() != &input);
   }
 
   TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")

@@ -38,6 +38,7 @@
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
+#include "Krystal.UI/DataListSuggestionsOverlay.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
 #include "Krystal.UI/EditorClient.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
@@ -121,6 +122,21 @@ namespace krys::ui
         return nullptr;
       }
       return CreateRef<ColorChooserOverlay>(*_view, client, initialColor);
+    }
+
+    KRYS_NODISCARD RefPtr<boo::DataListSuggestionPicker>
+      CreateDataListSuggestionPicker(boo::DataListSuggestionsClient &client) noexcept override
+    {
+      if (!_view)
+      {
+        return nullptr;
+      }
+      return CreateRef<DataListSuggestionsOverlay>(*_view, client);
+    }
+
+    KRYS_NODISCARD bool CanShowDataListSuggestionLabels() const noexcept override
+    {
+      return true;
     }
 
     KRYS_NODISCARD RefPtr<boo::DateTimeChooser>
@@ -829,15 +845,19 @@ namespace krys::ui
       return;
     }
 
-    // While an overlay is open, the page doesn't see the mouse move.
+    // While a modal overlay is open, the page doesn't see the mouse move; it sees it outside one that isn't.
     if (_overlay)
     {
       auto &rect = _overlay->Rect();
       if (rect.Contains(point))
       {
         _overlay->MouseMoved(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()));
+        return;
       }
-      return;
+      if (_overlay->IsModal())
+      {
+        return;
+      }
     }
 
     // While a drag runs, the mouse moves it.
@@ -904,18 +924,24 @@ namespace krys::ui
       return;
     }
 
-    // A press outside the overlay closes it, and goes no further.
+    // A press outside the overlay closes it, and goes no further unless the overlay isn't modal.
     if (_overlay)
     {
-      _buttons |= ButtonsBit(button);
-      _lastMousePosition = point;
-      if (!_overlay->Rect().Contains(point))
+      if (_overlay->Rect().Contains(point) || _overlay->IsModal())
       {
-        RefPtr<Overlay> overlay = _overlay;
-        overlay->Hide();
-        PerformMicrotaskCheckpoint();
+        _buttons |= ButtonsBit(button);
+        _lastMousePosition = point;
+        if (!_overlay->Rect().Contains(point))
+        {
+          RefPtr<Overlay> overlay = _overlay;
+          overlay->Hide();
+          PerformMicrotaskCheckpoint();
+        }
+        return;
       }
-      return;
+      RefPtr<Overlay> overlay = _overlay;
+      overlay->Hide();
+      PerformMicrotaskCheckpoint();
     }
 
     // Other buttons do nothing while a drag runs.
@@ -1640,8 +1666,8 @@ namespace krys::ui
       return true;
     }
 
-    // While an overlay is open, it takes the keys.
-    if (_overlay)
+    // While a modal overlay is open, it takes the keys.
+    if (_overlay && _overlay->IsModal())
     {
       RefPtr<Overlay> overlay = _overlay;
       bool handled = overlay->KeyPressed(key, modifiers);
@@ -1709,9 +1735,14 @@ namespace krys::ui
     return handled;
   }
 
+  bool View::HasModalOverlay() const noexcept
+  {
+    return _overlay && _overlay->IsModal();
+  }
+
   bool View::InsertText(const utf8_string &text) noexcept
   {
-    if (_overlay || text.empty())
+    if (HasModalOverlay() || text.empty())
     {
       return false;
     }
@@ -1723,7 +1754,7 @@ namespace krys::ui
   void View::SetComposition(const utf8_string &text, Span<const pal::CompositionClause> clauses,
                             uint32 caret) noexcept
   {
-    if (_overlay)
+    if (HasModalOverlay())
     {
       return;
     }
@@ -1734,7 +1765,7 @@ namespace krys::ui
 
   void View::ConfirmComposition(const utf8_string &text) noexcept
   {
-    if (_overlay)
+    if (HasModalOverlay())
     {
       return;
     }
@@ -1744,7 +1775,7 @@ namespace krys::ui
 
   bool View::AcceptsTextInput() const noexcept
   {
-    return !_overlay && _editorClient->AcceptsTextInput();
+    return !HasModalOverlay() && _editorClient->AcceptsTextInput();
   }
 
   Maybe<boo::IntRect> View::TextInputRect() noexcept

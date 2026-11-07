@@ -1205,6 +1205,11 @@ namespace krys::boo::html
     return _inputType->SliderTrackElement();
   }
 
+  HTMLElement *HTMLInputElement::DataListButtonElement() const noexcept
+  {
+    return _inputType->DataListButtonElement();
+  }
+
   HTMLElement *HTMLInputElement::ResultsButtonElement() const noexcept
   {
     return _inputType->ResultsButtonElement();

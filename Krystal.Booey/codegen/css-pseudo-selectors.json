@@ -224,6 +224,11 @@
             "user-agent-part": true,
             "user-agent-sheet-only": true
         },
+        "-webkit-list-button": {
+            "comment": "The list button of text fields with a datalist.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
         "-webkit-meter-bar": {
             "comment": "The bar of meters.",
             "user-agent-part": true,

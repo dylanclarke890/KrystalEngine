@@ -500,6 +500,18 @@ input::-webkit-datetime-edit-text {
     display: inline;
 }
 
+input::-webkit-list-button {
+    appearance: auto;
+    display: block;
+    position: relative;
+    cursor: default;
+    align-self: stretch;
+    flex: none;
+    user-select: none;
+    inline-size: 16px;
+    block-size: 100%;
+}
+
 input::-webkit-inner-spin-button {
     appearance: auto;
     display: block;

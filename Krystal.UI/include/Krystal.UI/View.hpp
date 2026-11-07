@@ -619,6 +619,8 @@ namespace krys::ui
     /// @brief Confirms the composition, if there is one, and tells the host to drop the input method's: the
     /// mouse pressed, or the window lost focus.
     void ConfirmCompositionForHost() noexcept;
+    /// @brief Whether a modal overlay is open, which takes the keys and text input.
+    KRYS_NODISCARD bool HasModalOverlay() const noexcept;
 
     /// @brief A load committed: the new document is painted with the view's focus state.
     void DidCommitLoad() noexcept;

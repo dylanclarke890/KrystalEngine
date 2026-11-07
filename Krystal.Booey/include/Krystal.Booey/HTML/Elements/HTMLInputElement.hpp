@@ -535,6 +535,8 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept;
     KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept;
     KRYS_NODISCARD HTMLElement *InnerSpinButtonElement() const noexcept;
+    /// @brief The list button of a text field with a datalist.
+    KRYS_NODISCARD HTMLElement *DataListButtonElement() const noexcept;
     KRYS_NODISCARD HTMLElement *SliderThumbElement() const noexcept;
     KRYS_NODISCARD HTMLElement *SliderTrackElement() const noexcept;
     KRYS_NODISCARD HTMLElement *ResultsButtonElement() const noexcept;

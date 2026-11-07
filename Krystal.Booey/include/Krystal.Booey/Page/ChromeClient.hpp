@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/DataListSuggestionPicker.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Booey/Platform/GraphicsClient.hpp"
@@ -29,6 +30,7 @@ namespace krys::boo
   class LocalFrame;
   class Color;
   class ColorChooserClient;
+  class DataListSuggestionsClient;
   class DateTimeChooserClient;
   class PopupMenuClient;
 
@@ -131,6 +133,21 @@ namespace krys::boo
       (void)client;
       (void)initialColor;
       return nullptr;
+    }
+
+    /// @brief Makes the list a text field shows its datalist suggestions in; a host that doesn't override
+    /// this shows no suggestions.
+    KRYS_NODISCARD virtual RefPtr<DataListSuggestionPicker>
+      CreateDataListSuggestionPicker(DataListSuggestionsClient &client) noexcept
+    {
+      (void)client;
+      return nullptr;
+    }
+
+    /// @brief Whether the host's suggestion list shows the suggestions' labels, so typing matches them too.
+    KRYS_NODISCARD virtual bool CanShowDataListSuggestionLabels() const noexcept
+    {
+      return false;
     }
 
     /// @brief Makes the picker a date input chooses its date in; a host that doesn't override this has no

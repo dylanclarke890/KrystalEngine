@@ -1958,6 +1958,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp
   include/Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp
+  include/Krystal.Booey/HTML/Shadow/DataListButtonElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp
@@ -2141,6 +2142,7 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Sanitizer/Sanitizer.cpp
   src/HTML/Sanitizer/SanitizerAlgorithms.cpp
   src/HTML/Sanitizer/SanitizerConstants.cpp
+  src/HTML/Shadow/DataListButtonElement.cpp
   src/HTML/Shadow/DateTimeEditElement.cpp
   src/HTML/Shadow/DateTimeFieldElement.cpp
   src/HTML/Shadow/DateTimeFieldElements.cpp
@@ -2480,6 +2482,8 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/CaretAnimator.hpp
   include/Krystal.Booey/Platform/Choosers/ColorChooser.hpp
   include/Krystal.Booey/Platform/Choosers/ColorChooserClient.hpp
+  include/Krystal.Booey/Platform/Choosers/DataListSuggestionPicker.hpp
+  include/Krystal.Booey/Platform/Choosers/DataListSuggestionsClient.hpp
   include/Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp
   include/Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp
   include/Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp
