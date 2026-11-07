@@ -25,6 +25,7 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include <algorithm>
 
 namespace krys::boo::html
@@ -909,6 +910,11 @@ namespace krys::boo::html
   void TextFieldInputType::DidCloseSuggestions() noexcept
   {
     _cachedSuggestions = null;
+    Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
+    if (_suggestionPicker)
+    {
+      styleInvalidation.emplace(*Element(), css::SelectorPseudoClass::Open, false);
+    }
     if (auto picker = std::exchange(_suggestionPicker, nullptr))
     {
       picker->Detach();
@@ -937,6 +943,8 @@ namespace krys::boo::html
     }
     if (!_suggestionPicker && !Suggestions().empty())
     {
+      // The field matches :open while its suggestions are shown.
+      style::PseudoClassChangeInvalidation styleInvalidation(element, css::SelectorPseudoClass::Open, true);
       _suggestionPicker = page->GetChromeClient().CreateDataListSuggestionPicker(*this);
     }
     if (auto picker = _suggestionPicker)

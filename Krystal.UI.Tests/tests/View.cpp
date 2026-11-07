@@ -2064,6 +2064,7 @@ namespace krys::ui::tests
     auto *list = static_cast<DataListSuggestionsOverlay *>(view.ShownOverlay());
     REQUIRE(list);
     CHECK_FALSE(list->IsModal());
+    CHECK(input.Matches(u8":open").Value());
     CHECK(list->Suggestions().size() == 3uz);
     CHECK(list->Suggestions()[1].Label == u8"Yellow");
     CHECK(list->Rect().Y() == static_cast<int32>(box->Bottom()));
@@ -2086,6 +2087,7 @@ namespace krys::ui::tests
     CHECK(input.Value() == u8"Pineapple");
     CHECK(changes->Count == 1);
     CHECK_FALSE(input.IsPresentingAttachedView());
+    CHECK_FALSE(input.Matches(u8":open").Value());
 
     // The list button opens it; Escape closes it.
     (void)input.SetValue(u8"");
