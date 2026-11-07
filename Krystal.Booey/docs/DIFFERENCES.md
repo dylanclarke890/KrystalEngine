@@ -222,6 +222,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- Nothing inside a `<foreignObject>` is composited: its positioned boxes are painted into the foreign object's layer, in SVG coordinates, whatever their styles ask for (the layer lists that compositing goes by leave it out; `RenderLayer::PaintForeignObjectLayers`). So `backdrop-filter`, which only composited layers draw, isn't drawn there, and `transform` and `opacity` animations there run on the page rather than on layers. Chrome composites them; doing so would take the SVG's transforms and viewport clip into the graphics layer tree.
 - Filters run on the GPU in float textures: a Gaussian blur is a true Gaussian rather than three box blurs, and nothing is quantised between effects, so an edge-detecting convolution of a smooth gradient stays smooth where Chrome amplifies the banding.
 
 ## MathML

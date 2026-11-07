@@ -172,7 +172,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- Positioned boxes inside an SVG `<foreignObject>` are painted into its layer rather than composited, whatever their styles ask for, as compositing goes by the layer lists that leave the foreign object out.
 - `RenderSVGText` and `LegacyRenderSVGRoot` compute their decorated bounding box by delegating to the accurate repaint rect (FIXMEs).
 
 ### Missing
