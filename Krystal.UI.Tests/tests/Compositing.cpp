@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransformAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp"
@@ -11,6 +12,7 @@
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
+#include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include <string>
 
@@ -401,6 +403,46 @@ namespace krys::ui::tests
       REQUIRE(box->AddAnimation(keyframes, LongAnimation().get(), u8"backdrop", 0));
       CHECK(PixelAt(fixture.Composite(*root), 50, 50) == Array<uint8, 4> {239, 71, 111, 255});
     }
+  }
+
+  TEST_CASE("Compositing: contents follow the layer's scaling filters", "[UI][GPU][Compositing]")
+  {
+    CompositingFixture fixture(200u, 100u);
+    // Two texels, red then blue, stretched over the layer.
+    auto texture = fixture.Device->CreateTexture({.Format = gfx::TextureFormat::BGRA8Unorm,
+                                                  .Width = 2u,
+                                                  .Height = 1u,
+                                                  .Usage = gfx::TextureUsage::Sampled,
+                                                  .DebugName = u8"Compositing.Texels"});
+    REQUIRE(texture.has_value());
+    // ARGB in a 32-bit value is BGRA in memory.
+    const Array<uint32, 2> texels {0xFF'FF'00'00u, 0xFF'00'00'FFu};
+    fixture.Device->WriteTexture(*texture, gfx::TextureRegion::Whole2D(2u, 1u),
+                                 {reinterpret_cast<const byte *>(texels.data()), sizeof(texels)});
+    auto engineTexture = EngineTexture::Create(*texture, {2, 1});
+
+    auto root = fixture.CreateLayer(u8"root", {}, {200, 100});
+    root->SetContentsDisplayDelegate(engineTexture->LayerContentsDisplayDelegate(),
+                                     boo::GraphicsLayerContentsLayerPurpose::Canvas);
+    root->SetContentsRect({0, 0, 200, 100});
+    root->SetContentsClippingRect(boo::FloatRoundedRect(boo::FloatRect {0, 0, 200, 100}));
+
+    SECTION("linear blends the texels")
+    {
+      auto pixel = PixelAt(fixture.Composite(*root), 90, 50);
+      CHECK(pixel[0] < 250);
+      CHECK(pixel[2] > 5);
+    }
+
+    SECTION("nearest keeps them sharp")
+    {
+      root->SetContentsMinificationFilter(boo::GraphicsLayerScalingFilter::Nearest);
+      root->SetContentsMagnificationFilter(boo::GraphicsLayerScalingFilter::Nearest);
+      auto image = fixture.Composite(*root);
+      CHECK(PixelAt(image, 90, 50) == Array<uint8, 4> {255, 0, 0, 255});
+      CHECK(PixelAt(image, 110, 50) == Array<uint8, 4> {0, 0, 255, 255});
+    }
+    fixture.Device->Destroy(*texture);
   }
 
   TEST_CASE("Compositing: a layer tree as text", "[UI][Compositing]")

@@ -32,7 +32,7 @@ namespace krys::ui
     }
     if (const auto texture = textureMapper.RenderImageBuffer(*backend); texture.IsValid())
     {
-      textureMapper.DrawTexture(texture, targetRect, modelViewMatrix, opacity,
+      textureMapper.DrawTexture(texture, backend->Size(), targetRect, modelViewMatrix, opacity,
                                 AlphaPremultiplication::Premultiplied);
     }
   }

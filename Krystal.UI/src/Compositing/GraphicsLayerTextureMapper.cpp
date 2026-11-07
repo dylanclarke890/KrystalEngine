@@ -255,6 +255,26 @@ namespace krys::ui
     }
   }
 
+  void GraphicsLayerTextureMapper::SetContentsMinificationFilter(ScalingFilter filter) noexcept
+  {
+    if (filter == ContentsMinificationFilter())
+    {
+      return;
+    }
+    GraphicsLayer::SetContentsMinificationFilter(filter);
+    NotifyChange(ContentsScalingFiltersChange);
+  }
+
+  void GraphicsLayerTextureMapper::SetContentsMagnificationFilter(ScalingFilter filter) noexcept
+  {
+    if (filter == ContentsMagnificationFilter())
+    {
+      return;
+    }
+    GraphicsLayer::SetContentsMagnificationFilter(filter);
+    NotifyChange(ContentsScalingFiltersChange);
+  }
+
   void GraphicsLayerTextureMapper::SetContentsVisible(bool value) noexcept
   {
     if (value == ContentsAreVisible())
@@ -605,6 +625,11 @@ namespace krys::ui
     if (_changeMask & ContentsVisibleChange)
     {
       _layer->SetContentsVisible(ContentsAreVisible());
+    }
+
+    if (_changeMask & ContentsScalingFiltersChange)
+    {
+      _layer->SetContentsScalingFilters(ContentsMinificationFilter(), ContentsMagnificationFilter());
     }
 
     if (_changeMask & ContentsOpaqueChange)

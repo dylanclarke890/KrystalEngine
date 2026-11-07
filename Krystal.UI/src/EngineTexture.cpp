@@ -10,7 +10,8 @@ namespace krys::ui
                                                 const boo::TransformationMatrix &modelViewMatrix,
                                                 float opacity) noexcept
   {
-    textureMapper.DrawTexture(_texture.Handle(), targetRect, modelViewMatrix, opacity, _texture.Alpha());
+    textureMapper.DrawTexture(_texture.Handle(), _texture.Size(), targetRect, modelViewMatrix, opacity,
+                              _texture.Alpha());
   }
 
   EngineTexture::EngineTexture(gfx::TextureHandle texture, const boo::IntSize &size,

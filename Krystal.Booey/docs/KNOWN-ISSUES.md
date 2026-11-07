@@ -118,7 +118,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- `GraphicsLayerTextureMapper` has no contents scaling filters, so composited images and texture canvases with `image-rendering: pixelated` or `crisp-edges` scale smoothly.
 - There's no scroll anchoring, autoscroll timers beyond the scrollbar repeat, wheel latching, kinetic scrolling, touchpad gesture states or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
 - Scroll snapping without gesture phases: each wheel event goes to the next snap position, so a touchpad's small deltas page through a mandatory container. An autoscroll and a pan scroll don't snap, even when they end, until the next layout. Smooth scrolls aren't run for list boxes, whose keyboard and wheel scrolls stay immediate.
 - There are no overlay scrollbars, native scrollbars, scroll corners or resizers. `scrollbar-color` has no effect, and `ScrollableArea` has no scrollbars controller.

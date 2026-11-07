@@ -190,8 +190,12 @@ namespace krys::ui
       options.TextureMapper.BeginClip(transform, _state.ContentsClippingRect);
     }
 
+    options.TextureMapper.SetScalingFilters(_state.ContentsMinificationFilter,
+                                            _state.ContentsMagnificationFilter);
     contentsLayer->PaintToTextureMapper(options.TextureMapper, _state.ContentsRect, transform,
                                         options.Opacity);
+    options.TextureMapper.SetScalingFilters(boo::GraphicsLayerScalingFilter::Linear,
+                                            boo::GraphicsLayerScalingFilter::Linear);
 
     if (shouldClip)
     {
@@ -563,6 +567,13 @@ namespace krys::ui
   void TextureMapperLayer::SetContentsVisible(bool contentsVisible) noexcept
   {
     _state.ContentsVisible = contentsVisible;
+  }
+
+  void TextureMapperLayer::SetContentsScalingFilters(boo::GraphicsLayerScalingFilter minification,
+                                                     boo::GraphicsLayerScalingFilter magnification) noexcept
+  {
+    _state.ContentsMinificationFilter = minification;
+    _state.ContentsMagnificationFilter = magnification;
   }
 
   void TextureMapperLayer::SetContentsOpaque(bool contentsOpaque) noexcept

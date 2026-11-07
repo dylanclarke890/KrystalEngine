@@ -54,6 +54,7 @@ namespace krys::ui
       BackdropLayerChange = (1u << 27),
       SolidColorChange = (1u << 28),
       BoundsOriginChange = (1u << 29),
+      ContentsScalingFiltersChange = (1u << 30),
     };
 
     UniquePtr<TextureMapperLayer> _layer {CreateUnique<TextureMapperLayer>()};
@@ -102,6 +103,8 @@ namespace krys::ui
     void SetMasksToBounds(bool value) noexcept override;
     void SetDrawsContent(bool value) noexcept override;
     void SetContentsVisible(bool value) noexcept override;
+    void SetContentsMinificationFilter(ScalingFilter filter) noexcept override;
+    void SetContentsMagnificationFilter(ScalingFilter filter) noexcept override;
     void SetContentsOpaque(bool value) noexcept override;
     void SetBackfaceVisibility(bool value) noexcept override;
     void SetBackgroundColor(const boo::Color &value) noexcept override;

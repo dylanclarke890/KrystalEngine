@@ -786,11 +786,7 @@ namespace krys::boo
 
   void RenderLayerBacking::UpdateContentsScalingFilters(const RenderStyle &style) noexcept
   {
-    if (!Renderer().IsRenderHTMLCanvas()
-        || GetCanvasCompositingStrategy(Renderer()) != CanvasCompositingStrategy::CanvasAsLayerContents)
-    {
-      return;
-    }
+    // The filters sample the contents layer: a composited image's, or a canvas's.
     auto minificationFilter = GraphicsLayer::ScalingFilter::Linear;
     auto magnificationFilter = GraphicsLayer::ScalingFilter::Linear;
     switch (style.GetImageRendering())
