@@ -4,8 +4,10 @@
 #include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -308,6 +310,19 @@ namespace krys::boo::html
 
   List<Color> ColorInputType::SuggestedColors() const noexcept
   {
-    return {};
+    // The datalist's suggestions that are simple colours.
+    List<Color> suggestions;
+    krys_debug_assert(Element());
+    if (auto dataList = Element()->List())
+    {
+      for (auto &option : dataList->Suggestions())
+      {
+        if (auto color = ParseSimpleColorValue(option->Value()))
+        {
+          suggestions.push_back(*color);
+        }
+      }
+    }
+    return suggestions;
   }
 }

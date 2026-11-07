@@ -3,7 +3,9 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -608,7 +610,23 @@ namespace krys::boo::html
     parameters.HasMillisecondField = ShouldHaveMillisecondField(date);
     parameters.WasActivatedByKeyboard = _pickerWasActivatedByKeyboard;
 
-    // FIXME: The suggestions of the input's datalist, once there are datalists.
+    // The datalist's suggestions with valid values, and their labels where they differ from their values.
+    if (auto dataList = element.List())
+    {
+      for (auto &option : dataList->Suggestions())
+      {
+        auto label = option->Label();
+        auto value = option->Value();
+        if (!element.IsValidValue(value))
+        {
+          continue;
+        }
+        parameters.SuggestionValues.push_back(
+          element.SanitizeValue(dom::DOMStringView(value)).value_or(dom::DOMString()));
+        parameters.LocalizedSuggestionValues.push_back(LocalizeValue(value));
+        parameters.SuggestionLabels.push_back(value == label ? dom::DOMString() : krys::move(label));
+      }
+    }
 
     return true;
   }

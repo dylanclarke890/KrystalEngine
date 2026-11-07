@@ -1974,6 +1974,64 @@ namespace krys::ui::tests
     CHECK(input.Value() == u8"#ff0000");
   }
 
+  TEST_CASE("View: datalist suggestions in pickers", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } input { margin: 10px }</style>"
+                  u8"<input type=date id=d list=dates value=2026-05-01><input type=color id=c list=colours>"
+                  u8"<datalist id=dates><option value=2026-05-01 label=Launch><option value=2026-06-15>"
+                  u8"<option value=nope></datalist>"
+                  u8"<datalist id=colours><option value=#123456><option value=red></datalist>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    SECTION("A date input lists its valid suggestions, then Other for the calendar")
+    {
+      auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
+      input.Click();
+      auto *picker = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
+      REQUIRE(picker);
+      CHECK(picker->GetMode() == DateTimeChooserOverlay::Mode::Suggestions);
+      auto &list = picker->ContentView().Document();
+      auto rows = list.QuerySelectorAll(u8".suggestion");
+      REQUIRE_FALSE(rows.HasException());
+      CHECK(rows.Value()->Length() == 3);
+      auto label = list.QuerySelector(u8".label");
+      REQUIRE_FALSE(label.HasException());
+      REQUIRE(label.Value());
+      CHECK(label.Value()->TextContent() == u8"Launch");
+
+      // The value's suggestion is highlighted; Down and Enter choose the next.
+      CHECK(picker->HighlightedValue() == u8"2026-05-01");
+      CHECK(view.KeyPressed(pal::Key::DownArrow));
+      CHECK(view.KeyPressed(pal::Key::Enter));
+      CHECK_FALSE(view.ShownOverlay());
+      CHECK(input.Value() == u8"2026-06-15");
+
+      // Other shows the calendar.
+      input.Click();
+      picker = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
+      REQUIRE(picker);
+      CHECK(view.KeyPressed(pal::Key::End));
+      CHECK(view.KeyPressed(pal::Key::Enter));
+      CHECK(view.ShownOverlay() == picker);
+      CHECK(picker->GetMode() == DateTimeChooserOverlay::Mode::Days);
+      CHECK(picker->HighlightedValue() == u8"2026-06-15");
+      CHECK(view.KeyPressed(pal::Key::Escape));
+    }
+
+    SECTION("A colour input's palette starts with its simple colour suggestions")
+    {
+      auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
+      input.Click();
+      auto *picker = static_cast<ColorChooserOverlay *>(view.ShownOverlay());
+      REQUIRE(picker);
+      CHECK(picker->Colors().size() == 41uz);
+      CHECK(picker->Colors()[0] == boo::Color(SRGBA<uint8> {0x12, 0x34, 0x56}));
+      CHECK(view.KeyPressed(pal::Key::Escape));
+    }
+  }
+
   TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")
   {
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".PNG") == u8"image/png");

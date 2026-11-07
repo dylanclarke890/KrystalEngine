@@ -99,6 +99,33 @@ namespace krys::ui
     }
 
     _parameters = parameters;
+    if (!_parameters.SuggestionValues.empty())
+    {
+      _mode = Mode::Suggestions;
+      _selected = null;
+      auto &values = _parameters.SuggestionValues;
+      if (auto it = std::ranges::find(values, _parameters.CurrentValue); it != values.end())
+      {
+        _selected = static_cast<int32>(it - values.begin());
+      }
+      _highlighted = _selected.value_or(0);
+      _page = 0;
+    }
+    else
+    {
+      SetUpCalendar();
+    }
+    Build();
+
+    if (!_visible)
+    {
+      _visible = true;
+      ShowIn(*_owner, *this);
+    }
+  }
+
+  void DateTimeChooserOverlay::SetUpCalendar() noexcept
+  {
     if (_parameters.Type == u8"week")
     {
       _mode = Mode::Weeks;
@@ -149,13 +176,6 @@ namespace krys::ui
     }
     _highlighted = _selected.value_or(today);
     _page = PageOf(_highlighted);
-    Build();
-
-    if (!_visible)
-    {
-      _visible = true;
-      ShowIn(*_owner, *this);
-    }
   }
 
   void DateTimeChooserOverlay::EndChooser() noexcept
@@ -179,6 +199,10 @@ namespace krys::ui
 
   int32 DateTimeChooserOverlay::PageOf(int32 value) const noexcept
   {
+    if (_mode == Mode::Suggestions)
+    {
+      return 0;
+    }
     if (_mode == Mode::Months)
     {
       return FloorDiv(value, 12);
@@ -189,6 +213,10 @@ namespace krys::ui
 
   bool DateTimeChooserOverlay::IsEnabled(int32 value) const noexcept
   {
+    if (_mode == Mode::Suggestions)
+    {
+      return value >= 0 && static_cast<size_t>(value) <= _parameters.SuggestionValues.size();
+    }
     auto minimum = _parameters.Minimum;
     auto maximum = _parameters.Maximum;
     switch (_mode)
@@ -213,6 +241,12 @@ namespace krys::ui
 
   utf8_string DateTimeChooserOverlay::ValueFor(int32 value) const noexcept
   {
+    if (_mode == Mode::Suggestions)
+    {
+      auto &values = _parameters.SuggestionValues;
+      return value >= 0 && static_cast<size_t>(value) < values.size() ? values[static_cast<size_t>(value)]
+                                                                      : utf8_string();
+    }
     switch (_mode)
     {
       case Mode::Days:
@@ -267,127 +301,161 @@ namespace krys::ui
     {
       html += u8" color-scheme: dark;";
     }
-    html +=
-      u8" }\nbody { margin: 0; padding: 4px; }\n"
-      u8".header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;"
-      u8" font-weight: bold; }\n"
-      u8".nav { padding: 0 8px; }\n"
-      u8"table { border-collapse: collapse; }\n"
-      u8"th { font-weight: normal; color: GrayText; }\n"
-      u8"th, td { padding: 2px 4px; min-width: 2em; text-align: center; }\n"
-      u8".other, .week { color: GrayText; }\n"
-      u8".disabled { color: GrayText; opacity: 0.5; }\n"
-      u8".today { font-weight: bold; }\n"
-      u8".selected { outline: 1px solid Highlight; outline-offset: -1px; }\n"
-      u8".highlighted { background: Highlight; color: HighlightText; }\n"
-      u8"</style><body><div class=header><span class=nav data-action=-1>";
-    html += u8"&lt;</span><span>";
-    utf8_string nextButton = u8"</span><span class=nav data-action=1>&gt;</span></div><table>";
-
-    auto cellClasses = [&](int32 value, bool other)
+    if (_mode == Mode::Suggestions)
     {
-      utf8_string classes;
-      auto add = [&](utf8_stringview name)
+      html +=
+        u8" }\nbody { margin: 0; padding: 4px; }\n"
+        u8".suggestion { display: flex; justify-content: space-between; gap: 16px; padding: 2px 6px; }\n"
+        u8".label { color: GrayText; }\n"
+        u8".selected { outline: 1px solid Highlight; outline-offset: -1px; }\n"
+        u8".highlighted { background: Highlight; color: HighlightText; }\n"
+        u8".highlighted .label { color: HighlightText; }\n"
+        u8".other { border-top: 1px solid GrayText; }\n"
+        u8"</style><body>";
+      auto &values = _parameters.LocalizedSuggestionValues;
+      for (size_t i = 0; i < values.size(); ++i)
       {
-        if (!classes.empty())
+        auto index = static_cast<int32>(i);
+        html += u8"<div data-value=" + Number(index)
+                + (_selected == index ? u8" class=\"suggestion selected\">" : u8" class=suggestion>");
+        html += u8"<span>";
+        AppendEscaped(html, values[i]);
+        html += u8"</span>";
+        if (i < _parameters.SuggestionLabels.size() && !_parameters.SuggestionLabels[i].empty())
         {
-          classes += u8' ';
+          html += u8"<span class=label>";
+          AppendEscaped(html, _parameters.SuggestionLabels[i]);
+          html += u8"</span>";
         }
-        classes += name;
-      };
-      if (other)
-      {
-        add(u8"other");
+        html += u8"</div>";
       }
-      if (!IsEnabled(value))
-      {
-        add(u8"disabled");
-      }
-      if (_selected == value && _mode != Mode::Weeks)
-      {
-        add(u8"selected");
-      }
-      return classes;
-    };
-
-    if (_mode == Mode::Months)
-    {
-      html += Number(1'970 + _page);
-      html += nextButton;
-      auto &labels = locale->ShortStandAloneMonthLabels();
-      for (int32 row = 0; row < 4; ++row)
-      {
-        html += u8"<tr>";
-        for (int32 column = 0; column < 3; ++column)
-        {
-          auto month = row * 3 + column;
-          auto value = _page * 12 + month;
-          html += u8"<td data-value=" + Number(value) + u8" class=\"" + cellClasses(value, false) + u8"\">";
-          AppendEscaped(html, labels[static_cast<size_t>(month)]);
-          html += u8"</td>";
-        }
-        html += u8"</tr>";
-      }
+      html += u8"<div data-value=" + Number(static_cast<int32>(values.size()))
+              + u8" class=\"suggestion other\">Other\u2026</div>";
     }
     else
     {
-      auto first = FirstDayOfMonth(_page);
-      auto last = FirstDayOfMonth(_page + 1) - 1;
-      boo::DateComponents month;
-      if (auto date = boo::DateComponents::FromMonthsSinceEpoch(_page))
-      {
-        month = *date;
-      }
-      AppendEscaped(html, locale->FormatDateTime(month));
-      html += nextButton;
-      html += u8"<tr>";
+      html +=
+        u8" }\nbody { margin: 0; padding: 4px; }\n"
+        u8".header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;"
+        u8" font-weight: bold; }\n"
+        u8".nav { padding: 0 8px; }\n"
+        u8"table { border-collapse: collapse; }\n"
+        u8"th { font-weight: normal; color: GrayText; }\n"
+        u8"th, td { padding: 2px 4px; min-width: 2em; text-align: center; }\n"
+        u8".other, .week { color: GrayText; }\n"
+        u8".disabled { color: GrayText; opacity: 0.5; }\n"
+        u8".today { font-weight: bold; }\n"
+        u8".selected { outline: 1px solid Highlight; outline-offset: -1px; }\n"
+        u8".highlighted { background: Highlight; color: HighlightText; }\n"
+        u8"</style><body><div class=header><span class=nav data-action=-1>";
+      html += u8"&lt;</span><span>";
+      utf8_string nextButton = u8"</span><span class=nav data-action=1>&gt;</span></div><table>";
 
-      // Weeks start on Monday, as ISO weeks do.
-      auto firstWeekDay = _mode == Mode::Weeks ? 1 : 0;
-      if (_mode == Mode::Weeks)
+      auto cellClasses = [&](int32 value, bool other)
       {
-        html += u8"<th></th>";
-      }
-      for (int32 i = 0; i < 7; ++i)
-      {
-        html += u8"<th>";
-        html += WeekDayLabels[static_cast<size_t>((firstWeekDay + i) % 7)];
-        html += u8"</th>";
-      }
-      html += u8"</tr>";
-
-      auto today = DayOf(boo::LocalTimeNow());
-      auto start = first - FloorMod(WeekDay(first) - firstWeekDay, 7);
-      for (int32 row = 0; row < 6; ++row)
-      {
-        auto rowStart = start + row * 7;
-        if (_mode == Mode::Weeks)
+        utf8_string classes;
+        auto add = [&](utf8_stringview name)
         {
-          bool selectedWeek = _selected && *_selected >= rowStart && *_selected < rowStart + 7;
-          html += selectedWeek ? u8"<tr class=selected>" : u8"<tr>";
-          auto week = boo::DateComponents::FromMillisecondsSinceEpochForWeek(rowStart * MsPerDay);
-          html += u8"<td class=week>" + Number(week ? week->Week() : 0) + u8"</td>";
+          if (!classes.empty())
+          {
+            classes += u8' ';
+          }
+          classes += name;
+        };
+        if (other)
+        {
+          add(u8"other");
         }
-        else
+        if (!IsEnabled(value))
+        {
+          add(u8"disabled");
+        }
+        if (_selected == value && _mode != Mode::Weeks)
+        {
+          add(u8"selected");
+        }
+        return classes;
+      };
+
+      if (_mode == Mode::Months)
+      {
+        html += Number(1'970 + _page);
+        html += nextButton;
+        auto &labels = locale->ShortStandAloneMonthLabels();
+        for (int32 row = 0; row < 4; ++row)
         {
           html += u8"<tr>";
-        }
-        for (int32 column = 0; column < 7; ++column)
-        {
-          auto day = rowStart + column;
-          auto classes = cellClasses(day, day < first || day > last);
-          if (day == today)
+          for (int32 column = 0; column < 3; ++column)
           {
-            classes += classes.empty() ? u8"today" : u8" today";
+            auto month = row * 3 + column;
+            auto value = _page * 12 + month;
+            html += u8"<td data-value=" + Number(value) + u8" class=\"" + cellClasses(value, false) + u8"\">";
+            AppendEscaped(html, labels[static_cast<size_t>(month)]);
+            html += u8"</td>";
           }
-          auto date = DayToDate(day);
-          html += u8"<td data-value=" + Number(day) + u8" class=\"" + classes + u8"\">"
-                  + Number(date ? date->MonthDay() : 0) + u8"</td>";
+          html += u8"</tr>";
+        }
+      }
+      else
+      {
+        auto first = FirstDayOfMonth(_page);
+        auto last = FirstDayOfMonth(_page + 1) - 1;
+        boo::DateComponents month;
+        if (auto date = boo::DateComponents::FromMonthsSinceEpoch(_page))
+        {
+          month = *date;
+        }
+        AppendEscaped(html, locale->FormatDateTime(month));
+        html += nextButton;
+        html += u8"<tr>";
+
+        // Weeks start on Monday, as ISO weeks do.
+        auto firstWeekDay = _mode == Mode::Weeks ? 1 : 0;
+        if (_mode == Mode::Weeks)
+        {
+          html += u8"<th></th>";
+        }
+        for (int32 i = 0; i < 7; ++i)
+        {
+          html += u8"<th>";
+          html += WeekDayLabels[static_cast<size_t>((firstWeekDay + i) % 7)];
+          html += u8"</th>";
         }
         html += u8"</tr>";
+
+        auto today = DayOf(boo::LocalTimeNow());
+        auto start = first - FloorMod(WeekDay(first) - firstWeekDay, 7);
+        for (int32 row = 0; row < 6; ++row)
+        {
+          auto rowStart = start + row * 7;
+          if (_mode == Mode::Weeks)
+          {
+            bool selectedWeek = _selected && *_selected >= rowStart && *_selected < rowStart + 7;
+            html += selectedWeek ? u8"<tr class=selected>" : u8"<tr>";
+            auto week = boo::DateComponents::FromMillisecondsSinceEpochForWeek(rowStart * MsPerDay);
+            html += u8"<td class=week>" + Number(week ? week->Week() : 0) + u8"</td>";
+          }
+          else
+          {
+            html += u8"<tr>";
+          }
+          for (int32 column = 0; column < 7; ++column)
+          {
+            auto day = rowStart + column;
+            auto classes = cellClasses(day, day < first || day > last);
+            if (day == today)
+            {
+              classes += classes.empty() ? u8"today" : u8" today";
+            }
+            auto date = DayToDate(day);
+            html += u8"<td data-value=" + Number(day) + u8" class=\"" + classes + u8"\">"
+                    + Number(date ? date->MonthDay() : 0) + u8"</td>";
+          }
+          html += u8"</tr>";
+        }
       }
+      html += u8"</table>";
     }
-    html += u8"</table>";
 
     auto viewport = _owner->ViewportSize();
     if (!_view)
@@ -472,6 +540,10 @@ namespace krys::ui
 
   void DateTimeChooserOverlay::TurnPage(int32 pages) noexcept
   {
+    if (_mode == Mode::Suggestions)
+    {
+      return;
+    }
     if (_mode == Mode::Months)
     {
       Highlight(_highlighted + pages * 12);
@@ -491,6 +563,14 @@ namespace krys::ui
   {
     if (!IsEnabled(value))
     {
+      return;
+    }
+
+    // "Other…" shows the calendar.
+    if (_mode == Mode::Suggestions && static_cast<size_t>(value) == _parameters.SuggestionValues.size())
+    {
+      SetUpCalendar();
+      Build();
       return;
     }
 
@@ -557,6 +637,26 @@ namespace krys::ui
 
   bool DateTimeChooserOverlay::KeyPressed(pal::Key key, pal::KeyModifiers) noexcept
   {
+    if (_mode == Mode::Suggestions)
+    {
+      auto last = static_cast<int32>(_parameters.SuggestionValues.size());
+      switch (key)
+      {
+        case pal::Key::UpArrow:     MoveHighlight(std::max(_highlighted - 1, 0)); return true;
+        case pal::Key::DownArrow:   MoveHighlight(std::min(_highlighted + 1, last)); return true;
+        case pal::Key::Home:
+        case pal::Key::PageUp:      MoveHighlight(0); return true;
+        case pal::Key::End:
+        case pal::Key::PageDown:    MoveHighlight(last); return true;
+        case pal::Key::Enter:
+        case pal::Key::KeypadEnter:
+        case pal::Key::Space:       Choose(_highlighted); return true;
+        case pal::Key::Escape:
+        case pal::Key::Tab:         EndChooser(); return true;
+        default:                    return true;
+      }
+    }
+
     bool months = _mode == Mode::Months;
     // Mirrored, the left arrow goes on to the next day and the right one back.
     auto forward = _parameters.IsAnchorElementRTL ? -1 : 1;
