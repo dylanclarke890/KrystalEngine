@@ -561,6 +561,19 @@ namespace krys::boo::css::tests
     CHECK(dark.PaletteIndex() == 2u);
     CHECK(dark.PaletteOverrides()
           == List<FontPaletteValues::OverriddenColor> {{1, boo::Color(SRGBA<uint8>(255, 0, 0))}});
+    // A local() source takes its @font-face rule's features, and the palettes of the rule's family.
+    PageInFrameFixture local(
+      u8"<style>@font-face { font-family: LocalFeature; src: local('Feature Test'); font-feature-settings: "
+      u8"'ss01' }"
+      u8"@font-face { font-family: LocalPalette; src: local('Palette Test') }"
+      u8"@font-palette-values --dark { font-family: LocalPalette; base-palette: 2 }"
+      u8"span { display: inline-block; font-size: 10px }</style><body>"
+      u8"<span id=feature style=\"font-family: LocalFeature\">a</span>"
+      u8"<span id=palette style=\"font-family: LocalPalette; font-palette: --dark\">a</span></body>");
+    (void)local.Document->UpdateLayout();
+    CHECK(Width(local, u8"feature") == 20);
+    CHECK(PrimaryFont(local, u8"palette")->PlatformData().PaletteIndex() == 2u);
+
     // The font itself is shared: another document's text gets no palette.
     PageInFrameFixture other(u8"<body><span id=a style=\"font: 10px 'Palette Test'\">a</span></body>");
     CHECK(PrimaryFont(other, u8"a")->PlatformData().PaletteIndex() == 0u);

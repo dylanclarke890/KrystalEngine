@@ -174,9 +174,8 @@ namespace krys::boo::css
       {
         options.Add(FontLookupOptions::DisallowObliqueSynthesis);
       }
-      // FIXME: The font face's features, palette and size adjustment (fontCreationContext), once the font
-      // cache takes them.
-      return FontCache::Singleton().FontForFamily(fontDescription, _fontFaceName, options);
+      return FontCache::Singleton().FontForFamily(fontDescription, _fontFaceName, options,
+                                                  fontCreationContext);
     }
 
     auto success = _fontRequest->EnsureCustomFontData();
