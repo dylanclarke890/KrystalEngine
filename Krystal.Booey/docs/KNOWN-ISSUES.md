@@ -113,7 +113,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - The compositing operators `darker` and `difference` are not mapped: `CompositeOperator` falls back to source-over (FIXME in Krystal.UI's `GraphicsContextRender2D.cpp`).
 - There's no software filter path: filters are applied by the host's accelerated backend, or by the graphics context for the ones it can draw. Reference filter clients and SVG shapes' filter regions are FIXMEs (see *SVG*), and `filter: url()` to an external document is not supported (see *Images and resources*).
 - Backdrop filters are drawn only by the compositor: the flattened whole repaint (`View::Record`) doesn't draw them.
-- `::backdrop` is missing from repaint and `Styleable::FromRenderer`.
 - The broken image icon is not drawn (FIXMEs in `CachedImage.cpp` and `RenderImage.cpp`).
 - `ImageQualityController::ChooseInterpolationQuality` returns the style's quality or the default: there is no size- or scroll-dependent choice.
 - Text painting has no document markers (spelling, grammar), no IME composition painting, no dragged or transparent content and no glyph display list cache. There is no print-backgrounds setting, and font subpixel quantization is a FIXME.

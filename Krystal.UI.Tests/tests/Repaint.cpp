@@ -10,6 +10,7 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -177,6 +178,64 @@ namespace krys::ui::tests
         CheckNoStalePixels(fixture, view, "animation-" + std::to_string(i));
       }
     }
+  }
+
+  TEST_CASE("View: a dialog's ::backdrop leaves no stale pixels", "[UI][GPU]")
+  {
+    RepaintFixture fixture(320u, 240u);
+    View view({320, 240});
+    view.LoadHTML(u8"<!DOCTYPE html><style>"
+                  u8"body { margin: 0; background: #f4f4f4 }"
+                  u8"#under { width: 200px; height: 100px; background: #118ab2 }"
+                  u8"dialog { width: 60px; height: 40px; padding: 0; border: 0; background: #ffd166 }"
+                  u8"dialog::backdrop { background: #ef476f80 }"
+                  u8"dialog.changed::backdrop { background: #073b4c80; inset: 40px }"
+                  u8"</style><div id=under></div><dialog id=d></dialog>");
+    WaitForLoad(view);
+
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+    };
+    frame();
+    CheckNoStalePixels(fixture, view, "closed");
+    const auto closed = fixture.Painted(view);
+
+    auto element = view.Document().GetElementById(u8"d");
+    REQUIRE(element);
+    auto &dialog = Downcast<boo::html::HTMLDialogElement>(*element);
+
+    REQUIRE_FALSE(dialog.ShowModal().HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "opened");
+    const auto opened = fixture.Painted(view);
+    CHECK(CompareImages(closed, opened, 2u).PixelsOver > 0u);
+
+    // Its colour and its size change, with no change to the dialog's own box.
+    REQUIRE_FALSE(dialog.SetAttribute(u8"class", u8"changed").HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "changed");
+    CHECK(CompareImages(opened, fixture.Painted(view), 2u).PixelsOver > 0u);
+
+    dialog.RemoveAttribute(u8"class");
+    frame();
+    CheckNoStalePixels(fixture, view, "changed back");
+
+    dialog.Close();
+    frame();
+    CheckNoStalePixels(fixture, view, "closed again");
+    CHECK(CompareImages(closed, fixture.Painted(view), 2u).PixelsOver == 0u);
+
+    // It goes when the dialog is removed, too.
+    REQUIRE_FALSE(dialog.ShowModal().HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "reopened");
+    REQUIRE_FALSE(dialog.Remove().HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "removed");
+    CHECK(CompareImages(closed, fixture.Painted(view), 2u).PixelsOver == 0u);
   }
 
   TEST_CASE("View: changes inside filters leave no stale pixels", "[UI][GPU]")
