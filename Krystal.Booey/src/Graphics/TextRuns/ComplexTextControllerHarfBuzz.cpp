@@ -113,8 +113,9 @@ namespace krys::boo
       return HBRun {startIndex, index, *currentScript};
     }
 
-    /// @brief The OpenType features to shape with @p fontDescription.
-    KRYS_NODISCARD SmallList<hb_feature_t, 4> ComputeFeatures(const FontDescription &fontDescription) noexcept
+    /// @brief The OpenType features to shape @p font with, for @p fontDescription.
+    KRYS_NODISCARD SmallList<hb_feature_t, 4> ComputeFeatures(const FontDescription &fontDescription,
+                                                              const FontPlatformData &font) noexcept
     {
       FeaturesMap featuresToBeApplied;
       auto set = [&](const char (&tag)[5], int value)
@@ -129,12 +130,15 @@ namespace krys::boo
 
       // 2. If the font is defined via an @font-face rule, the font features implied by the
       //    font-feature-settings descriptor in the @font-face rule.
-      // FIXME: No @font-face.
+      for (const auto &feature : font.FontFaceFeatures())
+      {
+        featuresToBeApplied[feature.Tag()] = feature.Value();
+      }
 
       // 3. Font features implied by the value of the ‘font-variant’ property, the related ‘font-variant’
       //    subproperties and any other CSS property that uses OpenType features.
       for (auto &[tag, value] :
-           ComputeFeatureSettingsFromVariants(fontDescription.VariantSettings(), nullptr))
+           ComputeFeatureSettingsFromVariants(fontDescription.VariantSettings(), font.GetFontFeatureValues()))
       {
         featuresToBeApplied[tag] = value;
       }
@@ -327,7 +331,7 @@ namespace krys::boo
       return;
     }
 
-    auto features = ComputeFeatures(_fontCascade.GetFontDescription());
+    auto features = ComputeFeatures(_fontCascade.GetFontDescription(), font->PlatformData());
     // Kerning is not handled as font features, so only in case it's explicitly disabled
     // we need to include kern feature.
     if (!_fontCascade.EnableKerning())

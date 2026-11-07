@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontPaletteValues.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -13,10 +16,13 @@
 
 namespace krys::boo
 {
+  class FontCreationContext;
+  class FontDescription;
   struct FontSizeAdjust;
 
   /// @brief A face at a size: what a font is made from. Whether bold and oblique are synthesized, the
-  /// orientation, the width variant (for `text-combine-upright`) and the text rendering mode come with it.
+  /// orientation, the width variant (for `text-combine-upright`), the text rendering mode, and the features,
+  /// feature values and palette of the rules that name it come with it.
   class FontPlatformData
   {
   private:
@@ -29,6 +35,10 @@ namespace krys::boo
     bool _syntheticOblique {false};
     bool _isColorBitmapFont {false};
     bool _isHashTableDeletedValue {false};
+    FontFeatureSettings _fontFaceFeatures;
+    RefPtr<FontFeatureValues> _fontFeatureValues;
+    uint32 _paletteIndex {0};
+    List<FontPaletteValues::OverriddenColor> _paletteOverrides;
 
   public:
     explicit FontPlatformData(HashTableDeletedValueTag) noexcept;
@@ -107,6 +117,36 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string FamilyName() const noexcept;
+
+    /// @brief Takes the features of the font's `@font-face` rule, the `@font-feature-values` of its family,
+    /// and its palette: @p description's `font-palette`, with the `@font-palette-values` it names.
+    /// @see https://drafts.csswg.org/css-fonts-4/#font-palette-prop
+    void ApplyCreationContext(const FontDescription &description,
+                              const FontCreationContext &context) noexcept;
+
+    /// @brief The `font-feature-settings` descriptor of the font's `@font-face` rule.
+    KRYS_NODISCARD const FontFeatureSettings &FontFaceFeatures() const noexcept
+    {
+      return _fontFaceFeatures;
+    }
+
+    /// @brief The `@font-feature-values` of the font's family, for `font-variant-alternates`.
+    KRYS_NODISCARD const RefPtr<FontFeatureValues> &GetFontFeatureValues() const noexcept
+    {
+      return _fontFeatureValues;
+    }
+
+    /// @brief The palette (`CPAL`) colour glyphs are drawn with.
+    KRYS_NODISCARD uint32 PaletteIndex() const noexcept
+    {
+      return _paletteIndex;
+    }
+
+    /// @brief Colours replacing entries of that palette, each an entry the palette has; later ones win.
+    KRYS_NODISCARD const List<FontPaletteValues::OverriddenColor> &PaletteOverrides() const noexcept
+    {
+      return _paletteOverrides;
+    }
 
     KRYS_NODISCARD size_t Hash() const noexcept;
 

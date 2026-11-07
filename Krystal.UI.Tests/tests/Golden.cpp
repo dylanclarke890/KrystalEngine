@@ -465,6 +465,13 @@ namespace krys::ui::tests
     CheckPage("variable-fonts", 320u, 200u, true);
   }
 
+  TEST_CASE("Golden: font rules", "[UI][GPU][Golden]")
+  {
+    // Palettes colour the boxes, and features widen them. Text, so Chrome's golden is only reported (see
+    // "Golden: text"): it places glyphs at fractions of a pixel, and the colours and widths match it.
+    CheckPage("font-rules", 320u, 160u, true);
+  }
+
   TEST_CASE("Golden: filters", "[UI][GPU][Golden]")
   {
     CheckPage("filters", 360u, 240u);

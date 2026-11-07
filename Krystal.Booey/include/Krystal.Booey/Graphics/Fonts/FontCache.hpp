@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontPlatformData.hpp"
 #include "Krystal.Booey/Graphics/Fonts/SystemFallbackFontCache.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
@@ -88,9 +89,11 @@ namespace krys::boo
 
     KRYS_NODISCARD static FontCache &Singleton() noexcept;
 
-    /// @brief The font of @p family for @p description, or null if there's no such family.
+    /// @brief The font of @p family for @p description, or null if there's no such family. @p context gives
+    /// the family's `@font-feature-values` and `@font-palette-values`.
     KRYS_NODISCARD RefPtr<Font> FontForFamily(const FontDescription &description, const StringAtom &family,
-                                              EnumSet<FontLookupOptions> options = {}) noexcept;
+                                              EnumSet<FontLookupOptions> options = {},
+                                              const FontCreationContext &context = {}) noexcept;
 
     /// @brief The font used when no family has a font: the bundled Liberation Sans.
     KRYS_NODISCARD Ref<Font> LastResortFallbackFont(const FontDescription &description) noexcept;

@@ -506,8 +506,9 @@ namespace krys::boo::css
       resolveAndAssignGenericFamily();
     }
 
-    // FIXME: The palette and feature values, once the font cache takes them.
-    auto font = FontCache::Singleton().FontForFamily(description, familyForLookup);
+    auto font = FontCache::Singleton().FontForFamily(
+      description, familyForLookup, {},
+      FontCreationContext {{}, {}, fontPaletteValues, krys::move(fontFeatureValues), 1.0f});
     return {FontRanges {krys::move(font)}, isGenericFontFamily};
   }
 

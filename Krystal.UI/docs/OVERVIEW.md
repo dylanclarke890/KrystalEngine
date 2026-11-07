@@ -20,7 +20,7 @@ Krystal.UI is the only module that knows both Booey and Krystal.Gfx: it hosts Bo
 - Image buffers: `ImageBufferRender2DBackend` is the accelerated buffer (canvas bitmaps). It records into a display list and renders into the texture it keeps when next drawn; readbacks render at once and use `Device::ReadTexture`. `ImageBufferTextures` renders and uploads images through renderers that record into the replay's command buffer ahead of its passes; textures are pooled by size across replays, which is safe because OpenGL runs commands in order. `AcceleratedImageBuffers` renders outside a paint, waiting for the GPU before and after because transient memory belongs to the host's frames.
 - External images (engine textures through a `<canvas>`'s `"krystal-texture"` context, canvas snapshots) are `TextureImage`s drawn without a copy.
 - `FilterGraph2DBuilder` is Booey's accelerated filter backend, turning each effect into `FilterGraph2D` nodes.
-- `FontFaceCache` maps a Booey `Font` to a `FontFace2D`, one per FreeType face and synthetic bold or oblique combination, shared by every size.
+- `FontFaceCache` maps a Booey `Font` to a `FontFace2D`, one per FreeType face, synthetic bold or oblique, and palette (index and overridden colours), shared by every size.
 - Controls use the Adwaita theme behind `RenderTheme`'s interface, so another theme can replace it.
 
 ## Input

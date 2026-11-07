@@ -111,7 +111,8 @@ namespace krys::boo
   }
 
   RefPtr<Font> FontCache::FontForFamily(const FontDescription &description, const StringAtom &family,
-                                        EnumSet<FontLookupOptions> options) noexcept
+                                        EnumSet<FontLookupOptions> options,
+                                        const FontCreationContext &context) noexcept
   {
     if (!_purgeTimer.IsActive())
     {
@@ -120,7 +121,10 @@ namespace krys::boo
 
     if (auto *platformData = CachedFontPlatformData(description, family, options))
     {
-      return FontForPlatformData(*platformData);
+      // The platform data is shared by every document, and the rules are each document's own.
+      FontPlatformData withContext(*platformData);
+      withContext.ApplyCreationContext(description, context);
+      return FontForPlatformData(withContext);
     }
 
     return nullptr;

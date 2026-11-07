@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include <filesystem>
+#include <string>
 
 namespace krys::boo::css::tests
 {
@@ -413,6 +414,156 @@ namespace krys::boo::css::tests
     auto font = PrimaryFont(fixture, u8"t");
     CHECK(font->PlatformData().SyntheticBold() == testCase.SyntheticBold);
     CHECK_FALSE(font->PlatformData().SyntheticOblique());
+  }
+
+  TEST_CASE("CSSFontFace: features from @font-face, @font-feature-values and the properties",
+            "[CSS][CSSFontFace][css-fonts:font-rend-desc][css-fonts:font-feature-values]"
+            "[css-fonts:feature-precedence]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddFile(u8"file:///fonts/feature.ttf", FontPath("webfonts", "FeatureTest.ttf"),
+                            u8"font/ttf");
+
+    // The width of `a` at 10px says which features reached it (see tools/make_feature_test_fonts.py); each is
+    // Chrome's.
+    struct Case
+    {
+      utf8_stringview Family;
+      utf8_stringview Style;
+      int32 Width;
+    };
+    const List<Case> cases {
+      {u8"F", u8"", 10},
+      {u8"F1", u8"", 20},
+      {u8"F1", u8"font-feature-settings: 'ss01' 0", 10},
+      {u8"F", u8"font-feature-settings: 'ss02'", 30},
+      {u8"F", u8"font-variant-alternates: styleset(fancy)", 30},
+      {u8"F", u8"font-variant-alternates: stylistic(one)", 40},
+      {u8"F", u8"font-variant-alternates: stylistic(two)", 50},
+      {u8"F", u8"font-variant-alternates: character-variant(cv)", 60},
+      {u8"F", u8"font-variant-alternates: styleset(nope)", 10},
+      {u8"F", u8"font-variant-alternates: styleset(other)", 10},
+      {u8"F", u8"font-variant-alternates: styleset(fancy); font-feature-settings: 'ss02' 0", 10},
+      {u8"F2", u8"font-variant-alternates: styleset(fancy)", 30},
+      {u8"F2", u8"font-variant-alternates: styleset(first)", 20},
+    };
+    utf8_string markup =
+      u8"<style>@font-face { font-family: F; src: url(file:///fonts/feature.ttf) }"
+      u8"@font-face { font-family: F1; src: url(file:///fonts/feature.ttf); font-feature-settings: 'ss01' }"
+      u8"@font-face { font-family: F2; src: url(file:///fonts/feature.ttf); font-feature-settings: 'ss02' }"
+      u8"@font-feature-values F, F1 { @styleset { fancy: 2 } @stylistic { one: 1; two: 2 } "
+      u8"@character-variant { cv: 1 } }"
+      u8"@font-feature-values f2 { @styleset { first: 1; fancy: 2 } }"
+      u8"@font-feature-values Other { @styleset { other: 2 } }"
+      u8"span { font-size: 10px; display: inline-block }</style><body>";
+    for (size_t index = 0; index < cases.size(); ++index)
+    {
+      markup += u8"<div><span id=c"
+                + utf8_string(reinterpret_cast<const char8 *>(std::to_string(index).c_str()))
+                + u8" style=\"font-family: " + utf8_string(cases[index].Family) + u8"; "
+                + utf8_string(cases[index].Style) + u8"\">a</span></div>";
+    }
+    PageInFrameFixture fixture(krys::move(markup), {400, 400});
+    LoadFonts(fixture);
+
+    for (size_t index = 0; index < cases.size(); ++index)
+    {
+      INFO(reinterpret_cast<const char *>(utf8_string(cases[index].Family).c_str())
+           << " / " << reinterpret_cast<const char *>(utf8_string(cases[index].Style).c_str()));
+      auto id = u8"c" + utf8_string(reinterpret_cast<const char8 *>(std::to_string(index).c_str()));
+      CHECK(Width(fixture, id) == cases[index].Width);
+    }
+  }
+
+  TEST_CASE("CSSFontFace: palettes from font-palette and @font-palette-values",
+            "[CSS][CSSFontFace][css-fonts:font-palette-prop][css-fonts:font-palette-values]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddFile(u8"file:///fonts/palette.ttf", FontPath("webfonts", "PaletteTest.ttf"),
+                            u8"font/ttf");
+
+    // Palette 1 is for light backgrounds, palette 2 for dark ones. Each is Chrome's.
+    struct Case
+    {
+      utf8_stringview Style;
+      uint32 Palette;
+      List<FontPaletteValues::OverriddenColor> Overrides;
+    };
+    const List<Case> cases {
+      {u8"", 0, {}},
+      {u8"font-palette: light", 1, {}},
+      {u8"font-palette: dark", 2, {}},
+      {u8"font-palette: --one", 1, {}},
+      {u8"font-palette: --over", 0, {{1, boo::Color(boo::Color::black)}}},
+      {u8"font-palette: --lightOver", 1, {{0, boo::Color(SRGBA<uint8>(255, 0, 255))}}},
+      {u8"font-palette: --range", 0, {}},
+      {u8"font-palette: --badIndex", 0, {{0, boo::Color(SRGBA<uint8>(128, 128, 128))}}},
+      {u8"font-palette: --qOnly", 0, {}},
+      {u8"font-palette: --dup", 2, {}},
+      {u8"font-palette: --missing", 0, {}},
+      {u8"font-palette: --clear", 0, {{1, boo::Color(boo::Color::transparentBlack)}}},
+      {u8"font-family: Q; font-palette: --qOnly", 2, {}},
+    };
+    utf8_string markup =
+      u8"<style>@font-face { font-family: P; src: url(file:///fonts/palette.ttf) }"
+      u8"@font-face { font-family: Q; src: url(file:///fonts/palette.ttf) }"
+      u8"@font-palette-values --one { font-family: P; base-palette: 1 }"
+      u8"@font-palette-values --over { font-family: P; override-colors: 1 #000000 }"
+      u8"@font-palette-values --lightOver { font-family: P; base-palette: light; override-colors: 0 #FF00FF }"
+      u8"@font-palette-values --range { font-family: P; base-palette: 9 }"
+      u8"@font-palette-values --badIndex { font-family: P; override-colors: 7 #000000, 0 #808080 }"
+      u8"@font-palette-values --qOnly { font-family: Q; base-palette: 2 }"
+      u8"@font-palette-values --dup { font-family: P; base-palette: 1 }"
+      u8"@font-palette-values --dup { font-family: P; base-palette: 2 }"
+      u8"@font-palette-values --clear { font-family: P; override-colors: 1 transparent }"
+      u8"span { font: 40px P }</style><body>";
+    for (size_t index = 0; index < cases.size(); ++index)
+    {
+      markup += u8"<span id=c" + utf8_string(reinterpret_cast<const char8 *>(std::to_string(index).c_str()))
+                + u8" style=\"" + utf8_string(cases[index].Style) + u8"\">a</span>";
+    }
+    PageInFrameFixture fixture(krys::move(markup), {400, 400});
+    LoadFonts(fixture);
+
+    for (size_t index = 0; index < cases.size(); ++index)
+    {
+      INFO(reinterpret_cast<const char *>(utf8_string(cases[index].Style).c_str()));
+      auto id = u8"c" + utf8_string(reinterpret_cast<const char8 *>(std::to_string(index).c_str()));
+      const auto &platformData = PrimaryFont(fixture, id)->PlatformData();
+      CHECK(platformData.FamilyName() == u8"Palette Test");
+      CHECK(platformData.PaletteIndex() == cases[index].Palette);
+      CHECK(platformData.PaletteOverrides() == cases[index].Overrides);
+    }
+  }
+
+  TEST_CASE("CSSFontFace: a host's font takes @font-feature-values and @font-palette-values",
+            "[CSS][CSSFontFace][css-fonts:font-feature-values][css-fonts:font-palette-values]")
+  {
+    auto &database = FontDatabase::Singleton();
+    (void)database.AddFontFile(FontPath("webfonts", "FeatureTest.ttf"));
+    (void)database.AddFontFile(FontPath("webfonts", "PaletteTest.ttf"));
+    PageInFrameFixture fixture(
+      u8"<style>@font-feature-values 'Feature Test' { @styleset { wide: 2 } }"
+      u8"@font-palette-values --dark { font-family: 'Palette Test'; base-palette: dark; override-colors: 1 "
+      u8"red }"
+      u8"span { display: inline-block; font-size: 10px }</style><body>"
+      u8"<span id=plain style=\"font-family: 'Feature Test'\">a</span>"
+      u8"<span id=wide style=\"font-family: 'Feature Test'; font-variant-alternates: "
+      u8"styleset(wide)\">a</span>"
+      u8"<span id=light style=\"font-family: 'Palette Test'; font-palette: light\">a</span>"
+      u8"<span id=dark style=\"font-family: 'Palette Test'; font-palette: --dark\">a</span></body>");
+    (void)fixture.Document->UpdateLayout();
+
+    CHECK(Width(fixture, u8"plain") == 10);
+    CHECK(Width(fixture, u8"wide") == 30);
+    CHECK(PrimaryFont(fixture, u8"light")->PlatformData().PaletteIndex() == 1u);
+    const auto &dark = PrimaryFont(fixture, u8"dark")->PlatformData();
+    CHECK(dark.PaletteIndex() == 2u);
+    CHECK(dark.PaletteOverrides()
+          == List<FontPaletteValues::OverriddenColor> {{1, boo::Color(SRGBA<uint8>(255, 0, 0))}});
+    // The font itself is shared: another document's text gets no palette.
+    PageInFrameFixture other(u8"<body><span id=a style=\"font: 10px 'Palette Test'\">a</span></body>");
+    CHECK(PrimaryFont(other, u8"a")->PlatformData().PaletteIndex() == 0u);
   }
 
   TEST_CASE("CSSFontFace: a variable font's instances", "[CSS][CSSFontFace]")

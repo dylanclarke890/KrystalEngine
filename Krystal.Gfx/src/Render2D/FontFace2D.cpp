@@ -5,6 +5,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_ADVANCES_H
+#include FT_COLOR_H
 #include FT_OUTLINE_H
 #include FT_SIZES_H
 
@@ -41,6 +42,31 @@ namespace krys::gfx
         return {(x + Slant * y) * Scale, -y * Scale};
       }
     };
+
+    /// @brief Selects @p options's palette on the shared @p face, for its colour glyphs.
+    void SelectPalette(FT_Face face, const FontFace2DOptions &options) noexcept
+    {
+      // Selecting reloads the palette from the font, so another face's overrides don't stay.
+      FT_Color *palette = nullptr;
+      if (FT_Palette_Select(face, static_cast<FT_UShort>(options.PaletteIndex), &palette) != 0 || !palette)
+      {
+        return;
+      }
+
+      FT_Palette_Data data {};
+      if (FT_Palette_Data_Get(face, &data) != 0)
+      {
+        return;
+      }
+      for (const auto &colour : options.PaletteOverrides)
+      {
+        if (colour.Index < data.num_palette_entries)
+        {
+          palette[colour.Index] =
+            FT_Color {.blue = colour.B, .green = colour.G, .red = colour.R, .alpha = colour.A};
+        }
+      }
+    }
   }
 
   Expected<UniquePtr<FontFace2D>> FontFace2D::Create(Ref<text::FreeTypeFace> face,
@@ -137,6 +163,10 @@ namespace krys::gfx
       flags |= FT_LOAD_TARGET_LIGHT;
     }
     flags |= FT_HAS_COLOR(face) ? FT_LOAD_COLOR : FT_LOAD_NO_BITMAP;
+    if (FT_HAS_COLOR(face))
+    {
+      SelectPalette(face, _options);
+    }
 
     const bool loaded = FT_Load_Glyph(face, glyph, flags) == 0;
     // The face is shared: leave no transform on it.

@@ -30,7 +30,6 @@ namespace krys::boo
     FontCustomPlatformData::GetFontPlatformData(const FontDescription &description, bool bold, bool italic,
                                                 const FontCreationContext &fontCreationContext) const noexcept
   {
-    // FIXME: The font face's features (fontFaceFeatures), once the font backend applies them.
     auto size = description.AdjustedSizeForFontFace(fontCreationContext.SizeAdjust());
     const auto &descriptors = fontCreationContext.FontFaceCapabilities();
 
@@ -52,6 +51,7 @@ namespace krys::boo
                                   description.Orientation(), description.WidthVariant(),
                                   description.GetTextRenderingMode());
     platformData.UpdateSizeWithFontSizeAdjust(description.GetFontSizeAdjust(), description.ComputedSize());
+    platformData.ApplyCreationContext(description, fontCreationContext);
     return platformData;
   }
 

@@ -30,6 +30,18 @@ namespace krys::gfx
     Full,
   };
 
+  /// @brief A colour replacing an entry of a colour font's palette.
+  struct PaletteColour
+  {
+    uint32 Index {0};
+    uint8 R {0};
+    uint8 G {0};
+    uint8 B {0};
+    uint8 A {255};
+
+    KRYS_NODISCARD bool operator==(const PaletteColour &) const noexcept = default;
+  };
+
   struct FontFace2DOptions
   {
     FontHinting Hinting {FontHinting::Slight};
@@ -37,6 +49,11 @@ namespace krys::gfx
     bool SyntheticBold {false};
     /// @brief Slants glyphs by a quarter (about 14 degrees), for an italic the face doesn't have.
     bool SyntheticOblique {false};
+    /// @brief The palette (`CPAL`) colour glyphs are drawn with.
+    uint32 PaletteIndex {0};
+    /// @brief Colours replacing entries of that palette; later ones win, and entries it doesn't have are
+    /// ignored.
+    List<PaletteColour> PaletteOverrides;
   };
 
   /// @brief A glyph rasterised for drawing.
