@@ -112,10 +112,8 @@ namespace krys::boo::css
 
     // MARK: - @font-face descriptor consumers
 
-    // FIXME: Add the string parsers for the `FontFace` interface (`ParseFontFaceSrc`,
-    // `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`,
-    // `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`,
-    // `ParseFontFaceFontWeight`) once `ScriptExecutionContext` and `Document` are available.
+    // There are no string parsers for the `FontFace` interface, as there's no CSS Font Loading API (see
+    // DIFFERENCES.md): descriptors come only from `@font-face` rules.
 
     // MARK: @font-face 'src'
     // https://drafts.csswg.org/css-fonts-4/#src-desc

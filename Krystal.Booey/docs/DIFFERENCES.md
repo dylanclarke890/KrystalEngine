@@ -203,6 +203,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 ### From the specs
 
 - Password fields mask one character per code point (`RenderText::SecureText`), so a character outside the BMP gets one mask.
+- There's no CSS Font Loading API (`FontFace`, `FontFaceSet`, `document.fonts`), nor its string parsers for descriptors: it's for scripts, and a host adds fonts with `FontDatabase` (`AddFontFile`, `AddFontData`) or `Page::AddFontDirectory`. Web fonts come only from `@font-face` rules.
 
 ### From Chrome
 

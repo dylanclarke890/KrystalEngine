@@ -48,7 +48,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Typed OM has only numeric values and `CSSKeywordValue` (`CSS/TypedOM/`). There is no `CSSStyleValue::Parse()`/`ParseAll()`, `CSSStyleValueFactory`, `StylePropertyMap` (`styleMap`, `attributeStyleMap`, `computedStyleMap()`), `CSSUnparsedValue`, image, transform or colour values. `CSSNumericFactory` is a struct of static functions (`CSSNumericFactory::Px(10)`) and there is no `CSS` namespace object.
 - No `CSS.registerProperty` or `CSS.supports`. `CSSStyleSheet` has `ReplaceSync` only; the async `replace()` needs promises.
 - `SingleAnimationRangeStart/End::ToTimelineRangeValue()` returns a null `CSSNumericValue` for a calculated offset (FIXME).
-- The `FontFace` string parsers (`ParseFontFaceSrc`, `ParseFontFaceFontWeight` and the rest, FIXME in `Consumers/Font.hpp`) aren't written.
 - `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).
 - State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
 - `:lang()` has no document default language or Content-Language header (FIXME in `SelectorCheckerTestFunctions.cpp`); WebVTT elements don't use their cue's language.
@@ -155,7 +154,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `FontDescription::SetSpecifiedLocale` resolves every Han locale to `zh-hans`, as there are no user language preferences.
 - `FontCache` has no memory-pressure limits; the host cannot report pressure (FIXME in `FontCache.cpp`). The purge of inactive fonts runs on a timer only.
 - Right-to-left scripts other than Arabic and Hebrew (Syriac, Thaana, N'Ko and so on) have no bundled font and work only if the host registers one. Kashida justification is not done.
-- Web fonts: SVG fonts, font collections (the item in a collection is not selectable), a font parsing policy (safe font parser, trusted types) and `FontFace`/`FontFaceSet` as an API from C++ are missing. Font loading has no settings: installed fonts are always allowed and load completions are never ignored.
+- Web fonts: SVG fonts, font collections (the item in a collection is not selectable), and a font parsing policy (safe font parser, trusted types) are missing. Font loading has no settings: installed fonts are always allowed and load completions are never ignored.
 - Text search (`findPlainText`, `SearchBuffer`) is absent. The text iterator does not traverse the flat tree, enter image overlays or emit text placeholders (FIXMEs in `TextIterator.cpp`).
 
 ## Images and resources

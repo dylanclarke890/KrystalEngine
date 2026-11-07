@@ -194,7 +194,7 @@ namespace krys::boo::css
       // the CSSFontFaceSource objects will inspect their CachedFonts, the new CSSFontFace is smart enough
       // to enter the correct state() during the next pump(). This approach of making a new CSSFontFace is
       // simpler than computing and applying a diff of the StyleProperties.
-      // FIXME: Pass the old face's `FontFace` wrapper to the new face, once there's one.
+      // (There's no `FontFace` wrapper to pass to the new face: see DIFFERENCES.md.)
       _cssFontFaceSet->Remove(*existingFace);
     }
 
