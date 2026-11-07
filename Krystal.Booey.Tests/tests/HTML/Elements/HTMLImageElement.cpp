@@ -126,6 +126,28 @@ namespace krys::boo::tests
     CHECK(Count(painted, u8"draw-native-image") == 0u);
   }
 
+  TEST_CASE("HTMLImageElement: the box follows the alt text when there's no image",
+            "[HTML][HTMLImageElement]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+
+    ImageFixture fixture(u8"<img id=text alt=a><img id=loaded alt=a src='file:///a.png'>");
+    RunNetworkingTasks();
+    auto small = fixture.RendererSize(u8"text");
+    CHECK(fixture.RendererSize(u8"loaded") == IntSize(3, 2));
+
+    fixture.Image(u8"text").Alt(u8"a much longer label");
+    CHECK(fixture.RendererSize(u8"text").Width() > small.Width());
+
+    // An alt change leaves a loaded image alone, and losing the image shows the text.
+    fixture.Image(u8"loaded").Alt(u8"b");
+    CHECK(fixture.RendererSize(u8"loaded") == IntSize(3, 2));
+    fixture.Image(u8"loaded").RemoveAttribute(u8"src");
+    RunNetworkingTasks();
+    CHECK(fixture.RendererSize(u8"loaded") == small);
+  }
+
   TEST_CASE("HTMLImageElement: an image without a source fires error if it has src or uses srcset or picture",
             "[HTML][HTMLImageElement][html:update-the-image-data][html:use-srcset-or-picture]"
             "[html:dom-img-currentsrc]")

@@ -223,7 +223,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.19 Image Button state (type=image)](https://html.spec.whatwg.org/#image-button-state-%28type=image%29)
 
 Status: reviewed (2026-11-01)
-> `ImageInputType`; the image isn't loaded (see `KNOWN-ISSUES.md`).
+> `ImageInputType`, with `HTMLImageLoader` and `RenderImage`. As in Chrome, the label falls back from `alt` to `title`, `value` and "Submit".
 <!-- definitions: input-img-available -->
 
 - [x] [then unless the user agent cannot support images, or its support for images has…](https://html.spec.whatwg.org/#attr-input-src) — then unless the user agent cannot support images, or its support for images has been disabled, or the user agent only fetches images on demand, or the src attribute's value is the empty string, run these steps:

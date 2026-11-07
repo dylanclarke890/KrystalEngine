@@ -24,6 +24,8 @@ namespace krys::boo::html
     RefPtr<HTMLInputElement> CheckedRadioButton;
   };
 
+  class HTMLImageLoader;
+
   /// @see https://html.spec.whatwg.org/#htmlinputelement
   class HTMLInputElement : public HTMLTextFormControlElement
   {
@@ -45,6 +47,7 @@ namespace krys::boo::html
 
     dom::DOMString _name;
     Maybe<dom::DOMString> _valueIfDirty;
+    UniquePtr<HTMLImageLoader> _imageLoader;
     uint32 _size {DefaultSize};
     bool _isChecked : 1 {false};
     bool _dirtyCheckednessFlag : 1 {false};
@@ -438,6 +441,18 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsEmailField() const noexcept;
     KRYS_NODISCARD bool IsFileUpload() const noexcept;
     KRYS_NODISCARD bool IsImageButton() const noexcept;
+
+    /// @brief The loader of an image button's image, if the element has been one.
+    KRYS_NODISCARD HTMLImageLoader *ImageLoaderIfExists() const noexcept
+    {
+      return _imageLoader.get();
+    }
+
+    KRYS_NODISCARD HTMLImageLoader &EnsureImageLoader() noexcept;
+
+    /// @brief An image button's label when it shows no image: the `alt` attribute, or else the `title` or
+    /// `value` attribute, or else a default.
+    KRYS_NODISCARD dom::DOMString AltText() const noexcept;
     KRYS_NODISCARD bool IsNumberField() const noexcept;
     KRYS_NODISCARD bool IsSubmitButton() const noexcept final;
     KRYS_NODISCARD bool IsTelephoneField() const noexcept;
@@ -599,6 +614,7 @@ namespace krys::boo::html
     void OnInsert() noexcept final;
     void OnPostConnection() noexcept final;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnAdopt(dom::Document &oldDocument) noexcept final;
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
     void OnClone(dom::Node &copy, bool subtree) noexcept final;

@@ -710,6 +710,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/InputTypes/BaseDateAndTimeInputType.cpp
 		tests/HTML/InputTypes/ColorInputType.cpp
 		tests/HTML/InputTypes/FileInputType.cpp
+		tests/HTML/InputTypes/ImageInputType.cpp
 		tests/HTML/CustomElement/CustomElementRegistry.cpp
 		tests/HTML/CloseWatcher/CloseWatcher.cpp
 		tests/HTML/CustomElement/ElementInternals.cpp

@@ -775,7 +775,7 @@ namespace krys::boo::html
     {
       if (auto *renderImage = DynamicDowncast<RenderImage>(Renderer()))
       {
-        renderImage->UpdateAltText();
+        renderImage->UpdateForAltText();
       }
     }
     else if (localName == u8"src" || localName == u8"srcset" || localName == u8"sizes")

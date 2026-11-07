@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
+#include "Krystal.Booey/HTML/Images/HTMLImageLoader.hpp"
 #include "Krystal.Booey/HTML/InputTypes/FileInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/RadioInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/TextInputType.hpp"
@@ -22,6 +23,7 @@
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -857,6 +859,27 @@ namespace krys::boo::html
     return _inputType->IsImageButton();
   }
 
+  HTMLImageLoader &HTMLInputElement::EnsureImageLoader() noexcept
+  {
+    if (!_imageLoader)
+    {
+      _imageLoader = CreateUnique<HTMLImageLoader>(*this);
+    }
+    return *_imageLoader;
+  }
+
+  dom::DOMString HTMLInputElement::AltText() const noexcept
+  {
+    for (auto name : {u8"alt", u8"title", u8"value"})
+    {
+      if (auto text = GetAttribute(name))
+      {
+        return krys::move(*text);
+      }
+    }
+    return SubmitButtonDefaultLabel();
+  }
+
   bool HTMLInputElement::IsNumberField() const noexcept
   {
     return _inputType->IsNumberField();
@@ -1124,7 +1147,7 @@ namespace krys::boo::html
   {
     HTMLTextFormControlElement::DidAttachRenderers();
 
-    // FIXME: Attaching the type (InputType::attach, for image buttons' loaders).
+    _inputType->Attach();
 
     if (NodeDocument().FocusedElement() == this)
     {
@@ -1726,6 +1749,7 @@ namespace krys::boo::html
     // 5. Signal a type change for the element.
     // (Removing it from its radio button group above, and adding it again in RunPostTypeUpdateTasks.)
     RunPostTypeUpdateTasks();
+    _inputType->DidBecomeElementType();
 
     // 8. Let nowSelectable be true if setRangeText() now applies to the element, and false otherwise.
     bool nowSelectable = _inputType->SupportsSelectionAPI();
@@ -1935,6 +1959,20 @@ namespace krys::boo::html
       UpdateValidity();
     }
     // FIXME: Resetting the list attribute's target observer, with datalists.
+  }
+
+  void HTMLInputElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    HTMLTextFormControlElement::OnAdopt(oldDocument);
+    if (_imageLoader)
+    {
+      _imageLoader->ElementDidMoveToNewDocument(oldDocument);
+    }
+    // A document without a browsing context loads no images, so it may only start now.
+    if (IsImageButton())
+    {
+      EnsureImageLoader().UpdateFromElement();
+    }
   }
 
   void HTMLInputElement::OnClone(dom::Node &copy, bool subtree) noexcept

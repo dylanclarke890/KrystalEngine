@@ -64,6 +64,9 @@ namespace krys::boo
 
     void UpdateAltText() noexcept;
 
+    /// @brief Updates the alt text, and sizes the box for it if there's no image to show.
+    void UpdateForAltText() noexcept;
+
     void SetIsGeneratedContent(bool generated = true) noexcept
     {
       _isGeneratedContent = generated;

@@ -389,6 +389,12 @@ namespace krys::boo
     if (_image != cachedImage && (_imageComplete || !cachedImage))
     {
       imageResource->SetCachedImage(CachedResourceHandle {_image});
+
+      // With its image gone, the box is sized for the alt text instead.
+      if (auto *renderImage = DynamicDowncast<RenderImage>(GetElement().Renderer()); renderImage && !_image)
+      {
+        renderImage->UpdateForAltText();
+      }
     }
   }
 

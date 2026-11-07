@@ -37,7 +37,7 @@ namespace krys::boo
     FullImage
   };
 
-  /// @brief Loads the image of an element (`<img>`, and later `<input type=image>`, video posters and
+  /// @brief Loads the image of an element (`<img>`, `<input type=image>`, and later video posters and
   /// `<object>`), keeps its renderer's image up to date, and fires its `load` and `error` events.
   // FIXME: decode() promises, loading manually, image documents, archives, and whether the image is visible
   // in the viewport (for animations, G7d).

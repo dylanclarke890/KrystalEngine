@@ -555,6 +555,10 @@ input:is([type="hidden"], [type="image"], [type="file"]) {
     border: initial;
 }
 
+input[type="image"] {
+    cursor: pointer;
+}
+
 input[type="file"] {
     align-items: baseline;
     color: inherit;

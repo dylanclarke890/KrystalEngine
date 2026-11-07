@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -727,6 +728,16 @@ namespace krys::boo
     return ImageResource().ErrorOccurred() ? IntrinsicSize().Height() : 0_lu;
   }
 
+  void RenderImage::UpdateForAltText() noexcept
+  {
+    UpdateAltText();
+    if (GetCachedImage() && !ImageResource().ErrorOccurred())
+    {
+      return;
+    }
+    RepaintOrMarkForLayout(SetImageSizeForAltText(GetCachedImage()));
+  }
+
   void RenderImage::UpdateAltText() noexcept
   {
     if (!GetElement())
@@ -735,10 +746,14 @@ namespace krys::boo
     }
 
     Maybe<utf8_string> altText;
-    // FIXME: <input type=image>'s alt text, once it has a renderer.
     if (auto *image = DynamicDowncast<html::HTMLImageElement>(*GetElement()))
     {
       altText = image->AltText();
+    }
+    else if (auto *input = DynamicDowncast<html::HTMLInputElement>(*GetElement());
+             input && input->IsImageButton())
+    {
+      altText = input->AltText();
     }
 
     // We check for null and not empty because we don't want to override empty-string

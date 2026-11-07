@@ -368,6 +368,16 @@ namespace krys::boo::html
     {
     }
 
+    /// @brief Called when the element has taken on this type, after its type attribute changed.
+    virtual void DidBecomeElementType() noexcept
+    {
+    }
+
+    /// @brief Called when the element's renderers have been created.
+    virtual void Attach() noexcept
+    {
+    }
+
     /// @brief Called when the element's renderers are torn down: closes the picker.
     virtual void Detach() noexcept
     {
