@@ -586,7 +586,7 @@ Status: n/a (authoring advice)
 #### [6.8.4 Editing APIs](https://html.spec.whatwg.org/#editing-apis)
 
 Status: reviewed (2026-11-01)
-> Editing hosts are `FocusAlgorithms`' `IsEditingHost` and the editing code's; `execCommand()` isn't implemented (see `KNOWN-ISSUES.md`).
+> Editing hosts are `FocusAlgorithms`' `IsEditingHost` and the editing code's; `execCommand()` and the `queryCommand*()` methods are `Document`'s, running `EditorCommand`'s commands.
 <!-- definitions: active-range editing-host-of editable execCommand dom-document-querycommandenabled dom-document-querycommandindeterm dom-document-querycommandstate dom-document-querycommandsupported dom-document-querycommandvalue delete-the-selection -->
 
 - [x] [editing host](https://html.spec.whatwg.org/#editing-host) — An editing host is either an HTML element with its contenteditable attribute in the true state or plaintext-only state, or a child HTML element of a Document whose design mode enabled is true.

@@ -13,7 +13,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No Fullscreen API (`:fullscreen`).
 - No Event Timing or Long Animation Frames timing: inner invoke doesn't record timing info for event listeners, and firing an event doesn't record task time (FIXMEs in `EventDispatcher.cpp` and `EventDispatcher.hpp`).
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
-- `[CEReactions]` scopes are missing on members that aren't implemented yet (`execCommand`, `nonce`).
+- `[CEReactions]` scopes are missing on members that aren't implemented yet (`nonce`).
 - `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
 - `DocumentTouch` (`createTouch`, `createTouchList`) is not implemented; `Touch` has no constructor and there is no `TouchInit`.
 - `DataTransferItem` has no `getAsEntry` (no file system API).
@@ -196,7 +196,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- `execCommand()` and `queryCommandState()`/`queryCommandValue()` are not implemented; `Document` only declares the IDL in a comment. `EditorCommand` has 86 selection, navigation, delete, insert, clipboard and undo/redo commands but no state or value for them.
 - Formatting commands are absent: bold, italic and the rest of the `styleWithCSS`/`-webkit-font-size-delta` family, lists, indent and outdent, format block, links, remove format. Tab spans are absent with them. The `MakeTextWritingDirection*` commands apply styles but report no state.
 - Paste does not render the fragment in a staging document to take its text as rendered and drop invisible content (`ReplacementFragment`); it does not remove event handler attributes or `javascript:` URLs from pasted markup (FIXMEs in `ReplaceSelectionCommand.cpp`). `MarkupAccumulator` does not resolve URL attributes against the base URL, and the markup sanitiser's staging page has no dark appearance.
 - Bidi-aware pasting (matching each pasted paragraph's direction) and the bidi contiguity helpers (`AdjustToVisuallyContiguousRange` and relatives) are absent.

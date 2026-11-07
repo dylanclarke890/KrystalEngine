@@ -39,6 +39,7 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
@@ -4578,6 +4579,107 @@ namespace krys::boo::dom
       _designModeEnabled = false;
       ScheduleFullStyleRebuild();
     }
+  }
+
+  namespace
+  {
+    /// @brief The editing command @p commandName names for script in @p document; none when the document
+    /// isn't its frame's.
+    KRYS_NODISCARD Editor::Command DOMCommand(Document &document, DOMStringView commandName,
+                                              bool userInterface = false) noexcept
+    {
+      (void)document.UpdateStyleIfNeeded();
+      auto *frame = document.Frame();
+      if (!frame || frame->Document() != &document)
+      {
+        return {};
+      }
+      return document.GetEditor().GetCommand(
+        commandName, userInterface ? EditorCommandSource::DOMWithUserInterface : EditorCommandSource::DOM);
+    }
+
+    KRYS_NODISCARD Exception NotHTMLDocument(utf8_stringview method) noexcept
+    {
+      return Exception {ExceptionCode::InvalidStateError,
+                        utf8_string(method) + u8" is only supported on HTML documents."};
+    }
+  }
+
+  ExceptionOr<bool> Document::ExecCommand(DOMStringView commandId, bool showUI, DOMStringView value) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"execCommand");
+    }
+
+    // As in Chrome, a command doesn't run from within another (a listener for the events the first fires):
+    // that is how attack code nests them.
+    if (_isRunningExecCommand)
+    {
+      return false;
+    }
+    _isRunningExecCommand = true;
+    struct ResetRunning
+    {
+      bool &Running;
+      ~ResetRunning() noexcept
+      {
+        Running = false;
+      }
+    } resetRunning {_isRunningExecCommand};
+
+    // The events the command fires (mutation and input events) are dispatched once it's done, as script they
+    // run could change the tree under it.
+    EventQueueScope eventQueueScope;
+    Ref protectedThis = ShareRef(*this);
+    return DOMCommand(*this, commandId, showUI).Execute(value);
+  }
+
+  ExceptionOr<bool> Document::QueryCommandEnabled(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandEnabled");
+    }
+    return DOMCommand(*this, commandId).IsEnabled();
+  }
+
+  ExceptionOr<bool> Document::QueryCommandIndeterm(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandIndeterm");
+    }
+    return DOMCommand(*this, commandId).State() == TriState::Indeterminate;
+  }
+
+  ExceptionOr<bool> Document::QueryCommandState(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandState");
+    }
+    return DOMCommand(*this, commandId).State() == TriState::True;
+  }
+
+  ExceptionOr<bool> Document::QueryCommandSupported(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandSupported");
+    }
+    return DOMCommand(*this, commandId).IsSupported();
+  }
+
+  ExceptionOr<DOMString> Document::QueryCommandValue(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandValue");
+    }
+    return DOMCommand(*this, commandId).Value();
   }
 
   void Document::ScheduleFullStyleRebuild() noexcept

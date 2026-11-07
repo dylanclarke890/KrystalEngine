@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/TriState.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -175,6 +176,13 @@ namespace krys::boo
 
       KRYS_NODISCARD bool IsTextInsertion() const noexcept;
       KRYS_NODISCARD bool AllowExecutionWhenDisabled() const noexcept;
+
+      /// @brief Whether the command's effect is on the current selection (bold text for `Bold`); false for
+      /// an unsupported command or one without a state.
+      KRYS_NODISCARD TriState State(dom::Event *triggeringEvent = nullptr) const noexcept;
+      /// @brief The command's value for the current selection (the font for `FontName`); "true" or "false"
+      /// for a command with a state but no value, and empty for an unsupported command or one with neither.
+      KRYS_NODISCARD utf8_string Value(dom::Event *triggeringEvent = nullptr) const noexcept;
 
     private:
       KRYS_NODISCARD LocalFrame *Frame() const noexcept;

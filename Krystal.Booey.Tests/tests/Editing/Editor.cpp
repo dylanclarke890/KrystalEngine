@@ -8,12 +8,15 @@
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/Editing/Commands/UndoStep.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -624,6 +627,86 @@ namespace krys::boo::tests
                                  Affinity::Downstream);
       CHECK_FALSE(fixture.GetEditor().InsertText(u8"Q", nullptr));
       CHECK(Narrow(fixture.InnerHTML(locked)) == "no<b id=\"in\">pe</b>");
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: commands from script", "[Editing][Editor]")
+  {
+    EditorFixture fixture(u8"<div id=e contenteditable>abc</div><p id=p>Not editable</p>");
+    auto &document = *fixture.Document;
+    auto &text = fixture.TextIn(u8"e");
+
+    SECTION("Script can run only the commands supported from the DOM, ignoring ASCII case")
+    {
+      CHECK(document.QueryCommandSupported(u8"selectall").Value());
+      CHECK(document.QueryCommandSupported(u8"insertText").Value());
+      CHECK_FALSE(document.QueryCommandSupported(u8"MoveRight").Value());
+      CHECK_FALSE(document.QueryCommandSupported(u8"NoSuchCommand").Value());
+      CHECK_FALSE(document.ExecCommand(u8"MoveRight").Value());
+      CHECK_FALSE(document.QueryCommandEnabled(u8"NoSuchCommand").Value());
+    }
+
+    SECTION("A command runs on the selection when it's enabled")
+    {
+      fixture.Select(fixture.TextIn(u8"p"), 0, 3);
+      CHECK_FALSE(document.QueryCommandEnabled(u8"insertText").Value());
+      CHECK_FALSE(document.ExecCommand(u8"insertText", false, u8"X").Value());
+
+      fixture.Select(text, 1, 1);
+      CHECK(document.QueryCommandEnabled(u8"insertText").Value());
+      CHECK_FALSE(document.QueryCommandEnabled(u8"undo").Value());
+      CHECK(document.ExecCommand(u8"InsertText", false, u8"X").Value());
+      CHECK(fixture.ById(u8"e").TextContent() == u8"aXbc");
+      CHECK(document.QueryCommandEnabled(u8"undo").Value());
+      CHECK(document.ExecCommand(u8"undo").Value());
+      CHECK(fixture.ById(u8"e").TextContent() == u8"abc");
+    }
+
+    SECTION("Commands without a state or value are false and empty")
+    {
+      fixture.Select(text, 0, 3);
+      CHECK_FALSE(document.QueryCommandState(u8"selectAll").Value());
+      CHECK_FALSE(document.QueryCommandIndeterm(u8"selectAll").Value());
+      CHECK(document.QueryCommandValue(u8"selectAll").Value().empty());
+      CHECK(document.QueryCommandValue(u8"NoSuchCommand").Value().empty());
+    }
+
+    SECTION("As in Chrome, a command doesn't run from within another")
+    {
+      fixture.Select(text, 1, 1);
+      Maybe<bool> nested;
+      ListenWith(fixture, u8"input",
+                 [&](dom::Event &)
+                 {
+                   if (!nested)
+                   {
+                     nested = document.ExecCommand(u8"insertText", false, u8"Y").Value();
+                   }
+                 });
+      CHECK(document.ExecCommand(u8"insertText", false, u8"X").Value());
+      REQUIRE(nested);
+      CHECK_FALSE(*nested);
+      CHECK(fixture.ById(u8"e").TextContent() == u8"aXbc");
+
+      // It runs again once the first is done.
+      CHECK(document.ExecCommand(u8"insertText", false, u8"Z").Value());
+      CHECK(fixture.ById(u8"e").TextContent() == u8"aXZbc");
+    }
+
+    SECTION("Only HTML documents have commands")
+    {
+      auto svg =
+        document.Implementation().CreateDocument(infra::Namespaces::SVG, u8"svg", nullptr).ReleaseValue();
+      auto threw = [](const auto &result)
+      {
+        return result.HasException() && result.GetException().Code() == dom::ExceptionCode::InvalidStateError;
+      };
+      CHECK(threw(svg->ExecCommand(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandEnabled(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandIndeterm(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandState(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandSupported(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandValue(u8"selectAll")));
     }
   }
 }

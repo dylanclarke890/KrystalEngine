@@ -442,6 +442,7 @@ namespace krys::boo::dom
     List<WeakPtr<Element>> _elementsWithPendingUserAgentShadowTreeUpdates;
     bool _autofocusProcessed {false};
     bool _designModeEnabled {false};
+    bool _isRunningExecCommand {false};
     // FIXME: Documents create their render trees on their first style resolution, which is a rebuild.
     bool _needsFullStyleRebuild {true};
     bool _inStyleRecalc {false};
@@ -778,13 +779,36 @@ namespace krys::boo::dom
       return _designModeEnabled;
     }
 
-    // [CEReactions] boolean execCommand(DOMString commandId, optional boolean showUI = false, optional
-    // DOMString value = "");
-    // boolean queryCommandEnabled(DOMString commandId);
-    // boolean queryCommandIndeterm(DOMString commandId);
-    // boolean queryCommandState(DOMString commandId);
-    // boolean queryCommandSupported(DOMString commandId);
-    // DOMString queryCommandValue(DOMString commandId);
+    /// @brief Runs the editing command @p commandId (ASCII case-insensitive) with @p value, as script does.
+    /// @return Whether it ran; false for an unknown, unsupported or disabled command, or, as in Chrome, when
+    /// called from within another `execCommand()`.
+    /// @note Only HTML documents have commands: in others it throws an `InvalidStateError`. @p showUI is
+    /// ignored, as no command shows a user interface.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#execcommand()
+    KRYS_NODISCARD ExceptionOr<bool> ExecCommand(DOMStringView commandId, bool showUI = false,
+                                                 DOMStringView value = {}) noexcept;
+
+    /// @brief Whether the editing command @p commandId can run on the current selection.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandenabled()
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandEnabled(DOMStringView commandId) noexcept;
+
+    /// @brief Whether the editing command @p commandId's state is indeterminate (some of the selection has
+    /// it, some doesn't).
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandindeterm()
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandIndeterm(DOMStringView commandId) noexcept;
+
+    /// @brief Whether the editing command @p commandId's state is true for the current selection.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandstate()
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandState(DOMStringView commandId) noexcept;
+
+    /// @brief Whether @p commandId names an editing command script can run.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandsupported()
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandSupported(DOMStringView commandId) noexcept;
+
+    /// @brief The editing command @p commandId's value for the current selection: "true" or "false" for a
+    /// command with a state and no value, and empty for one with neither.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandvalue()
+    KRYS_NODISCARD ExceptionOr<DOMString> QueryCommandValue(DOMStringView commandId) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-hidden
     KRYS_NODISCARD bool Hidden() const noexcept

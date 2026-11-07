@@ -29,6 +29,9 @@ namespace krys::boo
     bool (*IsEnabled)(LocalFrame &, dom::Event *, EditorCommandSource) noexcept;
     bool IsTextInsertion;
     bool (*AllowExecutionWhenDisabled)(LocalFrame &, EditorCommandSource) noexcept;
+    /// @brief The command's state and value; null for a command without them.
+    TriState (*State)(LocalFrame &, dom::Event *) noexcept {nullptr};
+    utf8_string (*Value)(LocalFrame &, dom::Event *) noexcept {nullptr};
   };
 
   namespace
@@ -1334,6 +1337,34 @@ namespace krys::boo
       return false;
     }
     return _command->IsEnabled(*frame, triggeringEvent, _source);
+  }
+
+  TriState Editor::Command::State(dom::Event *triggeringEvent) const noexcept
+  {
+    auto *frame = Frame();
+    if (!IsSupported() || !frame || !_command->State)
+    {
+      return TriState::False;
+    }
+    return _command->State(*frame, triggeringEvent);
+  }
+
+  utf8_string Editor::Command::Value(dom::Event *triggeringEvent) const noexcept
+  {
+    auto *frame = Frame();
+    if (!IsSupported() || !frame)
+    {
+      return {};
+    }
+    if (!_command->Value)
+    {
+      if (!_command->State)
+      {
+        return {};
+      }
+      return _command->State(*frame, triggeringEvent) == TriState::True ? u8"true" : u8"false";
+    }
+    return _command->Value(*frame, triggeringEvent);
   }
 
   bool Editor::Command::IsTextInsertion() const noexcept
