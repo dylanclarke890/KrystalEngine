@@ -510,4 +510,95 @@ namespace krys::boo::tests
     CHECK_FALSE(hadDataTransfer);
     CHECK(Narrow(field.Value()).contains("XY"));
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Document: designMode",
+                   "[Editing][Document][html:designMode][html:design-mode-enabled][html:editing-host]")
+  {
+    EditorFixture fixture(
+      u8"<div id=one>hello</div><div id=locked contenteditable=false>no<b id=in>pe</b></div>"
+      u8"<div id=host></div><svg id=svg></svg>");
+    auto &document = *fixture.Document;
+    auto &one = fixture.ById(u8"one");
+    auto &locked = fixture.ById(u8"locked");
+    auto readWrite = [](dom::Element &element)
+    {
+      return element.Matches(u8":read-write").ReleaseValue();
+    };
+
+    SECTION("the setter takes on and off in any case, and ignores anything else")
+    {
+      CHECK(document.DesignMode() == u8"off");
+      document.DesignMode(u8"foo");
+      CHECK(document.DesignMode() == u8"off");
+      document.DesignMode(u8"oN");
+      CHECK(document.DesignMode() == u8"on");
+      document.DesignMode(u8"foo");
+      CHECK(document.DesignMode() == u8"on");
+      document.DesignMode(u8"");
+      CHECK(document.DesignMode() == u8"on");
+      document.DesignMode(u8"OFF");
+      CHECK(document.DesignMode() == u8"off");
+    }
+
+    SECTION("the document tree is editable while it's on")
+    {
+      CHECK_FALSE(one.IsContentEditable());
+      CHECK_FALSE(readWrite(one));
+
+      document.DesignMode(u8"on");
+      CHECK(one.IsContentEditable());
+      CHECK(readWrite(one));
+      CHECK(readWrite(fixture.Body()));
+      CHECK(document.HasEditableStyle());
+
+      document.DesignMode(u8"off");
+      CHECK_FALSE(one.IsContentEditable());
+      CHECK_FALSE(readWrite(one));
+    }
+
+    SECTION("but not what's marked otherwise, nor what's outside the document tree")
+    {
+      auto shadow = fixture.ById(u8"host").AttachShadow({}).ReleaseValue();
+      auto inShadow = document.CreateElement(u8"span").ReleaseValue();
+      REQUIRE_FALSE(shadow->AppendChild(*inShadow).HasException());
+      auto detached = document.CreateElement(u8"span").ReleaseValue();
+
+      document.DesignMode(u8"on");
+      CHECK_FALSE(locked.IsContentEditable());
+      CHECK_FALSE(readWrite(locked));
+      CHECK_FALSE(fixture.ById(u8"in").IsContentEditable());
+      CHECK_FALSE(inShadow->IsContentEditable());
+      CHECK_FALSE(readWrite(*inShadow));
+      CHECK_FALSE(detached->IsContentEditable());
+      CHECK_FALSE(readWrite(*detached));
+      CHECK_FALSE(readWrite(fixture.ById(u8"svg")));
+    }
+
+    SECTION("turning it on leaves the selection and the focus")
+    {
+      auto &text = fixture.TextIn(u8"one");
+      fixture.Select(text, 1, 3);
+      document.DesignMode(u8"on");
+      CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 1);
+      CHECK(fixture.Selection().Selection().End().DeprecatedEditingOffset() == 3);
+      CHECK_FALSE(document.FocusedElement());
+    }
+
+    SECTION("text can be typed where it's editable")
+    {
+      document.DesignMode(u8"on");
+      (void)document.UpdateLayout();
+      auto &text = fixture.TextIn(u8"one");
+      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2),
+                                 Affinity::Downstream);
+      CHECK(fixture.GetEditor().InsertText(u8"ZZ", nullptr));
+      CHECK(Narrow(fixture.InnerHTML(one)) == "heZZllo");
+
+      auto &lockedText = fixture.TextIn(u8"locked");
+      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&lockedText), 1),
+                                 Affinity::Downstream);
+      CHECK_FALSE(fixture.GetEditor().InsertText(u8"Q", nullptr));
+      CHECK(Narrow(fixture.InnerHTML(locked)) == "no<b id=\"in\">pe</b>");
+    }
+  }
 }

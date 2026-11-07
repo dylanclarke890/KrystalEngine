@@ -441,6 +441,7 @@ namespace krys::boo::dom
     // The inputs inserted without their user agent shadow tree, which the next style resolution creates.
     List<WeakPtr<Element>> _elementsWithPendingUserAgentShadowTreeUpdates;
     bool _autofocusProcessed {false};
+    bool _designModeEnabled {false};
     // FIXME: Documents create their render trees on their first style resolution, which is a rebuild.
     bool _needsFullStyleRebuild {true};
     bool _inStyleRecalc {false};
@@ -759,7 +760,20 @@ namespace krys::boo::dom
     // user interaction
     // readonly attribute WindowProxy? defaultView;
     // boolean hasFocus();
-    // [CEReactions] attribute DOMString designMode;
+
+    /// @see https://html.spec.whatwg.org/#designMode
+    KRYS_NODISCARD DOMString DesignMode() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#designMode
+    void DesignMode(DOMStringView value) noexcept;
+
+    /// @brief Whether the document's design mode is enabled, which makes its document tree editable.
+    /// @see https://html.spec.whatwg.org/#design-mode-enabled
+    KRYS_NODISCARD bool InDesignMode() const noexcept
+    {
+      return _designModeEnabled;
+    }
+
     // [CEReactions] boolean execCommand(DOMString commandId, optional boolean showUI = false, optional
     // DOMString value = "");
     // boolean queryCommandEnabled(DOMString commandId);

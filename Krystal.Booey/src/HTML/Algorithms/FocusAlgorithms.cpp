@@ -58,6 +58,12 @@ namespace krys::boo::html
       {
         return false;
       }
+      // NOTE: as in Chrome, the body is one in design mode, not just the document element.
+      if (element.NodeDocument().InDesignMode() && IsHTMLElement(element, TagName::body)
+          && element.ParentNode() == element.NodeDocument().DocumentElement())
+      {
+        return true;
+      }
       auto *parent = element.ParentElement();
       return !parent || !Is<HTMLElement>(*parent) || IsHTMLElement(*parent, TagName::input)
              || IsHTMLElement(*parent, TagName::textarea) || !css::MatchesReadWritePseudoClass(*parent);

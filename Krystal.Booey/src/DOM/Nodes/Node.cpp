@@ -815,7 +815,6 @@ namespace krys::boo::dom
         return Node::Editability::ReadOnly;
       }
 
-      // FIXME: A page that's editable as a whole (`Page::isEditable`).
       switch (style.UsedUserModify())
       {
         case UserModify::ReadOnly:               return Node::Editability::ReadOnly;

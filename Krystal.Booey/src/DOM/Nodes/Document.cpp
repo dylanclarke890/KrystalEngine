@@ -4510,6 +4510,42 @@ namespace krys::boo::dom
     ScheduleFullStyleRebuild();
   }
 
+  DOMString Document::DesignMode() const noexcept
+  {
+    return InDesignMode() ? u8"on" : u8"off";
+  }
+
+  void Document::DesignMode(DOMStringView value) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+
+    // 1. Let value be the given value, converted to ASCII lowercase.
+    auto lowered = text::ToASCIILower(value);
+    auto enabled = _designModeEnabled;
+
+    // 2. If value is "on" and this's design mode enabled is false:
+    //    2.1. Set this's design mode enabled to true.
+    //    2.2. Reset this's active range's start and end boundary points to be at the start of this.
+    //    2.3. Run the focusing steps for this's document element, if non-null.
+    // (As in Chrome, the selection and the focus stay where they are; see DIFFERENCES.md.)
+    if (lowered == u8"on")
+    {
+      enabled = true;
+    }
+
+    // 3. If value is "off", then set this's design mode enabled to false.
+    if (lowered == u8"off")
+    {
+      enabled = false;
+    }
+
+    if (enabled != _designModeEnabled)
+    {
+      _designModeEnabled = enabled;
+      ScheduleFullStyleRebuild();
+    }
+  }
+
   void Document::ScheduleFullStyleRebuild() noexcept
   {
     _needsFullStyleRebuild = true;

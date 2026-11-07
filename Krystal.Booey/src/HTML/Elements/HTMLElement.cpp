@@ -1621,7 +1621,6 @@ namespace krys::boo::html
 
   dom::Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const dom::Node &node) noexcept
   {
-    // FIXME: A page that's editable as a whole.
     auto *startElement = DynamicDowncast<dom::Element>(node);
     if (!startElement)
     {
@@ -1649,7 +1648,11 @@ namespace krys::boo::html
       return dom::Node::Editability::ReadOnly;
     }
 
-    // FIXME: The document's design mode makes the document tree editable, once there's a design mode.
+    if (node.NodeDocument().InDesignMode() && node.IsInDocumentTree())
+    {
+      return dom::Node::Editability::CanEditRichly;
+    }
+
     return dom::Node::Editability::ReadOnly;
   }
 

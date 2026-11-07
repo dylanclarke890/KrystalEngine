@@ -565,8 +565,8 @@ Status: reviewed (2026-11-01)
 
 #### [6.8.2 Making entire documents editable: the designMode getter and setter](https://html.spec.whatwg.org/#making-entire-documents-editable:-the-designmode-idl-attribute)
 
-Status: reviewed (2026-11-01)
-> Not implemented (see `KNOWN-ISSUES.md`).
+Status: reviewed (2026-11-06)
+> `Document::DesignMode`. The setter leaves out steps 2b and 2c, as Chrome does (see `DIFFERENCES.md`).
 <!-- definitions: design-mode-enabled -->
 
 - [x] [Document.designMode](https://html.spec.whatwg.org/#designMode) — The designMode getter steps are to return "on" if this's design mode enabled is true; otherwise "off".

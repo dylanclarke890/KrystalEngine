@@ -1409,7 +1409,10 @@ namespace krys::boo
 
     // Arrows and other possible directional navigation keys can be used in design
     // mode editing.
-    // FIXME: Design mode, once documents have it.
+    if (_frame.Document()->InDesignMode())
+    {
+      return false;
+    }
 
     return html::FocusAlgorithms::DirectionalNavigation(*_frame.Document(), focusDirection);
   }
@@ -1526,8 +1529,14 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Tabs can be used in design mode editing; whether the page lets Tab cycle through elements
-    // (tabKeyCyclesThroughElements), once the host can say.
+    // Tabs can be used in design mode editing.
+    if (document->InDesignMode())
+    {
+      return false;
+    }
+
+    // FIXME: Whether the page lets Tab cycle through elements (tabKeyCyclesThroughElements), once the host
+    // can say.
     return html::FocusAlgorithms::SequentialNavigation(
       *document, event.ShiftKey() ? dom::FocusDirection::Backward : dom::FocusDirection::Forward);
   }

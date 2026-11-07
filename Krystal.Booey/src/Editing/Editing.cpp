@@ -918,9 +918,8 @@ namespace krys::boo
     auto position = visiblePosition.DeepEquivalent();
     auto &document = *position.GetDocument();
 
-    // FIXME: The document's design mode, once there's one.
     auto editableRoot = HighestEditableRoot(position, EditableType::ContentIsEditable);
-    if (editableRoot)
+    if (editableRoot && !document.InDesignMode())
     {
       scope = editableRoot;
     }

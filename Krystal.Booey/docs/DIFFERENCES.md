@@ -85,6 +85,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - A details element closes for its name group only once it's connected (`HTMLDetailsElement::OnPostConnection`): open details with the same name stay open in a disconnected tree, and when that tree is connected the earlier ones close rather than the later. The specification's insertion steps run in any tree, as each is inserted.
 - A script's `src`, `text`, `innerText` and `textContent` setters take plain strings, as there are no Trusted Types, so they keep no script text. `HTMLScriptElement::Supports` gives the specification's answer although no script runs.
 - A legacy colour value that starts with `#` keeps the 128 code points after it (`HTMLElement::ParseLegacyColorValue`), as Chrome does; the specification truncates to 128 code points before removing the `#`.
+- Turning `designMode` on leaves the selection and the focus where they are, as Chrome and WebKit do; the specification puts the selection at the start of the document and focuses the document element. In design mode the body takes the focus when its content is pressed, as in both, though the specification's editing host is the document element.
 - A pragma (`<meta http-equiv>`) runs again when the element's `http-equiv` or `content` changes, as in Chrome; the specification runs it only when the element is inserted.
 - An option the parser pops (`OpenElementStack::Pop`) updates its select's `<selectedcontent>` elements again, as its children are parsed after its post-connection steps; the specification updates them only when it's inserted, so a parsed selected option would leave them empty.
 - `:optional` matches every input that isn't required, including those `required` doesn't apply to (such as range and colour inputs), as in Chrome; the specification matches only inputs to which `required` applies.
@@ -254,6 +255,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- In design mode, `isContentEditable` and `:read-write` say what can be edited: they're false inside `contenteditable=false` and in shadow trees, where Chrome reports true for both although typing there does nothing.
 - There's no find in page: no text match markers or scrollbar tick marks for matches, no forward-only scrolling to them, and a match in a closed `<details>` or `hidden=until-found` content doesn't reveal it.
 - There's no spelling or grammar checking: no text checker, autocorrection or document markers, so `::spelling-error` and `::grammar-error` highlights are never painted. Nor are the platform's text services built in: dictation, Writing Tools, text extraction, app highlights, image overlays (text recognised in images) and the kill ring and mark.
 - There are no mail blockquotes: a `<blockquote type=cite>` is edited like any other block (no breaking out of quotes on Enter or paste, no `InsertNewlineInQuotedContent` command), and pasted `Apple-style-span` and `Apple-paste-as-quotation` markup gets no special treatment.

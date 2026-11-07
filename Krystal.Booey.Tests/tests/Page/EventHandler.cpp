@@ -394,6 +394,16 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: a press in design mode focuses the body",
+                   "[Page][EventHandler][html:designMode]")
+  {
+    MouseFixture fixture {u8"<div id=plain style=height:20px>text</div><input id=field>"};
+    fixture.Document->DesignMode(u8"on");
+    (void)fixture.Move(5, 15);
+    (void)fixture.Press(5, 15);
+    CHECK(fixture.Document->FocusedElement() == fixture.Document->Body().get());
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: keys",
                    "[Page][EventHandler][html:focus-processing-model][html:fire-a-focus-event]")
   {
@@ -483,6 +493,20 @@ namespace krys::boo::tests
       Listen(*fixture.Document, u8"keydown", [](dom::Event &event) { event.PreventDefault(); });
       CHECK(tab());
       CHECK(fixture.Document->FocusedElement() == &box);
+    }
+
+    SECTION("Tab and the arrows don't move the focus in design mode")
+    {
+      fixture.Document->GetSettings().SpatialNavigationEnabled = true;
+      fixture.Document->DesignMode(u8"on");
+      CHECK_FALSE(
+        handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", u8"U+0009",
+                                               vk::Tab, false, false, false, {}, MonotonicTime::Now())));
+      CHECK_FALSE(handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"ArrowDown",
+                                                         u8"ArrowDown", u8"Down", vk::Down, false, false,
+                                                         false, {}, MonotonicTime::Now())));
+      CHECK_FALSE(fixture.Document->FocusedElement());
+      fixture.Document->GetSettings().SpatialNavigationEnabled = false;
     }
 
     SECTION("a press sets where Tab moves on from")
