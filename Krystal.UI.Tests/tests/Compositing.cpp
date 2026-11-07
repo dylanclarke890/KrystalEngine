@@ -1,6 +1,11 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransformAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformOperations.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -27,6 +32,9 @@ namespace krys::ui::tests
       };
 
       HashMap<utf8_string, Contents> ContentsByName;
+      /// @brief The static `translate` of every layer, which animations of the other transform properties
+      /// keep.
+      boo::TransformationMatrix Translate;
       /// @brief Fills alternate bands of this height in two colours, for tall layers.
       float StripeHeight {0};
       uint32 PaintCount {0};
@@ -59,6 +67,12 @@ namespace krys::ui::tests
         {
           context.FillRect(it->second.Inner, it->second.InnerFill);
         }
+      }
+
+      KRYS_NODISCARD boo::TransformationMatrix
+        TransformMatrixForProperty(boo::AnimatedProperty property) const noexcept override
+      {
+        return property == boo::AnimatedProperty::Translate ? Translate : boo::TransformationMatrix {};
       }
     };
 
@@ -146,6 +160,26 @@ namespace krys::ui::tests
     KRYS_NODISCARD Array<uint8, 4> PixelAt(const GoldenImage &image, uint32 x, uint32 y) noexcept
     {
       return image.Pixels[static_cast<size_t>(y) * image.Width + x];
+    }
+
+    /// @brief A long linear animation, so it's still running when the tree is composited.
+    KRYS_NODISCARD Ref<boo::GraphicsLayerAnimation> LongAnimation() noexcept
+    {
+      auto animation = boo::GraphicsLayerAnimation::Create();
+      animation->SetDuration(100.0);
+      animation->SetTimingFunction(boo::LinearTimingFunction::Create());
+      return animation;
+    }
+
+    /// @brief Filter keyframes that hold @p filter throughout.
+    KRYS_NODISCARD boo::GraphicsLayerKeyframeValueList HeldFilter(boo::AnimatedProperty property,
+                                                                  Ref<boo::FilterOperation> filter) noexcept
+    {
+      boo::FilterOperations filters(List<Ref<boo::FilterOperation>> {krys::move(filter)});
+      boo::GraphicsLayerKeyframeValueList keyframes(property);
+      keyframes.Insert(CreateUnique<boo::GraphicsLayerFilterAnimationValue>(0, filters));
+      keyframes.Insert(CreateUnique<boo::GraphicsLayerFilterAnimationValue>(1, filters));
+      return keyframes;
     }
   }
 
@@ -312,6 +346,61 @@ namespace krys::ui::tests
     image = fixture.Composite(*root);
     CHECK(PixelAt(image, 50, 50) == Array<uint8, 4> {17, 138, 178, 255});
     CHECK(PixelAt(image, 150, 50) == Array<uint8, 4> {239, 71, 111, 255});
+  }
+
+  TEST_CASE("Compositing: filter and individual transform animations run on layers", "[UI][GPU][Compositing]")
+  {
+    CompositingFixture fixture(200u, 100u);
+    fixture.Client.ContentsByName[u8"box"] = {Rgb(0xef476f), {}, {}};
+
+    auto root = fixture.CreateLayer(u8"root", {}, {200, 100});
+    auto box = fixture.CreateLayer(u8"box", {}, {100, 100});
+    box->SetDrawsContent(true);
+    root->AddChild(box);
+
+    SECTION("a scale animation keeps the static translate")
+    {
+      fixture.Client.Translate.Translate(100, 0);
+      boo::GraphicsLayerKeyframeValueList keyframes(boo::AnimatedProperty::Scale);
+      for (double keyTime : {0.0, 1.0})
+      {
+        keyframes.Insert(CreateUnique<boo::GraphicsLayerTransformAnimationValue>(
+          keyTime, boo::TransformOperations(
+                     boo::ScaleTransformOperation::Create(1, 1, boo::TransformOperation::Type::Scale))));
+      }
+      REQUIRE(box->AddAnimation(keyframes, LongAnimation().get(), u8"scale", 0));
+
+      auto image = fixture.Composite(*root);
+      CHECK(PixelAt(image, 50, 50)[3] == 0);
+      CHECK(PixelAt(image, 150, 50) == Array<uint8, 4> {239, 71, 111, 255});
+    }
+
+    SECTION("a filter animation filters the layer")
+    {
+      REQUIRE(box->AddAnimation(
+        HeldFilter(boo::AnimatedProperty::Filter,
+                   boo::BasicColorMatrixFilterOperation::Create(1, boo::FilterOperation::Type::Grayscale)),
+        LongAnimation().get(), u8"grey", 0));
+
+      auto pixel = PixelAt(fixture.Composite(*root), 50, 50);
+      CHECK(pixel[0] == pixel[1]);
+      CHECK(pixel[1] == pixel[2]);
+      CHECK(pixel[3] == 255);
+    }
+
+    SECTION("a backdrop filter animation needs a backdrop, and doesn't filter the layer")
+    {
+      auto keyframes =
+        HeldFilter(boo::AnimatedProperty::WebkitBackdropFilter,
+                   boo::BasicColorMatrixFilterOperation::Create(1, boo::FilterOperation::Type::Grayscale));
+      CHECK_FALSE(box->AddAnimation(keyframes, LongAnimation().get(), u8"backdrop", 0));
+
+      box->SetBackdropFilters(boo::FilterOperations(List<Ref<boo::FilterOperation>> {
+        boo::BasicColorMatrixFilterOperation::Create(0, boo::FilterOperation::Type::Grayscale)}));
+      box->SetBackdropFiltersRect(boo::FloatRoundedRect(boo::FloatRect {0, 0, 100, 100}));
+      REQUIRE(box->AddAnimation(keyframes, LongAnimation().get(), u8"backdrop", 0));
+      CHECK(PixelAt(fixture.Composite(*root), 50, 50) == Array<uint8, 4> {239, 71, 111, 255});
+    }
   }
 
   TEST_CASE("Compositing: a layer tree as text", "[UI][Compositing]")

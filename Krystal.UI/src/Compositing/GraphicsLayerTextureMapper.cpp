@@ -660,9 +660,33 @@ namespace krys::ui
       _layer->SetContentsLayer(_contentsLayer);
     }
 
-    if (_changeMask & AnimationChange)
+    if (_changeMask & (AnimationChange | TransformChange | BackdropLayerChange))
     {
-      _layer->SetAnimations(_animations);
+      // The individual transform properties that don't animate keep their static values.
+      auto &client = GraphicsLayer::Client();
+      _animations.SetTranslate(client.TransformMatrixForProperty(boo::AnimatedProperty::Translate));
+      _animations.SetRotate(client.TransformMatrixForProperty(boo::AnimatedProperty::Rotate));
+      _animations.SetScale(client.TransformMatrixForProperty(boo::AnimatedProperty::Scale));
+      _animations.SetTransform(client.TransformMatrixForProperty(boo::AnimatedProperty::Transform));
+
+      // Backdrop filter animations filter the backdrop layer, not this one.
+      auto layerAnimations = _animations;
+      TextureMapperAnimations backdropAnimations;
+      std::erase_if(layerAnimations.Animations(),
+                    [&](const TextureMapperAnimation &animation)
+                    {
+                      if (animation.Keyframes().Property() != boo::AnimatedProperty::WebkitBackdropFilter)
+                      {
+                        return false;
+                      }
+                      backdropAnimations.Add(animation);
+                      return true;
+                    });
+      _layer->SetAnimations(layerAnimations);
+      if (_backdropLayer)
+      {
+        _backdropLayer->SetAnimations(backdropAnimations);
+      }
     }
 
     if (_changeMask & AnimationStarted)
@@ -796,14 +820,31 @@ namespace krys::ui
   {
     krys_debug_assert(!keyframesName.empty());
 
-    if (!animation || animation->IsZeroDuration() || valueList.Size() < 2
-        || (valueList.Property() != boo::AnimatedProperty::Transform
-            && valueList.Property() != boo::AnimatedProperty::Opacity))
+    if (!animation || animation->IsZeroDuration() || valueList.Size() < 2)
     {
       return false;
     }
 
-    if (valueList.Property() == boo::AnimatedProperty::Filter)
+    switch (valueList.Property())
+    {
+      case boo::AnimatedProperty::Translate:
+      case boo::AnimatedProperty::Rotate:
+      case boo::AnimatedProperty::Scale:
+      case boo::AnimatedProperty::Transform:
+      case boo::AnimatedProperty::Opacity:
+      case boo::AnimatedProperty::Filter:    break;
+      case boo::AnimatedProperty::WebkitBackdropFilter:
+        // Without a backdrop layer there's nothing to filter, so the animation runs on the page.
+        if (!NeedsBackdrop())
+        {
+          return false;
+        }
+        break;
+      default: return false;
+    }
+
+    if (valueList.Property() == boo::AnimatedProperty::Filter
+        || valueList.Property() == boo::AnimatedProperty::WebkitBackdropFilter)
     {
       int32 listIndex = ValidateFilterOperations(valueList);
       if (listIndex < 0)

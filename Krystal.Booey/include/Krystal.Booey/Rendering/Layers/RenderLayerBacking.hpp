@@ -309,6 +309,8 @@ namespace krys::boo
     void DidChangePlatformLayerForLayer(const GraphicsLayer *layer) noexcept override;
     bool GetCurrentTransform(const GraphicsLayer *graphicsLayer,
                              TransformationMatrix &transform) const noexcept override;
+    KRYS_NODISCARD TransformationMatrix
+      TransformMatrixForProperty(AnimatedProperty property) const noexcept override;
 
     KRYS_NODISCARD bool IsFlushingLayers() const noexcept override;
     KRYS_NODISCARD bool IsTrackingRepaints() const noexcept override;

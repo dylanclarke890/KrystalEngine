@@ -3861,6 +3861,39 @@ namespace krys::boo
     Compositor().DidChangePlatformLayerForLayer(_owningLayer, layer);
   }
 
+  TransformationMatrix
+    RenderLayerBacking::TransformMatrixForProperty(AnimatedProperty property) const noexcept
+  {
+    TransformationMatrix matrix;
+    auto size = FloatSize(SnappedIntRect(_owningLayer.RendererBorderBoxRect()).Size());
+    const auto &style = Renderer().Style();
+    auto applyOperation = [&](const RefPtr<TransformOperation> &operation)
+    {
+      if (operation)
+      {
+        operation->Apply(matrix);
+      }
+    };
+
+    switch (property)
+    {
+      case AnimatedProperty::Translate:
+        applyOperation(style::ToPlatform<style::Translate> {}(style.GetTranslate(), size));
+        break;
+      case AnimatedProperty::Scale:
+        applyOperation(style::ToPlatform<style::Scale> {}(style.GetScale(), size));
+        break;
+      case AnimatedProperty::Rotate:
+        applyOperation(style::ToPlatform<style::Rotate> {}(style.GetRotate(), size));
+        break;
+      case AnimatedProperty::Transform:
+        style::ToPlatform<style::Transform> {}(style.GetTransform(), size).Apply(matrix);
+        break;
+      default: krys_debug_assert(false); break;
+    }
+    return matrix;
+  }
+
   bool RenderLayerBacking::GetCurrentTransform(const GraphicsLayer *graphicsLayer,
                                                TransformationMatrix &transform) const noexcept
   {

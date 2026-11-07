@@ -616,6 +616,14 @@ namespace krys::ui
     {
       return true;
     }
+    if (_state.ReplicaLayer && _state.ReplicaLayer->DescendantsOrSelfHaveRunningAnimations())
+    {
+      return true;
+    }
+    if (_state.BackdropLayer && _state.BackdropLayer->_animations.HasRunningAnimations())
+    {
+      return true;
+    }
 
     return std::ranges::any_of(_children, [](TextureMapperLayer *child)
                                { return child->DescendantsOrSelfHaveRunningAnimations(); });

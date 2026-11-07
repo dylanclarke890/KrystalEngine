@@ -947,6 +947,8 @@ namespace krys::ui::tests
         u8"<!DOCTYPE html><style>body { margin: 0 } @keyframes fade { from { opacity: 0 } to { opacity: 1 } }"
         u8"@keyframes spin { from { transform: rotate(0) } to { transform: rotate(90deg) } }"
         u8"@keyframes tint { from { filter: grayscale(0) } to { filter: grayscale(1) } }"
+        u8"@keyframes turn { from { rotate: 0deg } to { rotate: 90deg } }"
+        u8"@keyframes frost { from { backdrop-filter: invert(0) } to { backdrop-filter: invert(1) } }"
         u8"#box { margin: 20px; width: 30px; height: 20px; background: teal; animation: ";
       markup += animation;
       markup += u8" }</style><div id=box></div>";
@@ -993,21 +995,22 @@ namespace krys::ui::tests
       checkLayerAnimates("layer-transform");
     }
 
-    SECTION("a filter, which layers don't animate, recomposites")
+    SECTION("filter")
     {
       load(u8"tint 1s linear infinite");
-      (void)frame();
-      (void)frame();
-      TrackedRepaints repaints(view);
-      REQUIRE(view.Document().GetElementById(u8"box")->Renderer()->IsComposited());
-      for (int32 i = 0; i < 3; ++i)
-      {
-        repaints.Reset();
-        CHECK(frame());
-        CHECK(repaints.Bounds().IsEmpty());
-        CHECK(repaints.Bounds(repaints.LayerOf(u8"box")).IsEmpty());
-        CheckNoStalePixels(fixture, view, "page-filter-" + std::to_string(i));
-      }
+      checkLayerAnimates("layer-filter");
+    }
+
+    SECTION("rotate")
+    {
+      load(u8"turn 1s linear infinite");
+      checkLayerAnimates("layer-rotate");
+    }
+
+    SECTION("backdrop-filter")
+    {
+      load(u8"frost 1s linear infinite");
+      checkLayerAnimates("layer-backdrop-filter");
     }
 
     SECTION("it ends")
