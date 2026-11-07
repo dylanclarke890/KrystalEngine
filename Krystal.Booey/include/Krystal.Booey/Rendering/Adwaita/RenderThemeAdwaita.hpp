@@ -80,6 +80,7 @@ namespace krys::boo
     void AdjustSliderThumbSize(RenderStyle &, const dom::Element *) const noexcept final;
 
     KRYS_NODISCARD IntSize SliderTickSize() const noexcept final;
+    KRYS_NODISCARD LayoutUnit SliderTickSnappingThreshold() const noexcept final;
     KRYS_NODISCARD int32 SliderTickOffsetFromTrackCenter() const noexcept final;
 
     void AdjustListButtonStyle(RenderStyle &, const dom::Element *) const noexcept final;

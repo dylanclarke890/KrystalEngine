@@ -5,9 +5,12 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Controls/SliderTrackPart.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::layout::tests
@@ -116,5 +119,62 @@ layer at (0,0) size 800x66
     (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {100, 10}));
     (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {100, 10}));
     CHECK(input.Value() == u8"25");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderSlider: a datalist's ticks", "[Rendering][RenderSlider]")
+  {
+    boo::tests::EditorFixture fixture(
+      u8"<style>body{margin:0}input{margin:0;width:200px;display:block}</style>"
+      u8"<input type=range id=range list=d><input type=range id=plain>"
+      u8"<datalist id=d><option value=50><option value=20><option value=x><option disabled "
+      u8"value=70></datalist>");
+    auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"range"));
+    auto &plain = Downcast<html::HTMLInputElement>(fixture.ById(u8"plain"));
+    auto &handler = fixture.Frame->GetEventHandler();
+
+    SECTION("A slider with ticks is taller, to fit them")
+    {
+      auto height = Downcast<RenderBox>(*input.Renderer()).Height();
+      CHECK(height > Downcast<RenderBox>(*plain.Renderer()).Height());
+      CHECK(height == 32_lu);
+    }
+
+    SECTION("The thumb snaps to a tick within 5 pixels")
+    {
+      // The value 50 is at the track's middle.
+      (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {100, 16}));
+      CHECK(input.Value() == u8"50");
+      (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {104, 16}));
+      CHECK(input.Value() == u8"50");
+      (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {110, 16}));
+      CHECK(input.Value() != u8"50");
+      (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {110, 16}));
+    }
+
+    SECTION("Changing the datalist changes the ticks")
+    {
+      REQUIRE_FALSE(fixture.ById(u8"d").InnerHTML(u8"").HasException());
+      html::EventLoop::Current().RunUntilIdle();
+      (void)fixture.Document->UpdateLayout();
+      CHECK(Downcast<RenderBox>(*input.Renderer()).Height() == 32_lu);
+      (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {100, 16}));
+      (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {104, 16}));
+      CHECK(input.Value() != u8"50");
+      (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {104, 16}));
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderSlider: a datalist's tick positions",
+                   "[Rendering][RenderSlider]")
+  {
+    // The track draws a tick for each suggestion with a valid value, at its value's place along the range.
+    boo::tests::EditorFixture fixture(u8"<input type=range id=range list=d min=0 max=200>"
+                                      u8"<datalist id=d><option value=50><option value=20><option value=x>"
+                                      u8"<option disabled value=70></datalist>");
+    auto &renderer = *fixture.ById(u8"range").Renderer();
+    auto part = RenderTheme::Singleton().CreateControlPart(renderer);
+    REQUIRE(part);
+    RenderTheme::Singleton().UpdateControlPartForRenderer(*part, renderer);
+    CHECK(Downcast<SliderTrackPart>(*part).TickRatios() == List<double> {0.25, 0.1});
   }
 }

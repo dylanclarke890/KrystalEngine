@@ -25,6 +25,7 @@ namespace krys::boo::html
   };
 
   class HTMLDataListElement;
+  class HTMLOptionElement;
   class HTMLImageLoader;
   class ListAttributeTargetObserver;
 
@@ -217,6 +218,12 @@ namespace krys::boo::html
 
     /// @brief The input's datalist (its `list`) or its suggestions may have changed.
     void DataListMayHaveChanged() noexcept;
+
+    /// @brief @p option's value as a number, if it's a valid value for the input.
+    KRYS_NODISCARD Maybe<double> ListOptionValueAsDouble(const HTMLOptionElement &option) const noexcept;
+
+    /// @brief The value of the datalist suggestion closest to @p value, for a slider's thumb to snap to.
+    KRYS_NODISCARD Maybe<Decimal> FindClosestTickMarkValue(const Decimal &value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-max
     KRYS_NODISCARD dom::DOMString Max() const noexcept;

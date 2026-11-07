@@ -351,8 +351,6 @@ namespace krys::boo
       return 0;
     }
 
-    virtual void PaintSliderTicks(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept;
-
     KRYS_NODISCARD virtual bool ShouldHaveSpinButton(const html::HTMLInputElement &) const noexcept;
     KRYS_NODISCARD virtual bool ShouldHaveCapsLockIndicator(const html::HTMLInputElement &) const noexcept
     {

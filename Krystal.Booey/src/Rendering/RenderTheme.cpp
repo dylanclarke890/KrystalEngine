@@ -27,10 +27,12 @@
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/StringTruncator.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
@@ -489,12 +491,22 @@ namespace krys::boo
         thumbPosition = (input.ValueAsNumber() - minimum) / (maximum - minimum);
       }
 
-      // FIXME: The tick ratios of a data list's suggestions, with datalists.
+      List<double> tickRatios;
+      if (auto dataList = input.List())
+      {
+        for (auto &option : dataList->Suggestions())
+        {
+          if (auto optionValue = input.ListOptionValueAsDouble(*option))
+          {
+            tickRatios.push_back((*optionValue - minimum) / (maximum - minimum));
+          }
+        }
+      }
 
       sliderTrackPart.SetThumbSize(thumbSize);
       sliderTrackPart.SetTrackBounds(trackBounds);
       sliderTrackPart.SetThumbPosition(thumbPosition);
-      sliderTrackPart.SetTickRatios({});
+      sliderTrackPart.SetTickRatios(krys::move(tickRatios));
     }
   }
 
@@ -1472,11 +1484,6 @@ namespace krys::boo
   FloatSize RenderTheme::MeterSizeForBounds(const RenderMeter &, const FloatRect &bounds) const noexcept
   {
     return bounds.Size();
-  }
-
-  void RenderTheme::PaintSliderTicks(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
-  {
-    // FIXME: The ticks of a range's data list (paintSliderTicks), with datalists.
   }
 
   void RenderTheme::PaintPlatformResizer(const RenderLayerModelObject &renderer, GraphicsContext &context,

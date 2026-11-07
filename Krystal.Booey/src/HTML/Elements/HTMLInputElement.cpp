@@ -13,6 +13,7 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
@@ -2017,6 +2018,21 @@ namespace krys::boo::html
   {
     Ref<InputType> protectedInputType = ShareRef(*_inputType);
     protectedInputType->DataListMayHaveChanged();
+  }
+
+  Maybe<double> HTMLInputElement::ListOptionValueAsDouble(const HTMLOptionElement &option) const noexcept
+  {
+    auto value = option.Value();
+    if (!IsValidValue(value))
+    {
+      return {};
+    }
+    return ParseToDoubleForNumberType(SanitizeValue(dom::DOMStringView(value)).value_or(dom::DOMString()));
+  }
+
+  Maybe<Decimal> HTMLInputElement::FindClosestTickMarkValue(const Decimal &value) noexcept
+  {
+    return _inputType->FindClosestTickMarkValue(value);
   }
 
   void HTMLInputElement::ResetListAttributeTargetObserver() noexcept

@@ -1,10 +1,13 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/RangeInputType.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
@@ -331,5 +334,78 @@ namespace krys::boo::html
     StepRange stepRange(CreateStepRange(AnyStepHandling::Reject));
     const Decimal proposedNumericValue = ParseToNumber(proposedValue, stepRange.DefaultValue());
     return SerializeForNumberType(stepRange.ClampValue(proposedNumericValue));
+  }
+
+  void RangeInputType::DataListMayHaveChanged() noexcept
+  {
+    _tickMarkValuesDirty = true;
+    auto *track = SliderTrackElement();
+    if (!track)
+    {
+      return;
+    }
+    if (auto *renderer = track->Renderer())
+    {
+      renderer->SetNeedsLayout();
+    }
+    // The ticks are drawn with the slider's appearance.
+    if (auto *element = Element(); element && element->Renderer())
+    {
+      element->Renderer()->Repaint();
+    }
+  }
+
+  void RangeInputType::UpdateTickMarkValues() noexcept
+  {
+    if (!_tickMarkValuesDirty)
+    {
+      return;
+    }
+    _tickMarkValues.clear();
+    _tickMarkValuesDirty = false;
+    Ref<HTMLInputElement> element = ShareRef(*Element());
+    auto dataList = element->List();
+    if (!dataList)
+    {
+      return;
+    }
+    auto options = dataList->Options();
+    for (uint32 index = 0; index < options->Length(); ++index)
+    {
+      auto &option = Downcast<HTMLOptionElement>(*options->Item(index));
+      auto value = option.Value();
+      if (!element->IsValidValue(value))
+      {
+        continue;
+      }
+      _tickMarkValues.push_back(ParseToNumber(value, Decimal::NaN()));
+    }
+    std::ranges::sort(_tickMarkValues);
+  }
+
+  Maybe<Decimal> RangeInputType::FindClosestTickMarkValue(const Decimal &value) noexcept
+  {
+    UpdateTickMarkValues();
+    if (_tickMarkValues.empty())
+    {
+      return {};
+    }
+
+    // The first tick at or after the value, and the one before it.
+    auto after = std::ranges::lower_bound(_tickMarkValues, value);
+    if (after == _tickMarkValues.begin())
+    {
+      return *after;
+    }
+    if (after == _tickMarkValues.end())
+    {
+      return _tickMarkValues.back();
+    }
+    auto before = std::prev(after);
+    if (*after - value < value - *before)
+    {
+      return *after;
+    }
+    return *before;
   }
 }

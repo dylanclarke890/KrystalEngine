@@ -480,6 +480,13 @@ namespace krys::boo::html
     {
     }
 
+    /// @brief The value of the datalist suggestion closest to @p value, for a slider's thumb to snap to.
+    KRYS_NODISCARD virtual Maybe<Decimal> FindClosestTickMarkValue(const Decimal &value) noexcept
+    {
+      (void)value;
+      return {};
+    }
+
     virtual void DisabledStateChanged() noexcept
     {
     }

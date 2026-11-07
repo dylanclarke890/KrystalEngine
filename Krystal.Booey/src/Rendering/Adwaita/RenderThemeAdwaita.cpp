@@ -305,6 +305,12 @@ namespace krys::boo
     style.SetHeight(style::PreferredSize::Fixed {static_cast<float>(SliderThumbSize)});
   }
 
+  LayoutUnit RenderThemeAdwaita::SliderTickSnappingThreshold() const noexcept
+  {
+    // As in Chrome: a thumb dragged within 5 pixels of a tick snaps to it.
+    return LayoutUnit(5);
+  }
+
   IntSize RenderThemeAdwaita::SliderTickSize() const noexcept
   {
     return {1, 7};

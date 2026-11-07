@@ -30,6 +30,13 @@ namespace krys::boo
     KRYS_NODISCARD bool InDragMode() const noexcept;
     KRYS_NODISCARD double ValueRatio() const noexcept;
 
+    /// @brief The content height a horizontal slider with a datalist's ticks needs to fit them; none
+    /// without them.
+    KRYS_NODISCARD Maybe<LayoutUnit> TickedTrackHeight() const noexcept;
+
+    KRYS_NODISCARD LogicalExtentComputedValues
+      ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+
   private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

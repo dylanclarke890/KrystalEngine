@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo
@@ -13,6 +15,32 @@ namespace krys::boo
   }
 
   RenderSlider::~RenderSlider() noexcept = default;
+
+  Maybe<LayoutUnit> RenderSlider::TickedTrackHeight() const noexcept
+  {
+    auto &input = InputElement();
+    if (Style().UsedAppearance() != StyleAppearance::SliderHorizontal || !input.List())
+    {
+      return {};
+    }
+    auto &theme = RenderTheme::Singleton();
+    int32 offsetFromCenter = theme.SliderTickOffsetFromTrackCenter();
+    LayoutUnit trackHeight(offsetFromCenter < 0 ? -2 * offsetFromCenter
+                                                : 2 * (offsetFromCenter + theme.SliderTickSize().Height()));
+    return LayoutUnit(trackHeight.ToFloat() * Style().UsedZoom());
+  }
+
+  RenderBox::LogicalExtentComputedValues
+    RenderSlider::ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept
+  {
+    // The track is centred, so the ticks above it need room above and below. (The container's height is
+    // stretched to the slider's, so it's the slider that grows.)
+    if (auto trackHeight = TickedTrackHeight())
+    {
+      logicalHeight = std::max(logicalHeight, *trackHeight + BorderAndPaddingLogicalHeight());
+    }
+    return RenderFlexibleBox::ComputeLogicalHeight(logicalHeight, logicalTop);
+  }
 
   html::HTMLInputElement &RenderSlider::InputElement() const noexcept
   {

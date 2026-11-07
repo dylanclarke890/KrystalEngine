@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
@@ -53,7 +54,14 @@ namespace krys::boo::html
         auto &input = Downcast<HTMLInputElement>(*dom::TreeQueries::ShadowHost(*GetElement()));
         bool isVertical = HasVerticalAppearance(input);
 
-        // FIXME: The track height for a range with a data list's ticks (hasDataList), with datalists.
+        // A horizontal slider with ticks is tall enough for them.
+        if (auto *slider = DynamicDowncast<RenderSlider>(input.Renderer()); slider && !isVertical)
+        {
+          if (auto trackHeight = slider->TickedTrackHeight())
+          {
+            return RenderBox::ComputeLogicalHeight(*trackHeight, logicalTop);
+          }
+        }
 
         if (isVertical && GetWritingMode().IsHorizontal())
         {
@@ -246,8 +254,21 @@ namespace krys::boo::html
     auto stepRange = input->CreateStepRange(AnyStepHandling::Reject);
     auto value = stepRange.ClampValue(stepRange.ValueFromProportion(fraction));
 
-    // FIXME: Snapping to the nearest tick mark (sliderTickSnappingThreshold, findClosestTickMarkValue), with
-    // datalists.
+    // Near a tick, the thumb snaps to it.
+    const LayoutUnit snappingThreshold = RenderTheme::Singleton().SliderTickSnappingThreshold();
+    if (snappingThreshold > 0)
+    {
+      if (auto closest = input->FindClosestTickMarkValue(value))
+      {
+        double closestFraction = stepRange.ProportionFromValue(*closest).ToDouble();
+        double closestRatio = isInlineFlipped ? 1.0 - closestFraction : closestFraction;
+        LayoutUnit closestPosition(trackLength.ToDouble() * closestRatio);
+        if ((closestPosition - position).Abs() <= snappingThreshold)
+        {
+          value = *closest;
+        }
+      }
+    }
 
     auto valueString = SerializeForNumberType(value);
     if (valueString == input->Value())
