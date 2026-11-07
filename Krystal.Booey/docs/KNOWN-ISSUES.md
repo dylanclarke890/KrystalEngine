@@ -79,7 +79,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Scroll and view timelines have no accelerated representation (no threaded animations), and a change in view timeline metrics doesn't update the timeline (FIXME in `KeyframeEffect.cpp`).
-- Keyframe offsets in named timeline ranges compute to NaN without a view timeline.
 - Image animations pause out of view and resume (`RenderView::AddRendererWithPausedImageAnimations`), and there is no per-element animation control (`RenderElement::AllowsAnimation` follows only the page's `SetImageAnimationEnabled`; FIXME).
 - Extent computation for animated motion path (`offset-*`) properties is missing (FIXME in `KeyframeEffect.cpp`).
 - Quirks that prevent acceleration (`shouldPreventKeyframeEffectAcceleration`) aren't implemented (FIXME).

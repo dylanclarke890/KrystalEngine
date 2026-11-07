@@ -80,6 +80,36 @@ namespace krys::boo::tests
     CHECK(fixture.Opacity(u8"box") == 1.0f);
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "CSSAnimation: keyframes in a named timeline range are ignored without a view timeline",
+                   "[Animation][CSSAnimation][scroll-animations:named-range-keyframes]")
+  {
+    // As Chrome: the range keyframes have no computed offset, and the others animate as if they were alone.
+    CSSAnimationFixture fixture {
+      u8"<!DOCTYPE html><style>@keyframes mixed{from{opacity:0}entry 50%{opacity:0.9}to{opacity:1}}"
+      u8"@keyframes only{entry 50%{opacity:0.2}}"
+      u8"#box{animation:mixed 1s linear}#other{opacity:0.7;animation:only 1s linear}</style>"
+      u8"<div id=box></div><div id=other></div>"};
+    fixture.StartAnimations();
+    fixture.Frame(500ms);
+    CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.5f));
+    CHECK(fixture.Opacity(u8"other") == Catch::Approx(0.7f));
+
+    auto keyframes = fixture.OnlyAnimation(u8"box").GetKeyframeEffect()->GetKeyframes();
+    REQUIRE(keyframes.size() == 3);
+    for (const auto &keyframe : keyframes)
+    {
+      if (std::holds_alternative<TimelineRangeOffset>(keyframe.Offset))
+      {
+        CHECK_FALSE(keyframe.ComputedOffset);
+      }
+      else
+      {
+        CHECK(keyframe.ComputedOffset);
+      }
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSAnimation: animation events", "[Animation][CSSAnimation]")
   {
     // The animation starts in the rendering update after its style is resolved, so the listener is added

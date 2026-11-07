@@ -63,7 +63,9 @@ namespace krys::boo
 
     struct BaseComputedKeyframe : BaseKeyframe
     {
-      double ComputedOffset {0};
+      /// @brief Null for a keyframe in a named timeline range when the timeline has no such range (it isn't a
+      /// view timeline), whose keyframe is then ignored.
+      Maybe<double> ComputedOffset {0.0};
     };
 
     /// @brief A keyframe as `getKeyframes()` returns it: its properties' values as CSS text.
