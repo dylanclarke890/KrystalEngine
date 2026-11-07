@@ -61,6 +61,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
@@ -4521,27 +4522,35 @@ namespace krys::boo::dom
 
     // 1. Let value be the given value, converted to ASCII lowercase.
     auto lowered = text::ToASCIILower(value);
-    auto enabled = _designModeEnabled;
 
     // 2. If value is "on" and this's design mode enabled is false:
-    //    2.1. Set this's design mode enabled to true.
-    //    2.2. Reset this's active range's start and end boundary points to be at the start of this.
-    //    2.3. Run the focusing steps for this's document element, if non-null.
-    // (As in Chrome, the selection and the focus stay where they are; see DIFFERENCES.md.)
-    if (lowered == u8"on")
+    if (lowered == u8"on" && !_designModeEnabled)
     {
-      enabled = true;
+      // 2.1. Set this's design mode enabled to true.
+      _designModeEnabled = true;
+      ScheduleFullStyleRebuild();
+
+      // NOTE: only a document in a frame has a selection and a focused area.
+      if (Frame())
+      {
+        // 2.2. Reset this's active range's start and end boundary points to be at the start of this.
+        // NOTE: that's a caret at the first place one can go, which needs the document's boxes.
+        (void)UpdateLayout();
+        Selection().SetSelection(
+          VisibleSelection(FirstPositionInOrBeforeNode(this), VisibleSelection::DefaultAffinity));
+
+        // 2.3. Run the focusing steps for this's document element, if non-null.
+        if (auto documentElement = DocumentElement())
+        {
+          html::FocusAlgorithms::FocusingSteps(*documentElement);
+        }
+      }
     }
 
     // 3. If value is "off", then set this's design mode enabled to false.
-    if (lowered == u8"off")
+    if (lowered == u8"off" && _designModeEnabled)
     {
-      enabled = false;
-    }
-
-    if (enabled != _designModeEnabled)
-    {
-      _designModeEnabled = enabled;
+      _designModeEnabled = false;
       ScheduleFullStyleRebuild();
     }
   }

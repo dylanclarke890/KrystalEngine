@@ -1751,6 +1751,24 @@ namespace krys::ui::tests
     strategies.SetPasteboardStrategy(systemPasteboard);
   }
 
+  TEST_CASE("View: the keyboard types as soon as design mode is on", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
+                  u8"<div id=e>abc</div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    CHECK_FALSE(view.AcceptsTextInput());
+
+    view.Document().DesignMode(u8"on");
+    view.UpdateRendering();
+    CHECK(view.AcceptsTextInput());
+    CHECK(view.Document().Selection().IsCaret());
+
+    (void)view.KeyPressed(pal::Key::D, {}, {u8"d", u8"d"});
+    CHECK(view.Document().GetElementById(u8"e")->TextContent() == u8"dabc");
+  }
+
   TEST_CASE("View: the keyboard edits editable text", "[UI]")
   {
     View view({400, 300});

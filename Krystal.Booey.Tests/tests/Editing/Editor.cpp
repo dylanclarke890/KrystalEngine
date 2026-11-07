@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Editing/Commands/UndoStep.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
@@ -574,14 +575,38 @@ namespace krys::boo::tests
       CHECK_FALSE(readWrite(fixture.ById(u8"svg")));
     }
 
-    SECTION("turning it on leaves the selection and the focus")
+    SECTION("turning it on puts a caret at the start and focuses the document element")
     {
       auto &text = fixture.TextIn(u8"one");
       fixture.Select(text, 1, 3);
       document.DesignMode(u8"on");
+      CHECK(fixture.Selection().IsCaret());
+      CHECK(fixture.Selection().Selection().Start().GetContainerNode() == &text);
+      CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 0);
+      CHECK(document.FocusedElement() == document.DocumentElement());
+
+      // Typing can start straight away.
+      CHECK(fixture.GetEditor().InsertText(u8"Z", nullptr));
+      CHECK(Narrow(fixture.InnerHTML(one)) == "Zhello");
+    }
+
+    SECTION("only turning it on moves the selection and the focus")
+    {
+      auto &text = fixture.TextIn(u8"one");
+      document.DesignMode(u8"on");
+      fixture.Select(text, 1, 3);
+      auto &field = fixture.ById(u8"host");
+      REQUIRE_FALSE(field.SetAttribute(u8"tabindex", u8"0").HasException());
+      html::FocusAlgorithms::FocusingSteps(field);
+      REQUIRE(document.FocusedElement() == &field);
+
+      document.DesignMode(u8"on");
       CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 1);
-      CHECK(fixture.Selection().Selection().End().DeprecatedEditingOffset() == 3);
-      CHECK_FALSE(document.FocusedElement());
+      CHECK(document.FocusedElement() == &field);
+
+      document.DesignMode(u8"off");
+      CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 1);
+      CHECK(document.FocusedElement() == &field);
     }
 
     SECTION("text can be typed where it's editable")

@@ -505,7 +505,7 @@ namespace krys::boo::tests
       CHECK_FALSE(handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"ArrowDown",
                                                          u8"ArrowDown", u8"Down", vk::Down, false, false,
                                                          false, {}, MonotonicTime::Now())));
-      CHECK_FALSE(fixture.Document->FocusedElement());
+      CHECK(fixture.Document->FocusedElement() == fixture.Document->DocumentElement());
       fixture.Document->GetSettings().SpatialNavigationEnabled = false;
     }
 
