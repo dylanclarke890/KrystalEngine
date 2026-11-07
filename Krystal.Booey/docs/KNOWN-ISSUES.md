@@ -131,7 +131,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - 3D rendering contexts do not exist: `preserve-3d` sorting and perspective are not done, and Render2D draws 3D transforms flattened (FIXMEs in `TextureMapper.cpp`, `TextureMapperLayer.cpp`).
 - Reference (SVG `url()`) filters are identities on composited layers (`TextureMapper.cpp` converts the other filter functions to `LayerFilter2D`).
 - Clip paths never composite as shape layers; a composited clip path is painted into the mask layer. Replicas (reflections), repaint counters, repeating contents tiles (`WrapMode::Repeat`) and creating tiles over several frames are FIXMEs.
-- `TextureMapperLayer` composites the whole tree each frame, with no damage tracking.
 - The compositor has no scrolling nodes, widget layers, video or plug-in layers, event or interaction regions, layer flush throttling, model or separated layers, or HDR and wide gamut backings (`ContentsFormat` is RGBA8 only). There is no `TiledBacking` (`SetIsInWindow` and `SetTileCoverage` do nothing), the fixed root background layer is never composited, and the host's compositing policy under memory pressure is a FIXME.
 
 ## Text and fonts

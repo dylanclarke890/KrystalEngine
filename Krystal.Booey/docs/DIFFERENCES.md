@@ -193,6 +193,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- The compositor has no damage tracking: each painted frame draws the whole layer tree into the host's target, as a game engine redraws its frames in full rather than presenting changed rects of a buffer it keeps. Painting is still damage-driven: the view repaints only damaged tiles, and `View::NeedsPaint()` lets a host skip frames where nothing changed.
 - Scrollbars are classic, not overlay (`ScrollbarThemeAdwaita::UsesOverlayScrollbars` is false; FIXME): they always show and take layout space, 21 px for `auto` and `thin` and 0 for `none`, with a rounded thumb of at least 40 px and no buttons. Chrome's are 15 px, and overlays that fade on some platforms.
 - Wheel scrolling is immediate outside a scroll snap container, where Chrome animates it. A notch is the system's lines (or a page) at 100/3 px per line, and Shift turns the vertical wheel horizontal. Keyboard scrolling moves 40 px for an arrow, a page for Page Up and Page Down, Space and Shift+Space, and to the ends for Home and End, animated unless `Settings::ScrollAnimatorEnabled` is off, and with the timing of a smooth scroll, which isn't measured against Chrome's keyboard.
 - A smooth scroll takes Chrome's time, the square root of the distance in 60ths of a second up to 1.5 s, on a `cubic-bezier(0.4, 0, 0, 1)` fitted to Chrome's. A smooth scroll that's retargeted starts again from where it has got to, easing out, and its speed isn't carried over.
