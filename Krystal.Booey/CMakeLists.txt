@@ -2329,6 +2329,7 @@ set(KRYSTAL_BOOEY_LOADER_HEADERS
   include/Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp
   include/Krystal.Booey/Loader/Cache/CachedImage.hpp
   include/Krystal.Booey/Loader/Cache/CachedImageClient.hpp
+  include/Krystal.Booey/Loader/Cache/CachedRawResource.hpp
   include/Krystal.Booey/Loader/Cache/CachedResource.hpp
   include/Krystal.Booey/Loader/Cache/CachedResourceClient.hpp
   include/Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp
@@ -2348,6 +2349,9 @@ set(KRYSTAL_BOOEY_LOADER_HEADERS
   include/Krystal.Booey/Loader/FrameLoader.hpp
   include/Krystal.Booey/Loader/FrameLoaderTypes.hpp
   include/Krystal.Booey/Loader/FrameLoadRequest.hpp
+  include/Krystal.Booey/Loader/Icons/IconLoader.hpp
+  include/Krystal.Booey/Loader/Icons/LinkIcon.hpp
+  include/Krystal.Booey/Loader/Icons/LinkIconCollector.hpp
   include/Krystal.Booey/Loader/ImageLoader.hpp
   include/Krystal.Booey/Loader/LoaderStrategy.hpp
   include/Krystal.Booey/Loader/LocalFrameLoaderClient.hpp
@@ -2360,6 +2364,7 @@ set(KRYSTAL_BOOEY_LOADER_SOURCES
   src/Loader/Cache/CachedCSSStyleSheet.cpp
   src/Loader/Cache/CachedFont.cpp
   src/Loader/Cache/CachedImage.cpp
+  src/Loader/Cache/CachedRawResource.cpp
   src/Loader/Cache/CachedResource.cpp
   src/Loader/Cache/CachedResourceLoader.cpp
   src/Loader/Cache/CachedSVGDocument.cpp
@@ -2368,6 +2373,8 @@ set(KRYSTAL_BOOEY_LOADER_SOURCES
   src/Loader/DocumentWriter.cpp
   src/Loader/FormSubmission.cpp
   src/Loader/FrameLoader.cpp
+  src/Loader/Icons/IconLoader.cpp
+  src/Loader/Icons/LinkIconCollector.cpp
   src/Loader/FrameLoadRequest.cpp
   src/Loader/ImageLoader.cpp
   src/Loader/NavigationAction.cpp

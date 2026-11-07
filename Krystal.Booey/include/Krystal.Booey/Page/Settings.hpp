@@ -66,6 +66,9 @@ namespace krys::boo
     /// @brief Copying the whole body turning its fixed and absolute positioning into relative positioning, so
     /// the pasted copy stays in flow.
     bool ShouldConvertPositionStyleOnCopy {false};
+    /// @brief Loading the icons documents name with `<link rel=icon>` (or `/favicon.ico` on `http(s):`), for
+    /// the host's frame loader client to show.
+    bool IconLoadingEnabled {true};
     /// @brief Whether text areas can be resized (`resize: -internal-textarea-auto` is `both`).
     bool TextAreasAreResizable {false};
     /// @brief Whether form controls show dates and numbers in their element's language (its `lang`), rather

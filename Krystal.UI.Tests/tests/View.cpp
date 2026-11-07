@@ -2280,4 +2280,26 @@ namespace krys::ui::tests
     CHECK(view.Update(now));
     CHECK_FALSE(view.GetPage().IsRenderingUpdateScheduled());
   }
+  TEST_CASE("View: hands the host the icons the page names", "[UI]")
+  {
+    View view({400, 300});
+    List<std::string> icons;
+    view.SetIconHandler(
+      [&](const PageIcon &icon)
+      {
+        icons.push_back(std::string(icon.URL.begin(), icon.URL.end()) + " "
+                        + std::to_string(icon.Size.value_or(0)) + " "
+                        + std::string(icon.Data.begin(), icon.Data.end()));
+      });
+
+    // "UE5H" is "PNG".
+    view.LoadHTML(u8"<!DOCTYPE html><link rel=icon sizes=16x16 href=\"data:image/png;base64,UE5H\">",
+                  boo::url::URL(u8"https://example.com/page.html"));
+    WaitForLoad(view);
+    auto &eventLoop = boo::html::EventLoop::Current();
+    while (icons.empty() && eventLoop.RunNextTask())
+    {
+    }
+    CHECK(icons == List<std::string> {"data:image/png;base64,UE5H 16 PNG"});
+  }
 }

@@ -33,7 +33,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Form submission has no `rel=noreferrer` handling (FIXME in `HTMLFormElement.cpp`).
 - Customizable `<select>`: `appearance: base-select` on the select alone gives a picker with base appearance, where without `::picker(select)` opting in too it should be the native one, as `RenderMenuList` owns the popup menu. List boxes ignore `appearance: base-select` and stay native. Type-ahead with the picker open changes the selection, where it should move the focus. Page Up and Page Down move ten options, not a viewport's worth. A `legend` in an `optgroup` isn't its label in a native menu.
 - `<img>` lacks `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` fires no events for video posters and has no `<object>` fallback (FIXMEs); `ImageLoader`'s reuse of available images has no preloads (FIXME).
-- `HTMLLinkElement` recognises only `rel=stylesheet` and `alternate`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, icons, manifests, integrity, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
+- `HTMLLinkElement` recognises only `rel=stylesheet`, `alternate` and `icon`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, manifests, integrity, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
 - `<a ping>` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported, and `<object>` and `<embed>` don't display their resources (no images, documents or plugins), so an object always shows its fallback content.
 - `<marquee>`'s `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` and `stop()` are not implemented, and marquees don't scroll (FIXME in `HTMLMarqueeElement.hpp`).
 - `MIMETypeRegistry::MIMETypeForExtension` has only a built-in table; most other extensions have no type (FIXME in `MIMETypeRegistry.cpp`).
@@ -221,5 +221,5 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Responses can't be streamed: the main resource arrives whole on a networking task, and the loader strategy has no cancellation or synchronous loads (FIXME in `LoaderStrategy.hpp`).
-- Icons (`<link rel=icon>`) are not loaded or handed to the host.
+- Icon loads keep error pages' bytes, as responses carry no HTTP status (FIXME in `IconLoader.cpp`).
 - Animation frames are not throttled below the page's rate (FIXME in `ScriptedAnimationController.cpp`), and scroll events are not throttled (FIXME in `LocalFrameView.cpp`).

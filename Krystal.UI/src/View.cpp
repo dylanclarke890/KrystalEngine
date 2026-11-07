@@ -16,6 +16,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
@@ -31,6 +32,7 @@
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -220,6 +222,7 @@ namespace krys::ui
     View *_view {nullptr};
     Func<void(const NavigationRequest &)> _navigationHandler;
     Func<void(const LoadEvent &)> _loadHandler;
+    Func<void(const PageIcon &)> _iconHandler;
 
   public:
     void DispatchDidClearWindowObject() noexcept override
@@ -262,6 +265,34 @@ namespace krys::ui
     void SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept
     {
       _loadHandler = krys::move(handler);
+    }
+
+    void SetIconHandler(Func<void(const PageIcon &)> &&handler) noexcept
+    {
+      _iconHandler = krys::move(handler);
+    }
+
+    void GetLoadDecisionForIcons(Span<const boo::LinkIconLoadDecision> icons) noexcept override
+    {
+      RefPtr<boo::DocumentLoader> documentLoader =
+        _view ? ShareRefPtr(_view->_frame->Loader().GetDocumentLoader()) : nullptr;
+      if (!documentLoader)
+      {
+        return;
+      }
+      // Every icon loads for a handler; none without one.
+      for (const auto &decision : icons)
+      {
+        documentLoader->DidGetLoadDecisionForIcon(
+          !!_iconHandler, decision.Identifier,
+          [this, icon = decision.Icon](const boo::SharedBuffer *data)
+          {
+            if (data && _iconHandler)
+            {
+              _iconHandler({icon.URL.String(), utf8_string(icon.MIMEType), icon.Size, data->GetSpan()});
+            }
+          });
+      }
     }
 
     void Notify(const LoadEvent &event) const noexcept
@@ -474,6 +505,11 @@ namespace krys::ui
   void View::SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept
   {
     _frameLoaderClient->SetLoadHandler(krys::move(handler));
+  }
+
+  void View::SetIconHandler(Func<void(const PageIcon &)> &&handler) noexcept
+  {
+    _frameLoaderClient->SetIconHandler(krys::move(handler));
   }
 
   void View::Reload() noexcept

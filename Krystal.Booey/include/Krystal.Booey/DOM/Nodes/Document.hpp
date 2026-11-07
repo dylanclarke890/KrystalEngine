@@ -1460,6 +1460,10 @@ namespace krys::boo::dom
       return _loadEventFinished;
     }
 
+    /// @brief An icon link (`<link rel=icon>`) was added, removed or changed: once the document has loaded,
+    /// its frame's loader collects its icons again.
+    void IconLinksMayHaveChanged() noexcept;
+
     /// @see https://html.spec.whatwg.org/#page-showing
     KRYS_NODISCARD bool PageShowing() const noexcept
     {

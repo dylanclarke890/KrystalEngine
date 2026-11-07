@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedRawResource.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
@@ -80,6 +81,8 @@ namespace krys::boo
                                                                   bool isSVG) noexcept;
     ResourceErrorOr<CachedResourceHandle<CachedSVGDocument>>
       RequestSVGDocument(CachedResourceRequest &&) noexcept;
+    /// @brief An icon (`<link rel=icon>`), kept as its bytes.
+    ResourceErrorOr<CachedResourceHandle<CachedRawResource>> RequestIcon(CachedResourceRequest &&) noexcept;
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(const url::URL &url) const noexcept;

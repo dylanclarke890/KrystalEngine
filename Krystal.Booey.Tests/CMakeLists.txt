@@ -436,6 +436,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
+		tests/Loader/Icons/IconLoader.cpp
 		tests/HTML/Forms/Autofill.cpp
 		tests/HTML/Forms/FormListedElement.cpp
 		tests/HTML/Forms/ValidatedFormListedElement.cpp

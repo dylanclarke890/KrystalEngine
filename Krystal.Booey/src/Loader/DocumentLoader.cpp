@@ -3,8 +3,13 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/Icons/IconLoader.hpp"
+#include "Krystal.Booey/Loader/Icons/LinkIconCollector.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
+#include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Network/DataURLDecoder.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
@@ -35,6 +40,97 @@ namespace krys::boo
     // Detached, the loader tells no one it stopped.
     _frame = nullptr;
     StopLoading();
+    StopLoadingIcons();
+  }
+
+  void DocumentLoader::StartIconLoading() noexcept
+  {
+    RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get());
+    auto *document = frame ? frame->Document() : nullptr;
+    if (!document || !document->GetSettings().IconLoadingEnabled)
+    {
+      return;
+    }
+
+    auto *page = frame->GetPage();
+    if (!page || &page->MainFrame() != frame.get())
+    {
+      return;
+    }
+
+    if (document->GetURL().IsEmpty() || document->GetURL().ProtocolIsAbout())
+    {
+      return;
+    }
+
+    auto icons = CollectLinkIcons(*document);
+    if (icons.empty() && document->GetURL().ProtocolIsInHTTPFamily())
+    {
+      icons.push_back({document->CompleteURL(u8"/favicon.ico"), {}, null});
+    }
+    if (icons == _linkIcons)
+    {
+      return;
+    }
+    _linkIcons = icons;
+
+    // The client may decide at once, or later.
+    List<LinkIconLoadDecision> decisions;
+    decisions.reserve(icons.size());
+    for (const auto &icon : icons)
+    {
+      auto identifier = _nextIconLoadIdentifier++;
+      _iconsPendingLoadDecision.emplace(identifier, icon);
+      decisions.push_back({icon, identifier});
+    }
+    Ref<DocumentLoader> protectedThis = ShareRef(*this);
+    frame->Loader().Client().GetLoadDecisionForIcons(decisions);
+  }
+
+  void DocumentLoader::DidGetLoadDecisionForIcon(bool decision, uint64 loadIdentifier,
+                                                 Func<void(const SharedBuffer *)> completionHandler) noexcept
+  {
+    auto pending = _iconsPendingLoadDecision.find(loadIdentifier);
+    // Not to load, or the loads stopped while the decision was pending: there's no load to perform.
+    if (!decision || !_frame || pending == _iconsPendingLoadDecision.end())
+    {
+      if (pending != _iconsPendingLoadDecision.end())
+      {
+        _iconsPendingLoadDecision.erase(pending);
+      }
+      completionHandler(nullptr);
+      return;
+    }
+    auto icon = krys::move(pending->second);
+    _iconsPendingLoadDecision.erase(pending);
+
+    auto iconLoader = IconLoader::Create(*this, krys::move(icon.URL));
+    _iconLoaders.emplace_back(iconLoader, krys::move(completionHandler));
+    iconLoader->StartLoading();
+  }
+
+  void DocumentLoader::FinishedLoadingIcon(IconLoader &loader, const SharedBuffer *data) noexcept
+  {
+    auto found =
+      std::ranges::find_if(_iconLoaders, [&](const auto &entry) { return entry.first.get() == &loader; });
+    if (found == _iconLoaders.end())
+    {
+      return;
+    }
+    auto completionHandler = krys::move(found->second);
+    _iconLoaders.erase(found);
+    completionHandler(data);
+  }
+
+  void DocumentLoader::StopLoadingIcons() noexcept
+  {
+    _iconsPendingLoadDecision.clear();
+    auto iconLoaders = std::exchange(_iconLoaders, {});
+    for (auto &[iconLoader, completionHandler] : iconLoaders)
+    {
+      iconLoader->StopLoading();
+      completionHandler(nullptr);
+    }
   }
 
   const url::URL &DocumentLoader::DocumentURL() const noexcept

@@ -105,6 +105,8 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Booey/Loader/DocumentLoader.hpp"
+#include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
@@ -3662,6 +3664,16 @@ namespace krys::boo::dom
       return;
     }
 
+    // The icons, as the load event's handlers left them.
+    if (auto *documentLoader = Frame()->Loader().GetDocumentLoader())
+    {
+      documentLoader->StartIconLoading();
+    }
+    if (!Frame())
+    {
+      return;
+    }
+
     UpdateStyleIfNeeded();
 
     // Always do a layout after loading if needed.
@@ -3675,6 +3687,18 @@ namespace krys::boo::dom
     if (auto *svgExtensions = SVGExtensionsIfExists())
     {
       svgExtensions->StartAnimations();
+    }
+  }
+
+  void Document::IconLinksMayHaveChanged() noexcept
+  {
+    if (!_loadEventFinished || !Frame())
+    {
+      return;
+    }
+    if (RefPtr<DocumentLoader> documentLoader = ShareRefPtr(Frame()->Loader().GetDocumentLoader()))
+    {
+      documentLoader->StartIconLoading();
     }
   }
 

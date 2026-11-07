@@ -75,6 +75,17 @@ namespace krys::boo::tests
     {
       Events.push_back("finish");
     }
+
+    /// @brief Each time the client is asked about icons, the icons, with their identifiers.
+    List<List<Pair<LinkIcon, uint64>>> IconDecisions;
+    void GetLoadDecisionForIcons(Span<const LinkIconLoadDecision> icons) noexcept override
+    {
+      auto &decisions = IconDecisions.emplace_back();
+      for (const auto &icon : icons)
+      {
+        decisions.emplace_back(icon.Icon, icon.Identifier);
+      }
+    }
   };
 
   /// @brief A page whose main frame starts with its initial empty document, and whose loads come from a

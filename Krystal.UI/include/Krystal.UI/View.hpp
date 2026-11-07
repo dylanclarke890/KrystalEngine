@@ -94,6 +94,19 @@ namespace krys::ui
     Failed,
   };
 
+  /// @brief An icon the page names (`<link rel=icon>`, or `/favicon.ico` on `http(s):`), loaded, as the
+  /// host's handler receives it.
+  struct PageIcon
+  {
+    utf8_string URL;
+    /// @brief Its link's `type`, a hint of its MIME type; empty without one.
+    utf8_string MIMEType;
+    /// @brief The width its link's `sizes` gives first, if any.
+    Maybe<uint32> Size;
+    /// @brief Its bytes as loaded (PNG, ICO, SVG and so on), for the host to decode; valid during the call.
+    Span<const uint8> Data;
+  };
+
   /// @brief A load event: its type, and why it failed.
   struct LoadEvent
   {
@@ -362,6 +375,10 @@ namespace krys::ui
     void Stop() noexcept;
     /// @brief Calls @p handler as loads start, commit, finish and fail.
     void SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept;
+    /// @brief Loads the icons the page names once it's loaded, and again as they change, calling @p handler
+    /// with each that loads. Without a handler, none are loaded (a handler set later loads the next ones);
+    /// `Settings::IconLoadingEnabled` turns them off for every view.
+    void SetIconHandler(Func<void(const PageIcon &)> &&handler) noexcept;
     /// @brief Loads the current document again, its resources revalidated, without its form state.
     void Reload() noexcept;
 
