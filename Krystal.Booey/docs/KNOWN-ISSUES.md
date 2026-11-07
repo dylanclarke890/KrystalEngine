@@ -9,7 +9,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Responses (`ResourceResponse`) have no HTTP headers, so `document.lastModified` is always the current time, the specification's fallback when the date is unknown (it needs `Last-Modified`, or a file's modification date for file loads; FIXME in `Document.cpp`), and a language from a `Content-Language` header is not read (only the `<meta>` pragma is; FIXME in `SelectorCheckerTestFunctions.cpp`).
-- `title` is never shown: there's no advisory information, no `HitTestResult::Title`, no tooltip hook on the chrome client, and Krystal.UI draws no tooltips.
+- `title` is never shown (nor an SVG `<a>`'s `xlink:title`, which Chrome shows): there's no advisory information, no `HitTestResult::Title`, no tooltip hook on the chrome client, and Krystal.UI draws no tooltips.
 - No Fullscreen API (`:fullscreen`).
 - No Event Timing or Long Animation Frames timing: inner invoke doesn't record timing info for event listeners, and firing an event doesn't record task time (FIXMEs in `EventDispatcher.cpp` and `EventDispatcher.hpp`).
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
@@ -174,7 +174,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Filters on SVG shapes use the border box for the filter region and source image rect rather than the object bounding box (FIXMEs in `RenderLayerFilters.cpp`). Attribute parse errors (`ReportAttributeParsingError`) and filter warnings are not reported, because there is no console.
 - `buffered-rendering: static` is not supported (FIXME in `LegacyRenderSVGImage.cpp`). `setMayHaveRenderedSVGForeignObjects` is not called (FIXME in `SVGForeignObjectElement.cpp`), as its only reader, composited scrolling, is absent.
 - The inline formatting context's SVG text path (`Settings::UseIFCForSVGText`, off) compiles but is untested.
-- SVG `<a>` has no `title` override (`xlink:title`) and no focus overrides (`supportsFocus`, `isMouseFocusable`, `isKeyboardFocusable`, `defaultTabIndex`); `SVGStyleElement` has no load event timer.
 
 ## MathML
 

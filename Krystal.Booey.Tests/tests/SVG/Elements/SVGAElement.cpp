@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -29,6 +30,29 @@ namespace krys::boo::svg::tests
     {
       return Downcast<SVGAElement>(Downcast<SVGElement>(fixture.ById(id)));
     }
+  }
+
+  TEST_CASE("SVGAElement: a link is focusable", "[SVG][SVGAElement][html:focusable-area]")
+  {
+    // As Chrome: a link, and an element with a tabindex, but not an `<a>` without href.
+    NavigationFixture fixture(
+      u8R"(<svg><a id=link href="#x"><rect width=10 height=10 /></a><a id=xlink xlink:href="#x"><rect /></a>
+      <a id=plain><rect width=10 height=10 /></a><a id=tab tabindex=0><rect width=10 height=10 /></a></svg>)");
+    fixture.Document->UpdateStyleIfNeeded();
+    (void)fixture.Document->UpdateLayout();
+
+    auto focused = [&](dom::DOMStringView id)
+    {
+      auto &element = Downcast<SVGElement>(fixture.ById(id));
+      element.Focus();
+      return fixture.Document->FocusedElement() == &element;
+    };
+    CHECK(focused(u8"link"));
+    CHECK(html::FocusAlgorithms::IsSequentiallyFocusable(fixture.ById(u8"link")));
+    CHECK(focused(u8"xlink"));
+    CHECK(focused(u8"tab"));
+    CHECK_FALSE(focused(u8"plain"));
+    CHECK_FALSE(html::FocusAlgorithms::IsSequentiallyFocusable(fixture.ById(u8"plain")));
   }
 
   TEST_CASE("SVGAElement: a click follows the link", "[SVG][SVGAElement]")
