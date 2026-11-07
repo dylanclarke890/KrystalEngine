@@ -115,7 +115,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `RenderReplaced::paint` skips event regions, accessibility bounds and document markers (FIXMEs); SVG painting has no event region context, and the paint milestones are a FIXME.
 - Render theme parts left out or FIXMEs: media controls, attachments, Apple Pay, image controls, `<input type=checkbox switch>`, devolvable widgets, the system preview badge, data list parts, the text area resize corner image, and the system's reduced motion and contrast settings.
 - Dragged images' files have no icons, there are no text indicators, and images changed mid-drag are not updated. There are no root view rects (`caretRectInRootViewCoordinates`, `editableElementRectInRootViewCoordinates`) for hosts' drop previews.
-- Frame scrollbars have no pan scroll icon or overhang areas.
 - `image-rendering` is not applied to composited images and canvases (see *Compositing and scrolling*).
 
 ## Compositing and scrolling

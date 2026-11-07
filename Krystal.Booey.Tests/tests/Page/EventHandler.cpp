@@ -714,6 +714,26 @@ namespace krys::boo::tests
       (void)fixture.Press(100, 20, MouseButton::Middle);
       REQUIRE(fixture.Handler().PanScrollInProgress());
 
+      SECTION("the icon is drawn where the pan started, until it ends")
+      {
+        // The view's whole paint, as a host's: the icon is drawn over the contents and scrollbars.
+        auto paintView = [&]
+        {
+          (void)fixture.Document->UpdateLayout();
+          display_list::RecorderImpl recorder(FloatSize(200, 100));
+          view->Paint(recorder, IntRect(0, 0, 200, 100));
+          return recorder.TakeDisplayList()->AsText({});
+        };
+        // Three discs centred on the mouse: an outline, a white fill, and a dot.
+        auto painted = paintView();
+        INFO(reinterpret_cast<const char *>(painted.c_str()));
+        CHECK(painted.find(u8"fill-ellipse") != utf8_string::npos);
+        CHECK(painted.find(u8"(92,12) size 16x16") != utf8_string::npos);
+        CHECK(fixture.Press(100, 20));
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+        CHECK(paintView().find(u8"fill-ellipse") == utf8_string::npos);
+      }
+
       SECTION("doesn't scroll over the icon, and goes on after the release")
       {
         (void)fixture.Release(100, 20, MouseButton::Middle);
