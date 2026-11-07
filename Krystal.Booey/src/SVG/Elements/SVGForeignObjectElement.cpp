@@ -77,8 +77,9 @@ namespace krys::boo::svg
 
   RenderPtr<RenderElement> SVGForeignObjectElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
-    // FIXME: Tell the document it may have rendered foreign objects (setMayHaveRenderedSVGForeignObjects),
-    // once there's composited scrolling, which asks.
+    // The document isn't told it may have rendered foreign objects (setMayHaveRenderedSVGForeignObjects): its
+    // only reader keeps boxes inside them from composited scrolling, and nothing inside them is composited
+    // (see DIFFERENCES.md).
     return CreateRenderer<LegacyRenderSVGForeignObject>(*this, krys::move(style));
   }
 

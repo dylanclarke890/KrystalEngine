@@ -934,11 +934,6 @@ namespace krys::boo::style
       return true;
     }
 
-    if (a.NonInheritedFlags.BufferedRendering != b.NonInheritedFlags.BufferedRendering)
-    {
-      return true;
-    }
-
     if (a.NonInheritedFlags.MaskType != b.NonInheritedFlags.MaskType)
     {
       return true;

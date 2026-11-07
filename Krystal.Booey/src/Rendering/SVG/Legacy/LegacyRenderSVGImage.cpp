@@ -216,7 +216,6 @@ namespace krys::boo
 
       if (renderingContext.IsRenderingPrepared())
       {
-        // FIXME: Paint the foreground buffered for buffered-rendering: static (bufferForeground).
         PaintForeground(childPaintInfo);
       }
     }

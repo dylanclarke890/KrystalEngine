@@ -3902,22 +3902,6 @@
         "url": "https://www.w3.org/TR/css-break-3/#break-within"
       }
     },
-    "buffered-rendering": {
-      "animation-type": "discrete",
-      "initial": "auto",
-      "values": ["auto", "dynamic", "static"],
-      "codegen-properties": {
-        "render-style-storage-path": ["m_svgStyle", "nonInheritedFlags"],
-        "render-style-storage-container": "struct",
-        "render-style-storage-kind": "enum",
-        "render-style-type": "BufferedRendering",
-        "parser-grammar": "<<values>>"
-      },
-      "specification": {
-        "module": "svg",
-        "url": "https://www.w3.org/TR/SVGTiny12/painting.html#BufferedRenderingProperty"
-      }
-    },
     "caption-side": {
       "animation-type": "discrete",
       "inherited": true,

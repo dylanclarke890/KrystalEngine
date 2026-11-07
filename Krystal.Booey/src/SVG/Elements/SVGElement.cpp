@@ -1152,7 +1152,6 @@ namespace krys::boo::svg
     static const HashMap<dom::DOMStringView, css::PropertyId> map {
       {u8"alignment-baseline", css::PropertyId::AlignmentBaseline},
       {u8"baseline-shift", css::PropertyId::BaselineShift},
-      {u8"buffered-rendering", css::PropertyId::BufferedRendering},
       {u8"clip", css::PropertyId::Clip},
       {u8"clip-path", css::PropertyId::ClipPath},
       {u8"clip-rule", css::PropertyId::ClipRule},

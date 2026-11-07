@@ -75,8 +75,6 @@ namespace krys::boo
     NonInheritedFlags.DominantBaseline =
       static_cast<unsigned>(style::ComputedStyle::InitialDominantBaseline());
     NonInheritedFlags.VectorEffect = static_cast<unsigned>(style::ComputedStyle::InitialVectorEffect());
-    NonInheritedFlags.BufferedRendering =
-      static_cast<unsigned>(style::ComputedStyle::InitialBufferedRendering());
     NonInheritedFlags.MaskType = static_cast<unsigned>(style::ComputedStyle::InitialMaskType());
   }
 

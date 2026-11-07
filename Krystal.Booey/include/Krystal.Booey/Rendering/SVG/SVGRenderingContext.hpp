@@ -102,9 +102,6 @@ namespace krys::boo
       return EnclosingIntRect(absoluteTransform.MapRect(targetRect));
     }
 
-    // FIXME: Support for the buffered-rendering hint (bufferForeground), once image buffers can be drawn
-    // back from the CPU.
-
     KRYS_NODISCARD const RenderElement *Renderer() const noexcept
     {
       return _renderer;

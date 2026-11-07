@@ -1045,13 +1045,6 @@ namespace krys::boo
     NonScalingStroke
   };
 
-  enum class BufferedRendering : uint8
-  {
-    Auto,
-    Dynamic,
-    Static
-  };
-
   enum class MaskType : uint8
   {
     Luminance,
