@@ -470,6 +470,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGShape.cpp
 		tests/Rendering/SVG/RenderSVGText.cpp
+		tests/Rendering/SVG/SVGRenderingContext.cpp
 		tests/Layout/LayoutTestUtils.cpp
 		tests/Layout/LayoutState.cpp
 		tests/Layout/LayoutTree/LayoutBoxGeometry.cpp

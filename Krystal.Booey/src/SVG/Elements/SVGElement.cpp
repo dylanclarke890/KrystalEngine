@@ -205,11 +205,8 @@ namespace krys::boo::svg
   void SVGElement::ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,
                                                dom::DOMStringView value) noexcept
   {
-    if (error == SVGParsingError::None)
-    {
-      return;
-    }
-
+    // There's no console to report the error to (see DIFFERENCES.md).
+    (void)error;
     (void)name;
     (void)value;
   }

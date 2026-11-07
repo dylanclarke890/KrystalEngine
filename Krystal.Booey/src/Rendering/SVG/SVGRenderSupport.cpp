@@ -23,6 +23,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
@@ -459,6 +460,14 @@ namespace krys::boo
     const RenderElement &renderer, FloatRect &repaintRect,
     RepaintRectCalculation repaintRectCalculation) noexcept
   {
+    // Filter functions draw past the renderer by their outsets.
+    if (auto outsets = SVGRenderingContext::CSSFilterOutsets(renderer); !outsets.IsZero())
+    {
+      repaintRect.Move(static_cast<float>(-outsets.Left()), static_cast<float>(-outsets.Top()));
+      repaintRect.Expand(static_cast<float>(outsets.Left() + outsets.Right()),
+                         static_cast<float>(outsets.Top() + outsets.Bottom()));
+    }
+
     auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer);
     if (!resources)
     {

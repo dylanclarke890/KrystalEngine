@@ -107,7 +107,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - The compositing operators `darker` and `difference` are not mapped: `CompositeOperator` falls back to source-over (FIXME in Krystal.UI's `GraphicsContextRender2D.cpp`).
-- There's no software filter path: filters are applied by the host's accelerated backend, or by the graphics context for the ones it can draw. Reference filter clients and SVG shapes' filter regions are FIXMEs (see *SVG*), and `filter: url()` to an external document is not supported (see *Images and resources*).
+- There's no software filter path: filters are applied by the host's accelerated backend, or by the graphics context for the ones it can draw. `filter: url()` to an external document is not supported (see *Images and resources*).
 - Backdrop filters are drawn only by the compositor: the flattened whole repaint (`View::Record`) doesn't draw them.
 - The broken image icon is not drawn (FIXMEs in `CachedImage.cpp` and `RenderImage.cpp`).
 - `ImageQualityController::ChooseInterpolationQuality` returns the style's quality or the default: there is no size- or scroll-dependent choice.
@@ -166,12 +166,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - SVG images keep the light appearance and do not copy the embedding page's settings (generic font families, dark appearance), because image observers cannot reach them (FIXME in `SVGImage.cpp`). The page of an SVG image has no loader strategy, so it loads only `data:` URLs.
 - Drags: no drag icon for a dragged image's file (`CreateDragImageIconForCachedImageFilename` returns none), the response's suggested filename is not parsed, colours cannot be dragged or dropped, and there are no text indicators or visible paths. `PasteboardImage` and `SelectionData` carry no image, so nothing prefers images' types when pasting.
 - Krystal.UI's `FileLoaderStrategy` reads files synchronously on the main thread (FIXME).
-
-## SVG
-
-### Missing
-
-- Filters on SVG shapes use the border box for the filter region and source image rect rather than the object bounding box (FIXMEs in `RenderLayerFilters.cpp`). Attribute parse errors (`ReportAttributeParsingError`) and filter warnings are not reported, because there is no console.
 
 ## MathML
 
