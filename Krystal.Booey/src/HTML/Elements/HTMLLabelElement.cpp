@@ -49,6 +49,15 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"for", krys::move(value));
   }
 
+  bool HTMLLabelElement::AccessKeyAction(bool sendMouseEvents) noexcept
+  {
+    if (auto control = Control())
+    {
+      return control->AccessKeyAction(sendMouseEvents);
+    }
+    return HTMLElement::AccessKeyAction(sendMouseEvents);
+  }
+
   RefPtr<HTMLElement> HTMLLabelElement::Control() const noexcept
   {
     auto forAttribute = GetAttribute(u8"for");

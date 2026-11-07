@@ -1353,6 +1353,17 @@ namespace krys::boo::dom
     /// @return Whether the event was neither cancelled nor handled.
     bool DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept;
 
+    /// @brief The element's assigned access key: the first token of its `accesskey` attribute that's a single
+    /// code point, or empty if it has none.
+    /// @see https://html.spec.whatwg.org/#assigned-access-key
+    KRYS_NODISCARD DOMString AssignedAccessKey() const noexcept;
+
+    /// @brief Runs the command the element's access key stands for. This focuses it if it's focusable.
+    /// @param sendMouseEvents Whether a click it fires comes with a press and a release.
+    /// @return Whether a click was dispatched.
+    /// @see https://html.spec.whatwg.org/#command-facet-action
+    virtual bool AccessKeyAction(bool sendMouseEvents) noexcept;
+
     /// @brief Dispatches a click at the element from the user agent, standing in for @p underlyingEvent.
     /// @return False if the element is a disabled form control, or is already being clicked.
     bool DispatchSimulatedClick(

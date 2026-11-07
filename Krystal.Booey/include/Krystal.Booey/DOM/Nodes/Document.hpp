@@ -761,6 +761,10 @@ namespace krys::boo::dom
     // readonly attribute WindowProxy? defaultView;
     // boolean hasFocus();
 
+    /// @brief The element whose assigned access key is @p key, ignoring ASCII case, in the composed tree. The
+    /// last in tree order wins, as in Chrome.
+    KRYS_NODISCARD RefPtr<Element> ElementForAccessKey(DOMStringView key) noexcept;
+
     /// @see https://html.spec.whatwg.org/#designMode
     KRYS_NODISCARD DOMString DesignMode() const noexcept;
 

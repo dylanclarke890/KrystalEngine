@@ -417,6 +417,10 @@ namespace krys::boo::html
     }
 
     /// @brief Whether the user can step the value up and down.
+    /// @brief Focuses the input and clicks it, except that a date or time input is only focused and a hidden
+    /// one does nothing, as in Chrome.
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
+
     KRYS_NODISCARD bool IsSteppable() const noexcept;
     KRYS_NODISCARD bool IsTextButton() const noexcept;
     KRYS_NODISCARD bool IsRadioButton() const noexcept;

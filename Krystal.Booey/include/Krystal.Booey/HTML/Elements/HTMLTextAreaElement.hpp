@@ -170,6 +170,9 @@ namespace krys::boo::html
     KRYS_NODISCARD RenderStyle CreateInnerTextStyle(const RenderStyle &style) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+    /// @brief Focuses the text area, without clicking it.
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
+
     void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
     void DefaultEventHandler(dom::Event &event) noexcept final;

@@ -47,6 +47,7 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
+#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -4509,6 +4510,30 @@ namespace krys::boo::dom
     StyleScope().InvalidateMatchedDeclarationsCache();
 
     ScheduleFullStyleRebuild();
+  }
+
+  RefPtr<Element> Document::ElementForAccessKey(DOMStringView key) noexcept
+  {
+    RefPtr<Element> found;
+    if (key.empty())
+    {
+      return found;
+    }
+    auto lowered = text::ToASCIILower(key);
+    for (auto &node : ComposedTreeDescendants(*this))
+    {
+      auto *element = DynamicDowncast<Element>(node);
+      if (!element)
+      {
+        continue;
+      }
+      auto assigned = element->AssignedAccessKey();
+      if (!assigned.empty() && text::ToASCIILower(DOMStringView(assigned)) == lowered)
+      {
+        found = ShareRefPtr(element);
+      }
+    }
+    return found;
   }
 
   DOMString Document::DesignMode() const noexcept

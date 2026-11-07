@@ -102,6 +102,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- Access keys follow the specification where Chrome doesn't: `accessKeyLabel` exists (Chrome has no such attribute), `accesskey="x y"` assigns the first token that's one code point (Chrome needs the whole value to match the key), and a legend's access key runs its accesskey delegatee's command (Chrome clicks the legend).
 - A textarea's `wrap` has no legacy `physical` and `on` aliases of `hard`, which Chrome keeps.
 - Textareas aren't resizable by default (`Settings::TextAreasAreResizable` is false); Chrome's are.
 - A search field's clear button shows whenever the field has a value, as the Adwaita theme does; Chrome shows it only while the field is focused or hovered.

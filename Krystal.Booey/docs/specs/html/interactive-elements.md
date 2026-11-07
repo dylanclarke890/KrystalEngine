@@ -85,24 +85,24 @@ Status: reviewed (2026-11-01)
 
 ##### [4.11.3.1 Facets](https://html.spec.whatwg.org/#facets-2)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
+Status: reviewed (2026-11-06)
+> `EventHandler::HandleAccessKey` runs commands by their access keys; `Element::AccessKeyAction` is the Action. There's no other list of commands.
 <!-- definitions: concept-command concept-facet command-facet-label command-facet-accesskey command-facet-hiddenstate command-facet-disabledstate command-facet-action -->
 
 ##### [4.11.3.2 Using the a element to define a command](https://html.spec.whatwg.org/#using-the-a-element-to-define-a-command)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
+Status: reviewed (2026-11-06)
+> `EventHandler::HandleAccessKey` runs commands by their access keys; `Element::AccessKeyAction` is the Action. There's no other list of commands.
 
 ##### [4.11.3.3 Using the button element to define a command](https://html.spec.whatwg.org/#using-the-button-element-to-define-a-command)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
+Status: reviewed (2026-11-06)
+> `EventHandler::HandleAccessKey` runs commands by their access keys; `Element::AccessKeyAction` is the Action. There's no other list of commands.
 
 ##### [4.11.3.4 Using the input element to define a command](https://html.spec.whatwg.org/#using-the-input-element-to-define-a-command)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
+Status: reviewed (2026-11-06)
+> `EventHandler::HandleAccessKey` runs commands by their access keys; `Element::AccessKeyAction` is the Action. There's no other list of commands.
 
 - [x] [The Label of the command is determined as follows](https://html.spec.whatwg.org/#command-facet-label) — The Label of the command is determined as follows:
   - 1. If the type attribute is in one of the Submit Button, Reset Button, Image Button, or Button states, then the Label is the string given by the value attribute, if any, and a UA-dependent, locale-dependent value that the UA uses to label the button itself if the attribute is absent.
@@ -112,20 +112,20 @@ Status: reviewed (2026-11-01)
 
 ##### [4.11.3.5 Using the option element to define a command](https://html.spec.whatwg.org/#using-the-option-element-to-define-a-command)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
+Status: reviewed (2026-11-06)
+> `EventHandler::HandleAccessKey` runs commands by their access keys; `Element::AccessKeyAction` is the Action. There's no other list of commands.
 
 ##### [4.11.3.6 Using the accesskey attribute on a legend element to define a command](https://html.spec.whatwg.org/#using-the-accesskey-attribute-on-a-legend-element-to-define-a-command)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
+Status: reviewed (2026-11-06)
+> `EventHandler::HandleAccessKey` runs commands by their access keys; `Element::AccessKeyAction` is the Action. There's no other list of commands.
 
 - [x] [the legend element's accesskey delegatee](https://html.spec.whatwg.org/#the-legend-element's-accesskey-delegatee) — Its parent has a descendant that defines a command that is neither a label element nor a legend element. This element, if it exists, is the legend element's accesskey delegatee.
 
 ##### [4.11.3.7 Using the accesskey attribute to define a command on other elements](https://html.spec.whatwg.org/#using-the-accesskey-attribute-to-define-a-command-on-other-elements)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
+Status: reviewed (2026-11-06)
+> `EventHandler::HandleAccessKey` runs commands by their access keys; `Element::AccessKeyAction` is the Action. There's no other list of commands.
 
 - [x] [The Action of the command](https://html.spec.whatwg.org/#command-facet-action) — The Action of the command is to run the following steps:
   - 1. Run the focusing steps for the element.

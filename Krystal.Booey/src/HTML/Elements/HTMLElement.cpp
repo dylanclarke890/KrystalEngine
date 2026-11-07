@@ -339,10 +339,7 @@ namespace krys::boo::html
 
   bool HTMLElement::AccessKeyAction(bool sendMouseEvents) noexcept
   {
-    if (FocusAlgorithms::IsFocusableArea(*this))
-    {
-      Focus();
-    }
+    (void)StyledElement::AccessKeyAction(sendMouseEvents);
     return DispatchSimulatedClick(nullptr, sendMouseEvents
                                              ? dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
                                              : dom::SimulatedClickMouseEventOptions::SendNoEvents);
@@ -350,8 +347,9 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::AccessKeyLabel() const noexcept
   {
-    // FIXME: Implement AccessKeyLabel() method.
-    return {};
+    // The modifier is the one EventHandler::HandleAccessKey looks for.
+    auto key = AssignedAccessKey();
+    return key.empty() ? key : dom::DOMString(u8"Alt+") + key;
   }
 
   bool HTMLElement::Draggable() const noexcept

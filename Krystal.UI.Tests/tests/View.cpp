@@ -1079,6 +1079,17 @@ namespace krys::ui::tests
     strategies.SetPasteboardStrategy(systemPasteboard);
   }
 
+  TEST_CASE("View: Alt and a key run an access key", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><button id=b accesskey=d>d</button>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    (void)view.KeyPressed(pal::Key::D, {pal::KeyModifier::Alt}, {u8"", u8"d"});
+    CHECK(view.Document().FocusedElement() == view.Document().GetElementById(u8"b").get());
+  }
+
   TEST_CASE("View: the keyboard types as soon as design mode is on", "[UI]")
   {
     View view({400, 300});

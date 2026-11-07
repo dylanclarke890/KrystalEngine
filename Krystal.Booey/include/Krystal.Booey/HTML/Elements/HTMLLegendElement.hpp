@@ -14,6 +14,13 @@ namespace krys::boo::html
   public:
     HTMLLegendElement(dom::Document &document) noexcept;
 
+    /// @brief The element whose command the legend's access key stands for.
+    /// @see https://html.spec.whatwg.org/#the-legend-element's-accesskey-delegatee
+    KRYS_NODISCARD RefPtr<dom::Element> AccessKeyDelegatee() const noexcept;
+
+    /// @brief Runs its delegatee's access key action; without one, the action of any other element.
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
+
 #pragma region HTMLLegendElement - https://html.spec.whatwg.org/#htmllegendelement
 
     /// @brief The form of the fieldset the legend is a child of, if any.

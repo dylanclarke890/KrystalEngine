@@ -418,6 +418,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Events/WheelEvent.cpp
 		tests/DOM/Abort/AbortController.cpp
 		tests/DOM/Abort/AbortSignal.cpp
+		tests/Page/AccessKeys.cpp
 		tests/Page/EventHandler.cpp
 		tests/Page/PenAndTouch.cpp
 		tests/Page/PointerLockController.cpp

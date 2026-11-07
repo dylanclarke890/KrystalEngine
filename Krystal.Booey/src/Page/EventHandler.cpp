@@ -1126,7 +1126,13 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Typing gestures and access keys (handleAccessKey).
+    // FIXME: Typing gestures.
+
+    // NOTE: where the host sends the character separately, an access key replaces its keypress.
+    if (initialKeyEvent.GetType() == Type::Char && HandleAccessKey(initialKeyEvent))
+    {
+      return true;
+    }
 
     // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
     if (initialKeyEvent.GetType() == Type::KeyUp || initialKeyEvent.GetType() == Type::Char)
@@ -1193,6 +1199,13 @@ namespace krys::boo
     // FIXME: The backward compatibility mode, which dispatches a cancelled keypress anyway.
     bool keydownResult =
       keydown->DefaultPrevented() || keydown->DefaultHandled() || DefaultKeyboardEventHandler(*keydown);
+
+    // An access key replaces the keypress, as in Chrome. It runs even if the keydown was cancelled.
+    if (HandleAccessKey(initialKeyEvent))
+    {
+      return true;
+    }
+
     if (keydownResult)
     {
       return keydownResult;
@@ -1223,6 +1236,27 @@ namespace krys::boo
 
     return keydownResult || keypress->DefaultPrevented() || keypress->DefaultHandled()
            || DefaultKeyboardEventHandler(*keypress);
+  }
+
+  bool EventHandler::HandleAccessKey(const PlatformKeyboardEvent &event) noexcept
+  {
+    using Modifier = PlatformEvent::Modifier;
+    auto modifiers = event.Modifiers();
+    if (!modifiers.Contains(Modifier::AltKey) || modifiers.Contains(Modifier::ControlKey)
+        || modifiers.Contains(Modifier::MetaKey))
+    {
+      return false;
+    }
+
+    auto *document = _frame.Document();
+    auto element = document ? document->ElementForAccessKey(event.UnmodifiedText()) : nullptr;
+    if (!element)
+    {
+      return false;
+    }
+    document->UpdateStyleIfNeeded();
+    (void)element->AccessKeyAction(false);
+    return true;
   }
 
   bool EventHandler::HandleTextInputEvent(utf8_stringview text, dom::Event *underlyingEvent,

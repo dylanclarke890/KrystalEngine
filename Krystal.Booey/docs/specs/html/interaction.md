@@ -531,8 +531,8 @@ Status: reviewed (2026-11-01)
 
 #### [6.7.3 Processing model](https://html.spec.whatwg.org/#keyboard-shortcuts-processing-model)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't assigned, and `accessKeyLabel` is empty (see `KNOWN-ISSUES.md`).
+Status: reviewed (2026-11-06)
+> `Element::AssignedAccessKey`. The key is pressed with Alt, as `EventHandler::HandleAccessKey` looks for, and `HTMLElement::AccessKeyLabel` says.
 
 - [x] [Whenever an element's accesskey attribute is set, changed, or removed, the user…](https://html.spec.whatwg.org/#assigned-access-key) — Whenever an element's accesskey attribute is set, changed, or removed, the user agent must update the element's assigned access key by running the following steps:
   - 1. If the element has no accesskey attribute, then skip to the fallback step below.

@@ -75,6 +75,11 @@ namespace krys::boo::html
     return CreateRenderer<RenderTextControlMultiLine>(*this, krys::move(style));
   }
 
+  bool HTMLTextAreaElement::AccessKeyAction(bool sendMouseEvents) noexcept
+  {
+    return dom::Element::AccessKeyAction(sendMouseEvents);
+  }
+
   void HTMLTextAreaElement::UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                                   SelectionRevealMode revealMode) noexcept
   {

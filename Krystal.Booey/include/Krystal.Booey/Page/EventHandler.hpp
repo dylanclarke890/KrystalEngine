@@ -518,6 +518,10 @@ namespace krys::boo
     bool DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept;
     bool DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept;
     bool DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept;
+    /// @brief Runs the access key action of the element @p event's key is the access key of, if it's pressed
+    /// with Alt (and perhaps Shift).
+    /// @return Whether there was such an element.
+    bool HandleAccessKey(const PlatformKeyboardEvent &event) noexcept;
     bool DefaultArrowEventHandler(dom::FocusDirection focusDirection, dom::KeyboardEvent &event) noexcept;
 
     KRYS_NODISCARD MouseEventWithHitTestResults

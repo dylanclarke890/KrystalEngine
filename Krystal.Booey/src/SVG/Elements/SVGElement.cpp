@@ -907,6 +907,14 @@ namespace krys::boo::svg
     }
   }
 
+  bool SVGElement::AccessKeyAction(bool sendMouseEvents) noexcept
+  {
+    (void)StyledElement::AccessKeyAction(sendMouseEvents);
+    return DispatchSimulatedClick(nullptr, sendMouseEvents
+                                             ? dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
+                                             : dom::SimulatedClickMouseEventOptions::SendNoEvents);
+  }
+
   void SVGElement::OnInsert() noexcept
   {
     StyledElement::OnInsert();

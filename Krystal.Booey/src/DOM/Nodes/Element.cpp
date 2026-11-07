@@ -242,6 +242,54 @@ namespace krys::boo::dom
     _customElementRegistry = krys::move(registry);
   }
 
+  DOMString Element::AssignedAccessKey() const noexcept
+  {
+    // 1. If the element has no accesskey attribute, then skip to the fallback step below.
+    auto value = GetAttribute(u8"accesskey");
+    if (!value)
+    {
+      return {};
+    }
+
+    // 2. Otherwise, split the attribute's value on ASCII whitespace, and let keys be the resulting tokens.
+    // 3. For each value in keys in turn, in the order the tokens appeared in the attribute's value:
+    for (auto &key : infra::StringAlgorithms::SplitOnWhitespace(*value))
+    {
+      // 3.1. If the value is not a string exactly one code point in length, then skip the remainder of these
+      //      steps for this value.
+      auto isLeadByte = [](char8_t unit)
+      {
+        return (unit & 0xC0) != 0x80;
+      };
+      if (std::ranges::count_if(key, isLeadByte) != 1)
+      {
+        continue;
+      }
+      // 3.2. If the value does not correspond to a key on the system's keyboard, then skip the remainder of
+      //      these steps for this value.
+      // (Only the host knows the keyboard; a key that isn't on it just never matches.)
+      // 3.3. If the user agent can find a mix of zero or more modifier keys that, combined with the key that
+      //      corresponds to the value given in the attribute, can be used as the access key, then the user
+      //      agent may assign that combination of keys as the element's assigned access key and return.
+      return key;
+    }
+
+    // 4. Fallback: Optionally, the user agent may assign a key combination of its choosing as the element's
+    //    assigned access key and then return.
+    // 5. If this step is reached, the element has no assigned access key.
+    return {};
+  }
+
+  bool Element::AccessKeyAction(bool) noexcept
+  {
+    // NOTE: or its focus delegate, such as a date input's first field.
+    if (html::FocusAlgorithms::IsFocusableArea(*this) || html::FocusAlgorithms::GetFocusableArea(*this))
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Focus(*this);
+    }
+    return false;
+  }
+
   bool Element::ShouldUseInputMethod() noexcept
   {
     return ComputeEditability(UserSelectAllTreatment::NotEditable, ShouldUpdateStyle::Update)

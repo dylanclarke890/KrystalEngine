@@ -985,6 +985,19 @@ namespace krys::boo::html
     }
   }
 
+  bool HTMLInputElement::AccessKeyAction(bool sendMouseEvents) noexcept
+  {
+    if (IsInputTypeHidden())
+    {
+      return false;
+    }
+    if (IsDateField() || IsDateTimeLocalField() || IsMonthField() || IsTimeField() || IsWeekField())
+    {
+      return dom::Element::AccessKeyAction(sendMouseEvents);
+    }
+    return HTMLTextFormControlElement::AccessKeyAction(sendMouseEvents);
+  }
+
   void HTMLInputElement::UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                                SelectionRevealMode revealMode) noexcept
   {

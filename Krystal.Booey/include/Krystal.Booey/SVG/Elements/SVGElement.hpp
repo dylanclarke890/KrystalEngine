@@ -435,6 +435,9 @@ namespace krys::boo::svg
                                                 css::MutableStyleProperties &style) noexcept override;
 
     void OnInsert() noexcept override;
+
+    /// @brief Focuses the element if it's focusable, and clicks it, as in Chrome.
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
     void OnPostConnection() noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
