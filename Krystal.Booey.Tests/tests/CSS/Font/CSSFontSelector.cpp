@@ -88,6 +88,43 @@ namespace krys::boo::css::tests
     }
   }
 
+  TEST_CASE_METHOD(ValueFixture, "CSSFontSelector: system font keywords are the host's",
+                   "[CSS][CSSFontSelector][css-fonts:font-prop]")
+  {
+    RegisterAhem();
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><p id=caption style="font: caption">x</p>
+      <p id=menu style="font: menu">x</p><p id=status style="font: status-bar">x</p>)"};
+    auto &document = *fixture.Document;
+
+    SECTION("By default, the standard family at Chrome's sizes")
+    {
+      document.UpdateStyleIfNeeded();
+      const auto &caption = Rendered(fixture, u8"caption");
+      CHECK(PrimaryFamily(caption) == u8"Liberation Sans");
+      CHECK(caption.ComputedFontSize() == 16.f);
+      CHECK(Rendered(fixture, u8"menu").ComputedFontSize() == 12.f);
+      CHECK(Rendered(fixture, u8"status").ComputedFontSize() == 12.f);
+      CHECK(caption.GetFontDescription().Weight() == NormalWeightValue());
+    }
+
+    SECTION("The document's settings give them")
+    {
+      auto settings = Settings::Create();
+      auto &menu = settings->Values.SystemFonts[SystemFontKeyword::Menu];
+      menu.Family = StringAtom {u8"Ahem"};
+      menu.Size = 20;
+      menu.Weight = BoldWeightValue();
+      document.SetSettings(Ref<Settings>(settings));
+      document.UpdateStyleIfNeeded();
+
+      const auto &style = Rendered(fixture, u8"menu");
+      CHECK(PrimaryFamily(style) == u8"Ahem");
+      CHECK(style.ComputedFontSize() == 20.f);
+      CHECK(style.GetFontDescription().Weight() == BoldWeightValue());
+      CHECK(Rendered(fixture, u8"caption").ComputedFontSize() == 16.f);
+    }
+  }
+
   TEST_CASE_METHOD(ValueFixture, "CSSFontSelector: the document's selector", "[CSS][CSSFontSelector]")
   {
     RegisterAhem();

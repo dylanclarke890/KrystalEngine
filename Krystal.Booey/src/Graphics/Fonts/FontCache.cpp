@@ -3,7 +3,6 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
 #include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
@@ -242,7 +241,6 @@ namespace krys::boo
   {
     _platformData.clear();
     _fontCascadeCache.Invalidate();
-    SystemFontDatabase::Singleton().Invalidate();
 
     ++_generation;
 

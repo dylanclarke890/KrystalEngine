@@ -1450,7 +1450,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Fonts/GlyphPage.hpp
   include/Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp
   include/Krystal.Booey/Graphics/Fonts/SystemFallbackFontCache.hpp
-  include/Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp
+  include/Krystal.Booey/Graphics/Fonts/SystemFonts.hpp
   include/Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxExtents.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxSides.hpp
@@ -1654,7 +1654,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Fonts/FontSelectionAlgorithm.cpp
   src/Graphics/Fonts/OpenTypeMathData.cpp
   src/Graphics/Fonts/SystemFallbackFontCache.cpp
-  src/Graphics/Fonts/SystemFontDatabase.cpp
   src/Graphics/Fonts/WOFFFileFormat.cpp
   src/Graphics/Geometry/DoubleSize.cpp
   src/Graphics/Geometry/FloatPoint.cpp

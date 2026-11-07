@@ -143,7 +143,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- Fonts come only from the host and the bundled faces; there is no system font lookup or system fallback. `SystemFontDatabase::PlatformSystemFontShorthandInfo` returns the standard family at 16px, normal weight, for every system font keyword (`caption`, `icon`, `menu`, `message-box`, `small-caption`, `status-bar`).
 - There are no hyphenation dictionaries, so `hyphens: auto` never hyphenates (FIXME in `Core/Hyphenation.hpp`).
 - Colour glyphs and emoji presentation are not detected (FIXME in `FontHarfBuzz.cpp`), so `font-variant-emoji` only adds a variation selector to fallback clusters. `ResolveEmojiPolicy` cannot return `RequireText` or `RequireEmoji` (FIXME in `FontCascade.cpp`).
 - Colour glyphs from bitmap strikes (`CBDT`) are drawn at their strike's size, unscaled, while COLR glyphs scale. Large colour glyphs stay bitmaps.

@@ -203,6 +203,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 ### From the specs
 
 - Password fields mask one character per code point (`RenderText::SecureText`), so a character outside the BMP gets one mask.
+- Fonts come only from the host (`FontDatabase`, `Page::AddFontDirectory`) and the bundled faces: there's no lookup of the operating system's fonts and no fallback to them, so text renders the same on every machine. The system font keywords (`caption`, `icon`, `menu`, `message-box`, `small-caption`, `status-bar`) are the host's too (`SettingsValues::SystemFonts`): by default the standard family, at Chrome's sizes on Windows (12px for `menu`, `small-caption` and `status-bar`, 16px for the others), where Chrome uses the system's fonts (Segoe UI for those three).
 - There's no CSS Font Loading API (`FontFace`, `FontFaceSet`, `document.fonts`), nor its string parsers for descriptors: it's for scripts, and a host adds fonts with `FontDatabase` (`AddFontFile`, `AddFontData`) or `Page::AddFontDirectory`. Web fonts come only from `@font-face` rules.
 
 ### From Chrome

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
+#include "Krystal.Booey/Graphics/Fonts/SystemFonts.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -159,18 +159,17 @@ namespace krys::boo::css
 
     KRYS_NODISCARD constexpr bool IsSystemFontShorthand(ValueId valueId) noexcept
     {
-      // This needs to stay in sync with SystemFontDatabase::FontShorthand.
+      // This needs to stay in sync with SystemFontKeyword.
       static_assert(ToUnderlying(ValueId::StatusBar) - ToUnderlying(ValueId::Caption)
-                    == ToUnderlying(SystemFontDatabase::FontShorthand::StatusBar));
+                    == ToUnderlying(SystemFontKeyword::StatusBar));
       return valueId >= ValueId::Caption && valueId <= ValueId::StatusBar;
     }
 
-    KRYS_NODISCARD constexpr SystemFontDatabase::FontShorthand LowerFontShorthand(ValueId valueId) noexcept
+    KRYS_NODISCARD constexpr SystemFontKeyword LowerFontShorthand(ValueId valueId) noexcept
     {
-      // This needs to stay in sync with SystemFontDatabase::FontShorthand.
+      // This needs to stay in sync with SystemFontKeyword.
       krys_debug_assert(IsSystemFontShorthand(valueId));
-      return static_cast<SystemFontDatabase::FontShorthand>(ToUnderlying(valueId)
-                                                            - ToUnderlying(ValueId::Caption));
+      return static_cast<SystemFontKeyword>(ToUnderlying(valueId) - ToUnderlying(ValueId::Caption));
     }
   }
 }

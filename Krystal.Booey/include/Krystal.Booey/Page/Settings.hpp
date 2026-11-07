@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
+#include "Krystal.Booey/Graphics/Fonts/SystemFonts.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -21,6 +22,8 @@ namespace krys::boo
     bool FontFallbackPrefersPictographs {false};
     /// @brief The families the generic families resolve to; none by default, so they use the bundled font.
     boo::FontGenericFamilies FontGenericFamilies;
+    /// @brief The fonts of the `font` shorthand's system font keywords (`caption`, `menu`, ...).
+    boo::SystemFonts SystemFonts;
   };
 
   /// @brief The host's settings for a document: the features without a specification it turns on, the
