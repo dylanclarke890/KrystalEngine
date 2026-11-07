@@ -212,7 +212,7 @@ namespace krys::ui
         _iterationCount(other._iterationCount), _duration(other._duration), _direction(other._direction),
         _fillsForwards(other._fillsForwards), _startTime(other._startTime), _pauseTime(other._pauseTime),
         _totalRunningTime(other._totalRunningTime), _lastRefreshedTime(other._lastRefreshedTime),
-        _state(other._state)
+        _state(other._state), _suspended(other._suspended)
   {
   }
 
@@ -230,6 +230,7 @@ namespace krys::ui
     _totalRunningTime = other._totalRunningTime;
     _lastRefreshedTime = other._lastRefreshedTime;
     _state = other._state;
+    _suspended = other._suspended;
     return *this;
   }
 
@@ -315,19 +316,35 @@ namespace krys::ui
     }
   }
 
-  void TextureMapperAnimation::Pause(boo::Seconds time) noexcept
+  void TextureMapperAnimation::Pause(boo::Seconds offset) noexcept
   {
     _state = State::Paused;
-    _pauseTime = time;
+    _pauseTime = offset;
+    _suspended = false;
+  }
+
+  void TextureMapperAnimation::Suspend(MonotonicTime::duration time) noexcept
+  {
+    if (_state != State::Playing)
+    {
+      return;
+    }
+    Pause(ComputeTotalRunningTime(time));
+    _suspended = true;
   }
 
   void TextureMapperAnimation::Resume(MonotonicTime::duration now) noexcept
   {
+    if (!_suspended)
+    {
+      return;
+    }
+    // It goes on from the running time it was held at.
     _state = State::Playing;
-    // FIXME: This seems wrong. _totalRunningTime is cleared.
-    _pauseTime = {};
     _totalRunningTime = _pauseTime;
+    _pauseTime = {};
     _lastRefreshedTime = now;
+    _suspended = false;
   }
 
   boo::Seconds TextureMapperAnimation::ComputeTotalRunningTime(MonotonicTime::duration time) noexcept
@@ -409,10 +426,9 @@ namespace krys::ui
 
   void TextureMapperAnimations::Suspend(MonotonicTime::duration time) noexcept
   {
-    // FIXME: This seems wrong. `Pause` takes a time offset, not a time.
     for (auto &animation : _animations)
     {
-      animation.Pause(time);
+      animation.Suspend(time);
     }
   }
 

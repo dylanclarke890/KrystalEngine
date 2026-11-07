@@ -133,6 +133,8 @@ namespace krys::ui
                       const boo::GraphicsLayerAnimation *animation, const utf8_string &keyframesName,
                       double timeOffset) noexcept override;
     void PauseAnimation(const utf8_string &animationName, double timeOffset) noexcept override;
+    void SuspendAnimations(MonotonicTime::duration time) noexcept override;
+    void ResumeAnimations() noexcept override;
     void RemoveAnimation(const utf8_string &animationName, Maybe<boo::AnimatedProperty>) noexcept override;
 
     void SetShowDebugBorder(bool show) noexcept override;

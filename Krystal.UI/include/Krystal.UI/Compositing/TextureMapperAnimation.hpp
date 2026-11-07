@@ -54,6 +54,8 @@ namespace krys::ui
     boo::Seconds _totalRunningTime {};
     MonotonicTime::duration _lastRefreshedTime {};
     State _state {State::Stopped};
+    /// @brief Whether it's paused by a suspension, rather than by its animation.
+    bool _suspended {false};
 
   public:
     TextureMapperAnimation() noexcept = default;
@@ -71,7 +73,11 @@ namespace krys::ui
     void Apply(ApplicationResult &applicationResults, MonotonicTime::duration time,
                KeepInternalState keepInternalState) noexcept;
 
-    void Pause(boo::Seconds time) noexcept;
+    /// @brief Holds it at @p offset into the animation.
+    void Pause(boo::Seconds offset) noexcept;
+    /// @brief Holds it, if it's playing, where it is at @p time, until it's resumed.
+    void Suspend(MonotonicTime::duration time) noexcept;
+    /// @brief Plays it on from where a suspension held it, from @p now. Paused animations stay paused.
     void Resume(MonotonicTime::duration now) noexcept;
 
     KRYS_NODISCARD const utf8_string &Name() const noexcept

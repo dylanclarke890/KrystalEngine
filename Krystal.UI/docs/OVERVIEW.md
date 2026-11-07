@@ -56,7 +56,6 @@ Krystal.UI is the only module that knows both Booey and Krystal.Gfx: it hosts Bo
 - `EditorClient`'s text-field notifications (`TextFieldDidBeginEditing`, `TextFieldDidEndEditing`, `TextDidChangeInTextField`, `TextWillBeDeletedInTextField`, `TextDidChangeInTextArea`) and `DoTextFieldCommandFromEvent` do nothing.
 - Pressing the mouse in the view while an overlay opens doesn't end the event handler's press (FIXME in `View.cpp`).
 - The resizer grip is drawn in pixels rather than the platform's image, and search fields have no recent searches.
-- `TextureMapperAnimation.cpp` has two FIXMEs about suspect behaviour: `_totalRunningTime` is cleared where it seems it shouldn't be, and `Pause` is passed a time where it takes a time offset.
 
 ### Missing
 

@@ -851,6 +851,18 @@ namespace krys::ui
     NotifyChange(AnimationChange);
   }
 
+  void GraphicsLayerTextureMapper::SuspendAnimations(MonotonicTime::duration time) noexcept
+  {
+    _animations.Suspend(time);
+    NotifyChange(AnimationChange);
+  }
+
+  void GraphicsLayerTextureMapper::ResumeAnimations() noexcept
+  {
+    _animations.Resume(boo::html::EventLoop::Current().Now());
+    NotifyChange(AnimationChange);
+  }
+
   void GraphicsLayerTextureMapper::RemoveAnimation(const utf8_string &animationName,
                                                    Maybe<boo::AnimatedProperty>) noexcept
   {

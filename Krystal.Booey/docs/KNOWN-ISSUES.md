@@ -119,10 +119,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## Compositing and scrolling
 
-### Bugs
-
-- `TextureMapperAnimation.cpp` carries two inherited FIXMEs about suspicious handling: `_totalRunningTime` is cleared where it seems it should not be, and `Pause` takes a time offset where it is passed a time.
-
 ### Missing
 
 - `GraphicsLayerTextureMapper` has no contents scaling filters, so composited images and texture canvases with `image-rendering: pixelated` or `crisp-edges` scale smoothly.
