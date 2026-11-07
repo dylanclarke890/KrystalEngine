@@ -169,10 +169,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## SVG
 
-### Bugs
-
-- `RenderSVGText` and `LegacyRenderSVGRoot` compute their decorated bounding box by delegating to the accurate repaint rect (FIXMEs).
-
 ### Missing
 
 - Filters on SVG shapes use the border box for the filter region and source image rect rather than the object bounding box (FIXMEs in `RenderLayerFilters.cpp`). Attribute parse errors (`ReportAttributeParsingError`) and filter warnings are not reported, because there is no console.
