@@ -41,6 +41,7 @@
 #include <unicode/ubrk.h>
 #include <unicode/ucasemap.h>
 #include <unicode/uchar.h>
+#include <unicode/unorm2.h>
 #include <unicode/ustring.h>
 
 namespace krys::boo
@@ -145,6 +146,84 @@ namespace krys::boo
         return utf8_string(text);
       }
       return result;
+    }
+
+    /// @brief The single code point @p character's compatibility decomposition maps it to, if it has one.
+    KRYS_NODISCARD Maybe<char32> SingleDecomposition(const UNormalizer2 *normalizer,
+                                                     char32 character) noexcept
+    {
+      std::array<UChar, 4> buffer {};
+      UErrorCode status = U_ZERO_ERROR;
+      int32_t length = unorm2_getRawDecomposition(normalizer, static_cast<UChar32>(character), buffer.data(),
+                                                  static_cast<int32_t>(buffer.size()), &status);
+      if (U_FAILURE(status) || length <= 0)
+      {
+        return {};
+      }
+      UChar32 decomposed = 0;
+      int32_t offset = 0;
+      U16_NEXT(buffer.data(), offset, length, decomposed);
+      if (offset != length)
+      {
+        return {};
+      }
+      return static_cast<char32>(decomposed);
+    }
+
+    /// @brief @p character's full-width form, or itself when it has none: what its `<narrow>` decomposition
+    /// maps it to, or the character whose `<wide>` decomposition maps to it (as in Firefox and Safari, and
+    /// the tests of CSS Text).
+    KRYS_NODISCARD char32 FullWidthForm(char32 character) noexcept
+    {
+      UErrorCode status = U_ZERO_ERROR;
+      const UNormalizer2 *normalizer = unorm2_getNFKDInstance(&status);
+      if (U_FAILURE(status))
+      {
+        return character;
+      }
+
+      auto type = u_getIntPropertyValue(static_cast<UChar32>(character), UCHAR_DECOMPOSITION_TYPE);
+      if (type == U_DT_NARROW)
+      {
+        return SingleDecomposition(normalizer, character).value_or(character);
+      }
+
+      // The wide characters are the ideographic space and the Halfwidth and Fullwidth Forms block's; their
+      // narrow counterparts are looked up, sorted, once.
+      static const auto wideForms = [normalizer]
+      {
+        List<std::pair<char32, char32>> forms;
+        auto add = [&](char32 wide)
+        {
+          if (u_getIntPropertyValue(static_cast<UChar32>(wide), UCHAR_DECOMPOSITION_TYPE) == U_DT_WIDE)
+          {
+            if (auto narrow = SingleDecomposition(normalizer, wide))
+            {
+              forms.push_back({*narrow, wide});
+            }
+          }
+        };
+        add(0x3000);
+        for (char32 wide = 0xFF00; wide <= 0xFFEF; ++wide)
+        {
+          add(wide);
+        }
+        std::ranges::sort(forms);
+        return forms;
+      }();
+      auto it = std::ranges::lower_bound(wideForms, character, {}, &std::pair<char32, char32>::first);
+      return it != wideForms.end() && it->first == character ? it->second : character;
+    }
+
+    // https://www.w3.org/TR/css-text-3/#valdef-text-transform-full-width
+    KRYS_NODISCARD utf8_string ConvertToFullWidth(utf8_stringview string) noexcept
+    {
+      StringBuilder result;
+      for (text::CodePointIterator it(string); !it.AtEnd(); ++it)
+      {
+        result.Append(FullWidthForm(*it));
+      }
+      return krys::move(result).ToString();
     }
 
     // https://www.w3.org/TR/css-text-3/#small-kana
@@ -314,7 +393,10 @@ namespace krys::boo
       modified = ConvertCase(modified, style.ComputedLocale().GetPlatform(), false);
     }
 
-    // FIXME: full-width (transformToFullWidth), which upstream only implements on Cocoa platforms.
+    if (transform.Contains(style::TextTransformValue::FullWidth))
+    {
+      modified = ConvertToFullWidth(modified);
+    }
 
     if (transform.Contains(style::TextTransformValue::FullSizeKana))
     {

@@ -134,7 +134,9 @@ namespace krys::boo::tests
       #lower { text-transform: lowercase }
       #capitalize { text-transform: capitalize }
       #kana { text-transform: full-size-kana }
-    </style><p id=upper>abc straße</p><p id=lower>ABC</p><p id=capitalize>hello world<span id=continued>wide</span> <span id=next>new</span></p><p id=kana>ぁァ</p><p id=none>Plain</p>)"};
+      #wide { text-transform: full-width }
+      #both { text-transform: uppercase full-width }
+    </style><p id=upper>abc straße</p><p id=lower>ABC</p><p id=capitalize>hello world<span id=continued>wide</span> <span id=next>new</span></p><p id=kana>ぁァ</p><p id=wide>a Z!~¢⦅ ｶﾞﾡ￨ éあ</p><p id=both>ab</p><p id=none>Plain</p>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
 
@@ -158,6 +160,14 @@ namespace krys::boo::tests
     SECTION("Small kana")
     {
       CHECK(RenderedText(fixture, u8"kana") == u8"あア");
+    }
+
+    SECTION("Full width")
+    {
+      // ASCII and the narrow forms widen, the half-width forms take their usual forms (the voiced sound mark
+      // the combining one), and characters without a full-width form are kept.
+      CHECK(RenderedText(fixture, u8"wide") == u8"ａ　Ｚ！～￠｟　ガㄱ│　éあ");
+      CHECK(RenderedText(fixture, u8"both") == u8"ＡＢ");
     }
 
     SECTION("A style change reapplies the transform")
