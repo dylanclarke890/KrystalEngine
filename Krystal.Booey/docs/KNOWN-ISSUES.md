@@ -90,7 +90,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Image-based `shape-outside` is not supported: `ShapeOutsideInfo` builds only box, rectangle and polygon shapes (no raster shape, no `shape-image-threshold`), and shapes have no display paths for highlighting (FIXMEs in `LayoutShape.hpp` and `ShapeOutsideInfo.cpp`).
 - `text-combine-upright` is not implemented: there is no combined-text renderer (`RenderCombineText`), so `BoxTreeUpdater`, the inline iterators, `RenderBlockFlow` and `RenderText` treat combined text as ordinary text (FIXMEs).
 - `layout_integration::GridLayout::CanUseFor` accepts only single-track spans at explicit unnamed lines and the self-alignments `start`, `flex-start`, `self-start`, `normal` and `stretch`; other grids fall back to `RenderGrid`. Multi-column spans in `ImplicitGrid` are a FIXME.
-- `RenderTreeAsText` leaves out SVG paint features and visual overflow, and file upload control names (FIXMEs).
 
 ## Painting
 

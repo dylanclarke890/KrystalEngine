@@ -73,13 +73,13 @@ namespace krys::boo::layout::tests
 layer at (0,0) size 800x38
   RenderBlock {HTML} at (0,0) size 800x38
     RenderBody {BODY} at (0,0) size 800x38
-      RenderFileUploadControl {INPUT} at (0,0) size 340x19 id="one"
+      RenderFileUploadControl {INPUT} at (0,0) size 340x19 "no file selected" id="one"
         RenderButton {INPUT} at (0,0) size 126x19 [color=#000000CC] [bgcolor=#C0C0C0] [border: (2px outset #C0C0C0)]
           RenderBlock (anonymous) at (8,4) size 110x10
             RenderTextFragment at (0,0) size 110x10
               text run at (0,0) width 110: "Choose File"
       RenderBR {BR} at (340,4) size 0x10
-      RenderFileUploadControl {INPUT} at (0,19) size 340x19 id="many"
+      RenderFileUploadControl {INPUT} at (0,19) size 340x19 "no files selected" id="many"
         RenderButton {INPUT} at (0,0) size 136x19 [color=#000000CC] [bgcolor=#C0C0C0] [border: (2px outset #C0C0C0)]
           RenderBlock (anonymous) at (8,4) size 120x10
             RenderTextFragment at (0,0) size 120x10

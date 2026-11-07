@@ -52,6 +52,15 @@ layer at (0,0) size 800x80 layerType: foreground only
 )");
     }
 
+    SECTION("A file upload control's file name")
+    {
+      ResolverFixture files {u8"<!DOCTYPE html><input type=file>"};
+      auto dump = ExternalRepresentation(files.Frame.get());
+      CAPTURE(css::tests::ToNarrow(dump));
+      CHECK(dump.contains(u8"RenderFileUploadControl {INPUT} at "));
+      CHECK(dump.contains(u8" \"no file selected\""));
+    }
+
     SECTION("All layers, nested, with ids and classes")
     {
       CHECK(ExternalRepresentation(fixture.Frame.get(),
