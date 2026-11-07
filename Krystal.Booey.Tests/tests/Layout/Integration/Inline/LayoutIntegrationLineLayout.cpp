@@ -1,13 +1,20 @@
 ﻿#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
+#include "Krystal.Booey/SVG/SVGRect.hpp"
+#include <string>
 
 namespace krys::boo::layout_integration::tests
 {
@@ -196,5 +203,71 @@ layer at (0,0) size 800x60
     CHECK(span.LinesBoundingBox() == IntRect(5, 5, 50, 20));
     auto &lineBreak = Downcast<RenderLineBreak>(*fixture.ById(u8"br").Renderer());
     CHECK(lineBreak.LinesBoundingBox() == IntRect(25, 15, 0, 10));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "LineLayout: SVG text laid out by the inline formatting context matches the legacy layout",
+                   "[Layout][LineLayout][SVG]")
+  {
+    // `UseIFCForSVGText` moves SVG text from the legacy line layout to the inline formatting context; each
+    // page draws and answers the text queries the same either way.
+    struct DefaultSettingsGuard
+    {
+      ~DefaultSettingsGuard() noexcept
+      {
+        Settings::Default().UseIFCForSVGText = false;
+      }
+    } guard;
+
+    const utf8_stringview pages[] = {
+      u8"<text id=t x='10 20 30' y='20 25' dx=3 rotate='0 10'>Hello <tspan fill=red "
+      u8"dy=5>world</tspan></text>",
+      u8"<text id=t x=100 y=40 text-anchor=middle font-size=20>centred <tspan "
+      u8"font-weight=bold>bold</tspan></text>",
+      u8"<path id=p d='M10 80 Q 100 0 190 80' fill=none /><text id=t><textPath href='#p'>along the "
+      u8"path</textPath>"
+      u8"</text>",
+      u8"<text id=t x=50 y=10 writing-mode=vertical-rl>vertical</text>",
+      u8"<text id=t x=10 y=50 direction=rtl>abc \u05D0\u05D1\u05D2 def</text>",
+      u8"<text id=t x=10 y=50 textLength=150 lengthAdjust=spacingAndGlyphs>stretched</text>",
+      u8"<text id=t x=10 y=50 style='letter-spacing: 3px; text-decoration: underline'>deco <a href='#'>"
+      u8"<tspan>link</tspan></a></text>",
+    };
+
+    auto laidOut = [](utf8_stringview page, bool inlineFormattingContext)
+    {
+      Settings::Default().UseIFCForSVGText = inlineFormattingContext;
+      boo::tests::PaintFixture fixture {
+        u8"<!DOCTYPE html><body style=\"margin: 0\"><svg width=200 height=100>" + utf8_string(page)
+        + u8"</svg></body>"};
+      auto painted = fixture.Painted();
+
+      auto &element = Downcast<svg::SVGElement>(*fixture.Document->GetElementById(u8"t"));
+      auto &flow = Downcast<RenderBlockFlow>(*element.Renderer());
+      CHECK(flow.HasSvgTextLayout() == !inlineFormattingContext);
+      CHECK((flow.InlineLayout() != nullptr) == inlineFormattingContext);
+
+      auto &text = Downcast<svg::SVGTextContentElement>(element);
+      auto box = Downcast<svg::SVGGraphicsElement>(element).GetBBox();
+      std::string result = "length " + std::to_string(text.GetComputedTextLength()) + ", box "
+                           + std::to_string(box.X()) + " " + std::to_string(box.Y()) + " "
+                           + std::to_string(box.Width()) + " " + std::to_string(box.Height());
+      for (uint32 index = 0; index < static_cast<uint32>(text.GetNumberOfChars()); ++index)
+      {
+        auto start = text.GetStartPositionOfChar(index);
+        if (!start.HasException())
+        {
+          auto point = start.ReleaseValue();
+          result += ", " + std::to_string(point->X()) + " " + std::to_string(point->Y());
+        }
+      }
+      return result + "\n" + std::string(reinterpret_cast<const char *>(painted.c_str()));
+    };
+
+    for (auto page : pages)
+    {
+      INFO(reinterpret_cast<const char *>(utf8_string(page).c_str()));
+      CHECK(laidOut(page, true) == laidOut(page, false));
+    }
   }
 }
