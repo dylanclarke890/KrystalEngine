@@ -160,7 +160,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Images decode synchronously: there is no decoding work queue, so `DecodingMode::Asynchronous` decodes at once and its callbacks run before the call returns (FIXMEs in `BitmapImageSource.cpp`). `HTMLImageElement` and `SVGImageElement` have no `decode()`.
 - Animated images (GIF, APNG, animated WebP) do not decode the next frame ahead, have no `allowsAnimation` override or system animation controls, and no controls for suspended documents or off-screen views.
 - Images are sRGB only: ICC profiles are ignored (FIXME in `PNGImageDecoder.cpp`), and there is no HDR, headroom or gain map support. `NativeImage` has no colour spaces.
-- PDF images are not supported (FIXME in `Image.cpp`).
 - Orientation is applied to the pixels, not by drawing; density-corrected sizes are not applied (FIXME in `BitmapImageSource.cpp`). `GraphicsContext`'s default `DrawImageBuffer` and `DrawPattern` for image buffers draw nothing (FIXMEs in `GraphicsContext.cpp`: `nativeImageForDrawing`).
 - `shape-outside: url()` does not use the image's alpha (see *Layout*).
 - `<video>`: `HTMLVideoElement::VideoWidth()` and `VideoHeight()` are unimplemented, a poster has no events or renderer, and there are no video decoders.

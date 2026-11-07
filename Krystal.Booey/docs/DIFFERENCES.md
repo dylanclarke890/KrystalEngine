@@ -164,6 +164,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
+- PDF isn't an image format: `Image::Create` makes SVG images from `image/svg+xml` and bitmaps from everything else, so a PDF is a broken image. A PDF renderer is too heavy for now; Chrome draws a PDF's first page.
 - Dashes follow SVG and canvas (an odd-length pattern is repeated, each contour restarts the pattern, a zero-length dash with round or square caps draws a dot or square, and an empty, negative, non-finite or zero-sum pattern strokes solid), except that more than 100,000 dashes on a contour strokes it solid (`detail::MaxDashes`). `StrokeStyle::MiterLimit` defaults to 10 (canvas's default; SVG's is 4), and a width of 0 strokes a hairline one target pixel wide, as Skia does (canvas callers skip such strokes).
 - Degenerate gradients (a line of zero length, or circles that coincide) are solid fills, as Skia's, where canvas paints nothing: the last colour when padded and the average colour when reflected or repeated. A padded radial gradient whose circles coincide but have a radius is the first colour inside the circle and the last outside.
 - Compositing operators on draws are bounded, as Skia's: only what a draw covers changes, and antialiased edges blend over. A layer composited with an operator covers its whole clip.

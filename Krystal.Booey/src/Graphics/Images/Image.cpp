@@ -33,7 +33,7 @@ namespace krys::boo
       return svg::SVGImage::Create(&observer);
     }
 
-    // FIXME: PDF images, once there are any.
+    // There are no PDF images (see DIFFERENCES.md).
     return BitmapImage::Create(&observer);
   }
 
