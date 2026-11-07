@@ -449,7 +449,7 @@ namespace krys::boo::html
 
   void HTMLOptionElement::OnChildrenChanged() noexcept
   {
-    // FIXME: Tell ancestor datalists (optionElementChildrenChanged) once datalists are ported.
+    NotifyAncestorDataLists();
 
     if (RefPtr<HTMLSelectElement> select = ShareRefPtr(OwnerSelectElement()))
     {
@@ -536,8 +536,26 @@ namespace krys::boo::html
         select->OptionElementChildrenChanged();
       }
     }
-    // FIXME: Tell ancestor datalists when the value changes (optionElementChildrenChanged) once datalists are
-    // ported.
+    else if (localName == u8"value")
+    {
+      NotifyAncestorDataLists();
+    }
+  }
+
+  void HTMLOptionElement::NotifyAncestorDataLists() noexcept
+  {
+    List<Ref<HTMLDataListElement>> dataLists;
+    for (auto *ancestor = ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+    {
+      if (auto *dataList = DynamicDowncast<HTMLDataListElement>(*ancestor))
+      {
+        dataLists.push_back(ShareRef(*dataList));
+      }
+    }
+    for (auto &dataList : dataLists)
+    {
+      dataList->OptionElementChildrenChanged();
+    }
   }
 
 #pragma endregion

@@ -147,6 +147,8 @@ namespace krys::boo::html
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnChildrenChanged() noexcept override;
+    /// @brief Tells the datalists the option is in that their suggestions may have changed.
+    void NotifyAncestorDataLists() noexcept;
     void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,

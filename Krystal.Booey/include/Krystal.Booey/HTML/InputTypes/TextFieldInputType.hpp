@@ -19,6 +19,10 @@ namespace krys::boo::html
 
   public:
     ~TextFieldInputType() noexcept override;
+    KRYS_NODISCARD bool ShouldRespectListAttribute() const noexcept override
+    {
+      return true;
+    }
 
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
 

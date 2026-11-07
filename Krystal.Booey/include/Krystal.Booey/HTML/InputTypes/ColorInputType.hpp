@@ -23,6 +23,10 @@ namespace krys::boo::html
     }
 
     ~ColorInputType() noexcept override;
+    KRYS_NODISCARD bool ShouldRespectListAttribute() const noexcept final
+    {
+      return true;
+    }
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {

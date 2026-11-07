@@ -75,7 +75,7 @@ namespace krys::boo::html
 {
   /// @brief The type-specific part of an input element: its value's rules, validity, form data, events,
   /// user agent shadow tree and renderer. Only HTMLInputElement uses it.
-  // FIXME: The switch control, datalists (shouldRespectListAttribute), and the types' own focus rules
+  // FIXME: The switch control, and the types' own focus rules
   // (isKeyboardFocusable, isMouseFocusable), which the focus model decides.
   class InputType : public RefCounted<InputType>
   {
@@ -465,6 +465,18 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual bool ShouldUseInputMethod() const noexcept;
 
     virtual void AttributeChanged(dom::DOMStringAtom) noexcept
+    {
+    }
+
+    /// @brief Whether the `list` attribute applies to the type, so its datalist gives suggestions.
+    /// @see https://html.spec.whatwg.org/#attr-input-list
+    KRYS_NODISCARD virtual bool ShouldRespectListAttribute() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief The element's datalist, or its suggestions, may have changed.
+    virtual void DataListMayHaveChanged() noexcept
     {
     }
 

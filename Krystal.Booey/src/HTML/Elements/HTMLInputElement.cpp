@@ -6,10 +6,12 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
+#include "Krystal.Booey/DOM/Internals/IdTargetObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
@@ -1552,7 +1554,7 @@ namespace krys::boo::html
 
 #pragma region Radio buttons
 
-  List<Ref<HTMLInputElement>> HTMLInputElement::RadioButtonGroup() const noexcept
+  krys::List<Ref<HTMLInputElement>> HTMLInputElement::RadioButtonGroup() const noexcept
   {
     if (auto *buttons = RadioButtonGroups())
     {
@@ -1901,7 +1903,15 @@ namespace krys::boo::html
         UpdateValidity();
       }
     }
-    // FIXME: The list attribute (its datalist and target observer), with datalists.
+    else if (localName == u8"list")
+    {
+      _hasNonEmptyList = value && !value->empty();
+      if (_hasNonEmptyList)
+      {
+        ResetListAttributeTargetObserver();
+        DataListMayHaveChanged();
+      }
+    }
 
     _inputType->AttributeChanged(localName);
   }
@@ -1909,7 +1919,7 @@ namespace krys::boo::html
   void HTMLInputElement::OnInsert() noexcept
   {
     HTMLTextFormControlElement::OnInsert();
-    // FIXME: Resetting the list attribute's target observer, with datalists.
+    ResetListAttributeTargetObserver();
     if (IsRadioButton())
     {
       UpdateValidity();
@@ -1958,7 +1968,69 @@ namespace krys::boo::html
     {
       UpdateValidity();
     }
-    // FIXME: Resetting the list attribute's target observer, with datalists.
+    ResetListAttributeTargetObserver();
+  }
+
+  /// @brief Tells its input when the element its `list` attribute names changes, in a task, as the change
+  /// may be in the middle of a tree mutation.
+  class ListAttributeTargetObserver final : private dom::IdTargetObserver
+  {
+  private:
+    WeakPtr<HTMLInputElement> _element;
+
+  public:
+    ListAttributeTargetObserver(dom::DOMStringAtom id, HTMLInputElement &element) noexcept
+        : IdTargetObserver(element.TreeScope().IdTargetObserverRegistry(), id),
+          _element(CreateWeakPtr(&element))
+    {
+    }
+
+  private:
+    void IdTargetChanged(dom::Element &) noexcept override
+    {
+      auto *element = _element.get();
+      if (!element)
+      {
+        return;
+      }
+      EventLoop::Current().QueueTask(TaskSource::DOMManipulation, element->NodeDocument(),
+                                     [weakElement = _element]
+                                     {
+                                       if (RefPtr<HTMLInputElement> element = ShareRefPtr(weakElement.get()))
+                                       {
+                                         element->DataListMayHaveChanged();
+                                       }
+                                     });
+    }
+  };
+
+  RefPtr<HTMLDataListElement> HTMLInputElement::List() const noexcept
+  {
+    if (!_hasNonEmptyList || !_inputType->ShouldRespectListAttribute())
+    {
+      return nullptr;
+    }
+    return DynamicDowncast<HTMLDataListElement>(ElementForAttributeInternal(u8"list"));
+  }
+
+  void HTMLInputElement::DataListMayHaveChanged() noexcept
+  {
+    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    protectedInputType->DataListMayHaveChanged();
+  }
+
+  void HTMLInputElement::ResetListAttributeTargetObserver() noexcept
+  {
+    if (IsConnected())
+    {
+      if (auto list = GetAttribute(u8"list"))
+      {
+        _listAttributeTargetObserver =
+          CreateUnique<ListAttributeTargetObserver>(dom::DOMStringAtom(*list), *this);
+        return;
+      }
+    }
+    _listAttributeTargetObserver = nullptr;
   }
 
   void HTMLInputElement::OnAdopt(dom::Document &oldDocument) noexcept

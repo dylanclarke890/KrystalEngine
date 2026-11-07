@@ -24,7 +24,9 @@ namespace krys::boo::html
     RefPtr<HTMLInputElement> CheckedRadioButton;
   };
 
+  class HTMLDataListElement;
   class HTMLImageLoader;
+  class ListAttributeTargetObserver;
 
   /// @see https://html.spec.whatwg.org/#htmlinputelement
   class HTMLInputElement : public HTMLTextFormControlElement
@@ -48,11 +50,13 @@ namespace krys::boo::html
     dom::DOMString _name;
     Maybe<dom::DOMString> _valueIfDirty;
     UniquePtr<HTMLImageLoader> _imageLoader;
+    UniquePtr<ListAttributeTargetObserver> _listAttributeTargetObserver;
     uint32 _size {DefaultSize};
     bool _isChecked : 1 {false};
     bool _dirtyCheckednessFlag : 1 {false};
     bool _isDefaultChecked : 1 {false};
     bool _isIndeterminate : 1 {false};
+    bool _hasNonEmptyList : 1 {false};
     bool _isActivatedSubmit : 1 {false};
     bool _wasModifiedByUser : 1 {false};
     bool _hasPendingUserAgentShadowTreeUpdate : 1 {false};
@@ -206,8 +210,13 @@ namespace krys::boo::html
 
     void SetIndeterminate(bool newValue) noexcept;
 
-    // FIXME: Implement List().
-    // readonly attribute HTMLDataListElement? list;
+    /// @brief The datalist giving the input's suggestions: the first element in its tree with the `list`
+    /// attribute's ID, if that's a datalist and the attribute applies to the input's type.
+    /// @see https://html.spec.whatwg.org/#dom-input-list
+    KRYS_NODISCARD RefPtr<HTMLDataListElement> List() const noexcept;
+
+    /// @brief The input's datalist (its `list`) or its suggestions may have changed.
+    void DataListMayHaveChanged() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-max
     KRYS_NODISCARD dom::DOMString Max() const noexcept;
@@ -491,7 +500,7 @@ namespace krys::boo::html
     KRYS_NODISCARD uint32 EffectiveMaxLength() const noexcept;
 
     /// @brief The radio buttons in this one's group, in tree order.
-    KRYS_NODISCARD List<Ref<HTMLInputElement>> RadioButtonGroup() const noexcept;
+    KRYS_NODISCARD krys::List<Ref<HTMLInputElement>> RadioButtonGroup() const noexcept;
     KRYS_NODISCARD RefPtr<HTMLInputElement> CheckedRadioButtonForGroup() const noexcept;
 
     /// @brief The groups this radio button is in: its form's, or its tree's; null if it isn't a radio button
@@ -658,6 +667,8 @@ namespace krys::boo::html
     void MinLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept;
     void UpdateValueIfNeeded() noexcept;
     void AddToRadioButtonGroup() noexcept;
+    /// @brief Watches the element the `list` attribute names, while the input is connected.
+    void ResetListAttributeTargetObserver() noexcept;
     void RemoveFromRadioButtonGroup() noexcept;
   };
 }
