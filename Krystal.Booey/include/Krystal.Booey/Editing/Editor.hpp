@@ -456,6 +456,8 @@ namespace krys::boo
 
     void SelectComposition() noexcept;
     void SetComposition(utf8_stringview text, SetCompositionMode mode) noexcept;
+    /// @brief Ends the composition, keeping its text, and tells the client the input method's is discarded.
+    void CancelCompositionAndNotifyClient() noexcept;
 
     KRYS_NODISCARD utf8_string SelectedText(TextIteratorBehaviors behaviors) const noexcept;
 

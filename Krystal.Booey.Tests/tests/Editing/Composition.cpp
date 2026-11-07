@@ -189,6 +189,20 @@ namespace krys::boo::tests
       CHECK(fixture.Client->DiscardedCompositions == 1);
     }
 
+    SECTION("Undoing ends the composition, through the editor client, and undoes its text")
+    {
+      CHECK(fixture.Run(u8"Undo"));
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(Narrow(fixture.InnerHTML(root)) == "ab");
+      CHECK(fixture.Client->DiscardedCompositions == 1);
+
+      // Redoing brings back the text, but not the composition.
+      CHECK(fixture.Run(u8"Redo"));
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(Narrow(fixture.InnerHTML(root)) == "ab" + Narrow(ka));
+      CHECK(fixture.Client->DiscardedCompositions == 1);
+    }
+
     SECTION("A confirmed composition is undone")
     {
       editor.ConfirmComposition();

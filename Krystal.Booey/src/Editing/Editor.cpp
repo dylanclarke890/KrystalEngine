@@ -890,6 +890,8 @@ namespace krys::boo
 
   void Editor::Undo() noexcept
   {
+    // Undoing changes the text under a composition, so the input method would be out of step with it.
+    CancelCompositionAndNotifyClient();
     if (auto *client = Client())
     {
       client->Undo();
@@ -904,6 +906,7 @@ namespace krys::boo
 
   void Editor::Redo() noexcept
   {
+    CancelCompositionAndNotifyClient();
     if (auto *client = Client())
     {
       client->Redo();
@@ -1600,6 +1603,19 @@ namespace krys::boo
       return;
     }
     SetComposition({}, SetCompositionMode::CancelComposition);
+  }
+
+  void Editor::CancelCompositionAndNotifyClient() noexcept
+  {
+    if (!HasComposition())
+    {
+      return;
+    }
+    CancelComposition();
+    if (auto *editorClient = Client())
+    {
+      editorClient->DiscardedComposition(_document);
+    }
   }
 
   bool Editor::CancelCompositionIfSelectionIsInvalid() noexcept

@@ -197,7 +197,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Image documents and writing images to the pasteboard are absent. Link decoration filtering and the `application/x-moz-file` quirk are not implemented.
 - Script access to the clipboard (`javaScriptCanAccessClipboard`, `domPasteAllowed`) is off (FIXMEs in `EditorCommand.cpp`). Password fields are kept off the clipboard.
 - Input methods are IMM32 only. TSF features (reconversion, inline handwriting, speech), custom highlights and annotations (inline predictions, writing suggestions), `inputmode`, `ime-mode` and an on-screen keyboard are not supported. The page draws no candidate list and the host is not told the candidates; the IME draws its own windows.
-- Undo does not cancel a composition.
 - Context menus are not built: only the `contextmenu` event is dispatched, and there is no keyboard (menu key) route to it.
 - Dragging a selection out to other applications is not supported.
 
