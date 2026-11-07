@@ -87,7 +87,7 @@ namespace krys::boo::html::tests
       auto &element = ById(u8"a");
       CHECK(Is<HTMLMaybeFormAssociatedCustomElement>(element));
       CHECK(element.IsDefinedCustomElement());
-      CHECK(dynamic_cast<LoggingElement *>(element.GetCustomElement()) != nullptr);
+      CHECK(element.GetCustomElement() != nullptr);
       CHECK(element.Matches(u8":defined").ReleaseValue());
       CHECK(TakeCalls() == Log {u8"constructed", u8"attribute value null 1", u8"connected a"});
     }

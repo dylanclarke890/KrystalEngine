@@ -1247,7 +1247,7 @@ namespace krys::boo
       return false;
     }
 
-    auto event = dom::TextEvent::Create(text, inputType);
+    auto event = dom::TextEvent::Create(_frame.Window(), text, inputType);
     event->SetUnderlyingEvent(underlyingEvent);
 
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());

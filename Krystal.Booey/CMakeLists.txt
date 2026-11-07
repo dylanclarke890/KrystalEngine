@@ -1135,6 +1135,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/DataTransfer/DataTransferItem.cpp
   src/DOM/DataTransfer/DataTransferItemList.cpp
   src/DOM/Events/BeforeTextInsertedEvent.cpp
+  src/DOM/Events/UIEvent.cpp
   src/DOM/Events/ClipboardEvent.cpp
   src/DOM/Events/CommandEvent.cpp
   src/DOM/Events/CompositionEvent.cpp

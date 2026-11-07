@@ -11,12 +11,14 @@ namespace krys::boo::dom
 
   InputEvent::~InputEvent() noexcept = default;
 
-  Ref<InputEvent> InputEvent::Create(DOMStringAtom type, DOMStringView inputType, bool cancelable,
-                                     Maybe<DOMString> data, RefPtr<DataTransfer> &&dataTransfer,
+  Ref<InputEvent> InputEvent::Create(DOMStringAtom type, LocalDOMWindow *view, DOMStringView inputType,
+                                     bool cancelable, Maybe<DOMString> data,
+                                     RefPtr<DataTransfer> &&dataTransfer,
                                      const List<RefPtr<StaticRange>> &targetRanges, int32 detail,
                                      IsInputMethodComposing isInputMethodComposing) noexcept
   {
     InputEventInit init;
+    init.View = view;
     init.Bubbles = true;
     init.Cancelable = cancelable;
     init.Composed = true;

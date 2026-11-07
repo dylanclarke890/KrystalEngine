@@ -242,7 +242,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- The window gets no `focus`/`blur` events: `FocusAlgorithms` has FIXMEs for firing them at a document's `Window`, and `FocusEvent`/`UIEvent` have no `view`.
+- While the page doesn't have system focus, `focus()` still fires `focus` and `focusin` at the element, and they fire again when the page gets system focus. Chrome only moves the focused element then, and fires them once, when the page gets system focus.
 - There is no keyboard route to `contextmenu` (`sendContextMenuEventForKey`), and no menu controller beyond the `contextmenu` event.
 - Access keys: `HTMLElement::AccessKeyAction` exists but nothing calls it (FIXME in `EventHandler.cpp`), `accessKeyLabel` is empty, and a legend has no accesskey delegatee.
 - Custom cursors (`cursor: url()`) are absent (`Cursor` has no images; FIXME in `EventHandler::SelectCursor`), as are auto-hiding cursors.

@@ -1113,9 +1113,10 @@ namespace krys::boo::dom
       // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
       Ref<MouseEvent> doubleClickEvent = MouseEvent::Create(
         DOMStringAtom(EventNames::DblClick), mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
-        html::EventLoop::Current().Now(), mouseEvent->View(), mouseEvent->Detail(), mouseEvent->ScreenX(),
-        mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(), mouseEvent->ModifierKeys(),
-        mouseEvent->ButtonType(), mouseEvent->Buttons(), mouseEvent->GetSyntheticClickType(), relatedTarget);
+        html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
+        mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(),
+        mouseEvent->ModifierKeys(), mouseEvent->ButtonType(), mouseEvent->Buttons(),
+        mouseEvent->GetSyntheticClickType(), relatedTarget);
 
       if (mouseEvent->DefaultHandled())
       {

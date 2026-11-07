@@ -657,7 +657,8 @@ namespace krys::boo::html
       // 2.2. If entry is an element, let blur event target be entry. If entry is a Document object, let blur
       //      event target be that Document object's relevant global object. Otherwise, let blur event target
       //      be null.
-      // FIXME: Fire blur at a document's Window.
+      // (A document stays in a chain only while it doesn't have system focus, without nested navigables.
+      // Its Window gets its events from SystemFocusChanged, when that changes.)
       RefPtr<dom::Element> blurEventTarget = DynamicDowncast<dom::Element>(entry);
 
       // 2.3. If entry is the last entry in old chain, and entry is an Element, and the last entry in new
@@ -711,7 +712,7 @@ namespace krys::boo::html
       // focus
       //      event target be that Document object's relevant global object. Otherwise, let focus event target
       //      be null.
-      // FIXME: Fire focus at a document's Window.
+      // (See the blur event target, above.)
       auto *focusEventTarget = DynamicDowncast<dom::Element>(*entry);
 
       // 4.3. If entry is the last entry in new chain, and entry is an Element, and the last entry in old
@@ -745,10 +746,12 @@ namespace krys::boo::html
   {
     // 1. Let view be target if target is a Window object; otherwise target's node document's relevant global
     //    object.
-    // FIXME: The view (the Window).
+    auto *view = target.NodeDocument().Window();
+
     // 2. Fire an event named e at target, using FocusEvent, with the relatedTarget attribute initialized to
     //    relatedTarget, the view attribute initialized to view, and the composed flag set.
     dom::FocusEventInit attributes;
+    attributes.View = view;
     attributes.RelatedTarget = ShareRefPtr(relatedTarget);
     attributes.Composed = true;
     (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(e, target, attributes);
@@ -1482,21 +1485,24 @@ namespace krys::boo::html
     document.SetFocusedAndActive(focused);
 
     // The focused element gets `blur` before the window, and `focus` after it.
-    auto fire = [](dom::DOMStringAtom type, dom::Element &target)
+    if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
+        !focused && focusedElement)
+    {
+      FireFocusEvent(dom::DOMStringAtom(u8"blur"), *focusedElement, nullptr);
+    }
+    if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document.Window()))
     {
       dom::FocusEventInit attributes;
+      attributes.View = window.get();
       attributes.Composed = true;
-      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(type, target, attributes);
-    };
-    RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
-    if (!focused && focusedElement)
-    {
-      fire(dom::DOMStringAtom(u8"blur"), *focusedElement);
+      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(
+        dom::DOMStringAtom(focused ? u8"focus" : u8"blur"), *window, attributes);
     }
-    // FIXME: Fire `focus` or `blur` at the document's Window.
-    if (focused && focusedElement)
+    // NOTE: the window's listeners may have moved the focus.
+    if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
+        focused && focusedElement)
     {
-      fire(dom::DOMStringAtom(u8"focus"), *focusedElement);
+      FireFocusEvent(dom::DOMStringAtom(u8"focus"), *focusedElement, nullptr);
     }
   }
 

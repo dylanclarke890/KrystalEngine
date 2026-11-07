@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -375,9 +376,40 @@ namespace krys::boo::tests
 
     SECTION("the window losing and regaining focus")
     {
-      // The focused element gets blur, without focusout, stays focused and stops matching `:focus`.
+      struct WindowRecorder : dom::EventListenerCallback
+      {
+        List<std::string> &Records;
+        LocalDOMWindow *Window;
+
+        WindowRecorder(List<std::string> &records, LocalDOMWindow *window) noexcept
+            : Records(records), Window(window)
+        {
+        }
+
+        void HandleEvent(dom::Event &event) noexcept override
+        {
+          // Not what bubbles from the focused element.
+          if (event.Target().get() != Window)
+          {
+            return;
+          }
+          auto *focusEvent = DynamicDowncast<dom::FocusEvent>(event);
+          bool isRight = focusEvent && focusEvent->View() == Window && !event.Bubbles() && event.Composed();
+          auto type = std::string(event.Type().View().begin(), event.Type().View().end());
+          Records.push_back("window:" + type + (isRight ? "" : "(wrong)"));
+        }
+      };
+      auto *window = fixture.Document->Window();
+      Ref<dom::EventListenerCallback> windowRecorder = CreateRef<WindowRecorder>(fixture.Records, window);
+      for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
+      {
+        window->AddEventListener(dom::DOMStringAtom(type), Ref {windowRecorder}, false);
+      }
+
+      // The focused element gets blur and focusout before the window, stays focused and stops matching
+      // `:focus`.
       html::FocusAlgorithms::SystemFocusChanged(*fixture.Document, false);
-      CHECK(fixture.Take() == Strings {"blur:outer(null)"});
+      CHECK(fixture.Take() == Strings {"blur:outer(null)", "focusout:outer(null)", "window:blur"});
       CHECK(fixture.Document->FocusedElement() == &outer);
       CHECK_FALSE(fixture.Document->HasFocus());
       (void)fixture.Document->UpdateLayout();
@@ -388,7 +420,7 @@ namespace krys::boo::tests
       CHECK(fixture.Take().empty());
 
       html::FocusAlgorithms::SystemFocusChanged(*fixture.Document, true);
-      CHECK(fixture.Take() == Strings {"focus:outer(null)"});
+      CHECK(fixture.Take() == Strings {"window:focus", "focus:outer(null)", "focusin:outer(null)"});
       (void)fixture.Document->UpdateLayout();
       CHECK(outer.OffsetWidth() == 100);
     }

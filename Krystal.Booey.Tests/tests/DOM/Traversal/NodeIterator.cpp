@@ -164,9 +164,9 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->AppendChild(*sibling1.Value()).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
 
-    auto nodeIterator =
-      data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, CreateRefPtr<TextNodeFilter>());
-    CHECK(dynamic_cast<TextNodeFilter *>(nodeIterator->Filter()) != nullptr);
+    RefPtr<NodeFilter> filter = CreateRefPtr<TextNodeFilter>();
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, RefPtr {filter});
+    CHECK(nodeIterator->Filter() == filter.get());
 
     auto nextNodeResult = nodeIterator->NextNode();
     REQUIRE_FALSE(nextNodeResult.HasException());

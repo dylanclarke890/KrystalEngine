@@ -313,6 +313,22 @@ namespace krys::boo::dom
 
 #pragma region Type Checks
 
+    KRYS_NODISCARD virtual bool IsUIEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsAnimationEvent() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief What identifies the type of a `CustomEvent`'s detail, or null if this isn't a `CustomEvent`.
+    KRYS_NODISCARD virtual const void *CustomEventDetailType() const noexcept
+    {
+      return nullptr;
+    }
+
     KRYS_NODISCARD virtual bool IsMouseEvent() const noexcept
     {
       return false;

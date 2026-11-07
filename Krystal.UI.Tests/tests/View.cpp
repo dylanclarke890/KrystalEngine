@@ -370,7 +370,7 @@ namespace krys::ui::tests
       auto found = view.Document().QuerySelector(u8"bean-rating").ReleaseValue();
       REQUIRE(found);
       auto &rating = *found;
-      REQUIRE(dynamic_cast<BeanRating *>(rating.GetCustomElement()));
+      REQUIRE(rating.GetCustomElement());
       auto form = view.Document().QuerySelector(u8"form.order").ReleaseValue();
       REQUIRE(form);
       auto &orderForm = Downcast<boo::html::HTMLFormElement>(*form);

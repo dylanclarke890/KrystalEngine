@@ -148,11 +148,12 @@ namespace krys::boo::dom
            || type == EventNames::AuxClick || type == EventNames::ContextMenu;
   }
 
-  Ref<PointerEvent> PointerEvent::CreateForPointerCapture(DOMStringAtom type, PointerID pointerId,
-                                                          bool isPrimary,
+  Ref<PointerEvent> PointerEvent::CreateForPointerCapture(DOMStringAtom type, LocalDOMWindow *view,
+                                                          PointerID pointerId, bool isPrimary,
                                                           const DOMString &pointerType) noexcept
   {
     PointerEventInit initializer;
+    initializer.View = view;
     initializer.Bubbles = true;
     initializer.PointerId = static_cast<int32>(pointerId);
     initializer.IsPrimary = isPrimary;
@@ -190,10 +191,12 @@ namespace krys::boo::dom
                                       isCancelable, TypeIsComposed(type)));
   }
 
-  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, PointerID pointerId,
+  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, LocalDOMWindow *view, PointerID pointerId,
                                          const DOMString &pointerType, IsPrimary isPrimary) noexcept
   {
-    return AdoptRef(*new PointerEvent(type, pointerId, pointerType, isPrimary));
+    Ref<PointerEvent> event = AdoptRef(*new PointerEvent(type, pointerId, pointerType, isPrimary));
+    event->SetView(view);
+    return event;
   }
 
   Ref<PointerEvent> PointerEvent::Create(const PlatformTouchEvent &event,
@@ -345,7 +348,7 @@ namespace krys::boo::dom
                              PointerID pointerId, const DOMString &pointerType, bool canBubble,
                              bool isCancelable, bool isComposed) noexcept
       : MouseEvent(type, TrustedInit(canBubble, isCancelable, isComposed, mouseEvent.Detail()),
-                   mouseEvent.View(), mouseEvent.ScreenLocation(), mouseEvent.WindowLocation(),
+                   mouseEvent.FrameView(), mouseEvent.ScreenLocation(), mouseEvent.WindowLocation(),
                    mouseEvent.MovementX(), mouseEvent.MovementY(), mouseEvent.ModifierKeys(), button,
                    mouseEvent.Buttons(), mouseEvent.RelatedTarget().get(), 0,
                    mouseEvent.GetSyntheticClickType(), {}, {},

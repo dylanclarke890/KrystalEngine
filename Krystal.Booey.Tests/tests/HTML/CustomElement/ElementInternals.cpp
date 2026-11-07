@@ -11,6 +11,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include <map>
 
 namespace krys::boo::html::tests
 {
@@ -53,17 +54,32 @@ namespace krys::boo::html::tests
 
     struct InternalsFixture : CustomElementFixture
     {
+      /// @brief The behaviour each element got from `DefineInternals`.
+      std::map<const dom::Element *, InternalsElement *> Behaviours;
+
+      KRYS_NODISCARD InternalsElement *BehaviourOf(dom::DOMStringView id) noexcept
+      {
+        auto found = Behaviours.find(&ById(id));
+        return found == Behaviours.end() ? nullptr : found->second;
+      }
+
       void DefineInternals(dom::DOMStringAtom name, CustomElementOptions &&options = {}) noexcept
       {
         auto result = Registry().Define(
-          name, [this](HTMLElement &element) { return CreateUnique<InternalsElement>(element, Calls); },
+          name,
+          [this](HTMLElement &element)
+          {
+            auto behaviour = CreateUnique<InternalsElement>(element, Calls);
+            Behaviours[&element] = behaviour.get();
+            return behaviour;
+          },
           krys::move(options));
         REQUIRE_FALSE(result.HasException());
       }
 
       ElementInternals &InternalsOf(dom::DOMStringView id) noexcept
       {
-        auto *behaviour = dynamic_cast<InternalsElement *>(ById(id).GetCustomElement());
+        auto *behaviour = BehaviourOf(id);
         REQUIRE(behaviour);
         REQUIRE(behaviour->Internals);
         return *behaviour->Internals;
@@ -110,7 +126,7 @@ namespace krys::boo::html::tests
 
     SECTION("a definition can disable them")
     {
-      auto *behaviour = dynamic_cast<InternalsElement *>(ById(u8"sealed").GetCustomElement());
+      auto *behaviour = BehaviourOf(u8"sealed");
       REQUIRE(behaviour);
       CHECK_FALSE(behaviour->Internals);
     }

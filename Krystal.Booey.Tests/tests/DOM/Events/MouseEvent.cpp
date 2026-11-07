@@ -88,8 +88,8 @@ namespace krys::boo::dom::tests
 
     SECTION("initMouseEvent")
     {
-      event->InitMouseEvent(DOMStringAtom(u8"mouseup"), false, true, 1, 1, 2, 3, 4, false, true, true, false,
-                            1, nullptr);
+      event->InitMouseEvent(DOMStringAtom(u8"mouseup"), false, true, nullptr, 1, 1, 2, 3, 4, false, true,
+                            true, false, 1, nullptr);
       CHECK(event->Type() == u8"mouseup");
       CHECK_FALSE(event->Bubbles());
       CHECK(event->Cancelable());

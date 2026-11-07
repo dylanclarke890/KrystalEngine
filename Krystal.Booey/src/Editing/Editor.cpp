@@ -100,9 +100,9 @@ namespace krys::boo
                                   const List<RefPtr<dom::StaticRange>> &targetRanges = {},
                                   bool cancelable = true) noexcept
     {
-      auto event = dom::InputEvent::Create(dom::DOMStringAtom(EventNames::BeforeInput), inputType, cancelable,
-                                           krys::move(data), krys::move(dataTransfer), targetRanges, 0,
-                                           isInputMethodComposing);
+      auto event = dom::InputEvent::Create(
+        dom::DOMStringAtom(EventNames::BeforeInput), element.NodeDocument().Window(), inputType, cancelable,
+        krys::move(data), krys::move(dataTransfer), targetRanges, 0, isInputMethodComposing);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &element);
       return !event->DefaultPrevented();
     }
@@ -115,9 +115,9 @@ namespace krys::boo
                             RefPtr<dom::DataTransfer> &&dataTransfer = nullptr,
                             const List<RefPtr<dom::StaticRange>> &targetRanges = {}) noexcept
     {
-      auto event =
-        dom::InputEvent::Create(dom::DOMStringAtom(EventNames::Input), inputType, false, krys::move(data),
-                                krys::move(dataTransfer), targetRanges, 0, isInputMethodComposing);
+      auto event = dom::InputEvent::Create(
+        dom::DOMStringAtom(EventNames::Input), element.NodeDocument().Window(), inputType, false,
+        krys::move(data), krys::move(dataTransfer), targetRanges, 0, isInputMethodComposing);
       dom::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
     }
 
@@ -454,7 +454,8 @@ namespace krys::boo
     {
       return;
     }
-    auto event = dom::TextEvent::CreateForPlainTextPaste(pastingText, smartReplace);
+    auto event =
+      dom::TextEvent::CreateForPlainTextPaste(target->NodeDocument().Window(), pastingText, smartReplace);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -471,8 +472,9 @@ namespace krys::boo
     {
       return;
     }
-    auto event = dom::TextEvent::CreateForFragmentPaste(
-      krys::move(pastingFragment), dom::TextEventInputType::Paste, smartReplace, matchStyle);
+    auto event =
+      dom::TextEvent::CreateForFragmentPaste(target->NodeDocument().Window(), krys::move(pastingFragment),
+                                             dom::TextEventInputType::Paste, smartReplace, matchStyle);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -1687,7 +1689,8 @@ namespace krys::boo
 
     if (RefPtr<dom::Element> target = ShareRefPtr(document->FocusedElement()))
     {
-      auto event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd), text);
+      auto event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd),
+                                                 target->NodeDocument().Window(), text);
       (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     }
 
@@ -1770,15 +1773,17 @@ namespace krys::boo
         // function doesn't create a composition node when the text is empty.
         if (!text.empty())
         {
-          auto start =
-            dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionStart), originalText);
+          auto start = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionStart),
+                                                     target->NodeDocument().Window(), originalText);
           (void)dom::EventDispatcher::DispatchToTarget(*start, target.get());
-          event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate), text);
+          event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate),
+                                                target->NodeDocument().Window(), text);
         }
       }
       else if (!text.empty())
       {
-        event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate), text);
+        event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate),
+                                              target->NodeDocument().Window(), text);
       }
 
       if (event)
@@ -1795,7 +1800,8 @@ namespace krys::boo
                                      TypingCommand::TextCompositionType::Pending);
       if (target)
       {
-        auto end = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd), text);
+        auto end = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd),
+                                                 target->NodeDocument().Window(), text);
         (void)dom::EventDispatcher::DispatchToTarget(*end, target.get());
       }
     }

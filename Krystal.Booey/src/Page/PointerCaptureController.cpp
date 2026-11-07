@@ -188,7 +188,8 @@ namespace krys::boo
         // FIXME: Spec doesn't specify which task source to use.
         element.NodeDocument().QueueTaskToDispatchEvent(
           html::TaskSource::UserInteraction,
-          dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::LostPointerCapture), id, pointerType));
+          dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::LostPointerCapture),
+                                    element.NodeDocument().Window(), id, pointerType));
         return;
       }
     }
@@ -822,18 +823,20 @@ namespace krys::boo
     }
     else
     {
-      auto cancelEvent = dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerCancel), pointerId,
+      auto cancelEvent = dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerCancel),
+                                                   target->NodeDocument().Window(), pointerId,
                                                    capturingData->PointerType, isPrimary);
       (void)dom::EventDispatcher::DispatchToTarget(*cancelEvent, target.get());
     }
 
     (void)dom::EventDispatcher::DispatchToTarget(
-      *dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerOut), pointerId,
-                                 capturingData->PointerType, isPrimary),
+      *dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerOut), target->NodeDocument().Window(),
+                                 pointerId, capturingData->PointerType, isPrimary),
       target.get());
     (void)dom::EventDispatcher::DispatchToTarget(
-      *dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerLeave), pointerId,
-                                 capturingData->PointerType, isPrimary),
+      *dom::PointerEvent::Create(dom::DOMStringAtom(EventNames::PointerLeave),
+                                 target->NodeDocument().Window(), pointerId, capturingData->PointerType,
+                                 isPrimary),
       target.get());
     ProcessPendingPointerCapture(pointerId);
   }
@@ -868,8 +871,8 @@ namespace krys::boo
       {
         (void)dom::EventDispatcher::DispatchToTarget(
           *dom::PointerEvent::CreateForPointerCapture(dom::DOMStringAtom(EventNames::LostPointerCapture),
-                                                      pointerId, capturingData->IsPrimary,
-                                                      capturingData->PointerType),
+                                                      targetOverride->NodeDocument().Window(), pointerId,
+                                                      capturingData->IsPrimary, capturingData->PointerType),
           targetOverride.get());
       }
       if (capturingData->PointerType == dom::MousePointerEventType())
@@ -895,8 +898,8 @@ namespace krys::boo
       }
       (void)dom::EventDispatcher::DispatchToTarget(
         *dom::PointerEvent::CreateForPointerCapture(dom::DOMStringAtom(EventNames::GotPointerCapture),
-                                                    pointerId, capturingData->IsPrimary,
-                                                    capturingData->PointerType),
+                                                    pendingTargetOverride->NodeDocument().Window(), pointerId,
+                                                    capturingData->IsPrimary, capturingData->PointerType),
         pendingTargetOverride.get());
     }
 

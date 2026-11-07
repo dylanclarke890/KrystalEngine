@@ -24,6 +24,18 @@ namespace krys::boo::dom
     /// @brief The dictionary its constructor takes.
     using dictionary_type = CustomEventInit<T>;
 
+    /// @brief What identifies T, as `CustomEventDetailType` reports it.
+    KRYS_NODISCARD static const void *DetailType() noexcept
+    {
+      static const char type {};
+      return &type;
+    }
+
+    KRYS_NODISCARD const void *CustomEventDetailType() const noexcept final
+    {
+      return DetailType();
+    }
+
 #pragma region CustomEvent - https://dom.spec.whatwg.org/#customevent
 
     /// @see https://dom.spec.whatwg.org/#dom-customevent-customevent
@@ -62,5 +74,18 @@ namespace krys::boo::dom
     }
 
 #pragma endregion
+  };
+}
+
+namespace krys
+{
+  template <typename T, typename Source>
+  class TypeCastTraits<const boo::dom::CustomEvent<T>, Source>
+  {
+  public:
+    KRYS_NODISCARD constexpr static bool IsOfType(Source &source) noexcept
+    {
+      return source.CustomEventDetailType() == boo::dom::CustomEvent<T>::DetailType();
+    }
   };
 }

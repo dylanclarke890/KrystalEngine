@@ -406,6 +406,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Replaced/RenderHTMLCanvas.cpp
 		tests/Rendering/Replaced/RenderImage.cpp
 		tests/DOM/Events/CustomEvent.cpp
+		tests/DOM/Events/UIEvent.cpp
 		tests/DOM/Events/Event.cpp
 		tests/DOM/Events/EventListenerHandle.cpp
 		tests/DOM/Events/EventTarget.cpp

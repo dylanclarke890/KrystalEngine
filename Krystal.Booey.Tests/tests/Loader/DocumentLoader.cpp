@@ -86,7 +86,7 @@ namespace krys::boo::tests
 
     auto body = fixture.Document().Body();
     REQUIRE(body);
-    auto *pre = dynamic_cast<html::HTMLElement *>(body->FirstChild());
+    auto *pre = DynamicDowncast<html::HTMLElement>(body->FirstChild());
     REQUIRE(pre);
     CHECK(pre->LocalName() == u8"pre");
     CHECK(pre->TextContent() == u8"<b>bold</b>\n& more");

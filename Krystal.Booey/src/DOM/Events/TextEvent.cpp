@@ -36,43 +36,48 @@ namespace krys::boo::dom
 
   TextEvent::~TextEvent() noexcept = default;
 
-  Ref<TextEvent> TextEvent::Create(DOMStringView data, TextEventInputType inputType) noexcept
+  Ref<TextEvent> TextEvent::Create(LocalDOMWindow *view, DOMStringView data,
+                                   TextEventInputType inputType) noexcept
   {
     auto event = CreateRef<TextEvent>(data, inputType);
+    event->SetView(view);
     event->_isTrusted = true;
     return event;
   }
 
-  Ref<TextEvent> TextEvent::CreateForPlainTextPaste(DOMStringView data, bool shouldSmartReplace) noexcept
+  Ref<TextEvent> TextEvent::CreateForPlainTextPaste(LocalDOMWindow *view, DOMStringView data,
+                                                    bool shouldSmartReplace) noexcept
   {
     auto event = CreateRef<TextEvent>(data, nullptr, TextEventInputType::Paste, shouldSmartReplace, false);
+    event->SetView(view);
     event->_isTrusted = true;
     return event;
   }
 
-  Ref<TextEvent> TextEvent::CreateForFragmentPaste(RefPtr<DocumentFragment> &&data,
+  Ref<TextEvent> TextEvent::CreateForFragmentPaste(LocalDOMWindow *view, RefPtr<DocumentFragment> &&data,
                                                    TextEventInputType inputType, bool shouldSmartReplace,
                                                    bool shouldMatchStyle) noexcept
   {
     auto event = CreateRef<TextEvent>(DOMStringView(), krys::move(data), inputType, shouldSmartReplace,
                                       shouldMatchStyle);
+    event->SetView(view);
     event->_isTrusted = true;
     return event;
   }
 
-  Ref<TextEvent> TextEvent::CreateForDrop(DOMStringView data) noexcept
+  Ref<TextEvent> TextEvent::CreateForDrop(LocalDOMWindow *view, DOMStringView data) noexcept
   {
-    return Create(data, TextEventInputType::Drop);
+    return Create(view, data, TextEventInputType::Drop);
   }
 
-  void TextEvent::InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable,
+  void TextEvent::InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable, LocalDOMWindow *view,
                                 DOMStringView data) noexcept
   {
     if (_dispatched)
     {
       return;
     }
-    InitUIEvent(type, bubbles, cancelable, 0);
+    InitUIEvent(type, bubbles, cancelable, view, 0);
     _inputType = TextEventInputType::Keyboard;
     _data = DOMString(data);
     _pastingFragment = nullptr;

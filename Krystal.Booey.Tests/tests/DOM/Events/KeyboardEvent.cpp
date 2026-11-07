@@ -56,7 +56,7 @@ namespace krys::boo::dom::tests
 
     SECTION("initKeyboardEvent")
     {
-      event->InitKeyboardEvent(DOMStringAtom(u8"keyup"), false, true, u8"U+0041",
+      event->InitKeyboardEvent(DOMStringAtom(u8"keyup"), false, true, nullptr, u8"U+0041",
                                KeyboardEvent::DOM_KEY_LOCATION_LEFT, true, false, false, true);
       CHECK(event->Type() == u8"keyup");
       CHECK_FALSE(event->Bubbles());

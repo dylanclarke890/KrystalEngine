@@ -155,17 +155,18 @@ namespace krys::boo::dom
     return mouseEvent;
   }
 
-  void MouseEvent::InitMouseEvent(DOMStringAtom type, bool canBubble, bool cancelable, int32 detail,
-                                  double screenX, double screenY, double clientX, double clientY,
-                                  bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, int16 button,
-                                  EventTarget *relatedTarget) noexcept
+  void MouseEvent::InitMouseEvent(DOMStringAtom type, bool canBubble, bool cancelable, LocalDOMWindow *view,
+                                  int32 detail, double screenX, double screenY, double clientX,
+                                  double clientY, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey,
+                                  int16 button, EventTarget *relatedTarget) noexcept
   {
     if (_dispatched)
     {
       return;
     }
 
-    InitUIEvent(type, canBubble, cancelable, detail);
+    InitUIEvent(type, canBubble, cancelable, view, detail);
+    UpdateFrameView();
 
     SetScreenLocation({FiniteOrZero(screenX), FiniteOrZero(screenY)});
     SetModifierKeys(ctrlKey, altKey, shiftKey, metaKey);

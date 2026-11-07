@@ -25,6 +25,11 @@ namespace krys::boo
   public:
     ~AnimationEventBase() noexcept override;
 
+    KRYS_NODISCARD bool IsAnimationEvent() const noexcept final
+    {
+      return true;
+    }
+
     KRYS_NODISCARD virtual bool IsAnimationPlaybackEvent() const noexcept
     {
       return false;
@@ -55,6 +60,13 @@ namespace krys::boo
     }
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::AnimationEventBase)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+  {
+    return event.IsAnimationEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
 
 #define KRYS_SPECIALIZE_TYPE_TRAITS_ANIMATION_EVENT_BASE(ToValueTypeName, predicate)                         \
   KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(ToValueTypeName)                                                    \
