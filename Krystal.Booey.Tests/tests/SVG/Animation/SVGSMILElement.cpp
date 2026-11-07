@@ -2,11 +2,14 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/SVG/AnimationTestUtils.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGAnimationElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include <algorithm>
+#include <string>
 
 namespace krys::boo::svg::tests
 {
@@ -52,6 +55,54 @@ namespace krys::boo::svg::tests
     // Offsets may be negative.
     CHECK(SVGSMILElement::ParseOffsetValue(u8"-2.5s") == SMILTime(-2.5));
     CHECK(SVGSMILElement::ParseOffsetValue(u8"+1s") == SMILTime(1));
+  }
+
+  TEST_CASE("SVGAnimationElement: event handlers", "[SVG][SVGSMILElement]")
+  {
+    AnimationFixture fixture(
+      u8R"html(<svg id=s><rect id=r x=7><animate id=a attributeName=x from=0 to=100 begin=0s dur=0.1s )html"
+      u8R"html(repeatCount=2 onbegin="inert()" /></rect></svg>)html");
+    auto &svg = fixture.Svg();
+    auto &animate = fixture.ById<SVGAnimationElement>(u8"a");
+
+    // The content attribute is a script, so it stays inert.
+    CHECK_FALSE(animate.OnBegin());
+
+    List<std::string> records;
+    auto recording = [&](const char *name)
+    {
+      return html::EventHandlerCallback(
+        [&records, name](dom::Event &event)
+        {
+          auto type = event.Type().View();
+          records.push_back(std::string(name) + ":" + std::string(type.begin(), type.end()));
+        });
+    };
+    animate.SetOnBegin(recording("begin"));
+    animate.SetOnEnd(recording("end"));
+    animate.SetOnRepeat(recording("repeat"));
+    CHECK(animate.OnBegin());
+
+    // Run in real time, as seeking resets the elements.
+    svg.UnpauseAnimations();
+    const auto deadline = MonotonicTime::Now() + std::chrono::seconds(5);
+    auto has = [&](const char *record)
+    {
+      return std::ranges::find(records, record) != records.end();
+    };
+    while (!has("end:endEvent") && MonotonicTime::Now() < deadline)
+    {
+      svg.TimeContainer().ServiceAnimations();
+      html::EventLoop::Current().RunUntilIdle();
+    }
+    REQUIRE(records.size() == 3);
+    CHECK(records[0] == "begin:beginEvent");
+    CHECK(has("repeat:repeatEvent"));
+    CHECK(has("end:endEvent"));
+
+    // An empty callback deactivates it.
+    animate.SetOnBegin({});
+    CHECK_FALSE(animate.OnBegin());
   }
 
   TEST_CASE("SVGSMILElement: intervals", "[SVG][SVGSMILElement]")
