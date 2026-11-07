@@ -247,6 +247,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - A filter needs the canvas's computed style (`SetFilterStringWithoutUpdatingStyle`).
 - While the current transform can't be inverted, the transform methods, the path methods and drawing do nothing, as in Chrome; the specification multiplies the matrix and adds the points regardless, so `scale(0, 1)` then `scale(1, 2)` leaves the vertical scale at 1 here, where the specification's is 2.
 - `letterSpacing` and `wordSpacing` reject the units whose resolution the specification leaves undefined (`lh`, `rlh`, the viewport units and the container query units; whatwg/html#10893).
+- `letterSpacing` and `wordSpacing` reject `calc()` lengths (`calc(1em + 2px)`), as Chrome and WebKit do: the specification parses a CSS `<length>`, but only a number with a unit is converted to pixels against the canvas's font (`ParseSpacing`).
 - The text preparation algorithm replaces vertical tabs with spaces too; the specification replaces only ASCII whitespace.
 - `arcTo()` with a negative radius throws before it ensures there's a subpath, so the path is unchanged, and `createPattern()` checks its repetition before the image's usability, so an unusable image with a bad repetition throws rather than returning null.
 - There's no `toBlob()`: `toDataURL()` encodes the pixels synchronously.

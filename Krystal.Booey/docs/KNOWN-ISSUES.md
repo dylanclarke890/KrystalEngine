@@ -193,7 +193,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - An image drawn without a renderer uses its own orientation, not its computed style's (FIXME).
 - A canvas copy and every readback wait for the GPU.
 - Image buffers of a resolution scale other than 1 replay their transforms unscaled (FIXME on Krystal.UI's `ImageBufferRender2DBackend`); canvases' buffers are always scale 1.
-- `letterSpacing` and `wordSpacing` reject `calc()` lengths.
 
 ## Editing and selection
 
