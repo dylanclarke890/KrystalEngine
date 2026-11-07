@@ -83,7 +83,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - Scroll and view timelines have no accelerated representation (no threaded animations), and a change in view timeline metrics doesn't update the timeline (FIXME in `KeyframeEffect.cpp`).
 - Keyframe offsets in named timeline ranges compute to NaN without a view timeline.
-- `TreeResolver` keeps after-change style on the element rather than in the parent stack (FIXMEs in `TreeResolver.cpp`).
 - Image animations pause out of view and resume (`RenderView::AddRendererWithPausedImageAnimations`), and there is no per-element animation control (`RenderElement::AllowsAnimation` follows only the page's `SetImageAnimationEnabled`; FIXME).
 - Extent computation for animated motion path (`offset-*`) properties is missing (FIXME in `KeyframeEffect.cpp`).
 - `onbegin`, `onend` and `onrepeat` attributes on SMIL elements don't exist.
