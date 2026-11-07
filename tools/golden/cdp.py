@@ -103,6 +103,10 @@ class WebSocket:
         self.sock.close()
 
 
+# How long a page's timers get to settle before it's captured: its fonts load and its animations reach their ends.
+VIRTUAL_TIME_BUDGET_MS = 5000
+
+
 class Chrome:
     """A headless Chrome showing one page, at a viewport of width by height."""
 
@@ -164,6 +168,20 @@ class Chrome:
                 break
             time.sleep(0.05)
         self.evaluate("document.fonts.ready.then(() => true)")
+
+    def load_settled(self, url):
+        """Loads a page as a focused window shows it, with its timers run for five seconds of virtual time."""
+        self.call("Emulation.setFocusEmulationEnabled", enabled=True)
+        self.load(url)
+        self.next_id += 1
+        params = {"policy": "pauseIfNetworkFetchesPending", "budget": VIRTUAL_TIME_BUDGET_MS}
+        self.socket.send(json.dumps({"id": self.next_id, "method": "Emulation.setVirtualTimePolicy", "params": params}))
+        while json.loads(self.socket.receive()).get("method") != "Emulation.virtualTimeBudgetExpired":
+            pass
+
+    def screenshot(self):
+        """The viewport, as the bytes of a PNG."""
+        return base64.b64decode(self.call("Page.captureScreenshot", format="png")["data"])
 
     def mouse(self, kind, x, y, click_count=0, modifiers=0, buttons=0):
         params = {"type": kind, "x": x, "y": y, "modifiers": modifiers, "buttons": buttons}
