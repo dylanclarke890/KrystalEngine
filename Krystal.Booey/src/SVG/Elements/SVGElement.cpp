@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -909,6 +910,7 @@ namespace krys::boo::svg
   void SVGElement::OnInsert() noexcept
   {
     StyledElement::OnInsert();
+    html::FocusAlgorithms::AutofocusInsertionSteps(*this);
 
     // NOTE: a node's insertion steps don't say whether it's the root of the inserted tree; telling the parent
     // again about a child that was inserted with it changes nothing.

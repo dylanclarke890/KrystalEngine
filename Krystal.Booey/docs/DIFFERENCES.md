@@ -231,6 +231,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 - Three behaviours differ from Chrome's: token heights are rounded, `<mtd>`'s padding differs, and `<mi>` has no italic correction. So the `mathml` golden is report-only against Chrome, for these and for DirectWrite's glyphs.
 - Chrome draws no `<menclose>`; the golden uses a stretched brace instead.
+- `autofocus` works on MathML elements, as the specification says (`MathMLElement::OnInsert`). Chrome only runs it for HTML and SVG elements, although `focus()` works on a MathML element with a `tabindex`.
 
 ## Canvas
 

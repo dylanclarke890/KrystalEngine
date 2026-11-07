@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
@@ -211,6 +212,41 @@ namespace krys::boo::tests
       REQUIRE_FALSE(late->SetAttribute(u8"tabindex", u8"0").HasException());
       REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*late).HasException());
       CHECK(fixture.Document->AutofocusCandidates().empty());
+    }
+
+    SECTION("SVG and MathML elements are candidates too")
+    {
+      auto markup = GENERATE(as<utf8_string> {},
+                             u8"<!DOCTYPE html><svg id=target autofocus tabindex=0 width=9 height=9></svg>",
+                             u8"<!DOCTYPE html><svg width=9 height=9><rect id=target autofocus tabindex=0 "
+                             u8"width=9 height=9 /></svg>",
+                             u8"<!DOCTYPE html><math id=target autofocus tabindex=0><mi>x</mi></math>",
+                             u8"<!DOCTYPE html><math><mi id=target autofocus tabindex=0>x</mi></math>");
+      PageFixture fixture {krys::move(markup)};
+      CHECK(fixture.Document->FocusedElement() == &fixture.ById(u8"target"));
+      CHECK(fixture.Document->AutofocusProcessed());
+    }
+
+    SECTION("an SVG or MathML element that can't be focused leaves the next candidate")
+    {
+      auto markup = GENERATE(as<utf8_string> {}, u8"<svg autofocus width=9 height=9></svg>",
+                             u8"<math autofocus><mi>x</mi></math>");
+      PageFixture fixture {u8"<!DOCTYPE html>" + markup + u8"<input id=target autofocus>"};
+      CHECK(fixture.Document->FocusedElement() == &fixture.ById(u8"target"));
+    }
+
+    SECTION("an SVG or MathML element is a candidate once inserted")
+    {
+      auto ns = GENERATE(as<const char8_t *> {}, u8"http://www.w3.org/2000/svg",
+                         u8"http://www.w3.org/1998/Math/MathML");
+      PageFixture fixture {u8"<!DOCTYPE html><body>"};
+      auto &document = *fixture.Document;
+      auto element = document.CreateElementNS(dom::DOMStringAtom(ns), u8"g").ReleaseValue();
+      REQUIRE_FALSE(element->SetAttribute(u8"autofocus", u8"").HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"tabindex", u8"0").HasException());
+      CHECK(document.AutofocusCandidates().empty());
+      REQUIRE_FALSE(document.Body()->AppendChild(*element).HasException());
+      CHECK(document.AutofocusCandidates().size() == 1);
     }
 
     SECTION("a candidate that isn't a focusable area focuses its focusable area")
