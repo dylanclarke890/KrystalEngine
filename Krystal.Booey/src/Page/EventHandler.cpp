@@ -2876,9 +2876,7 @@ namespace krys::boo
                                                         TextGranularity::ParagraphGranularity);
   }
 
-  // FIXME: Taps put the caret at the nearest word boundary (wordBoundaryForPositionWithoutCrossingLine), once
-  // the visible units have the granularity queries; the editor client's
-  // shouldAllowSingleClickToChangeSelection, with the editor.
+  // FIXME: The editor client's shouldAllowSingleClickToChangeSelection, with the editor.
   bool EventHandler::HandleMousePressEventSingleClick(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);

@@ -769,6 +769,50 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: a tap puts the caret under the finger, as a click does", "[UI]")
+  {
+    // In the middle of "wonderful", which runs from 6 to 15.
+    const boo::IntPoint point(120, 10);
+
+    // Each in its own view, as a click and a tap at the same place would count as a double click.
+    auto caretOffsetAfter = [&](auto press)
+    {
+      View view({400, 100});
+      view.LoadHTML(u8"<!DOCTYPE html><div id=e contenteditable style='margin: 0; font: 20px monospace'>"
+                    u8"hello wonderful world</div>");
+      WaitForLoad(view);
+      view.UpdateRendering();
+      press(view);
+      auto &selection = view.Document().Selection();
+      REQUIRE(selection.IsCaret());
+      return selection.Selection().Start().DeprecatedEditingOffset();
+    };
+
+    const auto clicked = caretOffsetAfter(
+      [&](View &view)
+      {
+        view.MousePressed(point, pal::MouseButton::Left);
+        view.MouseReleased(point, pal::MouseButton::Left);
+      });
+    CHECK(clicked > 6);
+    CHECK(clicked < 15);
+
+    const auto tapped = caretOffsetAfter(
+      [&](View &view)
+      {
+        pal::PointerInput touch;
+        touch.Id = 1;
+        touch.Type = pal::PointerType::Touch;
+        touch.Action = pal::PointerAction::Pressed;
+        touch.InContact = true;
+        (void)view.TouchInput(boo::DoublePoint(point), touch);
+        touch.Action = pal::PointerAction::Released;
+        touch.InContact = false;
+        (void)view.TouchInput(boo::DoublePoint(point), touch);
+      });
+    CHECK(tapped == clicked);
+  }
+
   TEST_CASE("View: gestures", "[UI]")
   {
     View view({400, 300});
