@@ -149,6 +149,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - There are no hyphenation dictionaries, so `hyphens: auto` never hyphenates (FIXME in `Core/Hyphenation.hpp`).
 - Colour glyphs and emoji presentation are not detected (FIXME in `FontHarfBuzz.cpp`), so `font-variant-emoji` only adds a variation selector to fallback clusters. `ResolveEmojiPolicy` cannot return `RequireText` or `RequireEmoji` (FIXME in `FontCascade.cpp`).
 - Colour glyphs from bitmap strikes (`CBDT`) are drawn at their strike's size, unscaled, while COLR glyphs scale. Large colour glyphs stay bitmaps.
+- A colour glyph's layers in the foreground colour (`CPAL` entry `0xFFFF`) are drawn black, FreeType's default, rather than in the text's colour (`FontFace2D::Rasterise` sets no foreground colour). The atlas would need to key colour glyphs by that colour.
 - `text-transform: full-width` does nothing (FIXME in `RenderText.cpp`).
 - A backslash is never shown as a yen sign, because that depends on the font and the document encoding (FIXME in `RenderText.cpp`).
 - `FontDescription::SetSpecifiedLocale` resolves every Han locale to `zh-hans`, as there are no user language preferences.
