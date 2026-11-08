@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
+#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -269,11 +270,16 @@ namespace krys::boo::html
     // Normalize full-width digits and minus sign to ASCII
     auto normalizedText = NormalizeFullWidthNumberChars(event.Text());
 
-    // FIXME: Numbers in the element's locale (convertFromLocalizedNumber), with locales.
+    // The text is checked as an HTML number, then inserted with the locale's decimal separator, which the
+    // field shows (as in Chrome).
+    krys_debug_assert(Element());
+    auto &locale = Element()->GetLocale();
+    const auto &separator = locale.LocalizedDecimalSeparator();
+    auto localizedText = locale.ConvertFromLocalizedNumber(normalizedText);
 
     // If the cleaned up text doesn't match input text, don't insert partial input
     // since it could be an incorrect paste.
-    auto updatedEventText = StripInvalidNumberCharacters(normalizedText);
+    auto updatedEventText = StripInvalidNumberCharacters(localizedText);
 
     // Get left and right of cursor
     krys_debug_assert(Element());
@@ -299,7 +305,9 @@ namespace krys::boo::html
         // after the 'e'.
         // - Reject if the editing value contains '+' or '-' and the caret is
         // placed before it unless it's after an e
-        if (HasDecimalSeparator(leftHalf) || HasDecimalSeparator(rightHalf) || HasE(leftHalf)
+        if (HasDecimalSeparator(leftHalf) || HasDecimalSeparator(rightHalf)
+            || leftHalf.find(separator) != dom::DOMStringView::npos
+            || rightHalf.find(separator) != dom::DOMStringView::npos || HasE(leftHalf)
             || HasSignNotAfterE(rightHalf))
         {
           continue;
@@ -397,17 +405,52 @@ namespace krys::boo::html
         }
       }
 
-      // Add character
+      // Add character, a decimal point as the locale's separator.
+      if (IsDecimalSeparator(character))
+      {
+        leftHalf += separator;
+        finalEventText += separator;
+        continue;
+      }
       leftHalf.push_back(character);
       finalEventText.push_back(character);
     }
     event.SetText(krys::move(finalEventText));
   }
 
+  namespace
+  {
+    // Scientific notation isn't localised.
+    KRYS_NODISCARD bool HasExponent(dom::DOMStringView value) noexcept
+    {
+      return value.find_first_of(u8"eE") != dom::DOMStringView::npos;
+    }
+  }
+
+  dom::DOMString NumberInputType::LocalizeValue(dom::DOMStringView proposedValue) const noexcept
+  {
+    if (proposedValue.empty() || HasExponent(proposedValue))
+    {
+      return dom::DOMString(proposedValue);
+    }
+    krys_debug_assert(Element());
+    return dom::DOMString(Element()->GetLocale().ConvertToLocalizedNumber(proposedValue));
+  }
+
+  dom::DOMString NumberInputType::VisibleValue() const noexcept
+  {
+    krys_debug_assert(Element());
+    return LocalizeValue(Element()->Value());
+  }
+
   dom::DOMString NumberInputType::ConvertFromVisibleValue(dom::DOMStringView visibleValue) const noexcept
   {
-    // FIXME: Numbers in the element's locale (convertFromLocalizedNumber), with locales.
-    return dom::DOMString(visibleValue);
+    if (visibleValue.empty() || HasExponent(visibleValue))
+    {
+      return dom::DOMString(visibleValue);
+    }
+    krys_debug_assert(Element());
+    return dom::DOMString(Element()->GetLocale().ConvertFromLocalizedNumber(visibleValue));
   }
 
   void NumberInputType::AttributeChanged(dom::DOMStringAtom name) noexcept
