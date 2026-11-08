@@ -92,6 +92,11 @@ namespace krys::boo
     AllPages().push_back(this);
   }
 
+  void Page::UpdateStyleForAllPagesAfterGlobalChangeInEnvironment() noexcept
+  {
+    ForEachPage([](Page &page) { page.UpdateStyleAfterChangeInEnvironment(); });
+  }
+
   void Page::ForEachPage(const Func<void(Page &)> &function) noexcept
   {
     // A copy, so the function can make and destroy pages.

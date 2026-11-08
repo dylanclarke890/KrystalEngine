@@ -257,6 +257,10 @@ namespace krys::boo
     void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
 
     void ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept;
+
+    /// @brief Restyles every page's documents (UpdateStyleAfterChangeInEnvironment), after a change in the
+    /// environment they all share, such as the theme's colours.
+    static void UpdateStyleForAllPagesAfterGlobalChangeInEnvironment() noexcept;
     /// @brief Calls @p functor for each document that's rendered: not render-blocked ones.
     void ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept;
 

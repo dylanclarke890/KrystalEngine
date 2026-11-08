@@ -206,4 +206,22 @@ namespace krys::boo::tests
     CHECK(Contains(painted, u8"#FF0000"));
     CHECK(painted.find(u8"(type button)") == painted.rfind(u8"(type button)"));
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderTheme::PlatformColorsDidChange: every page restyles",
+                   "[Rendering][RenderTheme]")
+  {
+    PaintFixture first(u8"<!DOCTYPE html><p>One", {200, 100}, true);
+    PaintFixture second(u8"<!DOCTYPE html><p>Two", {200, 100}, true);
+    (void)first.Painted();
+    (void)second.Painted();
+    REQUIRE_FALSE(first.Document->HasPendingFullStyleRebuild());
+    REQUIRE_FALSE(second.Document->HasPendingFullStyleRebuild());
+
+    // The theme's colours changing (its accent colour, say) restyles what's drawn with them.
+    RenderTheme::Singleton().PlatformColorsDidChange();
+    CHECK(first.Document->HasPendingFullStyleRebuild());
+    CHECK(second.Document->HasPendingFullStyleRebuild());
+    (void)first.Painted();
+    CHECK_FALSE(first.Document->HasPendingFullStyleRebuild());
+  }
 }

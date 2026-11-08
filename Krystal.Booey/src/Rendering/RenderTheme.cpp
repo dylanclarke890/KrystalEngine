@@ -39,6 +39,7 @@
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
@@ -1590,8 +1591,7 @@ namespace krys::boo
   {
     _colorCacheMap.clear();
 
-    // FIXME: Restyling every page (Page::ForEachPage) after a change in the environment
-    // (Page::updateStyleForAllPagesAfterGlobalChangeInEnvironment).
+    Page::UpdateStyleForAllPagesAfterGlobalChangeInEnvironment();
   }
 
   RenderTheme::ColorCache &RenderTheme::GetColorCache(style::ColorOptions options) const noexcept
