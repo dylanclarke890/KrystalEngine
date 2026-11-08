@@ -381,6 +381,20 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"decoding", krys::move(value));
   }
 
+  DecodingMode HTMLImageElement::GetDecodingMode() const noexcept
+  {
+    auto decoding = Decoding();
+    if (decoding == u8"sync")
+    {
+      return DecodingMode::Synchronous;
+    }
+    if (decoding == u8"async")
+    {
+      return DecodingMode::Asynchronous;
+    }
+    return DecodingMode::Auto;
+  }
+
   dom::DOMString HTMLImageElement::Loading() const noexcept
   {
     return ReflectEnumerated<"loading">(*this);

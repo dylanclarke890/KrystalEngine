@@ -55,7 +55,43 @@ namespace krys::boo
   {
   }
 
-  BitmapImageSource::~BitmapImageSource() noexcept = default;
+  BitmapImageSource::~BitmapImageSource() noexcept
+  {
+    // A frame still being decoded is dropped when it arrives.
+    if (_workQueue)
+    {
+      _workQueue->Detach();
+    }
+  }
+
+  ImageFrameWorkQueue &BitmapImageSource::FrameWorkQueue() const noexcept
+  {
+    if (!_workQueue)
+    {
+      _workQueue = ImageFrameWorkQueue::Create(const_cast<BitmapImageSource &>(*this));
+    }
+    return *_workQueue;
+  }
+
+  bool BitmapImageSource::CanDecodeAsynchronously() const noexcept
+  {
+    return _allDataReceived && _bitmapImage && _bitmapImage->Data() && ImageFrameWorkQueue::HostWorkQueue();
+  }
+
+  RefPtr<ImageDecoder> BitmapImageSource::CreateWorkQueueDecoder() const noexcept
+  {
+    auto *data = _bitmapImage ? _bitmapImage->Data() : nullptr;
+    if (!data || !_allDataReceived)
+    {
+      return nullptr;
+    }
+    auto decoder = ImageDecoder::Create(*data, MimeType(), _alphaOption, _gammaAndColorProfileOption);
+    if (decoder)
+    {
+      decoder->SetData(*data, true);
+    }
+    return decoder;
+  }
 
   ImageDecoder *BitmapImageSource::Decoder(SharedBuffer *data) const noexcept
   {
@@ -102,6 +138,12 @@ namespace krys::boo
   EncodedDataStatus BitmapImageSource::DataChanged(SharedBuffer *data, bool allDataReceived) noexcept
   {
     _descriptor.Clear();
+
+    // The work queue's decoder has the old data.
+    if (_workQueue)
+    {
+      _workQueue->Stop();
+    }
 
     auto status = SetData(data, allDataReceived);
     if (status < EncodedDataStatus::TypeAvailable)
@@ -379,14 +421,23 @@ namespace krys::boo
 
   void BitmapImageSource::StopDecodingWorkQueue() noexcept
   {
-    // Frames are decoded synchronously, so there's no work queue to stop.
+    if (!_workQueue || !_workQueue->IsIdle())
+    {
+      return;
+    }
+
+    _workQueue->Stop();
   }
 
-  bool BitmapImageSource::IsPendingDecodingAtIndex(uint32, SubsamplingLevel,
-                                                   const DecodingOptions &) const noexcept
+  bool BitmapImageSource::IsPendingDecodingAtIndex(uint32 index, SubsamplingLevel subsamplingLevel,
+                                                   const DecodingOptions &options) const noexcept
   {
-    // Frames are decoded synchronously, so none is ever pending.
-    return false;
+    if (!_workQueue)
+    {
+      return false;
+    }
+
+    return _workQueue->IsPendingDecodingAtIndex(index, subsamplingLevel, options);
   }
 
   bool BitmapImageSource::IsCompatibleWithOptionsAtIndex(uint32 index, SubsamplingLevel subsamplingLevel,
@@ -399,6 +450,12 @@ namespace krys::boo
   {
     _decodeCallbacks.push_back(krys::move(decodeCallback));
     uint32 index = CurrentFrameIndex();
+
+    if (IsPendingDecodingAtIndex(index, SubsamplingLevel::Default,
+                                 DecodingOptions(DecodingMode::Asynchronous)))
+    {
+      return;
+    }
 
     bool isCompatibleNativeImage = IsCompatibleWithOptionsAtIndex(
       index, SubsamplingLevel::Default, DecodingOptions(DecodingMode::Asynchronous));
@@ -416,8 +473,14 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Decode on the work queue; for now the frame decodes now, and the callbacks are called before
-    // this returns.
+    if (!isCompatibleNativeImage && CanDecodeAsynchronously())
+    {
+      (void)RequestNativeImageAtIndex(index, SubsamplingLevel::Default, ImageAnimatingState::No,
+                                      DecodingOptions(DecodingMode::Asynchronous));
+      return;
+    }
+
+    // Without the work queue, the frame decodes now, and the callbacks are called before this returns.
     auto nativeImage = NativeImageAtIndexCacheIfNeeded(index, SubsamplingLevel::Default,
                                                        DecodingOptions(DecodingMode::Asynchronous));
     CallDecodeCallbacks(nativeImage ? FrameDecodingStatusAtIndex(index) : DecodingStatus::Invalid);
@@ -455,6 +518,45 @@ namespace krys::boo
     if (auto imageObserver = GetImageObserver())
     {
       imageObserver->ImageFrameAvailable(*_bitmapImage, animatingState, nullptr, decodingStatus);
+    }
+  }
+
+  void BitmapImageSource::ImageFrameDecodeAtIndexHasFinished(uint32 index, ImageAnimatingState animatingState,
+                                                             DecodingStatus decodingStatus) noexcept
+  {
+    // Depending on its timer, the animator may call or postpone calling imageFrameAvailable().
+    if (_frameAnimator
+        && _frameAnimator->ImageFrameDecodeAtIndexHasFinished(index, animatingState, decodingStatus))
+    {
+      return;
+    }
+
+    ImageFrameAtIndexAvailable(index, animatingState, decodingStatus);
+  }
+
+  void BitmapImageSource::ImageFrameDecodeAtIndexHasFinished(uint32 index, SubsamplingLevel subsamplingLevel,
+                                                             ImageAnimatingState animatingState,
+                                                             const DecodingOptions &options,
+                                                             RefPtr<NativeImage> &&nativeImage) noexcept
+  {
+    krys_debug_assert(index < _frames.size());
+
+    if (!nativeImage || !_decoder)
+    {
+      DestroyNativeImageAtIndex(index);
+      ImageFrameDecodeAtIndexHasFinished(index, animatingState, DecodingStatus::Invalid);
+    }
+    else
+    {
+      Ref<NativeImage> image = krys::move(nativeImage);
+      CacheNativeImageAtIndex(index, subsamplingLevel, options, krys::move(image));
+      ImageFrameDecodeAtIndexHasFinished(index, animatingState, FrameDecodingStatusAtIndex(index));
+    }
+
+    // Do not leave any decoding work queue idle for static images.
+    if (animatingState == ImageAnimatingState::No)
+    {
+      StopDecodingWorkQueue();
     }
   }
 
@@ -564,6 +666,12 @@ namespace krys::boo
       return Unexpected(DecodingStatus::Invalid);
     }
 
+    // Never decode the same frame from two different threads.
+    if (IsPendingDecodingAtIndex(index, subsamplingLevel, options))
+    {
+      return Unexpected(DecodingStatus::Decoding);
+    }
+
     if (!IsCompatibleWithOptionsAtIndex(index, subsamplingLevel, options))
     {
       DecodingOptions decodingOptions {DecodingMode::Synchronous};
@@ -587,12 +695,79 @@ namespace krys::boo
     return Unexpected(DecodingStatus::Invalid);
   }
 
+  DecodingStatus BitmapImageSource::RequestNativeImageAtIndex(uint32 index, SubsamplingLevel subsamplingLevel,
+                                                              ImageAnimatingState animatingState,
+                                                              const DecodingOptions &options) noexcept
+  {
+    if (index >= _frames.size())
+    {
+      return DecodingStatus::Invalid;
+    }
+
+    FrameWorkQueue().Dispatch({index, subsamplingLevel, animatingState, options});
+    return DecodingStatus::Decoding;
+  }
+
+  DecodingStatus BitmapImageSource::RequestNativeImageAtIndexIfNeeded(uint32 index,
+                                                                      SubsamplingLevel subsamplingLevel,
+                                                                      ImageAnimatingState animatingState,
+                                                                      const DecodingOptions &options) noexcept
+  {
+    if (index >= _frames.size())
+    {
+      return DecodingStatus::Invalid;
+    }
+
+    // Never decode the same frame from two different threads.
+    if (IsPendingDecodingAtIndex(index, subsamplingLevel, options))
+    {
+      return DecodingStatus::Decoding;
+    }
+
+    // isCompatibleWithOptionsAtIndex() returns true only if the frame is complete.
+    if (IsCompatibleWithOptionsAtIndex(index, subsamplingLevel, options))
+    {
+      return DecodingStatus::Complete;
+    }
+
+    return RequestNativeImageAtIndex(index, subsamplingLevel, animatingState, options);
+  }
+
+  Expected<Ref<NativeImage>, DecodingStatus>
+    BitmapImageSource::NativeImageAtIndexRequestIfNeeded(uint32 index, SubsamplingLevel subsamplingLevel,
+                                                         const DecodingOptions &options) noexcept
+  {
+    if (!_decoder)
+    {
+      return Unexpected(DecodingStatus::Invalid);
+    }
+
+    auto status =
+      RequestNativeImageAtIndexIfNeeded(index, subsamplingLevel, ImageAnimatingState::No, options);
+    if (status == DecodingStatus::Invalid || status == DecodingStatus::Decoding)
+    {
+      return Unexpected(status);
+    }
+
+    if (RefPtr<NativeImage> nativeImage = FrameAtIndex(index).GetNativeImage())
+    {
+      return krys::move(nativeImage);
+    }
+
+    return Unexpected(DecodingStatus::Invalid);
+  }
+
   Expected<Ref<NativeImage>, DecodingStatus>
     BitmapImageSource::NativeImageAtIndexForDrawing(uint32 index, SubsamplingLevel subsamplingLevel,
                                                     const DecodingOptions &options) noexcept
   {
-    // FIXME: Request asynchronous decoding of static images on the work queue; for now every frame decodes
-    // synchronously.
+    // If this is an animated image and the frame is not available, we have no
+    // choice but to decode it synchronously. Otherwise, a flicker will happen.
+    // Without the host's work queue, every frame decodes synchronously.
+    if (options.GetDecodingMode() == DecodingMode::Asynchronous && !IsAnimated() && CanDecodeAsynchronously())
+    {
+      return NativeImageAtIndexRequestIfNeeded(index, subsamplingLevel, options);
+    }
     return NativeImageAtIndexCacheIfNeeded(index, subsamplingLevel, options);
   }
 

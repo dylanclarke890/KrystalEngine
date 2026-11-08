@@ -85,6 +85,9 @@ namespace krys::boo
     RefPtr<Image> _image;
     UniquePtr<svg::SVGImageCache> _svgImageCache;
     HashMap<const CachedImageClient *, ContainerContext> _pendingContainerContextRequests;
+    /// @brief The clients that drew nothing while the image's frame decodes on the work queue, which a static
+    /// image's frame, once it's decoded, is shown in.
+    HashSet<const CachedImageClient *> _clientsWaitingForAsyncDecoding;
     bool _shouldPaintBrokenImage {true};
     bool _allowsOrientationOverride {true};
 
@@ -123,6 +126,10 @@ namespace krys::boo
 
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
                                       const url::URL &) noexcept;
+
+    KRYS_NODISCARD bool IsClientWaitingForAsyncDecoding(const CachedImageClient &) const noexcept;
+    /// @brief Remembers that @p client drew nothing while the frame decodes, so it's told when it's decoded.
+    void AddClientWaitingForAsyncDecoding(CachedImageClient &) noexcept;
     KRYS_NODISCARD bool UsesImageContainerSize() const noexcept
     {
       return _image && _image->UsesContainerSize();

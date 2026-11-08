@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/Images/BitmapImageDescriptor.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrameAnimator.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageFrameWorkQueue.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageSource.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -13,10 +14,12 @@ namespace krys::boo
   class ImageObserver;
 
   /// @brief The source of a bitmap image: its decoder, the frames decoded from it and their metadata.
-  /// FIXME: The decoding work queue: asynchronous decoding decodes synchronously for now, so a frame is never
-  /// pending decoding.
+  /// Asynchronous decoding decodes a frame on the host's work queue (`ImageFrameWorkQueue`), once all the
+  /// image's data has arrived; without a work queue, or before then, frames decode synchronously.
   class BitmapImageSource final : public ImageSource
   {
+    friend class ImageFrameWorkQueue;
+
   private:
     // State
     WeakPtr<BitmapImage> _bitmapImage;
@@ -27,6 +30,7 @@ namespace krys::boo
     BitmapImageDescriptor _descriptor;
     mutable RefPtr<ImageDecoder> _decoder;
     mutable UniquePtr<ImageFrameAnimator> _frameAnimator;
+    mutable RefPtr<ImageFrameWorkQueue> _workQueue;
     List<Func<void(DecodingStatus)>> _decodeCallbacks;
 
     // ImageFrame
@@ -70,6 +74,13 @@ namespace krys::boo
     KRYS_NODISCARD bool IsPendingDecodingAtIndex(uint32 index, SubsamplingLevel,
                                                  const DecodingOptions &) const noexcept;
     void ImageFrameAtIndexAvailable(uint32 index, ImageAnimatingState, DecodingStatus) noexcept;
+    void ImageFrameDecodeAtIndexHasFinished(uint32 index, ImageAnimatingState, DecodingStatus) noexcept;
+    /// @brief The frame at @p index, asked for with @p options at @p subsamplingLevel, was decoded on the
+    /// work queue as @p nativeImage, or failed to (null).
+    void ImageFrameDecodeAtIndexHasFinished(uint32 index, SubsamplingLevel subsamplingLevel,
+                                            ImageAnimatingState animatingState,
+                                            const DecodingOptions &options,
+                                            RefPtr<NativeImage> &&nativeImage) noexcept;
     KRYS_NODISCARD uint32 CurrentFrameIndex() const noexcept final;
 
     // Decoding & animation
@@ -141,6 +152,19 @@ namespace krys::boo
     KRYS_NODISCARD bool IsLargeForDecoding() const noexcept final;
     KRYS_NODISCARD bool IsCompatibleWithOptionsAtIndex(uint32 index, SubsamplingLevel,
                                                        const DecodingOptions &) const noexcept;
+    KRYS_NODISCARD ImageFrameWorkQueue &FrameWorkQueue() const noexcept;
+    /// @brief Whether frames can decode on the host's work queue: it has one, and all the data has arrived.
+    KRYS_NODISCARD bool CanDecodeAsynchronously() const noexcept;
+    /// @brief A decoder of the work queue's own, over all the image's data; null if there's none to decode.
+    KRYS_NODISCARD RefPtr<ImageDecoder> CreateWorkQueueDecoder() const noexcept;
+    KRYS_NODISCARD BitmapImage *Image() const noexcept
+    {
+      return _bitmapImage.get();
+    }
+    DecodingStatus RequestNativeImageAtIndex(uint32 index, SubsamplingLevel, ImageAnimatingState,
+                                             const DecodingOptions &) noexcept;
+    DecodingStatus RequestNativeImageAtIndexIfNeeded(uint32 index, SubsamplingLevel, ImageAnimatingState,
+                                                     const DecodingOptions &) noexcept;
     void StopDecodingWorkQueue() noexcept final;
     void Decode(Func<void(DecodingStatus)> &&decodeCallback) noexcept final;
     void CallDecodeCallbacks(DecodingStatus) noexcept;
@@ -163,6 +187,8 @@ namespace krys::boo
     KRYS_NODISCARD Expected<Ref<NativeImage>, DecodingStatus>
       NativeImageAtIndexCacheIfNeeded(uint32 index, SubsamplingLevel = SubsamplingLevel::Default,
                                       const DecodingOptions & = {}) noexcept;
+    KRYS_NODISCARD Expected<Ref<NativeImage>, DecodingStatus>
+      NativeImageAtIndexRequestIfNeeded(uint32 index, SubsamplingLevel, const DecodingOptions &) noexcept;
     KRYS_NODISCARD Expected<Ref<NativeImage>, DecodingStatus>
       NativeImageAtIndexForDrawing(uint32 index, SubsamplingLevel, const DecodingOptions &) noexcept;
 

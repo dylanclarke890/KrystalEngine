@@ -37,10 +37,22 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#registered-observer-list
     List<Ref<TransientRegisteredObserver>> _transientRegisteredObservers;
 
+    bool _hasEverPaintedImages {false};
+
   public:
     virtual ~NodeRareData() noexcept;
 
     KRYS_NODISCARD Ref<NodeList> ChildNodes(Node &node) noexcept;
+
+    KRYS_NODISCARD bool HasEverPaintedImages() const noexcept
+    {
+      return _hasEverPaintedImages;
+    }
+
+    void SetHasEverPaintedImages(bool hasEverPaintedImages) noexcept
+    {
+      _hasEverPaintedImages = hasEverPaintedImages;
+    }
 
     KRYS_NODISCARD Ref<HTMLCollection> Children(ContainerNode &parent) noexcept;
 

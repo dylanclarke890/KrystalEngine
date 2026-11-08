@@ -376,7 +376,8 @@ namespace krys::boo
 
   void Page::FinalizeRenderingUpdate() noexcept
   {
-    // FIXME: Images with asynchronous decodes, once there are any.
+    // FIXME: Invalidating images whose decodes are asynchronous (invalidateImagesWithAsyncDecodes), so a
+    // host's snapshot draws them, once hosts take snapshots.
     _renderingUpdateRemainingSteps.Remove(RenderingUpdateStep::LayerFlush);
 
     if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))

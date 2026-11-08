@@ -550,8 +550,8 @@ namespace krys::boo
   void RenderImage::PaintReplaced(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
     GraphicsContext &context = paintInfo.Context();
-    // FIXME: Invalidating images with asynchronous decodes and detecting contentful paint, once there are
-    // asynchronous decodes and paint milestones.
+    // FIXME: Invalidating images with asynchronous decodes for a host's snapshot, and detecting contentful
+    // paint, once there are snapshots and paint milestones.
 
     auto contentSize = ContentBoxSize();
     float deviceScaleFactor = GetDocument().DeviceScaleFactor();
@@ -709,16 +709,24 @@ namespace krys::boo
     // FIXME: Document when image != img.get().
     RefPtr image = ImageResource().GetImage();
 
-    // FIXME: The decoding mode, subsampling, debug backgrounds and HDR options, once they exist.
+    // FIXME: The subsampling, debug backgrounds and HDR options, once they exist.
     ImagePaintingOptions options = {
-      CompositeOperator::SourceOver, GetImageOrientation(),
+      CompositeOperator::SourceOver,
+      image ? DecodingModeForImageDraw(*image, paintInfo) : DecodingMode::Synchronous, GetImageOrientation(),
       image ? ChooseInterpolationQuality(paintInfo.Context(), *image, image.get(), LayoutSize(rect.Size()))
             : InterpolationQuality::Default};
 
     auto drawResult = paintInfo.Context().DrawImage(*img, rect, options);
 
-    // FIXME: Wait for asynchronous decoding (addClientWaitingForAsyncDecoding), and remember that the element
-    // painted images (setHasEverPaintedImages), once there are asynchronous decodes.
+    if (drawResult == ImageDrawResult::DidRequestDecoding)
+    {
+      ImageResource().GetCachedImage()->AddClientWaitingForAsyncDecoding(GetCachedImageClient());
+    }
+
+    if (GetElement() && !paintInfo.Context().PaintingDisabled())
+    {
+      GetElement()->SetHasEverPaintedImages(true);
+    }
 
     return drawResult;
   }

@@ -156,6 +156,10 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-img-decoding
     void Decoding(dom::DOMString value) noexcept;
 
+    /// @brief The decoding hint `decoding` gives: synchronous, asynchronous, or the engine's choice.
+    /// @see https://html.spec.whatwg.org/#image-decoding-hint
+    KRYS_NODISCARD DecodingMode GetDecodingMode() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-img-loading
     KRYS_NODISCARD dom::DOMString Loading() const noexcept;
 

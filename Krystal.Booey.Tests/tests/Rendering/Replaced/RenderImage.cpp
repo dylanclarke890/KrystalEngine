@@ -1,6 +1,17 @@
 ﻿#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
+#include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Threading/JobSystem.hpp"
+#include "Krystal.Threading/ManualWorkQueue.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -11,6 +22,115 @@ namespace krys::boo::tests
     KRYS_NODISCARD std::string Narrow(utf8_stringview text) noexcept
     {
       return std::string(text.begin(), text.end());
+    }
+
+    // 400x400 decodes to 640KB, over the 500KB that makes a still image large for decoding.
+    constexpr uint8 LargePNG[] = {
+      137, 80,  78,  71,  13,  10,  26,  10,  0,   0,   0,   13,  73,  72,  68,  82,  0,   0,   1,   144, 0,
+      0,   1,   144, 8,   6,   0,   0,   0,   128, 191, 54,  204, 0,   0,   4,   129, 73,  68,  65,  84,  120,
+      218, 237, 213, 49,  1,   0,   0,   8,   195, 176, 73,  199, 249, 208, 192, 77,  142, 24,  232, 211, 100,
+      90,  0,   56,  19,  1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  17,
+      0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,
+      3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,
+      0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,
+      3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,
+      0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,
+      3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,   192, 64,
+      0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,
+      3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,   192, 64,
+      0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,
+      3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   17,  1,   0,   3,   1,   192,
+      64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,
+      0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192,
+      64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,
+      0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192,
+      64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,
+      0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192,
+      64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,
+      0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192,
+      64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,
+      0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  17,  0,   48,  16,  0,   12,  4,   0,   3,   1,
+      192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,
+      16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,
+      192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,
+      16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,
+      192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   17,  0,   48,  16,  0,   12,
+      4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,
+      192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,
+      4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,
+      192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,
+      4,   0,   3,   1,   192, 64,  0,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,
+      192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,
+      4,   0,   3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,
+      192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,
+      4,   0,   3,   1,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   1,   0,   3,   1,
+      192, 64,  0,   48,  16,  0,   12,  4,   0,   3,   17,  1,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      12,  4,   0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,
+      1,   192, 64,  0,   48,  16,  0,   48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   48,  16,  0,
+      48,  16,  0,   12,  4,   0,   3,   1,   192, 64,  0,   248, 106, 1,   210, 36,  249, 60,  169, 120, 12,
+      62,  0,   0,   0,   0,   73,  69,  78,  68,  174, 66,  96,  130};
+    constexpr uint8 SmallPNG[] = {
+      137, 80,  78,  71,  13,  10,  26,  10,  0,   0,  0,  13, 73, 72, 68, 82,  0,   0,   0,   20,  0,   0,
+      0,   20,  8,   6,   0,   0,   0,   141, 137, 29, 13, 0,  0,  0,  29, 73,  68,  65,  84,  120, 218, 99,
+      96,  104, 248, 255, 159, 170, 120, 212, 192, 81, 3,  71, 13, 28, 53, 112, 212, 192, 145, 106, 32,  0,
+      50,  228, 229, 14,  187, 233, 42,  66,  0,   0,  0,  0,  73, 69, 78, 68,  174, 66,  96,  130};
+
+    /// @brief Gives Booey @p workQueue as the host's, for as long as it lives.
+    struct HostWorkQueueScope
+    {
+      explicit HostWorkQueueScope(WorkQueue &workQueue) noexcept
+      {
+        PlatformStrategies::Singleton().SetWorkQueue(&workQueue);
+      }
+
+      ~HostWorkQueueScope() noexcept
+      {
+        PlatformStrategies::Singleton().SetWorkQueue(nullptr);
+      }
+    };
+
+    /// @brief A page showing a large or a small image, loaded.
+    struct ImagePage
+    {
+      LoaderFixture Loader;
+      UniquePtr<PageInFrameFixture> Fixture;
+
+      explicit ImagePage(bool large, utf8_stringview attributes = {}) noexcept
+      {
+        Loader.Strategy.Resources[u8"file:///image.png"] =
+          large ? Span<const uint8>(LargePNG) : Span<const uint8>(SmallPNG);
+        Fixture =
+          CreateUnique<PageInFrameFixture>(u8"<style>body{margin:0}</style><img id=i "
+                                             + utf8_string(attributes) + u8" src='file:///image.png'>",
+                                           IntSize(500, 500));
+        (void)Fixture->Document->UpdateLayout();
+        RunNetworkingTasks();
+      }
+
+      KRYS_NODISCARD html::HTMLImageElement &Image() noexcept
+      {
+        return Downcast<html::HTMLImageElement>(Fixture->ById(u8"i"));
+      }
+    };
+
+    KRYS_NODISCARD bool DrawsImage(PageInFrameFixture &fixture) noexcept
+    {
+      return fixture.Painted().find(u8"draw-native-image") != utf8_string::npos;
     }
   }
 
@@ -38,5 +158,95 @@ namespace krys::boo::tests
     CHECK(drawn(u8"dir=auto title='\u05E9\u05DCab'") == Narrow(u8"ab|\u05DC\u05E9"));
     // Otherwise the image's direction.
     CHECK(drawn(u8"alt='\u05E9\u05DCab'") == Narrow(u8"\u05DC\u05E9|ab"));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderImage: a large image decodes on the work queue when first painted",
+                   "[Rendering][RenderImage][html:image-decoding-hint]")
+  {
+    ManualWorkQueue queue;
+    HostWorkQueueScope scope(queue);
+    ImagePage page(true);
+    auto &fixture = page.Fixture;
+    auto &image = page.Image();
+    REQUIRE(image.GetCachedImage());
+    REQUIRE(image.GetCachedImage()->HasImage());
+
+    SECTION("it draws nothing until the decoded frame arrives, which repaints it")
+    {
+      CHECK_FALSE(DrawsImage(*fixture));
+      CHECK(queue.PendingCount() == 1);
+      // Painting again while it decodes doesn't ask again.
+      CHECK_FALSE(DrawsImage(*fixture));
+      CHECK(queue.PendingCount() == 1);
+
+      CHECK(queue.RunAll() == 1);
+      // The frame waits in the event loop's inbox.
+      CHECK_FALSE(DrawsImage(*fixture));
+      (void)fixture->Frame->View()->TakeDamage();
+
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(fixture->Frame->View()->HasDamage());
+      CHECK(DrawsImage(*fixture));
+      CHECK(queue.PendingCount() == 0);
+      CHECK(image.HasEverPaintedImages());
+    }
+
+    SECTION("an image that's gone when its frame arrives drops it")
+    {
+      CHECK_FALSE(DrawsImage(*fixture));
+      CHECK(queue.RunAll() == 1);
+      image.Remove();
+      fixture.reset();
+      html::EventLoop::Current().RunUntilIdle();
+    }
+
+    SECTION("decoding=sync decodes it at once")
+    {
+      REQUIRE_FALSE(image.SetAttribute(u8"decoding", u8"sync").HasException());
+      CHECK(DrawsImage(*fixture));
+      CHECK(queue.PendingCount() == 0);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderImage: small images, and any without a work queue, decode at once",
+                   "[Rendering][RenderImage][html:image-decoding-hint]")
+  {
+    SECTION("small, with a work queue")
+    {
+      ManualWorkQueue queue;
+      HostWorkQueueScope scope(queue);
+      ImagePage page(false);
+      CHECK(DrawsImage(*page.Fixture));
+      CHECK(queue.PendingCount() == 0);
+    }
+
+    SECTION("large, without one")
+    {
+      ImagePage page(true);
+      CHECK(DrawsImage(*page.Fixture));
+    }
+
+    SECTION("large with decoding=async, without one")
+    {
+      ImagePage page(true, u8"decoding=async");
+      CHECK(DrawsImage(*page.Fixture));
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderImage: a large image decodes on the job system's workers",
+                   "[Rendering][RenderImage][html:image-decoding-hint]")
+  {
+    UniquePtr<ImagePage> page;
+    {
+      JobSystem jobs(2);
+      HostWorkQueueScope scope(jobs);
+      page = CreateUnique<ImagePage>(true);
+      CHECK_FALSE(DrawsImage(*page->Fixture));
+      // The workers finish the decode as the system goes.
+    }
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(DrawsImage(*page->Fixture));
   }
 }

@@ -1,5 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
@@ -1213,6 +1216,84 @@ namespace krys::boo
     // Only a composited root layer paints its fixed background in its own coordinates; there's no
     // compositing.
     return false;
+  }
+
+  DecodingMode RenderBoxModelObject::DecodingModeForImageDraw(const Image &image,
+                                                              const PaintInfo &paintInfo) const noexcept
+  {
+    // (Skipped: image documents decoding synchronously, as there are none; see KNOWN-ISSUES.md.)
+
+    // A PaintBehavior may force synchronous decoding.
+    if (paintInfo.PaintBehavior.Contains(PaintBehavior::Snapshotting))
+    {
+      return DecodingMode::Synchronous;
+    }
+
+    auto *bitmapImage = DynamicDowncast<BitmapImage>(image);
+    if (!bitmapImage)
+    {
+      return DecodingMode::Synchronous;
+    }
+
+    auto defaultDecodingMode = [&]() -> DecodingMode
+    {
+      if (paintInfo.PaintBehavior.Contains(PaintBehavior::ForceSynchronousImageDecode))
+      {
+        return DecodingMode::Synchronous;
+      }
+
+      // No image has been painted in this element yet and it should not flicker with previous painting.
+      // (WebKit decodes such an image asynchronously only in a layer's first paint; any first paint does
+      // here, so an image arriving while the page runs doesn't stall it; see DIFFERENCES.md.)
+      auto observer = bitmapImage->GetImageObserver();
+      bool mayOverlapOtherClients =
+        observer && observer->NumberOfClients() > 1
+        && bitmapImage->CurrentFrameDecodingOptions().GetDecodingMode() == DecodingMode::Asynchronous;
+      if (GetElement() && !GetElement()->HasEverPaintedImages() && !mayOverlapOtherClients)
+      {
+        return DecodingMode::Asynchronous;
+      }
+
+      // FIXME: Calling isVisibleInViewport() is not cheap. Find a way to make this faster.
+      return IsVisibleInViewport() ? DecodingMode::Synchronous : DecodingMode::Asynchronous;
+    };
+
+    if (auto *imgElement = DynamicDowncast<html::HTMLImageElement>(GetElement()))
+    {
+      // <img decoding="sync"> forces synchronous decoding.
+      if (imgElement->GetDecodingMode() == DecodingMode::Synchronous)
+      {
+        return DecodingMode::Synchronous;
+      }
+
+      // <img decoding="async"> forces asynchronous decoding but make sure this
+      // will not cause flickering.
+      if (imgElement->GetDecodingMode() == DecodingMode::Asynchronous)
+      {
+        if (bitmapImage->IsAnimated())
+        {
+          return DecodingMode::Asynchronous;
+        }
+
+        // Choose a decodingMode such that the image does not flicker.
+        return defaultDecodingMode();
+      }
+    }
+
+    // Animated image case.
+    if (bitmapImage->IsAnimated())
+    {
+      return bitmapImage->IsLargeForDecoding() ? DecodingMode::Asynchronous : DecodingMode::Synchronous;
+    }
+
+    // Large image case.
+    if (!bitmapImage->IsLargeForDecoding())
+    {
+      return DecodingMode::Synchronous;
+    }
+
+    // Choose a decodingMode such that the image does not flicker.
+    return defaultDecodingMode();
   }
 
   InterpolationQuality RenderBoxModelObject::ChooseInterpolationQuality(GraphicsContext &context,

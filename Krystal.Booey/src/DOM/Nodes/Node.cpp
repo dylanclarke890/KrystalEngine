@@ -238,6 +238,20 @@ namespace krys::boo::dom
     return EnsureNodeRareData().ChildNodes(*this);
   }
 
+  bool Node::HasEverPaintedImages() const noexcept
+  {
+    return _nodeRareData && _nodeRareData->HasEverPaintedImages();
+  }
+
+  void Node::SetHasEverPaintedImages(bool hasEverPaintedImages) noexcept
+  {
+    if (!hasEverPaintedImages && !_nodeRareData)
+    {
+      return;
+    }
+    EnsureNodeRareData().SetHasEverPaintedImages(hasEverPaintedImages);
+  }
+
   NodeRareData &Node::EnsureNodeRareData() noexcept
   {
     if (_nodeRareData == nullptr)

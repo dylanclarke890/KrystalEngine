@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
@@ -265,8 +266,8 @@ namespace krys::boo
     auto bgImage = layer.Layer.GetImage().TryStyleImage();
     bool shouldPaintBackgroundImage = bgImage && bgImage->CanRender(&_renderer, style.UsedZoom());
 
-    // FIXME: Contentful paint detection and asynchronous image decoding (detectingContentfulPaint,
-    // invalidatingImagesWithAsyncDecodes).
+    // FIXME: Contentful paint detection, and invalidating images with asynchronous decodes for a host's
+    // snapshot (detectingContentfulPaint, invalidatingImagesWithAsyncDecodes).
 
     bool baseBgColorOnly = (baseBgColorUsage == BaseBackgroundColorOnly);
     if (baseBgColorOnly && (!isRoot || !layer.IsLast || bgColor.IsOpaque()))
@@ -550,15 +551,26 @@ namespace krys::boo
 
         ImagePaintingOptions options = {
           op == CompositeOperator::SourceOver ? layer.Layer.CompositeForPainting(layer.IsLast) : op,
-          layer.Layer.GetBlendMode(), ImageOrientation::Orientation::FromImage,
+          layer.Layer.GetBlendMode(), _renderer.DecodingModeForImageDraw(*image, _paintInfo),
+          ImageOrientation::Orientation::FromImage,
           _renderer.ChooseInterpolationQuality(context, *image, &layer.Layer, geometry.TileSize)};
 
-        (void)context.DrawTiledImage(*image, FloatRect(geometry.DestinationRect),
-                                     FloatPoint(ToLayoutPoint(geometry.RelativePhase())),
-                                     FloatSize(geometry.TileSize), FloatSize(geometry.SpaceSize), options);
+        auto drawResult = context.DrawTiledImage(
+          *image, FloatRect(geometry.DestinationRect), FloatPoint(ToLayoutPoint(geometry.RelativePhase())),
+          FloatSize(geometry.TileSize), FloatSize(geometry.SpaceSize), options);
+        if (drawResult == ImageDrawResult::DidRequestDecoding)
+        {
+          krys_debug_assert(bgImage->HasCachedImage());
+          bgImage->GetCachedImage()->AddClientWaitingForAsyncDecoding(_renderer.GetCachedImageClient());
+        }
 
-        // FIXME: Asynchronous decoding and painted image bookkeeping (setHasEverPaintedImages,
-        // didPaintImage).
+        if (!context.PaintingDisabled() && _renderer.GetElement())
+        {
+          _renderer.GetElement()->SetHasEverPaintedImages(true);
+        }
+
+        // FIXME: Painted image bookkeeping for largest contentful paint (didPaintImage), once there are paint
+        // milestones.
       }
     }
   }

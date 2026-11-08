@@ -1510,6 +1510,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Images/ImageDecoder.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrame.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrameAnimator.hpp
+  include/Krystal.Booey/Graphics/Images/ImageFrameWorkQueue.hpp
   include/Krystal.Booey/Graphics/Images/ImageObserver.hpp
   include/Krystal.Booey/Graphics/Images/ImageOrientation.hpp
   include/Krystal.Booey/Graphics/Images/ImagePaintingOptions.hpp
@@ -1704,6 +1705,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Images/ImageDecoder.cpp
   src/Graphics/Images/ImageFrame.cpp
   src/Graphics/Images/ImageFrameAnimator.cpp
+  src/Graphics/Images/ImageFrameWorkQueue.cpp
   src/Graphics/Images/ImageSource.cpp
   src/Graphics/Images/NativeImage.cpp
   src/Graphics/Images/NativeImageSource.cpp

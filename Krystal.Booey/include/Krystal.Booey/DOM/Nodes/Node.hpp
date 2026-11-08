@@ -723,6 +723,11 @@ namespace krys::boo::dom
     /// @brief Clears the caches that a change to the attribute called @p localName of the node affects.
     void InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept;
 
+    /// @brief Whether an image has been painted for the node (as its content or a background): a later decode
+    /// of a visible one is synchronous, so the image doesn't flicker.
+    KRYS_NODISCARD bool HasEverPaintedImages() const noexcept;
+    void SetHasEverPaintedImages(bool hasEverPaintedImages) noexcept;
+
   protected:
     /// @brief The node's rare data, if it has any; an element's is an `ElementRareData`.
     KRYS_NODISCARD NodeRareData *RareData() const noexcept

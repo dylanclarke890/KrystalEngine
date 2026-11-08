@@ -209,6 +209,11 @@ namespace krys::boo
     /// compositing.
     KRYS_NODISCARD bool FixedBackgroundPaintsInLocalCoordinates() const noexcept;
 
+    /// @brief Whether @p image is decoded for drawing synchronously, or on the work queue, drawing nothing
+    /// until it's decoded.
+    KRYS_NODISCARD DecodingMode DecodingModeForImageDraw(const Image &image,
+                                                         const PaintInfo &paintInfo) const noexcept;
+
     /// @brief How @p image is interpolated when drawn at @p size.
     KRYS_NODISCARD InterpolationQuality ChooseInterpolationQuality(GraphicsContext &, Image &image,
                                                                    const void *layer,
