@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 
 namespace krys::boo

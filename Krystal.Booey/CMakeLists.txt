@@ -2527,6 +2527,8 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/MIMETypeRegistry.hpp
   include/Krystal.Booey/Platform/Network/BlobData.hpp
   include/Krystal.Booey/Platform/Network/DataURLDecoder.hpp
+  include/Krystal.Booey/Platform/Network/HTTPHeaderMap.hpp
+  include/Krystal.Booey/Platform/Network/HTTPParsers.hpp
   include/Krystal.Booey/Platform/Network/ResourceError.hpp
   include/Krystal.Booey/Platform/Network/ResourceRequest.hpp
   include/Krystal.Booey/Platform/Network/ResourceResponse.hpp
@@ -2578,6 +2580,9 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/MIMETypeRegistry.cpp
   src/Platform/Network/BlobData.cpp
   src/Platform/Network/DataURLDecoder.cpp
+  src/Platform/Network/HTTPHeaderMap.cpp
+  src/Platform/Network/HTTPParsers.cpp
+  src/Platform/Network/ResourceResponse.cpp
   src/Platform/Pasteboard/DragData.cpp
   src/Platform/Pasteboard/DragImage.cpp
   src/Platform/Pasteboard/Pasteboard.cpp

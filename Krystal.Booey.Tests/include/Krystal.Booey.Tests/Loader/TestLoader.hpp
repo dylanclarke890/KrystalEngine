@@ -30,6 +30,9 @@ namespace krys::boo::tests
   public:
     HashMap<utf8_string, Span<const uint8>> Resources;
     HashMap<utf8_string, utf8_string> MimeTypes;
+    /// @brief The headers and status served with a URL's resource; 0 is no status (not HTTP).
+    HashMap<utf8_string, List<Pair<utf8_string, utf8_string>>> Headers;
+    HashMap<utf8_string, uint16> StatusCodes;
     List<utf8_string> Requests;
     bool Defer {false};
     List<Pair<url::URL, Func<void(LoadResult &&)>>> Deferred;
@@ -88,11 +91,22 @@ namespace krys::boo::tests
         return;
       }
       auto mimeType = MimeTypes.find(key);
-      completionHandler(LoadedResource {
-        .Response =
-          ResourceResponse(url, mimeType != MimeTypes.end() ? mimeType->second : utf8_string(u8"image/png"),
-                           static_cast<int64>(found->second.size())),
-        .Data = SharedBuffer::Create(found->second)});
+      ResourceResponse response(url,
+                                mimeType != MimeTypes.end() ? mimeType->second : utf8_string(u8"image/png"),
+                                static_cast<int64>(found->second.size()));
+      if (auto headers = Headers.find(key); headers != Headers.end())
+      {
+        for (const auto &[name, value] : headers->second)
+        {
+          response.AddHTTPHeaderField(name, value);
+        }
+      }
+      if (auto status = StatusCodes.find(key); status != StatusCodes.end())
+      {
+        response.SetHTTPStatusCode(status->second);
+      }
+      completionHandler(
+        LoadedResource {.Response = krys::move(response), .Data = SharedBuffer::Create(found->second)});
     }
   };
 

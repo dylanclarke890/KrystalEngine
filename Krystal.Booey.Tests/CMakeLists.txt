@@ -490,6 +490,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/Decimal.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Platform/Network/DataURLDecoder.cpp
+		tests/Platform/Network/HTTPParsers.cpp
 		tests/Platform/Scrolling/ScrollAlignment.cpp
 		tests/Platform/Timer.cpp
 		tests/Rendering/Grid/RenderGrid.cpp
