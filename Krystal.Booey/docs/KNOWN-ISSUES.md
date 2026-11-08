@@ -47,10 +47,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `SingleAnimationRangeStart/End::ToTimelineRangeValue()` returns a null `CSSNumericValue` for a calculated offset (FIXME).
 - `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).
 - State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
-- `:lang()` on WebVTT elements doesn't use their cue's language (FIXME in `SelectorCheckerTestFunctions.cpp`).
 - `SelectorQuery` has no ID fast paths (rightmost-ID lookup, filtering the root by an ancestor ID, `[id=...]`; FIXMEs until tree scopes map IDs).
 - No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), and user style sheets' `@import`s and load options aren't handled.
-- `RuleSet` doesn't clone `::cue` rules for the cue background box (no WebVTT cues).
 - `css::calc::Value::DoubleValueDeprecated` doesn't log when the tree needs conversion data (FIXME in `ValueEvaluation.cpp`).
 - There is no inspector: `:hover` can't be forced and there are no observer hooks for source ranges.
 
@@ -59,7 +57,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - `env()` has no values: without the document's `ConstantPropertyMap` an `env()` reference falls back or is invalid at computed-value time (FIXME in `VariableReferenceValue.cpp`).
-- `::cue` rules for WebVTT elements aren't collected (FIXME in `ElementRuleCollector.cpp`).
 - Visually ordered documents aren't applied in `ResolveForDocument` (FIXME).
 - No visibility adjustment (`VisibilityAdjustment`): `adjustVisibilityForPseudoElement` and the force-hidden subtree adjustment are FIXMEs.
 - `Adjuster` leaves SVG transforms not stored on the style, and the layer-based SVG engine's `z-index`/stacking branches, as FIXMEs.
