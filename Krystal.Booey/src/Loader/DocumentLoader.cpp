@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Platform/Network/DataURLDecoder.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo
 {
@@ -294,6 +295,22 @@ namespace krys::boo
     if (RefPtr<dom::Document> document = ShareRefPtr(frame->Document()))
     {
       document->SetLastModified(_response.LastModified());
+      // The Content-Language header's first language is the document's language until a content-language
+      // pragma sets one, as Chrome takes it.
+      auto contentLanguage = _response.HTTPHeaderField(u8"Content-Language");
+      contentLanguage = contentLanguage.substr(0, contentLanguage.find(u8','));
+      while (!contentLanguage.empty() && text::IsASCIIWhitespace(contentLanguage.front()))
+      {
+        contentLanguage.remove_prefix(1);
+      }
+      while (!contentLanguage.empty() && text::IsASCIIWhitespace(contentLanguage.back()))
+      {
+        contentLanguage.remove_suffix(1);
+      }
+      if (!contentLanguage.empty())
+      {
+        document->SetContentLanguage(dom::DOMString(contentLanguage));
+      }
     }
     _writer.AddData(data);
 

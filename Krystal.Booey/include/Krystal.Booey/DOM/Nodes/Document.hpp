@@ -1493,8 +1493,8 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#pragma-directives
     void ProcessMetaHttpEquiv(DOMStringView equiv, DOMStringView content) noexcept;
 
-    /// @brief The document's language from its `content-language` pragma, for elements without a language of
-    /// their own; empty if it has none.
+    /// @brief The document's language, for elements without a language of their own: its `content-language`
+    /// pragma's, or else its response's `Content-Language` header's first language; empty if it has none.
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
     KRYS_NODISCARD const DOMString &ContentLanguage() const noexcept
     {

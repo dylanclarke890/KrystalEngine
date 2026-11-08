@@ -499,4 +499,40 @@ namespace krys::boo::tests
         (value == localText(before) || value == localText(before - 1s) || value == localText(before + 1s)));
     }
   }
+  TEST_CASE("A document's language falls back to its Content-Language header's first language",
+            "[Loader][DocumentLoader][html:pragma-set-default-language]")
+  {
+    LoadFixture fixture;
+    auto serve = [&](utf8_stringview name, utf8_stringview header, utf8_stringview markup)
+    {
+      auto url = utf8_string(u8"https://example.com/") + utf8_string(name);
+      fixture.Strategy.AddText(url, markup, u8"text/html");
+      fixture.Strategy.Headers[url] = {{u8"Content-Language", utf8_string(header)}};
+      fixture.LoadURL(url);
+      RunNetworkingTasks();
+      return fixture.Document().GetElementById(u8"p");
+    };
+
+    auto paragraph = serve(u8"one", u8"fr", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"fr");
+    CHECK(paragraph->Matches(u8":lang(fr)").Value());
+
+    // A list gives its first language, without the whitespace around it.
+    paragraph = serve(u8"list", u8"  fr , de", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"fr");
+    CHECK_FALSE(paragraph->Matches(u8":lang(de)").Value());
+
+    // The pragma comes first.
+    paragraph = serve(u8"pragma", u8"fr",
+                      u8"<!DOCTYPE html><meta http-equiv=content-language content=de><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"de");
+    CHECK(paragraph->Matches(u8":lang(de)").Value());
+
+    paragraph = serve(u8"empty", u8" , fr", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage().empty());
+  }
 }
