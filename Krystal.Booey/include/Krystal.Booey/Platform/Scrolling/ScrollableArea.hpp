@@ -200,6 +200,10 @@ namespace krys::boo
     /// @brief Repaints the scrollbars, for a new `scrollbar-color` or dark appearance.
     virtual void ScrollbarAppearanceChanged() noexcept;
 
+    /// @brief Changes the scrollbars over to the theme's choice of overlay or classic scrollbars: overlay
+    /// ones start fading, classic ones show, and the area lays out again for the space they take.
+    virtual void ScrollbarStyleChanged() noexcept;
+
     KRYS_NODISCARD bool AllowsHorizontalScrolling() const noexcept;
     KRYS_NODISCARD bool AllowsVerticalScrolling() const noexcept;
 

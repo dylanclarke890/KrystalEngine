@@ -1590,8 +1590,8 @@ namespace krys::boo
   {
     _colorCacheMap.clear();
 
-    // FIXME: Restyling every page after a change in the environment
-    // (Page::updateStyleForAllPagesAfterGlobalChangeInEnvironment), once pages are tracked.
+    // FIXME: Restyling every page (Page::ForEachPage) after a change in the environment
+    // (Page::updateStyleForAllPagesAfterGlobalChangeInEnvironment).
   }
 
   RenderTheme::ColorCache &RenderTheme::GetColorCache(style::ColorOptions options) const noexcept

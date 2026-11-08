@@ -111,6 +111,10 @@ namespace krys::boo
                                            UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient = nullptr,
                                            UniquePtr<DragClient> dragClient = nullptr) noexcept;
 
+    /// @brief Calls @p function with each page that's alive, for changes that reach every page (the
+    /// scrollbars' style).
+    static void ForEachPage(const Func<void(Page &)> &function) noexcept;
+
     KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
     {
       return *_chromeClient;

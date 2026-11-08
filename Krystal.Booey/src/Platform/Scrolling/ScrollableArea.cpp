@@ -72,6 +72,27 @@ namespace krys::boo
     }
   }
 
+  void ScrollableArea::ScrollbarStyleChanged() noexcept
+  {
+    auto &controller = GetScrollbarsController();
+    for (auto orientation : {ScrollbarOrientation::Horizontal, ScrollbarOrientation::Vertical})
+    {
+      auto *scrollbar =
+        orientation == ScrollbarOrientation::Horizontal ? HorizontalScrollbar() : VerticalScrollbar();
+      if (!scrollbar)
+      {
+        continue;
+      }
+      // The controller takes it again as what it now is.
+      controller.WillRemoveScrollbar(*scrollbar, orientation);
+      scrollbar->SetOpacity(1);
+      controller.DidAddScrollbar(*scrollbar, orientation);
+    }
+    ScrollbarWidthChanged();
+    ScrollbarAppearanceChanged();
+    AvailableContentSizeChanged(AvailableSizeChangeReason::ScrollbarsChanged);
+  }
+
   void ScrollableArea::ScrollbarAppearanceChanged() noexcept
   {
     for (auto *scrollbar : {HorizontalScrollbar(), VerticalScrollbar()})

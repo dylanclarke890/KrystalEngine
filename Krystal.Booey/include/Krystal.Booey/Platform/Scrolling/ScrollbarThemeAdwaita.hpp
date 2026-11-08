@@ -18,8 +18,8 @@ namespace krys::boo
     ScrollbarThemeAdwaita() noexcept = default;
     ~ScrollbarThemeAdwaita() noexcept override = default;
 
-    /// @brief Chooses overlay scrollbars (@p overlay) or classic ones, for every page.
-    /// @note Choose before showing pages: scrollbars that already exist don't start fading (FIXME).
+    /// @brief Chooses overlay scrollbars (@p overlay) or classic ones, for every page: the pages showing
+    /// change over, laying out again for the space their scrollbars take.
     static void SetUsesOverlayScrollbars(bool overlay) noexcept;
 
   protected:

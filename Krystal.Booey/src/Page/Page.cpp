@@ -32,6 +32,13 @@ namespace krys::boo
 {
   namespace
   {
+    /// @brief The pages alive.
+    KRYS_NODISCARD List<Page *> &AllPages() noexcept
+    {
+      static MainThreadNeverDestroyed<List<Page *>> pages;
+      return pages;
+    }
+
     /// @brief The SVG images @p document has loaded, each with its own page.
     KRYS_NODISCARD List<Ref<svg::SVGImage>> SVGImagesOf(dom::Document &document) noexcept
     {
@@ -81,6 +88,16 @@ namespace krys::boo
     if (!_editorClient)
     {
       _editorClient = CreateUnique<EmptyEditorClient>();
+    }
+    AllPages().push_back(this);
+  }
+
+  void Page::ForEachPage(const Func<void(Page &)> &function) noexcept
+  {
+    // A copy, so the function can make and destroy pages.
+    for (auto *page : List<Page *>(AllPages()))
+    {
+      function(*page);
     }
   }
 
@@ -139,7 +156,10 @@ namespace krys::boo
     _pointerCaptureController->Reset();
   }
 
-  Page::~Page() noexcept = default;
+  Page::~Page() noexcept
+  {
+    std::erase(AllPages(), this);
+  }
 
   Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
                          UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient,

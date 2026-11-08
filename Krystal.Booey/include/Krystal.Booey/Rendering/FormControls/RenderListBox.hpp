@@ -194,6 +194,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept final;
+    void ScrollbarStyleChanged() noexcept final
+    {
+      ScrollableArea::ScrollbarStyleChanged();
+      // The scrollbar's width is part of the list box's.
+      SetNeedsLayoutAndPreferredWidthsUpdate();
+    }
     KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept final
     {
       return Style().UsedScrollbarColor();

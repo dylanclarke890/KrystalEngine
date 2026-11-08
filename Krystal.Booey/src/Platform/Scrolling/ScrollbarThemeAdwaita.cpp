@@ -3,6 +3,9 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -56,7 +59,22 @@ namespace krys::boo
 
   void ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(bool overlay) noexcept
   {
-    static_cast<ScrollbarThemeAdwaita &>(Theme())._usesOverlayScrollbars = overlay;
+    auto &theme = static_cast<ScrollbarThemeAdwaita &>(Theme());
+    if (theme._usesOverlayScrollbars == overlay)
+    {
+      return;
+    }
+    theme._usesOverlayScrollbars = overlay;
+
+    Page::ForEachPage(
+      [](Page &page)
+      {
+        if (auto *view = page.MainFrame().View())
+        {
+          view->ForEachScrollableArea([](ScrollableArea &area) { area.ScrollbarStyleChanged(); });
+        }
+        page.ScheduleRenderingUpdate();
+      });
   }
 
   bool ScrollbarThemeAdwaita::UsesOverlayScrollbars() const noexcept

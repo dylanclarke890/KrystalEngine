@@ -1173,6 +1173,13 @@ namespace krys::boo
     InvalidateScrollCorner(ScrollCornerRect());
   }
 
+  void LocalFrameView::ScrollbarStyleChanged() noexcept
+  {
+    ScrollableArea::ScrollbarStyleChanged();
+    // Its scrollbars come and go with the space they take.
+    UpdateScrollbars(GetScrollPosition());
+  }
+
   bool LocalFrameView::UseDarkAppearanceForScrollbars() const noexcept
   {
     auto *document = Frame().Document();

@@ -427,4 +427,44 @@ namespace krys::boo::tests
     CHECK(inner.Opacity() == 0);
     CHECK(outer.Opacity() == 1);
   }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture,
+    "RenderLayerScrollableArea: switching to and from overlay scrollbars changes the pages showing",
+    "[Rendering][RenderLayerScrollableArea][ScrollbarsController]")
+  {
+    using namespace std::chrono_literals;
+    auto classic = MakeScopeExit([] { ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(false); });
+    PaintFixture fixture(u8"<!DOCTYPE html><div id=box style='overflow: scroll; width: 100px; height: 100px'>"
+                         u8"<div style='width: 300px; height: 300px'></div></div>",
+                         {200, 100}, true);
+    (void)fixture.Painted();
+    auto &loop = html::EventLoop::Current();
+    auto &box = BoxOf(fixture, u8"box");
+    REQUIRE(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar());
+    CHECK_FALSE(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar()->IsOverlayScrollbar());
+    CHECK(box.VerticalScrollbarWidth() == 21);
+
+    // To overlay: the scrollbar takes no space and fades.
+    ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
+    (void)fixture.Painted();
+    auto *scrollbar = ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar();
+    REQUIRE(scrollbar);
+    CHECK(scrollbar->IsOverlayScrollbar());
+    CHECK(box.VerticalScrollbarWidth() == 0);
+    CHECK(box.ContentBoxWidth() == 100);
+    loop.Run(loop.Now() + 3'100ms);
+    CHECK(scrollbar->Opacity() == 0);
+
+    // Back to classic: it takes its space again and shows, and stays shown.
+    ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(false);
+    (void)fixture.Painted();
+    scrollbar = ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar();
+    REQUIRE(scrollbar);
+    CHECK(box.VerticalScrollbarWidth() == 21);
+    CHECK(box.ContentBoxWidth() == 79);
+    CHECK(scrollbar->Opacity() == 1);
+    loop.Run(loop.Now() + 3'100ms);
+    CHECK(scrollbar->Opacity() == 1);
+  }
 }
