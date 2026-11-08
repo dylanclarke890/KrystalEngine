@@ -3,7 +3,9 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
@@ -52,6 +54,29 @@ namespace krys::boo
       }
 
       return true;
+    }
+
+    /// @brief Settles each of @p promises as a microtask: fulfilled, or rejected with an `EncodingError` of
+    /// @p rejection.
+    void SettleDecodePromises(List<ImageLoader::DecodePromise> promises,
+                              Maybe<utf8_stringview> rejection) noexcept
+    {
+      for (auto &promise : promises)
+      {
+        html::EventLoop::Current().QueueMicrotask(
+          [promise = krys::move(promise),
+           rejection = rejection.transform([](utf8_stringview message) { return utf8_string(message); })]
+          {
+            if (rejection)
+            {
+              promise(dom::Exception(dom::ExceptionCode::EncodingError, *rejection));
+            }
+            else
+            {
+              promise({});
+            }
+          });
+      }
     }
   }
 
@@ -232,6 +257,12 @@ namespace krys::boo
         _hasPendingErrorEvent = false;
       }
 
+      // The current request changed, so the promises waiting for the old image can't be kept.
+      if (newImage != oldImage && !_decodingPromises.empty())
+      {
+        RejectDecodePromises(u8"The image's source changed.");
+      }
+
       _image = newImage;
       _hasPendingLoadEvent = static_cast<bool>(newImage);
       _imageComplete = !newImage;
@@ -314,6 +345,10 @@ namespace krys::boo
     if (!_hasPendingLoadEvent)
     {
       SetImageCompleteAndMaybeUpdateRenderer();
+      if (!_decodingPromises.empty())
+      {
+        DecodeImage();
+      }
       return;
     }
 
@@ -325,6 +360,11 @@ namespace krys::boo
 
       _hasPendingErrorEvent = true;
       LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
+
+      if (!_decodingPromises.empty())
+      {
+        RejectDecodePromises(u8"Access control error.");
+      }
 
       krys_debug_assert(!_hasPendingLoadEvent);
 
@@ -338,6 +378,10 @@ namespace krys::boo
     {
       SetImageCompleteAndMaybeUpdateRenderer();
 
+      if (!_decodingPromises.empty())
+      {
+        RejectDecodePromises(u8"Loading was canceled.");
+      }
       _hasPendingLoadEvent = false;
       // Only consider updating the protection ref-count of the Element immediately before returning
       // from this function as doing so might result in the destruction of this ImageLoader.
@@ -347,7 +391,82 @@ namespace krys::boo
 
     // A bitmap image has no subresources, so its load event can be queued now.
     SetImageCompleteAndMaybeUpdateRenderer();
+    if (!_decodingPromises.empty())
+    {
+      DecodeImage();
+    }
     LoadEventSender().DispatchEventSoon(*this, LoadEventName());
+  }
+
+  void ImageLoader::Decode(DecodePromise promise) noexcept
+  {
+    if (!promise)
+    {
+      return;
+    }
+    _decodingPromises.push_back(krys::move(promise));
+
+    if (!GetDocument().IsFullyActive())
+    {
+      RejectDecodePromises(u8"Inactive document.");
+      return;
+    }
+
+    auto source = _element.ImageSourceURL();
+    if (!source || ContainsOnlyASCIIWhitespace(*source))
+    {
+      RejectDecodePromises(u8"Missing source URL.");
+      return;
+    }
+
+    if (_imageComplete)
+    {
+      DecodeImage();
+    }
+  }
+
+  void ImageLoader::DecodeImage() noexcept
+  {
+    krys_debug_assert(!_decodingPromises.empty());
+
+    if (!GetDocument().IsFullyActive())
+    {
+      RejectDecodePromises(u8"Inactive document.");
+      return;
+    }
+
+    if (!_image || !_image->GetImage() || _image->ErrorOccurred())
+    {
+      RejectDecodePromises(u8"Loading error.");
+      return;
+    }
+
+    // Other images (SVG images) draw without decoding.
+    auto *bitmapImage = DynamicDowncast<BitmapImage>(_image->GetImage());
+    if (!bitmapImage)
+    {
+      ResolveDecodePromises();
+      return;
+    }
+
+    bitmapImage->Decode(
+      [promises = std::exchange(_decodingPromises, {})](DecodingStatus decodingStatus) mutable
+      {
+        krys_debug_assert(decodingStatus != DecodingStatus::Decoding);
+        SettleDecodePromises(krys::move(promises), decodingStatus == DecodingStatus::Invalid
+                                                     ? Maybe<utf8_stringview>(u8"Decoding error.")
+                                                     : null);
+      });
+  }
+
+  void ImageLoader::ResolveDecodePromises() noexcept
+  {
+    SettleDecodePromises(std::exchange(_decodingPromises, {}), null);
+  }
+
+  void ImageLoader::RejectDecodePromises(utf8_stringview message) noexcept
+  {
+    SettleDecodePromises(std::exchange(_decodingPromises, {}), message);
   }
 
   RenderImageResource *ImageLoader::GetRenderImageResource() noexcept

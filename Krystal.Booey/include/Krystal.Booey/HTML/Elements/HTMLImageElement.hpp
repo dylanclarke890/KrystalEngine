@@ -172,7 +172,10 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-img-fetchpriority
     void FetchPriority(dom::DOMString value) noexcept;
 
-    // FIXME: Promise<undefined> decode();
+    /// @brief Calls @p promise, as a microtask, once the image has loaded and decoded, so it can be drawn
+    /// without decoding; it's rejected with an `EncodingError` if it can't be.
+    /// @see https://html.spec.whatwg.org/#dom-img-decode
+    void Decode(ImageLoader::DecodePromise promise) noexcept;
 
 #pragma endregion
 

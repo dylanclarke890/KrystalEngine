@@ -159,7 +159,7 @@ A job must not throw (the engine is `noexcept`) and must not block on IO or on o
 2. `WorkQueue` and `ManualWorkQueue` (in Krystal.Core, so Booey's and Krystal.UI's tests share it); Booey's event loop drains a `TaskInbox`; the editor creates the `JobSystem`.
 3. Asynchronous still-image decoding in Booey.
 4. Decoding animation frames ahead.
-5. `HTMLImageElement::decode()` and `SVGImageElement::decode()`.
+5. `HTMLImageElement::decode()` (`SVGImageElement`'s is WebKit's alone, so Booey doesn't have it).
 6. `FileLoaderStrategy` reads on an IO thread.
 
 ## Open questions

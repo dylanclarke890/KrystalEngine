@@ -415,6 +415,11 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
 
+  void HTMLImageElement::Decode(ImageLoader::DecodePromise promise) noexcept
+  {
+    GetImageLoader().Decode(krys::move(promise));
+  }
+
 #pragma endregion
 
 #pragma region HTMLImageElement Obsolete members

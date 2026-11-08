@@ -83,8 +83,6 @@ namespace krys::boo::svg
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGImageElement, SVGGraphicsElement, SVGURIReference>;
 
-    // FIXME: decode(), once image loaders have decode() promises.
-
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
