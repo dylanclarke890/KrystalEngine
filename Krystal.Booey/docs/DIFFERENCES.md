@@ -122,6 +122,8 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `attr()` lowercases its attribute name when parsed in an HTML document (`ConsumeAttr`), so it no longer matches a camel-case attribute on an SVG element there; the specification lowercases it only to compare with the attributes of HTML elements.
 - An empty string keyframes name (`animation-name: ""`) becomes an empty `<custom-ident>` that serialises as nothing.
 - `@supports` condition text is trimmed of ASCII whitespace and the vertical tab.
+- `CSS.registerProperty()` (`DOMCSSNamespace::RegisterProperty`) throws a `SyntaxError` for a syntax other than `*` without an initial value, as Chrome and WebKit do and as `@property` requires, where the specification now gives it the guaranteed-invalid value. `CSS.supports()` and `CSS.registerProperty()` take the document that stands in for the global.
+- `CSSStyleSheet` has no `replace()`: it's `replaceSync()` (`ReplaceSync`) with a promise, as both drop `@import` rules, and there are no promises.
 - Whitespace tokens serialise compactly: in normal mode a run of spaces and tabs is one space and each newline another (`a \n b` becomes `a   b`); in custom property mode whitespace keeps its length and its newlines, with tabs as spaces. In custom property mode a dimension keeps its original text, escapes included (`10\70 x`).
 - Media features read the frame's `MediaEnvironment`, which the host fills in. `hover`/`any-hover` and the pointer features default to a mouse (hover, fine pointer).
 - There are no view transitions: `@view-transition` is an unknown at-rule, `view-transition-name`/`-class` are unknown properties, and `:active-view-transition(-type)` and the `::view-transition*` pseudo-elements are invalid selectors.

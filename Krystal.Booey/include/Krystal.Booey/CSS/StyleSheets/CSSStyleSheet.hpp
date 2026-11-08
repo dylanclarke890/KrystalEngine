@@ -45,7 +45,7 @@ namespace krys::boo::css
 
   /// @brief A CSS style sheet exposed to scripts, wrapping its (possibly shared) parsed contents.
   /// @see https://drafts.csswg.org/cssom/#the-cssstylesheet-interface
-  // FIXME: The async Replace (needs promises).
+  // NOTE: there's no async replace(): it's ReplaceSync with a promise (see DIFFERENCES.md).
   class CSSStyleSheet final : public StyleSheet, public CanMakeWeakPtr<CSSStyleSheet>
   {
   public:
