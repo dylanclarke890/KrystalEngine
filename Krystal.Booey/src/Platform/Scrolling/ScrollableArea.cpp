@@ -19,7 +19,7 @@ namespace krys::boo
     }
   }
 
-  void ScrollableArea::ScrollbarColorChanged() noexcept
+  void ScrollableArea::ScrollbarAppearanceChanged() noexcept
   {
     for (auto *scrollbar : {HorizontalScrollbar(), VerticalScrollbar()})
     {

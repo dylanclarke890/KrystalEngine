@@ -365,7 +365,8 @@ namespace krys::boo
     }
 
     // FIXME: The scrollable area's scroll position and scrollbar placement.
-    // The scrollbars follow their box's scrollbar-width and scrollbar-color; the root's are the view's.
+    // The scrollbars follow their box's scrollbar-width, scrollbar-color and color-scheme; the root's are
+    // the view's.
     if (Layer() && oldStyle)
     {
       ScrollableArea *scrollableArea = IsDocumentElementRenderer()
@@ -377,9 +378,10 @@ namespace krys::boo
         {
           scrollableArea->ScrollbarWidthChanged();
         }
-        if (oldStyle->GetScrollbarColor() != newStyle.GetScrollbarColor())
+        if (oldStyle->GetScrollbarColor() != newStyle.GetScrollbarColor()
+            || GetDocument().UseDarkAppearance(oldStyle) != UseDarkAppearance())
         {
-          scrollableArea->ScrollbarColorChanged();
+          scrollableArea->ScrollbarAppearanceChanged();
         }
       }
     }

@@ -240,4 +240,45 @@ namespace krys::boo::tests
       CHECK(colours->TrackColor == Color(SRGBA<uint8> {0, 0, 255}));
     }
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderLayerScrollableArea: scrollbars follow color-scheme's dark appearance",
+                   "[Rendering][RenderLayerScrollableArea][css-color-adjust:color-scheme-prop]")
+  {
+    SECTION("a scroller's own color-scheme")
+    {
+      ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>div { overflow: scroll }</style>
+        <div id=dark style="color-scheme: dark"></div><div id=light></div><div id=either style="color-scheme: light dark"></div>)html"};
+      fixture.Document->UpdateStyleIfNeeded();
+      (void)fixture.Document->UpdateLayout();
+      CHECK(ScrollableAreaOf(fixture, u8"dark")->UseDarkAppearanceForScrollbars());
+      CHECK_FALSE(ScrollableAreaOf(fixture, u8"light")->UseDarkAppearanceForScrollbars());
+      // Light or dark is light unless the page is dark.
+      CHECK_FALSE(ScrollableAreaOf(fixture, u8"either")->UseDarkAppearanceForScrollbars());
+      CHECK_FALSE(fixture.Document->View()->UseDarkAppearanceForScrollbars());
+    }
+
+    SECTION("the root's color-scheme is the viewport's")
+    {
+      ResolverFixture fixture {u8"<!DOCTYPE html><style>html { color-scheme: dark }</style>"};
+      fixture.Document->UpdateStyleIfNeeded();
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.Document->View()->UseDarkAppearanceForScrollbars());
+    }
+
+    SECTION("light dark follows the page's appearance")
+    {
+      PaintFixture fixture(
+        u8"<!DOCTYPE html><div id=box style='overflow: scroll; color-scheme: light dark'></div>", {200, 100},
+        true);
+      (void)fixture.Painted();
+      CHECK_FALSE(ScrollableAreaOf(fixture, u8"box")->UseDarkAppearanceForScrollbars());
+
+      auto environment = fixture.TestPage->MainFrame().GetMediaEnvironment();
+      environment.UseDarkAppearance = true;
+      fixture.TestPage->MainFrame().SetMediaEnvironment(environment);
+      (void)fixture.Painted();
+      CHECK(ScrollableAreaOf(fixture, u8"box")->UseDarkAppearanceForScrollbars());
+    }
+  }
 }

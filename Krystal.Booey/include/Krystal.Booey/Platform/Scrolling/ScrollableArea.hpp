@@ -195,8 +195,8 @@ namespace krys::boo
     /// @brief Resizes the scrollbars for a new `scrollbar-width`.
     void ScrollbarWidthChanged() noexcept;
 
-    /// @brief Repaints the scrollbars, for a new `scrollbar-color`.
-    virtual void ScrollbarColorChanged() noexcept;
+    /// @brief Repaints the scrollbars, for a new `scrollbar-color` or dark appearance.
+    virtual void ScrollbarAppearanceChanged() noexcept;
 
     KRYS_NODISCARD bool AllowsHorizontalScrolling() const noexcept;
     KRYS_NODISCARD bool AllowsVerticalScrolling() const noexcept;

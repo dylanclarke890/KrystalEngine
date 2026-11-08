@@ -845,6 +845,11 @@ namespace krys::boo
     return ScrollbarWidth::Auto;
   }
 
+  bool RenderLayerScrollableArea::UseDarkAppearanceForScrollbars() const noexcept
+  {
+    return _layer.Renderer().UseDarkAppearance();
+  }
+
   Maybe<ScrollbarColor> RenderLayerScrollableArea::ScrollbarColorStyle() const noexcept
   {
     if (_layer.GetRenderBox())

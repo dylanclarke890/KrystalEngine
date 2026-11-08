@@ -110,6 +110,8 @@ namespace krys::boo
 
     KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept final;
     KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept final;
+    /// @brief Whether the scrollbars are dark: their box's `color-scheme`.
+    KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept final;
 
     KRYS_NODISCARD bool RequiresScrollPositionReconciliation() const noexcept
     {

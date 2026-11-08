@@ -506,7 +506,13 @@ namespace krys::boo
 
     KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept override;
     KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept override;
-    void ScrollbarColorChanged() noexcept override;
+    void ScrollbarAppearanceChanged() noexcept override;
+    /// @brief Whether the viewport's scrollbars are dark: the root's `color-scheme` where it sets one, or
+    /// else the document's.
+    KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept override;
+    /// @brief Repaints the scrollbars of the view and of every scroller and list box in it, for a change in
+    /// the page's dark appearance.
+    void InvalidateScrollbarsForAllScrollableAreas() noexcept;
     KRYS_NODISCARD OverscrollBehavior HorizontalOverscrollBehavior() const noexcept override;
     KRYS_NODISCARD OverscrollBehavior VerticalOverscrollBehavior() const noexcept override;
 

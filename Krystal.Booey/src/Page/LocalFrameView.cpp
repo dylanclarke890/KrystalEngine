@@ -28,6 +28,8 @@
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
@@ -1166,10 +1168,43 @@ namespace krys::boo
     return null;
   }
 
-  void LocalFrameView::ScrollbarColorChanged() noexcept
+  void LocalFrameView::ScrollbarAppearanceChanged() noexcept
   {
-    ScrollableArea::ScrollbarColorChanged();
+    ScrollableArea::ScrollbarAppearanceChanged();
     InvalidateScrollCorner(ScrollCornerRect());
+  }
+
+  bool LocalFrameView::UseDarkAppearanceForScrollbars() const noexcept
+  {
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    auto *renderer = documentElement ? documentElement->Renderer() : nullptr;
+    if (renderer && renderer->Style().HasExplicitlySetColorScheme())
+    {
+      return renderer->UseDarkAppearance();
+    }
+    return document && document->UseDarkAppearance(nullptr);
+  }
+
+  void LocalFrameView::InvalidateScrollbarsForAllScrollableAreas() noexcept
+  {
+    ScrollbarAppearanceChanged();
+    auto *renderView = GetRenderViewForUpdate();
+    if (!renderView)
+    {
+      return;
+    }
+    for (auto &box : DescendantsOfType<RenderBox>(*renderView))
+    {
+      if (auto *listBox = DynamicDowncast<RenderListBox>(box))
+      {
+        listBox->ScrollbarAppearanceChanged();
+      }
+      else if (auto *layer = box.Layer(); layer && layer->GetScrollableArea())
+      {
+        layer->GetScrollableArea()->ScrollbarAppearanceChanged();
+      }
+    }
   }
 
   OverscrollBehavior LocalFrameView::HorizontalOverscrollBehavior() const noexcept
