@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -77,6 +78,16 @@ namespace krys::boo
     Auto,
     Thin,
     None
+  };
+
+  /// @brief The colours `scrollbar-color` gives a scrollbar's thumb and track.
+  /// @see https://drafts.csswg.org/css-scrollbars/#scrollbar-color
+  struct ScrollbarColor
+  {
+    Color ThumbColor;
+    Color TrackColor;
+
+    friend bool operator==(const ScrollbarColor &, const ScrollbarColor &) noexcept = default;
   };
 
   enum class NativeScrollbarVisibility : uint8

@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -29,9 +31,9 @@ namespace krys::boo::tests
   {
     auto &theme = ScrollbarTheme::Theme();
     CHECK_FALSE(theme.UsesOverlayScrollbars());
-    // Classic Adwaita scrollbars are 21 pixels thick, thin or not.
+    // Classic Adwaita scrollbars are 21 pixels thick, or 13 thin.
     CHECK(theme.ScrollbarThickness() == 21);
-    CHECK(theme.ScrollbarThickness(ScrollbarWidth::Thin) == 21);
+    CHECK(theme.ScrollbarThickness(ScrollbarWidth::Thin) == 13);
     CHECK(theme.ScrollbarThickness(ScrollbarWidth::None) == 0);
   }
 
@@ -115,7 +117,8 @@ namespace krys::boo::tests
 
     SECTION("scrollbar-width")
     {
-      CHECK(BoxOf(fixture, u8"thin").VerticalScrollbarWidth() == 21);
+      CHECK(BoxOf(fixture, u8"thin").VerticalScrollbarWidth() == 13);
+      CHECK(BoxOf(fixture, u8"thin").HorizontalScrollbarHeight() == 13);
       CHECK(BoxOf(fixture, u8"none").VerticalScrollbarWidth() == 0);
     }
 
@@ -147,6 +150,94 @@ namespace krys::boo::tests
       document.UpdateStyleIfNeeded();
       REQUIRE(ScrollableAreaOf(fixture, u8"rel"));
       CHECK(ScrollableAreaOf(fixture, u8"rel")->HasScrollbars());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderLayerScrollableArea: changing scrollbar-width resizes the scrollbars",
+                   "[Rendering][RenderLayerScrollableArea][css-scrollbars:scrollbar-width]")
+  {
+    ResolverFixture fixture {
+      u8R"html(<!DOCTYPE html><div id=box style="overflow: scroll; width: 100px; height: 100px"></div>)html"};
+    auto &document = *fixture.Document;
+    auto relayout = [&]
+    {
+      document.UpdateStyleIfNeeded();
+      (void)document.UpdateLayout();
+    };
+    relayout();
+    auto &box = fixture.ById(u8"box");
+    REQUIRE(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar());
+    CHECK(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar()->Width() == 21);
+
+    REQUIRE_FALSE(
+      box.SetAttribute(u8"style", u8"overflow: scroll; width: 100px; height: 100px; scrollbar-width: thin")
+        .HasException());
+    relayout();
+    CHECK(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar()->Width() == 13);
+    CHECK(ScrollableAreaOf(fixture, u8"box")->HorizontalScrollbar()->Height() == 13);
+    CHECK(BoxOf(fixture, u8"box").VerticalScrollbarWidth() == 13);
+    // The content box gives up only the thin scrollbar's width.
+    CHECK(BoxOf(fixture, u8"box").ContentBoxWidth() == 87);
+
+    REQUIRE_FALSE(
+      box.SetAttribute(u8"style", u8"overflow: scroll; width: 100px; height: 100px").HasException());
+    relayout();
+    CHECK(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar()->Width() == 21);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderLayerScrollableArea: scrollbar-color colours the thumb and track",
+                   "[Rendering][RenderLayerScrollableArea][css-scrollbars:scrollbar-color]")
+  {
+    constexpr utf8_stringview Thumb = u8"(color #FF0000)";
+    constexpr utf8_stringview Track = u8"(color #0000FF)";
+    auto scroller = [](utf8_stringview colour)
+    {
+      return u8"<!DOCTYPE html><style>body { margin: 0 }</style><div id=box style='overflow: scroll; width: "
+             u8"100px; height: 80px; scrollbar-color: "
+             + utf8_string(colour) + u8"'><div style='width: 300px; height: 300px'></div></div>";
+    };
+
+    SECTION("auto leaves the theme's colours, and no track")
+    {
+      PaintFixture fixture(scroller(u8"auto"));
+      auto painted = fixture.Painted();
+      CHECK(painted.find(Thumb) == utf8_string::npos);
+      CHECK(painted.find(Track) == utf8_string::npos);
+      CHECK_FALSE(ScrollableAreaOf(fixture, u8"box")->ScrollbarColorStyle());
+    }
+
+    SECTION("two colours: the thumb's and the track's, which fills the tracks and the corner")
+    {
+      PaintFixture fixture(scroller(u8"red blue"));
+      auto painted = fixture.Painted();
+      auto colours = ScrollableAreaOf(fixture, u8"box")->ScrollbarColorStyle();
+      REQUIRE(colours);
+      CHECK(colours->ThumbColor == Color(SRGBA<uint8> {255, 0, 0}));
+      CHECK(colours->TrackColor == Color(SRGBA<uint8> {0, 0, 255}));
+
+      // The vertical track, the horizontal track and the corner between them.
+      CHECK(painted.find(u8"(rect at (79,0) size 21x59)") != utf8_string::npos);
+      CHECK(painted.find(u8"(rect at (0,59) size 79x21)") != utf8_string::npos);
+      CHECK(painted.find(u8"(rect at (79,59) size 21x21)") != utf8_string::npos);
+      size_t tracks = 0;
+      for (auto at = painted.find(Track); at != utf8_string::npos; at = painted.find(Track, at + 1))
+      {
+        ++tracks;
+      }
+      CHECK(tracks == 3u);
+      CHECK(painted.find(Thumb) != utf8_string::npos);
+    }
+
+    SECTION("the root's colours are the viewport's")
+    {
+      PaintFixture fixture(u8"<!DOCTYPE html><style>html { scrollbar-color: red blue }</style>"
+                           u8"<div style='height: 300px'></div>");
+      (void)fixture.Painted();
+      auto colours = fixture.Document->View()->ScrollbarColorStyle();
+      REQUIRE(colours);
+      CHECK(colours->TrackColor == Color(SRGBA<uint8> {0, 0, 255}));
     }
   }
 }

@@ -409,6 +409,17 @@ namespace krys::boo
       [&](const auto &parts) -> Color { return ColorResolvingCurrentColor(parts.Track); });
   }
 
+  Maybe<ScrollbarColor> RenderStyle::UsedScrollbarColor() const noexcept
+  {
+    return krys::SwitchOn(
+      GetScrollbarColor(), [](const css::keywords::Auto &) -> Maybe<ScrollbarColor> { return null; },
+      [&](const auto &parts) -> Maybe<ScrollbarColor>
+      {
+        return ScrollbarColor {.ThumbColor = ColorResolvingCurrentColor(parts.Thumb),
+                               .TrackColor = ColorResolvingCurrentColor(parts.Track)};
+      });
+  }
+
   Color RenderStyle::UsedAccentColor(style::ColorOptions styleColorOptions) const noexcept
   {
     return krys::SwitchOn(

@@ -194,6 +194,10 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept final;
+    KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept final
+    {
+      return Style().UsedScrollbarColor();
+    }
 
 #pragma endregion
 

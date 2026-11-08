@@ -505,6 +505,8 @@ namespace krys::boo
     KRYS_NODISCARD Scrollbar *ScrollbarAtPoint(const IntPoint &windowPoint) const noexcept;
 
     KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept override;
+    KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept override;
+    void ScrollbarColorChanged() noexcept override;
     KRYS_NODISCARD OverscrollBehavior HorizontalOverscrollBehavior() const noexcept override;
     KRYS_NODISCARD OverscrollBehavior VerticalOverscrollBehavior() const noexcept override;
 

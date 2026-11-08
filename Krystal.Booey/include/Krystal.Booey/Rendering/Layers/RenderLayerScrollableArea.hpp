@@ -109,6 +109,7 @@ namespace krys::boo
     void SetHasVerticalScrollbar(bool hasScrollbar) noexcept;
 
     KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept final;
+    KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept final;
 
     KRYS_NODISCARD bool RequiresScrollPositionReconciliation() const noexcept
     {

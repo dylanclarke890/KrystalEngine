@@ -167,6 +167,8 @@ namespace krys::boo
     KRYS_NODISCARD inline float UsedPerspective() const noexcept;
     KRYS_NODISCARD Color UsedScrollbarThumbColor() const noexcept;
     KRYS_NODISCARD Color UsedScrollbarTrackColor() const noexcept;
+    /// @brief The thumb and track colours of `scrollbar-color`, or nothing for `auto`.
+    KRYS_NODISCARD Maybe<ScrollbarColor> UsedScrollbarColor() const noexcept;
     KRYS_NODISCARD Color UsedAccentColor(style::ColorOptions) const noexcept;
     // FIXME: `usedFloat()` and `usedClear()` (logical left/right, block-relative) come with the renderers.
 

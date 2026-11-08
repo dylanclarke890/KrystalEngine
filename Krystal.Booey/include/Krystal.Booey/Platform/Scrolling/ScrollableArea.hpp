@@ -186,6 +186,18 @@ namespace krys::boo
       return ScrollbarWidth::Auto;
     }
 
+    /// @brief The colours the scrollbars' `scrollbar-color` gives them, or nothing for the theme's.
+    KRYS_NODISCARD virtual Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept
+    {
+      return null;
+    }
+
+    /// @brief Resizes the scrollbars for a new `scrollbar-width`.
+    void ScrollbarWidthChanged() noexcept;
+
+    /// @brief Repaints the scrollbars, for a new `scrollbar-color`.
+    virtual void ScrollbarColorChanged() noexcept;
+
     KRYS_NODISCARD bool AllowsHorizontalScrolling() const noexcept;
     KRYS_NODISCARD bool AllowsVerticalScrolling() const noexcept;
 

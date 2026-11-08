@@ -845,6 +845,15 @@ namespace krys::boo
     return ScrollbarWidth::Auto;
   }
 
+  Maybe<ScrollbarColor> RenderLayerScrollableArea::ScrollbarColorStyle() const noexcept
+  {
+    if (_layer.GetRenderBox())
+    {
+      return _layer.Renderer().Style().UsedScrollbarColor();
+    }
+    return null;
+  }
+
   bool RenderLayerScrollableArea::HasOverflowControls() const noexcept
   {
     // FIXME: The custom scroll corner too, once there are any.

@@ -983,8 +983,9 @@ namespace krys::boo::style
   {
     return a.EffectiveInert != b.EffectiveInert || a.UserModify != b.UserModify
            || a.UserSelect != b.UserSelect || a.ImageRendering != b.ImageRendering
-           || a.AccentColor != b.AccentColor || a.InsideDefaultButton != b.InsideDefaultButton
-           || a.InsideSubmitButton != b.InsideSubmitButton || a.ColorScheme != b.ColorScheme;
+           || a.AccentColor != b.AccentColor || a.ScrollbarColor != b.ScrollbarColor
+           || a.InsideDefaultButton != b.InsideDefaultButton || a.InsideSubmitButton != b.InsideSubmitButton
+           || a.ColorScheme != b.ColorScheme;
   }
 
   static bool ChangedCustomPaintWatchedProperty(const RenderStyle &a, const StyleRareNonInheritedData &aData,

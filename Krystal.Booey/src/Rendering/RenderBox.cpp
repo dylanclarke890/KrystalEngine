@@ -364,7 +364,25 @@ namespace krys::boo
       RenderBlock::ClearPercentHeightDescendantsFrom(*this);
     }
 
-    // FIXME: The scrollable area's scroll position, scrollbar placement, width and colour.
+    // FIXME: The scrollable area's scroll position and scrollbar placement.
+    // The scrollbars follow their box's scrollbar-width and scrollbar-color; the root's are the view's.
+    if (Layer() && oldStyle)
+    {
+      ScrollableArea *scrollableArea = IsDocumentElementRenderer()
+                                         ? static_cast<ScrollableArea *>(&View().FrameView())
+                                         : Layer()->GetScrollableArea();
+      if (scrollableArea)
+      {
+        if (oldStyle->GetScrollbarWidth() != newStyle.GetScrollbarWidth())
+        {
+          scrollableArea->ScrollbarWidthChanged();
+        }
+        if (oldStyle->GetScrollbarColor() != newStyle.GetScrollbarColor())
+        {
+          scrollableArea->ScrollbarColorChanged();
+        }
+      }
+    }
 
     // Our opaqueness might have changed without triggering layout.
     if (diff >= style::DifferenceResult::Repaint && diff <= style::DifferenceResult::RepaintLayer)

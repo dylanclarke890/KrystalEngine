@@ -1153,6 +1153,25 @@ namespace krys::boo
     return ScrollbarWidth::Auto;
   }
 
+  Maybe<ScrollbarColor> LocalFrameView::ScrollbarColorStyle() const noexcept
+  {
+    // The root element's scrollbar-color is the viewport's.
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    auto *scrollingObject = documentElement ? documentElement->Renderer() : nullptr;
+    if (scrollingObject && GetRenderView())
+    {
+      return scrollingObject->Style().UsedScrollbarColor();
+    }
+    return null;
+  }
+
+  void LocalFrameView::ScrollbarColorChanged() noexcept
+  {
+    ScrollableArea::ScrollbarColorChanged();
+    InvalidateScrollCorner(ScrollCornerRect());
+  }
+
   OverscrollBehavior LocalFrameView::HorizontalOverscrollBehavior() const noexcept
   {
     auto *document = Frame().Document();

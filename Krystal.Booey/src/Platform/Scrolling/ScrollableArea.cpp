@@ -8,6 +8,28 @@
 
 namespace krys::boo
 {
+  void ScrollableArea::ScrollbarWidthChanged() noexcept
+  {
+    for (auto *scrollbar : {HorizontalScrollbar(), VerticalScrollbar()})
+    {
+      if (scrollbar)
+      {
+        scrollbar->UpdateScrollbarThickness();
+      }
+    }
+  }
+
+  void ScrollableArea::ScrollbarColorChanged() noexcept
+  {
+    for (auto *scrollbar : {HorizontalScrollbar(), VerticalScrollbar()})
+    {
+      if (scrollbar)
+      {
+        scrollbar->Invalidate();
+      }
+    }
+  }
+
   ScrollableArea::ScrollableArea() noexcept = default;
   ScrollableArea::~ScrollableArea() noexcept = default;
 
