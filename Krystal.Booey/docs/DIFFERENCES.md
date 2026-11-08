@@ -292,6 +292,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- A range takes a touch that first moves along it (`SliderContainerElement::HandleTouchEvent`), as Chrome does, but a slider with any transform (or `rotate`, `scale`, `translate` or `offset-path`) takes moves in every direction, where Chrome does so only for a rotation.
 - The `focus` and `blur` events at the window are composed `FocusEvent`s with a `view`, as the specification says. Chrome fires a plain `Event` that isn't composed.
 - `beforeinput` and `input` have the window as their `view`, as UI Events says; Chrome's is null.
 - After a scroll, the hovered element follows the content under a still mouse when a fake mouse move fires, 100 ms later (250 ms once handling a mouse move has taken over 10 ms), as in WebKit; Chrome updates hover in the next frames. Fake moves carry the modifier keys of the latest mouse or keyboard event and are skipped while the page is hidden, but a page whose view isn't focused still gets them, as it does real mouse moves.

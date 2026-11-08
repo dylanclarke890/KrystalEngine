@@ -1063,6 +1063,57 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: a touch drags a slider's thumb along it, and pans across it", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } #r { margin: 0; width: 200px }</style>"
+                  u8"<div style='height: 100px'></div><input type=range id=r>"
+                  u8"<div style='height: 2000px'></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"r"));
+    auto rect = input.GetBoundingClientRect();
+    auto y = rect->Y() + rect->Height() / 2;
+    uint32 changes = 0;
+    auto handle =
+      input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
+                             Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+
+    auto touch = [&](pal::PointerAction action, boo::DoublePoint point)
+    {
+      pal::PointerInput pointer;
+      pointer.Id = 1;
+      pointer.Type = pal::PointerType::Touch;
+      pointer.Action = action;
+      pointer.InContact = action == pal::PointerAction::Pressed || action == pal::PointerAction::Moved;
+      (void)view.TouchInput(point, pointer);
+    };
+
+    SECTION("along the slider, the thumb follows the touch and the page doesn't pan")
+    {
+      touch(pal::PointerAction::Pressed, {20, y});
+      CHECK(input.ValueAsNumber() < 20);
+      touch(pal::PointerAction::Moved, {100, y + 5});
+      touch(pal::PointerAction::Moved, {190, y + 30});
+      CHECK(input.ValueAsNumber() > 90);
+      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(changes == 0);
+      touch(pal::PointerAction::Released, {190, y + 30});
+      CHECK(changes == 1);
+    }
+
+    SECTION("across the slider, the touch pans the page")
+    {
+      touch(pal::PointerAction::Pressed, {100, y});
+      auto value = input.Value();
+      touch(pal::PointerAction::Moved, {102, y - 10});
+      touch(pal::PointerAction::Moved, {180, y - 60});
+      CHECK(input.Value() == value);
+      CHECK(view.ScrollPosition().Y() > 0);
+      touch(pal::PointerAction::Released, {180, y - 60});
+    }
+  }
+
   TEST_CASE("View: a click focuses and the window's focus", "[UI]")
   {
     View view({400, 300});
