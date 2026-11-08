@@ -4,6 +4,12 @@ Known bugs and missing features in Krystal.Booey, by area. A bug with a `[!shoul
 
 What's out of scope by choice (scripting, the network, frames, workers, accessibility and the rest) is in `OVERVIEW.md` and isn't repeated here. Where Booey deliberately differs from a specification or Chrome, it's in `DIFFERENCES.md`. Issues in Render2D and Krystal.UI are in `Krystal.Gfx/docs/OVERVIEW.md` and `Krystal.UI/docs/OVERVIEW.md`.
 
+## Threads
+
+### Missing
+
+- Every page has to run on the same thread: there are no agents, so what the specifications keep per agent is process-wide, as is much else. That includes the event loop (`html::EventLoop::Current()`) and its timers (`ThreadTimers`), the mutation observer flag, pending observers and signal slots (`MutationObserverAlgorithms`), and the backup element queue of custom element reactions (`CustomElementReactionQueue.cpp`). It also includes the CSS value pool (`ValuePool::MainThreadPool`), Krystal.Core's string atom pool, and the singleton caches and services: `MemoryCache`, `FontCache`, `FontDatabase`, `RenderTheme`, `PlatformStrategies`, the style sheet, selector query and text breaking caches, and the other `Singleton()`s. Each page (or each agent, as the specifications group them) should be able to live on its own thread, with this state per thread or agent, or made thread-safe where it's shared (the memory and font caches).
+
 ## DOM
 
 ### Missing
