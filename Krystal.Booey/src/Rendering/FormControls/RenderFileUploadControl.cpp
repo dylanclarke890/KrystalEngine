@@ -138,15 +138,15 @@ namespace krys::boo
     }
 
     LayoutUnit buttonLogicalWidth(NodeLogicalWidth(button));
-    LayoutUnit buttonAndIconLogicalWidth = buttonLogicalWidth + AfterButtonSpacing;
+    LayoutUnit buttonAndSpacingLogicalWidth = buttonLogicalWidth + AfterButtonSpacing;
     LayoutUnit textLogicalLeft;
     if (writingMode.IsLogicalLeftInlineStart())
     {
-      textLogicalLeft = contentLogicalLeft + buttonAndIconLogicalWidth;
+      textLogicalLeft = contentLogicalLeft + buttonAndSpacingLogicalWidth;
     }
     else
     {
-      textLogicalLeft = contentLogicalLeft + ContentBoxLogicalWidth() - buttonAndIconLogicalWidth
+      textLogicalLeft = contentLogicalLeft + ContentBoxLogicalWidth() - buttonAndSpacingLogicalWidth
                         - LayoutUnit(font.Width(textRun));
     }
 
@@ -221,8 +221,6 @@ namespace krys::boo
 
       paintInfo.Context().DrawBidiText(font, textRun, FloatPoint(textOrigin));
     }
-
-    // FIXME: The file icon, drawn after the button (inputElement().icon()), with the host's file icons.
   }
 
   void RenderFileUploadControl::ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,

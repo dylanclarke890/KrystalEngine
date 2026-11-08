@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/DataListSuggestionPicker.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/FileChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Booey/Platform/GraphicsClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -157,6 +158,15 @@ namespace krys::boo
     {
       (void)client;
       return nullptr;
+    }
+
+    /// @brief Shows the host's file picker for a file input in @p frame, answering @p chooser with the files
+    /// the user chooses, or cancelling it, now or later; a host that doesn't override this has no file
+    /// picker, so the choice is cancelled at once.
+    virtual void RunOpenPanel(LocalFrame &frame, FileChooser &chooser) noexcept
+    {
+      (void)frame;
+      chooser.Cancel();
     }
 
     /// @brief Whether the system has a mouse, whose movement the host can report before the system's

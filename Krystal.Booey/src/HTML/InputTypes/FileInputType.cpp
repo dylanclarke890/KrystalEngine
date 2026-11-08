@@ -7,13 +7,85 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html
 {
+  namespace
+  {
+    // A MIME type or a wildcard one (`image/*`): a type and a subtype of token characters.
+    KRYS_NODISCARD bool IsAcceptedMIMEType(utf8_stringview type) noexcept
+    {
+      auto slash = type.find(u8'/');
+      if (slash == utf8_stringview::npos || slash == 0 || slash == type.size() - 1)
+      {
+        return false;
+      }
+      for (size_t i = 0; i < type.size(); ++i)
+      {
+        auto c = type[i];
+        if (i != slash && !text::IsASCIIAlphanumeric(c)
+            && utf8_stringview(u8"!#$%&'*+-.^_`|~").find(c) == utf8_stringview::npos)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // https://html.spec.whatwg.org/#attr-input-accept
+    // The accept attribute's comma-separated tokens that @p predicate keeps, trimmed and lowercased.
+    template <typename TPredicate>
+    KRYS_NODISCARD List<utf8_string> ParseAcceptAttribute(utf8_stringview accept,
+                                                          TPredicate predicate) noexcept
+    {
+      List<utf8_string> tokens;
+      size_t start = 0;
+      while (start <= accept.size())
+      {
+        auto end = accept.find(u8',', start);
+        if (end == utf8_stringview::npos)
+        {
+          end = accept.size();
+        }
+        auto token = accept.substr(start, end - start);
+        while (!token.empty() && text::IsASCIIWhitespace(token.front()))
+        {
+          token.remove_prefix(1);
+        }
+        while (!token.empty() && text::IsASCIIWhitespace(token.back()))
+        {
+          token.remove_suffix(1);
+        }
+        if (!token.empty() && predicate(token))
+        {
+          utf8_string lowered(token);
+          for (auto &c : lowered)
+          {
+            c = text::ToASCIILower(c);
+          }
+          tokens.push_back(krys::move(lowered));
+        }
+        start = end + 1;
+      }
+      return tokens;
+    }
+  }
+
+  FileInputType::~FileInputType() noexcept
+  {
+    if (_fileChooser)
+    {
+      _fileChooser->Invalidate();
+    }
+  }
+
   bool FileInputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());
@@ -163,6 +235,72 @@ namespace krys::boo::html
       files.push_back(File::Create(paths[i]));
     }
     SetFiles(FileList::Create(krys::move(files)), WasSetByJavaScript::No);
+  }
+
+  void FileInputType::FileChoosingCancelled() noexcept
+  {
+    // https://html.spec.whatwg.org/#show-the-picker,-if-applicable
+    // If the user dismissed the prompt without changing their selection, then queue an element task on the
+    // user interaction task source given element to fire an event named cancel at element, with the bubbles
+    // attribute initialized to true.
+    // (Fired as the host answers.)
+    if (auto *element = Element())
+    {
+      Ref<HTMLInputElement> protectedElement = ShareRef(*element);
+      protectedElement->DispatchCancelEvent();
+    }
+  }
+
+  FileChooserSettings FileInputType::ChooserSettings() const noexcept
+  {
+    krys_debug_assert(Element());
+    auto &element = *Element();
+    auto accept = element.GetAttribute(u8"accept").value_or(dom::DOMString());
+    FileChooserSettings settings {
+      .AllowsMultipleFiles = element.Multiple(),
+      .AcceptMIMETypes = ParseAcceptAttribute(accept, IsAcceptedMIMEType),
+      // An extension: a dot and at least one character.
+      .AcceptFileExtensions = ParseAcceptAttribute(accept, [](utf8_stringview token)
+                                                   { return token.size() >= 2 && token[0] == u8'.'; }),
+    };
+    for (auto &file : _fileList->Files())
+    {
+      settings.SelectedFiles.push_back(utf8_string(file->Path()));
+    }
+    return settings;
+  }
+
+  void FileInputType::ShowPicker() noexcept
+  {
+    krys_debug_assert(Element());
+    auto *frame = Element()->NodeDocument().Frame();
+    auto *chromeClient = GetChromeClient();
+    if (!frame || !chromeClient)
+    {
+      return;
+    }
+
+    // A new request replaces one the host hasn't answered.
+    if (_fileChooser)
+    {
+      _fileChooser->Invalidate();
+    }
+    Ref<FileChooser> chooser = FileChooser::Create(*this, ChooserSettings());
+    _fileChooser = chooser;
+    chromeClient->RunOpenPanel(*frame, *chooser);
+  }
+
+  void FileInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  {
+    krys_debug_assert(Element());
+    // Only for a user's click or key.
+    if (Element()->IsDisabledFormControl() || !HasTransientActivation())
+    {
+      return;
+    }
+
+    ShowPicker();
+    event.SetDefaultHandled();
   }
 
   // Transcoding dropped images to a type the input accepts (receiveDroppedFilesWithImageTranscoding) is the

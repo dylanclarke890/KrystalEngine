@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
@@ -1119,6 +1120,48 @@ namespace krys::ui::tests
       CHECK(input.Value() == value);
       CHECK(view.ScrollPosition().Y() > 0);
       touch(pal::PointerAction::Released, {180, y - 60});
+    }
+  }
+
+  TEST_CASE("View: a file input asks the host for files", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } input { margin: 0 }</style>"
+                  u8"<input type=file id=f accept=image/*>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"f"));
+    uint32 changes = 0;
+    auto handle =
+      input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
+                             Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+    auto click = [&]
+    {
+      view.MousePressed({5, 5}, pal::MouseButton::Left);
+      view.MouseReleased({5, 5}, pal::MouseButton::Left);
+      boo::html::EventLoop::Current().RunUntilIdle();
+    };
+
+    SECTION("without a handler, the choice is cancelled")
+    {
+      click();
+      CHECK(input.Files()->IsEmpty());
+      CHECK(changes == 0);
+    }
+
+    SECTION("a click on its button asks the handler, which answers later")
+    {
+      RefPtr<boo::FileChooser> chooser;
+      view.SetFileChooserHandler([&](Ref<boo::FileChooser> request) { chooser = request; });
+      click();
+      REQUIRE(chooser);
+      CHECK(chooser->Settings().AcceptMIMETypes == List<utf8_string> {u8"image/*"});
+      CHECK_FALSE(chooser->Settings().AllowsMultipleFiles);
+
+      chooser->ChooseFiles({u8"C:/pictures/cat.png"});
+      CHECK(changes == 1);
+      REQUIRE(input.Files()->Length() == 1);
+      CHECK(input.Files()->GetFile(0).Name() == u8"cat.png");
     }
   }
 

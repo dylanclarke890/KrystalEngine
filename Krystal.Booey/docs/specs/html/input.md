@@ -201,7 +201,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.17 File Upload state (type=file)](https://html.spec.whatwg.org/#file-upload-state-%28type=file%29)
 
 Status: reviewed (2026-11-01)
-> `FileInputType`; no file chooser (see `KNOWN-ISSUES.md`).
+> `FileInputType`; the host shows the file picker (`ChromeClient::RunOpenPanel`, see `DIFFERENCES.md`).
 <!-- definitions: concept-input-type-file-selected concept-input-file-path attr-input-accept -->
 
 - [x] [update the file selection](https://html.spec.whatwg.org/#update-the-file-selection) — To update the file selection for an element element:

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
@@ -2130,6 +2131,19 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#the-input-element:activation-behaviour
   void HTMLInputElement::ActivationBehavior(dom::Event &event) noexcept
   {
+    // A file input's button (its ::file-selector-button) activates the input, so clicking it opens the
+    // chooser, as in Chrome.
+    if (IsInUserAgentShadowTree() && UserAgentPart() == css::UserAgentParts::FileSelectorButton())
+    {
+      if (RefPtr<HTMLInputElement> host =
+            ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
+          host && host->IsFileUpload())
+      {
+        host->ActivationBehavior(event);
+        return;
+      }
+    }
+
     Ref<InputType> protectedInputType = ShareRef(*_inputType);
 
     // 1. If element is not mutable, and element's type attribute is neither in the Checkbox nor in the Radio

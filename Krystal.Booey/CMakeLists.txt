@@ -2494,6 +2494,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp
   include/Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp
   include/Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp
+  include/Krystal.Booey/Platform/Choosers/FileChooser.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenu.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenuClient.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp

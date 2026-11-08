@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
+#include "Krystal.Booey/Platform/Choosers/FileChooser.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp"
@@ -603,6 +604,11 @@ namespace krys::ui
     /// @brief Calls @p handler when the page asks to be brought to the front (`window.focus()`); the host
     /// decides whether to raise its window. A view without a handler ignores it.
     void SetFocusRequestHandler(Func<void()> &&handler) noexcept;
+
+    /// @brief Calls @p handler when a file input asks for files (a user's click, or `showPicker()`): the host
+    /// shows its file picker with the chooser's `Settings()`, then answers it, now or later, with
+    /// `ChooseFiles` or `Cancel`. A view without a handler cancels at once, so the input gets `cancel`.
+    void SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept;
 
     /// @brief The view's document: the main frame's.
     KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept;

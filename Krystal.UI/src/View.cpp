@@ -68,6 +68,7 @@ namespace krys::ui
     GraphicsLayerFactoryTextureMapper _factory;
     GraphicsLayerTextureMapper *_rootLayer {nullptr};
     Func<void()> _focusRequestHandler;
+    Func<void(Ref<boo::FileChooser>)> _fileChooserHandler;
 
   public:
     void Focus() noexcept override
@@ -81,6 +82,21 @@ namespace krys::ui
     void SetFocusRequestHandler(Func<void()> &&handler) noexcept
     {
       _focusRequestHandler = krys::move(handler);
+    }
+
+    void RunOpenPanel(boo::LocalFrame &, boo::FileChooser &chooser) noexcept override
+    {
+      if (_fileChooserHandler)
+      {
+        _fileChooserHandler(ShareRef(chooser));
+        return;
+      }
+      chooser.Cancel();
+    }
+
+    void SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept
+    {
+      _fileChooserHandler = krys::move(handler);
     }
 
     void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
@@ -2171,6 +2187,11 @@ namespace krys::ui
   void View::SetFocusRequestHandler(Func<void()> &&handler) noexcept
   {
     _chromeClient->SetFocusRequestHandler(krys::move(handler));
+  }
+
+  void View::SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept
+  {
+    _chromeClient->SetFileChooserHandler(krys::move(handler));
   }
 
   namespace
