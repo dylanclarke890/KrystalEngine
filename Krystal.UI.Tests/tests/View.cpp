@@ -46,6 +46,7 @@
 #include "Krystal.UI/Input.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
 
@@ -297,6 +298,25 @@ namespace krys::ui::tests
       REQUIRE(second);
     }
     CHECK_FALSE(second);
+  }
+
+  TEST_CASE("View: a file's lastModified is its modification time", "[UI]")
+  {
+    using namespace std::chrono;
+    const auto path = std::filesystem::temp_directory_path() / "krystal-ui-dated-page.html";
+    {
+      std::ofstream file(path, std::ios::binary);
+      file << "<!DOCTYPE html>";
+    }
+    const sys_seconds modified = sys_days(2'001y / March / 4) + 5h + 6min + 7s;
+    std::filesystem::last_write_time(path, clock_cast<file_clock>(modified));
+
+    View view({200, 100});
+    REQUIRE(view.LoadFile(path).has_value());
+    WaitForLoad(view);
+    auto expected = std::format("{:%m/%d/%Y %H:%M:%S}", current_zone()->to_local(modified));
+    CHECK(view.Document().LastModified() == utf8_string(expected.begin(), expected.end()));
+    std::filesystem::remove(path);
   }
 
   TEST_CASE("View: loads files", "[UI]")

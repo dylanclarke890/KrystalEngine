@@ -409,6 +409,8 @@ namespace krys::boo::dom
     uint32 _unloadCounter {0};
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
     DOMString _contentLanguage;
+    /// @brief When its source was last modified, as its response said; none if it's unknown.
+    Maybe<std::chrono::sys_seconds> _lastModified;
     /// @brief The document's active timers.
     List<Ref<DocumentTimer>> _timers;
     UniquePtr<ScriptedAnimationController> _scriptedAnimationController;
@@ -642,6 +644,12 @@ namespace krys::boo::dom
     /// `MM/DD/YYYY hh:mm:ss`.
     /// @see https://html.spec.whatwg.org/#dom-document-lastmodified
     KRYS_NODISCARD DOMString LastModified() const noexcept;
+    /// @brief When the document's source was last modified (its response's `Last-Modified`); unknown, the
+    /// document's `lastModified` is the current time.
+    void SetLastModified(Maybe<std::chrono::sys_seconds> lastModified) noexcept
+    {
+      _lastModified = lastModified;
+    }
 
     /// @see https://html.spec.whatwg.org/#dom-document-readystate
     KRYS_NODISCARD html::DocumentReadyState ReadyState() const noexcept

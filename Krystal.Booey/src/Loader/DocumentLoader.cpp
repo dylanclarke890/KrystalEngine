@@ -291,6 +291,10 @@ namespace krys::boo
       _isLoadingMainResource = false;
       return;
     }
+    if (RefPtr<dom::Document> document = ShareRefPtr(frame->Document()))
+    {
+      document->SetLastModified(_response.LastModified());
+    }
     _writer.AddData(data);
 
     // The data is all there.

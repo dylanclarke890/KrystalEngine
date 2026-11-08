@@ -22,6 +22,8 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include <chrono>
+#include <format>
 
 namespace krys::boo::tests
 {
@@ -463,5 +465,38 @@ namespace krys::boo::tests
     fixture.Document().ProcessMetaHttpEquiv(u8"content-language", u8"de");
     CHECK(fixture.Document().ContentLanguage() == u8"de");
     CHECK(paragraph->Matches(u8":lang(de)").Value());
+  }
+  TEST_CASE("A document's lastModified is its response's Last-Modified date, in local time",
+            "[Loader][DocumentLoader][html:dom-document-lastmodified]")
+  {
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/dated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.AddText(u8"https://example.com/undated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.AddText(u8"https://example.com/misdated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.Headers[u8"https://example.com/dated.html"] = {
+      {u8"Last-Modified", u8"Sun, 06 Nov 1994 08:49:37 GMT"}};
+    fixture.Strategy.Headers[u8"https://example.com/misdated.html"] = {{u8"Last-Modified", u8"yesterday"}};
+
+    using namespace std::chrono;
+    auto localText = [](sys_seconds time)
+    {
+      auto text = std::format("{:%m/%d/%Y %H:%M:%S}", current_zone()->to_local(time));
+      return utf8_string(text.begin(), text.end());
+    };
+
+    fixture.LoadURL(u8"https://example.com/dated.html");
+    RunNetworkingTasks();
+    CHECK(fixture.Document().LastModified() == localText(sys_days(1'994y / November / 6) + 8h + 49min + 37s));
+
+    // Without a valid date, it's the current time.
+    for (auto url : {u8"https://example.com/undated.html", u8"https://example.com/misdated.html"})
+    {
+      fixture.LoadURL(url);
+      RunNetworkingTasks();
+      auto before = floor<seconds>(system_clock::now());
+      auto value = fixture.Document().LastModified();
+      CHECK(
+        (value == localText(before) || value == localText(before - 1s) || value == localText(before + 1s)));
+    }
   }
 }

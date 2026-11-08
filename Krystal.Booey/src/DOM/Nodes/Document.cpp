@@ -1309,11 +1309,12 @@ namespace krys::boo::dom
 
   DOMString Document::LastModified() const noexcept
   {
-    // FIXME: The response's Last-Modified header, or the file's modification date for a file, once responses
-    // have headers.
-    // When the last modification date and time aren't known, the attribute returns the current date and time.
-    auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
-    auto text = std::format("{:%m/%d/%Y %H:%M:%S}", std::chrono::current_zone()->to_local(now));
+    // The response's Last-Modified header (for a file, the host gives its modification time) is the source's
+    // last modification. When the last modification date and time aren't known, the attribute returns the
+    // current date and time.
+    auto lastModified =
+      _lastModified.value_or(std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now()));
+    auto text = std::format("{:%m/%d/%Y %H:%M:%S}", std::chrono::current_zone()->to_local(lastModified));
     return DOMString(DOMStringView(reinterpret_cast<const char8 *>(text.data()), text.size()));
   }
 

@@ -1,7 +1,9 @@
 ﻿#include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
+#include <chrono>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <iterator>
 
@@ -37,9 +39,19 @@ namespace krys::ui
 
     const auto extension = path.extension().u8string();
     const auto size = static_cast<int64>(bytes.size());
-    completionHandler(boo::LoadedResource {
-      .Response = boo::ResourceResponse(url, MimeTypeForExtension(utf8_stringview(extension)), size),
-      .Data = boo::SharedBuffer::Create(krys::move(bytes))});
+    boo::ResourceResponse response(url, MimeTypeForExtension(utf8_stringview(extension)), size);
+    // The file's modification time is its document's lastModified, as an HTTP-date.
+    std::error_code error;
+    if (auto writeTime = std::filesystem::last_write_time(path, error); !error)
+    {
+      auto modified = std::chrono::floor<std::chrono::seconds>(
+        std::chrono::clock_cast<std::chrono::system_clock>(writeTime));
+      auto date = std::format("{:%a, %d %b %Y %H:%M:%S} GMT", modified);
+      response.SetHTTPHeaderField(
+        u8"Last-Modified", utf8_stringview(reinterpret_cast<const char8_t *>(date.data()), date.size()));
+    }
+    completionHandler(boo::LoadedResource {.Response = krys::move(response),
+                                           .Data = boo::SharedBuffer::Create(krys::move(bytes))});
   }
 
   utf8_string FileLoaderStrategy::MimeTypeForExtension(utf8_stringview extension) noexcept
