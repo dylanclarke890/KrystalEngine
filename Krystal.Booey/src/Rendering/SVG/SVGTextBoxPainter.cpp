@@ -113,8 +113,7 @@ namespace krys::boo
       return;
     }
 
-    auto &parentRenderer = ParentRenderer();
-    krys_debug_assert(!parentRenderer.GetDocument().Printing());
+    krys_debug_assert(!ParentRenderer().GetDocument().Printing());
 
     // Determine whether or not we're selected.
     bool paintSelectedTextOnly = _paintInfo.Phase == PaintPhase::Selection;
