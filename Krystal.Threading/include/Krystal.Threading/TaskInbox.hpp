@@ -14,9 +14,9 @@ namespace krys::threads
   /// completion: a thread-safe queue of tasks that the owner runs, in the order they arrived, when it next
   /// drains it.
   /// @note The owner is the thread that creates it. It must outlive every job that posts to it.
-  class TaskTarget final
+  class TaskInbox final
   {
-    KRYS_NON_COPY_MOVABLE(TaskTarget);
+    KRYS_NON_COPY_MOVABLE(TaskInbox);
 
   private:
     mutable std::mutex _mutex;
@@ -25,11 +25,11 @@ namespace krys::threads
     std::thread::id _owner {std::this_thread::get_id()};
 
   public:
-    TaskTarget() noexcept = default;
+    TaskInbox() noexcept = default;
     /// @brief Destroys the tasks that haven't run, unrun.
-    ~TaskTarget() noexcept;
+    ~TaskInbox() noexcept;
 
-    /// @brief Adds @p task, to run when the owner next drains the target; callable from any thread.
+    /// @brief Adds @p task, to run when the owner next drains the inbox; callable from any thread.
     void Post(MoveOnlyFunc<void()> task) noexcept;
 
     /// @brief Runs the tasks posted before this was called, in the order they arrived; the ones they post run

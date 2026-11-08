@@ -1,4 +1,4 @@
-﻿#include "Krystal.Threading/TaskTarget.hpp"
+﻿#include "Krystal.Threading/TaskInbox.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Threading/Thread.hpp"
@@ -25,42 +25,42 @@ namespace krys::threads::tests
     };
   }
 
-  TEST_CASE("TaskTarget: tasks run when the owner drains, in the order they came", "[Threading]")
+  TEST_CASE("TaskInbox: tasks run when the owner drains, in the order they came", "[Threading]")
   {
-    TaskTarget target;
+    TaskInbox inbox;
     List<int> order;
-    target.Post([&]() { order.push_back(1); });
-    target.Post([&]() { order.push_back(2); });
+    inbox.Post([&]() { order.push_back(1); });
+    inbox.Post([&]() { order.push_back(2); });
     CHECK(order.empty());
-    CHECK(target.HasTasks());
+    CHECK(inbox.HasTasks());
 
-    CHECK(target.Drain() == 2);
+    CHECK(inbox.Drain() == 2);
     CHECK(order == List<int> {1, 2});
-    CHECK_FALSE(target.HasTasks());
-    CHECK(target.Drain() == 0);
+    CHECK_FALSE(inbox.HasTasks());
+    CHECK(inbox.Drain() == 0);
   }
 
-  TEST_CASE("TaskTarget: a task posted while draining runs at the next drain", "[Threading]")
+  TEST_CASE("TaskInbox: a task posted while draining runs at the next drain", "[Threading]")
   {
-    TaskTarget target;
+    TaskInbox inbox;
     int runs = 0;
-    target.Post(
+    inbox.Post(
       [&]()
       {
         ++runs;
-        target.Post([&]() { ++runs; });
+        inbox.Post([&]() { ++runs; });
       });
-    CHECK(target.Drain() == 1);
+    CHECK(inbox.Drain() == 1);
     CHECK(runs == 1);
-    CHECK(target.Drain() == 1);
+    CHECK(inbox.Drain() == 1);
     CHECK(runs == 2);
   }
 
-  TEST_CASE("TaskTarget: other threads post, the owner runs", "[Threading]")
+  TEST_CASE("TaskInbox: other threads post, the owner runs", "[Threading]")
   {
-    TaskTarget target;
+    TaskInbox inbox;
     std::atomic<uint32> wakes {0};
-    target.SetWakeHandler([&]() { ++wakes; });
+    inbox.SetWakeHandler([&]() { ++wakes; });
 
     constexpr int PostsEach = 100;
     List<std::thread::id> ranOn;
@@ -71,7 +71,7 @@ namespace krys::threads::tests
                    {
                      for (int i = 0; i < PostsEach; ++i)
                      {
-                       target.Post(
+                       inbox.Post(
                          [&, i]()
                          {
                            fromFirst.push_back(i);
@@ -84,13 +84,13 @@ namespace krys::threads::tests
                     {
                       for (int i = 0; i < PostsEach; ++i)
                       {
-                        target.Post([&]() { ranOn.push_back(std::this_thread::get_id()); });
+                        inbox.Post([&]() { ranOn.push_back(std::this_thread::get_id()); });
                       }
                     });
     }
 
     CHECK(wakes == 2 * PostsEach);
-    CHECK(target.Drain() == 2 * PostsEach);
+    CHECK(inbox.Drain() == 2 * PostsEach);
     REQUIRE(ranOn.size() == 2uz * PostsEach);
     for (auto id : ranOn)
     {
@@ -104,13 +104,13 @@ namespace krys::threads::tests
     }
   }
 
-  TEST_CASE("TaskTarget: tasks left when it goes are destroyed unrun", "[Threading]")
+  TEST_CASE("TaskInbox: tasks left when it goes are destroyed unrun", "[Threading]")
   {
     bool ran = false;
     bool destroyed = false;
     {
-      TaskTarget target;
-      target.Post([&ran, flag = CreateUnique<DestructionFlag>(destroyed)]() { ran = true; });
+      TaskInbox inbox;
+      inbox.Post([&ran, flag = CreateUnique<DestructionFlag>(destroyed)]() { ran = true; });
     }
     CHECK_FALSE(ran);
     CHECK(destroyed);

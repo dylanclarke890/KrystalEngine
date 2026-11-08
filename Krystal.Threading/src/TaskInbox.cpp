@@ -1,15 +1,15 @@
-﻿#include "Krystal.Threading/TaskTarget.hpp"
+﻿#include "Krystal.Threading/TaskInbox.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::threads
 {
-  TaskTarget::~TaskTarget() noexcept
+  TaskInbox::~TaskInbox() noexcept
   {
     krys_debug_assert(IsOwner());
   }
 
-  void TaskTarget::Post(MoveOnlyFunc<void()> task) noexcept
+  void TaskInbox::Post(MoveOnlyFunc<void()> task) noexcept
   {
     Func<void()> wakeHandler;
     {
@@ -24,7 +24,7 @@ namespace krys::threads
     }
   }
 
-  uint32 TaskTarget::Drain() noexcept
+  uint32 TaskInbox::Drain() noexcept
   {
     krys_debug_assert(IsOwner());
 
@@ -41,13 +41,13 @@ namespace krys::threads
     return static_cast<uint32>(tasks.size());
   }
 
-  bool TaskTarget::HasTasks() const noexcept
+  bool TaskInbox::HasTasks() const noexcept
   {
     std::scoped_lock lock(_mutex);
     return !_tasks.empty();
   }
 
-  void TaskTarget::SetWakeHandler(Func<void()> handler) noexcept
+  void TaskInbox::SetWakeHandler(Func<void()> handler) noexcept
   {
     krys_debug_assert(IsOwner());
     std::scoped_lock lock(_mutex);

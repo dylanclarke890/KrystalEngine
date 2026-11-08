@@ -11,7 +11,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Threading/TaskTarget.hpp"
+#include "Krystal.Threading/TaskInbox.hpp"
 #include "Krystal.Threading/Thread.hpp"
 #include <condition_variable>
 #include <mutex>
@@ -59,25 +59,25 @@ namespace krys::threads
     void Dispatch(MoveOnlyFunc<void()> job, JobPriority priority = JobPriority::Normal) noexcept;
 
     /// @brief Runs @p job on a worker, then posts @p completion, with what the job returned (if anything), to
-    /// @p target, whose owner runs it when it next drains the target. The completion is moved to the worker
+    /// @p inbox, whose owner runs it when it next drains the inbox. The completion is moved to the worker
     /// and back, never run or copied there.
     template <Callable TJob, typename TCompletion>
-    void Dispatch(TJob job, TaskTarget &target, TCompletion completion,
+    void Dispatch(TJob job, TaskInbox &inbox, TCompletion completion,
                   JobPriority priority = JobPriority::Normal) noexcept
     {
       Dispatch(
-        [job = krys::move(job), target = &target, completion = krys::move(completion)]() mutable
+        [job = krys::move(job), inbox = &inbox, completion = krys::move(completion)]() mutable
         {
           using Result = invoke_result_t<TJob &>;
           if constexpr (Void<Result>)
           {
             job();
-            target->Post(krys::move(completion));
+            inbox->Post(krys::move(completion));
           }
           else
           {
-            target->Post([completion = krys::move(completion), result = job()]() mutable
-                         { completion(krys::move(result)); });
+            inbox->Post([completion = krys::move(completion), result = job()]() mutable
+                        { completion(krys::move(result)); });
           }
         },
         priority);

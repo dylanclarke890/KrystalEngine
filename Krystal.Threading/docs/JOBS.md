@@ -25,7 +25,7 @@ The main thread owns everything that isn't explicitly handed off. A job gets its
 
 ## API
 
-It's a module of its own, **Krystal.Threading** (namespace `krys::threads`), laid out like the others: `include/Krystal.Threading/`, `src/`, and its tests in **Krystal.Threading.Tests**. It depends only on Krystal.Core. Booey and Krystal.UI depend on it for `WorkQueue` and `TaskTarget`, and the editor creates its `JobSystem`. `MoveOnlyFunc` is the exception: it's a general type, so it goes next to `Func` in Krystal.Core.
+It's a module of its own, **Krystal.Threading** (namespace `krys::threads`), laid out like the others: `include/Krystal.Threading/`, `src/`, and its tests in **Krystal.Threading.Tests**. It depends only on Krystal.Core. Booey and Krystal.UI depend on it for `WorkQueue` and `TaskInbox`, and the editor creates its `JobSystem`. `MoveOnlyFunc` is the exception: it's a general type, so it goes next to `Func` in Krystal.Core.
 
 ### `MoveOnlyFunc`
 
@@ -60,9 +60,9 @@ public:
   /// @brief Runs @p job on a worker, some time after this returns.
   void Dispatch(MoveOnlyFunc<void()> job, JobPriority priority = JobPriority::Normal) noexcept;
 
-  /// @brief Runs @p job on a worker, then @p completion with its result on @p target.
+  /// @brief Runs @p job on a worker, then @p completion with its result on @p inbox.
   template <typename TResult>
-  void Dispatch(MoveOnlyFunc<TResult()> job, TaskTarget &target, MoveOnlyFunc<void(TResult)> completion,
+  void Dispatch(MoveOnlyFunc<TResult()> job, TaskInbox &inbox, MoveOnlyFunc<void(TResult)> completion,
                 JobPriority priority = JobPriority::Normal) noexcept;
 
   KRYS_NODISCARD uint32 WorkerCount() const noexcept;
@@ -71,14 +71,14 @@ public:
 
 The application creates one `JobSystem` at start-up, and destroys it at shutdown before anything its jobs post to. Everything else is handed it, or a `WorkQueue` (below); there's no hidden global.
 
-### Getting results back: `TaskTarget`
+### Getting results back: `TaskInbox`
 
-A worker can't run a completion itself: that would touch the requester's state from the wrong thread. It posts the completion to a **task target**, a thread-safe inbox that the owning thread drains.
+A worker can't run a completion itself: that would touch the requester's state from the wrong thread. It posts the completion to a **task inbox**: a thread-safe queue of functions that its owning thread runs when it next drains it.
 
 ```cpp
 /// @brief Somewhere a job can send its completion: a thread-safe queue of functions that its owning thread
 /// runs, in the order they arrived, when it next drains it.
-class TaskTarget
+class TaskInbox
 {
 public:
   /// @brief Adds @p task; callable from any thread.
@@ -88,7 +88,7 @@ public:
 };
 ```
 
-The main thread drains its target once a frame. Booey's `EventLoop` holds one, and `EventLoop::Run` drains it at the start of each run, turning each completion into an ordinary task on the right task source. The editor's game loop runs every frame, so nothing needs waking. A host that sleeps when idle can give a target a wake callback (`SetWakeHandler`), called from the posting thread, that pokes its message loop.
+The main thread drains its inbox once a frame. Booey's `EventLoop` holds one, and `EventLoop::Run` drains it at the start of each run, turning each completion into an ordinary task on the right task source. The editor's game loop runs every frame, so nothing needs waking. A host that sleeps when idle can give an inbox a wake callback (`SetWakeHandler`), called from the posting thread, that pokes its message loop.
 
 ### Cancellation
 
@@ -110,7 +110,7 @@ public:
 };
 ```
 
-It's a thin wrapper over `std::jthread` that sets the name the debugger and profilers show (`SetThreadDescription` on Windows). Audio and IO threads are built from it, with a `TaskTarget` each if they take requests.
+It's a thin wrapper over `std::jthread` that sets the name the debugger and profilers show (`SetThreadDescription` on Windows). Audio and IO threads are built from it, with a `TaskInbox` each if they take requests.
 
 ### Main-thread checks
 
@@ -122,7 +122,7 @@ This is the part that matters most. A job may use:
 
 - **Values it owns,** moved into its lambda: a `List<byte>`, a `utf8_string`, a `UniquePtr`.
 - **Immutable shared data** through a `Ref`: `RefCounted`'s counts are atomic, so passing a `Ref<SharedBuffer>` to a worker is safe, provided nobody changes the buffer. Booey's `SharedBuffer` is already immutable.
-- **Thread-safe services** documented as such: the `JobSystem` and `TaskTarget`s, and later a thread-safe log.
+- **Thread-safe services** documented as such: the `JobSystem` and `TaskInbox`s, and later a thread-safe log.
 
 A job may never use:
 
@@ -140,12 +140,12 @@ A job must not throw (the engine is `noexcept`) and must not block on IO or on o
 
 **Fork–join (`JobGroup`), when a system needs it:** dispatch many jobs and wait for all of them, for a parallel-for over particles or physics bodies. The waiting thread runs queued jobs while it waits rather than sleeping, so a wait can't deadlock the pool. This isn't needed for Booey and can come with the first game system that uses it.
 
-**Shutdown:** the `JobSystem` destructor stops new dispatches, lets the Normal jobs finish, drops the Background ones, and joins the workers. Completions posted to targets afterwards are dropped when their targets are destroyed.
+**Shutdown:** the `JobSystem` destructor stops new dispatches, lets the Normal jobs finish, drops the Background ones, and joins the workers. Completions posted to inboxes afterwards are dropped when their inboxes are destroyed.
 
 ## Testing
 
-- **Krystal.Threading.Tests** covers the pool itself with real threads: every job runs exactly once, priorities are respected, shutdown joins cleanly, and completions arrive on the target in order.
-- **Everything else tests on one thread.** Booey and Krystal.UI don't take the `JobSystem` directly; they take a `WorkQueue` interface (`Dispatch(job, target, completion)`). In production that's the `JobSystem`; in tests it's a `ManualWorkQueue` that keeps jobs until the test calls `RunAll()`. A test can then check what happens before a decode finishes, after, and when the image goes away in between, with no timing involved. Booey's tests stay single-threaded and deterministic, as now.
+- **Krystal.Threading.Tests** covers the pool itself with real threads: every job runs exactly once, priorities are respected, shutdown joins cleanly, and completions arrive on the inbox in order.
+- **Everything else tests on one thread.** Booey and Krystal.UI don't take the `JobSystem` directly; they take a `WorkQueue` interface (`Dispatch(job, inbox, completion)`). In production that's the `JobSystem`; in tests it's a `ManualWorkQueue` that keeps jobs until the test calls `RunAll()`. A test can then check what happens before a decode finishes, after, and when the image goes away in between, with no timing involved. Booey's tests stay single-threaded and deterministic, as now.
 
 ## How Booey and Krystal.UI use it
 
@@ -155,8 +155,8 @@ A job must not throw (the engine is `noexcept`) and must not block on IO or on o
 
 ## Plan
 
-1. The Krystal.Threading and Krystal.Threading.Tests projects; `MoveOnlyFunc` in Krystal.Core; `TaskTarget`, `JobSystem` (shared queue), `Thread` and `IsMainThread`, with their tests.
-2. `WorkQueue` and `ManualWorkQueue` (in Krystal.Threading, so Booey's and Krystal.UI's tests share it); Booey's event loop drains a `TaskTarget`; the editor creates the `JobSystem`.
+1. The Krystal.Threading and Krystal.Threading.Tests projects; `MoveOnlyFunc` in Krystal.Core; `TaskInbox`, `JobSystem` (shared queue), `Thread` and `IsMainThread`, with their tests.
+2. `WorkQueue` and `ManualWorkQueue` (in Krystal.Threading, so Booey's and Krystal.UI's tests share it); Booey's event loop drains a `TaskInbox`; the editor creates the `JobSystem`.
 3. Asynchronous still-image decoding in Booey.
 4. Decoding animation frames ahead.
 5. `HTMLImageElement::decode()` and `SVGImageElement::decode()`.

@@ -126,9 +126,9 @@ namespace krys::threads::tests
     CHECK_FALSE(backgroundRan);
   }
 
-  TEST_CASE("JobSystem: a job's completion runs on its target's owner, with its result", "[Threading]")
+  TEST_CASE("JobSystem: a job's completion runs on its inbox's owner, with its result", "[Threading]")
   {
-    TaskTarget target;
+    TaskInbox inbox;
     List<int> results;
     bool voidCompleted = false;
     std::atomic<bool> jobOnMain {true};
@@ -141,23 +141,23 @@ namespace krys::threads::tests
           jobOnMain = IsMainThread();
           return 6 * 7;
         },
-        target,
+        inbox,
         [&](int result)
         {
           CHECK(IsMainThread());
           results.push_back(result);
         });
       // What can only be moved can be the result.
-      jobs.Dispatch([]() { return CreateUnique<int>(5); }, target,
+      jobs.Dispatch([]() { return CreateUnique<int>(5); }, inbox,
                     [&](UniquePtr<int> result) { owned = krys::move(result); });
-      jobs.Dispatch([]() {}, target, [&]() { voidCompleted = true; });
+      jobs.Dispatch([]() {}, inbox, [&]() { voidCompleted = true; });
     }
 
-    // Nothing completes until the target is drained.
+    // Nothing completes until the inbox is drained.
     CHECK(results.empty());
     CHECK_FALSE(owned);
     CHECK_FALSE(voidCompleted);
-    CHECK(target.Drain() == 3);
+    CHECK(inbox.Drain() == 3);
     CHECK(results == List<int> {42});
     REQUIRE(owned);
     CHECK(*owned == 5);

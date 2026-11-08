@@ -31,12 +31,12 @@ target_sources(Krystal.Threading
       include/Krystal.Threading/CancellationToken.hpp
       include/Krystal.Threading/JobSystem.hpp
       include/Krystal.Threading/MainThread.hpp
-      include/Krystal.Threading/TaskTarget.hpp
+      include/Krystal.Threading/TaskInbox.hpp
       include/Krystal.Threading/Thread.hpp
 
   PRIVATE
     src/JobSystem.cpp
     src/MainThread.cpp
-    src/TaskTarget.cpp
+    src/TaskInbox.cpp
     src/Thread.cpp
 )
