@@ -1893,8 +1893,12 @@ namespace krys::boo
       ScrollOffset clampedScrollPosition =
         RoundedIntPoint(revealRect.Location()).ConstrainedBetween(minScrollPosition, maxScrollPosition);
       auto scrollPositionOptions = ScrollPositionChangeOptions::CreateProgrammatic();
-      if (!Frame().GetEventHandler().AutoscrollInProgress() && element
-          && UseSmoothScrolling(options.Behavior, element))
+      if (Frame().GetEventHandler().IsAutoscrolling())
+      {
+        // An autoscroll moves bit by bit: it snaps when it ends.
+        scrollPositionOptions.SnapPointSelectionMethod = ScrollSnapPointSelectionMethod::None;
+      }
+      else if (element && UseSmoothScrolling(options.Behavior, element))
       {
         scrollPositionOptions.Animated = ScrollIsAnimated::Yes;
       }

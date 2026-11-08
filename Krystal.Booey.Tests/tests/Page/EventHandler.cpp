@@ -704,6 +704,36 @@ namespace krys::boo::tests
       loop.Run(loop.Now() + std::chrono::milliseconds(120));
     };
 
+    SECTION("a snap container snaps when it ends")
+    {
+      MouseFixture fixture(u8"<style>html { scroll-snap-type: y mandatory } div { height: 100px; "
+                           u8"scroll-snap-align: start }</style><div></div><div></div><div></div><div></div>"
+                           u8"<div></div><div></div><div></div><div></div>");
+      auto *view = fixture.Frame->View();
+      (void)fixture.Move(100, 20);
+      (void)fixture.Press(100, 20, MouseButton::Middle);
+      (void)fixture.Move(100, 80);
+      wait();
+      wait();
+      REQUIRE(view->ScrollY() > 0);
+      CHECK(view->ScrollY() % 100 != 0);
+
+      // Stopped, it moves smoothly to the closest snap position.
+      CHECK(fixture.Press(100, 80));
+      CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      CHECK(view->GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
+      auto &loop = html::EventLoop::Current();
+      for (int32 frame = 0; frame < 120; ++frame)
+      {
+        loop.Run(loop.Now() + std::chrono::milliseconds(16));
+        if (fixture.TestPage->IsRenderingUpdateScheduled())
+        {
+          fixture.TestPage->UpdateRendering();
+        }
+      }
+      CHECK(view->ScrollY() % 100 == 0);
+    }
+
     SECTION("the page")
     {
       MouseFixture fixture(u8"<div id=a style=height:1000px></div>");

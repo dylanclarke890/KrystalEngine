@@ -6,6 +6,8 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 
@@ -198,6 +200,22 @@ namespace krys::boo
     if (!rendererIsBeingDestroyed)
     {
       scrollable->StopAutoscroll();
+
+      // The scrollers it moved didn't snap as it went: they snap now it's ended, the innermost first.
+      if (auto *layer = scrollable->EnclosingLayer())
+      {
+        for (auto *scrollableLayer = layer->EnclosingScrollableLayer(IncludeSelf, CrossFrameBoundaries::No);
+             scrollableLayer && !scrollableLayer->IsRenderViewLayer();
+             scrollableLayer =
+               scrollableLayer->EnclosingScrollableLayer(ExcludeSelf, CrossFrameBoundaries::No))
+        {
+          if (auto *scrollableArea = scrollableLayer->GetScrollableArea())
+          {
+            scrollableArea->SnapAfterScrollEnds();
+          }
+        }
+      }
+      scrollable->View().FrameView().SnapAfterScrollEnds();
     }
 
     if (PanScrollInProgress())

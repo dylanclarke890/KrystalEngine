@@ -178,7 +178,11 @@ namespace krys::boo
     {
       // If we are here, we were called on a renderer that can be programmatically scrolled, but doesn't
       // have an overflow clip. Which means that it is a document node that can be scrolled.
-      renderer.View().FrameView().ScrollBy(delta);
+      // Bit by bit, it doesn't snap as it goes (it would never leave a snap position): it snaps when it ends.
+      auto &frameView = renderer.View().FrameView();
+      auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+      options.SnapPointSelectionMethod = ScrollSnapPointSelectionMethod::None;
+      frameView.SetScrollPosition(frameView.GetScrollPosition() + delta, options);
       if (scrolledArea)
       {
         *scrolledArea = &renderer.View().FrameView();
@@ -1349,8 +1353,12 @@ namespace krys::boo
                                                        options.AlignY, localVisiblityRect);
     auto scrollPositionOptions = ScrollPositionChangeOptions::CreateProgrammatic();
     auto *frame = box->GetDocument().Frame();
-    if (frame && !frame->GetEventHandler().AutoscrollInProgress() && box->GetElement()
-        && UseSmoothScrolling(options.Behavior, box->GetElement()))
+    if (frame && frame->GetEventHandler().IsAutoscrolling())
+    {
+      // An autoscroll moves bit by bit: it snaps when it ends.
+      scrollPositionOptions.SnapPointSelectionMethod = ScrollSnapPointSelectionMethod::None;
+    }
+    else if (frame && box->GetElement() && UseSmoothScrolling(options.Behavior, box->GetElement()))
     {
       scrollPositionOptions.Animated = ScrollIsAnimated::Yes;
     }

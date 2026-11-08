@@ -207,6 +207,11 @@ namespace krys::boo
   void ScrollableArea::DidEndTouchScroll() noexcept
   {
     _isTouchScrollInProgress = false;
+    SnapAfterScrollEnds();
+  }
+
+  void ScrollableArea::SnapAfterScrollEnds() noexcept
+  {
     if (!_scrollAnimator || !_scrollAnimator->UsesScrollSnap())
     {
       return;

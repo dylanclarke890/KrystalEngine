@@ -363,6 +363,8 @@ namespace krys::boo
       _mouseDownMayStartAutoscroll = true;
     }
     KRYS_NODISCARD bool AutoscrollInProgress() const noexcept;
+    /// @brief Whether any autoscroll (a selection's, a drag's, or a pan) is scrolling something.
+    KRYS_NODISCARD bool IsAutoscrolling() const noexcept;
     KRYS_NODISCARD bool PanScrollInProgress() const noexcept;
     /// @brief Starts pan scrolling @p renderer from the mouse's position.
     void StartPanScrolling(RenderBox &renderer) noexcept;

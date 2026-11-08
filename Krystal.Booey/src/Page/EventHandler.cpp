@@ -3567,6 +3567,11 @@ namespace krys::boo
     return _autoscrollController->AutoscrollInProgress();
   }
 
+  bool EventHandler::IsAutoscrolling() const noexcept
+  {
+    return _autoscrollController->AutoscrollRenderer() != nullptr;
+  }
+
   void EventHandler::StopAutoscrollTimer(bool rendererIsBeingDestroyed) noexcept
   {
     _autoscrollController->StopAutoscrollTimer(rendererIsBeingDestroyed);

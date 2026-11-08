@@ -105,6 +105,9 @@ namespace krys::boo
     void DoPostThumbMoveSnapping(ScrollbarOrientation orientation) noexcept;
     /// @brief A touch's pan or fling has ended: snaps to the closest position.
     void DidEndTouchScroll() noexcept;
+    /// @brief A scroll that didn't snap as it went (an autoscroll, a pan) has ended: snaps to the closest
+    /// position, smoothly.
+    void SnapAfterScrollEnds() noexcept;
     KRYS_NODISCARD bool IsTouchScrollInProgress() const noexcept
     {
       return _isTouchScrollInProgress;
