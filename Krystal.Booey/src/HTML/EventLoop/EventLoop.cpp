@@ -2,7 +2,9 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Platform/ThreadTimers.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Threading/MainThread.hpp"
 #include <algorithm>
 
 namespace krys::boo::html
@@ -13,8 +15,20 @@ namespace krys::boo::html
 
   EventLoop &EventLoop::Current() noexcept
   {
+    // Only the main thread has an event loop; a job mustn't reach it.
+    krys_debug_assert(threads::IsMainThread());
     static NeverDestroyed<EventLoop> eventLoop;
     return eventLoop;
+  }
+
+  bool EventLoop::DrainInbox() noexcept
+  {
+    if (!_inbox.Drain())
+    {
+      return false;
+    }
+    PerformMicrotaskCheckpoint();
+    return true;
   }
 
   void EventLoop::QueueTask(TaskSource source, Steps &&steps) noexcept
@@ -143,6 +157,7 @@ namespace krys::boo::html
 
     while (true)
     {
+      bool drained = DrainInbox();
       bool fired = ThreadTimers::Current().FireTimersDue();
       if (fired)
       {
@@ -153,7 +168,7 @@ namespace krys::boo::html
       {
         ranTask = true;
       }
-      if (!fired && !ranTask)
+      if (!drained && !fired && !ranTask)
       {
         break;
       }
@@ -169,6 +184,7 @@ namespace krys::boo::html
     timers.SetCurrentTime(now);
 
     PerformMicrotaskCheckpoint();
+    (void)DrainInbox();
     if (timers.FireTimersDue())
     {
       PerformMicrotaskCheckpoint();
@@ -192,7 +208,7 @@ namespace krys::boo::html
 
   Maybe<MonotonicTime::duration> EventLoop::NextWakeTime() const noexcept
   {
-    if (HasPendingTasks() || HasPendingMicrotasks())
+    if (HasPendingTasks() || HasPendingMicrotasks() || _inbox.HasTasks())
     {
       return Now();
     }

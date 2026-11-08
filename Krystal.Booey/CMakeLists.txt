@@ -3,6 +3,7 @@
 target_link_libraries(Krystal.Booey
   PUBLIC 
     Krystal.Core
+    Krystal.Threading
 )
 
 set_target_properties(Krystal.Booey

@@ -15,6 +15,7 @@
 #include "Krystal.PAL/Input.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/Platform.hpp"
+#include "Krystal.Threading/JobSystem.hpp"
 #include <algorithm>
 #include <exception>
 #include <utility>
@@ -64,6 +65,8 @@ namespace krys
     ApplicationSettings Settings {};
     UniquePtr<log::ILogger> Logger {};
     UniquePtr<EventManager> Events {};
+    /// @brief The worker threads that run the application's jobs.
+    UniquePtr<threads::JobSystem> Jobs {};
     UniquePtr<pal::IWindow> Window {};
     UniquePtr<pal::Input> Input {};
     UniquePtr<io::VirtualFileSystem> VFS {};

@@ -88,7 +88,7 @@ public:
 };
 ```
 
-The main thread drains its inbox once a frame. Booey's `EventLoop` holds one, and `EventLoop::Run` drains it at the start of each run, turning each completion into an ordinary task on the right task source. The editor's game loop runs every frame, so nothing needs waking. A host that sleeps when idle can give an inbox a wake callback (`SetWakeHandler`), called from the posting thread, that pokes its message loop.
+The main thread drains its inbox once a frame. Booey's `EventLoop` holds one, and `EventLoop::Run` drains it at the start of each run (and `RunUntilIdle` until it's empty), before the timers and tasks, with a microtask checkpoint after. A completion is the way back from steps the specifications run in parallel, so it queues a task, on the right task source and for the right document, for whatever touches the DOM; `NextWakeTime` is now while completions wait. The editor's game loop runs every frame, so nothing needs waking. A host that sleeps when idle can give an inbox a wake callback (`SetWakeHandler`), called from the posting thread, that pokes its message loop.
 
 ### Cancellation
 

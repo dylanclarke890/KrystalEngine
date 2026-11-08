@@ -30,6 +30,7 @@ target_sources(Krystal.Threading.Tests
     tests/CancellationToken.cpp
     tests/JobSystem.cpp
     tests/MainThread.cpp
+    tests/ManualWorkQueue.cpp
     tests/TaskInbox.cpp
     tests/Thread.cpp
 )

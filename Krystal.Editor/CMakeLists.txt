@@ -4,6 +4,7 @@ target_link_libraries(Krystal.Editor
 	PUBLIC Krystal.Core
 	PUBLIC Krystal.Gfx
 	PUBLIC Krystal.PAL
+	PUBLIC Krystal.Threading
 	PUBLIC Krystal.UI
 )
 

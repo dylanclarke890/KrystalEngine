@@ -25,6 +25,8 @@ namespace krys
 
   Application::~Application() noexcept
   {
+    // The jobs go first: what they post back to must still be there.
+    _context->Jobs.reset();
     _context->Events.reset();
     _context->Input.reset();
     if (_context->Device)
@@ -130,6 +132,8 @@ namespace krys
     {
       throw std::runtime_error("Failed to create event manager");
     }
+
+    _context->Jobs = CreateUnique<threads::JobSystem>();
 
     _context->Input = CreateUnique<pal::Input>(_context->Events.get());
     if (!_context->Input)

@@ -10,6 +10,7 @@
 #include "Krystal.Core/Types/Queue.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Threading/TaskInbox.hpp"
 
 namespace krys::boo
 {
@@ -70,6 +71,9 @@ namespace krys::boo::html
     /// @brief The timers of the tasks queued after a timeout; fired ones are removed when the loop next runs.
     List<UniquePtr<Timer>> _scheduledTasks;
 
+    /// @brief Where jobs post back to the loop's thread.
+    threads::TaskInbox _inbox;
+
   public:
     EventLoop() noexcept;
     ~EventLoop() noexcept;
@@ -119,8 +123,8 @@ namespace krys::boo::html
     /// @brief The host's time, as of the last time it ran the loop.
     KRYS_NODISCARD MonotonicTime::duration Now() const noexcept;
 
-    /// @brief When the loop next has work: now if a task is queued, or when the next timer fires; none if
-    /// it's idle.
+    /// @brief When the loop next has work: now if a task or a completion is waiting, or when the next timer
+    /// fires; none if it's idle.
     KRYS_NODISCARD Maybe<MonotonicTime::duration> NextWakeTime() const noexcept;
 
     /// @brief Whether a task can run: one without a document, or whose document's tasks aren't suspended.
@@ -130,5 +134,18 @@ namespace krys::boo::html
     {
       return !_microtaskQueue.empty();
     }
+
+    /// @brief Where jobs on other threads post their completions: the loop runs them as it runs, before its
+    /// timers and tasks. They're the way back from steps the specifications run in parallel, so a completion
+    /// queues a task (on the right task source, for the right document) for whatever touches the DOM.
+    KRYS_NODISCARD threads::TaskInbox &Inbox() noexcept
+    {
+      return _inbox;
+    }
+
+  private:
+    /// @brief Runs the completions posted to the inbox, then a microtask checkpoint if any ran.
+    /// @return Whether any ran.
+    bool DrainInbox() noexcept;
   };
 }

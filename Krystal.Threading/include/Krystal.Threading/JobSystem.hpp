@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Func.hpp"
@@ -9,32 +8,16 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/TypeTraits.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Threading/TaskInbox.hpp"
 #include "Krystal.Threading/Thread.hpp"
+#include "Krystal.Threading/WorkQueue.hpp"
 #include <condition_variable>
 #include <mutex>
 
 namespace krys::threads
 {
-  /// @brief How soon a job is needed, which decides which waiting job a free worker starts next. A running
-  /// job is never interrupted.
-  enum class JobPriority : uint8
-  {
-    /// @brief Needed soon, such as an image about to be drawn.
-    Normal,
-    /// @brief Needed eventually, such as streaming or warming a cache: starts only when no Normal job is
-    /// waiting.
-    Background,
-  };
-
-  /// @brief A pool of worker threads that run jobs: short functions that finish, which take what they need
-  /// when they're dispatched and touch nothing else. Workers sleep while there's nothing to do.
-  /// @note A job may use what it owns (moved into it), immutable data shared through a `Ref`, and services
-  /// documented as thread-safe; never the dispatching thread's state, nor its stack (capture by value, not
-  /// `[&]`). Jobs mustn't block on IO or wait on other jobs.
-  class JobSystem final
+  /// @brief A pool of worker threads that run jobs. Workers sleep while there's nothing to do; a free one
+  /// takes the oldest Normal job, or else the oldest Background one.
+  class JobSystem final : public WorkQueue
   {
     KRYS_NON_COPY_MOVABLE(JobSystem);
 
@@ -52,36 +35,11 @@ namespace krys::threads
     explicit JobSystem(Maybe<uint32> workerCount = null) noexcept;
     /// @brief Stops taking jobs, lets the Normal jobs already queued run, destroys the Background ones unrun,
     /// and waits for the workers to finish.
-    ~JobSystem() noexcept;
+    ~JobSystem() noexcept override;
 
-    /// @brief Runs @p job on a worker, some time after this returns. While the system is shutting down, the
-    /// job is destroyed unrun.
-    void Dispatch(MoveOnlyFunc<void()> job, JobPriority priority = JobPriority::Normal) noexcept;
-
-    /// @brief Runs @p job on a worker, then posts @p completion, with what the job returned (if anything), to
-    /// @p inbox, whose owner runs it when it next drains the inbox. The completion is moved to the worker
-    /// and back, never run or copied there.
-    template <Callable TJob, typename TCompletion>
-    void Dispatch(TJob job, TaskInbox &inbox, TCompletion completion,
-                  JobPriority priority = JobPriority::Normal) noexcept
-    {
-      Dispatch(
-        [job = krys::move(job), inbox = &inbox, completion = krys::move(completion)]() mutable
-        {
-          using Result = invoke_result_t<TJob &>;
-          if constexpr (Void<Result>)
-          {
-            job();
-            inbox->Post(krys::move(completion));
-          }
-          else
-          {
-            inbox->Post([completion = krys::move(completion), result = job()]() mutable
-                        { completion(krys::move(result)); });
-          }
-        },
-        priority);
-    }
+    using WorkQueue::Dispatch;
+    /// @brief Runs @p job on a worker. While the system is shutting down, the job is destroyed unrun.
+    void Dispatch(MoveOnlyFunc<void()> job, JobPriority priority = JobPriority::Normal) noexcept override;
 
     KRYS_NODISCARD uint32 WorkerCount() const noexcept
     {

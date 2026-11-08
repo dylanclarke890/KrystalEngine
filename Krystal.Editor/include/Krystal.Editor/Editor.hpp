@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
@@ -134,6 +135,7 @@ namespace krys
 
     void OnShutdown() noexcept override
     {
+      boo::PlatformStrategies::Singleton().SetWorkQueue(nullptr);
       _observers = nullptr;
       _animations = nullptr;
       _pointers = nullptr;
@@ -803,6 +805,8 @@ namespace krys
     /// Sans as Booey's fonts.
     void CreatePage() noexcept
     {
+      // Booey's work that can leave the main thread runs on the application's workers.
+      boo::PlatformStrategies::Singleton().SetWorkQueue(_context->Jobs.get());
       (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);

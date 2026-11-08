@@ -2,6 +2,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Threading/JobSystem.hpp"
+#include "Krystal.Threading/ManualWorkQueue.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -91,6 +93,52 @@ namespace krys::boo::html::tests
 
       loop.RunUntilIdle();
       REQUIRE(order == List<int> {2});
+    }
+  }
+
+  TEST_CASE("EventLoop: jobs post back to its inbox", "[HTML][EventLoop][html:event-loops]")
+  {
+    EventLoop loop;
+    List<utf8_string> order;
+
+    SECTION("a completion runs as the loop runs, and queues a task for what follows")
+    {
+      threads::ManualWorkQueue queue;
+      int received = 0;
+      queue.Dispatch([]() { return 42; }, loop.Inbox(),
+                     [&](int result)
+                     {
+                       received = result;
+                       order.push_back(u8"completion");
+                       loop.QueueMicrotask([&] { order.push_back(u8"microtask"); });
+                       loop.QueueTask(TaskSource::DOMManipulation, [&] { order.push_back(u8"task"); });
+                     });
+      CHECK_FALSE(loop.NextWakeTime());
+
+      REQUIRE(queue.RunAll() == 1);
+      // The completion waits in the inbox, which wakes the loop.
+      CHECK(order.empty());
+      CHECK(loop.NextWakeTime() == loop.Now());
+
+      loop.RunUntilIdle();
+      CHECK(order == List<utf8_string> {u8"completion", u8"microtask", u8"task"});
+      CHECK(received == 42);
+      CHECK_FALSE(loop.NextWakeTime());
+    }
+
+    SECTION("from the job system's workers")
+    {
+      {
+        threads::JobSystem jobs(2);
+        for (int i = 0; i < 3; ++i)
+        {
+          jobs.Dispatch([]() {}, loop.Inbox(), [&] { order.push_back(u8"done"); });
+        }
+        // The workers finish their jobs as the system goes.
+      }
+      CHECK(order.empty());
+      loop.Run(loop.Now());
+      CHECK(order == List<utf8_string> {u8"done", u8"done", u8"done"});
     }
   }
 }
