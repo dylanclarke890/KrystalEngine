@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleAttributeMutationScope.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
@@ -4751,8 +4752,8 @@ namespace krys::boo
       (currentSize + newOffset - adjustedOldOffset).ExpandedTo(MinimumSizeForResizing(zoomFactor))
       - currentSize;
 
-    // FIXME: A single mutation record for the style attribute (StyleAttributeMutationScope), with mutation
-    // observers of style changes.
+    // One mutation record for the style attribute, however many of its properties change.
+    css::StyleAttributeMutationScope mutationScope {styledElement.get()};
     bool isBoxSizingBorder = renderer->Style().GetBoxSizing() == BoxSizing::BorderBox;
 
     auto resize = renderer->Style().GetResize();
@@ -4776,6 +4777,8 @@ namespace krys::boo
       baseWidth = baseWidth / zoomFactor;
       (void)styledElement->SetInlineStyleProperty(
         css::PropertyId::Width, RoundToInt(baseWidth + difference.Width()), css::UnitType::px);
+
+      mutationScope.EnqueueMutationRecord();
     }
 
     bool canResizeHeight = resize == style::Resize::Vertical || resize == style::Resize::Both
@@ -4798,6 +4801,8 @@ namespace krys::boo
       baseHeight = baseHeight / zoomFactor;
       (void)styledElement->SetInlineStyleProperty(
         css::PropertyId::Height, RoundToInt(baseHeight + difference.Height()), css::UnitType::px);
+
+      mutationScope.EnqueueMutationRecord();
     }
 
     document->UpdateLayout();

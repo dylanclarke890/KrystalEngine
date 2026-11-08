@@ -1480,7 +1480,7 @@ namespace krys::boo
     PaintScrollCorner(context, adjustedPaintOffset, damageRect);
 
     // Paint our resizer last, since it sits on top of the scroll corner.
-    PaintResizer(context, LayoutPoint(paintOffset), LayoutRect(damageRect));
+    PaintResizer(context, LayoutPoint(adjustedPaintOffset), LayoutRect(damageRect));
   }
 
   void RenderLayerScrollableArea::PaintResizer(GraphicsContext &context, const LayoutPoint &paintOffset,
