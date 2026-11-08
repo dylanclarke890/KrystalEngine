@@ -112,7 +112,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Access keys follow the specification where Chrome doesn't: `accessKeyLabel` exists (Chrome has no such attribute), `accesskey="x y"` assigns the first token that's one code point (Chrome needs the whole value to match the key), and a legend's access key runs its accesskey delegatee's command (Chrome clicks the legend).
 - A textarea's `wrap` has no legacy `physical` and `on` aliases of `hard`, which Chrome keeps.
 - A marquee follows the specification where Chrome doesn't: setting `loop` to 0 or a negative number other than -1 is ignored (Chrome throws an `IndexSizeError`), and a `scrolldelay` under 60 without `truespeed` is 60 (Chrome uses 85).
-- Textareas aren't resizable by default (`Settings::TextAreasAreResizable` is false); Chrome's are.
+- Textareas aren't resizable by default (`Settings::TextAreasAreResizable` is false), by choice: an application's text areas rarely want a grip each. Chrome's are. The setting, or `resize` on the element, opts in.
 - A search field's clear button shows whenever the field has a value, as the Adwaita theme does; Chrome shows it only while the field is focused or hovered.
 - Booey breaks lines between adjacent atomic inlines (inline-block controls) with no space between them, where Chrome keeps them together (seen in the `ranges` golden).
 
