@@ -49,6 +49,7 @@
 #include "Krystal.UI/PathStrokerStrategy.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
 #include "Krystal.UI/SystemPasteboardStrategy.hpp"
+#include "Krystal.UI/ValidationMessageOverlay.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -69,6 +70,7 @@ namespace krys::ui
     GraphicsLayerTextureMapper *_rootLayer {nullptr};
     Func<void()> _focusRequestHandler;
     Func<void(Ref<boo::FileChooser>)> _fileChooserHandler;
+    RefPtr<ValidationMessageOverlay> _validationMessage;
 
   public:
     void Focus() noexcept override
@@ -97,6 +99,41 @@ namespace krys::ui
     void SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept
     {
       _fileChooserHandler = krys::move(handler);
+    }
+
+    void ShowValidationMessage(boo::dom::Element &anchor,
+                               const boo::dom::DOMString &message) noexcept override
+    {
+      if (!_view)
+      {
+        return;
+      }
+      if (!_validationMessage)
+      {
+        _validationMessage = CreateRef<ValidationMessageOverlay>(*_view);
+      }
+      _validationMessage->Show(anchor, message);
+    }
+
+    void HideValidationMessage(const boo::dom::Element &anchor) noexcept override
+    {
+      if (_validationMessage && _validationMessage->IsShownAt(anchor))
+      {
+        _validationMessage->Hide();
+      }
+    }
+
+    void HideAnyValidationMessage() noexcept override
+    {
+      if (_validationMessage)
+      {
+        _validationMessage->Hide();
+      }
+    }
+
+    KRYS_NODISCARD bool IsValidationMessageVisible(const boo::dom::Element &anchor) const noexcept override
+    {
+      return _validationMessage && _validationMessage->IsShownAt(anchor);
     }
 
     void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
@@ -184,6 +221,10 @@ namespace krys::ui
 
     void SetView(View *view) noexcept
     {
+      if (auto validationMessage = std::exchange(_validationMessage, nullptr))
+      {
+        validationMessage->Detach();
+      }
       _view = view;
     }
 

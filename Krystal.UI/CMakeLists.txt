@@ -61,6 +61,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/PathStrokerStrategy.hpp
       include/Krystal.UI/Render2DConversions.hpp
       include/Krystal.UI/SystemPasteboardStrategy.hpp
+      include/Krystal.UI/ValidationMessageOverlay.hpp
       include/Krystal.UI/View.hpp
 
   PRIVATE
@@ -88,6 +89,7 @@ target_sources(Krystal.UI
     src/Overlay.cpp
     src/PopupMenuOverlay.cpp
     src/PathStrokerStrategy.cpp
+    src/ValidationMessageOverlay.cpp
     src/Render2DConversions.cpp
     src/SystemPasteboardStrategy.cpp
     src/View.cpp

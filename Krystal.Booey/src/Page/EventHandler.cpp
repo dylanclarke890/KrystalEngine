@@ -1102,9 +1102,14 @@ namespace krys::boo
       {
         page->GetPointerLockController().RequestPointerUnlockAndForceCursorVisible();
       }
+      // Escape hides any validation message.
+      if (auto *page = _frame.GetPage())
+      {
+        page->GetChromeClient().HideAnyValidationMessage();
+      }
     }
 
-    // FIXME: Escape hiding validation messages and leaving fullscreen; pan scrolling.
+    // FIXME: Pan scrolling.
 
     // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
     // the location bar.

@@ -22,7 +22,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- No validation message bubble: `reportValidity()` and form submission don't show the message.
 - A number input in a locale with other digits (Arabic-Indic, say) shows its value in them, but digits typed are inserted as ASCII ones; the decimal separator typed is the locale's.
 - Customizable `<select>`: `appearance: base-select` on the select alone gives a picker with base appearance, where without `::picker(select)` opting in too it should be the native one, as `RenderMenuList` owns the popup menu. List boxes ignore `appearance: base-select` and stay native. Type-ahead with the picker open changes the selection, where it should move the focus. Page Up and Page Down move ten options, not a viewport's worth. A `legend` in an `optgroup` isn't its label in a native menu.
 - `<img>` lacks `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` has no `<object>` fallback (FIXME); `ImageLoader`'s reuse of available images has no preloads (FIXME).
@@ -188,7 +187,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Wheel: `PlatformWheelEvent` has no phases, velocities, precise deltas or inverted directions, so there is no scroll latching, wheel delta filter or precision touchpad gesture support (pinching, swiping, DirectManipulation). Pan gestures chain on to the next scroll box mid-gesture, as the wheel does.
 - Drag and drop: colour drags and drops are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
 - Sequential focus navigation does not handle moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
-- Keyboard: caps lock handling in text fields, Escape hiding validation messages, the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs.
+- Keyboard: the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs.
 - Touch: touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.
 - `RenderLayer` hit testing lacks SVG resources, fixed container sampling and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area (FIXMEs in `RenderLayer.cpp`).
 - `IsDraggableLink` is a local check (an HTML link with `href`, not editable); the editable-link-behaviour setting is absent.

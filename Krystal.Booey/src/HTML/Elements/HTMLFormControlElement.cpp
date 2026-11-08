@@ -66,6 +66,12 @@ namespace krys::boo::html
     ClearForm();
   }
 
+  void HTMLFormControlElement::DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept
+  {
+    HTMLElement::DispatchBlurEvent(relatedTarget);
+    HideVisibleValidationMessage();
+  }
+
   bool HTMLFormControlElement::FormNoValidate() const noexcept
   {
     return HasAttribute(u8"formnovalidate");

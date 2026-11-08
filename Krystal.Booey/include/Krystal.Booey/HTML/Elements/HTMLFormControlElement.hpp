@@ -176,6 +176,9 @@ namespace krys::boo::html
     void ReadOnlyStateChanged() noexcept override;
     virtual void RequiredStateChanged() noexcept;
 
+    /// @brief Losing the focus hides the control's validation message.
+    void DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept override;
+
   private:
     KRYS_NODISCARD HTMLElement *ValidationAnchorElement() noexcept final
     {

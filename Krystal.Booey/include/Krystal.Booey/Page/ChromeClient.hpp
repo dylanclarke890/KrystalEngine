@@ -160,6 +160,33 @@ namespace krys::boo
       return nullptr;
     }
 
+    /// @brief Shows @p message, a constraint the control @p anchor doesn't satisfy, near it (a validation
+    /// bubble), in place of any shown; the host may hide it after a while. A host that doesn't override this
+    /// shows no messages.
+    virtual void ShowValidationMessage(dom::Element &anchor, const dom::DOMString &message) noexcept
+    {
+      (void)anchor;
+      (void)message;
+    }
+
+    /// @brief Hides the validation message shown for @p anchor, if it's shown.
+    virtual void HideValidationMessage(const dom::Element &anchor) noexcept
+    {
+      (void)anchor;
+    }
+
+    /// @brief Hides any validation message shown.
+    virtual void HideAnyValidationMessage() noexcept
+    {
+    }
+
+    /// @brief Whether the validation message for @p anchor is shown.
+    KRYS_NODISCARD virtual bool IsValidationMessageVisible(const dom::Element &anchor) const noexcept
+    {
+      (void)anchor;
+      return false;
+    }
+
     /// @brief Shows the host's file picker for a file input in @p frame, answering @p chooser with the files
     /// the user chooses, or cancelling it, now or later; a host that doesn't override this has no file
     /// picker, so the choice is cancelled at once.

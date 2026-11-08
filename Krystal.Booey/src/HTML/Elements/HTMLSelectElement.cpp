@@ -794,7 +794,6 @@ namespace krys::boo::html
     {
       return false;
     }
-    // FIXME: Validation message shadow trees, once there are validation bubbles.
     if (!UsesMenuList())
     {
       return Is<HTMLOptionElement>(child) || Is<HTMLOptGroupElement>(child)

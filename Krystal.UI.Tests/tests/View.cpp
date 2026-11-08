@@ -46,6 +46,7 @@
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/Input.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
+#include "Krystal.UI/ValidationMessageOverlay.hpp"
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -2237,6 +2238,55 @@ namespace krys::ui::tests
     click(inside);
     REQUIRE(view.ShownOverlay());
     click({390, 290});
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(view.Document().FocusedElement() != &input);
+  }
+
+  TEST_CASE("View: an invalid control's validation message", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } input { margin: 10px }"
+                  u8"</style><form id=f><input id=t required pattern=x><button id=go>Go</button></form>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    auto &form = Downcast<boo::html::HTMLFormElement>(*view.Document().GetElementById(u8"f"));
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
+    auto box = input.GetBoundingClientRect();
+    auto shown = [&]()
+    {
+      return static_cast<ValidationMessageOverlay *>(view.ShownOverlay());
+    };
+
+    // reportValidity() shows the message below the control, which keeps the keys.
+    CHECK_FALSE(input.ReportValidity());
+    auto *bubble = shown();
+    REQUIRE(bubble);
+    CHECK_FALSE(bubble->IsModal());
+    CHECK(bubble->IsShownAt(input));
+    CHECK(bubble->Message() == input.ValidationMessage());
+    CHECK(bubble->Rect().Y() == static_cast<int32>(box->Bottom()));
+    CHECK(bubble->Rect().X() == static_cast<int32>(box->X()));
+    CHECK(bubble->Rect().Width() > 16);
+    CHECK(bubble->Rect().Height() > 10);
+    CHECK(input.IsShowingValidationMessage());
+
+    // Typing hides it.
+    CHECK(view.InsertText(u8"a"));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK_FALSE(input.IsShowingValidationMessage());
+
+    // Submitting shows it again; Escape hides it.
+    REQUIRE_FALSE(form.RequestSubmit().HasException());
+    REQUIRE(shown() == bubble);
+    CHECK(view.KeyPressed(pal::Key::Escape) == false);
+    CHECK_FALSE(view.ShownOverlay());
+
+    // A press elsewhere hides it, and goes on to the page.
+    CHECK_FALSE(input.ReportValidity());
+    REQUIRE(view.ShownOverlay());
+    view.MousePressed({390, 290}, pal::MouseButton::Left);
+    view.MouseReleased({390, 290}, pal::MouseButton::Left);
     CHECK_FALSE(view.ShownOverlay());
     CHECK(view.Document().FocusedElement() != &input);
   }
