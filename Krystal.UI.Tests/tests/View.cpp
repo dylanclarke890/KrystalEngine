@@ -476,6 +476,56 @@ namespace krys::ui::tests
     CHECK_FALSE(view.Document().Selection().IsRange());
   }
 
+  TEST_CASE("View: cursor images", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style>"
+      u8"<div style='cursor: "
+      u8"url(data:image/"
+      u8"png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAEklEQVR4nGP4z8DQgA0z0EECAAyiLOPFmS/"
+      u8"VAAAAAElFTkSuQmCC) 2 3, crosshair'></div>"
+      u8"<div style='cursor: "
+      u8"image-set(url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAEUlEQVR4nGNgYPj/"
+      u8"Hz8eEQoAQ1d/gZtbdTsAAAAASUVORK5CYII=) 2x) 1 2, auto'></div><div></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    boo::html::EventLoop::Current().RunUntilIdle();
+    view.UpdateRendering();
+
+    // Over the first box, its image with its hot spot, in straight alpha; the system cursor is the arrow.
+    view.MouseMoved({10, 10});
+    auto image = view.CurrentCursorImage();
+    REQUIRE(image);
+    CHECK(image->Width() == 6);
+    CHECK(image->Height() == 5);
+    CHECK(image->HotSpotX() == 2);
+    CHECK(image->HotSpotY() == 3);
+    REQUIRE(image->Pixels().size() == 30uz);
+    auto pixel = image->Pixels()[0];
+    CHECK(pixel >> 24 == 128);
+    CHECK(((pixel >> 16) & 0xFF) >= 254);
+    CHECK((pixel & 0xFFFF) == 0);
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
+
+    // The same image while the cursor doesn't change.
+    view.MouseMoved({20, 20});
+    CHECK(view.CurrentCursorImage() == image);
+
+    // An image-set() image's hot spot is in its natural size: in its pixels, twice as far.
+    view.MouseMoved({10, 60});
+    image = view.CurrentCursorImage();
+    REQUIRE(image);
+    CHECK(image->Width() == 8);
+    CHECK(image->HotSpotX() == 2);
+    CHECK(image->HotSpotY() == 4);
+
+    // Elsewhere, a system cursor.
+    view.MouseMoved({10, 110});
+    CHECK_FALSE(view.CurrentCursorImage());
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
+  }
+
   TEST_CASE("View: dragging a selection shows the I-beam only over text", "[UI]")
   {
     View view({400, 300});

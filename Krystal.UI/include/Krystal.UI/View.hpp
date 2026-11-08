@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/Region.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
@@ -176,6 +177,10 @@ namespace krys::ui
     Maybe<boo::WritingDirection> _pendingTextDirection;
     /// @brief The overlay open over the page (a menu list's popup, a picker), if any.
     RefPtr<Overlay> _overlay;
+    /// @brief The cursor image last made for the page's cursor, and the frame and hot spot it was made from.
+    mutable RefPtr<pal::CursorImage> _cursorImage;
+    mutable RefPtr<boo::NativeImage> _cursorImageFrame;
+    mutable boo::IntPoint _cursorImageHotSpot;
     /// @brief Whether a button was held as the overlay opened: its release goes to the page.
     bool _pageOwnsPress {false};
     /// @brief The pen's buttons held (its tip, its barrel button or its eraser), as the DOM's `buttons` bit
@@ -490,6 +495,12 @@ namespace krys::ui
     /// @brief The cursor the page wants over it, as of the last mouse move (none while the pointer is
     /// locked); while a drag runs, the drag and drop cursor for what a drop would do.
     KRYS_NODISCARD pal::CursorShape CurrentCursor() const noexcept;
+
+    /// @brief The image the page wants as the cursor over it (`cursor: url()`), for the window's
+    /// `SetCursorImage`, or null when it wants a system cursor, `CurrentCursor()`; it's shown at its pixel
+    /// size, even for an `image-set()` image of another resolution. An animated image's cursor is the frame
+    /// shown as of the last mouse move.
+    KRYS_NODISCARD RefPtr<pal::CursorImage> CurrentCursorImage() const noexcept;
 
     /// @brief Whether a drag that started in the page is running: the mouse's moves move it, the release
     /// drops it and Escape cancels it, and Ctrl makes a drop copy rather than move.

@@ -1,7 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -51,10 +54,11 @@ namespace krys::boo
     SouthEastPanning,
     SouthWestPanning,
     WestPanning,
+    /// @brief An image (`cursor: url()`).
+    Custom,
   };
 
-  /// @brief The mouse cursor the page asks the host to show.
-  // FIXME: Custom cursors (images and hot spots) come with cursor images.
+  /// @brief The mouse cursor the page asks the host to show: a predefined one, or an image with its hot spot.
   class Cursor
   {
   public:
@@ -62,19 +66,45 @@ namespace krys::boo
 
   private:
     Type _type {Type::Invalid};
+    RefPtr<Image> _image;
+    IntPoint _hotSpot;
+    float _imageScaleFactor {1};
 
   public:
-    constexpr Cursor() noexcept = default;
+    Cursor() noexcept = default;
 
-    constexpr explicit Cursor(Type type) noexcept : _type(type)
+    explicit Cursor(Type type) noexcept : _type(type)
     {
     }
 
-    KRYS_NODISCARD constexpr Type GetType() const noexcept
+    /// @brief A cursor showing @p image, an image @p scale times its natural size in pixels (from an
+    /// `image-set()`), with the hot spot at @p hotSpot (in the image's natural size) if that's in it, or at
+    /// the image's own hot spot (a `.cur` file's), or else at its top left.
+    Cursor(Image &image, const IntPoint &hotSpot, float scale) noexcept;
+
+    KRYS_NODISCARD Type GetType() const noexcept
     {
       return _type;
     }
 
-    KRYS_NODISCARD friend constexpr bool operator==(const Cursor &, const Cursor &) noexcept = default;
+    /// @brief A custom cursor's image, or null.
+    KRYS_NODISCARD Image *GetImage() const noexcept
+    {
+      return _image.get();
+    }
+
+    /// @brief Where a custom cursor points, in its image's natural size.
+    KRYS_NODISCARD const IntPoint &HotSpot() const noexcept
+    {
+      return _hotSpot;
+    }
+
+    /// @brief How many of a custom cursor's image pixels make a pixel of its natural size.
+    KRYS_NODISCARD float ImageScaleFactor() const noexcept
+    {
+      return _imageScaleFactor;
+    }
+
+    KRYS_NODISCARD friend bool operator==(const Cursor &, const Cursor &) noexcept = default;
   };
 }

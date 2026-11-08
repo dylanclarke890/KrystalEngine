@@ -7,9 +7,11 @@
 #include "Krystal.PAL/Win32/DropTarget.hpp"
 #include "Krystal.PAL/Win32/Utils.hpp"
 #include <algorithm>
+#include <cstring>
 #include <hidusage.h>
 #include <imm.h>
 #include <string>
+#include <utility>
 #include <windows.h>
 #include <windowsx.h>
 
@@ -502,6 +504,7 @@ namespace krys::pal
     Win32Window::~Win32Window() noexcept
     {
       RevokeDropTarget();
+      ClearCursorImage();
     }
 
     WindowHandle Win32Window::GetWindowHandle() const noexcept
@@ -1251,12 +1254,87 @@ namespace krys::pal
 
     void Win32Window::SetCursor(CursorShape cursor) noexcept
     {
-      if (_cursor == cursor)
+      if (_cursor == cursor && !_cursorImage)
       {
         return;
       }
       _cursor = cursor;
+      ClearCursorImage();
+      CursorChanged();
+    }
 
+    void Win32Window::ClearCursorImage() noexcept
+    {
+      _cursorImage = nullptr;
+      if (auto cursor = std::exchange(_imageCursor, nullptr))
+      {
+        ::DestroyCursor(cursor);
+      }
+    }
+
+    void Win32Window::SetCursorImage(Ref<CursorImage> image) noexcept
+    {
+      if (_cursorImage == image.get())
+      {
+        return;
+      }
+      ClearCursorImage();
+
+      // A 32-bit top-down colour bitmap with alpha, and an empty mask that the alpha takes the place of.
+      auto width = static_cast<LONG>(image->Width());
+      auto height = static_cast<LONG>(image->Height());
+      if (width > 0 && height > 0 && image->Pixels().size() == static_cast<size_t>(width) * height)
+      {
+        BITMAPV5HEADER header {};
+        header.bV5Size = sizeof(header);
+        header.bV5Width = width;
+        header.bV5Height = -height;
+        header.bV5Planes = 1;
+        header.bV5BitCount = 32;
+        header.bV5Compression = BI_BITFIELDS;
+        header.bV5RedMask = 0x00'FF'00'00;
+        header.bV5GreenMask = 0x00'00'FF'00;
+        header.bV5BlueMask = 0x00'00'00'FF;
+        header.bV5AlphaMask = 0xFF'00'00'00;
+        void *bits = nullptr;
+        HDC screen = ::GetDC(nullptr);
+        HBITMAP colour = ::CreateDIBSection(screen, reinterpret_cast<BITMAPINFO *>(&header), DIB_RGB_COLORS,
+                                            &bits, nullptr, 0);
+        ::ReleaseDC(nullptr, screen);
+        List<BYTE> maskBits(static_cast<size_t>((width + 15) / 16 * 2) * height, BYTE {0xFF});
+        HBITMAP mask = ::CreateBitmap(width, height, 1, 1, maskBits.data());
+        if (colour && mask && bits)
+        {
+          std::memcpy(bits, image->Pixels().data(), image->Pixels().size() * sizeof(uint32));
+          ICONINFO info {};
+          info.fIcon = FALSE;
+          info.xHotspot = static_cast<DWORD>(std::clamp<int32>(image->HotSpotX(), 0, width - 1));
+          info.yHotspot = static_cast<DWORD>(std::clamp<int32>(image->HotSpotY(), 0, height - 1));
+          info.hbmMask = mask;
+          info.hbmColor = colour;
+          _imageCursor = ::CreateIconIndirect(&info);
+        }
+        if (colour)
+        {
+          ::DeleteObject(colour);
+        }
+        if (mask)
+        {
+          ::DeleteObject(mask);
+        }
+      }
+      // An image the system can't make a cursor of shows as the arrow.
+      _cursorImage = krys::move(image);
+      CursorChanged();
+    }
+
+    CursorImage *Win32Window::GetCursorImage() const noexcept
+    {
+      return _cursorImage.get();
+    }
+
+    void Win32Window::CursorChanged() const noexcept
+    {
       // While the window captures the mouse (a button is held), its cursor shows wherever the mouse is, and
       // no WM_SETCURSOR comes.
       if (::GetCapture() == _handle)
@@ -1621,6 +1699,11 @@ namespace krys::pal
       if (_cursor == CursorShape::Hidden || _pointerLock)
       {
         ::SetCursor(NULL);
+        return;
+      }
+      if (_cursorImage)
+      {
+        ::SetCursor(_imageCursor ? _imageCursor : ::LoadCursorW(NULL, IDC_ARROW));
         return;
       }
       if (auto dragCursor = DragCursor(_cursor))

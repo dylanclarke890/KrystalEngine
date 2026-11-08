@@ -1711,6 +1711,58 @@ namespace krys::ui
     return input::ToCursorShape(_frame->GetEventHandler().CurrentMouseCursor());
   }
 
+  RefPtr<pal::CursorImage> View::CurrentCursorImage() const noexcept
+  {
+    if (_pointerLocked || _drag)
+    {
+      return nullptr;
+    }
+    auto cursor = _frame->GetEventHandler().CurrentMouseCursor();
+    auto *image = cursor.GetImage();
+    auto frame = image ? image->CurrentNativeImage() : nullptr;
+    auto *platformImage = frame ? frame->GetPlatformImage().get() : nullptr;
+    if (!platformImage || platformImage->Pixels().empty())
+    {
+      return nullptr;
+    }
+
+    // The hot spot is in the image's natural size; the cursor's pixels are the image's.
+    auto scale = cursor.ImageScaleFactor();
+    boo::IntPoint hotSpot(static_cast<int32>(cursor.HotSpot().X() * scale),
+                          static_cast<int32>(cursor.HotSpot().Y() * scale));
+    if (_cursorImage && _cursorImageFrame == frame && _cursorImageHotSpot == hotSpot)
+    {
+      return _cursorImage;
+    }
+
+    // The window takes straight alpha.
+    List<uint32> pixels(platformImage->Pixels().begin(), platformImage->Pixels().end());
+    if (platformImage->PremultipliedAlpha())
+    {
+      for (auto &pixel : pixels)
+      {
+        uint32 alpha = pixel >> 24;
+        if (!alpha || alpha == 255)
+        {
+          continue;
+        }
+        auto unpremultiply = [&](uint32 shift)
+        {
+          uint32 channel = (pixel >> shift) & 0xFF;
+          return std::min<uint32>(255, (channel * 255 + alpha / 2) / alpha) << shift;
+        };
+        pixel = (alpha << 24) | unpremultiply(16) | unpremultiply(8) | unpremultiply(0);
+      }
+    }
+    auto size = platformImage->Size();
+    _cursorImage =
+      CreateRef<pal::CursorImage>(static_cast<uint32>(size.Width()), static_cast<uint32>(size.Height()),
+                                  krys::move(pixels), hotSpot.X(), hotSpot.Y());
+    _cursorImageFrame = frame;
+    _cursorImageHotSpot = hotSpot;
+    return _cursorImage;
+  }
+
   void View::SetPointerLockHandler(Func<bool(bool)> &&handler) noexcept
   {
     _pointerLockHandler = krys::move(handler);

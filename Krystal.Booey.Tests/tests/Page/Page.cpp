@@ -383,6 +383,77 @@ namespace krys::boo::tests
     CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Cross);
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: cursor images",
+                   "[Page][Cursor][css-ui:cursor][css-ui:typedef-cursor-cursor-image]")
+  {
+    constexpr utf8_stringview Small = u8"data:image/"
+                                      u8"png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+"
+                                      u8"AAAAEklEQVR4nGP4z8DwHxkzkC4AADxAH+HggXe0AAAAAElFTkSuQmCC";
+    constexpr utf8_stringview Eight =
+      u8"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAEUlEQVR4nGNgYPj/Hz8eEQoAQ1d/"
+      u8"gZtbdTsAAAAASUVORK5CYII=";
+    constexpr utf8_stringview Big = u8"data:image/"
+                                    u8"png;base64,"
+                                    u8"iVBORw0KGgoAAAANSUhEUgAAAIIAAAABCAYAAAASJ3aLAAAAEklEQVR4nGP4z8DwfxQzjH"
+                                    u8"gMAJrgAwzQzIqPAAAAAElFTkSuQmCC";
+    auto page = [](utf8_stringview cursor)
+    {
+      return u8"<!DOCTYPE html><style>body{margin:0}</style><div id=box "
+             u8"style='width:100px;height:50px;cursor:"
+             + utf8_string(cursor) + u8"'></div>";
+    };
+    auto cursorAt = [](PageFixture &fixture)
+    {
+      // The images load as tasks.
+      fixture.Frame();
+      fixture.MoveMouse(10, 10);
+      return fixture.Handler().CurrentMouseCursor();
+    };
+
+    SECTION("the first image that loads is the cursor, with its hot spot")
+    {
+      PageFixture fixture {page(u8"url(" + utf8_string(Small) + u8") 3 2, crosshair")};
+      auto cursor = cursorAt(fixture);
+      REQUIRE(cursor.GetType() == Cursor::Type::Custom);
+      REQUIRE(cursor.GetImage());
+      CHECK(cursor.GetImage()->Size() == FloatSize(4, 4));
+      CHECK(cursor.HotSpot() == IntPoint(3, 2));
+      CHECK(cursor.ImageScaleFactor() == 1);
+    }
+
+    SECTION("a hot spot outside the image is its top left")
+    {
+      PageFixture fixture {page(u8"url(" + utf8_string(Small) + u8") 4 1, crosshair")};
+      auto cursor = cursorAt(fixture);
+      REQUIRE(cursor.GetType() == Cursor::Type::Custom);
+      CHECK(cursor.HotSpot() == IntPoint(0, 0));
+    }
+
+    SECTION("an image that fails or is too big is passed over")
+    {
+      PageFixture fixture {page(u8"url(data:image/png;base64,AAAA), url(" + utf8_string(Big) + u8"), url("
+                                + utf8_string(Small) + u8"), crosshair")};
+      auto cursor = cursorAt(fixture);
+      REQUIRE(cursor.GetType() == Cursor::Type::Custom);
+      CHECK(cursor.GetImage()->Size() == FloatSize(4, 4));
+    }
+
+    SECTION("with no image to show, the predefined cursor")
+    {
+      PageFixture fixture {page(u8"url(" + utf8_string(Big) + u8"), crosshair")};
+      CHECK(cursorAt(fixture).GetType() == Cursor::Type::Cross);
+    }
+
+    SECTION("an image-set() image has its resolution, and its hot spot is in its natural size")
+    {
+      PageFixture fixture {page(u8"image-set(url(" + utf8_string(Eight) + u8") 2x) 3 3, auto")};
+      auto cursor = cursorAt(fixture);
+      REQUIRE(cursor.GetType() == Cursor::Type::Custom);
+      CHECK(cursor.ImageScaleFactor() == 2);
+      CHECK(cursor.HotSpot() == IntPoint(3, 3));
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture,
                    "Page: hover follows the content under a still mouse after a scroll",
                    "[Page][RenderingUpdate]")

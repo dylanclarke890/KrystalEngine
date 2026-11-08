@@ -4,6 +4,7 @@
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
@@ -142,7 +143,14 @@ namespace krys::pal
     /// the mouse is there now.
     virtual void SetCursor(CursorShape cursor) noexcept = 0;
 
+    /// @brief Shows @p image as the cursor, as `SetCursor` does a system one, until a cursor is set again.
+    virtual void SetCursorImage(Ref<CursorImage> image) noexcept = 0;
+
+    /// @brief The system cursor last set; an image set since shows in its place.
     KRYS_NODISCARD virtual CursorShape GetCursor() const noexcept = 0;
+
+    /// @brief The image shown as the cursor, or null for a system cursor.
+    KRYS_NODISCARD virtual CursorImage *GetCursorImage() const noexcept = 0;
 
     /// @brief Locks the pointer (@p locked) or unlocks it: while it's locked, the cursor is hidden and kept
     /// in the window, and the mouse's moves come as `OnLockedMouseMove`; unlocking puts the cursor back where

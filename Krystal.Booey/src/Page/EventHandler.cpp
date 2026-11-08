@@ -26,6 +26,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/Drag/DragState.hpp"
@@ -62,6 +63,12 @@ namespace krys::boo
     // Match key code of composition keydown event on windows.
     // IE sends VK_PROCESSKEY which has value 229;
     constexpr int32 CompositionEventKeyCode = 229;
+
+    /// @brief The largest a cursor image can be, in CSS pixels each way, as in Chrome.
+    constexpr float MaximumCursorSize = 128;
+    // It's pretty unlikely that a scale of less than one would ever be used. But all we really need to ensure
+    // is that it can't be zero and that there's no possibility of integer overflow.
+    constexpr float MinimumCursorScale = 0.001f;
 
     /// @brief The element key events go to in @p document: its focused element, or its body.
     // FIXME: A fullscreen video, once there is one.
@@ -1775,7 +1782,44 @@ namespace krys::boo
     // own cursor (getCursor).
 
     auto styleCursor = style ? style->GetCursor() : style::Cursor {null, CursorType::Auto};
-    // FIXME: Cursor images, once they load.
+    if (styleCursor.Images)
+    {
+      for (auto &styleCursorImage : *styleCursor.Images)
+      {
+        Ref<StyleImage> styleImage = styleCursorImage.Image;
+        auto *cachedImage = styleImage->GetCachedImage();
+        if (!cachedImage)
+        {
+          continue;
+        }
+        float scale = styleImage->ImageScaleFactor();
+        // Get hotspot and convert from logical pixels to physical pixels.
+        auto hotSpot = styleCursorImage.HotSpot;
+        auto *image = cachedImage->ImageForRenderer(renderer);
+        if (!image || cachedImage->ErrorOccurred())
+        {
+          continue;
+        }
+        auto size = image->Size();
+        // Limit the size of cursors (in UI pixels) so that they cannot be used to cover UI elements in
+        // chrome.
+        size.Scale(1 / scale);
+        if (size.Width() > MaximumCursorSize || size.Height() > MaximumCursorSize)
+        {
+          continue;
+        }
+
+        // (Skipped: falling back when the cursor would reach out of the main frame's visible content, as
+        // there's no browser UI to cover; see DIFFERENCES.md.)
+
+        // Ensure no overflow possible in calculations above.
+        if (scale < MinimumCursorScale)
+        {
+          continue;
+        }
+        return Cursor(*image, hotSpot, scale);
+      }
+    }
 
     switch (styleCursor.Predefined)
     {

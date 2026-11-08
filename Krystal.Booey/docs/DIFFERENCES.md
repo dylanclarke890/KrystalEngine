@@ -297,6 +297,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- A cursor image (`cursor: url()`, up to 128 CSS pixels each way, as in Chrome) is shown wherever the mouse is. Chrome falls back to the next cursor when a large one would reach out of the page's visible content, so as not to cover its own UI; a C++ application has no browser UI to protect, and a game's cursor shouldn't change near the window's edge.
 - A range takes a touch that first moves along it (`SliderContainerElement::HandleTouchEvent`), as Chrome does, but a slider with any transform (or `rotate`, `scale`, `translate` or `offset-path`) takes moves in every direction, where Chrome does so only for a rotation.
 - The `focus` and `blur` events at the window are composed `FocusEvent`s with a `view`, as the specification says. Chrome fires a plain `Event` that isn't composed.
 - `beforeinput` and `input` have the window as their `view`, as UI Events says; Chrome's is null.

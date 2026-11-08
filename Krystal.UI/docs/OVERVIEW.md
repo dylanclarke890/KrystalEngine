@@ -26,7 +26,7 @@ Krystal.UI is the only module that knows both Booey and Krystal.Gfx: it hosts Bo
 ## Input
 
 `View` takes Krystal.PAL's types and `Input.hpp` maps them to DOM events (`code`, `key`, legacy key identifier, Windows key code).
-- **Mouse:** `MouseMoved`, `MousePressed`, `MouseReleased`, `MouseLeft`, `MouseWheel`, with click counting and the cursor. A wheel notch is the system's line count times 100/3 px; Shift turns the vertical wheel horizontal.
+- **Mouse:** `MouseMoved`, `MousePressed`, `MouseReleased`, `MouseLeft`, `MouseWheel`, with click counting and the cursor: `CurrentCursor` for a system cursor, or `CurrentCursorImage` for a `cursor: url()` image (straight-alpha pixels and a hot spot for `pal::IWindow::SetCursorImage`, shown at its pixel size). A wheel notch is the system's line count times 100/3 px; Shift turns the vertical wheel horizontal.
 - **Pen and touch** come from Windows pointer messages through `PenInput` and `TouchInput`. Gestures honour `touch-action`: tap, double tap, pan with fling, long press as `contextmenu`, and pinch-scale between 1 and 5. `SetPointingDevices` drives the pointer and hover media features and `maxTouchPoints` (until set, a mouse alone).
 - **Keyboard:** `KeyPressed`, `KeyReleased`, `InsertText`. `EditorClient` runs the editor commands Windows binds keys to and keeps the undo and redo stacks.
 - **Input methods** follow GTK's model: `SetComposition`, `ConfirmComposition`, `InsertText`, `AcceptsTextInput`, `TextInputRect` (for the host's candidate window) and `SetCompositionDiscardedHandler`. The page confirms its composition on a press and on window focus loss.

@@ -781,12 +781,21 @@ namespace krys
       }
     }
 
-    /// @brief Shows the page's cursor over the page view, and the arrow everywhere else; a drag in the page
-    /// shows its cursor wherever the mouse is.
+    /// @brief Shows the page's cursor (a system one or its image) over the page view, and the arrow
+    /// everywhere else; a drag in the page shows its cursor wherever the mouse is.
     void UpdateCursor() noexcept
     {
       bool overPage =
         _pageView && _view == EditorView::Page && (_pointer.Y() >= 0 || _pageView->IsDragging());
+      if (overPage)
+      {
+        if (auto image = _pageView->CurrentCursorImage())
+        {
+          Ref<pal::CursorImage> cursorImage = krys::move(image);
+          _context->Window->SetCursorImage(krys::move(cursorImage));
+          return;
+        }
+      }
       _context->Window->SetCursor(overPage ? _pageView->CurrentCursor() : pal::CursorShape::Arrow);
     }
 

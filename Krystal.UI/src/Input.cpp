@@ -327,6 +327,8 @@ namespace krys::ui::input
       case Type::Hand:
       case Type::Grab:
       case Type::Grabbing:                 return pal::CursorShape::Hand;
+      // An image's cursor is `View::CurrentCursorImage`; this is the system cursor in its place.
+      case Type::Custom:                   return pal::CursorShape::Arrow;
       case Type::IBeam:
       case Type::VerticalText:             return pal::CursorShape::IBeam;
       case Type::Cross:
