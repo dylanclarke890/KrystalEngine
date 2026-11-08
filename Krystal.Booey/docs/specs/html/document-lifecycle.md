@@ -211,7 +211,7 @@ Status: reviewed (2026-11-01)
 #### [7.5.10 Destroying documents](https://html.spec.whatwg.org/#destroying-documents)
 
 Status: reviewed (2026-11-01)
-> A document is destroyed when it's released, rather than by these steps; tasks of a document that isn't fully active still run (see `KNOWN-ISSUES.md`).
+> A document is destroyed when it's released, rather than by these steps; tasks of a document that isn't fully active still run (see `DIFFERENCES.md`).
 
 - [x] [destroy](https://html.spec.whatwg.org/#destroy-a-document) — To destroy a Document document:
   - 1. Assert: this is running as part of a task queued on document's relevant agent's event loop.

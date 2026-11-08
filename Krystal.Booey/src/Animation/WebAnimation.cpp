@@ -995,11 +995,12 @@ namespace krys::boo
       _hasScheduledEventsDuringTick = true;
       timeline->EnqueueAnimationEvent(*event);
     }
-    else
+    // Otherwise, queue a task to dispatch event at animation. The task source for this task is the DOM
+    // manipulation task source.
+    // (A task of the animation's document; there's none to dispatch once the document is gone.)
+    else if (auto *document = _document.get())
     {
-      // Otherwise, queue a task to dispatch event at animation. The task source for this task is the DOM
-      // manipulation task source.
-      html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
+      html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, *document,
                                            [event = krys::move(event)]
                                            {
                                              RefPtr target = event->Target();

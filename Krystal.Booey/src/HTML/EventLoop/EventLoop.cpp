@@ -22,9 +22,10 @@ namespace krys::boo::html
     _taskQueue.push_back({source, krys::move(steps)});
   }
 
-  void EventLoop::QueueTask(TaskSource source, dom::Document &document, Steps &&steps) noexcept
+  void EventLoop::QueueTask(TaskSource source, dom::Document &document, Steps &&steps,
+                            StoppedDocumentTask whenStopped) noexcept
   {
-    _taskQueue.push_back({source, krys::move(steps), CreateWeakPtr(&document), true});
+    _taskQueue.push_back({source, krys::move(steps), CreateWeakPtr(&document), true, whenStopped});
   }
 
   namespace
@@ -46,7 +47,7 @@ namespace krys::boo::html
       auto *document = task.Document.get();
       if (!document || document->ActiveDOMObjectsAreStopped())
       {
-        return TaskState::Dropped;
+        return task.WhenStopped == StoppedDocumentTask::Run ? TaskState::Runnable : TaskState::Dropped;
       }
       return document->ScheduledTasksAreSuspended() ? TaskState::Suspended : TaskState::Runnable;
     }

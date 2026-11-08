@@ -462,7 +462,7 @@ Status: reviewed (2026-10-30)
 ### [3.2. Interface AbortSignal](https://dom.spec.whatwg.org/#interface-AbortSignal)
 
 Status: reviewed (2026-10-30)
-> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/DOM/Abort/AbortSignal.cpp` and `tests/DOM/Algorithms/AbortAlgorithms.cpp`.
+> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/DOM/Abort/AbortSignal.cpp` and `tests/DOM/Algorithms/AbortAlgorithms.cpp`. `AbortSignal::Timeout` takes the document standing in for the global, and waits on one of its timers, which is held while the document is suspended.
 <!-- definitions: abortsignal-abort-reason abortsignal-abort-algorithms abortsignal-dependent abortsignal-source-signals abortsignal-dependent-signals dom-abortsignal-onabort abortsignal-onabort eventdef-abortsignal-abort abortsignal-aborted -->
 
 - [x] [AbortSignal.abort(reason)](https://dom.spec.whatwg.org/#dom-abortsignal-abort) — The static abort(reason) method steps are:

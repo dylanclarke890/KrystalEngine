@@ -2821,8 +2821,14 @@ namespace krys::boo
       return;
     }
 
+    auto *document = Frame().Document();
+    if (!document)
+    {
+      return;
+    }
+
     _scheduledToScrollToAnchor = true;
-    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, *document,
                                          [protectedThis = ShareRef(*this)]
                                          {
                                            if (!protectedThis->_maintainScrollPositionAnchor)

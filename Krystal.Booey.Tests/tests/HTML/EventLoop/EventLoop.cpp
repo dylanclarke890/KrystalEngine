@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::html::tests
@@ -78,6 +79,18 @@ namespace krys::boo::html::tests
       loop.RunUntilIdle();
       REQUIRE(order == List<int> {1, 2});
       REQUIRE_FALSE(loop.HasPendingTasks());
+    }
+
+    SECTION("A document's tasks are dropped once it's gone, unless they're to run regardless")
+    {
+      RefPtr<dom::Document> document = CreateRef<dom::Document>();
+      loop.QueueTask(TaskSource::Networking, *document, [&] { order.push_back(1); });
+      loop.QueueTask(
+        TaskSource::Networking, *document, [&] { order.push_back(2); }, StoppedDocumentTask::Run);
+      document = nullptr;
+
+      loop.RunUntilIdle();
+      REQUIRE(order == List<int> {2});
     }
   }
 }

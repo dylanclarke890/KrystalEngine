@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 
 namespace krys::boo::dom
@@ -19,22 +20,25 @@ namespace krys::boo::dom
     return signal;
   }
 
-  Ref<AbortSignal> AbortSignal::Timeout(size_t milliseconds) noexcept
+  Ref<AbortSignal> AbortSignal::Timeout(Document &document, size_t milliseconds) noexcept
   {
     // 1. Let signal be a new AbortSignal object.
     auto signal = CreateRef<AbortSignal>();
 
-    // 2. (Skipped: there are no global objects; the timeout runs on the current event loop.)
+    // 2. Let global be signal's relevant global object.
+    // (The document stands in for its window.)
 
     // 3. Run steps after a timeout given global, "AbortSignal-timeout", milliseconds, and the following step:
     //   3a. Queue a global task on the timer task source given global to signal abort given signal and a new
     //       "TimeoutError" DOMException.
     // For the duration of this timeout, if signal has any event listeners registered for its abort event,
     // there must be a strong reference from global to signal.
-    // The task holds the signal strongly whether or not it has listeners.
-    html::EventLoop::Current().ScheduleTask(
-      std::chrono::milliseconds(milliseconds), html::TaskSource::Timer,
-      [signal] { AbortAlgorithms::SignalAbort(*signal, Exception {ExceptionCode::TimeoutError}); });
+    // The document's timer waits while the document is suspended, and fires as a task of the document; it
+    // holds the signal strongly whether or not it has listeners, and runs to completion on its own.
+    document
+      .StartTimer(std::chrono::milliseconds(milliseconds), [signal]
+                  { AbortAlgorithms::SignalAbort(*signal, Exception {ExceptionCode::TimeoutError}); })
+      .Release();
 
     // 4. Return signal.
     return signal;

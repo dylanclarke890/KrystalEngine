@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Types/Exception.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 
@@ -47,7 +48,8 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
 
-    Ref<AbortSignal> signal = AbortSignal::Timeout(100);
+    auto document = CreateRef<Document>();
+    Ref<AbortSignal> signal = AbortSignal::Timeout(*document, 100);
     CHECK_FALSE(signal->Aborted());
 
     loop.Run(loop.Now() + 99ms);
