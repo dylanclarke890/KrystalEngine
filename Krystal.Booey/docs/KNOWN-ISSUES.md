@@ -18,7 +18,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `DataTransferItem` has no `getAsEntry` (no file system API).
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).
 - A task's document is not checked for being fully active (documents never in a frame, such as `createHTMLDocument()`, run their tasks). Subresource loads, `close()`, the scroll to the anchor and `AbortSignal.timeout()` are not tagged with a document, so suspension does not hold them.
-- Suspension covers only the document's timers and animation frame callbacks: no media, font loading, service workers or IndexedDB, and animations aren't suspended (FIXME in `WebAnimation.hpp`).
+- Suspension covers only the document's timers and animation frame callbacks: no font loading, service workers or IndexedDB, and animations aren't suspended (FIXME in `WebAnimation.hpp`).
 - `FirstChild()`, `ParentNode()` and friends return raw pointers rather than `RefPtr`; `NodeFilter` is clunky from C++.
 
 ## HTML elements and forms
@@ -31,7 +31,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No autofill (`:autofill`), caps lock indicator or strong password fields on password fields, validation message bubble, `RenderSearchField` (search fields have no recent searches), or input purpose hints (`inputmode`, `autocapitalize`, spell checking). Numbers aren't localised (FIXMEs in `NumberInputType.cpp`); dates are, through ICU.
 - Form submission has no `rel=noreferrer` handling (FIXME in `HTMLFormElement.cpp`).
 - Customizable `<select>`: `appearance: base-select` on the select alone gives a picker with base appearance, where without `::picker(select)` opting in too it should be the native one, as `RenderMenuList` owns the popup menu. List boxes ignore `appearance: base-select` and stay native. Type-ahead with the picker open changes the selection, where it should move the focus. Page Up and Page Down move ten options, not a viewport's worth. A `legend` in an `optgroup` isn't its label in a native menu.
-- `<img>` lacks `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` fires no events for video posters and has no `<object>` fallback (FIXMEs); `ImageLoader`'s reuse of available images has no preloads (FIXME).
+- `<img>` lacks `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` has no `<object>` fallback (FIXME); `ImageLoader`'s reuse of available images has no preloads (FIXME).
 - `HTMLLinkElement` recognises only `rel=stylesheet`, `alternate` and `icon`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, manifests, integrity, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
 - `<a ping>` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported, and `<object>` and `<embed>` don't display their resources (no images, documents or plugins), so an object always shows its fallback content.
 - `<marquee>`'s `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` and `stop()` are not implemented, and marquees don't scroll (FIXME in `HTMLMarqueeElement.hpp`).
@@ -46,7 +46,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No `CSS.registerProperty` or `CSS.supports`. `CSSStyleSheet` has `ReplaceSync` only; the async `replace()` needs promises.
 - `SingleAnimationRangeStart/End::ToTimelineRangeValue()` returns a null `CSSNumericValue` for a calculated offset (FIXME).
 - `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).
-- State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
+- State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
 - `SelectorQuery` has no ID fast paths (rightmost-ID lookup, filtering the root by an ancestor ID, `[id=...]`; FIXMEs until tree scopes map IDs).
 - No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), and user style sheets' `@import`s and load options aren't handled.
 - `css::calc::Value::DoubleValueDeprecated` doesn't log when the tree needs conversion data (FIXME in `ValueEvaluation.cpp`).
@@ -105,7 +105,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `ImageQualityController::ChooseInterpolationQuality` returns the style's quality or the default: there is no size- or scroll-dependent choice.
 - Text painting has no document markers (spelling, grammar), no IME composition painting, no dragged or transparent content and no glyph display list cache. There is no print-backgrounds setting, and font subpixel quantization is a FIXME.
 - `RenderReplaced::paint` skips event regions, accessibility bounds and document markers (FIXMEs); SVG painting has no event region context, and the paint milestones are a FIXME.
-- Render theme parts left out or FIXMEs: media controls, attachments, Apple Pay, image controls, `<input type=checkbox switch>`, devolvable widgets, the system preview badge, the text area resize corner image, and the system's reduced motion and contrast settings.
+- Render theme parts left out or FIXMEs: attachments, Apple Pay, image controls, `<input type=checkbox switch>`, devolvable widgets, the system preview badge, the text area resize corner image, and the system's reduced motion and contrast settings.
 - Dragged images' files have no icons, there are no text indicators, and images changed mid-drag are not updated. There are no root view rects (`caretRectInRootViewCoordinates`, `editableElementRectInRootViewCoordinates`) for hosts' drop previews.
 - `image-rendering` is not applied to composited images and canvases (see *Compositing and scrolling*).
 
@@ -121,7 +121,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - 3D rendering contexts do not exist: `preserve-3d` sorting and perspective are not done, and Render2D draws 3D transforms flattened (FIXMEs in `TextureMapper.cpp`, `TextureMapperLayer.cpp`).
 - Reference (SVG `url()`) filters are identities on composited layers (`TextureMapper.cpp` converts the other filter functions to `LayerFilter2D`).
 - Clip paths never composite as shape layers; a composited clip path is painted into the mask layer. Replicas (reflections), repaint counters, repeating contents tiles (`WrapMode::Repeat`) and creating tiles over several frames are FIXMEs.
-- The compositor has no scrolling nodes, widget layers, video or plug-in layers, event or interaction regions, layer flush throttling, model or separated layers, or HDR and wide gamut backings (`ContentsFormat` is RGBA8 only). There is no `TiledBacking` (`SetIsInWindow` and `SetTileCoverage` do nothing), the fixed root background layer is never composited, and the host's compositing policy under memory pressure is a FIXME.
+- The compositor has no scrolling nodes, widget layers, plug-in layers, event or interaction regions, layer flush throttling, model or separated layers, or HDR and wide gamut backings (`ContentsFormat` is RGBA8 only). There is no `TiledBacking` (`SetIsInWindow` and `SetTileCoverage` do nothing), the fixed root background layer is never composited, and the host's compositing policy under memory pressure is a FIXME.
 
 ## Text and fonts
 
@@ -149,7 +149,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Images are sRGB only: ICC profiles are ignored (FIXME in `PNGImageDecoder.cpp`), and there is no HDR, headroom or gain map support. `NativeImage` has no colour spaces.
 - Orientation is applied to the pixels, not by drawing; density-corrected sizes are not applied (FIXME in `BitmapImageSource.cpp`). `GraphicsContext`'s default `DrawImageBuffer` and `DrawPattern` for image buffers draw nothing (FIXMEs in `GraphicsContext.cpp`: `nativeImageForDrawing`).
 - `shape-outside: url()` does not use the image's alpha (see *Layout*).
-- `<video>`: `HTMLVideoElement::VideoWidth()` and `VideoHeight()` are unimplemented, a poster has no events or renderer, and there are no video decoders.
 - SVG images keep the light appearance and do not copy the embedding page's settings (generic font families, dark appearance), because image observers cannot reach them (FIXME in `SVGImage.cpp`). The page of an SVG image has no loader strategy, so it loads only `data:` URLs.
 - Drags: no drag icon for a dragged image's file (`CreateDragImageIconForCachedImageFilename` returns none), the response's suggested filename is not parsed, colours cannot be dragged or dropped, and there are no text indicators or visible paths. `PasteboardImage` and `SelectionData` carry no image, so nothing prefers images' types when pasting.
 - Krystal.UI's `FileLoaderStrategy` reads files synchronously on the main thread (FIXME).
@@ -170,7 +169,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Without a host device (Booey's tests, or a view before its first paint), `getImageData` and other readbacks return transparent black, and `createPattern` of a canvas throws `InvalidStateError`.
 - Drawing is sRGB with 8 bits a channel. `display-p3` is accepted and drawn as sRGB; `rgba-float16` `ImageData` reads and writes 8 bits a channel (no `Float16Array`); `PixelFormat` has RGBA8, BGRX8 and BGRA8 only. The `alpha` context setting is accepted but ignored (the context is always transparent).
 - `willReadFrequently` is stored but changes nothing: there is no unaccelerated backend to read from (FIXME in `CanvasBase.cpp`).
-- `<video>`, `ImageBitmap` and `OffscreenCanvas` are not `CanvasImageSource`s. `createImageBitmap`, `OffscreenCanvas`, `ImageBitmapRenderingContext`, `PaintRenderingContext2D`, WebGL and WebGPU contexts do not exist, and there are no context loss events.
+- `ImageBitmap` and `OffscreenCanvas` are not `CanvasImageSource`s. `createImageBitmap`, `OffscreenCanvas`, `ImageBitmapRenderingContext`, `PaintRenderingContext2D`, WebGL and WebGPU contexts do not exist, and there are no context loss events.
 - An image drawn without a renderer uses its own orientation, not its computed style's (FIXME).
 - A canvas copy and every readback wait for the GPU.
 - Image buffers of a resolution scale other than 1 replay their transforms unscaled (FIXME on Krystal.UI's `ImageBufferRender2DBackend`); canvases' buffers are always scale 1.

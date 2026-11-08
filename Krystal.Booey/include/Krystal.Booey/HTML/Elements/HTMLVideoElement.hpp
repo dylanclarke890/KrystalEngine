@@ -5,6 +5,7 @@
 
 namespace krys::boo::html
 {
+  // FIXME: The poster frame (its loading, events and renderer) and decoded video, with a host media player.
   /// @see https://html.spec.whatwg.org/#htmlvideoelement
   class HTMLVideoElement : public HTMLMediaElement
   {

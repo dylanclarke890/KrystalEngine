@@ -806,6 +806,7 @@ namespace krys::boo
     float deviceScaleFactor = box.GetDocument().DeviceScaleFactor();
     FloatRect devicePixelSnappedRect = SnapRectToDevicePixels(rect, deviceScaleFactor);
 
+    // FIXME: The media controls' parts, with media elements' default controls.
     switch (appearance)
     {
       case StyleAppearance::Checkbox:  return PaintCheckbox(box, paintInfo, devicePixelSnappedRect);

@@ -3276,7 +3276,7 @@ namespace krys::boo::dom
     }
 
     // FIXME: The page's overlay scrollbars, the composited layers' pending update and font loading, once
-    // there are those.
+    // there are those, and media elements' playback, with media.
     SuspendScheduledTasks(reason);
 
     // The frame's timers: the layout, the animations and autoscrolling stop.
