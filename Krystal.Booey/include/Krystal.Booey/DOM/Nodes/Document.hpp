@@ -2148,8 +2148,6 @@ namespace krys::boo::dom
     {
       return _nodeIterators;
     }
-
-  private:
   };
 }
 

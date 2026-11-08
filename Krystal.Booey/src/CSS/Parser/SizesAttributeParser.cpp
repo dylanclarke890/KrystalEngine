@@ -9,6 +9,7 @@
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
@@ -25,9 +26,18 @@ namespace krys::boo::css
     }
     auto &style = renderer->Style();
 
-    // FIXME: Font-relative units (ex, cap, ch, ic) resolve against the view's style before its fonts are
-    // consistent; clear the font selector while resolving them, as upstream does.
-    ToLengthConversionData conversionData(style, &style, nullptr, renderer);
+    ToLengthConversionData conversionData(style, &style, renderer->ParentStyle(), renderer);
+    // "sizes" is evaluated as it's parsed, before style is resolved, so the font selector may not be
+    // consistent yet. The font-relative units measure the view's fonts without it: its style's font is the
+    // standard family, which needs no font selector.
+    if (unit == LengthUnit::Ex || unit == LengthUnit::Cap || unit == LengthUnit::Ch || unit == LengthUnit::Ic)
+    {
+      RefPtr<FontSelector> fontSelector = ShareRefPtr(style.GetFontCascade().GetFontSelector());
+      style.GetFontCascade().Update(nullptr);
+      auto result = ClampTo<float>(style::ComputeNonCalcLengthDouble(value, unit, conversionData));
+      style.GetFontCascade().Update(krys::move(fontSelector));
+      return result;
+    }
     return ClampTo<float>(style::ComputeNonCalcLengthDouble(value, unit, conversionData));
   }
 

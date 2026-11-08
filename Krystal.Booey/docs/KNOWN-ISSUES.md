@@ -52,7 +52,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `SelectorQuery` has no ID fast paths (rightmost-ID lookup, filtering the root by an ancestor ID, `[id=...]`; FIXMEs until tree scopes map IDs).
 - No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), and user style sheets' `@import`s and load options aren't handled.
 - `RuleSet` doesn't clone `::cue` rules for the cue background box (no WebVTT cues).
-- `SizesAttributeParser` doesn't clear the font selector for font-relative units (FIXME).
 - `css::calc::Value::DoubleValueDeprecated` doesn't log when the tree needs conversion data (FIXME in `ValueEvaluation.cpp`).
 - There is no inspector: `:hover` can't be forced and there are no observer hooks for source ranges.
 
