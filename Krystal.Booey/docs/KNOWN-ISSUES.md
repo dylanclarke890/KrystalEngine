@@ -31,7 +31,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `<img>` lacks `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` has no `<object>` fallback (FIXME); `ImageLoader`'s reuse of available images has no preloads (FIXME).
 - `HTMLLinkElement` recognises only `rel=stylesheet`, `alternate` and `icon`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, manifests, integrity, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
 - `<a ping>` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported, and `<object>` and `<embed>` don't display their resources (no images, documents or plugins), so an object always shows its fallback content.
-- `MIMETypeRegistry::MIMETypeForExtension` has only a built-in table; most other extensions have no type (FIXME in `MIMETypeRegistry.cpp`).
 
 ## CSS parsing and CSSOM
 

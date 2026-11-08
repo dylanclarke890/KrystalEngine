@@ -488,6 +488,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
 		tests/Platform/DateComponents.cpp
 		tests/Platform/Decimal.cpp
+		tests/Platform/MIMETypeRegistry.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Platform/Network/DataURLDecoder.cpp
 		tests/Platform/Network/HTTPParsers.cpp

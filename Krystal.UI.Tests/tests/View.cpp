@@ -2188,16 +2188,6 @@ namespace krys::ui::tests
     CHECK(view.Document().FocusedElement() != &input);
   }
 
-  TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")
-  {
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".PNG") == u8"image/png");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".jpeg") == u8"image/jpeg");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".webp") == u8"image/webp");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".woff2") == u8"font/woff2");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".TTF") == u8"font/ttf");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".unknown").empty());
-  }
-
   TEST_CASE("View: animations run on the host's frames", "[UI]")
   {
     using namespace std::chrono_literals;

@@ -13,8 +13,5 @@ namespace krys::ui
     void LoadResource(boo::LocalFrame &, const boo::ResourceRequest &request,
                       const boo::ResourceLoaderOptions &,
                       Func<void(boo::LoadResult &&)> &&completionHandler) noexcept override;
-
-    /// @brief The MIME type of a file with @p extension (with its dot, any case); empty if unknown.
-    KRYS_NODISCARD static utf8_string MimeTypeForExtension(utf8_stringview extension) noexcept;
   };
 }

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.UI/FileLoaderStrategy.hpp"
+#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
 #include <chrono>
@@ -37,9 +38,13 @@ namespace krys::ui
     }
     List<uint8> bytes {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
 
+    // The type is the extension's, without its dot.
     const auto extension = path.extension().u8string();
     const auto size = static_cast<int64>(bytes.size());
-    boo::ResourceResponse response(url, MimeTypeForExtension(utf8_stringview(extension)), size);
+    boo::ResourceResponse response(url,
+                                   boo::MIMETypeRegistry::MIMETypeForExtension(
+                                     utf8_stringview(extension).substr(extension.empty() ? 0 : 1)),
+                                   size);
     // The file's modification time is its document's lastModified, as an HTTP-date.
     std::error_code error;
     if (auto writeTime = std::filesystem::last_write_time(path, error); !error)
@@ -52,29 +57,5 @@ namespace krys::ui
     }
     completionHandler(boo::LoadedResource {.Response = krys::move(response),
                                            .Data = boo::SharedBuffer::Create(krys::move(bytes))});
-  }
-
-  utf8_string FileLoaderStrategy::MimeTypeForExtension(utf8_stringview extension) noexcept
-  {
-    utf8_string lowered(extension);
-    std::ranges::transform(lowered, lowered.begin(), [](char8_t c) { return text::ToASCIILower(c); });
-
-    constexpr std::pair<utf8_stringview, utf8_stringview> types[] = {
-      {u8".png", u8"image/png"},     {u8".apng", u8"image/apng"},     {u8".jpg", u8"image/jpeg"},
-      {u8".jpeg", u8"image/jpeg"},   {u8".gif", u8"image/gif"},       {u8".webp", u8"image/webp"},
-      {u8".bmp", u8"image/bmp"},     {u8".ico", u8"image/x-icon"},    {u8".cur", u8"image/x-icon"},
-      {u8".svg", u8"image/svg+xml"}, {u8".css", u8"text/css"},        {u8".html", u8"text/html"},
-      {u8".htm", u8"text/html"},     {u8".txt", u8"text/plain"},      {u8".ttf", u8"font/ttf"},
-      {u8".otf", u8"font/otf"},      {u8".ttc", u8"font/collection"}, {u8".woff", u8"font/woff"},
-      {u8".woff2", u8"font/woff2"},
-    };
-    for (const auto &[candidate, type] : types)
-    {
-      if (lowered == candidate)
-      {
-        return utf8_string(type);
-      }
-    }
-    return {};
   }
 }
