@@ -222,7 +222,7 @@ namespace krys::boo::html
       }
       case TagName::marquee:
       {
-        return CreateRefPtr<HTMLMarqueeElement>(document);
+        return HTMLMarqueeElement::Create(document);
       }
       case TagName::div:
       {

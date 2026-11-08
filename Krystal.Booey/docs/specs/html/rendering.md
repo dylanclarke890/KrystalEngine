@@ -251,7 +251,7 @@ Status: reviewed (2026-11-02)
 #### [15.5.13 The marquee element](https://html.spec.whatwg.org/#the-marquee-element-2)
 
 Status: reviewed (2026-11-02)
-> Marquees don't scroll (see `KNOWN-ISSUES.md`).
+> `html.css`, `marqueeElementShadow.css`, and `HTMLMarqueeElement::ContinueAnimation`, which moves the contents with a Web Animation of the shadow tree's mover, as Chrome does (see `DIFFERENCES.md`).
 
 #### [15.5.14 The meter element](https://html.spec.whatwg.org/#the-meter-element-2)
 

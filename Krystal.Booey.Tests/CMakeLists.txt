@@ -522,6 +522,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Elements/HTMLLabelElement.cpp
 		tests/HTML/Elements/HTMLLinkElement.cpp
 		tests/HTML/Elements/HTMLMapElement.cpp
+		tests/HTML/Elements/HTMLMarqueeElement.cpp
 		tests/HTML/Elements/HTMLMeterElement.cpp
 		tests/HTML/Elements/HTMLModElement.cpp
 		tests/HTML/Elements/HTMLOptGroupElement.cpp
