@@ -405,7 +405,7 @@ Status: reviewed (2026-11-01)
 ##### [4.10.22.3 Form submission algorithm](https://html.spec.whatwg.org/#form-submission-algorithm)
 
 Status: reviewed (2026-11-01)
-> `HTMLFormElement::SubmitIfPossible` and `Submit`, `FormSubmission::Create`, and `FrameLoader::SubmitForm`; the dialog method is `SubmitDialog`. The rel attribute's noopener and noreferrer are FIXMEs.
+> `HTMLFormElement::SubmitIfPossible` and `Submit`, `FormSubmission::Create`, and `FrameLoader::SubmitForm`; the dialog method is `SubmitDialog`. The rel attribute's noopener and noreferrer change nothing, as there are no openers or referrers (see DIFFERENCES.md).
 <!-- definitions: constructing-entry-list firing-submission-events submit-submitted-from-method submit-user-involvement planned-navigation plan-to-navigate submit-mutate-action submit-body submit-get-action submit-mailto-headers submit-mailto-body -->
 
 - [x] [submit](https://html.spec.whatwg.org/#concept-form-submit) — To submit a form element form from an element submitter (typically a button), given an optional boolean submitted from submit() method (default false) and an optional user navigation involvement userInvolvement (default "none"):

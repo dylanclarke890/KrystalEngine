@@ -455,6 +455,12 @@ namespace krys::boo
       return;
     }
 
+    // https://html.spec.whatwg.org/#form-submission-algorithm
+    // 26a. Let referrerPolicy be the empty string.
+    // 26b. If the form element's link types include the noreferrer keyword, then set referrerPolicy to
+    //      "no-referrer".
+    // (Skipped: there are no referrers, so the policy would change nothing; see DIFFERENCES.md.)
+
     // https://html.spec.whatwg.org/#plan-to-navigate
     // The navigation is planned for a later task, which a later submission of the form cancels.
     html::EventLoop::Current().QueueTask(
