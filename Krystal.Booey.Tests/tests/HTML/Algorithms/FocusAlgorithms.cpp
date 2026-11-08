@@ -250,6 +250,20 @@ namespace krys::boo::html::tests
       CHECK(a.GetRenderStyle()->GetColor() != boo::Color(boo::Color::blue));
       document.SetFocusedAndActive(true);
     }
+
+    SECTION("Without system focus, the focus moves without events until the window gets it")
+    {
+      a.Focus();
+      FocusAlgorithms::SystemFocusChanged(document, false);
+      records.clear();
+
+      b.Focus();
+      CHECK(document.ActiveElement() == &b);
+      CHECK(records.empty());
+
+      FocusAlgorithms::SystemFocusChanged(document, true);
+      CHECK(records == List<std::string> {"focus:b(null)", "focusin:b(null)"});
+    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: focus visibility and clicks",

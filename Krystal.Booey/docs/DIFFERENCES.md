@@ -281,6 +281,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
+- While the window doesn't have system focus, moving the focus fires no `focus`, `blur`, `focusin` or `focusout` events at elements, as in Chrome (`Element::DispatchFocusEvent`): the focused element gets `focus` and `focusin` when the window gets system focus. The focus update steps fire them regardless, as WebKit does.
 - `window.focus()` asks the host (`ChromeClient::Focus`) and keeps the focused element, as browsers do, rather than running the specification's focusing steps on the viewport.
 - The old focused element loses focus before the `blur` events fire, as in browsers (the specification designates the new area only before `focus`), so blur handlers see the viewport focused.
 - `:focus-visible` uses a heuristic: `focus()` shows it unless the latest focus change was a click or `focusVisible` says otherwise, and text fields, selects and editable elements always show it.

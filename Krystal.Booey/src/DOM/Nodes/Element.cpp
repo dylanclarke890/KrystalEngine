@@ -709,12 +709,21 @@ namespace krys::boo::dom
 
   void Element::DispatchFocusEvent(EventTarget *relatedTarget, const FocusOptions &) noexcept
   {
-    html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"focus"), *this, relatedTarget);
+    // While the document's window doesn't have system focus, the focus moves without events, as in Chrome:
+    // the element gets them when the window gets system focus (FocusAlgorithms::SystemFocusChanged).
+    if (NodeDocument().IsFocusedAndActive())
+    {
+      html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"focus"), *this, relatedTarget);
+    }
   }
 
   void Element::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
   {
-    html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"blur"), *this, relatedTarget);
+    // (See DispatchFocusEvent: the element had its blur when the window lost system focus.)
+    if (NodeDocument().IsFocusedAndActive())
+    {
+      html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"blur"), *this, relatedTarget);
+    }
   }
 
   void Element::FindTargetAndUpdateFocusAppearance(SelectionRestorationMode restorationMode,
