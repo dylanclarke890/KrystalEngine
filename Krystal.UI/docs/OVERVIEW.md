@@ -59,6 +59,7 @@ Krystal.UI is the only module that knows both Booey and Krystal.Gfx: it hosts Bo
 
 ### Missing
 
+- The colour picker (`ColorChooserOverlay`) has no alpha control, so a colour it picks for an `<input type=color alpha>` is opaque.
 - `TextureMapperLayer` flattens 3D transforms (Render2D is 2D only). Replicas, reference filters in `TextureMapper`, masks and backdrops on `TextureMapperLayer` and repeating textures are FIXMEs.
 - Layers are composited on the main thread, with no compositor thread or async scrolling. That's worth doing only once something can keep the main thread busy.
 - The colour space passed to a host image buffer is ignored, and the view's target and pixel readback are sRGB, 8 bits a channel (FIXME in `View.cpp`). `Path` has no platform implementation: arcs are flattened into bezier curves (FIXME in `Graphics/Paths/Path.hpp`).

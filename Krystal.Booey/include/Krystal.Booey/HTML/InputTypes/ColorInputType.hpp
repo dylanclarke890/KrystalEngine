@@ -10,7 +10,6 @@ namespace krys::boo::html
 {
   /// @brief The color input type: a swatch of its colour (the `::-webkit-color-swatch` part), which opens the
   /// host's colour picker when activated.
-  // FIXME: The alpha and colorspace attributes.
   class ColorInputType final : public BaseClickableWithKeyInputType, private ColorChooserClient
   {
   private:

@@ -1,9 +1,13 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/ColorInputType.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/ColorInlines.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -13,61 +17,74 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include <string_view>
 
 namespace krys::boo::html
 {
   namespace
   {
-    // https://html.spec.whatwg.org/#valid-simple-colour
-    KRYS_NODISCARD bool IsValidSimpleColor(dom::DOMStringView string) noexcept
+    // https://html.spec.whatwg.org/#update-a-color-well-control-color
+    // 3. Let color be the result of parsing value.
+    // (As a CSS <color>, with currentcolor as black, as WebKit does.)
+    KRYS_NODISCARD Maybe<Color> ParseColorValue(dom::DOMStringView string,
+                                                const HTMLInputElement &input) noexcept
     {
-      if (string.size() != 7)
+      using namespace css::PropertyParserHelpers;
+      auto context = input.NodeDocument().CssParserContext();
+      context.Mode = css::ParserMode::HTMLStandard;
+      auto color = ParseColorRawSimple(string, context);
+      if (color.IsValid())
       {
-        return false;
+        return color;
       }
-      if (string[0] != u8'#')
+
+      ColorParsingOptions options;
+      css::PlatformColorResolutionState state {.ResolvedCurrentColor = Color::black};
+      color = ParseColorRawGeneral(string, context, options, state);
+      if (color.IsValid())
       {
-        return false;
+        return color;
       }
-      for (size_t i = 1; i < 7; ++i)
-      {
-        if (!text::IsASCIIHexDigit(string[i]))
-        {
-          return false;
-        }
-      }
-      return true;
+      return null;
     }
 
-    // https://html.spec.whatwg.org/#rules-for-parsing-simple-colour-values
-    KRYS_NODISCARD Maybe<SRGBA<uint8>> ParseSimpleColorValue(dom::DOMStringView string) noexcept
+    // https://html.spec.whatwg.org/#serialize-a-color-well-control-color
+    KRYS_NODISCARD dom::DOMString SerializeColorValue(Color color, const HTMLInputElement &element) noexcept
     {
-      if (!IsValidSimpleColor(string))
+      // 1. Assert: element is an input element whose type attribute is in the Color state.
+      // 2. Let htmlCompatible be false.
+      // 3. If element's alpha attribute is not specified, then set color's alpha component to be fully
+      // opaque.
+      bool alpha = element.Alpha();
+      if (!alpha)
       {
-        return null;
+        color = color.OpaqueColor();
       }
-      auto hex = [&](size_t i)
-      {
-        return static_cast<uint8>(text::ToASCIIHexValue(string[i]) * 16
-                                  + text::ToASCIIHexValue(string[i + 1]));
-      };
-      return SRGBA<uint8> {hex(1), hex(3), hex(5), 255};
-    }
 
-    /// @brief The serialisation of a simple colour: # and six lowercase hexadecimal digits.
-    KRYS_NODISCARD dom::DOMString SerializeColorValue(const Color &input) noexcept
-    {
-      constexpr std::string_view hexDigits = "0123456789abcdef";
-      dom::DOMString result(u8"#");
-      auto resolved = ResolvedColour(input.ToColorTypeLossy<SRGBA<uint8>>());
-      for (uint8 component : {resolved.Red, resolved.Green, resolved.Blue})
+      // 4. If element's colorspace attribute is in the Limited sRGB state:
+      if (element.ColourSpace() == u8"limited-srgb")
       {
-        result += static_cast<char8>(hexDigits[component >> 4]);
-        result += static_cast<char8>(hexDigits[component & 0xF]);
+        // 4a. Set color to color converted to the 'srgb' color space.
+        // 4b. Round each of color's components so they are in the range 0 to 255, inclusive. Components are
+        //     to be rounded towards +∞.
+        // (Rounded to the nearest, as WebKit does.)
+        auto rgba = color.ToColorTypeLossy<SRGBA<uint8>>();
+        // 4c. If element's alpha attribute is not specified, then set htmlCompatible to true.
+        // 4d. Otherwise, set color to color converted using the 'color()' function.
+        color = alpha ? Color(rgba, ColorFlags::UseColorFunctionSerialisation) : Color(ResolvedColour(rgba));
       }
-      return result;
+      // 5. Otherwise:
+      else
+      {
+        // 5a. Assert: element's colorspace attribute is in the Display P3 state.
+        krys_debug_assert(element.ColourSpace() == u8"display-p3");
+        // 5b. Set color to color converted to the 'display-p3' color space.
+        color = ResolvedColour(color.ToColorTypeLossy<ExtendedDisplayP3<float>>());
+      }
+
+      // 6. Return the result of serializing color. If htmlCompatible is true, then do so with HTML-compatible
+      //    serialization requested.
+      // (An opaque sRGB colour serialises as # and six lowercase hexadecimal digits.)
+      return dom::DOMString(SerialisationForHTML(color));
     }
   }
 
@@ -88,25 +105,30 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> ColorInputType::FallbackValue() const noexcept
   {
-    return SerializeColorValue(Color::black);
+    krys_debug_assert(Element());
+    return SerializeColorValue(Color::black, *Element());
   }
 
   dom::DOMString ColorInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
   {
-    auto color = ParseSimpleColorValue(proposedValue);
+    // https://html.spec.whatwg.org/#update-a-color-well-control-color
+    krys_debug_assert(Element());
+    auto color = ParseColorValue(proposedValue, *Element());
 
+    // 4. If color is failure, then set color to opaque black.
     if (!color)
     {
       return *FallbackValue();
     }
 
-    return SerializeColorValue(*color);
+    // 5. Set element's value to the result of serializing a color well control color given element and color.
+    return SerializeColorValue(*color, *Element());
   }
 
   Color ColorInputType::ValueAsColor() const noexcept
   {
     krys_debug_assert(Element());
-    auto color = ParseSimpleColorValue(Element()->Value());
+    auto color = ParseColorValue(Element()->Value(), *Element());
     krys_debug_assert(!!color);
     if (!color)
     {
@@ -219,7 +241,7 @@ namespace krys::boo::html
     }
 
     Ref<HTMLInputElement> input = ShareRef(*element);
-    auto serializedColor = SerializeColorValue(color);
+    auto serializedColor = SerializeColorValue(color, *input);
     if (serializedColor == input->Value())
     {
       return;
@@ -305,19 +327,20 @@ namespace krys::boo::html
 
   bool ColorInputType::SupportsAlpha() const noexcept
   {
-    return false;
+    krys_debug_assert(Element());
+    return Element()->Alpha();
   }
 
   List<Color> ColorInputType::SuggestedColors() const noexcept
   {
-    // The datalist's suggestions that are simple colours.
+    // The datalist's suggestions that are colours.
     List<Color> suggestions;
     krys_debug_assert(Element());
     if (auto dataList = Element()->List())
     {
       for (auto &option : dataList->Suggestions())
       {
-        if (auto color = ParseSimpleColorValue(option->Value()))
+        if (auto color = ParseColorValue(option->Value(), *Element()))
         {
           suggestions.push_back(*color);
         }

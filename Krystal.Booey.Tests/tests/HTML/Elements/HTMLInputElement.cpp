@@ -234,7 +234,8 @@ namespace krys::boo::html::tests
     CHECK(Sanitized(u8"range", u8"7", u8"min=0 max=10 step=5") == "5");
     CHECK(Sanitized(u8"range", u8"1", u8"min=10 max=5") == "10");
     CHECK(Sanitized(u8"color", u8"#ABCDEF") == "#abcdef");
-    CHECK(Sanitized(u8"color", u8"red") == "#000000");
+    CHECK(Sanitized(u8"color", u8"red") == "#ff0000");
+    CHECK(Sanitized(u8"color", u8"nonsense") == "#000000");
     CHECK(Sanitized(u8"date", u8"2026-02-30").empty());
     CHECK(Sanitized(u8"date", u8"2026-02-28") == "2026-02-28");
     CHECK(Sanitized(u8"time", u8"25:00").empty());

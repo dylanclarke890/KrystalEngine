@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/ColorInputType.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
@@ -115,6 +116,42 @@ namespace krys::boo::tests
     CHECK(SerialisationForCSS(
             swatch.Renderer()->Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor))
           == u8"rgb(0, 0, 255)");
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "ColorInputType: any CSS colour, with alpha and colorspace",
+    "[HTML][ColorInputType][html:update-a-color-well-control-color]"
+    "[html:serialize-a-color-well-control-color][html:attr-input-alpha][html:attr-input-colorspace]")
+  {
+    EditorFixture fixture(u8"<input type=color id=c>");
+    auto &input = InputById(fixture, u8"c");
+    auto value = [&](const char8_t *text)
+    {
+      (void)input.SetValue(text);
+      return css::tests::ToNarrow(input.Value());
+    };
+
+    // Any CSS colour is parsed; without alpha it's opaque and serialised as a simple colour.
+    CHECK(value(u8"red") == "#ff0000");
+    CHECK(value(u8"rgb(0 128 255 / 0.5)") == "#0080ff");
+    CHECK(value(u8"currentcolor") == "#000000");
+    CHECK(value(u8"nonsense") == "#000000");
+
+    // With alpha, the alpha is kept and the value is a color() function.
+    (void)input.SetAttribute(u8"alpha", u8"");
+    CHECK(input.Value() == u8"color(srgb 0 0 0)");
+    // Components are rounded to 0 to 255, alpha too: 0.4 is 102.
+    CHECK(value(u8"rgb(255 0 0 / 0.4)") == "color(srgb 1 0 0 / 0.4)");
+
+    // In Display P3, the value is in that colour space.
+    (void)input.RemoveAttribute(u8"alpha");
+    (void)input.SetAttribute(u8"colorspace", u8"display-p3");
+    CHECK(value(u8"color(display-p3 1 0 0)") == "color(display-p3 1 0 0)");
+    CHECK(input.ColourSpace() == u8"display-p3");
+
+    // Changing the attributes updates a dirty value.
+    (void)input.RemoveAttribute(u8"colorspace");
+    CHECK(input.Value() == u8"#ff0000");
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ColorInputType: the colour chooser", "[HTML][ColorInputType]")

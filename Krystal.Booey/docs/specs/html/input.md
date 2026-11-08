@@ -150,7 +150,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.14 Color state (type=color)](https://html.spec.whatwg.org/#color-state-%28type=color%29)
 
 Status: reviewed (2026-11-01)
-> `ColorInputType`; no `alpha` or `colorspace` support in the colour well (see `KNOWN-ISSUES.md`), though `colorSpace` reflects.
+> `ColorInputType`: the value is any CSS colour, serialised for the `alpha` and `colorspace` attributes. Parsing follows WebKit: `currentcolor` is black, and components round to the nearest rather than towards +∞.
 <!-- definitions: attr-input-alpha attr-input-colorspace -->
 
 - [x] [update a color well control color](https://html.spec.whatwg.org/#update-a-color-well-control-color) — To update a color well control color, given an element element:

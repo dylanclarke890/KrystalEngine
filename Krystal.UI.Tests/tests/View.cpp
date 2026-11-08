@@ -2049,11 +2049,12 @@ namespace krys::ui::tests
   TEST_CASE("View: datalist suggestions in pickers", "[UI]")
   {
     View view({400, 300});
-    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } input { margin: 10px }</style>"
-                  u8"<input type=date id=d list=dates value=2026-05-01><input type=color id=c list=colours>"
-                  u8"<datalist id=dates><option value=2026-05-01 label=Launch><option value=2026-06-15>"
-                  u8"<option value=nope></datalist>"
-                  u8"<datalist id=colours><option value=#123456><option value=red></datalist>");
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } input { margin: 10px }</style>"
+      u8"<input type=date id=d list=dates value=2026-05-01><input type=color id=c list=colours>"
+      u8"<datalist id=dates><option value=2026-05-01 label=Launch><option value=2026-06-15>"
+      u8"<option value=nope></datalist>"
+      u8"<datalist id=colours><option value=#123456><option value=red><option value=nope></datalist>");
     WaitForLoad(view);
     view.UpdateRendering();
 
@@ -2092,14 +2093,15 @@ namespace krys::ui::tests
       CHECK(view.KeyPressed(pal::Key::Escape));
     }
 
-    SECTION("A colour input's palette starts with its simple colour suggestions")
+    SECTION("A colour input's palette starts with its colour suggestions")
     {
       auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
       input.Click();
       auto *picker = static_cast<ColorChooserOverlay *>(view.ShownOverlay());
       REQUIRE(picker);
-      CHECK(picker->Colors().size() == 41uz);
+      CHECK(picker->Colors().size() == 42uz);
       CHECK(picker->Colors()[0] == boo::Color(SRGBA<uint8> {0x12, 0x34, 0x56}));
+      CHECK(picker->Colors()[1] == boo::Color(SRGBA<uint8> {255, 0, 0}));
       CHECK(view.KeyPressed(pal::Key::Escape));
     }
   }
