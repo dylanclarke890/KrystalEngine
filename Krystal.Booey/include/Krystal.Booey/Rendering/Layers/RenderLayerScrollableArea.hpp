@@ -28,6 +28,11 @@ namespace krys::boo
     bool _inOverflowRelayout {false};
     bool _hasCompositedScrollableOverflow {false};
     bool _requiresScrollPositionReconciliation {false};
+    /// @brief Whether the overlay scrollbars of this layer's descendants (painting into it) wait for the
+    /// second pass.
+    bool _containsDirtyOverlayScrollbars {false};
+    /// @brief Where the overlay scrollbars paint in the second pass: their paint offset in the first.
+    IntPoint _cachedOverlayScrollbarOffset;
 
     // The width/height of our scrolled area.
     int32 _scrollWidth {0};
@@ -210,10 +215,24 @@ namespace krys::boo
     void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
 
-    /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset.
-    // FIXME: Overlay scrollbars' second pass, once there are overlay scrollbars.
+    /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset. Overlay scrollbars paint over
+    /// everything else, in a second pass through the layer tree (@p paintingOverlayControls): the first pass
+    /// only marks the painting root as having them to paint.
     void PaintOverflowControls(GraphicsContext &context, EnumSet<PaintBehavior> paintBehavior,
-                               const IntPoint &paintOffset, const IntRect &damageRect) noexcept;
+                               const IntPoint &paintOffset, const IntRect &damageRect,
+                               bool paintingOverlayControls = false) noexcept;
+    /// @brief The second pass: paints the overlay scrollbars the first pass found, if there were any.
+    void PaintOverlayScrollbars(GraphicsContext &context, const LayoutRect &damageRect,
+                                EnumSet<PaintBehavior> paintBehavior,
+                                RenderObject *subtreePaintRoot = nullptr) noexcept;
+    KRYS_NODISCARD bool ContainsDirtyOverlayScrollbars() const noexcept
+    {
+      return _containsDirtyOverlayScrollbars;
+    }
+    void SetContainsDirtyOverlayScrollbars(bool dirtyScrollbars) noexcept
+    {
+      _containsDirtyOverlayScrollbars = dirtyScrollbars;
+    }
     void PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
                            const IntRect &damageRect) noexcept;
     /// @brief Paints the grip of a box the user can resize, in its bottom corner.

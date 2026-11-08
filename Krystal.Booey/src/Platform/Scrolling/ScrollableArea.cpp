@@ -2,12 +2,65 @@
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include <algorithm>
 #include <cmath>
 
 namespace krys::boo
 {
+  ScrollbarsController &ScrollableArea::GetScrollbarsController() const noexcept
+  {
+    if (!_scrollbarsController)
+    {
+      _scrollbarsController = CreateUnique<ScrollbarsController>();
+    }
+    return *_scrollbarsController;
+  }
+
+  void ScrollableArea::DidAddScrollbar(Scrollbar *scrollbar, ScrollbarOrientation orientation) noexcept
+  {
+    if (scrollbar)
+    {
+      GetScrollbarsController().DidAddScrollbar(*scrollbar, orientation);
+    }
+  }
+
+  void ScrollableArea::WillRemoveScrollbar(Scrollbar &scrollbar, ScrollbarOrientation orientation) noexcept
+  {
+    GetScrollbarsController().WillRemoveScrollbar(scrollbar, orientation);
+  }
+
+  void ScrollableArea::MouseEnteredContentArea() const noexcept
+  {
+    GetScrollbarsController().MouseEnteredContentArea();
+  }
+
+  void ScrollableArea::MouseExitedContentArea() const noexcept
+  {
+    GetScrollbarsController().MouseExitedContentArea();
+  }
+
+  void ScrollableArea::MouseMovedInContentArea() const noexcept
+  {
+    GetScrollbarsController().MouseMovedInContentArea();
+  }
+
+  void ScrollableArea::ContentAreaDidShow() const noexcept
+  {
+    GetScrollbarsController().ContentAreaDidShow();
+  }
+
+  void ScrollableArea::ContentAreaDidHide() const noexcept
+  {
+    GetScrollbarsController().ContentAreaDidHide();
+  }
+
+  void ScrollableArea::LockOverlayScrollbarStateToHidden(bool shouldLockState) const noexcept
+  {
+    GetScrollbarsController().LockOverlayScrollbarStateToHidden(shouldLockState);
+  }
+
   void ScrollableArea::ScrollbarWidthChanged() noexcept
   {
     for (auto *scrollbar : {HorizontalScrollbar(), VerticalScrollbar()})
@@ -196,8 +249,7 @@ namespace krys::boo
     SetScrollOffset(ScrollOffsetFromPosition(position));
 
     // Tell the scrollbars to update their thumb postions.
-    // FIXME: Invalidate overlay scrollbars, and notify the scrollbars controller and scroll anchoring, once
-    // there are any.
+    // FIXME: Scroll anchoring, once there is any.
     if (_scrollAnimator)
     {
       _scrollAnimator->UpdateSnapTargets();
@@ -213,6 +265,8 @@ namespace krys::boo
 
     if (GetScrollPosition() != oldPosition)
     {
+      // Scrolling shows the overlay scrollbars.
+      GetScrollbarsController().NotifyContentAreaScrolled();
       UpdateAnchorPositionedAfterScroll();
     }
   }

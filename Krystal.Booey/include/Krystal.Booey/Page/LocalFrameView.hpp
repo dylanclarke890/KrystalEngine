@@ -510,6 +510,8 @@ namespace krys::boo
     /// @brief Whether the viewport's scrollbars are dark: the root's `color-scheme` where it sets one, or
     /// else the document's.
     KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept override;
+    /// @brief Calls @p function with the view and every scroller and list box in it.
+    void ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept;
     /// @brief Repaints the scrollbars of the view and of every scroller and list box in it, for a change in
     /// the page's dark appearance.
     void InvalidateScrollbarsForAllScrollableAreas() noexcept;
@@ -602,8 +604,7 @@ namespace krys::boo
     KRYS_NODISCARD bool UseSlowRepaints() const noexcept;
 
     /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates; only the
-    /// node to draw and its descendants, if there's one.
-    /// FIXME: The overlay scrollbars aren't ported.
+    /// node to draw and its descendants, if there's one. Overlay scrollbars paint last, over the content.
     void PaintContents(GraphicsContext &, const IntRect &dirtyRect) noexcept;
 
     /// @brief Paints only @p node and its descendants from now on, or everything if it's null.

@@ -2,10 +2,17 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
+#include <chrono>
 
 namespace krys::boo::tests
 {
@@ -280,5 +287,97 @@ namespace krys::boo::tests
       (void)fixture.Painted();
       CHECK(ScrollableAreaOf(fixture, u8"box")->UseDarkAppearanceForScrollbars());
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderLayerScrollableArea: overlay scrollbars take no space and fade",
+                   "[Rendering][RenderLayerScrollableArea][ScrollbarsController]")
+  {
+    using namespace std::chrono_literals;
+    ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
+    auto classic = MakeScopeExit([] { ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(false); });
+
+    ResolverFixture fixture {
+      u8R"html(<!DOCTYPE html><div id=box style="overflow: scroll; width: 100px; height: 100px">
+      <div style="width: 300px; height: 300px"></div></div>)html"};
+    fixture.Document->UpdateStyleIfNeeded();
+    (void)fixture.Document->UpdateLayout();
+    auto &loop = html::EventLoop::Current();
+    auto &area = *ScrollableAreaOf(fixture, u8"box");
+    REQUIRE(area.VerticalScrollbar());
+    auto &scrollbar = *area.VerticalScrollbar();
+    CHECK(scrollbar.IsOverlayScrollbar());
+    CHECK(BoxOf(fixture, u8"box").VerticalScrollbarWidth() == 0);
+    CHECK(BoxOf(fixture, u8"box").ContentBoxWidth() == 100);
+
+    // A new scrollbar shows, then fades out after two seconds, over a second.
+    CHECK(scrollbar.Opacity() == 1);
+    loop.Run(loop.Now() + 2'500ms);
+    CHECK(scrollbar.Opacity() > 0);
+    CHECK(scrollbar.Opacity() < 1);
+    loop.Run(loop.Now() + 1s);
+    CHECK(scrollbar.Opacity() == 0);
+
+    SECTION("the mouse moving over the area shows it")
+    {
+      area.MouseMovedInContentArea();
+      loop.Run(loop.Now() + 1s);
+      CHECK(scrollbar.Opacity() == 1);
+      loop.Run(loop.Now() + 3'100ms);
+      CHECK(scrollbar.Opacity() == 0);
+    }
+
+    SECTION("scrolling shows it")
+    {
+      (void)area.ScrollToOffset({0, 50});
+      loop.Run(loop.Now() + 1s);
+      CHECK(scrollbar.Opacity() == 1);
+    }
+
+    SECTION("hiding the page hides it at once")
+    {
+      area.MouseMovedInContentArea();
+      loop.Run(loop.Now() + 1s);
+      area.ContentAreaDidHide();
+      CHECK(scrollbar.Opacity() == 0);
+    }
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture,
+    "RenderLayerScrollableArea: overlay scrollbars paint over the content, and show for the mouse",
+    "[Rendering][RenderLayerScrollableArea][ScrollbarsController]")
+  {
+    using namespace std::chrono_literals;
+    ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
+    auto classic = MakeScopeExit([] { ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(false); });
+
+    // The child has a layer of its own, which covers where the scrollbar is.
+    PaintFixture fixture(
+      u8"<!DOCTYPE html><style>body { margin: 0 }</style>"
+      u8"<div id=box style='overflow: scroll; width: 100px; height: 100px; scrollbar-color: red "
+      u8"blue'><div style='position: relative; width: 300px; height: 300px; background: lime'>"
+      u8"</div></div>",
+      {200, 100}, true);
+    constexpr utf8_stringview Thumb = u8"(color #FF0000)";
+    constexpr utf8_stringview Child = u8"(color #00FF00)";
+    auto &loop = html::EventLoop::Current();
+
+    auto painted = fixture.Painted();
+    REQUIRE(painted.find(Child) != utf8_string::npos);
+    REQUIRE(painted.find(Thumb) != utf8_string::npos);
+    CHECK(painted.find(Thumb) > painted.find(Child));
+
+    // Faded out, it isn't drawn.
+    loop.Run(loop.Now() + 3'100ms);
+    CHECK(fixture.Painted().find(Thumb) == utf8_string::npos);
+
+    // The mouse coming over the scroller shows it.
+    auto move = PlatformMouseEvent(DoublePoint(50, 50), DoublePoint(50, 50), MouseButton::None,
+                                   PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now());
+    (void)fixture.Frame->GetEventHandler().MouseMoved(move);
+    loop.Run(loop.Now() + 1s);
+    CHECK(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar()->Opacity() == 1);
+    CHECK(fixture.Painted().find(Thumb) != utf8_string::npos);
   }
 }

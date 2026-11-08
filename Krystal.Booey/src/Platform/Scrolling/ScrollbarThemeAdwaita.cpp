@@ -54,11 +54,14 @@ namespace krys::boo
     constexpr auto ThumbColorDark = SRGBA<uint8> {255, 255, 255, 51};
   }
 
+  void ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(bool overlay) noexcept
+  {
+    static_cast<ScrollbarThemeAdwaita &>(Theme())._usesOverlayScrollbars = overlay;
+  }
+
   bool ScrollbarThemeAdwaita::UsesOverlayScrollbars() const noexcept
   {
-    // Classic scrollbars (decided): overlay scrollbars fade in and out, which needs animations.
-    // FIXME: Overlay scrollbars.
-    return false;
+    return _usesOverlayScrollbars;
   }
 
   int32

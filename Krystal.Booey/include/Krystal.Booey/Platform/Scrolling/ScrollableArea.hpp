@@ -18,9 +18,10 @@ namespace krys::boo
 {
   class PlatformWheelEvent;
   class ScrollAnimator;
+  class ScrollbarsController;
   /// @brief Something that scrolls: a scroll position within its contents, its scroll origin, and its
-  /// scrollbars.
-  // FIXME: The scrollbars controller, scroll anchoring and compositing layers.
+  /// scrollbars, whose overlay scrollbars its scrollbars controller shows and hides.
+  // FIXME: Scroll anchoring and compositing layers.
   class ScrollableArea : public CanMakeWeakPtr<ScrollableArea>, public CanMakeCheckedPtr<ScrollableArea>
   {
     KRYS_NON_COPY_MOVABLE(ScrollableArea);
@@ -60,6 +61,7 @@ namespace krys::boo
     bool _isAwaitingScrollend {false};
     bool _isTouchScrollInProgress {false};
     UniquePtr<ScrollAnimator> _scrollAnimator;
+    mutable UniquePtr<ScrollbarsController> _scrollbarsController;
 
   public:
     KRYS_NODISCARD virtual bool IsScrollView() const noexcept
@@ -201,12 +203,21 @@ namespace krys::boo
     KRYS_NODISCARD bool AllowsHorizontalScrolling() const noexcept;
     KRYS_NODISCARD bool AllowsVerticalScrolling() const noexcept;
 
-    virtual void DidAddScrollbar(Scrollbar *, ScrollbarOrientation) noexcept
-    {
-    }
-    virtual void WillRemoveScrollbar(Scrollbar &, ScrollbarOrientation) noexcept
-    {
-    }
+    /// @brief The scrollbars controller, made when it's first wanted.
+    KRYS_NODISCARD ScrollbarsController &GetScrollbarsController() const noexcept;
+
+    void DidAddScrollbar(Scrollbar *scrollbar, ScrollbarOrientation orientation) noexcept;
+    void WillRemoveScrollbar(Scrollbar &scrollbar, ScrollbarOrientation orientation) noexcept;
+
+    /// @brief The mouse entered, left or moved over the area, which shows its overlay scrollbars.
+    void MouseEnteredContentArea() const noexcept;
+    void MouseExitedContentArea() const noexcept;
+    void MouseMovedInContentArea() const noexcept;
+    /// @brief The page showing the area was shown or hidden.
+    void ContentAreaDidShow() const noexcept;
+    void ContentAreaDidHide() const noexcept;
+    /// @brief Keeps the overlay scrollbars hidden, or lets them show again.
+    void LockOverlayScrollbarStateToHidden(bool shouldLockState) const noexcept;
 
     virtual void ContentsResized() noexcept
     {
@@ -353,7 +364,8 @@ namespace krys::boo
     }
 
     // The scrollbars tell the scrollable area what the mouse does to them.
-    // FIXME: The scrollbars controller (overlay scrollbars, hover feedback), once there is one.
+    // The theme repaints a scrollbar the mouse enters or leaves (InvalidateOnMouseEnterExit), so these do
+    // nothing.
     virtual void MouseEnteredScrollbar(Scrollbar *) const noexcept
     {
     }

@@ -4249,11 +4249,12 @@ namespace krys::boo
              || (overflow == Overflow::Hidden && !gutter.IsAuto());
     };
 
-    // FIXME: Overlay scrollbars (canUseOverlayScrollbars).
+    // Overlay scrollbars take no space, so reserve none.
     if (IsHorizontalWritingMode()
         && (Style().OverflowY() == Overflow::Scroll
             || shouldIncludeScrollbarGutter(Style().GetScrollbarGutter(), HasScrollableOverflowY(),
-                                            Style().OverflowY())))
+                                            Style().OverflowY()))
+        && !CanUseOverlayScrollbars())
     {
       return Style().GetScrollbarGutter().IsStableBothEdges() ? VerticalScrollbarWidth() * 2
                                                               : VerticalScrollbarWidth();
@@ -4262,7 +4263,8 @@ namespace krys::boo
     if (!IsHorizontalWritingMode()
         && (Style().OverflowX() == Overflow::Scroll
             || shouldIncludeScrollbarGutter(Style().GetScrollbarGutter(), HasScrollableOverflowX(),
-                                            Style().OverflowX())))
+                                            Style().OverflowX()))
+        && !CanUseOverlayScrollbars())
     {
       return Style().GetScrollbarGutter().IsStableBothEdges() ? HorizontalScrollbarHeight() * 2
                                                               : HorizontalScrollbarHeight();

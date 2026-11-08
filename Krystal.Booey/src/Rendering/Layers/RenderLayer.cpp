@@ -5992,7 +5992,10 @@ namespace krys::boo
         PaintList(PositiveZOrderLayers(), currentContext, localPaintingInfo, localPaintFlags);
       }
 
-      // FIXME: Overlay scrollbars (paintOverflowControlsForFragments).
+      if (_scrollableArea && isPaintingOverlayScrollbars && _scrollableArea->HasScrollbars())
+      {
+        PaintOverflowControlsForFragments(layerFragments, currentContext, localPaintingInfo);
+      }
 
       if (filterContext)
       {
@@ -6195,6 +6198,29 @@ namespace krys::boo
                           paintBehavior, subtreePaintRootForRenderer,
                           &localPaintingInfo.RootLayer->Renderer(), this);
       Renderer().Paint(paintInfo, PaintOffsetForRenderer(fragment, localPaintingInfo));
+    }
+  }
+
+  void RenderLayer::PaintOverflowControlsForFragments(const LayerFragments &layerFragments,
+                                                      GraphicsContext &context,
+                                                      const LayerPaintingInfo &localPaintingInfo) noexcept
+  {
+    krys_debug_assert(_scrollableArea);
+
+    for (const auto &fragment : layerFragments)
+    {
+      if (fragment.DirtyBackgroundRect().IsEmpty())
+      {
+        continue;
+      }
+
+      GraphicsContextStateSaver stateSaver(context, false);
+      ClipToRect(context, stateSaver, localPaintingInfo, localPaintingInfo.PaintBehavior,
+                 fragment.DirtyBackgroundRect());
+      _scrollableArea->PaintOverflowControls(
+        context, localPaintingInfo.PaintBehavior,
+        RoundedIntPoint(PaintOffsetForRenderer(fragment, localPaintingInfo)),
+        SnappedIntRect(fragment.DirtyBackgroundRect().Rect()), true);
     }
   }
 

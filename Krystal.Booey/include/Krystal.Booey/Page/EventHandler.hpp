@@ -572,6 +572,12 @@ namespace krys::boo
     void UpdateMouseEventTargetNode(dom::DOMStringAtom eventType, dom::Node *targetNode,
                                     const PlatformMouseEvent &platformMouseEvent,
                                     FireMouseOverOut fireMouseOverOut) noexcept;
+    /// @brief The scroller, list box or frame view that scrolls @p node.
+    KRYS_NODISCARD ScrollableArea *EnclosingScrollableArea(dom::Node *node) const noexcept;
+    /// @brief Tells the scrollable areas the mouse moved over, entered or left, which show their overlay
+    /// scrollbars.
+    void NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType, dom::Element *lastElementUnderMouse,
+                                            dom::Element *elementUnderMouse) noexcept;
     void ClearElementUnderMouse() noexcept;
     KRYS_NODISCARD bool IsElementAnAncestorOfLastElementUnderMouse(dom::Element *element) const noexcept;
 

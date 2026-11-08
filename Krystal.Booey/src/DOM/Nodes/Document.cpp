@@ -3275,8 +3275,14 @@ namespace krys::boo::dom
       }
     }
 
-    // FIXME: The page's overlay scrollbars and the composited layers' pending update, once there are those,
-    // and media elements' playback, with media.
+    // The overlay scrollbars stay hidden while the document is suspended.
+    if (RefPtr<LocalFrameView> view = ShareRefPtr(View()))
+    {
+      view->ForEachScrollableArea([](ScrollableArea &area) { area.LockOverlayScrollbarStateToHidden(true); });
+    }
+
+    // FIXME: The composited layers' pending update, once there is one, and media elements' playback, with
+    // media.
     SuspendScheduledTasks(reason);
 
     // The frame's timers: the layout, the animations and autoscrolling stop.
@@ -3312,6 +3318,12 @@ namespace krys::boo::dom
     }
 
     ResumeScheduledTasks(reason);
+
+    if (RefPtr<LocalFrameView> view = ShareRefPtr(View()))
+    {
+      view->ForEachScrollableArea([](ScrollableArea &area)
+                                  { area.LockOverlayScrollbarStateToHidden(false); });
+    }
 
     if (_fontLoader)
     {

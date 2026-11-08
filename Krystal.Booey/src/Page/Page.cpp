@@ -454,6 +454,8 @@ namespace krys::boo
       if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
       {
         view->Show();
+        // Shown, the overlay scrollbars show, then fade.
+        view->ForEachScrollableArea([](ScrollableArea &area) { area.ContentAreaDidShow(); });
       }
 
       ForEachDocument(
@@ -499,6 +501,8 @@ namespace krys::boo
       if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
       {
         view->Hide();
+        // Hidden, the overlay scrollbars hide at once.
+        view->ForEachScrollableArea([](ScrollableArea &area) { area.ContentAreaDidHide(); });
       }
     }
 

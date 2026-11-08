@@ -24,6 +24,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
@@ -837,11 +838,126 @@ namespace krys::boo
       request, DocumentPointForWindowPoint(*frame, mouseEvent.Position()), mouseEvent);
   }
 
+  ScrollableArea *EventHandler::EnclosingScrollableArea(dom::Node *node) const noexcept
+  {
+    for (auto *ancestor = node; ancestor; ancestor = ancestor->ParentOrShadowHostNode())
+    {
+      if (Is<html::HTMLHtmlElement>(*ancestor) || Is<dom::Document>(*ancestor))
+      {
+        break;
+      }
+
+      auto *renderer = ancestor->Renderer();
+      if (!renderer)
+      {
+        continue;
+      }
+
+      if (auto *renderListBox = DynamicDowncast<RenderListBox>(*renderer))
+      {
+        auto *scrollableArea = static_cast<ScrollableArea *>(renderListBox);
+        if (scrollableArea->IsScrollableOrRubberbandable())
+        {
+          return scrollableArea;
+        }
+      }
+
+      auto *layer = renderer->EnclosingLayer();
+      if (!layer)
+      {
+        return nullptr;
+      }
+
+      if (auto *scrollableLayer = layer->EnclosingScrollableLayer(IncludeSelf, CrossFrameBoundaries::No))
+      {
+        if (!scrollableLayer->IsRenderViewLayer())
+        {
+          return scrollableLayer->GetScrollableArea();
+        }
+      }
+    }
+
+    return _frame.View();
+  }
+
+  void EventHandler::NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType,
+                                                        dom::Element *lastElementUnderMouse,
+                                                        dom::Element *elementUnderMouse) noexcept
+  {
+    auto *frameView = _frame.View();
+    if (!frameView)
+    {
+      return;
+    }
+
+    auto *scrollableAreaForLastNode = EnclosingScrollableArea(lastElementUnderMouse);
+    auto *scrollableAreaForNodeUnderMouse = EnclosingScrollableArea(elementUnderMouse);
+
+    if (!lastElementUnderMouse != !elementUnderMouse)
+    {
+      if (elementUnderMouse)
+      {
+        if (scrollableAreaForNodeUnderMouse != frameView)
+        {
+          frameView->MouseEnteredContentArea();
+        }
+        if (scrollableAreaForNodeUnderMouse)
+        {
+          scrollableAreaForNodeUnderMouse->MouseEnteredContentArea();
+        }
+      }
+      else
+      {
+        if (scrollableAreaForLastNode)
+        {
+          scrollableAreaForLastNode->MouseExitedContentArea();
+        }
+        if (scrollableAreaForLastNode != frameView)
+        {
+          frameView->MouseExitedContentArea();
+        }
+      }
+      return;
+    }
+
+    if (!scrollableAreaForLastNode && !scrollableAreaForNodeUnderMouse)
+    {
+      return;
+    }
+
+    // FIXME: Nested scrollable areas: this needs the relationship between the two areas.
+    bool movedBetweenScrollableAreas = scrollableAreaForLastNode && scrollableAreaForNodeUnderMouse
+                                       && scrollableAreaForLastNode != scrollableAreaForNodeUnderMouse;
+    if (eventType == EventNames::MouseMove)
+    {
+      frameView->MouseMovedInContentArea();
+
+      if (!movedBetweenScrollableAreas && scrollableAreaForNodeUnderMouse
+          && scrollableAreaForNodeUnderMouse != frameView)
+      {
+        scrollableAreaForNodeUnderMouse->MouseMovedInContentArea();
+      }
+    }
+
+    if (!movedBetweenScrollableAreas)
+    {
+      return;
+    }
+
+    if (scrollableAreaForLastNode && scrollableAreaForLastNode != frameView)
+    {
+      scrollableAreaForLastNode->MouseExitedContentArea();
+    }
+    if (scrollableAreaForNodeUnderMouse && scrollableAreaForNodeUnderMouse != frameView)
+    {
+      scrollableAreaForNodeUnderMouse->MouseEnteredContentArea();
+    }
+  }
+
   void EventHandler::UpdateMouseEventTargetNode(dom::DOMStringAtom eventType, dom::Node *targetNode,
                                                 const PlatformMouseEvent &platformMouseEvent,
                                                 FireMouseOverOut fireMouseOverOut) noexcept
   {
-    (void)eventType;
     Ref frame = ShareRef(_frame);
 
     // If we're capturing, we always go right to that element.
@@ -862,7 +978,7 @@ namespace krys::boo
     // Fire mouseout/mouseover if the mouse has shifted to a different node.
     if (fireMouseOverOut == FireMouseOverOut::Yes)
     {
-      // FIXME: Telling scrollable areas about the mouse (notifyScrollableAreasOfMouseEvents).
+      NotifyScrollableAreasOfMouseEvents(eventType, _lastElementUnderMouse.get(), _elementUnderMouse.get());
 
       if (_lastElementUnderMouse && &_lastElementUnderMouse->NodeDocument() != frame->Document())
       {

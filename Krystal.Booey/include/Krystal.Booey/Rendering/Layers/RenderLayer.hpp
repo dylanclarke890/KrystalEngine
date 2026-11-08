@@ -1808,6 +1808,9 @@ namespace krys::boo
     void PaintOutlineForFragments(const LayerFragments &, GraphicsContext &, const LayerPaintingInfo &,
                                   EnumSet<boo::PaintBehavior>,
                                   RenderObject *subtreePaintRootForRenderer) noexcept;
+    /// @brief The overlay scrollbars' second pass: paints the scrollbars in each fragment.
+    void PaintOverflowControlsForFragments(const LayerFragments &, GraphicsContext &,
+                                           const LayerPaintingInfo &) noexcept;
     void PaintMaskForFragments(const LayerFragments &, GraphicsContext &, const LayerPaintingInfo &,
                                EnumSet<boo::PaintBehavior>,
                                RenderObject *subtreePaintRootForRenderer) noexcept;

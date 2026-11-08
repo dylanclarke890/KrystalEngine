@@ -1392,7 +1392,8 @@ namespace krys::boo
   void RenderLayerScrollableArea::PaintOverflowControls(GraphicsContext &context,
                                                         EnumSet<PaintBehavior> paintBehavior,
                                                         const IntPoint &paintOffset,
-                                                        const IntRect &damageRect) noexcept
+                                                        const IntRect &damageRect,
+                                                        bool paintingOverlayControls) noexcept
   {
     // Don't do anything if we have no overflow.
     auto &renderer = _layer.Renderer();
@@ -1406,13 +1407,53 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Overlay scrollbars paint in a second pass through the layer tree, once there are overlay
-    // scrollbars.
+    // Overlay scrollbars paint in a second pass through the layer tree so that they will paint on top of
+    // everything else. If this is the normal painting pass, paintingOverlayControls will be false, and we
+    // should just tell the root layer that there are overlay scrollbars that need to be painted. That will
+    // cause the second pass through the layer tree to run, and we'll paint the scrollbars then. In the
+    // meantime, cache the paint offset so that the second pass doesn't need to re-enter the render tree to
+    // get it right.
+    if (HasOverlayScrollbars() && !paintingOverlayControls)
+    {
+      _cachedOverlayScrollbarOffset = paintOffset;
+
+      // It's not necessary to do the second pass if the scrollbars paint into layers.
+      if ((_hBar && LayerForHorizontalScrollbar()) || (_vBar && LayerForVerticalScrollbar()))
+      {
+        return;
+      }
+      IntRect localDamageRect = damageRect;
+      localDamageRect.MoveBy(-paintOffset);
+      if (!OverflowControlsIntersectRect(localDamageRect))
+      {
+        return;
+      }
+
+      auto *paintingRoot = _layer.EnclosingCompositingLayer();
+      if (!paintingRoot)
+      {
+        paintingRoot = renderer.View().Layer();
+      }
+
+      if (auto *scrollableArea = paintingRoot->GetScrollableArea())
+      {
+        scrollableArea->SetContainsDirtyOverlayScrollbars(true);
+      }
+      return;
+    }
+
+    // Classic scrollbars painted in the first pass.
+    if (paintingOverlayControls && !HasOverlayScrollbars())
+    {
+      return;
+    }
+
+    IntPoint adjustedPaintOffset = paintingOverlayControls ? _cachedOverlayScrollbarOffset : paintOffset;
 
     // Move the scrollbar widgets if necessary. We normally move and resize widgets during layout, but
     // sometimes widgets can move without layout occurring (most notably when you scroll a document that
     // contains fixed positioned elements).
-    (void)PositionOverflowControls(ToIntSize(paintOffset));
+    (void)PositionOverflowControls(ToIntSize(adjustedPaintOffset));
 
     // Now that we're sure the scrollbars are in the right place, paint them.
     if (RefPtr<Scrollbar> hBar = _hBar;
@@ -1436,7 +1477,7 @@ namespace krys::boo
 
     // We fill our scroll corner with white if we have a scrollbar that doesn't run all the way up to the edge
     // of the box.
-    PaintScrollCorner(context, paintOffset, damageRect);
+    PaintScrollCorner(context, adjustedPaintOffset, damageRect);
 
     // Paint our resizer last, since it sits on top of the scroll corner.
     PaintResizer(context, LayoutPoint(paintOffset), LayoutRect(damageRect));
@@ -1537,6 +1578,23 @@ namespace krys::boo
     {
       ScrollbarTheme::Theme().PaintScrollCorner(*this, context, absRect);
     }
+  }
+
+  void RenderLayerScrollableArea::PaintOverlayScrollbars(GraphicsContext &context,
+                                                         const LayoutRect &damageRect,
+                                                         EnumSet<PaintBehavior> paintBehavior,
+                                                         RenderObject *subtreePaintRoot) noexcept
+  {
+    if (!_containsDirtyOverlayScrollbars)
+    {
+      return;
+    }
+
+    RenderLayer::LayerPaintingInfo paintingInfo(&_layer, LayoutRect(EnclosingIntRect(damageRect)),
+                                                paintBehavior, LayoutSize(), subtreePaintRoot);
+    _layer.PaintLayer(context, paintingInfo, RenderLayer::PaintLayerFlag::PaintingOverlayScrollbars);
+
+    _containsDirtyOverlayScrollbars = false;
   }
 
   bool RenderLayerScrollableArea::HitTestOverflowControls(HitTestResult &result,

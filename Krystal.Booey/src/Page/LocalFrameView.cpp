@@ -282,7 +282,6 @@ namespace krys::boo
   IntRect LocalFrameView::RectToCopyOnScroll() const noexcept
   {
     IntRect scrollViewRect(0, 0, VisibleWidth(), VisibleHeight());
-    // FIXME: Overlay scrollbars, once there are any.
     if (ShouldPlaceVerticalScrollbarOnLeft() && _verticalScrollbar)
     {
       scrollViewRect.Move(_verticalScrollbar->OccupiedWidth(), 0);
@@ -1186,9 +1185,9 @@ namespace krys::boo
     return document && document->UseDarkAppearance(nullptr);
   }
 
-  void LocalFrameView::InvalidateScrollbarsForAllScrollableAreas() noexcept
+  void LocalFrameView::ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept
   {
-    ScrollbarAppearanceChanged();
+    function(*this);
     auto *renderView = GetRenderViewForUpdate();
     if (!renderView)
     {
@@ -1198,13 +1197,18 @@ namespace krys::boo
     {
       if (auto *listBox = DynamicDowncast<RenderListBox>(box))
       {
-        listBox->ScrollbarAppearanceChanged();
+        function(*listBox);
       }
       else if (auto *layer = box.Layer(); layer && layer->GetScrollableArea())
       {
-        layer->GetScrollableArea()->ScrollbarAppearanceChanged();
+        function(*layer->GetScrollableArea());
       }
     }
+  }
+
+  void LocalFrameView::InvalidateScrollbarsForAllScrollableAreas() noexcept
+  {
+    ForEachScrollableArea([](ScrollableArea &area) { area.ScrollbarAppearanceChanged(); });
   }
 
   OverscrollBehavior LocalFrameView::HorizontalOverscrollBehavior() const noexcept
@@ -1475,6 +1479,11 @@ namespace krys::boo
     RenderObject *renderer = _nodeToDraw ? _nodeToDraw->Renderer() : nullptr;
     RenderLayer *rootLayer = renderView->Layer();
     rootLayer->Paint(context, LayoutRect(dirtyRect), LayoutSize(), _paintBehavior, renderer);
+    if (auto *scrollableRootLayer = rootLayer->GetScrollableArea();
+        scrollableRootLayer && scrollableRootLayer->ContainsDirtyOverlayScrollbars())
+    {
+      scrollableRootLayer->PaintOverlayScrollbars(context, LayoutRect(dirtyRect), _paintBehavior, renderer);
+    }
 
     _paintBehavior = paintBehavior;
     _isPainting = false;

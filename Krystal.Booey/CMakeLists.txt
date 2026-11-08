@@ -2551,6 +2551,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollbarThemeComposite.hpp
+  include/Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp
   include/Krystal.Booey/Platform/SharedBuffer.hpp
   include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
@@ -2601,6 +2602,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Scrolling/ScrollbarTheme.cpp
   src/Platform/Scrolling/ScrollbarThemeAdwaita.cpp
   src/Platform/Scrolling/ScrollbarThemeComposite.cpp
+  src/Platform/Scrolling/ScrollbarsController.cpp
   src/Platform/SimpleCaretAnimator.cpp
   src/Platform/ThemeAdwaita.cpp
   src/Platform/ThreadTimers.cpp

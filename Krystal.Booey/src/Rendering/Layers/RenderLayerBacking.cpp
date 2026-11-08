@@ -3651,8 +3651,12 @@ namespace krys::boo
       {
         layer.PaintLayerContents(context, paintingInfo, paintFlags);
 
-        // FIXME: Dirty overlay scrollbars (containsDirtyOverlayScrollbars), once there are overlay
-        // scrollbars.
+        if (auto *scrollableArea = layer.GetScrollableArea();
+            scrollableArea && scrollableArea->ContainsDirtyOverlayScrollbars())
+        {
+          layer.PaintLayerContents(context, paintingInfo,
+                                   paintFlags | RenderLayer::PaintLayerFlag::PaintingOverlayScrollbars);
+        }
       }
       else
       {
