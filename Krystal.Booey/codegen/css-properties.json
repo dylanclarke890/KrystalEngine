@@ -9835,23 +9835,6 @@
         "url": "https://www.w3.org/TR/css-color-adjust/#print-color-adjust"
       }
     },
-    "-internal-rtl-ordering": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "logical",
-      "values": ["logical", "visual"],
-      "codegen-properties": {
-        "internal-only": true,
-        "render-style-initial": "initialRTLOrdering",
-        "render-style-setter": "setRTLOrdering",
-        "render-style-storage-path": ["m_inheritedFlags"],
-        "render-style-storage-container": "struct",
-        "render-style-storage-kind": "enum",
-        "render-style-type": "WebCore::Order",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
     "text-combine-upright": {
       "animation-type": "not animatable",
       "inherited": true,

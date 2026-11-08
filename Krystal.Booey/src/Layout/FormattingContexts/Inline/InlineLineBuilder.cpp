@@ -1246,7 +1246,7 @@ namespace krys::boo::layout
                             {},
                             ExpansionBehavior::DefaultBehavior(),
                             TextDirection::RTL,
-                            style.RtlOrdering() == Order::Visual,
+                            false /* directionalOverride */,
                             characterScanForCodePath};
     // The advance of each byte: a glyph's advance goes to the first byte of its character.
     auto glyphAdvances = ComplexTextController::GlyphAdvancesForTextRun(style.GetFontCascade(), textRun);

@@ -641,9 +641,6 @@ namespace krys::boo
         uint8 BorderCollapse : 1;
         uint8 CaptionSide : 2;
 
-        // -webkit- Stuff = 1 bit
-        uint8 RtlOrdering : 1;
-
         // Color Stuff = 2 bits
         uint8 HasExplicitlySetColor : 1;
         uint8 PrintColorAdjust : 1;

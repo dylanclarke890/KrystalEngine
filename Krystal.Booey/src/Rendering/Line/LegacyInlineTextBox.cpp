@@ -199,7 +199,7 @@ namespace krys::boo
                      0,
                      ExpansionBehavior::ForbidAll(),
                      Direction(),
-                     style.RtlOrdering() == Order::Visual,
+                     false /* directionalOverride */,
                      !Renderer().CanUseSimpleFontCodePath()};
     textRun.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
     return textRun;

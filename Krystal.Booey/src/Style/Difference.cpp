@@ -567,8 +567,7 @@ namespace krys::boo::style
       }
     }
 
-    if (a.GetInheritedFlags().RtlOrdering != b.GetInheritedFlags().RtlOrdering
-        || a.GetNonInheritedFlags().Position != b.GetNonInheritedFlags().Position
+    if (a.GetNonInheritedFlags().Position != b.GetNonInheritedFlags().Position
         || a.GetNonInheritedFlags().Floating != b.GetNonInheritedFlags().Floating
         || a.GetNonInheritedFlags().OriginalDisplay != b.GetNonInheritedFlags().OriginalDisplay)
     {

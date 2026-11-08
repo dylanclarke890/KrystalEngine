@@ -391,7 +391,6 @@ input {
     background-color: Canvas;
     border: 2px inset gray;
     padding: 1px;
-    -internal-rtl-ordering: logical;
     user-select: text;
     cursor: auto;
 }
@@ -530,7 +529,6 @@ textarea {
     color: CanvasText;
     background-color: Canvas;
     border: 1px solid;
-    -internal-rtl-ordering: logical;
     user-select: text;
     padding: 2px;
     resize: -internal-textarea-auto;
@@ -696,7 +694,6 @@ select {
     background-color: -internal-auto-base(Canvas, transparent);
     align-items: center;
     white-space: -internal-auto-base(pre, nowrap);
-    -internal-rtl-ordering: logical;
     cursor: default;
     display: -internal-auto-base(inline-block, inline-flex);
     gap: -internal-auto-base(normal, 0.5em);

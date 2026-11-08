@@ -210,13 +210,6 @@ namespace krys::boo
     }
   };
 
-  enum class VisualDirectionOverride : uint8
-  {
-    NoVisualOverride,
-    VisualLeftToRightOverride,
-    VisualRightToLeftOverride
-  };
-
   /// @brief An implementation of the Unicode Bidi Algorithm (http://unicode.org/reports/tr9).
   /// @note The iterator steps by code point. Its NextOffset() is the offset just past the code point it's at,
   /// which ends a run.
@@ -347,9 +340,7 @@ namespace krys::boo
 
     bool CommitExplicitEmbedding() noexcept;
 
-    void CreateBidiRunsForLine(const Iterator &end,
-                               VisualDirectionOverride = VisualDirectionOverride::NoVisualOverride,
-                               bool hardLineBreak = false) noexcept;
+    void CreateBidiRunsForLine(const Iterator &end, bool hardLineBreak = false) noexcept;
 
     KRYS_NODISCARD BidiRunList<Run> &Runs() noexcept
     {
@@ -743,31 +734,9 @@ namespace krys::boo
 
   template <typename Iterator, typename Run, typename DerivedClass>
   void BidiResolverBase<Iterator, Run, DerivedClass>::CreateBidiRunsForLine(const Iterator &end,
-                                                                            VisualDirectionOverride override,
                                                                             bool hardLineBreak) noexcept
   {
     krys_debug_assert(_direction == U_OTHER_NEUTRAL);
-
-    if (override != VisualDirectionOverride::NoVisualOverride)
-    {
-      _emptyRun = false;
-      _sor = _current;
-      _eor = Iterator();
-      while (_current != end && !_current.AtEnd())
-      {
-        _eor = _current;
-        Increment();
-      }
-      _direction =
-        override == VisualDirectionOverride::VisualLeftToRightOverride ? U_LEFT_TO_RIGHT : U_RIGHT_TO_LEFT;
-      AppendRun();
-      _runs.SetLogicallyLastRun(_runs.LastRun());
-      if (override == VisualDirectionOverride::VisualRightToLeftOverride && _runs.RunCount())
-      {
-        _runs.ReverseRuns(0, _runs.RunCount() - 1);
-      }
-      return;
-    }
 
     _emptyRun = true;
 

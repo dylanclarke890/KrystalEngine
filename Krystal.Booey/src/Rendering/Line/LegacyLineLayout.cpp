@@ -112,14 +112,13 @@ namespace krys::boo
 
     // FIXME: BidiResolver should have this logic.
     void ConstructBidiRunsForSegment(InlineBidiResolver &topResolver, BidiRunList<BidiRun> &bidiRuns,
-                                     const LegacyInlineIterator &endOfRuns,
-                                     VisualDirectionOverride override) noexcept
+                                     const LegacyInlineIterator &endOfRuns) noexcept
     {
       // FIXME: We should pass a BidiRunList into createBidiRunsForLine instead
       // of the resolver owning the runs.
       krys_debug_assert(&topResolver.Runs() == &bidiRuns);
       krys_debug_assert(topResolver.Position() != endOfRuns);
-      topResolver.CreateBidiRunsForLine(endOfRuns, override);
+      topResolver.CreateBidiRunsForLine(endOfRuns);
 
       while (!topResolver.IsolatedRuns().empty())
       {
@@ -164,7 +163,7 @@ namespace krys::boo
 
         // We stop at the next end of line; we may re-enter this isolate in the next call to
         // constructBidiRuns().
-        isolatedResolver.CreateBidiRunsForLine(endOfRuns, VisualDirectionOverride::NoVisualOverride);
+        isolatedResolver.CreateBidiRunsForLine(endOfRuns);
         // Note that we do not delete the runs from the resolver.
         // We're not guaranteed to get any BidiRuns in the previous step. If we don't, we allow the
         // placeholder itself to be turned into an InlineBox. We can't remove it here without potentially
@@ -604,12 +603,6 @@ namespace krys::boo
 
       if (!lineInfo.IsEmpty())
       {
-        VisualDirectionOverride override =
-          (styleToUse.RtlOrdering() == Order::Visual
-             ? (styleToUse.GetWritingMode().IsBidiLTR() ? VisualDirectionOverride::VisualLeftToRightOverride
-                                                        : VisualDirectionOverride::VisualRightToLeftOverride)
-             : VisualDirectionOverride::NoVisualOverride);
-
         if (styleToUse.GetUnicodeBidi() == UnicodeBidi::Plaintext && !resolver.Context()->Parent())
         {
           TextDirection direction = styleToUse.GetWritingMode().BidiDirection();
@@ -619,7 +612,7 @@ namespace krys::boo
         // FIXME: This ownership is reversed. We should own the BidiRunList and pass it to
         // createBidiRunsForLine.
         BidiRunList<BidiRun> &bidiRuns = resolver.Runs();
-        ConstructBidiRunsForSegment(resolver, bidiRuns, end, override);
+        ConstructBidiRunsForSegment(resolver, bidiRuns, end);
         krys_debug_assert(resolver.Position() == end);
 
         // Now that the runs have been ordered, we create the line boxes.

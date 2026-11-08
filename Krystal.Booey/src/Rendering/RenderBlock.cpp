@@ -837,14 +837,14 @@ namespace krys::boo
                                         ExpansionBehavior expansion, EnumSet<TextRunFlag> flags) noexcept
   {
     auto textDirection = TextDirection::LTR;
-    bool directionalOverride = style.RtlOrdering() == Order::Visual;
+    bool directionalOverride = false;
     if (flags.Contains(TextRunFlag::RespectDirection))
     {
       textDirection = style.GetWritingMode().BidiDirection();
     }
     if (flags.Contains(TextRunFlag::RespectDirectionOverride))
     {
-      directionalOverride |= IsOverride(style.GetUnicodeBidi());
+      directionalOverride = IsOverride(style.GetUnicodeBidi());
     }
 
     // The security disc characters (-webkit-text-security) were dropped, so the text is used as it is.

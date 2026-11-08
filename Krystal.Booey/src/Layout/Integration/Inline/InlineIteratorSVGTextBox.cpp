@@ -45,8 +45,6 @@ namespace krys::boo::inline_iterator
       return LayoutRect();
     }
 
-    auto &style = Renderer().Style();
-
     AffineTransform fragmentTransform;
     FloatRect selectionRect;
     uint32 fragmentStartPosition = 0;
@@ -62,8 +60,8 @@ namespace krys::boo::inline_iterator
         continue;
       }
 
-      FloatRect fragmentRect = SelectionRectForTextFragment(
-        Renderer(), Direction(), fragment, fragmentStartPosition, fragmentEndPosition, style);
+      FloatRect fragmentRect = SelectionRectForTextFragment(Renderer(), Direction(), fragment,
+                                                            fragmentStartPosition, fragmentEndPosition);
       fragment.BuildFragmentTransform(fragmentTransform);
       if (!fragmentTransform.IsIdentity())
       {

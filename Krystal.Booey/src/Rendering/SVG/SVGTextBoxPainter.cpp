@@ -60,7 +60,7 @@ namespace krys::boo
 
   FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &renderer, TextDirection direction,
                                          const SVGTextFragment &fragment, uint32 startPosition,
-                                         uint32 endPosition, const RenderStyle &style) noexcept
+                                         uint32 endPosition) noexcept
   {
     krys_debug_assert(startPosition < endPosition);
 
@@ -79,7 +79,7 @@ namespace krys::boo
 
     LayoutRect selectionRect {LayoutPoint(textOrigin),
                               LayoutSize(0, LayoutUnit(fragment.Height * scalingFactor))};
-    TextRun run = ConstructTextRun(renderer.Text(), direction, style, fragment);
+    TextRun run = ConstructTextRun(renderer.Text(), direction, fragment);
     scaledFont.AdjustSelectionRectForText(renderer.CanUseSimplifiedTextMeasuring().value_or(false), run,
                                           selectionRect, startPosition, endPosition);
     FloatRect snappedSelectionRect = SnapRectToDevicePixelsWithWritingDirection(
@@ -134,8 +134,6 @@ namespace krys::boo
       return;
     }
 
-    auto &style = parentRenderer.Style();
-
     auto [startPosition, endPosition] = SelectionStartEnd();
 
     uint32 fragmentStartPosition = 0;
@@ -162,8 +160,7 @@ namespace krys::boo
 
       _paintInfo.Context().SetFillColor(backgroundColor);
       _paintInfo.Context().FillRect(SelectionRectForTextFragment(Renderer(), _textBox.Direction(), fragment,
-                                                                 fragmentStartPosition, fragmentEndPosition,
-                                                                 style),
+                                                                 fragmentStartPosition, fragmentEndPosition),
                                     backgroundColor);
 
       _paintingResourceMode = {};
@@ -662,7 +659,7 @@ namespace krys::boo
     }
 
     // Fast path if there is no selection, just draw the whole chunk part using the regular style
-    TextRun textRun = ConstructTextRun(Renderer().Text(), _textBox.Direction(), style, fragment);
+    TextRun textRun = ConstructTextRun(Renderer().Text(), _textBox.Direction(), fragment);
     if (!hasSelection || startPosition >= endPosition)
     {
       PaintTextWithShadows(style, textRun, fragment, 0, fragment.Length);
@@ -690,14 +687,13 @@ namespace krys::boo
     }
   }
 
-  TextRun ConstructTextRun(utf8_stringview text, TextDirection direction, const RenderStyle &style,
+  TextRun ConstructTextRun(utf8_stringview text, TextDirection direction,
                            const SVGTextFragment &fragment) noexcept
   {
     TextRun run(text.substr(fragment.CharacterOffset, fragment.Length),
                 0, /* xPos, only relevant with allowTabs=true */
                 0, /* padding, only relevant for justified text, not relevant for SVG */
-                ExpansionBehavior::AllowRightOnly(), direction,
-                style.RtlOrdering() == Order::Visual /* directionalOverride */);
+                ExpansionBehavior::AllowRightOnly(), direction);
 
     // We handle letter & word spacing ourselves.
     run.DisableSpacing();

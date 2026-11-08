@@ -87,11 +87,10 @@ namespace krys::boo
                             const LayoutPoint &paintOffset) noexcept;
   };
 
-  KRYS_NODISCARD TextRun ConstructTextRun(utf8_stringview, TextDirection, const RenderStyle &,
-                                          const SVGTextFragment &) noexcept;
+  KRYS_NODISCARD TextRun ConstructTextRun(utf8_stringview, TextDirection, const SVGTextFragment &) noexcept;
   KRYS_NODISCARD FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &, TextDirection,
                                                         const SVGTextFragment &, uint32 startPosition,
-                                                        uint32 endPosition, const RenderStyle &) noexcept;
+                                                        uint32 endPosition) noexcept;
   bool MapStartEndPositionsIntoFragmentCoordinates(uint32 textBoxStart, const SVGTextFragment &,
                                                    uint32 &startPosition, uint32 &endPosition) noexcept;
 }

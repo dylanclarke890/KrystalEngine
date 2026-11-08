@@ -38,7 +38,7 @@ namespace krys::boo::inline_iterator
                expansion.HorizontalExpansion,
                expansion.Behavior,
                Direction(),
-               style.RtlOrdering() == Order::Visual,
+               false /* directionalOverride */,
                characterScanForCodePath};
     textRun.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
     return textRun;

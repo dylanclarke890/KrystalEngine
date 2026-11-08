@@ -735,12 +735,6 @@ namespace krys::boo
 
   TextStream &operator<<(TextStream &ts, ImageRendering imageRendering) noexcept;
 
-  enum class Order : bool
-  {
-    Logical,
-    Visual
-  };
-
   enum class RubyPosition : uint8
   {
     Over,

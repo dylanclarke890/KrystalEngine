@@ -789,7 +789,7 @@ namespace krys::boo
                         expansion.HorizontalExpansion,
                         expansion.Behavior,
                         _textBox.Direction(),
-                        _style.RtlOrdering() == Order::Visual,
+                        false /* directionalOverride */,
                         characterScanForCodePath};
     run.DisableSpacing();
 

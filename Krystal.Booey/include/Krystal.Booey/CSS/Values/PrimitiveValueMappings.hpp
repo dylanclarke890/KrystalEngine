@@ -1141,12 +1141,6 @@ namespace krys::boo
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
 
-#define KRYS_MAPPING_TYPE Order
-#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Logical) CASE(Visual)
-  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
-#undef KRYS_MAPPING_TYPE
-#undef KRYS_MAPPING_FOR_EACH
-
 #define KRYS_MAPPING_TYPE BlendMode
 #define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Normal)                                                                                               \

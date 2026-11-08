@@ -12,7 +12,6 @@ namespace krys::boo::style::tests
     auto style = ResolveForDocument(*document);
 
     CHECK(style.Display() == DisplayType::Block);
-    CHECK(style.RtlOrdering() == boo::Order::Logical);
     CHECK(style.GetUserModify() == UserModify::ReadOnly);
     CHECK(style.ComputedFontSize() == 16);
     CHECK(style.GetFontDescription().SpecifiedSize() == 16);

@@ -128,8 +128,7 @@ namespace krys::boo::layout_integration
         if (auto *renderInline = DynamicDowncast<RenderInline>(renderer))
         {
           auto &style = renderInline->Style();
-          return style.GetWritingMode().IsBidiRTL()
-                 || (style.RtlOrdering() == Order::Logical && style.GetUnicodeBidi() != UnicodeBidi::Normal);
+          return style.GetWritingMode().IsBidiRTL() || style.GetUnicodeBidi() != UnicodeBidi::Normal;
         }
         return false;
       };
