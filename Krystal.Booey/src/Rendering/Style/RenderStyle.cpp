@@ -312,10 +312,13 @@ namespace krys::boo
       GetHyphenateCharacter(),
       [&](const css::keywords::Auto &) -> const css::CSSOMStringAtom &
       {
-        // FIXME: This should depend on locale, and use U+2010 HYPHEN when the primary font has a glyph for it
-        // (fonts have no glyph data yet).
+        // U+2010 HYPHEN when the primary font has a glyph for it, as Chrome and WebKit hyphenate; otherwise
+        // the hyphen-minus.
+        // FIXME: This should depend on locale.
         static const NeverDestroyed<const css::CSSOMStringAtom> hyphenMinusString {u8"-"};
-        return hyphenMinusString.get();
+        static const NeverDestroyed<const css::CSSOMStringAtom> hyphenString {u8"\u2010"};
+        return GetFontCascade().PrimaryFont()->GlyphForCharacter(U'\u2010') ? hyphenString.get()
+                                                                            : hyphenMinusString.get();
       },
       [](const css::CSSOMStringAtom &string) -> const css::CSSOMStringAtom & { return string; });
   }

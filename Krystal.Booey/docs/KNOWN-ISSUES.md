@@ -62,7 +62,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Anchor positioning has no fragmented flows: an anchor's rect isn't the bounding box of its fragments (FIXMEs in `AnchorPositionEvaluator.cpp`). Anchor-positioned viewport-constrained objects need a scrolling coordinator Booey doesn't have.
 - The switch control sheet (`htmlSwitchControl.css`) and the fullscreen sheet are never loaded (FIXMEs in `UserAgentStyle.cpp`).
 - `DidChangeViewportSize` doesn't visit pseudo-elements, as they aren't nodes (FIXME in `Scope.cpp`).
-- `RenderStyle::HyphenString()` gives the hyphen-minus for `hyphenate-character: auto` (FIXME: U+2010 when the primary font has the glyph, locale dependent).
+- `hyphenate-character: auto` doesn't depend on the content language (FIXME in `RenderStyle.cpp`).
 
 ## Animations
 
