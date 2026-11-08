@@ -1,4 +1,4 @@
-﻿#include "Krystal.Threading/Thread.hpp"
+﻿#include "Krystal.Core/Threading/Thread.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 #ifdef _WIN32

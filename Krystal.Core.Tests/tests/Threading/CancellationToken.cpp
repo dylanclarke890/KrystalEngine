@@ -1,6 +1,6 @@
-﻿#include "Krystal.Threading/CancellationToken.hpp"
+﻿#include "Krystal.Core/Threading/CancellationToken.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Threading/Thread.hpp"
+#include "Krystal.Core/Threading/Thread.hpp"
 
 namespace krys::tests
 {

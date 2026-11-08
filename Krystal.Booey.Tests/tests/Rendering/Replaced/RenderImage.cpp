@@ -11,8 +11,8 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Threading/JobSystem.hpp"
-#include "Krystal.Threading/ManualWorkQueue.hpp"
+#include "Krystal.Core/Threading/JobSystem.hpp"
+#include "Krystal.Core/Threading/ManualWorkQueue.hpp"
 #include <chrono>
 #include <string>
 

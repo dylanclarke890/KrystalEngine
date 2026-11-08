@@ -1,4 +1,4 @@
-﻿#include "Krystal.Threading/ManualWorkQueue.hpp"
+﻿#include "Krystal.Core/Threading/ManualWorkQueue.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"

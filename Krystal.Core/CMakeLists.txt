@@ -216,8 +216,14 @@ target_sources(Krystal.Core
       include/Krystal.Core/Text/Unicode.hpp
 
       # Threading
+      include/Krystal.Core/Threading/CancellationToken.hpp
+      include/Krystal.Core/Threading/JobSystem.hpp
       include/Krystal.Core/Threading/MainThread.hpp
+      include/Krystal.Core/Threading/ManualWorkQueue.hpp
       include/Krystal.Core/Threading/NeverDestroyed.hpp
+      include/Krystal.Core/Threading/TaskInbox.hpp
+      include/Krystal.Core/Threading/Thread.hpp
+      include/Krystal.Core/Threading/WorkQueue.hpp
 
       # Time
       include/Krystal.Core/Time/Duration.hpp
@@ -316,7 +322,11 @@ target_sources(Krystal.Core
     src/Log/SpdlogLogger.cpp
     
     # Threading
+    src/Threading/JobSystem.cpp
     src/Threading/MainThread.cpp
+    src/Threading/ManualWorkQueue.cpp
+    src/Threading/TaskInbox.cpp
+    src/Threading/Thread.cpp
 
     # Utils
     src/Utils/ScopedProfiler.cpp

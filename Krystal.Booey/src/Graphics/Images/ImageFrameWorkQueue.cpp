@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/MainThread.hpp"
-#include "Krystal.Threading/WorkQueue.hpp"
+#include "Krystal.Core/Threading/WorkQueue.hpp"
 #include <algorithm>
 
 namespace krys::boo

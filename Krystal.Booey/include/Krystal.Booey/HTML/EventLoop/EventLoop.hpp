@@ -3,6 +3,7 @@
 #include "Krystal.Booey/HTML/EventLoop/TaskSource.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Threading/TaskInbox.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -10,7 +11,6 @@
 #include "Krystal.Core/Types/Queue.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
-#include "Krystal.Threading/TaskInbox.hpp"
 
 namespace krys::boo
 {

@@ -3,10 +3,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Threading/TaskInbox.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Threading/TaskInbox.hpp"
 
 namespace krys
 {

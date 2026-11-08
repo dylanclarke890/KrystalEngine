@@ -6,6 +6,7 @@
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Threading/JobSystem.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/String.hpp"
@@ -15,7 +16,6 @@
 #include "Krystal.PAL/Input.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/Platform.hpp"
-#include "Krystal.Threading/JobSystem.hpp"
 #include <algorithm>
 #include <exception>
 #include <utility>

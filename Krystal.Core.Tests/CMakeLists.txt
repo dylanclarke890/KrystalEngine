@@ -80,8 +80,13 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Types/Packed.cpp
 
   # Threading
+	PRIVATE tests/Threading/CancellationToken.cpp
+	PRIVATE tests/Threading/JobSystem.cpp
 	PRIVATE tests/Threading/MainThread.cpp
+	PRIVATE tests/Threading/ManualWorkQueue.cpp
 	PRIVATE tests/Threading/NeverDestroyed.cpp
+	PRIVATE tests/Threading/TaskInbox.cpp
+	PRIVATE tests/Threading/Thread.cpp
 
   # Commands
 	PRIVATE tests/Commands/Command.cpp

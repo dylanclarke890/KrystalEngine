@@ -28,7 +28,6 @@ enable_testing()
 
 add_subdirectory(Krystal.Core)
 add_subdirectory(Krystal.Text)
-add_subdirectory(Krystal.Threading)
 
 # Krystal Engine modules
 add_subdirectory(Krystal.Booey)
@@ -42,7 +41,6 @@ add_subdirectory(Krystal.Editor)
 # Krystal Engine tests
 add_subdirectory(Krystal.Core.Tests)
 add_subdirectory(Krystal.Text.Tests)
-add_subdirectory(Krystal.Threading.Tests)
 add_subdirectory(Krystal.Booey.Tests)
 add_subdirectory(Krystal.Gfx.Tests)
 add_subdirectory(Krystal.UI.Tests)

@@ -4,7 +4,7 @@
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Threading/ManualWorkQueue.hpp"
+#include "Krystal.Core/Threading/ManualWorkQueue.hpp"
 
 namespace krys::boo::tests
 {

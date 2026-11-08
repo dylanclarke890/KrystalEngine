@@ -1,4 +1,4 @@
-﻿#include "Krystal.Threading/TaskInbox.hpp"
+﻿#include "Krystal.Core/Threading/TaskInbox.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 

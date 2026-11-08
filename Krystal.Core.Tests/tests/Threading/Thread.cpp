@@ -1,4 +1,4 @@
-﻿#include "Krystal.Threading/Thread.hpp"
+﻿#include "Krystal.Core/Threading/Thread.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/Move.hpp"

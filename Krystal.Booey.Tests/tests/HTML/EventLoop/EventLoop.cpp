@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Core/Threading/JobSystem.hpp"
+#include "Krystal.Core/Threading/ManualWorkQueue.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Threading/JobSystem.hpp"
-#include "Krystal.Threading/ManualWorkQueue.hpp"
 
 namespace krys::boo::html::tests
 {

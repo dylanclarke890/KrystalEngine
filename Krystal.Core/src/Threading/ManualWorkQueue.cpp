@@ -1,4 +1,4 @@
-﻿#include "Krystal.Threading/ManualWorkQueue.hpp"
+﻿#include "Krystal.Core/Threading/ManualWorkQueue.hpp"
 
 namespace krys
 {

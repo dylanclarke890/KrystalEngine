@@ -25,7 +25,7 @@ The main thread owns everything that isn't explicitly handed off. A job gets its
 
 ## API
 
-It's a module of its own, **Krystal.Threading** (namespace `krys`), laid out like the others: `include/Krystal.Threading/`, `src/`, and its tests in **Krystal.Threading.Tests**. It depends only on Krystal.Core. Booey and Krystal.UI depend on it for `WorkQueue` and `TaskInbox`, and the editor creates its `JobSystem`. `MoveOnlyFunc` is the exception: it's a general type, so it goes next to `Func` in Krystal.Core.
+It lives in Krystal.Core's `Threading` folder (namespace `krys`), with its tests in Krystal.Core.Tests' `tests/Threading/`. Booey and Krystal.UI use its `WorkQueue` and `TaskInbox`, and the editor creates its `JobSystem`. `MoveOnlyFunc`, a general type, sits next to `Func` in `Types/`.
 
 ### `MoveOnlyFunc`
 
@@ -144,7 +144,7 @@ A job must not throw (the engine is `noexcept`) and must not block on IO or on o
 
 ## Testing
 
-- **Krystal.Threading.Tests** covers the pool itself with real threads: every job runs exactly once, priorities are respected, shutdown joins cleanly, and completions arrive on the inbox in order.
+- **Krystal.Core.Tests** covers the pool itself with real threads: every job runs exactly once, priorities are respected, shutdown joins cleanly, and completions arrive on the inbox in order.
 - **Everything else tests on one thread.** Booey and Krystal.UI don't take the `JobSystem` directly; they take a `WorkQueue` interface (`Dispatch(job, inbox, completion)`). In production that's the `JobSystem`; in tests it's a `ManualWorkQueue` that keeps jobs until the test calls `RunAll()`. A test can then check what happens before a decode finishes, after, and when the image goes away in between, with no timing involved. Booey's tests stay single-threaded and deterministic, as now.
 
 ## How Booey and Krystal.UI use it
@@ -155,8 +155,8 @@ A job must not throw (the engine is `noexcept`) and must not block on IO or on o
 
 ## Plan
 
-1. The Krystal.Threading and Krystal.Threading.Tests projects; `MoveOnlyFunc` in Krystal.Core; `TaskInbox`, `JobSystem` (shared queue) and `Thread`, with their tests; `IsMainThread` in Krystal.Core.
-2. `WorkQueue` and `ManualWorkQueue` (in Krystal.Threading, so Booey's and Krystal.UI's tests share it); Booey's event loop drains a `TaskInbox`; the editor creates the `JobSystem`.
+1. `MoveOnlyFunc` in Krystal.Core; `TaskInbox`, `JobSystem` (shared queue) and `Thread`, with their tests; `IsMainThread` in Krystal.Core.
+2. `WorkQueue` and `ManualWorkQueue` (in Krystal.Core, so Booey's and Krystal.UI's tests share it); Booey's event loop drains a `TaskInbox`; the editor creates the `JobSystem`.
 3. Asynchronous still-image decoding in Booey.
 4. Decoding animation frames ahead.
 5. `HTMLImageElement::decode()` and `SVGImageElement::decode()`.
