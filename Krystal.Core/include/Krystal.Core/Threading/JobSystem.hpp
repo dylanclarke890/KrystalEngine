@@ -17,6 +17,8 @@ namespace krys
 {
   /// @brief A pool of worker threads that run jobs. Workers sleep while there's nothing to do; a free one
   /// takes the oldest Normal job, or else the oldest Background one.
+  /// @note With one worker, jobs run one at a time, in the order they're dispatched within a priority: a
+  /// thread of its own for work that blocks, such as file reads, which the application's workers mustn't do.
   class JobSystem final : public WorkQueue
   {
     KRYS_NON_COPY_MOVABLE(JobSystem);
@@ -31,8 +33,8 @@ namespace krys
 
   public:
     /// @brief Starts @p workerCount workers, or by default one fewer than the machine has cores (at least
-    /// one), leaving a core for the main thread.
-    explicit JobSystem(Maybe<uint32> workerCount = null) noexcept;
+    /// one), leaving a core for the main thread. They're named @p name, numbered if there's more than one.
+    explicit JobSystem(Maybe<uint32> workerCount = null, utf8_stringview name = u8"Worker") noexcept;
     /// @brief Stops taking jobs, lets the Normal jobs already queued run, destroys the Background ones unrun,
     /// and waits for the workers to finish.
     ~JobSystem() noexcept override;

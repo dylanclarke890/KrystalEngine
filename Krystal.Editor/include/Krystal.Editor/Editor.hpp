@@ -38,6 +38,7 @@
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
+#include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/View.hpp"
 #include <algorithm>
 #include <cmath>
@@ -73,6 +74,8 @@ namespace krys
     gfx::TextureHandle _image {};
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
+    /// @brief Booey's loader, which reads files on the application's IO thread.
+    UniquePtr<ui::FileLoaderStrategy> _fileLoader {};
     UniquePtr<ui::View> _pageView {};
     /// @brief The page's listeners, which go when the page is loaded again.
     boo::dom::EventListenerHandle _cardPicker;
@@ -136,6 +139,7 @@ namespace krys
     void OnShutdown() noexcept override
     {
       boo::PlatformStrategies::Singleton().SetWorkQueue(nullptr);
+      boo::PlatformStrategies::Singleton().SetLoaderStrategy(nullptr);
       _observers = nullptr;
       _animations = nullptr;
       _pointers = nullptr;
@@ -805,8 +809,11 @@ namespace krys
     /// Sans as Booey's fonts.
     void CreatePage() noexcept
     {
-      // Booey's work that can leave the main thread runs on the application's workers.
+      // Booey's work that can leave the main thread runs on the application's workers, and its files are read
+      // on the IO thread.
       boo::PlatformStrategies::Singleton().SetWorkQueue(_context->Jobs.get());
+      _fileLoader = CreateUnique<ui::FileLoaderStrategy>(_context->IO.get());
+      boo::PlatformStrategies::Singleton().SetLoaderStrategy(_fileLoader.get());
       (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);

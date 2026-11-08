@@ -26,7 +26,8 @@ namespace krys
   /// `JobSystem`'s workers, or in a test, on its own thread when the test says (`ManualWorkQueue`).
   /// @note A job may use what it owns (moved into it), immutable data shared through a `Ref`, and services
   /// documented as thread-safe; never the dispatching thread's state, nor its stack (capture by value, not
-  /// `[&]`). Jobs mustn't block on IO or wait on other jobs.
+  /// `[&]`). Jobs mustn't block on IO or wait on other jobs, unless the queue is a thread of its own for that
+  /// (a one-worker `JobSystem`).
   class WorkQueue
   {
   public:

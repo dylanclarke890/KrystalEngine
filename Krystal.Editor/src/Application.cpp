@@ -26,6 +26,7 @@ namespace krys
   Application::~Application() noexcept
   {
     // The jobs go first: what they post back to must still be there.
+    _context->IO.reset();
     _context->Jobs.reset();
     _context->Events.reset();
     _context->Input.reset();
@@ -134,6 +135,7 @@ namespace krys
     }
 
     _context->Jobs = CreateUnique<JobSystem>();
+    _context->IO = CreateUnique<JobSystem>(1u, u8"IO");
 
     _context->Input = CreateUnique<pal::Input>(_context->Events.get());
     if (!_context->Input)

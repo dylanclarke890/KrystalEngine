@@ -38,6 +38,7 @@
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Core/Threading/ManualWorkQueue.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
@@ -351,6 +352,48 @@ namespace krys::ui::tests
 
     CHECK_FALSE(view.LoadFile(path).has_value());
     WaitForLoad(view);
+  }
+
+  TEST_CASE("FileLoaderStrategy: reads files on its read queue, and gives them to Booey on its event loop",
+            "[UI]")
+  {
+    const auto path = std::filesystem::temp_directory_path() / "krystal-ui-queued-read.txt";
+    {
+      std::ofstream file(path, std::ios::binary);
+      file << "queued";
+    }
+
+    View view({200, 100});
+    ManualWorkQueue queue;
+    FileLoaderStrategy loader(&queue);
+    Maybe<boo::LoadResult> result;
+    auto load = [&](const std::filesystem::path &file)
+    {
+      loader.LoadResource(
+        view.Frame(), boo::ResourceRequest(boo::url::URL::FileURLWithFileSystemPath(file.generic_u8string())),
+        {}, [&](boo::LoadResult &&loaded) { result = krys::move(loaded); });
+    };
+
+    load(path);
+    CHECK_FALSE(result);
+    CHECK(queue.PendingCount() == 1);
+    CHECK(queue.RunAll() == 1);
+    // Read, the file waits in the event loop's inbox.
+    CHECK_FALSE(result);
+    boo::html::EventLoop::Current().RunUntilIdle();
+    REQUIRE(result);
+    REQUIRE(result->has_value());
+    CHECK((*result)->Response.MimeType() == u8"text/plain");
+    auto data = (*result)->Data->GetSpan();
+    CHECK(utf8_string(data.begin(), data.end()) == u8"queued");
+
+    std::filesystem::remove(path);
+    result = null;
+    load(path);
+    CHECK(queue.RunAll() == 1);
+    boo::html::EventLoop::Current().RunUntilIdle();
+    REQUIRE(result);
+    CHECK_FALSE(result->has_value());
   }
 
   TEST_CASE("View: defines custom elements in the pages it loads", "[UI]")

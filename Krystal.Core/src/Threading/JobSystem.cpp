@@ -13,14 +13,18 @@ namespace krys
     return cores - 1;
   }
 
-  JobSystem::JobSystem(Maybe<uint32> workerCount) noexcept
+  JobSystem::JobSystem(Maybe<uint32> workerCount, utf8_stringview name) noexcept
   {
     auto count = std::max(workerCount.value_or(DefaultWorkerCount()), 1u);
     _workers.reserve(count);
     for (uint32 i = 0; i < count; ++i)
     {
-      _workers.push_back(CreateUnique<Thread>(
-        std::format("Worker {}", i + 1) | std::ranges::to<utf8_string>(), [this]() { RunWorker(); }));
+      auto workerName = utf8_string(name);
+      if (count > 1)
+      {
+        workerName += std::format(" {}", i + 1) | std::ranges::to<utf8_string>();
+      }
+      _workers.push_back(CreateUnique<Thread>(krys::move(workerName), [this]() { RunWorker(); }));
     }
   }
 

@@ -67,6 +67,8 @@ namespace krys
     UniquePtr<EventManager> Events {};
     /// @brief The worker threads that run the application's jobs.
     UniquePtr<JobSystem> Jobs {};
+    /// @brief The thread that reads files: its jobs block, which the workers' mustn't.
+    UniquePtr<JobSystem> IO {};
     UniquePtr<pal::IWindow> Window {};
     UniquePtr<pal::Input> Input {};
     UniquePtr<io::VirtualFileSystem> VFS {};
