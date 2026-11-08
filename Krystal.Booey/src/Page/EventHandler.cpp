@@ -56,6 +56,7 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/UI/Cursor.hpp"
 #include <algorithm>
+#include <ranges>
 
 namespace krys::boo
 {
@@ -838,8 +839,17 @@ namespace krys::boo
       request, DocumentPointForWindowPoint(*frame, mouseEvent.Position()), mouseEvent);
   }
 
-  ScrollableArea *EventHandler::EnclosingScrollableArea(dom::Node *node) const noexcept
+  List<ScrollableArea *> EventHandler::ScrollableAreasEnclosing(dom::Node *node) const noexcept
   {
+    List<ScrollableArea *> areas;
+    auto *frameView = _frame.View();
+    if (!node || !frameView)
+    {
+      return areas;
+    }
+
+    // The innermost scrolling layer, or list box, the node is in.
+    RenderLayer *scrollableLayer = nullptr;
     for (auto *ancestor = node; ancestor; ancestor = ancestor->ParentOrShadowHostNode())
     {
       if (Is<html::HTMLHtmlElement>(*ancestor) || Is<dom::Document>(*ancestor))
@@ -858,99 +868,76 @@ namespace krys::boo
         auto *scrollableArea = static_cast<ScrollableArea *>(renderListBox);
         if (scrollableArea->IsScrollableOrRubberbandable())
         {
-          return scrollableArea;
+          areas.push_back(scrollableArea);
+          // The list box's own layer doesn't scroll it: the scrollers around it come next.
+          auto *ownLayer = renderListBox->Layer();
+          scrollableLayer =
+            ownLayer ? ownLayer->EnclosingScrollableLayer(ExcludeSelf, CrossFrameBoundaries::No)
+                     : renderListBox->EnclosingLayer()->EnclosingScrollableLayer(IncludeSelf,
+                                                                                 CrossFrameBoundaries::No);
+          break;
         }
       }
 
       auto *layer = renderer->EnclosingLayer();
       if (!layer)
       {
-        return nullptr;
+        return areas;
       }
 
-      if (auto *scrollableLayer = layer->EnclosingScrollableLayer(IncludeSelf, CrossFrameBoundaries::No))
+      if (auto *enclosing = layer->EnclosingScrollableLayer(IncludeSelf, CrossFrameBoundaries::No);
+          enclosing && !enclosing->IsRenderViewLayer())
       {
-        if (!scrollableLayer->IsRenderViewLayer())
-        {
-          return scrollableLayer->GetScrollableArea();
-        }
+        scrollableLayer = enclosing;
+        break;
       }
     }
 
-    return _frame.View();
+    // Then each scroller around it, by containing block, as they clip it.
+    for (auto *layer = scrollableLayer; layer && !layer->IsRenderViewLayer();
+         layer = layer->EnclosingScrollableLayer(ExcludeSelf, CrossFrameBoundaries::No))
+    {
+      if (auto *scrollableArea = layer->GetScrollableArea())
+      {
+        areas.push_back(scrollableArea);
+      }
+    }
+
+    areas.push_back(frameView);
+    return areas;
   }
 
   void EventHandler::NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType,
                                                         dom::Element *lastElementUnderMouse,
                                                         dom::Element *elementUnderMouse) noexcept
   {
-    auto *frameView = _frame.View();
-    if (!frameView)
+    auto lastAreas = ScrollableAreasEnclosing(lastElementUnderMouse);
+    auto areas = ScrollableAreasEnclosing(elementUnderMouse);
+    auto contains = [](const List<ScrollableArea *> &list, ScrollableArea *area)
     {
-      return;
-    }
+      return std::ranges::find(list, area) != list.end();
+    };
 
-    auto *scrollableAreaForLastNode = EnclosingScrollableArea(lastElementUnderMouse);
-    auto *scrollableAreaForNodeUnderMouse = EnclosingScrollableArea(elementUnderMouse);
-
-    if (!lastElementUnderMouse != !elementUnderMouse)
+    // The areas the mouse left, innermost first.
+    for (auto *area : lastAreas)
     {
-      if (elementUnderMouse)
+      if (!contains(areas, area))
       {
-        if (scrollableAreaForNodeUnderMouse != frameView)
-        {
-          frameView->MouseEnteredContentArea();
-        }
-        if (scrollableAreaForNodeUnderMouse)
-        {
-          scrollableAreaForNodeUnderMouse->MouseEnteredContentArea();
-        }
-      }
-      else
-      {
-        if (scrollableAreaForLastNode)
-        {
-          scrollableAreaForLastNode->MouseExitedContentArea();
-        }
-        if (scrollableAreaForLastNode != frameView)
-        {
-          frameView->MouseExitedContentArea();
-        }
-      }
-      return;
-    }
-
-    if (!scrollableAreaForLastNode && !scrollableAreaForNodeUnderMouse)
-    {
-      return;
-    }
-
-    // FIXME: Nested scrollable areas: this needs the relationship between the two areas.
-    bool movedBetweenScrollableAreas = scrollableAreaForLastNode && scrollableAreaForNodeUnderMouse
-                                       && scrollableAreaForLastNode != scrollableAreaForNodeUnderMouse;
-    if (eventType == EventNames::MouseMove)
-    {
-      frameView->MouseMovedInContentArea();
-
-      if (!movedBetweenScrollableAreas && scrollableAreaForNodeUnderMouse
-          && scrollableAreaForNodeUnderMouse != frameView)
-      {
-        scrollableAreaForNodeUnderMouse->MouseMovedInContentArea();
+        area->MouseExitedContentArea();
       }
     }
 
-    if (!movedBetweenScrollableAreas)
+    // The areas it entered, outermost first; those it was already in hear it moved.
+    for (auto *area : std::ranges::reverse_view(areas))
     {
-      return;
-    }
-
-    if (scrollableAreaForLastNode && scrollableAreaForLastNode != frameView)
-    {
-      scrollableAreaForLastNode->MouseExitedContentArea();
-    }
-    if (scrollableAreaForNodeUnderMouse && scrollableAreaForNodeUnderMouse != frameView)
-    {
-      scrollableAreaForNodeUnderMouse->MouseEnteredContentArea();
+      if (!contains(lastAreas, area))
+      {
+        area->MouseEnteredContentArea();
+      }
+      else if (eventType == EventNames::MouseMove)
+      {
+        area->MouseMovedInContentArea();
+      }
     }
   }
 

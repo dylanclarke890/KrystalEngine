@@ -380,4 +380,51 @@ namespace krys::boo::tests
     CHECK(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar()->Opacity() == 1);
     CHECK(fixture.Painted().find(Thumb) != utf8_string::npos);
   }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture,
+    "RenderLayerScrollableArea: the mouse in a nested scroller is in the scrollers around it too",
+    "[Rendering][RenderLayerScrollableArea][ScrollbarsController]")
+  {
+    using namespace std::chrono_literals;
+    ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
+    auto classic = MakeScopeExit([] { ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(false); });
+
+    PaintFixture fixture(
+      u8"<!DOCTYPE html><style>body { margin: 0 } div { overflow: scroll }</style>"
+      u8"<div id=outer style='width: 150px; height: 90px'>"
+      u8"<div id=inner style='width: 60px; height: 60px'><p style='width: 200px; height: 200px'></div>"
+      u8"<p style='width: 300px; height: 300px'></div>",
+      {200, 100}, true);
+    (void)fixture.Painted();
+    auto &loop = html::EventLoop::Current();
+    auto &outer = *ScrollableAreaOf(fixture, u8"outer")->VerticalScrollbar();
+    auto &inner = *ScrollableAreaOf(fixture, u8"inner")->VerticalScrollbar();
+    auto move = [&](double x, double y)
+    {
+      (void)fixture.Frame->GetEventHandler().MouseMoved(
+        PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), MouseButton::None,
+                           PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now()));
+    };
+
+    // Both fade out once they're made, and the mouse starts outside them.
+    move(180, 95);
+    loop.Run(loop.Now() + 3'100ms);
+    REQUIRE(outer.Opacity() == 0);
+    REQUIRE(inner.Opacity() == 0);
+
+    // Straight into the inner scroller: it's in the outer one too.
+    move(30, 30);
+    loop.Run(loop.Now() + 1s);
+    CHECK(inner.Opacity() == 1);
+    CHECK(outer.Opacity() == 1);
+
+    // Into the outer one alone: the inner one fades while the outer one, moved over, stays.
+    move(120, 70);
+    loop.Run(loop.Now() + 1'500ms);
+    move(121, 70);
+    loop.Run(loop.Now() + 1'600ms);
+    CHECK(inner.Opacity() == 0);
+    CHECK(outer.Opacity() == 1);
+  }
 }
