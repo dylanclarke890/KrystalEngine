@@ -216,6 +216,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- `hyphens: auto` never hyphenates, as there are no hyphenation dictionaries (`CanHyphenate` in `Text/Hyphenation.hpp` is false for every language), which css-text allows; Chrome hyphenates the languages it has downloaded dictionaries for.
 - `text-transform: full-width` is supported, as in Firefox and Safari: a character's full-width form is what its `<narrow>` decomposition maps it to, or the character whose `<wide>` decomposition maps to it. Chrome doesn't parse the value.
 - Hinting defaults to slight (`FontHinting::Slight`, vertical snapping only), and is off under a transform or synthetic oblique. Pens snap to a quarter pixel horizontally (four glyph variants, `GlyphAtlas::SubpixelPositions`) and to a whole pixel vertically. There's no LCD antialiasing. See *Painting* for how this compares with Chrome's text.
 - Chrome hints Ahem's boxes differently, leaving seams between them, so the `webfonts` and `textfields` goldens are report-only.
