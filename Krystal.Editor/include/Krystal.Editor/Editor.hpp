@@ -15,6 +15,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
@@ -814,6 +815,8 @@ namespace krys
       boo::PlatformStrategies::Singleton().SetWorkQueue(_context->Jobs.get());
       _fileLoader = CreateUnique<ui::FileLoaderStrategy>(_context->IO.get());
       boo::PlatformStrategies::Singleton().SetLoaderStrategy(_fileLoader.get());
+      // Overlay scrollbars, which fade in while the mouse is over a scroller or it scrolls.
+      boo::ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
       (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);
