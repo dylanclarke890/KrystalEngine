@@ -933,8 +933,13 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: Only while processing a user gesture (UserGestureIndicator), unless the text or the datalist
-    // changed.
+    // A click shows them only for a user's click; changes to the text or the datalist always update them.
+    if ((type == DataListSuggestionActivationType::ControlClicked
+         || type == DataListSuggestionActivationType::IndicatorClicked)
+        && !HasTransientActivation())
+    {
+      return;
+    }
 
     auto *page = element.NodeDocument().GetPage();
     if (!page)

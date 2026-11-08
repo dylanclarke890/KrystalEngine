@@ -23,6 +23,14 @@ namespace krys::boo::tests
 
   namespace
   {
+    /// @brief Clicks @p input as a user does, with the window's transient activation that opening a picker
+    /// needs.
+    void UserClick(HTMLInputElement &input) noexcept
+    {
+      input.NodeDocument().Window()->NotifyActivated();
+      input.Click();
+    }
+
     /// @brief Calls `showPicker()` on @p input during a user gesture, which it needs.
     KRYS_NODISCARD dom::ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
     {
@@ -481,9 +489,15 @@ namespace krys::boo::tests
       CHECK(input.ShowPicker().HasException());
     }
 
-    SECTION("a click shows it; leaving the fields ends it")
+    SECTION("a click without the user's activation doesn't show it")
     {
       input.Click();
+      CHECK_FALSE(client->Chooser);
+    }
+
+    SECTION("a click shows it; leaving the fields ends it")
+    {
+      UserClick(input);
       REQUIRE(client->Chooser);
       CHECK(client->Chooser->Shows == 1);
       // Editing a field updates it.

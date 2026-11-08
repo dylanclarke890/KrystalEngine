@@ -16,6 +16,14 @@ namespace krys::boo::tests
 
   namespace
   {
+    /// @brief Clicks @p input as a user does, with the window's transient activation that opening a picker
+    /// needs.
+    void UserClick(HTMLInputElement &input) noexcept
+    {
+      input.NodeDocument().Window()->NotifyActivated();
+      input.Click();
+    }
+
     /// @brief Calls `showPicker()` on @p input during a user gesture, which it needs.
     KRYS_NODISCARD dom::ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
     {
@@ -163,9 +171,15 @@ namespace krys::boo::tests
     auto inputs = fixture.Listen(u8"input");
     auto changes = fixture.Listen(u8"change");
 
-    SECTION("a click shows it, with the value")
+    SECTION("a click without the user's activation doesn't show it")
     {
       input.Click();
+      CHECK_FALSE(client->Chooser);
+    }
+
+    SECTION("a click shows it, with the value")
+    {
+      UserClick(input);
       REQUIRE(client->Chooser);
       CHECK(SerialisationForHTML(client->Chooser->Selected) == u8"#336699");
       CHECK(input.IsPresentingAttachedView());
@@ -190,7 +204,7 @@ namespace krys::boo::tests
 
     SECTION("input and change fire once the colour is shown")
     {
-      input.Click();
+      UserClick(input);
       REQUIRE(client->Chooser);
 
       List<dom::DOMString> swatchAtInput;
@@ -205,7 +219,7 @@ namespace krys::boo::tests
     SECTION("losing the focus or the renderer ends it")
     {
       input.Focus();
-      input.Click();
+      UserClick(input);
       REQUIRE(client->Chooser);
       input.Blur();
       CHECK(client->Chooser->Ended);
@@ -221,7 +235,7 @@ namespace krys::boo::tests
     SECTION("disabled inputs have none")
     {
       (void)input.SetAttribute(u8"disabled", u8"");
-      input.Click();
+      UserClick(input);
       CHECK_FALSE(client->Chooser);
       CHECK(ShowPicker(input).HasException());
     }

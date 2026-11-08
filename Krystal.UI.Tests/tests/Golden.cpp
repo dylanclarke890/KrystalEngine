@@ -17,6 +17,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
@@ -38,6 +39,14 @@ namespace krys::ui::tests
 
   namespace
   {
+    /// @brief Clicks @p element as a user does, with the window's transient activation that opening a picker
+    /// needs.
+    void UserClick(boo::html::HTMLElement &element) noexcept
+    {
+      element.NodeDocument().Window()->NotifyActivated();
+      element.Click();
+    }
+
     /// @brief The page's own golden is checked tightly: any change beyond rounding is a regression.
     constexpr uint32 OwnTolerance = 2u;
     /// @brief Chrome antialiases, blurs and dithers a little differently, so its golden is checked loosely.
@@ -666,7 +675,7 @@ namespace krys::ui::tests
               {
                 auto &input =
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
-                input.Click();
+                UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // The highlight moves to the 12th.
                 (void)view.KeyPressed(pal::Key::RightArrow);
@@ -685,7 +694,7 @@ namespace krys::ui::tests
               {
                 auto &input =
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
-                input.Click();
+                UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 view.UpdateRendering();
               });
@@ -719,7 +728,7 @@ namespace krys::ui::tests
               {
                 auto &input =
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
-                input.Click();
+                UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // Mirrored, the left arrow moves on: the highlight moves to the 12th.
                 for (int32 i = 0; i < 5; ++i)
@@ -739,7 +748,7 @@ namespace krys::ui::tests
               {
                 auto &input =
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
-                input.Click();
+                UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // Mirrored, the left arrow moves on, to the next swatch.
                 (void)view.KeyPressed(pal::Key::LeftArrow);

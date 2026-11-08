@@ -196,7 +196,11 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: Only while processing a user gesture (UserGestureIndicator).
+    // Only for a user's click or key.
+    if (!HasTransientActivation())
+    {
+      return;
+    }
 
     ShowPicker();
     event.SetDefaultHandled();

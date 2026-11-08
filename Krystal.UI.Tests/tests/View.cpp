@@ -54,6 +54,14 @@ namespace krys::ui::tests
 {
   namespace
   {
+    /// @brief Clicks @p element as a user does, with the window's transient activation that opening a picker
+    /// needs.
+    void UserClick(boo::html::HTMLElement &element) noexcept
+    {
+      element.NodeDocument().Window()->NotifyActivated();
+      element.Click();
+    }
+
     /// @brief A clipboard in memory, in place of the system's: text and markup, counting the writes.
     struct MemoryPasteboard final : boo::PasteboardStrategy
     {
@@ -1963,7 +1971,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
     auto &month = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"m"));
-    month.Click();
+    UserClick(month);
     auto *months = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
     REQUIRE(months);
     CHECK(months->GetMode() == DateTimeChooserOverlay::Mode::Months);
@@ -1977,7 +1985,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
     auto &week = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"w"));
-    week.Click();
+    UserClick(week);
     auto *weeks = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
     REQUIRE(weeks);
     CHECK(weeks->GetMode() == DateTimeChooserOverlay::Mode::Weeks);
@@ -2061,7 +2069,7 @@ namespace krys::ui::tests
     SECTION("A date input lists its valid suggestions, then Other for the calendar")
     {
       auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
-      input.Click();
+      UserClick(input);
       auto *picker = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
       REQUIRE(picker);
       CHECK(picker->GetMode() == DateTimeChooserOverlay::Mode::Suggestions);
@@ -2082,7 +2090,7 @@ namespace krys::ui::tests
       CHECK(input.Value() == u8"2026-06-15");
 
       // Other shows the calendar.
-      input.Click();
+      UserClick(input);
       picker = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
       REQUIRE(picker);
       CHECK(view.KeyPressed(pal::Key::End));
@@ -2096,7 +2104,7 @@ namespace krys::ui::tests
     SECTION("A colour input's palette starts with its colour suggestions")
     {
       auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
-      input.Click();
+      UserClick(input);
       auto *picker = static_cast<ColorChooserOverlay *>(view.ShownOverlay());
       REQUIRE(picker);
       CHECK(picker->Colors().size() == 42uz);

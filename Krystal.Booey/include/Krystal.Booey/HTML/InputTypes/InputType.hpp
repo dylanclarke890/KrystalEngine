@@ -543,6 +543,11 @@ namespace krys::boo::html
     /// @brief The chrome client of the element's page, which makes pickers; null without a page.
     KRYS_NODISCARD ChromeClient *GetChromeClient() const noexcept;
 
+    /// @brief Whether the element's window has transient activation, which a click or key needs to open a
+    /// picker, as in Chrome. It isn't consumed.
+    /// @see https://html.spec.whatwg.org/#transient-activation
+    KRYS_NODISCARD bool HasTransientActivation() const noexcept;
+
     KRYS_NODISCARD Decimal ParseToNumberOrNaN(dom::DOMStringView string) const noexcept;
 
     /// @brief The step base, following the HTML algorithm.
