@@ -116,6 +116,32 @@ namespace krys::boo::tests
     CHECK(fired == List<std::string> {"interval", "installed", "interval", "timeout"});
   }
 
+  TEST_CASE("A suspended document's web fonts start loading once it resumes", "[DOM][Document][Suspension]")
+  {
+    SuspensionFixture fixture;
+    auto &document = fixture.Document();
+    // The bytes don't matter: only whether the font is requested.
+    fixture.Strategy.AddText(u8"https://example.com/font.ttf", u8"not a font", u8"font/ttf");
+
+    document.Suspend(Reason);
+    auto style = document.CreateElement(u8"style").ReleaseValue();
+    (void)style->TextContent(u8"@font-face { font-family: web; src: url(font.ttf) } p { font-family: web }");
+    (void)document.Body()->AppendChild(*style);
+    (void)document.UpdateLayout();
+    html::EventLoop::Current().RunUntilIdle();
+    RunNetworkingTasks();
+    auto requested = [&]
+    {
+      return std::ranges::count(fixture.Strategy.Requests, utf8_string(u8"https://example.com/font.ttf"));
+    };
+    CHECK(requested() == 0);
+
+    document.Resume(Reason);
+    html::EventLoop::Current().RunUntilIdle();
+    RunNetworkingTasks();
+    CHECK(requested() == 1);
+  }
+
   TEST_CASE("A suspended document's animation frame callbacks wait", "[DOM][Document][Suspension]")
   {
     SuspensionFixture fixture;

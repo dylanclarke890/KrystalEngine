@@ -3275,8 +3275,8 @@ namespace krys::boo::dom
       }
     }
 
-    // FIXME: The page's overlay scrollbars, the composited layers' pending update and font loading, once
-    // there are those, and media elements' playback, with media.
+    // FIXME: The page's overlay scrollbars and the composited layers' pending update, once there are those,
+    // and media elements' playback, with media.
     SuspendScheduledTasks(reason);
 
     // The frame's timers: the layout, the animations and autoscrolling stop.
@@ -3289,6 +3289,9 @@ namespace krys::boo::dom
       }
       Frame()->GetEventHandler().StopAutoscrollTimer();
     }
+
+    // Web fonts start no more loads until the document resumes.
+    SuspendFontLoading();
 
     _isSuspended = true;
   }
@@ -3309,6 +3312,11 @@ namespace krys::boo::dom
     }
 
     ResumeScheduledTasks(reason);
+
+    if (_fontLoader)
+    {
+      _fontLoader->ResumeFontLoading();
+    }
 
     _isSuspended = false;
   }
@@ -4485,6 +4493,11 @@ namespace krys::boo::dom
     if (!_fontLoader)
     {
       _fontLoader = UniquePtr<DocumentFontLoader>(new DocumentFontLoader(const_cast<Document &>(*this)));
+      // A loader made while the document is suspended waits for it to resume too.
+      if (_isSuspended)
+      {
+        _fontLoader->SuspendFontLoading();
+      }
     }
     return *_fontLoader;
   }
