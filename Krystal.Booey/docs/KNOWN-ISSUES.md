@@ -146,7 +146,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - External reference filters (`filter: url(doc.svg#f)`) are not loaded or watched (FIXME in `RenderLayerFilters.cpp`). `cross-fade()` and filter images load their inputs but do not follow them as clients (FIXMEs in `StyleCrossfadeImage.cpp`, `StyleFilterImage.cpp`), so they do not update when an input loads, and `StyleCrossfadeImage::Blend` always returns null, so `cross-fade()` percentages don't interpolate.
-- Style sheets have no `nosniff` or HTTP status checks (FIXMEs in `CachedCSSStyleSheet.cpp`).
 - `CachedResource` has no preloads, priorities or streaming and partial data; a resource decodes only once all its data has arrived. `CachedResourceLoader` loads images, fonts and style sheets only; other types, request counting and loads that do not delay the load event are FIXMEs. `MemoryCache` has one LRU list. `SharedBuffer` is one contiguous immutable buffer.
 - Images decode synchronously: there is no decoding work queue, so `DecodingMode::Asynchronous` decodes at once and its callbacks run before the call returns (FIXMEs in `BitmapImageSource.cpp`). `HTMLImageElement` and `SVGImageElement` have no `decode()`.
 - Animated images (GIF, APNG, animated WebP) do not decode the next frame ahead, have no `allowsAnimation` override or system animation controls, and no controls for suspended documents or off-screen views.
@@ -219,5 +218,4 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Responses can't be streamed: the main resource arrives whole on a networking task, and the loader strategy has no cancellation or synchronous loads (FIXME in `LoaderStrategy.hpp`).
-- Icon loads keep error pages' bytes, as responses carry no HTTP status (FIXME in `IconLoader.cpp`).
 - Animation frames are not throttled below the page's rate (FIXME in `ScriptedAnimationController.cpp`), and scroll events are not throttled (FIXME in `LocalFrameView.cpp`).

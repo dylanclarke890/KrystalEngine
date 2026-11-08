@@ -59,10 +59,14 @@ namespace krys::boo::tests
   {
     LoadFixture fixture;
     fixture.Strategy.AddText(u8"https://example.com/icon.png", u8"PNG bytes", u8"image/png");
-    LoadPage(fixture, u8"<!DOCTYPE html><link rel=icon href=icon.png><link rel=icon href=missing.png>");
+    // An error page isn't an icon.
+    fixture.Strategy.AddText(u8"https://example.com/error.png", u8"Not found", u8"text/html");
+    fixture.Strategy.StatusCodes[u8"https://example.com/error.png"] = 404;
+    LoadPage(fixture, u8"<!DOCTYPE html><link rel=icon href=icon.png><link rel=icon href=missing.png>"
+                      u8"<link rel=icon href=error.png>");
     REQUIRE(fixture.Client->IconDecisions.size() == 1);
     auto icons = fixture.Client->IconDecisions[0];
-    REQUIRE(icons.size() == 2);
+    REQUIRE(icons.size() == 3);
 
     auto &documentLoader = *fixture.Frame().Loader().GetDocumentLoader();
     List<std::string> loaded;
@@ -73,7 +77,7 @@ namespace krys::boo::tests
         { loaded.push_back(data ? std::string(data->GetSpan().begin(), data->GetSpan().end()) : "none"); });
     }
     RunNetworkingTasks();
-    CHECK(loaded == List<std::string> {"PNG bytes", "none"});
+    CHECK(loaded == List<std::string> {"PNG bytes", "none", "none"});
 
     SECTION("an icon declined, or decided on twice, isn't loaded")
     {

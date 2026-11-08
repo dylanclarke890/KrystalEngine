@@ -66,9 +66,13 @@ namespace krys::boo
   void IconLoader::NotifyFinished(CachedResource &resource) noexcept
   {
     krys_debug_assert(&resource == _resource.get());
-    // FIXME: Ignore error pages (a status outside 200 to 299), once responses have a status.
     RefPtr<SharedBuffer> data =
       resource.LoadFailedOrCanceled() ? nullptr : ShareRefPtr(resource.ResourceBuffer());
+    // An error page isn't an icon to decode.
+    if (resource.Response().HTTPStatusCode() && !resource.Response().IsSuccessful())
+    {
+      data = nullptr;
+    }
 
     // Not a PDF, which can't be an icon.
     constexpr Array<uint8, 4> pdfMagicNumber {'%', 'P', 'D', 'F'};
