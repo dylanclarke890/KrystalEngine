@@ -74,6 +74,9 @@ namespace krys::boo
         // The job owns the decoder until it hands it back.
         auto frame = decoder->CreateFrameImageAtIndex(request.Index, request.Level,
                                                       DecodingOptions(DecodingMode::Synchronous));
+        // The frame's image keeps its pixels: the decoder keeps only what later frames are decoded from, so
+        // an animation's frames aren't held twice.
+        decoder->ClearFrameBufferCache(request.Index);
         return DecodedFrame {krys::move(decoder), krys::move(frame)};
       },
       html::EventLoop::Current().Inbox(),

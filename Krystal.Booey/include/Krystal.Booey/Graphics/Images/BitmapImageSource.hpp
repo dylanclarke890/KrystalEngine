@@ -15,9 +15,11 @@ namespace krys::boo
 
   /// @brief The source of a bitmap image: its decoder, the frames decoded from it and their metadata.
   /// Asynchronous decoding decodes a frame on the host's work queue (`ImageFrameWorkQueue`), once all the
-  /// image's data has arrived; without a work queue, or before then, frames decode synchronously.
+  /// image's data has arrived; without a work queue, or before then, frames decode synchronously. An
+  /// animation decodes its next frame on the work queue while the current one shows.
   class BitmapImageSource final : public ImageSource
   {
+    friend class ImageFrameAnimator;
     friend class ImageFrameWorkQueue;
 
   private:

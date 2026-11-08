@@ -776,8 +776,7 @@ namespace krys::boo
                                                     const DecodingOptions &options) noexcept
   {
     // The current frame decodes before the animation starts, so its duration (known once it's decoded) times
-    // the frame.
-    // FIXME: Decode the next frame ahead on the decoding work queue, once there's one.
+    // the frame; starting it asks the work queue for the next frame.
     auto nativeImage = NativeImageAtIndexForDrawing(CurrentFrameIndex(), subsamplingLevel, options);
     (void)StartAnimation(subsamplingLevel, options);
     return nativeImage;

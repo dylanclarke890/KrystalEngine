@@ -117,8 +117,12 @@ namespace krys::boo
     _nextFrameSubsamplingLevel = subsamplingLevel;
     _nextFrameOptions = options;
 
-    // FIXME: Request decoding the next frame asynchronously, once there's a decoding work queue; for now it
-    // decodes when it's drawn.
+    // Without the host's work queue, the next frame decodes when it's drawn.
+    if (options.GetDecodingMode() == DecodingMode::Asynchronous && _source.CanDecodeAsynchronously())
+    {
+      (void)_source.RequestNativeImageAtIndexIfNeeded(NextFrameIndex(), subsamplingLevel,
+                                                      ImageAnimatingState::Yes, options);
+    }
 
     auto time = CurrentTime();
 
