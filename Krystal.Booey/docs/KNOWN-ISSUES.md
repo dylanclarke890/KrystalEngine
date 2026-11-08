@@ -49,7 +49,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - `env()` has no values: without the document's `ConstantPropertyMap` an `env()` reference falls back or is invalid at computed-value time (FIXME in `VariableReferenceValue.cpp`).
-- Visually ordered documents aren't applied in `ResolveForDocument` (FIXME).
 - No visibility adjustment (`VisibilityAdjustment`): `adjustVisibilityForPseudoElement` and the force-hidden subtree adjustment are FIXMEs.
 - `Adjuster` leaves SVG transforms not stored on the style, and the layer-based SVG engine's `z-index`/stacking branches, as FIXMEs.
 - `Style::Extractor` has no branch for properties with running keyframe effects (FIXME).

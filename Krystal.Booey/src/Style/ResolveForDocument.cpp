@@ -19,7 +19,8 @@ namespace krys::boo::style
     auto documentStyle = RenderStyle::Create();
 
     documentStyle.SetDisplay(DisplayType::Block);
-    // FIXME: Visually ordered documents (legacy encodings) set `Order::Visual`; there are no encodings.
+    // A document is never visually ordered: that comes from the legacy ISO-8859-8 encoding, and everything is
+    // decoded as UTF-8 (see DIFFERENCES.md).
     documentStyle.SetRTLOrdering(boo::Order::Logical);
     if (auto *frame = document.Frame())
     {
