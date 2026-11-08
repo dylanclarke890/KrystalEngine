@@ -5,8 +5,7 @@
 
 namespace krys::boo::html
 {
-  /// @brief The password input type.
-  // FIXME: The caps lock indicator.
+  /// @brief The password input type. There's no caps lock indicator, as in Chrome.
   class PasswordInputType final : public BaseTextInputType
   {
   public:

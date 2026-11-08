@@ -76,7 +76,7 @@ namespace krys::ui
     void Undo() noexcept override;
     void Redo() noexcept override;
 
-    // FIXME: Autofill (offering to fill text fields as they're edited), which the host doesn't do.
+    // There's no autofill (not planned, see Krystal.Booey's OVERVIEW.md).
 
     void TextFieldDidBeginEditing(boo::dom::Element &) noexcept override
     {

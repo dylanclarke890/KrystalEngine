@@ -495,7 +495,6 @@ namespace krys::boo::html
       SetTextAsOfLastFormControlChangeEvent(sanitizedValue);
     }
 
-    // FIXME: The chrome client's didProgrammaticallyClearTextFormControl, with the host's autofill.
     return {};
   }
 
@@ -1138,8 +1137,6 @@ namespace krys::boo::html
     }
 
     UpdateValidity();
-
-    // FIXME: Clearing the autofill flags, with autofill.
   }
 
   RenderPtr<RenderElement> HTMLInputElement::CreateElementRenderer(RenderStyle &&style) noexcept
@@ -1259,9 +1256,6 @@ namespace krys::boo::html
     textBlockStyle.SetTextOverflow(ShouldTruncateText(style) ? TextOverflow::Ellipsis : TextOverflow::Clip);
 
     textBlockStyle.SetDisplay(DisplayType::Block);
-
-    // FIXME: The strong password AutoFill button's inner text (a masked, translucent inline block), with
-    // autofill.
 
     return textBlockStyle;
   }
@@ -2261,8 +2255,6 @@ namespace krys::boo::html
 
     if (_inputType->ShouldSubmitImplicitly(event))
     {
-      // FIXME: Adding a recent search (addSearchResult) for search fields, with recent searches.
-
       // Form submission finishes editing, just as loss of focus does. If there was a change, send the event
       // now.
       if (WasChangedSinceLastFormControlChangeEvent())

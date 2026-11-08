@@ -22,7 +22,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- No autofill (`:autofill`), caps lock indicator or strong password fields on password fields, validation message bubble, `RenderSearchField` (search fields have no recent searches), or input purpose hints (`inputmode`, `autocapitalize`, spell checking).
+- No validation message bubble: `reportValidity()` and form submission don't show the message.
 - A number input in a locale with other digits (Arabic-Indic, say) shows its value in them, but digits typed are inserted as ASCII ones; the decimal separator typed is the locale's.
 - Customizable `<select>`: `appearance: base-select` on the select alone gives a picker with base appearance, where without `::picker(select)` opting in too it should be the native one, as `RenderMenuList` owns the popup menu. List boxes ignore `appearance: base-select` and stay native. Type-ahead with the picker open changes the selection, where it should move the focus. Page Up and Page Down move ten options, not a viewport's worth. A `legend` in an `optgroup` isn't its label in a native menu.
 - `<img>` lacks `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` has no `<object>` fallback (FIXME); `ImageLoader`'s reuse of available images has no preloads (FIXME).

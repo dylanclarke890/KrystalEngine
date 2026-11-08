@@ -271,7 +271,6 @@ namespace krys::boo::html
 
     bool isFocusEvent = event.Type() == EventNames::Focus;
     bool isBlurEvent = event.Type() == EventNames::Blur;
-    // FIXME: The caps lock indicator (capsLockStateMayHaveChanged), with the caps lock indicator.
     if (event.IsMouseEvent() || isFocusEvent || isBlurEvent)
     {
       Element()->ForwardEvent(event);
@@ -365,7 +364,6 @@ namespace krys::boo::html
     Ref<HTMLInputElement> element = ShareRef(*Element());
     auto &document = element->NodeDocument();
     bool shouldHaveSpinButton = ShouldHaveSpinButton();
-    // FIXME: The caps lock indicator and the autofill button also need a container.
     bool createsContainer = shouldHaveSpinButton || element->List() || NeedsContainer();
 
     auto innerText = TextControlInnerTextElement::Create(document, element->IsInnerTextElementEditable());
@@ -390,8 +388,6 @@ namespace krys::boo::html
       _innerSpinButton = innerSpinButton;
       (void)_container->AppendChild(*innerSpinButton);
     }
-
-    // FIXME: The caps lock indicator and the autofill button.
 
     DataListMayHaveChanged();
   }
@@ -463,7 +459,6 @@ namespace krys::boo::html
     {
       innerSpinButton->ReleaseCapture();
     }
-    // FIXME: The caps lock indicator and the autofill button, with them.
   }
 
   void TextFieldInputType::ReadOnlyStateChanged() noexcept
@@ -477,7 +472,6 @@ namespace krys::boo::html
     {
       innerSpinButton->ReleaseCapture();
     }
-    // FIXME: The caps lock indicator and the autofill button, with them.
   }
 
   void TextFieldInputType::SpinButtonStepDown() noexcept

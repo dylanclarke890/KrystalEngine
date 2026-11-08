@@ -688,7 +688,6 @@ namespace krys::boo::html
   void HTMLFormElement::OnInsert() noexcept
   {
     HTMLElement::OnInsert();
-    // FIXME: Telling the host about the form (Document::didAssociateFormControl), for autofill.
   }
 
   void HTMLFormElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
@@ -1293,8 +1292,6 @@ namespace krys::boo::html
         if (input->IsTextField())
         {
           formValues->push_back({input->Name(), input->Value()});
-          // FIXME: Adding the value to the search field's recent searches (addSearchResult), with search
-          // fields' results.
         }
       }
     }

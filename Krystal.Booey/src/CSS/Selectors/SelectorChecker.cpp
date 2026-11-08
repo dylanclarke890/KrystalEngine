@@ -1337,7 +1337,7 @@ namespace krys::boo::css
           }
           break;
         case SelectorPseudoClass::Autofill:
-          // FIXME: Autofill.
+          // There's no autofill (see OVERVIEW.md), so it never matches.
           return false;
         case SelectorPseudoClass::AnyLink:
         case SelectorPseudoClass::Link:

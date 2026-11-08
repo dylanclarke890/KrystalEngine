@@ -1104,8 +1104,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Escape hiding validation messages and leaving fullscreen; the caps lock state of text fields;
-    // pan scrolling.
+    // FIXME: Escape hiding validation messages and leaving fullscreen; pan scrolling.
 
     // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
     // the location bar.

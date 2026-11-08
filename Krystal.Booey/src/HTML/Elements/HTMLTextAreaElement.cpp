@@ -434,8 +434,7 @@ namespace krys::boo::html
 
     SetTextAsOfLastFormControlChangeEvent(krys::move(normalizedValue));
 
-    // FIXME: Telling accessibility the value changed, and the chrome client's
-    // didProgrammaticallyClearTextFormControl, with accessibility and the host's autofill.
+    // FIXME: Telling accessibility the value changed, once there's accessibility.
   }
 
   // https://html.spec.whatwg.org/#dom-textarea-defaultvalue

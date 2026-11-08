@@ -9,7 +9,6 @@ namespace krys::boo::html
 {
   /// @brief The base of the text-like input types and number: a field with an inner text element the user
   /// edits, and a placeholder.
-  // FIXME: The caps lock indicator and the autofill button.
   class TextFieldInputType : public InputType,
                              protected SpinButtonOwner,
                              private DataListSuggestionsClient,
