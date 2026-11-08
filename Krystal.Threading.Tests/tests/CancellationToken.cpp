@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Threading/Thread.hpp"
 
-namespace krys::threads::tests
+namespace krys::tests
 {
   TEST_CASE("CancellationToken: another thread sees the cancellation", "[Threading]")
   {

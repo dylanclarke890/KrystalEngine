@@ -6,7 +6,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <atomic>
 
-namespace krys::threads
+namespace krys
 {
   /// @brief A flag a requester sets to tell a long job it's no longer wanted, which the job checks between
   /// steps to stop early. Shared by both through `Ref`s; any thread can set or read it.

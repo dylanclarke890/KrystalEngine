@@ -10,7 +10,7 @@
 #include "Krystal.Booey/DOM/MutationObservers/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <ranges>
 
 namespace krys::boo::dom

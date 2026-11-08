@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo
 {

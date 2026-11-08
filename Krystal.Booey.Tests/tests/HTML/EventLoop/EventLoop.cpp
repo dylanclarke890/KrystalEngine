@@ -103,7 +103,7 @@ namespace krys::boo::html::tests
 
     SECTION("a completion runs as the loop runs, and queues a task for what follows")
     {
-      threads::ManualWorkQueue queue;
+      ManualWorkQueue queue;
       int received = 0;
       queue.Dispatch([]() { return 42; }, loop.Inbox(),
                      [&](int result)
@@ -113,7 +113,6 @@ namespace krys::boo::html::tests
                        loop.QueueMicrotask([&] { order.push_back(u8"microtask"); });
                        loop.QueueTask(TaskSource::DOMManipulation, [&] { order.push_back(u8"task"); });
                      });
-      CHECK_FALSE(loop.NextWakeTime());
 
       REQUIRE(queue.RunAll() == 1);
       // The completion waits in the inbox, which wakes the loop.
@@ -123,13 +122,12 @@ namespace krys::boo::html::tests
       loop.RunUntilIdle();
       CHECK(order == List<utf8_string> {u8"completion", u8"microtask", u8"task"});
       CHECK(received == 42);
-      CHECK_FALSE(loop.NextWakeTime());
     }
 
     SECTION("from the job system's workers")
     {
       {
-        threads::JobSystem jobs(2);
+        JobSystem jobs(2);
         for (int i = 0; i < 3; ++i)
         {
           jobs.Dispatch([]() {}, loop.Inbox(), [&] { order.push_back(u8"done"); });

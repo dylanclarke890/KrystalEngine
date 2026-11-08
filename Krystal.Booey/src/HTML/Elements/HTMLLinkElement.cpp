@@ -20,7 +20,7 @@
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::html
 {

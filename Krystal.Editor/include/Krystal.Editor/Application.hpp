@@ -66,7 +66,7 @@ namespace krys
     UniquePtr<log::ILogger> Logger {};
     UniquePtr<EventManager> Events {};
     /// @brief The worker threads that run the application's jobs.
-    UniquePtr<threads::JobSystem> Jobs {};
+    UniquePtr<JobSystem> Jobs {};
     UniquePtr<pal::IWindow> Window {};
     UniquePtr<pal::Input> Input {};
     UniquePtr<io::VirtualFileSystem> VFS {};

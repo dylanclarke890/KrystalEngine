@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Platform/ThreadTimers.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <utility>
 
 namespace krys::boo

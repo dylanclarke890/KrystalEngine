@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>
 #include <ranges>
 

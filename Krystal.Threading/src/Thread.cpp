@@ -9,7 +9,7 @@
   #include <windows.h>
 #endif
 
-namespace krys::threads
+namespace krys
 {
   namespace
   {

@@ -7,11 +7,11 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/AlignedStorage.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::css
 {

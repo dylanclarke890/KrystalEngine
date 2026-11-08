@@ -12,8 +12,8 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::dom
 {

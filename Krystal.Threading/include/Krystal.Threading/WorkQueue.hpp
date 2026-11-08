@@ -8,7 +8,7 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Threading/TaskInbox.hpp"
 
-namespace krys::threads
+namespace krys
 {
   /// @brief How soon a job is needed, which decides which waiting job starts next. A running job is never
   /// interrupted.

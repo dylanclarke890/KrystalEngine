@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionCache.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::layout
 {

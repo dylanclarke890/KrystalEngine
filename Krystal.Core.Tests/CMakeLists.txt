@@ -79,8 +79,9 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Types/ListHashSet.cpp
 	PRIVATE tests/Types/Packed.cpp
 
-  # Utils
-	PRIVATE tests/Utils/NeverDestroyed.cpp
+  # Threading
+	PRIVATE tests/Threading/MainThread.cpp
+	PRIVATE tests/Threading/NeverDestroyed.cpp
 
   # Commands
 	PRIVATE tests/Commands/Command.cpp

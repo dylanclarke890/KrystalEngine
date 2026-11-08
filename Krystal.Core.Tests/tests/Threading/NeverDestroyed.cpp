@@ -1,4 +1,4 @@
-﻿#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+﻿#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests

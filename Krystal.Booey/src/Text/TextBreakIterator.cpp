@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>
 #include <unicode/ubrk.h>

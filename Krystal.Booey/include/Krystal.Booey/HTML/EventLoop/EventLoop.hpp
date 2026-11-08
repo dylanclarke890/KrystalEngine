@@ -72,7 +72,7 @@ namespace krys::boo::html
     List<UniquePtr<Timer>> _scheduledTasks;
 
     /// @brief Where jobs post back to the loop's thread.
-    threads::TaskInbox _inbox;
+    TaskInbox _inbox;
 
   public:
     EventLoop() noexcept;
@@ -138,7 +138,7 @@ namespace krys::boo::html
     /// @brief Where jobs on other threads post their completions: the loop runs them as it runs, before its
     /// timers and tasks. They're the way back from steps the specifications run in parallel, so a completion
     /// queues a task (on the right task source, for the right document) for whatever touches the DOM.
-    KRYS_NODISCARD threads::TaskInbox &Inbox() noexcept
+    KRYS_NODISCARD TaskInbox &Inbox() noexcept
     {
       return _inbox;
     }

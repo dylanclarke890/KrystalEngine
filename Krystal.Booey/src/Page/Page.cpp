@@ -25,8 +25,8 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo
 {

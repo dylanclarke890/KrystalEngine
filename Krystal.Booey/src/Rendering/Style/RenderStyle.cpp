@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 
 namespace krys::boo

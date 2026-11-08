@@ -4,7 +4,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <thread>
 
-namespace krys::threads::tests
+namespace krys::tests
 {
   TEST_CASE("ManualWorkQueue: jobs run when the test says, on its thread", "[Threading]")
   {

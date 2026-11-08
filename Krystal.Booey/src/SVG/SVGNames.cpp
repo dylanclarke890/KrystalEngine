@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 #define KRYS_DEFINE_SVG_ATTRIBUTE_NAME(Name, localName)                                                      \
   const dom::QualifiedName &SVGNames::Name() noexcept                                                        \

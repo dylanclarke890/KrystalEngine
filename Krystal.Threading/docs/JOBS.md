@@ -25,7 +25,7 @@ The main thread owns everything that isn't explicitly handed off. A job gets its
 
 ## API
 
-It's a module of its own, **Krystal.Threading** (namespace `krys::threads`), laid out like the others: `include/Krystal.Threading/`, `src/`, and its tests in **Krystal.Threading.Tests**. It depends only on Krystal.Core. Booey and Krystal.UI depend on it for `WorkQueue` and `TaskInbox`, and the editor creates its `JobSystem`. `MoveOnlyFunc` is the exception: it's a general type, so it goes next to `Func` in Krystal.Core.
+It's a module of its own, **Krystal.Threading** (namespace `krys`), laid out like the others: `include/Krystal.Threading/`, `src/`, and its tests in **Krystal.Threading.Tests**. It depends only on Krystal.Core. Booey and Krystal.UI depend on it for `WorkQueue` and `TaskInbox`, and the editor creates its `JobSystem`. `MoveOnlyFunc` is the exception: it's a general type, so it goes next to `Func` in Krystal.Core.
 
 ### `MoveOnlyFunc`
 
@@ -114,7 +114,7 @@ It's a thin wrapper over `std::jthread` that sets the name the debugger and prof
 
 ### Main-thread checks
 
-`IsMainThread()` (the thread the program started on) and `krys_debug_assert(IsMainThread())` go in the places that must never be reached from a worker: `EventLoop`, the `View` entry points, `Document`, `ValuePool`. Debug builds then catch a job that strays where it shouldn't.
+`IsMainThread()` (the thread the program started on) is in Krystal.Core (`Threading/MainThread.hpp`), next to `NeverDestroyed`, so that Core's own main-thread singletons can use it: a `MainThreadNeverDestroyed` asserts it on every access in debug builds. Booey's event loop and value pool are `MainThreadNeverDestroyed`s, so debug builds catch a job that strays into Booey.
 
 ## What a job may touch
 
@@ -155,7 +155,7 @@ A job must not throw (the engine is `noexcept`) and must not block on IO or on o
 
 ## Plan
 
-1. The Krystal.Threading and Krystal.Threading.Tests projects; `MoveOnlyFunc` in Krystal.Core; `TaskInbox`, `JobSystem` (shared queue), `Thread` and `IsMainThread`, with their tests.
+1. The Krystal.Threading and Krystal.Threading.Tests projects; `MoveOnlyFunc` in Krystal.Core; `TaskInbox`, `JobSystem` (shared queue) and `Thread`, with their tests; `IsMainThread` in Krystal.Core.
 2. `WorkQueue` and `ManualWorkQueue` (in Krystal.Threading, so Booey's and Krystal.UI's tests share it); Booey's event loop drains a `TaskInbox`; the editor creates the `JobSystem`.
 3. Asynchronous still-image decoding in Booey.
 4. Decoding animation frames ahead.

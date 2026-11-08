@@ -4,9 +4,9 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::css::mq

@@ -133,7 +133,7 @@ namespace krys
       throw std::runtime_error("Failed to create event manager");
     }
 
-    _context->Jobs = CreateUnique<threads::JobSystem>();
+    _context->Jobs = CreateUnique<JobSystem>();
 
     _context->Input = CreateUnique<pal::Input>(_context->Events.get());
     if (!_context->Input)

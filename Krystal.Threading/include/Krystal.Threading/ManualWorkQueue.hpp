@@ -6,7 +6,7 @@
 #include "Krystal.Core/Types/Queue.hpp"
 #include "Krystal.Threading/WorkQueue.hpp"
 
-namespace krys::threads
+namespace krys
 {
   /// @brief A work queue that keeps its jobs until it's told to run them, on the thread that tells it: for
   /// tests of code that dispatches jobs, which can then check what happens before a job runs, after, and in

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Threading/ManualWorkQueue.hpp"
 
-namespace krys::threads
+namespace krys
 {
   void ManualWorkQueue::Dispatch(MoveOnlyFunc<void()> job, JobPriority priority) noexcept
   {

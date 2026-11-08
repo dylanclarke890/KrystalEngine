@@ -12,7 +12,7 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGPoint.hpp"
 #include "Krystal.Booey/SVG/SVGRect.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 
 namespace krys::boo::svg

@@ -4,7 +4,6 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Maths/Random.hpp"
-#include "Krystal.Threading/MainThread.hpp"
 #include <iterator>
 #include <mutex>
 
@@ -54,8 +53,6 @@ namespace krys::boo::css
 
   ValuePool &ValuePool::MainThreadPool() noexcept
   {
-    // Values are made on the main thread only; a job mustn't make or share them.
-    krys_debug_assert(threads::IsMainThread());
     static MainThreadNeverDestroyed<ValuePool> pool;
     return pool;
   }

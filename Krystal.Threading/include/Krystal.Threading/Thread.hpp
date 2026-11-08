@@ -6,7 +6,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include <thread>
 
-namespace krys::threads
+namespace krys
 {
   /// @brief A thread of its own, named for debuggers and profilers, that runs a function until it returns:
   /// for work that blocks, has a deadline or never ends (audio, file reads), which doesn't suit a job.

@@ -2,7 +2,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::threads
+namespace krys
 {
   TaskInbox::~TaskInbox() noexcept
   {

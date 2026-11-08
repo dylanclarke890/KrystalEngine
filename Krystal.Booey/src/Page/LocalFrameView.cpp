@@ -46,7 +46,7 @@
 #include "Krystal.Booey/URL/URLParser.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo

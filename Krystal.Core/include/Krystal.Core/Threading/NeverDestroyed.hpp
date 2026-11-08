@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Threading/MainThread.hpp"
 #include "Krystal.Core/Utils/AlignedStorage.hpp"
 #include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
@@ -19,8 +20,7 @@ namespace krys
   {
     static void AssertAccess() noexcept
     {
-      // FIXME: Implement a proper main thread check for the target platform.
-      // krys_assert(isMainThread());
+      krys_debug_assert(IsMainThread());
     }
   };
 

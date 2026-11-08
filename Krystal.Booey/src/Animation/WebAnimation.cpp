@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 #include <cmath>
 

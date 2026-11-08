@@ -5,7 +5,7 @@
 #include <atomic>
 #include <thread>
 
-namespace krys::threads::tests
+namespace krys::tests
 {
   namespace
   {

@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Threading/JobSystem.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Threading/MainThread.hpp"
+#include "Krystal.Core/Threading/MainThread.hpp"
 #include <atomic>
 #include <latch>
 #include <mutex>
 #include <thread>
 
-namespace krys::threads::tests
+namespace krys::tests
 {
   namespace
   {

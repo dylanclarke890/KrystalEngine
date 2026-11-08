@@ -2,8 +2,8 @@
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <new>
 
 namespace krys::boo::css

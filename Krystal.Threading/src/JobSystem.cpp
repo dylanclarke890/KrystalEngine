@@ -4,7 +4,7 @@
 #include <ranges>
 #include <thread>
 
-namespace krys::threads
+namespace krys
 {
   uint32 JobSystem::DefaultWorkerCount() noexcept
   {

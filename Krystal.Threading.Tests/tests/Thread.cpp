@@ -5,7 +5,7 @@
 #include <atomic>
 #include <thread>
 
-namespace krys::threads::tests
+namespace krys::tests
 {
   TEST_CASE("Thread: runs its body on a thread of its own, and waits for it", "[Threading]")
   {

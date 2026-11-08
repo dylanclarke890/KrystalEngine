@@ -8,7 +8,7 @@
 #include <mutex>
 #include <thread>
 
-namespace krys::threads
+namespace krys
 {
   /// @brief Somewhere other threads can send work back to the thread that owns it, such as a job's
   /// completion: a thread-safe queue of tasks that the owner runs, in the order they arrived, when it next

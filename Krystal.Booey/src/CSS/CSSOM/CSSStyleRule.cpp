@@ -14,8 +14,8 @@
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::css
 {

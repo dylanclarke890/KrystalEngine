@@ -3,8 +3,7 @@
 #include "Krystal.Booey/Platform/ThreadTimers.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
-#include "Krystal.Threading/MainThread.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 
 namespace krys::boo::html
@@ -16,8 +15,7 @@ namespace krys::boo::html
   EventLoop &EventLoop::Current() noexcept
   {
     // Only the main thread has an event loop; a job mustn't reach it.
-    krys_debug_assert(threads::IsMainThread());
-    static NeverDestroyed<EventLoop> eventLoop;
+    static MainThreadNeverDestroyed<EventLoop> eventLoop;
     return eventLoop;
   }
 

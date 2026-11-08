@@ -9614,7 +9614,7 @@ class GenerateStyleInterpolationWrapperMap:
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Core/Types/Array.hpp",
-                    "Krystal.Core/Utils/NeverDestroyed.hpp",
+                    "Krystal.Core/Threading/NeverDestroyed.hpp",
                 ],
             )
 

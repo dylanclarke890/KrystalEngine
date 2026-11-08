@@ -13,7 +13,7 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace krys::threads
+namespace krys
 {
   /// @brief A pool of worker threads that run jobs. Workers sleep while there's nothing to do; a free one
   /// takes the oldest Normal job, or else the oldest Background one.
