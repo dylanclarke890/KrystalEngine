@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
@@ -375,17 +376,24 @@ namespace krys::boo::style::tests
     REQUIRE(Names(MatchAll(ById(*document, u8"i1"))->AuthorDeclarations) == Strings {"root"});
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "ElementRuleCollector: @container rules don't match yet",
-                   "[Style][ElementRuleCollector]")
+  TEST_CASE("ElementRuleCollector: @container rules match when their queries are true",
+            "[Style][ElementRuleCollector]")
   {
-    RunTasks();
-    // FIXME: Container queries are unknown until there is a container query evaluator.
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
-      #c { container-type: inline-size; }
-      @container (width >= 0px) { p { --n: container; } }
+    // Shown in a view and laid out, so the size container has a box to query.
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #c { container-type: inline-size; --x: 1; }
+      @container (width >= 0px) { p { --n: wide; } }
+      @container (width < 0px) { p { --n: narrow; } }
+      @container style(--x: 1) { p { --n: styled; } }
+      @container style(--x: 2) { p { --n: unstyled; } }
       p { --n: plain; }
-    </style><div id=c><p id=p></p></div>)");
-    REQUIRE(Names(MatchAll(ById(*document, u8"p"))->AuthorDeclarations) == Strings {"plain"});
+    </style><div id=c><p id=p></p></div><p id=o></p>)"};
+    (void)fixture.Document->UpdateLayout();
+
+    REQUIRE(Names(MatchAll(fixture.ById(u8"p"))->AuthorDeclarations) == Strings {"wide", "styled", "plain"});
+
+    // Outside the container, size queries have no container and style queries are false.
+    REQUIRE(Names(MatchAll(fixture.ById(u8"o"))->AuthorDeclarations) == Strings {"plain"});
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ElementRuleCollector: pseudo-elements",
