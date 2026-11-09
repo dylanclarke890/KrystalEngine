@@ -293,10 +293,6 @@ namespace krys
   XYZA<float, WhitePoint::D65>
     ColourConversion<XYZA<float, WhitePoint::D65>, OKLab<float>>::Convert(const OKLab<float> &color) noexcept
   {
-    // FIXME: This could be optimized for when we are not explicitly converting to XYZ-D65 by pre-multiplying
-    // the 'LMSToXYZD65' matrix with any subsequent matrices in the conversion. This would mean teaching the
-    // main conversion about this matrix and adding new logic for this transform.
-
     // https://bottosson.github.io/posts/oklab/ with XYZ <-> LMS matrices recalculated for consistent
     // reference white in https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-943521484
 
@@ -329,10 +325,6 @@ namespace krys
   OKLab<float> ColourConversion<OKLab<float>, XYZA<float, WhitePoint::D65>>::Convert(
     const XYZA<float, WhitePoint::D65> &color) noexcept
   {
-    // FIXME: This could be optimized for when we are not explicitly converting from XYZ-D65 by
-    // pre-multiplying the 'XYZD65ToLMS' matrix with any previous matrices in the conversion. This would mean
-    // teaching the main conversion about this matrix and adding new logic for this transform.
-
     // https://bottosson.github.io/posts/oklab/ with XYZ <-> LMS matrices recalculated for consistent
     // reference white in https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-943521484
 
