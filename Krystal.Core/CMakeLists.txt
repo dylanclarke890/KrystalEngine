@@ -243,7 +243,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/DataRef.hpp
       include/Krystal.Core/Types/Expected.hpp
       include/Krystal.Core/Types/FixedVector.hpp
-      include/Krystal.Core/Types/FlatteningVariant.hpp
       include/Krystal.Core/Types/Func.hpp
       include/Krystal.Core/Types/HashMap.hpp
       include/Krystal.Core/Types/HashSet.hpp

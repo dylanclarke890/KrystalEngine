@@ -34,7 +34,6 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/CompactVariant.hpp"
-#include "Krystal.Core/Types/FlatteningVariant.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include <algorithm>
 #include <cmath>
@@ -638,12 +637,6 @@ namespace krys::boo::style
 
 namespace krys
 {
-  template <boo::style::DimensionPercentageNumeric T>
-  struct FlatteningVariantTraits<T>
-  {
-    using TypeList = typename FlatteningVariantTraits<typename T::Representation>::TypeList;
-  };
-
   template <auto R, typename V>
   struct MarkableTraits<boo::style::Integer<R, V>>
       : boo::style::PrimitiveNumericMarkableTraits<boo::style::Integer<R, V>>

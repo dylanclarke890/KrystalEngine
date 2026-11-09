@@ -139,7 +139,8 @@ namespace krys::boo::style::tests
   TEST_CASE("Style PrimitiveNumericOrKeyword", "[Style][PrimitiveNumeric]")
   {
     using LengthPercentageOrAuto = PrimitiveNumericOrKeyword<LengthPercentage<>, css::keywords::Auto>;
-    STATIC_CHECK((SameType<LengthPercentageOrAuto::Representation::Representation,
+    // A numeric with dimension and percentage alternatives shares one index with the keywords.
+    STATIC_CHECK((SameType<LengthPercentageOrAuto::Representation,
                            CompactVariant<Length<>, Percentage<css::All, float>,
                                           UnevaluatedCalc<css::LengthPercentage<>>, css::keywords::Auto>>));
 
@@ -147,9 +148,14 @@ namespace krys::boo::style::tests
     CHECK(length.HoldsAlternative<Length<>>());
     CHECK(length.IsZero());
 
+    LengthPercentageOrAuto percentage {LengthPercentage<> {Percentage<css::All, float> {50.0f}}};
+    CHECK(percentage.HoldsAlternative<Percentage<css::All, float>>());
+    CHECK_FALSE(percentage.IsZero());
+
     LengthPercentageOrAuto keyword {css::keywords::Auto {}};
     CHECK(keyword.HoldsAlternative<css::keywords::Auto>());
     CHECK_FALSE(keyword.IsZero());
     CHECK_FALSE(keyword == length);
+    CHECK(length == LengthPercentageOrAuto {LengthPercentage<> {Length<> {0.0f}}});
   }
 }

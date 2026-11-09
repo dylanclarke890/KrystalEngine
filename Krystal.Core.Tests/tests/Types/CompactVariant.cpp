@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Core/Types/CompactVariant.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Types/FlatteningVariant.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <bit>
@@ -403,32 +402,5 @@ namespace krys::tests
     a.swap(b);
     CHECK(a == CompactVariant<float, SmallEnoughStruct>(SmallEnoughStruct {3.0f}));
     CHECK(b == CompactVariant<float, SmallEnoughStruct>(SmallEnoughStruct {2.0f}));
-  }
-
-  TEST_CASE("FlatteningVariant flattens nested variants", "[FlatteningVariant]")
-  {
-    using Nested = Variant<int, float>;
-    using Flat = FlatteningVariant<Nested, double>;
-    STATIC_CHECK(SameType<Flat::Representation, Variant<int, float, double>>);
-
-    Flat fromNested = Nested {2.5f};
-    CHECK(fromNested.HoldsAlternative<float>());
-    CHECK(
-      SwitchOn(fromNested, [](int) { return 0; }, [](float) { return 1; }, [](double) { return 2; }) == 1);
-
-    Flat fromDouble = 1.0;
-    CHECK(fromDouble.HoldsAlternative<double>());
-    CHECK_FALSE(fromDouble == fromNested);
-    CHECK(fromDouble == Flat(1.0));
-
-    // Adaptors flatten through each other.
-    using Small = FlatteningVariant<Nested, uint16>;
-    using Outer = FlatteningCompactVariant<Small, SmallEnoughStruct>;
-    STATIC_CHECK(SameType<Outer::Representation, CompactVariant<int, float, uint16, SmallEnoughStruct>>);
-
-    Outer outer = Small {Nested {1}};
-    CHECK(outer.HoldsAlternative<int>());
-    Outer outerStruct = SmallEnoughStruct {2.0f};
-    CHECK(outerStruct.HoldsAlternative<SmallEnoughStruct>());
   }
 }

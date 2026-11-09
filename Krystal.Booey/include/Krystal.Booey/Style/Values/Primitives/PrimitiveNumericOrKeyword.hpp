@@ -27,12 +27,25 @@
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumericOrKeyword.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumeric.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/FlatteningVariant.hpp"
+#include "Krystal.Core/Types/CompactVariant.hpp"
 #include <algorithm>
 
 namespace krys::boo::style
 {
-  template <Numeric N, css::PrimitiveKeyword... Ks>
+  namespace detail
+  {
+    /// @brief A numeric's own alternatives followed by the keywords, so that one index covers them all.
+    template <typename TRepresentation, typename... Ks>
+    struct AppendAlternatives;
+
+    template <typename... As, typename... Ks>
+    struct AppendAlternatives<CompactVariant<As...>, Ks...>
+    {
+      using Type = CompactVariant<As..., Ks...>;
+    };
+  }
+
+  template <DimensionPercentageNumeric N, css::PrimitiveKeyword... Ks>
   class PrimitiveNumericOrKeyword
   {
   public:
@@ -41,7 +54,7 @@ namespace krys::boo::style
     using Calc = typename N::Calc;
     using Dimension = typename N::Dimension;
     using Keywords = css::PrimitiveKeywordList<Ks...>;
-    using Representation = FlatteningCompactVariant<N, Ks...>;
+    using Representation = typename detail::AppendAlternatives<typename N::Representation, Ks...>::Type;
 
   private:
     Representation _value;
@@ -49,7 +62,7 @@ namespace krys::boo::style
   public:
     template <typename U>
     requires SameType<remove_cvref_t<U>, N>
-    PrimitiveNumericOrKeyword(U &&value) noexcept : _value {std::forward<U>(value)}
+    PrimitiveNumericOrKeyword(U &&value) noexcept : _value {FromNumeric(std::forward<U>(value))}
     {
     }
 
@@ -77,6 +90,15 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD bool operator==(const PrimitiveNumericOrKeyword &) const noexcept = default;
+
+  private:
+    /// @brief The representation of a numeric: its active alternative.
+    template <typename U>
+    KRYS_NODISCARD static Representation FromNumeric(U &&value) noexcept
+    {
+      return krys::SwitchOn(std::forward<U>(value), []<typename A>(A &&alternative) -> Representation
+                            { return Representation(std::forward<A>(alternative)); });
+    }
   };
 
   // MARK: CSS -> Style
@@ -93,16 +115,6 @@ namespace krys::boo::style
   struct ToCSSMapping<PrimitiveNumericOrKeyword<N, Ks...>>
   {
     using type = css::PrimitiveNumericOrKeyword<CSSType<N>, Ks...>;
-  };
-}
-
-namespace krys
-{
-  template <typename N, typename... Ks>
-  struct FlatteningVariantTraits<boo::style::PrimitiveNumericOrKeyword<N, Ks...>>
-  {
-    using TypeList = typename FlatteningVariantTraits<
-      typename boo::style::PrimitiveNumericOrKeyword<N, Ks...>::Representation>::TypeList;
   };
 }
 
