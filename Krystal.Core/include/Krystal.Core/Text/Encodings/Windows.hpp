@@ -248,8 +248,7 @@ namespace krys::text
        0x00F5, 0x00F6, 0x00F7, 0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x00FD, 0x00FE, 0x00FF}};
 
     template <CodeUnitInputIterator<Windows1252> TIterator>
-    KRYS_NODISCARD constexpr static DecodeOneResult<Windows1252> DecodeOne(TIterator current,
-                                                                           TIterator end) noexcept
+    KRYS_NODISCARD constexpr static DecodeOneResult<Windows1252> DecodeOne(TIterator current, KRYS_MAYBE_UNUSED TIterator end) noexcept
     {
       krys_debug_assert(current != end);
       return DecodeOneWithExtendedASCIILookupMap<Windows1252>(CodeUnitValue(*current));

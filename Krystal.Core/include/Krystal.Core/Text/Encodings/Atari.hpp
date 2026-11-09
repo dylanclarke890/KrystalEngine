@@ -94,7 +94,7 @@ namespace krys::text
 
     template <CodeUnitInputIterator<ATASCII> TIterator>
     KRYS_NODISCARD constexpr static DecodeOneResult<ATASCII> DecodeOne(TIterator current,
-                                                                       TIterator end) noexcept
+                                                                       KRYS_MAYBE_UNUSED TIterator end) noexcept
     {
       krys_debug_assert(current != end);
       return DecodeOneWithLookupMap<ATASCII>(CodeUnitValue(*current));
