@@ -94,17 +94,15 @@ namespace krys::boo::html
     {
       // The rectangle state is the missing and invalid value default, so rect and rectangle are left to it.
       auto shape = value.value_or(dom::DOMStringView());
-      if (text::IsASCIICaselessEqual(shape, utf8_stringview(u8"default")))
+      if (text::IsASCIICaselessEqual(shape, u8"default"))
       {
         _shape = AreaShape::Default;
       }
-      else if (text::IsASCIICaselessEqual(shape, utf8_stringview(u8"circle"))
-               || text::IsASCIICaselessEqual(shape, utf8_stringview(u8"circ")))
+      else if (text::IsASCIICaselessEqual(shape, u8"circle") || text::IsASCIICaselessEqual(shape, u8"circ"))
       {
         _shape = AreaShape::Circle;
       }
-      else if (text::IsASCIICaselessEqual(shape, utf8_stringview(u8"poly"))
-               || text::IsASCIICaselessEqual(shape, utf8_stringview(u8"polygon")))
+      else if (text::IsASCIICaselessEqual(shape, u8"poly") || text::IsASCIICaselessEqual(shape, u8"polygon"))
       {
         _shape = AreaShape::Poly;
       }
@@ -389,14 +387,14 @@ namespace krys::boo::html
   {
     if (!_relList)
     {
-      _relList = dom::ElementAlgorithms::CreateDOMTokenList(
-        *this, u8"rel",
-        [](dom::Document &, dom::DOMStringView token)
-        {
-          return text::IsASCIICaselessEqual(token, utf8_stringview(u8"noreferrer"))
-                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"noopener"))
-                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"opener"));
-        });
+      _relList =
+        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel",
+                                                   [](dom::Document &, dom::DOMStringView token)
+                                                   {
+                                                     return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                                            || text::IsASCIICaselessEqual(token, u8"noopener")
+                                                            || text::IsASCIICaselessEqual(token, u8"opener");
+                                                   });
     }
 
     return *_relList;

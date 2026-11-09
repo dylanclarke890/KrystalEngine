@@ -366,7 +366,7 @@ namespace krys::boo::css
       return {};
     }
 
-    bool important = text::IsASCIICaselessEqual(CSSOMStringView(priority), CSSOMStringView(u8"important"));
+    bool important = text::IsASCIICaselessEqual(CSSOMStringView(priority), u8"important");
     if (!important && !priority.empty())
     {
       return {};

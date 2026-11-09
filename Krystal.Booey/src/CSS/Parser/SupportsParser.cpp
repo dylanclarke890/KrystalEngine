@@ -100,7 +100,7 @@ namespace krys::boo::css
   {
     if (tokens.Peek().Type() == TokenType::Ident)
     {
-      if (text::IsASCIICaselessEqual(tokens.Peek().IdentCodePoints(), utf8_stringview(u8"not")))
+      if (text::IsASCIICaselessEqual(tokens.Peek().IdentCodePoints(), u8"not"))
       {
         return ConsumeNegation(tokens);
       }
@@ -156,9 +156,9 @@ namespace krys::boo::css
           token.IdentCodePoints().size() == 3uz ? ClauseType::Conjunction : ClauseType::Disjunction;
       }
       if ((clauseType == ClauseType::Conjunction
-           && !text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"and")))
+           && !text::IsASCIICaselessEqual(token.IdentCodePoints(), u8"and"))
           || (clauseType == ClauseType::Disjunction
-              && !text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"or"))))
+              && !text::IsASCIICaselessEqual(token.IdentCodePoints(), u8"or")))
       {
         return Invalid;
       }

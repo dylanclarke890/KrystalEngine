@@ -103,7 +103,7 @@ namespace krys::boo::html
     {
       _blocking = dom::ElementAlgorithms::CreateDOMTokenList(
         *this, u8"blocking", [](dom::Document &, dom::DOMStringView token)
-        { return text::IsASCIICaselessEqual(token, utf8_stringview(u8"render")); });
+        { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;

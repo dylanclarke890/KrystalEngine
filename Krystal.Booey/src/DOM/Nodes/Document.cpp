@@ -3029,7 +3029,7 @@ namespace krys::boo::dom
         // behaves as the Button state.)
         if (button->IsSubmitButton() || button->Type() == u8"reset"
             || !text::IsASCIICaselessEqual(
-              DOMStringView(button->GetAttribute(u8"type").value_or(DOMString())), DOMStringView(u8"button")))
+              DOMStringView(button->GetAttribute(u8"type").value_or(DOMString())), u8"button"))
         {
           return nullptr;
         }
@@ -3774,7 +3774,7 @@ namespace krys::boo::dom
 
   void Document::ProcessMetaHttpEquiv(DOMStringView equiv, DOMStringView content) noexcept
   {
-    if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"content-language")))
+    if (text::IsASCIICaselessEqual(equiv, u8"content-language"))
     {
       // https://html.spec.whatwg.org/#pragma-set-default-language
       // 1. If the meta element has no content attribute, then return.
@@ -3810,7 +3810,7 @@ namespace krys::boo::dom
       return;
     }
 
-    if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"default-style")))
+    if (text::IsASCIICaselessEqual(equiv, u8"default-style"))
     {
       // https://html.spec.whatwg.org/#attr-meta-http-equiv-default-style
       // 1. If the meta element has no content attribute, or if that attribute's value is the empty string,
@@ -5228,7 +5228,7 @@ namespace krys::boo::dom
     ProcessColorSchemeString(colorSchemeString,
                              [&](DOMStringView key)
                              {
-                               if (text::IsASCIICaselessEqual(key, utf8_stringview(u8"auto")))
+                               if (text::IsASCIICaselessEqual(key, u8"auto"))
                                {
                                  colorScheme = {};
                                  allowsTransformations = true;
@@ -5241,15 +5241,15 @@ namespace krys::boo::dom
                                  return;
                                }
 
-                               if (text::IsASCIICaselessEqual(key, utf8_stringview(u8"light")))
+                               if (text::IsASCIICaselessEqual(key, u8"light"))
                                {
                                  colorScheme.Add(boo::ColorScheme::Light);
                                }
-                               else if (text::IsASCIICaselessEqual(key, utf8_stringview(u8"dark")))
+                               else if (text::IsASCIICaselessEqual(key, u8"dark"))
                                {
                                  colorScheme.Add(boo::ColorScheme::Dark);
                                }
-                               else if (text::IsASCIICaselessEqual(key, utf8_stringview(u8"only")))
+                               else if (text::IsASCIICaselessEqual(key, u8"only"))
                                {
                                  allowsTransformations = false;
                                }
@@ -5286,8 +5286,7 @@ namespace krys::boo::dom
     {
       auto nameValue = metaElement.GetAttribute(u8"name");
       auto content = metaElement.GetAttribute(u8"content");
-      if (!nameValue || !content
-          || !text::IsASCIICaselessEqual(*nameValue, utf8_stringview(u8"color-scheme")))
+      if (!nameValue || !content || !text::IsASCIICaselessEqual(*nameValue, u8"color-scheme"))
       {
         return null;
       }

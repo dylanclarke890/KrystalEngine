@@ -45,11 +45,11 @@ namespace krys::boo::html
     KRYS_NODISCARD MarqueeBehavior BehaviorOf(const HTMLMarqueeElement &marquee) noexcept
     {
       auto value = marquee.GetAttribute(u8"behavior").value_or(u8"");
-      if (text::IsASCIICaselessEqual(value, utf8_stringview(u8"alternate")))
+      if (text::IsASCIICaselessEqual(value, u8"alternate"))
       {
         return MarqueeBehavior::Alternate;
       }
-      if (text::IsASCIICaselessEqual(value, utf8_stringview(u8"slide")))
+      if (text::IsASCIICaselessEqual(value, u8"slide"))
       {
         return MarqueeBehavior::Slide;
       }
@@ -60,15 +60,15 @@ namespace krys::boo::html
     KRYS_NODISCARD MarqueeDirection DirectionOf(const HTMLMarqueeElement &marquee) noexcept
     {
       auto value = marquee.GetAttribute(u8"direction").value_or(u8"");
-      if (text::IsASCIICaselessEqual(value, utf8_stringview(u8"right")))
+      if (text::IsASCIICaselessEqual(value, u8"right"))
       {
         return MarqueeDirection::Right;
       }
-      if (text::IsASCIICaselessEqual(value, utf8_stringview(u8"up")))
+      if (text::IsASCIICaselessEqual(value, u8"up"))
       {
         return MarqueeDirection::Up;
       }
-      if (text::IsASCIICaselessEqual(value, utf8_stringview(u8"down")))
+      if (text::IsASCIICaselessEqual(value, u8"down"))
       {
         return MarqueeDirection::Down;
       }

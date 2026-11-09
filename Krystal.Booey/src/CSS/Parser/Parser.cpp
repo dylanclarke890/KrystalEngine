@@ -606,7 +606,7 @@ namespace krys::boo::css
       }
 
       if (token.Type() != TokenType::Function
-          || !text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"url")))
+          || !text::IsASCIICaselessEqual(token.IdentCodePoints(), u8"url"))
       {
         return null;
       }
@@ -690,7 +690,7 @@ namespace krys::boo::css
     {
       auto &token = prelude.Peek();
       if (token.Type() == TokenType::Function
-          && text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"layer")))
+          && text::IsASCIICaselessEqual(token.IdentCodePoints(), u8"layer"))
       {
         auto savedPreludeForFailure = prelude;
         auto contents = PropertyParserHelpers::ConsumeFunction(prelude);
@@ -702,8 +702,7 @@ namespace krys::boo::css
         }
         return layerName;
       }
-      if (token.Type() == TokenType::Ident
-          && text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"layer")))
+      if (token.Type() == TokenType::Ident && text::IsASCIICaselessEqual(token.IdentCodePoints(), u8"layer"))
       {
         std::ignore = prelude.ConsumeIncludingWhitespace();
         return CascadeLayerName {};
@@ -715,7 +714,7 @@ namespace krys::boo::css
     {
       auto &token = prelude.Peek();
       if (token.Type() == TokenType::Function
-          && text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"supports")))
+          && text::IsASCIICaselessEqual(token.IdentCodePoints(), u8"supports"))
       {
         auto arguments = PropertyParserHelpers::ConsumeFunction(prelude);
         auto supported = SupportsParser::SupportsCondition(arguments, *this,
@@ -1242,7 +1241,7 @@ namespace krys::boo::css
 
     // [ returns <css-type> ]?
     if (prelude.Peek().Type() == TokenType::Ident
-        && text::IsASCIICaselessEqual(prelude.Peek().IdentCodePoints(), utf8_stringview(u8"returns")))
+        && text::IsASCIICaselessEqual(prelude.Peek().IdentCodePoints(), u8"returns"))
     {
       std::ignore = prelude.ConsumeIncludingWhitespace();
 
@@ -1323,7 +1322,7 @@ namespace krys::boo::css
           return false;
         }
         auto &to = prelude.ConsumeIncludingWhitespace();
-        if (!text::IsASCIICaselessEqual(to.IdentCodePoints(), utf8_stringview(u8"to")))
+        if (!text::IsASCIICaselessEqual(to.IdentCodePoints(), u8"to"))
         {
           return false;
         }
@@ -1796,8 +1795,7 @@ namespace krys::boo::css
 
     auto removeImportantRange = tokens;
     if (auto &last = removeImportantRange.ConsumeLast();
-        last.Type() != TokenType::Ident
-        || !text::IsASCIICaselessEqual(last.IdentCodePoints(), utf8_stringview(u8"important")))
+        last.Type() != TokenType::Ident || !text::IsASCIICaselessEqual(last.IdentCodePoints(), u8"important"))
     {
       return IsImportant(false);
     }

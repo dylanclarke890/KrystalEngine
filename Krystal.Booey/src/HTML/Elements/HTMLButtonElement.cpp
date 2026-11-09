@@ -151,8 +151,7 @@ namespace krys::boo::html
       // 3c. If element's type attribute is in the Auto state, then return.
       if (_type == ButtonType::Button
           && !text::IsASCIICaselessEqual(
-            dom::DOMStringView(GetAttribute(u8"type").value_or(dom::DOMString())),
-            dom::DOMStringView(u8"button")))
+            dom::DOMStringView(GetAttribute(u8"type").value_or(dom::DOMString())), u8"button"))
       {
         return;
       }
@@ -284,15 +283,15 @@ namespace krys::boo::html
   void HTMLButtonElement::ComputeType(dom::DOMStringView typeAttributeValue) noexcept
   {
     auto oldType = _type;
-    if (text::IsASCIICaselessEqual(typeAttributeValue, dom::DOMStringView(u8"reset")))
+    if (text::IsASCIICaselessEqual(typeAttributeValue, u8"reset"))
     {
       _type = ButtonType::Reset;
     }
-    else if (text::IsASCIICaselessEqual(typeAttributeValue, dom::DOMStringView(u8"button")))
+    else if (text::IsASCIICaselessEqual(typeAttributeValue, u8"button"))
     {
       _type = ButtonType::Button;
     }
-    else if (text::IsASCIICaselessEqual(typeAttributeValue, dom::DOMStringView(u8"submit")))
+    else if (text::IsASCIICaselessEqual(typeAttributeValue, u8"submit"))
     {
       _type = ButtonType::Submit;
     }

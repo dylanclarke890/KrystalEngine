@@ -211,15 +211,15 @@ namespace krys::boo::html
         ++position;
       }
       auto token = value.substr(start, position - start);
-      if (text::IsASCIICaselessEqual(token, dom::DOMStringView(u8"stylesheet")))
+      if (text::IsASCIICaselessEqual(token, u8"stylesheet"))
       {
         _relIsStyleSheet = true;
       }
-      else if (text::IsASCIICaselessEqual(token, dom::DOMStringView(u8"alternate")))
+      else if (text::IsASCIICaselessEqual(token, u8"alternate"))
       {
         _relIsAlternate = true;
       }
-      else if (text::IsASCIICaselessEqual(token, dom::DOMStringView(u8"icon")))
+      else if (text::IsASCIICaselessEqual(token, u8"icon"))
       {
         _relIsIcon = true;
       }
@@ -379,7 +379,7 @@ namespace krys::boo::html
         auto mimeType = dom::DOMStringView(*_type);
         mimeType = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
           mimeType.substr(0, mimeType.find(u8';')));
-        treatAsStyleSheet = text::IsASCIICaselessEqual(mimeType, dom::DOMStringView(u8"text/css"));
+        treatAsStyleSheet = text::IsASCIICaselessEqual(mimeType, u8"text/css");
       }
     }
 
@@ -811,9 +811,9 @@ namespace krys::boo::html
         // The link types Booey processes.
         [](dom::Document &, dom::DOMStringView token)
         {
-          return text::IsASCIICaselessEqual(token, utf8_stringview(u8"stylesheet"))
-                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"alternate"))
-                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"icon"));
+          return text::IsASCIICaselessEqual(token, u8"stylesheet")
+                 || text::IsASCIICaselessEqual(token, u8"alternate")
+                 || text::IsASCIICaselessEqual(token, u8"icon");
         });
     }
 
@@ -906,7 +906,7 @@ namespace krys::boo::html
     {
       _blocking = dom::ElementAlgorithms::CreateDOMTokenList(
         *this, u8"blocking", [](dom::Document &, dom::DOMStringView token)
-        { return text::IsASCIICaselessEqual(token, utf8_stringview(u8"render")); });
+        { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;

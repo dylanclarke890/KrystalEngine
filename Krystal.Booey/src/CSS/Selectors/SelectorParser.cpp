@@ -1181,7 +1181,7 @@ namespace krys::boo::css
           // Only a select has a picker: it's the part of its shadow tree that the selector then matches.
           const auto &ident = block.ConsumeIncludingWhitespace();
           if (ident.Type() != TokenType::Ident || !block.IsAtEnd()
-              || !text::IsASCIICaselessEqual(ident.IdentCodePoints(), CSSOMStringView(u8"select")))
+              || !text::IsASCIICaselessEqual(ident.IdentCodePoints(), u8"select"))
           {
             return nullptr;
           }

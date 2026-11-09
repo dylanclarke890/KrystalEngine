@@ -193,7 +193,7 @@ namespace krys::boo::html
   dom::DOMString HTMLInputElement::ColourSpace() const noexcept
   {
     auto value = GetAttribute(u8"colorspace");
-    if (value && text::IsASCIICaselessEqual(dom::DOMStringView(*value), dom::DOMStringView(u8"display-p3")))
+    if (value && text::IsASCIICaselessEqual(dom::DOMStringView(*value), u8"display-p3"))
     {
       return u8"display-p3";
     }
@@ -1890,7 +1890,7 @@ namespace krys::boo::html
     else if (localName == u8"autocomplete")
     {
       auto newValue = value.value_or(dom::DOMStringView());
-      if (text::IsASCIICaselessEqual(newValue, dom::DOMStringView(u8"off")))
+      if (text::IsASCIICaselessEqual(newValue, u8"off"))
       {
         _autocomplete = Off;
       }

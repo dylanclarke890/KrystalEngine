@@ -190,17 +190,17 @@ namespace krys::boo::dom
   {
     auto create = [&]() -> Ref<Document>
     {
-      if (text::IsASCIICaselessEqual(contentType, utf8_stringview(u8"text/html")))
+      if (text::IsASCIICaselessEqual(contentType, u8"text/html"))
       {
         return CreateRef<HTMLDocument>();
       }
-      if (text::IsASCIICaselessEqual(contentType, utf8_stringview(u8"application/xhtml+xml")))
+      if (text::IsASCIICaselessEqual(contentType, u8"application/xhtml+xml"))
       {
         auto document = CreateRef<XHTMLDocument>();
         document->_contentType = u8"application/xhtml+xml";
         return document;
       }
-      if (text::IsASCIICaselessEqual(contentType, utf8_stringview(u8"image/svg+xml")))
+      if (text::IsASCIICaselessEqual(contentType, u8"image/svg+xml"))
       {
         auto document = CreateRef<svg::SVGDocument>();
         document->_contentType = u8"image/svg+xml";

@@ -101,7 +101,7 @@ namespace krys::boo::css
     }
     else
     {
-      isFormatSVG = text::IsASCIICaselessEqual(_format, utf8_stringview(u8"svg"));
+      isFormatSVG = text::IsASCIICaselessEqual(_format, u8"svg");
       if (!FontCustomPlatformData::SupportsFormat(_format))
       {
         return nullptr;

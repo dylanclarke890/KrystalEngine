@@ -93,7 +93,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     KRYS_NODISCARD CSSOMString ConsumeUnicodeRangeString(TokenRange &tokens) noexcept
     {
-      if (!krys::text::IsASCIICaselessEqual(ConsumeIdentifier(tokens), utf8_stringview(u8"u")))
+      if (!krys::text::IsASCIICaselessEqual(ConsumeIdentifier(tokens), u8"u"))
       {
         return {};
       }

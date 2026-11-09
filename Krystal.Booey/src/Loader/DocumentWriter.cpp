@@ -120,7 +120,7 @@ namespace krys::boo
       // https://mimesniff.spec.whatwg.org/#json-mime-type: a subtype that ends in "+json".
       auto slash = mimeType.find(u8'/');
       return slash != utf8_stringview::npos && mimeType.size() - slash > 5
-             && text::IsASCIICaselessEqual(mimeType.substr(mimeType.size() - 5), utf8_stringview(u8"+json"));
+             && text::IsASCIICaselessEqual(mimeType.substr(mimeType.size() - 5), u8"+json");
     }
   }
 

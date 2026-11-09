@@ -226,20 +226,19 @@ namespace krys::boo
 
   bool MIMETypeRegistry::IsJPEGMIMEType(utf8_stringview mimeType) noexcept
   {
-    return text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"image/jpeg"))
-           || text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"image/jpg"));
+    return text::IsASCIICaselessEqual(mimeType, u8"image/jpeg")
+           || text::IsASCIICaselessEqual(mimeType, u8"image/jpg");
   }
 
   bool MIMETypeRegistry::IsSupportedImageVideoOrSVGMIMEType(utf8_stringview mimeType) noexcept
   {
-    return IsSupportedImageMIMEType(mimeType)
-           || text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"image/svg+xml"));
+    return IsSupportedImageMIMEType(mimeType) || text::IsASCIICaselessEqual(mimeType, u8"image/svg+xml");
   }
 
   bool MIMETypeRegistry::IsXMLMIMEType(utf8_stringview mimeType) noexcept
   {
-    if (text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"text/xml"))
-        || text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"application/xml")))
+    if (text::IsASCIICaselessEqual(mimeType, u8"text/xml")
+        || text::IsASCIICaselessEqual(mimeType, u8"application/xml"))
     {
       return true;
     }

@@ -127,8 +127,7 @@ namespace krys::boo::html
     // FIXME: We can't use stepUp() for the step value "any". So, we increase or decrease the value by 1/100
     // of the value range. Is it reasonable?
     bool isAnyStep = text::IsASCIICaselessEqual(
-      dom::DOMStringView(element->GetAttribute(u8"step").value_or(dom::DOMString())),
-      dom::DOMStringView(u8"any"));
+      dom::DOMStringView(element->GetAttribute(u8"step").value_or(dom::DOMString())), u8"any");
     const Decimal step =
       isAnyStep ? (stepRange.Maximum() - stepRange.Minimum()) / Decimal(100) : stepRange.Step();
     const Decimal bigStep = std::max((stepRange.Maximum() - stepRange.Minimum()) / Decimal(10), step);

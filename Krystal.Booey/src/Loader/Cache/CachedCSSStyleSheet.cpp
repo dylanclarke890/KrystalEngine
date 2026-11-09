@@ -161,7 +161,7 @@ namespace krys::boo
   {
     // A nosniff response is a style sheet only if it says it's one.
     return !IsNosniffContentTypeOptions(Response().HTTPHeaderField(u8"X-Content-Type-Options"))
-           || text::IsASCIICaselessEqual(ResponseMIMEType(), utf8_stringview(u8"text/css"));
+           || text::IsASCIICaselessEqual(ResponseMIMEType(), u8"text/css");
   }
 
   bool CachedCSSStyleSheet::CanUseSheet(MIMETypeCheckHint mimeTypeCheckHint, bool *hasValidMIMEType,
@@ -208,9 +208,8 @@ namespace krys::boo
     // FIXME: Types that aren't valid content types (isValidContentType) are allowed too, once there's a
     // content type parser.
     auto mimeType = ResponseMIMEType();
-    bool typeOK =
-      mimeType.empty() || text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"text/css"))
-      || text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"application/x-unknown-content-type"));
+    bool typeOK = mimeType.empty() || text::IsASCIICaselessEqual(mimeType, u8"text/css")
+                  || text::IsASCIICaselessEqual(mimeType, u8"application/x-unknown-content-type");
     if (hasValidMIMEType)
     {
       *hasValidMIMEType = typeOK;

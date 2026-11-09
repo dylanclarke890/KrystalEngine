@@ -261,14 +261,14 @@ namespace krys::boo::html
   {
     if (!_relList)
     {
-      _relList = dom::ElementAlgorithms::CreateDOMTokenList(
-        *this, u8"rel",
-        [](dom::Document &, dom::DOMStringView token)
-        {
-          return text::IsASCIICaselessEqual(token, utf8_stringview(u8"noreferrer"))
-                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"noopener"))
-                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"opener"));
-        });
+      _relList =
+        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel",
+                                                   [](dom::Document &, dom::DOMStringView token)
+                                                   {
+                                                     return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                                            || text::IsASCIICaselessEqual(token, u8"noopener")
+                                                            || text::IsASCIICaselessEqual(token, u8"opener");
+                                                   });
     }
 
     return *_relList;
@@ -1161,8 +1161,7 @@ namespace krys::boo::html
   bool HTMLFormElement::ShouldAutocomplete() const noexcept
   {
     auto autocomplete = GetAttribute(u8"autocomplete");
-    return !autocomplete
-           || !text::IsASCIICaselessEqual(dom::DOMStringView(*autocomplete), dom::DOMStringView(u8"off"));
+    return !autocomplete || !text::IsASCIICaselessEqual(dom::DOMStringView(*autocomplete), u8"off");
   }
 
   List<Ref<HTMLElement>> HTMLFormElement::CopyListedElementsVector() const noexcept

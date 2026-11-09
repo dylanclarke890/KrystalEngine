@@ -3003,8 +3003,7 @@ namespace krys::boo
       }
     }
     else if (!anchorElement
-             && !(fragmentIdentifier.empty()
-                  || text::IsASCIICaselessEqual(fragmentIdentifier, utf8_stringview(u8"top"))))
+             && !(fragmentIdentifier.empty() || text::IsASCIICaselessEqual(fragmentIdentifier, u8"top")))
     {
       // Implement the rule that "" and "top" both mean top of page as in other browsers.
       return false;

@@ -552,9 +552,8 @@ namespace krys::boo
     // 6. Otherwise, if name is an ASCII case-insensitive match for "_top", set chosen to currentNavigable's
     //    traversable navigable.
     // (The frame has no parent, and is its traversable navigable.)
-    if (name.empty() || text::IsASCIICaselessEqual(name, utf8_stringview(u8"_self"))
-        || text::IsASCIICaselessEqual(name, utf8_stringview(u8"_parent"))
-        || text::IsASCIICaselessEqual(name, utf8_stringview(u8"_top")))
+    if (name.empty() || text::IsASCIICaselessEqual(name, u8"_self")
+        || text::IsASCIICaselessEqual(name, u8"_parent") || text::IsASCIICaselessEqual(name, u8"_top"))
     {
       return &_frame;
     }

@@ -195,11 +195,11 @@ namespace krys::boo
     {
       encoded = EncodeJPEG(pixelBuffer, EncoderQuality(quality), output);
     }
-    else if (text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"image/webp")))
+    else if (text::IsASCIICaselessEqual(mimeType, u8"image/webp"))
     {
       encoded = EncodeWebP(pixelBuffer, EncoderQuality(quality), output);
     }
-    else if (text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"image/png")))
+    else if (text::IsASCIICaselessEqual(mimeType, u8"image/png"))
     {
       encoded = EncodePNG(pixelBuffer, output);
     }

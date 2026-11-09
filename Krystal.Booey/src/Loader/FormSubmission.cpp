@@ -62,11 +62,11 @@ namespace krys::boo
 
   utf8_stringview FormSubmission::Attributes::ParseEncodingType(utf8_stringview type) noexcept
   {
-    if (text::IsASCIICaselessEqual(type, utf8_stringview(u8"multipart/form-data")))
+    if (text::IsASCIICaselessEqual(type, u8"multipart/form-data"))
     {
       return u8"multipart/form-data";
     }
-    if (text::IsASCIICaselessEqual(type, utf8_stringview(u8"text/plain")))
+    if (text::IsASCIICaselessEqual(type, u8"text/plain"))
     {
       return u8"text/plain";
     }
@@ -80,11 +80,11 @@ namespace krys::boo
 
   FormSubmission::Method FormSubmission::Attributes::ParseMethodType(utf8_stringview type) noexcept
   {
-    if (text::IsASCIICaselessEqual(type, utf8_stringview(u8"dialog")))
+    if (text::IsASCIICaselessEqual(type, u8"dialog"))
     {
       return FormSubmission::Method::Dialog;
     }
-    if (text::IsASCIICaselessEqual(type, utf8_stringview(u8"post")))
+    if (text::IsASCIICaselessEqual(type, u8"post"))
     {
       return FormSubmission::Method::Post;
     }

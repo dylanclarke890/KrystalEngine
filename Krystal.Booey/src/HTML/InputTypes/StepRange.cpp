@@ -87,7 +87,7 @@ namespace krys::boo::html
       return stepDescription.DefaultValue();
     }
 
-    if (text::IsASCIICaselessEqual(*stepString, dom::DOMStringView(u8"any")))
+    if (text::IsASCIICaselessEqual(*stepString, u8"any"))
     {
       switch (anyStepHandling)
       {

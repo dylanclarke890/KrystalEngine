@@ -993,7 +993,7 @@ namespace krys::boo::html
 
     Decimal newValue = current;
     auto stepString = element->GetAttribute(u8"step").value_or(dom::DOMString());
-    bool isAnyStep = text::IsASCIICaselessEqual(dom::DOMStringView(stepString), dom::DOMStringView(u8"any"));
+    bool isAnyStep = text::IsASCIICaselessEqual(dom::DOMStringView(stepString), u8"any");
     if (!isAnyStep && stepRange.StepMismatch(current))
     {
       // Snap-to-step / clamping steps

@@ -326,19 +326,48 @@ namespace krys::text
     return ToASCIILower(static_cast<char32>(c)) == ToASCIILower(static_cast<char32>(expected));
   }
 
-  // FIXME: This is a bit clunky to use with string literals as they don't have .length etc., rework slightly
-  // to account for this
-  template <typename A, typename B>
-  KRYS_NODISCARD constexpr bool IsASCIICaselessEqual(A &&a, B &&b) noexcept
+  namespace detail
   {
-    if (a.length() != b.length())
+    /// @brief @p string itself if it has a length and can be indexed, otherwise a view of it (a string
+    /// literal, for example).
+    template <typename TString>
+    KRYS_NODISCARD constexpr decltype(auto) AsIndexableString(const TString &string) noexcept
+    {
+      if constexpr (requires {
+                      string.length();
+                      string[0uz];
+                    })
+      {
+        return (string);
+      }
+      else
+      {
+        return std::basic_string_view {string};
+      }
+    }
+  }
+
+  /// @brief Whether @p a and @p b are equal, ignoring ASCII case. Either can be a string, a view or a string
+  /// literal.
+  template <typename A, typename B>
+  KRYS_NODISCARD constexpr bool IsASCIICaselessEqual(const A &a, const B &b) noexcept
+  {
+    const auto &first = detail::AsIndexableString(a);
+    const auto &second = detail::AsIndexableString(b);
+    if (first.length() != second.length())
     {
       return false;
     }
 
-    for (size_t i = 0uz; i < a.length(); i++)
+    // Each code unit is folded on its own and compared unsigned, so a `char` past 0x7F equals the same
+    // `char8_t`.
+    auto folded = []<typename TChar>(TChar c) noexcept
     {
-      if (ToASCIILowerUnchecked(a[i]) != ToASCIILowerUnchecked(b[i]))
+      return static_cast<char32>(static_cast<sized_unsigned_t<TChar>>(ToASCIILower(c)));
+    };
+    for (size_t i = 0uz; i < first.length(); i++)
+    {
+      if (folded(first[i]) != folded(second[i]))
       {
         return false;
       }

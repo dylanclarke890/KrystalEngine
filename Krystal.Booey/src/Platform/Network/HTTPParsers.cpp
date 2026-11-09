@@ -263,6 +263,6 @@ namespace krys::boo
     {
       first.remove_suffix(1);
     }
-    return text::IsASCIICaselessEqual(first, utf8_stringview(u8"nosniff"));
+    return text::IsASCIICaselessEqual(first, u8"nosniff");
   }
 }

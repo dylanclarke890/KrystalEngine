@@ -56,7 +56,7 @@ namespace krys::boo::html
       {
         return true;
       }
-      return text::IsASCIICaselessEqual(type.View(), dom::DOMStringView(u8"text/css"));
+      return text::IsASCIICaselessEqual(type.View(), u8"text/css");
     }
   }
 
