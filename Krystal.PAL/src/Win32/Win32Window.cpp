@@ -559,7 +559,6 @@ namespace krys::pal
 
     void Win32Window::RegisterRawInput() const
     {
-      // FIXME: Account for dpi?
       RAWINPUTDEVICE rid {};
       rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
       rid.usUsage = HID_USAGE_GENERIC_MOUSE;
