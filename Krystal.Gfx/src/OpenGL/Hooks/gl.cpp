@@ -767,7 +767,6 @@ namespace
 
   static GL gl = {nullptr};
 
-  // FIXME: This is only for windows, need to implement for other platforms
   static void *GetFunctionAddress(const char *name, const char *fallbackModule = "opengl32.dll") noexcept
   {
     void *p = (void *)::wglGetProcAddress(name);
