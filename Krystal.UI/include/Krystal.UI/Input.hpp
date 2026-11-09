@@ -17,6 +17,7 @@
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Platform.hpp"
 #include "Krystal.PAL/TextInput.hpp"
+#include "Krystal.PAL/TouchpadPan.hpp"
 
 /// @brief Conversions between the platform layer's input and cursors and Booey's.
 namespace krys::ui::input
@@ -78,6 +79,11 @@ namespace krys::ui::input
   KRYS_NODISCARD boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point, float notchesX,
                                                     float notchesY, pal::KeyModifiers modifiers,
                                                     const pal::WheelScrollSettings &settings) noexcept;
+
+  /// @brief A step of a touchpad's pan at @p point: deltas in the pixels the content follows, in the phase of
+  /// the gesture or of the momentum after it.
+  KRYS_NODISCARD boo::PlatformWheelEvent TouchpadPanEvent(const boo::IntPoint &point,
+                                                          const pal::TouchpadPanInput &input) noexcept;
 
   /// @brief The system cursor nearest to a Booey cursor.
   KRYS_NODISCARD pal::CursorShape ToCursorShape(boo::Cursor cursor) noexcept;

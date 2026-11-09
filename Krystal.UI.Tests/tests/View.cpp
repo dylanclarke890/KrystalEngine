@@ -1614,6 +1614,31 @@ namespace krys::ui::tests
   (y -400.00)))"));
   }
 
+  TEST_CASE("View: a touchpad's pan scrolls by the pixels the content follows", "[UI]")
+  {
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 }</style><div style='width: 400px; height: 500px'></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    auto pan = [&](pal::TouchpadPanPhase phase, float deltaX, float deltaY)
+    {
+      return view.TouchpadPan({50, 50}, {.Phase = phase, .DeltaX = deltaX, .DeltaY = deltaY});
+    };
+
+    // The content moving up and left scrolls down and right, whatever the wheel's settings.
+    CHECK_FALSE(pan(pal::TouchpadPanPhase::Began, 0, 0));
+    CHECK(pan(pal::TouchpadPanPhase::Changed, 0, -7));
+    CHECK(view.ScrollPosition() == boo::IntPoint(0, 7));
+    CHECK(pan(pal::TouchpadPanPhase::Changed, -12, 0));
+    CHECK(view.ScrollPosition() == boo::IntPoint(12, 7));
+    CHECK(pan(pal::TouchpadPanPhase::MomentumChanged, 0, -5));
+    CHECK(view.ScrollPosition() == boo::IntPoint(12, 12));
+    CHECK_FALSE(pan(pal::TouchpadPanPhase::MomentumEnded, 0, 0));
+    CHECK(view.ScrollPosition() == boo::IntPoint(12, 12));
+  }
+
   TEST_CASE("View: the wheel scrolls", "[UI]")
   {
     View view({200, 100});

@@ -59,6 +59,15 @@ namespace krys::boo::tests
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {}));
     }
 
+    bool TouchpadPan(AnimationPageFixture &fixture, PlatformWheelEventPhase phase,
+                     PlatformWheelEventPhase momentumPhase, float deltaY) noexcept
+    {
+      return fixture.TestPage->MainFrame().GetEventHandler().HandleWheelEvent(
+        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, deltaY, 0, 0,
+                           PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})
+          .CopyAsTouchpadPan(phase, momentumPhase));
+    }
+
     bool TouchPan(AnimationPageFixture &fixture, float deltaY) noexcept
     {
       return fixture.TestPage->MainFrame().GetEventHandler().HandleTouchScroll(
@@ -134,10 +143,39 @@ namespace krys::boo::tests
         CHECK(scroller.ScrollTop() == 80);
       }
 
-      fixture.TestPage->MainFrame().GetEventHandler().DidEndTouchScroll();
+      fixture.TestPage->MainFrame().GetEventHandler().DidEndGestureScroll();
       CHECK(scroller.ScrollTop() == 80);
       Finish(fixture);
       CHECK(scroller.ScrollTop() == 100);
+    }
+
+    SECTION("a touchpad's pan moves freely and snaps when its momentum ends")
+    {
+      using Phase = PlatformWheelEventPhase;
+      CHECK_FALSE(TouchpadPan(fixture, Phase::Began, Phase::None, 0));
+      CHECK(TouchpadPan(fixture, Phase::Changed, Phase::None, -30));
+      CHECK(TouchpadPan(fixture, Phase::Changed, Phase::None, -30));
+      CHECK(scroller.ScrollTop() == 60);
+
+      // The fingers flicked: the content coasts on, still free.
+      CHECK_FALSE(TouchpadPan(fixture, Phase::None, Phase::Began, 0));
+      CHECK(TouchpadPan(fixture, Phase::None, Phase::Changed, -20));
+      Finish(fixture);
+      CHECK(scroller.ScrollTop() == 80);
+
+      CHECK_FALSE(TouchpadPan(fixture, Phase::None, Phase::Ended, 0));
+      Finish(fixture);
+      CHECK(scroller.ScrollTop() == 100);
+    }
+
+    SECTION("a touchpad's pan without momentum snaps when the fingers lift")
+    {
+      using Phase = PlatformWheelEventPhase;
+      CHECK(TouchpadPan(fixture, Phase::Began, Phase::None, -30));
+      CHECK(scroller.ScrollTop() == 30);
+      CHECK_FALSE(TouchpadPan(fixture, Phase::Ended, Phase::None, 0));
+      Finish(fixture);
+      CHECK(scroller.ScrollTop() == 0);
     }
 
     SECTION("letting go of a scrollbar's thumb snaps")

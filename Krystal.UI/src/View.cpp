@@ -1132,6 +1132,24 @@ namespace krys::ui
     return handled;
   }
 
+  bool View::TouchpadPan(const boo::IntPoint &point, const pal::TouchpadPanInput &input) noexcept
+  {
+    if (_overlay)
+    {
+      // Overlays take the wheel's notches; the content moving down is the wheel turning away.
+      constexpr float pixelsPerNotch = 3 * boo::ScrollbarPixelsPerLine;
+      float notchesX = -input.DeltaX / pixelsPerNotch;
+      float notchesY = input.DeltaY / pixelsPerNotch;
+      auto &rect = _overlay->Rect();
+      return (notchesX || notchesY) && rect.Contains(point)
+             && _overlay->MouseWheel(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()), notchesX,
+                                     notchesY);
+    }
+    bool handled = _frame->GetEventHandler().HandleWheelEvent(input::TouchpadPanEvent(point, input));
+    PerformMicrotaskCheckpoint();
+    return handled;
+  }
+
   int32 View::CountClick(const boo::IntPoint &point, boo::MouseButton button, int32 distance) noexcept
   {
     // A press soon after the last, near it and with the same button, counts on from it.
@@ -1329,7 +1347,7 @@ namespace krys::ui
           bool stoppedFling = std::exchange(_fling, null).has_value();
           if (stoppedFling)
           {
-            _frame->GetEventHandler().DidEndTouchScroll();
+            _frame->GetEventHandler().DidEndGestureScroll();
           }
           ResetGesture();
           if (cancelled)
@@ -1440,7 +1458,7 @@ namespace krys::ui
           StartFling();
           if (!_fling)
           {
-            _frame->GetEventHandler().DidEndTouchScroll();
+            _frame->GetEventHandler().DidEndGestureScroll();
           }
         }
         ResetGesture();
@@ -1577,7 +1595,7 @@ namespace krys::ui
     if (!scrolled || std::hypot(velocity.Width(), velocity.Height()) < StopFlingVelocity)
     {
       _fling = null;
-      _frame->GetEventHandler().DidEndTouchScroll();
+      _frame->GetEventHandler().DidEndGestureScroll();
     }
   }
 

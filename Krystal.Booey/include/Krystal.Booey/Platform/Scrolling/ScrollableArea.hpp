@@ -59,7 +59,7 @@ namespace krys::boo
     ScrollAnimationStatus _scrollAnimationStatus {ScrollAnimationStatus::NotAnimating};
     bool _scrollOriginChanged {false};
     bool _isAwaitingScrollend {false};
-    bool _isTouchScrollInProgress {false};
+    bool _isGestureScrollInProgress {false};
     UniquePtr<ScrollAnimator> _scrollAnimator;
     mutable UniquePtr<ScrollbarsController> _scrollbarsController;
 
@@ -103,14 +103,15 @@ namespace krys::boo
     void ResnapAfterLayout() noexcept;
     /// @brief Snaps on the axis of @p orientation's scrollbar, whose thumb was let go.
     void DoPostThumbMoveSnapping(ScrollbarOrientation orientation) noexcept;
-    /// @brief A touch's pan or fling has ended: snaps to the closest position.
-    void DidEndTouchScroll() noexcept;
+    /// @brief A gesture (a touch's or a touchpad's pan, and its momentum) has ended: snaps to the closest
+    /// position.
+    void DidEndGestureScroll() noexcept;
     /// @brief A scroll that didn't snap as it went (an autoscroll, a pan) has ended: snaps to the closest
     /// position, smoothly.
     void SnapAfterScrollEnds() noexcept;
-    KRYS_NODISCARD bool IsTouchScrollInProgress() const noexcept
+    KRYS_NODISCARD bool IsGestureScrollInProgress() const noexcept
     {
-      return _isTouchScrollInProgress;
+      return _isGestureScrollInProgress;
     }
     /// @brief Scrolls by @p stepCount steps of @p granularity (a line, a page, the document or a pixel of the
     /// scrollbar in @p direction).

@@ -204,9 +204,9 @@ namespace krys::boo
     }
   }
 
-  void ScrollableArea::DidEndTouchScroll() noexcept
+  void ScrollableArea::DidEndGestureScroll() noexcept
   {
-    _isTouchScrollInProgress = false;
+    _isGestureScrollInProgress = false;
     SnapAfterScrollEnds();
   }
 
@@ -596,10 +596,11 @@ namespace krys::boo
       return false;
     }
 
-    // A notch goes to the next snap position that way. A touch moves freely, and snaps when it ends.
-    if (wheelEvent.IsTouchScroll())
+    // A notch goes to the next snap position that way. A gesture (a touch's or a touchpad's pan) moves
+    // freely, and snaps when it ends.
+    if (wheelEvent.IsGestureScroll())
     {
-      _isTouchScrollInProgress = true;
+      _isGestureScrollInProgress = true;
     }
     else if (_scrollAnimator && _scrollAnimator->UsesScrollSnap())
     {

@@ -188,7 +188,7 @@ namespace krys::boo
 
   void ScrollAnimator::ResnapAfterLayout() noexcept
   {
-    if (!_snapOffsetsInfo || _isAnimating || _scrollableArea.IsTouchScrollInProgress())
+    if (!_snapOffsetsInfo || _isAnimating || _scrollableArea.IsGestureScrollInProgress())
     {
       return;
     }

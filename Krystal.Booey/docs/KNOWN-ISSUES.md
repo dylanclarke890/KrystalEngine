@@ -106,8 +106,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- There's no scroll anchoring, autoscroll timers beyond the scrollbar repeat, wheel latching, kinetic scrolling, touchpad gesture states or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
-- Scroll snapping without gesture phases: each wheel event goes to the next snap position, so a touchpad's small deltas page through a mandatory container.
+- There's no scroll anchoring, autoscroll timers beyond the scrollbar repeat, wheel latching, kinetic scrolling or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
+- Scroll snapping for touchpads without phases: a touchpad that isn't a precision one (or a host that doesn't take `OnTouchpadPan`) reports its pans as the wheel's notches, each going to the next snap position, so its small deltas page through a mandatory container.
 - There are no native scrollbars.
 - `VisualViewport` is the layout viewport at the page scale and never scrolls within it, so its `scroll` event never fires (its `resize` does). There are no obscured insets, auto-sizing, base viewport layout size scale factor (FIXME in `VisualViewport.cpp`) or layout viewport separate from the scroll position. Pinch zoom is only the page scale (1 to 5) from the view's gesture recogniser.
 - There is no async scrolling or threaded compositing: no scrolling coordinator or tree, no reconciliation of the composited scroll position after user scrolls, and animations and scrolling run on the main thread. A sticky box stuck to the view therefore repaints its old and new rects on scroll instead of compositing.
@@ -190,7 +190,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - There is no keyboard route to `contextmenu` (`sendContextMenuEventForKey`), and no menu controller beyond the `contextmenu` event.
 - Auto-hiding cursors are absent (FIXME in `EventHandler::SelectCursor`).
-- Wheel: `PlatformWheelEvent` has no phases, velocities, precise deltas or inverted directions, so there is no scroll latching, wheel delta filter or precision touchpad gesture support (pinching, swiping, DirectManipulation). Pan gestures chain on to the next scroll box mid-gesture, as the wheel does.
+- Wheel: `PlatformWheelEvent` has no velocities or inverted directions, and there is no scroll latching or wheel delta filter. A precision touchpad's pans come with their phases and momentum (DirectManipulation in Krystal.PAL), but not its pinches or swipes. Pan gestures chain on to the next scroll box mid-gesture, as the wheel does.
 - Drag and drop: colour drags and drops are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
 - Sequential focus navigation does not handle moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
 - Keyboard: the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs.

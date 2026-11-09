@@ -2075,7 +2075,13 @@ namespace krys::boo
   bool EventHandler::HandleWheelEvent(const PlatformWheelEvent &event) noexcept
   {
     EnumSet<EventHandling> handling;
-    return HandleWheelEventInternal(event, handling);
+    bool handled = HandleWheelEventInternal(event, handling);
+    // However the event went (a listener may have cancelled it), what the gesture scrolled snaps.
+    if (event.EndsGesture())
+    {
+      DidEndGestureScroll();
+    }
+    return handled;
   }
 
   bool EventHandler::HandleWheelEventInternal(const PlatformWheelEvent &event,
@@ -2118,7 +2124,8 @@ namespace krys::boo
 
     // FIXME: Widgets (isOverWidget, passWheelEventToWidget), once there are any.
 
-    if (element)
+    // The start and end of a touchpad's gesture move nothing, so no event fires for them.
+    if (element && (event.DeltaX() || event.DeltaY()))
     {
       if (!element->DispatchWheelEvent(event, handling))
       {
@@ -2257,16 +2264,15 @@ namespace krys::boo
   bool EventHandler::HandleWheelEventInScrollableArea(const PlatformWheelEvent &wheelEvent,
                                                       ScrollableArea &scrollableArea) noexcept
   {
-    // FIXME: Gesture states (updateWheelGestureState), with touchpad gestures.
-    if (wheelEvent.IsTouchScroll())
+    if (wheelEvent.IsGestureScroll())
     {
       auto isArea = [&](const WeakPtr<ScrollableArea> &area)
       {
         return area.get() == &scrollableArea;
       };
-      if (std::none_of(_touchScrolledAreas.begin(), _touchScrolledAreas.end(), isArea))
+      if (std::none_of(_gestureScrolledAreas.begin(), _gestureScrolledAreas.end(), isArea))
       {
-        _touchScrolledAreas.push_back(CreateWeakPtr<ScrollableArea>(&scrollableArea));
+        _gestureScrolledAreas.push_back(CreateWeakPtr<ScrollableArea>(&scrollableArea));
       }
     }
     return scrollableArea.HandleWheelEventForScrolling(wheelEvent);
@@ -2290,15 +2296,15 @@ namespace krys::boo
     return HandleWheelEventInAppropriateEnclosingBox(startNode, wheelEvent, filteredPlatformDelta);
   }
 
-  void EventHandler::DidEndTouchScroll() noexcept
+  void EventHandler::DidEndGestureScroll() noexcept
   {
-    auto areas = krys::move(_touchScrolledAreas);
-    _touchScrolledAreas.clear();
+    auto areas = krys::move(_gestureScrolledAreas);
+    _gestureScrolledAreas.clear();
     for (auto &area : areas)
     {
       if (area)
       {
-        area->DidEndTouchScroll();
+        area->DidEndGestureScroll();
       }
     }
   }

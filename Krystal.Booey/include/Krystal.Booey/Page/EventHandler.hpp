@@ -228,8 +228,9 @@ namespace krys::boo
     Timer _fakeMouseMoveEventTimer;
     bool _hasScheduledCursorUpdate {false};
     bool _isHandlingWheelEvent {false};
-    /// @brief What a touch's pan or fling has scrolled, to snap when it ends.
-    List<WeakPtr<ScrollableArea>> _touchScrolledAreas;
+    /// @brief What a gesture (a touch's or a touchpad's pan, or its momentum) has scrolled, to snap when it
+    /// ends.
+    List<WeakPtr<ScrollableArea>> _gestureScrolledAreas;
     PlatformMouseEvent _lastPlatformMouseEvent;
     /// @brief The modifier keys of the latest mouse or keyboard event: the keys held as far as the page
     /// knows.
@@ -446,7 +447,8 @@ namespace krys::boo
     /// @brief Handles a turn of the mouse wheel: `wheel` at the element under the mouse, then, unless it's
     /// cancelled, a scroll of the nearest box that can scroll that way, or else the view.
     /// @return Whether the event was cancelled or scrolled something.
-    // FIXME: Latching, the delta filter and gesture states come with touchpad gestures.
+    /// @note A touchpad's pan scrolls freely, and what it scrolled snaps once it and its momentum end.
+    // FIXME: Latching and the delta filter.
     bool HandleWheelEvent(const PlatformWheelEvent &event) noexcept;
     /// @brief The default action of a `wheel` event at @p startNode: scrolls the nearest enclosing box that
     /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops
@@ -459,8 +461,9 @@ namespace krys::boo
     /// event fires.
     /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
     bool HandleTouchScroll(const PlatformWheelEvent &event) noexcept;
-    /// @brief A touch's pan and its fling have ended: what they scrolled snaps.
-    void DidEndTouchScroll() noexcept;
+    /// @brief A gesture (a touch's pan and its fling, or a touchpad's pan and its momentum) has ended: what
+    /// it scrolled snaps.
+    void DidEndGestureScroll() noexcept;
     KRYS_NODISCARD ScrollIsAnimated KeyboardScrollIsAnimated() const noexcept;
     KRYS_NODISCARD bool IsHandlingWheelEvent() const noexcept
     {

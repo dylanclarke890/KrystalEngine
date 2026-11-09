@@ -38,6 +38,7 @@
 #include "Krystal.PAL/Platform.hpp"
 #include "Krystal.PAL/Pointer.hpp"
 #include "Krystal.PAL/TextInput.hpp"
+#include "Krystal.PAL/TouchpadPan.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include "Krystal.UI/ImageBufferRender2DBackend.hpp"
@@ -464,6 +465,11 @@ namespace krys::ui
     bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY,
                     pal::KeyModifiers modifiers = {},
                     const pal::WheelScrollSettings &settings = pal::GetWheelScrollSettings()) noexcept;
+    /// @brief A step of a touchpad's pan at @p point: the content follows the fingers, then any momentum,
+    /// as the wheel scrolls (`wheel` fires for each step that moves), and what it scrolled snaps once the pan
+    /// and its momentum end. Over an overlay, the steps are its wheel's notches, at 100 pixels a notch.
+    /// @return Whether the page cancelled the step or scrolled.
+    bool TouchpadPan(const boo::IntPoint &point, const pal::TouchpadPanInput &input) noexcept;
 
     /// @brief A pen's input at @p point (in viewport coordinates): the pen moves (hovering or touching),
     /// presses and releases as the mouse does, with its pressure, tilt and twist, as pointer events of type

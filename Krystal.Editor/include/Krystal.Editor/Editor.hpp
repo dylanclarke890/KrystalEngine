@@ -445,6 +445,26 @@ namespace krys
           return true;
         });
 
+      // A touchpad's pans scroll the page view as the wheel does; their ends go to it wherever the cursor is,
+      // so what they scrolled snaps.
+      _context->Events->On<TouchpadPanEvent>(
+        [&](const auto &event)
+        {
+          if (!_pageView || _view != EditorView::Page)
+          {
+            return true;
+          }
+          auto &input = event.Input();
+          boo::IntPoint point(static_cast<int32>(input.ClientX),
+                              static_cast<int32>(input.ClientY - HeaderHeight));
+          bool moves = input.DeltaX || input.DeltaY;
+          if (point.Y() >= 0 || !moves)
+          {
+            (void)_pageView->TouchpadPan(point, input);
+          }
+          return true;
+        });
+
       // Drags from other applications go to the page view, which answers what a drop would do; off it (over
       // the header, or with another view shown), they're off the page.
       _context->Events->On<DragInputEvent>(
