@@ -55,6 +55,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - A `ResizeObserver` or `IntersectionObserver` belongs to whoever created it, since there's no garbage collector, and disconnects when it's destroyed.
 - Element reflection covers only `popovertarget` and `commandfor`, one element per attribute (`ExplicitlySetAttrElementsMap`): there are no reflected arrays of elements.
 - `Document::CreateEvent` throws `NotSupportedError` for `devicemotionevent` and `deviceorientationevent`, whose interfaces don't exist, and `storageevent`, as there's no Web storage. A `customevent` is a `CustomEvent<RefPtr<SerializedScriptValue>>`, its detail standing for `any`.
+- There's no Fullscreen API (`requestFullscreen()`, `fullscreenElement`, `:fullscreen`, `::backdrop` for it): without script, a host that wants an element to fill the screen makes the window fullscreen and lays the page out for it itself.
 
 ## HTML parser
 
