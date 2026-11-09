@@ -23,6 +23,11 @@
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <tuple>
 
+namespace krys::boo
+{
+  class RenderStyle;
+}
+
 namespace krys::boo::css
 {
   class CounterStyleRegistry;
@@ -228,6 +233,10 @@ namespace krys::boo::style
 
     /// @brief Notes that @p element, in the scope, has a resolved style that uses viewport units.
     void AddElementWithViewportUnits(dom::Element &element) noexcept;
+
+    /// @brief Whether @p style, or the style of one of its pseudo-elements, uses viewport units.
+    /// Pseudo-elements aren't nodes: their styles are in their element's, which is restyled for them.
+    KRYS_NODISCARD static bool UsesViewportUnits(const RenderStyle &style) noexcept;
 
     KRYS_NODISCARD bool HasPendingUpdate() const noexcept
     {

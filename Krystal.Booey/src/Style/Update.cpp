@@ -76,7 +76,7 @@ namespace krys::boo::style
       AddPossibleRebuildRoot(element, parent);
     }
 
-    if (elementUpdate.Style && elementUpdate.Style->UsesViewportUnits())
+    if (elementUpdate.Style && Scope::UsesViewportUnits(*elementUpdate.Style))
     {
       Scope::ForNode(element).AddElementWithViewportUnits(element);
     }

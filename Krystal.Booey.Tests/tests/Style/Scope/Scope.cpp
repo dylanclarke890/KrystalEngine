@@ -385,6 +385,27 @@ namespace krys::boo::style::tests
     RunTasks();
   }
 
+  TEST_CASE("Scope: a change of viewport size restyles pseudo-elements using viewport units",
+            "[Style][Scope]")
+  {
+    // The element shrinks to fit its ::before, so its width is the pseudo-element's; its own style uses no
+    // viewport units.
+    ResolverFixture fixture(u8"<!DOCTYPE html><style>body{margin:0}#p{display:inline-block}"
+                            u8"#p::before{content:'';display:block;width:50vw}</style><span id=p></span>");
+    auto &element = *fixture.Document->GetElementById(u8"p");
+    auto width = [&]() -> int32
+    {
+      (void)fixture.Document->UpdateLayout();
+      return Downcast<html::HTMLElement>(element).OffsetWidth();
+    };
+    REQUIRE(width() == 400);
+
+    fixture.Frame->View()->Resize({1'000, 600});
+    CHECK(width() == 500);
+    fixture.Frame->View()->Resize({600, 600});
+    CHECK(width() == 300);
+  }
+
   TEST_CASE("Scope: a change of viewport size restyles the elements using viewport units", "[Style][Scope]")
   {
     ResolverFixture fixture(

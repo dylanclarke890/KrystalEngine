@@ -1092,21 +1092,32 @@ namespace krys::boo::style
       return;
     }
 
-    // FIXME: Pseudo-elements (nextIncludingPseudo), once they're nodes; their styles are in their element's
-    // pseudo-style cache.
+    // An element is noted for its pseudo-elements' styles too (nextIncludingPseudo), as they aren't nodes.
     std::erase_if(_elementsWithViewportUnits,
                   [&](const auto &entry)
                   {
                     auto *element = entry.second.get();
                     auto *style = element ? element->GetRenderStyle() : nullptr;
                     // Those no longer using them, or no longer here, are noted again if they do.
-                    if (!style || !style->UsesViewportUnits() || &ForNode(*element) != this)
+                    if (!style || !UsesViewportUnits(*style) || &ForNode(*element) != this)
                     {
                       return true;
                     }
                     element->InvalidateStyle();
                     return false;
                   });
+  }
+
+  bool Scope::UsesViewportUnits(const RenderStyle &style) noexcept
+  {
+    if (style.UsesViewportUnits())
+    {
+      return true;
+    }
+    auto *pseudoStyles = style.CachedPseudoStyles();
+    return pseudoStyles
+           && std::any_of(pseudoStyles->Styles.begin(), pseudoStyles->Styles.end(),
+                          [](const auto &entry) { return entry.second && UsesViewportUnits(*entry.second); });
   }
 
   void Scope::AddElementWithViewportUnits(dom::Element &element) noexcept
