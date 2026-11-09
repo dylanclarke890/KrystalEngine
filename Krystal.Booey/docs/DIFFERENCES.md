@@ -294,6 +294,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `pointerrawupdate` fires in every document, where it's only for secure contexts, as there are no origins. It fires just before the `pointermove` of each move, not sooner or more often, since the host's moves aren't delayed or coalesced into `pointermove`s.
 - A pointer lock request needs the window's transient activation, so it may come from a timer up to five seconds after a press or key.
 - Event timestamps aren't coarsened, where High Resolution Time coarsens them (Chrome to 100 µs): without script there are no timing attacks to guard against.
+- There's no Event Timing or Long Animation Frames timing yet: inner invoke doesn't record timing info for event listeners, and firing an event doesn't record task time (FIXMEs in `EventDispatcher.cpp` and `EventDispatcher.hpp`).
 
 ### From Chrome
 
