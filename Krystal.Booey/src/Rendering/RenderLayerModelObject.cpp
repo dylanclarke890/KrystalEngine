@@ -207,8 +207,19 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Scrollbar steps. (A scroll snap container's changes make it lay out, which finds its snap
-    // positions.)
+    // A page's step leaves out the scroll padding. (A scroll snap container's changes make it lay out, which
+    // finds its snap positions.)
+    if (oldStyle && !oldStyle->ScrollPaddingEqual(Style()))
+    {
+      if (IsDocumentElementRenderer())
+      {
+        View().FrameView().UpdateScrollbarSteps();
+      }
+      else if (auto *renderLayer = Layer())
+      {
+        renderLayer->UpdateScrollbarSteps();
+      }
+    }
   }
 
   bool RenderLayerModelObject::ApplyCachedClipAndScrollPosition(RepaintRects &,

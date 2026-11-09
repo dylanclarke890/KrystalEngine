@@ -1210,15 +1210,24 @@ namespace krys::boo
 
   void LocalFrameView::UpdateScrollbarSteps() noexcept
   {
+    // A page is what's in view less the root's scroll padding, which content scrolled to stays clear of.
+    LayoutRect paddedViewRect(LayoutPoint(), LayoutSize(VisibleWidth(), VisibleHeight()));
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    if (auto *renderer = documentElement ? DynamicDowncast<RenderBox>(documentElement->Renderer()) : nullptr)
+    {
+      paddedViewRect.Contract(renderer->ScrollPaddingForViewportRect(paddedViewRect));
+    }
+
     if (_horizontalScrollbar)
     {
-      _horizontalScrollbar->SetSteps(Scrollbar::PixelsPerLineStep(VisibleWidth()),
-                                     Scrollbar::PageStep(VisibleWidth()));
+      int32 width = paddedViewRect.Width().ToInt();
+      _horizontalScrollbar->SetSteps(Scrollbar::PixelsPerLineStep(width), Scrollbar::PageStep(width));
     }
     if (_verticalScrollbar)
     {
-      _verticalScrollbar->SetSteps(Scrollbar::PixelsPerLineStep(VisibleHeight()),
-                                   Scrollbar::PageStep(VisibleHeight()));
+      int32 height = paddedViewRect.Height().ToInt();
+      _verticalScrollbar->SetSteps(Scrollbar::PixelsPerLineStep(height), Scrollbar::PageStep(height));
     }
   }
 

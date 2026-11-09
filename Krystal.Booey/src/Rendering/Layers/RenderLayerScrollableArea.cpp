@@ -1196,9 +1196,8 @@ namespace krys::boo
     auto *box = _layer.GetRenderBox();
     krys_debug_assert(box);
 
-    // FIXME: Contract the bounds by the scroll padding (scrollPaddingForViewportRect), once there's scroll
-    // snapping.
     LayoutRect paddedLayerBounds(0_lu, 0_lu, box->ClientWidth(), box->ClientHeight());
+    paddedLayerBounds.Contract(box->ScrollPaddingForViewportRect(paddedLayerBounds));
 
     // Set up the  page step/line step.
     if (_hBar)

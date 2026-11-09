@@ -820,6 +820,8 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect AbsoluteToLayoutViewportRect(FloatRect rect) const noexcept;
 
     void AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept override;
+    /// @brief Sets the scrollbars' line and page steps from what's in view, less the root's scroll padding.
+    void UpdateScrollbarSteps() noexcept;
 
   private:
     bool SetHasHorizontalScrollbar(bool hasBar, bool *contentSizeAffected = nullptr) noexcept;
@@ -827,7 +829,6 @@ namespace krys::boo
     bool SetHasScrollbarInternal(RefPtr<Scrollbar> &scrollbar, ScrollbarOrientation orientation, bool hasBar,
                                  bool *contentSizeAffected) noexcept;
     KRYS_NODISCARD Ref<Scrollbar> CreateScrollbar(ScrollbarOrientation orientation) noexcept;
-    void UpdateScrollbarSteps() noexcept;
     /// @brief Lays the view out again if adding or removing a scrollbar changed the size content is laid out
     /// at.
     void UpdateContentsSize() noexcept;

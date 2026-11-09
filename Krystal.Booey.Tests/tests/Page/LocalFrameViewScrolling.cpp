@@ -501,6 +501,23 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a page's step leaves out the scroll padding",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {utf8_string(TallPage)};
+    auto &view = fixture.View();
+    REQUIRE(view.VerticalScrollbar());
+    // Four fifths of the 79 pixels in view.
+    CHECK(view.VerticalScrollbar()->PageStep() == Scrollbar::PageStep(79));
+
+    // Padding the root's scrollport by 20 pixels at the top leaves 59.
+    REQUIRE_FALSE(fixture.Document->DocumentElement()
+                    ->SetAttribute(u8"style", u8"scroll-padding-top:20px")
+                    .HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(view.VerticalScrollbar()->PageStep() == Scrollbar::PageStep(59));
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture,
                    "LocalFrameView: a box keeps its scroll position as its zoom changes",
                    "[Page][LocalFrameView][Scrolling]")
