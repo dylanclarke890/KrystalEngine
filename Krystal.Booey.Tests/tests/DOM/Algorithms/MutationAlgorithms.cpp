@@ -32,6 +32,33 @@ namespace krys::boo::dom::tests
     {
       return CreateRef<MutationObserver>([](const List<Ref<MutationRecord>> &, MutationObserver &) {});
     }
+
+    /// @brief The nodes in @p list, in order (none if it's null).
+    KRYS_NODISCARD List<const Node *> Nodes(const RefPtr<NodeList> &list)
+    {
+      List<const Node *> nodes;
+      if (list)
+      {
+        for (size_t i = 0uz; i < list->Length(); ++i)
+        {
+          nodes.push_back(list->Item(i).get());
+        }
+      }
+      return nodes;
+    }
+
+    /// @brief Checks that @p record is a childList record for @p target with these nodes and siblings.
+    void CheckChildListRecord(const MutationRecord &record, const Node &target, List<const Node *> addedNodes,
+                              List<const Node *> removedNodes, const Node *previousSibling,
+                              const Node *nextSibling)
+    {
+      CHECK(record.Type() == u8"childList");
+      CHECK(record.Target().get() == &target);
+      CHECK(Nodes(record.AddedNodes()) == addedNodes);
+      CHECK(Nodes(record.RemovedNodes()) == removedNodes);
+      CHECK(record.PreviousSibling().get() == previousSibling);
+      CHECK(record.NextSibling().get() == nextSibling);
+    }
   }
 
   TEST_CASE(
@@ -59,9 +86,6 @@ namespace krys::boo::dom::tests
       auto result = MutationAlgorithms::EnsurePreInsertValidity(*element, *otherElement, nullptr);
       REQUIRE(result.HasException());
       REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-      REQUIRE_FALSE(element->RemoveChild(*otherElement).HasException());
-      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
     }
 
     SECTION("Inserting before a node that isn't a child of the parent returns a NotFoundError")
@@ -128,9 +152,6 @@ namespace krys::boo::dom::tests
           auto result = MutationAlgorithms::EnsurePreInsertValidity(*docFragment, *document, nullptr);
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-          REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
-          REQUIRE_FALSE(docFragment->RemoveChild(*element).HasException());
         }
 
         SECTION("Node has a Text child returns a HierarchyRequestError")
@@ -142,8 +163,6 @@ namespace krys::boo::dom::tests
           auto result = MutationAlgorithms::EnsurePreInsertValidity(*docFragment, *document, nullptr);
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-          REQUIRE_FALSE(docFragment->RemoveChild(*textNode).HasException());
         }
 
         SECTION("Node has one element child")
@@ -156,9 +175,6 @@ namespace krys::boo::dom::tests
             auto result = MutationAlgorithms::EnsurePreInsertValidity(*docFragment, *document, nullptr);
             REQUIRE(result.HasException());
             REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-            REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
-            REQUIRE_FALSE(document->RemoveChild(*element).HasException());
           }
 
           auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
@@ -171,9 +187,6 @@ namespace krys::boo::dom::tests
             auto result = MutationAlgorithms::EnsurePreInsertValidity(*docFragment, *document, docType.get());
             REQUIRE(result.HasException());
             REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-            REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
-            REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
           }
 
           SECTION(
@@ -188,10 +201,6 @@ namespace krys::boo::dom::tests
             auto result = MutationAlgorithms::EnsurePreInsertValidity(*docFragment, *document, comment.get());
             REQUIRE(result.HasException());
             REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-            REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
-            REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
-            REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
           }
         }
       }
@@ -208,8 +217,6 @@ namespace krys::boo::dom::tests
           auto result = MutationAlgorithms::EnsurePreInsertValidity(*otherElement, *document, nullptr);
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-          REQUIRE_FALSE(document->RemoveChild(*element).HasException());
         }
 
         SECTION("Ref child is a DocumentType returns a HierarchyRequestError")
@@ -219,8 +226,6 @@ namespace krys::boo::dom::tests
           auto result = MutationAlgorithms::EnsurePreInsertValidity(*otherElement, *document, docType.get());
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-          REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
         }
 
         SECTION("Ref child non null and document type is following ref child returns a HierarchyRequestError")
@@ -233,9 +238,6 @@ namespace krys::boo::dom::tests
           auto result = MutationAlgorithms::EnsurePreInsertValidity(*otherElement, *document, comment.get());
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-          REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
-          REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
         }
       }
 
@@ -252,8 +254,6 @@ namespace krys::boo::dom::tests
           auto result = MutationAlgorithms::EnsurePreInsertValidity(*docType, *document, nullptr);
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-          REQUIRE_FALSE(document->RemoveChild(*childDocType).HasException());
         }
 
         SECTION("Document already has an Element child preceding ref child returns a HierarchyRequestError")
@@ -266,9 +266,6 @@ namespace krys::boo::dom::tests
           auto result = MutationAlgorithms::EnsurePreInsertValidity(*docType, *document, comment.get());
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-          REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
-          REQUIRE_FALSE(document->RemoveChild(*element).HasException());
         }
 
         SECTION("Document already has an element child and ref child is null returns a HierarchyRequestError")
@@ -278,8 +275,6 @@ namespace krys::boo::dom::tests
           auto result = MutationAlgorithms::EnsurePreInsertValidity(*docType, *document, nullptr);
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-          REQUIRE_FALSE(document->RemoveChild(*element).HasException());
         }
       }
     }
@@ -298,15 +293,12 @@ namespace krys::boo::dom::tests
     {
       auto document = CreateRef<Document>();
       auto element = CreateRef<TestElement>(*document);
-      auto otherElement = CreateRef<TestElement>(*document);
 
       REQUIRE_FALSE(document->AppendChild(*element).HasException());
 
       auto result = MutationAlgorithms::PreInsert(*element, *document, nullptr);
       REQUIRE(result.HasException());
       REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
-
-      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
     }
 
     SECTION("Otherwise, the node is pre-inserted into the parent before the child and the node is returned")
@@ -321,8 +313,6 @@ namespace krys::boo::dom::tests
       REQUIRE(&result.Value() == element.get());
       REQUIRE(element->ParentNode() == otherElement.get());
       REQUIRE(otherElement->FirstChild() == element.get());
-
-      REQUIRE_FALSE(otherElement->RemoveChild(*element).HasException());
     }
 
     SECTION("PreInsert with refChild same as node to insert inserts node in same place and returns node")
@@ -338,8 +328,6 @@ namespace krys::boo::dom::tests
       REQUIRE(&result.Value() == comment.get());
       REQUIRE(comment->ParentNode() == document.get());
       REQUIRE(document->FirstChild() == comment.get());
-
-      REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
     }
   }
 
@@ -364,17 +352,21 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(docFragment->AppendChild(*comment).HasException());
       REQUIRE_FALSE(docFragment->AppendChild(*element).HasException());
 
+      auto observer = NewCollectingObserver();
+      REQUIRE_FALSE(observer->Observe(*docFragment, {.ChildList = true}).HasException());
+      REQUIRE_FALSE(observer->Observe(*document, {.ChildList = true}).HasException());
+
       REQUIRE_FALSE(MutationAlgorithms::Insert(*docFragment, *document, nullptr).HasException());
 
       REQUIRE(document->FirstChild() == comment.get());
       REQUIRE(document->LastChild() == element.get());
       REQUIRE_FALSE(docFragment->HasChildNodes());
 
-      // FIXME: Need to test that a mutation record is queued for the nodes removed
-      // from the DocumentFragment.
-
-      REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
-      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
+      // A record for the fragment's children leaving it, then one for their insertion.
+      auto records = observer->TakeRecords();
+      REQUIRE(records.size() == 2);
+      CheckChildListRecord(*records[0], *docFragment, {}, {comment.get(), element.get()}, nullptr, nullptr);
+      CheckChildListRecord(*records[1], *document, {comment.get(), element.get()}, {}, nullptr, nullptr);
     }
 
     SECTION("Inserting before a refChild that is contained within a live range correctly updates the offsets "
@@ -400,11 +392,6 @@ namespace krys::boo::dom::tests
 
       REQUIRE(range->EndContainer() == element.get());
       REQUIRE(range->EndOffset() == 3uz);
-
-      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
-      REQUIRE_FALSE(element->RemoveChild(*child1).HasException());
-      REQUIRE_FALSE(element->RemoveChild(*child2).HasException());
-      REQUIRE_FALSE(element->RemoveChild(*child3).HasException());
     }
 
     SECTION("Inserting a node from another Document adopts the node into the new Document")
@@ -419,8 +406,6 @@ namespace krys::boo::dom::tests
 
       REQUIRE(&element->NodeDocument() == document.get());
       REQUIRE(element->IsConnected());
-
-      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
     }
 
     SECTION("A record is queued for the parent unless suppressObservers is true")
@@ -450,14 +435,11 @@ namespace krys::boo::dom::tests
     {
       auto document = CreateRef<Document>();
       auto element = CreateRef<TestElement>(*document);
-      auto otherElement = CreateRef<TestElement>(*document);
 
       REQUIRE_FALSE(document->AppendChild(*element).HasException());
 
       auto result = MutationAlgorithms::Append(*element, *document);
       REQUIRE(result == ExceptionCode::HierarchyRequestError);
-
-      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
     }
 
     SECTION("Otherwise, the node is appended to the parent and the node is returned")
@@ -472,8 +454,6 @@ namespace krys::boo::dom::tests
       REQUIRE(&result.Value() == element);
       REQUIRE(element->ParentNode() == otherElement);
       REQUIRE(otherElement->FirstChild() == element);
-
-      REQUIRE_FALSE(otherElement->RemoveChild(*element).HasException());
     }
   }
 
@@ -511,8 +491,6 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(document->InsertBefore(*doctype.Value(), element.get()).HasException());
       REQUIRE(MutationAlgorithms::Move(*doctype.Value(), *document, nullptr)
               == ExceptionCode::HierarchyRequestError);
-
-      REQUIRE_FALSE(document->RemoveChild(*doctype.Value()).HasException());
     }
 
     SECTION("HierarchyRequestError if node is a Text node and newParent is a Document")
@@ -522,8 +500,6 @@ namespace krys::boo::dom::tests
 
       REQUIRE(MutationAlgorithms::Move(*textNode, *document, nullptr)
               == ExceptionCode::HierarchyRequestError);
-
-      REQUIRE_FALSE(element->RemoveChild(*textNode).HasException());
     }
 
     SECTION("HierarchyRequest error if newParent is a Document, node is an Element node and")
@@ -534,8 +510,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Move(*otherElement, *document, nullptr)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(element->RemoveChild(*otherElement).HasException());
       }
 
       SECTION("refChild is a doctype")
@@ -546,8 +520,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Move(*element, *document, doctype.Value().get())
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(document->RemoveChild(*doctype.Value()).HasException());
       }
 
       SECTION("refChild is non null and a DocumentType is following child")
@@ -560,9 +532,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Move(*element, *document, comment.get())
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(document->RemoveChild(*doctype.Value()).HasException());
-        REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
       }
     }
 
@@ -592,16 +561,83 @@ namespace krys::boo::dom::tests
       REQUIRE(otherElement->LastChild() == nullptr);
       REQUIRE(anotherElement->FirstChild() == child2.get());
       REQUIRE(anotherElement->LastChild() == child1.get());
-
-      REQUIRE_FALSE(element->RemoveChild(*otherElement).HasException());
-      REQUIRE_FALSE(element->RemoveChild(*anotherElement).HasException());
-      REQUIRE_FALSE(anotherElement->RemoveChild(*child1).HasException());
-      REQUIRE_FALSE(anotherElement->RemoveChild(*child2).HasException());
     }
 
-    // FIXME: Tests for the mutation records queued.
+    SECTION("A record is queued for the old parent, then one for the new parent")
+    {
+      auto child1 = CreateRef<TestElement>(*document);
+      auto child2 = CreateRef<TestElement>(*document);
+      auto child3 = CreateRef<TestElement>(*document);
+      auto newParent = CreateRef<TestElement>(*document);
+      auto newChild = CreateRef<TestElement>(*document);
+      REQUIRE_FALSE(element->AppendChild(*otherElement).HasException());
+      REQUIRE_FALSE(element->AppendChild(*newParent).HasException());
+      REQUIRE_FALSE(otherElement->AppendChild(*child1).HasException());
+      REQUIRE_FALSE(otherElement->AppendChild(*child2).HasException());
+      REQUIRE_FALSE(otherElement->AppendChild(*child3).HasException());
+      REQUIRE_FALSE(newParent->AppendChild(*newChild).HasException());
 
-    // FIXME: Tests for live ranges.
+      auto observer = NewCollectingObserver();
+      REQUIRE_FALSE(observer->Observe(*otherElement, {.ChildList = true}).HasException());
+      REQUIRE_FALSE(observer->Observe(*newParent, {.ChildList = true}).HasException());
+
+      REQUIRE_FALSE(MutationAlgorithms::Move(*child2, *newParent, newChild.get()).HasException());
+
+      auto records = observer->TakeRecords();
+      REQUIRE(records.size() == 2);
+      CheckChildListRecord(*records[0], *otherElement, {}, {child2.get()}, child1.get(), child3.get());
+      CheckChildListRecord(*records[1], *newParent, {child2.get()}, {}, nullptr, newChild.get());
+    }
+
+    SECTION("Live ranges in the old and new parents are updated")
+    {
+      auto child1 = CreateRef<TestElement>(*document);
+      auto child2 = CreateRef<TestElement>(*document);
+      auto child3 = CreateRef<TestElement>(*document);
+      auto newParent = CreateRef<TestElement>(*document);
+      auto newChild1 = CreateRef<TestElement>(*document);
+      auto newChild2 = CreateRef<TestElement>(*document);
+      REQUIRE_FALSE(element->AppendChild(*otherElement).HasException());
+      REQUIRE_FALSE(element->AppendChild(*newParent).HasException());
+      REQUIRE_FALSE(otherElement->AppendChild(*child1).HasException());
+      REQUIRE_FALSE(otherElement->AppendChild(*child2).HasException());
+      REQUIRE_FALSE(otherElement->AppendChild(*child3).HasException());
+      REQUIRE_FALSE(newParent->AppendChild(*newChild1).HasException());
+      REQUIRE_FALSE(newParent->AppendChild(*newChild2).HasException());
+
+      // Spanning the moved node in the old parent.
+      auto oldRange = document->CreateRange();
+      REQUIRE_FALSE(oldRange->SetStart(*otherElement, 1uz).HasException());
+      REQUIRE_FALSE(oldRange->SetEnd(*otherElement, 3uz).HasException());
+      // Inside the moved node.
+      auto innerRange = document->CreateRange();
+      REQUIRE_FALSE(innerRange->SetStart(*child2, 0uz).HasException());
+      REQUIRE_FALSE(innerRange->SetEnd(*child2, 0uz).HasException());
+      // Spanning the insertion point in the new parent.
+      auto newRange = document->CreateRange();
+      REQUIRE_FALSE(newRange->SetStart(*newParent, 1uz).HasException());
+      REQUIRE_FALSE(newRange->SetEnd(*newParent, 2uz).HasException());
+
+      REQUIRE_FALSE(MutationAlgorithms::Move(*child2, *newParent, newChild2.get()).HasException());
+
+      // The old parent's range loses the node from its end.
+      CHECK(oldRange->StartContainer() == otherElement.get());
+      CHECK(oldRange->StartOffset() == 1uz);
+      CHECK(oldRange->EndContainer() == otherElement.get());
+      CHECK(oldRange->EndOffset() == 2uz);
+
+      // A range inside the node collapses to where it was.
+      CHECK(innerRange->StartContainer() == otherElement.get());
+      CHECK(innerRange->StartOffset() == 1uz);
+      CHECK(innerRange->EndContainer() == otherElement.get());
+      CHECK(innerRange->EndOffset() == 1uz);
+
+      // Offsets after the insertion point grow; one at it doesn't.
+      CHECK(newRange->StartContainer() == newParent.get());
+      CHECK(newRange->StartOffset() == 1uz);
+      CHECK(newRange->EndContainer() == newParent.get());
+      CHECK(newRange->EndOffset() == 3uz);
+    }
   }
 
   TEST_CASE("Replace: ensures validity excluding the child, then swaps in the node",
@@ -667,8 +703,6 @@ namespace krys::boo::dom::tests
         auto otherElement = CreateRef<TestElement>(*document);
         REQUIRE(MutationAlgorithms::Replace(*docType, *otherElement, *document)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
       }
 
       SECTION("newChild is an Element node and parent has a DocumentType following oldChild")
@@ -681,9 +715,6 @@ namespace krys::boo::dom::tests
         auto otherElement = CreateRef<TestElement>(*document);
         REQUIRE(MutationAlgorithms::Replace(*comment, *otherElement, *document)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
-        REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
       }
 
       SECTION("newChild is a DocumentType node and parent already has a DocumentType child")
@@ -696,9 +727,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Replace(*comment, *otherDocType, *document)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
-        REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
       }
 
       SECTION("newChild is a DocumentType node and an Element node precedes oldChild")
@@ -709,8 +737,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Replace(*comment, *docType, *document)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
       }
 
       SECTION("newChild is a DocumentFragment node and has more than one Element child")
@@ -725,9 +751,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Replace(*element, *docFragment, *document)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(docFragment->RemoveChild(*element1).HasException());
-        REQUIRE_FALSE(docFragment->RemoveChild(*element2).HasException());
       }
 
       SECTION("newChild is a DocumentFragment node and has an Text node child and parent already")
@@ -739,8 +762,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Replace(*element, *docFragment, *document)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(docFragment->RemoveChild(*text).HasException());
       }
 
       SECTION("newChild is a DocumentFragment node and has an Element child and parent already has an "
@@ -755,9 +776,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Replace(*comment, *docFragment, *document)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(docFragment->RemoveChild(*element1).HasException());
-        REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
       }
 
       SECTION("newChild is a DocumentFragment node, has an Element child and parent already has a "
@@ -773,10 +791,6 @@ namespace krys::boo::dom::tests
 
         REQUIRE(MutationAlgorithms::Replace(*comment, *docFragment, *document)
                 == ExceptionCode::HierarchyRequestError);
-
-        REQUIRE_FALSE(docFragment->RemoveChild(*element1).HasException());
-        REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
-        REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
       }
 
       SECTION("Otherwise, the newChild replaces the oldChild")
@@ -790,22 +804,34 @@ namespace krys::boo::dom::tests
         REQUIRE(element->LastChild() == child2.get());
         REQUIRE_FALSE(child1->ParentNode());
       }
-
-      if (element->ParentNode())
-      {
-        REQUIRE_FALSE(element->ParentNode()->RemoveChild(*element).HasException());
-      }
-      if (child1->ParentNode())
-      {
-        REQUIRE_FALSE(child1->ParentNode()->RemoveChild(*child1).HasException());
-      }
-      if (child2->ParentNode())
-      {
-        REQUIRE_FALSE(child2->ParentNode()->RemoveChild(*child2).HasException());
-      }
     }
 
-    // FIXME: Tests for the mutation records queued.
+    SECTION("One record is queued for the parent, after the fragment's")
+    {
+      auto replacement = CreateRef<TestElement>(*document);
+
+      auto observer = NewCollectingObserver();
+      REQUIRE_FALSE(observer->Observe(*element, {.ChildList = true}).HasException());
+
+      REQUIRE_FALSE(MutationAlgorithms::Replace(*child1, *replacement, *element).HasException());
+      auto records = observer->TakeRecords();
+      REQUIRE(records.size() == 1);
+      CheckChildListRecord(*records[0], *element, {replacement.get()}, {child1.get()}, nullptr, child2.get());
+
+      auto fragment = CreateRef<DocumentFragment>(*document);
+      auto new1 = CreateRef<TestElement>(*document);
+      auto new2 = CreateRef<TestElement>(*document);
+      REQUIRE_FALSE(fragment->AppendChild(*new1).HasException());
+      REQUIRE_FALSE(fragment->AppendChild(*new2).HasException());
+      REQUIRE_FALSE(observer->Observe(*fragment, {.ChildList = true}).HasException());
+
+      REQUIRE_FALSE(MutationAlgorithms::Replace(*child2, *fragment, *element).HasException());
+      records = observer->TakeRecords();
+      REQUIRE(records.size() == 2);
+      CheckChildListRecord(*records[0], *fragment, {}, {new1.get(), new2.get()}, nullptr, nullptr);
+      CheckChildListRecord(*records[1], *element, {new1.get(), new2.get()}, {child2.get()}, replacement.get(),
+                           nullptr);
+    }
   }
 
   TEST_CASE("Replace all: removes every child, then inserts the node, in one record",
@@ -852,12 +878,43 @@ namespace krys::boo::dom::tests
       REQUIRE(element->LastChild() == newChild2.get());
       REQUIRE_FALSE(child1->ParentNode());
       REQUIRE_FALSE(child2->ParentNode());
-
-      REQUIRE_FALSE(element->RemoveChild(*newChild1).HasException());
-      REQUIRE_FALSE(element->RemoveChild(*newChild2).HasException());
     }
 
-    // FIXME: Tests for the mutation records queued.
+    SECTION("One record is queued for the parent, unless nothing was added or removed")
+    {
+      auto document = CreateRef<Document>();
+      auto element = CreateRef<TestElement>(*document);
+      auto child1 = CreateRef<TestElement>(*document);
+      auto child2 = CreateRef<TestElement>(*document);
+      auto docFragment = CreateRef<DocumentFragment>(*document);
+      auto newChild1 = CreateRef<TestElement>(*document);
+      auto newChild2 = CreateRef<TestElement>(*document);
+      REQUIRE_FALSE(element->AppendChild(*child1).HasException());
+      REQUIRE_FALSE(element->AppendChild(*child2).HasException());
+      REQUIRE_FALSE(docFragment->AppendChild(*newChild1).HasException());
+      REQUIRE_FALSE(docFragment->AppendChild(*newChild2).HasException());
+
+      auto observer = NewCollectingObserver();
+      REQUIRE_FALSE(observer->Observe(*element, {.ChildList = true}).HasException());
+      REQUIRE_FALSE(observer->Observe(*docFragment, {.ChildList = true}).HasException());
+
+      REQUIRE_FALSE(MutationAlgorithms::ReplaceAll(docFragment.get(), *element).HasException());
+      auto records = observer->TakeRecords();
+      REQUIRE(records.size() == 2);
+      CheckChildListRecord(*records[0], *docFragment, {}, {newChild1.get(), newChild2.get()}, nullptr,
+                           nullptr);
+      CheckChildListRecord(*records[1], *element, {newChild1.get(), newChild2.get()},
+                           {child1.get(), child2.get()}, nullptr, nullptr);
+
+      REQUIRE_FALSE(MutationAlgorithms::ReplaceAll(nullptr, *element).HasException());
+      records = observer->TakeRecords();
+      REQUIRE(records.size() == 1);
+      CheckChildListRecord(*records[0], *element, {}, {newChild1.get(), newChild2.get()}, nullptr, nullptr);
+
+      // Replacing no children with nothing changes nothing.
+      REQUIRE_FALSE(MutationAlgorithms::ReplaceAll(nullptr, *element).HasException());
+      CHECK(observer->TakeRecords().empty());
+    }
   }
 
   TEST_CASE("Pre-remove: removes the child, which must be the parent's",
