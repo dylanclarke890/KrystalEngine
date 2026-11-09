@@ -24,15 +24,6 @@ namespace krys
     }
   };
 
-  struct MainRunLoopAccessTraits
-  {
-    static void AssertAccess() noexcept
-    {
-      // FIXME: Implement a proper main run loop check for the target platform.
-      // krys_assert(isMainRunLoop());
-    }
-  };
-
   template <typename T, typename AccessTraits = AnyThreadsAccessTraits>
   class NeverDestroyed
   {
@@ -113,9 +104,7 @@ namespace krys
 
     PointerType StoragePointerWithoutAccessCheck() const noexcept
     {
-#if KRYS_DEBUG
-      krys_assert(_isConstructed);
-#endif
+      krys_debug_assert(_isConstructed);
       return const_cast<PointerType>(_storage.get());
     }
 
@@ -187,11 +176,5 @@ namespace krys
   using MainThreadNeverDestroyed = NeverDestroyed<T, MainThreadAccessTraits>;
 
   template <typename T>
-  using MainRunLoopNeverDestroyed = NeverDestroyed<T, MainRunLoopAccessTraits>;
-
-  template <typename T>
   using MainThreadLazyNeverDestroyed = LazyNeverDestroyed<T, MainThreadAccessTraits>;
-
-  template <typename T>
-  using MainRunLoopLazyNeverDestroyed = LazyNeverDestroyed<T, MainRunLoopAccessTraits>;
 }
