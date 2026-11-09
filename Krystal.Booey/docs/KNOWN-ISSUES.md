@@ -41,7 +41,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).
 - State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
 - No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), and user style sheets' `@import`s and load options aren't handled.
-- `css::calc::Value::DoubleValueDeprecated` doesn't log when the tree needs conversion data (FIXME in `ValueEvaluation.cpp`).
 
 ## Style (cascade and computed values)
 
@@ -53,7 +52,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `Style::Extractor` has no branch for properties with running keyframe effects (FIXME).
 - `Style::PendingResources` has no user agent shadow tree support and no anonymous mode for masks (FIXME).
 - Anchor positioning has no fragmented flows: an anchor's rect isn't the bounding box of its fragments (FIXMEs in `AnchorPositionEvaluator.cpp`). Anchor-positioned viewport-constrained objects need a scrolling coordinator Booey doesn't have.
-- The switch control sheet (`htmlSwitchControl.css`) and the fullscreen sheet are never loaded (FIXMEs in `UserAgentStyle.cpp`).
 
 ## Animations
 
