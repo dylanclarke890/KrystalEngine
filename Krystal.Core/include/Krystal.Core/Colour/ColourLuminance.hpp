@@ -8,17 +8,6 @@ namespace krys
   KRYS_NODISCARD inline double RelativeLuminance(const ColourType &color) noexcept
   {
     // https://en.wikipedia.org/wiki/Relative_luminance
-
-    // FIXME: This can be optimized a bit by observing that in some cases the conversion
-    // to XYZA<float, WhitePoint::D65> in its entirety is unnecessary to get just the Y
-    // component. For instance, for SRGBA<float>, this could be done as:
-    //
-    //     convertColor<LinearSRGBA<float>>(color) * LinearSRGBA<float>::LinearToXYZ.row(1)
-    //
-    // (for a hypothetical row() function on ColourMatrix). We would probably want to implement
-    // this in ColourConversion.h as a sibling function to convertColor which can get a channel
-    // of a color in another space in this kind of optimal way.
-
     return ConvertColour<XYZA<float, WhitePoint::D65>>(color).Resolved().Y;
   }
 

@@ -1562,8 +1562,9 @@ namespace krys::boo
     Operation operation =
       (side == BoxSide::Top || side == BoxSide::Left) == (style == BorderStyle::Inset) ? Darken : Lighten;
 
-    bool isVeryDarkColor = color.Luminance() <= baseDarkColorLuminance;
-    bool isVeryLightColor = color.Luminance() > baseLightColorLuminance;
+    auto luminance = color.Luminance();
+    bool isVeryDarkColor = luminance <= baseDarkColorLuminance;
+    bool isVeryLightColor = luminance > baseLightColorLuminance;
 
     // Special case very dark colors to give them extra contrast.
     if (isVeryDarkColor)
