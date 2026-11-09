@@ -64,7 +64,18 @@ namespace krys::boo::html::tests
 
       SECTION("USVString")
       {
-        // FIXME: Implement when USVString is implemented.
+        TestData data;
+        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"");
+
+        // Not treated as a URL: the value is returned as it is, not completed.
+        data.Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+        Reflect<dom::USVString>(*data.Element, TestAttribute, u8"source.html");
+        REQUIRE(data.Element->GetAttribute(TestAttribute) == u8"source.html");
+        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"source.html");
+
+        Reflect<dom::USVString>(*data.Element, TestAttribute, u8"");
+        REQUIRE(data.Element->HasAttribute(TestAttribute));
+        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"");
       }
 
       SECTION("bool")
@@ -297,9 +308,36 @@ namespace krys::boo::html::tests
 
   TEST_CASE("ReflectURL", "[HTML][Attributes][html:xattr-reflecturl][html:treated-as-a-url]")
   {
-    SECTION("USVString")
+    TestData data;
+    data.Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+
+    SECTION("An absent attribute is the empty string")
     {
-      // FIXME: Implement when USVString is implemented.
+      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute) == u8"");
+    }
+
+    SECTION("The value is completed against the document's base URL, and set as it is")
+    {
+      ReflectURL<dom::USVString>(*data.Element, TestAttribute, u8"source.html");
+      REQUIRE(data.Element->GetAttribute(TestAttribute) == u8"source.html");
+      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute)
+              == u8"https://example.com/dir/source.html");
+
+      ReflectURL<dom::USVString>(*data.Element, TestAttribute, u8"https://other.example/a?b#c");
+      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute) == u8"https://other.example/a?b#c");
+    }
+
+    SECTION("An empty value is the base URL")
+    {
+      ReflectURL<dom::USVString>(*data.Element, TestAttribute, u8"");
+      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute)
+              == u8"https://example.com/dir/page.html");
+    }
+
+    SECTION("A value that doesn't parse as a URL is returned as it is")
+    {
+      ReflectURL<dom::USVString>(*data.Element, TestAttribute, u8"http://[");
+      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute) == u8"http://[");
     }
   }
 
@@ -426,6 +464,13 @@ namespace krys::boo::html::tests
       TestData data;
       ReflectSetter<dom::DOMString>(*data.Element, TestAttribute, u8"setter value");
       REQUIRE(Reflect<dom::DOMString>(*data.Element, TestAttribute) == u8"setter value");
+    }
+
+    SECTION("USVString")
+    {
+      TestData data;
+      ReflectSetter<dom::USVString>(*data.Element, TestAttribute, u8"setter value");
+      REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"setter value");
     }
 
     SECTION("bool")
