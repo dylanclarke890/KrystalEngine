@@ -568,11 +568,6 @@ namespace krys
       // This handles conversions between extended linear color types that can be converted using pre-defined
       // 3x3 matrices.
 
-      // FIXME: Pre-compute (using constexpr) the concatenation of the matrices prior to applying them
-      // to reduce number of matrix multiplications to a minimum. This will likely give subtly different
-      // results (due to floating point effects) so if this optimization is considered we should ensure we
-      // have sufficient testing coverage to notice any adverse effects.
-
       auto ApplyMatrices = [](const Input &color, auto... matrices)
       {
         return CreateFromComponents<Output>(
