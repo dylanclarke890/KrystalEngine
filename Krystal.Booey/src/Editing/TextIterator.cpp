@@ -226,7 +226,8 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Widgets, media and attachments, once there are any.
+    // FIXME: Media, once there are any. (No widgets or attachments: frames, plug-ins and WebKit's
+    // `<attachment>` aren't planned.)
     if (renderer->IsRenderImage())
     {
       return true;

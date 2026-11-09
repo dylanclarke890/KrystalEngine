@@ -38,7 +38,7 @@ namespace krys::boo
   /// @brief A timer that fires once, or repeatedly, after an interval of the host's time: the event loop
   /// fires the timers that are due when the host runs it with the current time.
   /// @note A timer stops when it's destroyed, so its owner may hold it as a member.
-  // FIXME: Timer alignment and nesting levels, once there are script timers.
+  // (No timer alignment or nesting levels: they're for script timers, and scripting isn't planned.)
   class TimerBase
   {
     friend class ThreadTimers;

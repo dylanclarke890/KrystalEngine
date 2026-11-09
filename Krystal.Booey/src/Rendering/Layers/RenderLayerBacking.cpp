@@ -1170,7 +1170,7 @@ namespace krys::boo
       layerConfigChanged = true;
     }
 
-    // FIXME: Video and widgets' content layers, once there are any.
+    // FIXME: Video's content layers, once there's video. (No widgets: frames and plug-ins aren't planned.)
     if (ShouldSetContentsDisplayDelegate())
     {
       auto &canvas = Downcast<html::HTMLCanvasElement>(*Renderer().GetElement());

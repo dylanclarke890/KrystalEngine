@@ -3184,7 +3184,7 @@ namespace krys::boo::dom
 
   void Document::DidRemoveAllPendingStylesheet() noexcept
   {
-    // FIXME: Running the scripts waiting for style sheets, once there are scripts.
+    // (No scripts wait for style sheets, as scripting isn't planned; see OVERVIEW.md.)
     if (!_gotoAnchorNeededAfterStylesheetsLoad || !View())
     {
       return;

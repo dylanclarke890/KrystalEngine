@@ -49,7 +49,8 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-embed-height
     void Height(dom::DOMString value) noexcept;
 
-    // FIXME: Document? getSVGDocument();
+    // (No `getSVGDocument()`: an embed loads no nested document, as subframes aren't planned; see
+    // OVERVIEW.md.)
 
 #pragma endregion
 

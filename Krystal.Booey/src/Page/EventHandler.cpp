@@ -3201,7 +3201,7 @@ namespace krys::boo
     return _mouseDownMayStartSelect;
   }
 
-  // FIXME: Widgets. (There's no image overlay text; see DIFFERENCES.md.)
+  // (No widgets, as frames and plug-ins aren't planned, and no image overlay text; see DIFFERENCES.md.)
   bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);

@@ -66,7 +66,7 @@ namespace krys::boo
     {
       return nullptr;
     }
-    // FIXME: PlugingReplacement shadow trees are very wrong.
+    // (Plug-in replacement shadow trees aren't planned, as plug-ins aren't; see OVERVIEW.md.)
     if (parentElement == &node)
     {
       return nullptr;

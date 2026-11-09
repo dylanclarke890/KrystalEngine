@@ -591,7 +591,7 @@ namespace krys::boo
       return utf8_string(utf8_stringview(text.Data()).substr(start, end - start));
     }
 
-    // FIXME: The attachment identifiers of attachment, image and source elements, with attachments.
+    // (No attachment identifiers: `<attachment>` is WebKit's, not a standard element.)
     void StyledMarkupAccumulator::AppendCustomAttributes(utf8_string &, const dom::Element &,
                                                          Namespaces *) noexcept
     {
@@ -1633,8 +1633,8 @@ namespace krys::boo
            + result + u8"</html>";
   }
 
-  // FIXME: Restoring attachment elements' files (restoreAttachmentElementsInFragment), with attachments; and
-  // completing relative URLs against baseURL (completeURLs), with URL attributes.
+  // FIXME: Completing relative URLs against baseURL (completeURLs), with URL attributes. (No attachment
+  // elements' files to restore: `<attachment>` is WebKit's, not a standard element.)
   Ref<dom::DocumentFragment> CreateFragmentFromMarkup(dom::Document &document, utf8_stringview markup,
                                                       utf8_stringview baseURL) noexcept
   {

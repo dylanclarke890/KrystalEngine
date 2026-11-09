@@ -30,26 +30,19 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Customizable `<select>`: `appearance: base-select` on the select alone gives a picker with base appearance, where without `::picker(select)` opting in too it should be the native one, as `RenderMenuList` owns the popup menu. List boxes ignore `appearance: base-select` and stay native. Type-ahead with the picker open changes the selection, where it should move the focus. Page Up and Page Down move ten options, not a viewport's worth. A `legend` in an `optgroup` isn't its label in a native menu.
 - `<img>` lacks the `Image()` constructor (FIXME in `HTMLImageElement.hpp`), and `sizes=auto` (auto sizes for lazy images: `auto` is an invalid size), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` has no `<object>` fallback (FIXME); `ImageLoader`'s reuse of available images has no preloads (FIXME).
 - `HTMLLinkElement` recognises only `rel=stylesheet`, `alternate` and `icon`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, manifests, integrity, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
-- `<a ping>` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported, and `<object>` and `<embed>` don't display their resources (no images, documents or plugins), so an object always shows its fallback content.
+- `<a ping>` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported, and `<object>` and `<embed>` don't display images, so an object always shows its fallback content.
 
 ## CSS parsing and CSSOM
 
 ### Missing
 
 - Typed OM has only numeric values and `CSSKeywordValue` (`CSS/TypedOM/`). There is no `CSSStyleValue::Parse()`/`ParseAll()`, `CSSStyleValueFactory`, `StylePropertyMap` (`styleMap`, `attributeStyleMap`, `computedStyleMap()`), `CSSUnparsedValue`, image, transform or colour values. `CSSNumericFactory` is a struct of static functions (`CSSNumericFactory::Px(10)`) and there is no `CSS` namespace object.
-- `SingleAnimationRangeStart/End::ToTimelineRangeValue()` returns a null `CSSNumericValue` for a calculated offset (FIXME).
-- `::part()` doesn't follow `exportparts`: part names match only in the host's own scope (FIXMEs in `SelectorChecker.cpp` and `ElementRuleCollector.cpp`).
-- State pseudo-classes that match nothing, with FIXMEs in `SelectorChecker.cpp`: `:autofill`, `:fullscreen`, `:picture-in-picture`, `:future`/`:past`. `:visited` matches only links with an empty `href` (see *Style*).
 - No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), and user style sheets' `@import`s and load options aren't handled.
 
 ## Style (cascade and computed values)
 
 ### Missing
 
-- `env()` has no values: without the document's `ConstantPropertyMap` an `env()` reference falls back or is invalid at computed-value time (FIXME in `VariableReferenceValue.cpp`).
-- No visibility adjustment (`VisibilityAdjustment`): `adjustVisibilityForPseudoElement` and the force-hidden subtree adjustment are FIXMEs.
-- `Adjuster` leaves SVG transforms not stored on the style, and the layer-based SVG engine's `z-index`/stacking branches, as FIXMEs.
-- `Style::Extractor` has no branch for properties with running keyframe effects (FIXME).
 - `Style::PendingResources` has no user agent shadow tree support and no anonymous mode for masks (FIXME).
 - Anchor positioning has no fragmented flows: an anchor's rect isn't the bounding box of its fragments (FIXMEs in `AnchorPositionEvaluator.cpp`). Anchor-positioned viewport-constrained objects need a scrolling coordinator Booey doesn't have.
 
@@ -59,8 +52,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - Scroll and view timelines have no accelerated representation (no threaded animations), and a change in view timeline metrics doesn't update the timeline (FIXME in `KeyframeEffect.cpp`).
 - Image animations pause out of view and resume (`RenderView::AddRendererWithPausedImageAnimations`), and there is no per-element animation control (`RenderElement::AllowsAnimation` follows only the page's `SetImageAnimationEnabled`; FIXME).
-- Extent computation for animated motion path (`offset-*`) properties is missing (FIXME in `KeyframeEffect.cpp`).
-- Quirks that prevent acceleration (`shouldPreventKeyframeEffectAcceleration`) aren't implemented (FIXME).
 
 ## Layout
 
@@ -68,8 +59,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - An unstyled XML document (one with no style sheets, hints or HTML, SVG or MathML elements) is rendered as its text, not as a view of its source or tree.
 - There is no multi-column layout or fragmentation: no column renderers, column rules, fragmented flows or pagination. `collectFragments` makes one fragment, paginated layers paint unfragmented, and out-of-flow boxes, `TextBoxTrimmer`, `RenderView::NodeForHitTest`, the highlight range iterator and repaint containers have no column handling (FIXMEs). Multi-column flows don't lay out `content-visibility` skipped content (FIXME in `RenderBlockFlow.cpp`).
-- Image-based `shape-outside` is not supported: `ShapeOutsideInfo` builds only box, rectangle and polygon shapes (no raster shape, no `shape-image-threshold`), and shapes have no display paths for highlighting (FIXMEs in `LayoutShape.hpp` and `ShapeOutsideInfo.cpp`).
-- `text-combine-upright` is not implemented: there is no combined-text renderer (`RenderCombineText`), so `BoxTreeUpdater`, the inline iterators, `RenderBlockFlow` and `RenderText` treat combined text as ordinary text (FIXMEs).
 - `layout_integration::GridLayout::CanUseFor` accepts only single-track spans at explicit unnamed lines and the self-alignments `start`, `flex-start`, `self-start`, `normal` and `stretch`; other grids fall back to `RenderGrid`. Multi-column spans in `ImplicitGrid` are a FIXME.
 
 ## Painting
@@ -79,49 +68,40 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - A dashed rounded border with different widths on each side has its dashes drift from Chrome's along the sides, by a few pixels (FIXME in `BorderPainter::DrawBoxSideFromPath`).
 - Dashed collapsed table borders share out the junctions between cells slightly differently from Chrome: an edge after a junction starts a few pixels off, so its gaps differ a little (the `tables` and `dashed-borders` goldens).
 - A mask's `color-interpolation: linearRGB` is drawn in sRGB (`LegacyRenderSVGResourceMasker`, FIXME), because image buffers have no colour space conversion.
-- `Path::ApplyElements` applies nothing for continuous rounded rects, and `Path::Transform` drops them, as there's no platform path (FIXMEs in `Path.cpp`); nothing in Booey makes one yet.
 - A composited mask's or clip path's edge pixels (and those of a turned masked layer) can differ slightly from the whole-page repaint.
 
 ### Missing
 
-- The compositing operators `darker` and `difference` are not mapped: `CompositeOperator` falls back to source-over (FIXME in Krystal.UI's `GraphicsContextRender2D.cpp`).
 - There's no software filter path: filters are applied by the host's accelerated backend, or by the graphics context for the ones it can draw. `filter: url()` to an external document is not supported (see *Images and resources*).
 - Backdrop filters are drawn only by the compositor: the flattened whole repaint (`View::Record`) doesn't draw them.
-- The broken image icon is not drawn (FIXMEs in `CachedImage.cpp` and `RenderImage.cpp`).
 - `ImageQualityController::ChooseInterpolationQuality` returns the style's quality or the default: there is no size- or scroll-dependent choice.
 - Text painting has no document markers (spelling, grammar), no IME composition painting, no dragged or transparent content and no glyph display list cache. There is no print-backgrounds setting, and font subpixel quantization is a FIXME.
-- `RenderReplaced::paint` skips event regions, accessibility bounds and document markers (FIXMEs); SVG painting has no event region context, and the paint milestones are a FIXME.
-- Render theme parts left out or FIXMEs: attachments, Apple Pay, image controls, `<input type=checkbox switch>`, devolvable widgets, the system preview badge, the text area resize corner image, and the system's reduced motion and contrast settings.
-- Dragged images' files have no icons, there are no text indicators, and images changed mid-drag are not updated. There are no root view rects (`caretRectInRootViewCoordinates`, `editableElementRectInRootViewCoordinates`) for hosts' drop previews.
-- `image-rendering` is not applied to composited images and canvases (see *Compositing and scrolling*).
+- Render theme parts left out or FIXMEs: `<input type=checkbox switch>`, devolvable widgets, the text area resize corner image, and the system's reduced motion and contrast settings.
+- Images changed mid-drag are not updated, and there are no root view rects (`caretRectInRootViewCoordinates`, `editableElementRectInRootViewCoordinates`) for hosts' drop previews.
 
 ## Compositing and scrolling
 
 ### Missing
 
-- There's no scroll anchoring, autoscroll timers beyond the scrollbar repeat, wheel latching, kinetic scrolling or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
+- There's no scroll anchoring, autoscroll timers beyond the scrollbar repeat, kinetic scrolling or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
 - Scroll snapping for touchpads without phases: a touchpad that isn't a precision one (or a host that doesn't take `OnTouchpadPan`) reports its pans as the wheel's notches, each going to the next snap position, so its small deltas page through a mandatory container.
 - There are no native scrollbars.
 - `VisualViewport` is the layout viewport at the page scale and never scrolls within it, so its `scroll` event never fires (its `resize` does). There are no obscured insets, auto-sizing, base viewport layout size scale factor (FIXME in `VisualViewport.cpp`) or layout viewport separate from the scroll position. Pinch zoom is only the page scale (1 to 5) from the view's gesture recogniser.
 - There is no async scrolling or threaded compositing: no scrolling coordinator or tree, no reconciliation of the composited scroll position after user scrolls, and animations and scrolling run on the main thread. A sticky box stuck to the view therefore repaints its old and new rects on scroll instead of compositing.
-- 3D rendering contexts do not exist: `preserve-3d` sorting and perspective are not done, and Render2D draws 3D transforms flattened (FIXMEs in `TextureMapper.cpp`, `TextureMapperLayer.cpp`).
 - Reference (SVG `url()`) filters are identities on composited layers (`TextureMapper.cpp` converts the other filter functions to `LayerFilter2D`).
 - Clip paths never composite as shape layers; a composited clip path is painted into the mask layer. Replicas (reflections), repaint counters, repeating contents tiles (`WrapMode::Repeat`) and creating tiles over several frames are FIXMEs.
-- The compositor has no scrolling nodes, widget layers, plug-in layers, event or interaction regions, layer flush throttling, model or separated layers, or HDR and wide gamut backings (`ContentsFormat` is RGBA8 only). There is no `TiledBacking` (`SetIsInWindow` and `SetTileCoverage` do nothing), the fixed root background layer is never composited, and the host's compositing policy under memory pressure is a FIXME.
+- The compositor has no scrolling nodes, event or interaction regions, layer flush throttling, model or separated layers, or HDR and wide gamut backings (`ContentsFormat` is RGBA8 only). There is no `TiledBacking` (`SetIsInWindow` and `SetTileCoverage` do nothing), the fixed root background layer is never composited, and the host's compositing policy under memory pressure is a FIXME.
 
 ## Text and fonts
 
 ### Missing
 
-- Colour glyphs and emoji presentation are not detected (FIXME in `FontHarfBuzz.cpp`), so `font-variant-emoji` only adds a variation selector to fallback clusters. `ResolveEmojiPolicy` cannot return `RequireText` or `RequireEmoji` (FIXME in `FontCascade.cpp`).
 - Colour glyphs from bitmap strikes (`CBDT`) are drawn at their strike's size, unscaled, while COLR glyphs scale. Large colour glyphs stay bitmaps.
 - A colour glyph's layers in the foreground colour (`CPAL` entry `0xFFFF`) are drawn black, FreeType's default, rather than in the text's colour (`FontFace2D::Rasterise` sets no foreground colour). The atlas would need to key colour glyphs by that colour.
-- A backslash is never shown as a yen sign, because that depends on the font and the document encoding (FIXME in `RenderText.cpp`).
 - `FontDescription::SetSpecifiedLocale` resolves every Han locale to `zh-hans`, as there are no user language preferences.
-- `FontCache` has no memory-pressure limits; the host cannot report pressure (FIXME in `FontCache.cpp`). The purge of inactive fonts runs on a timer only.
 - Right-to-left scripts other than Arabic and Hebrew (Syriac, Thaana, N'Ko and so on) have no bundled font and work only if the host registers one. Kashida justification is not done.
 - Web fonts: SVG fonts, font collections (the item in a collection is not selectable), and a font parsing policy (safe font parser, trusted types) are missing. Font loading has no settings: installed fonts are always allowed and load completions are never ignored.
-- Text search (`findPlainText`, `SearchBuffer`) is absent. The text iterator does not traverse the flat tree, enter image overlays or emit text placeholders (FIXMEs in `TextIterator.cpp`).
+- Text search (`findPlainText`, `SearchBuffer`) is absent. The text iterator does not traverse the flat tree or emit text placeholders (FIXMEs in `TextIterator.cpp`).
 
 ## Images and resources
 
@@ -133,9 +113,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Animated images (GIF, APNG, animated WebP) have no `allowsAnimation` override or system animation controls, and no controls for suspended documents or off-screen views.
 - Images are sRGB only: ICC profiles are ignored (FIXME in `PNGImageDecoder.cpp`), and there is no HDR, headroom or gain map support. `NativeImage` has no colour spaces.
 - Orientation is applied to the pixels, not by drawing; density-corrected sizes are not applied (FIXME in `BitmapImageSource.cpp`). `GraphicsContext`'s default `DrawImageBuffer` and `DrawPattern` for image buffers draw nothing (FIXMEs in `GraphicsContext.cpp`: `nativeImageForDrawing`).
-- `shape-outside: url()` does not use the image's alpha (see *Layout*).
 - SVG images keep the light appearance and do not copy the embedding page's settings (generic font families, dark appearance), because image observers cannot reach them (FIXME in `SVGImage.cpp`). The page of an SVG image has no loader strategy, so it loads only `data:` URLs.
-- Drags: no drag icon for a dragged image's file (`CreateDragImageIconForCachedImageFilename` returns none), the response's suggested filename is not parsed, colours cannot be dragged or dropped, and there are no text indicators or visible paths. `PasteboardImage` and `SelectionData` carry no image, so nothing prefers images' types when pasting.
+- Drags: no drag icon for a dragged image's file (`CreateDragImageIconForCachedImageFilename` returns none), the response's suggested filename is not parsed, and there are no text indicators or visible paths. `PasteboardImage` and `SelectionData` carry no image, so nothing prefers images' types when pasting.
 
 ## MathML
 
@@ -143,7 +122,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - Negative leading and trailing operator spaces, negative `lspace` on `<mpadded>` and negative `<mspace>` widths are not implemented (FIXMEs). Operator spacing is not applied to the whole embellished operator, and the dictionary does not accept multi-character operators.
 - Percentages in some MathML lengths are not resolved (FIXMEs in `RenderMathMLBlock.cpp`). Floats are neither positioned nor cleared because `display: math` is unimplemented.
-- `<menclose>`'s over and under bar thicknesses are not read from the MATH table (FIXME).
 - An operator whose assembly font is missing returns without painting.
 
 ## Canvas
@@ -152,11 +130,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - Without a host device (Booey's tests, or a view before its first paint), `getImageData` and other readbacks return transparent black, and `createPattern` of a canvas throws `InvalidStateError`.
 - Drawing is sRGB with 8 bits a channel. `display-p3` is accepted and drawn as sRGB; `rgba-float16` `ImageData` reads and writes 8 bits a channel (no `Float16Array`); `PixelFormat` has RGBA8, BGRX8 and BGRA8 only. The `alpha` context setting is accepted but ignored (the context is always transparent).
-- `willReadFrequently` is stored but changes nothing: there is no unaccelerated backend to read from (FIXME in `CanvasBase.cpp`).
 - `ImageBitmap` and `OffscreenCanvas` are not `CanvasImageSource`s. `createImageBitmap`, `OffscreenCanvas`, `ImageBitmapRenderingContext`, `PaintRenderingContext2D`, WebGL and WebGPU contexts do not exist, and there are no context loss events.
-- An image drawn without a renderer uses its own orientation, not its computed style's (FIXME).
 - A canvas copy and every readback wait for the GPU.
-- Image buffers of a resolution scale other than 1 replay their transforms unscaled (FIXME on Krystal.UI's `ImageBufferRender2DBackend`); canvases' buffers are always scale 1.
 
 ## Editing and selection
 
@@ -167,34 +142,27 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Formatting commands are absent: bold, italic and the rest of the `styleWithCSS`/`-webkit-font-size-delta` family, lists, indent and outdent, format block, links, remove format. Tab spans are absent with them. The `MakeTextWritingDirection*` commands apply styles but report no state.
-- Paste does not render the fragment in a staging document to take its text as rendered and drop invisible content (`ReplacementFragment`); it does not remove event handler attributes or `javascript:` URLs from pasted markup (FIXMEs in `ReplaceSelectionCommand.cpp`). `MarkupAccumulator` does not resolve URL attributes against the base URL, and the markup sanitiser's staging page has no dark appearance.
+- Paste does not render the fragment in a staging document to take its text as rendered and drop invisible content (`ReplacementFragment`). `MarkupAccumulator` does not resolve URL attributes against the base URL, and the markup sanitiser's staging page has no dark appearance.
 - Bidi-aware pasting (matching each pasted paragraph's direction) and the bidi contiguity helpers (`AdjustToVisuallyContiguousRange` and relatives) are absent.
 - `EditorClient` is only the selection, clipboard permission, undo/redo, composition and text-field hooks. It has no `shouldInsertText`/`shouldDeleteRange`/`shouldBeginEditing`/`shouldApplyStyle` delegates, so the host cannot veto or observe edits, and no spelling, grammar or text-checking, autocorrection or autofill hooks.
 - The drag caret, the overtype block cursor, caret browsing's focusing of the anchor the caret is in, stopping the blink while typing, beeping on empty cuts and deletes, and spatial navigation's use of the caret are absent.
-- Image documents and writing images to the pasteboard are absent. Link decoration filtering and the `application/x-moz-file` quirk are not implemented.
-- Script access to the clipboard (`javaScriptCanAccessClipboard`, `domPasteAllowed`) is off (FIXMEs in `EditorCommand.cpp`). Password fields are kept off the clipboard.
+- Image documents and writing images to the pasteboard are absent.
 - Input methods are IMM32 only. TSF features (reconversion, inline handwriting, speech), custom highlights and annotations (inline predictions, writing suggestions), `inputmode`, `ime-mode` and an on-screen keyboard are not supported. The page draws no candidate list and the host is not told the candidates; the IME draws its own windows.
-- Context menus are not built: only the `contextmenu` event is dispatched, and there is no keyboard (menu key) route to it.
 - Dragging a selection out to other applications is not supported.
 
 ## Input and events
 
 ### Missing
 
-- There is no keyboard route to `contextmenu` (`sendContextMenuEventForKey`), and no menu controller beyond the `contextmenu` event.
-- Auto-hiding cursors are absent (FIXME in `EventHandler::SelectCursor`).
+- Context menus are not built: only the `contextmenu` event is dispatched, and there is no keyboard (menu key) route to it (`sendContextMenuEventForKey`).
 - Wheel: `PlatformWheelEvent` has no velocities or inverted directions, and there is no scroll latching or wheel delta filter. A precision touchpad's pans come with their phases and momentum (DirectManipulation in Krystal.PAL), but not its pinches or swipes. Pan gestures chain on to the next scroll box mid-gesture, as the wheel does.
 - Drag and drop: colour drags and drops are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
 - Sequential focus navigation does not handle moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
-- Keyboard: the backward-compatibility mode of `charCode` (`needsKeyboardEventDisambiguationQuirks`) and `getCurrentModifierState` are FIXMEs.
 - Touch: touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.
-- `RenderLayer` hit testing lacks SVG resources, fixed container sampling and transformed layers in paginated layers, and the visual viewport is not applied to the hit test area (FIXMEs in `RenderLayer.cpp`).
 - `IsDraggableLink` is a local check (an HTML link with `href`, not editable); the editable-link-behaviour setting is absent.
-- Page overlays and synthetic touch events are FIXMEs in `EventHandler`.
 
 ## Loading, navigation and history
 
 ### Missing
 
 - Responses can't be streamed: the main resource arrives whole on a networking task, and the loader strategy has no cancellation or synchronous loads (FIXME in `LoaderStrategy.hpp`).
-- Animation frames are not throttled below the page's rate (FIXME in `ScriptedAnimationController.cpp`), and scroll events are not throttled (FIXME in `LocalFrameView.cpp`).

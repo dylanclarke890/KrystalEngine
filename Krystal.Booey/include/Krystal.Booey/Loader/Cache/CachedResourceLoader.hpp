@@ -64,8 +64,8 @@ namespace krys::boo
   // The CachedResourceLoader provides a per-context interface to the MemoryCache
   // and enforces a bunch of security checks and rules for resource revalidation.
   /// @note One per document, which creates it; it loads through the document's frame.
-  // FIXME: Scripts and the other resource types; preloads, request counting for the
-  // load event, resource timing, security checks and revalidation, once there are those.
+  // FIXME: The other resource types (not scripts: scripting isn't planned); preloads, request counting
+  // for the load event, resource timing, security checks and revalidation, once there are those.
   class CachedResourceLoader : public RefCounted<CachedResourceLoader>,
                                public CanMakeWeakPtr<CachedResourceLoader>
   {

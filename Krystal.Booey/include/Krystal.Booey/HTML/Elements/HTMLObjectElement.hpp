@@ -77,10 +77,8 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-object-height
     void Height(dom::DOMString value) noexcept;
 
-    // FIXME: The rest of the interface:
-    // readonly attribute Document? contentDocument;
-    // readonly attribute WindowProxy? contentWindow;
-    // Document? getSVGDocument();
+    // (No `contentDocument`, `contentWindow` or `getSVGDocument()`: an object loads no nested document, as
+    // subframes aren't planned; see OVERVIEW.md.)
 
     /// @brief Objects are never candidates for constraint validation.
     /// @see https://html.spec.whatwg.org/#dom-cva-willvalidate

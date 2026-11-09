@@ -551,7 +551,7 @@ namespace krys::boo
   {
   }
 
-  // FIXME: Link decoration filtering (applyLinkDecorationFiltering), which is Cocoa's.
+  // (No link decoration filtering (applyLinkDecorationFiltering): it's Cocoa's, not a standard feature.)
   void Editor::CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept
   {
     PasteboardURL pasteboardURL;

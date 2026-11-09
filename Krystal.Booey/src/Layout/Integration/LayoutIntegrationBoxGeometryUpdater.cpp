@@ -294,7 +294,7 @@ namespace krys::boo::layout_integration
         return null;
       }
 
-      // FIXME: Images, attachments, buttons, list boxes, file upload controls and sliders have their own
+      // FIXME: Images, buttons, list boxes, file upload controls and sliders have their own
       // baseline.
       if (Is<LegacyRenderSVGRoot>(renderBox) || Is<RenderHTMLCanvas>(renderBox)
           || Is<RenderTextControlMultiLine>(renderBox))
@@ -490,7 +490,7 @@ namespace krys::boo::layout_integration
           return !renderListMarker->IsImage();
         }
 
-        // FIXME: List boxes, sliders, attachments and buttons.
+        // FIXME: List boxes, sliders and buttons.
         if ((Is<RenderReplaced>(renderBox) && renderBox.Style().Display() == DisplayType::Inline)
             || Is<RenderTextControlMultiLine>(renderBox) || Is<RenderTable>(renderBox)
             || Is<RenderGrid>(renderBox) || Is<RenderFlexibleBox>(renderBox)

@@ -94,8 +94,7 @@ namespace krys::boo::html
 
     /// @brief Queues a task on @p source after @p timeout of the host's time.
     /// @see https://html.spec.whatwg.org/#run-steps-after-a-timeout
-    // FIXME: The ordering identifier (timeouts with the same one complete in order), once there are script
-    // timers.
+    // (No ordering identifier, which orders script timers' timeouts, as scripting isn't planned.)
     void ScheduleTask(MonotonicTime::duration timeout, TaskSource source, Steps &&steps) noexcept;
 
     /// @see https://html.spec.whatwg.org/#queue-a-microtask

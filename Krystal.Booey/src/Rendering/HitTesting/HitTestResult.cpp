@@ -261,7 +261,7 @@ namespace krys::boo
     return _innerNonSharedNode->GetRenderBox()->AbsoluteContentQuad().EnclosingBoundingBox();
   }
 
-  // FIXME: Link decoration filtering (applyLinkDecorationFiltering), which is Cocoa's.
+  // (No link decoration filtering (applyLinkDecorationFiltering): it's Cocoa's, not a standard feature.)
   url::URL HitTestResult::AbsoluteImageURL() const noexcept
   {
     if (!_innerNonSharedNode)

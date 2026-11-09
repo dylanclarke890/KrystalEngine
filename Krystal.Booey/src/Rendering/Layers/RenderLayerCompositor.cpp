@@ -2228,7 +2228,8 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Video and widgets, once there are any, hook up to the layer when it changes.
+    // FIXME: Video, once there's video, hooks up to the layer when it changes. (No widgets: frames and
+    // plug-ins aren't planned.)
 
     if (layerChanged)
     {
