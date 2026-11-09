@@ -263,7 +263,6 @@ namespace krys
     using Operations = CompactVariantOperations<Ts...>;
 
   private:
-    // FIXME: Use a smaller data type if values are small enough / empty.
     Storage _data;
 
   public:

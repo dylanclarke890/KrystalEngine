@@ -136,7 +136,6 @@ namespace krys
 
     KRYS_NODISCARD T *get() const noexcept
     {
-      // FIXME: PackedPtr<> can load memory with one mov by checking page boundary.
       uintptr_t value = 0;
 
 #if KRYS_CPU(LITTLE_ENDIAN)
