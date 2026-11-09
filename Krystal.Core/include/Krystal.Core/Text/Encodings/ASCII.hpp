@@ -19,7 +19,7 @@ namespace krys::text
     {
       krys_debug_assert(current != end);
 
-      char32 codeUnit = static_cast<char32>(*current);
+      char32 codeUnit = CodeUnitValue(*current);
       if (codeUnit > MaxASCIIChar)
       {
         return DecodeOneInvalidSequenceError<ASCII>();

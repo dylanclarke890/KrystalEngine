@@ -69,6 +69,9 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Text/EncodingRegistry.cpp
 	PRIVATE tests/Text/Unicode.cpp
 	PRIVATE tests/Text/Encodings/ASCII.cpp
+	PRIVATE tests/Text/Encodings/Atari.cpp
+	PRIVATE tests/Text/Encodings/ISO-8859.cpp
+	PRIVATE tests/Text/Encodings/Windows.cpp
 
   # Types
 	PRIVATE tests/Types/BloomFilter.cpp

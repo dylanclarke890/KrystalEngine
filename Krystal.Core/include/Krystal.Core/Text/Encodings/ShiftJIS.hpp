@@ -1571,7 +1571,7 @@ namespace krys::text
     {
       krys_debug_assert(current != end);
 
-      char32 first = static_cast<char32>(*current);
+      char32 first = CodeUnitValue(*current);
       if (first <= 0x80)
       {
         return DecodeOneSuccess<ShiftJISx0208>(first, CodeUnitsConsumed(1u));
@@ -1593,7 +1593,7 @@ namespace krys::text
         return DecodeOneIncompleteSequenceError<ShiftJISx0208>(CodeUnitsConsumed(1u));
       }
 
-      char32 second = static_cast<char32>(*current);
+      char32 second = CodeUnitValue(*current);
       if (!((second <= 0x7E && second >= 0x40) || (second <= 0xFC && second >= 0x80)))
       {
         return DecodeOneInvalidSequenceError<ShiftJISx0208>(CodeUnitsConsumed(2u));

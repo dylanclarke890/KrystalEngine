@@ -3743,7 +3743,7 @@ namespace krys::text
     {
       krys_debug_assert(current != end);
 
-      char32 first = static_cast<char32>(*current);
+      char32 first = CodeUnitValue(*current);
       if (first <= MaxASCIIChar)
       {
         return DecodeOneSuccess<Big5_HKSCS_2001>(first, CodeUnitsConsumed(1uz));
@@ -3754,7 +3754,7 @@ namespace krys::text
         return DecodeOneIncompleteSequenceError<Big5_HKSCS_2001>(current, CodeUnitsConsumed(1uz));
       }
 
-      char32 second = static_cast<char32>(*current);
+      char32 second = CodeUnitValue(*current);
       if (first < 0x81 || first > 0xFE)
       {
         return DecodeOneInvalidSequenceError<Big5_HKSCS_2001>(CodeUnitsConsumed(2u));

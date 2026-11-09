@@ -148,18 +148,25 @@ namespace krys::text
     using Base::Base;
   };
 
-  /// @brief A lookup entry for an encoding, mapping a code unit to a Unicode code point.
+  /// @brief A lookup entry for a multi-byte encoding's sparse table, mapping an index to a Unicode code
+  /// point. The tables are sorted by index. (A single-byte encoding's table is just the code points, indexed
+  /// by byte.)
   struct EncodingLookupEntry
   {
     uint32 Index;
     uint32 CodePoint;
   };
 
-  /// @brief An invalid lookup entry for an encoding, used to pad lookup tables so that indexing can be used
-  /// instead of a linear/lower bounded scan.
-  KRYS_NODISCARD constexpr EncodingLookupEntry InvalidEntry(uint8 fillsIndex) noexcept
+  /// @brief The entry for a byte that a single-byte encoding leaves unassigned. It's past the last code
+  /// point, so no code point encodes to it.
+  constexpr char32 UnmappedByte = MaxUnicodeChar + 1u;
+
+  /// @brief The value of @p codeUnit, read as unsigned so that a `char` code unit past 0x7F (signed on some
+  /// platforms) isn't sign extended.
+  template <typename TCodeUnit>
+  KRYS_NODISCARD constexpr char32 CodeUnitValue(TCodeUnit codeUnit) noexcept
   {
-    return {fillsIndex, MaxUnicodeChar + 1u};
+    return static_cast<char32>(static_cast<sized_unsigned_t<TCodeUnit>>(codeUnit));
   }
 
   /// @brief The action to take for a particular encoding error when it occurs during an operation.
@@ -291,9 +298,9 @@ namespace krys::text
       return DecodeOneInvalidSequenceError<TEncoding>();
     }
 
-    auto index = static_cast<size_t>(codeUnit);
-    krys_debug_assert(!IsNonUnicodeCharacter(TEncoding::LookupMap[index].CodePoint));
-    return DecodeOneSuccess<TEncoding>(TEncoding::LookupMap[index].CodePoint);
+    auto codePoint = TEncoding::LookupMap[static_cast<size_t>(codeUnit)];
+    krys_debug_assert(!IsNonUnicodeCharacter(codePoint));
+    return DecodeOneSuccess<TEncoding>(codePoint);
   }
 
   template <Encoding TEncoding, MightBeInvalidEntry MightBeInvalid = MightBeInvalidEntry(false)>
@@ -305,26 +312,23 @@ namespace krys::text
       return DecodeOneSuccess<TEncoding>(codeUnit);
     }
 
-    if (codeUnit > MaxUnicodeChar)
+    auto index = static_cast<size_t>(codeUnit - (MaxASCIIChar + 1u));
+    if (index >= TEncoding::LookupMap.size())
     {
       return DecodeOneInvalidSequenceError<TEncoding>();
     }
 
-    auto index = static_cast<uint8>(codeUnit - 0x80u);
-    if constexpr (!MightBeInvalid)
+    auto codePoint = TEncoding::LookupMap[index];
+    if constexpr (MightBeInvalid)
     {
-      krys_debug_assert(!IsNonUnicodeCharacter(TEncoding::LookupMap[index].CodePoint));
-      return DecodeOneSuccess<TEncoding>(TEncoding::LookupMap[index].CodePoint);
+      if (codePoint == UnmappedByte)
+      {
+        return DecodeOneInvalidSequenceError<TEncoding>();
+      }
     }
 
-    auto entry = TEncoding::LookupMap[index];
-    if (entry == InvalidEntry(index))
-    {
-      return DecodeOneInvalidSequenceError<TEncoding>();
-    }
-
-    krys_debug_assert(!IsNonUnicodeCharacter(entry.CodePoint));
-    return DecodeOneSuccess<TEncoding>(entry.CodePoint);
+    krys_debug_assert(!IsNonUnicodeCharacter(codePoint));
+    return DecodeOneSuccess<TEncoding>(codePoint);
   }
 
 #pragma endregion
@@ -419,17 +423,27 @@ namespace krys::text
       .Output = {{first, second, third, fourth}}, .CodeUnitsProduced = 4u, .Error = EncodeOneError::None};
   }
 
+  /// @brief The byte that a single-byte encoding's table maps @p codePoint from, offset by @p firstByte (the
+  /// byte of the table's first entry).
   template <Encoding TEncoding>
-  KRYS_NODISCARD constexpr EncodeOneResult<TEncoding> EncodeOneWithLookupMap(char32 codePoint) noexcept
+  KRYS_NODISCARD constexpr EncodeOneResult<TEncoding> EncodeOneWithLookupMap(char32 codePoint,
+                                                                             uint32 firstByte = 0u) noexcept
   {
-    auto it = std::ranges::find_if(TEncoding::LookupMap,
-                                   [codePoint](auto &value) { return codePoint == value.CodePoint; });
+    // Unmapped bytes are past the last code point, so they can't be matched.
+    if (codePoint > MaxUnicodeChar)
+    {
+      return EncodeOneUnmappableCodePointError<TEncoding>();
+    }
+
+    auto it = std::ranges::find(TEncoding::LookupMap, codePoint);
     if (it == std::ranges::cend(TEncoding::LookupMap))
     {
       return EncodeOneUnmappableCodePointError<TEncoding>();
     }
 
-    return EncodeOneSuccess<TEncoding>(static_cast<typename TEncoding::code_unit>((*it).Index));
+    auto byte =
+      firstByte + static_cast<uint32>(std::ranges::distance(std::ranges::cbegin(TEncoding::LookupMap), it));
+    return EncodeOneSuccess<TEncoding>(static_cast<typename TEncoding::code_unit>(byte));
   }
 
   template <Encoding TEncoding>
@@ -441,14 +455,8 @@ namespace krys::text
       return EncodeOneSuccess<TEncoding>(static_cast<typename TEncoding::code_unit>(codePoint));
     }
 
-    auto it = std::ranges::find_if(TEncoding::LookupMap,
-                                   [codePoint](auto &value) { return codePoint == value.CodePoint; });
-    if (it == std::ranges::cend(TEncoding::LookupMap))
-    {
-      return EncodeOneUnmappableCodePointError<TEncoding>();
-    }
-
-    return EncodeOneSuccess<TEncoding>(static_cast<typename TEncoding::code_unit>((*it).Index));
+    // The table starts at the first byte after ASCII.
+    return EncodeOneWithLookupMap<TEncoding>(codePoint, MaxASCIIChar + 1u);
   }
 
 #pragma endregion

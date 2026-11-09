@@ -3434,7 +3434,7 @@ namespace krys::text
     {
       krys_debug_assert(current != end);
 
-      char32 first = static_cast<char32>(*current);
+      char32 first = CodeUnitValue(*current);
       if (first <= MaxASCIIChar)
       {
         return DecodeOneSuccess<EUC_KR_UHC>(first, CodeUnitsConsumed(1u));
@@ -3450,7 +3450,7 @@ namespace krys::text
         return DecodeOneIncompleteSequenceError<EUC_KR_UHC>(CodeUnitsConsumed(1u));
       }
 
-      char32 second = static_cast<char32>(*current);
+      char32 second = CodeUnitValue(*current);
       if (second > 0xFE || second < 0x41)
       {
         return DecodeOneInvalidSequenceError<EUC_KR_UHC>(CodeUnitsConsumed(2u));

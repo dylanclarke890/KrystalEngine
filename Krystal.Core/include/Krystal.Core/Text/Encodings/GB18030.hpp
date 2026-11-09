@@ -4861,7 +4861,7 @@ namespace krys::text
     {
       krys_debug_assert(current != end);
 
-      char32 first = static_cast<char32>(*current);
+      char32 first = CodeUnitValue(*current);
       if (first <= MaxASCIIChar)
       {
         return DecodeOneSuccess<GB18030>(first, CodeUnitsConsumed(1u));
@@ -4882,7 +4882,7 @@ namespace krys::text
         return DecodeOneIncompleteSequenceError<GB18030>(CodeUnitsConsumed(1u));
       }
 
-      char32 second = static_cast<char32>(*current);
+      char32 second = CodeUnitValue(*current);
       if ((second >= 0x40 && second <= 0x7E) || (second >= 0x80 && second <= 0xFE))
       {
         const uint32 secondOffset = second < 0x7F ? 0x40 : 0x41;
@@ -4909,7 +4909,7 @@ namespace krys::text
         return DecodeOneIncompleteSequenceError<GB18030>(CodeUnitsConsumed(2u));
       }
 
-      char32 third = static_cast<char32>(*current);
+      char32 third = CodeUnitValue(*current);
       if (!(third >= 0x81 && third <= 0xFE))
       {
         return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(3u));
@@ -4920,7 +4920,7 @@ namespace krys::text
         return DecodeOneIncompleteSequenceError<GB18030>(CodeUnitsConsumed(3u));
       }
 
-      char32 fourth = static_cast<char32>(*current);
+      char32 fourth = CodeUnitValue(*current);
       if (!(fourth >= 0x30 && fourth <= 0x39))
       {
         return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(4u));
@@ -5041,7 +5041,7 @@ namespace krys::text
     {
       krys_debug_assert(current != end);
 
-      char32 first = static_cast<char32>(*current);
+      char32 first = CodeUnitValue(*current);
       if (first <= MaxASCIIChar)
       {
         return DecodeOneSuccess<GBK>(first, CodeUnitsConsumed(1u));
@@ -5062,7 +5062,7 @@ namespace krys::text
         return DecodeOneIncompleteSequenceError<GBK>(CodeUnitsConsumed(1u));
       }
 
-      char32 second = static_cast<char32>(*current);
+      char32 second = CodeUnitValue(*current);
       if (!((second >= 0x40 && second <= 0x7E) || (second >= 0x80 && second <= 0xFE)))
       {
         return DecodeOneInvalidSequenceError<GBK>(CodeUnitsConsumed(2u));
