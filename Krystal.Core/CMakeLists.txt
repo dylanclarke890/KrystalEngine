@@ -217,6 +217,7 @@ target_sources(Krystal.Core
 
       # Threading
       include/Krystal.Core/Threading/CancellationToken.hpp
+      include/Krystal.Core/Threading/JobSequence.hpp
       include/Krystal.Core/Threading/JobSystem.hpp
       include/Krystal.Core/Threading/MainThread.hpp
       include/Krystal.Core/Threading/ManualWorkQueue.hpp
@@ -322,6 +323,7 @@ target_sources(Krystal.Core
     src/Log/SpdlogLogger.cpp
     
     # Threading
+    src/Threading/JobSequence.cpp
     src/Threading/JobSystem.cpp
     src/Threading/MainThread.cpp
     src/Threading/ManualWorkQueue.cpp

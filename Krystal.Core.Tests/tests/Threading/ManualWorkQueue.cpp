@@ -11,7 +11,7 @@ namespace krys::tests
     ManualWorkQueue queue;
     List<int> order;
     std::thread::id ranOn;
-    queue.Dispatch([&]() { order.push_back(1); }, JobPriority::Background);
+    queue.Dispatch([&]() { order.push_back(1); }, {.Priority = JobPriority::Background});
     queue.Dispatch(
       [&]()
       {

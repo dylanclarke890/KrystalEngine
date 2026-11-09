@@ -2,9 +2,9 @@
 
 namespace krys
 {
-  void ManualWorkQueue::Dispatch(MoveOnlyFunc<void()> job, JobPriority priority) noexcept
+  void ManualWorkQueue::Dispatch(MoveOnlyFunc<void()> job, JobTraits traits) noexcept
   {
-    (priority == JobPriority::Normal ? _normalJobs : _backgroundJobs).push_back(krys::move(job));
+    (traits.Priority == JobPriority::Normal ? _normalJobs : _backgroundJobs).push_back(krys::move(job));
   }
 
   bool ManualWorkQueue::RunNext() noexcept

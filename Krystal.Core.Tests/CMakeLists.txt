@@ -81,6 +81,7 @@ target_sources(Krystal.Core.Tests
 
   # Threading
 	PRIVATE tests/Threading/CancellationToken.cpp
+	PRIVATE tests/Threading/JobSequence.cpp
 	PRIVATE tests/Threading/JobSystem.cpp
 	PRIVATE tests/Threading/MainThread.cpp
 	PRIVATE tests/Threading/ManualWorkQueue.cpp

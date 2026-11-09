@@ -97,9 +97,9 @@ namespace krys::tests
         release.wait();
       });
     started.wait();
-    jobs.Dispatch(record(1), JobPriority::Background);
+    jobs.Dispatch(record(1), {.Priority = JobPriority::Background});
     jobs.Dispatch(record(2));
-    jobs.Dispatch(record(3), JobPriority::Background);
+    jobs.Dispatch(record(3), {.Priority = JobPriority::Background});
     jobs.Dispatch(record(4));
     release.count_down();
     done.wait();
@@ -118,7 +118,7 @@ namespace krys::tests
       JobSystem jobs(1);
       jobs.Dispatch([&]() { backgroundDestroyed.wait(); });
       jobs.Dispatch([&, guard = CreateUnique<CountDownOnDestruction>(backgroundDestroyed)]()
-                    { backgroundRan = true; }, JobPriority::Background);
+                    { backgroundRan = true; }, {.Priority = JobPriority::Background});
       jobs.Dispatch([&]() { ++normalRuns; });
       jobs.Dispatch([&]() { ++normalRuns; });
     }
@@ -163,5 +163,77 @@ namespace krys::tests
     CHECK(*owned == 5);
     CHECK(voidCompleted);
     CHECK_FALSE(jobOnMain);
+  }
+
+  TEST_CASE("JobSystem: a job that may block doesn't keep the others from running", "[Threading]")
+  {
+    using namespace std::chrono_literals;
+    JobSystem jobs(1, u8"Worker", 50ms);
+    std::latch blocking(1);
+    std::latch release(1);
+    std::latch ran(1);
+
+    // The only worker blocks; the pool starts another, so the next job runs before the first is released.
+    jobs.Dispatch(
+      [&]()
+      {
+        blocking.count_down();
+        release.wait();
+      },
+      {.MayBlock = true});
+    blocking.wait();
+    jobs.Dispatch([&]() { ran.count_down(); });
+    ran.wait();
+    CHECK(jobs.WorkerCount() == 1);
+    CHECK(jobs.RunningWorkerCount() == 2);
+    release.count_down();
+
+    // Left idle, the extra worker stops.
+    for (int attempt = 0; attempt < 200 && jobs.RunningWorkerCount() > 1; ++attempt)
+    {
+      std::this_thread::sleep_for(10ms);
+    }
+    CHECK(jobs.RunningWorkerCount() == 1);
+
+    // And jobs still run.
+    std::latch after(1);
+    jobs.Dispatch([&]() { after.count_down(); });
+    after.wait();
+  }
+
+  TEST_CASE("JobSystem: a job that doesn't block starts no worker", "[Threading]")
+  {
+    JobSystem jobs(1);
+    std::latch started(1);
+    std::latch release(1);
+    jobs.Dispatch(
+      [&]()
+      {
+        started.count_down();
+        release.wait();
+      });
+    started.wait();
+    CHECK(jobs.RunningWorkerCount() == 1);
+    release.count_down();
+  }
+
+  TEST_CASE("JobSystem: shutting down waits for the jobs that may block, and their extra workers",
+            "[Threading]")
+  {
+    std::atomic<int> runs {0};
+    {
+      JobSystem jobs(2);
+      for (int i = 0; i < 50; ++i)
+      {
+        jobs.Dispatch(
+          [&]()
+          {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            ++runs;
+          },
+          {.MayBlock = true});
+      }
+    }
+    CHECK(runs == 50);
   }
 }
