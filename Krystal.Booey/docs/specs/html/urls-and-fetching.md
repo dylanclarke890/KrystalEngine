@@ -197,7 +197,7 @@ Status: reviewed (2026-11-01)
 #### [2.5.8 Blocking attributes](https://html.spec.whatwg.org/#blocking-attributes)
 
 Status: reviewed (2026-11-01)
-> `RenderBlocking::HasRenderBlockingToken` (new); `<link>` is potentially render-blocking in `HTMLLinkElement::PotentiallyBlockRendering`. Fixed: `blocking=RENDER` didn't block, as the token list is case-sensitive. `<style>` and `<script>` don't block rendering yet (reviewed with them).
+> `RenderBlocking::HasRenderBlockingToken` (new); `<link>` is potentially render-blocking in `HTMLLinkElement::PotentiallyBlockRendering`. Fixed: `blocking=RENDER` didn't block, as the token list is case-sensitive. `<style>` blocks rendering in `HTMLStyleElement::PotentiallyBlockRendering`; there's no `<script>`.
 <!-- definitions: blocking-attribute possible-blocking-token implicitly-potentially-render-blocking -->
 
 - [x] [blocking tokens set](https://html.spec.whatwg.org/#blocking-tokens-set) — The blocking tokens set for an element el are the result of the following steps:

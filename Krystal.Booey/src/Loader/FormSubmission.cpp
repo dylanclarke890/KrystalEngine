@@ -129,8 +129,8 @@ namespace krys::boo
       krys_debug_assert(copiedAttributes.GetMethod() == Method::Post
                         || copiedAttributes.GetMethod() == Method::Get);
 
-      // FIXME: The form's accept-charset and the document's encoding, once there are encodings other than
-      // UTF-8.
+      // (The entries are UTF-8 whatever the form's accept-charset and the document's encoding; see
+      // DIFFERENCES.md.)
       RefPtr<html::DOMFormData> result =
         form.ConstructEntryList(RefPtr(submitter), html::DOMFormData::Create(), nullptr);
       krys_assert(result);

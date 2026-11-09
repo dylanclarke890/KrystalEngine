@@ -53,7 +53,6 @@ namespace krys::boo
     if (beforeChildAncestor->Style().Display() == DisplayType::RubyBlock)
     {
       // See if we have an anonymous ruby box already.
-      // FIXME: It should be the immediate child but continuations can break this assumption.
       for (auto *first = beforeChildAncestor->FirstChild(); first; first = first->FirstChildSlow())
       {
         if (!first->IsAnonymous())

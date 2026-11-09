@@ -222,7 +222,7 @@ namespace krys::boo::html
       }
       case TagName::marquee:
       {
-        return CreateRefPtr<HTMLMarqueeElement>(document);
+        return HTMLMarqueeElement::Create(document);
       }
       case TagName::div:
       {
@@ -319,7 +319,7 @@ namespace krys::boo::html
       }
       case TagName::optgroup:
       {
-        return CreateRefPtr<HTMLOptGroupElement>(document);
+        return HTMLOptGroupElement::Create(document);
       }
       case TagName::option:
       {
@@ -355,7 +355,7 @@ namespace krys::boo::html
       }
       case TagName::select:
       {
-        return CreateRefPtr<HTMLSelectElement>(document);
+        return HTMLSelectElement::Create(document);
       }
       case TagName::selectedcontent:
       {

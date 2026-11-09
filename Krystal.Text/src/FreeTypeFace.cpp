@@ -2,8 +2,10 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
+#include <cmath>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_MULTIPLE_MASTERS_H
 #include FT_TRUETYPE_TABLES_H
 
 namespace krys::text
@@ -103,10 +105,30 @@ namespace krys::text
     return utf8_string {reinterpret_cast<const char8 *>(name)};
   }
 
+  KRYS_NODISCARD static List<FontVariationAxis> VariationAxesOfFace(FT_Face face) noexcept
+  {
+    List<FontVariationAxis> axes;
+    FT_MM_Var *variations = nullptr;
+    if (!FT_HAS_MULTIPLE_MASTERS(face) || FT_Get_MM_Var(face, &variations))
+    {
+      return axes;
+    }
+    constexpr float fixedOne = 65'536.f;
+    for (FT_UInt i = 0; i < variations->num_axis; ++i)
+    {
+      const auto &axis = variations->axis[i];
+      axes.push_back({static_cast<uint32>(axis.tag), static_cast<float>(axis.minimum) / fixedOne,
+                      static_cast<float>(axis.def) / fixedOne, static_cast<float>(axis.maximum) / fixedOne});
+    }
+    FT_Done_MM_Var(Library(), variations);
+    return axes;
+  }
+
   FreeTypeFace::FreeTypeFace(Ref<FontFileData> &&data, FT_Face face) noexcept
       : _data(krys::move(data)), _face(face), _familyName(ToString(face->family_name)),
         _styleName(ToString(face->style_name)), _postScriptName(ToString(FT_Get_Postscript_Name(face))),
-        _style(StyleOfFace(face)), _isFixedPitch(FT_IS_FIXED_WIDTH(face))
+        _style(StyleOfFace(face)), _isFixedPitch(FT_IS_FIXED_WIDTH(face)),
+        _variationAxes(VariationAxesOfFace(face))
   {
   }
 
@@ -148,6 +170,64 @@ namespace krys::text
     auto count = static_cast<uint32>(face->num_faces);
     FT_Done_Face(face);
     return count;
+  }
+
+  bool FreeTypeFace::HasVariationAxis(uint32 tag) const noexcept
+  {
+    return std::ranges::any_of(_variationAxes,
+                               [&](const FontVariationAxis &axis) { return axis.Tag == tag; });
+  }
+
+  Ref<FreeTypeFace> FreeTypeFace::WithVariations(Span<const FontVariationValue> values) noexcept
+  {
+    // The axes in the font's order, and those away from their defaults.
+    List<FT_Fixed> coordinates;
+    List<FontVariationValue> variations;
+    for (const auto &axis : _variationAxes)
+    {
+      float value = axis.Default;
+      for (const auto &candidate : values)
+      {
+        if (candidate.Tag == axis.Tag)
+        {
+          value = std::clamp(candidate.Value, axis.Minimum, axis.Maximum);
+        }
+      }
+      coordinates.push_back(static_cast<FT_Fixed>(std::lround(static_cast<double>(value) * 65'536.0)));
+      if (value != axis.Default)
+      {
+        variations.push_back({axis.Tag, value});
+      }
+    }
+    if (variations == _variations)
+    {
+      return ShareRef(*this);
+    }
+
+    for (auto &instance : _instances)
+    {
+      if (instance->_variations == variations)
+      {
+        return instance;
+      }
+    }
+
+    // Variations are the state of a FreeType face, so an instance needs one of its own.
+    auto *face = OpenFace(*_data, _face->face_index);
+    if (!face)
+    {
+      return ShareRef(*this);
+    }
+    if (FT_Select_Charmap(face, FT_ENCODING_UNICODE)
+        || FT_Set_Var_Design_Coordinates(face, static_cast<FT_UInt>(coordinates.size()), coordinates.data()))
+    {
+      FT_Done_Face(face);
+      return ShareRef(*this);
+    }
+    Ref<FreeTypeFace> instance = AdoptRef(*new FreeTypeFace(Ref<FontFileData>(_data), face));
+    instance->_variations = krys::move(variations);
+    _instances.push_back(instance);
+    return instance;
   }
 
   uint32 FreeTypeFace::UnitsPerEm() const noexcept

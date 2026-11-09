@@ -1,22 +1,252 @@
 ﻿#include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include <algorithm>
 #include <cmath>
 
 namespace krys::boo
 {
+  ScrollbarsController &ScrollableArea::GetScrollbarsController() const noexcept
+  {
+    if (!_scrollbarsController)
+    {
+      _scrollbarsController = CreateUnique<ScrollbarsController>();
+    }
+    return *_scrollbarsController;
+  }
+
+  void ScrollableArea::DidAddScrollbar(Scrollbar *scrollbar, ScrollbarOrientation orientation) noexcept
+  {
+    if (scrollbar)
+    {
+      GetScrollbarsController().DidAddScrollbar(*scrollbar, orientation);
+    }
+  }
+
+  void ScrollableArea::WillRemoveScrollbar(Scrollbar &scrollbar, ScrollbarOrientation orientation) noexcept
+  {
+    GetScrollbarsController().WillRemoveScrollbar(scrollbar, orientation);
+  }
+
+  void ScrollableArea::MouseEnteredContentArea() const noexcept
+  {
+    GetScrollbarsController().MouseEnteredContentArea();
+  }
+
+  void ScrollableArea::MouseExitedContentArea() const noexcept
+  {
+    GetScrollbarsController().MouseExitedContentArea();
+  }
+
+  void ScrollableArea::MouseMovedInContentArea() const noexcept
+  {
+    GetScrollbarsController().MouseMovedInContentArea();
+  }
+
+  void ScrollableArea::ContentAreaDidShow() const noexcept
+  {
+    GetScrollbarsController().ContentAreaDidShow();
+  }
+
+  void ScrollableArea::ContentAreaDidHide() const noexcept
+  {
+    GetScrollbarsController().ContentAreaDidHide();
+  }
+
+  void ScrollableArea::LockOverlayScrollbarStateToHidden(bool shouldLockState) const noexcept
+  {
+    GetScrollbarsController().LockOverlayScrollbarStateToHidden(shouldLockState);
+  }
+
+  void ScrollableArea::ScrollbarWidthChanged() noexcept
+  {
+    for (auto *scrollbar : {HorizontalScrollbar(), VerticalScrollbar()})
+    {
+      if (scrollbar)
+      {
+        scrollbar->UpdateScrollbarThickness();
+      }
+    }
+  }
+
+  void ScrollableArea::ScrollbarStyleChanged() noexcept
+  {
+    auto &controller = GetScrollbarsController();
+    for (auto orientation : {ScrollbarOrientation::Horizontal, ScrollbarOrientation::Vertical})
+    {
+      auto *scrollbar =
+        orientation == ScrollbarOrientation::Horizontal ? HorizontalScrollbar() : VerticalScrollbar();
+      if (!scrollbar)
+      {
+        continue;
+      }
+      // The controller takes it again as what it now is.
+      controller.WillRemoveScrollbar(*scrollbar, orientation);
+      scrollbar->SetOpacity(1);
+      controller.DidAddScrollbar(*scrollbar, orientation);
+    }
+    ScrollbarWidthChanged();
+    ScrollbarAppearanceChanged();
+    AvailableContentSizeChanged(AvailableSizeChangeReason::ScrollbarsChanged);
+  }
+
+  void ScrollableArea::SetScrollbarOverlayStyle(ScrollbarOverlayStyle style) noexcept
+  {
+    _scrollbarOverlayStyle = style;
+    // The theme repaints them (updateScrollbarOverlayStyle), with the corner (invalidateScrollbars).
+    ScrollbarAppearanceChanged();
+  }
+
+  void ScrollableArea::ScrollbarAppearanceChanged() noexcept
+  {
+    for (auto *scrollbar : {HorizontalScrollbar(), VerticalScrollbar()})
+    {
+      if (scrollbar)
+      {
+        scrollbar->Invalidate();
+      }
+    }
+  }
+
+  ScrollableArea::ScrollableArea() noexcept = default;
+  ScrollableArea::~ScrollableArea() noexcept = default;
+
+  ScrollAnimator &ScrollableArea::GetScrollAnimator() noexcept
+  {
+    if (!_scrollAnimator)
+    {
+      _scrollAnimator = CreateUnique<ScrollAnimator>(*this);
+    }
+    return *_scrollAnimator;
+  }
+
+  void ScrollableArea::ScrollToPositionWithAnimation(const ScrollPosition &position,
+                                                     const ScrollPositionChangeOptions &options) noexcept
+  {
+    bool wasAnimating = GetScrollAnimationStatus() == ScrollAnimationStatus::Animating;
+    if (GetScrollAnimator().ScrollToOffsetWithAnimation(FloatPoint(ScrollOffsetFromPosition(position)),
+                                                        options.Type))
+    {
+      SetScrollAnimationStatus(ScrollAnimationStatus::Animating);
+      RegisterForAnimatedScroll();
+    }
+    else if (wasAnimating)
+    {
+      DidStopAnimatedScroll();
+    }
+  }
+
+  bool ScrollableArea::StopAnimatedScroll() noexcept
+  {
+    if (GetScrollAnimationStatus() != ScrollAnimationStatus::Animating)
+    {
+      return false;
+    }
+    _scrollAnimator->StopAnimation();
+    SetScrollAnimationStatus(ScrollAnimationStatus::NotAnimating);
+    AnimatedScrollDidEnd();
+    return true;
+  }
+
+  void ScrollableArea::DidStopAnimatedScroll() noexcept
+  {
+    SetScrollAnimationStatus(ScrollAnimationStatus::NotAnimating);
+    AnimatedScrollDidEnd();
+    ScrollDidEnd();
+  }
+
+  void ScrollableArea::ClearSnapOffsets() noexcept
+  {
+    if (_scrollAnimator)
+    {
+      _scrollAnimator->ClearSnapOffsetsInfo();
+    }
+  }
+
+  ScrollOffset
+    ScrollableArea::ScrollOffsetAdjustedForSnapping(const ScrollOffset &offset,
+                                                    ScrollSnapPointSelectionMethod method) const noexcept
+  {
+    if (!_scrollAnimator || !_scrollAnimator->UsesScrollSnap())
+    {
+      return offset;
+    }
+    return RoundedIntPoint(_scrollAnimator->ScrollOffsetAdjustedForSnapping(FloatPoint(offset), method));
+  }
+
+  void ScrollableArea::ResnapAfterLayout() noexcept
+  {
+    if (_scrollAnimator)
+    {
+      _scrollAnimator->ResnapAfterLayout();
+    }
+  }
+
+  void ScrollableArea::DoPostThumbMoveSnapping(ScrollbarOrientation orientation) noexcept
+  {
+    if (!_scrollAnimator || !_scrollAnimator->UsesScrollSnap())
+    {
+      return;
+    }
+
+    auto currentOffset = GetScrollOffset();
+    auto newOffset = currentOffset;
+    auto snapped = ScrollOffsetAdjustedForSnapping(currentOffset, ScrollSnapPointSelectionMethod::Closest);
+    if (orientation == ScrollbarOrientation::Horizontal)
+    {
+      newOffset.SetX(snapped.X());
+    }
+    else
+    {
+      newOffset.SetY(snapped.Y());
+    }
+
+    if (newOffset != currentOffset)
+    {
+      ScrollToPositionWithAnimation(ScrollPositionFromOffset(newOffset),
+                                    ScrollPositionChangeOptions::CreateUser());
+    }
+  }
+
+  void ScrollableArea::DidEndGestureScroll() noexcept
+  {
+    _isGestureScrollInProgress = false;
+    SnapAfterScrollEnds();
+  }
+
+  void ScrollableArea::SnapAfterScrollEnds() noexcept
+  {
+    if (!_scrollAnimator || !_scrollAnimator->UsesScrollSnap())
+    {
+      return;
+    }
+
+    auto currentOffset = GetScrollOffset();
+    auto snapped = ScrollOffsetAdjustedForSnapping(currentOffset, ScrollSnapPointSelectionMethod::Closest);
+    if (snapped != currentOffset)
+    {
+      ScrollToPositionWithAnimation(ScrollPositionFromOffset(snapped),
+                                    ScrollPositionChangeOptions::CreateUser());
+    }
+  }
+
   bool ScrollableArea::ScrollToPositionWithoutAnimation(const IntPoint &position,
                                                         ScrollClamping clamping) noexcept
   {
-    // FIXME: The scroll animator holds the current position and stops animated scrolls, once there is one.
+    bool stoppedAnimation = StopAnimatedScroll();
     auto adjustedPosition = clamping == ScrollClamping::Clamped
                               ? position.ConstrainedBetween(MinimumScrollPosition(), MaximumScrollPosition())
                               : position;
 
     if (adjustedPosition == GetScrollPosition() && !ScrollOriginChanged())
     {
+      if (stoppedAnimation)
+      {
+        ScrollDidEnd();
+      }
       return false;
     }
 
@@ -52,8 +282,11 @@ namespace krys::boo
     SetScrollOffset(ScrollOffsetFromPosition(position));
 
     // Tell the scrollbars to update their thumb postions.
-    // FIXME: Invalidate overlay scrollbars, and notify the scrollbars controller and scroll anchoring, once
-    // there are any.
+    // FIXME: Scroll anchoring, once there is any.
+    if (_scrollAnimator)
+    {
+      _scrollAnimator->UpdateSnapTargets();
+    }
     if (auto *horizontalScrollbar = this->HorizontalScrollbar())
     {
       horizontalScrollbar->OffsetDidChange();
@@ -65,6 +298,8 @@ namespace krys::boo
 
     if (GetScrollPosition() != oldPosition)
     {
+      // Scrolling shows the overlay scrollbars.
+      GetScrollbarsController().NotifyContentAreaScrolled();
       UpdateAnchorPositionedAfterScroll();
     }
   }
@@ -224,8 +459,8 @@ namespace krys::boo
     }
   }
 
-  bool ScrollableArea::Scroll(ScrollDirection direction, ScrollGranularity granularity,
-                              uint32 stepCount) noexcept
+  bool ScrollableArea::Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
+                              ScrollIsAnimated animated) noexcept
   {
     RefPtr<Scrollbar> scrollbar = ShareRefPtr(ScrollbarForDirection(direction));
     if (!scrollbar)
@@ -256,26 +491,56 @@ namespace krys::boo
       scrollDelta = -scrollDelta;
     }
 
-    return SingleAxisScroll(axis, scrollDelta);
+    return SingleAxisScroll(axis, scrollDelta, animated);
   }
 
-  bool ScrollableArea::SingleAxisScroll(ScrollEventAxis axis, float delta) noexcept
+  bool ScrollableArea::SingleAxisScroll(ScrollEventAxis axis, float delta, ScrollIsAnimated animated) noexcept
   {
-    // The scroll animator's singleAxisScroll, without animation or snapping.
-    // FIXME: Scroll snapping and animated scrolls (scrollAnimatorEnabled), once there are those.
-    auto position = GetScrollPosition();
-    if (axis == ScrollEventAxis::Horizontal)
+    // Keys and wheel notches in quick succession add up, so each goes on from where the last is going.
+    bool isAnimating = GetScrollAnimationStatus() == ScrollAnimationStatus::Animating;
+    auto baseOffset = isAnimating ? RoundedIntPoint(_scrollAnimator->DestinationOffset()) : GetScrollOffset();
+    auto newOffset = baseOffset;
+    bool isHorizontal = axis == ScrollEventAxis::Horizontal;
+    int32 base = isHorizontal ? baseOffset.X() : baseOffset.Y();
+    int32 destination = base + static_cast<int32>(delta);
+    if (_scrollAnimator && _scrollAnimator->UsesScrollSnap())
     {
-      position.SetX(position.X() + static_cast<int32>(delta));
+      FloatPoint floatOffset(baseOffset);
+      if (isHorizontal)
+      {
+        floatOffset.SetX(static_cast<float>(destination));
+      }
+      else
+      {
+        floatOffset.SetY(static_cast<float>(destination));
+      }
+      destination = static_cast<int32>(std::lround(_scrollAnimator->AdjustedScrollDestination(
+        axis, floatOffset, std::copysign(1.f, delta), static_cast<float>(base))));
+    }
+    if (isHorizontal)
+    {
+      newOffset.SetX(destination);
     }
     else
     {
-      position.SetY(position.Y() + static_cast<int32>(delta));
+      newOffset.SetY(destination);
+    }
+    newOffset = newOffset.ConstrainedBetween(MinimumScrollOffset(), MaximumScrollOffset());
+
+    if (animated == ScrollIsAnimated::Yes)
+    {
+      if (newOffset == baseOffset)
+      {
+        return false;
+      }
+      ScrollToPositionWithAnimation(ScrollPositionFromOffset(newOffset),
+                                    ScrollPositionChangeOptions::CreateUser());
+      return true;
     }
 
     auto oldScrollType = CurrentScrollType();
     SetCurrentScrollType(ScrollType::User);
-    bool scrolled = ScrollToPositionWithoutAnimation(position);
+    bool scrolled = ScrollToPositionWithoutAnimation(ScrollPositionFromOffset(newOffset));
     SetCurrentScrollType(oldScrollType);
     return scrolled;
   }
@@ -287,8 +552,8 @@ namespace krys::boo
       return false;
     }
 
-    // The scroll animator's and the scrolling effects controller's handleWheelEvent, without animation,
-    // snapping or kinetic scrolling.
+    // The scroll animator's and the scrolling effects controller's handleWheelEvent, without animation
+    // outside a scroll snap container, or kinetic scrolling.
     auto scrollOffset = GetScrollOffset();
     float deltaX = AllowsHorizontalScrolling() ? wheelEvent.DeltaX() : 0;
     float deltaY = AllowsVerticalScrolling() ? wheelEvent.DeltaY() : 0;
@@ -336,6 +601,25 @@ namespace krys::boo
     if (!deltaX && !deltaY)
     {
       return false;
+    }
+
+    // A notch goes to the next snap position that way. A gesture (a touch's or a touchpad's pan) moves
+    // freely, and snaps when it ends.
+    if (wheelEvent.IsGestureScroll())
+    {
+      _isGestureScrollInProgress = true;
+    }
+    else if (_scrollAnimator && _scrollAnimator->UsesScrollSnap())
+    {
+      if (deltaX)
+      {
+        (void)SingleAxisScroll(ScrollEventAxis::Horizontal, deltaX, ScrollIsAnimated::Yes);
+      }
+      if (deltaY)
+      {
+        (void)SingleAxisScroll(ScrollEventAxis::Vertical, deltaY, ScrollIsAnimated::Yes);
+      }
+      return true;
     }
 
     // The scroll animator's immediateScrollBy.

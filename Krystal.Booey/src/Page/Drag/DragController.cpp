@@ -58,13 +58,13 @@ namespace krys::boo
 
   namespace
   {
-    // FIXME: The keys held (currentStateOfModifierKeys), once the host reports them outside its events.
+    /// @brief The mouse event drag events are made from, with the keys the host reports held.
     KRYS_NODISCARD PlatformMouseEvent CreateMouseEvent(const DragData &dragData) noexcept
     {
-      return PlatformMouseEvent(DoublePoint(dragData.ClientPosition()),
-                                DoublePoint(dragData.GlobalPosition()), MouseButton::Left,
-                                PlatformEvent::Type::MouseMoved, 0, {}, html::EventLoop::Current().Now(), 0,
-                                {}, ForceAtClick, SyntheticClickType::NoTap);
+      return PlatformMouseEvent(
+        DoublePoint(dragData.ClientPosition()), DoublePoint(dragData.GlobalPosition()), MouseButton::Left,
+        PlatformEvent::Type::MouseMoved, 0, dragData.Modifiers(), html::EventLoop::Current().Now(), 0, {},
+        ForceAtClick, SyntheticClickType::NoTap);
     }
 
     KRYS_NODISCARD RefPtr<dom::DocumentFragment> DocumentFragmentFromDragData(const DragData &dragData,
@@ -631,7 +631,7 @@ namespace krys::boo
     auto target = innerFrame->Document()->GetEditor().FindEventTargetFrom(
       VisibleSelection(dragCaretController.CaretPosition()));
     // FIXME: What guarantees target is not null?
-    auto event = dom::TextEvent::CreateForDrop(text);
+    auto event = dom::TextEvent::CreateForDrop(target->NodeDocument().Window(), text);
     (void)target->DispatchEvent(*event);
     return !event->DefaultPrevented();
   }
@@ -865,8 +865,8 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Attachments and models, which are Cocoa's; image overlays' text, once there are image overlays;
-  // colour inputs, with dragging colours.
+  // FIXME: Attachments and models, which are Cocoa's; colour inputs, with dragging colours. (There's no
+  // image overlay text; see DIFFERENCES.md.)
   RefPtr<dom::Element> DragController::DraggableElement(const LocalFrame *sourceFrame,
                                                         dom::Element *startElement,
                                                         const IntPoint &dragOrigin,

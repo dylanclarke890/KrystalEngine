@@ -15,7 +15,7 @@ namespace krys::boo
 
   /// @brief The scrollable area of a layer whose box can scroll its overflow: its scroll position and
   /// extents, and its scrollbars.
-  // FIXME: Marquees, touch, wheel and keyboard scrolling, animated scrolls, scroll snapping and anchoring,
+  // FIXME: Marquees, touch, wheel and keyboard scrolling, scroll anchoring,
   // composited scrolling, custom scroll corners and resizers, painting and hit testing of the overflow
   // controls, scroll events and scrolling into view come with input, animations, compositing and painting.
   class RenderLayerScrollableArea final : public ScrollableArea
@@ -28,12 +28,19 @@ namespace krys::boo
     bool _inOverflowRelayout {false};
     bool _hasCompositedScrollableOverflow {false};
     bool _requiresScrollPositionReconciliation {false};
+    /// @brief Whether the overlay scrollbars of this layer's descendants (painting into it) wait for the
+    /// second pass.
+    bool _containsDirtyOverlayScrollbars {false};
+    /// @brief Where the overlay scrollbars paint in the second pass: their paint offset in the first.
+    IntPoint _cachedOverlayScrollbarOffset;
 
     // The width/height of our scrolled area.
     int32 _scrollWidth {0};
     int32 _scrollHeight {0};
 
     RenderLayer &_layer;
+    /// @brief Whether the area is in the frame view's scrollable areas.
+    bool _registeredScrollableArea {false};
     ScrollPosition _scrollPosition;
     Maybe<ScrollPosition> _postLayoutScrollPosition;
 
@@ -74,6 +81,9 @@ namespace krys::boo
     /// (or the view, if the layer has no overflow clip), setting @p scrolledArea to the last area scrolled.
     void ScrollByRecursively(const IntSize &delta, ScrollableArea **scrolledArea = nullptr) noexcept;
 
+    /// @brief Scrolls towards @p mousePosition, the further from @p sourcePoint the faster.
+    void PanScrollFromPoint(const IntPoint &sourcePoint, const IntPoint &mousePosition) noexcept;
+
     /// @brief Scrolls so the absolute rect is aligned as asked.
     /// @return The rect in absolute coordinates after scrolling.
     LayoutRect ScrollRectToVisible(const LayoutRect &absoluteRect,
@@ -89,6 +99,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ScrollsOverflow() const noexcept;
     KRYS_NODISCARD bool HasScrollableHorizontalOverflow() const noexcept;
+    /// @brief Adds the area to the frame view's scrollable areas while it can scroll (@p hasOverflow), has
+    /// scrollbars or scrolls smoothly, and removes it otherwise.
+    void UpdateScrollableAreaSet(bool hasOverflow) noexcept;
     KRYS_NODISCARD bool HasScrollableVerticalOverflow() const noexcept;
     KRYS_NODISCARD bool HasScrollbars() const noexcept
     {
@@ -106,6 +119,9 @@ namespace krys::boo
     void SetHasVerticalScrollbar(bool hasScrollbar) noexcept;
 
     KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept final;
+    KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept final;
+    /// @brief Whether the scrollbars are dark: their box's `color-scheme`.
+    KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept final;
 
     KRYS_NODISCARD bool RequiresScrollPositionReconciliation() const noexcept
     {
@@ -186,6 +202,9 @@ namespace krys::boo
 
     // NOTE: This should only be called by the overridden setScrollOffset from ScrollableArea.
     void ScrollTo(const ScrollPosition &position) noexcept;
+    void RegisterForAnimatedScroll() noexcept override;
+    /// @brief Finds the snap positions of the boxes that snap in this one.
+    void UpdateSnapOffsets() noexcept;
 
     /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;
@@ -201,10 +220,24 @@ namespace krys::boo
     void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
 
-    /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset.
-    // FIXME: Overlay scrollbars' second pass, once there are overlay scrollbars.
+    /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset. Overlay scrollbars paint over
+    /// everything else, in a second pass through the layer tree (@p paintingOverlayControls): the first pass
+    /// only marks the painting root as having them to paint.
     void PaintOverflowControls(GraphicsContext &context, EnumSet<PaintBehavior> paintBehavior,
-                               const IntPoint &paintOffset, const IntRect &damageRect) noexcept;
+                               const IntPoint &paintOffset, const IntRect &damageRect,
+                               bool paintingOverlayControls = false) noexcept;
+    /// @brief The second pass: paints the overlay scrollbars the first pass found, if there were any.
+    void PaintOverlayScrollbars(GraphicsContext &context, const LayoutRect &damageRect,
+                                EnumSet<PaintBehavior> paintBehavior,
+                                RenderObject *subtreePaintRoot = nullptr) noexcept;
+    KRYS_NODISCARD bool ContainsDirtyOverlayScrollbars() const noexcept
+    {
+      return _containsDirtyOverlayScrollbars;
+    }
+    void SetContainsDirtyOverlayScrollbars(bool dirtyScrollbars) noexcept
+    {
+      _containsDirtyOverlayScrollbars = dirtyScrollbars;
+    }
     void PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
                            const IntRect &damageRect) noexcept;
     /// @brief Paints the grip of a box the user can resize, in its bottom corner.

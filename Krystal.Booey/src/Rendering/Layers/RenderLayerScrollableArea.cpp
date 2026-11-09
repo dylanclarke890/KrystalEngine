@@ -1,10 +1,14 @@
 ﻿#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
@@ -21,6 +25,7 @@
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
+#include <cmath>
 
 namespace krys::boo
 {
@@ -33,7 +38,12 @@ namespace krys::boo
 
   void RenderLayerScrollableArea::Clear() noexcept
   {
-    // FIXME: Unregister from the frame view's scrollable areas and animated scrolls, once it keeps them.
+    if (_registeredScrollableArea)
+    {
+      (void)_layer.Renderer().View().FrameView().RemoveScrollableArea(*this);
+      _registeredScrollableArea = false;
+    }
+    (void)StopAnimatedScroll();
 
     auto &renderer = _layer.Renderer();
     if (auto *element = renderer.GetElement())
@@ -59,7 +69,6 @@ namespace krys::boo
     {
       // We save and restore only the scrollOffset as the other scroll values are recalculated.
       _scrollPosition = element->SavedLayerScrollPosition();
-      // FIXME: Tell the scroll animator the current position, once there is one.
     }
 
     element->SetSavedLayerScrollPosition({});
@@ -111,6 +120,27 @@ namespace krys::boo
     return scrollOffset.ConstrainedBetween(MinimumScrollOffset(), MaximumScrollOffset());
   }
 
+  void RenderLayerScrollableArea::PanScrollFromPoint(const IntPoint &sourcePoint,
+                                                     const IntPoint &mousePosition) noexcept
+  {
+    // The speed grows faster than the distance, as in WebKit.
+    auto adjustedDelta = [](int32 delta)
+    {
+      if (std::abs(delta) <= LocalFrameView::NoPanScrollRadius)
+      {
+        return 0;
+      }
+      constexpr int32 speedReducer = 12;
+      int32 adjusted = delta / speedReducer;
+      return std::abs(adjusted) > 1
+               ? static_cast<int32>(adjusted * std::sqrt(static_cast<double>(std::abs(adjusted))))
+               : adjusted;
+    };
+
+    ScrollByRecursively(IntSize(adjustedDelta(mousePosition.X() - sourcePoint.X()),
+                                adjustedDelta(mousePosition.Y() - sourcePoint.Y())));
+  }
+
   void RenderLayerScrollableArea::ScrollByRecursively(const IntSize &delta,
                                                       ScrollableArea **scrolledArea) noexcept
   {
@@ -123,7 +153,9 @@ namespace krys::boo
     if (renderer.HasNonVisibleOverflow())
     {
       ScrollOffset newScrollOffset = GetScrollOffset() + delta;
-      (void)ScrollToOffset(newScrollOffset);
+      auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+      options.SnapPointSelectionMethod = ScrollSnapPointSelectionMethod::None;
+      (void)ScrollToOffset(newScrollOffset, options);
       if (scrolledArea)
       {
         *scrolledArea = this;
@@ -150,7 +182,11 @@ namespace krys::boo
     {
       // If we are here, we were called on a renderer that can be programmatically scrolled, but doesn't
       // have an overflow clip. Which means that it is a document node that can be scrolled.
-      renderer.View().FrameView().ScrollBy(delta);
+      // Bit by bit, it doesn't snap as it goes (it would never leave a snap position): it snaps when it ends.
+      auto &frameView = renderer.View().FrameView();
+      auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+      options.SnapPointSelectionMethod = ScrollSnapPointSelectionMethod::None;
+      frameView.SetScrollPosition(frameView.GetScrollPosition() + delta, options);
       if (scrolledArea)
       {
         *scrolledArea = &renderer.View().FrameView();
@@ -164,28 +200,53 @@ namespace krys::boo
   ScrollOffset RenderLayerScrollableArea::ScrollToOffset(const ScrollOffset &scrollOffset,
                                                          const ScrollPositionChangeOptions &options) noexcept
   {
-    // FIXME: Cancel running scroll animations, once there are any.
+    // A smooth scroll is retargeted by another, and stopped by any other.
+    bool animated = options.Animated == ScrollIsAnimated::Yes;
+    bool wasAnimating = GetScrollAnimationStatus() == ScrollAnimationStatus::Animating;
+    bool stoppedAnimation = !animated && StopAnimatedScroll();
     ScrollOffset clampedScrollOffset =
       options.Clamping == ScrollClamping::Clamped ? ClampScrollOffset(scrollOffset) : scrollOffset;
-    if (clampedScrollOffset == this->GetScrollOffset())
+    if (clampedScrollOffset == this->GetScrollOffset() && !(animated && wasAnimating))
     {
+      if (stoppedAnimation)
+      {
+        ScrollDidEnd();
+      }
       return clampedScrollOffset;
     }
 
     auto previousScrollType = CurrentScrollType();
     SetCurrentScrollType(options.Type);
 
-    // FIXME: Snap the offset (scrollOffsetAdjustedForSnapping) and scroll with an animation
-    // (ScrollIsAnimated::Yes), once there are scroll snapping and animated scrolls.
-    ScrollOffset snappedOffset = clampedScrollOffset;
+    ScrollOffset snappedOffset =
+      ScrollOffsetAdjustedForSnapping(clampedScrollOffset, options.SnapPointSelectionMethod);
     auto snappedPosition = ScrollPositionFromOffset(snappedOffset);
-    if (!RequestScrollToPosition(snappedPosition, options))
+    if (animated)
+    {
+      ScrollToPositionWithAnimation(snappedPosition, options);
+    }
+    else if (!RequestScrollToPosition(snappedPosition, options))
     {
       (void)ScrollToPositionWithoutAnimation(snappedPosition, options.Clamping);
     }
 
     SetCurrentScrollType(previousScrollType);
     return snappedOffset;
+  }
+
+  void RenderLayerScrollableArea::RegisterForAnimatedScroll() noexcept
+  {
+    _layer.Renderer().View().FrameView().AddScrollableAreaForAnimatedScroll(*this);
+  }
+
+  void RenderLayerScrollableArea::UpdateSnapOffsets() noexcept
+  {
+    auto *box = _layer.GetRenderBox();
+    if (!box || !box->GetElement())
+    {
+      return;
+    }
+    UpdateSnapOffsetsForScrollableArea(*this, *box, box->PaddingBoxRect());
   }
 
   void RenderLayerScrollableArea::ScrollTo(const ScrollPosition &position) noexcept
@@ -792,6 +853,20 @@ namespace krys::boo
     return ScrollbarWidth::Auto;
   }
 
+  bool RenderLayerScrollableArea::UseDarkAppearanceForScrollbars() const noexcept
+  {
+    return _layer.Renderer().UseDarkAppearance();
+  }
+
+  Maybe<ScrollbarColor> RenderLayerScrollableArea::ScrollbarColorStyle() const noexcept
+  {
+    if (_layer.GetRenderBox())
+    {
+      return _layer.Renderer().Style().UsedScrollbarColor();
+    }
+    return null;
+  }
+
   bool RenderLayerScrollableArea::HasOverflowControls() const noexcept
   {
     // FIXME: The custom scroll corner too, once there are any.
@@ -1034,8 +1109,11 @@ namespace krys::boo
       ComputeScrollOrigin();
     }
 
-    // FIXME: Register with the frame view's scrollable areas (updateScrollableAreaSet), and the scrollbars'
-    // dark appearance, once the frame view keeps them and there's painting.
+    // Before the box lays out, the overflow is known after it.
+    if (!_scrollDimensionsDirty)
+    {
+      UpdateScrollableAreaSet(HasScrollableHorizontalOverflow() || HasScrollableVerticalOverflow());
+    }
   }
 
   void RenderLayerScrollableArea::UpdateScrollbarsAfterLayout() noexcept
@@ -1112,7 +1190,31 @@ namespace krys::boo
 
     UpdateScrollbarSteps();
 
-    // FIXME: Register with the frame view's scrollable areas (updateScrollableAreaSet), once it keeps them.
+    UpdateScrollableAreaSet(HasScrollableHorizontalOverflow() || HasScrollableVerticalOverflow());
+  }
+
+  void RenderLayerScrollableArea::UpdateScrollableAreaSet(bool hasOverflow) noexcept
+  {
+    // WebKit keeps only those that can scroll and are visible to hit testing; scrollbars that can't scroll,
+    // and hidden ones, are kept too here, so the theme's changes reach them.
+    // FIXME: Touch event listeners for unaccelerated overflow scrolling
+    // (registerAsTouchEventListenerForScrolling).
+    auto &frameView = _layer.Renderer().View().FrameView();
+    bool needsToBeRegistered =
+      hasOverflow || _hBar || _vBar || GetScrollAnimationStatus() == ScrollAnimationStatus::Animating;
+    if (needsToBeRegistered)
+    {
+      if (!_registeredScrollableArea)
+      {
+        (void)frameView.AddScrollableArea(*this);
+        _registeredScrollableArea = true;
+      }
+    }
+    else if (_registeredScrollableArea)
+    {
+      (void)frameView.RemoveScrollableArea(*this);
+      _registeredScrollableArea = false;
+    }
   }
 
   void RenderLayerScrollableArea::UpdateScrollbarSteps() noexcept
@@ -1125,9 +1227,8 @@ namespace krys::boo
     auto *box = _layer.GetRenderBox();
     krys_debug_assert(box);
 
-    // FIXME: Contract the bounds by the scroll padding (scrollPaddingForViewportRect), once there's scroll
-    // snapping.
     LayoutRect paddedLayerBounds(0_lu, 0_lu, box->ClientWidth(), box->ClientHeight());
+    paddedLayerBounds.Contract(box->ScrollPaddingForViewportRect(paddedLayerBounds));
 
     // Set up the  page step/line step.
     if (_hBar)
@@ -1157,7 +1258,7 @@ namespace krys::boo
     ComputeScrollDimensions();
     _layer.UpdateSelfPaintingLayer();
 
-    // FIXME: Update the snap offsets, once there's scroll snapping.
+    UpdateSnapOffsets();
 
     // FIXME: Don't clamp during user scrolls, once there are any.
     if (!box->IsHTMLMarquee())
@@ -1182,7 +1283,9 @@ namespace krys::boo
       (void)ScrollToPositionWithoutAnimation(IntPoint(GetScrollPosition()));
     }
 
-    // FIXME: The compositing updates, resnapping after layout and the inspector, once there are any.
+    ResnapAfterLayout();
+
+    // FIXME: The compositing updates and the inspector, once there are any.
   }
 
   bool RenderLayerScrollableArea::OverflowControlsIntersectRect(const IntRect &localRect) const noexcept
@@ -1278,8 +1381,17 @@ namespace krys::boo
 
     auto revealRect = GetRectToExposeForScrollIntoView(layerBounds, localExposeRect, options.AlignX,
                                                        options.AlignY, localVisiblityRect);
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
     auto scrollPositionOptions = ScrollPositionChangeOptions::CreateProgrammatic();
+    auto *frame = box->GetDocument().Frame();
+    if (frame && frame->GetEventHandler().IsAutoscrolling())
+    {
+      // An autoscroll moves bit by bit: it snaps when it ends.
+      scrollPositionOptions.SnapPointSelectionMethod = ScrollSnapPointSelectionMethod::None;
+    }
+    else if (frame && box->GetElement() && UseSmoothScrolling(options.Behavior, box->GetElement()))
+    {
+      scrollPositionOptions.Animated = ScrollIsAnimated::Yes;
+    }
     if (auto result =
           UpdateScrollPositionForScrollIntoView(scrollPositionOptions, revealRect, localExposeRect))
     {
@@ -1318,7 +1430,8 @@ namespace krys::boo
   void RenderLayerScrollableArea::PaintOverflowControls(GraphicsContext &context,
                                                         EnumSet<PaintBehavior> paintBehavior,
                                                         const IntPoint &paintOffset,
-                                                        const IntRect &damageRect) noexcept
+                                                        const IntRect &damageRect,
+                                                        bool paintingOverlayControls) noexcept
   {
     // Don't do anything if we have no overflow.
     auto &renderer = _layer.Renderer();
@@ -1332,13 +1445,53 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Overlay scrollbars paint in a second pass through the layer tree, once there are overlay
-    // scrollbars.
+    // Overlay scrollbars paint in a second pass through the layer tree so that they will paint on top of
+    // everything else. If this is the normal painting pass, paintingOverlayControls will be false, and we
+    // should just tell the root layer that there are overlay scrollbars that need to be painted. That will
+    // cause the second pass through the layer tree to run, and we'll paint the scrollbars then. In the
+    // meantime, cache the paint offset so that the second pass doesn't need to re-enter the render tree to
+    // get it right.
+    if (HasOverlayScrollbars() && !paintingOverlayControls)
+    {
+      _cachedOverlayScrollbarOffset = paintOffset;
+
+      // It's not necessary to do the second pass if the scrollbars paint into layers.
+      if ((_hBar && LayerForHorizontalScrollbar()) || (_vBar && LayerForVerticalScrollbar()))
+      {
+        return;
+      }
+      IntRect localDamageRect = damageRect;
+      localDamageRect.MoveBy(-paintOffset);
+      if (!OverflowControlsIntersectRect(localDamageRect))
+      {
+        return;
+      }
+
+      auto *paintingRoot = _layer.EnclosingCompositingLayer();
+      if (!paintingRoot)
+      {
+        paintingRoot = renderer.View().Layer();
+      }
+
+      if (auto *scrollableArea = paintingRoot->GetScrollableArea())
+      {
+        scrollableArea->SetContainsDirtyOverlayScrollbars(true);
+      }
+      return;
+    }
+
+    // Classic scrollbars painted in the first pass.
+    if (paintingOverlayControls && !HasOverlayScrollbars())
+    {
+      return;
+    }
+
+    IntPoint adjustedPaintOffset = paintingOverlayControls ? _cachedOverlayScrollbarOffset : paintOffset;
 
     // Move the scrollbar widgets if necessary. We normally move and resize widgets during layout, but
     // sometimes widgets can move without layout occurring (most notably when you scroll a document that
     // contains fixed positioned elements).
-    (void)PositionOverflowControls(ToIntSize(paintOffset));
+    (void)PositionOverflowControls(ToIntSize(adjustedPaintOffset));
 
     // Now that we're sure the scrollbars are in the right place, paint them.
     if (RefPtr<Scrollbar> hBar = _hBar;
@@ -1362,10 +1515,10 @@ namespace krys::boo
 
     // We fill our scroll corner with white if we have a scrollbar that doesn't run all the way up to the edge
     // of the box.
-    PaintScrollCorner(context, paintOffset, damageRect);
+    PaintScrollCorner(context, adjustedPaintOffset, damageRect);
 
     // Paint our resizer last, since it sits on top of the scroll corner.
-    PaintResizer(context, LayoutPoint(paintOffset), LayoutRect(damageRect));
+    PaintResizer(context, LayoutPoint(adjustedPaintOffset), LayoutRect(damageRect));
   }
 
   void RenderLayerScrollableArea::PaintResizer(GraphicsContext &context, const LayoutPoint &paintOffset,
@@ -1463,6 +1616,23 @@ namespace krys::boo
     {
       ScrollbarTheme::Theme().PaintScrollCorner(*this, context, absRect);
     }
+  }
+
+  void RenderLayerScrollableArea::PaintOverlayScrollbars(GraphicsContext &context,
+                                                         const LayoutRect &damageRect,
+                                                         EnumSet<PaintBehavior> paintBehavior,
+                                                         RenderObject *subtreePaintRoot) noexcept
+  {
+    if (!_containsDirtyOverlayScrollbars)
+    {
+      return;
+    }
+
+    RenderLayer::LayerPaintingInfo paintingInfo(&_layer, LayoutRect(EnclosingIntRect(damageRect)),
+                                                paintBehavior, LayoutSize(), subtreePaintRoot);
+    _layer.PaintLayer(context, paintingInfo, RenderLayer::PaintLayerFlag::PaintingOverlayScrollbars);
+
+    _containsDirtyOverlayScrollbars = false;
   }
 
   bool RenderLayerScrollableArea::HitTestOverflowControls(HitTestResult &result,

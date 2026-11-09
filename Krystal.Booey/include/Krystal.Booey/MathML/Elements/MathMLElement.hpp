@@ -160,6 +160,8 @@ namespace krys::boo::mathml
     virtual void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                                   Maybe<dom::DOMStringView> value) noexcept;
 
+    void OnInsert() noexcept override;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
 
     KRYS_NODISCARD bool

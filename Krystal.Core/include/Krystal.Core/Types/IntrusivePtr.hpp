@@ -335,88 +335,107 @@ namespace krys
     return Is<TExpected>(source.get());
   }
 
-  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  KRYS_NODISCARD constexpr IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>
-    Upcast(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept
+  namespace detail
   {
-    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
-    static_assert(CanUpcast<T, U>, "Invalid upcast");
+    template <typename TPtrTraits, typename U>
+    struct RebindPtrTraits;
 
-    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>;
-
-    return instrusive_ptr::WithRef(static_cast<T *>(source.get()));
-  }
-
-  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  KRYS_NODISCARD constexpr IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>
-    Upcast(IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &&source) noexcept
-  {
-    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
-    static_assert(CanUpcast<T, U>, "Invalid upcast");
-
-    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>;
-
-    return instrusive_ptr::NoRef(static_cast<T *>(source.release()));
-  }
-
-  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  KRYS_NODISCARD constexpr IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>
-    Downcast(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept
-  {
-    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
-    static_assert(CanDowncast<T, U>, "Invalid downcast");
-    krys_assert(Is<T>(source));
-
-    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>;
-    return instrusive_ptr::WithRef(static_cast<T *>(source.get()));
-  }
-
-  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  KRYS_NODISCARD constexpr IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>
-    Downcast(IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &&source) noexcept
-  {
-    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
-    static_assert(CanDowncast<T, U>, "Invalid downcast");
-    krys_assert(Is<T>(source));
-
-    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>;
-    return instrusive_ptr::NoRef(static_cast<T *>(source.release()));
-  }
-
-  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  KRYS_NODISCARD constexpr IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, IsNullable(true)>
-    DynamicDowncast(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept
-  {
-    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
-    static_assert(CanDowncast<T, U>, "Invalid downcast");
-
-    // regardless of what was passed in, we have to return a nullable intrusive ptr here because the dynamic
-    // cast might fail.
-    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, IsNullable(true)>;
-    if (!Is<T>(source))
+    template <template <typename> typename TPtrTraits, typename T, typename U>
+    struct RebindPtrTraits<TPtrTraits<T>, U>
     {
-      return instrusive_ptr(nullptr);
-    }
+      using Type = TPtrTraits<U>;
+    };
 
-    return instrusive_ptr::WithRef(static_cast<T *>(source.get()));
+    /// @brief What casting an `IntrusivePtr` to @p Target gives: the source's constness, pointer traits (for
+    /// @p Target) and reference policy, with @p Nullable.
+    template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+    using IntrusivePtrCast =
+      IntrusivePtr<match_constness_t<Source, Target>,
+                   typename RebindPtrTraits<PtrTraits, match_constness_t<Source, Target>>::Type, RefPolicy,
+                   Nullable>;
   }
 
-  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  KRYS_NODISCARD constexpr IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, IsNullable(true)>
-    DynamicDowncast(IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &&source) noexcept
+  // The casts take the target type explicitly and deduce the source's, as the reference and pointer ones do:
+  // Downcast<Derived>(refPtrToBase). Casting keeps the source's nullability, and its constness.
+
+  template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>
+    Upcast(const IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &source) noexcept
   {
-    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
-    static_assert(CanDowncast<T, U>, "Invalid downcast");
+    static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
+    static_assert(CanUpcast<Source, Target>, "Invalid upcast");
 
-    // regardless of what was passed in, we have to return a nullable intrusive ptr here because the dynamic
-    // cast might fail.
-    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, IsNullable(true)>;
-    if (!Is<T>(source))
+    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>;
+    return Result::WithRef(static_cast<match_constness_t<Source, Target> *>(source.get()));
+  }
+
+  template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>
+    Upcast(IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &&source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
+    static_assert(CanUpcast<Source, Target>, "Invalid upcast");
+
+    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>;
+    return Result::NoRef(static_cast<match_constness_t<Source, Target> *>(source.release()));
+  }
+
+  /// @brief Casts @p source to its derived type @p Target, which it must be; a null pointer stays null.
+  template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>
+    Downcast(const IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
+    static_assert(CanDowncast<Source, Target>, "Invalid downcast");
+    krys_assert(!source.get() || Is<Target>(source));
+
+    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>;
+    return Result::WithRef(static_cast<match_constness_t<Source, Target> *>(source.get()));
+  }
+
+  /// @brief Casts @p source to its derived type @p Target, which it must be; a null pointer stays null.
+  template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>
+    Downcast(IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &&source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
+    static_assert(CanDowncast<Source, Target>, "Invalid downcast");
+    krys_assert(!source.get() || Is<Target>(source));
+
+    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>;
+    return Result::NoRef(static_cast<match_constness_t<Source, Target> *>(source.release()));
+  }
+
+  /// @brief @p source as its derived type @p Target if it is one, and null otherwise (so always nullable).
+  template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable(true)>
+    DynamicDowncast(const IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
+    static_assert(CanDowncast<Source, Target>, "Invalid downcast");
+
+    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable(true)>;
+    if (!Is<Target>(source))
     {
-      return instrusive_ptr(nullptr);
+      return Result(nullptr);
     }
+    return Result::WithRef(static_cast<match_constness_t<Source, Target> *>(source.get()));
+  }
 
-    return instrusive_ptr::NoRef(static_cast<T *>(source.release()));
+  /// @brief @p source as its derived type @p Target if it is one, and null otherwise (so always nullable).
+  template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable(true)>
+    DynamicDowncast(IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &&source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
+    static_assert(CanDowncast<Source, Target>, "Invalid downcast");
+
+    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable(true)>;
+    if (!Is<Target>(source))
+    {
+      return Result(nullptr);
+    }
+    return Result::NoRef(static_cast<match_constness_t<Source, Target> *>(source.release()));
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>

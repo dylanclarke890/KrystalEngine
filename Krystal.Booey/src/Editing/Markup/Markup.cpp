@@ -1631,6 +1631,24 @@ namespace krys::boo
     return accumulator.SerializeNodes(const_cast<dom::Node &>(node), root);
   }
 
+  dom::ExceptionOr<utf8_string> SerializeFragmentRequiringWellFormed(const dom::Node &node,
+                                                                     SerializedNodes root) noexcept
+  {
+    // 1. Let context document be node's node document.
+    // 2. If context document is an HTML document, then return the result of HTML fragment serialization
+    //    algorithm with node, false, and « ».
+    // 3. Return the XML serialization of node given require well-formed.
+    MarkupAccumulator accumulator(nullptr, ResolveURLs::NoExcludingURLsForPrivacy,
+                                  MarkupAccumulator::GetSerializationSyntax(node.NodeDocument()),
+                                  SerializeShadowRoots::Explicit, {}, RequireWellFormed::Yes);
+    auto markup = accumulator.SerializeNodes(const_cast<dom::Node &>(node), root);
+    if (!accumulator.IsWellFormed())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+    return markup;
+  }
+
   bool IsPlainTextMarkup(dom::Node *node) noexcept
   {
     krys_debug_assert(node);

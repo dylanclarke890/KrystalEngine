@@ -1,6 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::pal
 {
@@ -41,5 +45,52 @@ namespace krys::pal
     DragLink,
     /// @brief No cursor.
     Hidden,
+  };
+
+  /// @brief A cursor drawn from an image, which a window can show in place of a system cursor.
+  class CursorImage final : public RefCounted<CursorImage>
+  {
+    KRYS_NON_COPY_MOVABLE(CursorImage);
+
+  private:
+    uint32 _width;
+    uint32 _height;
+    List<uint32> _pixels;
+    int32 _hotSpotX;
+    int32 _hotSpotY;
+
+  public:
+    /// @brief An image @p width by @p height, of @p pixels (row after row, each ARGB with straight alpha in
+    /// the high byte), that points at (@p hotSpotX, @p hotSpotY) in it.
+    CursorImage(uint32 width, uint32 height, List<uint32> pixels, int32 hotSpotX, int32 hotSpotY) noexcept
+        : _width(width), _height(height), _pixels(krys::move(pixels)), _hotSpotX(hotSpotX),
+          _hotSpotY(hotSpotY)
+    {
+    }
+
+    KRYS_NODISCARD uint32 Width() const noexcept
+    {
+      return _width;
+    }
+
+    KRYS_NODISCARD uint32 Height() const noexcept
+    {
+      return _height;
+    }
+
+    KRYS_NODISCARD const List<uint32> &Pixels() const noexcept
+    {
+      return _pixels;
+    }
+
+    KRYS_NODISCARD int32 HotSpotX() const noexcept
+    {
+      return _hotSpotX;
+    }
+
+    KRYS_NODISCARD int32 HotSpotY() const noexcept
+    {
+      return _hotSpotY;
+    }
   };
 }

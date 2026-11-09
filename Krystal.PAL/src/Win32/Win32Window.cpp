@@ -4,12 +4,15 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/Platform.hpp"
+#include "Krystal.PAL/Win32/DirectManipulationPan.hpp"
 #include "Krystal.PAL/Win32/DropTarget.hpp"
 #include "Krystal.PAL/Win32/Utils.hpp"
 #include <algorithm>
+#include <cstring>
 #include <hidusage.h>
 #include <imm.h>
 #include <string>
+#include <utility>
 #include <windows.h>
 #include <windowsx.h>
 
@@ -51,8 +54,6 @@ namespace
 
   /// @brief The engine key for a key message's virtual key code and `lParam` (its scan code and extended
   /// bit, which tell the left and right modifiers and the keypad's Enter apart).
-  // FIXME: Insert, Print Screen, Pause, Scroll Lock, Num Lock and the context menu key, once the engine has
-  // keys for them.
   static krys::pal::Key KeyCodeToEngineKey(const WPARAM keyCode, const LPARAM lParam) noexcept
   {
     using krys::pal::Key;
@@ -175,6 +176,13 @@ namespace
       case VK_DOWN:        return Key::DownArrow;
       case VK_UP:          return Key::UpArrow;
       case VK_RETURN:      return extended ? Key::KeypadEnter : Key::Enter;
+      case VK_INSERT:      return Key::Insert;
+      // Windows sends only the key up of Print Screen; it takes the key down for itself.
+      case VK_SNAPSHOT:    return Key::PrintScreen;
+      case VK_PAUSE:       return Key::Pause;
+      case VK_SCROLL:      return Key::ScrollLock;
+      case VK_NUMLOCK:     return Key::NumLock;
+      case VK_APPS:        return Key::ContextMenu;
       default:             return Key::UNKNOWN;
     }
   }
@@ -496,7 +504,9 @@ namespace krys::pal
 
     Win32Window::~Win32Window() noexcept
     {
+      DestroyTouchpadPan();
       RevokeDropTarget();
+      ClearCursorImage();
     }
 
     WindowHandle Win32Window::GetWindowHandle() const noexcept
@@ -959,6 +969,28 @@ namespace krys::pal
           }
           break;
         }
+        // A precision touchpad's contact goes to the DirectManipulation viewport, which reports its pans in
+        // place of wheel messages.
+        case DM_POINTERHITTEST:
+        {
+          const UINT32 pointerId = GET_POINTERID_WPARAM(wParam);
+          POINTER_INPUT_TYPE type {};
+          if (_touchpadPan && ::GetPointerType(pointerId, &type) && type == PT_TOUCHPAD)
+          {
+            _touchpadPan->SetContact(pointerId);
+            return 0;
+          }
+          break;
+        }
+        case WM_TIMER:
+        {
+          if (wParam == DirectManipulationPan::TimerId && _touchpadPan)
+          {
+            _touchpadPan->Update();
+            return 0;
+          }
+          break;
+        }
         case WM_MOUSEWHEEL:
         case WM_MOUSEHWHEEL:
         {
@@ -1040,6 +1072,12 @@ namespace krys::pal
           break;
         }
 #pragma endregion
+        case WM_DISPLAYCHANGE:
+        {
+          // The display's mode changed: its refresh rate is read again.
+          _refreshRateMonitor = nullptr;
+          break;
+        }
         case WM_MOVE:
         {
           if (_pointerLock)
@@ -1149,6 +1187,30 @@ namespace krys::pal
       return WindowSize {0, 0};
     }
 
+    Maybe<uint32> Win32Window::DisplayRefreshRate() const noexcept
+    {
+      auto *monitor = ::MonitorFromWindow(_handle, MONITOR_DEFAULTTONEAREST);
+      if (monitor == _refreshRateMonitor)
+      {
+        return _refreshRate;
+      }
+      _refreshRateMonitor = monitor;
+      _refreshRate = null;
+
+      MONITORINFOEXW info {};
+      info.cbSize = sizeof(info);
+      DEVMODEW mode {};
+      mode.dmSize = sizeof(mode);
+      // A frequency of 0 or 1 is the hardware's default, which the system doesn't name.
+      if (monitor && ::GetMonitorInfoW(monitor, &info)
+          && ::EnumDisplaySettingsW(info.szDevice, ENUM_CURRENT_SETTINGS, &mode)
+          && mode.dmDisplayFrequency > 1)
+      {
+        _refreshRate = static_cast<uint32>(mode.dmDisplayFrequency);
+      }
+      return _refreshRate;
+    }
+
     void Win32Window::Show() noexcept
     {
       // The result is whether the window was visible before, not an error.
@@ -1165,6 +1227,7 @@ namespace krys::pal
     {
       _callbacks = std::move(callbacks);
       UpdateDropTarget();
+      UpdateTouchpadPan();
     }
 
     void Win32Window::SetDropOperation(Maybe<DropOperation> operation) noexcept
@@ -1203,6 +1266,44 @@ namespace krys::pal
       }
     }
 
+    void Win32Window::UpdateTouchpadPan() noexcept
+    {
+      if (!_callbacks.OnTouchpadPan)
+      {
+        DestroyTouchpadPan();
+        return;
+      }
+      if (!_touchpadPan)
+      {
+        _touchpadPan =
+          DirectManipulationPan::Create(_handle, [this](TouchpadPanPhase phase, float deltaX, float deltaY)
+                                        { ReportTouchpadPan(phase, deltaX, deltaY); });
+      }
+    }
+
+    void Win32Window::DestroyTouchpadPan() noexcept
+    {
+      if (_touchpadPan)
+      {
+        std::exchange(_touchpadPan, nullptr)->Destroy();
+      }
+    }
+
+    void Win32Window::ReportTouchpadPan(TouchpadPanPhase phase, float deltaX, float deltaY) const noexcept
+    {
+      if (!_callbacks.OnTouchpadPan)
+      {
+        return;
+      }
+      // The pan is where the cursor is.
+      POINT point {};
+      (void)::GetCursorPos(&point);
+      ::ScreenToClient(_handle, &point);
+      TouchpadPanInput input {
+        phase, deltaX, deltaY, static_cast<float>(point.x), static_cast<float>(point.y), CurrentModifiers()};
+      _callbacks.OnTouchpadPan(GetWindowHandle(), input);
+    }
+
     void Win32Window::RevokeDropTarget() noexcept
     {
       if (!_dropTarget)
@@ -1216,12 +1317,87 @@ namespace krys::pal
 
     void Win32Window::SetCursor(CursorShape cursor) noexcept
     {
-      if (_cursor == cursor)
+      if (_cursor == cursor && !_cursorImage)
       {
         return;
       }
       _cursor = cursor;
+      ClearCursorImage();
+      CursorChanged();
+    }
 
+    void Win32Window::ClearCursorImage() noexcept
+    {
+      _cursorImage = nullptr;
+      if (auto cursor = std::exchange(_imageCursor, nullptr))
+      {
+        ::DestroyCursor(cursor);
+      }
+    }
+
+    void Win32Window::SetCursorImage(Ref<CursorImage> image) noexcept
+    {
+      if (_cursorImage == image.get())
+      {
+        return;
+      }
+      ClearCursorImage();
+
+      // A 32-bit top-down colour bitmap with alpha, and an empty mask that the alpha takes the place of.
+      auto width = static_cast<LONG>(image->Width());
+      auto height = static_cast<LONG>(image->Height());
+      if (width > 0 && height > 0 && image->Pixels().size() == static_cast<size_t>(width) * height)
+      {
+        BITMAPV5HEADER header {};
+        header.bV5Size = sizeof(header);
+        header.bV5Width = width;
+        header.bV5Height = -height;
+        header.bV5Planes = 1;
+        header.bV5BitCount = 32;
+        header.bV5Compression = BI_BITFIELDS;
+        header.bV5RedMask = 0x00'FF'00'00;
+        header.bV5GreenMask = 0x00'00'FF'00;
+        header.bV5BlueMask = 0x00'00'00'FF;
+        header.bV5AlphaMask = 0xFF'00'00'00;
+        void *bits = nullptr;
+        HDC screen = ::GetDC(nullptr);
+        HBITMAP colour = ::CreateDIBSection(screen, reinterpret_cast<BITMAPINFO *>(&header), DIB_RGB_COLORS,
+                                            &bits, nullptr, 0);
+        ::ReleaseDC(nullptr, screen);
+        List<BYTE> maskBits(static_cast<size_t>((width + 15) / 16 * 2) * height, BYTE {0xFF});
+        HBITMAP mask = ::CreateBitmap(width, height, 1, 1, maskBits.data());
+        if (colour && mask && bits)
+        {
+          std::memcpy(bits, image->Pixels().data(), image->Pixels().size() * sizeof(uint32));
+          ICONINFO info {};
+          info.fIcon = FALSE;
+          info.xHotspot = static_cast<DWORD>(std::clamp<int32>(image->HotSpotX(), 0, width - 1));
+          info.yHotspot = static_cast<DWORD>(std::clamp<int32>(image->HotSpotY(), 0, height - 1));
+          info.hbmMask = mask;
+          info.hbmColor = colour;
+          _imageCursor = ::CreateIconIndirect(&info);
+        }
+        if (colour)
+        {
+          ::DeleteObject(colour);
+        }
+        if (mask)
+        {
+          ::DeleteObject(mask);
+        }
+      }
+      // An image the system can't make a cursor of shows as the arrow.
+      _cursorImage = krys::move(image);
+      CursorChanged();
+    }
+
+    CursorImage *Win32Window::GetCursorImage() const noexcept
+    {
+      return _cursorImage.get();
+    }
+
+    void Win32Window::CursorChanged() const noexcept
+    {
       // While the window captures the mouse (a button is held), its cursor shows wherever the mouse is, and
       // no WM_SETCURSOR comes.
       if (::GetCapture() == _handle)
@@ -1586,6 +1762,11 @@ namespace krys::pal
       if (_cursor == CursorShape::Hidden || _pointerLock)
       {
         ::SetCursor(NULL);
+        return;
+      }
+      if (_cursorImage)
+      {
+        ::SetCursor(_imageCursor ? _imageCursor : ::LoadCursorW(NULL, IDC_ARROW));
         return;
       }
       if (auto dragCursor = DragCursor(_cursor))

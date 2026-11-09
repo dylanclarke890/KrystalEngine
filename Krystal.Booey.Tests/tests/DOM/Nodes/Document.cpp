@@ -240,7 +240,7 @@ namespace krys::boo::dom::tests
     };
 
     CHECK(Is<CompositionEvent>(*create(u8"compositionevent")));
-    CHECK(dynamic_cast<CustomEvent<EmptyTag> *>(&*create(u8"customevent")));
+    CHECK(Is<CustomEvent<EmptyTag>>(*create(u8"customevent")));
     CHECK(Is<DragEvent>(*create(u8"dragevent")));
     CHECK(Is<FocusEvent>(*create(u8"focusevent")));
     CHECK(Is<KeyboardEvent>(*create(u8"keyboardevent")));
@@ -251,13 +251,13 @@ namespace krys::boo::dom::tests
     for (auto name : {u8"uievent", u8"uievents"})
     {
       auto event = create(name);
-      CHECK(dynamic_cast<UIEvent *>(&*event));
+      CHECK(Is<UIEvent>(*event));
       CHECK_FALSE(Is<MouseEvent>(*event));
     }
     for (auto name : {u8"event", u8"events", u8"htmlevents", u8"svgevents"})
     {
       auto event = create(name);
-      CHECK_FALSE(dynamic_cast<UIEvent *>(&*event));
+      CHECK_FALSE(Is<UIEvent>(*event));
       CHECK_FALSE(Is<CompositionEvent>(*event));
     }
 
@@ -663,6 +663,15 @@ namespace krys::boo::dom::tests
       CHECK(result == child);
       CHECK(child->ParentNode() == nullptr);
       CHECK(&child->NodeDocument() == document.get());
+    }
+
+    SECTION("a node kept only by its parent is kept while it's adopted")
+    {
+      auto parent = source->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(parent->AppendChild(*source->CreateElement(u8"p").ReleaseValue()).HasException());
+      auto result = document->AdoptNode(*parent->FirstChild()).ReleaseValue();
+      CHECK(parent->FirstChild() == nullptr);
+      CHECK(&result->NodeDocument() == document.get());
     }
 
     SECTION("a template's contents are adopted too")

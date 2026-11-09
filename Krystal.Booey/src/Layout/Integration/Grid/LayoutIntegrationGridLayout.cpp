@@ -98,7 +98,7 @@ namespace krys::boo::layout_integration
 
   GridLayout::GridLayout(RenderGrid &renderGrid) noexcept
       : _gridBox(ShareCheckedPtr(BoxTreeUpdater {renderGrid}.Build().get())),
-        _layoutState(WeakPtr<layout::LayoutState>::WithRef(renderGrid.View().GetLayoutState()))
+        _layoutState(CreateWeakPtr(&renderGrid.View().GetLayoutState()))
   {
   }
 

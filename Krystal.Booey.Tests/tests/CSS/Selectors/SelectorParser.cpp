@@ -134,11 +134,7 @@ namespace krys::boo::css::tests
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("has-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("has-02.dat");
 
-  // FIXME: :heading and :heading() (Selectors 5) aren't supported.
-  TEST_CASE("CSSSelectorParser(heading-01.dat)", "[CSS][CSSSelectorParser][!shouldfail]")
-  {
-    RunTest("heading-01.dat");
-  }
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("heading-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("heading-02.dat");
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("id-01.dat");
@@ -149,11 +145,7 @@ namespace krys::boo::css::tests
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-02.dat");
 
-  // FIXME: A complex selector inside :not() inside :host() should be invalid (WPT parse-not.html).
-  TEST_CASE("CSSSelectorParser(not-03.dat)", "[CSS][CSSSelectorParser][!shouldfail]")
-  {
-    RunTest("not-03.dat");
-  }
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-03.dat");
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("part-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("part-02.dat");
@@ -376,6 +368,10 @@ namespace krys::boo::css::tests
     CHECK(Parse(u8"[ a ~= \"b\" ]") == u8"[a~=\"b\"]");
     CHECK(Parse(u8"[a~ =b]") == u8"<invalid>");
     CHECK(Parse(u8"[a=\"b\" I]") == u8"[a=\"b\" i]");
+    CHECK(Parse(u8"[a=b s]") == u8"[a=\"b\" s]");
+    CHECK(Parse(u8"[a=\"b\" S]") == u8"[a=\"b\" s]");
+    CHECK(Parse(u8"[a=b i s]") == u8"<invalid>");
+    CHECK(Parse(u8"[a s]") == u8"<invalid>");
     CHECK(Parse(u8"[a=b x]") == u8"<invalid>");
     CHECK(Parse(u8"[a=1]") == u8"<invalid>");
     CHECK(Parse(u8"[a=b c]") == u8"<invalid>");

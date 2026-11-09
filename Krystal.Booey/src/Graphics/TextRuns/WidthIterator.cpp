@@ -495,7 +495,7 @@ namespace krys::boo
         *firstGlyphData.Font, fontDescription.GetTextSpacingTrim(), charactersData);
       if (halfWidthFont)
       {
-        firstGlyphData.Font = WeakPtr<const Font>::WithRef(halfWidthFont.get());
+        firstGlyphData.Font = CreateWeakPtr(halfWidthFont.get());
       }
     }
     advanceInternalState.UpdateFont(firstGlyphData.Font ? firstGlyphData.Font.get() : primaryFont.get());
@@ -541,7 +541,7 @@ namespace krys::boo
           *glyphData.Font, fontDescription.GetTextSpacingTrim(), charactersData);
         if (halfWidthFont)
         {
-          glyphData.Font = WeakPtr<const Font>::WithRef(halfWidthFont.get());
+          glyphData.Font = CreateWeakPtr(halfWidthFont.get());
         }
       }
       advanceInternalState.UpdateFont(glyphData.Font ? glyphData.Font.get() : primaryFont.get());

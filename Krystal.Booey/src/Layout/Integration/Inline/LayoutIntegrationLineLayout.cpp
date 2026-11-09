@@ -128,8 +128,7 @@ namespace krys::boo::layout_integration
         if (auto *renderInline = DynamicDowncast<RenderInline>(renderer))
         {
           auto &style = renderInline->Style();
-          return style.GetWritingMode().IsBidiRTL()
-                 || (style.RtlOrdering() == Order::Logical && style.GetUnicodeBidi() != UnicodeBidi::Normal);
+          return style.GetWritingMode().IsBidiRTL() || style.GetUnicodeBidi() != UnicodeBidi::Normal;
         }
         return false;
       };
@@ -374,7 +373,7 @@ namespace krys::boo::layout_integration
   LineLayout::LineLayout(RenderBlockFlow &flow) noexcept
       : _rootLayoutBox(ShareCheckedPtr(BoxTreeUpdater {flow}.Build().get())),
         _document(ShareCheckedPtr(&flow.GetDocument())),
-        _layoutState(WeakPtr<layout::LayoutState>::WithRef(flow.View().GetLayoutState())),
+        _layoutState(CreateWeakPtr(&flow.View().GetLayoutState())),
         _blockFormattingState(GetLayoutState().EnsureBlockFormattingState(RootLayoutBox())),
         _inlineContentCache(GetLayoutState().GetInlineContentCache(RootLayoutBox())),
         _boxGeometryUpdater(flow.View().GetLayoutState(), RootLayoutBox())
@@ -1736,10 +1735,26 @@ namespace krys::boo::layout_integration
 
     auto &layoutBox = *renderInline.LayoutBox();
 
+    // Blocks that follow each other in the inline box are one piece of it.
     List<FloatRect> result;
+    Maybe<size_t> previousBlockLine;
     _inlineContent->TraverseNonRootInlineBoxes(
-      layoutBox, [&](const inline_display::Box &inlineBox)
-      { result.push_back(inlineBox.VisualRectIgnoringBlockDirection()); });
+      layoutBox,
+      [&](const inline_display::Box &inlineBox)
+      {
+        auto rect = inlineBox.VisualRectIgnoringBlockDirection();
+        const auto lineIndex = inlineBox.LineIndex();
+        const bool isBlockLine = _inlineContent->DisplayContent().LineList[lineIndex].HasBlockLevelBox();
+        if (isBlockLine && previousBlockLine && *previousBlockLine + 1 == lineIndex)
+        {
+          result.back().Unite(rect);
+        }
+        else
+        {
+          result.push_back(rect);
+        }
+        previousBlockLine = isBlockLine ? Maybe<size_t> {lineIndex} : null;
+      });
 
     return result;
   }

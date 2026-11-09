@@ -10,9 +10,8 @@ namespace krys::boo::html
 namespace krys::boo
 {
   /// @brief The renderer of `<input type=file>`. Each RenderFileUploadControl contains a RenderButton (for
-  /// opening the file chooser), and sufficient space to draw a file icon and filename. The RenderButton has a
-  /// shadow node associated with it to receive click/hover events.
-  // FIXME: The file icon (the input's `icon()`), with the host's file icons.
+  /// opening the file chooser), and sufficient space to draw the files' names; there's no file icon, as in
+  /// Chrome. The RenderButton has a shadow node associated with it to receive click/hover events.
   class RenderFileUploadControl final : public RenderBlockFlow
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderFileUploadControl);

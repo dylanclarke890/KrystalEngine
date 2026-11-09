@@ -34,12 +34,13 @@ namespace krys::boo
     SpellingError,
     TargetText,
     Checkmark,
+    PickerIcon,
 
-    HighestEnumValue = Checkmark
+    HighestEnumValue = PickerIcon
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PseudoElementType, 12uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PseudoElementType, 13uz);
 
 namespace krys::boo
 {
@@ -48,6 +49,7 @@ namespace krys::boo
     PseudoElementType::Highlight,     PseudoElementType::Marker,      PseudoElementType::Before,
     PseudoElementType::After,         PseudoElementType::Selection,   PseudoElementType::Backdrop,
     PseudoElementType::SpellingError, PseudoElementType::TargetText,  PseudoElementType::Checkmark,
+    PseudoElementType::PickerIcon,
   };
 
   constexpr EnumSet<PseudoElementType> AllPseudoElementTypes = AllPublicPseudoElementTypes;
@@ -733,12 +735,6 @@ namespace krys::boo
 
   TextStream &operator<<(TextStream &ts, ImageRendering imageRendering) noexcept;
 
-  enum class Order : bool
-  {
-    Logical,
-    Visual
-  };
-
   enum class RubyPosition : uint8
   {
     Over,
@@ -1041,13 +1037,6 @@ namespace krys::boo
   {
     None,
     NonScalingStroke
-  };
-
-  enum class BufferedRendering : uint8
-  {
-    Auto,
-    Dynamic,
-    Static
   };
 
   enum class MaskType : uint8

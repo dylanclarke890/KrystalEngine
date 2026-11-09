@@ -34,8 +34,7 @@ namespace krys::editor
     int32 _frameRequest {0};
 
   public:
-    explicit PageAnimations(boo::dom::Document &document) noexcept
-        : _document(WeakPtr<boo::dom::Document>::WithRef(document))
+    explicit PageAnimations(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       auto ball = document.GetElementById(u8"anim-ball");
       if (!ball)

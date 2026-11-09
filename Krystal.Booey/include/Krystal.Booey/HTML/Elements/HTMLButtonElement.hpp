@@ -147,6 +147,13 @@ namespace krys::boo::html
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
 
   private:
+    void OnInsert() noexcept override;
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
+    /// @brief Computes the type again, which in the Auto state depends on the parent.
+    void UpdateTypeForParent() noexcept;
+
     void ComputeType(dom::DOMStringView typeAttributeValue) noexcept;
 
     /// @brief Fires `command` at the button's `commandfor` element, which then carries out a built-in command

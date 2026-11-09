@@ -108,7 +108,6 @@ namespace krys::boo
       return;
     }
     _enabled = enabled;
-    // FIXME: The theme's and the scrollbars controller's enabled state, once there are any.
     Invalidate();
   }
 
@@ -119,8 +118,8 @@ namespace krys::boo
 
   bool Scrollbar::ShouldParticipateInHitTesting() const noexcept
   {
-    // Non-overlay scrollbars should always participate in hit testing.
-    // FIXME: Ask the scrollbars controller about overlay scrollbars, once there is one.
+    // Classic scrollbars always take part; overlay scrollbars do too, even faded out, as WebKit's do, so the
+    // mouse finds them where they show.
     return true;
   }
 
@@ -407,6 +406,7 @@ namespace krys::boo
 
   bool Scrollbar::MouseUp(const PlatformMouseEvent &event) noexcept
   {
+    bool wasPressed = _pressedPart != NoPart;
     SetPressedPart(NoPart);
     _pressedPos = 0;
     _draggingDocument = false;
@@ -423,7 +423,10 @@ namespace krys::boo
       scrollableArea.MouseExitedScrollbar(this);
     }
 
-    // FIXME: Snapping after moving the thumb (doPostThumbMoveSnapping), once there's scroll snapping.
+    if (wasPressed)
+    {
+      scrollableArea.DoPostThumbMoveSnapping(_orientation);
+    }
     return true;
   }
 
@@ -476,6 +479,10 @@ namespace krys::boo
 
   void Scrollbar::InvalidateRect(const IntRect &rect) noexcept
   {
+    if (SuppressInvalidation())
+    {
+      return;
+    }
     GetScrollableArea().InvalidateScrollbar(*this, rect);
   }
 

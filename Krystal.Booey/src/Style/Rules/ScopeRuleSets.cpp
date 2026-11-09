@@ -414,16 +414,19 @@ namespace krys::boo::style
         {
           return;
         }
-        for (auto &query : ruleSet->ContainerQueryRules())
+        for (auto &rule : ruleSet->ContainerQueryRules())
         {
-          css::mq::TraverseFeatures(query->ContainerQuery().Condition,
-                                    [&](const css::mq::Feature &containerFeature)
-                                    {
-                                      if (css::IsCustomPropertyName(containerFeature.Name.View()))
+          for (const auto &query : rule->ContainerQueries())
+          {
+            css::mq::TraverseFeatures(query.Condition,
+                                      [&](const css::mq::Feature &containerFeature)
                                       {
-                                        propertyNames.insert(containerFeature.Name);
-                                      }
-                                    });
+                                        if (css::IsCustomPropertyName(containerFeature.Name.View()))
+                                        {
+                                          propertyNames.insert(containerFeature.Name);
+                                        }
+                                      });
+          }
         }
       };
 

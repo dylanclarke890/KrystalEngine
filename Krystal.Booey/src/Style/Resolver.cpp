@@ -35,8 +35,8 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::style
 {
@@ -130,7 +130,7 @@ namespace krys::boo::style
   }
 
   Resolver::Resolver(dom::Document &document, ScopeType scopeType) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document)), _scopeType(scopeType), _ruleSets(*this),
+      : _document(CreateWeakPtr(&document)), _scopeType(scopeType), _ruleSets(*this),
         _matchedDeclarationsCache(*this)
   {
     // FIXME: Settings: authorAndUserStylesEnabled (on by default).
@@ -213,13 +213,13 @@ namespace krys::boo::style
   void Resolver::AddUserAgentKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept
   {
     const auto animationName = rule->Name();
-    UserAgentKeyframes().insert_or_assign(animationName, RefPtr<css::KeyframesRule> {krys::move(rule)});
+    UserAgentKeyframes().insert_or_assign(animationName, krys::move(rule));
   }
 
   void Resolver::AddKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept
   {
     const auto animationName = rule->Name();
-    _keyframesRuleMap.insert_or_assign(animationName, RefPtr<css::KeyframesRule> {krys::move(rule)});
+    _keyframesRuleMap.insert_or_assign(animationName, krys::move(rule));
     Document().KeyframesRuleDidChange(css::CSSOMString(animationName.View()));
   }
 

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorLayers.hpp"
+#include "Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorMix.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ContrastColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/DynamicRangeLimit.hpp"
@@ -542,5 +543,74 @@ namespace krys::boo::css::tests
 
     DynamicRangeLimit moved = krys::move(a);
     CHECK(moved == b);
+  }
+
+  TEST_CASE("color-layers(): blend modes", "[CSS][Color][ColorLayers]")
+  {
+    auto blend = [](BlendMode mode, boo::Color source, boo::Color backdrop)
+    {
+      List<boo::Color> colors {source, backdrop};
+      auto color = BlendSourceOver(ColorLayersResolver {.BlendMode = mode, .Colors = colors});
+      return color.ToColorTypeLossy<SRGBA<uint8>>();
+    };
+    auto rgba = [](uint8 r, uint8 g, uint8 b, uint8 a = 255)
+    {
+      return SRGBA<uint8> {r, g, b, a};
+    };
+    auto color = [&](uint8 r, uint8 g, uint8 b, uint8 a = 255)
+    {
+      return boo::Color(rgba(r, g, b, a));
+    };
+
+    SECTION("separable")
+    {
+      CHECK(blend(BlendMode::Multiply, color(255, 0, 0), color(0, 255, 0)) == rgba(0, 0, 0));
+      CHECK(blend(BlendMode::Screen, color(255, 0, 0), color(0, 255, 0)) == rgba(255, 255, 0));
+      CHECK(blend(BlendMode::Darken, color(200, 10, 90), color(100, 50, 90)) == rgba(100, 10, 90));
+      CHECK(blend(BlendMode::Lighten, color(200, 10, 90), color(100, 50, 90)) == rgba(200, 50, 90));
+      CHECK(blend(BlendMode::Difference, color(255, 255, 255), color(100, 0, 255)) == rgba(155, 255, 0));
+      CHECK(blend(BlendMode::Exclusion, color(255, 0, 255), color(255, 255, 0)) == rgba(0, 255, 255));
+      CHECK(blend(BlendMode::Overlay, color(255, 255, 255), color(0, 255, 0)) == rgba(0, 255, 0));
+      CHECK(blend(BlendMode::HardLight, color(255, 0, 255), color(0, 255, 0)) == rgba(255, 0, 255));
+      CHECK(blend(BlendMode::ColorDodge, color(0, 0, 255), color(0, 128, 128)) == rgba(0, 128, 255));
+      CHECK(blend(BlendMode::ColorBurn, color(255, 255, 0), color(255, 128, 128)) == rgba(255, 128, 0));
+      CHECK(blend(BlendMode::SoftLight, color(128, 128, 128), color(100, 200, 50)) == rgba(100, 200, 50));
+    }
+
+    SECTION("non-separable")
+    {
+      // Red takes the luminosity of 128 grey, about 0.502, by adding 0.202 and clipping the result to 1,
+      // which moves green and blue from 0.202 to 0.502 - 0.3 x 0.7115 = 0.2885.
+      CHECK(blend(BlendMode::Color, color(255, 0, 0), color(128, 128, 128)) == rgba(255, 74, 74));
+      CHECK(blend(BlendMode::Luminosity, color(255, 255, 255), color(0, 0, 255)) == rgba(255, 255, 255));
+      // A grey has no hue or saturation to give.
+      auto saturation = blend(BlendMode::Saturation, color(128, 128, 128), color(200, 100, 100)).Resolved();
+      CHECK(saturation.Red == saturation.Green);
+      CHECK(saturation.Blue == saturation.Green);
+      auto hue = blend(BlendMode::Hue, color(0, 0, 255), color(128, 128, 128)).Resolved();
+      CHECK(hue.Red == hue.Green);
+      CHECK(hue.Blue == hue.Green);
+    }
+
+    SECTION("with alpha")
+    {
+      // The blend shows as far as the source is opaque, the source as far as the backdrop isn't.
+      CHECK(blend(BlendMode::Multiply, color(255, 0, 0, 128), color(255, 255, 255)) == rgba(255, 127, 127));
+      CHECK(blend(BlendMode::Multiply, color(255, 0, 0, 128), color(0, 0, 0, 0)) == rgba(255, 0, 0, 128));
+      CHECK(blend(BlendMode::Multiply, color(0, 0, 0, 0), color(0, 255, 0)) == rgba(0, 255, 0));
+      CHECK(blend(BlendMode::Multiply, color(0, 0, 0, 0), color(0, 0, 0, 0)) == rgba(0, 0, 0, 0));
+    }
+
+    SECTION("an opaque colour hides what's beneath it only in normal blending")
+    {
+      auto layers = [&](BlendMode mode)
+      {
+        List<boo::Color> colors {color(255, 255, 255), color(255, 0, 0), color(0, 255, 0)};
+        return BlendSourceOver(ColorLayersResolver {.BlendMode = mode, .Colors = colors})
+          .ToColorTypeLossy<SRGBA<uint8>>();
+      };
+      CHECK(layers(BlendMode::Normal) == rgba(255, 255, 255));
+      CHECK(layers(BlendMode::Multiply) == rgba(0, 0, 0));
+    }
   }
 }

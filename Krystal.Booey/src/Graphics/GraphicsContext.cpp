@@ -544,6 +544,34 @@ namespace krys::boo
     return FloatRect(origin, FloatSize(rect.Width(), thickness));
   }
 
+  auto GraphicsContext::DashPatternForStrokeLength(float length, float thickness, bool closedPath) noexcept
+    -> Maybe<DashPattern>
+  {
+    const float dash = thickness * (thickness >= 3 ? 2.0f : 3.0f);
+    const float gap = thickness * (thickness >= 3 ? 1.0f : 2.0f);
+    if (length <= dash * 2)
+    {
+      return null;
+    }
+
+    // Exactly two dashes, sized in proportion.
+    const float twoDashes = 2 * dash + gap + (closedPath ? gap : 0);
+    if (length <= twoDashes)
+    {
+      const float scale = length / twoDashes;
+      return DashPattern {dash * scale, gap * scale};
+    }
+
+    // Whichever number of dashes needs the gap changed the least.
+    const float available = closedPath ? length : length + gap;
+    const float fewerDashes = std::floor(available / (dash + gap));
+    const float moreDashes = fewerDashes + 1;
+    const float gapWithFewer = (length - fewerDashes * dash) / (closedPath ? fewerDashes : fewerDashes - 1);
+    const float gapWithMore = (length - moreDashes * dash) / (closedPath ? moreDashes : moreDashes - 1);
+    const bool useFewer = gapWithMore <= 0 || std::abs(gapWithFewer - gap) < std::abs(gapWithMore - gap);
+    return DashPattern {dash, useFewer ? gapWithFewer : gapWithMore};
+  }
+
   float GraphicsContext::DashedLineCornerWidthForStrokeWidth(float strokeWidth) const noexcept
   {
     float thickness = StrokeThickness();

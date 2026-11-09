@@ -22,8 +22,7 @@ namespace krys::boo::inline_iterator
     LineBoxIteratorModernPath() noexcept = default;
     LineBoxIteratorModernPath(const layout_integration::InlineContent &inlineContent,
                               size_t lineIndex) noexcept
-        : _inlineContent(WeakPtr<const layout_integration::InlineContent>::WithRef(inlineContent)),
-          _lineIndex(lineIndex)
+        : _inlineContent(CreateWeakPtr(&inlineContent)), _lineIndex(lineIndex)
     {
       krys_debug_assert(lineIndex <= Lines().size());
     }

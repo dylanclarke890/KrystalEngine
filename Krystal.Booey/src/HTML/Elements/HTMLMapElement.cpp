@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
@@ -81,4 +82,25 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  void HTMLMapElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                          Maybe<dom::DOMStringView> value,
+                                          dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+
+    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"id" || localName == u8"name")
+        && oldValue != value && (IsConnected() || IsInShadowTree()))
+    {
+      auto &scope = TreeScope();
+      if (oldValue && !oldValue->empty())
+      {
+        scope.RemoveImageMap(dom::DOMStringAtom(*oldValue), *this);
+      }
+      if (value && !value->empty())
+      {
+        scope.AddImageMap(dom::DOMStringAtom(*value), *this);
+      }
+    }
+  }
 }

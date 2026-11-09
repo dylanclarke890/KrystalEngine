@@ -114,6 +114,20 @@ namespace krys::boo
       PointerEventForMouseEvent(const dom::MouseEvent &mouseEvent, PointerID pointerId,
                                 const dom::DOMString &pointerType) noexcept;
 
+    /// @brief Dispatches `pointerrawupdate` for @p mouseEvent, which moved the pointer, at @p target, if
+    /// anything in its document listens for it.
+    /// @see https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
+    void DispatchPointerRawUpdateForMouseEvent(const dom::MouseEvent &mouseEvent, PointerID pointerId,
+                                               const dom::DOMString &pointerType,
+                                               dom::Element &target) noexcept;
+
+    /// @brief Keeps the pointer's state without an event, if @p mouseEvent is a `mousemove` and nothing in
+    /// @p target's document listens for `pointermove`.
+    /// @return Whether it did, so there's no `pointermove` to create.
+    KRYS_NODISCARD bool SkipPointerMoveForMouseEvent(const dom::MouseEvent &mouseEvent, PointerID pointerId,
+                                                     const dom::DOMString &pointerType,
+                                                     dom::Element &target) noexcept;
+
     /// @brief Dispatches the pointer events for the touch at @p index in @p event at @p target: `pointerover`
     /// and `pointerenter` before a `pointerdown`, the boundary events if a move changed the target, and
     /// `pointerout` and `pointerleave` after a `pointerup`.
@@ -140,7 +154,14 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD RefPtr<CapturingData> CapturingDataFor(PointerID pointerId) const noexcept;
+    Ref<CapturingData> EnsureCapturingData(PointerID pointerId, const dom::DOMString &pointerType) noexcept;
     Ref<CapturingData> EnsureCapturingDataForPointerEvent(const dom::PointerEvent &event) noexcept;
+    KRYS_NODISCARD bool HasActiveTouch() const noexcept;
+    KRYS_NODISCARD MouseButton ButtonForMouseEvent(const dom::MouseEvent &mouseEvent,
+                                                   PointerID pointerId) const noexcept;
+    /// @brief What dispatching a `pointermove` at an element of @p document would do to the pointer's state.
+    void PointerMoveWasSkipped(CapturingData &capturingData, dom::Document &document,
+                               bool isPrimary) noexcept;
     void PointerEventWillBeDispatched(const dom::PointerEvent &event, dom::EventTarget *target) noexcept;
     void PointerEventWasDispatched(const dom::PointerEvent &event) noexcept;
 

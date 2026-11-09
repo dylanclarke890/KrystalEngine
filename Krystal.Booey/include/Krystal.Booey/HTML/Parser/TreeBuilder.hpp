@@ -495,6 +495,10 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#insert-a-comment
     void InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> location = null) noexcept;
 
+    /// @see https://html.spec.whatwg.org/#insert-a-processing-instruction
+    void InsertProcessingInstruction(const TokenAtom &token,
+                                     Maybe<InsertionLocation> location = null) noexcept;
+
     /// @see https://html.spec.whatwg.org/#insert-a-character
     void AppendCommentToDocument(dom::DOMStringView data) noexcept;
 

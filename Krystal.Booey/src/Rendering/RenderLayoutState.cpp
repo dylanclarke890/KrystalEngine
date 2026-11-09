@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 
 namespace krys::boo
@@ -45,8 +46,14 @@ namespace krys::boo
     // FIXME: Fixed positioned boxes start from the view's absolute position (localToAbsolute).
     _paintOffset = ancestor.PaintOffset() + offset;
 
-    // FIXME: Out-of-flow boxes inside an in-flow positioned inline move with it
-    // (offsetForInFlowPositionedInline).
+    if (renderer.IsOutOfFlowPositioned() && !renderer.IsFixedPositioned())
+    {
+      if (auto *container = DynamicDowncast<RenderInline>(renderer.Container());
+          container && container->IsInFlowPositioned())
+      {
+        _paintOffset += container->OffsetForInFlowPositionedInline(&renderer);
+      }
+    }
 
     _layoutOffset = _paintOffset;
 

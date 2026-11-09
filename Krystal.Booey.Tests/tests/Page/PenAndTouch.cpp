@@ -82,7 +82,7 @@ namespace krys::boo::tests
     {
       List<std::string> Records;
 
-      TouchFixture() noexcept
+      explicit TouchFixture(bool recordPointerMoves = true) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0}div{width:100px;height:50px}</style>"
                          u8"<div id=a></div><div id=b></div>",
                          {200, 100}, true)
@@ -96,7 +96,10 @@ namespace krys::boo::tests
               u8"lostpointercapture", u8"touchstart", u8"touchmove", u8"touchend", u8"touchcancel",
               u8"mousedown", u8"mousemove", u8"mouseup", u8"click"})
         {
-          Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+          if (recordPointerMoves || type != utf8_stringview(u8"pointermove"))
+          {
+            Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+          }
         }
       }
 
@@ -204,8 +207,15 @@ namespace krys::boo::tests
 
       // The touch is captured implicitly, before its next pointer event, and keeps its target as it moves
       // onto b.
+      fixture.On(a, u8"pointerrawupdate",
+                 [&](dom::Event &event)
+                 {
+                   CHECK_FALSE(event.Cancelable());
+                   fixture.Records.push_back("raw:a");
+                 });
       (void)fixture.Touch(Type::TouchMove, {TouchFixture::Point(0, State::TouchMoved, 10, 70)});
-      CHECK(fixture.Take() == Strings {"gotpointercapture3:a", "pointermove3:a", "touchmove[1,1,1]:a"});
+      CHECK(fixture.Take()
+            == Strings {"gotpointercapture3:a", "raw:a", "pointermove3:a", "touchmove[1,1,1]:a"});
       CHECK(a.HasPointerCapture(3));
 
       (void)fixture.Touch(Type::TouchEnd, {TouchFixture::Point(0, State::TouchReleased, 10, 70)});
@@ -260,9 +270,16 @@ namespace krys::boo::tests
                  [&](dom::Event &event) { aPrimary = Downcast<dom::PointerEvent>(event).GetIsPrimary(); });
       fixture.On(b, u8"pointermove",
                  [&](dom::Event &event) { bPrimary = Downcast<dom::PointerEvent>(event).GetIsPrimary(); });
-      // A stationary touch has a pointermove, but isn't among the changed touches.
+      uint32 aRawUpdates = 0;
+      uint32 bRawUpdates = 0;
+      fixture.On(a, u8"pointerrawupdate", [&](dom::Event &) { ++aRawUpdates; });
+      fixture.On(b, u8"pointerrawupdate", [&](dom::Event &) { ++bRawUpdates; });
+      // A stationary touch has a pointermove, but isn't among the changed touches, and has no
+      // pointerrawupdate.
       (void)fixture.Touch(Type::TouchMove, {TouchFixture::Point(0, State::TouchStationary, 10, 10),
                                             TouchFixture::Point(1, State::TouchMoved, 20, 70)});
+      CHECK(aRawUpdates == 0);
+      CHECK(bRawUpdates == 1);
       CHECK(fixture.Take()
             == Strings {"gotpointercapture3:a", "pointermove3:a", "gotpointercapture4:b", "pointermove4:b",
                         "touchmove[2,1,1]:b"});
@@ -318,6 +335,90 @@ namespace krys::boo::tests
         CHECK_FALSE(record.starts_with("mouse"));
         CHECK_FALSE(record.starts_with("click"));
       }
+    }
+  }
+
+  TEST_CASE("EventHandler: touch moves with no pointermove listener", "[Page][TouchEvent]")
+  {
+    TouchFixture fixture(false);
+    auto &a = fixture.ById(u8"a");
+
+    (void)fixture.Touch(Type::TouchStart, {TouchFixture::Point(0, State::TouchPressed, 10, 10)});
+    (void)fixture.Take();
+
+    // The implicit capture still applies, as the move would have applied it.
+    (void)fixture.Touch(Type::TouchMove, {TouchFixture::Point(0, State::TouchMoved, 10, 70)});
+    CHECK(fixture.Take() == Strings {"gotpointercapture3:a", "touchmove[1,1,1]:a"});
+    CHECK(a.HasPointerCapture(3));
+
+    (void)fixture.Touch(Type::TouchEnd, {TouchFixture::Point(0, State::TouchReleased, 10, 70)});
+    auto records = fixture.Take();
+    REQUIRE_FALSE(records.empty());
+    CHECK(records[0] == "pointerup3:a");
+  }
+
+  TEST_CASE("EventHandler: touches in a document with no touch or pointer listener", "[Page][TouchEvent]")
+  {
+    PaintFixture fixture(u8"<!DOCTYPE html><style>body{margin:0}div{width:100px;height:50px}</style>"
+                         u8"<div id=a></div>",
+                         {200, 100}, true);
+    (void)fixture.Document->UpdateLayout();
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto touch = [&](Type type, State state)
+    {
+      PlatformTouchEvent event(type, {TouchFixture::Point(0, state, 10, 10)}, {}, MonotonicTime::Now());
+      return handler.HandleTouchEvent(event);
+    };
+    int calls = 0;
+    auto listen = [&](dom::EventTarget &target, utf8_stringview type)
+    {
+      auto action = [&calls](dom::Event &)
+      {
+        ++calls;
+      };
+      Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<decltype(action)>>(action);
+      target.AddEventListener(dom::DOMStringAtom(type), krys::move(listener), false);
+    };
+
+    SECTION("nothing is dispatched, and the press still activates what it hits")
+    {
+      CHECK_FALSE(fixture.Document->HasTouchRelatedListener());
+      CHECK_FALSE(touch(Type::TouchStart, State::TouchPressed));
+      CHECK(fixture.ById(u8"a").Matches(u8":active").ReleaseValue());
+      CHECK_FALSE(touch(Type::TouchEnd, State::TouchReleased));
+      CHECK_FALSE(fixture.ById(u8"a").Matches(u8":active").ReleaseValue());
+    }
+
+    SECTION("a touch that began before the first listener isn't dispatched to it")
+    {
+      CHECK_FALSE(touch(Type::TouchStart, State::TouchPressed));
+      listen(fixture.ById(u8"a"), u8"touchend");
+      CHECK_FALSE(touch(Type::TouchEnd, State::TouchReleased));
+      CHECK(calls == 0);
+
+      // The next one is.
+      (void)touch(Type::TouchStart, State::TouchPressed);
+      (void)touch(Type::TouchEnd, State::TouchReleased);
+      CHECK(calls == 1);
+    }
+
+    SECTION("a pointer listener is enough")
+    {
+      listen(fixture.ById(u8"a"), u8"pointerdown");
+      CHECK(fixture.Document->HasTouchRelatedListener());
+      (void)touch(Type::TouchStart, State::TouchPressed);
+      CHECK(calls == 1);
+      (void)touch(Type::TouchEnd, State::TouchReleased);
+    }
+
+    SECTION("a listener on the window is enough")
+    {
+      REQUIRE(fixture.Document->DefaultView());
+      listen(*fixture.Document->DefaultView(), u8"touchstart");
+      CHECK(fixture.Document->HasTouchRelatedListener());
+      (void)touch(Type::TouchStart, State::TouchPressed);
+      CHECK(calls == 1);
+      (void)touch(Type::TouchEnd, State::TouchReleased);
     }
   }
 

@@ -51,9 +51,10 @@ namespace krys::boo::style
 
   Builder::Builder(RenderStyle &style, BuilderContext &&context, const MatchResult &matchResult,
                    PropertyCascade::IncludedProperties &&includedProperties,
-                   const HashSet<AnimatableCSSProperty> *animatedProperties) noexcept
+                   const HashSet<AnimatableCSSProperty> *animatedProperties,
+                   const HashSet<AnimatableCSSProperty> *transitioningProperties) noexcept
       : _cascade(matchResult, krys::move(includedProperties), animatedProperties,
-                 PositionTryFallbackProperties(context)),
+                 PositionTryFallbackProperties(context), transitioningProperties),
         _state(CreateUnique<BuilderState>(style, krys::move(context)))
   {
   }
@@ -452,7 +453,7 @@ namespace krys::boo::style
     {
       if (registeredCustomProperty && registeredCustomProperty->InitialValue)
       {
-        applyValue(Ref<const CustomProperty> {registeredCustomProperty->InitialValue});
+        applyValue(registeredCustomProperty->InitialValue);
         return;
       }
       applyValue(CustomProperty::CreateForGuaranteedInvalid(name));
@@ -563,8 +564,10 @@ namespace krys::boo::style
       return ShareRef(value);
     }
 
-    const auto *result =
-      _state->Style().Appearance() == StyleAppearance::Base ? functionValue->Item(1) : functionValue->Item(0);
+    const auto *result = _state->Style().Appearance() == StyleAppearance::Base
+                             || _state->Style().Appearance() == StyleAppearance::BaseSelect
+                           ? functionValue->Item(1)
+                           : functionValue->Item(0);
 
     if (!result)
     {

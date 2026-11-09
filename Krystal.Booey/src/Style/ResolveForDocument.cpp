@@ -19,8 +19,6 @@ namespace krys::boo::style
     auto documentStyle = RenderStyle::Create();
 
     documentStyle.SetDisplay(DisplayType::Block);
-    // FIXME: Visually ordered documents (legacy encodings) set `Order::Visual`; there are no encodings.
-    documentStyle.SetRTLOrdering(boo::Order::Logical);
     if (auto *frame = document.Frame())
     {
       documentStyle.SetZoom(!document.Printing() ? frame->PageZoomFactor() : 1);
@@ -28,8 +26,7 @@ namespace krys::boo::style
     }
 
     // This overrides any -webkit-user-modify inherited from the parent iframe.
-    // FIXME: Documents in design mode are `read-write`; there's no design mode.
-    documentStyle.SetUserModify(UserModify::ReadOnly);
+    documentStyle.SetUserModify(document.InDesignMode() ? UserModify::ReadWrite : UserModify::ReadOnly);
 
     Adjuster::AdjustEventListenerRegionTypesForRootStyle(documentStyle, document);
 

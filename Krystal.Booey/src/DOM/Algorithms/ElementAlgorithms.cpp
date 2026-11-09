@@ -159,6 +159,8 @@ namespace krys::boo::dom
                                                  Maybe<DOMStringView> oldValue,
                                                  Maybe<DOMStringView> newValue) noexcept
   {
+    element.InvalidateLiveCollectionCachesForAttribute(attribute.LocalName());
+
     // 1. Queue a mutation record of "attributes" for element with attribute's local name, attribute's
     //    namespace, oldValue, « », « », null, and null.
     MutationObserverAlgorithms::QueueMutationRecord(
@@ -179,6 +181,9 @@ namespace krys::boo::dom
     //    attribute's namespace.
     ExtensibilityHooks::ElementAttributeChanged(element, attribute.LocalName(), oldValue, newValue,
                                                 attribute.NamespaceURI());
+
+    // Again, as the steps update what filters read, such as an input's type, and could have read them.
+    element.InvalidateLiveCollectionCachesForAttribute(attribute.LocalName());
   }
 
   void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString value) noexcept

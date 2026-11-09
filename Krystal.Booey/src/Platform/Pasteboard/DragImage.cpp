@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
-#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Page/FrameSnapshotting.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 
@@ -204,13 +205,14 @@ namespace krys::boo
     constexpr float DragLinkLabelFontsize = 11;
     constexpr float DragLinkUrlFontSize = 10;
 
-    /// @brief The system's small caption font at @p size.
-    KRYS_NODISCARD FontCascade DragLabelFont(float size, bool bold) noexcept
+    /// @brief @p settings's small caption font at @p size.
+    KRYS_NODISCARD FontCascade DragLabelFont(const Settings &settings, float size, bool bold) noexcept
     {
       FontCascadeDescription description;
       description.SetWeight(bold ? BoldWeightValue() : NormalWeightValue());
-      description.SetOneFamily(SystemFontDatabase::Singleton().SystemFontShorthandFamily(
-        SystemFontDatabase::FontShorthand::SmallCaption));
+      const auto &family = settings.Values.SystemFonts[SystemFontKeyword::SmallCaption].Family;
+      description.SetOneFamily(family == StringAtom::Null() ? css::GenericFontFamilyNames::StandardFamily()
+                                                            : family);
       description.SetSpecifiedSize(size);
       description.SetComputedSize(size);
       FontCascade result(krys::move(description));
@@ -241,10 +243,12 @@ namespace krys::boo
     }
   }
 
-  DragImageData CreateDragImageForLink(dom::Element &, url::URL &url, utf8_stringview inLabel, float) noexcept
+  DragImageData CreateDragImageForLink(dom::Element &element, url::URL &url, utf8_stringview inLabel,
+                                       float) noexcept
   {
-    const FontCascade labelFont = DragLabelFont(DragLinkLabelFontsize, true);
-    const FontCascade urlFont = DragLabelFont(DragLinkUrlFontSize, false);
+    const auto &settings = element.NodeDocument().GetSettings();
+    const FontCascade labelFont = DragLabelFont(settings, DragLinkLabelFontsize, true);
+    const FontCascade urlFont = DragLabelFont(settings, DragLinkUrlFontSize, false);
 
     bool drawURLString = true;
     bool clipURLString = false;

@@ -240,11 +240,10 @@ namespace krys::boo::style
     KRYS_NODISCARD const RenderStyle &
       ParentAfterChangeStyle(const Styleable &styleable,
                              const ResolutionContext &resolutionContext) const noexcept;
-    KRYS_NODISCARD HashSet<AnimatableCSSProperty>
-      ApplyCascadeAfterAnimation(RenderStyle &animatedStyle,
-                                 const AnimatableCSSPropertySet &animatedProperties, bool isTransition,
-                                 const MatchResult &matchResult, const dom::Element &element,
-                                 const ResolutionContext &resolutionContext) noexcept;
+    KRYS_NODISCARD HashSet<AnimatableCSSProperty> ApplyCascadeAfterAnimation(
+      RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties,
+      const AnimatableCSSPropertySet &transitioningProperties, const MatchResult &matchResult,
+      const dom::Element &element, const ResolutionContext &resolutionContext) noexcept;
 
     KRYS_NODISCARD Maybe<ElementUpdate>
       ResolvePseudoElement(dom::Element &element, const PseudoElementIdentifier &pseudoElementIdentifier,

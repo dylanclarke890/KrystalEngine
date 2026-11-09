@@ -11,10 +11,12 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
@@ -30,6 +32,7 @@
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -37,6 +40,7 @@
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
+#include "Krystal.UI/DataListSuggestionsOverlay.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
 #include "Krystal.UI/EditorClient.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
@@ -45,6 +49,7 @@
 #include "Krystal.UI/PathStrokerStrategy.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
 #include "Krystal.UI/SystemPasteboardStrategy.hpp"
+#include "Krystal.UI/ValidationMessageOverlay.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -64,6 +69,8 @@ namespace krys::ui
     GraphicsLayerFactoryTextureMapper _factory;
     GraphicsLayerTextureMapper *_rootLayer {nullptr};
     Func<void()> _focusRequestHandler;
+    Func<void(Ref<boo::FileChooser>)> _fileChooserHandler;
+    RefPtr<ValidationMessageOverlay> _validationMessage;
 
   public:
     void Focus() noexcept override
@@ -77,6 +84,56 @@ namespace krys::ui
     void SetFocusRequestHandler(Func<void()> &&handler) noexcept
     {
       _focusRequestHandler = krys::move(handler);
+    }
+
+    void RunOpenPanel(boo::LocalFrame &, boo::FileChooser &chooser) noexcept override
+    {
+      if (_fileChooserHandler)
+      {
+        _fileChooserHandler(ShareRef(chooser));
+        return;
+      }
+      chooser.Cancel();
+    }
+
+    void SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept
+    {
+      _fileChooserHandler = krys::move(handler);
+    }
+
+    void ShowValidationMessage(boo::dom::Element &anchor,
+                               const boo::dom::DOMString &message) noexcept override
+    {
+      if (!_view)
+      {
+        return;
+      }
+      if (!_validationMessage)
+      {
+        _validationMessage = CreateRef<ValidationMessageOverlay>(*_view);
+      }
+      _validationMessage->Show(anchor, message);
+    }
+
+    void HideValidationMessage(const boo::dom::Element &anchor) noexcept override
+    {
+      if (_validationMessage && _validationMessage->IsShownAt(anchor))
+      {
+        _validationMessage->Hide();
+      }
+    }
+
+    void HideAnyValidationMessage() noexcept override
+    {
+      if (_validationMessage)
+      {
+        _validationMessage->Hide();
+      }
+    }
+
+    KRYS_NODISCARD bool IsValidationMessageVisible(const boo::dom::Element &anchor) const noexcept override
+    {
+      return _validationMessage && _validationMessage->IsShownAt(anchor);
     }
 
     void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
@@ -122,6 +179,21 @@ namespace krys::ui
       return CreateRef<ColorChooserOverlay>(*_view, client, initialColor);
     }
 
+    KRYS_NODISCARD RefPtr<boo::DataListSuggestionPicker>
+      CreateDataListSuggestionPicker(boo::DataListSuggestionsClient &client) noexcept override
+    {
+      if (!_view)
+      {
+        return nullptr;
+      }
+      return CreateRef<DataListSuggestionsOverlay>(*_view, client);
+    }
+
+    KRYS_NODISCARD bool CanShowDataListSuggestionLabels() const noexcept override
+    {
+      return true;
+    }
+
     KRYS_NODISCARD RefPtr<boo::DateTimeChooser>
       CreateDateTimeChooser(boo::DateTimeChooserClient &client) noexcept override
     {
@@ -149,6 +221,10 @@ namespace krys::ui
 
     void SetView(View *view) noexcept
     {
+      if (auto validationMessage = std::exchange(_validationMessage, nullptr))
+      {
+        validationMessage->Detach();
+      }
       _view = view;
     }
 
@@ -203,6 +279,7 @@ namespace krys::ui
     View *_view {nullptr};
     Func<void(const NavigationRequest &)> _navigationHandler;
     Func<void(const LoadEvent &)> _loadHandler;
+    Func<void(const PageIcon &)> _iconHandler;
 
   public:
     void DispatchDidClearWindowObject() noexcept override
@@ -245,6 +322,34 @@ namespace krys::ui
     void SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept
     {
       _loadHandler = krys::move(handler);
+    }
+
+    void SetIconHandler(Func<void(const PageIcon &)> &&handler) noexcept
+    {
+      _iconHandler = krys::move(handler);
+    }
+
+    void GetLoadDecisionForIcons(Span<const boo::LinkIconLoadDecision> icons) noexcept override
+    {
+      RefPtr<boo::DocumentLoader> documentLoader =
+        _view ? ShareRefPtr(_view->_frame->Loader().GetDocumentLoader()) : nullptr;
+      if (!documentLoader)
+      {
+        return;
+      }
+      // Every icon loads for a handler; none without one.
+      for (const auto &decision : icons)
+      {
+        documentLoader->DidGetLoadDecisionForIcon(
+          !!_iconHandler, decision.Identifier,
+          [this, icon = decision.Icon](const boo::SharedBuffer *data)
+          {
+            if (data && _iconHandler)
+            {
+              _iconHandler({icon.URL.String(), utf8_string(icon.MIMEType), icon.Size, data->GetSpan()});
+            }
+          });
+      }
     }
 
     void Notify(const LoadEvent &event) const noexcept
@@ -459,6 +564,11 @@ namespace krys::ui
     _frameLoaderClient->SetLoadHandler(krys::move(handler));
   }
 
+  void View::SetIconHandler(Func<void(const PageIcon &)> &&handler) noexcept
+  {
+    _frameLoaderClient->SetIconHandler(krys::move(handler));
+  }
+
   void View::Reload() noexcept
   {
     _frame->Loader().Reload();
@@ -579,15 +689,16 @@ namespace krys::ui
 
     // The overlay's page shares the event loop, and updates with the page.
     bool overlayUpdated = false;
-    if (_overlay && _overlay->ContentView().GetPage().IsRenderingUpdateScheduled())
+    if (_overlay && _overlay->ContentView().GetPage().IsVisible()
+        && _overlay->ContentView().GetPage().IsRenderingUpdateScheduled())
     {
       _overlay->ContentView().UpdateRendering();
       overlayUpdated = true;
     }
 
-    // Each frame is a rendering opportunity.
+    // Each frame is a rendering opportunity, except for a hidden page, whose update waits until it's shown.
     bool updated = overlayUpdated;
-    if (_page->IsRenderingUpdateScheduled())
+    if (_page->IsVisible() && _page->IsRenderingUpdateScheduled())
     {
       _page->UpdateRendering();
       _needsPaint = true;
@@ -688,6 +799,12 @@ namespace krys::ui
         return;
       }
       _textureMapper = krys::move(*textureMapper);
+    }
+
+    // A render-blocked document isn't shown: the last frame stays until it's unblocked.
+    if (boo::html::RenderBlocking::IsRenderBlocked(Document()))
+    {
+      return;
     }
 
     // The rendering update runs in Update; painting only needs the layout and the layers up to date.
@@ -821,15 +938,19 @@ namespace krys::ui
       return;
     }
 
-    // While an overlay is open, the page doesn't see the mouse move.
+    // While a modal overlay is open, the page doesn't see the mouse move; it sees it outside one that isn't.
     if (_overlay)
     {
       auto &rect = _overlay->Rect();
       if (rect.Contains(point))
       {
         _overlay->MouseMoved(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()));
+        return;
       }
-      return;
+      if (_overlay->IsModal())
+      {
+        return;
+      }
     }
 
     // While a drag runs, the mouse moves it.
@@ -896,18 +1017,24 @@ namespace krys::ui
       return;
     }
 
-    // A press outside the overlay closes it, and goes no further.
+    // A press outside the overlay closes it, and goes no further unless the overlay isn't modal.
     if (_overlay)
     {
-      _buttons |= ButtonsBit(button);
-      _lastMousePosition = point;
-      if (!_overlay->Rect().Contains(point))
+      if (_overlay->Rect().Contains(point) || _overlay->IsModal())
       {
-        RefPtr<Overlay> overlay = _overlay;
-        overlay->Hide();
-        PerformMicrotaskCheckpoint();
+        _buttons |= ButtonsBit(button);
+        _lastMousePosition = point;
+        if (!_overlay->Rect().Contains(point))
+        {
+          RefPtr<Overlay> overlay = _overlay;
+          overlay->Hide();
+          PerformMicrotaskCheckpoint();
+        }
+        return;
       }
-      return;
+      RefPtr<Overlay> overlay = _overlay;
+      overlay->Hide();
+      PerformMicrotaskCheckpoint();
     }
 
     // Other buttons do nothing while a drag runs.
@@ -1001,6 +1128,24 @@ namespace krys::ui
     }
     bool handled = _frame->GetEventHandler().HandleWheelEvent(
       input::WheelEvent(point, notchesX, notchesY, modifiers, settings));
+    PerformMicrotaskCheckpoint();
+    return handled;
+  }
+
+  bool View::TouchpadPan(const boo::IntPoint &point, const pal::TouchpadPanInput &input) noexcept
+  {
+    if (_overlay)
+    {
+      // Overlays take the wheel's notches; the content moving down is the wheel turning away.
+      constexpr float pixelsPerNotch = 3 * boo::ScrollbarPixelsPerLine;
+      float notchesX = -input.DeltaX / pixelsPerNotch;
+      float notchesY = input.DeltaY / pixelsPerNotch;
+      auto &rect = _overlay->Rect();
+      return (notchesX || notchesY) && rect.Contains(point)
+             && _overlay->MouseWheel(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()), notchesX,
+                                     notchesY);
+    }
+    bool handled = _frame->GetEventHandler().HandleWheelEvent(input::TouchpadPanEvent(point, input));
     PerformMicrotaskCheckpoint();
     return handled;
   }
@@ -1200,6 +1345,10 @@ namespace krys::ui
         {
           // A touch stops the fling, and can't tap while it does.
           bool stoppedFling = std::exchange(_fling, null).has_value();
+          if (stoppedFling)
+          {
+            _frame->GetEventHandler().DidEndGestureScroll();
+          }
           ResetGesture();
           if (cancelled)
           {
@@ -1307,6 +1456,10 @@ namespace krys::ui
         {
           PanTo(position);
           StartFling();
+          if (!_fling)
+          {
+            _frame->GetEventHandler().DidEndGestureScroll();
+          }
         }
         ResetGesture();
         // A cancelled touchend stops the tap's mouse events, the click among them, and the long press's
@@ -1442,6 +1595,7 @@ namespace krys::ui
     if (!scrolled || std::hypot(velocity.Width(), velocity.Height()) < StopFlingVelocity)
     {
       _fling = null;
+      _frame->GetEventHandler().DidEndGestureScroll();
     }
   }
 
@@ -1575,6 +1729,58 @@ namespace krys::ui
     return input::ToCursorShape(_frame->GetEventHandler().CurrentMouseCursor());
   }
 
+  RefPtr<pal::CursorImage> View::CurrentCursorImage() const noexcept
+  {
+    if (_pointerLocked || _drag)
+    {
+      return nullptr;
+    }
+    auto cursor = _frame->GetEventHandler().CurrentMouseCursor();
+    auto *image = cursor.GetImage();
+    auto frame = image ? image->CurrentNativeImage() : nullptr;
+    auto *platformImage = frame ? frame->GetPlatformImage().get() : nullptr;
+    if (!platformImage || platformImage->Pixels().empty())
+    {
+      return nullptr;
+    }
+
+    // The hot spot is in the image's natural size; the cursor's pixels are the image's.
+    auto scale = cursor.ImageScaleFactor();
+    boo::IntPoint hotSpot(static_cast<int32>(cursor.HotSpot().X() * scale),
+                          static_cast<int32>(cursor.HotSpot().Y() * scale));
+    if (_cursorImage && _cursorImageFrame == frame && _cursorImageHotSpot == hotSpot)
+    {
+      return _cursorImage;
+    }
+
+    // The window takes straight alpha.
+    List<uint32> pixels(platformImage->Pixels().begin(), platformImage->Pixels().end());
+    if (platformImage->PremultipliedAlpha())
+    {
+      for (auto &pixel : pixels)
+      {
+        uint32 alpha = pixel >> 24;
+        if (!alpha || alpha == 255)
+        {
+          continue;
+        }
+        auto unpremultiply = [&](uint32 shift)
+        {
+          uint32 channel = (pixel >> shift) & 0xFF;
+          return std::min<uint32>(255, (channel * 255 + alpha / 2) / alpha) << shift;
+        };
+        pixel = (alpha << 24) | unpremultiply(16) | unpremultiply(8) | unpremultiply(0);
+      }
+    }
+    auto size = platformImage->Size();
+    _cursorImage =
+      CreateRef<pal::CursorImage>(static_cast<uint32>(size.Width()), static_cast<uint32>(size.Height()),
+                                  krys::move(pixels), hotSpot.X(), hotSpot.Y());
+    _cursorImageFrame = frame;
+    _cursorImageHotSpot = hotSpot;
+    return _cursorImage;
+  }
+
   void View::SetPointerLockHandler(Func<bool(bool)> &&handler) noexcept
   {
     _pointerLockHandler = krys::move(handler);
@@ -1623,8 +1829,8 @@ namespace krys::ui
       return true;
     }
 
-    // While an overlay is open, it takes the keys.
-    if (_overlay)
+    // While a modal overlay is open, it takes the keys.
+    if (_overlay && _overlay->IsModal())
     {
       RefPtr<Overlay> overlay = _overlay;
       bool handled = overlay->KeyPressed(key, modifiers);
@@ -1692,9 +1898,14 @@ namespace krys::ui
     return handled;
   }
 
+  bool View::HasModalOverlay() const noexcept
+  {
+    return _overlay && _overlay->IsModal();
+  }
+
   bool View::InsertText(const utf8_string &text) noexcept
   {
-    if (_overlay || text.empty())
+    if (HasModalOverlay() || text.empty())
     {
       return false;
     }
@@ -1706,7 +1917,7 @@ namespace krys::ui
   void View::SetComposition(const utf8_string &text, Span<const pal::CompositionClause> clauses,
                             uint32 caret) noexcept
   {
-    if (_overlay)
+    if (HasModalOverlay())
     {
       return;
     }
@@ -1717,7 +1928,7 @@ namespace krys::ui
 
   void View::ConfirmComposition(const utf8_string &text) noexcept
   {
-    if (_overlay)
+    if (HasModalOverlay())
     {
       return;
     }
@@ -1727,7 +1938,7 @@ namespace krys::ui
 
   bool View::AcceptsTextInput() const noexcept
   {
-    return !_overlay && _editorClient->AcceptsTextInput();
+    return !HasModalOverlay() && _editorClient->AcceptsTextInput();
   }
 
   Maybe<boo::IntRect> View::TextInputRect() noexcept
@@ -2069,6 +2280,16 @@ namespace krys::ui
     return _page->IsVisible();
   }
 
+  void View::SetFramesPerSecond(uint32 framesPerSecond) noexcept
+  {
+    _page->SetDisplayNominalFramesPerSecond(framesPerSecond);
+  }
+
+  void View::SetImageAnimationEnabled(bool enabled) noexcept
+  {
+    _page->SetImageAnimationEnabled(enabled);
+  }
+
   void View::SetNavigationHandler(Func<void(const NavigationRequest &)> &&handler) noexcept
   {
     _frameLoaderClient->SetNavigationHandler(krys::move(handler));
@@ -2077,6 +2298,11 @@ namespace krys::ui
   void View::SetFocusRequestHandler(Func<void()> &&handler) noexcept
   {
     _chromeClient->SetFocusRequestHandler(krys::move(handler));
+  }
+
+  void View::SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept
+  {
+    _chromeClient->SetFileChooserHandler(krys::move(handler));
   }
 
   namespace
@@ -2167,7 +2393,8 @@ namespace krys::ui
     }
     drag.Position = point;
     drag.Modifiers = modifiers;
-    boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(modifiers));
+    boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(modifiers),
+                       input::ToBooey(modifiers));
 
     auto size = ViewportSize();
     bool inView = point.X() >= 0 && point.Y() >= 0 && point.X() < size.Width() && point.Y() < size.Height();
@@ -2198,7 +2425,8 @@ namespace krys::ui
     EnumSet<boo::DragOperation> operation;
     if (drag.InView)
     {
-      boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(drag.Modifiers));
+      boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(drag.Modifiers),
+                         input::ToBooey(drag.Modifiers));
       if (drop && drag.Operation)
       {
         if (controller.PerformDragOperation(krys::move(data)))
@@ -2244,7 +2472,8 @@ namespace krys::ui
       case pal::DragAction::Moved:
       {
         drag.Position = point;
-        boo::DragData data(&drag.Data, point, point, operationMask, DragFlags(input.Modifiers));
+        boo::DragData data(&drag.Data, point, point, operationMask, DragFlags(input.Modifiers),
+                           input::ToBooey(input.Modifiers));
         if (inView)
         {
           drag.Operation = controller.DragEnteredOrUpdated(*_frame, krys::move(data));
@@ -2278,7 +2507,8 @@ namespace krys::ui
           return null;
         }
 
-        boo::DragData data(&dropped.Data, point, point, operationMask, DragFlags(input.Modifiers));
+        boo::DragData data(&dropped.Data, point, point, operationMask, DragFlags(input.Modifiers),
+                           input::ToBooey(input.Modifiers));
         if (inView && dropped.Operation)
         {
           if (controller.PerformDragOperation(krys::move(data)))

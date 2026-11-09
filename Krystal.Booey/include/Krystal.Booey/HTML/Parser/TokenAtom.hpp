@@ -52,6 +52,14 @@ namespace krys::boo::html
 
           break;
         }
+        case TokenType::ProcessingInstruction:
+        {
+          _name = dom::DOMString {data.begin(), data.end()};
+          const auto &piData = token.ProcessingInstructionData();
+          _data = dom::DOMString {piData.begin(), piData.end()};
+
+          break;
+        }
         case TokenType::StartTag:
         case TokenType::EndTag:
         {
@@ -116,6 +124,18 @@ namespace krys::boo::html
 
       _dataReleased = true;
       return std::move(_data);
+    }
+
+    KRYS_NODISCARD dom::DOMStringAtom ProcessingInstructionTarget() const noexcept
+    {
+      krys_debug_assert(_type == TokenType::ProcessingInstruction);
+      return _name;
+    }
+
+    KRYS_NODISCARD dom::DOMStringView ProcessingInstructionData() const noexcept
+    {
+      krys_debug_assert(_type == TokenType::ProcessingInstruction);
+      return _data;
     }
 
     KRYS_NODISCARD dom::DOMStringView Characters() const noexcept

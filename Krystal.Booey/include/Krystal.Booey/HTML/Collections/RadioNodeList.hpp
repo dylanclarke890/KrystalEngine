@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
@@ -12,24 +12,27 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
+  /// @brief Which of a form's elements a RadioNodeList holds.
+  enum class RadioNodeListCandidates : uint8
+  {
+    ListedElements,
+    Images
+  };
+
   /// @brief The listed elements of a form with an ID or name, as its named getter returns them when there are
   /// several.
   /// @see https://html.spec.whatwg.org/#radionodelist
-  class RadioNodeList final : public dom::NodeList
+  class RadioNodeList final : public dom::LiveNodeList
   {
   private:
     Ref<dom::ContainerNode> _ownerNode;
     dom::DOMString _name;
-    bool _isRootedAtTreeScope;
+    RadioNodeListCandidates _candidates;
 
   public:
-    RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name) noexcept;
-
-    KRYS_NODISCARD RefPtr<dom::Node> Item(size_t index) noexcept override;
-    KRYS_NODISCARD RefPtr<const dom::Node> Item(size_t index) const noexcept override;
-    KRYS_NODISCARD RefPtr<dom::Node> operator[](size_t index) noexcept override;
-    KRYS_NODISCARD RefPtr<const dom::Node> operator[](size_t index) const noexcept override;
-    KRYS_NODISCARD size_t Length() const noexcept override;
+    RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name,
+                  RadioNodeListCandidates candidates = RadioNodeListCandidates::ListedElements) noexcept;
+    ~RadioNodeList() noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-radionodelist-value
     KRYS_NODISCARD dom::DOMString Value() const noexcept;
@@ -38,8 +41,5 @@ namespace krys::boo::html
     void SetValue(dom::DOMStringView value) noexcept;
 
     KRYS_NODISCARD bool ElementMatches(const dom::Element &element) const noexcept;
-
-  private:
-    KRYS_NODISCARD List<Ref<dom::Element>> Elements() const noexcept;
   };
 }

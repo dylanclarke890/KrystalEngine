@@ -2,6 +2,11 @@
 
 #include "Krystal.Core/Attributes.hpp"
 
+namespace krys
+{
+  class WorkQueue;
+}
+
 namespace krys::boo
 {
   class LoaderStrategy;
@@ -16,6 +21,7 @@ namespace krys::boo
     LoaderStrategy *_loaderStrategy {nullptr};
     PasteboardStrategy *_pasteboardStrategy {nullptr};
     PathStrokeStrategy *_pathStrokeStrategy {nullptr};
+    WorkQueue *_workQueue {nullptr};
 
   public:
     KRYS_NODISCARD static PlatformStrategies &Singleton() noexcept;
@@ -50,6 +56,19 @@ namespace krys::boo
     void SetPathStrokeStrategy(PathStrokeStrategy *pathStrokeStrategy) noexcept
     {
       _pathStrokeStrategy = pathStrokeStrategy;
+    }
+
+    /// @brief Where work that can run off the main thread goes, its completions posting back to the event
+    /// loop's inbox; null until the host sets one, and then that work runs on the main thread when it's
+    /// needed.
+    KRYS_NODISCARD WorkQueue *GetWorkQueue() const noexcept
+    {
+      return _workQueue;
+    }
+
+    void SetWorkQueue(WorkQueue *workQueue) noexcept
+    {
+      _workQueue = workQueue;
     }
   };
 }

@@ -563,6 +563,18 @@ namespace krys::boo::tests
       fixture.Document->PrepareCanvasesForDisplayOrFlushIfNeeded();
       CHECK_FALSE(context.HasDeferredOperations());
       CHECK_FALSE(context.IsInPreparationForDisplayOrFlush());
+
+      // A canvas moved to another document is flushed in that document's update.
+      context.FillRect(5, 5, 5, 5);
+      auto other = fixture.Document->Implementation().CreateHTMLDocument(u8"other").ReleaseValue();
+      auto adopted = other->AdoptNode(fixture.Canvas());
+      REQUIRE_FALSE(adopted.HasException());
+      fixture.Document->PrepareCanvasesForDisplayOrFlushIfNeeded();
+      CHECK(context.HasDeferredOperations());
+      CHECK(context.IsInPreparationForDisplayOrFlush());
+      other->PrepareCanvasesForDisplayOrFlushIfNeeded();
+      CHECK_FALSE(context.HasDeferredOperations());
+      CHECK_FALSE(context.IsInPreparationForDisplayOrFlush());
     }
 
     SECTION("the host's accelerated buffer is prepared in the rendering update")
@@ -945,6 +957,12 @@ namespace krys::boo::tests
       context.SetLetterSpacing(u8"bogus");
       context.SetLetterSpacing(u8"2px 3px");
       CHECK(context.LetterSpacing() == u8"0.5em");
+
+      // calc() lengths too, as in Chrome (see DIFFERENCES.md).
+      context.SetLetterSpacing(u8"calc(1px + 2px)");
+      context.SetWordSpacing(u8"calc(1em + 2px)");
+      CHECK(context.LetterSpacing() == u8"0.5em");
+      CHECK(context.WordSpacing() == u8"0px");
 
       context.SetLetterSpacing(u8"0px");
       context.SetWordSpacing(u8"4px");

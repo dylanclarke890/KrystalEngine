@@ -61,8 +61,7 @@ namespace krys::editor
     boo::dom::DOMString _colour {u8"#1a2240"};
 
   public:
-    explicit PageCanvas2D(boo::dom::Document &document) noexcept
-        : _document(WeakPtr<boo::dom::Document>::WithRef(document))
+    explicit PageCanvas2D(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       _chart = Context(u8"chart");
       if (!_chart)

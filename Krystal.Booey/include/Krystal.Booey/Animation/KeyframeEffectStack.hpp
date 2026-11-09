@@ -69,6 +69,9 @@ namespace krys::boo
                                                   AnimatableCSSPropertySet &affectedProperties,
                                                   const RenderStyle *previousLastStyleChangeEventStyle,
                                                   const style::ResolutionContext &resolutionContext) noexcept;
+    /// @brief The properties that CSS transitions animate and no other effect currently in effect does.
+    KRYS_NODISCARD AnimatableCSSPropertySet PropertiesAnimatedOnlyByTransitions() noexcept;
+
     KRYS_NODISCARD bool HasMatchingEffect(const Func<bool(const KeyframeEffect &)> &function) const noexcept;
 
     /// @brief The animation names of the target's `animation` list that no `@keyframes` rule defines.

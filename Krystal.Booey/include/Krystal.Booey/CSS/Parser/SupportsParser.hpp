@@ -22,10 +22,14 @@ namespace krys::boo::css
       Invalid
     };
 
-    enum class ParsingMode : bool
+    enum class ParsingMode : uint8
     {
       ForAtRuleSupports,
+      /// @brief `CSS.supports()`: a condition, or anything else as if it were in parentheses.
       AllowBareDeclarationAndGeneralEnclosed,
+      /// @brief `@import`'s `supports()`: a condition or a declaration, and otherwise invalid.
+      /// @see https://drafts.csswg.org/css-cascade-5/#at-import
+      AllowBareDeclaration,
     };
 
   private:

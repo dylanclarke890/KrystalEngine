@@ -38,7 +38,7 @@ namespace krys::boo
   void RenderButton::SetInnerRenderer(RenderBlock &innerRenderer) noexcept
   {
     krys_debug_assert(!_inner.get());
-    _inner = WeakPtr<RenderBlock>::WithRef(innerRenderer);
+    _inner = CreateWeakPtr(&innerRenderer);
     UpdateAnonymousChildStyle(_inner->MutableStyle());
     if (_inner && _inner->LayoutBox())
     {
@@ -104,7 +104,7 @@ namespace krys::boo
     if (!_buttonText)
     {
       auto newButtonText = CreateRenderer<RenderTextFragment>(GetDocument(), str);
-      _buttonText = WeakPtr<RenderTextFragment>::WithRef(*newButtonText);
+      _buttonText = CreateWeakPtr(newButtonText.get());
       // FIXME: This mutation should go through the normal RenderTreeBuilder path.
       if (RenderTreeBuilder::Current())
       {

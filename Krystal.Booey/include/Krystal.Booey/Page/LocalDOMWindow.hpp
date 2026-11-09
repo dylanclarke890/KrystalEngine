@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -184,6 +185,9 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-window-scroll
     void ScrollTo(double x, double y) const noexcept;
+    /// @brief As `ScrollTo`, choosing the snap position by @p snapPointSelectionMethod.
+    void ScrollTo(const ScrollToOptions &options,
+                  ScrollSnapPointSelectionMethod snapPointSelectionMethod) const noexcept;
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-window-scroll
     void Scroll(const ScrollToOptions &options = {}) const noexcept
@@ -284,6 +288,9 @@ namespace krys::boo
     /// @brief The document's selection, while the window's document is its frame's.
     /// @see https://w3c.github.io/selection-api/#dom-window-getselection
     KRYS_NODISCARD DOMSelection *GetSelection() const noexcept;
+
+  protected:
+    void DidAddEventListener(const dom::EventListener &listener) noexcept final;
 
   private:
     /// @brief Whether @p element is a named object of the window with the name @p name.

@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -62,6 +63,8 @@ namespace krys::ui
 
     WrapMode _wrapMode {WrapMode::Stretch};
     boo::TransformationMatrix _patternTransform;
+    boo::GraphicsLayerScalingFilter _minificationFilter {boo::GraphicsLayerScalingFilter::Linear};
+    boo::GraphicsLayerScalingFilter _magnificationFilter {boo::GraphicsLayerScalingFilter::Linear};
 
   public:
     KRYS_NODISCARD static Expected<UniquePtr<TextureMapper>> Create(gfx::Device &device,
@@ -86,10 +89,10 @@ namespace krys::ui
     void DrawTexture(const BitmapTexture &texture, const boo::FloatRect &target,
                      const boo::TransformationMatrix &modelViewMatrix = {}, float opacity = 1.0f,
                      AllEdgesExposed allEdgesExposed = AllEdgesExposed::Yes) noexcept;
-    /// @brief Draws a texture the mapper doesn't own, whose alpha is @p alpha.
-    void DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &target,
-                     const boo::TransformationMatrix &modelViewMatrix, float opacity,
-                     AlphaPremultiplication alpha) noexcept;
+    /// @brief Draws a texture of @p textureSize the mapper doesn't own, whose alpha is @p alpha.
+    void DrawTexture(gfx::TextureHandle texture, const boo::IntSize &textureSize,
+                     const boo::FloatRect &target, const boo::TransformationMatrix &modelViewMatrix,
+                     float opacity, AlphaPremultiplication alpha) noexcept;
     /// @brief The texture an accelerated image buffer keeps, with what's been flushed rendered into it ahead
     /// of the frame's passes; invalid if it can't be. Between `BeginPainting` and `EndPainting`.
     KRYS_NODISCARD gfx::TextureHandle RenderImageBuffer(ImageBufferRender2DBackend &backend) noexcept;
@@ -118,6 +121,13 @@ namespace krys::ui
     {
       _wrapMode = mode;
     }
+    /// @brief How the textures drawn next are sampled where they're shown smaller and larger than they are.
+    void SetScalingFilters(boo::GraphicsLayerScalingFilter minification,
+                           boo::GraphicsLayerScalingFilter magnification) noexcept
+    {
+      _minificationFilter = minification;
+      _magnificationFilter = magnification;
+    }
     void SetPatternTransform(const boo::TransformationMatrix &transform) noexcept
     {
       _patternTransform = transform;
@@ -141,6 +151,10 @@ namespace krys::ui
 
     /// @brief Draws under `matrix`, from the view's coordinates, after the base transform.
     void SetTransform(const boo::TransformationMatrix &matrix) noexcept;
+    /// @brief How a texture of @p textureSize drawn into @p targetRect is sampled.
+    KRYS_NODISCARD gfx::SamplerFilter
+      ScalingFilter(const boo::IntSize &textureSize, const boo::FloatRect &targetRect,
+                    const boo::TransformationMatrix &modelViewMatrix) const noexcept;
 
     template <typename TPaint>
     void PaintIntoTexture(BitmapTexture &texture, const boo::IntRect &targetRect, TPaint &&paint) noexcept;

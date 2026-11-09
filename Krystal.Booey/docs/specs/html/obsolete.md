@@ -32,7 +32,7 @@ Status: reviewed (2026-11-02)
 #### [16.3.1 The marquee element](https://html.spec.whatwg.org/#the-marquee-element)
 
 Status: reviewed (2026-11-02)
-> `HTMLMarqueeElement` has the reflected string attributes and its presentational hints, but no `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` or `stop()`, and marquees don't scroll (FIXME, see `KNOWN-ISSUES.md`).
+> `HTMLMarqueeElement`: its reflected attributes, `loop` (the marquee loop count), `ScrollInterval` (the marquee scroll interval), `Start`/`Stop` (turning it on and off), and the loop index, incremented as each loop's animation finishes (`ContinueAnimation`). Its shadow tree's mover moves as Chrome moves it (see `DIFFERENCES.md`).
 <!-- definitions: concept-marquee-on concept-marquee-off attr-marquee-behavior attr-marquee-direction attr-marquee-truespeed attr-marquee-loop marquee-current-loop-index -->
 
 - [x] [HTMLMarqueeElement.start()](https://html.spec.whatwg.org/#dom-marquee-start) — When the start() method is called, the marquee element must be turned on.

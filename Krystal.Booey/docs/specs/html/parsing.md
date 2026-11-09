@@ -25,19 +25,19 @@ Status: reviewed (2026-11-02)
 #### [13.2.3 The input byte stream](https://html.spec.whatwg.org/#the-input-byte-stream)
 
 Status: reviewed (2026-11-02)
-> Documents decode UTF-8 only (`DocumentWriter`, see `KNOWN-ISSUES.md`).
+> Documents decode UTF-8 only (`DocumentWriter`, see `DIFFERENCES.md`).
 <!-- definitions: concept-encoding-confidence -->
 
 ##### [13.2.3.1 Parsing with a known character encoding](https://html.spec.whatwg.org/#parsing-with-a-known-character-encoding)
 
 Status: reviewed (2026-11-02)
-> Documents decode UTF-8 only (`DocumentWriter`, see `KNOWN-ISSUES.md`).
+> Documents decode UTF-8 only (`DocumentWriter`, see `DIFFERENCES.md`).
 <!-- definitions: a-known-definite-encoding -->
 
 ##### [13.2.3.2 Determining the character encoding](https://html.spec.whatwg.org/#determining-the-character-encoding)
 
 Status: reviewed (2026-11-02)
-> `DocumentWriter` removes a UTF-8 BOM and decodes UTF-8 only; there's no prescan (see `KNOWN-ISSUES.md`).
+> `DocumentWriter` removes a UTF-8 BOM and decodes UTF-8 only; there's no prescan (see `DIFFERENCES.md`).
 <!-- definitions: prescan-end-condition -->
 
 - [x] [encoding sniffing algorithm](https://html.spec.whatwg.org/#encoding-sniffing-algorithm) — User agents must use the following algorithm, called the encoding sniffing algorithm, to determine the character encoding to use when decoding a document in the first pass. This algorithm takes as input any out-of-band metadata available to the user agent (e.g. the Content-Type metadata of the docu…
@@ -120,13 +120,13 @@ Status: reviewed (2026-11-02)
 ##### [13.2.3.3 Character encodings](https://html.spec.whatwg.org/#character-encodings)
 
 Status: reviewed (2026-11-02)
-> Documents decode UTF-8 only (`DocumentWriter`, see `KNOWN-ISSUES.md`).
+> Documents decode UTF-8 only (`DocumentWriter`, see `DIFFERENCES.md`).
 <!-- definitions: utf-8 iso-8859-2 iso-8859-7 iso-8859-8 windows-874 windows-1250 windows-1251 windows-1252 windows-1254 windows-1255 windows-1256 windows-1257 windows-1258 gbk big5 iso-2022-jp shift_jis euc-kr utf-16be utf-16le utf-16-encoding x-user-defined -->
 
 ##### [13.2.3.4 Changing the encoding while parsing](https://html.spec.whatwg.org/#changing-the-encoding-while-parsing)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> Skipped: documents are UTF-8 only (see `DIFFERENCES.md`).
 
 - [x] [change the encoding](https://html.spec.whatwg.org/#change-the-encoding) — When the parser requires the user agent to change the encoding, it must run the following steps. This might happen if the encoding sniffing algorithm described above failed to find a character encoding, or if it found a character encoding that was not the actual encoding of the file.
   - 1. If the encoding that is already being used to interpret the input stream is UTF-16BE/LE, then set the confidence to certain and return. The new encoding is ignored; if it was anything but the same encoding, then it would be clearly incorrect.
@@ -545,12 +545,12 @@ Status: reviewed (2026-11-02)
 ##### [13.2.5.72 Processing instruction open state](https://html.spec.whatwg.org/#processing-instruction-open-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 ##### [13.2.5.73 Processing instruction target state](https://html.spec.whatwg.org/#processing-instruction-target-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 - [x] [If target is an ASCII case-insensitive match for "xml" or "xml-stylesheet"](https://html.spec.whatwg.org/#processing-instruction-target-state) — If target is an ASCII case-insensitive match for "xml" or "xml-stylesheet":
   - 1. This is a disallowed-processing-instruction-target parse error.
@@ -560,17 +560,17 @@ Status: reviewed (2026-11-02)
 ##### [13.2.5.74 After processing instruction target state](https://html.spec.whatwg.org/#after-processing-instruction-target-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 ##### [13.2.5.75 Processing instruction data state](https://html.spec.whatwg.org/#processing-instruction-data-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 ##### [13.2.5.76 Processing instruction questionable state](https://html.spec.whatwg.org/#processing-instruction-questionable-state)
 
 Status: reviewed (2026-11-02)
-> Not implemented (see `KNOWN-ISSUES.md`).
+> `Tokenizer.hpp`.
 
 ##### [13.2.5.77 Character reference state](https://html.spec.whatwg.org/#character-reference-state)
 
@@ -629,7 +629,7 @@ Status: reviewed (2026-11-02)
 ##### [13.2.6.1 Creating and inserting nodes](https://html.spec.whatwg.org/#creating-and-inserting-nodes)
 
 Status: reviewed (2026-11-02)
-> `AppropriatePlaceToInsertNode`, `CreateElement`, `InsertForeignElement`, `InsertCharacters`, `InsertComment` and the attribute adjusters; content patching, the xmlns parse errors, resetting resettable elements and the parser form owner are missing (see `KNOWN-ISSUES.md`).
+> `AppropriatePlaceToInsertNode`, `CreateElement`, `InsertForeignElement`, `InsertCharacters`, `InsertComment`, `InsertProcessingInstruction` and the attribute adjusters; content patching is `InsertionLocationInTemplate`. The xmlns parse errors are skipped (see `DIFFERENCES.md`), a resettable element isn't reset again after its attributes have put it in its reset state.
 > Fixed: a plain `xmlns` attribute on a foreign element got the `xmlns` prefix.
 <!-- definitions: insertion-location insertion-location-target-parent insertion-location-reference-child foster-parent -->
 
@@ -781,7 +781,7 @@ Status: reviewed (2026-11-02)
 ###### [13.2.6.4.4 The "in head" insertion mode](https://html.spec.whatwg.org/#parsing-main-inhead)
 
 Status: reviewed (2026-11-02)
-> A meta element doesn't change the encoding (see `KNOWN-ISSUES.md`).
+> A meta element doesn't change the encoding, as documents are UTF-8 only (see `DIFFERENCES.md`).
 
 - [x] [If the active speculative HTML parser is null](https://html.spec.whatwg.org/#parsing-main-inhead) — If the active speculative HTML parser is null:
   - 1. If the element has a charset attribute, and getting an encoding from its value results in an encoding, and the confidence is currently tentative, then change the encoding to the resulting encoding.

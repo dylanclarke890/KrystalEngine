@@ -168,6 +168,31 @@ namespace krys::ui
     // FIXME: Repaint counters, which draw the count as text.
   }
 
+  namespace
+  {
+    KRYS_NODISCARD constexpr gfx::SamplerFilter
+      ToSamplerFilter(boo::GraphicsLayerScalingFilter filter) noexcept
+    {
+      // Render2D has no mipmaps, so trilinear filtering is linear.
+      return filter == boo::GraphicsLayerScalingFilter::Nearest ? gfx::SamplerFilter::Nearest
+                                                                : gfx::SamplerFilter::Linear;
+    }
+  }
+
+  gfx::SamplerFilter
+    TextureMapper::ScalingFilter(const boo::IntSize &textureSize, const boo::FloatRect &targetRect,
+                                 const boo::TransformationMatrix &modelViewMatrix) const noexcept
+  {
+    if (_minificationFilter == _magnificationFilter)
+    {
+      return ToSamplerFilter(_magnificationFilter);
+    }
+    auto shown = modelViewMatrix.MapRect(targetRect);
+    bool magnified = shown.Width() >= static_cast<float>(textureSize.Width())
+                     && shown.Height() >= static_cast<float>(textureSize.Height());
+    return ToSamplerFilter(magnified ? _magnificationFilter : _minificationFilter);
+  }
+
   void TextureMapper::DrawTexture(const BitmapTexture &texture, const boo::FloatRect &targetRect,
                                   const boo::TransformationMatrix &modelViewMatrix, float opacity,
                                   AllEdgesExposed) noexcept
@@ -180,11 +205,14 @@ namespace krys::ui
     // FIXME: Repeating textures (WrapMode::Repeat, the pattern transform), once contents layers are tiled.
     _renderer->Save();
     SetTransform(modelViewMatrix);
-    _renderer->DrawImage(texture.Handle(), ToRect2D(targetRect), {.Opacity = opacity});
+    _renderer->DrawImage(
+      texture.Handle(), ToRect2D(targetRect),
+      {.Filter = ScalingFilter(texture.Size(), targetRect, modelViewMatrix), .Opacity = opacity});
     _renderer->Restore();
   }
 
-  void TextureMapper::DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &targetRect,
+  void TextureMapper::DrawTexture(gfx::TextureHandle texture, const boo::IntSize &textureSize,
+                                  const boo::FloatRect &targetRect,
                                   const boo::TransformationMatrix &modelViewMatrix, float opacity,
                                   AlphaPremultiplication alpha) noexcept
   {
@@ -195,7 +223,10 @@ namespace krys::ui
 
     _renderer->Save();
     SetTransform(modelViewMatrix);
-    _renderer->DrawImage(texture, ToRect2D(targetRect), {.Alpha = alpha, .Opacity = opacity});
+    _renderer->DrawImage(texture, ToRect2D(targetRect),
+                         {.Filter = ScalingFilter(textureSize, targetRect, modelViewMatrix),
+                          .Alpha = alpha,
+                          .Opacity = opacity});
     _renderer->Restore();
   }
 

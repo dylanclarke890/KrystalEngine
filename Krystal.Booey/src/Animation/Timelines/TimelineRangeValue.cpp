@@ -17,27 +17,24 @@ namespace krys::boo
     }
 
     Ref document = ShareRef(element->NodeDocument());
-    auto parserType = type == style::SingleAnimationRangeType::Start ? css::SingleAnimationRangeType::Start
-                                                                     : css::SingleAnimationRangeType::End;
-
     return krys::SwitchOn(
       value,
       [&](dom::DOMString &rangeString) -> RefPtr<css::Value>
       {
-        return css::PropertyParserHelpers::ParseSingleAnimationRange(
-          rangeString, document->CssParserContext(), parserType);
+        return css::PropertyParserHelpers::ParseSingleAnimationRange(rangeString,
+                                                                     document->CssParserContext(), type);
       },
       [&](TimelineRangeOffset &rangeOffset) -> RefPtr<css::Value>
       {
         if (auto consumedRangeName = css::PropertyParserHelpers::ParseSingleAnimationRange(
-              rangeOffset.RangeName, document->CssParserContext(), parserType))
+              rangeOffset.RangeName, document->CssParserContext(), type))
         {
           if (RefPtr offset = rangeOffset.Offset)
           {
             if (auto offsetValue = offset->ToCSSValue())
             {
-              return css::ValuePair::CreateNonCoalescing(Ref<css::Value> {krys::move(consumedRangeName)},
-                                                         Ref<css::Value> {krys::move(offsetValue)});
+              return css::ValuePair::CreateNonCoalescing(krys::move(consumedRangeName),
+                                                         krys::move(offsetValue));
             }
           }
           return consumedRangeName;

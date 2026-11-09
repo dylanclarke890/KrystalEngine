@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
@@ -253,6 +254,12 @@ namespace krys::boo::mathml
   }
 
 #pragma endregion
+
+  void MathMLElement::OnInsert() noexcept
+  {
+    StyledElement::OnInsert();
+    html::FocusAlgorithms::AutofocusInsertionSteps(*this);
+  }
 
   bool MathMLElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
   {

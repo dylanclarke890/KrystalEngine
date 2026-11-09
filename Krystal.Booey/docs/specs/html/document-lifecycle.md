@@ -157,7 +157,7 @@ Status: reviewed (2026-11-01)
 #### [7.5.9 Unloading documents](https://html.spec.whatwg.org/#unloading-documents)
 
 Status: reviewed (2026-11-01)
-> `FrameLoader::DispatchUnloadEvents` and `Document::DispatchPagehideEvent`; the back/forward cache state is the salvageable state. Visibility isn't updated (see `KNOWN-ISSUES.md`), and there's no termination nesting level, as there's no script.
+> `FrameLoader::DispatchUnloadEvents` and `Document::DispatchPagehideEvent`; the back/forward cache state is the salvageable state. Hiding the document fires `visibilitychange` (`Document::SetVisibilityHiddenDueToDismissal`), and there's no termination nesting level, as there's no script.
 <!-- definitions: concept-document-salvageable page-showing suspension-time suspended-timer-handles termination-nesting-level unload-counter -->
 
 - [x] [unload](https://html.spec.whatwg.org/#unload-a-document) — To unload a Document oldDocument, given an optional Document newDocument:
@@ -211,7 +211,7 @@ Status: reviewed (2026-11-01)
 #### [7.5.10 Destroying documents](https://html.spec.whatwg.org/#destroying-documents)
 
 Status: reviewed (2026-11-01)
-> A document is destroyed when it's released, rather than by these steps; tasks of a document that isn't fully active still run (see `KNOWN-ISSUES.md`).
+> A document is destroyed when it's released, rather than by these steps; tasks of a document that isn't fully active still run (see `DIFFERENCES.md`).
 
 - [x] [destroy](https://html.spec.whatwg.org/#destroy-a-document) — To destroy a Document document:
   - 1. Assert: this is running as part of a task queued on document's relevant agent's event loop.

@@ -15,8 +15,7 @@
 
 namespace krys::boo::css
 {
-  MediaQueryMatcher::MediaQueryMatcher(dom::Document &document) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document))
+  MediaQueryMatcher::MediaQueryMatcher(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
   {
   }
 
@@ -83,7 +82,7 @@ namespace krys::boo::css
   {
     krys_debug_assert(std::ranges::none_of(_mediaQueryLists, [&](const WeakPtr<MediaQueryList> &existing)
                                            { return existing.get() == &list; }));
-    _mediaQueryLists.push_back(WeakPtr<MediaQueryList>::WithRef(list));
+    _mediaQueryLists.push_back(CreateWeakPtr(&list));
   }
 
   void MediaQueryMatcher::RemoveMediaQueryList(MediaQueryList &list) noexcept

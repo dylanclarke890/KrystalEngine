@@ -8,6 +8,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
 
 namespace krys::boo::css::calc
@@ -32,6 +33,9 @@ namespace krys::boo::css::calc
   static auto Evaluate(const IndirectNode<Random> &, const EvaluationOptions &) noexcept -> Maybe<double>;
   static auto Evaluate(const IndirectNode<Anchor> &, const EvaluationOptions &) noexcept -> Maybe<double>;
   static auto Evaluate(const IndirectNode<AnchorSize> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+  static auto Evaluate(const IndirectNode<Sin> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+  static auto Evaluate(const IndirectNode<Cos> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+  static auto Evaluate(const IndirectNode<Tan> &, const EvaluationOptions &) noexcept -> Maybe<double>;
   template <typename Op>
   static auto Evaluate(const IndirectNode<Op> &, const EvaluationOptions &) noexcept -> Maybe<double>;
 
@@ -307,6 +311,38 @@ namespace krys::boo::css::calc
     }
 
     return result;
+  }
+
+  /// @brief Evaluates sin(), cos() or tan(), whose argument is a number of radians or an angle in canonical
+  /// units (degrees), as simplification takes it.
+  template <typename Op>
+  static Maybe<double> EvaluateTrig(const IndirectNode<Op> &root, const EvaluationOptions &options) noexcept
+  {
+    auto argument = Evaluate(root->A, options);
+    if (!argument)
+    {
+      return null;
+    }
+    if (GetType(root->A).MatchesAny<Type::Match::Angle>())
+    {
+      argument = deg2rad(*argument);
+    }
+    return ExecuteOperation<ToCalculationTreeOp<Op>::Op>(*argument);
+  }
+
+  Maybe<double> Evaluate(const IndirectNode<Sin> &root, const EvaluationOptions &options) noexcept
+  {
+    return EvaluateTrig(root, options);
+  }
+
+  Maybe<double> Evaluate(const IndirectNode<Cos> &root, const EvaluationOptions &options) noexcept
+  {
+    return EvaluateTrig(root, options);
+  }
+
+  Maybe<double> Evaluate(const IndirectNode<Tan> &root, const EvaluationOptions &options) noexcept
+  {
+    return EvaluateTrig(root, options);
   }
 
   template <typename Op>

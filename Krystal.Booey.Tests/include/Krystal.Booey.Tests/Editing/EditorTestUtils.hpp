@@ -465,7 +465,7 @@ namespace krys::boo::tests
     KRYS_NODISCARD Ref<CountingListener> Listen(utf8_stringview type) noexcept
     {
       auto listener = CreateRef<CountingListener>();
-      Document->AddEventListener(dom::DOMStringAtom(type), Ref<dom::EventListenerCallback> {listener}, true);
+      Document->AddEventListener(dom::DOMStringAtom(type), listener, true);
       return listener;
     }
   };

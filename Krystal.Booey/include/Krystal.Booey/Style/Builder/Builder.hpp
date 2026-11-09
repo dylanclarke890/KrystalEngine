@@ -63,7 +63,8 @@ namespace krys::boo::style
   public:
     Builder(RenderStyle &, BuilderContext &&, const MatchResult &,
             PropertyCascade::IncludedProperties &&includedProperties = PropertyCascade::NormalProperties(),
-            const HashSet<AnimatableCSSProperty> *animatedProperties = nullptr) noexcept;
+            const HashSet<AnimatableCSSProperty> *animatedProperties = nullptr,
+            const HashSet<AnimatableCSSProperty> *transitioningProperties = nullptr) noexcept;
     ~Builder() noexcept;
 
     void ApplyAllProperties() noexcept;

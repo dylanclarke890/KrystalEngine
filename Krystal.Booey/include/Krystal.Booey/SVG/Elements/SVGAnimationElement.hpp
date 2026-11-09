@@ -79,6 +79,13 @@ namespace krys::boo::svg
     /// @see https://svgwg.org/specs/animations/#__svg__SVGAnimationElement__endElementAt
     void EndElementAt(float offset) noexcept;
 
+    /// @see https://svgwg.org/specs/animations/#InterfaceSVGAnimationElement
+    KRYS_DECLARE_EVENT_HANDLER(Begin, u8"beginEvent")
+    /// @see https://svgwg.org/specs/animations/#InterfaceSVGAnimationElement
+    KRYS_DECLARE_EVENT_HANDLER(End, u8"endEvent")
+    /// @see https://svgwg.org/specs/animations/#InterfaceSVGAnimationElement
+    KRYS_DECLARE_EVENT_HANDLER(Repeat, u8"repeatEvent")
+
 #pragma endregion
 
     KRYS_NODISCARD static bool IsTargetAttributeCSSProperty(SVGElement *,

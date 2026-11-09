@@ -9,7 +9,8 @@ namespace krys::boo::dom
 
   CompositionEvent::~CompositionEvent() noexcept = default;
 
-  Ref<CompositionEvent> CompositionEvent::Create(DOMStringAtom type, DOMStringView data) noexcept
+  Ref<CompositionEvent> CompositionEvent::Create(DOMStringAtom type, LocalDOMWindow *view,
+                                                 DOMStringView data) noexcept
   {
     CompositionEventInit init;
     init.Bubbles = true;
@@ -17,19 +18,20 @@ namespace krys::boo::dom
     init.Composed = true;
     init.Data = DOMString(data);
     auto event = CreateRef<CompositionEvent>(type, init);
+    event->SetView(view);
     event->_isTrusted = true;
     return event;
   }
 
   void CompositionEvent::InitCompositionEvent(DOMStringAtom type, bool canBubble, bool cancelable,
-                                              DOMStringView data) noexcept
+                                              LocalDOMWindow *view, DOMStringView data) noexcept
   {
     if (IsBeingDispatched())
     {
       return;
     }
 
-    InitUIEvent(type, canBubble, cancelable, 0);
+    InitUIEvent(type, canBubble, cancelable, view, 0);
 
     _data = DOMString(data);
   }

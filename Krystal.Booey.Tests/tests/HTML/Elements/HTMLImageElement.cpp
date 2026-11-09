@@ -15,8 +15,11 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Core/Threading/ManualWorkQueue.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 
 namespace krys::boo::tests
 {
@@ -42,6 +45,29 @@ namespace krys::boo::tests
       }
       return count;
     }
+
+    /// @brief Counts the `decode()` promises fulfilled, and keeps the messages of those rejected.
+    struct DecodeResults
+    {
+      int Fulfilled = 0;
+      List<utf8_string> Rejections;
+
+      KRYS_NODISCARD ImageLoader::DecodePromise Promise() noexcept
+      {
+        return [this](dom::ExceptionOr<void> &&result)
+        {
+          if (result.HasException())
+          {
+            CHECK(result.GetException().Code() == dom::ExceptionCode::EncodingError);
+            Rejections.push_back(result.GetException().Message());
+          }
+          else
+          {
+            ++Fulfilled;
+          }
+        };
+      }
+    };
   }
 
   TEST_CASE("HTMLImageElement::AssociatedMapElement: the first map whose id or name follows the first #",
@@ -124,6 +150,28 @@ namespace krys::boo::tests
     CHECK(Count(painted, u8"draw-glyphs") == 2u);
     CHECK(Count(painted, u8"(color #C0C0C0)") >= 1u);
     CHECK(Count(painted, u8"draw-native-image") == 0u);
+  }
+
+  TEST_CASE("HTMLImageElement: the box follows the alt text when there's no image",
+            "[HTML][HTMLImageElement]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+
+    ImageFixture fixture(u8"<img id=text alt=a><img id=loaded alt=a src='file:///a.png'>");
+    RunNetworkingTasks();
+    auto small = fixture.RendererSize(u8"text");
+    CHECK(fixture.RendererSize(u8"loaded") == IntSize(3, 2));
+
+    fixture.Image(u8"text").Alt(u8"a much longer label");
+    CHECK(fixture.RendererSize(u8"text").Width() > small.Width());
+
+    // An alt change leaves a loaded image alone, and losing the image shows the text.
+    fixture.Image(u8"loaded").Alt(u8"b");
+    CHECK(fixture.RendererSize(u8"loaded") == IntSize(3, 2));
+    fixture.Image(u8"loaded").RemoveAttribute(u8"src");
+    RunNetworkingTasks();
+    CHECK(fixture.RendererSize(u8"loaded") == small);
   }
 
   TEST_CASE("HTMLImageElement: an image without a source fires error if it has src or uses srcset or picture",
@@ -457,5 +505,99 @@ namespace krys::boo::tests
     CHECK(image.IsAnimating());
     loop.Run(start + 400ms);
     CHECK(image.CurrentFrameIndex() == 2u);
+  }
+
+  TEST_CASE("HTMLImageElement::Decode: fulfilled once the image has loaded and decoded, as a microtask",
+            "[HTML][HTMLImageElement][html:dom-img-decode]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Defer = true;
+
+    ImageFixture fixture(u8"<img id=img src='file:///a.png'>");
+    auto &image = fixture.Image(u8"img");
+    DecodeResults results;
+
+    // It waits for the image to load.
+    image.Decode(results.Promise());
+    RunNetworkingTasks();
+    CHECK(results.Fulfilled == 0);
+    loader.Strategy.CompleteDeferred();
+    RunNetworkingTasks();
+    CHECK(results.Fulfilled == 1);
+
+    // Loaded, it's fulfilled at the next microtask checkpoint, not at once.
+    image.Decode(results.Promise());
+    CHECK(results.Fulfilled == 1);
+    html::EventLoop::Current().PerformMicrotaskCheckpoint();
+    CHECK(results.Fulfilled == 2);
+    CHECK(results.Rejections.empty());
+  }
+
+  TEST_CASE(
+    "HTMLImageElement::Decode: rejected without a source, when loading fails, or when the source changes",
+    "[HTML][HTMLImageElement][html:dom-img-decode]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Defer = true;
+
+    ImageFixture fixture(
+      u8"<img id=none><img id=missing src='file:///none.png'><img id=img src='file:///a.png'>");
+    DecodeResults results;
+
+    SECTION("without a source")
+    {
+      fixture.Image(u8"none").Decode(results.Promise());
+      RunNetworkingTasks();
+      CHECK(results.Rejections == List<utf8_string> {u8"Missing source URL."});
+    }
+
+    SECTION("when loading fails")
+    {
+      fixture.Image(u8"missing").Decode(results.Promise());
+      loader.Strategy.CompleteDeferred();
+      RunNetworkingTasks();
+      CHECK(results.Rejections == List<utf8_string> {u8"Loading error."});
+    }
+
+    SECTION("when the source changes, and a decode of the new source is fulfilled")
+    {
+      auto &image = fixture.Image(u8"img");
+      image.Decode(results.Promise());
+      REQUIRE_FALSE(image.SetAttribute(u8"src", u8"file:///b.jpg").HasException());
+      image.Decode(results.Promise());
+      RunNetworkingTasks();
+      CHECK(results.Rejections == List<utf8_string> {u8"The image's source changed."});
+
+      loader.Strategy.CompleteDeferred();
+      RunNetworkingTasks();
+      CHECK(results.Fulfilled == 1);
+    }
+    CHECK(results.Fulfilled <= 1);
+  }
+
+  TEST_CASE("HTMLImageElement::Decode: with the host's work queue, the image decodes there",
+            "[HTML][HTMLImageElement][html:dom-img-decode]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    ManualWorkQueue queue;
+    PlatformStrategies::Singleton().SetWorkQueue(&queue);
+    auto clearWorkQueue = MakeScopeExit([] { PlatformStrategies::Singleton().SetWorkQueue(nullptr); });
+
+    ImageFixture fixture(u8"<img id=img src='file:///a.png'>");
+    RunNetworkingTasks();
+    DecodeResults results;
+
+    fixture.Image(u8"img").Decode(results.Promise());
+    RunNetworkingTasks();
+    CHECK(results.Fulfilled == 0);
+    CHECK(queue.PendingCount() == 1);
+
+    CHECK(queue.RunAll() == 1);
+    RunNetworkingTasks();
+    CHECK(results.Fulfilled == 1);
   }
 }

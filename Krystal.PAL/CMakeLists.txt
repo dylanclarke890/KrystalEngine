@@ -41,6 +41,7 @@ target_sources(Krystal.PAL
       include/Krystal.PAL/Platform.hpp
       include/Krystal.PAL/Pointer.hpp
       include/Krystal.PAL/TextInput.hpp
+      include/Krystal.PAL/TouchpadPan.hpp
 
 	PRIVATE 
     src/Events.cpp
@@ -52,9 +53,11 @@ target_sources(Krystal.PAL
 if(WIN32)
   target_sources(Krystal.PAL
     PRIVATE
+      include/Krystal.PAL/Win32/DirectManipulationPan.hpp
       include/Krystal.PAL/Win32/DropTarget.hpp
       include/Krystal.PAL/Win32/Utils.hpp
       include/Krystal.PAL/Win32/Win32Window.hpp
+      src/Win32/DirectManipulationPan.cpp
       src/Win32/DropTarget.cpp
       src/Win32/Platform.cpp
       src/Win32/Utils.cpp

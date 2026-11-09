@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include <limits>
 
@@ -31,7 +32,7 @@ namespace krys::boo
   }
 
   LocalDOMWindow::LocalDOMWindow(dom::Document &document) noexcept
-      : EventTarget(dom::EventTargetFlags::IsWindow), _document(WeakPtr<dom::Document>::WithRef(document)),
+      : EventTarget(dom::EventTargetFlags::IsWindow), _document(CreateWeakPtr(&document)),
         _timeOrigin(html::EventLoop::Current().Now()),
         _lastActivationTimestamp(std::numeric_limits<dom::DOMHighResTimeStamp>::infinity()),
         _lastHistoryActionActivationTimestamp(std::numeric_limits<dom::DOMHighResTimeStamp>::infinity())
@@ -62,6 +63,15 @@ namespace krys::boo
   dom::Document *LocalDOMWindow::Document() const noexcept
   {
     return _document.get();
+  }
+
+  void LocalDOMWindow::DidAddEventListener(const dom::EventListener &listener) noexcept
+  {
+    EventTarget::DidAddEventListener(listener);
+    if (auto *document = Document())
+    {
+      document->AddListenerTypeIfNeeded(listener.Type());
+    }
   }
 
   LocalFrame *LocalDOMWindow::Frame() const noexcept
@@ -177,7 +187,8 @@ namespace krys::boo
     // named objects of window with the name name.
     RefPtr<dom::HTMLCollection> collection = CreateRef<dom::LiveHTMLCollection>(
       *document, [name = dom::DOMString(name)](const dom::Element &element)
-      { return IsNamedObject(element, name) && element.IsInDocumentTree(); });
+      { return IsNamedObject(element, name) && element.IsInDocumentTree(); },
+      dom::LiveCollectionInvalidation::IdOrName);
     return Variant<RefPtr<dom::Element>, RefPtr<dom::HTMLCollection>>(krys::move(collection));
   }
 
@@ -324,6 +335,12 @@ namespace krys::boo
 
   void LocalDOMWindow::ScrollTo(const ScrollToOptions &options) const noexcept
   {
+    ScrollTo(options, ScrollSnapPointSelectionMethod::Closest);
+  }
+
+  void LocalDOMWindow::ScrollTo(const ScrollToOptions &options,
+                                ScrollSnapPointSelectionMethod snapPointSelectionMethod) const noexcept
+  {
     if (!IsCurrentlyDisplayedInFrame())
     {
       return;
@@ -353,8 +370,12 @@ namespace krys::boo
     IntPoint layoutPos(view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Left)),
                        view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Top)));
 
-    // FIXME: Smooth scrolling (useSmoothScrolling) and scroll snapping, once there are scroll animations.
-    view->SetContentsScrollPosition(layoutPos, ScrollPositionChangeOptions::CreateProgrammatic());
+    auto animated = UseSmoothScrolling(scrollToOptions.Behavior.value_or(ScrollBehavior::Auto),
+                                       Document()->DocumentElement().get())
+                      ? ScrollIsAnimated::Yes
+                      : ScrollIsAnimated::No;
+    view->SetContentsScrollPosition(layoutPos, ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
+                                                 animated, snapPointSelectionMethod));
   }
 
   void LocalDOMWindow::ScrollBy(double x, double y) const noexcept
@@ -380,7 +401,7 @@ namespace krys::boo
     ScrollToOptions scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(options, 0, 0);
     *scrollToOptions.Left += view->MapFromLayoutToCSSUnits(view->ContentsScrollPosition().X());
     *scrollToOptions.Top += view->MapFromLayoutToCSSUnits(view->ContentsScrollPosition().Y());
-    ScrollTo(scrollToOptions);
+    ScrollTo(scrollToOptions, ScrollSnapPointSelectionMethod::Directional);
   }
 
   double LocalDOMWindow::DevicePixelRatio() const noexcept

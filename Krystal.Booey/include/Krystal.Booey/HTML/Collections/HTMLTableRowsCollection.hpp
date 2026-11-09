@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 
 namespace krys::boo::html
 {
@@ -10,7 +10,7 @@ namespace krys::boo::html
   /// @brief A table's rows: those of its `thead`s, then those that are its children or in its `tbody`s, then
   /// those of its `tfoot`s, each in tree order.
   /// @see https://html.spec.whatwg.org/#dom-table-rows
-  class HTMLTableRowsCollection final : public dom::HTMLCollection
+  class HTMLTableRowsCollection final : public dom::LiveHTMLCollection
   {
   private:
     Ref<HTMLTableElement> _table;
@@ -25,21 +25,8 @@ namespace krys::boo::html
     /// @brief The last of @p table's rows.
     KRYS_NODISCARD static HTMLTableRowElement *LastRow(HTMLTableElement &table) noexcept;
 
-    KRYS_NODISCARD RefPtr<dom::Element> Item(size_t index) noexcept override;
-    KRYS_NODISCARD RefPtr<const dom::Element> Item(size_t index) const noexcept override;
-
-    KRYS_NODISCARD RefPtr<dom::Element> operator[](size_t index) noexcept override;
-    KRYS_NODISCARD RefPtr<const dom::Element> operator[](size_t index) const noexcept override;
-
-    KRYS_NODISCARD RefPtr<dom::Element> NamedItem(dom::DOMStringView name) noexcept override;
-    KRYS_NODISCARD RefPtr<const dom::Element> NamedItem(dom::DOMStringView name) const noexcept override;
-
-    KRYS_NODISCARD RefPtr<dom::Element> operator[](dom::DOMStringView name) noexcept override;
-    KRYS_NODISCARD RefPtr<const dom::Element> operator[](dom::DOMStringView name) const noexcept override;
-
-    KRYS_NODISCARD size_t Length() const noexcept override;
-
   protected:
-    KRYS_NODISCARD List<dom::DOMString> SupportedPropertyNames() const noexcept override;
+    KRYS_NODISCARD dom::Element *CollectionBegin() const noexcept override;
+    KRYS_NODISCARD dom::Element *CollectionNext(dom::Element &element) const noexcept override;
   };
 }

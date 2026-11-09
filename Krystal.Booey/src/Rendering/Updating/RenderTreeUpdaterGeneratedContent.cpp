@@ -139,8 +139,9 @@ namespace krys::boo
     return stack->RequiresPseudoElement() || stack->ContainsProperty(css::PropertyId::Display);
   }
 
-  static void CreateContentRenderers(RenderTreeBuilder &builder, RenderElement &pseudoRenderer,
-                                     const RenderStyle &style) noexcept
+  void RenderTreeUpdater::GeneratedContent::CreateContentRenderers(RenderTreeBuilder &builder,
+                                                                   RenderElement &pseudoRenderer,
+                                                                   const RenderStyle &style) noexcept
   {
     if (auto *contentData = style.GetContent().TryData())
     {
@@ -376,5 +377,11 @@ namespace krys::boo
     }
     TearDownRenderers(*pseudoElement, TeardownType::Full, builder);
     element.ClearAfterPseudoElement();
+  }
+
+  void RenderTreeUpdater::CreateContentRenderers(RenderTreeBuilder &builder, RenderElement &pseudoRenderer,
+                                                 const RenderStyle &style) noexcept
+  {
+    GeneratedContent::CreateContentRenderers(builder, pseudoRenderer, style);
   }
 }

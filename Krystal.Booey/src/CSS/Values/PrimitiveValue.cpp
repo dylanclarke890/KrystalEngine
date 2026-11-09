@@ -11,8 +11,8 @@
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>
 #include <charconv>
 

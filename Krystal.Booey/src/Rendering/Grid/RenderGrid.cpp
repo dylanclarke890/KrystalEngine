@@ -325,8 +325,7 @@ namespace krys::boo
     {
       for (auto &gridItem : ChildrenOfType<RenderBox>(grid))
       {
-        // FIXME: Skip a fieldset's legend (isLegend), once there are fieldsets.
-        if (gridItem.IsOutOfFlowPositioned())
+        if (gridItem.IsOutOfFlowPositioned() || gridItem.IsLegend())
         {
           continue;
         }
@@ -392,8 +391,7 @@ namespace krys::boo
       // execution.
       for (auto &gridItem : ChildrenOfType<RenderBox>(renderGrid))
       {
-        // FIXME: Skip a fieldset's legend (isLegend), once there are fieldsets.
-        if (gridItem.IsOutOfFlowPositioned())
+        if (gridItem.IsOutOfFlowPositioned() || gridItem.IsLegend())
         {
           continue;
         }

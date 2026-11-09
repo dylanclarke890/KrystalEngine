@@ -88,8 +88,8 @@ namespace krys::boo::dom::tests
 
     SECTION("initMouseEvent")
     {
-      event->InitMouseEvent(DOMStringAtom(u8"mouseup"), false, true, 1, 1, 2, 3, 4, false, true, true, false,
-                            1, nullptr);
+      event->InitMouseEvent(DOMStringAtom(u8"mouseup"), false, true, nullptr, 1, 1, 2, 3, 4, false, true,
+                            true, false, 1, nullptr);
       CHECK(event->Type() == u8"mouseup");
       CHECK_FALSE(event->Bubbles());
       CHECK(event->Cancelable());
@@ -157,7 +157,7 @@ namespace krys::boo::dom::tests
     SECTION("offsets are relative to the target's border box, layer positions to its layer")
     {
       Ref<OffsetRecorder> recorder = CreateRef<OffsetRecorder>();
-      box.AddEventListener(DOMStringAtom(u8"mousedown"), Ref<EventListenerCallback> {recorder}, false);
+      box.AddEventListener(DOMStringAtom(u8"mousedown"), recorder, false);
       (void)box.DispatchMouseEvent(platform, DOMStringAtom(u8"mousedown"), 1);
       CHECK(recorder->OffsetX == 13);
       CHECK(recorder->OffsetY == 17);

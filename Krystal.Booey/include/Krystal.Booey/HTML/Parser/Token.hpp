@@ -20,6 +20,7 @@ namespace krys::boo::html
     StartTag,
     EndTag,
     Comment,
+    ProcessingInstruction,
     Character,
     EndOfFile,
   };
@@ -92,8 +93,12 @@ namespace krys::boo::html
     // For DOCTYPE only
     UniquePtr<DoctypeData> _doctypeData;
 
-    // The name for DOCTYPE/start/end tokens, text data for character tokens, comment data for comment tokens.
+    // The name for DOCTYPE/start/end tokens, text data for character tokens, comment data for comment tokens
+    // and the target for processing instruction tokens.
     DataBuffer _data;
+
+    // For processing instruction tokens only.
+    DataBuffer _processingInstructionData;
 
   public:
     Token() = default;
@@ -120,6 +125,7 @@ namespace krys::boo::html
     {
       _type = TokenType::Uninitialized;
       _data.clear();
+      _processingInstructionData.clear();
       _attributes.clear();
     }
 
@@ -359,6 +365,37 @@ namespace krys::boo::html
     {
       krys_debug_assert(_type == TokenType::Comment);
       _data.append(characters.begin(), characters.end());
+    }
+
+    void AppendToComment(Span<char32> characters) noexcept
+    {
+      krys_debug_assert(_type == TokenType::Comment);
+      AppendToDataInternal(characters);
+    }
+
+#pragma endregion
+
+#pragma region ProcessingInstruction
+
+    void BeginProcessingInstruction(Span<char32> target) noexcept
+    {
+      krys_debug_assert(_type == TokenType::Uninitialized);
+      _type = TokenType::ProcessingInstruction;
+      AppendToDataInternal(target);
+    }
+
+    void AppendToProcessingInstructionData(char32 character) noexcept
+    {
+      krys_debug_assert(_type == TokenType::ProcessingInstruction);
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _processingInstructionData.append(encodeResult.Output.begin(), encodeResult.Output.end());
+    }
+
+    KRYS_NODISCARD const DataBuffer &ProcessingInstructionData() const noexcept
+    {
+      krys_debug_assert(_type == TokenType::ProcessingInstruction);
+      return _processingInstructionData;
     }
 
 #pragma endregion

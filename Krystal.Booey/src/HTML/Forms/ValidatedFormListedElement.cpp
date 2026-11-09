@@ -7,6 +7,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo::html
@@ -85,14 +87,57 @@ namespace krys::boo::html
            && !(_hasReadOnlyAttribute && ReadOnlyBarsFromConstraintValidation());
   }
 
-  void ValidatedFormListedElement::UpdateVisibleValidationMessage(HTMLElement &) noexcept
+  namespace
   {
-    // FIXME: The validation message bubble (ValidationMessage), shown by the host.
+    KRYS_NODISCARD ChromeClient *ValidationChromeClientOf(const HTMLElement &element) noexcept
+    {
+      auto *page = element.NodeDocument().GetPage();
+      return page ? &page->GetChromeClient() : nullptr;
+    }
+  }
+
+  void ValidatedFormListedElement::UpdateVisibleValidationMessage(HTMLElement &validationAnchor) noexcept
+  {
+    auto &element = AsHTMLElement();
+    auto *chromeClient = ValidationChromeClientOf(element);
+    if (!chromeClient)
+    {
+      return;
+    }
+
+    // The message is hidden as soon as the user starts typing, even if a constraint is still violated.
+    if (IsShowingValidationMessage())
+    {
+      HideVisibleValidationMessage();
+      return;
+    }
+
+    dom::DOMString message;
+    if (element.Renderer() && WillValidate())
+    {
+      message = ValidationMessage();
+      auto first = message.find_first_not_of(u8" \t\n\f\r");
+      auto last = message.find_last_not_of(u8" \t\n\f\r");
+      message = first == dom::DOMString::npos ? dom::DOMString() : message.substr(first, last - first + 1);
+    }
+    if (message.empty())
+    {
+      HideVisibleValidationMessage();
+      return;
+    }
+
+    _validationMessageAnchor = CreateWeakPtr(&validationAnchor);
+    chromeClient->ShowValidationMessage(validationAnchor, message);
   }
 
   void ValidatedFormListedElement::HideVisibleValidationMessage() noexcept
   {
-    // FIXME: The validation message bubble (ValidationMessage), shown by the host.
+    auto *anchor = _validationMessageAnchor.get();
+    auto *chromeClient = ValidationChromeClientOf(AsHTMLElement());
+    if (anchor && chromeClient)
+    {
+      chromeClient->HideValidationMessage(*anchor);
+    }
   }
 
   // https://html.spec.whatwg.org/#check-validity-steps
@@ -183,8 +228,8 @@ namespace krys::boo::html
     // Calling focus() will scroll the element into view.
     validationAnchor.Focus();
 
-    // FIXME: Showing the validation message once focusing has scrolled the anchor into view
-    // (Page::scheduleValidationMessageUpdate), with the validation message bubble.
+    // The message is shown where the scrolled anchor now is; the host places it as it draws.
+    UpdateVisibleValidationMessage(validationAnchor);
 
     _isFocusingWithValidationMessage = wasFocusingWithValidationMessage;
   }
@@ -195,8 +240,9 @@ namespace krys::boo::html
 
   bool ValidatedFormListedElement::IsShowingValidationMessage() const noexcept
   {
-    // FIXME: The validation message bubble.
-    return false;
+    auto *anchor = _validationMessageAnchor.get();
+    auto *chromeClient = ValidationChromeClientOf(AsHTMLElement());
+    return anchor && chromeClient && chromeClient->IsValidationMessageVisible(*anchor);
   }
 
   bool ValidatedFormListedElement::IsFocusingWithValidationMessage() const noexcept

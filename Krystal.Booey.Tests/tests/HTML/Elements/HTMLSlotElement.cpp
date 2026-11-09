@@ -24,7 +24,7 @@ namespace krys::boo::html::tests
       KRYS_NODISCARD Ref<HTMLSlotElement> NewSlot() noexcept
       {
         auto slot = Document->CreateElement(u8"slot").ReleaseValue();
-        return ShareRef(Downcast<HTMLSlotElement>(*slot));
+        return Downcast<HTMLSlotElement>(krys::move(slot));
       }
 
       /// @brief Whether @p slot's assigned nodes are exactly @p nodes.

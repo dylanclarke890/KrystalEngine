@@ -242,8 +242,16 @@ namespace krys::ui
     style.Dashes.clear();
     float cornerWidth = 0;
 
-    if (GetStrokeStyle() == boo::StrokeStyle::DottedStroke
-        || GetStrokeStyle() == boo::StrokeStyle::DashedStroke)
+    if (GetStrokeStyle() == boo::StrokeStyle::DashedStroke)
+    {
+      // From end to end, with no room for dashes leaving it solid.
+      if (auto pattern = DashPatternForStrokeLength(strokeWidth, StrokeThickness(), false))
+      {
+        style.Dashes = {pattern->Dash, pattern->Gap};
+        style.DashOffset = 0;
+      }
+    }
+    else if (GetStrokeStyle() == boo::StrokeStyle::DottedStroke)
     {
       // Figure out end points to ensure we always paint corners.
       cornerWidth = DashedLineCornerWidthForStrokeWidth(strokeWidth);

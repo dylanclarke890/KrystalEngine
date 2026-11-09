@@ -254,7 +254,7 @@ namespace krys::boo
       document->DispatchPagehideEvent(false);
 
       // 10c. Update the visibility state of oldDocument to "hidden".
-      // FIXME: The visibility (visibilitychange), once there's one.
+      document->SetVisibilityHiddenDueToDismissal();
 
       // 12. If oldDocument's salvageable state is false, then fire an event named unload at oldDocument's
       //     relevant global object, with legacy target override flag set.
@@ -269,6 +269,9 @@ namespace krys::boo
 
   void FrameLoader::DidBeginDocument() noexcept
   {
+    // A document written into the frame (as an SVG image's is, after its initial empty one) completes anew.
+    _isComplete = false;
+    _didCallImplicitClose = false;
     _client->DispatchDidClearWindowObject();
     if (_state == FrameState::CommittedPage)
     {
@@ -452,6 +455,12 @@ namespace krys::boo
       return;
     }
 
+    // https://html.spec.whatwg.org/#form-submission-algorithm
+    // 26a. Let referrerPolicy be the empty string.
+    // 26b. If the form element's link types include the noreferrer keyword, then set referrerPolicy to
+    //      "no-referrer".
+    // (Skipped: there are no referrers, so the policy would change nothing; see DIFFERENCES.md.)
+
     // https://html.spec.whatwg.org/#plan-to-navigate
     // The navigation is planned for a later task, which a later submission of the form cancels.
     html::EventLoop::Current().QueueTask(
@@ -569,7 +578,6 @@ namespace krys::boo
 
   void FrameLoader::FinishedParsing() noexcept
   {
-    // FIXME: Unsuppressing the scrollbars, once they're suppressed while a document loads.
     Ref<LocalFrame> frame = ShareRef(_frame);
     if (_state == FrameState::CommittedPage)
     {
@@ -577,6 +585,12 @@ namespace krys::boo
     }
 
     CheckCompleted();
+
+    // Check if the scrollbars are really needed for the content. If not, remove them, relayout, and repaint.
+    if (auto *view = frame->View())
+    {
+      view->RestoreScrollbar();
+    }
 
     if (auto *document = frame->Document())
     {

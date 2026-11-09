@@ -98,8 +98,8 @@ namespace krys::boo::html
     }
 
     Ref<dom::HTMLCollection> cells = CreateRef<dom::LiveHTMLCollection>(
-      *this, [this](const dom::Element &element)
-      { return element.ParentNode() == this && AsTableElement<HTMLTableCellElement>(&element); });
+      *this, [](const dom::Element &element) { return AsTableElement<HTMLTableCellElement>(&element); },
+      dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _cells = CreateWeakPtr(cells.get());
     return cells;
   }

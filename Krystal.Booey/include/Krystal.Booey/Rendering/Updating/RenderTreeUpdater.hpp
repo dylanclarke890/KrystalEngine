@@ -74,6 +74,11 @@ namespace krys::boo
     UniquePtr<RenderTreeBuilder> _builder;
 
   public:
+    /// @brief Adds the renderers of the `content` of @p style to @p pseudoRenderer, which has no
+    /// pseudo-element node.
+    static void CreateContentRenderers(RenderTreeBuilder &builder, RenderElement &pseudoRenderer,
+                                       const RenderStyle &style) noexcept;
+
     RenderTreeUpdater(dom::Document &document, style::PostResolutionCallbackDisabler &) noexcept;
     ~RenderTreeUpdater() noexcept;
 

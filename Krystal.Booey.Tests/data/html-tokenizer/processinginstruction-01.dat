@@ -1,0 +1,119 @@
+#name
+emits a processing instruction with its target and data
+#data
+<?target data?>
+#tokens
+ProcessingInstruction(target, data)
+
+#name
+emits a processing instruction with empty data
+#data
+<?target?>
+#tokens
+ProcessingInstruction(target, )
+
+#name
+skips the whitespace after the target, and ends at a greater than sign without a question mark
+#data
+<?target  spaced  data>
+#tokens
+ProcessingInstruction(target, spaced  data)
+
+#name
+keeps a question mark that isn't followed by a greater than sign
+#data
+<?target a?b??>
+#tokens
+ProcessingInstruction(target, a?b?)
+
+#name
+keeps newlines in the data
+#data
+<?target a
+b>
+#tokens
+ProcessingInstruction(target, a
+b)
+
+#name
+accepts a target starting with a low line, with digits and hyphens
+#data
+<?_x-1 d>
+#tokens
+ProcessingInstruction(_x-1, d)
+
+#name
+treats an xml target as a bogus comment
+#data
+<?xml version="1.0"?>
+#tokens
+Comment(?xml version="1.0"?)
+#errors
+1:6 DisallowedProcessingInstructionTarget
+
+#name
+treats an xml-stylesheet target as a bogus comment, ignoring case
+#data
+<?XML-Stylesheet x>
+#tokens
+Comment(?XML-Stylesheet x)
+#errors
+1:17 DisallowedProcessingInstructionTarget
+
+#name
+treats an invalid first character of the target as a bogus comment
+#data
+<?#x>
+#tokens
+Comment(?#x)
+#errors
+1:3 InvalidFirstCharacterOfProcessingInstructionTarget
+
+#name
+treats an invalid character in the target as a bogus comment
+#data
+<?a#b>
+#tokens
+Comment(?a#b)
+#errors
+1:4 InvalidProcessingInstructionTarget
+
+#name
+drops a processing instruction cut off by EOF before its target
+#data
+<?
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:3 EOFInProcessingInstruction
+
+#name
+drops a processing instruction cut off by EOF in its target
+#data
+<?target
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:9 EOFInProcessingInstruction
+
+#name
+drops a processing instruction cut off by EOF in its data
+#data
+<?target data
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:14 EOFInProcessingInstruction
+
+#name
+drops a processing instruction cut off by EOF after a question mark
+#data
+<?target a?
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:12 EOFInProcessingInstruction

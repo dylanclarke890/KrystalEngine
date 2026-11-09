@@ -31,8 +31,7 @@ namespace krys::editor
     /// @brief How many events the log shows.
     static constexpr size_t MaxLines {12};
 
-    explicit PageTextInput(boo::dom::Document &document) noexcept
-        : _document(WeakPtr<boo::dom::Document>::WithRef(document))
+    explicit PageTextInput(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       RefPtr<boo::dom::EventTarget> fields = document.GetElementById(u8"ime-fields");
       if (!fields)

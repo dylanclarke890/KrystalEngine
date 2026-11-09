@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
@@ -37,18 +38,18 @@
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Editor/BeanRating.hpp"
-#include "Krystal.Editor/PageAnimations.hpp"
-#include "Krystal.Editor/PageObservers.hpp"
-#include "Krystal.Editor/PagePointers.hpp"
+#include "Krystal.Core/Threading/ManualWorkQueue.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
+#include "Krystal.UI/DataListSuggestionsOverlay.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/Input.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
+#include "Krystal.UI/ValidationMessageOverlay.hpp"
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
 
@@ -56,6 +57,14 @@ namespace krys::ui::tests
 {
   namespace
   {
+    /// @brief Clicks @p element as a user does, with the window's transient activation that opening a picker
+    /// needs.
+    void UserClick(boo::html::HTMLElement &element) noexcept
+    {
+      element.NodeDocument().Window()->NotifyActivated();
+      element.Click();
+    }
+
     /// @brief A clipboard in memory, in place of the system's: text and markup, counting the writes.
     struct MemoryPasteboard final : boo::PasteboardStrategy
     {
@@ -247,31 +256,48 @@ namespace krys::ui::tests
     CHECK(boo::WebAnimation::Instances().size() == animationsBefore);
 
     // A page loaded from files: its style sheets, fonts and images go too.
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    for (int32 i = 0; i < 10; ++i)
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-freed-page";
+    std::filesystem::create_directories(directory);
+    const auto scenes = gfx::tests::GoldenDirectory() / "scenes";
+    const auto overwrite = std::filesystem::copy_options::overwrite_existing;
+    std::filesystem::copy_file(scenes / "fonts" / "Ahem.woff2", directory / "Ahem.woff2", overwrite);
+    std::filesystem::copy_file(scenes / "images" / "checker.png", directory / "checker.png", overwrite);
     {
-      run(view);
+      std::ofstream file(directory / "style.css", std::ios::binary);
+      file << "@font-face { font-family: Boxes; src: url(Ahem.woff2) } "
+           << "#text { display: inline-block; font: 20px Boxes }";
     }
-    auto editor = CreateWeakPtr<boo::dom::Document>(&view.Document());
+    {
+      std::ofstream file(directory / "page.html", std::ios::binary);
+      file << "<!DOCTYPE html><link rel=stylesheet href=style.css><span id=text>XX</span>"
+           << "<img id=image src=checker.png>";
+    }
+    auto loadFromFiles = [&]
+    {
+      REQUIRE(view.LoadFile(directory / "page.html").has_value());
+      WaitForLoad(view);
+      for (int32 i = 0; i < 10; ++i)
+      {
+        run(view);
+        boo::html::EventLoop::Current().RunUntilIdle();
+      }
+      auto picture = view.Document().GetElementById(u8"image");
+      REQUIRE(picture);
+      CHECK(Downcast<boo::html::HTMLImageElement>(*picture).NaturalWidth() > 0);
+      auto text = view.Document().GetElementById(u8"text");
+      REQUIRE(text);
+      CHECK(text->OffsetWidth() == 40);
+    };
+    loadFromFiles();
+    auto fromFiles = CreateWeakPtr<boo::dom::Document>(&view.Document());
     view.LoadHTML(u8"<!DOCTYPE html><p>Another page</p>");
     WaitForLoad(view);
     run(view);
-    CHECK_FALSE(editor);
+    CHECK_FALSE(fromFiles);
 
     // Loading it again reuses the cached resources the freed document's elements were clients of.
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    for (int32 i = 0; i < 20; ++i)
-    {
-      time += 50ms;
-      (void)view.Update(time);
-    }
-    CHECK(view.Document().GetElementById(u8"nonexistent") == nullptr);
+    loadFromFiles();
+    std::filesystem::remove_all(directory);
 
     WeakPtr<boo::dom::Document> second;
     {
@@ -283,6 +309,25 @@ namespace krys::ui::tests
       REQUIRE(second);
     }
     CHECK_FALSE(second);
+  }
+
+  TEST_CASE("View: a file's lastModified is its modification time", "[UI]")
+  {
+    using namespace std::chrono;
+    const auto path = std::filesystem::temp_directory_path() / "krystal-ui-dated-page.html";
+    {
+      std::ofstream file(path, std::ios::binary);
+      file << "<!DOCTYPE html>";
+    }
+    const sys_seconds modified = sys_days(2'001y / March / 4) + 5h + 6min + 7s;
+    std::filesystem::last_write_time(path, clock_cast<file_clock>(modified));
+
+    View view({200, 100});
+    REQUIRE(view.LoadFile(path).has_value());
+    WaitForLoad(view);
+    auto expected = std::format("{:%m/%d/%Y %H:%M:%S}", current_zone()->to_local(modified));
+    CHECK(view.Document().LastModified() == utf8_string(expected.begin(), expected.end()));
+    std::filesystem::remove(path);
   }
 
   TEST_CASE("View: loads files", "[UI]")
@@ -307,6 +352,48 @@ namespace krys::ui::tests
 
     CHECK_FALSE(view.LoadFile(path).has_value());
     WaitForLoad(view);
+  }
+
+  TEST_CASE("FileLoaderStrategy: reads files on its read queue, and gives them to Booey on its event loop",
+            "[UI]")
+  {
+    const auto path = std::filesystem::temp_directory_path() / "krystal-ui-queued-read.txt";
+    {
+      std::ofstream file(path, std::ios::binary);
+      file << "queued";
+    }
+
+    View view({200, 100});
+    ManualWorkQueue queue;
+    FileLoaderStrategy loader(&queue);
+    Maybe<boo::LoadResult> result;
+    auto load = [&](const std::filesystem::path &file)
+    {
+      loader.LoadResource(
+        view.Frame(), boo::ResourceRequest(boo::url::URL::FileURLWithFileSystemPath(file.generic_u8string())),
+        {}, [&](boo::LoadResult &&loaded) { result = krys::move(loaded); });
+    };
+
+    load(path);
+    CHECK_FALSE(result);
+    CHECK(queue.PendingCount() == 1);
+    CHECK(queue.RunAll() == 1);
+    // Read, the file waits in the event loop's inbox.
+    CHECK_FALSE(result);
+    boo::html::EventLoop::Current().RunUntilIdle();
+    REQUIRE(result);
+    REQUIRE(result->has_value());
+    CHECK((*result)->Response.MimeType() == u8"text/plain");
+    auto data = (*result)->Data->GetSpan();
+    CHECK(utf8_string(data.begin(), data.end()) == u8"queued");
+
+    std::filesystem::remove(path);
+    result = null;
+    load(path);
+    CHECK(queue.RunAll() == 1);
+    boo::html::EventLoop::Current().RunUntilIdle();
+    REQUIRE(result);
+    CHECK_FALSE(result->has_value());
   }
 
   TEST_CASE("View: defines custom elements in the pages it loads", "[UI]")
@@ -350,691 +437,6 @@ namespace krys::ui::tests
     CHECK(constructed == 3);
     CHECK(view.Document().GetElementById(u8"a")->IsDefinedCustomElement());
     CHECK(view.Document().GetElementById(u8"b")->GetCustomElement() != nullptr);
-  }
-
-  TEST_CASE("View: the editor page's bean rating", "[UI]")
-  {
-    View view({1'200, 1'600});
-    REQUIRE(view
-              .DefineCustomElement(
-                u8"bean-rating", [](boo::html::HTMLElement &element)
-                { return CreateUnique<BeanRating>(element); }, BeanRating::Options())
-              .has_value());
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    view.UpdateRendering();
-
-    {
-      auto found = view.Document().QuerySelector(u8"bean-rating").ReleaseValue();
-      REQUIRE(found);
-      auto &rating = *found;
-      REQUIRE(dynamic_cast<BeanRating *>(rating.GetCustomElement()));
-      auto form = view.Document().QuerySelector(u8"form.order").ReleaseValue();
-      REQUIRE(form);
-      auto &orderForm = Downcast<boo::html::HTMLFormElement>(*form);
-      auto submitted = [&]
-      {
-        auto formData = boo::html::DOMFormData::Create(&orderForm, nullptr).ReleaseValue();
-        auto value = formData->Get(u8"rating");
-        return value ? Maybe<boo::dom::DOMString>(std::get<boo::dom::DOMString>(*value)) : std::nullopt;
-      };
-
-      // Unrated, it's required.
-      CHECK_FALSE(rating.Matches(u8":state(rated)").ReleaseValue());
-      CHECK(rating.Matches(u8":invalid").ReleaseValue());
-      CHECK_FALSE(submitted().has_value());
-
-      // A click on the first bean rates it one.
-      auto box = rating.GetBoundingClientRect();
-      view.MousePressed({static_cast<int32>(box->X()) + 11, static_cast<int32>(box->Y() + box->Height() / 2)},
-                        pal::MouseButton::Left);
-      view.MouseReleased(
-        {static_cast<int32>(box->X()) + 11, static_cast<int32>(box->Y() + box->Height() / 2)},
-        pal::MouseButton::Left);
-      CHECK(rating.Matches(u8":state(rated)").ReleaseValue());
-      CHECK(rating.Matches(u8":valid").ReleaseValue());
-      CHECK(submitted() == u8"1");
-
-      // The click focused it: the arrow keys and digits rate it.
-      CHECK(view.Document().ActiveElement().get() == &rating);
-      (void)view.KeyPressed(pal::Key::RightArrow);
-      CHECK(submitted() == u8"2");
-      (void)view.KeyPressed(pal::Key::Num4, {}, {u8"4", u8"4"});
-      CHECK(submitted() == u8"4");
-
-      // Reset clears it.
-      orderForm.Reset();
-      CHECK_FALSE(rating.Matches(u8":state(rated)").ReleaseValue());
-      CHECK_FALSE(submitted().has_value());
-    }
-
-    // The page goes when another loads.
-    auto page = CreateWeakPtr<boo::dom::Document>(&view.Document());
-    view.LoadHTML(u8"<!DOCTYPE html><p>Another page</p>");
-    WaitForLoad(view);
-    boo::html::EventLoop::Current().RunUntilIdle();
-    CHECK_FALSE(page);
-  }
-
-  TEST_CASE("View: the editor's pages link to each other, and route the guide", "[UI]")
-  {
-    View view({1'200, 1'600});
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    RefPtr<boo::dom::Document> index = ShareRefPtr<boo::dom::Document>(&view.Document());
-
-    SECTION("the settings page, and back to a new first page")
-    {
-      FollowLinks(view);
-      auto link = view.Document().QuerySelector(u8"a[href='settings.html']").ReleaseValue();
-      REQUIRE(link);
-      link->DispatchSimulatedClick(nullptr);
-      WaitForLoad(view);
-      CHECK(view.Document().GetURL().LastPathComponent() == u8"settings.html");
-
-      link = view.Document().QuerySelector(u8"a[href='index.html']").ReleaseValue();
-      REQUIRE(link);
-      link->DispatchSimulatedClick(nullptr);
-      WaitForLoad(view);
-      CHECK(view.Document().GetURL().LastPathComponent() == u8"index.html");
-      CHECK(&view.Document() != index.get());
-    }
-
-    SECTION("the guide's links can be handled in place")
-    {
-      // As the editor's navigation handler does: the guide's links stay in the page.
-      List<std::string> routed;
-      view.SetNavigationHandler(
-        [&](const NavigationRequest &request)
-        {
-          boo::url::URL url(request.URL);
-          routed.push_back(std::string(url.Query().begin(), url.Query().end()));
-        });
-      auto topic = view.Document().GetElementById(u8"topic-routing");
-      REQUIRE(topic);
-      topic->DispatchSimulatedClick(nullptr);
-      boo::html::EventLoop::Current().RunUntilIdle();
-      CHECK_FALSE(view.IsLoading());
-      CHECK(&view.Document() == index.get());
-      CHECK(view.Document().GetURL().Query().empty());
-      CHECK(routed == List<std::string> {"guide=routing"});
-    }
-  }
-
-  TEST_CASE("View: the editor page's dialogs, popovers and details", "[UI]")
-  {
-    View view({1'200, 1'600});
-    FollowLinks(view);
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    auto byId = [&](utf8_stringview id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return element;
-    };
-    auto click = [&](utf8_stringview selectors)
-    {
-      auto element = document.QuerySelector(selectors).ReleaseValue();
-      REQUIRE(element);
-      element->DispatchSimulatedClick(nullptr);
-      boo::html::EventLoop::Current().RunUntilIdle();
-    };
-    auto showing = [&](utf8_stringview id)
-    {
-      return byId(id)->Matches(u8":popover-open").ReleaseValue();
-    };
-
-    SECTION("the dialogs open and close through their commands")
-    {
-      auto &refill = Downcast<boo::html::HTMLDialogElement>(*byId(u8"refill"));
-      click(u8"button[commandfor=refill]");
-      CHECK(refill.Matches(u8":modal").ReleaseValue());
-      click(u8"#refill button[value=yes]");
-      CHECK_FALSE(refill.Open());
-      CHECK(refill.ReturnValue() == u8"yes");
-
-      // As the editor does for the tip's custom command.
-      auto &tip = Downcast<boo::html::HTMLDialogElement>(*byId(u8"tip"));
-      List<std::string> commands;
-      auto handler = tip.AddEventListener<boo::dom::CommandEvent>(
-        u8"command",
-        [&](boo::dom::CommandEvent &event)
-        {
-          commands.push_back(std::string(event.Command().begin(), event.Command().end()));
-          if (event.Command() == u8"--show")
-          {
-            (void)tip.Show();
-          }
-        });
-      click(u8"button[commandfor=tip][command='--show']");
-      CHECK(tip.Open());
-      CHECK_FALSE(tip.IsModal());
-      click(u8"#tip button[command=close]");
-      CHECK_FALSE(tip.Open());
-      CHECK(tip.ReturnValue() == u8"tip read");
-      CHECK(commands == List<std::string> {"--show", "close"});
-    }
-
-    SECTION("the popovers")
-    {
-      click(u8"button[popovertarget=menu]");
-      CHECK(showing(u8"menu"));
-      // The nested popover keeps the menu open; a hint leaves it open too.
-      click(u8"#menu button[popovertarget=menu-more]");
-      CHECK(showing(u8"menu"));
-      CHECK(showing(u8"menu-more"));
-      click(u8"button[popovertarget=hint]");
-      CHECK(showing(u8"hint"));
-      CHECK(showing(u8"menu"));
-      // The toast shows and hides only with its buttons.
-      click(u8"button[popovertarget=toast][popovertargetaction=show]");
-      CHECK(showing(u8"toast"));
-      click(u8"button[popovertarget=toast][popovertargetaction=hide]");
-      CHECK_FALSE(showing(u8"toast"));
-    }
-
-    SECTION("the details")
-    {
-      auto details = document.QuerySelectorAll(u8".overlays details").ReleaseValue();
-      REQUIRE(details->Length() == 3u);
-      auto &fresh = Downcast<boo::html::HTMLDetailsElement>(*details->Item(0));
-      auto &local = Downcast<boo::html::HTMLDetailsElement>(*details->Item(1));
-      auto &secret = Downcast<boo::html::HTMLDetailsElement>(*details->Item(2));
-      CHECK(fresh.Open());
-      // The two questions are an accordion.
-      click(u8"details[name=faq]:not([open]) summary");
-      CHECK(local.Open());
-      CHECK_FALSE(fresh.Open());
-      // The link to the hidden text opens its details.
-      CHECK_FALSE(secret.Open());
-      click(u8"a[href='#secret']");
-      CHECK(secret.Open());
-    }
-
-    SECTION("the header's menu is anchored to its button")
-    {
-      click(u8"#menu-button");
-      REQUIRE(showing(u8"page-menu"));
-      auto button = byId(u8"menu-button")->GetBoundingClientRect();
-      auto menu = byId(u8"page-menu")->GetBoundingClientRect();
-      CHECK(menu->X() == Catch::Approx(button->X()));
-      CHECK(menu->Y() == Catch::Approx(button->Y() + button->Height() + 4));
-
-      // The nested menu opens to the right of its button, and keeps the first open.
-      click(u8"#goto-button");
-      CHECK(showing(u8"page-menu"));
-      REQUIRE(showing(u8"page-menu-goto"));
-      auto gotoButton = byId(u8"goto-button")->GetBoundingClientRect();
-      auto gotoMenu = byId(u8"page-menu-goto")->GetBoundingClientRect();
-      CHECK(gotoMenu->X() == Catch::Approx(gotoButton->X() + gotoButton->Width() + 4));
-      CHECK(gotoMenu->Y() == Catch::Approx(gotoButton->Y()));
-
-      // Escape closes them (opened without user activation, their close watchers are grouped).
-      (void)view.KeyPressed(pal::Key::Escape);
-      boo::html::EventLoop::Current().RunUntilIdle();
-      CHECK_FALSE(showing(u8"page-menu-goto"));
-      CHECK_FALSE(showing(u8"page-menu"));
-
-      // So does a click outside them.
-      click(u8"#menu-button");
-      click(u8"#goto-button");
-      REQUIRE(showing(u8"page-menu-goto"));
-      view.MousePressed({4, 4}, pal::MouseButton::Left);
-      view.MouseReleased({4, 4}, pal::MouseButton::Left);
-      boo::html::EventLoop::Current().RunUntilIdle();
-      CHECK_FALSE(showing(u8"page-menu-goto"));
-      CHECK_FALSE(showing(u8"page-menu"));
-    }
-
-    SECTION("dialogs fade out in the top layer")
-    {
-      auto &refill = Downcast<boo::html::HTMLDialogElement>(*byId(u8"refill"));
-      auto time = boo::html::EventLoop::Current().Now();
-      auto run = [&](MonotonicTime::duration duration)
-      {
-        for (auto end = time + duration; time < end;)
-        {
-          time += 16ms;
-          (void)view.Update(time);
-        }
-      };
-      click(u8"button[commandfor=refill]");
-      run(300ms);
-      REQUIRE(refill.Renderer());
-      CHECK(refill.Renderer()->AnimatedStyle()->GetOpacity().Value.Value == Catch::Approx(1.0f));
-
-      click(u8"#refill button[value=yes]");
-      CHECK_FALSE(refill.Open());
-      run(48ms);
-      // Closed, it stays rendered in the top layer while it fades out.
-      CHECK(refill.IsInTopLayer());
-      REQUIRE(refill.Renderer());
-      CHECK(refill.Renderer()->AnimatedStyle()->GetOpacity().Value.Value < 1.0f);
-      run(300ms);
-      CHECK_FALSE(refill.IsInTopLayer());
-      CHECK_FALSE(refill.Renderer());
-    }
-  }
-
-  TEST_CASE("View: the editor page's observers", "[UI]")
-  {
-    // Images that other cases loaded load at once, from the memory cache.
-    boo::MemoryCache::Singleton().EvictResources();
-    View view({1'200, 300});
-    FollowLinks(view);
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    // As the editor makes them once the page has loaded.
-    editor::PageObservers observers(document);
-    auto byId = [&](utf8_stringview id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return element;
-    };
-    auto textOf = [&](utf8_stringview id)
-    {
-      auto text = byId(id)->TextContent().value_or(boo::dom::DOMString {});
-      return std::string(text.begin(), text.end());
-    };
-    auto update = [&]
-    {
-      view.UpdateRendering();
-      boo::html::EventLoop::Current().RunUntilIdle();
-    };
-    update();
-
-    SECTION("the resize card shows its size as the view resizes")
-    {
-      // Its content box: the card less its padding.
-      auto card = byId(u8"resize-card");
-      auto sizeText = [&]
-      {
-        return std::format("{} \u00d7 140 pixels", card->OffsetWidth() - 40);
-      };
-      CHECK(textOf(u8"resize-size") == sizeText());
-
-      auto before = card->OffsetWidth();
-      view.Resize({1'000, 300});
-      update();
-      CHECK(card->OffsetWidth() < before);
-      CHECK(textOf(u8"resize-size") == sizeText());
-    }
-
-    SECTION("the lazy list's images load as it scrolls")
-    {
-      auto list = byId(u8"lazy-list");
-      auto images = list->QuerySelectorAll(u8"img").ReleaseValue();
-      REQUIRE(images->Length() == 21);
-      auto &first = Downcast<boo::html::HTMLImageElement>(*images->Item(0));
-      auto &last = Downcast<boo::html::HTMLImageElement>(*images->Item(20));
-
-      // Below the page's view, none has loaded.
-      CHECK(first.IsDeferred());
-      CHECK(textOf(u8"lazy-count") == "No images loaded yet");
-
-      // Scrolled to, those within a list's height of its view load; the rest wait.
-      list->ScrollIntoView(true);
-      update();
-      update();
-      CHECK(first.Complete());
-      CHECK(last.IsDeferred());
-      auto loaded = observers.ImagesLoaded();
-      CHECK(loaded > 0);
-      CHECK(loaded < 21);
-      CHECK(textOf(u8"lazy-count") == std::format("{} of 21 images loaded", loaded));
-
-      list->SetScrollTop(10'000);
-      update();
-      CHECK_FALSE(last.IsDeferred());
-      CHECK(last.Complete());
-      CHECK(observers.ImagesLoaded() > loaded);
-    }
-
-    SECTION("the chapters skip their contents off screen, and the header's chapter follows the scroll")
-    {
-      // At the top of the page, no chapter is in view, and each is skipped.
-      CHECK(observers.CurrentChapter().empty());
-      CHECK_FALSE(byId(u8"chapter-1")->IsRelevantToUser());
-
-      byId(u8"chapter-1")->ScrollIntoView(true);
-      update();
-      update();
-      CHECK(observers.CurrentChapter() == u8"The beans");
-      CHECK(byId(u8"chapter-1")->IsRelevantToUser());
-      CHECK_FALSE(byId(u8"chapter-6")->IsRelevantToUser());
-      auto height = byId(u8"chapter-1")->OffsetHeight();
-      CHECK(height != 320);
-
-      // Scrolled past, the first chapter is skipped again, at the size it last had.
-      byId(u8"chapter-6")->ScrollIntoView(true);
-      update();
-      update();
-      CHECK(observers.CurrentChapter() == u8"Tasting");
-      CHECK(byId(u8"chapter-6")->IsRelevantToUser());
-      CHECK_FALSE(byId(u8"chapter-1")->IsRelevantToUser());
-      CHECK(byId(u8"chapter-1")->OffsetHeight() == height);
-    }
-  }
-
-  TEST_CASE("View: the editor page's animations", "[UI]")
-  {
-    using namespace std::chrono_literals;
-    boo::MemoryCache::Singleton().EvictResources();
-    View view({1'200, 300});
-    FollowLinks(view);
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    // As the editor makes it once the page has loaded.
-    editor::PageAnimations animations(document);
-    auto byId = [&](utf8_stringview id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return element;
-    };
-    auto textOf = [&](utf8_stringview id)
-    {
-      auto text = byId(id)->TextContent().value_or(boo::dom::DOMString {});
-      return std::string(text.begin(), text.end());
-    };
-    auto time = boo::html::EventLoop::Current().Now();
-    auto run = [&](MonotonicTime::duration delta)
-    {
-      constexpr auto frame =
-        std::chrono::duration_cast<MonotonicTime::duration>(std::chrono::microseconds {16'667});
-      for (auto end = time + delta; time < end;)
-      {
-        time += frame;
-        (void)view.Update(time);
-      }
-    };
-    run(50ms);
-
-    SECTION("the ball's animation from C++, with its controls and readout")
-    {
-      auto *animation = animations.Animation();
-      REQUIRE(animation);
-      CHECK(animation->GetPlayState() == boo::WebAnimation::PlayState::Paused);
-      CHECK(textOf(u8"anim-time") == "0.00 s of 2 s, paused");
-
-      // Seeking halfway puts the ball halfway along its track (ease-in-out is halfway at half time).
-      animations.Seek(0.5);
-      run(50ms);
-      auto ball = byId(u8"anim-ball");
-      auto track = byId(u8"anim-ball")->ParentElement();
-      REQUIRE(track);
-      CHECK(ball->OffsetLeft() - track->OffsetLeft()
-            == Catch::Approx((track->OffsetWidth() - 40) / 2.0).margin(0.5));
-      CHECK(textOf(u8"anim-time") == "1.00 s of 2 s, paused");
-      CHECK(Downcast<boo::html::HTMLInputElement>(*byId(u8"anim-seek")).ValueAsNumber() == Catch::Approx(50));
-
-      // The buttons play, reverse and pause it; the readout follows on the animation frames.
-      Downcast<boo::html::HTMLElement>(*byId(u8"anim-play")).Click();
-      run(200ms);
-      CHECK(animation->GetPlayState() == boo::WebAnimation::PlayState::Running);
-      CHECK(textOf(u8"anim-time").ends_with(", running"));
-      auto timeBeforeReversing = animation->CurrentTime()->Time()->count();
-      CHECK(timeBeforeReversing > 1);
-
-      Downcast<boo::html::HTMLElement>(*byId(u8"anim-reverse")).Click();
-      run(200ms);
-      CHECK(animation->PlaybackRate() == -1);
-      CHECK(animation->CurrentTime()->Time()->count() < timeBeforeReversing);
-
-      Downcast<boo::html::HTMLElement>(*byId(u8"anim-pause")).Click();
-      run(50ms);
-      CHECK(animation->GetPlayState() == boo::WebAnimation::PlayState::Paused);
-      CHECK(textOf(u8"anim-time").ends_with(", paused"));
-    }
-
-    SECTION("the reading bar and the cards follow the page's scroll")
-    {
-      auto progress = [&]
-      {
-        auto barAnimations = byId(u8"reading-progress")->GetAnimations();
-        REQUIRE(barAnimations.size() == 1);
-        auto currentTime = barAnimations[0]->CurrentTime();
-        REQUIRE(currentTime);
-        REQUIRE(currentTime->Percentage());
-        return *currentTime->Percentage();
-      };
-      auto opacityOf = [&](utf8_stringview id)
-      {
-        auto *renderer = byId(id)->Renderer();
-        REQUIRE(renderer);
-        return renderer->Style().GetOpacity().Value.Value;
-      };
-
-      // At the top of the page, the bar is empty and the cards below the view haven't come in.
-      CHECK(progress() == Catch::Approx(0));
-      CHECK(opacityOf(u8"reveal-1") == 0);
-
-      // Scrolled to, a card has come in.
-      byId(u8"reveal-1")->ScrollIntoView(true);
-      run(50ms);
-      CHECK(progress() > 0);
-      CHECK(progress() < 100);
-      CHECK(opacityOf(u8"reveal-1") == 1);
-
-      // At the bottom of the page, the bar is full.
-      view.Document().ScrollingElement()->SetScrollTop(1'000'000);
-      run(50ms);
-      CHECK(progress() == Catch::Approx(100));
-    }
-  }
-
-  TEST_CASE("View: the editor page's pointers", "[UI]")
-  {
-    boo::MemoryCache::Singleton().EvictResources();
-    View view({1'200, 600});
-    FollowLinks(view);
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    // As the editor makes it once the page has loaded.
-    editor::PagePointers pointers(document);
-    auto byId = [&](utf8_stringview id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return element;
-    };
-    auto textOf = [&](utf8_stringview id)
-    {
-      auto text = byId(id)->TextContent().value_or(boo::dom::DOMString {});
-      return std::string(text.begin(), text.end());
-    };
-
-    // The pointer cards at the top of the view.
-    auto padRect = byId(u8"pointer-pad")->GetBoundingClientRect();
-    view.ScrollTo(boo::IntPoint(0, view.ScrollPosition().Y() + static_cast<int32>(padRect->Top()) - 20));
-    view.UpdateRendering();
-    auto centre = [&](utf8_stringview id)
-    {
-      auto rect = byId(id)->GetBoundingClientRect();
-      return boo::IntPoint(static_cast<int32>(rect->Left() + rect->Width() / 2),
-                           static_cast<int32>(rect->Top() + rect->Height() / 2));
-    };
-    auto touchInput = [](pal::PointerAction action, uint32 id)
-    {
-      pal::PointerInput input;
-      input.Id = id;
-      input.Type = pal::PointerType::Touch;
-      input.Action = action;
-      input.InContact = action == pal::PointerAction::Pressed || action == pal::PointerAction::Moved;
-      input.Pressure = 0.5f;
-      return input;
-    };
-    CHECK(textOf(u8"pointer-readout") == "Move a mouse, a pen or a finger over the pad.\nTouches held: 0");
-
-    SECTION("the pad shows the pointers over it and the touches it holds, which don't pinch")
-    {
-      auto pad = centre(u8"pointer-pad");
-      view.MouseMoved(pad);
-      CHECK(textOf(u8"pointer-readout").starts_with("mouse 1 at "));
-
-      auto first = boo::DoublePoint(pad.X() - 40, pad.Y());
-      auto second = boo::DoublePoint(pad.X() + 40, pad.Y());
-      (void)view.TouchInput(first, touchInput(pal::PointerAction::Pressed, 10));
-      (void)view.TouchInput(second, touchInput(pal::PointerAction::Pressed, 11));
-      (void)view.TouchInput(boo::DoublePoint(pad.X() + 120, pad.Y()),
-                            touchInput(pal::PointerAction::Moved, 11));
-      auto readout = textOf(u8"pointer-readout");
-      CHECK(readout.contains("\ntouch 3 at "));
-      CHECK(readout.contains("pressure 0.50"));
-      CHECK(readout.contains("\ntouch 4 at "));
-      CHECK(readout.ends_with("Touches held: 2"));
-      CHECK(view.GetPage().PageScaleFactor() == 1);
-
-      (void)view.TouchInput(first, touchInput(pal::PointerAction::Released, 10));
-      (void)view.TouchInput(second, touchInput(pal::PointerAction::Released, 11));
-      readout = textOf(u8"pointer-readout");
-      CHECK_FALSE(readout.contains("touch"));
-      CHECK(readout.ends_with("Touches held: 0"));
-    }
-
-    SECTION("the chip follows the pointer that captured it, within its area")
-    {
-      auto chip = centre(u8"drag-chip");
-      view.MouseMoved(chip);
-      // The capture takes hold at the pointer's next event.
-      view.MousePressed(chip, pal::MouseButton::Left);
-      view.MouseMoved(boo::IntPoint(chip.X() + 50, chip.Y() + 30));
-      CHECK(textOf(u8"drag-chip") == "Dragging (pointer 1)");
-      CHECK(byId(u8"drag-chip")->GetAttribute(u8"style") == boo::dom::DOMString(u8"left: 50px; top: 30px"));
-      // Far outside its area, it stops at the area's edge.
-      view.MouseMoved(boo::IntPoint(chip.X() - 500, chip.Y() + 1'000));
-      auto style = byId(u8"drag-chip")->GetAttribute(u8"style").value_or(boo::dom::DOMString());
-      CHECK(std::string(style.begin(), style.end()).starts_with("left: 0px; top: "));
-      view.MouseReleased(boo::IntPoint(chip.X() - 500, chip.Y() + 1'000), pal::MouseButton::Left);
-      CHECK(textOf(u8"drag-chip") == "Drag me");
-    }
-
-    SECTION("the box locks the pointer, and shows the movement it gets")
-    {
-      CHECK(textOf(u8"lock-readout") == "Click the box to lock the pointer to it.");
-      view.SetPointerLockHandler([](bool) { return true; });
-      auto box = centre(u8"lock-box");
-      view.MouseMoved(box);
-      view.MousePressed(box, pal::MouseButton::Left);
-      view.MouseReleased(box, pal::MouseButton::Left);
-      boo::html::EventLoop::Current().RunUntilIdle();
-      CHECK(view.PointerLocked());
-      CHECK(textOf(u8"lock-readout") == "Locked: move the mouse. Escape unlocks it.");
-      view.LockedMouseMoved({5, -3}, {5, -3});
-      view.LockedMouseMoved({2, 1}, {2, 1});
-      CHECK(textOf(u8"lock-readout") == "Locked: moved 2, 1; 7, -2 in all. Escape unlocks it.");
-      (void)view.KeyPressed(pal::Key::Escape);
-      boo::html::EventLoop::Current().RunUntilIdle();
-      CHECK(textOf(u8"lock-readout") == "Click the box to lock the pointer to it.");
-    }
-
-    SECTION("the tiles pan with a finger, and a tap clicks them")
-    {
-      auto area = centre(u8"pan-area");
-      (void)view.TouchInput(boo::DoublePoint(area), touchInput(pal::PointerAction::Pressed, 1));
-      (void)view.TouchInput(boo::DoublePoint(area), touchInput(pal::PointerAction::Released, 1));
-      CHECK(textOf(u8"gesture-log").starts_with("click from touch at "));
-
-      (void)view.TouchInput(boo::DoublePoint(area), touchInput(pal::PointerAction::Pressed, 1));
-      (void)view.TouchInput(boo::DoublePoint(area.X() - 30, area.Y() - 40),
-                            touchInput(pal::PointerAction::Moved, 1));
-      (void)view.TouchInput(boo::DoublePoint(area.X() - 30, area.Y() - 40),
-                            touchInput(pal::PointerAction::Released, 1));
-      CHECK(byId(u8"pan-area")->ScrollLeft() == 30);
-      CHECK(byId(u8"pan-area")->ScrollTop() == 40);
-    }
-  }
-
-  TEST_CASE("View: the editor's settings page asks before saving", "[UI]")
-  {
-    View view({1'200, 800});
-    List<NavigationRequest> submissions;
-    view.SetNavigationHandler(
-      [&](const NavigationRequest &request)
-      {
-        if (request.IsFormSubmission)
-        {
-          submissions.push_back(request);
-        }
-      });
-    REQUIRE(
-      view
-        .LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "settings.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    auto confirm = document.GetElementById(u8"confirm-save");
-    REQUIRE(confirm);
-    auto &dialog = Downcast<boo::html::HTMLDialogElement>(*confirm);
-    auto &form = Downcast<boo::html::HTMLFormElement>(*document.GetElementById(u8"settings"));
-    // As the editor does: the form is submitted when the dialog closes with "save".
-    auto closer = dialog.AddEventListener(u8"close",
-                                          [&](boo::dom::Event &)
-                                          {
-                                            if (dialog.ReturnValue() == u8"save")
-                                            {
-                                              (void)form.RequestSubmit();
-                                            }
-                                            dialog.ReturnValue({});
-                                          });
-    auto click = [&](utf8_stringview selectors)
-    {
-      auto element = document.QuerySelector(selectors).ReleaseValue();
-      REQUIRE(element);
-      element->DispatchSimulatedClick(nullptr);
-      boo::html::EventLoop::Current().RunUntilIdle();
-      (void)view.Update(boo::html::EventLoop::Current().Now());
-    };
-
-    // Save shows the dialog modally, over the page.
-    click(u8".settings button[command=show-modal]");
-    REQUIRE(dialog.Matches(u8":modal").ReleaseValue());
-    CHECK(document.ActiveElement().get()
-          == document.QuerySelector(u8"#confirm-save button[value=save]").Value().get());
-
-    // Escape cancels; so does Cancel.
-    (void)view.KeyPressed(pal::Key::Escape);
-    boo::html::EventLoop::Current().RunUntilIdle();
-    CHECK_FALSE(dialog.Open());
-    click(u8".settings button[command=show-modal]");
-    click(u8"#confirm-save button[value=cancel]");
-    CHECK_FALSE(dialog.Open());
-    CHECK(submissions.empty());
-
-    // Saving submits the form.
-    click(u8".settings button[command=show-modal]");
-    click(u8"#confirm-save button[value=save]");
-    CHECK_FALSE(dialog.Open());
-    REQUIRE(submissions.size() == 1);
-    CHECK(submissions[0].SourceElement.get() == &form);
-    CHECK(submissions[0].URL == u8"https://example.com/settings");
-    REQUIRE(submissions[0].Entries);
-    CHECK_FALSE(submissions[0].Entries->Items().empty());
-
-    // Escape after a save doesn't save again.
-    click(u8".settings button[command=show-modal]");
-    (void)view.KeyPressed(pal::Key::Escape);
-    boo::html::EventLoop::Current().RunUntilIdle();
-    (void)view.Update(boo::html::EventLoop::Current().Now());
-    CHECK(submissions.size() == 1);
   }
 
   TEST_CASE("View: records its painting", "[UI]")
@@ -1115,6 +517,56 @@ namespace krys::ui::tests
     view.MouseMoved({10, 10});
     CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
     CHECK_FALSE(view.Document().Selection().IsRange());
+  }
+
+  TEST_CASE("View: cursor images", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style>"
+      u8"<div style='cursor: "
+      u8"url(data:image/"
+      u8"png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAEklEQVR4nGP4z8DQgA0z0EECAAyiLOPFmS/"
+      u8"VAAAAAElFTkSuQmCC) 2 3, crosshair'></div>"
+      u8"<div style='cursor: "
+      u8"image-set(url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAEUlEQVR4nGNgYPj/"
+      u8"Hz8eEQoAQ1d/gZtbdTsAAAAASUVORK5CYII=) 2x) 1 2, auto'></div><div></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    boo::html::EventLoop::Current().RunUntilIdle();
+    view.UpdateRendering();
+
+    // Over the first box, its image with its hot spot, in straight alpha; the system cursor is the arrow.
+    view.MouseMoved({10, 10});
+    auto image = view.CurrentCursorImage();
+    REQUIRE(image);
+    CHECK(image->Width() == 6);
+    CHECK(image->Height() == 5);
+    CHECK(image->HotSpotX() == 2);
+    CHECK(image->HotSpotY() == 3);
+    REQUIRE(image->Pixels().size() == 30uz);
+    auto pixel = image->Pixels()[0];
+    CHECK(pixel >> 24 == 128);
+    CHECK(((pixel >> 16) & 0xFF) >= 254);
+    CHECK((pixel & 0xFFFF) == 0);
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
+
+    // The same image while the cursor doesn't change.
+    view.MouseMoved({20, 20});
+    CHECK(view.CurrentCursorImage() == image);
+
+    // An image-set() image's hot spot is in its natural size: in its pixels, twice as far.
+    view.MouseMoved({10, 60});
+    image = view.CurrentCursorImage();
+    REQUIRE(image);
+    CHECK(image->Width() == 8);
+    CHECK(image->HotSpotX() == 2);
+    CHECK(image->HotSpotY() == 4);
+
+    // Elsewhere, a system cursor.
+    view.MouseMoved({10, 110});
+    CHECK_FALSE(view.CurrentCursorImage());
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
   }
 
   TEST_CASE("View: dragging a selection shows the I-beam only over text", "[UI]")
@@ -1441,6 +893,50 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: a tap puts the caret under the finger, as a click does", "[UI]")
+  {
+    // In the middle of "wonderful", which runs from 6 to 15.
+    const boo::IntPoint point(120, 10);
+
+    // Each in its own view, as a click and a tap at the same place would count as a double click.
+    auto caretOffsetAfter = [&](auto press)
+    {
+      View view({400, 100});
+      view.LoadHTML(u8"<!DOCTYPE html><div id=e contenteditable style='margin: 0; font: 20px monospace'>"
+                    u8"hello wonderful world</div>");
+      WaitForLoad(view);
+      view.UpdateRendering();
+      press(view);
+      auto &selection = view.Document().Selection();
+      REQUIRE(selection.IsCaret());
+      return selection.Selection().Start().DeprecatedEditingOffset();
+    };
+
+    const auto clicked = caretOffsetAfter(
+      [&](View &view)
+      {
+        view.MousePressed(point, pal::MouseButton::Left);
+        view.MouseReleased(point, pal::MouseButton::Left);
+      });
+    CHECK(clicked > 6);
+    CHECK(clicked < 15);
+
+    const auto tapped = caretOffsetAfter(
+      [&](View &view)
+      {
+        pal::PointerInput touch;
+        touch.Id = 1;
+        touch.Type = pal::PointerType::Touch;
+        touch.Action = pal::PointerAction::Pressed;
+        touch.InContact = true;
+        (void)view.TouchInput(boo::DoublePoint(point), touch);
+        touch.Action = pal::PointerAction::Released;
+        touch.InContact = false;
+        (void)view.TouchInput(boo::DoublePoint(point), touch);
+      });
+    CHECK(tapped == clicked);
+  }
+
   TEST_CASE("View: gestures", "[UI]")
   {
     View view({400, 300});
@@ -1670,6 +1166,99 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: a touch drags a slider's thumb along it, and pans across it", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } #r { margin: 0; width: 200px }</style>"
+                  u8"<div style='height: 100px'></div><input type=range id=r>"
+                  u8"<div style='height: 2000px'></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"r"));
+    auto rect = input.GetBoundingClientRect();
+    auto y = rect->Y() + rect->Height() / 2;
+    uint32 changes = 0;
+    auto handle =
+      input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
+                             Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+
+    auto touch = [&](pal::PointerAction action, boo::DoublePoint point)
+    {
+      pal::PointerInput pointer;
+      pointer.Id = 1;
+      pointer.Type = pal::PointerType::Touch;
+      pointer.Action = action;
+      pointer.InContact = action == pal::PointerAction::Pressed || action == pal::PointerAction::Moved;
+      (void)view.TouchInput(point, pointer);
+    };
+
+    SECTION("along the slider, the thumb follows the touch and the page doesn't pan")
+    {
+      touch(pal::PointerAction::Pressed, {20, y});
+      CHECK(input.ValueAsNumber() < 20);
+      touch(pal::PointerAction::Moved, {100, y + 5});
+      touch(pal::PointerAction::Moved, {190, y + 30});
+      CHECK(input.ValueAsNumber() > 90);
+      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(changes == 0);
+      touch(pal::PointerAction::Released, {190, y + 30});
+      CHECK(changes == 1);
+    }
+
+    SECTION("across the slider, the touch pans the page")
+    {
+      touch(pal::PointerAction::Pressed, {100, y});
+      auto value = input.Value();
+      touch(pal::PointerAction::Moved, {102, y - 10});
+      touch(pal::PointerAction::Moved, {180, y - 60});
+      CHECK(input.Value() == value);
+      CHECK(view.ScrollPosition().Y() > 0);
+      touch(pal::PointerAction::Released, {180, y - 60});
+    }
+  }
+
+  TEST_CASE("View: a file input asks the host for files", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } input { margin: 0 }</style>"
+                  u8"<input type=file id=f accept=image/*>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"f"));
+    uint32 changes = 0;
+    auto handle =
+      input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
+                             Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+    auto click = [&]
+    {
+      view.MousePressed({5, 5}, pal::MouseButton::Left);
+      view.MouseReleased({5, 5}, pal::MouseButton::Left);
+      boo::html::EventLoop::Current().RunUntilIdle();
+    };
+
+    SECTION("without a handler, the choice is cancelled")
+    {
+      click();
+      CHECK(input.Files()->IsEmpty());
+      CHECK(changes == 0);
+    }
+
+    SECTION("a click on its button asks the handler, which answers later")
+    {
+      RefPtr<boo::FileChooser> chooser;
+      view.SetFileChooserHandler([&](Ref<boo::FileChooser> request) { chooser = request; });
+      click();
+      REQUIRE(chooser);
+      CHECK(chooser->Settings().AcceptMIMETypes == List<utf8_string> {u8"image/*"});
+      CHECK_FALSE(chooser->Settings().AllowsMultipleFiles);
+
+      chooser->ChooseFiles({u8"C:/pictures/cat.png"});
+      CHECK(changes == 1);
+      REQUIRE(input.Files()->Length() == 1);
+      CHECK(input.Files()->GetFile(0).Name() == u8"cat.png");
+    }
+  }
+
   TEST_CASE("View: a click focuses and the window's focus", "[UI]")
   {
     View view({400, 300});
@@ -1749,6 +1338,35 @@ namespace krys::ui::tests
     CHECK(view.Document().GetEditor().SelectedText() == u8"The quick brown fox");
 
     strategies.SetPasteboardStrategy(systemPasteboard);
+  }
+
+  TEST_CASE("View: Alt and a key run an access key", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><button id=b accesskey=d>d</button>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    (void)view.KeyPressed(pal::Key::D, {pal::KeyModifier::Alt}, {u8"", u8"d"});
+    CHECK(view.Document().FocusedElement() == view.Document().GetElementById(u8"b").get());
+  }
+
+  TEST_CASE("View: the keyboard types as soon as design mode is on", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
+                  u8"<div id=e>abc</div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    CHECK_FALSE(view.AcceptsTextInput());
+
+    view.Document().DesignMode(u8"on");
+    view.UpdateRendering();
+    CHECK(view.AcceptsTextInput());
+    CHECK(view.Document().Selection().IsCaret());
+
+    (void)view.KeyPressed(pal::Key::D, {}, {u8"d", u8"d"});
+    CHECK(view.Document().GetElementById(u8"e")->TextContent() == u8"dabc");
   }
 
   TEST_CASE("View: the keyboard edits editable text", "[UI]")
@@ -1908,11 +1526,32 @@ namespace krys::ui::tests
     CHECK(input::Describe(pal::Key::Del).NamedKey == u8"Backspace");
     CHECK(input::Describe(pal::Key::Option).WindowsVirtualKeyCode == boo::vk::LMenu);
     CHECK(input::Describe(pal::Key::KeypadEnter).IsKeypad);
+    auto contextMenu = input::Describe(pal::Key::ContextMenu);
+    CHECK(contextMenu.Code == u8"ContextMenu");
+    CHECK(contextMenu.NamedKey == u8"ContextMenu");
+    CHECK(contextMenu.WindowsVirtualKeyCode == boo::vk::Apps);
+    CHECK(input::Describe(pal::Key::Insert).NamedKey == u8"Insert");
+    CHECK(input::Describe(pal::Key::PrintScreen).WindowsVirtualKeyCode == boo::vk::Snapshot);
+    CHECK(input::Describe(pal::Key::Pause).Code == u8"Pause");
+    CHECK(input::Describe(pal::Key::ScrollLock).NamedKey == u8"ScrollLock");
+    CHECK(input::Describe(pal::Key::NumLock).Code == u8"NumLock");
+    CHECK_FALSE(input::Describe(pal::Key::NumLock).IsKeypad);
 
     // A key that types text has a key identifier from it.
     auto a = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, pal::Key::A, {}, {u8"a", u8"a"}, false);
     CHECK(a.KeyIdentifier() == u8"U+0041");
     CHECK(a.Key() == u8"a");
+
+    // A dead key types nothing, so its key is "Dead", whatever the key would type unmodified; its release
+    // keeps the key its press had.
+    auto dead = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, pal::Key::Quote, {},
+                                     {.Text = {}, .UnmodifiedText = u8"'", .DeadKey = true}, false);
+    CHECK(dead.Key() == u8"Dead");
+    CHECK(dead.KeyIdentifier() == u8"Unidentified");
+    CHECK(dead.Code() == u8"Quote");
+    auto deadUp =
+      input::KeyboardEvent(boo::PlatformEvent::Type::KeyUp, pal::Key::Quote, {}, {}, false, u8"Dead");
+    CHECK(deadUp.Key() == u8"Dead");
 
     CHECK(input::ToBooey(pal::MouseButton::Thumb1) == boo::MouseButton::Back);
     auto modifiers = input::ToBooey(pal::KeyModifiers {pal::KeyModifier::Alt, pal::KeyModifier::Meta});
@@ -1957,8 +1596,7 @@ namespace krys::ui::tests
       }
     };
     Ref<ScrollCounter> counter = CreateRef<ScrollCounter>();
-    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"scroll"),
-                                     Ref<boo::dom::EventListenerCallback> {counter}, false);
+    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"scroll"), counter, false);
 
     CHECK(view.ScrollPosition() == boo::IntPoint());
     view.ScrollTo({0, 150});
@@ -1974,6 +1612,31 @@ namespace krys::ui::tests
     CHECK(view.Record()->AsText({}).contains(u8R"((translate
   (x 0.00)
   (y -400.00)))"));
+  }
+
+  TEST_CASE("View: a touchpad's pan scrolls by the pixels the content follows", "[UI]")
+  {
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 }</style><div style='width: 400px; height: 500px'></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    auto pan = [&](pal::TouchpadPanPhase phase, float deltaX, float deltaY)
+    {
+      return view.TouchpadPan({50, 50}, {.Phase = phase, .DeltaX = deltaX, .DeltaY = deltaY});
+    };
+
+    // The content moving up and left scrolls down and right, whatever the wheel's settings.
+    CHECK_FALSE(pan(pal::TouchpadPanPhase::Began, 0, 0));
+    CHECK(pan(pal::TouchpadPanPhase::Changed, 0, -7));
+    CHECK(view.ScrollPosition() == boo::IntPoint(0, 7));
+    CHECK(pan(pal::TouchpadPanPhase::Changed, -12, 0));
+    CHECK(view.ScrollPosition() == boo::IntPoint(12, 7));
+    CHECK(pan(pal::TouchpadPanPhase::MomentumChanged, 0, -5));
+    CHECK(view.ScrollPosition() == boo::IntPoint(12, 12));
+    CHECK_FALSE(pan(pal::TouchpadPanPhase::MomentumEnded, 0, 0));
+    CHECK(view.ScrollPosition() == boo::IntPoint(12, 12));
   }
 
   TEST_CASE("View: the wheel scrolls", "[UI]")
@@ -2381,8 +2044,7 @@ namespace krys::ui::tests
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
-    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
-                           Ref<boo::dom::EventListenerCallback> {changes}, false);
+    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
     auto open = [&]
     {
       view.MousePressed(inside, pal::MouseButton::Left);
@@ -2471,7 +2133,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
     auto &month = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"m"));
-    month.Click();
+    UserClick(month);
     auto *months = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
     REQUIRE(months);
     CHECK(months->GetMode() == DateTimeChooserOverlay::Mode::Months);
@@ -2485,7 +2147,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
     auto &week = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"w"));
-    week.Click();
+    UserClick(week);
     auto *weeks = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
     REQUIRE(weeks);
     CHECK(weeks->GetMode() == DateTimeChooserOverlay::Mode::Weeks);
@@ -2507,8 +2169,7 @@ namespace krys::ui::tests
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
-    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
-                           Ref<boo::dom::EventListenerCallback> {changes}, false);
+    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
     auto open = [&]
     {
       view.MousePressed(inside, pal::MouseButton::Left);
@@ -2555,14 +2216,197 @@ namespace krys::ui::tests
     CHECK(input.Value() == u8"#ff0000");
   }
 
-  TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")
+  TEST_CASE("View: datalist suggestions in pickers", "[UI]")
   {
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".PNG") == u8"image/png");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".jpeg") == u8"image/jpeg");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".webp") == u8"image/webp");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".woff2") == u8"font/woff2");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".TTF") == u8"font/ttf");
-    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".unknown").empty());
+    View view({400, 300});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } input { margin: 10px }</style>"
+      u8"<input type=date id=d list=dates value=2026-05-01><input type=color id=c list=colours>"
+      u8"<datalist id=dates><option value=2026-05-01 label=Launch><option value=2026-06-15>"
+      u8"<option value=nope></datalist>"
+      u8"<datalist id=colours><option value=#123456><option value=red><option value=nope></datalist>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    SECTION("A date input lists its valid suggestions, then Other for the calendar")
+    {
+      auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
+      UserClick(input);
+      auto *picker = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
+      REQUIRE(picker);
+      CHECK(picker->GetMode() == DateTimeChooserOverlay::Mode::Suggestions);
+      auto &list = picker->ContentView().Document();
+      auto rows = list.QuerySelectorAll(u8".suggestion");
+      REQUIRE_FALSE(rows.HasException());
+      CHECK(rows.Value()->Length() == 3);
+      auto label = list.QuerySelector(u8".label");
+      REQUIRE_FALSE(label.HasException());
+      REQUIRE(label.Value());
+      CHECK(label.Value()->TextContent() == u8"Launch");
+
+      // The value's suggestion is highlighted; Down and Enter choose the next.
+      CHECK(picker->HighlightedValue() == u8"2026-05-01");
+      CHECK(view.KeyPressed(pal::Key::DownArrow));
+      CHECK(view.KeyPressed(pal::Key::Enter));
+      CHECK_FALSE(view.ShownOverlay());
+      CHECK(input.Value() == u8"2026-06-15");
+
+      // Other shows the calendar.
+      UserClick(input);
+      picker = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
+      REQUIRE(picker);
+      CHECK(view.KeyPressed(pal::Key::End));
+      CHECK(view.KeyPressed(pal::Key::Enter));
+      CHECK(view.ShownOverlay() == picker);
+      CHECK(picker->GetMode() == DateTimeChooserOverlay::Mode::Days);
+      CHECK(picker->HighlightedValue() == u8"2026-06-15");
+      CHECK(view.KeyPressed(pal::Key::Escape));
+    }
+
+    SECTION("A colour input's palette starts with its colour suggestions")
+    {
+      auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
+      UserClick(input);
+      auto *picker = static_cast<ColorChooserOverlay *>(view.ShownOverlay());
+      REQUIRE(picker);
+      CHECK(picker->Colors().size() == 42uz);
+      CHECK(picker->Colors()[0] == boo::Color(SRGBA<uint8> {0x12, 0x34, 0x56}));
+      CHECK(picker->Colors()[1] == boo::Color(SRGBA<uint8> {255, 0, 0}));
+      CHECK(view.KeyPressed(pal::Key::Escape));
+    }
+  }
+
+  TEST_CASE("View: a text field's datalist suggestions", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } input { margin: 10px }"
+                  u8"</style><input id=t list=fruit><p id=after>After</p>"
+                  u8"<datalist id=fruit><option value=Apple><option value=Banana label=Yellow>"
+                  u8"<option value=Pineapple><option value=Cherry disabled></datalist>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
+    auto box = input.GetBoundingClientRect();
+    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    auto changes = CreateRef<EventCounter>();
+    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
+    auto click = [&](boo::IntPoint point)
+    {
+      view.MousePressed(point, pal::MouseButton::Left);
+      view.MouseReleased(point, pal::MouseButton::Left);
+    };
+
+    // The field has a list button.
+    REQUIRE(input.DataListButtonElement());
+    CHECK(input.DataListButtonElement()->Renderer());
+
+    // Clicking the focused field lists the enabled suggestions below it, with their labels.
+    click(inside);
+    click(inside);
+    auto *list = static_cast<DataListSuggestionsOverlay *>(view.ShownOverlay());
+    REQUIRE(list);
+    CHECK_FALSE(list->IsModal());
+    CHECK(input.Matches(u8":open").Value());
+    CHECK(list->Suggestions().size() == 3uz);
+    CHECK(list->Suggestions()[1].Label == u8"Yellow");
+    CHECK(list->Rect().Y() == static_cast<int32>(box->Bottom()));
+    CHECK(input.IsPresentingAttachedView());
+
+    // Typing goes to the field, and narrows the list: those starting with the text, then those containing it.
+    CHECK(view.InsertText(u8"app"));
+    CHECK(input.Value() == u8"app");
+    REQUIRE(view.ShownOverlay() == list);
+    REQUIRE(list->Suggestions().size() == 2uz);
+    CHECK(list->Suggestions()[0].Value == u8"Apple");
+    CHECK(list->Suggestions()[1].Value == u8"Pineapple");
+
+    // Down highlights, Enter chooses, firing change.
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(list->HighlightedIndex() == 1);
+    CHECK(view.KeyPressed(pal::Key::Enter));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"Pineapple");
+    CHECK(changes->Count == 1);
+    CHECK_FALSE(input.IsPresentingAttachedView());
+    CHECK_FALSE(input.Matches(u8":open").Value());
+
+    // The list button opens it; Escape closes it.
+    (void)input.SetValue(u8"");
+    auto button = input.DataListButtonElement()->GetBoundingClientRect();
+    click(boo::IntPoint(static_cast<int32>(button->X() + button->Width() / 2),
+                        static_cast<int32>(button->Y() + button->Height() / 2)));
+    list = static_cast<DataListSuggestionsOverlay *>(view.ShownOverlay());
+    REQUIRE(list);
+    CHECK(list->Suggestions().size() == 3uz);
+    CHECK(view.KeyPressed(pal::Key::Escape));
+    CHECK_FALSE(view.ShownOverlay());
+
+    // Clicking a suggestion chooses it; a press elsewhere closes the list and goes on to the page.
+    click(inside);
+    list = static_cast<DataListSuggestionsOverlay *>(view.ShownOverlay());
+    REQUIRE(list);
+    auto banana = list->ContentView().Document().QuerySelector(u8"[data-index='1']");
+    REQUIRE_FALSE(banana.HasException());
+    REQUIRE(banana.Value());
+    click(CentreOf(*banana.Value(), list->Rect().Location()));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"Banana");
+    click(inside);
+    REQUIRE(view.ShownOverlay());
+    click({390, 290});
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(view.Document().FocusedElement() != &input);
+  }
+
+  TEST_CASE("View: an invalid control's validation message", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } input { margin: 10px }"
+                  u8"</style><form id=f><input id=t required pattern=x><button id=go>Go</button></form>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    auto &form = Downcast<boo::html::HTMLFormElement>(*view.Document().GetElementById(u8"f"));
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
+    auto box = input.GetBoundingClientRect();
+    auto shown = [&]()
+    {
+      return static_cast<ValidationMessageOverlay *>(view.ShownOverlay());
+    };
+
+    // reportValidity() shows the message below the control, which keeps the keys.
+    CHECK_FALSE(input.ReportValidity());
+    auto *bubble = shown();
+    REQUIRE(bubble);
+    CHECK_FALSE(bubble->IsModal());
+    CHECK(bubble->IsShownAt(input));
+    CHECK(bubble->Message() == input.ValidationMessage());
+    CHECK(bubble->Rect().Y() == static_cast<int32>(box->Bottom()));
+    CHECK(bubble->Rect().X() == static_cast<int32>(box->X()));
+    CHECK(bubble->Rect().Width() > 16);
+    CHECK(bubble->Rect().Height() > 10);
+    CHECK(input.IsShowingValidationMessage());
+
+    // Typing hides it.
+    CHECK(view.InsertText(u8"a"));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK_FALSE(input.IsShowingValidationMessage());
+
+    // Submitting shows it again; Escape hides it.
+    REQUIRE_FALSE(form.RequestSubmit().HasException());
+    REQUIRE(shown() == bubble);
+    CHECK(view.KeyPressed(pal::Key::Escape) == false);
+    CHECK_FALSE(view.ShownOverlay());
+
+    // A press elsewhere hides it, and goes on to the page.
+    CHECK_FALSE(input.ReportValidity());
+    REQUIRE(view.ShownOverlay());
+    view.MousePressed({390, 290}, pal::MouseButton::Left);
+    view.MouseReleased({390, 290}, pal::MouseButton::Left);
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(view.Document().FocusedElement() != &input);
   }
 
   TEST_CASE("View: animations run on the host's frames", "[UI]")
@@ -2705,9 +2549,39 @@ namespace krys::ui::tests
     boo::html::EventLoop::Current().RunUntilIdle();
     CHECK(changes == 1);
 
+    // A hidden page's update waits, without asking the host to paint each frame.
+    auto now = boo::html::EventLoop::Current().Now();
+    view.GetPage().ScheduleRenderingUpdate();
+    CHECK_FALSE(view.Update(now));
+    CHECK(view.GetPage().IsRenderingUpdateScheduled());
+
     view.SetVisible(true);
     CHECK_FALSE(view.Document().Hidden());
     boo::html::EventLoop::Current().RunUntilIdle();
     CHECK(changes == 2);
+    CHECK(view.Update(now));
+    CHECK_FALSE(view.GetPage().IsRenderingUpdateScheduled());
+  }
+  TEST_CASE("View: hands the host the icons the page names", "[UI]")
+  {
+    View view({400, 300});
+    List<std::string> icons;
+    view.SetIconHandler(
+      [&](const PageIcon &icon)
+      {
+        icons.push_back(std::string(icon.URL.begin(), icon.URL.end()) + " "
+                        + std::to_string(icon.Size.value_or(0)) + " "
+                        + std::string(icon.Data.begin(), icon.Data.end()));
+      });
+
+    // "UE5H" is "PNG".
+    view.LoadHTML(u8"<!DOCTYPE html><link rel=icon sizes=16x16 href=\"data:image/png;base64,UE5H\">",
+                  boo::url::URL(u8"https://example.com/page.html"));
+    WaitForLoad(view);
+    auto &eventLoop = boo::html::EventLoop::Current();
+    while (icons.empty() && eventLoop.RunNextTask())
+    {
+    }
+    CHECK(icons == List<std::string> {"data:image/png;base64,UE5H 16 PNG"});
   }
 }

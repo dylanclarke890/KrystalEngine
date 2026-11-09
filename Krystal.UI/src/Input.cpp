@@ -132,7 +132,14 @@ namespace krys::ui::input
       case Key::RightArrow: return named(u8"ArrowRight", u8"ArrowRight", u8"Right", boo::vk::Right);
       case Key::DownArrow:  return named(u8"ArrowDown", u8"ArrowDown", u8"Down", boo::vk::Down);
       case Key::UpArrow:    return named(u8"ArrowUp", u8"ArrowUp", u8"Up", boo::vk::Up);
-      default:              return named({}, u8"Unidentified", u8"Unidentified", 0);
+      case Key::Insert:     return named(u8"Insert", u8"Insert", u8"Insert", boo::vk::Insert);
+      case Key::PrintScreen:
+        return named(u8"PrintScreen", u8"PrintScreen", u8"PrintScreen", boo::vk::Snapshot);
+      case Key::Pause:       return named(u8"Pause", u8"Pause", u8"Pause", boo::vk::Pause);
+      case Key::ScrollLock:  return named(u8"ScrollLock", u8"ScrollLock", u8"Scroll", boo::vk::Scroll);
+      case Key::NumLock:     return named(u8"NumLock", u8"NumLock", u8"NumLock", boo::vk::NumLock);
+      case Key::ContextMenu: return named(u8"ContextMenu", u8"ContextMenu", u8"Apps", boo::vk::Apps);
+      default:               return named({}, u8"Unidentified", u8"Unidentified", 0);
     }
   }
 
@@ -219,6 +226,12 @@ namespace krys::ui::input
     {
       keyValue = utf8_string(description.NamedKey);
     }
+    else if (text.DeadKey)
+    {
+      // A dead key types nothing itself; its accent joins the next key's text.
+      // https://w3c.github.io/uievents-key/#key-Dead
+      keyValue = u8"Dead";
+    }
     else if (!text.Text.empty())
     {
       keyValue = text.Text;
@@ -229,12 +242,12 @@ namespace krys::ui::input
     }
     else
     {
-      // FIXME: Dead keys ("Dead"), which the platform layer marks with KeyText::DeadKey.
       keyValue = u8"Unidentified";
     }
 
-    utf8_string keyIdentifier = !description.KeyIdentifier.empty()
-                                  ? utf8_string(description.KeyIdentifier)
+    utf8_string keyIdentifier = !description.KeyIdentifier.empty() ? utf8_string(description.KeyIdentifier)
+                                : text.DeadKey
+                                  ? utf8_string(u8"Unidentified")
                                   : KeyIdentifierForText(!text.UnmodifiedText.empty() ? text.UnmodifiedText
                                                          : !text.Text.empty()         ? text.Text
                                                                                       : keyValue);
@@ -314,6 +327,8 @@ namespace krys::ui::input
       case Type::Hand:
       case Type::Grab:
       case Type::Grabbing:                 return pal::CursorShape::Hand;
+      // An image's cursor is `View::CurrentCursorImage`; this is the system cursor in its place.
+      case Type::Custom:                   return pal::CursorShape::Arrow;
       case Type::IBeam:
       case Type::VerticalText:             return pal::CursorShape::IBeam;
       case Type::Cross:
@@ -323,20 +338,29 @@ namespace krys::ui::input
       case Type::Help:                     return pal::CursorShape::Help;
       case Type::NoDrop:
       case Type::NotAllowed:               return pal::CursorShape::NotAllowed;
-      case Type::Move:                     return pal::CursorShape::Move;
+      case Type::Move:
+      case Type::MiddlePanning:            return pal::CursorShape::Move;
       case Type::NorthResize:
       case Type::SouthResize:
+      case Type::NorthPanning:
+      case Type::SouthPanning:
       case Type::NorthSouthResize:
       case Type::RowResize:                return pal::CursorShape::ResizeNS;
       case Type::EastResize:
       case Type::WestResize:
+      case Type::EastPanning:
+      case Type::WestPanning:
       case Type::EastWestResize:
       case Type::ColumnResize:             return pal::CursorShape::ResizeEW;
       case Type::NorthEastResize:
       case Type::SouthWestResize:
+      case Type::NorthEastPanning:
+      case Type::SouthWestPanning:
       case Type::NorthEastSouthWestResize: return pal::CursorShape::ResizeNESW;
       case Type::NorthWestResize:
       case Type::SouthEastResize:
+      case Type::NorthWestPanning:
+      case Type::SouthEastPanning:
       case Type::NorthWestSouthEastResize: return pal::CursorShape::ResizeNWSE;
       case Type::None:                     return pal::CursorShape::Hidden;
       default:                             return pal::CursorShape::Arrow;
@@ -392,5 +416,32 @@ namespace krys::ui::input
     // FIXME: The screen position, once the host reports where the page is on the screen.
     return boo::PlatformWheelEvent(point, point, deltaX, deltaY, wheelTicksX, wheelTicksY, granularity,
                                    modifiers, boo::html::EventLoop::Current().Now());
+  }
+
+  boo::PlatformWheelEvent TouchpadPanEvent(const boo::IntPoint &point,
+                                           const pal::TouchpadPanInput &input) noexcept
+  {
+    using Phase = boo::PlatformWheelEventPhase;
+    auto phase = Phase::None;
+    auto momentumPhase = Phase::None;
+    switch (input.Phase)
+    {
+      case pal::TouchpadPanPhase::Began:           phase = Phase::Began; break;
+      case pal::TouchpadPanPhase::Changed:         phase = Phase::Changed; break;
+      case pal::TouchpadPanPhase::Ended:           phase = Phase::Ended; break;
+      case pal::TouchpadPanPhase::MomentumBegan:   momentumPhase = Phase::Began; break;
+      case pal::TouchpadPanPhase::MomentumChanged: momentumPhase = Phase::Changed; break;
+      case pal::TouchpadPanPhase::MomentumEnded:   momentumPhase = Phase::Ended; break;
+    }
+
+    // The content moves with the fingers, as Booey's deltas go. The ticks are the notches a wheel would
+    // have turned, at 100 pixels per three lines a notch (right and away from the user positive).
+    constexpr float pixelsPerNotch = 3 * boo::ScrollbarPixelsPerLine;
+    // FIXME: The screen position, once the host reports where the page is on the screen.
+    return boo::PlatformWheelEvent(point, point, input.DeltaX, input.DeltaY, -input.DeltaX / pixelsPerNotch,
+                                   input.DeltaY / pixelsPerNotch,
+                                   boo::PlatformWheelEventGranularity::ScrollByPixelWheelEvent,
+                                   ToBooey(input.Modifiers), boo::html::EventLoop::Current().Now())
+      .CopyAsTouchpadPan(phase, momentumPhase);
   }
 }

@@ -25,6 +25,7 @@ SHEETS = {
     "ThemeAdwaitaUserAgentStyleSheet": "themeAdwaita.css",
     "MeterElementShadowUserAgentStyleSheet": "meterElementShadow.css",
     "DetailsElementShadowUserAgentStyleSheet": "detailsElementShadow.css",
+    "MarqueeElementShadowUserAgentStyleSheet": "marqueeElementShadow.css",
 }
 
 

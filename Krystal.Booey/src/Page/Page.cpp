@@ -5,7 +5,10 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
@@ -20,14 +23,37 @@
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
   namespace
   {
+    /// @brief The pages alive.
+    KRYS_NODISCARD List<Page *> &AllPages() noexcept
+    {
+      static MainThreadNeverDestroyed<List<Page *>> pages;
+      return pages;
+    }
+
+    /// @brief The SVG images @p document has loaded, each with its own page.
+    KRYS_NODISCARD List<Ref<svg::SVGImage>> SVGImagesOf(dom::Document &document) noexcept
+    {
+      List<Ref<svg::SVGImage>> images;
+      for (const auto &[url, resource] : document.GetCachedResourceLoader().AllCachedResources())
+      {
+        auto *cachedImage = DynamicDowncast<CachedImage>(resource.get());
+        if (auto *image = cachedImage ? DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()) : nullptr)
+        {
+          images.push_back(ShareRef(*image));
+        }
+      }
+      return images;
+    }
+
     constexpr EnumSet<RenderingUpdateStep> AllRenderingUpdateSteps {
       RenderingUpdateStep::FlushAutofocusCandidates,
       RenderingUpdateStep::Resize,
@@ -36,6 +62,7 @@ namespace krys::boo
       RenderingUpdateStep::Animations,
       RenderingUpdateStep::AnimationFrameCallbacks,
       RenderingUpdateStep::CaretAnimation,
+      RenderingUpdateStep::Images,
       RenderingUpdateStep::ResizeObservations,
       RenderingUpdateStep::FocusFixup,
       RenderingUpdateStep::SnapshottedScrollOffsets,
@@ -61,6 +88,21 @@ namespace krys::boo
     if (!_editorClient)
     {
       _editorClient = CreateUnique<EmptyEditorClient>();
+    }
+    AllPages().push_back(this);
+  }
+
+  void Page::UpdateStyleForAllPagesAfterGlobalChangeInEnvironment() noexcept
+  {
+    ForEachPage([](Page &page) { page.UpdateStyleAfterChangeInEnvironment(); });
+  }
+
+  void Page::ForEachPage(const Func<void(Page &)> &function) noexcept
+  {
+    // A copy, so the function can make and destroy pages.
+    for (auto *page : List<Page *>(AllPages()))
+    {
+      function(*page);
     }
   }
 
@@ -119,7 +161,10 @@ namespace krys::boo
     _pointerCaptureController->Reset();
   }
 
-  Page::~Page() noexcept = default;
+  Page::~Page() noexcept
+  {
+    std::erase(AllPages(), this);
+  }
 
   Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
                          UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient,
@@ -146,8 +191,7 @@ namespace krys::boo
         return;
       }
 
-      // FIXME: The rendering update scheduler (display refresh), once the host reports refreshes: the host
-      // runs a scheduled update at its next frame.
+      // The host's frames are the page's rendering opportunities: it runs a scheduled update at its next one.
       _renderingUpdateIsScheduled = true;
       return;
     }
@@ -162,6 +206,62 @@ namespace krys::boo
     }
   }
 
+  void Page::SetImageAnimationEnabled(bool enabled) noexcept
+  {
+    if (_imageAnimationEnabled == enabled)
+    {
+      return;
+    }
+    _imageAnimationEnabled = enabled;
+
+    ForEachDocument(
+      [enabled](dom::Document &document)
+      {
+        if (auto *svgExtensions = document.SVGExtensionsIfExists())
+        {
+          if (enabled)
+          {
+            svgExtensions->UnpauseAnimations();
+          }
+          else
+          {
+            svgExtensions->PauseAnimations();
+          }
+        }
+
+        // An SVG image's animations are its page's SMIL animations.
+        for (auto &image : SVGImagesOf(document))
+        {
+          if (enabled)
+          {
+            image->ResumeAnimation();
+          }
+          else
+          {
+            image->StopAnimation();
+          }
+        }
+
+        // Animated images stop at their next frame, and start again as they're drawn.
+        if (auto *renderView = enabled ? document.GetRenderView() : nullptr)
+        {
+          renderView->RepaintRootContents();
+        }
+      });
+  }
+
+  void Page::SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept
+  {
+    krys_debug_assert(framesPerSecond);
+    _displayNominalFramesPerSecond = std::max(framesPerSecond, 1u);
+  }
+
+  MonotonicTime::duration Page::PreferredRenderingUpdateInterval() const noexcept
+  {
+    return std::chrono::duration_cast<MonotonicTime::duration>(
+      std::chrono::duration<double>(1.0 / _displayNominalFramesPerSecond));
+  }
+
   // https://html.spec.whatwg.org/#update-the-rendering
   void Page::UpdateRendering() noexcept
   {
@@ -174,15 +274,23 @@ namespace krys::boo
       return;
     }
 
+    // A hidden page's documents aren't rendered: the update stays scheduled until the page is shown.
+    if (!_isVisible)
+    {
+      return;
+    }
+
     ++_renderingUpdateDepth;
     _unfulfilledRequestedSteps = {};
     _renderingUpdateRemainingSteps = AllRenderingUpdateSteps;
     _lastRenderingUpdateTimestamp = html::EventLoop::Current().Now();
     _renderingUpdateIsScheduled = false;
+    _skippedRenderBlockedDocument = false;
 
     LayoutIfNeeded();
 
-    // FIXME: Revealing documents, once there's visibility.
+    // Revealing documents is skipped: it only fires pagereveal and starts view transitions, which there
+    // aren't (see DIFFERENCES.md).
 
     ForEachDocument(
       [](dom::Document &document)
@@ -214,6 +322,19 @@ namespace krys::boo
 
     RunProcessingStep(RenderingUpdateStep::CaretAnimation,
                       [](dom::Document &document) { document.ServiceCaretAnimation(); });
+
+    // An SVG image's page is updated with the page that shows it, which its updates are scheduled with.
+    RunProcessingStep(RenderingUpdateStep::Images,
+                      [](dom::Document &document)
+                      {
+                        for (auto &image : SVGImagesOf(document))
+                        {
+                          if (RefPtr<Page> page = ShareRefPtr(image->InternalPage()))
+                          {
+                            page->UpdateRendering();
+                          }
+                        }
+                      });
 
     LayoutIfNeeded();
 
@@ -280,7 +401,8 @@ namespace krys::boo
 
   void Page::FinalizeRenderingUpdate() noexcept
   {
-    // FIXME: Images with asynchronous decodes, once there are any.
+    // FIXME: Invalidating images whose decodes are asynchronous (invalidateImagesWithAsyncDecodes), so a
+    // host's snapshot draws them, once hosts take snapshots.
     _renderingUpdateRemainingSteps.Remove(RenderingUpdateStep::LayerFlush);
 
     if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
@@ -317,10 +439,12 @@ namespace krys::boo
   void Page::RenderingUpdateCompleted() noexcept
   {
     _renderingUpdateRemainingSteps = {};
-    if (!_unfulfilledRequestedSteps.IsEmpty())
+    // A render-blocked document is updated once it's unblocked, or the block times out.
+    if (!_unfulfilledRequestedSteps.IsEmpty() || _skippedRenderBlockedDocument)
     {
-      _renderingUpdateIsScheduled = true;
       _unfulfilledRequestedSteps = {};
+      // As any request between updates is, so the chrome client hears of it.
+      ScheduleRenderingUpdate();
     }
   }
 
@@ -355,6 +479,8 @@ namespace krys::boo
       if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
       {
         view->Show();
+        // Shown, the overlay scrollbars show, then fade.
+        view->ForEachScrollableArea([](ScrollableArea &area) { area.ContentAreaDidShow(); });
       }
 
       ForEachDocument(
@@ -374,6 +500,9 @@ namespace krys::boo
         });
 
       ResumeAnimatingImages();
+
+      // Updates asked for while the page was hidden were put off until now.
+      ScheduleRenderingUpdate();
     }
     else
     {
@@ -397,6 +526,8 @@ namespace krys::boo
       if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
       {
         view->Hide();
+        // Hidden, the overlay scrollbars hide at once.
+        view->ForEachScrollableArea([](ScrollableArea &area) { area.ContentAreaDidHide(); });
       }
     }
 
@@ -427,8 +558,19 @@ namespace krys::boo
 
   void Page::ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept
   {
+    // https://html.spec.whatwg.org/#update-the-rendering
+    // Remove from docs any Document doc for which doc is render-blocked.
     List<Ref<dom::Document>> documents;
-    ForEachDocument([&](dom::Document &document) { documents.push_back(ShareRef(document)); });
+    ForEachDocument(
+      [&](dom::Document &document)
+      {
+        if (html::RenderBlocking::IsRenderBlocked(document))
+        {
+          _skippedRenderBlockedDocument = true;
+          return;
+        }
+        documents.push_back(ShareRef(document));
+      });
     for (auto &document : documents)
     {
       functor(*document);

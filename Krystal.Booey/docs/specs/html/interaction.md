@@ -56,7 +56,7 @@ Status: reviewed (2026-11-01)
 ### [6.2 Page visibility](https://html.spec.whatwg.org/#page-visibility)
 
 Status: reviewed (2026-11-01)
-> A document's visibility state is its page's, updated as the host shows or hides the page (`Document::VisibilityStateChanged`), as upstream (see `DIFFERENCES.md`). There's no initial visibility state to set without navigables.
+> A document's visibility state is its page's, updated as the host shows or hides the page (`Document::VisibilityStateChanged`), as upstream (see `DIFFERENCES.md`); unloading a document hides it for good (`Document::SetVisibilityHiddenDueToDismissal`). There's no initial visibility state to set without navigables.
 <!-- definitions: visibility-state page-visibility-change-steps -->
 
 - [x] [When a user agent determines that the system visibility state for traversable n…](https://html.spec.whatwg.org/#page-visibility) — When a user agent determines that the system visibility state for traversable navigable traversable has changed to newState, it must run the following steps:
@@ -531,8 +531,8 @@ Status: reviewed (2026-11-01)
 
 #### [6.7.3 Processing model](https://html.spec.whatwg.org/#keyboard-shortcuts-processing-model)
 
-Status: reviewed (2026-11-01)
-> Access keys aren't assigned, and `accessKeyLabel` is empty (see `KNOWN-ISSUES.md`).
+Status: reviewed (2026-11-06)
+> `Element::AssignedAccessKey`. The key is pressed with Alt, as `EventHandler::HandleAccessKey` looks for, and `HTMLElement::AccessKeyLabel` says.
 
 - [x] [Whenever an element's accesskey attribute is set, changed, or removed, the user…](https://html.spec.whatwg.org/#assigned-access-key) — Whenever an element's accesskey attribute is set, changed, or removed, the user agent must update the element's assigned access key by running the following steps:
   - 1. If the element has no accesskey attribute, then skip to the fallback step below.
@@ -565,8 +565,8 @@ Status: reviewed (2026-11-01)
 
 #### [6.8.2 Making entire documents editable: the designMode getter and setter](https://html.spec.whatwg.org/#making-entire-documents-editable:-the-designmode-idl-attribute)
 
-Status: reviewed (2026-11-01)
-> Not implemented (see `KNOWN-ISSUES.md`).
+Status: reviewed (2026-11-06)
+> `Document::DesignMode`.
 <!-- definitions: design-mode-enabled -->
 
 - [x] [Document.designMode](https://html.spec.whatwg.org/#designMode) — The designMode getter steps are to return "on" if this's design mode enabled is true; otherwise "off".
@@ -586,7 +586,7 @@ Status: n/a (authoring advice)
 #### [6.8.4 Editing APIs](https://html.spec.whatwg.org/#editing-apis)
 
 Status: reviewed (2026-11-01)
-> Editing hosts are `FocusAlgorithms`' `IsEditingHost` and the editing code's; `execCommand()` isn't implemented (see `KNOWN-ISSUES.md`).
+> Editing hosts are `FocusAlgorithms`' `IsEditingHost` and the editing code's; `execCommand()` and the `queryCommand*()` methods are `Document`'s, running `EditorCommand`'s commands.
 <!-- definitions: active-range editing-host-of editable execCommand dom-document-querycommandenabled dom-document-querycommandindeterm dom-document-querycommandstate dom-document-querycommandsupported dom-document-querycommandvalue delete-the-selection -->
 
 - [x] [editing host](https://html.spec.whatwg.org/#editing-host) — An editing host is either an HTML element with its contenteditable attribute in the true state or plaintext-only state, or a child HTML element of a Document whose design mode enabled is true.
@@ -594,7 +594,7 @@ Status: reviewed (2026-11-01)
 #### [6.8.5 Spelling and grammar checking](https://html.spec.whatwg.org/#spelling-and-grammar-checking)
 
 Status: reviewed (2026-11-01)
-> `HTMLElement::SpellCheck`; every element's default behavior is inherit-by-default, true at the root. Text isn't checked (see `KNOWN-ISSUES.md`).
+> `HTMLElement::SpellCheck`; every element's default behavior is inherit-by-default, true at the root. Text isn't checked (see `DIFFERENCES.md`).
 > Fixed: the `spellcheck` getter was false in the Default state.
 <!-- definitions: concept-spellcheck-default concept-spellcheck-default-true concept-spellcheck-default-false concept-spellcheck-default-inherit attr-spellcheck -->
 

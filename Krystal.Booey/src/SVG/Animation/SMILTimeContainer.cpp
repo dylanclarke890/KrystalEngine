@@ -1,16 +1,19 @@
 ﻿#include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
+#include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/SVG/Animation/SVGSMILElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include <algorithm>
 #include <chrono>
+#include <limits>
+#include <utility>
 
 namespace krys::boo::svg
 {
   namespace
   {
-    constexpr Seconds SMILAnimationFrameDelay {1.0 / 60.};
-
     KRYS_NODISCARD SMILTime ToSMILTime(MonotonicTime::duration duration) noexcept
     {
       return std::chrono::duration_cast<Seconds>(duration).count();
@@ -74,14 +77,23 @@ namespace krys::boo::svg
   {
     // Schedule updateAnimations() to be called asynchronously so multiple intervals
     // can change with updateAnimations() only called once at the end.
-    StartTimer(Elapsed(), 0);
+    ScheduleUpdate(Elapsed(), 0);
   }
 
   Seconds SMILTimeContainer::AnimationFrameDelay() const noexcept
   {
-    // FIXME: The throttled delay (a 30th of a second) in low power mode or under thermal mitigation, once the
-    // page knows about those.
-    return SMILAnimationFrameDelay;
+    RefPtr<SVGSvgElement> owner = ShareRefPtr(_ownerSVGElement.get());
+    return owner ? owner->NodeDocument().Timeline().AnimationInterval()
+                 : Seconds {std::numeric_limits<double>::infinity()};
+  }
+
+  void SMILTimeContainer::ServiceAnimations() noexcept
+  {
+    if (!std::exchange(_animationFrameScheduled, false) || !IsActive())
+    {
+      return;
+    }
+    UpdateAnimations(Elapsed());
   }
 
   SMILTime SMILTimeContainer::Elapsed() const noexcept
@@ -131,6 +143,7 @@ namespace krys::boo::svg
     {
       _pauseTime = now;
       _timer.Stop();
+      _animationFrameScheduled = false;
     }
   }
 
@@ -143,6 +156,7 @@ namespace krys::boo::svg
     {
       _accumulatedActiveTime += _pauseTime - LastResumeTime();
       _timer.Stop();
+      _animationFrameScheduled = false;
     }
   }
 
@@ -152,7 +166,7 @@ namespace krys::boo::svg
 
     _resumeTime = MonotonicTime::Now();
     _pauseTime = {};
-    StartTimer(Elapsed(), 0);
+    ScheduleUpdate(Elapsed(), 0);
   }
 
   void SMILTimeContainer::SetElapsed(SMILTime time) noexcept
@@ -185,7 +199,7 @@ namespace krys::boo::svg
     UpdateAnimations(time, true);
   }
 
-  void SMILTimeContainer::StartTimer(SMILTime elapsed, SMILTime fireTime, SMILTime minimumDelay) noexcept
+  void SMILTimeContainer::ScheduleUpdate(SMILTime elapsed, SMILTime fireTime) noexcept
   {
     if (_beginTime == MonotonicTime::duration {} || IsPaused())
     {
@@ -197,15 +211,34 @@ namespace krys::boo::svg
       return;
     }
 
-    SMILTime delay = std::max(fireTime - elapsed, minimumDelay);
-    _timer.StartOneShot(ToDuration(delay));
+    // As the document timeline does: a change within a frame is sampled in the next rendering update, and a
+    // later one wakes a frame before it to ask for that update.
+    SMILTime delay = fireTime - elapsed;
+    SMILTime frameDelay = AnimationFrameDelay().count();
+    if (delay < frameDelay)
+    {
+      _timer.Stop();
+      ScheduleAnimationFrame();
+      return;
+    }
+    _timer.StartOneShot(ToDuration(delay - frameDelay));
+  }
+
+  void SMILTimeContainer::ScheduleAnimationFrame() noexcept
+  {
+    _animationFrameScheduled = true;
+    RefPtr<SVGSvgElement> owner = ShareRefPtr(_ownerSVGElement.get());
+    if (auto *page = owner ? owner->NodeDocument().GetPage() : nullptr)
+    {
+      page->ScheduleRenderingUpdate({RenderingUpdateStep::Animations});
+    }
   }
 
   void SMILTimeContainer::TimerFired() noexcept
   {
     krys_debug_assert(_beginTime != MonotonicTime::duration {});
     krys_debug_assert(_pauseTime == MonotonicTime::duration {});
-    UpdateAnimations(Elapsed());
+    ScheduleAnimationFrame();
   }
 
   void SMILTimeContainer::UpdateDocumentOrderIndexes() noexcept
@@ -265,9 +298,6 @@ namespace krys::boo::svg
 
   void SMILTimeContainer::UpdateAnimations(SMILTime elapsed, bool seekToTime) noexcept
   {
-    // FIXME: Don't mutate the DOM while updating the animations (EventQueueScope), once there's a scoped
-    // event queue.
-
     ProcessScheduledAnimations(
       [](SVGSMILElement &animation)
       {
@@ -335,6 +365,6 @@ namespace krys::boo::svg
       animation->ApplyResultsToTarget();
     }
 
-    StartTimer(elapsed, earliestFireTime, AnimationFrameDelay().count());
+    ScheduleUpdate(elapsed, earliestFireTime);
   }
 }

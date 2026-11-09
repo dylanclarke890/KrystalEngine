@@ -13,6 +13,7 @@
 
 namespace krys::pal::win32
 {
+  class DirectManipulationPan;
   class DropTarget;
 
   class Win32Window final : public IWindow
@@ -23,6 +24,9 @@ namespace krys::pal::win32
     WNDCLASSW _class;
     HWND _handle;
     CursorShape _cursor {CursorShape::Arrow};
+    /// @brief The image shown as the cursor in place of `_cursor`, and the system cursor made from it.
+    RefPtr<CursorImage> _cursorImage;
+    HCURSOR _imageCursor {nullptr};
     /// @brief The pens and touches in range, by id, so a capture change can cancel them.
     mutable HashMap<uint32, PointerType> _activePointers;
 
@@ -51,6 +55,11 @@ namespace krys::pal::win32
     mutable bool _hasCaret {false};
     /// @brief The window's drop target, while the host takes drops.
     DropTarget *_dropTarget {nullptr};
+    /// @brief The window's DirectManipulation viewport, while the host takes touchpad pans.
+    DirectManipulationPan *_touchpadPan {nullptr};
+    /// @brief The display the refresh rate was last read for, and its rate; a display change clears them.
+    mutable HMONITOR _refreshRateMonitor {nullptr};
+    mutable Maybe<uint32> _refreshRate;
 
   public:
     Win32Window(const WindowSettings &settings);
@@ -65,6 +74,8 @@ namespace krys::pal::win32
 
     KRYS_NODISCARD virtual WindowSize GetSize() const noexcept override;
 
+    KRYS_NODISCARD Maybe<uint32> DisplayRefreshRate() const noexcept override;
+
     void Show() noexcept override;
 
     void Hide() noexcept override;
@@ -74,8 +85,10 @@ namespace krys::pal::win32
     void SetCallbacks(WindowCallbacks &&callbacks) noexcept override;
 
     void SetCursor(CursorShape cursor) noexcept override;
+    void SetCursorImage(Ref<CursorImage> image) noexcept override;
 
     KRYS_NODISCARD CursorShape GetCursor() const noexcept override;
+    KRYS_NODISCARD CursorImage *GetCursorImage() const noexcept override;
 
     bool SetPointerLocked(bool locked) noexcept override;
 
@@ -105,6 +118,10 @@ namespace krys::pal::win32
     /// @brief Shows the window's cursor, as the mouse is over the client area (none while the pointer is
     /// locked).
     void ApplyCursor() const noexcept;
+    /// @brief Applies the cursor now if it's showing: while the window captures the mouse, or under it.
+    void CursorChanged() const noexcept;
+    /// @brief Destroys the system cursor made from the cursor image, and forgets the image.
+    void ClearCursorImage() noexcept;
     /// @brief Keeps the cursor in the client area, at its centre, while the pointer is locked.
     void ConfinePointer() const noexcept;
     /// @brief Unlocks the pointer, putting the cursor back where it was.
@@ -126,5 +143,12 @@ namespace krys::pal::win32
     void UpdateDropTarget() noexcept;
     /// @brief Revokes the window's drop target, if it has one.
     void RevokeDropTarget() noexcept;
+    /// @brief Makes the window's DirectManipulation viewport if the host takes touchpad pans, or destroys it
+    /// if not.
+    void UpdateTouchpadPan() noexcept;
+    /// @brief Destroys the window's DirectManipulation viewport, if it has one.
+    void DestroyTouchpadPan() noexcept;
+    /// @brief Reports a step of a touchpad's pan, where the cursor is.
+    void ReportTouchpadPan(TouchpadPanPhase phase, float deltaX, float deltaY) const noexcept;
   };
 }

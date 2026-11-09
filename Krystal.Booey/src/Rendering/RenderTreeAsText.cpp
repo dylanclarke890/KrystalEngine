@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
@@ -195,11 +196,15 @@ namespace krys::boo
       ts << ' ' << EnclosingIntRect(r);
     }
 
-    // FIXME: The SVG painting features of SVG renderers.
+    // The SVG painting features and visual overflow of the layer-based SVG renderers (RenderSVGModelObject)
+    // aren't written: there are none, and the legacy ones write theirs (SVGRenderTreeAsText.cpp).
 
     if (auto *renderElement = DynamicDowncast<RenderElement>(o))
     {
-      // FIXME: The file name of file upload controls.
+      if (auto *control = DynamicDowncast<RenderFileUploadControl>(*renderElement))
+      {
+        ts << ' ' << QuoteAndEscapeNonPrintables(control->FileTextValue());
+      }
 
       if (renderElement->Parent())
       {
@@ -235,7 +240,17 @@ namespace krys::boo
       LayoutUnit borderBottom = box->BorderBottom();
       LayoutUnit borderLeft = box->BorderLeft();
       bool overridden = renderElement->Style().GetBorderImageWidth().OverridesBorderWidths();
-      // FIXME: Subtract a fieldset's intrinsic border (intrinsicBorderForFieldset), once there are fieldsets.
+      if (box->IsFieldset())
+      {
+        auto &block = Downcast<RenderBlock>(*box);
+        switch (o.GetWritingMode().BlockDirection())
+        {
+          case FlowDirection::TopToBottom: borderTop -= block.IntrinsicBorderForFieldset(); break;
+          case FlowDirection::BottomToTop: borderBottom -= block.IntrinsicBorderForFieldset(); break;
+          case FlowDirection::LeftToRight: borderLeft -= block.IntrinsicBorderForFieldset(); break;
+          case FlowDirection::RightToLeft: borderRight -= block.IntrinsicBorderForFieldset(); break;
+        }
+      }
       if (borderTop || borderRight || borderBottom || borderLeft)
       {
         ts << " [border:";
@@ -439,8 +454,6 @@ namespace krys::boo
           }
         }
       }
-
-      // FIXME: The visual overflow of SVG renderers.
     }
   }
 

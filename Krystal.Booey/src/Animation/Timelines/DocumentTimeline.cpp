@@ -62,12 +62,12 @@ namespace krys::boo
 
   Seconds DocumentTimeline::AnimationInterval() const noexcept
   {
-    if (!_document || !_document->GetPage())
+    auto *page = _document ? _document->GetPage() : nullptr;
+    if (!page)
     {
       return Infinity;
     }
-    // FIXME: The page's preferred rendering update interval, once the host reports display refreshes.
-    return FullSpeedAnimationInterval;
+    return std::chrono::duration_cast<Seconds>(page->PreferredRenderingUpdateInterval());
   }
 
   void DocumentTimeline::SuspendAnimations() noexcept

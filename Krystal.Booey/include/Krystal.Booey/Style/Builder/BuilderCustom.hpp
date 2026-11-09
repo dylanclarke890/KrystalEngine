@@ -3,8 +3,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
-#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
@@ -1409,8 +1409,10 @@ namespace krys::boo::style
 
       if (css::PropertyParserHelpers::IsSystemFontShorthand(ident))
       {
-        size = SystemFontDatabase::Singleton().SystemFontShorthandSize(
-          css::PropertyParserHelpers::LowerFontShorthand(ident));
+        size = builderState.GetDocument()
+                 .GetSettings()
+                 .Values.SystemFonts[css::PropertyParserHelpers::LowerFontShorthand(ident)]
+                 .Size;
       }
 
       switch (ident)

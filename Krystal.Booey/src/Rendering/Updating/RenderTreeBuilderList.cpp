@@ -179,7 +179,6 @@ namespace krys::boo
         _builder.Detach(*currentParent, *markerRenderer, WillBeDestroyed::No, CanCollapseAnonymousBlock::No),
         FirstNonMarkerChild(*newParent));
       // If current parent is an anonymous block that has lost all its children, destroy it.
-      // FIXME: Unless it has a continuation, once there are continuations.
       if (currentParent->IsAnonymousBlock() && !currentParent->FirstChild())
       {
         _builder.Destroy(*currentParent);

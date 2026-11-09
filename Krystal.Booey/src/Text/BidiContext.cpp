@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Text/BidiContext.hpp"
 
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo
 {

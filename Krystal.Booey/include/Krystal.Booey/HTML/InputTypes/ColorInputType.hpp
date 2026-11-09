@@ -10,7 +10,6 @@ namespace krys::boo::html
 {
   /// @brief The color input type: a swatch of its colour (the `::-webkit-color-swatch` part), which opens the
   /// host's colour picker when activated.
-  // FIXME: The alpha and colorspace attributes, and the datalist's suggestions (suggestedColors).
   class ColorInputType final : public BaseClickableWithKeyInputType, private ColorChooserClient
   {
   private:
@@ -23,6 +22,10 @@ namespace krys::boo::html
     }
 
     ~ColorInputType() noexcept override;
+    KRYS_NODISCARD bool ShouldRespectListAttribute() const noexcept final
+    {
+      return true;
+    }
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {

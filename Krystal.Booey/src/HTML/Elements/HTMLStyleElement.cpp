@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
@@ -6,8 +7,11 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -110,6 +114,11 @@ namespace krys::boo::html
     {
       _blocking->AssociatedAttributeValueChanged();
     }
+    // An element that's no longer potentially render-blocking stops blocking rendering.
+    if (localName == u8"blocking" && !RenderBlocking::HasRenderBlockingToken(*this) && !_createdByParser)
+    {
+      UnblockRendering();
+    }
 
     auto newValue = value ? dom::DOMStringAtom(*value) : dom::DOMStringAtom::Null();
     if (localName == u8"title")
@@ -152,6 +161,8 @@ namespace krys::boo::html
     HTMLElement::OnInsert();
     if (IsConnected())
     {
+      // The parser inserts the elements it makes before their children.
+      _createdByParser = !IsFinishedParsingChildren();
       _styleSheetOwner.InsertedIntoDocument(*this);
     }
   }
@@ -162,6 +173,7 @@ namespace krys::boo::html
     if (oldAncestor.IsConnected())
     {
       _styleSheetOwner.RemovedFromDocument(*this);
+      UnblockRendering();
     }
   }
 
@@ -201,10 +213,54 @@ namespace krys::boo::html
     // 4a. If success is true, fire an event named load at element.
     // 4b. Otherwise, fire an event named error at element.
     // 4c. If element contributes a script-blocking style sheet: (Skipped: nothing waits for scripts.)
-    // 4d. Unblock rendering on element. (It doesn't block rendering; see step 8.)
+    // 4d. Unblock rendering on element.
+    // (Unblocked now rather than in the task, so a sheet without critical subresources, which is processed as
+    // it's parsed, never holds back rendering; see DIFFERENCES.md.)
+    UnblockRendering();
     html::EventLoop::Current().QueueTask(
       TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = _loadedSheet]
       { dom::EventDispatcher::FireEvent(loaded ? EventNames::Load : EventNames::Error, *element); });
+  }
+
+  void HTMLStyleElement::PotentiallyBlockRendering(const css::mq::MediaQueryList &mediaQueries) noexcept
+  {
+    // An element is potentially render-blocking if its blocking tokens set contains "render", or if it is
+    // implicitly potentially render-blocking: a style element is if the parser made it.
+    // https://html.spec.whatwg.org/#potentially-render-blocking
+    if (!RenderBlocking::HasRenderBlockingToken(*this) && !_createdByParser)
+    {
+      return;
+    }
+
+    auto &document = NodeDocument();
+    if (!mediaQueries.empty())
+    {
+      Maybe<RenderStyle> documentStyle;
+      if (document.HasLivingRenderTree())
+      {
+        documentStyle = style::ResolveForDocument(document);
+      }
+      auto *frameView = document.View();
+      css::mq::MediaQueryEvaluator evaluator(frameView ? frameView->MediaType()
+                                                       : css::CSSOMStringAtom(u8"screen"),
+                                             document, documentStyle ? &*documentStyle : nullptr);
+      if (!evaluator.Evaluate(mediaQueries))
+      {
+        return;
+      }
+    }
+
+    RenderBlocking::BlockRendering(*this);
+    _isRenderBlocking = true;
+  }
+
+  void HTMLStyleElement::UnblockRendering() noexcept
+  {
+    if (_isRenderBlocking)
+    {
+      RenderBlocking::UnblockRendering(*this);
+      _isRenderBlocking = false;
+    }
   }
 
   void HTMLStyleElement::StartLoadingDynamicSheet() noexcept

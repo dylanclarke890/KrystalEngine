@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -63,6 +64,12 @@ namespace krys::boo::html
   HTMLFormControlElement::~HTMLFormControlElement() noexcept
   {
     ClearForm();
+  }
+
+  void HTMLFormControlElement::DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept
+  {
+    HTMLElement::DispatchBlurEvent(relatedTarget);
+    HideVisibleValidationMessage();
   }
 
   bool HTMLFormControlElement::FormNoValidate() const noexcept
@@ -174,8 +181,8 @@ namespace krys::boo::html
 
   void HTMLFormControlElement::DispatchChangeEvent() noexcept
   {
-    auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Change), true, false);
-    (void)dom::EventDispatcher::DispatchToTarget(*event, this);
+    dom::ScopedEventQueue::DispatchOrQueue(
+      dom::Event::Create(dom::DOMStringAtom(EventNames::Change), true, false), ShareRef(*this));
   }
 
   void HTMLFormControlElement::DispatchCancelEvent() noexcept
@@ -194,8 +201,8 @@ namespace krys::boo::html
   void HTMLFormControlElement::DispatchFormControlInputEvent() noexcept
   {
     SetChangedSinceLastFormControlChangeEvent(true);
-    auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true);
-    (void)dom::EventDispatcher::DispatchToTarget(*event, this);
+    dom::ScopedEventQueue::DispatchOrQueue(
+      dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true), ShareRef(*this));
   }
 
   Maybe<dom::DOMString> HTMLFormControlElement::ResultForDialogSubmit() const noexcept

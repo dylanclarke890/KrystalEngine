@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -56,6 +57,8 @@ namespace krys::ui
       boo::Color DebugBorderColor;
       float DebugBorderWidth {0};
       int32 RepaintCount {0};
+      boo::GraphicsLayerScalingFilter ContentsMinificationFilter {boo::GraphicsLayerScalingFilter::Linear};
+      boo::GraphicsLayerScalingFilter ContentsMagnificationFilter {boo::GraphicsLayerScalingFilter::Linear};
       bool Preserves3D : 1 {false};
       bool MasksToBounds : 1 {false};
       bool DrawsContent : 1 {false};
@@ -138,6 +141,9 @@ namespace krys::ui
     }
 
     void SetContentsVisible(bool contentsVisible) noexcept;
+    /// @brief How its contents layer's textures are sampled where they're shown smaller and larger.
+    void SetContentsScalingFilters(boo::GraphicsLayerScalingFilter minification,
+                                   boo::GraphicsLayerScalingFilter magnification) noexcept;
     void SetContentsOpaque(bool contentsOpaque) noexcept;
     void SetBackfaceVisibility(bool backfaceVisibility) noexcept;
     void SetOpacity(float opacity) noexcept;

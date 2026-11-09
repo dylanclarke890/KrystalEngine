@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
+#include "Krystal.Booey/Platform/Network/HTTPParsers.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
@@ -62,7 +63,7 @@ namespace krys::boo
 
   utf8_stringview CachedCSSStyleSheet::Encoding() const noexcept
   {
-    // FIXME: The charset of the request, the response or `@charset`, once there are decoders for them.
+    // Style sheets are UTF-8 only, whatever the request, the response or `@charset` say (see DIFFERENCES.md).
     return u8"UTF-8";
   }
 
@@ -135,8 +136,9 @@ namespace krys::boo
 
   bool CachedCSSStyleSheet::MimeTypeAllowedByNosniff() const noexcept
   {
-    // FIXME: `X-Content-Type-Options: nosniff`, once responses have headers.
-    return true;
+    // A nosniff response is a style sheet only if it says it's one.
+    return !IsNosniffContentTypeOptions(Response().HTTPHeaderField(u8"X-Content-Type-Options"))
+           || text::IsASCIICaselessEqual(ResponseMIMEType(), utf8_stringview(u8"text/css"));
   }
 
   bool CachedCSSStyleSheet::CanUseSheet(MIMETypeCheckHint mimeTypeCheckHint, bool *hasValidMIMEType,
@@ -147,7 +149,18 @@ namespace krys::boo
       return false;
     }
 
-    (void)hasHTTPStatusOK;
+    // An unsuccessful HTTP response is no style sheet. (A host that gives no status, 0, isn't saying it
+    // failed.)
+    // https://html.spec.whatwg.org/#fetching-and-processing-a-resource-from-a-link-element:processresponseconsumebody
+    if (Response().URL().ProtocolIsInHTTPFamily() && Response().HTTPStatusCode()
+        && !Response().IsSuccessful())
+    {
+      if (hasHTTPStatusOK)
+      {
+        *hasHTTPStatusOK = false;
+      }
+      return false;
+    }
 
     if (!MimeTypeAllowedByNosniff())
     {

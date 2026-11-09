@@ -129,8 +129,8 @@ namespace krys::boo::html
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::BorderStyle, css::ValueId::Solid);
         auto darkGrayValue =
           css::ValuePool::MainThreadPool().CreateColorValue(boo::Color(boo::Color::darkGray));
-        style.SetProperty(css::PropertyId::BorderColor, Ref<css::Value> {darkGrayValue});
-        style.SetProperty(css::PropertyId::BackgroundColor, Ref<css::Value> {krys::move(darkGrayValue)});
+        style.SetProperty(css::PropertyId::BorderColor, darkGrayValue);
+        style.SetProperty(css::PropertyId::BackgroundColor, krys::move(darkGrayValue));
       }
       return;
     }

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 #define KRYS_DEFINE_SVG_ATTRIBUTE_NAME(Name, localName)                                                      \
   const dom::QualifiedName &SVGNames::Name() noexcept                                                        \
@@ -19,7 +19,6 @@ namespace krys::boo::svg
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(AttributeTypeAttr, u8"attributeType")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(BaselineShiftAttr, u8"baseline-shift")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(BeginAttr, u8"begin")
-  KRYS_DEFINE_SVG_ATTRIBUTE_NAME(BufferedRenderingAttr, u8"buffered-rendering")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(ByAttr, u8"by")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(CalcModeAttr, u8"calcMode")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(ClassAttr, u8"class")

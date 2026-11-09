@@ -40,6 +40,13 @@ namespace krys::ui
     /// @brief A key was pressed while the overlay was shown.
     virtual bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers) noexcept = 0;
 
+    /// @brief Whether the overlay takes the keys and text input, and a press outside it only hides it. A
+    /// suggestion list isn't modal: its field keeps them, and the press goes on to the page.
+    KRYS_NODISCARD virtual bool IsModal() const noexcept
+    {
+      return true;
+    }
+
   protected:
     /// @brief Shows @p overlay over @p owner's page, hiding the one shown before.
     static void ShowIn(View &owner, Overlay &overlay) noexcept;

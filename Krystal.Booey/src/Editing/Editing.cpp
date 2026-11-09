@@ -387,7 +387,7 @@ namespace krys::boo
   RefPtr<dom::Element> EnclosingBlock(RefPtr<dom::Node> node, EditingBoundaryCrossingRule rule) noexcept
   {
     auto block = EnclosingNodeOfType(FirstPositionInOrBeforeNode(node.get()), IsBlock, rule);
-    return ShareRefPtr(DynamicDowncast<dom::Element>(block.get()));
+    return DynamicDowncast<dom::Element>(krys::move(block));
   }
 
   dom::Node *AncestorNodeInThisScope(const dom::Node &scopeRoot, dom::Node *node) noexcept
@@ -442,7 +442,6 @@ namespace krys::boo
     // These are characters that can behave as word boundaries, but can appear within words.
     // If they are just typed, i.e. if they are immediately followed by a caret, we want to delay text
     // checking until the next character has been typed.
-    // FIXME: this is required until <rdar://problem/6853027> is fixed and text checking can do this for us.
     return character == '\'' || character == '@' || character == 0x2019 /* rightSingleQuotationMark */
            || character == 0x05F4 /* hebrewPunctuationGershayim */;
   }
@@ -919,9 +918,8 @@ namespace krys::boo
     auto position = visiblePosition.DeepEquivalent();
     auto &document = *position.GetDocument();
 
-    // FIXME: The document's design mode, once there's one.
     auto editableRoot = HighestEditableRoot(position, EditableType::ContentIsEditable);
-    if (editableRoot)
+    if (editableRoot && !document.InDesignMode())
     {
       scope = editableRoot;
     }
@@ -1281,7 +1279,7 @@ namespace krys::boo
     auto clone = dom::NodeAlgorithms::CloneNode(element, &element.NodeDocument(), false);
     krys_debug_assert(!clone.HasException());
     auto node = clone.ReleaseValue();
-    return ShareRef(Downcast<dom::Element>(*node));
+    return Downcast<dom::Element>(krys::move(node));
   }
 
   void CloneDataFromElement(dom::Element &target, const dom::Element &source) noexcept

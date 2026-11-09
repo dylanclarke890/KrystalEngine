@@ -11,15 +11,17 @@
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
   class PlatformWheelEvent;
+  class ScrollAnimator;
+  class ScrollbarsController;
   /// @brief Something that scrolls: a scroll position within its contents, its scroll origin, and its
-  /// scrollbars.
-  // FIXME: The scroll animator and scrollbars controller, scroll snapping, scroll anchoring and compositing
-  // layers: scrolls are immediate.
+  /// scrollbars, whose overlay scrollbars its scrollbars controller shows and hides.
+  // FIXME: Scroll anchoring and compositing layers.
   class ScrollableArea : public CanMakeWeakPtr<ScrollableArea>, public CanMakeCheckedPtr<ScrollableArea>
   {
     KRYS_NON_COPY_MOVABLE(ScrollableArea);
@@ -57,6 +59,10 @@ namespace krys::boo
     ScrollAnimationStatus _scrollAnimationStatus {ScrollAnimationStatus::NotAnimating};
     bool _scrollOriginChanged {false};
     bool _isAwaitingScrollend {false};
+    bool _isGestureScrollInProgress {false};
+    ScrollbarOverlayStyle _scrollbarOverlayStyle {ScrollbarOverlayStyle::Default};
+    UniquePtr<ScrollAnimator> _scrollAnimator;
+    mutable UniquePtr<ScrollbarsController> _scrollbarsController;
 
   public:
     KRYS_NODISCARD virtual bool IsScrollView() const noexcept
@@ -73,19 +79,56 @@ namespace krys::boo
     void ScrollToOffsetWithoutAnimation(const IntPoint &offset,
                                         ScrollClamping clamping = ScrollClamping::Clamped) noexcept;
     void ScrollToOffsetWithoutAnimation(ScrollbarOrientation orientation, float offset) noexcept;
+    /// @brief Scrolls smoothly to @p position, over the next frames: the area's `AnimatedScrollDidEnd` and
+    /// `ScrollDidEnd` follow. A later call retargets it, and a scroll without animation stops it.
+    void ScrollToPositionWithAnimation(const ScrollPosition &position,
+                                       const ScrollPositionChangeOptions &options) noexcept;
+    /// @brief Stops a smooth scroll where it has got to, without calling `ScrollDidEnd`.
+    /// @return Whether there was one.
+    bool StopAnimatedScroll() noexcept;
+    /// @brief The animation has run to its end.
+    void DidStopAnimatedScroll() noexcept;
 
+    KRYS_NODISCARD ScrollAnimator &GetScrollAnimator() noexcept;
+    KRYS_NODISCARD ScrollAnimator *ExistingScrollAnimator() const noexcept
+    {
+      return _scrollAnimator.get();
+    }
+
+    /// @brief Forgets the area's snap positions: it isn't a scroll snap container.
+    void ClearSnapOffsets() noexcept;
+    /// @brief @p offset, moved to where a scroll to it snaps.
+    KRYS_NODISCARD ScrollOffset ScrollOffsetAdjustedForSnapping(
+      const ScrollOffset &offset, ScrollSnapPointSelectionMethod method) const noexcept;
+    /// @see ScrollAnimator::ResnapAfterLayout
+    void ResnapAfterLayout() noexcept;
+    /// @brief Snaps on the axis of @p orientation's scrollbar, whose thumb was let go.
+    void DoPostThumbMoveSnapping(ScrollbarOrientation orientation) noexcept;
+    /// @brief A gesture (a touch's or a touchpad's pan, and its momentum) has ended: snaps to the closest
+    /// position.
+    void DidEndGestureScroll() noexcept;
+    /// @brief A scroll that didn't snap as it went (an autoscroll, a pan) has ended: snaps to the closest
+    /// position, smoothly.
+    void SnapAfterScrollEnds() noexcept;
+    KRYS_NODISCARD bool IsGestureScrollInProgress() const noexcept
+    {
+      return _isGestureScrollInProgress;
+    }
     /// @brief Scrolls by @p stepCount steps of @p granularity (a line, a page, the document or a pixel of the
     /// scrollbar in @p direction).
     /// @return Whether it scrolled: false without a scrollbar in that direction, or at its end.
-    virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity,
-                        uint32 stepCount = 1) noexcept;
-    /// @brief Scrolls by @p delta pixels on @p axis, as a user scroll.
+    virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
+                        ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
+    /// @brief Scrolls by @p delta pixels on @p axis, as a user scroll, on from where a smooth scroll is
+    /// going, and to the next snap position that way if there is one.
     /// @return Whether it scrolled.
-    bool SingleAxisScroll(ScrollEventAxis axis, float delta) noexcept;
+    bool SingleAxisScroll(ScrollEventAxis axis, float delta,
+                          ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
 
     /// @brief Scrolls by @p wheelEvent's deltas, as a user scroll.
     /// @return Whether it scrolled: false if it can't scroll, or is at its end in the event's direction.
-    // FIXME: Animated scrolling, momentum and scroll snapping, once there are those.
+    // FIXME: Animated scrolling of notches outside a scroll snap container, and momentum the host doesn't
+    // send.
     virtual bool HandleWheelEventForScrolling(const PlatformWheelEvent &wheelEvent) noexcept;
     KRYS_NODISCARD virtual bool IsScrollableOrRubberbandable() const noexcept = 0;
 
@@ -150,15 +193,40 @@ namespace krys::boo
       return ScrollbarWidth::Auto;
     }
 
+    /// @brief The colours the scrollbars' `scrollbar-color` gives them, or nothing for the theme's.
+    KRYS_NODISCARD virtual Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept
+    {
+      return null;
+    }
+
+    /// @brief Resizes the scrollbars for a new `scrollbar-width`.
+    void ScrollbarWidthChanged() noexcept;
+
+    /// @brief Repaints the scrollbars, for a new `scrollbar-color` or dark appearance.
+    virtual void ScrollbarAppearanceChanged() noexcept;
+
+    /// @brief Changes the scrollbars over to the theme's choice of overlay or classic scrollbars: overlay
+    /// ones start fading, classic ones show, and the area lays out again for the space they take.
+    virtual void ScrollbarStyleChanged() noexcept;
+
     KRYS_NODISCARD bool AllowsHorizontalScrolling() const noexcept;
     KRYS_NODISCARD bool AllowsVerticalScrolling() const noexcept;
 
-    virtual void DidAddScrollbar(Scrollbar *, ScrollbarOrientation) noexcept
-    {
-    }
-    virtual void WillRemoveScrollbar(Scrollbar &, ScrollbarOrientation) noexcept
-    {
-    }
+    /// @brief The scrollbars controller, made when it's first wanted.
+    KRYS_NODISCARD ScrollbarsController &GetScrollbarsController() const noexcept;
+
+    void DidAddScrollbar(Scrollbar *scrollbar, ScrollbarOrientation orientation) noexcept;
+    void WillRemoveScrollbar(Scrollbar &scrollbar, ScrollbarOrientation orientation) noexcept;
+
+    /// @brief The mouse entered, left or moved over the area, which shows its overlay scrollbars.
+    void MouseEnteredContentArea() const noexcept;
+    void MouseExitedContentArea() const noexcept;
+    void MouseMovedInContentArea() const noexcept;
+    /// @brief The page showing the area was shown or hidden.
+    void ContentAreaDidShow() const noexcept;
+    void ContentAreaDidHide() const noexcept;
+    /// @brief Keeps the overlay scrollbars hidden, or lets them show again.
+    void LockOverlayScrollbarStateToHidden(bool shouldLockState) const noexcept;
 
     virtual void ContentsResized() noexcept
     {
@@ -304,8 +372,17 @@ namespace krys::boo
       return false;
     }
 
+    /// @brief Which way overlay scrollbars stand out from what's behind them: light over a dark page.
+    KRYS_NODISCARD ScrollbarOverlayStyle GetScrollbarOverlayStyle() const noexcept
+    {
+      return _scrollbarOverlayStyle;
+    }
+    /// @brief Sets the overlay scrollbars' style, repainting them.
+    void SetScrollbarOverlayStyle(ScrollbarOverlayStyle style) noexcept;
+
     // The scrollbars tell the scrollable area what the mouse does to them.
-    // FIXME: The scrollbars controller (overlay scrollbars, hover feedback), once there is one.
+    // The theme repaints a scrollbar the mouse enters or leaves (InvalidateOnMouseEnterExit), so these do
+    // nothing.
     virtual void MouseEnteredScrollbar(Scrollbar *) const noexcept
     {
     }
@@ -363,6 +440,11 @@ namespace krys::boo
       return false;
     }
 
+    /// @brief Has the area's scroll animation serviced in the frames to come.
+    virtual void RegisterForAnimatedScroll() noexcept
+    {
+    }
+
     virtual void AnimatedScrollDidEnd() noexcept
     {
     }
@@ -376,8 +458,8 @@ namespace krys::boo
     }
 
   protected:
-    ScrollableArea() noexcept = default;
-    virtual ~ScrollableArea() noexcept = default;
+    ScrollableArea() noexcept;
+    virtual ~ScrollableArea() noexcept;
 
     void SetScrollOrigin(const IntPoint &origin) noexcept;
     void ResetScrollOriginChanged() noexcept

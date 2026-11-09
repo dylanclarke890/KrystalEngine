@@ -209,8 +209,12 @@ namespace krys::boo
       return KeyframeEffect::KeyframeOffset {nullptr};
     }
 
-    KRYS_NODISCARD double ComputedOffset(style::SingleAnimationRangeName rangeName, double offset,
-                                         const ViewTimeline *viewTimeline, WebAnimation *animation) noexcept
+    /// @brief The offset of @p offset in the range @p rangeName, or null without a view timeline (whose
+    /// ranges they are).
+    /// @see https://drafts.csswg.org/scroll-animations-1/#named-range-keyframes
+    KRYS_NODISCARD Maybe<double> ComputedOffset(style::SingleAnimationRangeName rangeName, double offset,
+                                                const ViewTimeline *viewTimeline,
+                                                WebAnimation *animation) noexcept
     {
       if (rangeName == style::SingleAnimationRangeName::Normal
           || rangeName == style::SingleAnimationRangeName::Omitted)
@@ -220,7 +224,7 @@ namespace krys::boo
 
       if (!viewTimeline)
       {
-        return std::numeric_limits<double>::quiet_NaN();
+        return std::nullopt;
       }
 
       Ref timeline = ShareRef(*viewTimeline);
@@ -260,10 +264,7 @@ namespace krys::boo
       List<KeyframeEffect::ParsedKeyframe *> keyframesWithDoubleOrNullOffset;
 
       // 1. For each keyframe, in keyframes, let the computed keyframe offset of the keyframe be equal to its
-      // keyframe offset value. In our implementation, we only set non-null values to avoid making
-      // computedOffset Maybe<double>. Instead, we'll know that a keyframe hasn't had a computed offset by
-      // checking if it has a null offset and a 0 computedOffset, since the first keyframe will already have a
-      // 0 computedOffset.
+      // keyframe offset value.
       for (auto &keyframe : keyframes)
       {
         auto &offset = keyframe.Offset;
@@ -284,7 +285,7 @@ namespace krys::boo
           }
           else
           {
-            keyframe.ComputedOffset = std::numeric_limits<double>::quiet_NaN();
+            keyframe.ComputedOffset = std::nullopt;
           }
         }
       }
@@ -296,15 +297,14 @@ namespace krys::boo
 
       // 2. If keyframes contains more than one keyframe and the computed keyframe offset of the first
       // keyframe in keyframes is null, set the computed keyframe offset of the first keyframe to 0.
-      if (keyframesWithDoubleOrNullOffset.size() > 1
-          && std::isnan(keyframesWithDoubleOrNullOffset[0]->ComputedOffset))
+      if (keyframesWithDoubleOrNullOffset.size() > 1 && !keyframesWithDoubleOrNullOffset[0]->ComputedOffset)
       {
         keyframesWithDoubleOrNullOffset[0]->ComputedOffset = 0;
       }
 
       // 3. If the computed keyframe offset of the last keyframe in keyframes is null, set its computed
       // keyframe offset to 1.
-      if (std::isnan(keyframesWithDoubleOrNullOffset.back()->ComputedOffset))
+      if (!keyframesWithDoubleOrNullOffset.back()->ComputedOffset)
       {
         keyframesWithDoubleOrNullOffset.back()->ComputedOffset = 1;
       }
@@ -327,15 +327,15 @@ namespace krys::boo
         auto &keyframe = *keyframesWithDoubleOrNullOffset[i];
         // Keyframes with a null offset that don't yet have a non-zero computed offset are keyframes with an
         // offset that needs to be computed.
-        if (std::isnan(keyframe.ComputedOffset))
+        if (!keyframe.ComputedOffset)
         {
           continue;
         }
         if (indexOfLastKeyframeWithNonNullOffset != i - 1)
         {
           double lastNonNullOffset =
-            keyframesWithDoubleOrNullOffset[indexOfLastKeyframeWithNonNullOffset]->ComputedOffset;
-          double offsetDelta = keyframe.ComputedOffset - lastNonNullOffset;
+            *keyframesWithDoubleOrNullOffset[indexOfLastKeyframeWithNonNullOffset]->ComputedOffset;
+          double offsetDelta = *keyframe.ComputedOffset - lastNonNullOffset;
           double offsetIncrement =
             offsetDelta / static_cast<double>(i - indexOfLastKeyframeWithNonNullOffset);
           size_t indexOfFirstKeyframeWithNullOffset = indexOfLastKeyframeWithNonNullOffset + 1;
@@ -633,12 +633,12 @@ namespace krys::boo
       std::ranges::stable_sort(parsedKeyframes,
                                [](const auto &lhs, const auto &rhs)
                                {
-                                 if (!std::isnan(lhs.ComputedOffset) && !std::isnan(rhs.ComputedOffset))
+                                 if (lhs.ComputedOffset && rhs.ComputedOffset)
                                  {
-                                   return lhs.ComputedOffset < rhs.ComputedOffset;
+                                   return *lhs.ComputedOffset < *rhs.ComputedOffset;
                                  }
-                                 // This will sort null values prior to other values.
-                                 return !std::isnan(lhs.ComputedOffset) && std::isnan(rhs.ComputedOffset);
+                                 // This will sort null values after the other values.
+                                 return lhs.ComputedOffset && !rhs.ComputedOffset;
                                });
 
       // 4. Merge adjacent keyframes in processed keyframes when they have equal computed keyframe offsets.
@@ -649,7 +649,7 @@ namespace krys::boo
         auto &previousKeyframe = parsedKeyframes[i - 1];
         // If the offsets of this keyframe and the previous keyframe are different, this means that the two
         // keyframes should not be merged and we can move on to the next keyframe.
-        if (keyframe.ComputedOffset != previousKeyframe.ComputedOffset)
+        if (!keyframe.ComputedOffset || keyframe.ComputedOffset != previousKeyframe.ComputedOffset)
         {
           i++;
           continue;
@@ -850,8 +850,8 @@ namespace krys::boo
         return {rangeName, offsetUnitValue->Value() / 100};
       }
 
-      krys_debug_assert(!std::isnan(keyframe.ComputedOffset));
-      return keyframe.ComputedOffset;
+      krys_debug_assert(keyframe.ComputedOffset);
+      return *keyframe.ComputedOffset;
     }
   }
 
@@ -1209,7 +1209,15 @@ namespace krys::boo
       {
         computedKeyframe.Offset = keyframe.SpecifiedOffset().Value;
       }
-      computedKeyframe.ComputedOffset = keyframe.Offset();
+      // A keyframe in a named timeline range has none without a view timeline.
+      if (!std::isnan(keyframe.Offset()))
+      {
+        computedKeyframe.ComputedOffset = keyframe.Offset();
+      }
+      else
+      {
+        computedKeyframe.ComputedOffset = std::nullopt;
+      }
       // For CSS transitions, all keyframes should return "linear" since the effect's global timing function
       // applies.
       computedKeyframe.Easing = Animation() && Is<CSSTransition>(*Animation())
@@ -3198,11 +3206,11 @@ namespace krys::boo
   Seconds KeyframeEffect::TimeToNextTick(const BasicEffectTiming &timing) noexcept
   {
     // CSS Animations need to trigger "animationiteration" events even if there is no need to update styles
-    // while animating, so if we're dealing with one we must wait until the next iteration.
-    // FIXME: Only when the document has `animationiteration` listeners (hasListenerType), once documents
-    // track their listener types.
+    // while animating, so if we're dealing with one we must wait until the next iteration, if anything
+    // listens for them.
+    auto *document = Document();
     if (timing.Phase == AnimationEffectPhase::Active && Animation() && Is<CSSAnimation>(*Animation())
-        && !TicksContinuouslyWhileActive())
+        && document && document->HasAnimationIterationListener() && !TicksContinuouslyWhileActive())
     {
       if (auto iterationProgress = GetComputedTiming().SimpleIterationProgress)
       {
@@ -3306,11 +3314,11 @@ namespace krys::boo
           HashSet<css::PropertyId> explicitOneProperties;
           for (const auto &propertyReference : *keyframe.Style)
           {
-            auto computedOffset = keyframe.ComputedOffset;
-            if (std::isnan(computedOffset))
+            if (!keyframe.ComputedOffset)
             {
               continue;
             }
+            auto computedOffset = *keyframe.ComputedOffset;
             auto property = propertyReference.Id();
             // All properties may end up being implicit.
             implicitProperties.insert(property);
@@ -3663,8 +3671,10 @@ namespace krys::boo
     _blendingKeyframes.UpdatedComputedOffsets(
       [&](const BlendingKeyframe::KeyframeOffset &specifiedOffset)
       {
+        // The blending keyframes keep a null offset as NaN.
         return ComputedOffset(specifiedOffset.Name, specifiedOffset.Value, viewTimeline.get(),
-                              animation.get());
+                              animation.get())
+          .value_or(std::numeric_limits<double>::quiet_NaN());
       });
 
     _needsComputedKeyframeOffsetsUpdate = false;

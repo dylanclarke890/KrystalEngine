@@ -11,7 +11,8 @@ namespace krys::boo::style
 {
   PropertyCascade::PropertyCascade(const MatchResult &matchResult, IncludedProperties &&includedProperties,
                                    const HashSet<AnimatableCSSProperty> *animatedProperties,
-                                   const css::StyleProperties *positionTryFallbackProperties) noexcept
+                                   const css::StyleProperties *positionTryFallbackProperties,
+                                   const HashSet<AnimatableCSSProperty> *transitioningProperties) noexcept
       : _matchResult(matchResult), _includedProperties(krys::move(includedProperties)),
         _maximumOrigin(positionTryFallbackProperties ? Origin::PositionFallback : Origin::Author)
   {
@@ -19,7 +20,7 @@ namespace krys::boo::style
 
     if (animatedProperties)
     {
-      _animationLayer.emplace(*animatedProperties);
+      _animationLayer.emplace(*animatedProperties, transitioningProperties);
     }
 
     if (positionTryFallbackProperties)
@@ -46,8 +47,10 @@ namespace krys::boo::style
 
   PropertyCascade::~PropertyCascade() noexcept = default;
 
-  PropertyCascade::AnimationLayer::AnimationLayer(const HashSet<AnimatableCSSProperty> &properties) noexcept
-      : Properties(properties)
+  PropertyCascade::AnimationLayer::AnimationLayer(
+    const HashSet<AnimatableCSSProperty> &properties,
+    const HashSet<AnimatableCSSProperty> *transitioningProperties) noexcept
+      : Properties(properties), TransitioningProperties(transitioningProperties)
   {
     HasCustomProperties = std::ranges::any_of(
       properties, [](auto &property) { return std::holds_alternative<css::CSSOMStringAtom>(property); });
@@ -294,8 +297,7 @@ namespace krys::boo::style
           return true;
         }
 
-        if (_includedProperties.Types.ContainsAny(
-              {PropertyType::AfterAnimation, PropertyType::AfterTransition}))
+        if (_includedProperties.Types.Contains(PropertyType::AfterAnimation))
         {
           if (ShouldApplyAfterAnimation(current))
           {
@@ -360,6 +362,17 @@ namespace krys::boo::style
 
     if (isAnimatedProperty)
     {
+      // Transition declarations take precedence over important ones, and are the only thing that does.
+      // https://drafts.csswg.org/css-cascade-5/#cascade-origin
+      if (_animationLayer->TransitioningProperties)
+      {
+        auto &transitioning = *_animationLayer->TransitioningProperties;
+        if (customProperty ? transitioning.contains(customProperty->Name()) : transitioning.contains(id))
+        {
+          return false;
+        }
+      }
+
       // "Important declarations from all origins take precedence over animations."
       // https://drafts.csswg.org/css-cascade-5/#importance
       return _includedProperties.Types.Contains(PropertyType::AfterAnimation) && property.IsImportant();

@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGStyleElement.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
+#include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
@@ -14,6 +16,36 @@ namespace krys::boo::svg::tests
 {
   using css::tests::ToNarrow;
   using style::tests::ResolverFixture;
+
+  TEST_CASE("SVGStyleElement: an error event when an import fails, and no load event",
+            "[SVG][SVGStyleElement]")
+  {
+    boo::tests::LoaderFixture loader;
+    loader.Strategy.AddText(u8"file:///ok.css", u8"rect { fill: green }");
+    boo::tests::PageInFrameFixture fixture(u8"<svg id=s></svg>");
+    auto &svg = fixture.ById(u8"s");
+
+    // As Chrome.
+    auto add = [&](utf8_stringview text)
+    {
+      auto style = CreateRef<SVGStyleElement>(*fixture.Document);
+      REQUIRE_FALSE(style->TextContent(dom::DOMString(text)).HasException());
+      auto events = boo::tests::LoadEvents::ListenTo(*style);
+      REQUIRE_FALSE(svg.AppendChild(*style).HasException());
+      return events;
+    };
+    auto plain = add(u8"rect {}");
+    auto imported = add(u8"@import url(file:///ok.css);");
+    auto missing = add(u8"@import url(file:///missing.css);");
+    boo::tests::RunNetworkingTasks();
+
+    CHECK(plain->Loads == 0);
+    CHECK(plain->Errors == 0);
+    CHECK(imported->Loads == 0);
+    CHECK(imported->Errors == 0);
+    CHECK(missing->Loads == 0);
+    CHECK(missing->Errors == 1);
+  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGStyleElement: the style sheet", "[SVG][SVGStyleElement]")
   {

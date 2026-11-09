@@ -14,9 +14,9 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::css
 {
@@ -478,7 +478,7 @@ namespace krys::boo::css
   StyleRuleCSSStyleProperties::StyleRuleCSSStyleProperties(MutableStyleProperties &propertySet,
                                                            CSSRule &parentRule) noexcept
       : PropertySetCSSStyleProperties(propertySet), _parentRuleType(parentRule.StyleRuleType()),
-        _parentRule(WeakPtr<CSSRule>::WithRef(parentRule))
+        _parentRule(CreateWeakPtr(&parentRule))
   {
     _propertySet->AddRef();
   }

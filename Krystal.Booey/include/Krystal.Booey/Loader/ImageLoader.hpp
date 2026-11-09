@@ -2,12 +2,15 @@
 
 #include "Krystal.Booey/DOM/Events/EventSender.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
@@ -37,13 +40,18 @@ namespace krys::boo
     FullImage
   };
 
-  /// @brief Loads the image of an element (`<img>`, and later `<input type=image>`, video posters and
+  /// @brief Loads the image of an element (`<img>`, `<input type=image>`, and later video posters and
   /// `<object>`), keeps its renderer's image up to date, and fires its `load` and `error` events.
-  // FIXME: decode() promises, loading manually, image documents, archives, and whether the image is visible
-  // in the viewport (for animations, G7d).
+  // FIXME: Loading manually, image documents, archives, and whether the image is visible in the viewport (for
+  // animations, G7d).
   class ImageLoader : public CachedImageClient
   {
     KRYS_NON_COPY_MOVABLE(ImageLoader);
+
+  public:
+    /// @brief Settles a `decode()` promise: with nothing once the image is decoded, or with an
+    /// `EncodingError`.
+    using DecodePromise = Func<void(dom::ExceptionOr<void> &&)>;
 
   private:
     dom::Element &_element;
@@ -57,6 +65,7 @@ namespace krys::boo
     bool _imageComplete : 1 {true};
     bool _elementIsProtected : 1 {false};
     LazyImageLoadState _lazyImageLoadState {LazyImageLoadState::None};
+    List<DecodePromise> _decodingPromises;
 
   public:
     ~ImageLoader() noexcept override;
@@ -92,6 +101,12 @@ namespace krys::boo
     {
       return _image.get();
     }
+
+    /// @brief Calls @p promise, as a microtask, once the image has loaded and decoded, so it can be drawn
+    /// without decoding. It's rejected with an `EncodingError` if the document isn't fully active, the
+    /// element has no source, or the image fails to load or decode, or its source changes first.
+    /// @see https://html.spec.whatwg.org/#dom-img-decode
+    void Decode(DecodePromise promise) noexcept;
 
     /// @brief Cancels pending load events, and doesn't dispatch new ones.
     void ClearImage() noexcept;
@@ -141,5 +156,10 @@ namespace krys::boo
     void SetImageCompleteAndMaybeUpdateRenderer() noexcept;
 
     void ResetLazyImageLoading(dom::Document &document) noexcept;
+
+    /// @brief Decodes the loaded image for the waiting `decode()` promises, settling them once it's decoded.
+    void DecodeImage() noexcept;
+    void ResolveDecodePromises() noexcept;
+    void RejectDecodePromises(utf8_stringview message) noexcept;
   };
 }

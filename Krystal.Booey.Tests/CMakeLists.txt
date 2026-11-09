@@ -100,6 +100,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
 		# CSS
+		tests/CSS/CSSOM/DOMCSSNamespace.cpp
 		tests/CSS/CSSOM/CSSContainerRule.cpp
 		tests/CSS/CSSOM/CSSCounterStyleRule.cpp
 		tests/CSS/CSSOM/CSSFontFaceRule.cpp
@@ -390,8 +391,12 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/TextRuns/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
 		tests/Page/LocalFrameViewScrolling.cpp
+		tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
+		tests/Platform/Scrolling/ScrollAnimator.cpp
 		tests/Rendering/GeneratedContent/RenderCounter.cpp
 		tests/Rendering/HitTesting/HitTestResult.cpp
+		tests/Rendering/RenderFieldset.cpp
+		tests/Rendering/RenderInlineBlockChildren.cpp
 		tests/Rendering/Iterators/RenderIterator.cpp
 		tests/Rendering/Layers/RenderLayer.cpp
 		tests/Rendering/Painting/ImageQualityController.cpp
@@ -401,16 +406,19 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Replaced/RenderHTMLCanvas.cpp
 		tests/Rendering/Replaced/RenderImage.cpp
 		tests/DOM/Events/CustomEvent.cpp
+		tests/DOM/Events/UIEvent.cpp
 		tests/DOM/Events/Event.cpp
 		tests/DOM/Events/EventListenerHandle.cpp
 		tests/DOM/Events/EventTarget.cpp
 		tests/DOM/Events/KeyboardEvent.cpp
 		tests/DOM/Events/MouseEvent.cpp
 		tests/DOM/Events/PointerEvent.cpp
+		tests/DOM/Events/ScopedEventQueue.cpp
 		tests/DOM/Events/ToggleEvent.cpp
 		tests/DOM/Events/WheelEvent.cpp
 		tests/DOM/Abort/AbortController.cpp
 		tests/DOM/Abort/AbortSignal.cpp
+		tests/Page/AccessKeys.cpp
 		tests/Page/EventHandler.cpp
 		tests/Page/PenAndTouch.cpp
 		tests/Page/PointerLockController.cpp
@@ -428,6 +436,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
+		tests/Loader/Icons/IconLoader.cpp
 		tests/HTML/Forms/Autofill.cpp
 		tests/HTML/Forms/FormListedElement.cpp
 		tests/HTML/Forms/ValidatedFormListedElement.cpp
@@ -462,6 +471,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGShape.cpp
 		tests/Rendering/SVG/RenderSVGText.cpp
+		tests/Rendering/SVG/SVGRenderingContext.cpp
 		tests/Layout/LayoutTestUtils.cpp
 		tests/Layout/LayoutState.cpp
 		tests/Layout/LayoutTree/LayoutBoxGeometry.cpp
@@ -478,8 +488,10 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
 		tests/Platform/DateComponents.cpp
 		tests/Platform/Decimal.cpp
+		tests/Platform/MIMETypeRegistry.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Platform/Network/DataURLDecoder.cpp
+		tests/Platform/Network/HTTPParsers.cpp
 		tests/Platform/Scrolling/ScrollAlignment.cpp
 		tests/Platform/Timer.cpp
 		tests/Rendering/Grid/RenderGrid.cpp
@@ -511,6 +523,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Elements/HTMLLabelElement.cpp
 		tests/HTML/Elements/HTMLLinkElement.cpp
 		tests/HTML/Elements/HTMLMapElement.cpp
+		tests/HTML/Elements/HTMLMarqueeElement.cpp
 		tests/HTML/Elements/HTMLMeterElement.cpp
 		tests/HTML/Elements/HTMLModElement.cpp
 		tests/HTML/Elements/HTMLOptGroupElement.cpp
@@ -630,6 +643,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Internals/ElementFactory.cpp
 		tests/DOM/Internals/EventFactory.cpp
 		tests/DOM/Internals/QualifiedNameCache.cpp
+		tests/DOM/Internals/TreeScopeOrderedMap.cpp
 		tests/DOM/Mixins/ChildNode.cpp
 		tests/DOM/Mixins/DocumentOrShadowRoot.cpp
 		tests/DOM/Mixins/NonDocumentTypeChildNode.cpp
@@ -663,6 +677,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Collections/DatasetDOMStringMap.cpp
 		tests/DOM/Collections/DOMTokenList.cpp
 		tests/DOM/Collections/HTMLCollection.cpp
+		tests/DOM/Collections/LiveCollection.cpp
 		tests/DOM/Collections/NodeList.cpp
 		tests/DOM/DOMParsing.cpp
 		tests/DOM/HTMLInsertionMethods.cpp
@@ -700,6 +715,8 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/InputTypes/BaseDateAndTimeInputType.cpp
 		tests/HTML/InputTypes/ColorInputType.cpp
 		tests/HTML/InputTypes/FileInputType.cpp
+		tests/HTML/InputTypes/ImageInputType.cpp
+		tests/HTML/InputTypes/NumberInputType.cpp
 		tests/HTML/CustomElement/CustomElementRegistry.cpp
 		tests/HTML/CloseWatcher/CloseWatcher.cpp
 		tests/HTML/CustomElement/ElementInternals.cpp

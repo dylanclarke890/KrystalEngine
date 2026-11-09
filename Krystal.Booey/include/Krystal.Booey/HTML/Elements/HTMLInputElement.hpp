@@ -24,6 +24,11 @@ namespace krys::boo::html
     RefPtr<HTMLInputElement> CheckedRadioButton;
   };
 
+  class HTMLDataListElement;
+  class HTMLOptionElement;
+  class HTMLImageLoader;
+  class ListAttributeTargetObserver;
+
   /// @see https://html.spec.whatwg.org/#htmlinputelement
   class HTMLInputElement : public HTMLTextFormControlElement
   {
@@ -45,11 +50,14 @@ namespace krys::boo::html
 
     dom::DOMString _name;
     Maybe<dom::DOMString> _valueIfDirty;
+    UniquePtr<HTMLImageLoader> _imageLoader;
+    UniquePtr<ListAttributeTargetObserver> _listAttributeTargetObserver;
     uint32 _size {DefaultSize};
     bool _isChecked : 1 {false};
     bool _dirtyCheckednessFlag : 1 {false};
     bool _isDefaultChecked : 1 {false};
     bool _isIndeterminate : 1 {false};
+    bool _hasNonEmptyList : 1 {false};
     bool _isActivatedSubmit : 1 {false};
     bool _wasModifiedByUser : 1 {false};
     bool _hasPendingUserAgentShadowTreeUpdate : 1 {false};
@@ -203,8 +211,19 @@ namespace krys::boo::html
 
     void SetIndeterminate(bool newValue) noexcept;
 
-    // FIXME: Implement List().
-    // readonly attribute HTMLDataListElement? list;
+    /// @brief The datalist giving the input's suggestions: the first element in its tree with the `list`
+    /// attribute's ID, if that's a datalist and the attribute applies to the input's type.
+    /// @see https://html.spec.whatwg.org/#dom-input-list
+    KRYS_NODISCARD RefPtr<HTMLDataListElement> List() const noexcept;
+
+    /// @brief The input's datalist (its `list`) or its suggestions may have changed.
+    void DataListMayHaveChanged() noexcept;
+
+    /// @brief @p option's value as a number, if it's a valid value for the input.
+    KRYS_NODISCARD Maybe<double> ListOptionValueAsDouble(const HTMLOptionElement &option) const noexcept;
+
+    /// @brief The value of the datalist suggestion closest to @p value, for a slider's thumb to snap to.
+    KRYS_NODISCARD Maybe<Decimal> FindClosestTickMarkValue(const Decimal &value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-max
     KRYS_NODISCARD dom::DOMString Max() const noexcept;
@@ -417,6 +436,10 @@ namespace krys::boo::html
     }
 
     /// @brief Whether the user can step the value up and down.
+    /// @brief Focuses the input and clicks it, except that a date or time input is only focused and a hidden
+    /// one does nothing, as in Chrome.
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
+
     KRYS_NODISCARD bool IsSteppable() const noexcept;
     KRYS_NODISCARD bool IsTextButton() const noexcept;
     KRYS_NODISCARD bool IsRadioButton() const noexcept;
@@ -434,6 +457,18 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsEmailField() const noexcept;
     KRYS_NODISCARD bool IsFileUpload() const noexcept;
     KRYS_NODISCARD bool IsImageButton() const noexcept;
+
+    /// @brief The loader of an image button's image, if the element has been one.
+    KRYS_NODISCARD HTMLImageLoader *ImageLoaderIfExists() const noexcept
+    {
+      return _imageLoader.get();
+    }
+
+    KRYS_NODISCARD HTMLImageLoader &EnsureImageLoader() noexcept;
+
+    /// @brief An image button's label when it shows no image: the `alt` attribute, or else the `title` or
+    /// `value` attribute, or else a default.
+    KRYS_NODISCARD dom::DOMString AltText() const noexcept;
     KRYS_NODISCARD bool IsNumberField() const noexcept;
     KRYS_NODISCARD bool IsSubmitButton() const noexcept final;
     KRYS_NODISCARD bool IsTelephoneField() const noexcept;
@@ -472,7 +507,7 @@ namespace krys::boo::html
     KRYS_NODISCARD uint32 EffectiveMaxLength() const noexcept;
 
     /// @brief The radio buttons in this one's group, in tree order.
-    KRYS_NODISCARD List<Ref<HTMLInputElement>> RadioButtonGroup() const noexcept;
+    KRYS_NODISCARD krys::List<Ref<HTMLInputElement>> RadioButtonGroup() const noexcept;
     KRYS_NODISCARD RefPtr<HTMLInputElement> CheckedRadioButtonForGroup() const noexcept;
 
     /// @brief The groups this radio button is in: its form's, or its tree's; null if it isn't a radio button
@@ -500,6 +535,8 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept;
     KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept;
     KRYS_NODISCARD HTMLElement *InnerSpinButtonElement() const noexcept;
+    /// @brief The list button of a text field with a datalist.
+    KRYS_NODISCARD HTMLElement *DataListButtonElement() const noexcept;
     KRYS_NODISCARD HTMLElement *SliderThumbElement() const noexcept;
     KRYS_NODISCARD HTMLElement *SliderTrackElement() const noexcept;
     KRYS_NODISCARD HTMLElement *ResultsButtonElement() const noexcept;
@@ -595,6 +632,7 @@ namespace krys::boo::html
     void OnInsert() noexcept final;
     void OnPostConnection() noexcept final;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnAdopt(dom::Document &oldDocument) noexcept final;
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
     void OnClone(dom::Node &copy, bool subtree) noexcept final;
@@ -638,6 +676,8 @@ namespace krys::boo::html
     void MinLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept;
     void UpdateValueIfNeeded() noexcept;
     void AddToRadioButtonGroup() noexcept;
+    /// @brief Watches the element the `list` attribute names, while the input is connected.
+    void ResetListAttributeTargetObserver() noexcept;
     void RemoveFromRadioButtonGroup() noexcept;
   };
 }

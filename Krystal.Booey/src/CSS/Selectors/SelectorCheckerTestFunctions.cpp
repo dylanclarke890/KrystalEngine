@@ -297,7 +297,7 @@ namespace krys::boo::css
     // Otherwise: If there is a pragma-set default language set, then that is the language of the node. If
     // there is no pragma-set default language set, then language information from a higher-level protocol
     // (such as HTTP), if any, must be used as the final fallback language instead.
-    // FIXME: The Content-Language header, once responses have headers.
+    // (The document's content language is the pragma's, or else the Content-Language header's.)
     return element.NodeDocument().ContentLanguage();
   }
 }

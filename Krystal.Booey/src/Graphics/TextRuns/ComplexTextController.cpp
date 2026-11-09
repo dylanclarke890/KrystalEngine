@@ -51,51 +51,6 @@ namespace krys::boo
       return text::DecodeUTF8(Span<const char8> {text}.subspan(offset));
     }
 
-    /// @brief Writes @p character to @p buffer at @p offset in place of the code point there if its UTF-8 is
-    /// as long, else copies @p original's code point.
-    void WriteCharacter(utf8_string &buffer, utf8_stringview original, uint32 offset,
-                        char32 character) noexcept
-    {
-      auto originalLength = CharacterAt(original, offset).Length;
-      Array<char8, 4> encoded {};
-      uint8 length = 0;
-      if (character < 0x80)
-      {
-        encoded[length++] = static_cast<char8>(character);
-      }
-      else if (character < 0x800)
-      {
-        encoded[length++] = static_cast<char8>(0xC0 | (character >> 6));
-        encoded[length++] = static_cast<char8>(0x80 | (character & 0x3F));
-      }
-      else if (character < 0x10000)
-      {
-        encoded[length++] = static_cast<char8>(0xE0 | (character >> 12));
-        encoded[length++] = static_cast<char8>(0x80 | ((character >> 6) & 0x3F));
-        encoded[length++] = static_cast<char8>(0x80 | (character & 0x3F));
-      }
-      else
-      {
-        encoded[length++] = static_cast<char8>(0xF0 | (character >> 18));
-        encoded[length++] = static_cast<char8>(0x80 | ((character >> 12) & 0x3F));
-        encoded[length++] = static_cast<char8>(0x80 | ((character >> 6) & 0x3F));
-        encoded[length++] = static_cast<char8>(0x80 | (character & 0x3F));
-      }
-
-      // FIXME: A capital whose UTF-8 is longer or shorter than its lowercase letter's isn't synthesized.
-      if (length != originalLength)
-      {
-        for (uint32 i = 0; i < originalLength; ++i)
-        {
-          buffer[offset + i] = original[offset + i];
-        }
-        return;
-      }
-      for (uint32 i = 0; i < length; ++i)
-      {
-        buffer[offset + i] = encoded[i];
-      }
-    }
   }
 
   void ComplexTextController::ComputeExpansionOpportunity() noexcept
@@ -427,7 +382,7 @@ namespace krys::boo
 
     if (engageAllSmallCapsProcessing || engageSmallCapsProcessing)
     {
-      _smallCapsBuffer.assign(baseOfString);
+      _smallCapsCapitals.assign(baseOfString.length(), 0);
     }
 
     uint32 currentIndex = 0;
@@ -471,8 +426,10 @@ namespace krys::boo
     {
       synthesizedFont = ShareRefPtr(&nextFont->NoSynthesizableFeaturesFont());
       smallSynthesizedFont = ShareRefPtr(synthesizedFont->SmallCapsFont(fontDescription));
-      char32 characterToWrite = capitalizedBase ? *capitalizedBase : CharacterAt(baseOfString, 0).CodePoint;
-      WriteCharacter(_smallCapsBuffer, baseOfString, 0, characterToWrite);
+      if (capitalizedBase)
+      {
+        _smallCapsCapitals[0] = *capitalizedBase;
+      }
       nextIsSmallCaps = true;
     }
 
@@ -489,7 +446,7 @@ namespace krys::boo
       {
         if (auto capitalizedCharacter = Capitalized(baseCharacter))
         {
-          WriteCharacter(_smallCapsBuffer, baseOfString, previousIndex, *capitalizedCharacter);
+          _smallCapsCapitals[previousIndex] = *capitalizedCharacter;
           nextIsSmallCaps = true;
         }
         else
@@ -539,8 +496,8 @@ namespace krys::boo
             if (isSmallCaps)
             {
               CollectComplexTextRunsForCharacters(
-                utf8_stringview {_smallCapsBuffer}.substr(itemStart, itemLength), itemStart,
-                smallSynthesizedFont.get());
+                baseOfString.substr(itemStart, itemLength), itemStart, smallSynthesizedFont.get(),
+                Span<const char32> {_smallCapsCapitals}.subspan(itemStart, itemLength));
             }
             else
             {
@@ -574,8 +531,8 @@ namespace krys::boo
         if (nextIsSmallCaps)
         {
           CollectComplexTextRunsForCharacters(
-            utf8_stringview {_smallCapsBuffer}.substr(itemStart, itemLength), itemStart,
-            smallSynthesizedFont.get());
+            baseOfString.substr(itemStart, itemLength), itemStart, smallSynthesizedFont.get(),
+            Span<const char32> {_smallCapsCapitals}.subspan(itemStart, itemLength));
         }
         else
         {

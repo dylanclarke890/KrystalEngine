@@ -435,7 +435,7 @@ namespace krys::boo::dom::tests
     insert(InsertAdjacentWhere::BeforeEnd, u8"i");
     insert(InsertAdjacentWhere::AfterEnd, u8"s");
 
-    CHECK(parent->InnerHTML() == u8"<a></a><p><b></b>child<i></i></p><s></s>");
+    CHECK(parent->InnerHTML().ReleaseValue() == u8"<a></a><p><b></b>child<i></i></p><s></s>");
 
     SECTION("Before or after an element without a parent gives null")
     {

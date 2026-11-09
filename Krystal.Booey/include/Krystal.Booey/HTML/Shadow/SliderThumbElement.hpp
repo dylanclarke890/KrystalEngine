@@ -1,6 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
+#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
+
+namespace krys::boo::dom
+{
+  class TouchEvent;
+}
 
 namespace krys::boo::html
 {
@@ -46,10 +52,22 @@ namespace krys::boo::html
   };
 
   /// @brief The container of a range's track (the `::-webkit-slider-container` part), which lays the track
-  /// and thumb out.
+  /// and thumb out, and drags the thumb by touch.
   class SliderContainerElement final : public HTMLDivElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SliderContainerElement);
+
+    enum class SlidingDirection : uint8
+    {
+      NoMove,
+      Horizontal,
+      Vertical
+    };
+
+  private:
+    DoublePoint _touchStartPoint;
+    SlidingDirection _slidingDirection {SlidingDirection::NoMove};
+    bool _touchStarted {false};
 
   public:
     explicit SliderContainerElement(dom::Document &) noexcept;
@@ -61,8 +79,17 @@ namespace krys::boo::html
       return true;
     }
 
+    void DefaultEventHandler(dom::Event &) noexcept final;
+
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+    void OnAdopt(dom::Document &oldDocument) noexcept final;
+
+    /// @brief Moves the thumb to a single touch as it starts, and with the touch's moves along the slider,
+    /// as Chrome does; a touch that first moves across the slider is left to pan.
+    void HandleTouchEvent(dom::TouchEvent &) noexcept;
+    /// @brief Whether the touch's moves so far are along the slider.
+    KRYS_NODISCARD bool CanSlide() const noexcept;
   };
 }
 

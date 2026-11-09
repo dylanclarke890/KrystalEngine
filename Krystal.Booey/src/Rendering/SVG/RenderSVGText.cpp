@@ -1027,8 +1027,8 @@ namespace krys::boo
 
   FloatRect RenderSVGText::DecoratedBoundingBox() const noexcept
   {
-    // FIXME: Compute decorated bounding box directly instead of delegating
-    // to accurate repaint rect.
+    // The area it may paint, as a mask's buffer must cover it: its fill, stroke and markers with its filter's
+    // region, within its clip and mask.
     return RepaintRectInLocalCoordinates(RepaintRectCalculation::Accurate);
   }
 

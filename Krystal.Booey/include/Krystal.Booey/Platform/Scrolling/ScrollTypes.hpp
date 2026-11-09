@@ -1,11 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
-
-// FIXME: The snapping types come with scroll snapping.
 
 namespace krys::boo
 {
@@ -81,6 +80,16 @@ namespace krys::boo
     None
   };
 
+  /// @brief The colours `scrollbar-color` gives a scrollbar's thumb and track.
+  /// @see https://drafts.csswg.org/css-scrollbars/#scrollbar-color
+  struct ScrollbarColor
+  {
+    Color ThumbColor;
+    Color TrackColor;
+
+    friend bool operator==(const ScrollbarColor &, const ScrollbarColor &) noexcept = default;
+  };
+
   enum class NativeScrollbarVisibility : uint8
   {
     Visible,
@@ -115,6 +124,8 @@ namespace krys::boo
   {
     Directional,
     Closest,
+    /// @brief It doesn't snap: an autoscroll moves bit by bit, so it would never leave a snap position.
+    None,
   };
 
   enum class ScrollbarMode : uint8
@@ -149,6 +160,14 @@ namespace krys::boo
     KRYS_NODISCARD static ScrollPositionChangeOptions CreateProgrammatic() noexcept
     {
       return {ScrollType::Programmatic};
+    }
+
+    KRYS_NODISCARD static ScrollPositionChangeOptions
+      CreateProgrammaticWithOptions(ScrollIsAnimated animated,
+                                    ScrollSnapPointSelectionMethod snapPointSelectionMethod =
+                                      ScrollSnapPointSelectionMethod::Closest) noexcept
+    {
+      return {ScrollType::Programmatic, ScrollClamping::Clamped, animated, snapPointSelectionMethod};
     }
 
     KRYS_NODISCARD static ScrollPositionChangeOptions CreateUser() noexcept

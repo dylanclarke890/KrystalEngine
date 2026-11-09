@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
@@ -69,6 +70,103 @@ namespace krys::boo::dom
     }
   }
 
+  namespace
+  {
+    KRYS_NODISCARD bool IsInTreeScope(const Node &node) noexcept
+    {
+      return node.IsConnected() || node.IsInShadowTree();
+    }
+
+    /// @brief Calls @p onId with each element of the subtree that has an ID, and @p onMapName with each name
+    /// a map in it goes by.
+    template <typename TOnId, typename TOnMapName>
+    void ForEachTreeScopeKeyInSubtree(Node &subtreeRoot, TOnId onId, TOnMapName onMapName) noexcept
+    {
+      // The nodes in shadow trees below stay in their own scopes.
+      for (auto &node : InclusiveDescendantRange(subtreeRoot))
+      {
+        auto *element = DynamicDowncast<Element>(node);
+        if (!element)
+        {
+          continue;
+        }
+
+        auto id = element->Id();
+        if (!id.empty())
+        {
+          onId(*element, DOMStringAtom(id));
+        }
+
+        if (auto *map = DynamicDowncast<html::HTMLMapElement>(*element))
+        {
+          if (!id.empty())
+          {
+            onMapName(*map, DOMStringAtom(id));
+          }
+          if (auto name = map->Name(); !name.empty())
+          {
+            onMapName(*map, DOMStringAtom(name));
+          }
+        }
+      }
+    }
+  }
+
+  void ExtensibilityHooks::SubtreeInserted(Node &node, ContainerNode &parent) noexcept
+  {
+    parent.InvalidateLiveCollectionCachesForChildChange(node);
+
+    if (IsInTreeScope(parent))
+    {
+      auto &scope = parent.TreeScope();
+      ForEachTreeScopeKeyInSubtree(
+        node, [&](Element &element, DOMStringAtom id) { scope.AddElementById(id, element); },
+        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.AddImageMap(name, map); });
+    }
+  }
+
+  void ExtensibilityHooks::SubtreeRemoved(Node &node, ContainerNode &parent) noexcept
+  {
+    parent.InvalidateLiveCollectionCachesForChildChange(node);
+
+    if (IsInTreeScope(parent))
+    {
+      auto &scope = parent.TreeScope();
+      ForEachTreeScopeKeyInSubtree(
+        node, [&](Element &element, DOMStringAtom id) { scope.RemoveElementById(id, element); },
+        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.RemoveImageMap(name, map); });
+    }
+  }
+
+  void ExtensibilityHooks::SubtreeMoved(Node &node, ContainerNode &oldParent,
+                                        ContainerNode &newParent) noexcept
+  {
+    oldParent.InvalidateLiveCollectionCachesForChildChange(node);
+    newParent.InvalidateLiveCollectionCachesForChildChange(node);
+
+    auto *oldScope = IsInTreeScope(oldParent) ? &oldParent.TreeScope() : nullptr;
+    auto *newScope = IsInTreeScope(newParent) ? &newParent.TreeScope() : nullptr;
+    if (oldScope == newScope)
+    {
+      if (oldScope)
+      {
+        ForEachTreeScopeKeyInSubtree(
+          node, [&](Element &, DOMStringAtom id) { oldScope->ElementsWithIdChangedOrder(id); },
+          [&](html::HTMLMapElement &, DOMStringAtom name) { oldScope->ImageMapsChangedOrder(name); });
+      }
+      return;
+    }
+
+    if (oldScope)
+    {
+      SubtreeRemoved(node, oldParent);
+    }
+    if (newScope)
+    {
+      SubtreeInserted(node, newParent);
+    }
+  }
+
   void ExtensibilityHooks::NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept
   {
     // NOTE: a shadow root has no parent: it's connected when its host is, and it's always in a shadow tree
@@ -104,6 +202,7 @@ namespace krys::boo::dom
     if (parent->IsInShadowTree())
     {
       insertedNode.SetNodeFlag(NodeFlags::IsInShadowTree);
+      insertedNode._containingShadowRoot = parent->_containingShadowRoot;
     }
 
     insertedNode.InvalidateStyle(style::Validity::SubtreeInvalid,
@@ -166,6 +265,7 @@ namespace krys::boo::dom
     {
       movedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
     }
+    movedNode._containingShadowRoot = parent->_containingShadowRoot;
 
     movedNode.InvalidateStyle(style::Validity::SubtreeInvalid, style::InvalidationMode::InsertedIntoAncestor);
     if (auto &newScope = movedNode.TreeScope(); &newScope != &oldScope)
@@ -242,6 +342,7 @@ namespace krys::boo::dom
     if (!Is<ShadowRoot>(TreeQueries::Root(removedNode)))
     {
       removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+      removedNode._containingShadowRoot = nullptr;
     }
 
     // Nodes in the shadow trees of the removed nodes stay in their trees.

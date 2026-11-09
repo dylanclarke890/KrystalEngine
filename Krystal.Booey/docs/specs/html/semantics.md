@@ -323,7 +323,7 @@ Status: n/a (documents are UTF-8 only; the parser's prescan reads the declaratio
 #### [4.2.6 The style element](https://html.spec.whatwg.org/#the-style-element)
 
 Status: reviewed (2026-11-01)
-> `HTMLStyleElement` (`Disabled`, and the load and error events in `NotifyLoadedSheetAndAllCriticalSubresources`) and `InlineStyleSheetOwner::CreateSheet` (update a style block, run when the element is connected, its text changes or it finishes parsing). A style element doesn't block rendering yet (FIXME, KNOWN-ISSUES.md: render blocking).
+> `HTMLStyleElement` (`Disabled`, and the load and error events in `NotifyLoadedSheetAndAllCriticalSubresources`) and `InlineStyleSheetOwner::CreateSheet` (update a style block, run when the element is connected, its text changes or it finishes parsing). A style element blocks rendering in `HTMLStyleElement::PotentiallyBlockRendering` and is unblocked as its sheet is processed, not in the task that fires `load` (see `DIFFERENCES.md`).
 <!-- definitions: attr-style-media attr-style-blocking attr-style-title -->
 
 - [x] [HTMLStyleElement.disabled](https://html.spec.whatwg.org/#dom-style-disabled) — The disabled getter steps are:

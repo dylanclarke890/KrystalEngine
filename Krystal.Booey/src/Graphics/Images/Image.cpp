@@ -4,12 +4,12 @@
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <cmath>
 
 namespace krys::boo
 {
-  Image::Image(ImageObserver *observer) noexcept : _imageObserver(WeakPtr<ImageObserver>::WithRef(observer))
+  Image::Image(ImageObserver *observer) noexcept : _imageObserver(CreateWeakPtr(observer))
   {
   }
 
@@ -33,7 +33,7 @@ namespace krys::boo
       return svg::SVGImage::Create(&observer);
     }
 
-    // FIXME: PDF images, once there are any.
+    // There are no PDF images (see DIFFERENCES.md).
     return BitmapImage::Create(&observer);
   }
 

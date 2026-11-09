@@ -194,15 +194,17 @@ namespace krys::boo::tests
           Event(PlatformEvent::Type::MouseReleased, x, y, MouseButton::Left, 1));
       }
 
-      KRYS_NODISCARD DragData Data(int32 x, int32 y, EnumSet<DragApplicationFlags> flags = {}) noexcept
+      KRYS_NODISCARD DragData Data(int32 x, int32 y, EnumSet<DragApplicationFlags> flags = {},
+                                   EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
       {
-        return DragData(&Client->Data, IntPoint(x, y), IntPoint(x, y), Client->SourceMask, flags);
+        return DragData(&Client->Data, IntPoint(x, y), IntPoint(x, y), Client->SourceMask, flags, modifiers);
       }
 
       /// @brief Moves the drag to (@p x, @p y), as the host does as the cursor moves.
-      Maybe<DragOperation> DragTo(int32 x, int32 y, EnumSet<DragApplicationFlags> flags = {}) noexcept
+      Maybe<DragOperation> DragTo(int32 x, int32 y, EnumSet<DragApplicationFlags> flags = {},
+                                  EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
       {
-        return Controller().DragEnteredOrUpdated(*Frame, Data(x, y, flags));
+        return Controller().DragEnteredOrUpdated(*Frame, Data(x, y, flags, modifiers));
       }
 
       /// @brief Drops the drag at (@p x, @p y).
@@ -315,6 +317,15 @@ namespace krys::boo::tests
     CHECK(fixture.DragTo(10, 64) == DragOperation::Move);
     CHECK(fixture.LogText() == "drag@src dragover@dst");
     CHECK(readInDragOver.empty());
+
+    // Drag events have the keys the host reports held.
+    Maybe<bool> shiftKey;
+    auto keys = fixture.ById(u8"dst").AddEventListener(
+      u8"dragover", [&](dom::Event &event) { shiftKey = Downcast<dom::MouseEvent>(event).ShiftKey(); });
+    (void)fixture.DragTo(10, 64, {}, {PlatformEvent::Modifier::ShiftKey});
+    CHECK(shiftKey == true);
+    (void)fixture.DragTo(10, 64);
+    CHECK(shiftKey == false);
     CHECK(dragOverSawType);
     CHECK(fixture.Controller().GetDragHandlingMethod() == DragHandlingMethod::NonDefault);
 

@@ -13,11 +13,10 @@ namespace krys::boo::svg
 {
   namespace
   {
-    // FIXME: Also when image animation is off, once the page knows about that.
     KRYS_NODISCARD bool AnimationsPausedForDocument(dom::Document &document) noexcept
     {
       auto *page = document.GetPage();
-      return !page || !page->IsVisible();
+      return !page || !page->IsVisible() || !page->ImageAnimationEnabled();
     }
   }
 
@@ -94,6 +93,14 @@ namespace krys::boo::svg
       container->UnpauseAnimations();
     }
     _areAnimationsPaused = false;
+  }
+
+  void SVGDocumentExtensions::ServiceAnimations() noexcept
+  {
+    for (auto &container : TimeContainers())
+    {
+      container->TimeContainer().ServiceAnimations();
+    }
   }
 
   void SVGDocumentExtensions::DispatchLoadEventToOutermostSVGElements() noexcept

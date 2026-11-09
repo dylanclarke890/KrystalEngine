@@ -200,4 +200,56 @@ namespace krys::boo::tests
     CHECK(ToText(Color(Color::red)) == u8"#FF0000");
     CHECK(ToText(GraphicsContextState::Change::DropShadow) == u8"drop-shadow");
   }
+
+  TEST_CASE("GraphicsContext: the dashes of a line, as Chrome has them", "[Graphics][GraphicsContext]")
+  {
+    auto gapOf = [](float length, float thickness, bool closed)
+    {
+      auto pattern = GraphicsContext::DashPatternForStrokeLength(length, thickness, closed);
+      REQUIRE(pattern);
+      return pattern->Gap;
+    };
+
+    SECTION("Dashes are twice the thickness, with gaps of it, stretched to fit")
+    {
+      auto pattern = GraphicsContext::DashPatternForStrokeLength(108, 4, false);
+      REQUIRE(pattern);
+      CHECK(pattern->Dash == 8);
+      CHECK(pattern->Gap == 4.5f);
+      CHECK(gapOf(105, 4, false) == 4.125f);
+    }
+
+    SECTION("A gap can be squeezed instead, if that changes it less")
+    {
+      CHECK(gapOf(50, 3, false) == Catch::Approx(2.8f));
+    }
+
+    SECTION("Under 3 they're three and two times the thickness")
+    {
+      auto pattern = GraphicsContext::DashPatternForStrokeLength(102, 1, false);
+      REQUIRE(pattern);
+      CHECK(pattern->Dash == 3);
+      CHECK(pattern->Gap == Catch::Approx(1.95f));
+    }
+
+    SECTION("A closed path ends in a gap")
+    {
+      CHECK(gapOf(120, 4, true) == 4);
+      CHECK(gapOf(282.3f, 4, true) == Catch::Approx(3.7625f));
+    }
+
+    SECTION("Too short for more than two, they're scaled down")
+    {
+      auto pattern = GraphicsContext::DashPatternForStrokeLength(18, 4, false);
+      REQUIRE(pattern);
+      CHECK(pattern->Dash == Catch::Approx(7.2f));
+      CHECK(pattern->Gap == Catch::Approx(3.6f));
+    }
+
+    SECTION("Too short for two, it's solid")
+    {
+      CHECK_FALSE(GraphicsContext::DashPatternForStrokeLength(9, 2, false));
+      CHECK_FALSE(GraphicsContext::DashPatternForStrokeLength(16, 4, false));
+    }
+  }
 }

@@ -37,6 +37,11 @@ namespace krys::boo
             AdoptRef(*new CachedSVGDocument(krys::move(request), ShareRef(settings)));
           return CachedResourceHandle<CachedResource>(resource.get());
         }
+        case CachedResource::Type::Icon:
+        {
+          Ref<CachedResource> resource = AdoptRef(*new CachedRawResource(krys::move(request), type));
+          return CachedResourceHandle<CachedResource>(resource.get());
+        }
         default:
           // FIXME: The other resource types, once they're loaded.
           krys_assert_msg(false, "Not reached");
@@ -46,7 +51,7 @@ namespace krys::boo
   }
 
   CachedResourceLoader::CachedResourceLoader(dom::Document *document) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document)),
+      : _document(CreateWeakPtr(document)),
         _garbageCollectDocumentResourcesTimer(*this, &CachedResourceLoader::GarbageCollectDocumentResources)
   {
   }
@@ -82,7 +87,7 @@ namespace krys::boo
 
   void CachedResourceLoader::SetDocument(dom::Document *document) noexcept
   {
-    _document = WeakPtr<dom::Document>::WithRef(document);
+    _document = CreateWeakPtr(document);
   }
 
   ResourceErrorOr<CachedResourceHandle<CachedImage>>
@@ -137,6 +142,17 @@ namespace krys::boo
       return Unexpected(resource.error());
     }
     return CachedResourceHandle<CachedSVGDocument>(Downcast<CachedSVGDocument>(resource->get()));
+  }
+
+  ResourceErrorOr<CachedResourceHandle<CachedRawResource>>
+    CachedResourceLoader::RequestIcon(CachedResourceRequest &&request) noexcept
+  {
+    auto resource = RequestResource(CachedResource::Type::Icon, krys::move(request));
+    if (!resource)
+    {
+      return Unexpected(resource.error());
+    }
+    return CachedResourceHandle<CachedRawResource>(Downcast<CachedRawResource>(resource->get()));
   }
 
   ResourceErrorOr<CachedResourceHandle<CachedResource>>

@@ -83,8 +83,6 @@ namespace krys::boo
     Timer _layoutTimer;
     bool _layoutSchedulingIsEnabled {true};
     bool _firstLayout {true};
-    bool _setNeedsLayoutWasDeferred {false};
-    uint32 _disableSetNeedsLayoutCount {0};
     WeakPtr<RenderElement> _subtreeLayoutRoot;
     bool _needsFullRepaint {true};
     bool _updateCompositingLayersIsPending {false};
@@ -190,9 +188,6 @@ namespace krys::boo
       _subtreeLayoutRoot = nullptr;
     }
     void ConvertSubtreeLayoutToFullLayout() noexcept;
-
-    void DisableSetNeedsLayout() noexcept;
-    void EnableSetNeedsLayout() noexcept;
 
     KRYS_NODISCARD LayoutPhase GetLayoutPhase() const noexcept
     {

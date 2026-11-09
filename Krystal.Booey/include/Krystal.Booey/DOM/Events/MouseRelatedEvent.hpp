@@ -17,7 +17,6 @@ namespace krys::boo::dom
 
   /// @brief An event at a point on the screen: its coordinates in the screen, the viewport, the page, the
   /// target and its layer.
-  // FIXME: The view is the frame view the event happened in rather than its Window.
   class MouseRelatedEvent : public UIEventWithKeyState
   {
   public:
@@ -115,7 +114,8 @@ namespace krys::boo::dom
       return _absoluteLocation;
     }
 
-    KRYS_NODISCARD LocalFrameView *View() const noexcept;
+    /// @brief The frame view of the event's view, which its coordinates are relative to.
+    KRYS_NODISCARD LocalFrameView *FrameView() const noexcept;
 
   protected:
     MouseRelatedEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
@@ -125,6 +125,8 @@ namespace krys::boo::dom
     MouseRelatedEvent(DOMStringAtom type, const MouseEventInit &initializer) noexcept;
 
     void InitCoordinates(const DoublePoint &clientLocation) noexcept;
+    /// @brief Makes the frame view the one of the event's view, after that changed.
+    void UpdateFrameView() noexcept;
 
     void SetScreenLocation(const DoublePoint &screenLocation) noexcept
     {

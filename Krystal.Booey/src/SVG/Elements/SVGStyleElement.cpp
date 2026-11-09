@@ -2,8 +2,11 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
@@ -133,5 +136,18 @@ namespace krys::boo::svg
   {
     SVGElement::OnChildrenChanged();
     _styleSheetOwner.ChildrenChanged(*this);
+  }
+
+  void SVGStyleElement::NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept
+  {
+    // As Chrome: an `error` event when a critical subresource (an `@import`) failed to load, and no `load`
+    // event.
+    if (!errorOccurred)
+    {
+      return;
+    }
+    html::EventLoop::Current().QueueTask(html::TaskSource::Networking, NodeDocument(),
+                                         [element = ShareRef(*this)]
+                                         { dom::EventDispatcher::FireEvent(EventNames::Error, *element); });
   }
 }

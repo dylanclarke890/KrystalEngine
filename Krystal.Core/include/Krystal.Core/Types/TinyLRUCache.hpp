@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <array>
 #include <utility>
 
@@ -42,7 +42,8 @@ namespace krys
     size_t _size {0};
 
   public:
-    /// @brief The value for `key`, created by the policy if it isn't cached (evicting the least recently used).
+    /// @brief The value for `key`, created by the policy if it isn't cached (evicting the least recently
+    /// used).
     KRYS_NODISCARD const TValue &Get(const TKey &key) noexcept
     {
       if (TPolicy::IsKeyNull(key))

@@ -16,8 +16,9 @@ namespace krys::ui
 {
   /// @brief A date input's picker, shown by the view of its page as an overlay: a month's calendar to choose
   /// a day from (or a week, for week inputs), or a year's months for month inputs, below the input (or above
-  /// it, if there's more room there) within the viewport. Choosing, Escape and pressing outside the picker
-  /// hide it, and go back through its client.
+  /// it, if there's more room there) within the viewport. An input with datalist suggestions lists them
+  /// first, as Chrome does, with "Other…" to show the calendar. Choosing, Escape and pressing outside the
+  /// picker hide it, and go back through its client.
   class DateTimeChooserOverlay final : public boo::DateTimeChooser, public Overlay
   {
   public:
@@ -29,6 +30,8 @@ namespace krys::ui
       Weeks,
       /// @brief A year's months: months.
       Months,
+      /// @brief The input's datalist suggestions, then "Other…" for the calendar.
+      Suggestions,
     };
 
   private:
@@ -41,8 +44,8 @@ namespace krys::ui
     /// @brief The month shown (months since January 1970) in the day modes, or the year shown in the month
     /// mode.
     int32 _page {0};
-    /// @brief What's highlighted: a day (days since 1970-01-01) in the day modes, or a month (months since
-    /// January 1970) in the month mode.
+    /// @brief What's highlighted: a day (days since 1970-01-01) in the day modes, a month (months since
+    /// January 1970) in the month mode, or a suggestion's index (the count of them for "Other…").
     int32 _highlighted {0};
     /// @brief What the input's value chooses, in the same units as `_highlighted`, if anything.
     Maybe<int32> _selected;
@@ -114,7 +117,10 @@ namespace krys::ui
     KRYS_NODISCARD utf8_string HighlightedValue() const noexcept;
 
   private:
-    /// @brief Fills the picker's page with the page of days or months shown, and places it.
+    /// @brief Shows the calendar for the input's type, at its value or today.
+    void SetUpCalendar() noexcept;
+    /// @brief Fills the picker's page with the suggestions or the page of days or months shown, and places
+    /// it.
     void Build() noexcept;
     /// @brief Highlights @p value, turning the page to it if it's on another.
     void Highlight(int32 value) noexcept;

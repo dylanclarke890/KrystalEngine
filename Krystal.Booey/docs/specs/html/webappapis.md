@@ -921,7 +921,7 @@ Status: reviewed (2026-11-01)
 ##### [8.1.7.1 Definitions](https://html.spec.whatwg.org/#definitions-3)
 
 Status: reviewed (2026-11-01)
-> `html::EventLoop`: one process-wide loop (FIXME), with a single queue for every task source, which keeps each source's tasks in order. A task of a document is runnable unless the document's tasks are suspended, and is dropped once its active objects are stopped; a document that isn't fully active otherwise still runs its tasks (see `KNOWN-ISSUES.md`).
+> `html::EventLoop`: one process-wide loop (FIXME), with a single queue for every task source, which keeps each source's tasks in order. A task of a document is runnable unless the document's tasks are suspended, and is dropped once its active objects are stopped (a subresource load's runs regardless, `StoppedDocumentTask::Run`); a document that isn't fully active otherwise still runs its tasks, as in Chrome (see `DIFFERENCES.md`).
 <!-- definitions: event-loop concept-agent-event-loop worker-event-loop-2 worklet-event-loop task-queue concept-task concept-task-steps concept-task-source concept-task-document script-evaluation-environment-settings-object-set task-source currently-running-task microtask-queue microtask performing-a-microtask-checkpoint last-render-opportunity-time last-idle-period-start-time -->
 
 - [x] [window event loop](https://html.spec.whatwg.org/#window-event-loop) — The event loop of a similar-origin window agent is known as a window event loop. The event loop of a dedicated worker agent, shared worker agent, or service worker agent is known as a worker event loop. And the event loop of a worklet agent is known as a worklet event loop.
@@ -978,7 +978,7 @@ Status: reviewed (2026-11-01)
 
 Status: reviewed (2026-11-01)
 > Fixed: the focus fixup step of updating the rendering sets the Navigation API's focus changed during ongoing navigation to false, so a navigation that finishes afterwards resets the focus.
-> `EventLoop::RunNextTask` runs the oldest runnable task and a microtask checkpoint; the host runs the loop (`Run`), updates the rendering (`Page::UpdateRendering`, in upstream's order of steps) and starts idle periods each frame. There's no long task reporting or canvas context loss.
+> `EventLoop::RunNextTask` runs the oldest runnable task and a microtask checkpoint; the host runs the loop (`Run`), updates the rendering (`Page::UpdateRendering`, in upstream's order of steps, leaving out render-blocked documents and trying again in the next one) and starts idle periods each frame. There's no long task reporting or canvas context loss.
 <!-- definitions: update-the-rendering context-lost-steps synchronous-section -->
 
 - [x] [An event loop must continually run through the following steps for as long as i…](https://html.spec.whatwg.org/#event-loop-processing-model) — An event loop must continually run through the following steps for as long as it exists:

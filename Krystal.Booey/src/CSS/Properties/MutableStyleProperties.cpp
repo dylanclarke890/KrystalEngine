@@ -106,11 +106,10 @@ namespace krys::boo::css
 
   bool MutableStyleProperties::RemoveShorthandProperty(PropertyId property, CSSOMString *returnText) noexcept
   {
-    // FIXME: Use SerialiseShorthandValue here to return the value of the removed shorthand as we do when
-    // removing a longhand.
+    // The value is read before its longhands go, as a longhand's is.
     if (returnText)
     {
-      *returnText = CSSOMString();
+      *returnText = GetPropertyValue(property);
     }
 
     return RemoveProperties(ShorthandForProperty(property).Properties());

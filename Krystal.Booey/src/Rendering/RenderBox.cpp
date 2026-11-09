@@ -143,10 +143,13 @@ namespace krys::boo
       frame->GetEventHandler().StopAutoscrollTimer(true);
     }
 
-    // FIXME: Unregister the box's scroll snap positions, once there are any. (Anchors unregister in
-    // RenderBoxModelObject::WillBeDestroyed.)
+    // (Anchors unregister in RenderBoxModelObject::WillBeDestroyed.)
     if (HasInitializedStyle())
     {
+      if (Style().HasSnapPosition())
+      {
+        View().UnregisterBoxWithScrollSnapPositions(*this);
+      }
       if (Style().GetContainerType() != ContainerType::Normal)
       {
         View().UnregisterContainerQueryBox(*this);
@@ -289,7 +292,15 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Scroll snap positions and anchor-positioned boxes, once there are any.
+    // FIXME: Anchor-positioned boxes, once there are any.
+    if (newStyle.HasSnapPosition())
+    {
+      View().RegisterBoxWithScrollSnapPositions(*this);
+    }
+    else if (oldStyle && oldStyle->HasSnapPosition())
+    {
+      View().UnregisterBoxWithScrollSnapPositions(*this);
+    }
     if (newStyle.GetContainerType() != ContainerType::Normal)
     {
       View().RegisterContainerQueryBox(*this);
@@ -353,7 +364,41 @@ namespace krys::boo
       RenderBlock::ClearPercentHeightDescendantsFrom(*this);
     }
 
-    // FIXME: The scrollable area's scroll position, scrollbar placement, width and colour.
+    // If our zoom factor changes and we have a defined scrollLeft/Top, we need to adjust that value into the
+    // new zoomed coordinate space.
+    if (HasNonVisibleOverflow() && Layer() && oldStyle && oldStyle->UsedZoom() != newStyle.UsedZoom())
+    {
+      if (auto *scrollableArea = Layer()->GetScrollableArea())
+      {
+        ScrollPosition scrollPosition = scrollableArea->GetScrollPosition();
+        float zoomScaleFactor = newStyle.UsedZoom() / oldStyle->UsedZoom();
+        scrollPosition.Scale(zoomScaleFactor);
+        scrollableArea->SetPostLayoutScrollPosition(scrollPosition);
+      }
+    }
+
+    // (The scrollbars' side, as `direction` changes, moves the scroll origin after the style change:
+    // RenderLayerScrollableArea::UpdateScrollbarsAfterStyleChange.)
+    // The scrollbars follow their box's scrollbar-width, scrollbar-color and color-scheme; the root's are
+    // the view's.
+    if (Layer() && oldStyle)
+    {
+      ScrollableArea *scrollableArea = IsDocumentElementRenderer()
+                                         ? static_cast<ScrollableArea *>(&View().FrameView())
+                                         : Layer()->GetScrollableArea();
+      if (scrollableArea)
+      {
+        if (oldStyle->GetScrollbarWidth() != newStyle.GetScrollbarWidth())
+        {
+          scrollableArea->ScrollbarWidthChanged();
+        }
+        if (oldStyle->GetScrollbarColor() != newStyle.GetScrollbarColor()
+            || GetDocument().UseDarkAppearance(oldStyle) != UseDarkAppearance())
+        {
+          scrollableArea->ScrollbarAppearanceChanged();
+        }
+      }
+    }
 
     // Our opaqueness might have changed without triggering layout.
     if (diff >= style::DifferenceResult::Repaint && diff <= style::DifferenceResult::RepaintLayer)
@@ -361,7 +406,13 @@ namespace krys::boo
       InvalidateAncestorBackgroundObscurationStatus();
     }
 
-    // FIXME: The view's scrollbar overlay style and the compositor, once there are any.
+    // The root's and the body's backgrounds are the document's, which the view's overlay scrollbars stand out
+    // from.
+    if (IsDocumentElementRenderer() || IsBody())
+    {
+      View().FrameView().RecalculateScrollbarOverlayStyle();
+      // FIXME: Telling the compositor the root's or the body's style changed (rootOrBodyStyleChanged).
+    }
 
     if ((oldStyle && !oldStyle->GetShapeOutside().IsNone()) || !Style().GetShapeOutside().IsNone())
     {
@@ -1033,7 +1084,9 @@ namespace krys::boo
       offset += TopLeftLocationOffset();
     }
 
-    if (auto *boxContainer = DynamicDowncast<RenderBox>(container))
+    // A legend in the border doesn't scroll with the contents of its fieldset.
+    if (auto *boxContainer = DynamicDowncast<RenderBox>(container);
+        boxContainer && !IsExcludedAndPlacedInBorder())
     {
       offset -= ToLayoutSize(LayoutPoint(boxContainer->GetScrollPosition()));
     }
@@ -3994,10 +4047,10 @@ namespace krys::boo
   }
 
   bool RenderBox::ScrollLayer(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                              dom::Element **stopElement) noexcept
+                              dom::Element **stopElement, ScrollIsAnimated animated) noexcept
   {
     auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr;
-    if (scrollableArea && scrollableArea->Scroll(direction, granularity, stepCount))
+    if (scrollableArea && scrollableArea->Scroll(direction, granularity, stepCount, animated))
     {
       if (stopElement)
       {
@@ -4011,9 +4064,9 @@ namespace krys::boo
   }
 
   bool RenderBox::Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                         dom::Element **stopElement) noexcept
+                         dom::Element **stopElement, ScrollIsAnimated animated) noexcept
   {
-    if (ScrollLayer(direction, granularity, stepCount, stopElement))
+    if (ScrollLayer(direction, granularity, stepCount, stopElement, animated))
     {
       return true;
     }
@@ -4028,20 +4081,21 @@ namespace krys::boo
 
     if (nextScrollBlock && !nextScrollBlock->IsRenderView())
     {
-      return nextScrollBlock->Scroll(direction, granularity, stepCount, stopElement);
+      return nextScrollBlock->Scroll(direction, granularity, stepCount, stopElement, animated);
     }
 
     return false;
   }
 
   bool RenderBox::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                uint32 stepCount, dom::Element **stopElement) noexcept
+                                uint32 stepCount, dom::Element **stopElement,
+                                ScrollIsAnimated animated) noexcept
   {
     if (auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr)
     {
       if (scrollableArea->Scroll(
             LogicalToPhysical(direction, IsHorizontalWritingMode(), GetWritingMode().IsBlockFlipped()),
-            granularity, stepCount))
+            granularity, stepCount, animated))
       {
         if (stopElement)
         {
@@ -4059,7 +4113,7 @@ namespace krys::boo
     RenderBlock *b = ContainingBlock();
     if (b && !b->IsRenderView())
     {
-      return b->LogicalScroll(direction, granularity, stepCount, stopElement);
+      return b->LogicalScroll(direction, granularity, stepCount, stopElement, animated);
     }
     return false;
   }
@@ -4069,6 +4123,14 @@ namespace krys::boo
     if (Layer())
     {
       Layer()->Autoscroll(positionInWindow);
+    }
+  }
+
+  void RenderBox::PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept
+  {
+    if (Layer())
+    {
+      Layer()->EnsureLayerScrollableArea()->PanScrollFromPoint(source, mousePosition);
     }
   }
 
@@ -4207,11 +4269,12 @@ namespace krys::boo
              || (overflow == Overflow::Hidden && !gutter.IsAuto());
     };
 
-    // FIXME: Overlay scrollbars (canUseOverlayScrollbars).
+    // Overlay scrollbars take no space, so reserve none.
     if (IsHorizontalWritingMode()
         && (Style().OverflowY() == Overflow::Scroll
             || shouldIncludeScrollbarGutter(Style().GetScrollbarGutter(), HasScrollableOverflowY(),
-                                            Style().OverflowY())))
+                                            Style().OverflowY()))
+        && !CanUseOverlayScrollbars())
     {
       return Style().GetScrollbarGutter().IsStableBothEdges() ? VerticalScrollbarWidth() * 2
                                                               : VerticalScrollbarWidth();
@@ -4220,7 +4283,8 @@ namespace krys::boo
     if (!IsHorizontalWritingMode()
         && (Style().OverflowX() == Overflow::Scroll
             || shouldIncludeScrollbarGutter(Style().GetScrollbarGutter(), HasScrollableOverflowX(),
-                                            Style().OverflowX())))
+                                            Style().OverflowX()))
+        && !CanUseOverlayScrollbars())
     {
       return Style().GetScrollbarGutter().IsStableBothEdges() ? HorizontalScrollbarHeight() * 2
                                                               : HorizontalScrollbarHeight();
@@ -5572,8 +5636,6 @@ namespace krys::boo
     }
 
     // Inline containing blocks are formed by relatively-positioned inline boxes.
-    // FIXME: A block's inline continuation forms the containing block (inlineContinuation), once there are
-    // continuations.
     if (auto *inlineContainer = DynamicDowncast<RenderInline>(container))
     {
       return isContainerInlineAxis ? LayoutRange(startEdge, inlineContainer->InnerPaddingBoxWidth())

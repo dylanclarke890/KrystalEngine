@@ -15,7 +15,7 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 #include "Krystal.Core/Text/StringToIntegerConversion.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -1346,7 +1346,8 @@ namespace krys::boo::svg
         }
         return _intervalEnd;
       }
-      return elapsed + _timeContainer->AnimationFrameDelay().count();
+      // It changes continuously: it's sampled in every frame.
+      return elapsed;
     }
     return _intervalBegin >= elapsed ? _intervalBegin : SMILTime::Unresolved();
   }

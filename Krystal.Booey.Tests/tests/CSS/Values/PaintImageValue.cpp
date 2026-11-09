@@ -37,9 +37,8 @@ namespace krys::boo::css::tests
   {
     CHECK(CssText(*PaintImageValue::Create(u8"checkerboard", Arguments(u8""))) == "paint(checkerboard)");
 
-    // The arguments aren't serialised yet (see the FIXME in PaintImageValue.cpp).
     CHECK(CssText(*PaintImageValue::Create(u8"checkerboard", Arguments(u8"red, 10px")))
-          == "paint(checkerboard)");
+          == "paint(checkerboard, red, 10px)");
   }
 
   TEST_CASE_METHOD(ValueFixture, "PaintImageValue equality and children", "[CSS][Values][PaintImageValue]")

@@ -102,6 +102,20 @@ namespace krys::boo::css
     /// @brief Set when a selector is implicit (it isn't written by a UA or author but is implied by the
     /// CSSOM, e.g. `:root`).
     IsImplicit = 1 << 6,
+    /// @brief Set when an attribute selector has a case-sensitive matching flag (e.g. `[attr=value s]`).
+    CaseSensitiveAttributeValueMatching = 1 << 7,
+  };
+
+  /// @brief An attribute selector's case flag.
+  /// @see https://drafts.csswg.org/selectors/#attribute-case
+  enum class AttributeCaseFlag : uint8
+  {
+    /// @brief None: the attribute's own rule applies, which for some in HTML is to ignore case.
+    None,
+    /// @brief `i`.
+    Insensitive,
+    /// @brief `s`.
+    Sensitive
   };
 
   struct IsCaseSensitive : public StronglyTypedBool<IsCaseSensitive>
@@ -184,6 +198,9 @@ namespace krys::boo::css
 
       // Used for :lang arguments.
       FixedVector<PossiblyQuotedIdentifier> LangList;
+
+      // Used for :heading() levels.
+      FixedVector<int32> IntegerList;
 
       // Used for :is(), :not(), :has(), :where(), :host(), :nth-*(... of) and ::slotted().
       UniquePtr<SelectorList> SubSelectors;
@@ -309,6 +326,12 @@ namespace krys::boo::css
       return HasRareData() ? _data.Rare->Argument : CSSOMStringAtom::Null();
     }
 
+    /// @brief Whether the selector's `s` flag makes it match case-sensitively, whatever the attribute.
+    KRYS_NODISCARD bool IsAttributeValueMatchingCaseSensitive() const noexcept
+    {
+      return HasFlag(_flags, SelectorFlag::CaseSensitiveAttributeValueMatching);
+    }
+
     KRYS_NODISCARD bool IsAttributeValueMatchingCaseInsensitive() const noexcept
     {
       return HasFlag(_flags, SelectorFlag::CaseInsensitiveAttributeValueMatching);
@@ -322,6 +345,12 @@ namespace krys::boo::css
     KRYS_NODISCARD const FixedVector<PossiblyQuotedIdentifier> *LangList() const noexcept
     {
       return HasRareData() ? &_data.Rare->LangList : nullptr;
+    }
+
+    /// @brief The integers of `:heading()`.
+    KRYS_NODISCARD const FixedVector<int32> *IntegerList() const noexcept
+    {
+      return HasRareData() ? &_data.Rare->IntegerList : nullptr;
     }
 
     KRYS_NODISCARD const SelectorList *SubSelectors() const noexcept
@@ -424,11 +453,12 @@ namespace krys::boo::css
     void SetValue(const CSSOMStringAtom &value,
                   MatchLowercase matchLowercase = MatchLowercase(false)) noexcept;
 
-    void SetAttribute(const dom::QualifiedName &name, IsCaseSensitive caseSensitive) noexcept;
+    void SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept;
     void SetNth(int32 a, int32 b) noexcept;
     void SetArgument(const CSSOMStringAtom &value) noexcept;
     void SetArgumentList(FixedVector<CSSOMStringAtom> argumentList) noexcept;
     void SetLangList(FixedVector<PossiblyQuotedIdentifier> langList) noexcept;
+    void SetIntegerList(FixedVector<int32> integerList) noexcept;
     void SetSubSelectors(UniquePtr<SelectorList> subSelectors) noexcept;
 
     void SetPseudoClass(SelectorPseudoClass pseudoClass) noexcept

@@ -41,8 +41,7 @@ namespace krys::boo::tests
                          {400, 200})
       {
         (void)Document->UpdateLayout();
-        Document->AddEventListener(dom::DOMStringAtom(u8"selectstart"),
-                                   Ref<dom::EventListenerCallback> {SelectStart}, true);
+        Document->AddEventListener(dom::DOMStringAtom(u8"selectstart"), SelectStart, true);
       }
 
       KRYS_NODISCARD EventHandler &Handler() noexcept

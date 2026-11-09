@@ -3,8 +3,12 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Events/Touch.hpp"
+#include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
+#include "Krystal.Booey/DOM/Events/TouchList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
@@ -53,7 +57,14 @@ namespace krys::boo::html
         auto &input = Downcast<HTMLInputElement>(*dom::TreeQueries::ShadowHost(*GetElement()));
         bool isVertical = HasVerticalAppearance(input);
 
-        // FIXME: The track height for a range with a data list's ticks (hasDataList), with datalists.
+        // A horizontal slider with ticks is tall enough for them.
+        if (auto *slider = DynamicDowncast<RenderSlider>(input.Renderer()); slider && !isVertical)
+        {
+          if (auto trackHeight = slider->TickedTrackHeight())
+          {
+            return RenderBox::ComputeLogicalHeight(*trackHeight, logicalTop);
+          }
+        }
 
         if (isVertical && GetWritingMode().IsHorizontal())
         {
@@ -246,8 +257,21 @@ namespace krys::boo::html
     auto stepRange = input->CreateStepRange(AnyStepHandling::Reject);
     auto value = stepRange.ClampValue(stepRange.ValueFromProportion(fraction));
 
-    // FIXME: Snapping to the nearest tick mark (sliderTickSnappingThreshold, findClosestTickMarkValue), with
-    // datalists.
+    // Near a tick, the thumb snaps to it.
+    const LayoutUnit snappingThreshold = RenderTheme::Singleton().SliderTickSnappingThreshold();
+    if (snappingThreshold > 0)
+    {
+      if (auto closest = input->FindClosestTickMarkValue(value))
+      {
+        double closestFraction = stepRange.ProportionFromValue(*closest).ToDouble();
+        double closestRatio = isInlineFlipped ? 1.0 - closestFraction : closestFraction;
+        LayoutUnit closestPosition(trackLength.ToDouble() * closestRatio);
+        if ((closestPosition - position).Abs() <= snappingThreshold)
+        {
+          value = *closest;
+        }
+      }
+    }
 
     auto valueString = SerializeForNumberType(value);
     if (valueString == input->Value())
@@ -392,6 +416,118 @@ namespace krys::boo::html
   SliderContainerElement::SliderContainerElement(dom::Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
+    // The container takes touches, which are only dispatched in documents with listeners for them.
+    document.AddListenerTypeIfNeeded(EventNames::TouchStart);
+  }
+
+  void SliderContainerElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    HTMLDivElement::OnAdopt(oldDocument);
+    NodeDocument().AddListenerTypeIfNeeded(EventNames::TouchStart);
+  }
+
+  void SliderContainerElement::DefaultEventHandler(dom::Event &event) noexcept
+  {
+    if (auto *touchEvent = DynamicDowncast<dom::TouchEvent>(event))
+    {
+      HandleTouchEvent(*touchEvent);
+      if (touchEvent->DefaultHandled())
+      {
+        return;
+      }
+    }
+    HTMLDivElement::DefaultEventHandler(event);
+  }
+
+  void SliderContainerElement::HandleTouchEvent(dom::TouchEvent &event) noexcept
+  {
+    RefPtr input = ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
+    if (!input || input->IsDisabledFormControl())
+    {
+      return;
+    }
+
+    auto type = event.Type();
+    if (type == EventNames::TouchEnd)
+    {
+      // The value the touch slid to is committed as it lifts.
+      if (std::exchange(_touchStarted, false))
+      {
+        input->DispatchFormControlChangeEvent();
+        event.SetDefaultHandled();
+      }
+      _slidingDirection = SlidingDirection::NoMove;
+      return;
+    }
+    if (type == EventNames::TouchCancel)
+    {
+      _touchStarted = false;
+      _slidingDirection = SlidingDirection::NoMove;
+      return;
+    }
+
+    // The touch already went across the slider, so it's the page's.
+    if (!CanSlide())
+    {
+      return;
+    }
+
+    RefPtr thumb = ShareRefPtr(DynamicDowncast<SliderThumbElement>(input->SliderThumbElement()));
+    auto *touches = event.TargetTouches();
+    if (!thumb || !touches || touches->Length() != 1)
+    {
+      return;
+    }
+
+    auto point = touches->Item(0)->AbsoluteLocation();
+    auto layoutPoint = LayoutPoint(FloatPoint(static_cast<float>(point.X()), static_cast<float>(point.Y())));
+    if (type == EventNames::TouchStart)
+    {
+      _touchStartPoint = point;
+      _slidingDirection = SlidingDirection::NoMove;
+      _touchStarted = true;
+      thumb->SetPositionFromPoint(layoutPoint);
+      return;
+    }
+    if (type != EventNames::TouchMove || !_touchStarted)
+    {
+      return;
+    }
+
+    // The touch's first move decides its direction.
+    if (_slidingDirection == SlidingDirection::NoMove && point != _touchStartPoint)
+    {
+      _slidingDirection =
+        std::abs(point.X() - _touchStartPoint.X()) >= std::abs(point.Y() - _touchStartPoint.Y())
+          ? SlidingDirection::Horizontal
+          : SlidingDirection::Vertical;
+    }
+    if (CanSlide())
+    {
+      thumb->SetPositionFromPoint(layoutPoint);
+      // Handled, so the host doesn't pan with it.
+      event.SetDefaultHandled();
+    }
+  }
+
+  bool SliderContainerElement::CanSlide() const noexcept
+  {
+    auto *input = DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this));
+    if (!input || !input->Renderer())
+    {
+      return false;
+    }
+    if (_slidingDirection == SlidingDirection::NoMove)
+    {
+      return true;
+    }
+    // A transformed slider may lie in any direction: it takes moves in all of them.
+    if (input->Renderer()->Style().HasTransformRelatedProperty())
+    {
+      return true;
+    }
+    bool isVertical = HasVerticalAppearance(*input);
+    return (_slidingDirection == SlidingDirection::Vertical) == isVertical;
   }
 
   Ref<SliderContainerElement> SliderContainerElement::Create(dom::Document &document) noexcept

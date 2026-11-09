@@ -6,6 +6,7 @@
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Threading/JobSystem.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/String.hpp"
@@ -64,6 +65,8 @@ namespace krys
     ApplicationSettings Settings {};
     UniquePtr<log::ILogger> Logger {};
     UniquePtr<EventManager> Events {};
+    /// @brief The worker threads that run the application's jobs, including those that block on files.
+    UniquePtr<JobSystem> Jobs {};
     UniquePtr<pal::IWindow> Window {};
     UniquePtr<pal::Input> Input {};
     UniquePtr<io::VirtualFileSystem> VFS {};

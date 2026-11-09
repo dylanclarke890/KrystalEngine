@@ -31,7 +31,7 @@ namespace krys::boo::html::tests
         REQUIRE_FALSE(element->SetAttribute(u8"target", dom::DOMString(*target)).HasException());
       }
       REQUIRE_FALSE(document.DocumentElement()->AppendChild(*element).HasException());
-      return ShareRef(Downcast<HTMLElement>(*element));
+      return Downcast<HTMLElement>(krys::move(element));
     }
   }
 

@@ -25,7 +25,7 @@ namespace krys::boo
 
     GlyphData(boo::Glyph glyph = 0, const boo::Font *font = nullptr,
               boo::ColorGlyphType colorGlyphType = boo::ColorGlyphType::Outline) noexcept
-        : Glyph(glyph), ColorGlyphType(colorGlyphType), Font(WeakPtr<const boo::Font>::WithRef(font))
+        : Glyph(glyph), ColorGlyphType(colorGlyphType), Font(CreateWeakPtr(font))
     {
     }
 
@@ -50,7 +50,7 @@ namespace krys::boo
     Array<Glyph, Size> _glyphs {};
     std::bitset<Size> _isColor;
 
-    explicit GlyphPage(const Font &font) noexcept : _font(WeakPtr<const Font>::WithRef(font))
+    explicit GlyphPage(const Font &font) noexcept : _font(CreateWeakPtr(&font))
     {
     }
 

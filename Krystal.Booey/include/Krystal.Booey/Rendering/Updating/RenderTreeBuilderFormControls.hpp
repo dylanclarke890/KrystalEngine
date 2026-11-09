@@ -10,7 +10,7 @@ namespace krys::boo
 
   /// @brief Attaches and detaches the children of form control renderers, which wrap them in an anonymous
   /// inner block.
-  // FIXME: Checkmarks (appearance: base checkboxes and radios).
+  // FIXME: Checkmarks of checkboxes and radios (appearance: base).
   class RenderTreeBuilder::FormControls
   {
     KRYS_NON_COPY_MOVABLE(FormControls);
@@ -20,6 +20,10 @@ namespace krys::boo
 
   public:
     explicit FormControls(RenderTreeBuilder &builder) noexcept;
+
+    /// @brief Updates the generated boxes of @p renderer's element, if it's a select or option rendered with
+    /// base appearance: an option's checkmark and a select's picker icon.
+    void UpdateAfterDescendants(RenderElement &renderer) noexcept;
 
     void Attach(RenderButton &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
     void Attach(RenderMenuList &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;

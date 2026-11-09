@@ -12,6 +12,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo::html
 {
@@ -68,11 +69,11 @@ namespace krys::boo::html
     auto defaultSummary = dom::ElementFactory::CreateHTMLElement<HTMLSummaryElement>(document, u8"summary");
     (void)defaultSummary->AppendChild(
       *CreateRef<dom::Text>(document, dom::DOMString(DefaultDetailsSummaryText())));
-    _defaultSummary = WeakPtr<HTMLSummaryElement>::WithRef(*defaultSummary);
+    _defaultSummary = CreateWeakPtr(defaultSummary.get());
 
     (void)summarySlot->AppendChild(*defaultSummary);
     (void)root.AppendChild(*summarySlot);
-    _summarySlot = WeakPtr<HTMLSlotElement>::WithRef(*summarySlot);
+    _summarySlot = CreateWeakPtr(summarySlot.get());
 
     auto defaultSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     defaultSlot->SetUserAgentPart(css::UserAgentParts::DetailsContent());
@@ -174,6 +175,11 @@ namespace krys::boo::html
     // 3. If localName is open:
     if (localName == u8"open")
     {
+      if (oldValue.has_value() != value.has_value())
+      {
+        style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::Open,
+                                                               value.has_value());
+      }
       // 3a. If one of oldValue or value is null and the other is not null, run the following steps, which are
       //     known as the details notification task steps, for this details element:
       if (oldValue.has_value() != value.has_value())

@@ -448,10 +448,17 @@ namespace krys::boo::style::tests
       CHECK(overridden.contains(PropertyId::Custom));
 
       // Important declarations don't win over transitions.
-      PropertyCascade afterTransition(*result, {{PropertyType::AfterTransition}}, &animated);
+      PropertyCascade afterTransition(*result, {{PropertyType::AfterAnimation}}, &animated, nullptr,
+                                      &animated);
       CHECK_FALSE(Has(afterTransition, PropertyId::Opacity));
       CHECK_FALSE(afterTransition.HasCustomProperty(css::CSSOMStringAtom(u8"--a")));
       CHECK(afterTransition.OverriddenAnimatedProperties().empty());
+
+      // That's decided property by property.
+      HashSet<AnimatableCSSProperty> transitioning {css::CSSOMStringAtom(u8"--a")};
+      PropertyCascade mixed(*result, {{PropertyType::AfterAnimation}}, &animated, nullptr, &transitioning);
+      CHECK(Winner(mixed, PropertyId::Opacity) == "0.5");
+      CHECK_FALSE(mixed.HasCustomProperty(css::CSSOMStringAtom(u8"--a")));
     }
 
     SECTION("Declarations that depend on an animated font size or line height")

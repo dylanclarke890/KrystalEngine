@@ -4,8 +4,12 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
+#include "Krystal.Booey/HTML/Images/HTMLImageLoader.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 #include <limits>
@@ -46,7 +50,6 @@ namespace krys::boo::html
       // 2. Let width and height be 0.
       // 3. If naturalDimensions is not null, then set width to naturalDimensions's width and height to
       //    naturalDimensions's height.
-      // FIXME: The image's natural dimensions, once image buttons load their image.
       // 4. If element has a width attribute:
       // 4a. Let attributeWidth be the result of parsing that attribute's value.
       // 4b. If attributeWidth is not an error, then set width to attributeWidth.
@@ -61,6 +64,11 @@ namespace krys::boo::html
       }
 
       // 6. Return a width of width and a height of height, in CSS pixels.
+      if (auto *loader = element.ImageLoaderIfExists(); loader && loader->Image())
+      {
+        auto naturalDimensions = loader->Image()->ImageSizeForRenderer(nullptr, 1.f);
+        return (height ? naturalDimensions.Height() : naturalDimensions.Width()).ToUnsigned();
+      }
       return 0;
     }
   }
@@ -160,7 +168,57 @@ namespace krys::boo::html
 
   RenderPtr<RenderElement> ImageInputType::CreateInputRenderer(RenderStyle &&style) noexcept
   {
-    // FIXME: The image's renderer (RenderImage, with its image loader and alt text).
-    return InputType::CreateInputRenderer(krys::move(style));
+    krys_debug_assert(Element());
+    return CreateRenderer<RenderImage>(RenderObject::Type::Image, *Element(), krys::move(style));
+  }
+
+  void ImageInputType::DidBecomeElementType() noexcept
+  {
+    krys_debug_assert(Element());
+    // The type was first set, or changed back, to this state. An unchanged src loads nothing new, as the
+    // loader keeps its image while the element has another type.
+    Element()->EnsureImageLoader().UpdateFromElement();
+  }
+
+  void ImageInputType::Attach() noexcept
+  {
+    krys_debug_assert(Element());
+    auto *renderer = DynamicDowncast<RenderImage>(Element()->Renderer());
+    if (!renderer)
+    {
+      return;
+    }
+
+    auto &imageResource = renderer->ImageResource();
+    if (imageResource.GetCachedImage())
+    {
+      return;
+    }
+
+    auto *image = Element()->EnsureImageLoader().Image();
+    imageResource.SetCachedImage(CachedResourceHandle<CachedImage>(image));
+
+    // With no image at all because there's no src attribute, it's sized for its alt text instead.
+    if (!image)
+    {
+      (void)renderer->SetImageSizeForAltText();
+    }
+  }
+
+  void ImageInputType::AttributeChanged(dom::DOMStringAtom localName) noexcept
+  {
+    krys_debug_assert(Element());
+    if (localName == u8"alt")
+    {
+      if (auto *renderer = DynamicDowncast<RenderImage>(Element()->Renderer()))
+      {
+        renderer->UpdateForAltText();
+      }
+    }
+    else if (localName == u8"src")
+    {
+      Element()->EnsureImageLoader().UpdateFromElementIgnoringPreviousError();
+    }
+    BaseButtonInputType::AttributeChanged(localName);
   }
 }

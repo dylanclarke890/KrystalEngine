@@ -31,7 +31,7 @@ namespace krys::boo::css
     {
       return;
     }
-    _keyframes.push_back(Ref<KeyframeRule>::WithRef(*keyframe));
+    _keyframes.push_back(krys::move(keyframe));
   }
 
   void KeyframesRule::WrapperAppendKeyframe(Ref<KeyframeRule> &&keyframe) noexcept

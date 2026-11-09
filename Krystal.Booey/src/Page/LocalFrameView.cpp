@@ -21,10 +21,15 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
@@ -43,13 +48,13 @@
 #include "Krystal.Booey/URL/URLParser.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
 {
   LocalFrameView::LocalFrameView(LocalFrame &frame) noexcept
-      : _frame(WeakPtr<LocalFrame>::WithRef(frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
+      : _frame(CreateWeakPtr(&frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
         _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired)
   {
   }
@@ -277,7 +282,6 @@ namespace krys::boo
   IntRect LocalFrameView::RectToCopyOnScroll() const noexcept
   {
     IntRect scrollViewRect(0, 0, VisibleWidth(), VisibleHeight());
-    // FIXME: Overlay scrollbars, once there are any.
     if (ShouldPlaceVerticalScrollbarOnLeft() && _verticalScrollbar)
     {
       scrollViewRect.Move(_verticalScrollbar->OccupiedWidth(), 0);
@@ -651,9 +655,70 @@ namespace krys::boo
     return BlendSourceOver(BlendSourceOver(BaseBackgroundColor(), htmlBackgroundColor), bodyBackgroundColor);
   }
 
+  style::ScrollbarGutter LocalFrameView::ScrollbarGutterStyle() const noexcept
+  {
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    if (auto *scrollingObject = documentElement ? documentElement->Renderer() : nullptr)
+    {
+      return scrollingObject->Style().GetScrollbarGutter();
+    }
+    return css::keywords::Auto {};
+  }
+
+  int32 LocalFrameView::ScrollbarGutterWidth(bool isHorizontalWritingMode) const noexcept
+  {
+    if (_verticalScrollbar && _verticalScrollbar->IsOverlayScrollbar())
+    {
+      return 0;
+    }
+
+    // A stable gutter keeps the scrollbar's space without it.
+    auto &theme = ScrollbarTheme::Theme();
+    if (!_verticalScrollbar && !(ScrollbarGutterStyle().IsAuto() || theme.UsesOverlayScrollbars())
+        && isHorizontalWritingMode)
+    {
+      return theme.ScrollbarThickness(ScrollbarWidthStyle());
+    }
+
+    if (!_verticalScrollbar)
+    {
+      return 0;
+    }
+
+    return _verticalScrollbar->Width();
+  }
+
+  IntSize LocalFrameView::TotalScrollbarSpace() const noexcept
+  {
+    IntSize scrollbarGutter(HorizontalScrollbarIntrusion(), VerticalScrollbarIntrusion());
+
+    if (IsHorizontalWritingMode())
+    {
+      if (ScrollbarGutterStyle().IsStableBothEdges())
+      {
+        scrollbarGutter.SetWidth(ScrollbarGutterWidth() * 2);
+      }
+      else
+      {
+        scrollbarGutter.SetWidth(ScrollbarGutterWidth());
+      }
+    }
+    return scrollbarGutter;
+  }
+
+  bool LocalFrameView::IsHorizontalWritingMode() const noexcept
+  {
+    auto *renderView = GetRenderView();
+    return renderView && renderView->GetWritingMode().IsHorizontal();
+  }
+
   int32 LocalFrameView::InsetForLeftScrollbarSpace() const noexcept
   {
-    // FIXME: Stable scrollbar gutters on both edges (scrollbarGutterWidth), once there are scrollbar gutters.
+    if (ScrollbarGutterStyle().IsStableBothEdges())
+    {
+      return ScrollbarGutterWidth();
+    }
     if (ShouldPlaceVerticalScrollbarOnLeft())
     {
       return _verticalScrollbar ? _verticalScrollbar->OccupiedWidth() : 0;
@@ -806,10 +871,12 @@ namespace krys::boo
   IntSize LocalFrameView::SizeForVisibleContent(
     VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept
   {
-    // FIXME: The space a stable `scrollbar-gutter` keeps for the view's scrollbars (totalScrollbarSpace),
-    // once the view reads it.
     IntSize scrollbarSpace;
-    if (scrollbarInclusion == VisibleContentRectIncludesScrollbars::No)
+    if (!ScrollbarGutterStyle().IsAuto() && scrollbarInclusion == VisibleContentRectIncludesScrollbars::No)
+    {
+      scrollbarSpace = TotalScrollbarSpace();
+    }
+    else if (scrollbarInclusion == VisibleContentRectIncludesScrollbars::No)
     {
       scrollbarSpace = ScrollbarIntrusion();
     }
@@ -833,6 +900,7 @@ namespace krys::boo
   void LocalFrameView::SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept
   {
     _baseBackgroundColor = backgroundColor.IsValid() ? backgroundColor : boo::Color(boo::Color::white);
+    RecalculateScrollbarOverlayStyle();
   }
 
   void LocalFrameView::Paint(GraphicsContext &context, const IntRect &rect) noexcept
@@ -861,7 +929,7 @@ namespace krys::boo
     }
 
     // Now paint the scrollbars.
-    if (_horizontalScrollbar || _verticalScrollbar)
+    if (!_scrollbarsSuppressed && (_horizontalScrollbar || _verticalScrollbar))
     {
       GraphicsContextStateSaver stateSaver(context);
       IntRect scrollViewDirtyRect = rect;
@@ -876,7 +944,51 @@ namespace krys::boo
       PaintScrollbars(context, scrollViewDirtyRect);
     }
 
-    // FIXME: The pan scroll icon, once there's pan scrolling.
+    if (_panScrollIconPosition)
+    {
+      GraphicsContextStateSaver stateSaver(context);
+      // A light disc with a dot: the place the mouse pans the page from.
+      auto disc = [&](float radius, const Color &color)
+      {
+        context.SetFillColor(color);
+        context.FillEllipse(FloatRect(static_cast<float>(_panScrollIconPosition->X()) - radius,
+                                      static_cast<float>(_panScrollIconPosition->Y()) - radius, radius * 2,
+                                      radius * 2));
+      };
+      disc(PanScrollIconSize / 2.0f, Color::black);
+      disc(PanScrollIconSize / 2.0f - 1, Color::white);
+      disc(2, Color::black);
+    }
+  }
+
+  void LocalFrameView::AddPanScrollIcon(const IntPoint &iconPosition) noexcept
+  {
+    _panScrollIconPosition = iconPosition;
+    InvalidatePanScrollIcon(iconPosition);
+  }
+
+  void LocalFrameView::RemovePanScrollIcon() noexcept
+  {
+    if (auto position = std::exchange(_panScrollIconPosition, null))
+    {
+      InvalidatePanScrollIcon(*position);
+    }
+  }
+
+  void LocalFrameView::InvalidatePanScrollIcon(const IntPoint &iconPosition) noexcept
+  {
+    auto *frame = _frame.get();
+    auto *page = frame ? frame->GetPage() : nullptr;
+    if (page)
+    {
+      page->GetChromeClient().InvalidateContentsAndRootView(IntRect(iconPosition.X() - PanScrollIconSize / 2,
+                                                                    iconPosition.Y() - PanScrollIconSize / 2,
+                                                                    PanScrollIconSize, PanScrollIconSize));
+    }
+    if (auto *document = frame ? frame->Document() : nullptr)
+    {
+      document->ScheduleRenderingUpdate({});
+    }
   }
 
   void LocalFrameView::PaintScrollbars(GraphicsContext &context, const IntRect &rect) noexcept
@@ -969,6 +1081,32 @@ namespace krys::boo
     }
 
     return cornerRect;
+  }
+
+  bool LocalFrameView::IsPointInScrollbarCorner(const IntPoint &windowPoint) const noexcept
+  {
+    if (!ScrollbarCornerPresent())
+    {
+      return false;
+    }
+
+    // The view is the root of its (absent) widget tree, so the window's coordinates are its own.
+    const auto &viewPoint = windowPoint;
+
+    if (_horizontalScrollbar)
+    {
+      auto &frame = _horizontalScrollbar->FrameRect();
+      return viewPoint.Y() > frame.Y() && viewPoint.Y() < frame.MaxY() && viewPoint.X() > frame.MaxX();
+    }
+
+    auto &frame = _verticalScrollbar->FrameRect();
+    return viewPoint.X() > frame.X() && viewPoint.X() < frame.MaxX() && viewPoint.Y() > frame.MaxY();
+  }
+
+  bool LocalFrameView::ScrollbarCornerPresent() const noexcept
+  {
+    return (_horizontalScrollbar && Width() - _horizontalScrollbar->Width() > 0)
+           || (_verticalScrollbar && Height() - _verticalScrollbar->Height() > 0);
   }
 
   Scrollbar *LocalFrameView::ScrollbarAtPoint(const IntPoint &windowPoint) const noexcept
@@ -1072,15 +1210,24 @@ namespace krys::boo
 
   void LocalFrameView::UpdateScrollbarSteps() noexcept
   {
+    // A page is what's in view less the root's scroll padding, which content scrolled to stays clear of.
+    LayoutRect paddedViewRect(LayoutPoint(), LayoutSize(VisibleWidth(), VisibleHeight()));
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    if (auto *renderer = documentElement ? DynamicDowncast<RenderBox>(documentElement->Renderer()) : nullptr)
+    {
+      paddedViewRect.Contract(renderer->ScrollPaddingForViewportRect(paddedViewRect));
+    }
+
     if (_horizontalScrollbar)
     {
-      _horizontalScrollbar->SetSteps(Scrollbar::PixelsPerLineStep(VisibleWidth()),
-                                     Scrollbar::PageStep(VisibleWidth()));
+      int32 width = paddedViewRect.Width().ToInt();
+      _horizontalScrollbar->SetSteps(Scrollbar::PixelsPerLineStep(width), Scrollbar::PageStep(width));
     }
     if (_verticalScrollbar)
     {
-      _verticalScrollbar->SetSteps(Scrollbar::PixelsPerLineStep(VisibleHeight()),
-                                   Scrollbar::PageStep(VisibleHeight()));
+      int32 height = paddedViewRect.Height().ToInt();
+      _verticalScrollbar->SetSteps(Scrollbar::PixelsPerLineStep(height), Scrollbar::PageStep(height));
     }
   }
 
@@ -1104,6 +1251,119 @@ namespace krys::boo
       return style::ToPlatform<style::ScrollbarWidth> {}(scrollingObject->Style().GetScrollbarWidth());
     }
     return ScrollbarWidth::Auto;
+  }
+
+  Maybe<ScrollbarColor> LocalFrameView::ScrollbarColorStyle() const noexcept
+  {
+    // The root element's scrollbar-color is the viewport's.
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    auto *scrollingObject = documentElement ? documentElement->Renderer() : nullptr;
+    if (scrollingObject && GetRenderView())
+    {
+      return scrollingObject->Style().UsedScrollbarColor();
+    }
+    return null;
+  }
+
+  void LocalFrameView::ScrollbarAppearanceChanged() noexcept
+  {
+    ScrollableArea::ScrollbarAppearanceChanged();
+    InvalidateScrollCorner(ScrollCornerRect());
+  }
+
+  void LocalFrameView::ScrollbarStyleChanged() noexcept
+  {
+    ScrollableArea::ScrollbarStyleChanged();
+    // Its scrollbars come and go with the space they take.
+    UpdateScrollbars(GetScrollPosition());
+  }
+
+  bool LocalFrameView::UseDarkAppearanceForScrollbars() const noexcept
+  {
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    auto *renderer = documentElement ? documentElement->Renderer() : nullptr;
+    if (renderer && renderer->Style().HasExplicitlySetColorScheme())
+    {
+      return renderer->UseDarkAppearance();
+    }
+    if (document && document->UseDarkAppearance(nullptr))
+    {
+      return true;
+    }
+    // Overlay scrollbars over a dark page are light, as WebKit's; classic ones keep their appearance, as
+    // Chrome's.
+    return ScrollbarTheme::Theme().UsesOverlayScrollbars()
+           && GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light;
+  }
+
+  void LocalFrameView::RecalculateScrollbarOverlayStyle() noexcept
+  {
+    // FIXME: The client's preferred style (ChromeClient::preferredScrollbarOverlayStyle), once a host wants
+    // one.
+    auto style = [this]
+    {
+      auto background = DocumentBackgroundColor();
+      if (background.IsVisible())
+      {
+        if (background.Lightness() <= .5)
+        {
+          return ScrollbarOverlayStyle::Light;
+        }
+      }
+      else if (auto *document = Frame().Document(); document && document->UseDarkAppearance(nullptr))
+      {
+        return ScrollbarOverlayStyle::Light;
+      }
+      return ScrollbarOverlayStyle::Default;
+    }();
+    if (GetScrollbarOverlayStyle() != style)
+    {
+      // The scroll corner is repainted with the scrollbars, to match their new appearance.
+      SetScrollbarOverlayStyle(style);
+    }
+  }
+
+  bool LocalFrameView::AddScrollableArea(ScrollableArea &scrollableArea) noexcept
+  {
+    // FIXME: Telling the scrolling coordinator (scrollableAreaSetChanged), once there's one.
+    return _scrollableAreas.insert(&scrollableArea).second;
+  }
+
+  bool LocalFrameView::RemoveScrollableArea(ScrollableArea &scrollableArea) noexcept
+  {
+    return _scrollableAreas.erase(&scrollableArea) != 0;
+  }
+
+  bool LocalFrameView::ContainsScrollableArea(const ScrollableArea &scrollableArea) const noexcept
+  {
+    return _scrollableAreas.contains(const_cast<ScrollableArea *>(&scrollableArea));
+  }
+
+  void LocalFrameView::ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept
+  {
+    function(*this);
+    // The function may lay out, which adds and removes areas, or destroy one, so it goes over a copy that
+    // forgets the destroyed.
+    List<WeakPtr<ScrollableArea>> areas;
+    areas.reserve(_scrollableAreas.size());
+    for (auto *area : _scrollableAreas)
+    {
+      areas.push_back(CreateWeakPtr(area));
+    }
+    for (auto &area : areas)
+    {
+      if (area)
+      {
+        function(*area);
+      }
+    }
+  }
+
+  void LocalFrameView::InvalidateScrollbarsForAllScrollableAreas() noexcept
+  {
+    ForEachScrollableArea([](ScrollableArea &area) { area.ScrollbarAppearanceChanged(); });
   }
 
   OverscrollBehavior LocalFrameView::HorizontalOverscrollBehavior() const noexcept
@@ -1228,18 +1488,73 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::AdjustScrollbarsForLayout(bool) noexcept
+  void LocalFrameView::AdjustScrollbarsForLayout(bool isFirstLayout) noexcept
   {
     ScrollbarMode hMode;
     ScrollbarMode vMode;
     CalculateScrollbarModesForLayout(hMode, vMode);
 
-    // FIXME: Starting the first layout with a vertical scrollbar (suppressed, with the vertical mode always
-    // on and the horizontal always off), once scrollbars can be suppressed.
-    if (hMode != HorizontalScrollbarMode() || vMode != VerticalScrollbarMode())
+    // The first layout starts with a vertical scrollbar and no horizontal one, as most pages are taller than
+    // they are wide: it's made while the scrollbars are suppressed, then kept as the real modes are set.
+    if (isFirstLayout && !_layoutContext.IsLayoutNested())
+    {
+      SetScrollbarsSuppressed(true);
+      if (vMode == ScrollbarMode::Auto)
+      {
+        SetVerticalScrollbarMode(ScrollbarMode::AlwaysOn);
+      }
+      if (hMode == ScrollbarMode::Auto)
+      {
+        SetHorizontalScrollbarMode(ScrollbarMode::AlwaysOff);
+      }
+      SetScrollbarModes(hMode, vMode);
+      SetScrollbarsSuppressed(false, true);
+    }
+    else if (hMode != HorizontalScrollbarMode() || vMode != VerticalScrollbarMode())
     {
       SetScrollbarModes(hMode, vMode);
     }
+  }
+
+  void LocalFrameView::SetScrollbarsSuppressed(bool suppressed, bool repaintOnUnsuppress) noexcept
+  {
+    if (suppressed == _scrollbarsSuppressed)
+    {
+      return;
+    }
+
+    _scrollbarsSuppressed = suppressed;
+
+    if (repaintOnUnsuppress && !suppressed)
+    {
+      if (_horizontalScrollbar)
+      {
+        _horizontalScrollbar->Invalidate();
+      }
+      if (_verticalScrollbar)
+      {
+        _verticalScrollbar->Invalidate();
+      }
+
+      // Invalidate the scroll corner too on unsuppress.
+      InvalidateRect(ScrollCornerRect());
+    }
+  }
+
+  void LocalFrameView::RestoreScrollbar() noexcept
+  {
+    SetScrollbarsSuppressed(false);
+  }
+
+  void LocalFrameView::Clear() noexcept
+  {
+    // reset(), of what the view keeps.
+    _lastViewportSize = IntSize();
+    _lastUsedZoomFactor = 1;
+    _layoutContext.ResetFirstLayoutFlag();
+    _layoutContext.SetNeedsFullRepaint();
+
+    SetScrollbarsSuppressed(true);
   }
 
   void LocalFrameView::WillDoLayout(const RenderElement &layoutRoot) noexcept
@@ -1289,9 +1604,11 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity) noexcept
+  bool LocalFrameView::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                                     ScrollIsAnimated animated) noexcept
   {
-    return Scroll(LogicalToPhysical(direction, IsVerticalDocument(), IsFlippedDocument()), granularity);
+    return Scroll(LogicalToPhysical(direction, IsVerticalDocument(), IsFlippedDocument()), granularity, 1,
+                  animated);
   }
 
   bool LocalFrameView::IsVerticalDocument() const noexcept
@@ -1372,6 +1689,11 @@ namespace krys::boo
     RenderObject *renderer = _nodeToDraw ? _nodeToDraw->Renderer() : nullptr;
     RenderLayer *rootLayer = renderView->Layer();
     rootLayer->Paint(context, LayoutRect(dirtyRect), LayoutSize(), _paintBehavior, renderer);
+    if (auto *scrollableRootLayer = rootLayer->GetScrollableArea();
+        scrollableRootLayer && scrollableRootLayer->ContainsDirtyOverlayScrollbars())
+    {
+      scrollableRootLayer->PaintOverlayScrollbars(context, LayoutRect(dirtyRect), _paintBehavior, renderer);
+    }
 
     _paintBehavior = paintBehavior;
     _isPainting = false;
@@ -1436,9 +1758,9 @@ namespace krys::boo
   {
     if (auto *document = Frame().Document())
     {
-      // FIXME: Merge this logic with m_setNeedsLayoutWasDeferred and find a more appropriate
-      // way of handling potential recursive layouts when the viewport is resized to accomodate
-      // the content but the content always overflows the viewport. See webkit.org/b/165781.
+      // FIXME: Find a more appropriate way of handling potential recursive layouts when the viewport is
+      // resized to accommodate the content but the content always overflows the viewport. See
+      // webkit.org/b/165781.
       if (_layoutContext.GetLayoutPhase() != LocalFrameViewLayoutContext::LayoutPhase::InViewSizeAdjust
           || !UseFixedLayout())
       {
@@ -1767,13 +2089,23 @@ namespace krys::boo
       GetPossiblyFixedRectToExpose(viewRect, targetRect, isFixed, options.AlignX, options.AlignY);
 
     // Avoid scrolling to the rounded value of revealRect.location() if we don't actually need to scroll
-    // FIXME: Only scrolling forward (OnlyAllowForwardScrolling), once there's find-in-page; smooth scrolling
-    // (useSmoothScrolling), once there are scroll animations.
+    // (Only scrolling forward, OnlyAllowForwardScrolling, is for find in page, which there isn't; see
+    // DIFFERENCES.md.)
     if (revealRect != viewRect)
     {
       ScrollOffset clampedScrollPosition =
         RoundedIntPoint(revealRect.Location()).ConstrainedBetween(minScrollPosition, maxScrollPosition);
-      SetScrollPosition(clampedScrollPosition, ScrollPositionChangeOptions::CreateProgrammatic());
+      auto scrollPositionOptions = ScrollPositionChangeOptions::CreateProgrammatic();
+      if (Frame().GetEventHandler().IsAutoscrolling())
+      {
+        // An autoscroll moves bit by bit: it snaps when it ends.
+        scrollPositionOptions.SnapPointSelectionMethod = ScrollSnapPointSelectionMethod::None;
+      }
+      else if (element && UseSmoothScrolling(options.Behavior, element))
+      {
+        scrollPositionOptions.Animated = ScrollIsAnimated::Yes;
+      }
+      SetScrollPosition(clampedScrollPosition, scrollPositionOptions);
     }
 
     // FIXME: Scrolling the client's containing scroll views (scrollContainingScrollViewsToRevealRect).
@@ -1918,12 +2250,19 @@ namespace krys::boo
     _maintainScrollPositionAnchor = nullptr;
     CancelScheduledScrolls();
 
-    // FIXME: Snapping, once there's scroll snapping; animated scrolls (scrollToPositionWithAnimation), once
-    // there are scroll animations.
-    auto position = ScrollPositionFromOffset(scrollOffset);
+    auto position = ScrollPositionFromOffset(
+      ScrollOffsetAdjustedForSnapping(scrollOffset, options.SnapPointSelectionMethod));
+
+    if (options.Animated == ScrollIsAnimated::Yes)
+    {
+      ScrollToPositionWithAnimation(position, options);
+      SetCurrentScrollType(oldScrollType);
+      return;
+    }
 
     // ScrollView::setScrollPosition.
-    // FIXME: Prohibiting scrolling and stopping scroll animations, once there are those.
+    // FIXME: Prohibiting scrolling, once something can.
+    bool stoppedAnimation = StopAnimatedScroll();
     auto newScrollPosition =
       options.Clamping == ScrollClamping::Clamped ? AdjustScrollPositionWithinRange(position) : position;
     bool scrollPositionChanged = newScrollPosition != GetScrollPosition();
@@ -1934,6 +2273,10 @@ namespace krys::boo
       {
         UpdateScrollbars(newScrollPosition);
       }
+    }
+    if (stoppedAnimation && !scrollPositionChanged)
+    {
+      ScrollDidEnd();
     }
 
     SetCurrentScrollType(oldScrollType);
@@ -1962,12 +2305,13 @@ namespace krys::boo
     // If we came in here with the view already needing a layout then do that first. (This will be the common
     // case, e.g., when the page changes due to window resizing for example). This layout will not re-enter
     // updateScrollbars and does not count towards our max layout pass total.
-    // FIXME: Not while the scrollbars are suppressed, once they can be.
-    if (scrollbarCanTakeSpace)
+    if (!_scrollbarsSuppressed && scrollbarCanTakeSpace)
     {
       SetForScope inUpdateScrollbarsScope(_inUpdateScrollbars, true);
       UpdateContentsSize();
     }
+
+    IntRect oldScrollCornerRect = ScrollCornerRect();
 
     bool hasHorizontalScrollbar = static_cast<bool>(_horizontalScrollbar);
     bool hasVerticalScrollbar = static_cast<bool>(_verticalScrollbar);
@@ -1989,7 +2333,7 @@ namespace krys::boo
 
     bool scrollbarAddedOrRemoved = false;
 
-    if (hScroll != ScrollbarMode::Auto && vScroll != ScrollbarMode::Auto)
+    if (_scrollbarsSuppressed || (hScroll != ScrollbarMode::Auto && vScroll != ScrollbarMode::Auto))
     {
       if (hasHorizontalScrollbar != newHasHorizontalScrollbar
           && SetHasHorizontalScrollbar(newHasHorizontalScrollbar))
@@ -2130,13 +2474,21 @@ namespace krys::boo
         Height() - _horizontalScrollbar->Height(),
         Width() - (_verticalScrollbar ? _verticalScrollbar->OccupiedWidth() : 0),
         _horizontalScrollbar->Height()));
-      if (oldRect != _horizontalScrollbar->FrameRect())
+      if (!_scrollbarsSuppressed && oldRect != _horizontalScrollbar->FrameRect())
       {
         _horizontalScrollbar->Invalidate();
       }
 
+      if (_scrollbarsSuppressed)
+      {
+        _horizontalScrollbar->SetSuppressInvalidation(true);
+      }
       _horizontalScrollbar->SetEnabled(ContentsSize().Width() > clientWidth);
       _horizontalScrollbar->SetProportion(clientWidth, ContentsSize().Width());
+      if (_scrollbarsSuppressed)
+      {
+        _horizontalScrollbar->SetSuppressInvalidation(false);
+      }
     }
 
     if (_verticalScrollbar)
@@ -2147,20 +2499,35 @@ namespace krys::boo
         IntRect(ShouldPlaceVerticalScrollbarOnLeft() ? 0 : Width() - _verticalScrollbar->Width(), 0,
                 _verticalScrollbar->Width(),
                 Height() - (_horizontalScrollbar ? _horizontalScrollbar->OccupiedHeight() : 0)));
-      if (oldRect != _verticalScrollbar->FrameRect())
+      if (!_scrollbarsSuppressed && oldRect != _verticalScrollbar->FrameRect())
       {
         _verticalScrollbar->Invalidate();
       }
 
+      if (_scrollbarsSuppressed)
+      {
+        _verticalScrollbar->SetSuppressInvalidation(true);
+      }
       _verticalScrollbar->SetEnabled(TotalContentsSize().Height() > clientHeight);
       _verticalScrollbar->SetProportion(clientHeight, TotalContentsSize().Height());
+      if (_scrollbarsSuppressed)
+      {
+        _verticalScrollbar->SetSuppressInvalidation(false);
+      }
     }
 
     UpdateScrollbarSteps();
 
     PositionScrollbarLayers();
-    // FIXME: Repainting the scroll corner when it changes (updateScrollCorner), once there are custom scroll
-    // corners.
+    if (hasHorizontalScrollbar != newHasHorizontalScrollbar
+        || hasVerticalScrollbar != newHasVerticalScrollbar)
+    {
+      // The corner the scrollbars left goes with them. (There are no custom scroll corners to update.)
+      if (!_horizontalScrollbar && !_verticalScrollbar)
+      {
+        InvalidateScrollCorner(oldScrollCornerRect);
+      }
+    }
 
     scrollToPosition(desiredPosition);
 
@@ -2197,7 +2564,16 @@ namespace krys::boo
 
     _scrollPosition = newPosition;
 
-    // FIXME: Suppressed scrollbars and deferring the update while the contents size changes.
+    // A view that's loading repaints all of itself; what's fixed moves with its next layout.
+    // FIXME: Deferring the update while the contents size changes.
+    if (_scrollbarsSuppressed)
+    {
+      if (oldPosition != GetScrollPosition())
+      {
+        ScrollPositionChanged(oldPosition, GetScrollPosition());
+      }
+      return;
+    }
 
     // completeUpdatesAfterScrollTo: the fixed layers move with the scroll position, then the painted contents
     // move.
@@ -2302,6 +2678,71 @@ namespace krys::boo
     SetIsAwaitingScrollend(true);
     Frame().GetEventHandler().ScheduleScrollEvent();
     Frame().GetEventHandler().DispatchFakeMouseMoveEventSoon();
+  }
+
+  void LocalFrameView::UpdateSnapOffsetsAndResnap() noexcept
+  {
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    auto *rootRenderer = documentElement ? DynamicDowncast<RenderBox>(documentElement->Renderer()) : nullptr;
+    if (!rootRenderer || rootRenderer->Style().GetScrollSnapType().IsNone())
+    {
+      ClearSnapOffsets();
+      return;
+    }
+
+    // Snap positions are found relative to the scroll container's padding box, but the view's viewport
+    // includes the root's margins.
+    LayoutRect viewport(LayoutPoint(), BaseLayoutViewportSize());
+    viewport.Move(-rootRenderer->MarginLeft(), -rootRenderer->MarginTop());
+    UpdateSnapOffsetsForScrollableArea(*this, *rootRenderer, viewport);
+    ResnapAfterLayout();
+  }
+
+  void LocalFrameView::RegisterForAnimatedScroll() noexcept
+  {
+    AddScrollableAreaForAnimatedScroll(*this);
+  }
+
+  void LocalFrameView::AddScrollableAreaForAnimatedScroll(ScrollableArea &area) noexcept
+  {
+    auto isArea = [&](const WeakPtr<ScrollableArea> &existing)
+    {
+      return existing.get() == &area;
+    };
+    if (std::none_of(_scrollableAreasForAnimatedScroll.begin(), _scrollableAreasForAnimatedScroll.end(),
+                     isArea))
+    {
+      _scrollableAreasForAnimatedScroll.push_back(CreateWeakPtr<ScrollableArea>(&area));
+    }
+    if (auto *document = Frame().Document())
+    {
+      document->ScheduleRenderingUpdate(RenderingUpdateStep::Scroll);
+    }
+  }
+
+  void LocalFrameView::ServiceScrollAnimations(MonotonicTime::duration now) noexcept
+  {
+    auto areas = krys::move(_scrollableAreasForAnimatedScroll);
+    _scrollableAreasForAnimatedScroll.clear();
+    bool inProgress = false;
+    for (auto &weakArea : areas)
+    {
+      auto *area = weakArea.get();
+      auto *animator = area ? area->ExistingScrollAnimator() : nullptr;
+      if (animator && animator->ServiceScrollAnimation(now))
+      {
+        inProgress = true;
+        _scrollableAreasForAnimatedScroll.push_back(krys::move(weakArea));
+      }
+    }
+    if (inProgress)
+    {
+      if (auto *document = Frame().Document())
+      {
+        document->ScheduleRenderingUpdate(RenderingUpdateStep::Scroll);
+      }
+    }
   }
 
   void LocalFrameView::ScrollDidEnd() noexcept
@@ -2690,8 +3131,14 @@ namespace krys::boo
       return;
     }
 
+    auto *document = Frame().Document();
+    if (!document)
+    {
+      return;
+    }
+
     _scheduledToScrollToAnchor = true;
-    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, *document,
                                          [protectedThis = ShareRef(*this)]
                                          {
                                            if (!protectedThis->_maintainScrollPositionAnchor)

@@ -18,7 +18,8 @@ namespace krys::boo::svg
   class SVGSvgElement;
 
   /// @brief The timeline of an `<svg>` element's animations: it schedules them by target and attribute,
-  /// and samples them on a timer every animation frame while any is due.
+  /// and samples them in the rendering update of each frame while any is changing, sleeping on a timer until
+  /// a frame before the next change otherwise.
   class SMILTimeContainer final : public RefCounted<SMILTimeContainer>,
                                   public CanMakeWeakPtr<SMILTimeContainer>
   {
@@ -34,6 +35,7 @@ namespace krys::boo::svg
     MonotonicTime::duration _presetStartTime {};
 
     bool _documentOrderIndexesDirty {false};
+    bool _animationFrameScheduled {false};
     Timer _timer;
     GroupedAnimationsMap _scheduledAnimations;
     WeakPtr<SVGSvgElement> _ownerSVGElement;
@@ -48,7 +50,10 @@ namespace krys::boo::svg
     void Unschedule(SVGSMILElement *, SVGElement *, const dom::QualifiedName &) noexcept;
     void NotifyIntervalsChanged() noexcept;
 
+    /// @brief The time between frames: the document timeline's animation interval.
     KRYS_NODISCARD Seconds AnimationFrameDelay() const noexcept;
+    /// @brief Samples the animations, if this rendering update was asked for.
+    void ServiceAnimations() noexcept;
 
     KRYS_NODISCARD SMILTime Elapsed() const noexcept;
 
@@ -70,7 +75,10 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD bool IsStarted() const noexcept;
     void TimerFired() noexcept;
-    void StartTimer(SMILTime elapsed, SMILTime fireTime, SMILTime minimumDelay = 0) noexcept;
+    /// @brief Samples the animations at @p fireTime: in the next rendering update if that's within a frame,
+    /// or else a frame before it.
+    void ScheduleUpdate(SMILTime elapsed, SMILTime fireTime) noexcept;
+    void ScheduleAnimationFrame() noexcept;
     void UpdateAnimations(SMILTime elapsed, bool seekToTime = false) noexcept;
 
     template <typename TFunction>

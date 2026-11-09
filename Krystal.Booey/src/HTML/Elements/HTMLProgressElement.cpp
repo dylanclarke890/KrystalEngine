@@ -159,7 +159,7 @@ namespace krys::boo::html
     auto valueElement = ProgressValueElement::Create(document);
     valueElement->SetInlineSizePercentage(HTMLProgressElement::IndeterminatePosition * 100);
     (void)bar->AppendChild(*valueElement);
-    _valueElement = WeakPtr<ProgressValueElement>::WithRef(*valueElement);
+    _valueElement = CreateWeakPtr(valueElement.get());
 
     (void)inner->AppendChild(*bar);
   }

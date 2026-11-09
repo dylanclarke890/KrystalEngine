@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
@@ -33,6 +34,7 @@
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/BoolOr.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -385,6 +387,8 @@ namespace krys::boo::dom
     bool _needsVisualViewportScrollEvent {false};
     /// @brief Whether the resize events wait for the document to be shown again.
     bool _deferResizeEventForVisibilityChange {false};
+    // Set as the document is unloaded: it's hidden from then on, whatever its page's visibility.
+    bool _visibilityHiddenDueToDismissal {false};
     List<WeakPtr<VisibilityChangeClient>> _visibilityStateCallbackClients;
     /// @brief Whether the document's parser is running (a document a frame loads).
     bool _parsing {false};
@@ -396,10 +400,17 @@ namespace krys::boo::dom
     bool _isDirAttributeDirty {false};
     /// @brief Things other than loads that delay the document's load event.
     uint32 _loadEventDelayCount {0};
+    // Whether an `animationiteration` listener was ever added to the document's nodes or window.
+    bool _hasAnimationIterationListener {false};
+    bool _hasPointerMoveListener {false};
+    bool _hasPointerRawUpdateListener {false};
+    bool _hasTouchRelatedListener {false};
     /// @see https://html.spec.whatwg.org/#unload-counter
     uint32 _unloadCounter {0};
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
     DOMString _contentLanguage;
+    /// @brief When its source was last modified, as its response said; none if it's unknown.
+    Maybe<std::chrono::sys_seconds> _lastModified;
     /// @brief The document's active timers.
     List<Ref<DocumentTimer>> _timers;
     UniquePtr<ScriptedAnimationController> _scriptedAnimationController;
@@ -432,6 +443,8 @@ namespace krys::boo::dom
     // The inputs inserted without their user agent shadow tree, which the next style resolution creates.
     List<WeakPtr<Element>> _elementsWithPendingUserAgentShadowTreeUpdates;
     bool _autofocusProcessed {false};
+    bool _designModeEnabled {false};
+    bool _isRunningExecCommand {false};
     // FIXME: Documents create their render trees on their first style resolution, which is a rebuild.
     bool _needsFullStyleRebuild {true};
     bool _inStyleRecalc {false};
@@ -450,6 +463,10 @@ namespace krys::boo::dom
     /// @brief The nodes that refer to this document (all of them but the document itself): it lives while any
     /// do, even with no references left.
     uint32 _referencingNodeCount {0};
+    /// @brief How many live collections in the document have cached their items, by what invalidates them.
+    Array<uint32, static_cast<size_t>(LiveCollectionInvalidation::Count)> _liveCollectionCacheCounts {};
+    /// @brief Those with a cache that a change anywhere in the document could affect.
+    List<LiveCollection *> _ownerTreeLiveCollectionCaches;
 
   protected:
     Document(DocumentFlags flags) noexcept;
@@ -627,6 +644,12 @@ namespace krys::boo::dom
     /// `MM/DD/YYYY hh:mm:ss`.
     /// @see https://html.spec.whatwg.org/#dom-document-lastmodified
     KRYS_NODISCARD DOMString LastModified() const noexcept;
+    /// @brief When the document's source was last modified (its response's `Last-Modified`); unknown, the
+    /// document's `lastModified` is the current time.
+    void SetLastModified(Maybe<std::chrono::sys_seconds> lastModified) noexcept
+    {
+      _lastModified = lastModified;
+    }
 
     /// @see https://html.spec.whatwg.org/#dom-document-readystate
     KRYS_NODISCARD html::DocumentReadyState ReadyState() const noexcept
@@ -746,14 +769,54 @@ namespace krys::boo::dom
     // user interaction
     // readonly attribute WindowProxy? defaultView;
     // boolean hasFocus();
-    // [CEReactions] attribute DOMString designMode;
-    // [CEReactions] boolean execCommand(DOMString commandId, optional boolean showUI = false, optional
-    // DOMString value = "");
-    // boolean queryCommandEnabled(DOMString commandId);
-    // boolean queryCommandIndeterm(DOMString commandId);
-    // boolean queryCommandState(DOMString commandId);
-    // boolean queryCommandSupported(DOMString commandId);
-    // DOMString queryCommandValue(DOMString commandId);
+
+    /// @brief The element whose assigned access key is @p key, ignoring ASCII case, in the composed tree. The
+    /// last in tree order wins, as in Chrome.
+    KRYS_NODISCARD RefPtr<Element> ElementForAccessKey(DOMStringView key) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#designMode
+    KRYS_NODISCARD DOMString DesignMode() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#designMode
+    void DesignMode(DOMStringView value) noexcept;
+
+    /// @brief Whether the document's design mode is enabled, which makes its document tree editable.
+    /// @see https://html.spec.whatwg.org/#design-mode-enabled
+    KRYS_NODISCARD bool InDesignMode() const noexcept
+    {
+      return _designModeEnabled;
+    }
+
+    /// @brief Runs the editing command @p commandId (ASCII case-insensitive) with @p value, as script does.
+    /// @return Whether it ran; false for an unknown, unsupported or disabled command, or, as in Chrome, when
+    /// called from within another `execCommand()`.
+    /// @note Only HTML documents have commands: in others it throws an `InvalidStateError`. @p showUI is
+    /// ignored, as no command shows a user interface.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#execcommand()
+    KRYS_NODISCARD ExceptionOr<bool> ExecCommand(DOMStringView commandId, bool showUI = false,
+                                                 DOMStringView value = {}) noexcept;
+
+    /// @brief Whether the editing command @p commandId can run on the current selection.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandenabled()
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandEnabled(DOMStringView commandId) noexcept;
+
+    /// @brief Whether the editing command @p commandId's state is indeterminate (some of the selection has
+    /// it, some doesn't).
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandindeterm()
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandIndeterm(DOMStringView commandId) noexcept;
+
+    /// @brief Whether the editing command @p commandId's state is true for the current selection.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandstate()
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandState(DOMStringView commandId) noexcept;
+
+    /// @brief Whether @p commandId names an editing command script can run.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandsupported()
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandSupported(DOMStringView commandId) noexcept;
+
+    /// @brief The editing command @p commandId's value for the current selection: "true" or "false" for a
+    /// command with a state and no value, and empty for one with neither.
+    /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandvalue()
+    KRYS_NODISCARD ExceptionOr<DOMString> QueryCommandValue(DOMStringView commandId) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-hidden
     KRYS_NODISCARD bool Hidden() const noexcept
@@ -761,9 +824,14 @@ namespace krys::boo::dom
       return VisibilityState() != html::DocumentVisibilityState::Visible;
     }
 
-    /// @brief The page's visibility: hidden if the document isn't in a page's frame.
+    /// @brief The page's visibility: hidden if the document isn't in a page's frame or has been unloaded.
     /// @see https://html.spec.whatwg.org/#dom-document-visibilitystate
     KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept;
+
+    /// @brief Hides the document as it's unloaded, firing `visibilitychange` straight away if it was visible.
+    /// It stays hidden.
+    /// @see https://html.spec.whatwg.org/#update-the-visibility-state
+    void SetVisibilityHiddenDueToDismissal() noexcept;
 
     /// @brief Fires `visibilitychange` in a task and tells the registered clients, as the page is shown or
     /// hidden.
@@ -776,7 +844,7 @@ namespace krys::boo::dom
     void UnregisterForVisibilityStateChangedCallbacks(VisibilityChangeClient &client) noexcept;
 
     // special event handler IDL attributes that only apply to Document objects
-    // [LegacyLenientThis] attribute EventHandler onreadystatechange;
+    KRYS_DECLARE_EVENT_HANDLER(ReadyStateChange, u8"readystatechange")
     KRYS_DECLARE_EVENT_HANDLER(VisibilityChange, u8"visibilitychange")
 
 #pragma endregion
@@ -786,6 +854,9 @@ namespace krys::boo::dom
     /// @brief Unlocks the pointer, if an element of this document has it.
     /// @see https://w3c.github.io/pointerlock/#dom-document-exitpointerlock
     void ExitPointerLock() noexcept;
+
+    KRYS_DECLARE_EVENT_HANDLER(PointerLockChange, u8"pointerlockchange")
+    KRYS_DECLARE_EVENT_HANDLER(PointerLockError, u8"pointerlockerror")
 
 #pragma endregion
 
@@ -1397,6 +1468,10 @@ namespace krys::boo::dom
       return _loadEventFinished;
     }
 
+    /// @brief An icon link (`<link rel=icon>`) was added, removed or changed: once the document has loaded,
+    /// its frame's loader collects its icons again.
+    void IconLinksMayHaveChanged() noexcept;
+
     /// @see https://html.spec.whatwg.org/#page-showing
     KRYS_NODISCARD bool PageShowing() const noexcept
     {
@@ -1418,8 +1493,8 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#pragma-directives
     void ProcessMetaHttpEquiv(DOMStringView equiv, DOMStringView content) noexcept;
 
-    /// @brief The document's language from its `content-language` pragma, for elements without a language of
-    /// their own; empty if it has none.
+    /// @brief The document's language, for elements without a language of their own: its `content-language`
+    /// pragma's, or else its response's `Content-Language` header's first language; empty if it has none.
     /// @see https://html.spec.whatwg.org/#pragma-set-default-language
     KRYS_NODISCARD const DOMString &ContentLanguage() const noexcept
     {
@@ -1677,6 +1752,61 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/web-animations-1/#dom-document-timeline
     KRYS_NODISCARD DocumentTimeline &Timeline() noexcept;
     KRYS_NODISCARD DocumentTimeline *ExistingTimeline() const noexcept;
+
+    /// @brief Notes a listener for @p type added to one of the document's nodes or to its window. A type the
+    /// document has had a listener for stays noted.
+    void AddListenerTypeIfNeeded(DOMStringAtom type) noexcept;
+    /// @brief Whether an `animationiteration` listener was ever added to the document's nodes or window, so
+    /// CSS animations wake for each iteration to fire the event.
+    KRYS_NODISCARD bool HasAnimationIterationListener() const noexcept
+    {
+      return _hasAnimationIterationListener;
+    }
+    /// @brief Whether a `pointermove` listener was ever added to the document's nodes or window; without one,
+    /// moves don't create the event.
+    KRYS_NODISCARD bool HasPointerMoveListener() const noexcept
+    {
+      return _hasPointerMoveListener;
+    }
+    void LiveCollectionCacheAdded(LiveCollectionInvalidation invalidation) noexcept
+    {
+      ++_liveCollectionCacheCounts[static_cast<size_t>(invalidation)];
+    }
+
+    void LiveCollectionCacheRemoved(LiveCollectionInvalidation invalidation) noexcept
+    {
+      --_liveCollectionCacheCounts[static_cast<size_t>(invalidation)];
+    }
+
+    void AddOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept;
+    void RemoveOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept;
+
+    /// @brief Clears the caches of the live collections rooted at the trees of their owners.
+    void InvalidateOwnerTreeLiveCollectionCaches() noexcept;
+
+    /// @brief Clears what those collections cached that depends on the attribute called @p localName.
+    void InvalidateOwnerTreeLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept;
+
+    /// @brief Whether a live collection in the document has cached its items, which a change to the tree
+    /// could affect.
+    KRYS_NODISCARD bool HasLiveCollectionCaches() const noexcept;
+
+    /// @brief Whether a live collection in the document has cached something that depends on the attribute
+    /// called @p localName.
+    KRYS_NODISCARD bool HasLiveCollectionCachesForAttribute(DOMStringAtom localName) const noexcept;
+
+    /// @brief Whether a touch or pointer listener was ever added to the document's nodes or window. Without
+    /// one, touches aren't dispatched in the document.
+    KRYS_NODISCARD bool HasTouchRelatedListener() const noexcept
+    {
+      return _hasTouchRelatedListener;
+    }
+    /// @brief Whether a `pointerrawupdate` listener was ever added to the document's nodes or window; without
+    /// one, moves don't create the event.
+    KRYS_NODISCARD bool HasPointerRawUpdateListener() const noexcept
+    {
+      return _hasPointerRawUpdateListener;
+    }
     /// @brief The relevant animations whose effects target elements in the document (outside shadow trees),
     /// in composite order.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-documentorshadowroot-getanimations
@@ -1945,6 +2075,8 @@ namespace krys::boo::dom
     /// @brief The teardown shared by the last reference going and leaving the frame: the observers
     /// disconnect.
     void CommonTeardown() noexcept;
+    /// @brief Removes the event listeners of the document, its window and its shadow-including descendants.
+    void RemoveAllEventListeners() noexcept;
 
     void SetQuirksMode(QuirksMode mode) noexcept;
 
@@ -2024,8 +2156,6 @@ namespace krys::boo::dom
     {
       return _nodeIterators;
     }
-
-  private:
   };
 }
 

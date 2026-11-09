@@ -79,8 +79,8 @@ namespace krys::boo
       options.Add(ReplaceSelectionCommand::CommandOption::SmartReplace);
     }
 
-    ApplyCommandToComposite(ReplaceSelectionCommand::Create(
-      GetDocument(), RefPtr<dom::DocumentFragment>(_fragment), options, EditAction::InsertFromDrop));
+    ApplyCommandToComposite(
+      ReplaceSelectionCommand::Create(GetDocument(), _fragment, options, EditAction::InsertFromDrop));
   }
 
   EditAction MoveSelectionCommand::EditingAction() const noexcept

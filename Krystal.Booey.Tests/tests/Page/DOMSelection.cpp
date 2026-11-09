@@ -230,8 +230,7 @@ namespace krys::boo::tests
     auto &selection = fixture.Selection();
     auto &text = fixture.TextIn(u8"a");
     auto counter = CreateRef<EventCounter>();
-    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"selectionchange"),
-                                       Ref<dom::EventListenerCallback> {counter}, false);
+    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"selectionchange"), counter, false);
     html::EventLoop::Current().RunUntilIdle();
 
     // Changes in a task fire one event, in a later task.

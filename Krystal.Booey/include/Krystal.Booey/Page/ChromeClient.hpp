@@ -4,12 +4,19 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/DataListSuggestionPicker.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
+#include "Krystal.Booey/Platform/Choosers/FileChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Booey/Platform/GraphicsClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo::html
+{
+  class HTMLSelectElement;
+}
 
 namespace krys::boo::svg
 {
@@ -24,6 +31,7 @@ namespace krys::boo
   class LocalFrame;
   class Color;
   class ColorChooserClient;
+  class DataListSuggestionsClient;
   class DateTimeChooserClient;
   class PopupMenuClient;
 
@@ -105,6 +113,11 @@ namespace krys::boo
       return true;
     }
 
+    /// @brief The options of the focused select changed, for a host showing them in its own picker.
+    virtual void FocusedSelectElementDidChangeOptions(const html::HTMLSelectElement &) noexcept
+    {
+    }
+
     /// @brief Makes the popup menu a menu list shows its options in; a host that doesn't override this has no
     /// popups, so menu lists don't open.
     KRYS_NODISCARD virtual RefPtr<PopupMenu> CreatePopupMenu(PopupMenuClient &client) const noexcept
@@ -123,6 +136,21 @@ namespace krys::boo
       return nullptr;
     }
 
+    /// @brief Makes the list a text field shows its datalist suggestions in; a host that doesn't override
+    /// this shows no suggestions.
+    KRYS_NODISCARD virtual RefPtr<DataListSuggestionPicker>
+      CreateDataListSuggestionPicker(DataListSuggestionsClient &client) noexcept
+    {
+      (void)client;
+      return nullptr;
+    }
+
+    /// @brief Whether the host's suggestion list shows the suggestions' labels, so typing matches them too.
+    KRYS_NODISCARD virtual bool CanShowDataListSuggestionLabels() const noexcept
+    {
+      return false;
+    }
+
     /// @brief Makes the picker a date input chooses its date in; a host that doesn't override this has no
     /// date pickers.
     KRYS_NODISCARD virtual RefPtr<DateTimeChooser>
@@ -130,6 +158,42 @@ namespace krys::boo
     {
       (void)client;
       return nullptr;
+    }
+
+    /// @brief Shows @p message, a constraint the control @p anchor doesn't satisfy, near it (a validation
+    /// bubble), in place of any shown; the host may hide it after a while. A host that doesn't override this
+    /// shows no messages.
+    virtual void ShowValidationMessage(dom::Element &anchor, const dom::DOMString &message) noexcept
+    {
+      (void)anchor;
+      (void)message;
+    }
+
+    /// @brief Hides the validation message shown for @p anchor, if it's shown.
+    virtual void HideValidationMessage(const dom::Element &anchor) noexcept
+    {
+      (void)anchor;
+    }
+
+    /// @brief Hides any validation message shown.
+    virtual void HideAnyValidationMessage() noexcept
+    {
+    }
+
+    /// @brief Whether the validation message for @p anchor is shown.
+    KRYS_NODISCARD virtual bool IsValidationMessageVisible(const dom::Element &anchor) const noexcept
+    {
+      (void)anchor;
+      return false;
+    }
+
+    /// @brief Shows the host's file picker for a file input in @p frame, answering @p chooser with the files
+    /// the user chooses, or cancelling it, now or later; a host that doesn't override this has no file
+    /// picker, so the choice is cancelled at once.
+    virtual void RunOpenPanel(LocalFrame &frame, FileChooser &chooser) noexcept
+    {
+      (void)frame;
+      chooser.Cancel();
     }
 
     /// @brief Whether the system has a mouse, whose movement the host can report before the system's

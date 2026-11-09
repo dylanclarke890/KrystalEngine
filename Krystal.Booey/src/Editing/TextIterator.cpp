@@ -350,7 +350,8 @@ namespace krys::boo
 
   namespace
   {
-    // FIXME: Traversing the flat tree (TraversesFlatTree), once something asks to (finding text).
+    // (The flat tree, TraversesFlatTree, is for finding text, and there's no find in page; see
+    // DIFFERENCES.md.)
     KRYS_NODISCARD inline dom::Node *FirstChild(TextIteratorBehaviors, dom::Node &node) noexcept
     {
       return node.FirstChild();
@@ -603,7 +604,7 @@ namespace krys::boo
 
   bool TextIterator::HandleTextNode() noexcept
   {
-    Ref textNode = ShareRef(Downcast<dom::Text>(*_currentNode));
+    Ref<dom::Text> textNode = Downcast<dom::Text>(_currentNode);
 
     if (_fullyClippedStack.Top() && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
     {
@@ -678,7 +679,7 @@ namespace krys::boo
 
   void TextIterator::HandleTextRun() noexcept
   {
-    Ref textNode = ShareRef(Downcast<dom::Text>(*_currentNode));
+    Ref<dom::Text> textNode = Downcast<dom::Text>(_currentNode);
 
     const RenderText &renderer = _firstLetterText ? *_firstLetterText : *textNode->Renderer();
     if (renderer.Style().GetVisibility() != Visibility::Visible
@@ -878,8 +879,7 @@ namespace krys::boo
 
     if (_lastTextNodeEndedWithCollapsedSpace)
     {
-      EmitCharacter(' ', ShareRefPtr<dom::Node>(_lastTextNode->ParentNode()),
-                    RefPtr<dom::Node>(_lastTextNode), 1, 1);
+      EmitCharacter(' ', ShareRefPtr<dom::Node>(_lastTextNode->ParentNode()), _lastTextNode, 1, 1);
       return false;
     }
 
@@ -895,7 +895,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Entering image overlays (EntersImageOverlays), once there are any.
+    // (There are no image overlays to enter; see DIFFERENCES.md.)
 
     _hasEmitted = true;
 

@@ -75,7 +75,7 @@ namespace krys::boo::html
 {
   /// @brief The type-specific part of an input element: its value's rules, validity, form data, events,
   /// user agent shadow tree and renderer. Only HTMLInputElement uses it.
-  // FIXME: The switch control, datalists (shouldRespectListAttribute), and the types' own focus rules
+  // FIXME: The switch control, and the types' own focus rules
   // (isKeyboardFocusable, isMouseFocusable), which the focus model decides.
   class InputType : public RefCounted<InputType>
   {
@@ -368,6 +368,16 @@ namespace krys::boo::html
     {
     }
 
+    /// @brief Called when the element has taken on this type, after its type attribute changed.
+    virtual void DidBecomeElementType() noexcept
+    {
+    }
+
+    /// @brief Called when the element's renderers have been created.
+    virtual void Attach() noexcept
+    {
+    }
+
     /// @brief Called when the element's renderers are torn down: closes the picker.
     virtual void Detach() noexcept
     {
@@ -397,6 +407,10 @@ namespace krys::boo::html
     }
     KRYS_NODISCARD virtual RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept;
     KRYS_NODISCARD virtual HTMLElement *InnerSpinButtonElement() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual HTMLElement *DataListButtonElement() const noexcept
     {
       return nullptr;
     }
@@ -458,6 +472,25 @@ namespace krys::boo::html
     {
     }
 
+    /// @brief Whether the `list` attribute applies to the type, so its datalist gives suggestions.
+    /// @see https://html.spec.whatwg.org/#attr-input-list
+    KRYS_NODISCARD virtual bool ShouldRespectListAttribute() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief The element's datalist, or its suggestions, may have changed.
+    virtual void DataListMayHaveChanged() noexcept
+    {
+    }
+
+    /// @brief The value of the datalist suggestion closest to @p value, for a slider's thumb to snap to.
+    KRYS_NODISCARD virtual Maybe<Decimal> FindClosestTickMarkValue(const Decimal &value) noexcept
+    {
+      (void)value;
+      return {};
+    }
+
     virtual void DisabledStateChanged() noexcept
     {
     }
@@ -509,6 +542,11 @@ namespace krys::boo::html
 
     /// @brief The chrome client of the element's page, which makes pickers; null without a page.
     KRYS_NODISCARD ChromeClient *GetChromeClient() const noexcept;
+
+    /// @brief Whether the element's window has transient activation, which a click or key needs to open a
+    /// picker, as in Chrome. It isn't consumed.
+    /// @see https://html.spec.whatwg.org/#transient-activation
+    KRYS_NODISCARD bool HasTransientActivation() const noexcept;
 
     KRYS_NODISCARD Decimal ParseToNumberOrNaN(dom::DOMStringView string) const noexcept;
 

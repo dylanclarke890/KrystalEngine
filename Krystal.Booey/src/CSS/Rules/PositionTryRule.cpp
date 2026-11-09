@@ -43,6 +43,6 @@ namespace krys::boo::css
 
   Ref<MutableStyleProperties> PositionTryRule::ProtectedMutableProperties() noexcept
   {
-    return Ref<MutableStyleProperties>::WithRef(MutableProperties());
+    return ShareRef(MutableProperties());
   }
 }

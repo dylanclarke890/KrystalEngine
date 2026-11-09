@@ -7,12 +7,14 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp"
@@ -98,25 +100,25 @@ namespace krys::boo
                                   const List<RefPtr<dom::StaticRange>> &targetRanges = {},
                                   bool cancelable = true) noexcept
     {
-      auto event = dom::InputEvent::Create(dom::DOMStringAtom(EventNames::BeforeInput), inputType, cancelable,
-                                           krys::move(data), krys::move(dataTransfer), targetRanges, 0,
-                                           isInputMethodComposing);
+      auto event = dom::InputEvent::Create(
+        dom::DOMStringAtom(EventNames::BeforeInput), element.NodeDocument().Window(), inputType, cancelable,
+        krys::move(data), krys::move(dataTransfer), targetRanges, 0, isInputMethodComposing);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &element);
       return !event->DefaultPrevented();
     }
 
-    // FIXME: Typing commands that are applied again fire `input` from within the command, so it's dispatched
-    // to a scoped event queue rather than straight away, with a scoped event queue.
+    // `input` goes through the scoped event queue: typing added to an open typing command fires it from
+    // within the command, so it waits until the typing is applied.
     void DispatchInputEvent(dom::Element &element, utf8_stringview inputType,
                             dom::IsInputMethodComposing isInputMethodComposing,
                             Maybe<dom::DOMString> data = null,
                             RefPtr<dom::DataTransfer> &&dataTransfer = nullptr,
                             const List<RefPtr<dom::StaticRange>> &targetRanges = {}) noexcept
     {
-      auto event =
-        dom::InputEvent::Create(dom::DOMStringAtom(EventNames::Input), inputType, false, krys::move(data),
-                                krys::move(dataTransfer), targetRanges, 0, isInputMethodComposing);
-      (void)dom::EventDispatcher::DispatchToTarget(*event, &element);
+      auto event = dom::InputEvent::Create(
+        dom::DOMStringAtom(EventNames::Input), element.NodeDocument().Window(), inputType, false,
+        krys::move(data), krys::move(dataTransfer), targetRanges, 0, isInputMethodComposing);
+      dom::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
     }
 
     bool DispatchBeforeInputEvents(RefPtr<dom::Element> startRoot, RefPtr<dom::Element> endRoot,
@@ -411,7 +413,7 @@ namespace krys::boo
     Paste(*Pasteboard::CreateForCopyAndPaste(), fromMenuOrKeyBinding);
   }
 
-  // FIXME: Spelling markers (updateMarkersForWordsAffectedByEditing), with text checking.
+  // There are no spelling markers to update, as there's no text checking (see DIFFERENCES.md).
   void Editor::Paste(Pasteboard &pasteboard, FromMenuOrKeyBinding fromMenuOrKeyBinding) noexcept
   {
     bool oldPasting =
@@ -431,7 +433,7 @@ namespace krys::boo
     _pastingFromMenuOrKeyBinding = oldPasting;
   }
 
-  // FIXME: Spelling markers (updateMarkersForWordsAffectedByEditing), with text checking.
+  // There are no spelling markers to update, as there's no text checking (see DIFFERENCES.md).
   void Editor::PasteAsPlainText(FromMenuOrKeyBinding fromMenuOrKeyBinding) noexcept
   {
     bool oldPasting =
@@ -452,7 +454,8 @@ namespace krys::boo
     {
       return;
     }
-    auto event = dom::TextEvent::CreateForPlainTextPaste(pastingText, smartReplace);
+    auto event =
+      dom::TextEvent::CreateForPlainTextPaste(target->NodeDocument().Window(), pastingText, smartReplace);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -469,8 +472,9 @@ namespace krys::boo
     {
       return;
     }
-    auto event = dom::TextEvent::CreateForFragmentPaste(
-      krys::move(pastingFragment), dom::TextEventInputType::Paste, smartReplace, matchStyle);
+    auto event =
+      dom::TextEvent::CreateForFragmentPaste(target->NodeDocument().Window(), krys::move(pastingFragment),
+                                             dom::TextEventInputType::Paste, smartReplace, matchStyle);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -627,10 +631,9 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Image documents and image overlays (writeImageToPasteboard), with images on the pasteboard; the
-  // editor client's notifications around writing the selection; spelling markers
-  // (updateMarkersForWordsAffectedByEditing), with text checking; and accessibility's notification of the cut
-  // text, with accessibility.
+  // FIXME: Image documents (writeImageToPasteboard), with images on the pasteboard; the editor client's
+  // notifications around writing the selection; and accessibility's notification of the cut text, with
+  // accessibility. (There are no image overlays or spelling markers; see DIFFERENCES.md.)
   void Editor::PerformCutOrCopy(EditorActionSpecifier action) noexcept
   {
     auto selection = SelectedRange();
@@ -671,7 +674,7 @@ namespace krys::boo
 
   void Editor::TextFieldDidEndEditing(dom::Element &e) noexcept
   {
-    // FIXME: Dismissing the correction panel (dismissCorrectionPanelAsIgnored), with spelling correction.
+    // (There's no correction panel to dismiss, as there's no spelling correction; see DIFFERENCES.md.)
     if (auto *client = Client())
     {
       client->TextFieldDidEndEditing(e);
@@ -712,7 +715,8 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Writing Tools suppressing editing, and stopping scrolling as content grows while typing.
+  // FIXME: Stopping scrolling as content grows while typing. (There are no Writing Tools to suppress editing;
+  // see DIFFERENCES.md.)
   bool Editor::WillApplyEditing(CompositeEditCommand &command,
                                 List<RefPtr<dom::StaticRange>> &&targetRanges) noexcept
   {
@@ -756,8 +760,8 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Updating the editor's UI, with menus; and autocorrection's response (respondToAppliedEditing),
-  // with text checking.
+  // FIXME: Updating the editor's UI, with menus. (There's no autocorrection to respond; see
+  // DIFFERENCES.md.)
   void Editor::AppliedEditing(CompositeEditCommand &command) noexcept
   {
     _document.UpdateLayout();
@@ -886,6 +890,8 @@ namespace krys::boo
 
   void Editor::Undo() noexcept
   {
+    // Undoing changes the text under a composition, so the input method would be out of step with it.
+    CancelCompositionAndNotifyClient();
     if (auto *client = Client())
     {
       client->Undo();
@@ -900,6 +906,7 @@ namespace krys::boo
 
   void Editor::Redo() noexcept
   {
+    CancelCompositionAndNotifyClient();
     if (auto *client = Client())
     {
       client->Redo();
@@ -911,8 +918,8 @@ namespace krys::boo
     return _lastEditCommand.get();
   }
 
-  // FIXME: Accessibility's notification of the change, with accessibility; and updating the spelling and
-  // grammar markers of the words the edit touched, with text checking.
+  // FIXME: Accessibility's notification of the change, with accessibility. (There are no spelling or
+  // grammar markers to update; see DIFFERENCES.md.)
   void Editor::RespondToChangedContents(const VisibleSelection &) noexcept
   {
     if (auto *client = Client())
@@ -1212,9 +1219,8 @@ namespace krys::boo
     return InsertText(text, triggeringEvent, dom::TextEventInputType::Keyboard);
   }
 
-  // FIXME: Dictation (DictationCommand), with dictation; autocorrection before and after the text, with text
-  // checking; and revealing the selection when the client asks (shouldRevealCurrentSelectionAfterInsertion),
-  // with the rest of the editor client.
+  // FIXME: Revealing the selection when the client asks (shouldRevealCurrentSelectionAfterInsertion), with
+  // the rest of the editor client. (There's no dictation or autocorrection; see DIFFERENCES.md.)
   bool Editor::InsertTextWithoutSendingTextEvent(utf8_stringview text, bool selectInsertedText,
                                                  dom::TextEvent *triggeringEvent) noexcept
   {
@@ -1359,7 +1365,7 @@ namespace krys::boo
     return InsertTextWithoutSendingTextEvent(data, false, &event);
   }
 
-  // FIXME: The kill ring (addRangeToKillRing, setStartNewKillRingSequence), with the kill ring.
+  // (There's no kill ring to add the range to; see DIFFERENCES.md.)
   bool Editor::DeleteWithDirection(SelectionDirection direction, TextGranularity granularity,
                                    bool shouldAddToKillRing, bool isTypingAction) noexcept
   {
@@ -1423,7 +1429,8 @@ namespace krys::boo
     DeleteSelectionCommand::Create(_document, smartDelete, true, false, false, true, editingAction)->Apply();
   }
 
-  // FIXME: Beeping when there's nothing to delete (systemBeep), with system sounds; and the kill ring.
+  // FIXME: Beeping when there's nothing to delete (systemBeep), with system sounds. (There's no kill ring;
+  // see DIFFERENCES.md.)
   void Editor::PerformDelete() noexcept
   {
     if (!CanDelete())
@@ -1434,9 +1441,9 @@ namespace krys::boo
     DeleteSelectionWithSmartDelete(CanSmartCopyOrDelete());
   }
 
-  // FIXME: Waiting for the inserted images to load before revealing the selection;
-  // accessibility's notifications of the pasted text, with accessibility; and checking the spelling of the
-  // editable root, with text checking.
+  // FIXME: Waiting for the inserted images to load before revealing the selection; and accessibility's
+  // notifications of the pasted text, with accessibility. (There's no spell checking; see
+  // DIFFERENCES.md.)
   void Editor::ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
                                             bool smartReplace, bool matchStyle,
                                             EditAction editingAction) noexcept
@@ -1496,12 +1503,33 @@ namespace krys::boo
 
   bool Editor::HasComposition() const noexcept
   {
-    return static_cast<bool>(_compositionNode);
+    return CompositionNode();
   }
 
   dom::Text *Editor::CompositionNode() const noexcept
   {
-    return _compositionNode.get();
+    if (!_compositionRange || _compositionRange->Collapsed()
+        || _compositionRange->StartContainer() != _compositionRange->EndContainer())
+    {
+      return nullptr;
+    }
+    auto *node = DynamicDowncast<dom::Text>(_compositionRange->StartContainer());
+    return node && node->IsConnected() ? node : nullptr;
+  }
+
+  uint32 Editor::CompositionStart() const noexcept
+  {
+    return HasComposition() ? static_cast<uint32>(_compositionRange->StartOffset()) : 0;
+  }
+
+  uint32 Editor::CompositionEnd() const noexcept
+  {
+    return HasComposition() ? static_cast<uint32>(_compositionRange->EndOffset()) : 0;
+  }
+
+  bool Editor::HasLostComposition() const noexcept
+  {
+    return _compositionRange && !HasComposition();
   }
 
   bool Editor::InsertTextForConfirmedComposition(utf8_stringview text) noexcept
@@ -1527,13 +1555,16 @@ namespace krys::boo
 
   void Editor::ConfirmComposition() noexcept
   {
-    if (!_compositionNode)
+    auto *node = CompositionNode();
+    if (!node)
     {
+      // A lost composition has no text to confirm.
+      CancelComposition();
       return;
     }
     // A copy: confirming replaces the composition's text in its node.
-    auto text = utf8_string(utf8_stringview(_compositionNode->Data())
-                              .substr(_compositionStart, _compositionEnd - _compositionStart));
+    auto start = CompositionStart();
+    auto text = utf8_string(utf8_stringview(node->Data()).substr(start, CompositionEnd() - start));
     SetComposition(text, SetCompositionMode::ConfirmComposition);
   }
 
@@ -1567,11 +1598,24 @@ namespace krys::boo
 
   void Editor::CancelComposition() noexcept
   {
-    if (!_compositionNode)
+    if (!_compositionRange)
     {
       return;
     }
     SetComposition({}, SetCompositionMode::CancelComposition);
+  }
+
+  void Editor::CancelCompositionAndNotifyClient() noexcept
+  {
+    if (!HasComposition())
+    {
+      return;
+    }
+    CancelComposition();
+    if (auto *editorClient = Client())
+    {
+      editorClient->DiscardedComposition(_document);
+    }
   }
 
   bool Editor::CancelCompositionIfSelectionIsInvalid() noexcept
@@ -1634,28 +1678,35 @@ namespace krys::boo
       SelectComposition();
     }
 
-    _compositionNode = nullptr;
+    _compositionRange = nullptr;
     _customCompositionUnderlines.clear();
 
+    // Without a selection there's nowhere for the text to go, but a cancelled composition still ends.
     if (document->Selection().IsNone())
     {
-      return;
+      if (mode != SetCompositionMode::CancelComposition)
+      {
+        return;
+      }
     }
-
-    // Always delete the current composition before inserting the finalized composition text if we're
-    // confirming our composition. Our default behavior (if the beforeinput event is not prevented) is to
-    // insert the finalized composition text back in. We pass TypingCommand::TextCompositionType::Pending here
-    // to indicate that we are deleting the pending composition.
-    if (mode != SetCompositionMode::CancelComposition)
+    else
     {
-      TypingCommand::DeleteSelection(*document, {}, TypingCommand::TextCompositionType::Pending);
-    }
+      // Always delete the current composition before inserting the finalized composition text if we're
+      // confirming our composition. Our default behavior (if the beforeinput event is not prevented) is to
+      // insert the finalized composition text back in. We pass TypingCommand::TextCompositionType::Pending
+      // here to indicate that we are deleting the pending composition.
+      if (mode != SetCompositionMode::CancelComposition)
+      {
+        TypingCommand::DeleteSelection(*document, {}, TypingCommand::TextCompositionType::Pending);
+      }
 
-    (void)InsertTextForConfirmedComposition(text);
+      (void)InsertTextForConfirmedComposition(text);
+    }
 
     if (RefPtr<dom::Element> target = ShareRefPtr(document->FocusedElement()))
     {
-      auto event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd), text);
+      auto event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd),
+                                                 target->NodeDocument().Window(), text);
       (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     }
 
@@ -1676,6 +1727,12 @@ namespace krys::boo
   void Editor::SetComposition(utf8_stringview text, const List<CompositionUnderline> &underlines,
                               uint32 selectionStart, uint32 selectionEnd) noexcept
   {
+    // The page's edits took the composition's text away: that one ends, and this starts another.
+    if (HasLostComposition())
+    {
+      CancelComposition();
+    }
+
     Ref<dom::Document> document = ShareRef(_document);
     SetCompositionScope setCompositionScope(*document);
 
@@ -1717,30 +1774,32 @@ namespace krys::boo
       // 1. Starting a new composition.
       //    Send a compositionstart and a compositionupdate event when this function creates
       //    a new composition node, i.e.
-      //    _compositionNode == 0 && !text.empty().
+      //    !HasComposition() && !text.empty().
       //    Sending a compositionupdate event at this time ensures that at least one
       //    compositionupdate event is dispatched.
       // 2. Updating the existing composition node.
       //    Send a compositionupdate event when this function updates the existing composition
-      //    node, i.e. _compositionNode != 0 && !text.empty().
+      //    node, i.e. HasComposition() && !text.empty().
       // 3. Canceling the ongoing composition.
       //    Send a compositionend event when function deletes the existing composition node, i.e.
-      //    _compositionNode != 0 && text.empty().
-      if (!_compositionNode)
+      //    HasComposition() && text.empty().
+      if (!HasComposition())
       {
         // We should send a compositionstart event only when the given text is not empty because this
         // function doesn't create a composition node when the text is empty.
         if (!text.empty())
         {
-          auto start =
-            dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionStart), originalText);
+          auto start = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionStart),
+                                                     target->NodeDocument().Window(), originalText);
           (void)dom::EventDispatcher::DispatchToTarget(*start, target.get());
-          event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate), text);
+          event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate),
+                                                target->NodeDocument().Window(), text);
         }
       }
       else if (!text.empty())
       {
-        event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate), text);
+        event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate),
+                                              target->NodeDocument().Window(), text);
       }
 
       if (event)
@@ -1757,12 +1816,13 @@ namespace krys::boo
                                      TypingCommand::TextCompositionType::Pending);
       if (target)
       {
-        auto end = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd), text);
+        auto end = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd),
+                                                 target->NodeDocument().Window(), text);
         (void)dom::EventDispatcher::DispatchToTarget(*end, target.get());
       }
     }
 
-    _compositionNode = nullptr;
+    _compositionRange = nullptr;
     _customCompositionUnderlines.clear();
 
     if (!text.empty())
@@ -1783,15 +1843,10 @@ namespace krys::boo
       if (auto *baseTextNode = DynamicDowncast<dom::Text>(baseNode.get());
           baseTextNode && baseNode == extentNode && baseOffset + text.size() == extentOffset)
       {
-        _compositionNode = ShareRefPtr(baseTextNode);
-        _compositionStart = baseOffset;
-        _compositionEnd = extentOffset;
+        _compositionRange =
+          CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<dom::Node>(*baseTextNode), baseOffset},
+                                dom::BoundaryPoint {ShareRef<dom::Node>(*baseTextNode), extentOffset});
         _customCompositionUnderlines = underlines;
-        for (auto &underline : _customCompositionUnderlines)
-        {
-          underline.StartOffset += baseOffset;
-          underline.EndOffset += baseOffset;
-        }
 
         if (auto *renderer = baseTextNode->Renderer())
         {
@@ -1824,56 +1879,50 @@ namespace krys::boo
 
   Maybe<dom::SimpleRange> Editor::CompositionRange() const noexcept
   {
-    if (!_compositionNode)
+    if (!HasComposition())
     {
       return {};
     }
-    auto length = static_cast<uint32>(_compositionNode->Length());
-    auto start = std::min(_compositionStart, length);
-    auto end = std::clamp(_compositionEnd, start, length);
-    if (start >= end)
-    {
-      return {};
-    }
-    return dom::SimpleRange {{ShareRef<dom::Node>(*_compositionNode), start},
-                             {ShareRef<dom::Node>(*_compositionNode), end}};
+    return dom::MakeSimpleRange(*_compositionRange);
   }
 
   bool Editor::GetCompositionSelection(uint32 &selectionStart, uint32 &selectionEnd) const noexcept
   {
-    if (!_compositionNode)
+    auto *node = CompositionNode();
+    if (!node)
     {
       return false;
     }
     const auto &selection = _document.Selection().Selection();
     auto start = selection.Start();
-    if (start.DeprecatedNode() != _compositionNode.get())
+    if (start.DeprecatedNode() != node)
     {
       return false;
     }
     auto end = selection.End();
-    if (end.DeprecatedNode() != _compositionNode.get())
+    if (end.DeprecatedNode() != node)
     {
       return false;
     }
 
-    if (static_cast<uint32>(start.DeprecatedEditingOffset()) < _compositionStart)
+    auto compositionStart = CompositionStart();
+    if (static_cast<uint32>(start.DeprecatedEditingOffset()) < compositionStart)
     {
       return false;
     }
-    if (static_cast<uint32>(end.DeprecatedEditingOffset()) > _compositionEnd)
+    if (static_cast<uint32>(end.DeprecatedEditingOffset()) > CompositionEnd())
     {
       return false;
     }
 
-    selectionStart = static_cast<uint32>(start.DeprecatedEditingOffset()) - _compositionStart;
-    selectionEnd = static_cast<uint32>(end.DeprecatedEditingOffset()) - _compositionStart;
+    selectionStart = static_cast<uint32>(start.DeprecatedEditingOffset()) - compositionStart;
+    selectionEnd = static_cast<uint32>(end.DeprecatedEditingOffset()) - compositionStart;
     return true;
   }
 
-  // FIXME: Spelling and grammar, the kill ring (setStartNewKillRingSequence), revealing images that load
-  // (imageElementsToLoadBeforeRevealingSelection) and the editor's user interface updates
-  // (scheduleEditorUIUpdate), with those.
+  // FIXME: Revealing images that load (imageElementsToLoadBeforeRevealingSelection) and the editor's user
+  // interface updates (scheduleEditorUIUpdate), with those. (There's no spelling and grammar checking or
+  // kill ring; see DIFFERENCES.md.)
   void Editor::RespondToChangedSelection(const VisibleSelection &,
                                          EnumSet<FrameSelectionSetSelectionOption>) noexcept
   {

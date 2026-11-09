@@ -310,4 +310,72 @@ namespace krys::boo::tests
     second->Cancel(WebAnimation::Silently::Yes);
     CHECK_FALSE(target.HasKeyframeEffects(null));
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "WebAnimation: suspended and stopped with its document",
+                   "[Animation][WebAnimation]")
+  {
+    AnimationFixture fixture;
+    auto &animation = *fixture.Animation;
+    auto &document = *fixture.Document;
+    constexpr auto Reason = dom::ReasonForSuspension::PageWillBeSuspended;
+    REQUIRE_FALSE(animation.Play().HasException());
+
+    SECTION("Suspending the document's scheduled tasks suspends it")
+    {
+      document.SuspendScheduledTasks(Reason);
+      CHECK(animation.IsSuspended());
+      document.ResumeScheduledTasks(Reason);
+      CHECK_FALSE(animation.IsSuspended());
+    }
+
+    SECTION("Suspending the document suspends it")
+    {
+      document.Suspend(Reason);
+      CHECK(animation.IsSuspended());
+      document.Resume(Reason);
+      CHECK_FALSE(animation.IsSuspended());
+    }
+
+    SECTION("In a hidden page it stays suspended when the document resumes")
+    {
+      document.Suspend(Reason);
+      fixture.TestPage->SetIsVisible(false);
+      document.Resume(Reason);
+      CHECK(animation.IsSuspended());
+      fixture.TestPage->SetIsVisible(true);
+      CHECK_FALSE(animation.IsSuspended());
+    }
+
+    SECTION("One made while the document's suspended starts out suspended")
+    {
+      document.SuspendScheduledTasks(Reason);
+      auto other = WebAnimation::Create(document, nullptr);
+      CHECK(other->IsSuspended());
+      document.ResumeScheduledTasks(Reason);
+      CHECK_FALSE(other->IsSuspended());
+    }
+
+    SECTION("Stopping the document takes its listeners and effect, and any timeline's")
+    {
+      auto noTimeline = WebAnimation::Create(
+        document, KeyframeEffect::Create(*document.GetElementById(u8"target"), null).get(), nullptr);
+      int32 fired = 0;
+      auto listener = [&](dom::Event &)
+      {
+        ++fired;
+      };
+      auto handle = animation.AddEventListener(u8"custom", listener);
+      auto otherHandle = noTimeline->AddEventListener(u8"custom", listener);
+      REQUIRE(animation.Effect());
+      REQUIRE(noTimeline->Effect());
+
+      document.StopActiveDOMObjects();
+
+      CHECK_FALSE(animation.Effect());
+      CHECK_FALSE(noTimeline->Effect());
+      (void)animation.DispatchEvent(*dom::Event::Create(dom::DOMStringAtom(u8"custom"), false, false));
+      (void)noTimeline->DispatchEvent(*dom::Event::Create(dom::DOMStringAtom(u8"custom"), false, false));
+      CHECK(fired == 0);
+    }
+  }
 }

@@ -99,6 +99,25 @@ namespace krys::pal
 
 #pragma endregion
 
+#pragma region TouchpadPanEvent
+
+  TouchpadPanEvent::TouchpadPanEvent(WindowHandle window, const TouchpadPanInput &input) noexcept
+      : Event(), _window(window), _input(input)
+  {
+  }
+
+  const TouchpadPanInput &TouchpadPanEvent::Input() const noexcept
+  {
+    return _input;
+  }
+
+  WindowHandle TouchpadPanEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
 #pragma region DragInputEvent
 
   DragInputEvent::DragInputEvent(WindowHandle window, DragInput input) noexcept

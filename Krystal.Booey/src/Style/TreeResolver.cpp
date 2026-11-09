@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -400,12 +401,22 @@ namespace krys::boo::style
       _document->SetTextColor(update.Style->ColorResolvingCurrentColor(css::PropertyId::Color));
     }
 
+    // What the contents of a select match depends on its appearance, so it's known before they're resolved.
+    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element);
+        select
+        && select->SetContentsUseBaseAppearance(update.Style->UsedAppearance()
+                                                == StyleAppearance::BaseSelect))
+    {
+      descendantsToResolve = DescendantsToResolve::All;
+    }
+
     // FIXME: These elements should not change renderer based on appearance property.
     if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
         htmlElement
         && ((Is<html::HTMLInputElement>(*htmlElement)
              && Downcast<html::HTMLInputElement>(*htmlElement).IsSearchField())
-            || Is<html::HTMLMeterElement>(*htmlElement) || Is<html::HTMLProgressElement>(*htmlElement)))
+            || Is<html::HTMLMeterElement>(*htmlElement) || Is<html::HTMLProgressElement>(*htmlElement)
+            || Is<html::HTMLSelectElement>(*htmlElement)))
     {
       if (existingStyle && update.Style->UsedAppearance() != existingStyle->UsedAppearance())
       {
@@ -469,6 +480,10 @@ namespace krys::boo::style
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::After});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Backdrop});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Checkmark});
+    if (Is<html::HTMLSelectElement>(element))
+    {
+      (void)resolveAndAddPseudoElementStyle({PseudoElementType::PickerIcon});
+    }
 
     return {krys::move(update), descendantsToResolve};
   }
@@ -1025,11 +1040,11 @@ namespace krys::boo::style
       if (resolvedStyle.MatchResult)
       {
         // The cascade may override animated properties and have dependencies to them.
-        // FIXME: This is wrong if there are both transitions and animations running on the same element.
-        auto overriddenAnimatedProperties =
-          ApplyCascadeAfterAnimation(*animatedStyle, animatedProperties, styleable.HasRunningTransitions(),
-                                     *resolvedStyle.MatchResult, element, resolutionContext);
         krys_debug_assert(styleable.GetKeyframeEffectStack());
+        auto overriddenAnimatedProperties = ApplyCascadeAfterAnimation(
+          *animatedStyle, animatedProperties,
+          styleable.GetKeyframeEffectStack()->PropertiesAnimatedOnlyByTransitions(),
+          *resolvedStyle.MatchResult, element, resolutionContext);
         styleable.GetKeyframeEffectStack()->CascadeDidOverrideProperties(
           AnimatableCSSPropertySet(overriddenAnimatedProperties.begin(), overriddenAnimatedProperties.end()),
           *_document);
@@ -1244,9 +1259,9 @@ namespace krys::boo::style
   }
 
   HashSet<AnimatableCSSProperty> TreeResolver::ApplyCascadeAfterAnimation(
-    RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties, bool isTransition,
-    const MatchResult &matchResult, const dom::Element &element,
-    const ResolutionContext &resolutionContext) noexcept
+    RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties,
+    const AnimatableCSSPropertySet &transitioningProperties, const MatchResult &matchResult,
+    const dom::Element &element, const ResolutionContext &resolutionContext) noexcept
   {
     auto builderContext = BuilderContext {
       .Document = ShareRefPtr<const dom::Document>(_document.get()),
@@ -1257,13 +1272,12 @@ namespace krys::boo::style
     };
 
     HashSet<AnimatableCSSProperty> properties(animatedProperties.begin(), animatedProperties.end());
+    HashSet<AnimatableCSSProperty> transitioning(transitioningProperties.begin(),
+                                                 transitioningProperties.end());
 
-    auto styleBuilder = Builder {animatedStyle,
-                                 krys::move(builderContext),
-                                 matchResult,
-                                 {isTransition ? PropertyCascade::PropertyType::AfterTransition
-                                               : PropertyCascade::PropertyType::AfterAnimation},
-                                 &properties};
+    auto styleBuilder = Builder {animatedStyle, krys::move(builderContext),
+                                 matchResult,   {PropertyCascade::PropertyType::AfterAnimation},
+                                 &properties,   &transitioning};
 
     styleBuilder.ApplyAllProperties();
 

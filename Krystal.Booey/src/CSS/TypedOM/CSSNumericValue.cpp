@@ -105,16 +105,14 @@ namespace krys::boo::css
     ReifyMathExpression(const calc::IndirectNode<calc::Negate> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(child, CSSNumericValue::ReifyMathExpression(root->A));
-    return ConvertToExceptionOrNumericValue(
-      CSSMathNegate::Create(RefPtr<CSSNumericValue> {krys::move(child)}));
+    return ConvertToExceptionOrNumericValue(CSSMathNegate::Create(krys::move(child)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
     ReifyMathExpression(const calc::IndirectNode<calc::Invert> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(child, CSSNumericValue::ReifyMathExpression(root->A));
-    return ConvertToExceptionOrNumericValue(
-      CSSMathInvert::Create(RefPtr<CSSNumericValue> {krys::move(child)}));
+    return ConvertToExceptionOrNumericValue(CSSMathInvert::Create(krys::move(child)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
@@ -137,9 +135,8 @@ namespace krys::boo::css
     CSS_NUMERIC_RETURN_IF_EXCEPTION(min, CSSNumericValue::ReifyMathExpression(root->Min));
     CSS_NUMERIC_RETURN_IF_EXCEPTION(val, CSSNumericValue::ReifyMathExpression(root->Val));
     CSS_NUMERIC_RETURN_IF_EXCEPTION(max, CSSNumericValue::ReifyMathExpression(root->Max));
-    return ConvertToExceptionOrNumericValue(CSSMathClamp::Create(RefPtr<CSSNumericValue> {krys::move(min)},
-                                                                 RefPtr<CSSNumericValue> {krys::move(val)},
-                                                                 RefPtr<CSSNumericValue> {krys::move(max)}));
+    return ConvertToExceptionOrNumericValue(
+      CSSMathClamp::Create(krys::move(min), krys::move(val), krys::move(max)));
   }
 
   template <typename TOp>
@@ -180,7 +177,7 @@ namespace krys::boo::css
     {
       return CSSUnitValue::Create(-unitValue->Value(), unitValue->UnitEnum());
     }
-    return CSSMathNegate::Create(RefPtr<CSSNumericValue> {krys::move(value)});
+    return CSSMathNegate::Create(krys::move(value));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>> Invert(Ref<CSSNumericValue> &&value) noexcept
@@ -203,7 +200,7 @@ namespace krys::boo::css
       }
     }
 
-    return Ref<CSSNumericValue> {CSSMathInvert::Create(RefPtr<CSSNumericValue> {krys::move(value)})};
+    return Ref<CSSNumericValue> {CSSMathInvert::Create(krys::move(value))};
   }
 
   template <typename T>
@@ -384,12 +381,12 @@ namespace krys::boo::css
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-numberish-value
     return krys::SwitchOn(
       numberish,
-      [](RefPtr<CSSNumericValue> &value)
+      [](RefPtr<CSSNumericValue> &value) -> Ref<CSSNumericValue>
       {
         krys_assert(value);
-        return Ref<CSSNumericValue> {krys::move(value)};
+        return krys::move(value);
       },
-      [](double value) { return Ref<CSSNumericValue> {CSSNumericFactory::Number(value)}; });
+      [](double value) -> Ref<CSSNumericValue> { return CSSNumericFactory::Number(value); });
   }
 
   bool CSSNumericValue::Equals(List<CSSNumberish> &&values) noexcept
@@ -483,7 +480,7 @@ namespace krys::boo::css
       {
         return dom::Exception {dom::ExceptionCode::TypeError, u8"Could not create CSSUnitValue"};
       }
-      values.push_back(Ref<CSSNumericValue> {krys::move(cssUnitValue)});
+      values.push_back(krys::move(cssUnitValue));
     }
 
     if (parsedUnits.empty())

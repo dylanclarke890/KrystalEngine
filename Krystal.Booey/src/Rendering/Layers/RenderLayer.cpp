@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleAttributeMutationScope.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
@@ -748,22 +749,22 @@ namespace krys::boo
 
   void RenderLayer::SetNextSibling(RenderLayer *next) noexcept
   {
-    _next = next ? CreateWeakPtr(next) : nullptr;
+    _next = CreateWeakPtr(next);
   }
 
   void RenderLayer::SetPreviousSibling(RenderLayer *prev) noexcept
   {
-    _previous = prev ? CreateWeakPtr(prev) : nullptr;
+    _previous = CreateWeakPtr(prev);
   }
 
   void RenderLayer::SetFirstChild(RenderLayer *first) noexcept
   {
-    _first = first ? CreateWeakPtr(first) : nullptr;
+    _first = CreateWeakPtr(first);
   }
 
   void RenderLayer::SetLastChild(RenderLayer *last) noexcept
   {
-    _last = last ? CreateWeakPtr(last) : nullptr;
+    _last = CreateWeakPtr(last);
   }
 
 #pragma region Tree
@@ -1063,7 +1064,7 @@ namespace krys::boo
     // "The root element forms the root stacking context." https://www.w3.org/TR/CSS22/visuren.html#z-index
     return !Renderer().Style().UsedZIndex().IsAuto() || Renderer().ShouldApplyLayoutContainment()
            || Renderer().ShouldApplyPaintContainment() || Renderer().IsDocumentElementRenderer()
-           || IsRenderViewLayer();
+           || Renderer().IsLegacyRenderSVGForeignObject() || IsRenderViewLayer();
   }
 
   bool RenderLayer::SetIsNormalFlowOnly(bool isNormalFlowOnly) noexcept
@@ -1390,7 +1391,8 @@ namespace krys::boo
                                   EnumSet<Compositing> &accumulatedDirtyFlags) noexcept
   {
     krys_debug_assert(!DescendantDependentFlagsAreDirty());
-    if (EstablishesTopLayer())
+    // A foreign object paints this layer itself.
+    if (EstablishesTopLayer() || Renderer().IsLegacyRenderSVGForeignObject())
     {
       return;
     }
@@ -1564,8 +1566,7 @@ namespace krys::boo
       SetSelfAndDescendantsNeedPositionUpdate();
     }
 
-    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
-    // markers.
+    // (There are no document markers whose rects to invalidate; see DIFFERENCES.md.)
     RecursiveUpdateLayerPositions(updateLayerPositionFlags(environmentChanged));
   }
 
@@ -1593,8 +1594,7 @@ namespace krys::boo
       SetSelfAndDescendantsNeedPositionUpdate();
     }
 
-    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
-    // markers.
+    // (There are no document markers whose rects to invalidate; see DIFFERENCES.md.)
     RecursiveUpdateLayerPositions(updateLayerPositionFlags(didFullRepaint, environmentChanged));
   }
 
@@ -1839,12 +1839,18 @@ namespace krys::boo
           localPoint -= LayoutSize(ToIntSize(positionedParentScrollableArea->GetScrollPosition()));
         }
       }
-      // FIXME: Move out-of-flow boxes inside an in-flow positioned inline with it
-      // (offsetForInFlowPositionedInline).
+      if (positionedParent->Renderer().IsInFlowPositioned())
+      {
+        if (auto *inlinePositionedParent = DynamicDowncast<RenderInline>(positionedParent->Renderer()))
+        {
+          localPoint += inlinePositionedParent->OffsetForInFlowPositionedInline(GetRenderBox());
+        }
+      }
     }
     else if (auto *parentLayer = Parent())
     {
-      if (parentLayer->Renderer().HasNonVisibleOverflow())
+      // A legend in the border doesn't scroll with the contents of its fieldset.
+      if (parentLayer->Renderer().HasNonVisibleOverflow() && !Renderer().IsExcludedAndPlacedInBorder())
       {
         if (auto *parentLayerScrollableArea = parentLayer->GetScrollableArea())
         {
@@ -2251,7 +2257,7 @@ namespace krys::boo
         return nullptr;
       }
       auto *paginationLayer = layer.EnclosingPaginationLayer(IncludeCompositedPaginatedLayers);
-      return paginationLayer ? CreateWeakPtr(paginationLayer) : nullptr;
+      return CreateWeakPtr(paginationLayer);
     };
 
     if (IsNormalFlowOnly())
@@ -3973,6 +3979,12 @@ namespace krys::boo
       return nullptr;
     }
 
+    // A legend in the border is outside what its fieldset clips, whose overflow clip is for the contents.
+    if (Renderer().IsExcludedAndPlacedInBorder())
+    {
+      return containerLayer->ParentClipRects(clipRectsContext);
+    }
+
     if (clipRectsContext.Type == PaintingClipRects && _suppressAncestorClippingInsideFilter
         && !clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter))
     {
@@ -4709,8 +4721,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The only case where renderer->element()->renderer() != renderer is with continuations. Do they
-    // matter here? If they do it would still be better to deal with them explicitly.
     auto *renderer = Downcast<RenderBox>(styledElement->Renderer());
 
     Ref<dom::Document> document = ShareRef(styledElement->NodeDocument());
@@ -4742,8 +4752,8 @@ namespace krys::boo
       (currentSize + newOffset - adjustedOldOffset).ExpandedTo(MinimumSizeForResizing(zoomFactor))
       - currentSize;
 
-    // FIXME: A single mutation record for the style attribute (StyleAttributeMutationScope), with mutation
-    // observers of style changes.
+    // One mutation record for the style attribute, however many of its properties change.
+    css::StyleAttributeMutationScope mutationScope {styledElement.get()};
     bool isBoxSizingBorder = renderer->Style().GetBoxSizing() == BoxSizing::BorderBox;
 
     auto resize = renderer->Style().GetResize();
@@ -4767,6 +4777,8 @@ namespace krys::boo
       baseWidth = baseWidth / zoomFactor;
       (void)styledElement->SetInlineStyleProperty(
         css::PropertyId::Width, RoundToInt(baseWidth + difference.Width()), css::UnitType::px);
+
+      mutationScope.EnqueueMutationRecord();
     }
 
     bool canResizeHeight = resize == style::Resize::Vertical || resize == style::Resize::Both
@@ -4789,6 +4801,8 @@ namespace krys::boo
       baseHeight = baseHeight / zoomFactor;
       (void)styledElement->SetInlineStyleProperty(
         css::PropertyId::Height, RoundToInt(baseHeight + difference.Height()), css::UnitType::px);
+
+      mutationScope.EnqueueMutationRecord();
     }
 
     document->UpdateLayout();
@@ -4860,8 +4874,7 @@ namespace krys::boo
 
   void RenderLayer::UpdateLayerPositionsAfterOverflowScroll() noexcept
   {
-    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
-    // markers.
+    // (There are no document markers whose rects to invalidate; see DIFFERENCES.md.)
 
     // FIXME: why is it OK to not check the ancestors of this layer in order to
     // initialize the HasSeenViewportConstrainedAncestor and HasSeenAncestorWithOverflowClip flags?
@@ -4872,8 +4885,7 @@ namespace krys::boo
   {
     krys_debug_assert(IsRenderViewLayer());
 
-    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
-    // markers.
+    // (There are no document markers whose rects to invalidate; see DIFFERENCES.md.)
     RecursiveUpdateLayerPositionsAfterScroll();
   }
 
@@ -5985,7 +5997,10 @@ namespace krys::boo
         PaintList(PositiveZOrderLayers(), currentContext, localPaintingInfo, localPaintFlags);
       }
 
-      // FIXME: Overlay scrollbars (paintOverflowControlsForFragments).
+      if (_scrollableArea && isPaintingOverlayScrollbars && _scrollableArea->HasScrollbars())
+      {
+        PaintOverflowControlsForFragments(layerFragments, currentContext, localPaintingInfo);
+      }
 
       if (filterContext)
       {
@@ -6084,6 +6099,24 @@ namespace krys::boo
     context.SetCTM(oldTransform);
   }
 
+  void RenderLayer::PaintForeignObjectLayers(GraphicsContext &context, const LayoutRect &dirtyRect,
+                                             EnumSet<PaintBehavior> paintBehavior, bool above) noexcept
+  {
+    UpdateLayerListsIfNeeded();
+
+    LayerPaintingInfo paintingInfo(this, LayoutRect(EnclosingIntRect(dirtyRect)), paintBehavior, LayoutSize(),
+                                   nullptr);
+    if (above)
+    {
+      PaintList(NormalFlowLayers(), context, paintingInfo, {});
+      PaintList(PositiveZOrderLayers(), context, paintingInfo, {});
+    }
+    else
+    {
+      PaintList(NegativeZOrderLayers(), context, paintingInfo, {});
+    }
+  }
+
   void RenderLayer::PaintList(LayerList layerIterator, GraphicsContext &context,
                               const LayerPaintingInfo &paintingInfo,
                               EnumSet<PaintLayerFlag> paintFlags) noexcept
@@ -6170,6 +6203,29 @@ namespace krys::boo
                           paintBehavior, subtreePaintRootForRenderer,
                           &localPaintingInfo.RootLayer->Renderer(), this);
       Renderer().Paint(paintInfo, PaintOffsetForRenderer(fragment, localPaintingInfo));
+    }
+  }
+
+  void RenderLayer::PaintOverflowControlsForFragments(const LayerFragments &layerFragments,
+                                                      GraphicsContext &context,
+                                                      const LayerPaintingInfo &localPaintingInfo) noexcept
+  {
+    krys_debug_assert(_scrollableArea);
+
+    for (const auto &fragment : layerFragments)
+    {
+      if (fragment.DirtyBackgroundRect().IsEmpty())
+      {
+        continue;
+      }
+
+      GraphicsContextStateSaver stateSaver(context, false);
+      ClipToRect(context, stateSaver, localPaintingInfo, localPaintingInfo.PaintBehavior,
+                 fragment.DirtyBackgroundRect());
+      _scrollableArea->PaintOverflowControls(
+        context, localPaintingInfo.PaintBehavior,
+        RoundedIntPoint(PaintOffsetForRenderer(fragment, localPaintingInfo)),
+        SnappedIntRect(fragment.DirtyBackgroundRect().Rect()), true);
     }
   }
 
@@ -6415,6 +6471,24 @@ namespace krys::boo
       LayoutRect(LayoutPoint(currentDocumentPosition), LayoutSize(1_lu, 1_lu)), Renderer(), false,
       {SelectionRevealMode::Reveal, ScrollAlignment::AlignToEdgeIfNeeded,
        ScrollAlignment::AlignToEdgeIfNeeded});
+  }
+
+  bool RenderLayer::HitTestForeignObjectLayers(const HitTestRequest &request, HitTestResult &result,
+                                               const HitTestLocation &hitTestLocation, bool above) noexcept
+  {
+    UpdateLayerListsIfNeeded();
+
+    auto hitTestList = [&](LayerList layers)
+    {
+      return HitTestList(layers, this, request, result, LayoutRect::InfiniteRect(), hitTestLocation, nullptr,
+                         nullptr, false)
+        .Layer;
+    };
+    if (above)
+    {
+      return hitTestList(PositiveZOrderLayers()) || hitTestList(NormalFlowLayers());
+    }
+    return hitTestList(NegativeZOrderLayers());
   }
 
   bool RenderLayer::HitTest(const HitTestRequest &request, HitTestResult &result) noexcept

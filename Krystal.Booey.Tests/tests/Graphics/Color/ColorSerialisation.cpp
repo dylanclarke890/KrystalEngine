@@ -114,9 +114,9 @@ namespace krys::boo::tests
     CHECK(SerialisationForCSS(Lab<float> {50, 20, -30, 0.5f}) == u8"lab(50 20 -30 / 0.5)");
     CHECK(SerialisationForCSS(OKLab<float> {0.5f, 0.25f, -0.125f, 1}) == u8"oklab(0.5 0.25 -0.125)");
 
-    // Hues are normalised to [0, 360).
-    CHECK(SerialisationForCSS(LCHA<float> {50, 30, 400, 1}) == u8"lch(50 30 40)");
-    CHECK(SerialisationForCSS(OKLCHA<float> {0.5f, 0.125f, -90, 1}) == u8"oklch(0.5 0.125 270)");
+    // (Hues are in [0, 360], normalised as they're parsed.)
+    CHECK(SerialisationForCSS(LCHA<float> {50, 30, 40, 1}) == u8"lch(50 30 40)");
+    CHECK(SerialisationForCSS(OKLCHA<float> {0.5f, 0.125f, 270, 1}) == u8"oklch(0.5 0.125 270)");
     CHECK(SerialisationForCSS(OKLCHA<float> {0.5f, 0.125f, none, 1}) == u8"oklch(0.5 0.125 none)");
 
     // HTML and the render tree use the CSS serialisation.

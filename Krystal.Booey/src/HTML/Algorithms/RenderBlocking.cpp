@@ -8,7 +8,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include <ranges>
 
 namespace krys::boo::html
@@ -45,7 +47,12 @@ namespace krys::boo::html
     //   elements.
     // - The current high resolution time given document's relevant global object has not exceeded an
     //   implementation-defined timeout value.
-    // FIXME: The timeout, once the rendering update skips render-blocked documents.
+    // (A document without a window has no time origin, so it doesn't time out.)
+    if (auto *window = document.Window();
+        window && EventLoop::Current().Now() - window->TimeOrigin() > Timeout)
+    {
+      return false;
+    }
     return !document._renderBlockingElements.empty() || AllowsAddingRenderBlockingElements(document);
   }
 

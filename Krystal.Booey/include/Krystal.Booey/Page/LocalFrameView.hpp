@@ -88,6 +88,7 @@ namespace krys::boo
     bool _isTransparent {false};
     bool _contentIsOpaque {false};
     ScrollPosition _scrollPosition;
+    Maybe<IntPoint> _panScrollIconPosition;
     /// @brief What needs painting again, in the view's coordinates, since the host last took it.
     Region _damage;
     /// @brief The painted contents the host moves before it paints the damage, as scrolling moved them.
@@ -95,6 +96,8 @@ namespace krys::boo
     /// @brief Renderers that paint a background fixed to the viewport (`background-attachment: fixed`): the
     /// contents can't be moved when the view scrolls. Keyed by address; renderers remove themselves.
     HashSet<const RenderElement *> _slowRepaintObjects;
+    /// @brief The areas with a smooth scroll to service.
+    List<WeakPtr<ScrollableArea>> _scrollableAreasForAnimatedScroll;
     /// @brief Renderers fixed or sticky to the viewport, which stay put when the contents move. Keyed by
     /// address; renderers remove themselves.
     HashSet<const RenderLayerModelObject *> _viewportConstrainedObjects;
@@ -111,6 +114,10 @@ namespace krys::boo
     bool _wasEverScrolledExplicitlyByUser {false};
     IntSize _contentsSize;
     bool _inUpdateScrollbars {false};
+    /// @brief Whether the scrollbars are kept as they are, unpainted, while a document loads.
+    bool _scrollbarsSuppressed {false};
+    /// @brief The boxes' and list boxes' scrollable areas that can scroll or have scrollbars.
+    HashSet<ScrollableArea *> _scrollableAreas;
     RefPtr<Scrollbar> _horizontalScrollbar;
     RefPtr<Scrollbar> _verticalScrollbar;
     ScrollbarMode _horizontalScrollbarMode {ScrollbarMode::Auto};
@@ -309,6 +316,14 @@ namespace krys::boo
     KRYS_NODISCARD boo::Color DocumentBackgroundColor() const noexcept;
 
     KRYS_NODISCARD int32 InsetForLeftScrollbarSpace() const noexcept;
+    /// @brief The root's `scrollbar-gutter`, which the view's scrollbars keep space by.
+    KRYS_NODISCARD style::ScrollbarGutter ScrollbarGutterStyle() const noexcept;
+    /// @brief The space the vertical scrollbar takes, or a stable gutter keeps without it (none for overlay
+    /// scrollbars).
+    KRYS_NODISCARD int32 ScrollbarGutterWidth(bool isHorizontalWritingMode = true) const noexcept;
+    /// @brief The space the scrollbars take from the content, with what a stable gutter keeps.
+    KRYS_NODISCARD IntSize TotalScrollbarSpace() const noexcept;
+    KRYS_NODISCARD bool IsHorizontalWritingMode() const noexcept override;
     KRYS_NODISCARD FloatPoint PositionForRootContentLayer() const noexcept;
     KRYS_NODISCARD LayoutRect
       FixedScrollableAreaBoundsInflatedForScrolling(const LayoutRect &uninflatedBounds) const noexcept;
@@ -474,13 +489,22 @@ namespace krys::boo
     /// @brief Gets the view ready for a layout of @p layoutRoot: its scrollbar modes, and marking the root
     /// (or the body) for layout if the size content is laid out at changed.
     void WillDoLayout(const RenderElement &layoutRoot) noexcept;
+    /// @brief The steps after layout for scroll snapping: finds the view's snap positions, and re-snaps to
+    /// them.
+    void UpdateSnapOffsetsAndResnap() noexcept;
+    /// @brief Has @p area's smooth scroll serviced in the frames to come.
+    void AddScrollableAreaForAnimatedScroll(ScrollableArea &area) noexcept;
+    /// @brief Moves the smooth scrolls to where they are at @p now.
+    void ServiceScrollAnimations(MonotonicTime::duration now) noexcept;
+    void RegisterForAnimatedScroll() noexcept override;
 
     /// @brief Whether the user can scroll the view: it has overflow, and `overflow` doesn't hide both axes.
     KRYS_NODISCARD bool IsScrollable() const noexcept;
     /// @brief Scrolls the view by a step of @p granularity in a direction relative to the document's writing
     /// mode.
     /// @return Whether it scrolled.
-    bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity) noexcept;
+    bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                       ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
     /// @brief Whether the root's writing mode is horizontal (its blocks stack vertically).
     KRYS_NODISCARD bool IsVerticalDocument() const noexcept;
     KRYS_NODISCARD bool IsFlippedDocument() const noexcept;
@@ -491,8 +515,38 @@ namespace krys::boo
 
     /// @brief The view's scrollbar at @p windowPoint, if any.
     KRYS_NODISCARD Scrollbar *ScrollbarAtPoint(const IntPoint &windowPoint) const noexcept;
+    /// @brief Whether @p windowPoint is in the corner past the end of a scrollbar, where a press does
+    /// nothing.
+    KRYS_NODISCARD bool IsPointInScrollbarCorner(const IntPoint &windowPoint) const noexcept;
+    /// @brief Whether a scrollbar stops short of the view's edge, leaving a corner.
+    KRYS_NODISCARD bool ScrollbarCornerPresent() const noexcept;
 
     KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept override;
+    KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept override;
+    void ScrollbarAppearanceChanged() noexcept override;
+    void ScrollbarStyleChanged() noexcept override;
+    /// @brief Whether the viewport's scrollbars are dark: the root's `color-scheme` where it sets one, or
+    /// else the document's.
+    KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept override;
+    /// @brief Makes the overlay scrollbars light over a dark document background (or, with none, a dark
+    /// appearance), as the root's or the body's style, or the base background colour, changes.
+    void RecalculateScrollbarOverlayStyle() noexcept;
+    /// @brief Calls @p function with the view and every scroller and list box in it.
+    /// @brief Adds @p scrollableArea to the view's scrollable areas.
+    /// @return Whether it wasn't there already.
+    bool AddScrollableArea(ScrollableArea &scrollableArea) noexcept;
+    /// @brief Removes @p scrollableArea from the view's scrollable areas.
+    /// @return Whether it was there.
+    bool RemoveScrollableArea(ScrollableArea &scrollableArea) noexcept;
+    KRYS_NODISCARD bool ContainsScrollableArea(const ScrollableArea &scrollableArea) const noexcept;
+    KRYS_NODISCARD const HashSet<ScrollableArea *> &ScrollableAreas() const noexcept
+    {
+      return _scrollableAreas;
+    }
+    void ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept;
+    /// @brief Repaints the scrollbars of the view and of every scroller and list box in it, for a change in
+    /// the page's dark appearance.
+    void InvalidateScrollbarsForAllScrollableAreas() noexcept;
     KRYS_NODISCARD OverscrollBehavior HorizontalOverscrollBehavior() const noexcept override;
     KRYS_NODISCARD OverscrollBehavior VerticalOverscrollBehavior() const noexcept override;
 
@@ -529,9 +583,15 @@ namespace krys::boo
     // Painting
 
     /// @brief Paints the view's part of @p rect (in the view's coordinates): its visible contents, scrolled
-    /// by the scroll position.
-    // FIXME: The scrollbars and pan scroll icon, once there are scrollbars and pan scrolling.
+    /// by the scroll position, its scrollbars and the pan scroll icon.
     void Paint(GraphicsContext &context, const IntRect &rect) noexcept;
+
+    /// @brief How far (in pixels) the mouse can be from the start of pan scrolling without it scrolling.
+    static constexpr int32 NoPanScrollRadius = 15;
+
+    /// @brief Shows the icon marking the start of pan scrolling, centred on @p iconPosition (in the window).
+    void AddPanScrollIcon(const IntPoint &iconPosition) noexcept;
+    void RemovePanScrollIcon() noexcept;
 
     /// @brief Damages @p rect of the contents (in the contents' coordinates): the host paints it again.
     /// @see `ScrollView::repaintContentRectangle`, which tells the host window
@@ -576,8 +636,7 @@ namespace krys::boo
     KRYS_NODISCARD bool UseSlowRepaints() const noexcept;
 
     /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates; only the
-    /// node to draw and its descendants, if there's one.
-    /// FIXME: The overlay scrollbars aren't ported.
+    /// node to draw and its descendants, if there's one. Overlay scrollbars paint last, over the content.
     void PaintContents(GraphicsContext &, const IntRect &dirtyRect) noexcept;
 
     /// @brief Paints only @p node and its descendants from now on, or everything if it's null.
@@ -774,6 +833,8 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect AbsoluteToLayoutViewportRect(FloatRect rect) const noexcept;
 
     void AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept override;
+    /// @brief Sets the scrollbars' line and page steps from what's in view, less the root's scroll padding.
+    void UpdateScrollbarSteps() noexcept;
 
   private:
     bool SetHasHorizontalScrollbar(bool hasBar, bool *contentSizeAffected = nullptr) noexcept;
@@ -781,7 +842,6 @@ namespace krys::boo
     bool SetHasScrollbarInternal(RefPtr<Scrollbar> &scrollbar, ScrollbarOrientation orientation, bool hasBar,
                                  bool *contentSizeAffected) noexcept;
     KRYS_NODISCARD Ref<Scrollbar> CreateScrollbar(ScrollbarOrientation orientation) noexcept;
-    void UpdateScrollbarSteps() noexcept;
     /// @brief Lays the view out again if adding or removing a scrollbar changed the size content is laid out
     /// at.
     void UpdateContentsSize() noexcept;
@@ -819,6 +879,23 @@ namespace krys::boo
     /// @brief Scrolls to @p desiredPosition, within the scroll range.
     // FIXME: Adding and removing scrollbars.
     void UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept;
+
+  public:
+    /// @brief Keeps the scrollbars as they are and unpainted (@p suppressed), as while a document loads, so
+    /// they don't come and go as its content arrives; or lets them change again, repainting them if
+    /// @p repaintOnUnsuppress.
+    void SetScrollbarsSuppressed(bool suppressed, bool repaintOnUnsuppress = false) noexcept;
+    KRYS_NODISCARD bool ScrollbarsSuppressed() const noexcept
+    {
+      return _scrollbarsSuppressed;
+    }
+    /// @brief Lets the scrollbars change again, once the document has been parsed.
+    void RestoreScrollbar() noexcept;
+    /// @brief Readies the view for a new document: its next layout is a first layout, and its scrollbars
+    /// are suppressed until the document is parsed.
+    void Clear() noexcept;
+
+  private:
     void ScheduleScrollEvent() noexcept;
     KRYS_NODISCARD LayoutRect GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
                                                            const LayoutRect &exposeRect,
@@ -834,6 +911,10 @@ namespace krys::boo
       CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept;
 
   private:
+    static constexpr int32 PanScrollIconSize = 16;
+
+    void InvalidatePanScrollIcon(const IntPoint &iconPosition) noexcept;
+
     void ScrollToFocusedElementTimerFired() noexcept;
     void ScrollToFocusedElementInternal() noexcept;
     /// @brief Scrolls the maintained anchor into view: to its top and closest side.

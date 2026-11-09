@@ -39,7 +39,7 @@ namespace krys::boo::css::tests
   {
     STATIC_CHECK(EnumTraits<SelectorMatch>::DistinctValues == 17uz);
     STATIC_CHECK(EnumTraits<SelectorRelation>::DistinctValues == 8uz);
-    STATIC_CHECK(EnumTraits<PseudoElementType>::DistinctValues == 12uz);
+    STATIC_CHECK(EnumTraits<PseudoElementType>::DistinctValues == 13uz);
     STATIC_CHECK(ToUnderlying(SelectorMatch::ForgivingUnknownNestContaining) == 16u);
     STATIC_CHECK(ToUnderlying(SelectorRelation::ShadowSlotted) == 7u);
   }

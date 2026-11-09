@@ -67,9 +67,9 @@ namespace krys::boo::css
       return _selector->Value();
     }
 
-    void SetAttribute(const dom::QualifiedName &name, IsCaseSensitive caseSensitive) noexcept
+    void SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept
     {
-      _selector->SetAttribute(name, caseSensitive);
+      _selector->SetAttribute(name, caseFlag);
     }
 
     void SetArgument(const CSSOMStringAtom &value) noexcept
@@ -120,6 +120,7 @@ namespace krys::boo::css
     void AdoptSelectorVector(MutableSelectorList &&selectorVector) noexcept;
     void SetArgumentList(FixedVector<CSSOMStringAtom> list) noexcept;
     void SetLangList(FixedVector<PossiblyQuotedIdentifier> list) noexcept;
+    void SetIntegerList(FixedVector<int32> list) noexcept;
     void SetSubSelectors(UniquePtr<SelectorList> selectorList) noexcept;
 
     void SetImplicit() noexcept

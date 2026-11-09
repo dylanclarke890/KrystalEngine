@@ -728,9 +728,10 @@ namespace krys::boo::style
     // wrapping container queries are true for that element."
     ContainerQueryEvaluator evaluator(Element(), selectionMode, matchRequest.StyleScopeOrdinal,
                                       containerQueryEvaluationState);
-    for (auto *query : queries)
+    // "A container query list is true if any of its component <container-condition>s are true."
+    for (const auto *list : queries)
     {
-      if (!evaluator.Evaluate(*query))
+      if (std::ranges::none_of(*list, [&](const auto &query) { return evaluator.Evaluate(query); }))
       {
         return false;
       }

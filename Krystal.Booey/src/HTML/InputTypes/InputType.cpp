@@ -33,6 +33,7 @@
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -849,6 +850,12 @@ namespace krys::boo::html
     }
     auto *page = Element()->NodeDocument().GetPage();
     return page ? &page->GetChromeClient() : nullptr;
+  }
+
+  bool InputType::HasTransientActivation() const noexcept
+  {
+    auto *window = _element ? _element->NodeDocument().Window() : nullptr;
+    return window && window->HasTransientActivation();
   }
 
   dom::DOMString InputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept

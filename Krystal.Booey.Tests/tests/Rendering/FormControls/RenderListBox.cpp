@@ -8,6 +8,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
@@ -86,6 +87,7 @@ layer at (0,0) size 400x44
     // Items are found by their offset; the optgroup's label is an item too.
     auto item = listBox.ItemBoundingBoxRect({}, 1);
     CHECK(listBox.ListIndexAtOffset(LayoutSize(item.X() + 1_lu, item.Y() + 1_lu)) == 1);
+    int32 itemHeight = (item.Y() - listBox.ItemBoundingBoxRect({}, 0).Y()).ToInt();
 
     auto changes = fixture.Listen(EventNames::Change);
 
@@ -104,6 +106,9 @@ layer at (0,0) size 400x44
 
     SECTION("The keys move the selection and scroll to it")
     {
+      // Immediately, without the smooth scrolls the user's preference turns off.
+      auto &settings = fixture.Document->GetSettings();
+      settings.ScrollAnimatorEnabled = false;
       select.Focus();
       CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
       CHECK(select.SelectedIndex() == 0);
@@ -111,17 +116,41 @@ layer at (0,0) size 400x44
       CHECK(select.SelectedIndex() == 4);
       CHECK(listBox.ListIndexIsVisible(5));
       CHECK_FALSE(listBox.ListIndexIsVisible(0));
-      CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 3));
+      CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 3 * itemHeight));
       CHECK(changes->Count == 2);
+      settings.ScrollAnimatorEnabled = true;
     }
 
-    SECTION("The wheel scrolls by items")
+    SECTION("The wheel scrolls by pixels, as far as the last item")
     {
       auto center = RoundedIntPoint(FloatPoint(listBox.ItemBoundingBoxRect({}, 1).Center()));
-      CHECK(Wheel(handler, center, 100));
-      CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 3));
-      CHECK(Wheel(handler, center, -100));
+      CHECK(Wheel(handler, center, 5));
+      CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 5));
+      CHECK(select.ScrollTop() == 5);
+      // The items move with it, and are found where they've moved to.
+      auto apple = listBox.ItemBoundingBoxRect({}, 0);
+      CHECK(apple.Y() == item.Y() - itemHeight - 5_lu);
+      CHECK(listBox.ListIndexAtOffset(LayoutSize(item.X() + 1_lu, item.Y() + 1_lu)) == 1);
+      CHECK(listBox.ListIndexAtOffset(LayoutSize(item.X() + 1_lu, item.Y() + LayoutUnit(itemHeight - 4)))
+            == 2);
+      // A partly hidden item isn't in view.
+      CHECK_FALSE(listBox.ListIndexIsVisible(0));
+      CHECK_FALSE(listBox.ListIndexIsVisible(3));
+
+      CHECK(Wheel(handler, center, 1'000));
+      CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 3 * itemHeight));
+      CHECK(listBox.ListIndexIsVisible(5));
+      CHECK(Wheel(handler, center, -1'000));
       CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 0));
+    }
+
+    SECTION("scrollTop is in pixels")
+    {
+      select.SetScrollTop(7);
+      CHECK(select.ScrollTop() == 7);
+      CHECK(select.ScrollHeight() == 6 * itemHeight - 1);
+      select.SetScrollTop(10'000);
+      CHECK(select.ScrollTop() == 3 * itemHeight);
     }
   }
 

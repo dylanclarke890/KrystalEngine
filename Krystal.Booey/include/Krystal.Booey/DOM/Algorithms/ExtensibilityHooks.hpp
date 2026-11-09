@@ -43,6 +43,15 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-node-adopt-ext
     static void NodeAdopted(Node &node, Document &oldDocument) noexcept;
 
+    /// @brief Adds the IDs of @p node and its descendants to @p parent's tree scope, if it's in one. Done
+    /// before their insertion steps, each of which may look up an ID.
+    static void SubtreeInserted(Node &node, ContainerNode &parent) noexcept;
+    /// @brief Removes the IDs of @p node and its descendants from @p parent's tree scope, if it's in one.
+    /// Done before their removing steps, each of which may look up an ID.
+    static void SubtreeRemoved(Node &node, ContainerNode &parent) noexcept;
+    /// @brief Moves the IDs of @p node and its descendants to their new tree scope, if it changed.
+    static void SubtreeMoved(Node &node, ContainerNode &oldParent, ContainerNode &newParent) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
     static void ElementAttributeChanged(Element &element, DOMStringAtom localName,
                                         Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,

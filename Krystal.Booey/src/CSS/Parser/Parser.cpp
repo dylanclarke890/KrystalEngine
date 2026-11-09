@@ -49,13 +49,13 @@ namespace krys::boo::css
   Parser::~Parser() noexcept = default;
 
   Parser::Parser(const ParserContext &context, StyleSheetContents *styleSheet) noexcept
-      : _context(context), _styleSheet(RefPtr<StyleSheetContents>::WithRef(styleSheet))
+      : _context(context), _styleSheet(ShareRefPtr(styleSheet))
   {
   }
 
   Parser::Parser(const ParserContext &context, CSSOMStringView string, StyleSheetContents *styleSheet,
                  NestedContext nestedContext) noexcept
-      : _context(context), _styleSheet(RefPtr<StyleSheetContents>::WithRef(styleSheet))
+      : _context(context), _styleSheet(ShareRefPtr(styleSheet))
   {
     InputStream input {CSSOMString(string)};
     _tokenizer = CreateUnique<Tokenizer>(input);
@@ -260,11 +260,7 @@ namespace krys::boo::css
                                                  const ParserContext &context) noexcept
   {
     auto keyframe = ParseRule(string, context, nullptr, AllowedRules::KeyframeRules);
-    if (!keyframe)
-    {
-      return nullptr;
-    }
-    return RefPtr<KeyframeRule>::WithRef(&Downcast<KeyframeRule>(*keyframe));
+    return Downcast<KeyframeRule>(krys::move(keyframe));
   }
 
   RefPtr<NestedDeclarationsRule> Parser::ParseNestedDeclarations(const ParserContext &context,
@@ -692,8 +688,8 @@ namespace krys::boo::css
           && text::IsASCIICaselessEqual(token.IdentCodePoints(), utf8_stringview(u8"supports")))
       {
         auto arguments = PropertyParserHelpers::ConsumeFunction(prelude);
-        auto supported = SupportsParser::SupportsCondition(
-          arguments, *this, SupportsParser::ParsingMode::AllowBareDeclarationAndGeneralEnclosed);
+        auto supported = SupportsParser::SupportsCondition(arguments, *this,
+                                                           SupportsParser::ParsingMode::AllowBareDeclaration);
         if (supported == SupportsParser::Invalid)
         {
           return null; // Discard import rule.
@@ -1067,12 +1063,8 @@ namespace krys::boo::css
     auto name = CSSOMStringAtom(nameToken.IdentCodePoints());
 
     auto keyframeRule = KeyframesRule::Create(name);
-    ConsumeRuleList(block, RuleList::Keyframes,
-                    [&keyframeRule](Ref<Rule> keyframe)
-                    {
-                      keyframeRule->ParserAppendKeyframe(
-                        RefPtr<KeyframeRule>::WithRef(&Downcast<KeyframeRule>(*keyframe)));
-                    });
+    ConsumeRuleList(block, RuleList::Keyframes, [&keyframeRule](Ref<Rule> keyframe)
+                    { keyframeRule->ParserAppendKeyframe(Downcast<KeyframeRule>(krys::move(keyframe))); });
 
     keyframeRule->ShrinkToFit();
     return keyframeRule;
@@ -1399,8 +1391,8 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    auto query = cq::ContainerQueryParser::ConsumeContainerQuery(prelude, _context);
-    if (!query)
+    auto queries = cq::ContainerQueryParser::ConsumeContainerQueryList(prelude, _context);
+    if (!queries)
     {
       return nullptr;
     }
@@ -1413,7 +1405,7 @@ namespace krys::boo::css
 
     auto rules = ConsumeNestedGroupRules(block);
 
-    return ContainerRule::Create(krys::move(*query), krys::move(rules));
+    return ContainerRule::Create(krys::move(*queries), krys::move(rules));
   }
 
   RefPtr<PropertyRule> Parser::ConsumePropertyRule(TokenRange prelude, TokenRange block) noexcept

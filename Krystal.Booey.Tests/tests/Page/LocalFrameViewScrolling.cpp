@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -13,12 +14,18 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -51,6 +58,22 @@ namespace krys::boo::tests
           FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
         View().Paint(recorder, IntRect(IntPoint(), ViewSize));
         return recorder.TakeDisplayList()->AsText({});
+      }
+    };
+
+    /// @brief The keyboard scrolling at once, for what's about where it goes rather than how.
+    struct ScrollAnimatorOff
+    {
+      Settings &Value;
+
+      explicit ScrollAnimatorOff(Settings &settings) noexcept : Value(settings)
+      {
+        Value.ScrollAnimatorEnabled = false;
+      }
+
+      ~ScrollAnimatorOff() noexcept
+      {
+        Value.ScrollAnimatorEnabled = true;
       }
     };
 
@@ -462,6 +485,14 @@ namespace krys::boo::tests
       CHECK(view.GetScrollPosition() == ScrollPosition(0, 189));
     }
 
+    SECTION("the corner past the scrollbars is in neither")
+    {
+      CHECK(view.IsPointInScrollbarCorner({190, 90}));
+      CHECK_FALSE(view.IsPointInScrollbarCorner({190, 50}));
+      CHECK_FALSE(view.IsPointInScrollbarCorner({100, 90}));
+      CHECK(view.ScrollbarAtPoint({190, 90}) == nullptr);
+    }
+
     SECTION("pressing a scrollbar leaves the focus alone")
     {
       auto &field = fixture.ById(u8"field");
@@ -471,6 +502,181 @@ namespace krys::boo::tests
       Release(handler, {190, 75});
       CHECK(fixture.Document->FocusedElement() == &field);
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the view keeps the boxes that scroll",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {u8"<!DOCTYPE html><style>body{margin:0}div{width:50px;height:50px}</style>"
+                           u8"<div id=scrolls style=overflow:auto><div style=height:500px></div></div>"
+                           u8"<div id=bars style=overflow:scroll></div>"
+                           u8"<div id=fits style=overflow:auto></div>"
+                           u8"<select id=list size=2><option>a</option></select>"};
+    auto &view = fixture.View();
+    auto areaOf = [&](utf8_stringview id) -> ScrollableArea *
+    {
+      auto *renderer = fixture.ById(id).Renderer();
+      if (auto *listBox = DynamicDowncast<RenderListBox>(renderer))
+      {
+        return listBox;
+      }
+      auto *layer = Downcast<RenderBox>(*renderer).Layer();
+      return layer ? layer->GetScrollableArea() : nullptr;
+    };
+
+    // A box that can scroll, one with scrollbars, and a list box; not one whose content fits without them.
+    CHECK(view.ContainsScrollableArea(*areaOf(u8"scrolls")));
+    CHECK(view.ContainsScrollableArea(*areaOf(u8"bars")));
+    CHECK(view.ContainsScrollableArea(*areaOf(u8"list")));
+    if (auto *fits = areaOf(u8"fits"))
+    {
+      CHECK_FALSE(view.ContainsScrollableArea(*fits));
+    }
+    CHECK(view.ScrollableAreas().size() == 3uz);
+
+    // Gone with their boxes.
+    fixture.ById(u8"scrolls").Remove();
+    fixture.ById(u8"list").Remove();
+    (void)fixture.Document->UpdateLayout();
+    CHECK(view.ScrollableAreas().size() == 1uz);
+
+    // Visiting the areas visits the view, then each of them.
+    int32 visited = 0;
+    view.ForEachScrollableArea([&](ScrollableArea &) { ++visited; });
+    CHECK(visited == 2);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a page's step leaves out the scroll padding",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {utf8_string(TallPage)};
+    auto &view = fixture.View();
+    REQUIRE(view.VerticalScrollbar());
+    // Four fifths of the 79 pixels in view.
+    CHECK(view.VerticalScrollbar()->PageStep() == Scrollbar::PageStep(79));
+
+    // Padding the root's scrollport by 20 pixels at the top leaves 59.
+    REQUIRE_FALSE(fixture.Document->DocumentElement()
+                    ->SetAttribute(u8"style", u8"scroll-padding-top:20px")
+                    .HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(view.VerticalScrollbar()->PageStep() == Scrollbar::PageStep(59));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "LocalFrameView: a box keeps its scroll position as its zoom changes",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}</style>"
+      u8"<div id=s style='width:100px;height:50px;overflow:auto'><div style=height:1000px></div></div>"};
+    auto &scroller = fixture.ById(u8"s");
+    scroller.SetScrollTop(100);
+    REQUIRE(scroller.ScrollTop() == 100);
+
+    // Twice the size, it's scrolled twice as far, so as far in CSS pixels.
+    REQUIRE_FALSE(
+      scroller.SetAttribute(u8"style", u8"width:100px;height:50px;overflow:auto;zoom:2").HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(scroller.ScrollTop() == 100);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: overlay scrollbars turn light over a dark page",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    auto page = [](utf8_stringview background)
+    {
+      return utf8_string(u8"<!DOCTYPE html><style>body{margin:0;background:") + utf8_string(background)
+             + u8"}</style><div style=height:600px></div>";
+    };
+
+    SECTION("a light page leaves them as they are")
+    {
+      ScrollFixture fixture {page(u8"white")};
+      CHECK(fixture.View().GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Default);
+      CHECK_FALSE(fixture.View().UseDarkAppearanceForScrollbars());
+    }
+
+    SECTION("a dark page makes them light, but not classic ones")
+    {
+      ScrollFixture fixture {page(u8"#202020")};
+      CHECK(fixture.View().GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light);
+      CHECK_FALSE(fixture.View().UseDarkAppearanceForScrollbars());
+
+      ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
+      auto classic = MakeScopeExit([] { ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(false); });
+      CHECK(fixture.View().UseDarkAppearanceForScrollbars());
+
+      // Lightening the page puts them back.
+      REQUIRE_FALSE(fixture.Document->Body()->SetAttribute(u8"style", u8"background:white").HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.View().GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Default);
+      CHECK_FALSE(fixture.View().UseDarkAppearanceForScrollbars());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "LocalFrameView: the root's scrollbar-gutter keeps the scrollbar's space",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    // A short page has no scrollbar, but a stable gutter keeps its 21 pixels.
+    auto page = [](utf8_stringview gutter)
+    {
+      return utf8_string(u8"<!DOCTYPE html><style>html{scrollbar-gutter:") + utf8_string(gutter)
+             + u8"}body{margin:0}</style><div id=d style=height:10px></div>";
+    };
+
+    SECTION("auto")
+    {
+      ScrollFixture fixture {page(u8"auto")};
+      CHECK_FALSE(fixture.View().VerticalScrollbar());
+      CHECK(fixture.View().VisibleWidth() == 200);
+      CHECK(fixture.ById(u8"d").ClientWidth() == 200);
+    }
+
+    SECTION("stable")
+    {
+      ScrollFixture fixture {page(u8"stable")};
+      CHECK_FALSE(fixture.View().VerticalScrollbar());
+      CHECK(fixture.View().VisibleWidth() == 179);
+      CHECK(fixture.ById(u8"d").ClientWidth() == 179);
+      CHECK(fixture.View().InsetForLeftScrollbarSpace() == 0);
+    }
+
+    SECTION("stable on both edges")
+    {
+      ScrollFixture fixture {page(u8"stable both-edges")};
+      CHECK(fixture.View().VisibleWidth() == 158);
+      CHECK(fixture.ById(u8"d").ClientWidth() == 158);
+      CHECK(fixture.View().InsetForLeftScrollbarSpace() == 21);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "LocalFrameView: a press in the scrollbars' corner doesn't select",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}</style><div style=width:400px;height:600px>"
+      u8"Some text to select</div>"};
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto &selection = fixture.Document->Selection();
+    REQUIRE(fixture.View().IsPointInScrollbarCorner({190, 90}));
+
+    auto drag = [&](IntPoint from, IntPoint to)
+    {
+      Press(handler, from);
+      DoublePoint point(to.X(), to.Y());
+      (void)handler.MouseMoved(PlatformMouseEvent(
+        point, point, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now()));
+      Release(handler, to);
+    };
+
+    // Dragging from the corner over the text selects none of it; from the content, it does.
+    drag({190, 90}, {2, 5});
+    CHECK_FALSE(selection.Selection().IsRange());
+    drag({150, 5}, {2, 5});
+    CHECK(selection.Selection().IsRange());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a box's scrollbars follow the mouse",
@@ -577,8 +783,7 @@ namespace krys::boo::tests
       auto canceller = CreateRef<WheelCanceller>();
       dom::AddEventListenerOptions options;
       options.Passive = false;
-      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
-                                         Ref<dom::EventListenerCallback> {canceller}, options);
+      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"), canceller, options);
       CHECK(Wheel(handler, {20, 20}, {0, 100}));
       CHECK(canceller->DeltaY == 100);
       CHECK(box.ScrollTop() == 0);
@@ -588,8 +793,7 @@ namespace krys::boo::tests
     SECTION("a passive listener on the document can't cancel it")
     {
       auto canceller = CreateRef<WheelCanceller>();
-      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
-                                         Ref<dom::EventListenerCallback> {canceller}, false);
+      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"), canceller, false);
       CHECK(Wheel(handler, {20, 20}, {0, 100}));
       CHECK(canceller->DeltaY == 100);
       CHECK(box.ScrollTop() == 100);
@@ -617,8 +821,7 @@ namespace krys::boo::tests
     auto canceller = CreateRef<WheelCanceller>();
     dom::AddEventListenerOptions options;
     options.Passive = false;
-    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
-                                       Ref<dom::EventListenerCallback> {canceller}, options);
+    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"), canceller, options);
 
     SECTION("the box under the touch scrolls, then the view once it reaches its end")
     {
@@ -664,6 +867,7 @@ namespace krys::boo::tests
         u8"<div style=height:200px></div></div>"};
     auto &view = fixture.View();
     auto &handler = fixture.Frame->GetEventHandler();
+    ScrollAnimatorOff animatorOff {fixture.Document->GetSettings()};
     auto down = [&]
     {
       return Key(handler, u8"ArrowDown", u8"Down", vk::Down);

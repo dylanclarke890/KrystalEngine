@@ -14,6 +14,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
@@ -37,6 +39,7 @@
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
+#include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/View.hpp"
 #include <algorithm>
 #include <cmath>
@@ -72,6 +75,8 @@ namespace krys
     gfx::TextureHandle _image {};
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
+    /// @brief Booey's loader, which reads files on the application's workers.
+    UniquePtr<ui::FileLoaderStrategy> _fileLoader {};
     UniquePtr<ui::View> _pageView {};
     /// @brief The page's listeners, which go when the page is loaded again.
     boo::dom::EventListenerHandle _cardPicker;
@@ -134,6 +139,8 @@ namespace krys
 
     void OnShutdown() noexcept override
     {
+      boo::PlatformStrategies::Singleton().SetWorkQueue(nullptr);
+      boo::PlatformStrategies::Singleton().SetLoaderStrategy(nullptr);
       _observers = nullptr;
       _animations = nullptr;
       _pointers = nullptr;
@@ -438,6 +445,26 @@ namespace krys
           return true;
         });
 
+      // A touchpad's pans scroll the page view as the wheel does; their ends go to it wherever the cursor is,
+      // so what they scrolled snaps.
+      _context->Events->On<TouchpadPanEvent>(
+        [&](const auto &event)
+        {
+          if (!_pageView || _view != EditorView::Page)
+          {
+            return true;
+          }
+          auto &input = event.Input();
+          boo::IntPoint point(static_cast<int32>(input.ClientX),
+                              static_cast<int32>(input.ClientY - HeaderHeight));
+          bool moves = input.DeltaX || input.DeltaY;
+          if (point.Y() >= 0 || !moves)
+          {
+            (void)_pageView->TouchpadPan(point, input);
+          }
+          return true;
+        });
+
       // Drags from other applications go to the page view, which answers what a drop would do; off it (over
       // the header, or with another view shown), they're off the page.
       _context->Events->On<DragInputEvent>(
@@ -474,6 +501,13 @@ namespace krys
       _pageTime += std::chrono::duration_cast<MonotonicTime::duration>(dt);
       if (_pageView)
       {
+        // The page's animations align their updates to the rate frames are drawn at: the display's with
+        // vsync, or else the cap.
+        const auto &settings = _context->Settings;
+        _pageView->SetFramesPerSecond(
+          settings.WindowSettings.VSync
+            ? _context->Window->DisplayRefreshRate().value_or(settings.RenderFramerate)
+            : settings.RenderFramerate);
         // The pads drive the page as the keyboard does, before its frame runs.
         _pageView->GamepadInput(_context->Input->GetGamepads(), _pageTime);
         if (_cube)
@@ -774,12 +808,21 @@ namespace krys
       }
     }
 
-    /// @brief Shows the page's cursor over the page view, and the arrow everywhere else; a drag in the page
-    /// shows its cursor wherever the mouse is.
+    /// @brief Shows the page's cursor (a system one or its image) over the page view, and the arrow
+    /// everywhere else; a drag in the page shows its cursor wherever the mouse is.
     void UpdateCursor() noexcept
     {
       bool overPage =
         _pageView && _view == EditorView::Page && (_pointer.Y() >= 0 || _pageView->IsDragging());
+      if (overPage)
+      {
+        if (auto image = _pageView->CurrentCursorImage())
+        {
+          Ref<pal::CursorImage> cursorImage = krys::move(image);
+          _context->Window->SetCursorImage(krys::move(cursorImage));
+          return;
+        }
+      }
       _context->Window->SetCursor(overPage ? _pageView->CurrentCursor() : pal::CursorShape::Arrow);
     }
 
@@ -787,6 +830,13 @@ namespace krys
     /// Sans as Booey's fonts.
     void CreatePage() noexcept
     {
+      // Booey's work that can leave the main thread runs on the application's workers, its file reads as
+      // jobs that may block.
+      boo::PlatformStrategies::Singleton().SetWorkQueue(_context->Jobs.get());
+      _fileLoader = CreateUnique<ui::FileLoaderStrategy>(_context->Jobs.get());
+      boo::PlatformStrategies::Singleton().SetLoaderStrategy(_fileLoader.get());
+      // Overlay scrollbars, which fade in while the mouse is over a scroller or it scrolls.
+      boo::ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
       (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);

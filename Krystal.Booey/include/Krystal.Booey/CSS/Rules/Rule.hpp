@@ -597,20 +597,21 @@ namespace krys::boo::css
   class ContainerRule final : public GroupRule
   {
   private:
-    cq::ContainerQuery _containerQuery;
+    cq::ContainerQueryList _containerQueries;
 
-    ContainerRule(cq::ContainerQuery &&query, List<Ref<Rule>> &&rules) noexcept;
+    ContainerRule(cq::ContainerQueryList &&queries, List<Ref<Rule>> &&rules) noexcept;
     ContainerRule(const ContainerRule &other) noexcept = default;
 
   public:
-    KRYS_NODISCARD static Ref<ContainerRule> Create(cq::ContainerQuery &&query,
+    KRYS_NODISCARD static Ref<ContainerRule> Create(cq::ContainerQueryList &&queries,
                                                     List<Ref<Rule>> &&rules) noexcept;
 
     KRYS_NODISCARD Ref<ContainerRule> Copy() const noexcept;
 
-    KRYS_NODISCARD const cq::ContainerQuery &ContainerQuery() const noexcept
+    /// @brief The rule's queries, of which any must be true.
+    KRYS_NODISCARD const cq::ContainerQueryList &ContainerQueries() const noexcept
     {
-      return _containerQuery;
+      return _containerQueries;
     }
   };
 

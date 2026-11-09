@@ -20,7 +20,7 @@
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::html
 {
@@ -173,6 +173,7 @@ namespace krys::boo::html
     // FIXME: The other link types (LinkRelAttribute), once they're loaded.
     _relIsStyleSheet = false;
     _relIsAlternate = false;
+    _relIsIcon = false;
     size_t position = 0;
     while (position < value.size())
     {
@@ -194,6 +195,18 @@ namespace krys::boo::html
       {
         _relIsAlternate = true;
       }
+      else if (text::IsASCIICaselessEqual(token, dom::DOMStringView(u8"icon")))
+      {
+        _relIsIcon = true;
+      }
+    }
+  }
+
+  void HTMLLinkElement::IconMayHaveChanged() noexcept
+  {
+    if (IsConnected())
+    {
+      NodeDocument().IconLinksMayHaveChanged();
     }
   }
 
@@ -231,11 +244,22 @@ namespace krys::boo::html
       _blocking->AssociatedAttributeValueChanged();
     }
 
+    // The document's icons follow its icon links.
+    if (_relIsIcon && (localName == u8"href" || localName == u8"type" || localName == u8"sizes"))
+    {
+      IconMayHaveChanged();
+    }
+
     if (localName == u8"rel")
     {
       bool wasStyleSheet = _relIsStyleSheet;
       bool wasAlternate = _relIsAlternate;
+      bool wasIcon = _relIsIcon;
       ParseRel(value.value_or(dom::DOMStringView()));
+      if (wasIcon != _relIsIcon)
+      {
+        IconMayHaveChanged();
+      }
       if (wasStyleSheet != _relIsStyleSheet || wasAlternate != _relIsAlternate)
       {
         Process();
@@ -460,6 +484,10 @@ namespace krys::boo::html
 
     _url = NonEmptyHrefURL();
     Process();
+    if (_relIsIcon)
+    {
+      IconMayHaveChanged();
+    }
   }
 
   void HTMLLinkElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
@@ -489,6 +517,11 @@ namespace krys::boo::html
     }
 
     UnblockRendering();
+
+    if (_relIsIcon)
+    {
+      NodeDocument().IconLinksMayHaveChanged();
+    }
   }
 
   void HTMLLinkElement::FinishParsingChildren() noexcept
@@ -546,7 +579,7 @@ namespace krys::boo::html
     {
       krys_debug_assert(restoredSheet->IsCacheable());
       krys_debug_assert(!restoredSheet->IsLoading());
-      InitializeStyleSheet(Ref<css::StyleSheetContents>(restoredSheet), parserContext);
+      InitializeStyleSheet(krys::move(restoredSheet), parserContext);
 
       _loading = false;
       (void)SheetLoaded();
@@ -755,7 +788,8 @@ namespace krys::boo::html
         [](dom::Document &, dom::DOMStringView token)
         {
           return text::IsASCIICaselessEqual(token, utf8_stringview(u8"stylesheet"))
-                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"alternate"));
+                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"alternate"))
+                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"icon"));
         });
     }
 

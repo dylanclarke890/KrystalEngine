@@ -23,7 +23,7 @@ namespace krys::boo::html::tests
 
     KRYS_NODISCARD std::string Id(const dom::EventTarget *target)
     {
-      auto *element = dynamic_cast<const dom::Element *>(target);
+      auto *element = DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(target));
       if (!element)
       {
         return "null";
@@ -249,6 +249,20 @@ namespace krys::boo::html::tests
       document.UpdateStyleIfNeeded();
       CHECK(a.GetRenderStyle()->GetColor() != boo::Color(boo::Color::blue));
       document.SetFocusedAndActive(true);
+    }
+
+    SECTION("Without system focus, the focus moves without events until the window gets it")
+    {
+      a.Focus();
+      FocusAlgorithms::SystemFocusChanged(document, false);
+      records.clear();
+
+      b.Focus();
+      CHECK(document.ActiveElement() == &b);
+      CHECK(records.empty());
+
+      FocusAlgorithms::SystemFocusChanged(document, true);
+      CHECK(records == List<std::string> {"focus:b(null)", "focusin:b(null)"});
     }
   }
 

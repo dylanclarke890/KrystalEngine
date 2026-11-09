@@ -119,7 +119,7 @@ namespace krys::boo
         PaintTrackPiece(graphicsContext, scrollbar, endTrackRect, ForwardTrackPart);
       }
 
-      // FIXME: The tickmarks (find-in-page matches), once there's find-in-page.
+      // (There are no tickmarks, which mark find-in-page matches; see DIFFERENCES.md.)
     }
 
     // Paint the thumb.

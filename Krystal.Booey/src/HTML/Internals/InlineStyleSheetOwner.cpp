@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Style/Rules/StyleSheetContentsCache.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -143,6 +144,11 @@ namespace krys::boo::html
     auto &document = element.NodeDocument();
 
     // 2. If element has an associated CSS style sheet, remove the CSS style sheet in question.
+    // (Its block on rendering goes with it.)
+    if (auto *styleElement = DynamicDowncast<HTMLStyleElement>(element))
+    {
+      styleElement->UnblockRendering();
+    }
     if (_sheet)
     {
       if (_sheet->IsLoading() && _styleScope)
@@ -174,9 +180,11 @@ namespace krys::boo::html
     //    script-blocking style sheet set. (Skipped: nothing waits for scripts.)
     // 8. If element's media attribute's value matches the environment and element is potentially
     //    render-blocking, then block rendering on element.
-    // FIXME: Blocking rendering, once render-blocked documents aren't rendered.
-
     auto mediaQueries = css::mq::MediaQueryParser::Parse(_media.View(), document.CssParserContext());
+    if (auto *styleElement = DynamicDowncast<HTMLStyleElement>(element))
+    {
+      styleElement->PotentiallyBlockRendering(mediaQueries);
+    }
 
     if (auto *scope = _styleScope.get())
     {

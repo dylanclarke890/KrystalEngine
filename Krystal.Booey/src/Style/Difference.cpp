@@ -346,7 +346,9 @@ namespace krys::boo::style
       return true;
     }
 
-    if (a.ScrollSnapType != b.ScrollSnapType)
+    // These move the snap positions, which are found in layout.
+    if (a.ScrollSnapType != b.ScrollSnapType || a.ScrollSnapAlign != b.ScrollSnapAlign
+        || a.ScrollSnapStop != b.ScrollSnapStop || a.ScrollMargin != b.ScrollMargin)
     {
       return true;
     }
@@ -565,8 +567,7 @@ namespace krys::boo::style
       }
     }
 
-    if (a.GetInheritedFlags().RtlOrdering != b.GetInheritedFlags().RtlOrdering
-        || a.GetNonInheritedFlags().Position != b.GetNonInheritedFlags().Position
+    if (a.GetNonInheritedFlags().Position != b.GetNonInheritedFlags().Position
         || a.GetNonInheritedFlags().Floating != b.GetNonInheritedFlags().Floating
         || a.GetNonInheritedFlags().OriginalDisplay != b.GetNonInheritedFlags().OriginalDisplay)
     {
@@ -932,11 +933,6 @@ namespace krys::boo::style
       return true;
     }
 
-    if (a.NonInheritedFlags.BufferedRendering != b.NonInheritedFlags.BufferedRendering)
-    {
-      return true;
-    }
-
     if (a.NonInheritedFlags.MaskType != b.NonInheritedFlags.MaskType)
     {
       return true;
@@ -987,8 +983,9 @@ namespace krys::boo::style
   {
     return a.EffectiveInert != b.EffectiveInert || a.UserModify != b.UserModify
            || a.UserSelect != b.UserSelect || a.ImageRendering != b.ImageRendering
-           || a.AccentColor != b.AccentColor || a.InsideDefaultButton != b.InsideDefaultButton
-           || a.InsideSubmitButton != b.InsideSubmitButton || a.ColorScheme != b.ColorScheme;
+           || a.AccentColor != b.AccentColor || a.ScrollbarColor != b.ScrollbarColor
+           || a.InsideDefaultButton != b.InsideDefaultButton || a.InsideSubmitButton != b.InsideSubmitButton
+           || a.ColorScheme != b.ColorScheme;
   }
 
   static bool ChangedCustomPaintWatchedProperty(const RenderStyle &a, const StyleRareNonInheritedData &aData,

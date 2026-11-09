@@ -126,7 +126,13 @@
   func(krys::pal::Key::RightArrow);                                                                          \
   func(krys::pal::Key::DownArrow);                                                                           \
   func(krys::pal::Key::UpArrow);                                                                             \
-  func(krys::pal::Key::Enter)
+  func(krys::pal::Key::Enter);                                                                               \
+  func(krys::pal::Key::Insert);                                                                              \
+  func(krys::pal::Key::PrintScreen);                                                                         \
+  func(krys::pal::Key::Pause);                                                                               \
+  func(krys::pal::Key::ScrollLock);                                                                          \
+  func(krys::pal::Key::NumLock);                                                                             \
+  func(krys::pal::Key::ContextMenu)
 
 #pragma endregion
 
@@ -256,7 +262,13 @@ namespace krys::pal
     RightArrow,
     DownArrow,
     UpArrow,
-    Enter
+    Enter,
+    Insert,
+    PrintScreen,
+    Pause,
+    ScrollLock,
+    NumLock,
+    ContextMenu
   };
 }
 

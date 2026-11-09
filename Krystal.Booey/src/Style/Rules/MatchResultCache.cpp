@@ -47,8 +47,8 @@ namespace krys::boo::style
 
     Entry(const dom::Element &element, style::UnadjustedStyle &&unadjustedStyle,
           const css::MutableStyleProperties &inlineStyle) noexcept
-        : Element(WeakPtr<const dom::Element>::WithRef(element)),
-          UnadjustedStyle(krys::move(unadjustedStyle)), InlineStyle(ShareRef(inlineStyle))
+        : Element(CreateWeakPtr(&element)), UnadjustedStyle(krys::move(unadjustedStyle)),
+          InlineStyle(ShareRef(inlineStyle))
     {
       OriginalInlineProperties.reserve(inlineStyle.PropertyCount());
       for (auto property : inlineStyle)

@@ -213,4 +213,34 @@ namespace krys::boo::tests
       CHECK(loader.Strategy.Requests.empty());
     }
   }
+
+  TEST_CASE("LazyLoadImageObserver: a lazy image moved to another document is observed there",
+            "[HTML][LazyLoadImageObserver][html:start-intersection-observing-a-lazy-loading-element]"
+            "[html:stop-intersection-observing-a-lazy-loading-element]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+
+    LazyImageFixture fixture(
+      u8"<div style='height: 300px'></div><img id=a loading=lazy src='file:///a.png'>");
+    LazyImageFixture other(u8"<p>other</p>");
+    auto &a = fixture.Image(u8"a");
+    REQUIRE(a.IsDeferred());
+    REQUIRE(fixture.Document->GetLazyLoadImageObserver().IsObserved(a));
+
+    // Moved into view in the other document, it's deferred there, and loads at that document's update.
+    REQUIRE_FALSE(other.Document->Body()->AppendChild(a).HasException());
+    CHECK_FALSE(fixture.Document->GetLazyLoadImageObserver().IsObserved(a));
+    CHECK(a.IsDeferred());
+    CHECK(other.Document->GetLazyLoadImageObserver().IsObserved(a));
+    CHECK(loader.Strategy.Requests.empty());
+
+    fixture.UpdateRendering();
+    CHECK(loader.Strategy.Requests.empty());
+    other.UpdateRendering();
+    CHECK(loader.Strategy.Requests == List<utf8_string> {u8"file:///a.png"});
+    RunNetworkingTasks();
+    CHECK(a.Complete());
+    CHECK_FALSE(other.Document->GetLazyLoadImageObserver().IsObserved(a));
+  }
 }

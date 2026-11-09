@@ -27,16 +27,19 @@
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/StringTruncator.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
@@ -84,6 +87,21 @@ namespace krys::boo
     if (appearance == autoAppearance)
     {
       return appearance;
+    }
+
+    // Everything but a drop-down box's select and its picker renders as for 'auto'.
+    // https://drafts.csswg.org/css-ui-4/#appearance-switching
+    if (appearance == StyleAppearance::BaseSelect)
+    {
+      auto *select = DynamicDowncast<html::HTMLSelectElement>(*element);
+      if ((select && select->UsesMenuList())
+          || (element->IsInUserAgentShadowTree()
+              && element->UserAgentPart() == css::UserAgentParts::InternalSelectPicker()))
+      {
+        return appearance;
+      }
+      style.SetUsedAppearance(autoAppearance);
+      return autoAppearance;
     }
 
     // Aliases of 'auto'.
@@ -150,7 +168,11 @@ namespace krys::boo
   {
     // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
     // FIXME: Remove when devolvable widgets are universally enabled.
-    // FIXME: Also the `::-webkit-list-button` part of user agent shadow trees, with datalists.
+    if (element.IsInUserAgentShadowTree()
+        && element.UserAgentPart() == css::UserAgentParts::WebkitListButton())
+    {
+      return true;
+    }
     if (!Is<html::HTMLElement>(element))
     {
       return false;
@@ -172,7 +194,8 @@ namespace krys::boo
   {
     auto autoAppearance = AutoAppearanceForElement(style, element);
     auto appearance = AdjustAppearanceForElement(style, parentStyle, element, autoAppearance);
-    if (appearance == StyleAppearance::None || appearance == StyleAppearance::Base)
+    if (appearance == StyleAppearance::None || appearance == StyleAppearance::Base
+        || appearance == StyleAppearance::BaseSelect)
     {
       return;
     }
@@ -354,8 +377,12 @@ namespace krys::boo
     {
       const auto &part = element.UserAgentPart();
 
-      // FIXME: The list button (webkitListButton), with datalists; the colour swatch parts, with colour
-      // inputs (G14d4).
+      if (part == css::UserAgentParts::WebkitListButton())
+      {
+        return StyleAppearance::ListButton;
+      }
+
+      // FIXME: The colour swatch parts, with colour inputs (G14d4).
 
       if (part == css::UserAgentParts::WebkitSearchCancelButton())
       {
@@ -473,12 +500,22 @@ namespace krys::boo
         thumbPosition = (input.ValueAsNumber() - minimum) / (maximum - minimum);
       }
 
-      // FIXME: The tick ratios of a data list's suggestions, with datalists.
+      List<double> tickRatios;
+      if (auto dataList = input.List())
+      {
+        for (auto &option : dataList->Suggestions())
+        {
+          if (auto optionValue = input.ListOptionValueAsDouble(*option))
+          {
+            tickRatios.push_back((*optionValue - minimum) / (maximum - minimum));
+          }
+        }
+      }
 
       sliderTrackPart.SetThumbSize(thumbSize);
       sliderTrackPart.SetTrackBounds(trackBounds);
       sliderTrackPart.SetThumbPosition(thumbPosition);
-      sliderTrackPart.SetTickRatios({});
+      sliderTrackPart.SetTickRatios(krys::move(tickRatios));
     }
   }
 
@@ -490,7 +527,8 @@ namespace krys::boo
     {
       case StyleAppearance::None:
       case StyleAppearance::Auto:
-      case StyleAppearance::Base:                         break;
+      case StyleAppearance::Base:
+      case StyleAppearance::BaseSelect:                   break;
 
       case StyleAppearance::Checkbox:
       case StyleAppearance::Radio:                        return ToggleButtonPart::Create(appearance);
@@ -769,6 +807,7 @@ namespace krys::boo
     float deviceScaleFactor = box.GetDocument().DeviceScaleFactor();
     FloatRect devicePixelSnappedRect = SnapRectToDevicePixels(rect, deviceScaleFactor);
 
+    // FIXME: The media controls' parts, with media elements' default controls.
     switch (appearance)
     {
       case StyleAppearance::Checkbox:  return PaintCheckbox(box, paintInfo, devicePixelSnappedRect);
@@ -1152,16 +1191,21 @@ namespace krys::boo
     return renderer.Style().UsedAppearance() == StyleAppearance::DefaultButton;
   }
 
-  bool RenderTheme::HasListButton(const RenderElement &) const noexcept
+  bool RenderTheme::HasListButton(const RenderElement &renderer) const noexcept
   {
-    // FIXME: Inputs with data lists (hasDataList), with datalists.
-    return false;
+    auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GeneratingElement());
+    return input && input->List();
   }
 
-  bool RenderTheme::HasListButtonPressed(const RenderElement &) const noexcept
+  bool RenderTheme::HasListButtonPressed(const RenderElement &renderer) const noexcept
   {
-    // FIXME: The data list button (dataListButtonElement), with datalists.
-    return false;
+    auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GeneratingElement());
+    if (!input)
+    {
+      return false;
+    }
+    auto *button = input->DataListButtonElement();
+    return button && button->Active();
   }
 
   Maybe<FontCascadeDescription> RenderTheme::ControlFont(StyleAppearance, const FontCascade &,
@@ -1457,11 +1501,6 @@ namespace krys::boo
     return bounds.Size();
   }
 
-  void RenderTheme::PaintSliderTicks(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
-  {
-    // FIXME: The ticks of a range's data list (paintSliderTicks), with datalists.
-  }
-
   void RenderTheme::PaintPlatformResizer(const RenderLayerModelObject &renderer, GraphicsContext &context,
                                          const LayoutRect &resizerCornerRect) noexcept
   {
@@ -1552,8 +1591,7 @@ namespace krys::boo
   {
     _colorCacheMap.clear();
 
-    // FIXME: Restyling every page after a change in the environment
-    // (Page::updateStyleForAllPagesAfterGlobalChangeInEnvironment), once pages are tracked.
+    Page::UpdateStyleForAllPagesAfterGlobalChangeInEnvironment();
   }
 
   RenderTheme::ColorCache &RenderTheme::GetColorCache(style::ColorOptions options) const noexcept

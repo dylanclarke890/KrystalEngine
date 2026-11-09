@@ -215,6 +215,17 @@ target_sources(Krystal.Core
       include/Krystal.Core/Text/TextStream.hpp
       include/Krystal.Core/Text/Unicode.hpp
 
+      # Threading
+      include/Krystal.Core/Threading/CancellationToken.hpp
+      include/Krystal.Core/Threading/JobSequence.hpp
+      include/Krystal.Core/Threading/JobSystem.hpp
+      include/Krystal.Core/Threading/MainThread.hpp
+      include/Krystal.Core/Threading/ManualWorkQueue.hpp
+      include/Krystal.Core/Threading/NeverDestroyed.hpp
+      include/Krystal.Core/Threading/TaskInbox.hpp
+      include/Krystal.Core/Threading/Thread.hpp
+      include/Krystal.Core/Threading/WorkQueue.hpp
+
       # Time
       include/Krystal.Core/Time/Duration.hpp
       include/Krystal.Core/Time/MonotonicTime.hpp
@@ -278,7 +289,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/IndexedRange.hpp
       include/Krystal.Core/Utils/Move.hpp
       include/Krystal.Core/Utils/NativeHandle.hpp
-      include/Krystal.Core/Utils/NeverDestroyed.hpp
       include/Krystal.Core/Utils/PointerComparison.hpp
       include/Krystal.Core/Utils/ScopeExit.hpp
       include/Krystal.Core/Utils/ScopedProfiler.hpp
@@ -312,6 +322,14 @@ target_sources(Krystal.Core
     # Log
     src/Log/SpdlogLogger.cpp
     
+    # Threading
+    src/Threading/JobSequence.cpp
+    src/Threading/JobSystem.cpp
+    src/Threading/MainThread.cpp
+    src/Threading/ManualWorkQueue.cpp
+    src/Threading/TaskInbox.cpp
+    src/Threading/Thread.cpp
+
     # Utils
     src/Utils/ScopedProfiler.cpp
 

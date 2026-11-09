@@ -190,8 +190,12 @@ namespace krys::ui
       options.TextureMapper.BeginClip(transform, _state.ContentsClippingRect);
     }
 
+    options.TextureMapper.SetScalingFilters(_state.ContentsMinificationFilter,
+                                            _state.ContentsMagnificationFilter);
     contentsLayer->PaintToTextureMapper(options.TextureMapper, _state.ContentsRect, transform,
                                         options.Opacity);
+    options.TextureMapper.SetScalingFilters(boo::GraphicsLayerScalingFilter::Linear,
+                                            boo::GraphicsLayerScalingFilter::Linear);
 
     if (shouldClip)
     {
@@ -565,6 +569,13 @@ namespace krys::ui
     _state.ContentsVisible = contentsVisible;
   }
 
+  void TextureMapperLayer::SetContentsScalingFilters(boo::GraphicsLayerScalingFilter minification,
+                                                     boo::GraphicsLayerScalingFilter magnification) noexcept
+  {
+    _state.ContentsMinificationFilter = minification;
+    _state.ContentsMagnificationFilter = magnification;
+  }
+
   void TextureMapperLayer::SetContentsOpaque(bool contentsOpaque) noexcept
   {
     _state.ContentsOpaque = contentsOpaque;
@@ -613,6 +624,14 @@ namespace krys::ui
   bool TextureMapperLayer::DescendantsOrSelfHaveRunningAnimations() const noexcept
   {
     if (_animations.HasRunningAnimations())
+    {
+      return true;
+    }
+    if (_state.ReplicaLayer && _state.ReplicaLayer->DescendantsOrSelfHaveRunningAnimations())
+    {
+      return true;
+    }
+    if (_state.BackdropLayer && _state.BackdropLayer->_animations.HasRunningAnimations())
     {
       return true;
     }

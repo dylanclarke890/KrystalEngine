@@ -38,6 +38,23 @@ namespace krys::boo::css::tests
       return query;
     }
 
+    /// @brief Parses `prelude` as a whole `@container` prelude: a list of container queries.
+    KRYS_NODISCARD Maybe<cq::ContainerQueryList> ParseContainerQueryList(utf8_stringview prelude)
+    {
+      InputStream inputStream {CSSOMString(prelude)};
+      Tokenizer tokenizer(inputStream);
+      std::ignore = tokenizer.PumpTokenizer();
+      auto tokens = tokenizer.Tokens();
+      tokens.DiscardWhitespace();
+      auto queries = cq::ContainerQueryParser::ConsumeContainerQueryList(tokens, MediaQueryParserContext());
+      tokens.DiscardWhitespace();
+      if (!queries || !tokens.IsAtEnd())
+      {
+        return {};
+      }
+      return queries;
+    }
+
     enum class ConditionResult
     {
       Invalid,
@@ -210,6 +227,8 @@ namespace krys::boo::css::tests
     CHECK(query->Condition.Queries.empty());
     CHECK(query->RequiredAxes == cq::Axis::None);
     CHECK(query->ContainsUnknownFeature == cq::ContainsUnknownFeature::No);
+    CHECK(ConditionText(u8"--foo") == "--foo");
+    CHECK(ConditionText(u8"--foo (width > 1px)") == "--foo (width > 1px)");
   }
 
   TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: required axes",
@@ -277,15 +296,73 @@ namespace krys::boo::css::tests
     CHECK(feature->RightComparison->Value->IsCustomPropertyValue());
   }
 
-  // FIXME: Range syntax in style queries and lists of container queries (css-conditional-5) aren't supported
-  // (WPT at-container-style-parsing.html and at-container-parsing.html).
-  TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() ranges and query lists",
-                   "[CSS][Queries][ContainerQueryParser][!shouldfail]")
+  // Cases from WPT at-container-style-parsing.html.
+  TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() ranges",
+                   "[CSS][Queries][ContainerQueryParser]")
   {
-    CHECK(ClassifyCondition(u8"style(--foo >= --bar)") == ConditionResult::Known);
-    CHECK(ClassifyCondition(u8"style(10px < --foo <= 10em)") == ConditionResult::Known);
-    CHECK(ParseContainerQuery(u8"(width: 100px), (height: 100px)"));
-    CHECK(ParseContainerQuery(u8"container, container2"));
+    for (auto condition : {
+           u8"style(--foo >= --bar)",
+           u8"style(10px < --foo <= 10em)",
+           u8"style(--foo = 1)",
+           u8"style(10 > --foo > 1)",
+           u8"style(1 < 2)",
+           u8"style(var(--x) < calc(1px + 1em))",
+           u8"style((--a < 1) and (--b > 2))",
+         })
+    {
+      INFO(ToNarrow(condition));
+      CHECK(ClassifyCondition(condition) == ConditionResult::Known);
+    }
+
+    for (auto condition : {
+           u8"style(--foo <)",
+           u8"style(--foo < 1 < 2 < 3)",
+           u8"style(1 < --foo > 2)",
+           u8"style(1 = --foo = 2)",
+           u8"style(1 < --foo = 2)",
+         })
+    {
+      INFO(ToNarrow(condition));
+      CHECK(ClassifyCondition(condition) == ConditionResult::Unknown);
+    }
+
+    auto query = ParseContainerQuery(u8"style(10px < --foo <= 10em)");
+    REQUIRE(query);
+    auto *range = std::get_if<mq::StyleRange>(&query->Condition.Queries[0]);
+    REQUIRE(range);
+    CHECK(range->Schema == &cq::Features::Style());
+    CHECK(range->FunctionId == ValueId::Style);
+    REQUIRE(range->Values.size() == 3uz);
+    CHECK(range->Values[1].CustomPropertyName == CSSOMStringAtom(u8"--foo"));
+    CHECK(range->Values[0].Value);
+    CHECK(range->Operators
+          == List {mq::ComparisonOperator::LessThan, mq::ComparisonOperator::LessThanOrEqual});
+
+    CHECK(ConditionText(u8"style(10px<--foo<=10em)") == "style(10px < --foo <= 10em)");
+    CHECK(ConditionText(u8"style(  --a   >=   --b  )") == "style(--a >= --b)");
+    CHECK(ConditionText(u8"style((--a = 1) or (--b > 2))") == "style((--a = 1) or (--b > 2))");
+  }
+
+  // Cases from WPT at-container-parsing.html.
+  TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: query lists", "[CSS][Queries][ContainerQueryParser]")
+  {
+    auto queries = ParseContainerQueryList(u8"(width: 100px), (height: 100px)");
+    REQUIRE(queries);
+    CHECK(queries->size() == 2u);
+
+    queries = ParseContainerQueryList(u8"container, container2");
+    REQUIRE(queries);
+    REQUIRE(queries->size() == 2u);
+    CHECK(queries->at(1).Name == CSSOMStringAtom(u8"container2"));
+
+    queries = ParseContainerQueryList(u8"a (width > 1px) , style(--x: 1)");
+    REQUIRE(queries);
+    StringBuilder text;
+    cq::Serialise(text, *queries);
+    CHECK(ToNarrow(text) == "a (width > 1px), style(--x: 1)");
+
+    CHECK_FALSE(ParseContainerQueryList(u8"(width: 100px),"));
+    CHECK_FALSE(ParseContainerQueryList(u8", (width: 100px)"));
   }
 
   // Cases from WPT css/css-conditional/container-queries/at-container-serialization.html and
@@ -329,10 +406,9 @@ namespace krys::boo::css::tests
     CHECK(ConditionText(u8"style(--foo:2.100  )") == "style(--foo: 2.100)");
   }
 
-  // FIXME: Fails upstream too: the unknown `prop: val` condition is serialised from its tokens in normal
-  // mode, so its whitespace collapses.
+  // WebKit collapses the whitespace, serialising the condition from its tokens in normal mode.
   TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() serialisation of unknown conditions",
-                   "[CSS][Queries][ContainerQueryParser][!shouldfail]")
+                   "[CSS][Queries][ContainerQueryParser]")
   {
     CHECK(ConditionText(u8" style(  ( --FOO: BAR) OR ( prop: val  ) )")
           == "style((--FOO: BAR) or ( prop: val  ))");

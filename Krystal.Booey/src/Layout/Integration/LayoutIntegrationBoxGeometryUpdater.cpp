@@ -92,7 +92,6 @@ namespace krys::boo::layout_integration
       return style::EvaluateMinimum<LayoutUnit>(paddingEdge, *availableWidth, usedZoom);
     }
 
-    // FIXME: The fieldset's intrinsic border (intrinsicBorderForFieldset), once fieldsets have a renderer.
     inline void AdjustBorderForTableAndFieldset(const RenderBoxModelObject &renderer,
                                                 RectEdges<LayoutUnit> &borderWidths) noexcept
     {
@@ -107,6 +106,19 @@ namespace krys::boo::layout_integration
       {
         borderWidths = tableCell->BorderWidths();
         return;
+      }
+
+      if (renderer.IsFieldset())
+      {
+        // This comes from inside the fieldset, so its own flow direction says where.
+        auto adjustment = Downcast<RenderBlock>(renderer).IntrinsicBorderForFieldset();
+        switch (renderer.GetWritingMode().BlockDirection())
+        {
+          case FlowDirection::TopToBottom: borderWidths.SetTop(borderWidths.Top() + adjustment); break;
+          case FlowDirection::BottomToTop: borderWidths.SetBottom(borderWidths.Bottom() + adjustment); break;
+          case FlowDirection::LeftToRight: borderWidths.SetLeft(borderWidths.Left() + adjustment); break;
+          case FlowDirection::RightToLeft: borderWidths.SetRight(borderWidths.Right() + adjustment); break;
+        }
       }
     }
 
@@ -514,8 +526,7 @@ namespace krys::boo::layout_integration
 
   BoxGeometryUpdater::BoxGeometryUpdater(layout::LayoutState &layoutState,
                                          const layout::ElementBox &rootLayoutBox) noexcept
-      : _layoutState(WeakPtr<layout::LayoutState>::WithRef(layoutState)),
-        _rootLayoutBox(ShareCheckedPtr(&rootLayoutBox))
+      : _layoutState(CreateWeakPtr(&layoutState)), _rootLayoutBox(ShareCheckedPtr(&rootLayoutBox))
   {
   }
 
@@ -793,7 +804,6 @@ namespace krys::boo::layout_integration
   {
     auto &boxGeometry = GetLayoutState().EnsureGeometryForBox(*renderInline.LayoutBox());
 
-    // FIXME: A continuation keeps only one side's margin, border and padding, once there are continuations.
     auto writingMode = renderInline.GetWritingMode();
 
     auto inlineMargin = HorizontalLogicalMargin(renderInline, availableWidth, writingMode);

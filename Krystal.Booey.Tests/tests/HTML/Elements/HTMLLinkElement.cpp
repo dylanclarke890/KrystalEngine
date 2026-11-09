@@ -60,6 +60,39 @@ namespace krys::boo::html::tests
     }
   }
 
+  TEST_CASE("HTMLLinkElement: an unsuccessful HTTP response or a nosniff one that isn't CSS fires error",
+            "[HTML][HTMLLinkElement][html:fetching-and-processing-a-resource-from-a-link-element]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddText(u8"https://example.com/missing.css", u8"#box { width: 50px }");
+    loader.Strategy.StatusCodes[u8"https://example.com/missing.css"] = 404;
+    loader.Strategy.AddText(u8"https://example.com/plain.css", u8"#box { height: 50px }", u8"text/plain");
+    loader.Strategy.Headers[u8"https://example.com/plain.css"] = {{u8"X-Content-Type-Options", u8"nosniff"}};
+    loader.Strategy.AddText(u8"https://example.com/sheet.css", u8"#box { min-width: 20px }");
+    // A host that gives no status isn't saying the load failed.
+    loader.Strategy.Headers[u8"https://example.com/sheet.css"] = {{u8"X-Content-Type-Options", u8"nosniff"}};
+    // A file isn't an HTTP response: it has no status to fail.
+    loader.Strategy.AddText(u8"file:///file.css", u8"#box { min-height: 20px }");
+
+    PageInFrameFixture fixture(
+      u8"<head><link id=missing rel=stylesheet href='https://example.com/missing.css'>"
+      u8"<link id=plain rel=stylesheet href='https://example.com/plain.css'>"
+      u8"<link id=sheet rel=stylesheet href='https://example.com/sheet.css'>"
+      u8"<link id=file rel=stylesheet href='file:///file.css'></head>"
+      u8"<body><div id=box style='width: 5px; height: 5px'></div></body>");
+    auto missing = LoadEvents::ListenTo(fixture.ById(u8"missing"));
+    auto plain = LoadEvents::ListenTo(fixture.ById(u8"plain"));
+    auto sheet = LoadEvents::ListenTo(fixture.ById(u8"sheet"));
+    auto file = LoadEvents::ListenTo(fixture.ById(u8"file"));
+    RunNetworkingTasks();
+
+    CHECK(missing->Errors == 1);
+    CHECK(plain->Errors == 1);
+    CHECK(sheet->Loads == 1);
+    CHECK(file->Loads == 1);
+    CHECK(fixture.RendererSize(u8"box") == IntSize(20, 20));
+  }
+
   TEST_CASE("HTMLLinkElement: a linked sheet loads, holds back rendering until it does, and fires load",
             "[HTML][HTMLLinkElement]")
   {

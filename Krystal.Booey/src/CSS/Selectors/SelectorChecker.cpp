@@ -10,9 +10,14 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
 #include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -170,6 +175,38 @@ namespace krys::boo::css
 
       updatedContext.Element = context.Element->ParentElement();
       return updatedContext;
+    }
+
+    /// @brief Whether @p element is a top-level element of a virtual scoping root (the document fragment or
+    /// shadow root a query is scoped to), which Selectors makes its parent, and the rest of the complex
+    /// selector, from @p selector leftwards, matches that root: a compound of only `:scope`, as nothing else
+    /// matches it and it has no ancestors or siblings.
+    /// @note Otherwise a shadow root's elements go on to match `:host` against the host
+    /// (LocalContextForParent).
+    KRYS_NODISCARD bool
+      MatchesVirtualScopingRootAsParent(const SelectorChecker::CheckingContext &checkingContext,
+                                        const dom::Element &element, const Selector &selector) noexcept
+    {
+      const auto *scope = checkingContext.Scope.get();
+      if (!scope || Is<dom::Element>(*scope) || element.ParentNode() != scope)
+      {
+        return false;
+      }
+
+      for (const auto *simple = &selector; simple->IsScopePseudoClass();)
+      {
+        const auto *preceding = simple->PrecedingComplexSelectorComponent();
+        if (!preceding)
+        {
+          return true;
+        }
+        if (simple->Relation() != SelectorRelation::Compounding)
+        {
+          return false;
+        }
+        simple = preceding;
+      }
+      return false;
     }
 
     KRYS_NODISCARD bool StartsWith(dom::DOMStringView value, dom::DOMStringView prefix,
@@ -668,10 +705,20 @@ namespace krys::boo::css
     switch (relation)
     {
       case SelectorRelation::Descendant:
-        nextContext = LocalContextForParent(nextContext);
         nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
-        for (; nextContext.Element; nextContext = LocalContextForParent(nextContext))
+        while (true)
         {
+          if (MatchesVirtualScopingRootAsParent(checkingContext, *nextContext.Element, *leftSelector))
+          {
+            return MatchResult::Matches(matchType);
+          }
+
+          nextContext = LocalContextForParent(nextContext);
+          if (!nextContext.Element)
+          {
+            return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
+          }
+
           EnumSet<PseudoElementType> ignoredPseudoElements;
           MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
           krys_debug_assert(!nextContext.PseudoElementEffective && !ignoredPseudoElements);
@@ -682,10 +729,13 @@ namespace krys::boo::css
             return MatchResult::UpdateWithMatchType(result, matchType);
           }
         }
-        return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
 
       case SelectorRelation::Child:
       {
+        if (MatchesVirtualScopingRootAsParent(checkingContext, *nextContext.Element, *leftSelector))
+        {
+          return MatchResult::Matches(matchType);
+        }
         nextContext = LocalContextForParent(nextContext);
         if (!nextContext.Element)
         {
@@ -847,7 +897,8 @@ namespace krys::boo::css
     {
       caseSensitive = false;
     }
-    else if (isHTML && !dom::HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()))
+    else if (isHTML && !selector.IsAttributeValueMatchingCaseSensitive()
+             && !dom::HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()))
     {
       caseSensitive = false;
     }
@@ -910,6 +961,7 @@ namespace krys::boo::css
         caseSensitive = false;
       }
       else if (_documentIsHTML && Is<html::HTMLElement>(element)
+               && !selector.IsAttributeValueMatchingCaseSensitive()
                && !dom::HTMLDocument::IsCaseSensitiveAttribute(attr))
       {
         caseSensitive = false;
@@ -1285,7 +1337,7 @@ namespace krys::boo::css
           }
           break;
         case SelectorPseudoClass::Autofill:
-          // FIXME: Autofill.
+          // There's no autofill (see OVERVIEW.md), so it never matches.
           return false;
         case SelectorPseudoClass::AnyLink:
         case SelectorPseudoClass::Link:
@@ -1363,8 +1415,8 @@ namespace krys::boo::css
             return !context.IsNegation;
           }
 
-          // FIXME: A virtual scoping root (a document fragment or shadow root) should act as the parent of
-          // its top-level elements, so that `:scope > p` matches them; no element is ever equal to one.
+          // A virtual scoping root (a document fragment or shadow root) matches no element; the child and
+          // descendant combinators match `:scope` against it (MatchesVirtualScopingRootAsParent).
           const dom::Node *contextualReferenceNode =
             !checkingContext.Scope ? dom::TreeQueries::DocumentElement(element.NodeDocument())
                                    : static_cast<const dom::Node *>(checkingContext.Scope.get());
@@ -1406,7 +1458,48 @@ namespace krys::boo::css
           return dialog && dialog->IsModal();
         }
 
-        case SelectorPseudoClass::PopoverOpen:          return element.IsPopoverShowing();
+        case SelectorPseudoClass::PopoverOpen: return element.IsPopoverShowing();
+
+        // https://drafts.csswg.org/selectors-5/#headings
+        case SelectorPseudoClass::Heading:
+        {
+          auto *heading = DynamicDowncast<html::HTMLHeadingElement>(element);
+          if (!heading)
+          {
+            return false;
+          }
+          const auto *levels = selector.IntegerList();
+          if (!levels || levels->isEmpty())
+          {
+            return true;
+          }
+          return std::ranges::contains(*levels, static_cast<int32>(heading->ComputedHeadingLevel()));
+        }
+
+        // https://html.spec.whatwg.org/#selector-open
+        case SelectorPseudoClass::Open:
+        {
+          if (Is<html::HTMLDetailsElement>(element) || Is<html::HTMLDialogElement>(element))
+          {
+            return element.HasAttribute(dom::DOMStringAtom(u8"open"));
+          }
+          if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element))
+          {
+            auto *menuList = DynamicDowncast<RenderMenuList>(select->Renderer());
+            return (menuList && menuList->PopupIsVisible()) || select->IsPickerOpen();
+          }
+          if (auto *input = DynamicDowncast<html::HTMLInputElement>(element))
+          {
+            return input->IsPresentingAttachedView();
+          }
+          return false;
+        }
+
+        case SelectorPseudoClass::InternalSelectBaseContents:
+        {
+          auto *select = DynamicDowncast<html::HTMLSelectElement>(element);
+          return select && select->ContentsUseBaseAppearance();
+        }
 
         case SelectorPseudoClass::InternalHtmlDocument: return Is<dom::HTMLDocument>(element.NodeDocument());
       }

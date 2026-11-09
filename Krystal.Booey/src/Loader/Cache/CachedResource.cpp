@@ -51,12 +51,26 @@ namespace krys::boo
     cachedResourceLoader.IncrementRequestCount(*this);
     _requestCountingLoader = CreateWeakPtr(&cachedResourceLoader);
 
+    // The load finishes as a task of the document that started it, so it waits while that document is
+    // suspended; it still finishes once the document is gone, as other documents may share the resource.
     auto completeAsNetworkingTask =
-      [protectedThis = CachedResourceHandle<CachedResource>(*this)](LoadResult &&result)
+      [protectedThis = CachedResourceHandle<CachedResource>(*this),
+       document = CreateWeakPtr(cachedResourceLoader.GetDocument())](LoadResult &&result)
     {
-      html::EventLoop::Current().QueueTask(html::TaskSource::Networking,
-                                           [protectedThis, result = krys::move(result)]() mutable
-                                           { protectedThis->DidFinishLoad(krys::move(result)); });
+      auto steps = [protectedThis, result = krys::move(result)]() mutable
+      {
+        protectedThis->DidFinishLoad(krys::move(result));
+      };
+      auto &eventLoop = html::EventLoop::Current();
+      if (auto *taskDocument = document.get())
+      {
+        eventLoop.QueueTask(html::TaskSource::Networking, *taskDocument, krys::move(steps),
+                            html::StoppedDocumentTask::Run);
+      }
+      else
+      {
+        eventLoop.QueueTask(html::TaskSource::Networking, krys::move(steps));
+      }
     };
 
     // Data URLs are decoded here, rather than by the host.

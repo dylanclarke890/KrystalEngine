@@ -12,28 +12,49 @@
 
 namespace krys::boo::dom
 {
-  LiveNodeList::LiveNodeList(Node &root, LiveNodeListFilterFunc &&filter) noexcept
-      : _root(ShareRef(root)), _filter(krys::move(filter))
+  LiveNodeList::LiveNodeList(Node &root, LiveNodeListFilterFunc &&filter,
+                             LiveCollectionInvalidation invalidation,
+                             LiveCollectionTraversal traversal) noexcept
+      : LiveCollection(root, invalidation, traversal), _filter(krys::move(filter))
   {
+  }
+
+  void LiveNodeList::InvalidateCache() noexcept
+  {
+    _indexCache.Invalidate();
+    UnregisterCache();
+  }
+
+  void LiveNodeList::WillValidateIndexCache() const noexcept
+  {
+    RegisterCache();
+  }
+
+  Node *LiveNodeList::FirstMatchFrom(Node *node) const noexcept
+  {
+    for (; node; node = NextNode(*node))
+    {
+      if (_filter(*node))
+      {
+        return node;
+      }
+    }
+    return nullptr;
+  }
+
+  Node *LiveNodeList::CollectionBegin() const noexcept
+  {
+    return FirstMatchFrom(FirstNode());
+  }
+
+  Node *LiveNodeList::CollectionNext(Node &node) const noexcept
+  {
+    return FirstMatchFrom(NextNode(node));
   }
 
   RefPtr<Node> LiveNodeList::Item(size_t index) noexcept
   {
-    size_t count = 0;
-    for (Node &node : DescendantRange(*_root))
-    {
-      if (_filter(node))
-      {
-        ++count;
-      }
-
-      if (count > index)
-      {
-        return ShareRefPtr(&node);
-      }
-    }
-
-    return nullptr;
+    return ShareRefPtr(_indexCache.At(*this, index));
   }
 
   RefPtr<const Node> LiveNodeList::Item(size_t index) const noexcept
@@ -53,6 +74,6 @@ namespace krys::boo::dom
 
   size_t LiveNodeList::Length() const noexcept
   {
-    return Count(ConstDescendantRange(*_root), _filter);
+    return _indexCache.Count(*this);
   }
 }

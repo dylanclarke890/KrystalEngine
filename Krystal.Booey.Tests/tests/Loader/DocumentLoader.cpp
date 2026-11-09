@@ -22,6 +22,8 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include <chrono>
+#include <format>
 
 namespace krys::boo::tests
 {
@@ -86,7 +88,7 @@ namespace krys::boo::tests
 
     auto body = fixture.Document().Body();
     REQUIRE(body);
-    auto *pre = dynamic_cast<html::HTMLElement *>(body->FirstChild());
+    auto *pre = DynamicDowncast<html::HTMLElement>(body->FirstChild());
     REQUIRE(pre);
     CHECK(pre->LocalName() == u8"pre");
     CHECK(pre->TextContent() == u8"<b>bold</b>\n& more");
@@ -132,7 +134,7 @@ namespace krys::boo::tests
     CHECK_FALSE(host->HasChildNodes());
     auto shadow = host->ShadowRoot();
     REQUIRE(shadow);
-    CHECK(shadow->InnerHTML() == u8"<b>s</b>");
+    CHECK(shadow->InnerHTML().ReleaseValue() == u8"<b>s</b>");
   }
 
   TEST_CASE("Documents load from the loader strategy and data: URLs", "[Loader][DocumentLoader]")
@@ -237,6 +239,40 @@ namespace krys::boo::tests
     auto paragraph = fixture.Document().GetElementById(u8"t");
     REQUIRE(paragraph);
     CHECK(Narrow(paragraph->TextContent().value_or(u8"")) == "\xC3\xA9\xEF\xBF\xBD");
+  }
+
+  TEST_CASE("A loading document's scrollbars stay as they are until its first layout",
+            "[Loader][DocumentLoader][Scrolling]")
+  {
+    LoadFixture fixture;
+    auto *view = fixture.Frame().View();
+    REQUIRE(view);
+    DocumentWriter writer;
+    writer.SetFrame(fixture.Frame());
+    REQUIRE(writer.Begin(url::URL(u8"about:blank")));
+    CHECK(view->ScrollbarsSuppressed());
+
+    SECTION("a tall page is laid out with its vertical scrollbar from the start")
+    {
+      const char markup[] = "<body style=margin:0><div id=d style=height:5000px></div>";
+      writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup), sizeof(markup) - 1));
+      (void)fixture.Document().UpdateLayout();
+      CHECK_FALSE(view->ScrollbarsSuppressed());
+      REQUIRE(view->VerticalScrollbar());
+      CHECK_FALSE(view->HorizontalScrollbar());
+    }
+
+    SECTION("a short page loses the vertical scrollbar its first layout starts with")
+    {
+      const char markup[] = "<body style=margin:0><div id=d style=height:5px></div>";
+      writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup), sizeof(markup) - 1));
+      (void)fixture.Document().UpdateLayout();
+      CHECK_FALSE(view->ScrollbarsSuppressed());
+      CHECK_FALSE(view->VerticalScrollbar());
+    }
+
+    writer.End();
+    CHECK_FALSE(view->ScrollbarsSuppressed());
   }
 
   namespace
@@ -360,7 +396,7 @@ namespace krys::boo::tests
   TEST_CASE(
     "Leaving a document: pagehide and unload",
     "[Loader][DocumentLoader][html:the-pagetransitionevent-interface][html:dom-pagetransitionevent-persisted]"
-    "[html:fire-a-page-transition-event][html:navigate]")
+    "[html:fire-a-page-transition-event][html:navigate][html:update-the-visibility-state]")
   {
     LoadFixture fixture;
     fixture.LoadMarkup(u8"<!DOCTYPE html><body><p>First</p></body>", u8"https://example.com/first.html");
@@ -394,12 +430,33 @@ namespace krys::boo::tests
                                              tryToNavigate();
                                            });
 
+    RefPtr<dom::Element> paragraph = first->QuerySelector(u8"p").ReleaseValue();
+    REQUIRE(paragraph);
+    auto onDocument = first->AddEventListener(u8"click", [](dom::Event &) {});
+    CHECK(first->VisibilityState() == html::DocumentVisibilityState::Visible);
+    auto visibilityChange = first->AddEventListener(u8"visibilitychange",
+                                                    [&](dom::Event &event)
+                                                    {
+                                                      CHECK(event.Bubbles());
+                                                      CHECK(first->Hidden());
+                                                      events.push_back("visibilitychange");
+                                                    });
+    auto onParagraph = paragraph->AddEventListener(u8"click", [](dom::Event &) {});
+
     // A document is unloaded as the next one commits.
     fixture.LoadMarkup(u8"<!DOCTYPE html><p>Second</p>", u8"https://example.com/second.html");
     CHECK(events.empty());
     html::EventLoop::Current().RunUntilIdle();
-    CHECK(events == List<std::string> {"pagehide", "unload"});
+    CHECK(events == List<std::string> {"pagehide", "visibilitychange", "unload"});
     CHECK(fixture.Document().GetURL().String() == u8"https://example.com/second.html");
+    CHECK(first->VisibilityState() == html::DocumentVisibilityState::Hidden);
+    CHECK(fixture.Document().VisibilityState() == html::DocumentVisibilityState::Visible);
+
+    // The unloaded document drops its listeners, and its window's and nodes'.
+    CHECK_FALSE(window->HasEventListener(dom::DOMStringAtom(u8"pagehide")));
+    CHECK_FALSE(window->HasEventListener(dom::DOMStringAtom(u8"unload")));
+    CHECK_FALSE(first->HasEventListener(dom::DOMStringAtom(u8"click")));
+    CHECK_FALSE(paragraph->HasEventListener(dom::DOMStringAtom(u8"click")));
     CHECK_FALSE(first->PageShowing());
     CHECK(std::ranges::find(fixture.Events, "navigation to https://example.com/elsewhere.html")
           == fixture.Events.end());
@@ -442,5 +499,74 @@ namespace krys::boo::tests
     fixture.Document().ProcessMetaHttpEquiv(u8"content-language", u8"de");
     CHECK(fixture.Document().ContentLanguage() == u8"de");
     CHECK(paragraph->Matches(u8":lang(de)").Value());
+  }
+  TEST_CASE("A document's lastModified is its response's Last-Modified date, in local time",
+            "[Loader][DocumentLoader][html:dom-document-lastmodified]")
+  {
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/dated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.AddText(u8"https://example.com/undated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.AddText(u8"https://example.com/misdated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.Headers[u8"https://example.com/dated.html"] = {
+      {u8"Last-Modified", u8"Sun, 06 Nov 1994 08:49:37 GMT"}};
+    fixture.Strategy.Headers[u8"https://example.com/misdated.html"] = {{u8"Last-Modified", u8"yesterday"}};
+
+    using namespace std::chrono;
+    auto localText = [](sys_seconds time)
+    {
+      auto text = std::format("{:%m/%d/%Y %H:%M:%S}", current_zone()->to_local(time));
+      return utf8_string(text.begin(), text.end());
+    };
+
+    fixture.LoadURL(u8"https://example.com/dated.html");
+    RunNetworkingTasks();
+    CHECK(fixture.Document().LastModified() == localText(sys_days(1'994y / November / 6) + 8h + 49min + 37s));
+
+    // Without a valid date, it's the current time.
+    for (auto url : {u8"https://example.com/undated.html", u8"https://example.com/misdated.html"})
+    {
+      fixture.LoadURL(url);
+      RunNetworkingTasks();
+      auto before = floor<seconds>(system_clock::now());
+      auto value = fixture.Document().LastModified();
+      CHECK(
+        (value == localText(before) || value == localText(before - 1s) || value == localText(before + 1s)));
+    }
+  }
+  TEST_CASE("A document's language falls back to its Content-Language header's first language",
+            "[Loader][DocumentLoader][html:pragma-set-default-language]")
+  {
+    LoadFixture fixture;
+    auto serve = [&](utf8_stringview name, utf8_stringview header, utf8_stringview markup)
+    {
+      auto url = utf8_string(u8"https://example.com/") + utf8_string(name);
+      fixture.Strategy.AddText(url, markup, u8"text/html");
+      fixture.Strategy.Headers[url] = {{u8"Content-Language", utf8_string(header)}};
+      fixture.LoadURL(url);
+      RunNetworkingTasks();
+      return fixture.Document().GetElementById(u8"p");
+    };
+
+    auto paragraph = serve(u8"one", u8"fr", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"fr");
+    CHECK(paragraph->Matches(u8":lang(fr)").Value());
+
+    // A list gives its first language, without the whitespace around it.
+    paragraph = serve(u8"list", u8"  fr , de", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"fr");
+    CHECK_FALSE(paragraph->Matches(u8":lang(de)").Value());
+
+    // The pragma comes first.
+    paragraph = serve(u8"pragma", u8"fr",
+                      u8"<!DOCTYPE html><meta http-equiv=content-language content=de><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"de");
+    CHECK(paragraph->Matches(u8":lang(de)").Value());
+
+    paragraph = serve(u8"empty", u8" , fr", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage().empty());
   }
 }

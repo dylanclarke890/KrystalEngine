@@ -243,7 +243,7 @@ Status: reviewed (2026-11-01)
 #### [4.12.3 The template element](https://html.spec.whatwg.org/#the-template-element)
 
 Status: reviewed (2026-11-01)
-> `HTMLTemplateElement`; the template contents are in the template's own document (see `DIFFERENCES.md`), and content patching isn't implemented (see `KNOWN-ISSUES.md`).
+> `HTMLTemplateElement`; the template contents are in the template's own document (see `DIFFERENCES.md`), and content patching is `PrepareContentPatching` (with find markers in `HTMLTemplateElement.cpp`).
 > Fixed: `htmlFor` was missing, `shadowRootMode` and `shadowRootSlotAssignment` weren't limited to known values, and adopting a template didn't adopt its contents.
 <!-- definitions: attr-template-for attr-template-shadowrootmode attr-shadowrootmode-none-state attr-template-shadowrootdelegatesfocus attr-template-shadowrootserializable attr-template-shadowrootslotassignment attr-template-shadowrootclonable attr-template-shadowrootcustomelementregistry associated-inert-template-document insertion-target insertion-start-marker -->
 

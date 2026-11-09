@@ -17,7 +17,6 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &AttributeTypeAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &BaselineShiftAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &BeginAttr() noexcept;
-    KRYS_NODISCARD static const dom::QualifiedName &BufferedRenderingAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &ByAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &CalcModeAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &ClassAttr() noexcept;

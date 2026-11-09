@@ -85,7 +85,11 @@ namespace krys
     return (Is<Ts>(source) || ...);
   }
 
+  // The reference overloads leave smart pointers to their own overloads, which a non-const one would
+  // otherwise lose to these.
+
   template <typename Target, typename Source>
+  requires(!IsSmartPtr<remove_cv_t<Source>>)
   KRYS_NODISCARD constexpr decltype(auto) Downcast(Source &source) noexcept
   {
     static_assert(!UnnecessaryTypeCast<Source, Target>, "Unnecessary cast to same type");
@@ -106,6 +110,7 @@ namespace krys
   }
 
   template <typename Target, typename Source>
+  requires(!IsSmartPtr<remove_cv_t<Source>>)
   KRYS_NODISCARD constexpr decltype(auto) DynamicDowncast(Source &source) noexcept
   {
     static_assert(!UnnecessaryTypeCast<Source, Target>, "Unnecessary cast to same type");

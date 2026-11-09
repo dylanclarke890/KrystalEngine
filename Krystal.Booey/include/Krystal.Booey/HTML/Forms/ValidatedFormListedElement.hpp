@@ -30,6 +30,8 @@ namespace krys::boo::html
     bool _wasInteractedWithSinceLastFormSubmitEvent : 1 {false};
     bool _belongsToFormThatIsBeingDestroyed : 1 {false};
     bool _isFocusingWithValidationMessage {false};
+    /// @brief The anchor the host was last asked to show the control's validation message at.
+    WeakPtr<HTMLElement> _validationMessageAnchor;
     mutable TriState _isInsideDataList {TriState::Indeterminate};
     uint32 _delayedUpdateValidityCount {0};
 
@@ -39,6 +41,8 @@ namespace krys::boo::html
     /// @brief Whether the element is a candidate for constraint validation.
     KRYS_NODISCARD bool WillValidate() const noexcept override;
 
+    /// @brief Asks the host to show the control's validation message at @p validationAnchor, or to hide it if
+    /// it's shown (as typing does) or there's none.
     void UpdateVisibleValidationMessage(HTMLElement &validationAnchor) noexcept;
     void HideVisibleValidationMessage() noexcept;
 

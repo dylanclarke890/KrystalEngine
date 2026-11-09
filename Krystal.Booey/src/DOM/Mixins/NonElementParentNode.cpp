@@ -18,6 +18,12 @@ namespace krys::boo::dom::mixins
       return nullptr;
     }
 
+    // The root of a tree scope maps its IDs; a fragment or an element has to look.
+    if (Is<Document>(node) || Is<ShadowRoot>(node))
+    {
+      return ShareRefPtr(node.TreeScope().FirstElementWithId(id));
+    }
+
     auto descendants = DescendantRange(node);
 
     auto it = First(descendants,

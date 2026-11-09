@@ -8,11 +8,15 @@
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/Editing/Commands/UndoStep.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -509,5 +513,200 @@ namespace krys::boo::tests
     CHECK(events == 1);
     CHECK_FALSE(hadDataTransfer);
     CHECK(Narrow(field.Value()).contains("XY"));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Document: designMode",
+                   "[Editing][Document][html:designMode][html:design-mode-enabled][html:editing-host]")
+  {
+    EditorFixture fixture(
+      u8"<div id=one>hello</div><div id=locked contenteditable=false>no<b id=in>pe</b></div>"
+      u8"<div id=host></div><svg id=svg></svg>");
+    auto &document = *fixture.Document;
+    auto &one = fixture.ById(u8"one");
+    auto &locked = fixture.ById(u8"locked");
+    auto readWrite = [](dom::Element &element)
+    {
+      return element.Matches(u8":read-write").ReleaseValue();
+    };
+
+    SECTION("the setter takes on and off in any case, and ignores anything else")
+    {
+      CHECK(document.DesignMode() == u8"off");
+      document.DesignMode(u8"foo");
+      CHECK(document.DesignMode() == u8"off");
+      document.DesignMode(u8"oN");
+      CHECK(document.DesignMode() == u8"on");
+      document.DesignMode(u8"foo");
+      CHECK(document.DesignMode() == u8"on");
+      document.DesignMode(u8"");
+      CHECK(document.DesignMode() == u8"on");
+      document.DesignMode(u8"OFF");
+      CHECK(document.DesignMode() == u8"off");
+    }
+
+    SECTION("the document tree is editable while it's on")
+    {
+      CHECK_FALSE(one.IsContentEditable());
+      CHECK_FALSE(readWrite(one));
+
+      document.DesignMode(u8"on");
+      CHECK(one.IsContentEditable());
+      CHECK(readWrite(one));
+      CHECK(readWrite(fixture.Body()));
+      CHECK(document.HasEditableStyle());
+
+      document.DesignMode(u8"off");
+      CHECK_FALSE(one.IsContentEditable());
+      CHECK_FALSE(readWrite(one));
+    }
+
+    SECTION("but not what's marked otherwise, nor what's outside the document tree")
+    {
+      auto shadow = fixture.ById(u8"host").AttachShadow({}).ReleaseValue();
+      auto inShadow = document.CreateElement(u8"span").ReleaseValue();
+      REQUIRE_FALSE(shadow->AppendChild(*inShadow).HasException());
+      auto detached = document.CreateElement(u8"span").ReleaseValue();
+
+      document.DesignMode(u8"on");
+      CHECK_FALSE(locked.IsContentEditable());
+      CHECK_FALSE(readWrite(locked));
+      CHECK_FALSE(fixture.ById(u8"in").IsContentEditable());
+      CHECK_FALSE(inShadow->IsContentEditable());
+      CHECK_FALSE(readWrite(*inShadow));
+      CHECK_FALSE(detached->IsContentEditable());
+      CHECK_FALSE(readWrite(*detached));
+      CHECK_FALSE(readWrite(fixture.ById(u8"svg")));
+    }
+
+    SECTION("turning it on puts a caret at the start and focuses the document element")
+    {
+      auto &text = fixture.TextIn(u8"one");
+      fixture.Select(text, 1, 3);
+      document.DesignMode(u8"on");
+      CHECK(fixture.Selection().IsCaret());
+      CHECK(fixture.Selection().Selection().Start().GetContainerNode() == &text);
+      CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 0);
+      CHECK(document.FocusedElement() == document.DocumentElement());
+
+      // Typing can start straight away.
+      CHECK(fixture.GetEditor().InsertText(u8"Z", nullptr));
+      CHECK(Narrow(fixture.InnerHTML(one)) == "Zhello");
+    }
+
+    SECTION("only turning it on moves the selection and the focus")
+    {
+      auto &text = fixture.TextIn(u8"one");
+      document.DesignMode(u8"on");
+      fixture.Select(text, 1, 3);
+      auto &field = fixture.ById(u8"host");
+      REQUIRE_FALSE(field.SetAttribute(u8"tabindex", u8"0").HasException());
+      html::FocusAlgorithms::FocusingSteps(field);
+      REQUIRE(document.FocusedElement() == &field);
+
+      document.DesignMode(u8"on");
+      CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 1);
+      CHECK(document.FocusedElement() == &field);
+
+      document.DesignMode(u8"off");
+      CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 1);
+      CHECK(document.FocusedElement() == &field);
+    }
+
+    SECTION("text can be typed where it's editable")
+    {
+      document.DesignMode(u8"on");
+      (void)document.UpdateLayout();
+      auto &text = fixture.TextIn(u8"one");
+      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2),
+                                 Affinity::Downstream);
+      CHECK(fixture.GetEditor().InsertText(u8"ZZ", nullptr));
+      CHECK(Narrow(fixture.InnerHTML(one)) == "heZZllo");
+
+      auto &lockedText = fixture.TextIn(u8"locked");
+      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&lockedText), 1),
+                                 Affinity::Downstream);
+      CHECK_FALSE(fixture.GetEditor().InsertText(u8"Q", nullptr));
+      CHECK(Narrow(fixture.InnerHTML(locked)) == "no<b id=\"in\">pe</b>");
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: commands from script", "[Editing][Editor]")
+  {
+    EditorFixture fixture(u8"<div id=e contenteditable>abc</div><p id=p>Not editable</p>");
+    auto &document = *fixture.Document;
+    auto &text = fixture.TextIn(u8"e");
+
+    SECTION("Script can run only the commands supported from the DOM, ignoring ASCII case")
+    {
+      CHECK(document.QueryCommandSupported(u8"selectall").Value());
+      CHECK(document.QueryCommandSupported(u8"insertText").Value());
+      CHECK_FALSE(document.QueryCommandSupported(u8"MoveRight").Value());
+      CHECK_FALSE(document.QueryCommandSupported(u8"NoSuchCommand").Value());
+      CHECK_FALSE(document.ExecCommand(u8"MoveRight").Value());
+      CHECK_FALSE(document.QueryCommandEnabled(u8"NoSuchCommand").Value());
+    }
+
+    SECTION("A command runs on the selection when it's enabled")
+    {
+      fixture.Select(fixture.TextIn(u8"p"), 0, 3);
+      CHECK_FALSE(document.QueryCommandEnabled(u8"insertText").Value());
+      CHECK_FALSE(document.ExecCommand(u8"insertText", false, u8"X").Value());
+
+      fixture.Select(text, 1, 1);
+      CHECK(document.QueryCommandEnabled(u8"insertText").Value());
+      CHECK_FALSE(document.QueryCommandEnabled(u8"undo").Value());
+      CHECK(document.ExecCommand(u8"InsertText", false, u8"X").Value());
+      CHECK(fixture.ById(u8"e").TextContent() == u8"aXbc");
+      CHECK(document.QueryCommandEnabled(u8"undo").Value());
+      CHECK(document.ExecCommand(u8"undo").Value());
+      CHECK(fixture.ById(u8"e").TextContent() == u8"abc");
+    }
+
+    SECTION("Commands without a state or value are false and empty")
+    {
+      fixture.Select(text, 0, 3);
+      CHECK_FALSE(document.QueryCommandState(u8"selectAll").Value());
+      CHECK_FALSE(document.QueryCommandIndeterm(u8"selectAll").Value());
+      CHECK(document.QueryCommandValue(u8"selectAll").Value().empty());
+      CHECK(document.QueryCommandValue(u8"NoSuchCommand").Value().empty());
+    }
+
+    SECTION("As in Chrome, a command doesn't run from within another")
+    {
+      fixture.Select(text, 1, 1);
+      Maybe<bool> nested;
+      ListenWith(fixture, u8"input",
+                 [&](dom::Event &)
+                 {
+                   if (!nested)
+                   {
+                     nested = document.ExecCommand(u8"insertText", false, u8"Y").Value();
+                   }
+                 });
+      CHECK(document.ExecCommand(u8"insertText", false, u8"X").Value());
+      REQUIRE(nested);
+      CHECK_FALSE(*nested);
+      CHECK(fixture.ById(u8"e").TextContent() == u8"aXbc");
+
+      // It runs again once the first is done.
+      CHECK(document.ExecCommand(u8"insertText", false, u8"Z").Value());
+      CHECK(fixture.ById(u8"e").TextContent() == u8"aXZbc");
+    }
+
+    SECTION("Only HTML documents have commands")
+    {
+      auto svg =
+        document.Implementation().CreateDocument(infra::Namespaces::SVG, u8"svg", nullptr).ReleaseValue();
+      auto threw = [](const auto &result)
+      {
+        return result.HasException() && result.GetException().Code() == dom::ExceptionCode::InvalidStateError;
+      };
+      CHECK(threw(svg->ExecCommand(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandEnabled(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandIndeterm(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandState(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandSupported(u8"selectAll")));
+      CHECK(threw(svg->QueryCommandValue(u8"selectAll")));
+    }
   }
 }

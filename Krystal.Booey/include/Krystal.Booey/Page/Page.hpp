@@ -44,6 +44,7 @@ namespace krys::boo
     Animations,
     AnimationFrameCallbacks,
     CaretAnimation,
+    Images,
     ResizeObservations,
     FocusFixup,
     UpdateContentRelevancy,
@@ -55,7 +56,7 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 15uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 16uz);
 
 namespace krys::boo
 {
@@ -83,9 +84,14 @@ namespace krys::boo
     uint32 _renderingUpdateDepth {0};
     float _pageScaleFactor {1};
     bool _renderingUpdateIsScheduled {false};
+    /// @brief Whether the rendering update in progress skipped a render-blocked document, which the next one
+    /// tries again.
+    mutable bool _skippedRenderBlockedDocument {false};
     bool _isVisible {true};
+    bool _imageAnimationEnabled {true};
     bool _scriptedAnimationsSuspended {false};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
+    uint32 _displayNominalFramesPerSecond {FullSpeedFramesPerSecond};
 
     Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
          UniquePtr<DragClient> dragClient) noexcept;
@@ -104,6 +110,10 @@ namespace krys::boo
                                            UniquePtr<EditorClient> editorClient = nullptr,
                                            UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient = nullptr,
                                            UniquePtr<DragClient> dragClient = nullptr) noexcept;
+
+    /// @brief Calls @p function with each page that's alive, for changes that reach every page (the
+    /// scrollbars' style).
+    static void ForEachPage(const Func<void(Page &)> &function) noexcept;
 
     KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
     {
@@ -127,7 +137,7 @@ namespace krys::boo
     /// @brief Shows or hides the page, as its host reports: hidden while its window is minimised or another
     /// view is shown in its place. A hidden page suspends its animation frame callbacks and SMIL animations,
     /// and its CSS animations unless `Settings::HiddenPageCSSAnimationSuspensionEnabled` is off; its
-    /// documents' visibility state follows it.
+    /// documents' visibility state follows it, and its rendering updates wait until it's shown.
     void SetIsVisible(bool isVisible) noexcept;
 
     /// @brief Whether the page is shown; it is until its host hides it.
@@ -211,6 +221,27 @@ namespace krys::boo
     {
       return _renderingUpdateIsScheduled;
     }
+
+    /// @brief Lets animated images and SMIL animations play (true), or holds them (false): animated images
+    /// stop at the frame they show, and SMIL animations pause, in the page's documents and its SVG images. A
+    /// page starts with them playing.
+    void SetImageAnimationEnabled(bool enabled) noexcept;
+    KRYS_NODISCARD bool ImageAnimationEnabled() const noexcept
+    {
+      return _imageAnimationEnabled;
+    }
+
+    /// @brief The rate the page is shown at when nothing tells it otherwise.
+    static constexpr uint32 FullSpeedFramesPerSecond {60};
+    /// @brief Sets the rate the host runs the page's rendering updates at (its display's refresh rate, or the
+    /// rate it caps its frames to), which animations align their updates to.
+    void SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept;
+    KRYS_NODISCARD uint32 DisplayNominalFramesPerSecond() const noexcept
+    {
+      return _displayNominalFramesPerSecond;
+    }
+    /// @brief The time between the page's rendering updates, at the host's rate.
+    KRYS_NODISCARD MonotonicTime::duration PreferredRenderingUpdateInterval() const noexcept;
     /// @brief The event loop's time at the start of the last rendering update.
     KRYS_NODISCARD MonotonicTime::duration LastRenderingUpdateTimestamp() const noexcept
     {
@@ -218,15 +249,19 @@ namespace krys::boo
     }
 
     /// @brief Runs the rendering update: the steps the page's documents need, in the specification's order,
-    /// with layout before and after the steps that read it, then flushes the composited layers' changes.
+    /// with layout before and after the steps that read it, then flushes the composited layers' changes. A
+    /// hidden page's update does nothing, and stays scheduled.
     void UpdateRendering() noexcept;
 
     /// @brief Brings the style and layout of the page's documents up to date.
     void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
 
     void ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept;
-    /// @brief Calls @p functor for each document that's rendered.
-    // FIXME: Documents whose visual updates are suppressed, once there are any.
+
+    /// @brief Restyles every page's documents (UpdateStyleAfterChangeInEnvironment), after a change in the
+    /// environment they all share, such as the theme's colours.
+    static void UpdateStyleForAllPagesAfterGlobalChangeInEnvironment() noexcept;
+    /// @brief Calls @p functor for each document that's rendered: not render-blocked ones.
     void ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept;
 
   private:

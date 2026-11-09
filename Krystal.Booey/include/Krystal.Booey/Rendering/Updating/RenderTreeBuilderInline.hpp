@@ -8,8 +8,6 @@ namespace krys::boo
 
   /// @brief Attaches children to inline boxes. Block children stay children of the inline box (blocks in
   /// inline layout).
-  // FIXME: Continuations (insertChildToContinuation, splitFlow, splitInlines, newChildIsInline), which
-  // upstream only builds with `blocksInInlineLayoutEnabled` off (it's on by default).
   class RenderTreeBuilder::Inline
   {
     KRYS_NON_COPY_MOVABLE(Inline);

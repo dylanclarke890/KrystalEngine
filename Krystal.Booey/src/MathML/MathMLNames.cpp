@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/MathML/MathMLNames.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 #define KRYS_DEFINE_MATHML_ATTRIBUTE_NAME(Name, localName)                                                   \
   const dom::QualifiedName &MathMLNames::Name() noexcept                                                     \

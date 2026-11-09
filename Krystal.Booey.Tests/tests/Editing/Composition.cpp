@@ -52,8 +52,7 @@ namespace krys::boo::tests
                         EventNames::CompositionEnd, EventNames::BeforeInput, EventNames::Input,
                         EventNames::TextInput, EventNames::KeyDown, EventNames::KeyPress})
       {
-        fixture.Document->AddEventListener(dom::DOMStringAtom(type), Ref<dom::EventListenerCallback> {log},
-                                           true);
+        fixture.Document->AddEventListener(dom::DOMStringAtom(type), log, true);
       }
       return log;
     }
@@ -109,10 +108,10 @@ namespace krys::boo::tests
       CHECK(editor.CompositionNode() == &fixture.TextIn(u8"e"));
       CHECK(editor.CompositionStart() == 2);
       CHECK(editor.CompositionEnd() == 5);
-      // The underlines are moved to the composition's place in its text node.
+      // The underlines stay in the composition's text, as its place in the text node can move.
       REQUIRE(editor.CustomCompositionUnderlines().size() == 1);
-      CHECK(editor.CustomCompositionUnderlines()[0].StartOffset == 2);
-      CHECK(editor.CustomCompositionUnderlines()[0].EndOffset == 5);
+      CHECK(editor.CustomCompositionUnderlines()[0].StartOffset == 0);
+      CHECK(editor.CustomCompositionUnderlines()[0].EndOffset == 3);
       CHECK(fixture.Selection().Selection().IsCaret());
       CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 5);
       CHECK(fixture.Client->CompositionUpdates == 1);
@@ -190,6 +189,20 @@ namespace krys::boo::tests
       CHECK(fixture.Client->DiscardedCompositions == 1);
     }
 
+    SECTION("Undoing ends the composition, through the editor client, and undoes its text")
+    {
+      CHECK(fixture.Run(u8"Undo"));
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(Narrow(fixture.InnerHTML(root)) == "ab");
+      CHECK(fixture.Client->DiscardedCompositions == 1);
+
+      // Redoing brings back the text, but not the composition.
+      CHECK(fixture.Run(u8"Redo"));
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(Narrow(fixture.InnerHTML(root)) == "ab" + Narrow(ka));
+      CHECK(fixture.Client->DiscardedCompositions == 1);
+    }
+
     SECTION("A confirmed composition is undone")
     {
       editor.ConfirmComposition();
@@ -245,7 +258,7 @@ namespace krys::boo::tests
     CHECK(Narrow(fixture.InnerHTML(root)) == "ab kanji");
     CHECK(editor.CompositionStart() == 3);
     CHECK(editor.CompositionEnd() == 8);
-    CHECK(editor.CustomCompositionUnderlines()[0].StartOffset == 3);
+    CHECK(editor.CustomCompositionUnderlines()[0].StartOffset == 0);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: composing text in a text field",

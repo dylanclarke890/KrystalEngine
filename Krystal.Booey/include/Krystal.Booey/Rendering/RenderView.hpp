@@ -47,6 +47,7 @@ namespace krys::boo
     RenderCounterSet _countersNeedingUpdate;
     // Keyed by address: a box unregisters itself when it's destroyed or stops being a query container.
     HashSet<const RenderBox *> _containerQueryBoxes;
+    HashSet<const RenderBox *> _boxesWithScrollSnapPositions;
     // Keyed by address: a renderer unregisters itself when it's destroyed or stops being an anchor.
     HashSet<const RenderBoxModelObject *> _anchors;
     // Keyed by address: a box unregisters itself when it's destroyed or stops having position-try fallbacks.
@@ -190,6 +191,19 @@ namespace krys::boo
     KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;
     KRYS_NODISCARD FloatSize SizeForCSSDynamicViewportUnits() const noexcept;
     KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
+
+    void RegisterBoxWithScrollSnapPositions(const RenderBox &box) noexcept
+    {
+      _boxesWithScrollSnapPositions.insert(&box);
+    }
+    void UnregisterBoxWithScrollSnapPositions(const RenderBox &box) noexcept
+    {
+      _boxesWithScrollSnapPositions.erase(&box);
+    }
+    KRYS_NODISCARD const HashSet<const RenderBox *> &BoxesWithScrollSnapPositions() const noexcept
+    {
+      return _boxesWithScrollSnapPositions;
+    }
 
     void RegisterContainerQueryBox(const RenderBox &box) noexcept
     {

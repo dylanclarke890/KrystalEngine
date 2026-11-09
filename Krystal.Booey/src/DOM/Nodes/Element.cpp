@@ -68,10 +68,14 @@
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -111,7 +115,8 @@ namespace krys::boo::dom
   {
     ContainerNode::OnAdopt(oldDocument);
 
-    // FIXME: The rest of moving to a new document (didMoveToNewDocument), as it's needed.
+    // Intersection observers watching the element move to its new document. (Class names and IDs are folded
+    // for quirks mode as they're read, so there's nothing to refresh.)
     if (auto *observerData = IntersectionObserverDataIfExists())
     {
       auto &newDocument = NodeDocument();
@@ -144,6 +149,8 @@ namespace krys::boo::dom
                                                            state == CustomElementState::Custom
                                                              || state == CustomElementState::Uncustomized);
     _customElementState = state;
+    // Whether it's a listed element can depend on it.
+    InvalidateLiveCollectionCachesInAncestors();
   }
 
   html::CustomElement *Element::GetCustomElement() const noexcept
@@ -234,6 +241,54 @@ namespace krys::boo::dom
   void Element::SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept
   {
     _customElementRegistry = krys::move(registry);
+  }
+
+  DOMString Element::AssignedAccessKey() const noexcept
+  {
+    // 1. If the element has no accesskey attribute, then skip to the fallback step below.
+    auto value = GetAttribute(u8"accesskey");
+    if (!value)
+    {
+      return {};
+    }
+
+    // 2. Otherwise, split the attribute's value on ASCII whitespace, and let keys be the resulting tokens.
+    // 3. For each value in keys in turn, in the order the tokens appeared in the attribute's value:
+    for (auto &key : infra::StringAlgorithms::SplitOnWhitespace(*value))
+    {
+      // 3.1. If the value is not a string exactly one code point in length, then skip the remainder of these
+      //      steps for this value.
+      auto isLeadByte = [](char8_t unit)
+      {
+        return (unit & 0xC0) != 0x80;
+      };
+      if (std::ranges::count_if(key, isLeadByte) != 1)
+      {
+        continue;
+      }
+      // 3.2. If the value does not correspond to a key on the system's keyboard, then skip the remainder of
+      //      these steps for this value.
+      // (Only the host knows the keyboard; a key that isn't on it just never matches.)
+      // 3.3. If the user agent can find a mix of zero or more modifier keys that, combined with the key that
+      //      corresponds to the value given in the attribute, can be used as the access key, then the user
+      //      agent may assign that combination of keys as the element's assigned access key and return.
+      return key;
+    }
+
+    // 4. Fallback: Optionally, the user agent may assign a key combination of its choosing as the element's
+    //    assigned access key and then return.
+    // 5. If this step is reached, the element has no assigned access key.
+    return {};
+  }
+
+  bool Element::AccessKeyAction(bool) noexcept
+  {
+    // NOTE: or its focus delegate, such as a date input's first field.
+    if (html::FocusAlgorithms::IsFocusableArea(*this) || html::FocusAlgorithms::GetFocusableArea(*this))
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Focus(*this);
+    }
+    return false;
   }
 
   bool Element::ShouldUseInputMethod() noexcept
@@ -655,12 +710,21 @@ namespace krys::boo::dom
 
   void Element::DispatchFocusEvent(EventTarget *relatedTarget, const FocusOptions &) noexcept
   {
-    html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"focus"), *this, relatedTarget);
+    // While the document's window doesn't have system focus, the focus moves without events, as in Chrome:
+    // the element gets them when the window gets system focus (FocusAlgorithms::SystemFocusChanged).
+    if (NodeDocument().IsFocusedAndActive())
+    {
+      html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"focus"), *this, relatedTarget);
+    }
   }
 
   void Element::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
   {
-    html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"blur"), *this, relatedTarget);
+    // (See DispatchFocusEvent: the element had its blur when the window lost system focus.)
+    if (NodeDocument().IsFocusedAndActive())
+    {
+      html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"blur"), *this, relatedTarget);
+    }
   }
 
   void Element::FindTargetAndUpdateFocusAppearance(SelectionRestorationMode restorationMode,
@@ -993,9 +1057,34 @@ namespace krys::boo::dom
           return ShouldIgnoreMouseEvent::No;
         }
 
+        // https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
+        // The user agent MUST dispatch the pointerrawupdate event before the corresponding pointermove.
+        bool isMove = mouseEvent.Type() == EventNames::MouseMove;
+        if (isMove)
+        {
+          pointerCaptureController.DispatchPointerRawUpdateForMouseEvent(
+            mouseEvent, platformEvent.PointerId(), platformEvent.PointerType(), element);
+        }
+
+        if (pointerCaptureController.SkipPointerMoveForMouseEvent(mouseEvent, platformEvent.PointerId(),
+                                                                  platformEvent.PointerType(), element))
+        {
+          return pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
+                   platformEvent.PointerId())
+                   ? ShouldIgnoreMouseEvent::Yes
+                   : ShouldIgnoreMouseEvent::No;
+        }
+
         if (auto pointerEvent = pointerCaptureController.PointerEventForMouseEvent(
               mouseEvent, platformEvent.PointerId(), platformEvent.PointerType()))
         {
+          // A chorded button's press or release is a pointermove.
+          if (!isMove && pointerEvent->Type() == EventNames::PointerMove)
+          {
+            pointerCaptureController.DispatchPointerRawUpdateForMouseEvent(
+              mouseEvent, platformEvent.PointerId(), platformEvent.PointerType(), element);
+          }
+
           pointerCaptureController.DispatchEvent(*pointerEvent, &element);
           if (IsCompatibilityMouseEvent(mouseEvent)
               && pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
@@ -1082,9 +1171,10 @@ namespace krys::boo::dom
       // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
       Ref<MouseEvent> doubleClickEvent = MouseEvent::Create(
         DOMStringAtom(EventNames::DblClick), mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
-        html::EventLoop::Current().Now(), mouseEvent->View(), mouseEvent->Detail(), mouseEvent->ScreenX(),
-        mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(), mouseEvent->ModifierKeys(),
-        mouseEvent->ButtonType(), mouseEvent->Buttons(), mouseEvent->GetSyntheticClickType(), relatedTarget);
+        html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
+        mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(),
+        mouseEvent->ModifierKeys(), mouseEvent->ButtonType(), mouseEvent->Buttons(),
+        mouseEvent->GetSyntheticClickType(), relatedTarget);
 
       if (mouseEvent->DefaultHandled())
       {
@@ -2515,10 +2605,11 @@ namespace krys::boo::dom
                              krys::move(options.ShadowRoots));
   }
 
-  DOMString Element::InnerHTML() const noexcept
+  ExceptionOr<DOMString> Element::InnerHTML() const noexcept
   {
-    return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy);
+    // The innerHTML getter steps are to return the result of running fragment serializing algorithm steps
+    // with this and true.
+    return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreesOfChildren);
   }
 
   ExceptionOr<void> Element::InnerHTML(DOMStringView markup) noexcept
@@ -2527,10 +2618,11 @@ namespace krys::boo::dom
     return ReplaceChildrenWithMarkup(markup, {});
   }
 
-  DOMString Element::OuterHTML() const noexcept
+  ExceptionOr<DOMString> Element::OuterHTML() const noexcept
   {
-    return SerializeFragment(*this, SerializedNodes::SubtreeIncludingNode, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy);
+    // 1. Let element be a fictional node whose only child is this.
+    // 2. Return the result of running fragment serializing algorithm steps with element and true.
+    return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreeIncludingNode);
   }
 
   ExceptionOr<void> Element::OuterHTML(DOMStringView markup) noexcept
@@ -2876,11 +2968,22 @@ namespace krys::boo::dom
     // 1. If localName is id, namespace is null, and value is null or the empty string, then unset element's
     //    ID.
     // 2. Otherwise, if localName is id, namespace is null, then set element's ID to value.
-    // The ID is read from the attribute (an empty one is no ID), so only the ID's observers need telling.
+    // The ID is read from the attribute (an empty one is no ID), so only the tree scope and the ID's
+    // observers need telling.
     if (localName == u8"id")
     {
       if (oldValue != value && (IsConnected() || IsInShadowTree()))
       {
+        auto &scope = TreeScope();
+        if (oldValue && !oldValue->empty())
+        {
+          scope.RemoveElementById(DOMStringAtom(*oldValue), *this);
+        }
+        if (value && !value->empty())
+        {
+          scope.AddElementById(DOMStringAtom(*value), *this);
+        }
+
         auto &registry = TreeScope().IdTargetObserverRegistry();
         if (oldValue && !oldValue->empty())
         {
@@ -2981,8 +3084,6 @@ namespace krys::boo::dom
         return;
       }
 
-      // FIXME: The layers of the renderer's continuations (forRendererAndContinuations), once there are
-      // continuations.
       if (layerModelObject->HasLayer())
       {
         function(*layerModelObject->Layer());
@@ -3586,6 +3687,14 @@ namespace krys::boo::dom
       return element.Renderer() && element.Renderer()->IsRenderBoxModelObject();
     }
 
+    /// @brief What a legend adds to a fieldset's border. It's left out of the client box, which script sees
+    /// as inside the border that's specified, as in other browsers.
+    KRYS_NODISCARD LayoutUnit IntrinsicBorderForFieldsetOf(const RenderBox &renderer) noexcept
+    {
+      auto *block = DynamicDowncast<RenderBlock>(renderer);
+      return block ? block->IntrinsicBorderForFieldset() : LayoutUnit {};
+    }
+
     KRYS_NODISCARD RenderBox *RenderBoxOf(const Element &element) noexcept
     {
       return DynamicDowncast<RenderBox>(element.Renderer());
@@ -3648,7 +3757,28 @@ namespace krys::boo::dom
       return null;
     }
 
-    return Pair<RenderElement *, FloatRect> {renderer, UnitedBoundingBoxes(quads)};
+    // The union of the rects that have an area, or else the first.
+    // https://drafts.csswg.org/cssom-view/#dom-element-getboundingclientrect
+    FloatRect bounds;
+    bool hasArea = false;
+    for (const auto &quad : quads)
+    {
+      auto box = quad.BoundingBox();
+      if (box.IsEmpty())
+      {
+        continue;
+      }
+      if (hasArea)
+      {
+        bounds.Unite(box);
+      }
+      else
+      {
+        bounds = box;
+        hasArea = true;
+      }
+    }
+    return Pair<RenderElement *, FloatRect> {renderer, hasArea ? bounds : quads.front().BoundingBox()};
   }
 
   FloatRect Element::BoundingClientRect() noexcept
@@ -3729,8 +3859,7 @@ namespace krys::boo::dom
     auto scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(options, 0, 0);
     *scrollToOptions.Left += ScrollLeft();
     *scrollToOptions.Top += ScrollTop();
-    // FIXME: Directional scroll snapping with the original delta, once there's scroll snapping.
-    ScrollTo(scrollToOptions);
+    ScrollTo(scrollToOptions, ScrollSnapPointSelectionMethod::Directional);
   }
 
   void Element::ScrollBy(double x, double y) noexcept
@@ -3739,6 +3868,12 @@ namespace krys::boo::dom
   }
 
   void Element::ScrollTo(const ScrollToOptions &options) noexcept
+  {
+    ScrollTo(options, ScrollSnapPointSelectionMethod::Closest);
+  }
+
+  void Element::ScrollTo(const ScrollToOptions &options,
+                         ScrollSnapPointSelectionMethod snapPointSelectionMethod) noexcept
   {
     auto &document = NodeDocument();
 
@@ -3763,8 +3898,14 @@ namespace krys::boo::dom
         return false;
       }
 
-      // FIXME: Elements that have ever been smooth-scrolled (hasEverHadSmoothScroll), once there's smooth
-      // scrolling.
+      // A smooth scroll has to be stopped.
+      auto *box = RenderBoxOf(*this);
+      auto *scrollableArea = box && box->Layer() ? box->Layer()->GetScrollableArea() : nullptr;
+      if (scrollableArea && scrollableArea->GetScrollAnimationStatus() == ScrollAnimationStatus::Animating)
+      {
+        return false;
+      }
+
       return SavedLayerScrollPosition().IsZero();
     };
 
@@ -3781,7 +3922,7 @@ namespace krys::boo::dom
       // invoke scroll() on window with options as the only argument, and terminate these steps.
       if (auto *window = document.Window())
       {
-        window->ScrollTo(options);
+        window->ScrollTo(options, snapPointSelectionMethod);
       }
       return;
     }
@@ -3800,6 +3941,11 @@ namespace krys::boo::dom
       {
         return renderTextControlSingleLine->InnerTextElementHasNonVisibleOverflow();
       }
+      // A list box scrolls its items itself, as Chrome's does, where WebKit's doesn't scroll for scrollTo().
+      if (Is<RenderListBox>(*renderer))
+      {
+        return true;
+      }
       return renderer->HasNonVisibleOverflow();
     };
     if (!rendererCanScroll())
@@ -3813,8 +3959,11 @@ namespace krys::boo::dom
     IntPoint scrollPosition(ClampToInteger(*scrollToOptions.Left * renderer->Style().UsedZoom()),
                             ClampToInteger(*scrollToOptions.Top * renderer->Style().UsedZoom()));
 
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
-    renderer->SetScrollPosition(scrollPosition, ScrollPositionChangeOptions::CreateProgrammatic());
+    auto animated = UseSmoothScrolling(scrollToOptions.Behavior.value_or(ScrollBehavior::Auto), this)
+                      ? ScrollIsAnimated::Yes
+                      : ScrollIsAnimated::No;
+    renderer->SetScrollPosition(scrollPosition, ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
+                                                  animated, snapPointSelectionMethod));
   }
 
   void Element::ScrollTo(double x, double y) noexcept
@@ -3948,6 +4097,10 @@ namespace krys::boo::dom
     {
       // The left border, and a vertical scrollbar placed between it and the padding.
       auto clientLeft = LayoutUnit(RoundToInt(renderer->ClientLeft()));
+      if (renderer->GetWritingMode().IsBlockLeftToRight())
+      {
+        clientLeft -= IntrinsicBorderForFieldsetOf(*renderer);
+      }
       if (renderer->Style().ShouldPlaceVerticalScrollbarOnLeft())
       {
         clientLeft += renderer->VerticalScrollbarWidth();
@@ -3967,6 +4120,10 @@ namespace krys::boo::dom
     if (auto *renderer = RenderBoxOf(*this))
     {
       auto clientTop = LayoutUnit(RoundToInt(renderer->ClientTop()));
+      if (renderer->GetWritingMode().IsBlockTopToBottom())
+      {
+        clientTop -= IntrinsicBorderForFieldsetOf(*renderer);
+      }
       return ConvertToNonSubpixelValue(
         AdjustLayoutUnitForAbsoluteZoom(clientTop, renderer->Style()).ToDouble());
     }
@@ -4000,6 +4157,10 @@ namespace krys::boo::dom
     if (auto *renderer = RenderBoxOf(*this))
     {
       auto clientWidth = LayoutUnit(RoundToInt(renderer->ClientWidth()));
+      if (!renderer->GetWritingMode().IsHorizontal())
+      {
+        clientWidth += IntrinsicBorderForFieldsetOf(*renderer);
+      }
       // clientWidth/Height is the visual portion of the box content, not including
       // borders or scroll bars, but includes padding. And per
       // https://www.w3.org/TR/CSS2/tables.html#model,
@@ -4051,6 +4212,10 @@ namespace krys::boo::dom
     if (auto *renderer = RenderBoxOf(*this))
     {
       auto clientHeight = LayoutUnit(RoundToInt(renderer->ClientHeight()));
+      if (renderer->GetWritingMode().IsHorizontal())
+      {
+        clientHeight += IntrinsicBorderForFieldsetOf(*renderer);
+      }
       // See ClientWidth() for why the table's padding and borders are added.
       if (renderer->IsRenderTable())
       {
@@ -4119,8 +4284,8 @@ namespace krys::boo::dom
                                                    LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
-    auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+    auto options = ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
+      UseSmoothScrolling(ScrollBehavior::Auto, this) ? ScrollIsAnimated::Yes : ScrollIsAnimated::No);
 
     if (document.ScrollingElement() == this)
     {
@@ -4149,8 +4314,8 @@ namespace krys::boo::dom
                                                    LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
-    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
-    auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+    auto options = ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
+      UseSmoothScrolling(ScrollBehavior::Auto, this) ? ScrollIsAnimated::Yes : ScrollIsAnimated::No);
 
     if (document.ScrollingElement() == this)
     {

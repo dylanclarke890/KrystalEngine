@@ -99,15 +99,14 @@ namespace krys::boo
         return dom::Exception {dom::ExceptionCode::TypeError};
       }
 
-      if (RefPtr insetPair = ShareRefPtr(DynamicDowncast<css::ValuePair>(consumedInset.get())))
+      if (RefPtr insetPair = DynamicDowncast<css::ValuePair>(consumedInset))
       {
         return SpecifiedViewTimelineInsets {
           ShareRefPtr(DynamicDowncast<css::PrimitiveValue>(insetPair->First())),
           ShareRefPtr(DynamicDowncast<css::PrimitiveValue>(insetPair->Second())),
         };
       }
-      return SpecifiedViewTimelineInsets {
-        ShareRefPtr(DynamicDowncast<css::PrimitiveValue>(consumedInset.get())), nullptr};
+      return SpecifiedViewTimelineInsets {DynamicDowncast<css::PrimitiveValue>(consumedInset), nullptr};
     }
 
     auto cssPrimitiveValueForCSSNumericValue =
@@ -116,7 +115,7 @@ namespace krys::boo
       if (const auto *insetValue = DynamicDowncast<css::CSSUnitValue>(numericValue.get()))
       {
         auto cssValue = insetValue->ToCSSValue();
-        return ShareRefPtr(DynamicDowncast<css::PrimitiveValue>(cssValue.get()));
+        return DynamicDowncast<css::PrimitiveValue>(krys::move(cssValue));
       }
       return RefPtr<css::PrimitiveValue> {};
     };

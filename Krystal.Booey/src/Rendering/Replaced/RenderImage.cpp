@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -21,6 +22,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -548,8 +550,8 @@ namespace krys::boo
   void RenderImage::PaintReplaced(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
     GraphicsContext &context = paintInfo.Context();
-    // FIXME: Invalidating images with asynchronous decodes and detecting contentful paint, once there are
-    // asynchronous decodes and paint milestones.
+    // FIXME: Invalidating images with asynchronous decodes for a host's snapshot, and detecting contentful
+    // paint, once there are snapshots and paint milestones.
 
     auto contentSize = ContentBoxSize();
     float deviceScaleFactor = GetDocument().DeviceScaleFactor();
@@ -591,10 +593,16 @@ namespace krys::boo
           auto &fontMetrics = fontCascade.MetricsOfPrimaryFont();
           auto isHorizontal = GetWritingMode().IsHorizontal();
           // FIXME: The display string modified by the document's encoding.
-          // FIXME: With dir=auto, the directionality of the alt attribute: its first strong character's.
           auto textRun = RenderBlock::ConstructTextRun(
             _altText, style, ExpansionBehavior::DefaultBehavior(),
             {TextRunFlag::RespectDirection, TextRunFlag::RespectDirectionOverride});
+          // With dir=auto, the text has the directionality of its attribute: its first strong character's, or
+          // ltr. https://html.spec.whatwg.org/#directionality-of-the-attribute
+          if (auto *element = GetElement();
+              _altTextIsFromAttribute && element && element->HasAutoTextDirectionState())
+          {
+            textRun.SetDirection(DefaultWritingDirection(_altText).value_or(TextDirection::LTR));
+          }
           auto textWidth = LayoutUnit {fontCascade.Width(textRun)};
 
           auto hasRoomForAltText = [&]
@@ -701,16 +709,24 @@ namespace krys::boo
     // FIXME: Document when image != img.get().
     RefPtr image = ImageResource().GetImage();
 
-    // FIXME: The decoding mode, subsampling, debug backgrounds and HDR options, once they exist.
+    // FIXME: The subsampling, debug backgrounds and HDR options, once they exist.
     ImagePaintingOptions options = {
-      CompositeOperator::SourceOver, GetImageOrientation(),
+      CompositeOperator::SourceOver,
+      image ? DecodingModeForImageDraw(*image, paintInfo) : DecodingMode::Synchronous, GetImageOrientation(),
       image ? ChooseInterpolationQuality(paintInfo.Context(), *image, image.get(), LayoutSize(rect.Size()))
             : InterpolationQuality::Default};
 
     auto drawResult = paintInfo.Context().DrawImage(*img, rect, options);
 
-    // FIXME: Wait for asynchronous decoding (addClientWaitingForAsyncDecoding), and remember that the element
-    // painted images (setHasEverPaintedImages), once there are asynchronous decodes.
+    if (drawResult == ImageDrawResult::DidRequestDecoding)
+    {
+      ImageResource().GetCachedImage()->AddClientWaitingForAsyncDecoding(GetCachedImageClient());
+    }
+
+    if (GetElement() && !paintInfo.Context().PaintingDisabled())
+    {
+      GetElement()->SetHasEverPaintedImages(true);
+    }
 
     return drawResult;
   }
@@ -718,6 +734,16 @@ namespace krys::boo
   LayoutUnit RenderImage::MinimumReplacedHeight() const noexcept
   {
     return ImageResource().ErrorOccurred() ? IntrinsicSize().Height() : 0_lu;
+  }
+
+  void RenderImage::UpdateForAltText() noexcept
+  {
+    UpdateAltText();
+    if (GetCachedImage() && !ImageResource().ErrorOccurred())
+    {
+      return;
+    }
+    RepaintOrMarkForLayout(SetImageSizeForAltText(GetCachedImage()));
   }
 
   void RenderImage::UpdateAltText() noexcept
@@ -728,14 +754,19 @@ namespace krys::boo
     }
 
     Maybe<utf8_string> altText;
-    // FIXME: <input type=image>'s alt text, once it has a renderer.
     if (auto *image = DynamicDowncast<html::HTMLImageElement>(*GetElement()))
     {
       altText = image->AltText();
     }
+    else if (auto *input = DynamicDowncast<html::HTMLInputElement>(*GetElement());
+             input && input->IsImageButton())
+    {
+      altText = input->AltText();
+    }
 
     // We check for null and not empty because we don't want to override empty-string
     // alt text provided by either of the above branches.
+    _altTextIsFromAttribute = altText.has_value();
     _altText = altText ? krys::move(*altText) : utf8_string(Style().AltFromContent());
   }
 

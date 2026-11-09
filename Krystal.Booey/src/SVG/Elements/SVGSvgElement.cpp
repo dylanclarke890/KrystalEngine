@@ -714,7 +714,7 @@ namespace krys::boo::svg
 
         if (rootElement->_currentViewElement.get() != viewElement.get())
         {
-          rootElement->_currentViewElement = WeakPtr<SVGViewElement>::WithRef(*viewElement);
+          rootElement->_currentViewElement = CreateWeakPtr(viewElement.get());
           viewElement->SetTargetElement(*rootElement);
         }
 

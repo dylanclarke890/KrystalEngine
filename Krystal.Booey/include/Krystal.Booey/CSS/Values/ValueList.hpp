@@ -119,7 +119,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD RefPtr<const Value> ProtectedItem(uint32 index) const noexcept
     {
-      return RefPtr<const Value>::WithRef(Item(index));
+      return ShareRefPtr(Item(index));
     }
 
     KRYS_NODISCARD const Value *ItemWithoutBoundsCheck(uint32 index) const noexcept KRYS_LIFETIME_BOUND

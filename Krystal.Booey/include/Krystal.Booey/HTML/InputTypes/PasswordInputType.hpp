@@ -5,14 +5,18 @@
 
 namespace krys::boo::html
 {
-  /// @brief The password input type.
-  // FIXME: The caps lock indicator.
+  /// @brief The password input type. There's no caps lock indicator, as in Chrome.
   class PasswordInputType final : public BaseTextInputType
   {
   public:
     explicit PasswordInputType(HTMLInputElement &element) noexcept
         : BaseTextInputType(Type::Password, element)
     {
+    }
+
+    KRYS_NODISCARD bool ShouldRespectListAttribute() const noexcept final
+    {
+      return false;
     }
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final

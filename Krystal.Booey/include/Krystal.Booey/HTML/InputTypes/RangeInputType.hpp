@@ -8,12 +8,21 @@ namespace krys::boo::html
   class SliderThumbElement;
 
   /// @brief The range input type: a slider, with a track and a thumb in its shadow tree.
-  // FIXME: Tick marks for a data list's suggestions, with datalists.
   class RangeInputType final : public InputType
   {
+  private:
+    /// @brief The valid values of the datalist's options, sorted; recomputed when the datalist changes.
+    List<Decimal> _tickMarkValues;
+    bool _tickMarkValuesDirty {true};
+
   public:
     explicit RangeInputType(HTMLInputElement &element) noexcept : InputType(Type::Range, element)
     {
+    }
+
+    KRYS_NODISCARD bool ShouldRespectListAttribute() const noexcept final
+    {
+      return true;
     }
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
@@ -43,8 +52,11 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLElement *SliderThumbElement() const noexcept final;
     KRYS_NODISCARD HTMLElement *SliderTrackElement() const noexcept final;
     KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept final;
+    void DataListMayHaveChanged() noexcept final;
+    KRYS_NODISCARD Maybe<Decimal> FindClosestTickMarkValue(const Decimal &value) noexcept final;
 
   private:
+    void UpdateTickMarkValues() noexcept;
     KRYS_NODISCARD html::SliderThumbElement &TypedSliderThumbElement() const noexcept;
   };
 }

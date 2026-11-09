@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -7,6 +8,8 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
@@ -23,6 +26,9 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -57,6 +63,53 @@ namespace krys::boo::dom
     }
   }
 
+  void Node::InvalidateLiveCollectionCaches() noexcept
+  {
+    if (_nodeRareData)
+    {
+      _nodeRareData->InvalidateLiveCollectionCaches();
+    }
+  }
+
+  void Node::InvalidateLiveCollectionCachesInAncestors() noexcept
+  {
+    if (auto &document = NodeDocument(); document.HasLiveCollectionCaches())
+    {
+      for (auto *node = this; node; node = node->ParentNode())
+      {
+        node->InvalidateLiveCollectionCaches();
+      }
+      document.InvalidateOwnerTreeLiveCollectionCaches();
+    }
+  }
+
+  void Node::InvalidateLiveCollectionCachesForChildChange(const Node &child) noexcept
+  {
+    if (Is<Element>(child))
+    {
+      InvalidateLiveCollectionCachesInAncestors();
+    }
+    else if (_nodeRareData)
+    {
+      _nodeRareData->InvalidateChildNodeListCache();
+    }
+  }
+
+  void Node::InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept
+  {
+    if (auto &document = NodeDocument(); document.HasLiveCollectionCachesForAttribute(localName))
+    {
+      for (auto *node = this; node; node = node->ParentNode())
+      {
+        if (node->_nodeRareData)
+        {
+          node->_nodeRareData->InvalidateLiveCollectionCachesForAttribute(localName);
+        }
+      }
+      document.InvalidateOwnerTreeLiveCollectionCachesForAttribute(localName);
+    }
+  }
+
   void Node::SetNodeDocument(Document &document) noexcept
   {
     krys_debug_assert(!IsDocumentNode());
@@ -64,19 +117,28 @@ namespace krys::boo::dom
     {
       return;
     }
+    // The old document counts them.
+    InvalidateLiveCollectionCaches();
     // The new document is counted first: dropping the old one's count may delete it.
     document.IncrementReferencingNodeCount();
     std::exchange(_nodeDocument, &document)->DecrementReferencingNodeCount();
+    for (const auto &listener : EventListeners())
+    {
+      document.AddListenerTypeIfNeeded(listener->Type());
+    }
+  }
+
+  void Node::DidAddEventListener(const EventListener &listener) noexcept
+  {
+    EventTarget::DidAddEventListener(listener);
+    NodeDocument().AddListenerTypeIfNeeded(listener.Type());
   }
 
   DocumentOrShadowRoot &Node::TreeScope() const noexcept
   {
-    if (IsInShadowTree())
+    if (_containingShadowRoot)
     {
-      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(const_cast<Node &>(*this))))
-      {
-        return *shadowRoot;
-      }
+      return *_containingShadowRoot;
     }
     return NodeDocument();
   }
@@ -174,6 +236,20 @@ namespace krys::boo::dom
   Ref<NodeList> Node::ChildNodes() noexcept
   {
     return EnsureNodeRareData().ChildNodes(*this);
+  }
+
+  bool Node::HasEverPaintedImages() const noexcept
+  {
+    return _nodeRareData && _nodeRareData->HasEverPaintedImages();
+  }
+
+  void Node::SetHasEverPaintedImages(bool hasEverPaintedImages) noexcept
+  {
+    if (!hasEverPaintedImages && !_nodeRareData)
+    {
+      return;
+    }
+    EnsureNodeRareData().SetHasEverPaintedImages(hasEverPaintedImages);
   }
 
   NodeRareData &Node::EnsureNodeRareData() noexcept
@@ -753,7 +829,6 @@ namespace krys::boo::dom
         return Node::Editability::ReadOnly;
       }
 
-      // FIXME: A page that's editable as a whole (`Page::isEditable`).
       switch (style.UsedUserModify())
       {
         case UserModify::ReadOnly:               return Node::Editability::ReadOnly;
@@ -847,6 +922,43 @@ namespace krys::boo::dom
       }
     }
     return result;
+  }
+
+  void Node::DefaultEventHandler(Event &event) noexcept
+  {
+    // A middle button press pans the nearest box that can scroll, unless it's on a link.
+    if (event.Type() != EventNames::MouseDown)
+    {
+      return;
+    }
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
+    if (!mouseEvent || mouseEvent->Button() != static_cast<int16>(MouseButton::Middle))
+    {
+      return;
+    }
+
+    // From the target: this runs on the nodes above the link too.
+    auto target = event.Target();
+    for (auto *node = DynamicDowncast<Node>(target.get()); node; node = node->ParentOrShadowHostNode())
+    {
+      if (auto *element = DynamicDowncast<Element>(*node); element && css::IsLink(*element))
+      {
+        return;
+      }
+    }
+
+    for (auto *renderer = Renderer(); renderer; renderer = renderer->Parent())
+    {
+      auto *renderBox = DynamicDowncast<RenderBox>(*renderer);
+      if (renderBox && renderBox->CanBeScrolledAndHasScrollableArea())
+      {
+        if (auto *frame = NodeDocument().Frame())
+        {
+          frame->GetEventHandler().StartPanScrolling(*renderBox);
+        }
+        break;
+      }
+    }
   }
 
   bool Node::CanStartSelection() const noexcept

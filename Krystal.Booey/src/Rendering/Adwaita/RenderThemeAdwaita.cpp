@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/Adwaita/RenderThemeAdwaita.hpp"
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Adwaita/Adwaita.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/ThemeAdwaita.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -269,12 +272,15 @@ namespace krys::boo
     };
   }
 
-  MonotonicTime::duration
-    RenderThemeAdwaita::AnimationRepeatIntervalForProgressBar(const RenderProgress &) const noexcept
+  MonotonicTime::duration RenderThemeAdwaita::AnimationRepeatIntervalForProgressBar(
+    const RenderProgress &renderProgress) const noexcept
   {
-    // FIXME: The page's preferred rendering update interval (Page::preferredRenderingUpdateInterval), with
-    // RenderProgress (G14d2).
-    return std::chrono::milliseconds(16);
+    if (auto *page = renderProgress.GetDocument().GetPage())
+    {
+      return page->PreferredRenderingUpdateInterval();
+    }
+    return std::chrono::duration_cast<MonotonicTime::duration>(
+      std::chrono::duration<double>(1.0 / Page::FullSpeedFramesPerSecond));
   }
 
   IntRect RenderThemeAdwaita::ProgressBarRectForBounds(const RenderProgress &,
@@ -297,6 +303,12 @@ namespace krys::boo
 
     style.SetWidth(style::PreferredSize::Fixed {static_cast<float>(SliderThumbSize)});
     style.SetHeight(style::PreferredSize::Fixed {static_cast<float>(SliderThumbSize)});
+  }
+
+  LayoutUnit RenderThemeAdwaita::SliderTickSnappingThreshold() const noexcept
+  {
+    // As in Chrome: a thumb dragged within 5 pixels of a tick snaps to it.
+    return LayoutUnit(5);
   }
 
   IntSize RenderThemeAdwaita::SliderTickSize() const noexcept

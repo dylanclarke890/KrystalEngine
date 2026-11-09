@@ -1,65 +1,66 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/BaseTextInputType.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include <regex>
-#include <string>
+#include <unicode/uregex.h>
+#include <unicode/utext.h>
 
 namespace krys::boo::html
 {
   namespace
   {
-    /// @brief @p text as UTF-16, as script regular expressions match it.
-    KRYS_NODISCARD std::wstring ToUTF16(dom::DOMStringView text) noexcept
+    /// @brief A pattern attribute compiled as an ICU regular expression, matched against whole values.
+    class CompiledPattern
     {
-      std::wstring result;
-      for (size_t i = 0; i < text.size();)
-      {
-        auto byte = static_cast<uint8>(text[i]);
-        char32_t codePoint = byte;
-        size_t length = 1;
-        if (byte >= 0xF0 && i + 3 < text.size() + 0)
-        {
-          codePoint = ((byte & 0x07) << 18) | ((text[i + 1] & 0x3F) << 12) | ((text[i + 2] & 0x3F) << 6)
-                      | (text[i + 3] & 0x3F);
-          length = 4;
-        }
-        else if (byte >= 0xE0 && i + 2 < text.size())
-        {
-          codePoint = ((byte & 0x0F) << 12) | ((text[i + 1] & 0x3F) << 6) | (text[i + 2] & 0x3F);
-          length = 3;
-        }
-        else if (byte >= 0xC0 && i + 1 < text.size())
-        {
-          codePoint = ((byte & 0x1F) << 6) | (text[i + 1] & 0x3F);
-          length = 2;
-        }
-        if (codePoint >= 0x10000)
-        {
-          codePoint -= 0x10000;
-          result += static_cast<wchar_t>(0xD800 + (codePoint >> 10));
-          result += static_cast<wchar_t>(0xDC00 + (codePoint & 0x3FF));
-        }
-        else
-        {
-          result += static_cast<wchar_t>(codePoint);
-        }
-        i += length;
-      }
-      return result;
-    }
+      KRYS_NON_COPY_MOVABLE(CompiledPattern);
 
-    /// @brief The pattern as a whole-value regular expression, or null if it isn't valid.
-    KRYS_NODISCARD Maybe<std::wregex> CompilePattern(dom::DOMStringView rawPattern) noexcept
-    {
-      try
+    private:
+      URegularExpression *_regex {nullptr};
+
+    public:
+      explicit CompiledPattern(dom::DOMStringView rawPattern) noexcept
       {
-        return std::wregex(L"^(?:" + ToUTF16(rawPattern) + L")$", std::regex_constants::ECMAScript);
+        UErrorCode status = U_ZERO_ERROR;
+        UText pattern = UTEXT_INITIALIZER;
+        utext_openUTF8(&pattern, reinterpret_cast<const char *>(rawPattern.data()),
+                       static_cast<int64_t>(rawPattern.size()), &status);
+        // Like the `v` flag, unknown escapes are errors.
+        _regex = uregex_openUText(&pattern, UREGEX_ERROR_ON_UNKNOWN_ESCAPES, nullptr, &status);
+        utext_close(&pattern);
+        if (U_FAILURE(status) && _regex)
+        {
+          uregex_close(_regex);
+          _regex = nullptr;
+        }
       }
-      catch (const std::regex_error &)
+
+      ~CompiledPattern() noexcept
       {
-        return std::nullopt;
+        if (_regex)
+        {
+          uregex_close(_regex);
+        }
       }
-    }
+
+      /// @brief Whether the pattern compiled.
+      KRYS_NODISCARD bool IsValid() const noexcept
+      {
+        return _regex;
+      }
+
+      /// @brief Whether the pattern matches the whole of @p value (as if anchored with `^(?:` and `)$`).
+      KRYS_NODISCARD bool Matches(dom::DOMStringView value) const noexcept
+      {
+        krys_debug_assert(_regex);
+        UErrorCode status = U_ZERO_ERROR;
+        UText text = UTEXT_INITIALIZER;
+        utext_openUTF8(&text, reinterpret_cast<const char *>(value.data()),
+                       static_cast<int64_t>(value.size()), &status);
+        uregex_setUText(_regex, &text, &status);
+        bool matches = uregex_matches64(_regex, -1, &status);
+        utext_close(&text);
+        return U_SUCCESS(status) && matches;
+      }
+    };
   }
 
   bool BaseTextInputType::PatternMismatch(dom::DOMStringView value) const noexcept
@@ -72,15 +73,15 @@ namespace krys::boo::html
       return false;
     }
 
-    auto regex = CompilePattern(*rawPattern);
-    if (!regex)
+    CompiledPattern pattern(*rawPattern);
+    if (!pattern.IsValid())
     {
       return false;
     }
 
     auto valuePatternMismatch = [&](dom::DOMStringView value)
     {
-      return !std::regex_match(ToUTF16(value), *regex);
+      return !pattern.Matches(value);
     };
 
     if (IsEmailField() && element.Multiple())

@@ -216,8 +216,8 @@ namespace krys::boo::dom::tests
 
     SECTION("an event for a pointer's capture")
     {
-      auto event = PointerEvent::CreateForPointerCapture(DOMStringAtom(u8"gotpointercapture"), 3, true,
-                                                         TouchPointerEventType());
+      auto event = PointerEvent::CreateForPointerCapture(
+        DOMStringAtom(u8"gotpointercapture"), fixture.Document->Window(), 3, true, TouchPointerEventType());
       CHECK(event->IsTrusted());
       CHECK(event->Bubbles());
       CHECK(event->Composed());
@@ -229,14 +229,15 @@ namespace krys::boo::dom::tests
 
     SECTION("an event with no position")
     {
-      auto cancel = PointerEvent::Create(DOMStringAtom(u8"pointercancel"), 4, TouchPointerEventType(),
-                                         PointerEvent::IsPrimary::Yes);
+      auto cancel = PointerEvent::Create(DOMStringAtom(u8"pointercancel"), fixture.Document->Window(), 4,
+                                         TouchPointerEventType(), PointerEvent::IsPrimary::Yes);
       CHECK(cancel->IsTrusted());
       CHECK(cancel->Bubbles());
       CHECK(cancel->Buttons() == 0);
       CHECK(cancel->Pressure() == 0);
       CHECK(cancel->GetIsPrimary());
-      auto leave = PointerEvent::Create(DOMStringAtom(u8"pointerleave"), 4, TouchPointerEventType());
+      auto leave = PointerEvent::Create(DOMStringAtom(u8"pointerleave"), fixture.Document->Window(), 4,
+                                        TouchPointerEventType());
       CHECK_FALSE(leave->Bubbles());
       CHECK_FALSE(leave->GetIsPrimary());
     }

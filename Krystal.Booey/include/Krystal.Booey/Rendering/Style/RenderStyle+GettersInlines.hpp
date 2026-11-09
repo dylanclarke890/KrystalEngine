@@ -590,7 +590,8 @@ namespace krys::boo
 
   inline bool RenderStyle::HasUsedAppearance() const noexcept
   {
-    return UsedAppearance() != StyleAppearance::None && UsedAppearance() != StyleAppearance::Base;
+    return UsedAppearance() != StyleAppearance::None && UsedAppearance() != StyleAppearance::Base
+           && UsedAppearance() != StyleAppearance::BaseSelect;
   }
 
   inline bool RenderStyle::HasUsedContentNone() const noexcept

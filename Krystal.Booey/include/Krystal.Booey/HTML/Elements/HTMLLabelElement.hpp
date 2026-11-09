@@ -31,6 +31,9 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#labeled-control
     KRYS_NODISCARD RefPtr<HTMLElement> Control() const noexcept;
 
+    /// @brief Runs the labeled control's access key action, if it has one.
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
+
     /// @see https://html.spec.whatwg.org/#dom-label-control
     KRYS_NODISCARD RefPtr<HTMLElement> ControlForBindings() const noexcept;
 

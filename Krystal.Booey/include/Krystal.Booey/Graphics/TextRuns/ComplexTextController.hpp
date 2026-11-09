@@ -42,7 +42,9 @@ namespace krys::boo
     SmallList<FloatPoint, 256> _glyphOrigins;
     SmallList<Glyph, 256> _adjustedGlyphs;
     SmallList<float, 256> _textAutoSpaceSpacings;
-    utf8_string _smallCapsBuffer;
+    /// @brief When small caps are synthesised, the capital to shape for the letter starting at each byte of
+    /// the run's text, or 0 to shape the text as written.
+    List<char32> _smallCapsCapitals;
 
     // There is a 3-level hierarchy here. At the top, we are interested in the run's text. We partition that
     // text into items, each of which is a sequence of characters which should use the same Font. Shaping then
@@ -291,8 +293,10 @@ namespace krys::boo
     }
 
     void CollectComplexTextRuns() noexcept;
+    /// @param capitals The capitals to shape in place of @p characters' letters, by byte (0 for the character
+    /// as written), or empty to shape @p characters as they are.
     void CollectComplexTextRunsForCharacters(utf8_stringview characters, uint32 stringLocation,
-                                             const Font *font) noexcept;
+                                             const Font *font, Span<const char32> capitals = {}) noexcept;
     void AdjustGlyphsAndAdvances() noexcept;
 
     KRYS_NODISCARD uint32 IndexOfCurrentRun(uint32 &leftmostGlyph) noexcept;

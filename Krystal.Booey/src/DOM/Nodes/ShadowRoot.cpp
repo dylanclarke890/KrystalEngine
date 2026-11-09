@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -26,6 +27,7 @@ namespace krys::boo::dom
         DocumentOrShadowRoot(*this, krys::move(registry))
   {
     SetNodeFlag(NodeFlags::IsInShadowTree);
+    _containingShadowRoot = this;
     _styleScope = CreateUnique<style::Scope>(*this);
   }
 
@@ -34,6 +36,12 @@ namespace krys::boo::dom
     if (_styleSheetList)
     {
       _styleSheetList->Detach();
+    }
+
+    // Children are detached without the removing steps, and something else may hold one.
+    for (auto &node : DescendantRange(*this))
+    {
+      node._containingShadowRoot = nullptr;
     }
   }
 
@@ -139,10 +147,11 @@ namespace krys::boo::dom
                              krys::move(options.ShadowRoots));
   }
 
-  DOMString ShadowRoot::InnerHTML() const noexcept
+  ExceptionOr<DOMString> ShadowRoot::InnerHTML() const noexcept
   {
-    return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy);
+    // The innerHTML getter steps are to return the result of running fragment serializing algorithm steps
+    // with this and true.
+    return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreesOfChildren);
   }
 
   ExceptionOr<void> ShadowRoot::InnerHTML(DOMStringView markup) noexcept

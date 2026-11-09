@@ -6,8 +6,7 @@
 
 namespace krys::boo
 {
-  FloatingObject::FloatingObject(RenderBox &renderer) noexcept
-      : _renderer(WeakPtr<RenderBox>::WithRef(renderer))
+  FloatingObject::FloatingObject(RenderBox &renderer) noexcept : _renderer(CreateWeakPtr(&renderer))
   {
     UsedFloat type = RenderStyle::GetUsedFloat(renderer);
     krys_debug_assert(type != UsedFloat::None);
@@ -29,8 +28,8 @@ namespace krys::boo
   FloatingObject::FloatingObject(RenderBox &renderer, Type type, const LayoutRect &frameRect,
                                  const LayoutSize &marginOffset, bool shouldPaint, bool isDescendant,
                                  bool overflowClipped) noexcept
-      : _renderer(WeakPtr<RenderBox>::WithRef(renderer)), _frameRect(frameRect), _marginOffset(marginOffset),
-        _type(type), _paintsFloat(shouldPaint), _isDescendant(isDescendant), _isPlaced(true),
+      : _renderer(CreateWeakPtr(&renderer)), _frameRect(frameRect), _marginOffset(marginOffset), _type(type),
+        _paintsFloat(shouldPaint), _isDescendant(isDescendant), _isPlaced(true),
         _hasAncestorWithOverflowClip(overflowClipped)
   {
   }

@@ -255,8 +255,7 @@ namespace krys::boo
     {
       if (_paintInfo.Phase == PaintPhase::Foreground)
       {
-        // FIXME: The background fill of document markers, and platform document markers (spelling and grammar
-        // errors), come with document markers.
+        // (There are no document markers to fill, or spelling and grammar errors; see DIFFERENCES.md.)
         auto shouldPaintBackgroundFill = [&]
         {
           if (_isPrinting)
@@ -316,7 +315,7 @@ namespace krys::boo
     return {};
   }
 
-  // FIXME: Document markers, and the composition's custom highlights, with those.
+  // FIXME: The composition's custom highlights. (There are no document markers; see DIFFERENCES.md.)
   void TextBoxPainter::PaintBackgroundFill() noexcept
   {
     if (_containsComposition && !_compositionWithCustomUnderlines)
@@ -420,7 +419,7 @@ namespace krys::boo
       _document.HasHighlight()
       && !MarkedText::CollectForHighlights(_renderer, _selectableRange, MarkedText::PaintPhase::Decoration)
             .empty();
-    // FIXME: Decorations from spelling and grammar errors, once there are document markers.
+    // (There are no spelling and grammar errors to decorate; see DIFFERENCES.md.)
     auto hasDecoration = hasTextDecoration || hasHighlightDecoration;
 
     auto contentMayNeedStyledMarkedText = [&]
@@ -433,7 +432,7 @@ namespace krys::boo
       {
         return true;
       }
-      // FIXME: Document markers, once there are any.
+      // (There are no document markers; see DIFFERENCES.md.)
       if (_document.HasHighlight())
       {
         return true;
@@ -462,7 +461,8 @@ namespace krys::boo
 
       if (!_isPrinting)
       {
-        // FIXME: Document markers and dragged and transparent content, once there are those.
+        // FIXME: Dragged content, once it's drawn translucent. (There are no document markers or transparent
+        // content; see DIFFERENCES.md.)
         auto highlights =
           MarkedText::CollectForHighlights(_renderer, _selectableRange, MarkedText::PaintPhase::Foreground);
         markedTexts.insert(markedTexts.end(), highlights.begin(), highlights.end());
@@ -610,9 +610,13 @@ namespace krys::boo
 
   void TextBoxPainter::PaintCompositionUnderlines() noexcept
   {
-    const auto &underlines = _renderer.GetDocument().GetEditor().CustomCompositionUnderlines();
-    for (const auto &underline : underlines)
+    const auto &editor = _renderer.GetDocument().GetEditor();
+    auto compositionStart = editor.CompositionStart();
+    for (auto underline : editor.CustomCompositionUnderlines())
     {
+      // Offsets in the text node, as the text box's are.
+      underline.StartOffset += compositionStart;
+      underline.EndOffset += compositionStart;
       if (underline.EndOffset <= TextBox().Start())
       {
         // Underline is completely before this run. This might be an underline that sits
@@ -785,7 +789,7 @@ namespace krys::boo
                         expansion.HorizontalExpansion,
                         expansion.Behavior,
                         _textBox.Direction(),
-                        _style.RtlOrdering() == Order::Visual,
+                        false /* directionalOverride */,
                         characterScanForCodePath};
     run.DisableSpacing();
 

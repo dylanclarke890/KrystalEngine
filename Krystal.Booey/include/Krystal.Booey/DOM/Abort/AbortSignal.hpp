@@ -14,6 +14,8 @@
 
 namespace krys::boo::dom
 {
+  class Document;
+
   /// @see https://dom.spec.whatwg.org/#abortsignal-abort-algorithms
   class AbortAlgorithmCallback
   {
@@ -91,8 +93,10 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-abort
     static Ref<AbortSignal> Abort(Maybe<Any> reason = null) noexcept;
 
+    /// @brief A signal that aborts once @p document, standing in for the global, has been active for
+    /// @p milliseconds.
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-timeout
-    static Ref<AbortSignal> Timeout(size_t milliseconds) noexcept;
+    static Ref<AbortSignal> Timeout(Document &document, size_t milliseconds) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-any
     static Ref<AbortSignal> Any(const List<Ref<AbortSignal>> &signals) noexcept;

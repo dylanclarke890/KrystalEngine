@@ -200,14 +200,14 @@ namespace krys::boo
         ResetSectionPointerIfNotBefore(_head, beforeChild);
         if (!_head)
         {
-          _head = WeakPtr<RenderTableSection>::WithRef(child);
+          _head = CreateWeakPtr(&child);
         }
         else
         {
           ResetSectionPointerIfNotBefore(_firstBody, beforeChild);
           if (!_firstBody)
           {
-            _firstBody = WeakPtr<RenderTableSection>::WithRef(child);
+            _firstBody = CreateWeakPtr(&child);
           }
         }
         break;
@@ -215,7 +215,7 @@ namespace krys::boo
         ResetSectionPointerIfNotBefore(_foot, beforeChild);
         if (!_foot)
         {
-          _foot = WeakPtr<RenderTableSection>::WithRef(child);
+          _foot = CreateWeakPtr(&child);
           break;
         }
         KRYS_FALLTHROUGH;
@@ -223,7 +223,7 @@ namespace krys::boo
         ResetSectionPointerIfNotBefore(_firstBody, beforeChild);
         if (!_firstBody)
         {
-          _firstBody = WeakPtr<RenderTableSection>::WithRef(child);
+          _firstBody = CreateWeakPtr(&child);
         }
         break;
       default: krys_debug_assert(false);
@@ -236,7 +236,7 @@ namespace krys::boo
   {
     krys_debug_assert(
       std::ranges::none_of(_captions, [&](const auto &existing) { return existing == &caption; }));
-    _captions.push_back(WeakPtr<RenderTableCaption>::WithRef(caption));
+    _captions.push_back(CreateWeakPtr(&caption));
   }
 
   void RenderTable::RemoveCaption(RenderTableCaption &oldCaption) noexcept
@@ -1047,7 +1047,7 @@ namespace krys::boo
       {
         continue;
       }
-      _columnRenderers.push_back(WeakPtr<RenderTableCol>::WithRef(*columnRenderer));
+      _columnRenderers.push_back(CreateWeakPtr(columnRenderer));
       // FIXME: We should look to compute the effective column index successively from previous values instead
       // of calling ColToEffCol(), which is in O(NumEffCols()). Although it's unlikely that this is a hot
       // function.
@@ -1221,11 +1221,11 @@ namespace krys::boo
           {
             if (!_head)
             {
-              _head = WeakPtr<RenderTableSection>::WithRef(*section);
+              _head = CreateWeakPtr(section);
             }
             else if (!_firstBody)
             {
-              _firstBody = WeakPtr<RenderTableSection>::WithRef(*section);
+              _firstBody = CreateWeakPtr(section);
             }
             section->RecalcCellsIfNeeded();
           }
@@ -1235,11 +1235,11 @@ namespace krys::boo
           {
             if (!_foot)
             {
-              _foot = WeakPtr<RenderTableSection>::WithRef(*section);
+              _foot = CreateWeakPtr(section);
             }
             else if (!_firstBody)
             {
-              _firstBody = WeakPtr<RenderTableSection>::WithRef(*section);
+              _firstBody = CreateWeakPtr(section);
             }
             section->RecalcCellsIfNeeded();
           }
@@ -1249,7 +1249,7 @@ namespace krys::boo
           {
             if (!_firstBody)
             {
-              _firstBody = WeakPtr<RenderTableSection>::WithRef(*section);
+              _firstBody = CreateWeakPtr(section);
             }
             section->RecalcCellsIfNeeded();
           }

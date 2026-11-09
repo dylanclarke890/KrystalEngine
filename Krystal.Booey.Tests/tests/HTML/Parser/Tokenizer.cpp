@@ -42,6 +42,15 @@ namespace krys::boo::html::Tests
           output += u8")\n";
           break;
         }
+        case TokenType::ProcessingInstruction:
+        {
+          output += u8"ProcessingInstruction(";
+          output += dom::DOMStringView(token.Data());
+          output += u8", ";
+          output += dom::DOMStringView(token.ProcessingInstructionData());
+          output += u8")\n";
+          break;
+        }
         case TokenType::StartTag:
         case TokenType::EndTag:
         {
@@ -360,6 +369,12 @@ namespace krys::boo::html::Tests
                                    "[html:doctype-system-identifier-(single-quoted)-state]");
   EXECUTE_HTML_TOKENIZER_TEST_CASE("endtagopen-01.dat", "[html:end-tag-open-state]");
   EXECUTE_HTML_TOKENIZER_TEST_CASE("markupdeclarationopen-01.dat", "[html:markup-declaration-open-state]");
+  EXECUTE_HTML_TOKENIZER_TEST_CASE(
+    "processinginstruction-01.dat",
+    "[html:processing-instruction-open-state][html:processing-instruction-target-state][html:after-"
+    "processing-"
+    "instruction-target-state][html:processing-instruction-data-state][html:processing-instruction-"
+    "questionable-state][html:convert-the-temporary-buffer-to-a-comment]");
   EXECUTE_HTML_TOKENIZER_TEST_CASE("plaintext-01.dat", "[html:plaintext-state]");
   EXECUTE_HTML_TOKENIZER_TEST_CASE("rawtext-01.dat", "[html:rawtext-state]");
   EXECUTE_HTML_TOKENIZER_TEST_CASE("rawtextendtagopen-01.dat", "[html:rawtext-end-tag-open-state]");

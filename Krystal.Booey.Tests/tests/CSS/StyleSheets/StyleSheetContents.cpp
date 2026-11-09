@@ -330,12 +330,17 @@ namespace krys::boo::css::tests
       CHECK_FALSE(plain->IsCacheable());
     }
 
-    SECTION("Namespace rules and load errors aren't cacheable")
+    SECTION("Namespace rules are copied, and load errors aren't cacheable")
     {
       auto namespaced = StyleSheetContents::Create();
       namespaced->ParserAppendRule(Namespace(u8"a", u8"urn:a"));
+      namespaced->ParserAppendRule(CreateStyleRule(u8".a", u8"color: red"));
       namespaced->CheckLoaded();
-      CHECK_FALSE(namespaced->IsCacheable());
+      REQUIRE(namespaced->IsCacheable());
+      auto copy = namespaced->Copy();
+      CHECK(copy->RuleCount() == 2);
+      CHECK(copy->RuleAt(0) == namespaced->RuleAt(0));
+      CHECK(copy->NamespaceURIFromPrefix(CSSOMStringAtom(u8"a")) == CSSOMStringAtom(u8"urn:a"));
 
       auto failed = StyleSheetContents::Create();
       failed->CheckLoaded();

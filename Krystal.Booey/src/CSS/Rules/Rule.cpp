@@ -440,10 +440,9 @@ namespace krys::boo::css
       if (componentsInThisSelector.size() + componentsSinceLastSplit.size() > maxCount
           && !componentsSinceLastSplit.empty())
       {
-        rules.push_back(
-          CreateForSplitting(componentsSinceLastSplit,
-                             Ref<StyleProperties>::WithRef(const_cast<StyleProperties &>(Properties())),
-                             HasDocumentSecurityOrigin()));
+        rules.push_back(CreateForSplitting(componentsSinceLastSplit,
+                                           ShareRef(const_cast<StyleProperties &>(Properties())),
+                                           HasDocumentSecurityOrigin()));
         componentsSinceLastSplit.clear();
       }
 
@@ -453,9 +452,9 @@ namespace krys::boo::css
 
     if (!componentsSinceLastSplit.empty())
     {
-      rules.push_back(CreateForSplitting(
-        componentsSinceLastSplit, Ref<StyleProperties>::WithRef(const_cast<StyleProperties &>(Properties())),
-        HasDocumentSecurityOrigin()));
+      rules.push_back(CreateForSplitting(componentsSinceLastSplit,
+                                         ShareRef(const_cast<StyleProperties &>(Properties())),
+                                         HasDocumentSecurityOrigin()));
     }
 
     if (!rules.empty())
@@ -751,14 +750,15 @@ namespace krys::boo::css
 
 #pragma region ContainerRule
 
-  ContainerRule::ContainerRule(cq::ContainerQuery &&query, List<Ref<Rule>> &&rules) noexcept
-      : GroupRule(RuleType::Container, krys::move(rules)), _containerQuery(krys::move(query))
+  ContainerRule::ContainerRule(cq::ContainerQueryList &&queries, List<Ref<Rule>> &&rules) noexcept
+      : GroupRule(RuleType::Container, krys::move(rules)), _containerQueries(krys::move(queries))
   {
+    krys_debug_assert(!_containerQueries.empty());
   }
 
-  Ref<ContainerRule> ContainerRule::Create(cq::ContainerQuery &&query, List<Ref<Rule>> &&rules) noexcept
+  Ref<ContainerRule> ContainerRule::Create(cq::ContainerQueryList &&queries, List<Ref<Rule>> &&rules) noexcept
   {
-    return AdoptRef(*new ContainerRule(krys::move(query), krys::move(rules)));
+    return AdoptRef(*new ContainerRule(krys::move(queries), krys::move(rules)));
   }
 
   Ref<ContainerRule> ContainerRule::Copy() const noexcept
@@ -817,7 +817,7 @@ namespace krys::boo::css
 
   void ScopeRule::SetStyleSheetContents(const StyleSheetContents &sheet) noexcept
   {
-    _styleSheetOwner = WeakPtr<const StyleSheetContents>::WithRef(sheet);
+    _styleSheetOwner = CreateWeakPtr(&sheet);
   }
 
 #pragma endregion

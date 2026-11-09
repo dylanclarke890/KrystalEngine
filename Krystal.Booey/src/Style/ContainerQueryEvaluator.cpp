@@ -89,7 +89,7 @@ namespace krys::boo::style
     auto *rootStyle = document.DocumentElement()->GetRenderStyle();
 
     return css::mq::FeatureEvaluationContext {
-      WeakRef<const dom::Document>::WithRef(document),
+      CreateWeakRef(document),
       css::ToLengthConversionData {*containerStyle, rootStyle, containerParentStyle, document.GetRenderView(),
                                    container.get()},
       ShareCheckedPtr<const RenderElement>(container->Renderer())};

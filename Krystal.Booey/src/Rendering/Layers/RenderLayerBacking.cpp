@@ -786,11 +786,7 @@ namespace krys::boo
 
   void RenderLayerBacking::UpdateContentsScalingFilters(const RenderStyle &style) noexcept
   {
-    if (!Renderer().IsRenderHTMLCanvas()
-        || GetCanvasCompositingStrategy(Renderer()) != CanvasCompositingStrategy::CanvasAsLayerContents)
-    {
-      return;
-    }
+    // The filters sample the contents layer: a composited image's, or a canvas's.
     auto minificationFilter = GraphicsLayer::ScalingFilter::Linear;
     auto magnificationFilter = GraphicsLayer::ScalingFilter::Linear;
     switch (style.GetImageRendering())
@@ -1522,6 +1518,11 @@ namespace krys::boo
             BorderShape::ShapeForBorderRect(Renderer().Style(), _owningLayer.RendererBorderBoxRect());
           auto contentsClippingRect = borderShape.DeprecatedPixelSnappedInnerRoundedRect(deviceScaleFactor);
           contentsClippingRect.Move(-clipLayer->OffsetFromRenderer());
+          // The layer's origin is a whole pixel but its offset from the renderer can be fractional, so snap
+          // the rect again in the layer, where the whole repaint snaps it, or its far edges sit a fraction
+          // short.
+          contentsClippingRect.SetRect(
+            SnapRectToDevicePixelsIfNeeded(contentsClippingRect.Rect(), Renderer()));
           return contentsClippingRect;
         }
 
@@ -3650,8 +3651,12 @@ namespace krys::boo
       {
         layer.PaintLayerContents(context, paintingInfo, paintFlags);
 
-        // FIXME: Dirty overlay scrollbars (containsDirtyOverlayScrollbars), once there are overlay
-        // scrollbars.
+        if (auto *scrollableArea = layer.GetScrollableArea();
+            scrollableArea && scrollableArea->ContainsDirtyOverlayScrollbars())
+        {
+          layer.PaintLayerContents(context, paintingInfo,
+                                   paintFlags | RenderLayer::PaintLayerFlag::PaintingOverlayScrollbars);
+        }
       }
       else
       {
@@ -3854,6 +3859,39 @@ namespace krys::boo
   void RenderLayerBacking::DidChangePlatformLayerForLayer(const GraphicsLayer *layer) noexcept
   {
     Compositor().DidChangePlatformLayerForLayer(_owningLayer, layer);
+  }
+
+  TransformationMatrix
+    RenderLayerBacking::TransformMatrixForProperty(AnimatedProperty property) const noexcept
+  {
+    TransformationMatrix matrix;
+    auto size = FloatSize(SnappedIntRect(_owningLayer.RendererBorderBoxRect()).Size());
+    const auto &style = Renderer().Style();
+    auto applyOperation = [&](const RefPtr<TransformOperation> &operation)
+    {
+      if (operation)
+      {
+        operation->Apply(matrix);
+      }
+    };
+
+    switch (property)
+    {
+      case AnimatedProperty::Translate:
+        applyOperation(style::ToPlatform<style::Translate> {}(style.GetTranslate(), size));
+        break;
+      case AnimatedProperty::Scale:
+        applyOperation(style::ToPlatform<style::Scale> {}(style.GetScale(), size));
+        break;
+      case AnimatedProperty::Rotate:
+        applyOperation(style::ToPlatform<style::Rotate> {}(style.GetRotate(), size));
+        break;
+      case AnimatedProperty::Transform:
+        style::ToPlatform<style::Transform> {}(style.GetTransform(), size).Apply(matrix);
+        break;
+      default: krys_debug_assert(false); break;
+    }
+    return matrix;
   }
 
   bool RenderLayerBacking::GetCurrentTransform(const GraphicsLayer *graphicsLayer,

@@ -28,7 +28,6 @@ namespace krys::boo::style
     _inheritedFlags.TextWrapMode = static_cast<unsigned>(ComputedStyle::InitialTextWrapMode());
     _inheritedFlags.TextWrapStyle = static_cast<unsigned>(ComputedStyle::InitialTextWrapStyle());
     _inheritedFlags.BorderCollapse = static_cast<unsigned>(ComputedStyle::InitialBorderCollapse());
-    _inheritedFlags.RtlOrdering = static_cast<unsigned>(ComputedStyle::InitialRTLOrdering());
     _inheritedFlags.PrintColorAdjust = static_cast<unsigned>(ComputedStyle::InitialPrintColorAdjust());
     _inheritedFlags.PointerEvents = static_cast<unsigned>(ComputedStyle::InitialPointerEvents());
 

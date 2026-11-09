@@ -2,7 +2,9 @@
 
 #include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -24,11 +26,12 @@ namespace krys::boo
     RestoreGraphicsContext,
     EndOpacityLayer,
     EndFilterLayer,
+    EndCSSFilterLayer,
     PrepareToRenderSVGContentWasCalled
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGRenderingContextFlag, 5uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGRenderingContextFlag, 6uz);
 
 namespace krys::boo
 {
@@ -50,6 +53,10 @@ namespace krys::boo
     PaintInfo *_paintInfo {nullptr};
     GraphicsContext *_savedContext {nullptr};
     LegacyRenderSVGResourceFilter *_filter {nullptr};
+    /// @brief The filter functions of a `filter` that isn't one `url()` (`blur()`, `drop-shadow()`, ...), and
+    /// the switcher drawing the renderer into their source image.
+    RefPtr<CSSFilterRenderer> _cssFilter;
+    UniquePtr<GraphicsContextSwitcher> _cssFilterSwitcher;
     LayoutRect _savedPaintRect;
     // To properly revert partially successful initializtions in the destructor, we record all successful
     // steps.
@@ -74,6 +81,10 @@ namespace krys::boo
     // Automatically finishes context rendering.
     ~SVGRenderingContext() noexcept;
 
+    /// @brief Where the filter functions of @p renderer's `filter` (when it isn't one `url()`) draw past its
+    /// stroke bounding box, in its local coordinates; none without them.
+    KRYS_NODISCARD static IntOutsets CSSFilterOutsets(const RenderElement &renderer) noexcept;
+
     // Used by all SVG renderers who apply clip/filter/etc. resources to the renderer content.
     void PrepareToRenderSVGContent(
       RenderElement &, PaintInfo &,
@@ -89,6 +100,11 @@ namespace krys::boo
     }
 
     static void RenderSubtreeToContext(GraphicsContext &, RenderElement &, const AffineTransform &) noexcept;
+
+  private:
+    void BeginCSSFilter() noexcept;
+
+  public:
     static void ClipToImageBuffer(GraphicsContext &, const FloatRect &targetRect, const FloatSize &scale,
                                   RefPtr<ImageBuffer> &, bool safeToClear) noexcept;
 
@@ -101,9 +117,6 @@ namespace krys::boo
     {
       return EnclosingIntRect(absoluteTransform.MapRect(targetRect));
     }
-
-    // FIXME: Support for the buffered-rendering hint (bufferForeground), once image buffers can be drawn
-    // back from the CPU.
 
     KRYS_NODISCARD const RenderElement *Renderer() const noexcept
     {

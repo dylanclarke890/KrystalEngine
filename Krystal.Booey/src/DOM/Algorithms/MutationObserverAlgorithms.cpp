@@ -10,7 +10,7 @@
 #include "Krystal.Booey/DOM/MutationObservers/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -23,9 +23,9 @@ namespace krys::boo::dom
       DOMStringAtom OldValue;
     };
 
-    /// @brief The surrounding agent's mutation observer state.
+    /// @brief The surrounding agent's mutation observer state, which is process-wide, as there are no agents
+    /// (see DIFFERENCES.md).
     /// @see https://dom.spec.whatwg.org/#mutation-observers
-    // FIXME: Process-wide until there are agents.
     struct MutationObserverAgent
     {
       /// @see https://dom.spec.whatwg.org/#mutation-observer-compound-microtask-queued-flag

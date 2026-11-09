@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLPictureElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSourceElement.hpp"
@@ -62,7 +63,36 @@ namespace krys::boo::html
   {
   }
 
-  HTMLImageElement::~HTMLImageElement() noexcept = default;
+  HTMLImageElement::~HTMLImageElement() noexcept
+  {
+    SetForm(nullptr);
+  }
+
+  void HTMLImageElement::ResetFormOwner() noexcept
+  {
+    SetForm(HTMLFormElement::FindClosestFormAncestor(*this));
+  }
+
+  void HTMLImageElement::SetFormInternal(HTMLFormElement *newForm) noexcept
+  {
+    if (auto *form = Form())
+    {
+      form->UnregisterImageElement(*this);
+    }
+    FormAssociatedElement::SetFormInternal(newForm);
+    if (newForm)
+    {
+      newForm->RegisterImageElement(*this);
+    }
+  }
+
+  void HTMLImageElement::FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept
+  {
+    if (&dom::TreeQueries::Root(*this) != &formRoot)
+    {
+      SetForm(nullptr);
+    }
+  }
 
 #pragma region HTMLImageElement
 
@@ -143,6 +173,12 @@ namespace krys::boo::html
     // 3. Return the first element of type type in scope's tree, in tree order, that has an id or name
     // attribute
     //    whose value is s, or null if there is no such element.
+    // The tree scope maps them; a tree outside one has to look.
+    if (IsConnected() || IsInShadowTree())
+    {
+      return TreeScope().FirstImageMap(name);
+    }
+
     auto &root = dom::TreeQueries::Root(const_cast<HTMLImageElement &>(*this));
     for (auto &node : dom::DescendantRange(root))
     {
@@ -151,9 +187,7 @@ namespace krys::boo::html
       {
         continue;
       }
-      auto id = map->GetAttribute(u8"id");
-      auto mapName = map->GetAttribute(u8"name");
-      if ((id && *id == name) || (mapName && *mapName == name))
+      if (map->Id() == name || map->Name() == name)
       {
         return map;
       }
@@ -347,6 +381,20 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"decoding", krys::move(value));
   }
 
+  DecodingMode HTMLImageElement::GetDecodingMode() const noexcept
+  {
+    auto decoding = Decoding();
+    if (decoding == u8"sync")
+    {
+      return DecodingMode::Synchronous;
+    }
+    if (decoding == u8"async")
+    {
+      return DecodingMode::Asynchronous;
+    }
+    return DecodingMode::Auto;
+  }
+
   dom::DOMString HTMLImageElement::Loading() const noexcept
   {
     return ReflectEnumerated<"loading">(*this);
@@ -365,6 +413,11 @@ namespace krys::boo::html
   void HTMLImageElement::FetchPriority(dom::DOMString value) noexcept
   {
     Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
+  }
+
+  void HTMLImageElement::Decode(ImageLoader::DecodePromise promise) noexcept
+  {
+    GetImageLoader().Decode(krys::move(promise));
   }
 
 #pragma endregion
@@ -527,8 +580,7 @@ namespace krys::boo::html
 
   void HTMLImageElement::SetPictureElement(HTMLPictureElement *pictureElement) noexcept
   {
-    _pictureElement =
-      pictureElement ? WeakPtr<HTMLPictureElement>::WithRef(*pictureElement) : WeakPtr<HTMLPictureElement>();
+    _pictureElement = CreateWeakPtr(pictureElement);
   }
 
   HTMLSourceElement *HTMLImageElement::SourceElement() const noexcept
@@ -542,8 +594,7 @@ namespace krys::boo::html
     {
       return;
     }
-    _sourceElement =
-      sourceElement ? WeakPtr<HTMLSourceElement>::WithRef(*sourceElement) : WeakPtr<HTMLSourceElement>();
+    _sourceElement = CreateWeakPtr(sourceElement);
     InvalidateAttributeMapping();
   }
 
@@ -743,7 +794,7 @@ namespace krys::boo::html
     {
       if (auto *renderImage = DynamicDowncast<RenderImage>(Renderer()))
       {
-        renderImage->UpdateAltText();
+        renderImage->UpdateForAltText();
       }
     }
     else if (localName == u8"src" || localName == u8"srcset" || localName == u8"sizes")
@@ -770,6 +821,12 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#the-img-element:html-element-insertion-steps
   void HTMLImageElement::OnInsert() noexcept
   {
+    FormAssociatedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    if (!Form())
+    {
+      ResetFormOwner();
+    }
+
     // Insert needs to complete first, before we start updating the loader. Loader dispatches events which
     // could result in callbacks back to this node.
     HTMLElement::OnInsert();
@@ -804,6 +861,8 @@ namespace krys::boo::html
       SelectImageSource(RelevantMutation::Yes);
     }
 
+    FormAssociatedElement::ElementRemovedFromAncestor(*this, !IsConnected());
+
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
   }
 
@@ -811,6 +870,8 @@ namespace krys::boo::html
   void HTMLImageElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+
+    ResetFormOwner();
 
     // 1. If isSubtreeRoot is true and oldAncestor is a picture element, then count this as a relevant
     //    mutation for movedNode.

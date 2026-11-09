@@ -3,8 +3,11 @@
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/MutationRecord.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
@@ -101,7 +104,23 @@ layer at (447,18) size 51x10
 
     (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {95, 45}));
     CHECK(layer->InResizeMode());
+
+    // Each move changes the style attribute once, however many of its properties change.
+    List<dom::DOMStringAtom> oldValues;
+    auto observer = CreateRef<dom::MutationObserver>(
+      [&](const List<Ref<dom::MutationRecord>> &records, dom::MutationObserver &)
+      {
+        for (auto &record : records)
+        {
+          CHECK(record->AttributeName() == u8"style");
+          oldValues.push_back(record->OldValue());
+        }
+      });
+    REQUIRE_FALSE(observer->Observe(box, {.Attributes = true, .AttributeOldValue = true}).HasException());
     (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {125, 35}));
+    html::EventLoop::Current().PerformMicrotaskCheckpoint();
+    REQUIRE(oldValues.size() == 1u);
+    CHECK(oldValues[0] == u8"overflow:auto;resize:both;width:100px;height:50px;min-height:40px");
     (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {125, 35}));
     CHECK_FALSE(layer->InResizeMode());
 

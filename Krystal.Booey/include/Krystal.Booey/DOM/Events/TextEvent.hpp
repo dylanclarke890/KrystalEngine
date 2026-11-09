@@ -27,7 +27,7 @@ namespace krys::boo::dom
   /// before the editor inserts it.
   /// @note Legacy.
   /// @see https://w3c.github.io/uievents/#legacy-textevent-events
-  // FIXME: Dictation's alternatives (dictationAlternatives), with dictation.
+  // (There are no dictation alternatives; see DIFFERENCES.md.)
   class TextEvent final : public UIEvent
   {
   private:
@@ -46,17 +46,20 @@ namespace krys::boo::dom
 
     /// @brief A trusted `textInput` event, which bubbles, can be cancelled and crosses shadow boundaries.
     KRYS_NODISCARD static Ref<TextEvent>
-      Create(DOMStringView data, TextEventInputType inputType = TextEventInputType::Keyboard) noexcept;
-    KRYS_NODISCARD static Ref<TextEvent> CreateForPlainTextPaste(DOMStringView data,
+      Create(LocalDOMWindow *view, DOMStringView data,
+             TextEventInputType inputType = TextEventInputType::Keyboard) noexcept;
+    KRYS_NODISCARD static Ref<TextEvent> CreateForPlainTextPaste(LocalDOMWindow *view, DOMStringView data,
                                                                  bool shouldSmartReplace) noexcept;
-    KRYS_NODISCARD static Ref<TextEvent> CreateForFragmentPaste(RefPtr<DocumentFragment> &&data,
+    KRYS_NODISCARD static Ref<TextEvent> CreateForFragmentPaste(LocalDOMWindow *view,
+                                                                RefPtr<DocumentFragment> &&data,
                                                                 TextEventInputType inputType,
                                                                 bool shouldSmartReplace,
                                                                 bool shouldMatchStyle) noexcept;
-    KRYS_NODISCARD static Ref<TextEvent> CreateForDrop(DOMStringView data) noexcept;
+    KRYS_NODISCARD static Ref<TextEvent> CreateForDrop(LocalDOMWindow *view, DOMStringView data) noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-textevent-inittextevent
-    void InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable, DOMStringView data) noexcept;
+    void InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable, LocalDOMWindow *view,
+                       DOMStringView data) noexcept;
 
     KRYS_NODISCARD bool IsTextEvent() const noexcept final
     {

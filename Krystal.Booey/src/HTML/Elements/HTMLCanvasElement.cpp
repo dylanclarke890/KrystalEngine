@@ -419,6 +419,18 @@ namespace krys::boo::html
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
   }
 
+  void HTMLCanvasElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    HTMLElement::OnAdopt(oldDocument);
+
+    // The context's pending preparation moves with the canvas, to be done in its new document's update.
+    if (auto *context = RenderingContext(); context && context->IsInPreparationForDisplayOrFlush())
+    {
+      oldDocument.RemoveCanvasNeedingPreparationForDisplayOrFlush(*context);
+      AddCanvasNeedingPreparationForDisplayOrFlush();
+    }
+  }
+
   RenderPtr<RenderElement> HTMLCanvasElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
     return CreateRenderer<RenderHTMLCanvas>(*this, krys::move(style));
@@ -488,8 +500,7 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#dom-canvas-todataurl
   dom::DOMString HTMLCanvasElement::ToDataURL(dom::DOMStringView mimeType, Maybe<double> quality) noexcept
   {
-    // 1. FIXME: If this canvas element's bitmap's origin-clean flag is set to false, then throw a
-    //    "SecurityError" DOMException, once there are origins.
+    // 1. (Skipped: a canvas is always origin-clean, as there are no origins; see DIFFERENCES.md.)
 
     // 2. If this canvas element's bitmap has no pixels (i.e. either its horizontal dimension or its vertical
     //    dimension is zero), then return the string "data:,".

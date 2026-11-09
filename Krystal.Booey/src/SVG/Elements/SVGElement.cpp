@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -204,11 +205,8 @@ namespace krys::boo::svg
   void SVGElement::ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,
                                                dom::DOMStringView value) noexcept
   {
-    if (error == SVGParsingError::None)
-    {
-      return;
-    }
-
+    // There's no console to report the error to (see DIFFERENCES.md).
+    (void)error;
     (void)name;
     (void)value;
   }
@@ -906,9 +904,18 @@ namespace krys::boo::svg
     }
   }
 
+  bool SVGElement::AccessKeyAction(bool sendMouseEvents) noexcept
+  {
+    (void)StyledElement::AccessKeyAction(sendMouseEvents);
+    return DispatchSimulatedClick(nullptr, sendMouseEvents
+                                             ? dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
+                                             : dom::SimulatedClickMouseEventOptions::SendNoEvents);
+  }
+
   void SVGElement::OnInsert() noexcept
   {
     StyledElement::OnInsert();
+    html::FocusAlgorithms::AutofocusInsertionSteps(*this);
 
     // NOTE: a node's insertion steps don't say whether it's the root of the inserted tree; telling the parent
     // again about a child that was inserted with it changes nothing.
@@ -1142,7 +1149,6 @@ namespace krys::boo::svg
     static const HashMap<dom::DOMStringView, css::PropertyId> map {
       {u8"alignment-baseline", css::PropertyId::AlignmentBaseline},
       {u8"baseline-shift", css::PropertyId::BaselineShift},
-      {u8"buffered-rendering", css::PropertyId::BufferedRendering},
       {u8"clip", css::PropertyId::Clip},
       {u8"clip-path", css::PropertyId::ClipPath},
       {u8"clip-rule", css::PropertyId::ClipRule},

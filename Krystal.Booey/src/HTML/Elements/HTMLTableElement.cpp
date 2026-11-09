@@ -12,7 +12,7 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::html
 {
@@ -85,7 +85,7 @@ namespace krys::boo::html
     // 1. If this has a caption element child, then return the first such element.
     if (auto existingCaption = Caption())
     {
-      return Ref<HTMLTableCaptionElement>(krys::move(existingCaption));
+      return krys::move(existingCaption);
     }
 
     // 2. Let caption be the result of creating a table element given this and "caption".
@@ -155,7 +155,7 @@ namespace krys::boo::html
     // 1. If this has a thead element child, then return the first such element.
     if (auto existingHead = THead())
     {
-      return Ref<HTMLTableSectionElement>(krys::move(existingHead));
+      return krys::move(existingHead);
     }
 
     // 2. Let thead be the result of creating a table element given this and "thead".
@@ -216,7 +216,7 @@ namespace krys::boo::html
     // 1. If this has a tfoot element child, then return the first such element.
     if (auto existingFoot = TFoot())
     {
-      return Ref<HTMLTableSectionElement>(krys::move(existingFoot));
+      return krys::move(existingFoot);
     }
 
     // 2. Let tfoot be the result of creating a table element given this and "tfoot".
@@ -246,8 +246,8 @@ namespace krys::boo::html
     }
 
     Ref<dom::HTMLCollection> tBodies = CreateRef<dom::LiveHTMLCollection>(
-      *this, [this](const dom::Element &element)
-      { return element.ParentNode() == this && IsTableChildWithTagName(element, TagName::tbody); });
+      *this, [](const dom::Element &element) { return IsTableChildWithTagName(element, TagName::tbody); },
+      dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _tBodies = CreateWeakPtr(tBodies.get());
     return tBodies;
   }

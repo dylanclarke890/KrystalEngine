@@ -23,6 +23,8 @@ namespace krys::ui
       const text::FreeTypeFace *Face;
       bool SyntheticBold;
       bool SyntheticOblique;
+      uint32 PaletteIndex;
+      List<gfx::PaletteColour> PaletteOverrides;
       UniquePtr<gfx::FontFace2D> Face2D;
     };
 

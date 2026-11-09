@@ -4,9 +4,9 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::css::mq
@@ -22,6 +22,8 @@ namespace krys::boo::css::mq
                                                              const MediaQueryParserContext &context) noexcept;
     KRYS_NODISCARD static RefPtr<Value> ConsumeValue(TokenRange &tokens,
                                                      const MediaQueryParserContext &context) noexcept;
+    /// @brief Consumes an `<mf-comparison>` and the whitespace after it.
+    KRYS_NODISCARD static Maybe<ComparisonOperator> ConsumeComparisonOperator(TokenRange &tokens) noexcept;
 
     /// @brief Checks the feature's syntax and values against the schema, and sets `Feature::Schema` if they
     /// match. A `<number>` given for a ratio feature is replaced by the ratio `<number> / 1`.
@@ -131,7 +133,8 @@ namespace krys::boo::css::mq
           CSSOMString name {tokens.Peek().IdentCodePoints()};
           auto functionRange = tokens.ConsumeBlock();
           tokens.DiscardWhitespace();
-          return GeneralEnclosed {krys::move(name), functionRange.Serialise(TokenSerialisationMode::Normal)};
+          return GeneralEnclosed {krys::move(name),
+                                  functionRange.Serialise(TokenSerialisationMode::CustomProperty)};
         }
       }
 
@@ -162,8 +165,15 @@ namespace krys::boo::css::mq
         return QueryInParens {krys::move(*feature)};
       }
 
+      auto styleRangeRange = blockRange;
+      if (auto range = TConcreteParser::ConsumeStyleRange(styleRangeRange, context, state))
+      {
+        range->FunctionId = functionId;
+        return QueryInParens {krys::move(*range)};
+      }
+
       return GeneralEnclosed {functionId ? CSSOMString(ToString(*functionId)) : CSSOMString {},
-                              originalBlockRange.Serialise(TokenSerialisationMode::Normal)};
+                              originalBlockRange.Serialise(TokenSerialisationMode::CustomProperty)};
     }
 
     KRYS_NODISCARD static Maybe<Feature> ConsumeAndValidateFeature(TokenRange &tokens,
@@ -187,6 +197,12 @@ namespace krys::boo::css::mq
     KRYS_NODISCARD static bool IsValidFunctionId(ValueId) noexcept
     {
       return false;
+    }
+
+    KRYS_NODISCARD static Maybe<StyleRange> ConsumeStyleRange(TokenRange &, const MediaQueryParserContext &,
+                                                              State &) noexcept
+    {
+      return {};
     }
 
     KRYS_NODISCARD static const FeatureSchema *

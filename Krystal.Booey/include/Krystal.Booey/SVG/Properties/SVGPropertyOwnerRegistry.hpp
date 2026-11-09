@@ -6,8 +6,8 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>
 
 namespace krys::boo::svg

@@ -164,12 +164,48 @@ namespace krys::boo
 
   LayoutUnit RenderInline::InnerPaddingBoxWidth() const noexcept
   {
-    krys_unreachable();
+    // From the padding edge of the first box to that of the last: what out-of-flow children are positioned
+    // in.
+    if (!layout_integration::LineLayout::Containing(*this))
+    {
+      return {};
+    }
+    auto inlineBox = inline_iterator::LineLeftmostInlineBoxFor(*this);
+    if (!inlineBox)
+    {
+      return {};
+    }
+
+    LayoutUnit firstInlineBoxPaddingBoxLeft;
+    LayoutUnit lastInlineBoxPaddingBoxRight;
+    if (GetWritingMode().IsBidiLTR())
+    {
+      firstInlineBoxPaddingBoxLeft =
+        LayoutUnit(inlineBox->LogicalLeftIgnoringInlineDirection()) + BorderStart();
+      for (; inlineBox->NextInlineBoxLineRightward(); inlineBox.TraverseInlineBoxLineRightward())
+      {
+      }
+      lastInlineBoxPaddingBoxRight =
+        LayoutUnit(inlineBox->LogicalRightIgnoringInlineDirection()) - BorderEnd();
+    }
+    else
+    {
+      lastInlineBoxPaddingBoxRight =
+        LayoutUnit(inlineBox->LogicalRightIgnoringInlineDirection()) - BorderStart();
+      for (; inlineBox->NextInlineBoxLineRightward(); inlineBox.TraverseInlineBoxLineRightward())
+      {
+      }
+      firstInlineBoxPaddingBoxLeft =
+        LayoutUnit(inlineBox->LogicalLeftIgnoringInlineDirection()) + BorderEnd();
+    }
+    return std::max(0_lu, lastInlineBoxPaddingBoxRight - firstInlineBoxPaddingBoxLeft);
   }
 
   LayoutUnit RenderInline::InnerPaddingBoxHeight() const noexcept
   {
-    krys_unreachable();
+    auto bounds = LinesBoundingBox();
+    return LayoutUnit(GetWritingMode().IsHorizontal() ? bounds.Height() : bounds.Width()) - BorderBefore()
+           - BorderAfter();
   }
 
   bool IsEmptyInline(const RenderInline &renderer) noexcept
@@ -347,8 +383,15 @@ namespace krys::boo
       }
       if (auto inlineBox = inline_iterator::LineLeftmostInlineBoxFor(*this))
       {
-        inlinePosition = LayoutUnit::FromFloatRound(inlineBox->LogicalLeftIgnoringInlineDirection());
         blockPosition = LayoutUnit(inlineBox->LogicalTop());
+        // The first box is the line left one, unless it's right to left: then the last box is.
+        if (!GetWritingMode().IsBidiLTR())
+        {
+          for (; inlineBox->NextInlineBoxLineRightward(); inlineBox.TraverseInlineBoxLineRightward())
+          {
+          }
+        }
+        inlinePosition = LayoutUnit::FromFloatRound(inlineBox->LogicalLeftIgnoringInlineDirection());
       }
       else if (auto *blockContainer = ContainingBlock())
       {
@@ -639,7 +682,6 @@ namespace krys::boo
       {
         return false;
       }
-      // FIXME: Continuations, once there are any.
       if (layout_integration::LineLayout::Containing(*this))
       {
         return false;
@@ -700,7 +742,6 @@ namespace krys::boo
       {
         repaintRect.Unite(child.RectWithOutlineForRepaint(repaintContainer, outlineSize));
       }
-      // FIXME: The continuation, once there are any.
     }
 
     return repaintRect;
@@ -834,7 +875,6 @@ namespace krys::boo
   dom::PositionWithAffinity RenderInline::PositionForPoint(const LayoutPoint &point,
                                                            HitTestSource source) noexcept
   {
-    // FIXME: Translating the point to a continuation's block, once there are continuations.
     return ContainingBlock()->PositionForPoint(point, source);
   }
 

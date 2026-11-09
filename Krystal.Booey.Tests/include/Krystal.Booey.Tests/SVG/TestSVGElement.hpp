@@ -8,8 +8,8 @@
 #include "Krystal.Booey/SVG/SVGTests.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::svg::tests
 {

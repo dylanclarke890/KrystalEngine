@@ -38,8 +38,7 @@ namespace krys::editor
     /// @brief How many lines the log shows.
     static constexpr size_t MaxLines {12};
 
-    explicit PageDragAndDrop(boo::dom::Document &document) noexcept
-        : _document(WeakPtr<boo::dom::Document>::WithRef(document))
+    explicit PageDragAndDrop(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       RefPtr<boo::dom::EventTarget> sample = document.GetElementById(u8"drag-and-drop");
       if (!sample)

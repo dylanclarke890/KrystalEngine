@@ -3,6 +3,9 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -11,14 +14,35 @@ namespace krys::boo
 {
   namespace
   {
-    constexpr int32 ScrollbarSize = 21;
+    /// @brief A scrollbar's thickness, and its thumb's margins: across the scrollbar, and at its ends.
+    struct ScrollbarMetrics
+    {
+      int32 Size;
+      int32 ThumbMargin;
+      int32 ThumbEndMargin;
+    };
+
+    constexpr ScrollbarMetrics AutoMetrics {.Size = 21, .ThumbMargin = 6, .ThumbEndMargin = 7};
+    // A thin scrollbar is a little over half as thick, with a thumb 6px across rather than 8px.
+    constexpr ScrollbarMetrics ThinMetrics {.Size = 13, .ThumbMargin = 3, .ThumbEndMargin = 4};
+
+    KRYS_NODISCARD constexpr const ScrollbarMetrics &MetricsFor(ScrollbarWidth width) noexcept
+    {
+      return width == ScrollbarWidth::Thin ? ThinMetrics : AutoMetrics;
+    }
+
     constexpr int32 ScrollbarBorderSize = 1;
     constexpr int32 ThumbBorderSize = 1;
     constexpr int32 OverlayThumbSize = 3;
     constexpr int32 MinimumThumbSize = 40;
-    constexpr int32 HorizThumbMargin = 6;
     constexpr int32 HorizOverlayThumbMargin = 3;
-    constexpr int32 VertThumbMargin = 7;
+
+    /// @brief A thumb colour's shade for hovering and pressing: lighter for a dark colour, darker for a light
+    /// one.
+    KRYS_NODISCARD Color ThumbStateColor(const Color &color, bool darkThumb) noexcept
+    {
+      return darkThumb ? color.Lightened() : color.Darkened();
+    }
 
     constexpr auto OverlayThumbBorderColorLight = SRGBA<uint8> {255, 255, 255, 102};
     constexpr auto OverlayTroughColorLight = SRGBA<uint8> {0, 0, 0, 25};
@@ -33,11 +57,29 @@ namespace krys::boo
     constexpr auto ThumbColorDark = SRGBA<uint8> {255, 255, 255, 51};
   }
 
+  void ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(bool overlay) noexcept
+  {
+    auto &theme = static_cast<ScrollbarThemeAdwaita &>(Theme());
+    if (theme._usesOverlayScrollbars == overlay)
+    {
+      return;
+    }
+    theme._usesOverlayScrollbars = overlay;
+
+    Page::ForEachPage(
+      [](Page &page)
+      {
+        if (auto *view = page.MainFrame().View())
+        {
+          view->ForEachScrollableArea([](ScrollableArea &area) { area.ScrollbarStyleChanged(); });
+        }
+        page.ScheduleRenderingUpdate();
+      });
+  }
+
   bool ScrollbarThemeAdwaita::UsesOverlayScrollbars() const noexcept
   {
-    // Classic scrollbars (decided): overlay scrollbars fade in and out, which needs animations.
-    // FIXME: Overlay scrollbars.
-    return false;
+    return _usesOverlayScrollbars;
   }
 
   int32
@@ -50,7 +92,7 @@ namespace krys::boo
     {
       return 0;
     }
-    return ScrollbarSize;
+    return MetricsFor(scrollbarWidth).Size;
   }
 
   int32 ScrollbarThemeAdwaita::MinimumThumbLength(Scrollbar &) noexcept
@@ -104,12 +146,12 @@ namespace krys::boo
       return true;
     }
 
-    SRGBA<uint8> overlayThumbBorderColor;
-    SRGBA<uint8> overlayTroughBorderColor;
-    SRGBA<uint8> overlayTroughColor;
-    SRGBA<uint8> thumbHoveredColor;
-    SRGBA<uint8> thumbPressedColor;
-    SRGBA<uint8> thumbColor;
+    Color overlayThumbBorderColor;
+    Color overlayTroughBorderColor;
+    Color overlayTroughColor;
+    Color thumbHoveredColor;
+    Color thumbPressedColor;
+    Color thumbColor;
 
     if (scrollbar.GetScrollableArea().UseDarkAppearanceForScrollbars())
     {
@@ -130,6 +172,17 @@ namespace krys::boo
       thumbColor = ThumbColorLight;
     }
 
+    // scrollbar-color gives the thumb its colour, shaded while it's hovered and more while it's pressed.
+    auto scrollbarColor = scrollbar.GetScrollableArea().ScrollbarColorStyle();
+    if (scrollbarColor)
+    {
+      // Darker than mid grey.
+      bool darkThumb = scrollbarColor->ThumbColor.Luminance() < 0.2;
+      thumbColor = scrollbarColor->ThumbColor;
+      thumbHoveredColor = ThumbStateColor(thumbColor, darkThumb);
+      thumbPressedColor = ThumbStateColor(thumbHoveredColor, darkThumb);
+    }
+
     GraphicsContextStateSaver stateSaver(graphicsContext);
     if (opacity != 1)
     {
@@ -137,11 +190,16 @@ namespace krys::boo
       graphicsContext.BeginTransparencyLayer(static_cast<float>(opacity));
     }
 
-    int32 thumbSize = ScrollbarSize - ScrollbarBorderSize - HorizThumbMargin * 2;
+    const auto &metrics = MetricsFor(scrollbar.WidthStyle());
+    int32 thumbSize = metrics.Size - ScrollbarBorderSize - metrics.ThumbMargin * 2;
     bool onLeft = scrollbar.GetScrollableArea().ShouldPlaceVerticalScrollbarOnLeft();
 
-    // Classic scrollbars have no track or border: what's behind them (the box's background, or the page's)
-    // shows through.
+    // scrollbar-color's track colour fills the track. Without it, classic scrollbars have no track or border:
+    // what's behind them (the box's background, or the page's) shows through.
+    if (scrollbarColor && !UsesOverlayScrollbars())
+    {
+      graphicsContext.FillRect(FloatRect(rect), scrollbarColor->TrackColor);
+    }
     if (UsesOverlayScrollbars() && scrollbar.HoveredPart() != NoPart)
     {
       int32 thumbCornerSize = thumbSize / 2;
@@ -154,20 +212,20 @@ namespace krys::boo
       {
         if (onLeft)
         {
-          trough.Move(ScrollbarSize - (ScrollbarSize / 2 + thumbSize / 2) - ScrollbarBorderSize,
-                      VertThumbMargin);
+          trough.Move(metrics.Size - (metrics.Size / 2 + thumbSize / 2) - ScrollbarBorderSize,
+                      metrics.ThumbEndMargin);
         }
         else
         {
-          trough.Move(ScrollbarSize - (ScrollbarSize / 2 + thumbSize / 2), VertThumbMargin);
+          trough.Move(metrics.Size - (metrics.Size / 2 + thumbSize / 2), metrics.ThumbEndMargin);
         }
         trough.SetWidth(thumbSize);
-        trough.SetHeight(rect.Height() - VertThumbMargin * 2);
+        trough.SetHeight(rect.Height() - metrics.ThumbEndMargin * 2);
       }
       else
       {
-        trough.Move(VertThumbMargin, ScrollbarSize - (ScrollbarSize / 2 + thumbSize / 2));
-        trough.SetWidth(rect.Width() - VertThumbMargin * 2);
+        trough.Move(metrics.ThumbEndMargin, metrics.Size - (metrics.Size / 2 + thumbSize / 2));
+        trough.SetWidth(rect.Width() - metrics.ThumbEndMargin * 2);
         trough.SetHeight(thumbSize);
       }
 
@@ -200,19 +258,21 @@ namespace krys::boo
       {
         if (onLeft)
         {
-          thumb.Move(HorizOverlayThumbMargin, thumbPos + VertThumbMargin);
+          thumb.Move(HorizOverlayThumbMargin, thumbPos + metrics.ThumbEndMargin);
         }
         else
         {
-          thumb.Move(ScrollbarSize - OverlayThumbSize - HorizOverlayThumbMargin, thumbPos + VertThumbMargin);
+          thumb.Move(metrics.Size - OverlayThumbSize - HorizOverlayThumbMargin,
+                     thumbPos + metrics.ThumbEndMargin);
         }
         thumb.SetWidth(OverlayThumbSize);
-        thumb.SetHeight(thumbLen - VertThumbMargin * 2);
+        thumb.SetHeight(thumbLen - metrics.ThumbEndMargin * 2);
       }
       else
       {
-        thumb.Move(thumbPos + VertThumbMargin, ScrollbarSize - OverlayThumbSize - HorizOverlayThumbMargin);
-        thumb.SetWidth(thumbLen - VertThumbMargin * 2);
+        thumb.Move(thumbPos + metrics.ThumbEndMargin,
+                   metrics.Size - OverlayThumbSize - HorizOverlayThumbMargin);
+        thumb.SetWidth(thumbLen - metrics.ThumbEndMargin * 2);
         thumb.SetHeight(OverlayThumbSize);
       }
     }
@@ -224,20 +284,20 @@ namespace krys::boo
       {
         if (onLeft)
         {
-          thumb.Move(ScrollbarSize - (ScrollbarSize / 2 + thumbSize / 2) - ScrollbarBorderSize,
-                     thumbPos + VertThumbMargin);
+          thumb.Move(metrics.Size - (metrics.Size / 2 + thumbSize / 2) - ScrollbarBorderSize,
+                     thumbPos + metrics.ThumbEndMargin);
         }
         else
         {
-          thumb.Move(ScrollbarSize - (ScrollbarSize / 2 + thumbSize / 2), thumbPos + VertThumbMargin);
+          thumb.Move(metrics.Size - (metrics.Size / 2 + thumbSize / 2), thumbPos + metrics.ThumbEndMargin);
         }
         thumb.SetWidth(thumbSize);
-        thumb.SetHeight(thumbLen - VertThumbMargin * 2);
+        thumb.SetHeight(thumbLen - metrics.ThumbEndMargin * 2);
       }
       else
       {
-        thumb.Move(thumbPos + VertThumbMargin, ScrollbarSize - (ScrollbarSize / 2 + thumbSize / 2));
-        thumb.SetWidth(thumbLen - VertThumbMargin * 2);
+        thumb.Move(thumbPos + metrics.ThumbEndMargin, metrics.Size - (metrics.Size / 2 + thumbSize / 2));
+        thumb.SetWidth(thumbLen - metrics.ThumbEndMargin * 2);
         thumb.SetHeight(thumbSize);
       }
     }
@@ -285,9 +345,15 @@ namespace krys::boo
     return true;
   }
 
-  void ScrollbarThemeAdwaita::PaintScrollCorner(ScrollableArea &, GraphicsContext &, const IntRect &) noexcept
+  void ScrollbarThemeAdwaita::PaintScrollCorner(ScrollableArea &area, GraphicsContext &context,
+                                                const IntRect &cornerRect) noexcept
   {
-    // The corner is left unpainted, as the scrollbars' tracks are: what's behind it shows through.
+    // The corner takes scrollbar-color's track colour. Without one, it's left unpainted, as the scrollbars'
+    // tracks are: what's behind it shows through.
+    if (auto scrollbarColor = area.ScrollbarColorStyle())
+    {
+      context.FillRect(FloatRect(cornerRect), scrollbarColor->TrackColor);
+    }
   }
 
   ScrollbarButtonPressAction ScrollbarThemeAdwaita::HandleMousePressEvent(Scrollbar &,

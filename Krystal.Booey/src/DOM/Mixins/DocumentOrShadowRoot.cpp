@@ -3,12 +3,14 @@
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
+#include "Krystal.Booey/DOM/Internals/TreeScopeOrderedMap.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -284,6 +286,105 @@ namespace krys::boo::dom
 
   DocumentOrShadowRoot::~DocumentOrShadowRoot() noexcept = default;
 
+  namespace
+  {
+    KRYS_NODISCARD bool ElementHasId(const Element &element, DOMStringView id) noexcept
+    {
+      return element.Id() == id;
+    }
+
+    KRYS_NODISCARD bool ElementIsImageMapNamed(const Element &element, DOMStringView name) noexcept
+    {
+      auto *map = DynamicDowncast<html::HTMLMapElement>(element);
+      return map && (map->Id() == name || map->Name() == name);
+    }
+  }
+
+  void DocumentOrShadowRoot::AddElementById(DOMStringAtom id, Element &element) noexcept
+  {
+    if (!_elementsById)
+    {
+      _elementsById = CreateUnique<TreeScopeOrderedMap>();
+    }
+    _elementsById->Add(id, element);
+  }
+
+  void DocumentOrShadowRoot::RemoveElementById(DOMStringAtom id, Element &element) noexcept
+  {
+    krys_debug_assert(_elementsById);
+    if (_elementsById)
+    {
+      _elementsById->Remove(id, element);
+    }
+  }
+
+  void DocumentOrShadowRoot::ElementsWithIdChangedOrder(DOMStringAtom id) noexcept
+  {
+    if (_elementsById)
+    {
+      _elementsById->OrderChanged(id);
+    }
+  }
+
+  uint32 DocumentOrShadowRoot::ElementCountWithId(DOMStringView id) const noexcept
+  {
+    return _elementsById && !id.empty() ? _elementsById->Count(DOMStringAtom(id)) : 0;
+  }
+
+  Element *DocumentOrShadowRoot::FirstElementWithId(DOMStringView id) const noexcept
+  {
+    if (!_elementsById || id.empty())
+    {
+      return nullptr;
+    }
+    return _elementsById->First(DOMStringAtom(id), _rootNode, ElementHasId);
+  }
+
+  void DocumentOrShadowRoot::AddImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept
+  {
+    if (!_imageMapsByName)
+    {
+      _imageMapsByName = CreateUnique<TreeScopeOrderedMap>();
+    }
+    _imageMapsByName->Add(name, map);
+  }
+
+  void DocumentOrShadowRoot::RemoveImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept
+  {
+    krys_debug_assert(_imageMapsByName);
+    if (_imageMapsByName)
+    {
+      _imageMapsByName->Remove(name, map);
+    }
+  }
+
+  void DocumentOrShadowRoot::ImageMapsChangedOrder(DOMStringAtom name) noexcept
+  {
+    if (_imageMapsByName)
+    {
+      _imageMapsByName->OrderChanged(name);
+    }
+  }
+
+  html::HTMLMapElement *DocumentOrShadowRoot::FirstImageMap(DOMStringView name) const noexcept
+  {
+    if (!_imageMapsByName || name.empty())
+    {
+      return nullptr;
+    }
+    return static_cast<html::HTMLMapElement *>(
+      _imageMapsByName->First(DOMStringAtom(name), _rootNode, ElementIsImageMapNamed));
+  }
+
+  Span<Element *const> DocumentOrShadowRoot::AllElementsWithId(DOMStringView id) const noexcept
+  {
+    if (!_elementsById || id.empty())
+    {
+      return {};
+    }
+    return _elementsById->All(DOMStringAtom(id), _rootNode, ElementHasId);
+  }
+
 #pragma region DocumentOrShadowRoot Mixin (DOM)
 
   RefPtr<html::CustomElementRegistry> DocumentOrShadowRoot::CustomElementRegistry() const noexcept
@@ -480,7 +581,7 @@ namespace krys::boo::dom
       node = RetargetToScope(*node, _rootNode);
     }
 
-    return ShareRefPtr(DynamicDowncast<Element>(node.get()));
+    return DynamicDowncast<Element>(krys::move(node));
   }
 
   List<RefPtr<Element>> DocumentOrShadowRoot::ElementsFromPoint(double clientX, double clientY,
@@ -541,7 +642,7 @@ namespace krys::boo::dom
         continue;
       }
 
-      elements.push_back(ShareRefPtr(DynamicDowncast<Element>(node.get())));
+      elements.push_back(DynamicDowncast<Element>(node));
       lastNode = node;
     }
 

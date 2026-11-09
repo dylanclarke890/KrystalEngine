@@ -10,6 +10,7 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -17,8 +18,6 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
-#include "Krystal.Editor/PageCanvas2D.hpp"
-#include "Krystal.Editor/PageCube.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -181,6 +180,64 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: a dialog's ::backdrop leaves no stale pixels", "[UI][GPU]")
+  {
+    RepaintFixture fixture(320u, 240u);
+    View view({320, 240});
+    view.LoadHTML(u8"<!DOCTYPE html><style>"
+                  u8"body { margin: 0; background: #f4f4f4 }"
+                  u8"#under { width: 200px; height: 100px; background: #118ab2 }"
+                  u8"dialog { width: 60px; height: 40px; padding: 0; border: 0; background: #ffd166 }"
+                  u8"dialog::backdrop { background: #ef476f80 }"
+                  u8"dialog.changed::backdrop { background: #073b4c80; inset: 40px }"
+                  u8"</style><div id=under></div><dialog id=d></dialog>");
+    WaitForLoad(view);
+
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+    };
+    frame();
+    CheckNoStalePixels(fixture, view, "closed");
+    const auto closed = fixture.Painted(view);
+
+    auto element = view.Document().GetElementById(u8"d");
+    REQUIRE(element);
+    auto &dialog = Downcast<boo::html::HTMLDialogElement>(*element);
+
+    REQUIRE_FALSE(dialog.ShowModal().HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "opened");
+    const auto opened = fixture.Painted(view);
+    CHECK(CompareImages(closed, opened, 2u).PixelsOver > 0u);
+
+    // Its colour and its size change, with no change to the dialog's own box.
+    REQUIRE_FALSE(dialog.SetAttribute(u8"class", u8"changed").HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "changed");
+    CHECK(CompareImages(opened, fixture.Painted(view), 2u).PixelsOver > 0u);
+
+    dialog.RemoveAttribute(u8"class");
+    frame();
+    CheckNoStalePixels(fixture, view, "changed back");
+
+    dialog.Close();
+    frame();
+    CheckNoStalePixels(fixture, view, "closed again");
+    CHECK(CompareImages(closed, fixture.Painted(view), 2u).PixelsOver == 0u);
+
+    // It goes when the dialog is removed, too.
+    REQUIRE_FALSE(dialog.ShowModal().HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "reopened");
+    REQUIRE_FALSE(dialog.Remove().HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "removed");
+    CHECK(CompareImages(closed, fixture.Painted(view), 2u).PixelsOver == 0u);
+  }
+
   TEST_CASE("View: changes inside filters leave no stale pixels", "[UI][GPU]")
   {
     RepaintFixture fixture(320u, 240u);
@@ -317,6 +374,34 @@ namespace krys::ui::tests
     CheckNoStalePixels(fixture, view, "fractional-images");
 
     std::filesystem::remove_all(directory);
+  }
+
+  TEST_CASE("View: composited scrollers at fractional positions paint as the whole page does", "[UI][GPU]")
+  {
+    // The scroller's layers sit at whole pixels, its contents 0.4 pixels into them, scrolled or not.
+    RepaintFixture fixture(120u, 100u);
+    View view({120, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; background: white }"
+      u8"#scroller { position: absolute; left: 10.4px; top: 10.4px; width: 80px; height: 60px; "
+      u8"overflow: auto; scrollbar-width: none; border-radius: 8px; background: #f7f8fb }"
+      u8".row { height: 15.3px; border-bottom: 1px solid #222; background: #06d6a0 }</style>"
+      u8"<div id=scroller><div class=row></div><div class=row></div><div class=row></div>"
+      u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div></div>");
+    WaitForLoad(view);
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    time += 16ms;
+    (void)view.Update(time);
+    auto scroller = view.Document().GetElementById(u8"scroller");
+    REQUIRE(scroller->Renderer()->IsComposited());
+    CheckNoStalePixels(fixture, view, "fractional-scroller");
+
+    // Scrolled so no row's border crosses a rounded corner, whose edge pixels can differ slightly (see
+    // KNOWN-ISSUES.md).
+    scroller->SetScrollTop(34);
+    time += 16ms;
+    (void)view.Update(time);
+    CheckNoStalePixels(fixture, view, "fractional-scroller-scrolled");
   }
 
   TEST_CASE("View: changes beside filters leave no stale pixels", "[UI][GPU]")
@@ -862,6 +947,8 @@ namespace krys::ui::tests
         u8"<!DOCTYPE html><style>body { margin: 0 } @keyframes fade { from { opacity: 0 } to { opacity: 1 } }"
         u8"@keyframes spin { from { transform: rotate(0) } to { transform: rotate(90deg) } }"
         u8"@keyframes tint { from { filter: grayscale(0) } to { filter: grayscale(1) } }"
+        u8"@keyframes turn { from { rotate: 0deg } to { rotate: 90deg } }"
+        u8"@keyframes frost { from { backdrop-filter: invert(0) } to { backdrop-filter: invert(1) } }"
         u8"#box { margin: 20px; width: 30px; height: 20px; background: teal; animation: ";
       markup += animation;
       markup += u8" }</style><div id=box></div>";
@@ -908,21 +995,22 @@ namespace krys::ui::tests
       checkLayerAnimates("layer-transform");
     }
 
-    SECTION("a filter, which layers don't animate, recomposites")
+    SECTION("filter")
     {
       load(u8"tint 1s linear infinite");
-      (void)frame();
-      (void)frame();
-      TrackedRepaints repaints(view);
-      REQUIRE(view.Document().GetElementById(u8"box")->Renderer()->IsComposited());
-      for (int32 i = 0; i < 3; ++i)
-      {
-        repaints.Reset();
-        CHECK(frame());
-        CHECK(repaints.Bounds().IsEmpty());
-        CHECK(repaints.Bounds(repaints.LayerOf(u8"box")).IsEmpty());
-        CheckNoStalePixels(fixture, view, "page-filter-" + std::to_string(i));
-      }
+      checkLayerAnimates("layer-filter");
+    }
+
+    SECTION("rotate")
+    {
+      load(u8"turn 1s linear infinite");
+      checkLayerAnimates("layer-rotate");
+    }
+
+    SECTION("backdrop-filter")
+    {
+      load(u8"frost 1s linear infinite");
+      checkLayerAnimates("layer-backdrop-filter");
     }
 
     SECTION("it ends")
@@ -1225,184 +1313,4 @@ namespace krys::ui::tests
     CheckNoStalePixels(fixture, view, "2d-canvas-changed");
   }
 
-  TEST_CASE("View: the editor page's live 3D view", "[UI][GPU]")
-  {
-    RepaintFixture fixture(1'200u, 600u);
-    View view({1'200, 600});
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    // As the editor makes it once the page has loaded, on the device it paints with.
-    editor::PageCube cube(document, fixture.Device());
-
-    auto canvas = document.GetElementById(u8"cube");
-    REQUIRE(canvas);
-    auto rect = canvas->GetBoundingClientRect();
-    view.ScrollTo(boo::IntPoint(0, view.ScrollPosition().Y() + static_cast<int32>(rect->Top()) - 40));
-    view.UpdateRendering();
-    rect = canvas->GetBoundingClientRect();
-    REQUIRE(rect->Width() == 240);
-    REQUIRE(rect->Height() == 240);
-    const auto left = static_cast<uint32>(rect->Left());
-    const auto top = static_cast<uint32>(rect->Top());
-    const auto centre = boo::IntPoint(static_cast<int32>(left + 120u), static_cast<int32>(top + 120u));
-
-    // Each frame, the cube is drawn into its texture before the page is painted.
-    auto frame = [&]
-    {
-      return fixture.PaintedAfter(view, [&](gfx::CommandBuffer &commands) { cube.Render(commands); });
-    };
-    auto pixel = [](const GoldenImage &image, uint32 x, uint32 y)
-    {
-      return image.Pixels[y * image.Width + x];
-    };
-    // #073b4c, the canvas's background, opaque.
-    constexpr Array<uint8, 4> canvasBackground {0x07, 0x3B, 0x4C, 0xFF};
-
-    auto before = frame();
-    // The cube is in the middle of the canvas, its background around it, and the corners are rounded off.
-    CHECK(pixel(before, left + 120u, top + 120u) != canvasBackground);
-    CHECK(pixel(before, left + 6u, top + 120u) == canvasBackground);
-    CHECK(pixel(before, left + 1u, top + 1u) != canvasBackground);
-    // The same texture fills the wide canvas too.
-    auto strip = document.GetElementById(u8"cube-strip")->GetBoundingClientRect();
-    CHECK(pixel(before, static_cast<uint32>(strip->Left() + strip->Width() / 2),
-                static_cast<uint32>(strip->Top() + strip->Height() / 2))
-          != canvasBackground);
-
-    // Dragging it turns the cube.
-    view.MouseMoved(centre);
-    view.MousePressed(centre, pal::MouseButton::Left);
-    view.MouseMoved(boo::IntPoint(centre.X() + 30, centre.Y()));
-    view.MouseMoved(boo::IntPoint(centre.X() + 60, centre.Y() + 20));
-    view.MouseReleased(boo::IntPoint(centre.X() + 60, centre.Y() + 20), pal::MouseButton::Left);
-    auto label = document.GetElementById(u8"cube-angle")->TextContent().value_or(boo::dom::DOMString {});
-    CHECK(std::string(label.begin(), label.end()).starts_with("Turned "));
-    auto after = frame();
-    CHECK(CompareImages(before, after, 2u).PixelsOver > 1'000u);
-
-    // Painted again whole, which draws the texture as an image, the canvases are as composited. (The page's
-    // frosted badge, a backdrop filter, isn't compared: the whole repaint draws no backdrops.)
-    auto repainted = fixture.Repainted(view);
-    auto sameWithin = [&](const boo::dom::DOMRectReadOnly &area)
-    {
-      uint32 differing = 0u;
-      for (auto y = static_cast<uint32>(area.Top()); y < static_cast<uint32>(area.Bottom()); ++y)
-      {
-        for (auto x = static_cast<uint32>(area.Left()); x < static_cast<uint32>(area.Right()); ++x)
-        {
-          const auto &a = pixel(after, x, y);
-          const auto &b = pixel(repainted, x, y);
-          for (size_t channel = 0; channel < 4u; ++channel)
-          {
-            if (std::abs(int32(a[channel]) - int32(b[channel])) > 2)
-            {
-              ++differing;
-              break;
-            }
-          }
-        }
-      }
-      return differing;
-    };
-    CHECK(sameWithin(*canvas->GetBoundingClientRect()) == 0u);
-    CHECK(sameWithin(*document.GetElementById(u8"cube-strip")->GetBoundingClientRect()) == 0u);
-  }
-
-  TEST_CASE("View: the editor page's canvas 2D sample", "[UI][GPU]")
-  {
-    RepaintFixture fixture(1'200u, 600u);
-    View view({1'200, 600});
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    // As the editor makes it once the page has loaded; its readbacks need the device the view paints with.
-    view.SetDevice(fixture.Device());
-    editor::PageCanvas2D sample(document);
-
-    auto chart = document.GetElementById(u8"chart");
-    REQUIRE(chart);
-    auto rect = chart->GetBoundingClientRect();
-    view.ScrollTo(boo::IntPoint(0, view.ScrollPosition().Y() + static_cast<int32>(rect->Top()) - 40));
-    view.UpdateRendering();
-    rect = chart->GetBoundingClientRect();
-    REQUIRE(rect->Width() == 320);
-    REQUIRE(rect->Height() == 160);
-
-    auto pixel = [](const GoldenImage &image, double x, double y)
-    {
-      return image.Pixels[static_cast<uint32>(y) * image.Width + static_cast<uint32>(x)];
-    };
-    constexpr Array<uint8, 4> white {0xFF, 0xFF, 0xFF, 0xFF};
-
-    // The chart: the newest value's bar is filled with its pattern, and it's redrawn as values come in.
-    view.UpdateRendering();
-    auto before = fixture.Painted(view);
-    const auto barX = rect->Left() + 296;
-    const auto barY = rect->Top() + 139;
-    CHECK(pixel(before, barX, barY) != white);
-    CHECK(pixel(before, rect->Left() + 300, rect->Top() + 6) == white);
-    const auto values = sample.Values();
-    sample.Update(1.f);
-    CHECK(sample.Values() != values);
-    CHECK(sample.Values()[0] == values[1]);
-    view.UpdateRendering();
-    auto after = fixture.Painted(view);
-    CHECK(CompareImages(before, after, 2u).PixelsOver > 100u);
-
-    // The pad keeps what's drawn on it.
-    auto pad = document.GetElementById(u8"pad")->GetBoundingClientRect();
-    const auto from =
-      boo::IntPoint(static_cast<int32>(pad->Left() + 40), static_cast<int32>(pad->Top() + 100));
-    const auto to =
-      boo::IntPoint(static_cast<int32>(pad->Left() + 200), static_cast<int32>(pad->Top() + 100));
-    view.MouseMoved(from);
-    view.MousePressed(from, pal::MouseButton::Left);
-    view.MouseMoved(boo::IntPoint(from.X() + 80, from.Y()));
-    view.MouseMoved(to);
-    view.MouseReleased(to, pal::MouseButton::Left);
-    view.UpdateRendering();
-    auto drawn = fixture.Painted(view);
-    // #1a2240, the default colour.
-    CHECK(pixel(drawn, pad->Left() + 120, pad->Top() + 100) == Array<uint8, 4> {0x1A, 0x22, 0x40, 0xFF});
-    CHECK(pixel(drawn, pad->Left() + 120, pad->Top() + 40) == white);
-
-    // A colour picked from the palette's pixels draws the next stroke.
-    auto palette = document.GetElementById(u8"pad-palette")->GetBoundingClientRect();
-    const auto red =
-      boo::IntPoint(static_cast<int32>(palette->Left() + 2), static_cast<int32>(palette->Top() + 14));
-    view.MouseMoved(red);
-    view.MousePressed(red, pal::MouseButton::Left);
-    view.MouseReleased(red, pal::MouseButton::Left);
-    auto swatch = document.GetElementById(u8"pad-colour")
-                    ->GetAttribute(boo::dom::DOMStringAtom(u8"style"))
-                    .value_or(boo::dom::DOMString {});
-    CHECK(std::string(swatch.begin(), swatch.end()).starts_with("background: rgb("));
-    const auto below = boo::IntPoint(from.X(), from.Y() + 40);
-    view.MouseMoved(below);
-    view.MousePressed(below, pal::MouseButton::Left);
-    view.MouseMoved(boo::IntPoint(to.X(), below.Y()));
-    view.MouseReleased(boo::IntPoint(to.X(), below.Y()), pal::MouseButton::Left);
-    view.UpdateRendering();
-    auto picked = fixture.Painted(view);
-    const auto stroke = pixel(picked, pad->Left() + 120, pad->Top() + 140);
-    CHECK(stroke[0] > 200);
-    CHECK(stroke[2] < 80);
-
-    // Clearing empties it.
-    auto clear = document.GetElementById(u8"pad-clear")->GetBoundingClientRect();
-    const auto button = boo::IntPoint(static_cast<int32>(clear->Left() + clear->Width() / 2),
-                                      static_cast<int32>(clear->Top() + clear->Height() / 2));
-    view.MouseMoved(button);
-    view.MousePressed(button, pal::MouseButton::Left);
-    view.MouseReleased(button, pal::MouseButton::Left);
-    view.UpdateRendering();
-    auto cleared = fixture.Painted(view);
-    CHECK(pixel(cleared, pad->Left() + 120, pad->Top() + 100) == white);
-    CHECK(pixel(cleared, pad->Left() + 120, pad->Top() + 140) == white);
-  }
 }

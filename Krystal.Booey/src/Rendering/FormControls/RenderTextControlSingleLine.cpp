@@ -560,7 +560,8 @@ namespace krys::boo
   }
 
   bool RenderTextControlSingleLine::Scroll(ScrollDirection direction, ScrollGranularity granularity,
-                                           uint32 stepCount, dom::Element **stopElement) noexcept
+                                           uint32 stepCount, dom::Element **stopElement,
+                                           ScrollIsAnimated animated) noexcept
   {
     auto *renderer = InnerTextElement()->Renderer();
     if (!renderer)
@@ -568,27 +569,28 @@ namespace krys::boo
       return false;
     }
     auto *scrollableArea = renderer->Layer() ? renderer->Layer()->GetScrollableArea() : nullptr;
-    if (scrollableArea && scrollableArea->Scroll(direction, granularity, stepCount))
+    if (scrollableArea && scrollableArea->Scroll(direction, granularity, stepCount, animated))
     {
       return true;
     }
-    return RenderBlockFlow::Scroll(direction, granularity, stepCount, stopElement);
+    return RenderBlockFlow::Scroll(direction, granularity, stepCount, stopElement, animated);
   }
 
   bool RenderTextControlSingleLine::LogicalScroll(ScrollLogicalDirection direction,
                                                   ScrollGranularity granularity, uint32 stepCount,
-                                                  dom::Element **stopElement) noexcept
+                                                  dom::Element **stopElement,
+                                                  ScrollIsAnimated animated) noexcept
   {
     auto *layer = InnerTextElement()->Renderer()->Layer();
     auto *scrollableArea = layer ? layer->GetScrollableArea() : nullptr;
     if (scrollableArea
         && scrollableArea->Scroll(
           LogicalToPhysical(direction, GetWritingMode().IsHorizontal(), GetWritingMode().IsBlockFlipped()),
-          granularity, stepCount))
+          granularity, stepCount, animated))
     {
       return true;
     }
-    return RenderBlockFlow::LogicalScroll(direction, granularity, stepCount, stopElement);
+    return RenderBlockFlow::LogicalScroll(direction, granularity, stepCount, stopElement, animated);
   }
 
   html::HTMLInputElement &RenderTextControlSingleLine::InputElement() const noexcept

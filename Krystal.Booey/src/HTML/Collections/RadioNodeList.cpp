@@ -1,56 +1,34 @@
 ﻿#include "Krystal.Booey/HTML/Collections/RadioNodeList.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
 
 namespace krys::boo::html
 {
-  RadioNodeList::RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name) noexcept
-      : _ownerNode(ShareRef(ownerNode)), _name(name), _isRootedAtTreeScope(Is<HTMLFormElement>(ownerNode))
+  RadioNodeList::RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name,
+                               RadioNodeListCandidates candidates) noexcept
+      : LiveNodeList(
+          ownerNode,
+          [this](const dom::Node &node)
+          {
+            auto *element = DynamicDowncast<dom::Element>(node);
+            return element && ElementMatches(*element);
+          },
+          dom::LiveCollectionInvalidation::FormControls,
+          // A form's list is rooted at its tree, as its controls can be anywhere in it.
+          Is<HTMLFormElement>(ownerNode) ? dom::LiveCollectionTraversal::OwnerTree
+                                         : dom::LiveCollectionTraversal::Descendants),
+        _ownerNode(ShareRef(ownerNode)), _name(name), _candidates(candidates)
   {
   }
 
-  List<Ref<dom::Element>> RadioNodeList::Elements() const noexcept
+  RadioNodeList::~RadioNodeList() noexcept
   {
-    // A form's list is rooted at its tree, as its controls can be anywhere in it.
-    dom::Node &root = _isRootedAtTreeScope ? dom::TreeQueries::Root(*_ownerNode) : *_ownerNode;
-    List<Ref<dom::Element>> elements;
-    for (auto &node : dom::DescendantRange(root))
+    if (auto *form = DynamicDowncast<HTMLFormElement>(*_ownerNode))
     {
-      if (auto *element = DynamicDowncast<dom::Element>(node); element && ElementMatches(*element))
-      {
-        elements.push_back(ShareRef(*element));
-      }
+      form->RadioNodeListDestroyed(_name, _candidates);
     }
-    return elements;
-  }
-
-  RefPtr<dom::Node> RadioNodeList::Item(size_t index) noexcept
-  {
-    auto elements = Elements();
-    return index < elements.size() ? RefPtr<dom::Node>(elements[index]) : nullptr;
-  }
-
-  RefPtr<const dom::Node> RadioNodeList::Item(size_t index) const noexcept
-  {
-    return const_cast<RadioNodeList *>(this)->Item(index);
-  }
-
-  RefPtr<dom::Node> RadioNodeList::operator[](size_t index) noexcept
-  {
-    return Item(index);
-  }
-
-  RefPtr<const dom::Node> RadioNodeList::operator[](size_t index) const noexcept
-  {
-    return Item(index);
-  }
-
-  size_t RadioNodeList::Length() const noexcept
-  {
-    return Elements().size();
   }
 
   dom::DOMString RadioNodeList::Value() const noexcept
@@ -58,8 +36,9 @@ namespace krys::boo::html
     // 1. Let element be the first element in tree order represented by the RadioNodeList object that is an
     //    input element whose type attribute is in the Radio Button state and whose checkedness is true.
     //    Otherwise, let it be null.
-    for (auto &element : Elements())
+    for (size_t i = 0, length = Length(); i < length; ++i)
     {
+      auto element = Item(i);
       auto *input = DynamicDowncast<HTMLInputElement>(element.get());
       if (input && input->IsRadioButton() && input->Checked())
       {
@@ -82,8 +61,9 @@ namespace krys::boo::html
     //    element in tree order represented by the RadioNodeList object that is an input element whose type
     //    attribute is in the Radio Button state and whose value content attribute is present and equal to the
     //    new value, if any. If no such element exists, then instead let element be null.
-    for (auto &element : Elements())
+    for (size_t i = 0, length = Length(); i < length; ++i)
     {
+      auto element = Item(i);
       auto *input = DynamicDowncast<HTMLInputElement>(element.get());
       if (!input || !input->IsRadioButton())
       {
@@ -101,6 +81,13 @@ namespace krys::boo::html
 
   bool RadioNodeList::ElementMatches(const dom::Element &element) const noexcept
   {
+    if (_candidates == RadioNodeListCandidates::Images)
+    {
+      auto *image = DynamicDowncast<HTMLImageElement>(element);
+      return image && image->Form() == _ownerNode.get()
+             && (element.GetAttribute(u8"id") == _name || element.GetAttribute(u8"name") == _name);
+    }
+
     if (!element.IsFormListedElement())
     {
       return false;

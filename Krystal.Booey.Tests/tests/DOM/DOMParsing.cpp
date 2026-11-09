@@ -57,7 +57,7 @@ namespace krys::boo::dom::tests
       auto span = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
       (void)span->SetAttribute(DOMStringAtom(u8"title"), u8"\"q\" & more");
       REQUIRE_FALSE(div.AppendChild(*span).HasException());
-      CHECK(MarkupText(div.InnerHTML())
+      CHECK(MarkupText(div.InnerHTML().ReleaseValue())
             == "a &lt; b &amp; c<span title=\"&quot;q&quot; &amp; more\"></span>");
     }
 
@@ -65,7 +65,7 @@ namespace krys::boo::dom::tests
     {
       REQUIRE_FALSE(div.AppendChild(*data.Document->CreateTextNode(u8"old")).HasException());
       REQUIRE_FALSE(div.InnerHTML(u8"<p id=x>one<b>two</p>three").HasException());
-      CHECK(MarkupText(div.InnerHTML()) == "<p id=\"x\">one<b>two</b></p><b>three</b>");
+      CHECK(MarkupText(div.InnerHTML().ReleaseValue()) == "<p id=\"x\">one<b>two</b></p><b>three</b>");
       CHECK(div.FirstChild()->NodeDocument() == *data.Document);
       CHECK(data.Document->GetElementById(u8"x") != nullptr);
     }
@@ -81,7 +81,7 @@ namespace krys::boo::dom::tests
     {
       auto table = data.Document->CreateElement(DOMStringAtom(u8"table")).ReleaseValue();
       REQUIRE_FALSE(table->InnerHTML(u8"<tr><td>1</td></tr>").HasException());
-      CHECK(MarkupText(table->InnerHTML()) == "<tbody><tr><td>1</td></tr></tbody>");
+      CHECK(MarkupText(table->InnerHTML().ReleaseValue()) == "<tbody><tr><td>1</td></tr></tbody>");
 
       auto textarea = data.Document->CreateElement(DOMStringAtom(u8"textarea")).ReleaseValue();
       REQUIRE_FALSE(textarea->InnerHTML(u8"<b>not bold</b>").HasException());
@@ -109,7 +109,7 @@ namespace krys::boo::dom::tests
       CHECK_FALSE(templateElement->HasChildNodes());
       auto content = Downcast<html::HTMLTemplateElement>(*templateElement).Content();
       REQUIRE(content->FirstChild());
-      CHECK(MarkupText(templateElement->InnerHTML()) == "<span>in</span>");
+      CHECK(MarkupText(templateElement->InnerHTML().ReleaseValue()) == "<span>in</span>");
     }
 
     SECTION("doesn't attach declarative shadow roots")
@@ -207,7 +207,7 @@ namespace krys::boo::dom::tests
     {
       auto child = document->CreateElementNS(DOMStringAtom::Null(), DOMStringAtom(u8"c")).ReleaseValue();
       REQUIRE_FALSE(root->AppendChild(*child).HasException());
-      CHECK(MarkupText(root->InnerHTML()) == "<c xmlns=\"\"/>");
+      CHECK(MarkupText(root->InnerHTML().ReleaseValue()) == "<c xmlns=\"\"/>");
     }
 
     SECTION("serialises a template's contents")
@@ -218,21 +218,100 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(root->AppendChild(*templateElement).HasException());
       REQUIRE_FALSE(templateElement->InnerHTML(u8"<b/>").HasException());
       CHECK(templateElement->FirstChild() == nullptr);
-      CHECK(MarkupText(templateElement->InnerHTML()) == "<b xmlns=\"http://www.w3.org/1999/xhtml\"></b>");
+      CHECK(MarkupText(templateElement->InnerHTML().ReleaseValue())
+            == "<b xmlns=\"http://www.w3.org/1999/xhtml\"></b>");
     }
   }
 
   TEST_CASE("The XML fragment serialization algorithm refuses a DOM that isn't well-formed",
-            "[DOM][Element][DOMParsing][html:xml-fragment-serialisation-algorithm][!shouldfail]")
+            "[DOM][Element][DOMParsing][html:xml-fragment-serialisation-algorithm][html:fragment-serializing-"
+            "algorithm-steps][html:dom-element-innerhtml][html:dom-element-outerhtml]")
   {
-    // FIXME: Serializing XML doesn't check for the error cases, so it writes markup that isn't well-formed
-    // where it should throw an InvalidStateError. See KNOWN-ISSUES.md.
     auto document = CreateRef<XMLDocument>();
     auto root =
       document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
-    REQUIRE_FALSE(root->AppendChild(*document->CreateComment(u8"a--b")).HasException());
-    CHECK(MarkupText(root->InnerHTML()).find("a--b") == std::string::npos);
+
+    auto throwsInvalidState = [&]
+    {
+      auto inner = root->InnerHTML();
+      auto outer = root->OuterHTML();
+      CHECK(inner.HasException() == outer.HasException());
+      return inner.HasException() && inner.GetException().Code() == ExceptionCode::InvalidStateError;
+    };
+    auto append = [&](Node &child)
+    {
+      REQUIRE_FALSE(root->AppendChild(child).HasException());
+    };
+
+    SECTION("well-formed nodes serialise")
+    {
+      append(*document->CreateComment(u8"a-b"));
+      append(*document->CreateProcessingInstruction(u8"target", u8"a?b>").ReleaseValue());
+      append(*document->CreateTextNode(u8"\t\n\r\uFFFD"));
+      CHECK_FALSE(throwsInvalidState());
+      CHECK(MarkupText(root->InnerHTML().ReleaseValue()) == "<!--a-b--><?target a?b>?>\t\n\r\uFFFD");
+    }
+
+    SECTION("a comment with two adjacent hyphens, or ending with one")
+    {
+      auto comment = document->CreateComment(u8"a--b");
+      append(*comment);
+      CHECK(throwsInvalidState());
+      REQUIRE_FALSE(comment->Data(u8"a-").HasException());
+      CHECK(throwsInvalidState());
+    }
+
+    SECTION("a processing instruction targeting xml, with a colon in its target, or with ?> in its data")
+    {
+      auto instruction = document->CreateProcessingInstruction(u8"XmL", u8"").ReleaseValue();
+      append(*instruction);
+      CHECK(throwsInvalidState());
+      REQUIRE_FALSE(root->RemoveChild(*instruction).HasException());
+      append(*document->CreateProcessingInstruction(u8"a:b", u8"").ReleaseValue());
+      CHECK(throwsInvalidState());
+      REQUIRE_FALSE(root->RemoveChild(*root->FirstChild()).HasException());
+      instruction = document->CreateProcessingInstruction(u8"a", u8"").ReleaseValue();
+      append(*instruction);
+      CHECK_FALSE(throwsInvalidState());
+      REQUIRE_FALSE(instruction->Data(u8"?>").HasException());
+      CHECK(throwsInvalidState());
+    }
+
+    SECTION("data with characters that aren't XML Chars")
+    {
+      append(*document->CreateTextNode(u8"\u0001"));
+      CHECK(throwsInvalidState());
+      REQUIRE_FALSE(root->RemoveChild(*root->FirstChild()).HasException());
+      append(*document->CreateTextNode(u8"\uFFFF"));
+      CHECK(throwsInvalidState());
+      REQUIRE_FALSE(root->RemoveChild(*root->FirstChild()).HasException());
+      auto child = document->CreateElement(DOMStringAtom(u8"c")).ReleaseValue();
+      append(*child);
+      REQUIRE_FALSE(child->SetAttribute(DOMStringAtom(u8"a"), u8"\u001F").HasException());
+      CHECK(throwsInvalidState());
+    }
+
+    SECTION("an element whose local name has a colon")
+    {
+      append(*document->CreateElement(DOMStringAtom(u8"a:b")).ReleaseValue());
+      CHECK(throwsInvalidState());
+    }
+
+    SECTION("an attribute in no namespace named xmlns")
+    {
+      auto child = document->CreateElement(DOMStringAtom(u8"c")).ReleaseValue();
+      append(*child);
+      REQUIRE_FALSE(child->SetAttribute(DOMStringAtom(u8"xmlns"), u8"urn:other").HasException());
+      CHECK(throwsInvalidState());
+    }
+
+    SECTION("an HTML document has no error cases")
+    {
+      MarkupDocument data;
+      REQUIRE_FALSE(data.Div->AppendChild(*data.Document->CreateComment(u8"a--b")).HasException());
+      CHECK(MarkupText(data.Div->InnerHTML().ReleaseValue()) == "<!--a--b-->");
+    }
   }
 
   TEST_CASE("The XML fragment parsing algorithm parses a script's or style's markup like any other",
@@ -268,7 +347,7 @@ namespace krys::boo::dom::tests
 
     REQUIRE_FALSE(div.InnerHTML(u8"<area><base><br><embed><hr><img><input><link><meta><source><track><wbr>")
                     .HasException());
-    CHECK(MarkupText(div.InnerHTML())
+    CHECK(MarkupText(div.InnerHTML().ReleaseValue())
           == "<area><base><br><embed><hr><img><input><link><meta><source><track><wbr>");
 
     // Elements made by the DOM serialise as void even with children: col (which the parser only keeps in a
@@ -277,7 +356,7 @@ namespace krys::boo::dom::tests
     {
       auto element = data.Document->CreateElement(DOMStringAtom(name)).ReleaseValue();
       REQUIRE_FALSE(element->AppendChild(*data.Document->CreateTextNode(u8"text")).HasException());
-      CHECK(MarkupText(element->OuterHTML()) == "<" + MarkupText(name) + ">");
+      CHECK(MarkupText(element->OuterHTML().ReleaseValue()) == "<" + MarkupText(name) + ">");
     }
   }
 
@@ -302,7 +381,7 @@ namespace krys::boo::dom::tests
     {
       auto br = make(u8"br");
       REQUIRE_FALSE(br->AppendChild(*document.CreateTextNode(u8"text")).HasException());
-      CHECK(MarkupText(br->InnerHTML()).empty());
+      CHECK(MarkupText(br->InnerHTML().ReleaseValue()).empty());
     }
 
     SECTION("escapes text and attribute values")
@@ -311,7 +390,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(span->SetAttribute(DOMStringAtom(u8"title"), u8"&\u00A0\"<>").HasException());
       REQUIRE_FALSE(span->AppendChild(*document.CreateTextNode(u8"&\u00A0\"<>")).HasException());
       REQUIRE_FALSE(div.AppendChild(*span).HasException());
-      CHECK(MarkupText(div.InnerHTML())
+      CHECK(MarkupText(div.InnerHTML().ReleaseValue())
             == "<span title=\"&amp;&nbsp;&quot;&lt;&gt;\">&amp;&nbsp;\"&lt;&gt;</span>");
     }
 
@@ -321,12 +400,12 @@ namespace krys::boo::dom::tests
       {
         auto element = make(name);
         REQUIRE_FALSE(element->AppendChild(*document.CreateTextNode(u8"<&>")).HasException());
-        CHECK(MarkupText(element->InnerHTML()) == "<&>");
+        CHECK(MarkupText(element->InnerHTML().ReleaseValue()) == "<&>");
       }
 
       auto noscript = make(u8"noscript");
       REQUIRE_FALSE(noscript->AppendChild(*document.CreateTextNode(u8"<&>")).HasException());
-      CHECK(MarkupText(noscript->InnerHTML()) == "&lt;&amp;&gt;");
+      CHECK(MarkupText(noscript->InnerHTML().ReleaseValue()) == "&lt;&amp;&gt;");
     }
 
     SECTION("serialises attributes with their serialised names")
@@ -346,16 +425,19 @@ namespace krys::boo::dom::tests
           .HasException());
       REQUIRE_FALSE(
         span->SetAttributeNS(DOMStringAtom(u8"urn:x"), DOMStringAtom(u8"d:e"), u8"5").HasException());
-      CHECK(MarkupText(span->OuterHTML())
+      CHECK(MarkupText(span->OuterHTML().ReleaseValue())
             == "<span xml:lang=\"1\" xlink:href=\"2\" xmlns=\"3\" xmlns:c=\"4\" d:e=\"5\"></span>");
     }
 
     SECTION("uses the local name of HTML, SVG and MathML elements, and the qualified name of others")
     {
-      CHECK(MarkupText(makeNS(infra::Namespaces::HTML, u8"a:div")->OuterHTML()) == "<div></div>");
-      CHECK(MarkupText(makeNS(infra::Namespaces::SVG, u8"b:svg")->OuterHTML()) == "<svg></svg>");
-      CHECK(MarkupText(makeNS(infra::Namespaces::MathML, u8"c:math")->OuterHTML()) == "<math></math>");
-      CHECK(MarkupText(makeNS(u8"urn:x", u8"d:e")->OuterHTML()) == "<d:e></d:e>");
+      CHECK(MarkupText(makeNS(infra::Namespaces::HTML, u8"a:div")->OuterHTML().ReleaseValue())
+            == "<div></div>");
+      CHECK(MarkupText(makeNS(infra::Namespaces::SVG, u8"b:svg")->OuterHTML().ReleaseValue())
+            == "<svg></svg>");
+      CHECK(MarkupText(makeNS(infra::Namespaces::MathML, u8"c:math")->OuterHTML().ReleaseValue())
+            == "<math></math>");
+      CHECK(MarkupText(makeNS(u8"urn:x", u8"d:e")->OuterHTML().ReleaseValue()) == "<d:e></d:e>");
     }
 
     SECTION("adds an is value that isn't in the attributes")
@@ -363,10 +445,10 @@ namespace krys::boo::dom::tests
       auto withIs =
         document.CreateElement(DOMStringAtom(u8"p"), ElementCreationOptions {.Is = DOMStringAtom(u8"x-a")})
           .ReleaseValue();
-      CHECK(MarkupText(withIs->OuterHTML()) == "<p is=\"x-a\"></p>");
+      CHECK(MarkupText(withIs->OuterHTML().ReleaseValue()) == "<p is=\"x-a\"></p>");
 
       REQUIRE_FALSE(withIs->SetAttribute(DOMStringAtom(u8"is"), u8"x-b").HasException());
-      CHECK(MarkupText(withIs->OuterHTML()) == "<p is=\"x-b\"></p>");
+      CHECK(MarkupText(withIs->OuterHTML().ReleaseValue()) == "<p is=\"x-b\"></p>");
     }
 
     SECTION("serialises comments and processing instructions")
@@ -374,7 +456,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(div.AppendChild(*document.CreateComment(u8"c")).HasException());
       REQUIRE_FALSE(
         div.AppendChild(*document.CreateProcessingInstruction(u8"t", u8"d").ReleaseValue()).HasException());
-      CHECK(MarkupText(div.InnerHTML()) == "<!--c--><?t d>");
+      CHECK(MarkupText(div.InnerHTML().ReleaseValue()) == "<!--c--><?t d>");
     }
 
     SECTION("serialises a shadow root's options, in order")
@@ -404,14 +486,14 @@ namespace krys::boo::dom::tests
     {
       (void)div.SetAttribute(DOMStringAtom(u8"id"), u8"d");
       REQUIRE_FALSE(div.InnerHTML(u8"<br>").HasException());
-      CHECK(MarkupText(div.OuterHTML()) == "<div id=\"d\"><br></div>");
+      CHECK(MarkupText(div.OuterHTML().ReleaseValue()) == "<div id=\"d\"><br></div>");
     }
 
     SECTION("replaces the element, parsed in its parent's context")
     {
       REQUIRE_FALSE(div.OuterHTML(u8"<p>1</p><p>2</p>").HasException());
       CHECK_FALSE(div.ParentNode());
-      CHECK(MarkupText(data.Body->InnerHTML()) == "<p>1</p><p>2</p>");
+      CHECK(MarkupText(data.Body->InnerHTML().ReleaseValue()) == "<p>1</p><p>2</p>");
     }
 
     SECTION("merges the text nodes it leaves next to each other")
@@ -421,7 +503,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(span->OuterHTML(u8"b c").HasException());
       REQUIRE(data.Body->FirstChild());
       CHECK(data.Body->FirstChild() == data.Body->LastChild());
-      CHECK(MarkupText(data.Body->InnerHTML()) == "ab cd");
+      CHECK(MarkupText(data.Body->InnerHTML().ReleaseValue()) == "ab cd");
     }
 
     SECTION("does nothing without a parent, and throws when the parent is the document")
@@ -460,7 +542,8 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(div.InsertAdjacentHTML(InsertAdjacentWhere::AfterBegin, u8"<b></b>").HasException());
       REQUIRE_FALSE(div.InsertAdjacentHTML(InsertAdjacentWhere::BeforeEnd, u8"<u></u>").HasException());
       REQUIRE_FALSE(div.InsertAdjacentHTML(InsertAdjacentWhere::AfterEnd, u8"<s></s>").HasException());
-      CHECK(MarkupText(data.Body->InnerHTML()) == "<a></a><div><b></b><i></i><u></u></div><s></s>");
+      CHECK(MarkupText(data.Body->InnerHTML().ReleaseValue())
+            == "<a></a><div><b></b><i></i><u></u></div><s></s>");
     }
 
     SECTION("parses in the parent's context before and after the element")
@@ -469,12 +552,12 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(div.AppendChild(*table).HasException());
       REQUIRE_FALSE(
         table->InsertAdjacentHTML(InsertAdjacentWhere::AfterBegin, u8"<td>1</td>").HasException());
-      CHECK(MarkupText(table->InnerHTML()) == "<tbody><tr><td>1</td></tr></tbody>");
+      CHECK(MarkupText(table->InnerHTML().ReleaseValue()) == "<tbody><tr><td>1</td></tr></tbody>");
 
       // Before the table, the context is the div, where a td start tag is ignored.
       REQUIRE_FALSE(
         table->InsertAdjacentHTML(InsertAdjacentWhere::BeforeBegin, u8"<td>2</td>").HasException());
-      CHECK(MarkupText(div.InnerHTML()).starts_with("<i></i>2<table>"));
+      CHECK(MarkupText(div.InnerHTML().ReleaseValue()).starts_with("<i></i>2<table>"));
     }
 
     SECTION("parses as in a body next to the document element")
@@ -528,7 +611,7 @@ namespace krys::boo::dom::tests
     {
       auto shadow = p->AttachShadow({.Serialisable = Serialisable(true)}).ReleaseValue();
       REQUIRE_FALSE(shadow->InnerHTML(u8"<b></b>").HasException());
-      CHECK(MarkupText(div.InnerHTML()) == "<p></p>");
+      CHECK(MarkupText(div.InnerHTML().ReleaseValue()) == "<p></p>");
       CHECK(MarkupText(div.GetHTML()) == "<p></p>");
       CHECK(MarkupText(div.GetHTML({.SerializableShadowRoots = true}))
             == "<p><template shadowrootmode=\"open\" shadowrootserializable=\"\"><b></b></template></p>");
@@ -548,7 +631,7 @@ namespace krys::boo::dom::tests
       auto shadow = p->AttachShadow({}).ReleaseValue();
       REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<b>1</b>").HasException());
       CHECK(MarkupText(shadow->GetHTML()) == "<b>1</b>");
-      CHECK(MarkupText(shadow->InnerHTML()) == "<b>1</b>");
+      CHECK(MarkupText(shadow->InnerHTML().ReleaseValue()) == "<b>1</b>");
       REQUIRE_FALSE(shadow->InnerHTML(u8"").HasException());
       CHECK_FALSE(shadow->HasChildNodes());
     }
@@ -556,7 +639,7 @@ namespace krys::boo::dom::tests
     SECTION("setHTMLUnsafe replaces the element's children")
     {
       REQUIRE_FALSE(div.SetHTMLUnsafe(u8"<span>1</span>").HasException());
-      CHECK(MarkupText(div.InnerHTML()) == "<span>1</span>");
+      CHECK(MarkupText(div.InnerHTML().ReleaseValue()) == "<span>1</span>");
     }
   }
 
@@ -584,7 +667,7 @@ namespace krys::boo::dom::tests
     REQUIRE(p);
     auto shadow = p->ShadowRoot();
     REQUIRE(shadow);
-    CHECK(MarkupText(shadow->InnerHTML()) == "<b></b>");
+    CHECK(MarkupText(shadow->InnerHTML().ReleaseValue()) == "<b></b>");
     CHECK_FALSE(p->HasChildNodes());
 
     auto result = Document::ParseHTMLUnsafe(
@@ -628,10 +711,10 @@ namespace krys::boo::dom::tests
                       .HasException());
       auto p = div.FirstElementChild();
       REQUIRE(p->ShadowRoot());
-      CHECK(MarkupText(p->ShadowRoot()->InnerHTML()) == "<b></b>");
+      CHECK(MarkupText(p->ShadowRoot()->InnerHTML().ReleaseValue()) == "<b></b>");
       auto *second = DynamicDowncast<html::HTMLTemplateElement>(p->FirstElementChild().get());
       REQUIRE(second);
-      CHECK(MarkupText(second->InnerHTML()) == "<i></i>");
+      CHECK(MarkupText(second->InnerHTML().ReleaseValue()) == "<i></i>");
     }
 
     SECTION("an invalid mode leaves a template")
@@ -661,7 +744,7 @@ namespace krys::boo::dom::tests
       auto span = outer->FirstElementChild();
       REQUIRE(span);
       REQUIRE(span->ShadowRoot());
-      CHECK(MarkupText(span->ShadowRoot()->InnerHTML()) == "<b></b>");
+      CHECK(MarkupText(span->ShadowRoot()->InnerHTML().ReleaseValue()) == "<b></b>");
     }
 
     SECTION("attach in a document's head and body")
@@ -672,7 +755,7 @@ namespace krys::boo::dom::tests
       auto host = result.Value()->GetElementById(u8"d");
       REQUIRE(host);
       REQUIRE(host->ShadowRoot());
-      CHECK(MarkupText(host->ShadowRoot()->InnerHTML()) == "text");
+      CHECK(MarkupText(host->ShadowRoot()->InnerHTML().ReleaseValue()) == "text");
     }
   }
 }

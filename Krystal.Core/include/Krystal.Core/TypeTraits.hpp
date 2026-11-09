@@ -62,6 +62,10 @@ namespace krys
   template <typename T>
   using decay_t = typename std::decay_t<T>;
 
+  /// @brief The type calling a @p TFunc with @p Args returns.
+  template <typename TFunc, typename... Args>
+  using invoke_result_t = typename std::invoke_result_t<TFunc, Args...>;
+
   /// @brief Converts an integral type to its signed counterpart.
   template <typename T>
   using make_signed_t = typename std::make_signed<T>::type;

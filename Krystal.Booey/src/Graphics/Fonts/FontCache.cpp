@@ -3,13 +3,12 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
 #include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
@@ -111,7 +110,8 @@ namespace krys::boo
   }
 
   RefPtr<Font> FontCache::FontForFamily(const FontDescription &description, const StringAtom &family,
-                                        EnumSet<FontLookupOptions> options) noexcept
+                                        EnumSet<FontLookupOptions> options,
+                                        const FontCreationContext &context) noexcept
   {
     if (!_purgeTimer.IsActive())
     {
@@ -120,7 +120,10 @@ namespace krys::boo
 
     if (auto *platformData = CachedFontPlatformData(description, family, options))
     {
-      return FontForPlatformData(*platformData);
+      // The platform data is shared by every document, and the rules are each document's own.
+      FontPlatformData withContext(*platformData);
+      withContext.ApplyCreationContext(description, context);
+      return FontForPlatformData(withContext);
     }
 
     return nullptr;
@@ -226,7 +229,7 @@ namespace krys::boo
   {
     krys_debug_assert(
       std::ranges::none_of(_clients, [&](auto &existing) { return existing.get() == &client; }));
-    _clients.push_back(WeakPtr<FontSelector>::WithRef(client));
+    _clients.push_back(CreateWeakPtr(&client));
   }
 
   void FontCache::RemoveClient(FontSelector &client) noexcept
@@ -238,7 +241,6 @@ namespace krys::boo
   {
     _platformData.clear();
     _fontCascadeCache.Invalidate();
-    SystemFontDatabase::Singleton().Invalidate();
 
     ++_generation;
 
@@ -314,8 +316,8 @@ namespace krys::boo
     bool syntheticOblique = false;
     GetFontPropertiesFromFace(CapabilitiesOfFace(face), description, options, syntheticBold,
                               syntheticOblique);
-    return FontPlatformData(ShareRef(face), description.ComputedSize(), syntheticBold, syntheticOblique,
-                            description.Orientation(), description.WidthVariant(),
+    return FontPlatformData(InstanceOfFace(face, description), description.ComputedSize(), syntheticBold,
+                            syntheticOblique, description.Orientation(), description.WidthVariant(),
                             description.GetTextRenderingMode());
   }
 
@@ -333,7 +335,7 @@ namespace krys::boo
     }
 
     auto platformData = CreateUnique<FontPlatformData>(PlatformDataForFace(*face, description, options));
-    // FIXME: Adjust the size for font-size-adjust (FontPlatformData::updateSizeWithFontSizeAdjust).
+    platformData->UpdateSizeWithFontSizeAdjust(description.GetFontSizeAdjust(), description.ComputedSize());
     return platformData;
   }
 

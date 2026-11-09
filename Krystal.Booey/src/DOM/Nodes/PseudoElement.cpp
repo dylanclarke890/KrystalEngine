@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::dom
 {
@@ -16,7 +16,7 @@ namespace krys::boo::dom
 
   PseudoElement::PseudoElement(Element &host, PseudoElementType pseudoElementType) noexcept
       : Element(host.NodeDocument(), PseudoElementTagName(), NodeFlags::IsPseudoElement),
-        _hostElement(WeakPtr<Element>::WithRef(host)), _pseudoElementType(pseudoElementType)
+        _hostElement(CreateWeakPtr(&host)), _pseudoElementType(pseudoElementType)
   {
     SetNodeFlag(NodeFlags::IsConnected);
     krys_debug_assert(pseudoElementType == PseudoElementType::Before

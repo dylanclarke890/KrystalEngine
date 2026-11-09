@@ -54,12 +54,14 @@ target_sources(Krystal.UI
       include/Krystal.UI/ImageBufferTextures.hpp
       include/Krystal.UI/Input.hpp
       include/Krystal.UI/ColorChooserOverlay.hpp
+      include/Krystal.UI/DataListSuggestionsOverlay.hpp
       include/Krystal.UI/DateTimeChooserOverlay.hpp
       include/Krystal.UI/Overlay.hpp
       include/Krystal.UI/PopupMenuOverlay.hpp
       include/Krystal.UI/PathStrokerStrategy.hpp
       include/Krystal.UI/Render2DConversions.hpp
       include/Krystal.UI/SystemPasteboardStrategy.hpp
+      include/Krystal.UI/ValidationMessageOverlay.hpp
       include/Krystal.UI/View.hpp
 
   PRIVATE
@@ -82,10 +84,12 @@ target_sources(Krystal.UI
     src/ImageBufferTextures.cpp
     src/Input.cpp
     src/ColorChooserOverlay.cpp
+    src/DataListSuggestionsOverlay.cpp
     src/DateTimeChooserOverlay.cpp
     src/Overlay.cpp
     src/PopupMenuOverlay.cpp
     src/PathStrokerStrategy.cpp
+    src/ValidationMessageOverlay.cpp
     src/Render2DConversions.cpp
     src/SystemPasteboardStrategy.cpp
     src/View.cpp

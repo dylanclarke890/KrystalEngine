@@ -132,6 +132,13 @@ namespace krys::boo
     _pendingBytes.clear();
     _hasReceivedSomeData = false;
 
+    // The view starts over for the new document, its scrollbars staying as they are until its first layout
+    // (FrameLoader::clear's LocalFrameView::clear).
+    if (auto *view = frame->View())
+    {
+      view->Clear();
+    }
+
     // Showing the document in the frame makes its window; the host then sets up the window before the
     // document is parsed (its custom element definitions, say).
     // The previous document is kept alive too, so the new window can take over its navigation entries.

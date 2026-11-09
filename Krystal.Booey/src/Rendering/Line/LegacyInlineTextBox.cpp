@@ -5,8 +5,8 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
@@ -165,7 +165,7 @@ namespace krys::boo
 
   bool LegacyInlineTextBox::HasMarkers() const noexcept
   {
-    // FIXME: Document markers (MarkedText::collectForDocumentMarkers), once there are document markers.
+    // (There are no document markers; see DIFFERENCES.md.)
     return false;
   }
 
@@ -199,7 +199,7 @@ namespace krys::boo
                      0,
                      ExpansionBehavior::ForbidAll(),
                      Direction(),
-                     style.RtlOrdering() == Order::Visual,
+                     false /* directionalOverride */,
                      !Renderer().CanUseSimpleFontCodePath()};
     textRun.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
     return textRun;

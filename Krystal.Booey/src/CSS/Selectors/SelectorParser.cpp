@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorInlines.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -433,7 +434,7 @@ namespace krys::boo::css
       {
         return combinator == SelectorRelation::Descendant ? krys::move(selector) : nullptr;
       }
-      if (previousCompoundHasPseudoElement)
+      if (previousCompoundHasPseudoElement || _disallowComplexSelectors)
       {
         return nullptr;
       }
@@ -582,12 +583,20 @@ namespace krys::boo::css
                                               const MutableSelector &compoundPseudoElement) noexcept
     {
       if (compoundPseudoElement.PseudoElement() == SelectorPseudoElement::UserAgentPart
-          && compoundPseudoElement.Value() == UserAgentParts::DetailsContent())
+          && (compoundPseudoElement.Value() == UserAgentParts::DetailsContent()
+              || compoundPseudoElement.Value() == UserAgentParts::InternalSelectPicker()))
       {
         if (simpleSelector.Match() == SelectorMatch::PseudoElement)
         {
           return true;
         }
+      }
+      // The picker is an element as a part is: it has its states, such as :popover-open.
+      if (compoundPseudoElement.PseudoElement() == SelectorPseudoElement::UserAgentPart
+          && compoundPseudoElement.Value() == UserAgentParts::InternalSelectPicker()
+          && simpleSelector.Match() == SelectorMatch::PseudoClass)
+      {
+        return !IsTreeStructuralPseudoClass(simpleSelector.PseudoClass());
       }
       if (compoundPseudoElement.PseudoElement() == SelectorPseudoElement::Part)
       {
@@ -879,7 +888,7 @@ namespace krys::boo::css
 
     if (block.IsAtEnd())
     {
-      selector->SetAttribute(qualifiedName, IsCaseSensitive(true));
+      selector->SetAttribute(qualifiedName, AttributeCaseFlag::None);
       selector->SetMatch(SelectorMatch::AttributeExists);
       return selector;
     }
@@ -1053,6 +1062,7 @@ namespace krys::boo::css
         }
         case SelectorPseudoClass::Host:
         {
+          SetForScope disallowComplexSelectors(_disallowComplexSelectors, true);
           auto innerSelector = ConsumeCompoundSelector(block);
           block.DiscardWhitespace();
           if (!innerSelector || !block.IsAtEnd())
@@ -1078,6 +1088,31 @@ namespace krys::boo::css
             return nullptr;
           }
           selector->SetSubSelectors(CreateUnique<SelectorList>(krys::move(selectorList)));
+          return selector;
+        }
+        // :heading( <integer># )
+        // https://drafts.csswg.org/selectors-5/#headings
+        case SelectorPseudoClass::Heading:
+        {
+          List<int32> levels;
+          while (true)
+          {
+            const auto &level = block.ConsumeIncludingWhitespace();
+            if (level.Type() != TokenType::Number || level.NumericValueType() != NumericValueType::Integer)
+            {
+              return nullptr;
+            }
+            levels.push_back(ClampTo<int32>(level.NumericValue()));
+            if (block.IsAtEnd())
+            {
+              break;
+            }
+            if (block.ConsumeIncludingWhitespace().Type() != TokenType::Comma)
+            {
+              return nullptr;
+            }
+          }
+          selector->SetIntegerList(FixedVector<int32>(levels.begin(), levels.end()));
           return selector;
         }
         case SelectorPseudoClass::Dir:
@@ -1112,6 +1147,19 @@ namespace krys::boo::css
           selector->SetSubSelectors(CreateUnique<SelectorList>(krys::move(selectorList)));
           return selector;
         }
+        case SelectorPseudoElement::Picker:
+        {
+          // Only a select has a picker: it's the part of its shadow tree that the selector then matches.
+          const auto &ident = block.ConsumeIncludingWhitespace();
+          if (ident.Type() != TokenType::Ident || !block.IsAtEnd()
+              || !text::IsASCIICaselessEqual(ident.IdentCodePoints(), CSSOMStringView(u8"select")))
+          {
+            return nullptr;
+          }
+          selector->SetPseudoElement(SelectorPseudoElement::UserAgentPart);
+          selector->SetValue(UserAgentParts::InternalSelectPicker());
+          return selector;
+        }
         case SelectorPseudoElement::Highlight:
         {
           const auto &ident = block.ConsumeIncludingWhitespace();
@@ -1139,6 +1187,7 @@ namespace krys::boo::css
         }
         case SelectorPseudoElement::Slotted:
         {
+          SetForScope disallowComplexSelectors(_disallowComplexSelectors, true);
           auto innerSelector = ConsumeCompoundSelector(block);
           block.DiscardWhitespace();
           if (!innerSelector || !block.IsAtEnd())
@@ -1248,20 +1297,23 @@ namespace krys::boo::css
     return SelectorMatch::AttributeEquals;
   }
 
-  IsCaseSensitive SelectorParser::ConsumeAttributeFlags(TokenRange &tokens) noexcept
+  AttributeCaseFlag SelectorParser::ConsumeAttributeFlags(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() != TokenType::Ident)
     {
-      return IsCaseSensitive(true);
+      return AttributeCaseFlag::None;
     }
     const auto &flag = tokens.ConsumeIncludingWhitespace();
     if (text::IsASCIICaselessEqual(flag.IdentCodePoints(), CSSOMStringView {u8"i"}))
     {
-      return IsCaseSensitive(false);
+      return AttributeCaseFlag::Insensitive;
     }
-    // FIXME: The `s` flag (selectors-4) isn't supported.
+    if (text::IsASCIICaselessEqual(flag.IdentCodePoints(), CSSOMStringView {u8"s"}))
+    {
+      return AttributeCaseFlag::Sensitive;
+    }
     _failedParsing = true;
-    return IsCaseSensitive(true);
+    return AttributeCaseFlag::None;
   }
 
   namespace

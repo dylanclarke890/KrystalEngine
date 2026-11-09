@@ -373,7 +373,7 @@ namespace krys::boo::html
 
     /// @brief Runs the element's access key action: focuses it if it's focusable, then clicks it.
     /// @return Whether the click was dispatched.
-    virtual bool AccessKeyAction(bool sendMouseEvents) noexcept;
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-blur
     void Blur() noexcept

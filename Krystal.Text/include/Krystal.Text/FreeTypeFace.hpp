@@ -29,6 +29,26 @@ namespace krys::text
     constexpr bool operator==(const FaceStyle &) const noexcept = default;
   };
 
+  /// @brief An axis of a variable font.
+  struct FontVariationAxis
+  {
+    /// @brief The axis's OpenType tag, as a big-endian integer.
+    uint32 Tag {0};
+    float Minimum {0};
+    float Default {0};
+    float Maximum {0};
+  };
+
+  /// @brief A value for an axis of a variable font.
+  struct FontVariationValue
+  {
+    /// @brief The axis's OpenType tag, as a big-endian integer.
+    uint32 Tag {0};
+    float Value {0};
+
+    constexpr bool operator==(const FontVariationValue &) const noexcept = default;
+  };
+
   /// @brief The contents of a font file (a font or a collection of fonts), which FreeType reads in place.
   class FontFileData final : public RefCounted<FontFileData>
   {
@@ -68,6 +88,9 @@ namespace krys::text
     utf8_string _postScriptName;
     FaceStyle _style;
     bool _isFixedPitch {false};
+    List<FontVariationAxis> _variationAxes;
+    List<FontVariationValue> _variations;
+    List<Ref<FreeTypeFace>> _instances;
     mutable HbUniquePtr<hb_face_t> _harfBuzzFace;
 
     FreeTypeFace(Ref<FontFileData> &&data, FT_Face face) noexcept;
@@ -112,6 +135,28 @@ namespace krys::text
     {
       return _isFixedPitch;
     }
+
+    /// @brief The axes of a variable font: none for any other.
+    KRYS_NODISCARD const List<FontVariationAxis> &VariationAxes() const noexcept
+    {
+      return _variationAxes;
+    }
+
+    KRYS_NODISCARD bool HasVariationAxis(uint32 tag) const noexcept;
+
+    /// @brief The axes this instance of a variable font isn't at the default of.
+    KRYS_NODISCARD const List<FontVariationValue> &Variations() const noexcept
+    {
+      return _variations;
+    }
+
+    /// @brief This face at @p values: a later value for an axis beats an earlier one, values are clamped to
+    /// the axis, and those for axes it doesn't have are ignored. The instance is a face of its own, kept for
+    /// the next time, or this face itself if that changes nothing.
+    KRYS_NODISCARD Ref<FreeTypeFace> WithVariations(Span<const FontVariationValue> values) noexcept;
+
+    /// @brief Gives @p font this instance's axis values.
+    void ApplyVariations(hb_font_t *font) const noexcept;
 
     /// @brief The HarfBuzz face of this face, read from the same font data.
     KRYS_NODISCARD hb_face_t *HarfBuzzFace() const noexcept;

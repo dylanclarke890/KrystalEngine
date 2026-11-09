@@ -582,7 +582,7 @@ namespace krys::boo::css
 
   void CounterStyle::SetFallbackReference(Ref<CounterStyle> &&fallback) noexcept
   {
-    _fallbackReference = WeakPtr<const CounterStyle>::WithRef(*fallback);
+    _fallbackReference = CreateWeakPtr(fallback.get());
   }
 
   // The counter's system value is promoted to the value of the counter we are extending.

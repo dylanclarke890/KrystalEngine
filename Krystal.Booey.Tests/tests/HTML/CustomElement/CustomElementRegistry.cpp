@@ -87,7 +87,7 @@ namespace krys::boo::html::tests
       auto &element = ById(u8"a");
       CHECK(Is<HTMLMaybeFormAssociatedCustomElement>(element));
       CHECK(element.IsDefinedCustomElement());
-      CHECK(dynamic_cast<LoggingElement *>(element.GetCustomElement()) != nullptr);
+      CHECK(element.GetCustomElement() != nullptr);
       CHECK(element.Matches(u8":defined").ReleaseValue());
       CHECK(TakeCalls() == Log {u8"constructed", u8"attribute value null 1", u8"connected a"});
     }
@@ -275,7 +275,7 @@ namespace krys::boo::html::tests
       auto listener = CreateRef<Reenter>();
       listener->Target = &element;
       listener->Calls = &Calls;
-      element.AddEventListener(u8"custom", Ref<dom::EventListenerCallback> {listener}, false);
+      element.AddEventListener(u8"custom", listener, false);
       auto event = CreateRef<dom::Event>(dom::DOMStringAtom(u8"custom"));
       (void)element.DispatchEvent(*event);
       CHECK(TakeCalls() == Log {u8"attribute value null from-listener", u8"returned"});

@@ -37,7 +37,7 @@ namespace krys::boo::dom
 
   /// @brief An event from a keyboard: `keydown`, `keypress` and `keyup`.
   /// @see https://w3c.github.io/uievents/#interface-keyboardevent
-  // FIXME: The view, once events have views, and key commands.
+  // FIXME: Key commands.
   class KeyboardEvent final : public UIEventWithKeyState
   {
   public:
@@ -71,12 +71,13 @@ namespace krys::boo::dom
     /// @brief A trusted event from @p key, which must be a raw key down, a char or a key up (a combined key
     /// down is disambiguated first); it's composing if @p view's editor has a composition.
     KRYS_NODISCARD static Ref<KeyboardEvent> Create(const PlatformKeyboardEvent &key,
-                                                    const LocalDOMWindow *view = nullptr) noexcept;
+                                                    LocalDOMWindow *view = nullptr) noexcept;
 
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-initkeyboardevent
-    void InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, DOMStringView keyIdentifier,
-                           uint32 location, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey) noexcept;
+    void InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, LocalDOMWindow *view,
+                           DOMStringView keyIdentifier, uint32 location, bool ctrlKey, bool altKey,
+                           bool shiftKey, bool metaKey) noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-key
     KRYS_NODISCARD const DOMString &Key() const noexcept

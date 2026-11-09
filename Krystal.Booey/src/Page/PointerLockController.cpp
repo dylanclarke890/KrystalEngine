@@ -48,7 +48,7 @@ namespace krys::boo
     }
   }
 
-  PointerLockController::PointerLockController(Page &page) noexcept : _page(WeakPtr<Page>::WithRef(page))
+  PointerLockController::PointerLockController(Page &page) noexcept : _page(CreateWeakPtr(&page))
   {
   }
 
@@ -200,8 +200,7 @@ namespace krys::boo
 
   void PointerLockController::ElementWasRemovedInternal() noexcept
   {
-    _documentOfRemovedElementWhileWaitingForUnlock =
-      WeakPtr<dom::Document>::WithRef(_element->NodeDocument());
+    _documentOfRemovedElementWhileWaitingForUnlock = CreateWeakPtr(&_element->NodeDocument());
     RequestPointerUnlock();
     // It is possible that the element is removed while pointer lock is still pending. This is essentially the
     // same situation as the !target->IsConnected() test in PointerLockController::RequestPointerLock, but it
@@ -221,8 +220,7 @@ namespace krys::boo
 
     if (_element && &_element->NodeDocument() == &document)
     {
-      _documentOfRemovedElementWhileWaitingForUnlock =
-        WeakPtr<dom::Document>::WithRef(_element->NodeDocument());
+      _documentOfRemovedElementWhileWaitingForUnlock = CreateWeakPtr(&_element->NodeDocument());
       RequestPointerUnlock();
       // It is possible that the document is detached while pointer lock is still pending.
       RejectPromises(dom::ExceptionCode::WrongDocumentError, u8"Pointer lock target document was detached.");
@@ -257,7 +255,7 @@ namespace krys::boo
     EnqueueEvent(dom::DOMStringAtom(EventNames::PointerLockChange), element.get());
     ResolvePromises();
     _lockPending = false;
-    _documentAllowedToRelockWithoutUserGesture = WeakPtr<dom::Document>::WithRef(element->NodeDocument());
+    _documentAllowedToRelockWithoutUserGesture = CreateWeakPtr(&element->NodeDocument());
 
     // When a pointer lock is successfully applied on an element, the pointers' captures are released.
     if (auto *page = _page.get())

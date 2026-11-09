@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorInlines.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
@@ -302,6 +303,10 @@ namespace krys::boo::css
       {
         return PseudoElementType::Checkmark;
       }
+      case SelectorPseudoElement::PickerIcon:
+      {
+        return PseudoElementType::PickerIcon;
+      }
       case SelectorPseudoElement::Cue:
       case SelectorPseudoElement::Slotted:
       case SelectorPseudoElement::Part:
@@ -583,6 +588,23 @@ namespace krys::boo::css
             }
             break;
           }
+          case SelectorPseudoClass::Heading:
+          {
+            if (const auto *levels = selector->IntegerList(); levels && !levels->isEmpty())
+            {
+              builder.Append(u8'(');
+              for (const auto &level : *levels)
+              {
+                if (&level != &*levels->begin())
+                {
+                  builder.Append(u8", ");
+                }
+                builder.Append(level);
+              }
+              builder.Append(u8')');
+            }
+            break;
+          }
           case SelectorPseudoClass::Lang:
           {
             builder.Append(u8'(');
@@ -684,6 +706,12 @@ namespace krys::boo::css
           {
             krys_debug_assert_msg(!PseudoElementMayHaveArgument(selector->PseudoElement()),
                                   "Missing serialisation for pseudo-element argument");
+            if (selector->PseudoElement() == SelectorPseudoElement::UserAgentPart
+                && selector->Value() == UserAgentParts::InternalSelectPicker())
+            {
+              builder.Append(u8"::picker(select)");
+              break;
+            }
             builder.Append(u8"::");
             AppendIdentifier(selector->SerialisingValue(), builder);
             break;
@@ -749,6 +777,10 @@ namespace krys::boo::css
           if (selector->IsAttributeValueMatchingCaseInsensitive())
           {
             builder.Append(u8" i]");
+          }
+          else if (selector->IsAttributeValueMatchingCaseSensitive())
+          {
+            builder.Append(u8" s]");
           }
           else
           {
@@ -842,11 +874,12 @@ namespace krys::boo::css
 
 #pragma endregion
 
-  void Selector::SetAttribute(const dom::QualifiedName &value, IsCaseSensitive caseSensitive) noexcept
+  void Selector::SetAttribute(const dom::QualifiedName &value, AttributeCaseFlag caseFlag) noexcept
   {
     CreateRareData();
     _data.Rare->Attribute = value;
-    SetFlag(SelectorFlag::CaseInsensitiveAttributeValueMatching, !caseSensitive);
+    SetFlag(SelectorFlag::CaseInsensitiveAttributeValueMatching, caseFlag == AttributeCaseFlag::Insensitive);
+    SetFlag(SelectorFlag::CaseSensitiveAttributeValueMatching, caseFlag == AttributeCaseFlag::Sensitive);
   }
 
   void Selector::SetArgument(const CSSOMStringAtom &value) noexcept
@@ -859,6 +892,12 @@ namespace krys::boo::css
   {
     CreateRareData();
     _data.Rare->ArgumentList = krys::move(argumentList);
+  }
+
+  void Selector::SetIntegerList(FixedVector<int32> integerList) noexcept
+  {
+    CreateRareData();
+    _data.Rare->IntegerList = krys::move(integerList);
   }
 
   void Selector::SetLangList(FixedVector<PossiblyQuotedIdentifier> langList) noexcept
@@ -908,7 +947,7 @@ namespace krys::boo::css
   Selector::RareData::RareData(const RareData &other) noexcept
       : MatchingValue(other.MatchingValue), SerialisingValue(other.SerialisingValue), NthA(other.NthA),
         NthB(other.NthB), Attribute(other.Attribute), Argument(other.Argument),
-        ArgumentList(other.ArgumentList), LangList(other.LangList)
+        ArgumentList(other.ArgumentList), LangList(other.LangList), IntegerList(other.IntegerList)
   {
     if (other.SubSelectors)
     {
@@ -1148,6 +1187,7 @@ namespace krys::boo::css
     return _match == other._match && _pseudoType == other._pseudoType && sameFlag(SelectorFlag::HasRareData)
            && sameFlag(SelectorFlag::TagIsForNamespaceRule)
            && sameFlag(SelectorFlag::CaseInsensitiveAttributeValueMatching)
+           && sameFlag(SelectorFlag::CaseSensitiveAttributeValueMatching)
            && sameFlag(SelectorFlag::IsImplicit) && valuesEqual();
   }
 

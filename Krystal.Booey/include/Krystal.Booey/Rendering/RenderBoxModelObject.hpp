@@ -55,7 +55,6 @@ namespace krys::boo
   };
 
   /// @brief A renderer that follows the CSS box model: a box or an inline box.
-  // FIXME: Continuations come with inline painting.
   class RenderBoxModelObject : public RenderLayerModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBoxModelObject);
@@ -209,6 +208,11 @@ namespace krys::boo
     /// @brief Whether the root's fixed background is painted in its layer's coordinates: never, as there's no
     /// compositing.
     KRYS_NODISCARD bool FixedBackgroundPaintsInLocalCoordinates() const noexcept;
+
+    /// @brief Whether @p image is decoded for drawing synchronously, or on the work queue, drawing nothing
+    /// until it's decoded.
+    KRYS_NODISCARD DecodingMode DecodingModeForImageDraw(const Image &image,
+                                                         const PaintInfo &paintInfo) const noexcept;
 
     /// @brief How @p image is interpolated when drawn at @p size.
     KRYS_NODISCARD InterpolationQuality ChooseInterpolationQuality(GraphicsContext &, Image &image,

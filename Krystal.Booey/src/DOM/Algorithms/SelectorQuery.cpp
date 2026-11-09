@@ -12,8 +12,8 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::dom
 {
@@ -59,7 +59,14 @@ namespace krys::boo::dom
              || (selector.Match() == css::SelectorMatch::AttributeEquals
                  && selector.Attribute().LocalName().View() == u8"id"
                  && selector.Attribute().NamespaceURI() == DOMStringAtom::Null()
-                 && !selector.IsAttributeValueMatchingCaseInsensitive());
+                 && !selector.IsAttributeValueMatchingCaseInsensitive() && !selector.Value().View().empty());
+    }
+
+    /// @brief Whether elements of @p rootNode's tree scope can be found by their IDs. IDs match without
+    /// regard to case in quirks mode, and the map's don't.
+    KRYS_NODISCARD bool CanUseIdFastPath(const ContainerNode &rootNode) noexcept
+    {
+      return (rootNode.IsConnected() || rootNode.IsInShadowTree()) && !rootNode.NodeDocument().InQuirksMode();
     }
 
     KRYS_NODISCARD bool NameMatchesFilter(const QualifiedName &name, const DOMStringAtom &filterPrefix,
@@ -156,7 +163,6 @@ namespace krys::boo::dom
           case css::SelectorMatch::Type:  _matchType = MatchType::TagNameMatch; break;
           case css::SelectorMatch::Class: _matchType = MatchType::ClassNameMatch; break;
           case css::SelectorMatch::AttributeEquals:
-            // FIXME: The [id="name"] fast path, once tree scopes map IDs to elements.
             if (!CanBeUsedForIdFastPath(selector) && CanOptimizeSingleAttributeExactMatch(selector))
             {
               _matchType = MatchType::AttributeExactMatch;
@@ -171,9 +177,20 @@ namespace krys::boo::dom
       }
       else
       {
-        // FIXME: The ID fast paths (rightmost ID lookup and filtering the root by an ancestor ID), once tree
-        // scopes map IDs to elements.
         _matchType = MatchType::SingleSelector;
+      }
+
+      for (auto *component = &selector; component; component = component->PrecedingComplexSelectorComponent())
+      {
+        if (CanBeUsedForIdFastPath(*component))
+        {
+          _rightmostIdSelector = component;
+          break;
+        }
+        if (component->Relation() != css::SelectorRelation::Compounding)
+        {
+          break;
+        }
       }
     }
     else
@@ -344,6 +361,94 @@ namespace krys::boo::dom
   }
 
   template <typename TOutput>
+  bool SelectorDataList::ExecuteRightmostIdSelectorData(const ContainerNode &rootNode,
+                                                        const SelectorData &selectorData,
+                                                        TOutput &output) const noexcept
+  {
+    if (!_rightmostIdSelector || !CanUseIdFastPath(rootNode))
+    {
+      return false;
+    }
+
+    auto id = _rightmostIdSelector->Value().View();
+    auto &scope = rootNode.TreeScope();
+    auto matches = [&](Element &element)
+    {
+      return TreeQueries::IsDescendant(element, rootNode) && SelectorMatches(selectorData, element, rootNode);
+    };
+
+    if (scope.ElementCountWithId(id) > 1) KRYS_UNLIKELY
+    {
+      for (auto *element : scope.AllElementsWithId(id))
+      {
+        if (matches(*element))
+        {
+          AppendOutputForElement(output, *element);
+          if (StopsAtFirstMatch<TOutput>)
+          {
+            break;
+          }
+        }
+      }
+      return true;
+    }
+
+    if (auto *element = scope.FirstElementWithId(id); element && matches(*element))
+    {
+      AppendOutputForElement(output, *element);
+    }
+    return true;
+  }
+
+  const ContainerNode &
+    SelectorDataList::SearchRootForAncestorId(const ContainerNode &rootNode,
+                                              const SelectorData &selectorData) const noexcept
+  {
+    if (!CanUseIdFastPath(rootNode))
+    {
+      return rootNode;
+    }
+
+    // Past the rightmost compound selector, which has no ID.
+    auto *component = selectorData.Selector;
+    while (component && component->Relation() == css::SelectorRelation::Compounding)
+    {
+      component = component->PrecedingComplexSelectorComponent();
+    }
+
+    auto &scope = rootNode.TreeScope();
+    bool inAdjacentChain = false;
+    for (; component; component = component->PrecedingComplexSelectorComponent())
+    {
+      if (CanBeUsedForIdFastPath(*component))
+      {
+        auto id = component->Value().View();
+        if (scope.ElementCountWithId(id) == 1)
+        {
+          auto *element = scope.FirstElementWithId(id);
+          if (TreeQueries::IsDescendant(*element, rootNode))
+          {
+            // What matches is below the element, or below its parent if it comes after the element.
+            return inAdjacentChain ? *element->ParentNode() : *element;
+          }
+        }
+      }
+
+      switch (component->Relation())
+      {
+        case css::SelectorRelation::Compounding:       break;
+        case css::SelectorRelation::Child:
+        case css::SelectorRelation::Descendant:        inAdjacentChain = false; break;
+        case css::SelectorRelation::NextSibling:
+        case css::SelectorRelation::SubsequentSibling: inAdjacentChain = true; break;
+        // These reach into other trees.
+        default:                                       return rootNode;
+      }
+    }
+    return rootNode;
+  }
+
+  template <typename TOutput>
   void SelectorDataList::ExecuteSingleSelectorData(const ContainerNode &rootNode,
                                                    const ContainerNode &searchRootNode,
                                                    const SelectorData &selectorData,
@@ -392,7 +497,11 @@ namespace krys::boo::dom
     switch (_matchType)
     {
       case MatchType::SingleSelector:
-        ExecuteSingleSelectorData(rootNode, rootNode, _selectors.front(), output);
+        if (!ExecuteRightmostIdSelectorData(rootNode, _selectors.front(), output))
+        {
+          ExecuteSingleSelectorData(rootNode, SearchRootForAncestorId(rootNode, _selectors.front()),
+                                    _selectors.front(), output);
+        }
         break;
       case MatchType::TagNameMatch:
         ExecuteSingleTagNameSelectorData(rootNode, _selectors.front(), output);

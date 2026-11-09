@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
+#include "Krystal.Booey/Graphics/Fonts/SystemFonts.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -21,6 +22,8 @@ namespace krys::boo
     bool FontFallbackPrefersPictographs {false};
     /// @brief The families the generic families resolve to; none by default, so they use the bundled font.
     boo::FontGenericFamilies FontGenericFamilies;
+    /// @brief The fonts of the `font` shorthand's system font keywords (`caption`, `menu`, ...).
+    boo::SystemFonts SystemFonts;
   };
 
   /// @brief The host's settings for a document: the features without a specification it turns on, the
@@ -56,11 +59,16 @@ namespace krys::boo
     /// @brief Arrow keys moving the focus to the nearest focusable element in their direction, rather than
     /// scrolling.
     bool SpatialNavigationEnabled {false};
+    /// @brief The keyboard's scrolls being animated, as a user's preference may turn off.
+    bool ScrollAnimatorEnabled {true};
     /// @brief Serializing attribute values without escaping `<` and `>`, as before the HTML standard changed.
     bool HTMLLegacyAttributeValueSerializationEnabled {false};
     /// @brief Copying the whole body turning its fixed and absolute positioning into relative positioning, so
     /// the pasted copy stays in flow.
     bool ShouldConvertPositionStyleOnCopy {false};
+    /// @brief Loading the icons documents name with `<link rel=icon>` (or `/favicon.ico` on `http(s):`), for
+    /// the host's frame loader client to show.
+    bool IconLoadingEnabled {true};
     /// @brief Whether text areas can be resized (`resize: -internal-textarea-auto` is `both`).
     bool TextAreasAreResizable {false};
     /// @brief Whether form controls show dates and numbers in their element's language (its `lang`), rather

@@ -7,8 +7,8 @@ namespace krys::boo::css::mq
 {
   MediaQueryEvaluator::MediaQueryEvaluator(const CSSOMStringAtom &mediaType, const dom::Document &document,
                                            const RenderStyle *rootElementStyle) noexcept
-      : GenericMediaQueryEvaluator(), _mediaType(mediaType),
-        _document(WeakPtr<const dom::Document>::WithRef(document)), _rootElementStyle(rootElementStyle)
+      : GenericMediaQueryEvaluator(), _mediaType(mediaType), _document(CreateWeakPtr(&document)),
+        _rootElementStyle(rootElementStyle)
   {
   }
 
@@ -63,7 +63,7 @@ namespace krys::boo::css::mq
       }
 
       FeatureEvaluationContext context {
-        WeakRef<const dom::Document>::WithRef(*document),
+        CreateWeakRef(*document),
         {*_rootElementStyle, _rootElementStyle, nullptr, document->GetRenderView()},
         nullptr};
       return EvaluateCondition(*query.Condition, context);

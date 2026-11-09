@@ -66,6 +66,7 @@ namespace krys::boo
     krys_debug_assert(client.ResourceClientType() == CachedImageClient::ExpectedType());
 
     _pendingContainerContextRequests.erase(&static_cast<CachedImageClient &>(client));
+    _clientsWaitingForAsyncDecoding.erase(&static_cast<CachedImageClient &>(client));
 
     if (_svgImageCache)
     {
@@ -379,10 +380,8 @@ namespace krys::boo
 
   bool CachedImage::CachedImageObserver::AllowsAnimation(const Image &image) const noexcept
   {
-    // FIXME: Ask the cached images once there are system animation controls
-    // (Image::systemAllowsAnimationControls).
-    (void)image;
-    return true;
+    return std::ranges::any_of(_cachedImages, [&image](const CachedImage *cachedImage)
+                               { return cachedImage->AllowsAnimation(image); });
   }
 
   void CachedImage::ClearImage() noexcept
@@ -562,8 +561,40 @@ namespace krys::boo
     return true;
   }
 
+  bool CachedImage::IsClientWaitingForAsyncDecoding(const CachedImageClient &client) const noexcept
+  {
+    return _clientsWaitingForAsyncDecoding.contains(&client);
+  }
+
+  void CachedImage::AddClientWaitingForAsyncDecoding(CachedImageClient &client) noexcept
+  {
+    krys_debug_assert(client.ResourceClientType() == CachedImageClient::ExpectedType());
+    if (_clientsWaitingForAsyncDecoding.contains(&client))
+    {
+      return;
+    }
+    if (!HasClient(client))
+    {
+      // If the <html> element does not have its own background specified, painting the root box
+      // renderer uses the style of the <body> element, see RenderView::rendererForRootBackground().
+      // In this case, the client we are asked to add is the root box renderer. Since we can't add
+      // a client to _clientsWaitingForAsyncDecoding unless it is one of the clients, we are going
+      // to cancel the repaint optimization we do in ImageFrameAvailable() by adding
+      // all the clients to _clientsWaitingForAsyncDecoding.
+      CachedResourceClientWalker<CachedImageClient> walker(*this);
+      while (auto *other = walker.Next())
+      {
+        _clientsWaitingForAsyncDecoding.insert(other);
+      }
+    }
+    else
+    {
+      _clientsWaitingForAsyncDecoding.insert(&client);
+    }
+  }
+
   void CachedImage::ImageFrameAvailable(const Image &image, ImageAnimatingState animatingState,
-                                        const IntRect *changeRect, DecodingStatus) noexcept
+                                        const IntRect *changeRect, DecodingStatus decodingStatus) noexcept
   {
     if (&image != _image.get())
     {
@@ -576,8 +607,7 @@ namespace krys::boo
     while (auto *client = walker.Next())
     {
       // All the clients of animated images have to be notified. The new frame has to be drawn in all of them.
-      // FIXME: Static images notify only the clients waiting for asynchronous decoding, once there is any.
-      if (animatingState == ImageAnimatingState::No)
+      if (animatingState == ImageAnimatingState::No && !_clientsWaitingForAsyncDecoding.contains(client))
       {
         continue;
       }
@@ -590,6 +620,11 @@ namespace krys::boo
     if (visibleState == VisibleInViewportState::No && animatingState == ImageAnimatingState::Yes)
     {
       _image->StopAnimation();
+    }
+
+    if (decodingStatus != DecodingStatus::Partial)
+    {
+      _clientsWaitingForAsyncDecoding.clear();
     }
   }
 
@@ -637,7 +672,15 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Ask the clients once there are system animation controls.
+    // An image animates while every client showing it allows it.
+    CachedResourceClientWalker<CachedImageClient> walker(*this);
+    while (auto *client = walker.Next())
+    {
+      if (!client->AllowsAnimation())
+      {
+        return false;
+      }
+    }
     return true;
   }
 

@@ -113,8 +113,9 @@ namespace krys::boo
       return HBRun {startIndex, index, *currentScript};
     }
 
-    /// @brief The OpenType features to shape with @p fontDescription.
-    KRYS_NODISCARD SmallList<hb_feature_t, 4> ComputeFeatures(const FontDescription &fontDescription) noexcept
+    /// @brief The OpenType features to shape @p font with, for @p fontDescription.
+    KRYS_NODISCARD SmallList<hb_feature_t, 4> ComputeFeatures(const FontDescription &fontDescription,
+                                                              const FontPlatformData &font) noexcept
     {
       FeaturesMap featuresToBeApplied;
       auto set = [&](const char (&tag)[5], int value)
@@ -127,16 +128,17 @@ namespace krys::boo
 
       // 1. Font features enabled by default, including features required for a given script.
 
-      // FIXME: optical sizing.
-
       // 2. If the font is defined via an @font-face rule, the font features implied by the
       //    font-feature-settings descriptor in the @font-face rule.
-      // FIXME: No @font-face.
+      for (const auto &feature : font.FontFaceFeatures())
+      {
+        featuresToBeApplied[feature.Tag()] = feature.Value();
+      }
 
       // 3. Font features implied by the value of the ‘font-variant’ property, the related ‘font-variant’
       //    subproperties and any other CSS property that uses OpenType features.
       for (auto &[tag, value] :
-           ComputeFeatureSettingsFromVariants(fontDescription.VariantSettings(), nullptr))
+           ComputeFeatureSettingsFromVariants(fontDescription.VariantSettings(), font.GetFontFeatureValues()))
       {
         featuresToBeApplied[tag] = value;
       }
@@ -306,10 +308,11 @@ namespace krys::boo
   }
 
   void ComplexTextController::CollectComplexTextRunsForCharacters(utf8_stringview characters,
-                                                                  uint32 stringLocation,
-                                                                  const Font *font) noexcept
+                                                                  uint32 stringLocation, const Font *font,
+                                                                  Span<const char32> capitals) noexcept
   {
     krys_debug_assert(!characters.empty());
+    krys_debug_assert(capitals.empty() || capitals.size() == characters.length());
     auto length = static_cast<uint32>(characters.length());
     if (!font)
     {
@@ -328,7 +331,7 @@ namespace krys::boo
       return;
     }
 
-    auto features = ComputeFeatures(_fontCascade.GetFontDescription());
+    auto features = ComputeFeatures(_fontCascade.GetFontDescription(), font->PlatformData());
     // Kerning is not handled as font features, so only in case it's explicitly disabled
     // we need to include kern feature.
     if (!_fontCascade.EnableKerning())
@@ -358,9 +361,24 @@ namespace krys::boo
         hb_buffer_set_direction(buffer.get(), hb_script_get_horizontal_direction(HarfBuzzScript(run.Script)));
       }
 
-      hb_buffer_add_utf8(buffer.get(), reinterpret_cast<const char *>(characters.data()),
-                         static_cast<int>(length), run.StartIndex,
-                         static_cast<int>(run.EndIndex - run.StartIndex));
+      if (capitals.empty())
+      {
+        hb_buffer_add_utf8(buffer.get(), reinterpret_cast<const char *>(characters.data()),
+                           static_cast<int>(length), run.StartIndex,
+                           static_cast<int>(run.EndIndex - run.StartIndex));
+      }
+      else
+      {
+        // A capital's UTF-8 can be longer or shorter than its letter's, so the code points are added one by
+        // one, each with its letter's offset as its cluster, as hb_buffer_add_utf8 would give it.
+        hb_buffer_set_content_type(buffer.get(), HB_BUFFER_CONTENT_TYPE_UNICODE);
+        for (auto offset = run.StartIndex; offset < run.EndIndex;)
+        {
+          auto decoded = text::DecodeUTF8(Span<const char8> {characters}.subspan(offset));
+          hb_buffer_add(buffer.get(), capitals[offset] ? capitals[offset] : decoded.CodePoint, offset);
+          offset += decoded.Length;
+        }
+      }
 
       hb_shape(hbFont, buffer.get(), features.empty() ? nullptr : features.data(),
                static_cast<unsigned>(features.size()));

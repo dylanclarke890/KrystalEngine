@@ -71,6 +71,8 @@ namespace krys::boo::css
   {
     CounterStyleSymbol Prefix {false, u8"-"};
     CounterStyleSymbol Suffix;
+    /// @brief Whether the descriptor gave a suffix, which serialisation keeps.
+    bool HasSuffix {false};
 
     KRYS_NODISCARD bool operator==(const CounterStyleNegativeSymbols &) const noexcept = default;
   };

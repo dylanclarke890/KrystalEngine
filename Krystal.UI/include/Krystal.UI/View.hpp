@@ -7,12 +7,14 @@
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/Region.hpp"
+#include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
+#include "Krystal.Booey/Platform/Choosers/FileChooser.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp"
@@ -36,6 +38,7 @@
 #include "Krystal.PAL/Platform.hpp"
 #include "Krystal.PAL/Pointer.hpp"
 #include "Krystal.PAL/TextInput.hpp"
+#include "Krystal.PAL/TouchpadPan.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include "Krystal.UI/ImageBufferRender2DBackend.hpp"
@@ -92,6 +95,19 @@ namespace krys::ui
     Finished,
     /// @brief The document couldn't be loaded (or the load was stopped); the view keeps the old one.
     Failed,
+  };
+
+  /// @brief An icon the page names (`<link rel=icon>`, or `/favicon.ico` on `http(s):`), loaded, as the
+  /// host's handler receives it.
+  struct PageIcon
+  {
+    utf8_string URL;
+    /// @brief Its link's `type`, a hint of its MIME type; empty without one.
+    utf8_string MIMEType;
+    /// @brief The width its link's `sizes` gives first, if any.
+    Maybe<uint32> Size;
+    /// @brief Its bytes as loaded (PNG, ICO, SVG and so on), for the host to decode; valid during the call.
+    Span<const uint8> Data;
   };
 
   /// @brief A load event: its type, and why it failed.
@@ -162,6 +178,10 @@ namespace krys::ui
     Maybe<boo::WritingDirection> _pendingTextDirection;
     /// @brief The overlay open over the page (a menu list's popup, a picker), if any.
     RefPtr<Overlay> _overlay;
+    /// @brief The cursor image last made for the page's cursor, and the frame and hot spot it was made from.
+    mutable RefPtr<pal::CursorImage> _cursorImage;
+    mutable RefPtr<boo::NativeImage> _cursorImageFrame;
+    mutable boo::IntPoint _cursorImageHotSpot;
     /// @brief Whether a button was held as the overlay opened: its release goes to the page.
     bool _pageOwnsPress {false};
     /// @brief The pen's buttons held (its tip, its barrel button or its eraser), as the DOM's `buttons` bit
@@ -362,6 +382,10 @@ namespace krys::ui
     void Stop() noexcept;
     /// @brief Calls @p handler as loads start, commit, finish and fail.
     void SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept;
+    /// @brief Loads the icons the page names once it's loaded, and again as they change, calling @p handler
+    /// with each that loads. Without a handler, none are loaded (a handler set later loads the next ones);
+    /// `Settings::IconLoadingEnabled` turns them off for every view.
+    void SetIconHandler(Func<void(const PageIcon &)> &&handler) noexcept;
     /// @brief Loads the current document again, its resources revalidated, without its form state.
     void Reload() noexcept;
 
@@ -441,6 +465,11 @@ namespace krys::ui
     bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY,
                     pal::KeyModifiers modifiers = {},
                     const pal::WheelScrollSettings &settings = pal::GetWheelScrollSettings()) noexcept;
+    /// @brief A step of a touchpad's pan at @p point: the content follows the fingers, then any momentum,
+    /// as the wheel scrolls (`wheel` fires for each step that moves), and what it scrolled snaps once the pan
+    /// and its momentum end. Over an overlay, the steps are its wheel's notches, at 100 pixels a notch.
+    /// @return Whether the page cancelled the step or scrolled.
+    bool TouchpadPan(const boo::IntPoint &point, const pal::TouchpadPanInput &input) noexcept;
 
     /// @brief A pen's input at @p point (in viewport coordinates): the pen moves (hovering or touching),
     /// presses and releases as the mouse does, with its pressure, tilt and twist, as pointer events of type
@@ -472,6 +501,12 @@ namespace krys::ui
     /// @brief The cursor the page wants over it, as of the last mouse move (none while the pointer is
     /// locked); while a drag runs, the drag and drop cursor for what a drop would do.
     KRYS_NODISCARD pal::CursorShape CurrentCursor() const noexcept;
+
+    /// @brief The image the page wants as the cursor over it (`cursor: url()`), for the window's
+    /// `SetCursorImage`, or null when it wants a system cursor, `CurrentCursor()`; it's shown at its pixel
+    /// size, even for an `image-set()` image of another resolution. An animated image's cursor is the frame
+    /// shown as of the last mouse move.
+    KRYS_NODISCARD RefPtr<pal::CursorImage> CurrentCursorImage() const noexcept;
 
     /// @brief Whether a drag that started in the page is running: the mouse's moves move it, the release
     /// drops it and Escape cancels it, and Ctrl makes a drop copy rather than move.
@@ -570,6 +605,14 @@ namespace krys::ui
     /// @brief Whether the page is shown (`SetVisible`).
     KRYS_NODISCARD bool IsVisible() const noexcept;
 
+    /// @brief The rate the host draws the page at, in frames per second: its display's refresh rate with
+    /// vsync, or the rate it caps its frames to. Animations align their updates to it. A page starts at 60.
+    void SetFramesPerSecond(uint32 framesPerSecond) noexcept;
+
+    /// @brief Lets the page's animated images and SMIL animations play (true), or holds them (false), as a
+    /// setting to reduce motion would. A page starts with them playing.
+    void SetImageAnimationEnabled(bool enabled) noexcept;
+
     /// @brief Calls @p handler with each navigation the page asks for (links followed and forms submitted),
     /// other than a link to a fragment of the page, which scrolls to it. The view doesn't navigate: the
     /// handler loads what it wants (`Load`, `LoadFile`, `LoadHTML`).
@@ -578,6 +621,11 @@ namespace krys::ui
     /// @brief Calls @p handler when the page asks to be brought to the front (`window.focus()`); the host
     /// decides whether to raise its window. A view without a handler ignores it.
     void SetFocusRequestHandler(Func<void()> &&handler) noexcept;
+
+    /// @brief Calls @p handler when a file input asks for files (a user's click, or `showPicker()`): the host
+    /// shows its file picker with the chooser's `Settings()`, then answers it, now or later, with
+    /// `ChooseFiles` or `Cancel`. A view without a handler cancels at once, so the input gets `cancel`.
+    void SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept;
 
     /// @brief The view's document: the main frame's.
     KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept;
@@ -611,6 +659,8 @@ namespace krys::ui
     /// @brief Confirms the composition, if there is one, and tells the host to drop the input method's: the
     /// mouse pressed, or the window lost focus.
     void ConfirmCompositionForHost() noexcept;
+    /// @brief Whether a modal overlay is open, which takes the keys and text input.
+    KRYS_NODISCARD bool HasModalOverlay() const noexcept;
 
     /// @brief A load committed: the new document is painted with the view's focus state.
     void DidCommitLoad() noexcept;

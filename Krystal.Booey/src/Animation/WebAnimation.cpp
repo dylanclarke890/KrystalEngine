@@ -14,6 +14,7 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -23,7 +24,7 @@
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -77,6 +78,23 @@ namespace krys::boo
   {
     krys_debug_assert(Instances().contains(this));
     Instances().erase(this);
+  }
+
+  void WebAnimation::StopAnimationsOfDocument(const dom::Document &document) noexcept
+  {
+    List<Ref<WebAnimation>> animations;
+    for (auto *animation : Instances())
+    {
+      if (animation->_document.get() == &document)
+      {
+        animations.push_back(ShareRef(*animation));
+      }
+    }
+    for (auto &animation : animations)
+    {
+      dom::EventTargetAlgorithms::RemoveAllEventListeners(*animation);
+      animation->SetEffectInternal(nullptr);
+    }
   }
 
   void WebAnimation::Remove() noexcept
@@ -950,7 +968,7 @@ namespace krys::boo
       {
         return timeline;
       }
-      if (RefPtr scrollTimeline = ShareRefPtr(DynamicDowncast<ScrollTimeline>(_timeline.get())))
+      if (RefPtr scrollTimeline = DynamicDowncast<ScrollTimeline>(_timeline))
       {
         if (RefPtr source = scrollTimeline->Source())
         {
@@ -977,11 +995,12 @@ namespace krys::boo
       _hasScheduledEventsDuringTick = true;
       timeline->EnqueueAnimationEvent(*event);
     }
-    else
+    // Otherwise, queue a task to dispatch event at animation. The task source for this task is the DOM
+    // manipulation task source.
+    // (A task of the animation's document; there's none to dispatch once the document is gone.)
+    else if (auto *document = _document.get())
     {
-      // Otherwise, queue a task to dispatch event at animation. The task source for this task is the DOM
-      // manipulation task source.
-      html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
+      html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, *document,
                                            [event = krys::move(event)]
                                            {
                                              RefPtr target = event->Target();
@@ -1726,7 +1745,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr scrollTimeline = ShareRefPtr(DynamicDowncast<ScrollTimeline>(_timeline.get()));
+    RefPtr scrollTimeline = DynamicDowncast<ScrollTimeline>(_timeline);
     krys_debug_assert(scrollTimeline);
     auto interval = scrollTimeline->IntervalForAttachmentRange(Range());
 

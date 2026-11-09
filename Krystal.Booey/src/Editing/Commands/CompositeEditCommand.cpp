@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
@@ -215,8 +216,7 @@ namespace krys::boo
   }
 
   // FIXME: Stopping scrolling as content size changes during the command
-  // (prohibitScrollingWhenChangingContentSize); and queueing the events the command fires until it's done
-  // (EventQueueScope), with a scoped event queue.
+  // (prohibitScrollingWhenChangingContentSize).
   void CompositeEditCommand::Apply() noexcept
   {
     if (!EndingSelection().IsContentRichlyEditable())
@@ -267,7 +267,8 @@ namespace krys::boo
 
     {
       // The custom element reactions of the command's changes run once they're all made, rather than after
-      // each of the DOM methods it calls.
+      // each of the DOM methods it calls, and then the events it queued are dispatched.
+      dom::EventQueueScope eventQueue;
       html::CEReactionsScope ceReactions;
       DoApply();
     }
@@ -1690,8 +1691,7 @@ namespace krys::boo
                    preserveStyle);
   }
 
-  // FIXME: Clearing and marking the spelling and grammar of the moved paragraph
-  // (clearMisspellingsAndBadGrammar, markMisspellingsAndBadGrammar), with text checking.
+  // (There's no spelling and grammar to clear and mark on the moved paragraph; see DIFFERENCES.md.)
   void CompositeEditCommand::MoveParagraphs(const VisiblePosition &startOfParagraphToMove,
                                             const VisiblePosition &endOfParagraphToMove,
                                             const VisiblePosition &passedDestination, bool preserveSelection,

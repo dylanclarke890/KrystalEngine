@@ -25,5 +25,10 @@ namespace krys::boo::css::cq
     cq::ContainsUnknownFeature ContainsUnknownFeature {cq::ContainsUnknownFeature::No};
   };
 
+  /// @brief An `@container` rule's prelude: true if any of its queries is, each against its own container.
+  /// @see https://drafts.csswg.org/css-conditional-5/#typedef-container-query-list
+  using ContainerQueryList = List<ContainerQuery>;
+
   void Serialise(StringBuilder &builder, const ContainerQuery &query) noexcept;
+  void Serialise(StringBuilder &builder, const ContainerQueryList &queries) noexcept;
 }

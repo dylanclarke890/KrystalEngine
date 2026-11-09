@@ -157,8 +157,8 @@ namespace krys::boo
       return nullptr;
     }
 
-    // FIXME: Variable fonts are shaped at their default instance.
     text::HbUniquePtr<hb_font_t> parent(hb_font_create(hbFace));
+    face->ApplyVariations(parent.get());
 
     // Create a subfont with custom functions so that the missing ones are taken from the parent.
     _harfBuzzFont.reset(hb_font_create_sub_font(parent.get()));

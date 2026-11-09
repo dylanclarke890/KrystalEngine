@@ -43,6 +43,8 @@ namespace krys::boo::dom
 
   private:
     List<SelectorData> _selectors;
+    /// @brief The ID the single selector's rightmost compound selector requires, if any.
+    const css::Selector *_rightmostIdSelector {nullptr};
     MatchType _matchType;
 
   public:
@@ -69,6 +71,17 @@ namespace krys::boo::dom
     void ExecuteSingleAttributeExactSelectorData(const ContainerNode &rootNode,
                                                  const SelectorData &selectorData,
                                                  TOutput &output) const noexcept;
+    /// @brief Finds what the selector matches through the ID in its rightmost compound selector, if there's
+    /// one, and at most one element has it.
+    /// @return Whether it did.
+    template <typename TOutput>
+    KRYS_NODISCARD bool ExecuteRightmostIdSelectorData(const ContainerNode &rootNode,
+                                                       const SelectorData &selectorData,
+                                                       TOutput &output) const noexcept;
+    /// @brief The narrowest subtree of @p rootNode that holds what the selector can match, going by an ID in
+    /// it that only one element has.
+    KRYS_NODISCARD const ContainerNode &
+      SearchRootForAncestorId(const ContainerNode &rootNode, const SelectorData &selectorData) const noexcept;
     template <typename TOutput>
     void ExecuteSingleSelectorData(const ContainerNode &rootNode, const ContainerNode &searchRootNode,
                                    const SelectorData &selectorData, TOutput &output) const noexcept;

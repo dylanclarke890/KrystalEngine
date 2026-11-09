@@ -14,8 +14,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
@@ -37,6 +39,14 @@ namespace krys::ui::tests
 
   namespace
   {
+    /// @brief Clicks @p element as a user does, with the window's transient activation that opening a picker
+    /// needs.
+    void UserClick(boo::html::HTMLElement &element) noexcept
+    {
+      element.NodeDocument().Window()->NotifyActivated();
+      element.Click();
+    }
+
     /// @brief The page's own golden is checked tightly: any change beyond rounding is a regression.
     constexpr uint32 OwnTolerance = 2u;
     /// @brief Chrome antialiases, blurs and dithers a little differently, so its golden is checked loosely.
@@ -444,6 +454,33 @@ namespace krys::ui::tests
     CheckPage("webfonts", 360u, 240u, true);
   }
 
+  TEST_CASE("Golden: block in inline", "[UI][GPU][Golden]")
+  {
+    CheckPage("block-in-inline", 480u, 420u, true);
+  }
+
+  TEST_CASE("Golden: dashed borders", "[UI][GPU][Golden]")
+  {
+    CheckPage("dashed-borders", 640u, 360u, true);
+  }
+
+  TEST_CASE("Golden: fieldset", "[UI][GPU][Golden]")
+  {
+    CheckPage("fieldset", 480u, 360u, true);
+  }
+
+  TEST_CASE("Golden: variable fonts", "[UI][GPU][Golden]")
+  {
+    CheckPage("variable-fonts", 320u, 200u, true);
+  }
+
+  TEST_CASE("Golden: font rules", "[UI][GPU][Golden]")
+  {
+    // Palettes colour the boxes, and features widen them. Text, so Chrome's golden is only reported (see
+    // "Golden: text"): it places glyphs at fractions of a pixel, and the colours and widths match it.
+    CheckPage("font-rules", 320u, 160u, true);
+  }
+
   TEST_CASE("Golden: filters", "[UI][GPU][Golden]")
   {
     CheckPage("filters", 360u, 240u);
@@ -564,6 +601,24 @@ namespace krys::ui::tests
     CheckPage("selects", 360u, 280u, true);
   }
 
+  TEST_CASE("Golden: customizable select", "[UI][GPU][Golden]")
+  {
+    // The picker is part of the page, as in Chrome, but capturing Chrome's golden doesn't open it, so there's
+    // none.
+    CheckPage("customizable-select", 320u, 240u, true,
+              [](View &view)
+              {
+                auto select = view.Document().GetElementById(u8"plain");
+                REQUIRE(select);
+                auto box = select->GetBoundingClientRect();
+                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                view.MousePressed(inside, pal::MouseButton::Left);
+                view.MouseReleased(inside, pal::MouseButton::Left);
+                REQUIRE(Downcast<boo::html::HTMLSelectElement>(*select).IsPickerOpen());
+                view.UpdateRendering();
+              });
+  }
+
   TEST_CASE("Golden: select popup", "[UI][GPU][Golden]")
   {
     // The popup is the view's overlay; Chrome draws its own in a window, so there's no Chrome golden.
@@ -620,7 +675,7 @@ namespace krys::ui::tests
               {
                 auto &input =
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
-                input.Click();
+                UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // The highlight moves to the 12th.
                 (void)view.KeyPressed(pal::Key::RightArrow);
@@ -639,7 +694,7 @@ namespace krys::ui::tests
               {
                 auto &input =
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
-                input.Click();
+                UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 view.UpdateRendering();
               });
@@ -673,7 +728,7 @@ namespace krys::ui::tests
               {
                 auto &input =
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
-                input.Click();
+                UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // Mirrored, the left arrow moves on: the highlight moves to the 12th.
                 for (int32 i = 0; i < 5; ++i)
@@ -693,7 +748,7 @@ namespace krys::ui::tests
               {
                 auto &input =
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
-                input.Click();
+                UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // Mirrored, the left arrow moves on, to the next swatch.
                 (void)view.KeyPressed(pal::Key::LeftArrow);

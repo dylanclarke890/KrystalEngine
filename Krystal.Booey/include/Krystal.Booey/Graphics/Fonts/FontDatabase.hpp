@@ -14,8 +14,26 @@
 
 namespace krys::boo
 {
+  class FontDescription;
+
   /// @brief The weights, widths and slopes a face provides, for font matching: its own style.
   KRYS_NODISCARD FontSelectionCapabilities CapabilitiesOfFace(const text::FreeTypeFace &face) noexcept;
+
+  /// @brief The instance of the variable font @p face that @p description asks for, or @p face if it isn't
+  /// one: `font-weight`, `font-stretch` and `font-style` within the ranges of @p descriptors,
+  /// `font-optical-sizing`, then `font-variation-settings`.
+  /// @see https://drafts.csswg.org/css-fonts/#font-variation-settings-def
+  KRYS_NODISCARD Ref<text::FreeTypeFace>
+    InstanceOfFace(text::FreeTypeFace &face, const FontDescription &description,
+                   const FontSelectionSpecifiedCapabilities &descriptors = {}) noexcept;
+
+  /// @brief An OpenType tag as the big-endian integer `text::FreeTypeFace` names its axes by.
+  KRYS_NODISCARD constexpr uint32 FontAxisTag(char a, char b, char c, char d) noexcept
+  {
+    return (static_cast<uint32>(static_cast<uint8>(a)) << 24)
+           | (static_cast<uint32>(static_cast<uint8>(b)) << 16)
+           | (static_cast<uint32>(static_cast<uint8>(c)) << 8) | static_cast<uint32>(static_cast<uint8>(d));
+  }
 
   /// @brief The fonts documents can use: the faces of the font files the host registers, by family, the
   /// bundled Liberation Sans, the last resort, the bundled Noto Sans Arabic, the last resort for Arabic, and

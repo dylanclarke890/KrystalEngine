@@ -1,8 +1,10 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -114,6 +116,73 @@ namespace krys::boo::tests
     CHECK(fired == List<std::string> {"interval", "installed", "interval"});
     Advance(10ms);
     CHECK(fired == List<std::string> {"interval", "installed", "interval", "timeout"});
+  }
+
+  TEST_CASE("A suspended document's web fonts start loading once it resumes", "[DOM][Document][Suspension]")
+  {
+    SuspensionFixture fixture;
+    auto &document = fixture.Document();
+    // The bytes don't matter: only whether the font is requested.
+    fixture.Strategy.AddText(u8"https://example.com/font.ttf", u8"not a font", u8"font/ttf");
+
+    document.Suspend(Reason);
+    auto style = document.CreateElement(u8"style").ReleaseValue();
+    (void)style->TextContent(u8"@font-face { font-family: web; src: url(font.ttf) } p { font-family: web }");
+    (void)document.Body()->AppendChild(*style);
+    (void)document.UpdateLayout();
+    html::EventLoop::Current().RunUntilIdle();
+    RunNetworkingTasks();
+    auto requested = [&]
+    {
+      return std::ranges::count(fixture.Strategy.Requests, utf8_string(u8"https://example.com/font.ttf"));
+    };
+    CHECK(requested() == 0);
+
+    document.Resume(Reason);
+    html::EventLoop::Current().RunUntilIdle();
+    RunNetworkingTasks();
+    CHECK(requested() == 1);
+  }
+
+  TEST_CASE("A suspended document's subresource loads finish once it resumes", "[DOM][Document][Suspension]")
+  {
+    SuspensionFixture fixture;
+    auto &document = fixture.Document();
+    fixture.Strategy.AddText(u8"https://example.com/sheet.css", u8"p { color: green }", u8"text/css");
+
+    document.Suspend(Reason);
+    auto link = document.CreateElement(u8"link").ReleaseValue();
+    (void)link->SetAttribute(u8"rel", u8"stylesheet");
+    (void)link->SetAttribute(u8"href", u8"sheet.css");
+    (void)document.Body()->AppendChild(*link);
+    html::EventLoop::Current().RunUntilIdle();
+    RunNetworkingTasks();
+    auto &linkElement = Downcast<html::HTMLLinkElement>(*link);
+    CHECK_FALSE(linkElement.Sheet());
+
+    document.Resume(Reason);
+    html::EventLoop::Current().RunUntilIdle();
+    RunNetworkingTasks();
+    CHECK(linkElement.Sheet());
+  }
+
+  TEST_CASE("A suspended document's AbortSignal.timeout() waits for it", "[DOM][Document][Suspension]")
+  {
+    SuspensionFixture fixture;
+    auto &document = fixture.Document();
+
+    auto signal = dom::AbortSignal::Timeout(document, 100);
+    Advance(60ms);
+    document.Suspend(Reason);
+    Advance(100ms);
+    CHECK_FALSE(signal->Aborted());
+
+    // The time it had left runs once the document resumes.
+    document.Resume(Reason);
+    Advance(39ms);
+    CHECK_FALSE(signal->Aborted());
+    Advance(1ms);
+    CHECK(signal->Aborted());
   }
 
   TEST_CASE("A suspended document's animation frame callbacks wait", "[DOM][Document][Suspension]")

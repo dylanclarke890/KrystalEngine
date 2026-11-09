@@ -134,8 +134,8 @@ namespace krys::boo
         primaryRanges.GlyphDataForCharacter(U' ', ExternalResourceDownloadPolicy::Allow).Font;
       if (!_cachedPrimaryFont)
       {
-        _cachedPrimaryFont = WeakPtr<const Font>::WithRef(
-          primaryRanges.RangeAt(0).GetFont(ExternalResourceDownloadPolicy::Allow));
+        _cachedPrimaryFont =
+          CreateWeakPtr(primaryRanges.RangeAt(0).GetFont(ExternalResourceDownloadPolicy::Allow));
       }
       else if (_cachedPrimaryFont->IsInterstitial())
       {
@@ -614,7 +614,7 @@ namespace krys::boo
       if (fallbackVisibility == FallbackVisibility::Invisible
           && data.Font->GetVisibility() == FontVisibility::Visible)
       {
-        data.Font = WeakPtr<const Font>::WithRef(&data.Font->InvisibleFont());
+        data.Font = CreateWeakPtr(&data.Font->InvisibleFont());
       }
 
       if (variant == NormalVariant)

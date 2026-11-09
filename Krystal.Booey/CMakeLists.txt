@@ -302,6 +302,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Counter/CounterStyle.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyleDescriptors.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp
+  include/Krystal.Booey/CSS/CSSOM/DOMCSSNamespace.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp
   include/Krystal.Booey/CSS/Font/CSSFontSelector.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp
@@ -687,6 +688,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Counter/CounterStyle.cpp
   src/CSS/Counter/CounterStyleDescriptors.cpp
   src/CSS/Counter/CounterStyleRegistry.cpp
+  src/CSS/CSSOM/DOMCSSNamespace.cpp
   src/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
   src/CSS/Font/CSSFontSelector.cpp
   src/CSS/CSSOM/CSSConditionRule.cpp
@@ -962,9 +964,11 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp
   include/Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp
   include/Krystal.Booey/DOM/Algorithms/TreeQueries.hpp
+  include/Krystal.Booey/DOM/Collections/CollectionIndexCache.hpp
   include/Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp
   include/Krystal.Booey/DOM/Collections/DOMTokenList.hpp
   include/Krystal.Booey/DOM/Collections/HTMLCollection.hpp
+  include/Krystal.Booey/DOM/Collections/LiveCollection.hpp
   include/Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp
   include/Krystal.Booey/DOM/Collections/LiveNodeList.hpp
   include/Krystal.Booey/DOM/Collections/NodeList.hpp
@@ -997,6 +1001,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/MouseRelatedEvent.hpp
   include/Krystal.Booey/DOM/Events/PointerEvent.hpp
   include/Krystal.Booey/DOM/Events/PointerEventTypeNames.hpp
+  include/Krystal.Booey/DOM/Events/ScopedEventQueue.hpp
   include/Krystal.Booey/DOM/Events/SimulatedClick.hpp
   include/Krystal.Booey/DOM/Events/TextEvent.hpp
   include/Krystal.Booey/DOM/Events/ToggleEvent.hpp
@@ -1020,6 +1025,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Internals/EventFactory.hpp
   include/Krystal.Booey/DOM/Internals/IdTargetObserver.hpp
   include/Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp
+  include/Krystal.Booey/DOM/Internals/TreeScopeOrderedMap.hpp
   include/Krystal.Booey/DOM/Internals/LayoutOptions.hpp
   include/Krystal.Booey/DOM/Internals/NodeRareData.hpp
   include/Krystal.Booey/DOM/Internals/PopoverData.hpp
@@ -1119,6 +1125,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Algorithms/TreeQueries.cpp
   src/DOM/Collections/DatasetDOMStringMap.cpp
   src/DOM/Collections/DOMTokenList.cpp
+  src/DOM/Collections/LiveCollection.cpp
   src/DOM/Collections/LiveHTMLCollection.cpp
   src/DOM/Collections/LiveNodeList.cpp
   src/DOM/Collections/StaticHTMLCollection.cpp
@@ -1128,6 +1135,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/DataTransfer/DataTransferItem.cpp
   src/DOM/DataTransfer/DataTransferItemList.cpp
   src/DOM/Events/BeforeTextInsertedEvent.cpp
+  src/DOM/Events/UIEvent.cpp
   src/DOM/Events/ClipboardEvent.cpp
   src/DOM/Events/CommandEvent.cpp
   src/DOM/Events/CompositionEvent.cpp
@@ -1144,6 +1152,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/MouseRelatedEvent.cpp
   src/DOM/Events/PointerEvent.cpp
   src/DOM/Events/PointerEventTypeNames.cpp
+  src/DOM/Events/ScopedEventQueue.cpp
   src/DOM/Events/SimulatedClick.cpp
   src/DOM/Events/TextEvent.cpp
   src/DOM/Events/ToggleEvent.cpp
@@ -1161,6 +1170,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Internals/ElementRareData.cpp
   src/DOM/Internals/IdTargetObserver.cpp
   src/DOM/Internals/IdTargetObserverRegistry.cpp
+  src/DOM/Internals/TreeScopeOrderedMap.cpp
   src/DOM/Internals/NodeRareData.cpp
   src/DOM/Internals/PopoverData.cpp
   src/DOM/Internals/QualifiedNameCache.cpp
@@ -1440,7 +1450,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Fonts/GlyphPage.hpp
   include/Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp
   include/Krystal.Booey/Graphics/Fonts/SystemFallbackFontCache.hpp
-  include/Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp
+  include/Krystal.Booey/Graphics/Fonts/SystemFonts.hpp
   include/Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxExtents.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxSides.hpp
@@ -1499,6 +1509,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Images/ImageDecoder.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrame.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrameAnimator.hpp
+  include/Krystal.Booey/Graphics/Images/ImageFrameWorkQueue.hpp
   include/Krystal.Booey/Graphics/Images/ImageObserver.hpp
   include/Krystal.Booey/Graphics/Images/ImageOrientation.hpp
   include/Krystal.Booey/Graphics/Images/ImagePaintingOptions.hpp
@@ -1644,7 +1655,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Fonts/FontSelectionAlgorithm.cpp
   src/Graphics/Fonts/OpenTypeMathData.cpp
   src/Graphics/Fonts/SystemFallbackFontCache.cpp
-  src/Graphics/Fonts/SystemFontDatabase.cpp
   src/Graphics/Fonts/WOFFFileFormat.cpp
   src/Graphics/Geometry/DoubleSize.cpp
   src/Graphics/Geometry/FloatPoint.cpp
@@ -1694,6 +1704,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Images/ImageDecoder.cpp
   src/Graphics/Images/ImageFrame.cpp
   src/Graphics/Images/ImageFrameAnimator.cpp
+  src/Graphics/Images/ImageFrameWorkQueue.cpp
   src/Graphics/Images/ImageSource.cpp
   src/Graphics/Images/NativeImage.cpp
   src/Graphics/Images/NativeImageSource.cpp
@@ -1949,6 +1960,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp
   include/Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp
   include/Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp
+  include/Krystal.Booey/HTML/Shadow/DataListButtonElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElement.hpp
   include/Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp
@@ -2132,6 +2144,7 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Sanitizer/Sanitizer.cpp
   src/HTML/Sanitizer/SanitizerAlgorithms.cpp
   src/HTML/Sanitizer/SanitizerConstants.cpp
+  src/HTML/Shadow/DataListButtonElement.cpp
   src/HTML/Shadow/DateTimeEditElement.cpp
   src/HTML/Shadow/DateTimeFieldElement.cpp
   src/HTML/Shadow/DateTimeFieldElements.cpp
@@ -2318,6 +2331,7 @@ set(KRYSTAL_BOOEY_LOADER_HEADERS
   include/Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp
   include/Krystal.Booey/Loader/Cache/CachedImage.hpp
   include/Krystal.Booey/Loader/Cache/CachedImageClient.hpp
+  include/Krystal.Booey/Loader/Cache/CachedRawResource.hpp
   include/Krystal.Booey/Loader/Cache/CachedResource.hpp
   include/Krystal.Booey/Loader/Cache/CachedResourceClient.hpp
   include/Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp
@@ -2337,6 +2351,9 @@ set(KRYSTAL_BOOEY_LOADER_HEADERS
   include/Krystal.Booey/Loader/FrameLoader.hpp
   include/Krystal.Booey/Loader/FrameLoaderTypes.hpp
   include/Krystal.Booey/Loader/FrameLoadRequest.hpp
+  include/Krystal.Booey/Loader/Icons/IconLoader.hpp
+  include/Krystal.Booey/Loader/Icons/LinkIcon.hpp
+  include/Krystal.Booey/Loader/Icons/LinkIconCollector.hpp
   include/Krystal.Booey/Loader/ImageLoader.hpp
   include/Krystal.Booey/Loader/LoaderStrategy.hpp
   include/Krystal.Booey/Loader/LocalFrameLoaderClient.hpp
@@ -2349,6 +2366,7 @@ set(KRYSTAL_BOOEY_LOADER_SOURCES
   src/Loader/Cache/CachedCSSStyleSheet.cpp
   src/Loader/Cache/CachedFont.cpp
   src/Loader/Cache/CachedImage.cpp
+  src/Loader/Cache/CachedRawResource.cpp
   src/Loader/Cache/CachedResource.cpp
   src/Loader/Cache/CachedResourceLoader.cpp
   src/Loader/Cache/CachedSVGDocument.cpp
@@ -2357,6 +2375,8 @@ set(KRYSTAL_BOOEY_LOADER_SOURCES
   src/Loader/DocumentWriter.cpp
   src/Loader/FormSubmission.cpp
   src/Loader/FrameLoader.cpp
+  src/Loader/Icons/IconLoader.cpp
+  src/Loader/Icons/LinkIconCollector.cpp
   src/Loader/FrameLoadRequest.cpp
   src/Loader/ImageLoader.cpp
   src/Loader/NavigationAction.cpp
@@ -2435,6 +2455,7 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp
   include/Krystal.Booey/Page/ScrollBehavior.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp
   include/Krystal.Booey/Page/ScrollOptions.hpp
   include/Krystal.Booey/Page/Settings.hpp
   include/Krystal.Booey/Page/SpatialNavigation.hpp
@@ -2460,6 +2481,7 @@ set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/ResizeObserver/ResizeObserver.cpp
   src/Page/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp
+  src/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   src/Page/Settings.cpp
   src/Page/SpatialNavigation.cpp
   src/Page/VisualViewport.cpp
@@ -2469,9 +2491,12 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/CaretAnimator.hpp
   include/Krystal.Booey/Platform/Choosers/ColorChooser.hpp
   include/Krystal.Booey/Platform/Choosers/ColorChooserClient.hpp
+  include/Krystal.Booey/Platform/Choosers/DataListSuggestionPicker.hpp
+  include/Krystal.Booey/Platform/Choosers/DataListSuggestionsClient.hpp
   include/Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp
   include/Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp
   include/Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp
+  include/Krystal.Booey/Platform/Choosers/FileChooser.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenu.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenuClient.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp
@@ -2505,6 +2530,8 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/MIMETypeRegistry.hpp
   include/Krystal.Booey/Platform/Network/BlobData.hpp
   include/Krystal.Booey/Platform/Network/DataURLDecoder.hpp
+  include/Krystal.Booey/Platform/Network/HTTPHeaderMap.hpp
+  include/Krystal.Booey/Platform/Network/HTTPParsers.hpp
   include/Krystal.Booey/Platform/Network/ResourceError.hpp
   include/Krystal.Booey/Platform/Network/ResourceRequest.hpp
   include/Krystal.Booey/Platform/Network/ResourceResponse.hpp
@@ -2518,11 +2545,13 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/PathStrokeStrategy.hpp
   include/Krystal.Booey/Platform/PlatformStrategies.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp
+  include/Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp
   include/Krystal.Booey/Platform/Scrolling/Scrollbar.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollbarThemeComposite.hpp
+  include/Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp
   include/Krystal.Booey/Platform/SharedBuffer.hpp
   include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
@@ -2535,6 +2564,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
 
 set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/CaretAnimator.cpp
+  src/Platform/Cursor.cpp
   src/Platform/DateComponents.cpp
   src/Platform/Decimal.cpp
   src/Platform/ImageDecoders/BMPImageDecoder.cpp
@@ -2555,6 +2585,9 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/MIMETypeRegistry.cpp
   src/Platform/Network/BlobData.cpp
   src/Platform/Network/DataURLDecoder.cpp
+  src/Platform/Network/HTTPHeaderMap.cpp
+  src/Platform/Network/HTTPParsers.cpp
+  src/Platform/Network/ResourceResponse.cpp
   src/Platform/Pasteboard/DragData.cpp
   src/Platform/Pasteboard/DragImage.cpp
   src/Platform/Pasteboard/Pasteboard.cpp
@@ -2563,11 +2596,13 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Pasteboard/StaticPasteboard.cpp
   src/Platform/PlatformStrategies.cpp
   src/Platform/Scrolling/ScrollableArea.cpp
+  src/Platform/Scrolling/ScrollAnimator.cpp
   src/Platform/Scrolling/ScrollAlignment.cpp
   src/Platform/Scrolling/Scrollbar.cpp
   src/Platform/Scrolling/ScrollbarTheme.cpp
   src/Platform/Scrolling/ScrollbarThemeAdwaita.cpp
   src/Platform/Scrolling/ScrollbarThemeComposite.cpp
+  src/Platform/Scrolling/ScrollbarsController.cpp
   src/Platform/SimpleCaretAnimator.cpp
   src/Platform/ThemeAdwaita.cpp
   src/Platform/ThreadTimers.cpp

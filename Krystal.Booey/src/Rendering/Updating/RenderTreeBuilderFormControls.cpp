@@ -1,9 +1,13 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFormControls.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
 
 namespace krys::boo
 {
@@ -76,5 +80,71 @@ namespace krys::boo
     _builder.BlockBuilder().Attach(parent, krys::move(wrapper), nullptr);
     parent.SetInnerRenderer(*innerRenderer);
     return *innerRenderer;
+  }
+
+  void RenderTreeBuilder::FormControls::UpdateAfterDescendants(RenderElement &renderer) noexcept
+  {
+    auto *element = renderer.GetElement();
+    if (!element)
+    {
+      return;
+    }
+
+    auto type = PseudoElementType::Checkmark;
+    bool usesBaseAppearance = false;
+    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*element))
+    {
+      type = PseudoElementType::PickerIcon;
+      usesBaseAppearance = select->ContentsUseBaseAppearance();
+    }
+    else if (auto *option = DynamicDowncast<html::HTMLOptionElement>(*element))
+    {
+      auto *ownerSelect = option->OwnerSelectElement();
+      usesBaseAppearance = ownerSelect && ownerSelect->ContentsUseBaseAppearance();
+    }
+    else
+    {
+      return;
+    }
+
+    RenderElement *existing = nullptr;
+    for (auto *child = renderer.FirstChild(); child; child = child->NextSibling())
+    {
+      if (auto *childElement = DynamicDowncast<RenderElement>(*child);
+          childElement && childElement->IsAnonymous() && childElement->Style().GetPseudoElementType() == type)
+      {
+        existing = childElement;
+        break;
+      }
+    }
+
+    const auto *style =
+      usesBaseAppearance ? renderer.GetCachedPseudoStyle({type}, &renderer.Style()) : nullptr;
+    bool isNeeded =
+      style && style->Display() != DisplayType::None && style->GetContent().TryData() != nullptr;
+
+    // Kept while its content stays: an animation or transition of it goes on from frame to frame.
+    if (existing && isNeeded && existing->Style().GetContent() == style->GetContent())
+    {
+      existing->SetStyle(RenderStyle::Clone(*style));
+      return;
+    }
+    if (existing)
+    {
+      _builder.Destroy(*existing);
+    }
+    if (!isNeeded)
+    {
+      return;
+    }
+
+    auto generated = boo::CreateRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow,
+                                                          renderer.GetDocument(), RenderStyle::Clone(*style));
+    generated->InitializeStyle();
+    auto &generatedRenderer = *generated;
+    // A checkmark comes before the option's contents, and an icon after the select's.
+    _builder.Attach(renderer, krys::move(generated),
+                    type == PseudoElementType::Checkmark ? renderer.FirstChild() : nullptr);
+    RenderTreeUpdater::CreateContentRenderers(_builder, generatedRenderer, generatedRenderer.Style());
   }
 }

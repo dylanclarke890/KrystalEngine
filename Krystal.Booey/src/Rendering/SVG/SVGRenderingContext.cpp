@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -39,7 +40,8 @@ namespace krys::boo
 
   SVGRenderingContext::SVGRenderingContext(SVGRenderingContext &&other) noexcept
       : _renderer {other._renderer}, _paintInfo {other._paintInfo}, _savedContext {other._savedContext},
-        _filter {other._filter}, _savedPaintRect {other._savedPaintRect},
+        _filter {other._filter}, _cssFilter {krys::move(other._cssFilter)},
+        _cssFilterSwitcher {krys::move(other._cssFilterSwitcher)}, _savedPaintRect {other._savedPaintRect},
         _renderingFlags {std::exchange(other._renderingFlags, {})},
         _pathClippingIsEntirelyWithinRendererContents {other._pathClippingIsEntirelyWithinRendererContents}
   {
@@ -49,7 +51,7 @@ namespace krys::boo
   {
     // Fast path if we don't need to restore anything.
     if (!_renderingFlags.ContainsAny({RenderingFlag::RestoreGraphicsContext, RenderingFlag::EndOpacityLayer,
-                                      RenderingFlag::EndFilterLayer}))
+                                      RenderingFlag::EndFilterLayer, RenderingFlag::EndCSSFilterLayer}))
     {
       return;
     }
@@ -63,6 +65,14 @@ namespace krys::boo
       _filter->PostApplyResource(*_renderer, contextPtr, {}, nullptr, nullptr);
       _paintInfo->SetContext(*_savedContext);
       _paintInfo->Rect = _savedPaintRect;
+    }
+
+    if (_renderingFlags.Contains(RenderingFlag::EndCSSFilterLayer))
+    {
+      krys_debug_assert(_cssFilterSwitcher && _savedContext);
+      _paintInfo->SetContext(*_savedContext);
+      _paintInfo->Rect = _savedPaintRect;
+      _cssFilterSwitcher->EndDrawSourceImage(*_savedContext);
     }
 
     if (_renderingFlags.Contains(RenderingFlag::EndOpacityLayer))
@@ -156,6 +166,10 @@ namespace krys::boo
         return;
       }
 
+      if (!isRenderingMask)
+      {
+        BeginCSSFilter();
+      }
       _renderingFlags.Add(RenderingFlag::RenderingPrepared);
       return;
     }
@@ -213,9 +227,86 @@ namespace krys::boo
         // be drawn.
         _paintInfo->Rect = LayoutRect(IntRect(_filter->DrawingRegion(*_renderer)));
       }
+      else if (!_filter)
+      {
+        BeginCSSFilter();
+      }
     }
 
     _renderingFlags.Add(RenderingFlag::RenderingPrepared);
+  }
+
+  IntOutsets SVGRenderingContext::CSSFilterOutsets(const RenderElement &renderer) noexcept
+  {
+    // The root's filter is its layer's.
+    const auto &style = renderer.Style();
+    if (!style.HasFilter() || style.GetFilter().IsReferenceFilter() || renderer.IsLegacyRenderSVGRoot())
+    {
+      return {};
+    }
+    auto &element = const_cast<RenderElement &>(renderer);
+    return CSSFilterRenderer::CalculateOutsets(element, style.GetFilter(), renderer.ObjectBoundingBox());
+  }
+
+  void SVGRenderingContext::BeginCSSFilter() noexcept
+  {
+    // Filter functions on an SVG element (Filter Effects 1 applies `filter` to them all): drawn as the
+    // filter resource of a `url()` is, after the mask and clip, with the object bounding box as the reference
+    // box and the stroke bounding box, past which the functions draw by their outsets, as the source.
+    auto &renderer = *_renderer;
+    const auto &style = renderer.Style();
+    if (!style.HasFilter() || style.GetFilter().IsReferenceFilter() || renderer.IsLegacyRenderSVGRoot()
+        || CSSFilterRenderer::IsIdentity(renderer, style.GetFilter()))
+    {
+      return;
+    }
+    auto *page = renderer.GetDocument().GetPage();
+    if (!page)
+    {
+      return;
+    }
+
+    auto absoluteTransform = CalculateTransformationToOutermostCoordinateSystem(renderer);
+    if (!absoluteTransform.IsInvertible())
+    {
+      return;
+    }
+    FloatSize scale(static_cast<float>(absoluteTransform.XScale()),
+                    static_cast<float>(absoluteTransform.YScale()));
+
+    auto sourceRect = renderer.StrokeBoundingBox();
+    auto outsets = CSSFilterOutsets(renderer);
+    auto filterRegion = sourceRect;
+    filterRegion.Move(static_cast<float>(-outsets.Left()), static_cast<float>(-outsets.Top()));
+    filterRegion.Expand(static_cast<float>(outsets.Left() + outsets.Right()),
+                        static_cast<float>(outsets.Top() + outsets.Bottom()));
+    if (filterRegion.IsEmpty())
+    {
+      return;
+    }
+    (void)ImageBuffer::SizeNeedsClamping(sourceRect.Size(), scale);
+
+    auto &context = _paintInfo->Context();
+    _cssFilter = CSSFilterRenderer::Create(
+      renderer, style.GetFilter(),
+      {.ReferenceBox = renderer.ObjectBoundingBox(), .FilterRegion = filterRegion, .Scale = scale},
+      page->PreferredFilterRenderingModes(context), context);
+    if (!_cssFilter)
+    {
+      return;
+    }
+    _cssFilterSwitcher = GraphicsContextSwitcher::Create(context, sourceRect, RefPtr<Filter>(_cssFilter));
+    if (!_cssFilterSwitcher)
+    {
+      return;
+    }
+
+    _cssFilterSwitcher->BeginDrawSourceImage(context);
+    _savedContext = &context;
+    _savedPaintRect = _paintInfo->Rect;
+    _paintInfo->SetContext(*_cssFilterSwitcher->DrawingContext(context));
+    _paintInfo->Rect = LayoutRect(EnclosingIntRect(filterRegion));
+    _renderingFlags.Add(RenderingFlag::EndCSSFilterLayer);
   }
 
   void SVGRenderingContext::ClipToImageBuffer(GraphicsContext &context, const FloatRect &targetRect,

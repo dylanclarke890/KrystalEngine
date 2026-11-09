@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::dom
@@ -15,7 +15,7 @@ namespace krys::boo::html
   /// @brief The labels of a labelable element: the `label` elements in its tree whose labeled control it is,
   /// in tree order.
   /// @see https://html.spec.whatwg.org/#dom-lfe-labels
-  class LabelsNodeList final : public dom::NodeList
+  class LabelsNodeList final : public dom::LiveNodeList
   {
   private:
     Ref<HTMLElement> _ownerNode;
@@ -23,15 +23,6 @@ namespace krys::boo::html
   public:
     explicit LabelsNodeList(HTMLElement &ownerNode) noexcept;
 
-    KRYS_NODISCARD RefPtr<dom::Node> Item(size_t index) noexcept override;
-    KRYS_NODISCARD RefPtr<const dom::Node> Item(size_t index) const noexcept override;
-    KRYS_NODISCARD RefPtr<dom::Node> operator[](size_t index) noexcept override;
-    KRYS_NODISCARD RefPtr<const dom::Node> operator[](size_t index) const noexcept override;
-    KRYS_NODISCARD size_t Length() const noexcept override;
-
     KRYS_NODISCARD bool ElementMatches(const dom::Element &testNode) const noexcept;
-
-  private:
-    KRYS_NODISCARD List<Ref<dom::Element>> Elements() const noexcept;
   };
 }

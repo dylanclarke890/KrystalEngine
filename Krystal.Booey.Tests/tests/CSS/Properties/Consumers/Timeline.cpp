@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
+#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers::tests
 {
@@ -65,12 +66,12 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"red", ConsumeSingleAnimationRangeStart) == "<null>");
 
     ParserContext context {ParserMode::HTMLStandard};
-    auto value =
-      ParseSingleAnimationRange(CSSOMString(u8" cover 10% "), context, SingleAnimationRangeType::Start);
+    auto value = ParseSingleAnimationRange(CSSOMString(u8" cover 10% "), context,
+                                           style::SingleAnimationRangeType::Start);
     REQUIRE(value);
     CHECK(CssText(*value) == "cover 10%");
     CHECK_FALSE(
-      ParseSingleAnimationRange(CSSOMString(u8"cover red"), context, SingleAnimationRangeType::End));
+      ParseSingleAnimationRange(CSSOMString(u8"cover red"), context, style::SingleAnimationRangeType::End));
   }
 
   TEST_CASE("PropertyParserHelpers(IsAnimationRangeKeyword)", "[CSS][Properties][Consumers]")

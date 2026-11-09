@@ -27,6 +27,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -227,7 +228,13 @@ namespace krys::boo
     Timer _fakeMouseMoveEventTimer;
     bool _hasScheduledCursorUpdate {false};
     bool _isHandlingWheelEvent {false};
+    /// @brief What a gesture (a touch's or a touchpad's pan, or its momentum) has scrolled, to snap when it
+    /// ends.
+    List<WeakPtr<ScrollableArea>> _gestureScrolledAreas;
     PlatformMouseEvent _lastPlatformMouseEvent;
+    /// @brief The modifier keys of the latest mouse or keyboard event: the keys held as far as the page
+    /// knows.
+    EnumSet<PlatformEventModifier> _lastKnownModifiers;
 
     // The element each touch began on, by its id plus one (so no key is 0).
     HashMap<uint32, RefPtr<dom::EventTarget>> _originatingTouchPointTargets;
@@ -240,6 +247,35 @@ namespace krys::boo
   public:
     explicit EventHandler(LocalFrame &frame) noexcept;
     ~EventHandler() noexcept;
+
+    /// @brief Drops the elements of @p chain, the elements an enter or leave event goes to (deepest first,
+    /// each followed by its ancestors), that no listener for one of @p types would see. These events don't
+    /// bubble, so only a listener on the element itself, or a capturing one on an ancestor (its shadow roots,
+    /// document and window included), runs for it.
+    template <typename TElementChain>
+    static void RemoveBoundaryTargetsWithoutListeners(TElementChain &chain,
+                                                      Span<const dom::DOMStringAtom> types) noexcept
+    {
+      if (chain.empty())
+      {
+        return;
+      }
+
+      List<bool> keep(chain.size());
+      bool capturingAbove = HasCapturingBoundaryListenerAbove(*chain.back(), types);
+      for (size_t i = chain.size(); i-- > 0;)
+      {
+        if (!chain[i])
+        {
+          continue;
+        }
+        keep[i] = capturingAbove || HasBoundaryListener(*chain[i], types);
+        capturingAbove = capturingAbove || HasCapturingBoundaryListener(*chain[i], types);
+      }
+
+      size_t index = 0;
+      std::erase_if(chain, [&](const auto &) { return !keep[index++]; });
+    }
 
     /// @brief Forgets the mouse's state, as when the frame's document is replaced.
     void Clear() noexcept;
@@ -328,6 +364,11 @@ namespace krys::boo
       _mouseDownMayStartAutoscroll = true;
     }
     KRYS_NODISCARD bool AutoscrollInProgress() const noexcept;
+    /// @brief Whether any autoscroll (a selection's, a drag's, or a pan) is scrolling something.
+    KRYS_NODISCARD bool IsAutoscrolling() const noexcept;
+    KRYS_NODISCARD bool PanScrollInProgress() const noexcept;
+    /// @brief Starts pan scrolling @p renderer from the mouse's position.
+    void StartPanScrolling(RenderBox &renderer) noexcept;
     void StopAutoscrollTimer(bool rendererIsBeingDestroyed = false) noexcept;
 
     KRYS_NODISCARD static DragState &GetDragState() noexcept;
@@ -339,6 +380,11 @@ namespace krys::boo
     }
 
     /// @brief The cursor to show, as chosen by the last mouse move or cursor update.
+    void SetCurrentMouseCursor(Cursor cursor) noexcept
+    {
+      _currentMouseCursor = cursor;
+    }
+
     KRYS_NODISCARD Cursor CurrentMouseCursor() const noexcept
     {
       return _currentMouseCursor;
@@ -401,8 +447,8 @@ namespace krys::boo
     /// @brief Handles a turn of the mouse wheel: `wheel` at the element under the mouse, then, unless it's
     /// cancelled, a scroll of the nearest box that can scroll that way, or else the view.
     /// @return Whether the event was cancelled or scrolled something.
-    // FIXME: Latching, the delta filter, scroll snapping and gesture states come with touchpad gestures and
-    // scroll snapping.
+    /// @note A touchpad's pan scrolls freely, and what it scrolled snaps once it and its momentum end.
+    // FIXME: Latching and the delta filter.
     bool HandleWheelEvent(const PlatformWheelEvent &event) noexcept;
     /// @brief The default action of a `wheel` event at @p startNode: scrolls the nearest enclosing box that
     /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops
@@ -415,6 +461,10 @@ namespace krys::boo
     /// event fires.
     /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
     bool HandleTouchScroll(const PlatformWheelEvent &event) noexcept;
+    /// @brief A gesture (a touch's pan and its fling, or a touchpad's pan and its momentum) has ended: what
+    /// it scrolled snaps.
+    void DidEndGestureScroll() noexcept;
+    KRYS_NODISCARD ScrollIsAnimated KeyboardScrollIsAnimated() const noexcept;
     KRYS_NODISCARD bool IsHandlingWheelEvent() const noexcept
     {
       return _isHandlingWheelEvent;
@@ -444,14 +494,28 @@ namespace krys::boo
     bool ScrollOverflow(ScrollDirection direction, ScrollGranularity granularity,
                         dom::Node *startingNode = nullptr) noexcept;
     bool LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                               dom::Node *startingNode = nullptr) noexcept;
+                               dom::Node *startingNode = nullptr,
+                               ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
     /// @brief As `ScrollOverflow`, or else scrolls the view.
     bool ScrollRecursively(ScrollDirection direction, ScrollGranularity granularity,
                            dom::Node *startingNode = nullptr) noexcept;
     bool LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                  dom::Node *startingNode = nullptr) noexcept;
+                                  dom::Node *startingNode = nullptr,
+                                  ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
 
   private:
+    /// @brief Whether @p element has a listener for one of @p types, or its shadow root a capturing one.
+    KRYS_NODISCARD static bool HasBoundaryListener(const dom::Element &element,
+                                                   Span<const dom::DOMStringAtom> types) noexcept;
+    /// @brief Whether @p element, or its shadow root, has a capturing listener for one of @p types.
+    KRYS_NODISCARD static bool HasCapturingBoundaryListener(const dom::Element &element,
+                                                            Span<const dom::DOMStringAtom> types) noexcept;
+    /// @brief Whether an ancestor of @p element (with their shadow roots), its document or its window has a
+    /// capturing listener for one of @p types.
+    KRYS_NODISCARD static bool
+      HasCapturingBoundaryListenerAbove(const dom::Element &element,
+                                        Span<const dom::DOMStringAtom> types) noexcept;
+
     bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
     bool DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept;
     bool DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &event, ScrollLogicalDirection direction,
@@ -459,6 +523,10 @@ namespace krys::boo
     bool DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept;
     bool DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept;
     bool DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept;
+    /// @brief Runs the access key action of the element @p event's key is the access key of, if it's pressed
+    /// with Alt (and perhaps Shift).
+    /// @return Whether there was such an element.
+    bool HandleAccessKey(const PlatformKeyboardEvent &event) noexcept;
     bool DefaultArrowEventHandler(dom::FocusDirection focusDirection, dom::KeyboardEvent &event) noexcept;
 
     KRYS_NODISCARD MouseEventWithHitTestResults
@@ -509,6 +577,13 @@ namespace krys::boo
     void UpdateMouseEventTargetNode(dom::DOMStringAtom eventType, dom::Node *targetNode,
                                     const PlatformMouseEvent &platformMouseEvent,
                                     FireMouseOverOut fireMouseOverOut) noexcept;
+    /// @brief The scrollers and list boxes that scroll @p node, innermost first, then the frame view; none
+    /// without a node.
+    KRYS_NODISCARD List<ScrollableArea *> ScrollableAreasEnclosing(dom::Node *node) const noexcept;
+    /// @brief Tells the scrollable areas the mouse moved over, entered or left, which show their overlay
+    /// scrollbars: the mouse is in a scroller and in each one around it.
+    void NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType, dom::Element *lastElementUnderMouse,
+                                            dom::Element *elementUnderMouse) noexcept;
     void ClearElementUnderMouse() noexcept;
     KRYS_NODISCARD bool IsElementAnAncestorOfLastElementUnderMouse(dom::Element *element) const noexcept;
 

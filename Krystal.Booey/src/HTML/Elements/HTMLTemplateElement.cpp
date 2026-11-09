@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -77,6 +79,151 @@ namespace krys::boo::html
   void HTMLTemplateElement::SetTemplateContents(dom::ShadowRoot &shadow) noexcept
   {
     _content = ShareRef<dom::DocumentFragment>(shadow);
+  }
+
+  namespace
+  {
+    // https://html.spec.whatwg.org/#find-markers
+    KRYS_NODISCARD Pair<dom::ProcessingInstruction *, dom::ProcessingInstruction *>
+      FindMarkers(dom::ContainerNode &scope, dom::DOMStringView name) noexcept
+    {
+      // 1. For each descendant of scope's descendants, in tree order:
+      for (auto &descendant : dom::DescendantRange(scope))
+      {
+        // 1a. If descendant is not a ProcessingInstruction node, then continue.
+        auto *instruction = DynamicDowncast<dom::ProcessingInstruction>(descendant);
+        if (!instruction)
+        {
+          continue;
+        }
+
+        // 1b. If the result of getting a processing instruction attribute given descendant and "name" is not
+        //     name, then continue.
+        auto instructionName = instruction->GetAttribute(u8"name");
+        if (!instructionName || *instructionName != name)
+        {
+          continue;
+        }
+
+        // 1c. If descendant's target is "marker", then return (descendant, descendant).
+        if (instruction->Target() == u8"marker")
+        {
+          return {instruction, instruction};
+        }
+
+        // 1d. If descendant's target is "start":
+        if (instruction->Target() == u8"start")
+        {
+          // 1d.i. Let start be descendant.
+          // 1d.ii. Let nestingLevel be 0.
+          uint32 nestingLevel = 0;
+
+          // 1d.iii. Let sibling be start's next sibling.
+          // 1d.iv. While sibling is not null: [...] 1d.iv.B. Set sibling to sibling's next sibling.
+          for (auto *sibling = instruction->NextSibling(); sibling; sibling = sibling->NextSibling())
+          {
+            // 1d.iv.A. If sibling is a ProcessingInstruction node:
+            auto *siblingInstruction = DynamicDowncast<dom::ProcessingInstruction>(*sibling);
+            if (!siblingInstruction)
+            {
+              continue;
+            }
+
+            // 1d.iv.A.1. If sibling's target is "start", then increment nestingLevel by one.
+            if (siblingInstruction->Target() == u8"start")
+            {
+              ++nestingLevel;
+            }
+
+            // 1d.iv.A.2. If sibling's target is "end":
+            if (siblingInstruction->Target() == u8"end")
+            {
+              // 1d.iv.A.2a. If nestingLevel is 0, then return (start, sibling).
+              if (nestingLevel == 0)
+              {
+                return {instruction, siblingInstruction};
+              }
+
+              // 1d.iv.A.2b. Decrement nestingLevel by one.
+              --nestingLevel;
+            }
+          }
+
+          // 1d.v. Return (start, null).
+          return {instruction, nullptr};
+        }
+      }
+
+      // 2. Return (null, null).
+      return {nullptr, nullptr};
+    }
+  }
+
+  void HTMLTemplateElement::ClearInsertionTarget() noexcept
+  {
+    _insertionTarget = nullptr;
+    _insertionStartMarker = nullptr;
+    _insertionEndMarker = nullptr;
+  }
+
+  // https://html.spec.whatwg.org/#prepare-content-patching
+  bool HTMLTemplateElement::PrepareContentPatching(dom::ContainerNode &scope) noexcept
+  {
+    // 1. Assert: template's for attribute is specified.
+    // 2. Let markerName be template's for attribute's value.
+    auto markerName = GetAttribute(u8"for");
+    krys_debug_assert(markerName);
+
+    // 3. If markerName is the empty string, then return false.
+    if (markerName->empty())
+    {
+      return false;
+    }
+
+    // 4. Let (start, end) be the result of find markers given scope and markerName.
+    auto [start, end] = FindMarkers(scope, *markerName);
+
+    // 5. If start is null, then return false.
+    if (!start)
+    {
+      return false;
+    }
+
+    // 6. Set template's insertion target to start's parent.
+    // 7. Set template's insertion start marker to start.
+    // 8. Set template's insertion end marker to end.
+    _insertionTarget = ShareRefPtr(start->ParentNode());
+    _insertionStartMarker = ShareRefPtr(start);
+    _insertionEndMarker = ShareRefPtr(end);
+
+    // 9. If start is end, then return true.
+    if (start == end)
+    {
+      return true;
+    }
+
+    // 10. Let removedNodes be an empty list.
+    // 11. Let currentNode be start's next sibling.
+    // 12. While currentNode is not null: if currentNode is end, then break; append currentNode to
+    //     removedNodes; and set currentNode to currentNode's next sibling.
+    List<Ref<dom::Node>> removedNodes;
+    for (auto *currentNode = start->NextSibling(); currentNode && currentNode != end;
+         currentNode = currentNode->NextSibling())
+    {
+      removedNodes.push_back(ShareRef(*currentNode));
+    }
+
+    // 13. For each node of removedNodes: if node's parent is not null, then remove node.
+    for (auto &node : removedNodes)
+    {
+      if (node->ParentNode())
+      {
+        (void)dom::MutationAlgorithms::Remove(*node);
+      }
+    }
+
+    // 14. Return true.
+    return true;
   }
 
   // https://html.spec.whatwg.org/#the-template-element:concept-node-adopt-ext

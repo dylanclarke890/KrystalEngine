@@ -74,7 +74,7 @@ namespace krys::boo
   };
 
   /// @brief How to scroll a rect into view.
-  // FIXME: Forward-only scrolling (onlyAllowForwardScrolling), once there's find-in-page.
+  // (There's no forward-only scrolling, which is for find in page; see DIFFERENCES.md.)
   struct ScrollRectToVisibleOptions
   {
     SelectionRevealMode RevealMode {SelectionRevealMode::Reveal};
@@ -1078,6 +1078,18 @@ namespace krys::boo
     /// and sets the result's link element.
     /// @return Whether a layer was hit: always for the view's layer on a move over the document, or a press
     /// or release.
+    /// @brief Paints the layers in this layer, an SVG foreign object's, in the context's current coordinates.
+    /// A foreign object's content has to be painted with the transforms of the SVG around it, which layers
+    /// don't know of, so ancestors leave this layer out of their lists and the foreign object calls this.
+    /// @param above The layers over the object's own content, rather than those under it.
+    void PaintForeignObjectLayers(GraphicsContext &context, const LayoutRect &dirtyRect,
+                                  EnumSet<PaintBehavior> paintBehavior, bool above) noexcept;
+
+    /// @brief Hit tests the same layers, with @p hitTestLocation in the foreign object's coordinates.
+    /// @return Whether one was hit.
+    bool HitTestForeignObjectLayers(const HitTestRequest &request, HitTestResult &result,
+                                    const HitTestLocation &hitTestLocation, bool above) noexcept;
+
     bool HitTest(const HitTestRequest &request, HitTestResult &result) noexcept;
 
     /// @brief Scrolls to bring @p positionInWindow into view, as a mouse drag selects past the layer's edge.
@@ -1796,6 +1808,9 @@ namespace krys::boo
     void PaintOutlineForFragments(const LayerFragments &, GraphicsContext &, const LayerPaintingInfo &,
                                   EnumSet<boo::PaintBehavior>,
                                   RenderObject *subtreePaintRootForRenderer) noexcept;
+    /// @brief The overlay scrollbars' second pass: paints the scrollbars in each fragment.
+    void PaintOverflowControlsForFragments(const LayerFragments &, GraphicsContext &,
+                                           const LayerPaintingInfo &) noexcept;
     void PaintMaskForFragments(const LayerFragments &, GraphicsContext &, const LayerPaintingInfo &,
                                EnumSet<boo::PaintBehavior>,
                                RenderObject *subtreePaintRootForRenderer) noexcept;

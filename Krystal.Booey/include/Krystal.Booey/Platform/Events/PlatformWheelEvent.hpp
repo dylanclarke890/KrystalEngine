@@ -29,6 +29,19 @@ namespace krys::boo
     ScrollByPixelWheelEvent,
   };
 
+  /// @brief Where a wheel event is in a gesture (a touchpad's pan) or in the momentum after it: its start, a
+  /// step, or its end; or in none, as a wheel's notches are.
+  /// @note A gesture that goes on into momentum has no `Ended`: its momentum's `Began` follows its last
+  /// `Changed`. So a gesture is over at an `Ended` or `Cancelled` of either.
+  enum class PlatformWheelEventPhase : uint8
+  {
+    None,
+    Began,
+    Changed,
+    Ended,
+    Cancelled,
+  };
+
   // How many pixels should we scroll per line? Gecko uses the height of the
   // current line, which means scroll distance changes as you go through the
   // page or go to different pages. IE 7 is ~50 px/line, although the value
@@ -38,11 +51,10 @@ namespace krys::boo
   // (the default scroll amount on Windows is three lines per wheel tick).
   constexpr float ScrollbarPixelsPerLine = 100.0f / 3.0f;
 
-  /// @brief A turn of the mouse wheel (or a touchpad scroll) from the host.
+  /// @brief A turn of the mouse wheel, or a step of a touchpad's pan, from the host.
   /// @note The deltas are positive when scrolling up or left: the direction the content moves, the opposite
   /// of the DOM's `deltaX` and `deltaY`.
-  // FIXME: Gesture and momentum phases, scrolling velocities, precise deltas and inverted directions come
-  // with touchpad gestures and momentum scrolling.
+  // FIXME: Scrolling velocities and inverted directions.
   class PlatformWheelEvent : public PlatformEvent
   {
   protected:
@@ -53,6 +65,10 @@ namespace krys::boo
     float _deltaY {0};
     float _wheelTicksX {0};
     float _wheelTicksY {0};
+    PlatformWheelEventPhase _phase {PlatformWheelEventPhase::None};
+    PlatformWheelEventPhase _momentumPhase {PlatformWheelEventPhase::None};
+    bool _hasPreciseScrollingDeltas {false};
+    bool _isTouchScroll {false};
 
   public:
     PlatformWheelEvent() noexcept : PlatformEvent(Type::Wheel)
@@ -78,6 +94,64 @@ namespace krys::boo
       std::swap(copy._deltaX, copy._deltaY);
       std::swap(copy._wheelTicksX, copy._wheelTicksY);
       return copy;
+    }
+
+    /// @brief This event, as a step of a touch's pan or fling: a gesture that snaps only once it ends.
+    KRYS_NODISCARD PlatformWheelEvent CopyAsTouchScroll() const noexcept
+    {
+      PlatformWheelEvent copy = *this;
+      copy._isTouchScroll = true;
+      return copy;
+    }
+    KRYS_NODISCARD bool IsTouchScroll() const noexcept
+    {
+      return _isTouchScroll;
+    }
+
+    /// @brief This event, as a step of a touchpad's pan: in @p phase of the gesture or @p momentumPhase of
+    /// the momentum after it (the other being `None`), with deltas in pixels the content follows rather than
+    /// notches.
+    KRYS_NODISCARD PlatformWheelEvent CopyAsTouchpadPan(PlatformWheelEventPhase phase,
+                                                        PlatformWheelEventPhase momentumPhase) const noexcept
+    {
+      PlatformWheelEvent copy = *this;
+      copy._phase = phase;
+      copy._momentumPhase = momentumPhase;
+      copy._hasPreciseScrollingDeltas = true;
+      return copy;
+    }
+
+    KRYS_NODISCARD PlatformWheelEventPhase Phase() const noexcept
+    {
+      return _phase;
+    }
+    KRYS_NODISCARD PlatformWheelEventPhase MomentumPhase() const noexcept
+    {
+      return _momentumPhase;
+    }
+    /// @brief Whether the deltas are the pixels the content follows (a touchpad's), rather than notches of a
+    /// wheel made into pixels.
+    KRYS_NODISCARD bool HasPreciseScrollingDeltas() const noexcept
+    {
+      return _hasPreciseScrollingDeltas;
+    }
+
+    /// @brief Whether the event is a step of a gesture (a touch's or a touchpad's pan, or the momentum
+    /// after it), which moves freely and snaps once it ends, rather than a notch, which goes to the next
+    /// snap position.
+    KRYS_NODISCARD bool IsGestureScroll() const noexcept
+    {
+      return _isTouchScroll || _phase != PlatformWheelEventPhase::None
+             || _momentumPhase != PlatformWheelEventPhase::None;
+    }
+    /// @brief Whether the event ends a touchpad's gesture, and the momentum after it.
+    KRYS_NODISCARD bool EndsGesture() const noexcept
+    {
+      auto ends = [](PlatformWheelEventPhase phase)
+      {
+        return phase == PlatformWheelEventPhase::Ended || phase == PlatformWheelEventPhase::Cancelled;
+      };
+      return ends(_phase) || ends(_momentumPhase);
     }
 
     KRYS_NODISCARD PlatformWheelEvent CopyWithDelta(FloatSize delta) const noexcept

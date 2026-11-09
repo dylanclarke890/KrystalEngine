@@ -17,7 +17,8 @@ namespace krys::boo
   /// @brief How scrollbars look, how much space they take, which part of one a point is over, and what
   /// pressing a part does.
   /// @note The theme is the Adwaita one (`ScrollbarThemeAdwaita`), drawn through `GraphicsContext`.
-  // FIXME: Control tints, overlay scrollbar styles and tickmarks, once there are those.
+  // FIXME: Control tints and overlay scrollbar styles, once there are those. (There are no find-in-page
+  // tickmarks; see DIFFERENCES.md.)
   class ScrollbarTheme
   {
     KRYS_NON_COPY_MOVABLE(ScrollbarTheme);

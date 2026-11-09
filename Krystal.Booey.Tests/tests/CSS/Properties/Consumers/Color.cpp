@@ -250,6 +250,9 @@ namespace krys::boo::css::tests
       CHECK(Serialised(u8"lch(50% 30 270deg)") == "lch(50 30 270)");
       CHECK(Serialised(u8"oklab(0.5 0.1 -0.1)") == "oklab(0.5 0.1 -0.1)");
       CHECK(Serialised(u8"oklch(50% 0.2 90)") == "oklch(0.5 0.2 90)");
+      // Hues are normalised to [0, 360).
+      CHECK(Serialised(u8"lch(50 30 400)") == "lch(50 30 40)");
+      CHECK(Serialised(u8"oklch(0.5 0.125 -90deg)") == "oklch(0.5 0.125 270)");
       CHECK(Serialised(u8"hwb(120 0% 0%)") == "rgb(0, 255, 0)");
       CHECK(Serialised(u8"lab(none 0 0)") == "lab(none 0 0)");
 
@@ -348,6 +351,16 @@ namespace krys::boo::css::tests
       CHECK(Serialised(u8"color-layers(red, blue)", enabled) == "color-layers(red, blue)");
       CHECK_FALSE(Parse(u8"contrast-color(red, blue)", enabled));
       CHECK_FALSE(Parse(u8"color-layers(red blue)", enabled));
+      CHECK(Serialised(u8"color-layers(multiply, red, blue)", enabled)
+            == "color-layers(multiply, red, blue)");
+      CHECK(Serialised(u8"color-layers(HUE, red)", enabled) == "color-layers(hue, red)");
+      CHECK(Serialised(u8"color-layers(color, red)", enabled) == "color-layers(color, red)");
+      CHECK(Serialised(u8"color-layers(normal, red)", enabled) == "color-layers(red)");
+      CHECK_FALSE(Parse(u8"color-layers(multiply)", enabled));
+      CHECK_FALSE(Parse(u8"color-layers(multiply red)", enabled));
+      CHECK_FALSE(Parse(u8"color-layers(red, multiply)", enabled));
+      CHECK_FALSE(Parse(u8"color-layers(plus-lighter, red)", enabled));
+      CHECK_FALSE(Parse(u8"color-layers(plus-darker, red)", enabled));
     }
 
     SECTION("A failed function doesn't consume anything")

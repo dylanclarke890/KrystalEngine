@@ -455,13 +455,17 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml
     KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions &&options = {}) const noexcept;
 
+    /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
+    /// as well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
-    KRYS_NODISCARD DOMString InnerHTML() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
     ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
+    /// @brief The element serialized; in an XML document, an `InvalidStateError` if it can't be serialized as
+    /// well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
-    KRYS_NODISCARD DOMString OuterHTML() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> OuterHTML() const noexcept;
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
     ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
 
@@ -1349,6 +1353,17 @@ namespace krys::boo::dom
     /// @return Whether the event was neither cancelled nor handled.
     bool DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept;
 
+    /// @brief The element's assigned access key: the first token of its `accesskey` attribute that's a single
+    /// code point, or empty if it has none.
+    /// @see https://html.spec.whatwg.org/#assigned-access-key
+    KRYS_NODISCARD DOMString AssignedAccessKey() const noexcept;
+
+    /// @brief Runs the command the element's access key stands for. This focuses it if it's focusable.
+    /// @param sendMouseEvents Whether a click it fires comes with a press and a release.
+    /// @return Whether a click was dispatched.
+    /// @see https://html.spec.whatwg.org/#command-facet-action
+    virtual bool AccessKeyAction(bool sendMouseEvents) noexcept;
+
     /// @brief Dispatches a click at the element from the user agent, standing in for @p underlyingEvent.
     /// @return False if the element is a disabled form control, or is already being clicked.
     bool DispatchSimulatedClick(
@@ -1538,6 +1553,9 @@ namespace krys::boo::dom
 #pragma endregion
 
   private:
+    void ScrollTo(const ScrollToOptions &options,
+                  ScrollSnapPointSelectionMethod snapPointSelectionMethod) noexcept;
+
     /// @brief The element's rare data, if it has any.
     KRYS_NODISCARD ElementRareData *GetElementRareData() const noexcept;
 

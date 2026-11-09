@@ -106,14 +106,43 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE("HTMLButtonElement: a button whose parent is a select isn't a submit button in the Auto state",
-            "[HTML][HTMLButtonElement][html:concept-submit-button][!shouldfail]")
+            "[HTML][HTMLButtonElement][html:concept-submit-button]")
   {
-    // FIXME: Customizable selects.
     auto document = CreateRef<dom::HTMLDocument>();
     auto select = document->CreateElement(u8"select").ReleaseValue();
+    auto div = document->CreateElement(u8"div").ReleaseValue();
     auto button = document->CreateElement(u8"button").ReleaseValue();
+    auto &element = Downcast<HTMLButtonElement>(*button);
+    CHECK(element.IsSubmitButton());
+
     REQUIRE_FALSE(select->AppendChild(*button).HasException());
-    CHECK_FALSE(Downcast<HTMLButtonElement>(*button).IsSubmitButton());
+    CHECK_FALSE(element.IsSubmitButton());
+    CHECK(Narrow(element.Type()) == "button");
+
+    SECTION("only while it's there")
+    {
+      REQUIRE_FALSE(select->RemoveChild(*button).HasException());
+      CHECK(element.IsSubmitButton());
+      REQUIRE_FALSE(select->AppendChild(*button).HasException());
+      CHECK_FALSE(element.IsSubmitButton());
+      REQUIRE_FALSE(div->AppendChild(*button).HasException());
+      CHECK(element.IsSubmitButton());
+    }
+
+    SECTION("not for a descendant of the select")
+    {
+      REQUIRE_FALSE(select->AppendChild(*div).HasException());
+      REQUIRE_FALSE(div->AppendChild(*button).HasException());
+      CHECK(element.IsSubmitButton());
+    }
+
+    SECTION("not in a state other than Auto")
+    {
+      REQUIRE_FALSE(button->SetAttribute(u8"type", u8"submit").HasException());
+      CHECK(element.IsSubmitButton());
+      button->RemoveAttribute(u8"type");
+      CHECK_FALSE(element.IsSubmitButton());
+    }
   }
 
   TEST_CASE("HTMLButtonElement: a button in a document that isn't fully active does nothing",

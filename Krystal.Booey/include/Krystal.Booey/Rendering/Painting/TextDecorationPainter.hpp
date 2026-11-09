@@ -84,8 +84,8 @@ namespace krys::boo
     /// and the ancestors they propagate from.
     /// @param firstLineStyle Whether the renderer is on the first line, so ancestors' first line styles
     /// override their styles.
-    /// FIXME: Decorations from pseudo-elements' styles (spelling and grammar errors, highlights) come with
-    /// marked text.
+    /// FIXME: Decorations from highlight pseudo-elements' styles come with marked text. (There are no
+    /// spelling and grammar errors; see DIFFERENCES.md.)
     KRYS_NODISCARD static Styles StylesForRenderer(const RenderObject &renderer,
                                                    style::TextDecorationLine requestedDecorations,
                                                    bool firstLineStyle = false,

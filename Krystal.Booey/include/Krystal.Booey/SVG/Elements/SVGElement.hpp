@@ -435,6 +435,9 @@ namespace krys::boo::svg
                                                 css::MutableStyleProperties &style) noexcept override;
 
     void OnInsert() noexcept override;
+
+    /// @brief Focuses the element if it's focusable, and clicks it, as in Chrome.
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
     void OnPostConnection() noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
@@ -457,6 +460,7 @@ namespace krys::boo::svg
     void UpdateRelativeLengthsInformation() noexcept;
     void UpdateRelativeLengthsInformationForChild(bool hasRelativeLengths, SVGElement &element) noexcept;
 
+  public:
 #pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
 
     KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
@@ -464,6 +468,7 @@ namespace krys::boo::svg
 
 #pragma endregion
 
+  protected:
 #pragma region Type Checks
 
     KRYS_NODISCARD bool IsSVGAElement() const noexcept

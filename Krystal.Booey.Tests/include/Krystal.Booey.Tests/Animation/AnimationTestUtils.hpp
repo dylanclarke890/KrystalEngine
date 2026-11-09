@@ -91,13 +91,14 @@ namespace krys::boo::tests
     {
       auto type = event.Type().View();
       std::string record(type.begin(), type.end());
-      if (auto *transitionEvent = dynamic_cast<CSSTransitionEvent *>(&event))
+      auto *animationEventBase = DynamicDowncast<AnimationEventBase>(event);
+      if (auto *transitionEvent = DynamicDowncast<CSSTransitionEvent>(animationEventBase))
       {
         const auto &property = transitionEvent->PropertyName();
         record += ' ';
         record.append(property.begin(), property.end());
       }
-      else if (auto *animationEvent = dynamic_cast<CSSAnimationEvent *>(&event))
+      else if (auto *animationEvent = DynamicDowncast<CSSAnimationEvent>(animationEventBase))
       {
         const auto &name = animationEvent->AnimationName();
         record += ' ';

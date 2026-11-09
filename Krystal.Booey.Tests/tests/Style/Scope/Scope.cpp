@@ -1,14 +1,18 @@
 ﻿#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 
 namespace krys::boo::style::tests
 {
@@ -35,6 +39,37 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(parent.AppendChild(*link).HasException());
       return link;
     }
+
+    /// @brief An element that calls back while its style is resolved and its renderers are attached.
+    class StyleCallbackElement final : public html::HTMLDivElement
+    {
+      KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(StyleCallbackElement);
+
+    public:
+      explicit StyleCallbackElement(dom::Document &document) noexcept
+          : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      {
+      }
+
+      void WillRecalcStyle(EnumSet<Change>) noexcept override
+      {
+        if (DuringStyleResolution)
+        {
+          std::exchange(DuringStyleResolution, nullptr)();
+        }
+      }
+
+      void DidAttachRenderers() noexcept override
+      {
+        if (DuringRenderTreeUpdate)
+        {
+          std::exchange(DuringRenderTreeUpdate, nullptr)();
+        }
+      }
+
+      Func<void()> DuringStyleResolution;
+      Func<void()> DuringRenderTreeUpdate;
+    };
 
     bool Contains(const List<WeakPtr<dom::ShadowRoot>> &roots, const dom::ShadowRoot &shadowRoot) noexcept
     {
@@ -227,6 +262,102 @@ namespace krys::boo::style::tests
     }
   }
 
+  TEST_CASE("Scope: updates while style is being resolved", "[Style][Scope]")
+  {
+    ResolverFixture fixture(u8"<!DOCTYPE html><body><div id=host></div>");
+    (void)fixture.Document->UpdateStyleIfNeeded();
+    auto &scope = fixture.Document->StyleScope();
+    auto element = CreateRef<StyleCallbackElement>(*fixture.Document);
+    bool called = false;
+
+    SECTION("wait until style resolution has finished")
+    {
+      element->DuringStyleResolution = [&]
+      {
+        called = true;
+        CHECK(fixture.Document->InStyleRecalc());
+        scope.DidChangeActiveStyleSheetCandidates();
+        scope.FlushPendingUpdate();
+        CHECK(scope.HasPendingUpdate());
+      };
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*element).HasException());
+      (void)fixture.Document->UpdateStyleIfNeeded();
+      REQUIRE(called);
+      CHECK(scope.HasPendingUpdate());
+
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK_FALSE(scope.HasPendingUpdate());
+    }
+
+    SECTION("wait until the render tree has been updated")
+    {
+      element->DuringRenderTreeUpdate = [&]
+      {
+        called = true;
+        CHECK(fixture.Document->InRenderTreeUpdate());
+        scope.DidChangeActiveStyleSheetCandidates();
+        scope.FlushPendingUpdate();
+        CHECK(scope.HasPendingUpdate());
+      };
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*element).HasException());
+      (void)fixture.Document->UpdateStyleIfNeeded();
+      REQUIRE(called);
+      CHECK(fixture.Document->HasPendingFullStyleRebuild());
+
+      (void)fixture.Document->UpdateStyleIfNeeded();
+      CHECK_FALSE(scope.HasPendingUpdate());
+      CHECK_FALSE(fixture.Document->HasPendingFullStyleRebuild());
+    }
+
+    SECTION("of a shadow root are still flushed with its document's")
+    {
+      auto shadow = fixture.ById(u8"host").AttachShadow({}).ReleaseValue();
+      auto &shadowScope = shadow->StyleScope();
+      element->DuringStyleResolution = [&]
+      {
+        called = true;
+        shadowScope.DidChangeActiveStyleSheetCandidates();
+        scope.FlushPendingUpdate();
+        CHECK(shadowScope.HasPendingUpdate());
+      };
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*element).HasException());
+      (void)fixture.Document->UpdateStyleIfNeeded();
+      REQUIRE(called);
+      CHECK(scope.HasPendingUpdate());
+
+      scope.FlushPendingUpdate();
+      CHECK_FALSE(shadowScope.HasPendingUpdate());
+      CHECK_FALSE(scope.HasPendingUpdate());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Scope: updates without a render tree", "[Style][Scope]")
+  {
+    RunTasks();
+
+    SECTION("still list the sheets")
+    {
+      auto document = CreateRef<dom::HTMLDocument>();
+      REQUIRE_FALSE(document->HasLivingRenderTree());
+      auto style = document->CreateElement(u8"style").ReleaseValue();
+      REQUIRE_FALSE(style->TextContent(u8"a{}").HasException());
+      REQUIRE_FALSE(document->AppendChild(*style).HasException());
+      REQUIRE(document->StyleScope().HasPendingUpdate());
+
+      CHECK(document->StyleScope().StyleSheetsForStyleSheetList().size() == 1);
+      CHECK(document->StyleScope().ActiveStyleSheets().size() == 1);
+    }
+
+    SECTION("leave the resolver to be built from the sheets when it's asked for")
+    {
+      auto document = Parse(u8"<!DOCTYPE html><style>a{}</style><body>");
+      auto &scope = document->StyleScope();
+      scope.FlushPendingUpdate();
+      CHECK_FALSE(scope.ResolverIfExists());
+      CHECK(scope.GetResolver().RuleSets().AuthorStyle().RuleCount() == 1);
+    }
+  }
+
   TEST_CASE("Scope: pending sheets", "[Style][Scope]")
   {
     RunTasks();
@@ -252,5 +383,152 @@ namespace krys::boo::style::tests
     REQUIRE_FALSE(scope.HasPendingSheets());
     REQUIRE(scope.HasPendingUpdate());
     RunTasks();
+  }
+
+  TEST_CASE("Scope: a change of viewport size restyles pseudo-elements using viewport units",
+            "[Style][Scope]")
+  {
+    // The element shrinks to fit its ::before, so its width is the pseudo-element's; its own style uses no
+    // viewport units.
+    ResolverFixture fixture(u8"<!DOCTYPE html><style>body{margin:0}#p{display:inline-block}"
+                            u8"#p::before{content:'';display:block;width:50vw}</style><span id=p></span>");
+    auto &element = *fixture.Document->GetElementById(u8"p");
+    auto width = [&]() -> int32
+    {
+      (void)fixture.Document->UpdateLayout();
+      return Downcast<html::HTMLElement>(element).OffsetWidth();
+    };
+    REQUIRE(width() == 400);
+
+    fixture.Frame->View()->Resize({1'000, 600});
+    CHECK(width() == 500);
+    fixture.Frame->View()->Resize({600, 600});
+    CHECK(width() == 300);
+  }
+
+  TEST_CASE("Scope: a change of viewport size restyles the elements using viewport units", "[Style][Scope]")
+  {
+    ResolverFixture fixture(
+      u8"<!DOCTYPE html><style>body{margin:0}.v{display:block;width:50vw}.n{display:none}"
+      u8".f{display:block;width:10px}</style><div id=a class=v></div><div id=b class=f></div>"
+      u8"<div id=host></div>");
+    auto width = [&](dom::Element &element) -> int32
+    {
+      (void)fixture.Document->UpdateLayout();
+      return Downcast<html::HTMLElement>(element).OffsetWidth();
+    };
+    auto resize = [&](int32 viewportWidth)
+    {
+      fixture.Frame->View()->Resize({viewportWidth, 600});
+      (void)fixture.Document->UpdateLayout();
+    };
+    auto &a = *fixture.Document->GetElementById(u8"a");
+    auto &b = *fixture.Document->GetElementById(u8"b");
+    REQUIRE(width(a) == 400);
+
+    SECTION("one that has them from the start")
+    {
+      resize(1'000);
+      CHECK(width(a) == 500);
+      CHECK(width(b) == 10);
+      resize(600);
+      CHECK(width(a) == 300);
+    }
+
+    SECTION("one that gains and loses them")
+    {
+      REQUIRE_FALSE(b.SetAttribute(u8"class", u8"v").HasException());
+      CHECK(width(b) == 400);
+      resize(1'000);
+      CHECK(width(b) == 500);
+
+      REQUIRE_FALSE(b.SetAttribute(u8"class", u8"f").HasException());
+      CHECK(width(b) == 10);
+      resize(600);
+      CHECK(width(b) == 10);
+
+      REQUIRE_FALSE(b.SetAttribute(u8"class", u8"v").HasException());
+      CHECK(width(b) == 300);
+      resize(1'000);
+      CHECK(width(b) == 500);
+    }
+
+    SECTION("one that's hidden when the size changes, and shown after")
+    {
+      REQUIRE_FALSE(a.SetAttribute(u8"class", u8"n").HasException());
+      (void)fixture.Document->UpdateLayout();
+      resize(1'000);
+      REQUIRE_FALSE(a.SetAttribute(u8"class", u8"v").HasException());
+      CHECK(width(a) == 500);
+      resize(600);
+      CHECK(width(a) == 300);
+    }
+
+    SECTION("one that leaves the tree and returns")
+    {
+      Ref<dom::Element> kept = ShareRef(a);
+      auto parent = ShareRefPtr(a.ParentNode());
+      REQUIRE_FALSE(parent->RemoveChild(a).HasException());
+      resize(1'000);
+      REQUIRE_FALSE(parent->AppendChild(a).HasException());
+      CHECK(width(a) == 500);
+      resize(600);
+      CHECK(width(a) == 300);
+    }
+
+    SECTION("one that is destroyed")
+    {
+      {
+        Ref<dom::Element> removed = ShareRef(a);
+        REQUIRE_FALSE(a.ParentNode()->RemoveChild(a).HasException());
+      }
+      resize(1'000);
+      CHECK(width(b) == 10);
+    }
+
+    SECTION("more destroyed than the scope lets pile up")
+    {
+      auto &body = *fixture.Document->Body();
+      for (int i = 0; i < 200; ++i)
+      {
+        auto element = fixture.Document->CreateElement(u8"div").ReleaseValue();
+        REQUIRE_FALSE(element->SetAttribute(u8"class", u8"v").HasException());
+        REQUIRE_FALSE(body.AppendChild(*element).HasException());
+        (void)fixture.Document->UpdateLayout();
+        REQUIRE_FALSE(body.RemoveChild(*element).HasException());
+      }
+      resize(1'000);
+      CHECK(width(a) == 500);
+    }
+
+    SECTION("one in a shadow tree, and one moved into and out of it")
+    {
+      auto &host = *fixture.Document->GetElementById(u8"host");
+      auto shadow = host.AttachShadow({}).ReleaseValue();
+      auto style = fixture.Document->CreateElement(u8"style").ReleaseValue();
+      (void)style->TextContent(u8".s{display:block;width:25vw}");
+      REQUIRE_FALSE(shadow->AppendChild(*style).HasException());
+      auto inner = fixture.Document->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(inner->SetAttribute(u8"class", u8"s").HasException());
+      REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+      CHECK(width(*inner) == 200);
+      resize(1'000);
+      CHECK(width(*inner) == 250);
+
+      // In the shadow tree, a has no rule; with the same class as inner, it's using its units there.
+      Ref<dom::Element> kept = ShareRef(a);
+      REQUIRE_FALSE(a.SetAttribute(u8"class", u8"s v").HasException());
+      REQUIRE_FALSE(shadow->AppendChild(a).HasException());
+      CHECK(width(a) == 250);
+      resize(600);
+      CHECK(width(a) == 150);
+
+      REQUIRE_FALSE(a.ParentNode()->RemoveChild(a).HasException());
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(a).HasException());
+      CHECK(width(a) == 300);
+      resize(1'000);
+      CHECK(width(a) == 500);
+      CHECK(width(*inner) == 250);
+    }
   }
 }

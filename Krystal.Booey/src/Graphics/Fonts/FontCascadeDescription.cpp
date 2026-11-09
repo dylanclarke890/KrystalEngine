@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <functional>
 
@@ -67,5 +68,24 @@ namespace krys::boo
   FontSmoothingMode FontCascadeDescription::UsedFontSmoothing() const noexcept
   {
     return FontSmoothing();
+  }
+
+  void FontCascadeDescription::ResolveFontSizeAdjustFromFontIfNeeded(const Font &font) noexcept
+  {
+    auto fontSizeAdjust = GetFontSizeAdjust();
+    if (!fontSizeAdjust.ShouldResolveFromFont())
+    {
+      return;
+    }
+
+    // The font's metrics are at its own size, which @font-face's size-adjust can make differ from the
+    // computed size.
+    auto aspectValue = fontSizeAdjust.Resolve(font.PlatformData().Size(), font.GetFontMetrics());
+    if (!aspectValue)
+    {
+      return;
+    }
+    fontSizeAdjust.Value = *aspectValue;
+    SetFontSizeAdjust(fontSizeAdjust);
   }
 }

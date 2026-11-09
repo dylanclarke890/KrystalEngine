@@ -36,7 +36,6 @@ namespace krys::boo
 
   /// @brief An animation: it plays an animation effect, and gives it its time from a timeline.
   /// @see https://drafts.csswg.org/web-animations-1/#animations
-  // FIXME: Suspending animations with the document (upstream's `ActiveDOMObject`).
   class WebAnimation : public dom::EventTarget
   {
   public:
@@ -132,6 +131,10 @@ namespace krys::boo
 
     /// @brief Every animation that exists.
     KRYS_NODISCARD static HashSet<WebAnimation *> &Instances() noexcept;
+
+    /// @brief Stops every animation of a document that's going away: they lose their listeners and effects,
+    /// and with them what those hold on to, even if something still holds the animation.
+    static void StopAnimationsOfDocument(const dom::Document &document) noexcept;
 
     KRYS_NODISCARD virtual bool IsStyleOriginatedAnimation() const noexcept
     {

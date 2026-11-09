@@ -1,8 +1,16 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -37,6 +45,66 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  Ref<HTMLOptGroupElement> HTMLOptGroupElement::Create(dom::Document &document) noexcept
+  {
+    auto optgroup = CreateRef<HTMLOptGroupElement>(document);
+    optgroup->EnsureUserAgentShadowRoot();
+    return optgroup;
+  }
+
+  // https://html.spec.whatwg.org/#the-select-element-2
+  void HTMLOptGroupElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  {
+    auto &document = NodeDocument();
+    auto legendSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
+    _legendSlot = CreateWeakPtr(legendSlot.get());
+    auto labelElement = dom::ElementFactory::CreateHTMLElement<HTMLDivElement>(document, u8"div");
+    labelElement->SetUserAgentPart(css::UserAgentParts::InternalOptgroupLabel());
+    _labelElement = CreateWeakPtr<dom::Element>(labelElement.get());
+    (void)legendSlot->AppendChild(*labelElement);
+    (void)root.AppendChild(*legendSlot);
+    auto contentsSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
+    _contentsSlot = CreateWeakPtr(contentsSlot.get());
+    (void)root.AppendChild(*contentsSlot);
+  }
+
+  HTMLSlotElement *HTMLOptGroupElement::SlotForHostChild(const dom::Node &child) const noexcept
+  {
+    krys_debug_assert(child.ParentNode() == this);
+    if (Is<HTMLLegendElement>(child) && dom::TreeQueries::FirstElementChild(*this) == &child)
+    {
+      return _legendSlot.get();
+    }
+    return _contentsSlot.get();
+  }
+
+  void HTMLOptGroupElement::OnChildrenChanged() noexcept
+  {
+    // Only for what the slots can't tell from the insertion or removal of the other children.
+    auto *firstChild = dom::TreeQueries::FirstElementChild(*this);
+    auto *legend = firstChild && Is<HTMLLegendElement>(*firstChild) ? firstChild : nullptr;
+    if (legend != _slottedLegend.get())
+    {
+      _slottedLegend = CreateWeakPtr(legend);
+      if (auto *root = UserAgentShadowRoot())
+      {
+        dom::SlotAlgorithms::AssignSlottablesForTree(*root);
+      }
+    }
+    HTMLElement::OnChildrenChanged();
+  }
+
+  bool HTMLOptGroupElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  {
+    if (&child != _labelElement.get())
+    {
+      return HTMLElement::ChildShouldCreateRenderer(child);
+    }
+    // The label shows only with base appearance; a list box draws it itself.
+    auto *select = HTMLSelectElement::FindOwnerSelect(ParentNode(), HTMLSelectElement::ExcludeOptGroup::No);
+    return select && select->ContentsUseBaseAppearance();
+  }
 
   dom::DOMString HTMLOptGroupElement::GroupLabelText() const noexcept
   {
@@ -117,6 +185,11 @@ namespace krys::boo::html
                                                dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+
+    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"label" && _labelElement)
+    {
+      (void)_labelElement->TextContent(dom::DOMString(value.value_or(dom::DOMStringView())));
+    }
 
     if (bool newDisabled = value.has_value();
         namespaceURI == dom::DOMStringAtom::Null() && localName == u8"disabled" && _isDisabled != newDisabled)

@@ -91,7 +91,7 @@ Status: n/a (no plugins)
 #### [2.1.7 Character encodings](https://html.spec.whatwg.org/#encoding-terminology)
 
 Status: reviewed (2026-11-02)
-> Documents are UTF-8 only (see `KNOWN-ISSUES.md`); the encoding names and labels are Krystal.Core's `EncodingRegistry`.
+> Documents are UTF-8 only (see `DIFFERENCES.md`); the encoding names and labels are Krystal.Core's `EncodingRegistry`.
 <!-- definitions: encoding encoding-name encoding-label -->
 
 #### [2.1.8 Conformance classes](https://html.spec.whatwg.org/#conformance-classes)

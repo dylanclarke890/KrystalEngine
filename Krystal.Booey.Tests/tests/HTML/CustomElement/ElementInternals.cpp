@@ -11,6 +11,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include <map>
 
 namespace krys::boo::html::tests
 {
@@ -53,17 +54,32 @@ namespace krys::boo::html::tests
 
     struct InternalsFixture : CustomElementFixture
     {
+      /// @brief The behaviour each element got from `DefineInternals`.
+      std::map<const dom::Element *, InternalsElement *> Behaviours;
+
+      KRYS_NODISCARD InternalsElement *BehaviourOf(dom::DOMStringView id) noexcept
+      {
+        auto found = Behaviours.find(&ById(id));
+        return found == Behaviours.end() ? nullptr : found->second;
+      }
+
       void DefineInternals(dom::DOMStringAtom name, CustomElementOptions &&options = {}) noexcept
       {
         auto result = Registry().Define(
-          name, [this](HTMLElement &element) { return CreateUnique<InternalsElement>(element, Calls); },
+          name,
+          [this](HTMLElement &element)
+          {
+            auto behaviour = CreateUnique<InternalsElement>(element, Calls);
+            Behaviours[&element] = behaviour.get();
+            return behaviour;
+          },
           krys::move(options));
         REQUIRE_FALSE(result.HasException());
       }
 
       ElementInternals &InternalsOf(dom::DOMStringView id) noexcept
       {
-        auto *behaviour = dynamic_cast<InternalsElement *>(ById(id).GetCustomElement());
+        auto *behaviour = BehaviourOf(id);
         REQUIRE(behaviour);
         REQUIRE(behaviour->Internals);
         return *behaviour->Internals;
@@ -110,7 +126,7 @@ namespace krys::boo::html::tests
 
     SECTION("a definition can disable them")
     {
-      auto *behaviour = dynamic_cast<InternalsElement *>(ById(u8"sealed").GetCustomElement());
+      auto *behaviour = BehaviourOf(u8"sealed");
       REQUIRE(behaviour);
       CHECK_FALSE(behaviour->Internals);
     }
@@ -302,5 +318,19 @@ namespace krys::boo::html::tests
     CHECK(form.Elements()->Length() == 1);
     CHECK(InternalsOf(u8"a").Form().Value().get() == &form);
     CHECK(ById(u8"a").Matches(u8":disabled").ReleaseValue());
+  }
+
+  TEST_CASE_METHOD(InternalsFixture,
+                   "ElementInternals: a fieldset's elements gain an element upgraded to be form-associated",
+                   "[HTML][CustomElement][ElementInternals][html:dom-fieldset-elements]")
+  {
+    Parse(u8"<fieldset id=f><x-field id=a></x-field></fieldset>");
+    auto &fieldset = Downcast<HTMLFieldSetElement>(ById(u8"f"));
+    auto elements = fieldset.Elements();
+    CHECK(elements->Length() == 0);
+
+    DefineInternals(u8"x-field", {.FormAssociated = true});
+    CHECK(elements->Length() == 1);
+    CHECK(elements->Item(0).get() == &ById(u8"a"));
   }
 }

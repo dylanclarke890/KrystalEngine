@@ -3,6 +3,8 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
@@ -13,6 +15,7 @@
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Pointer.hpp"
 #include "Krystal.PAL/TextInput.hpp"
+#include "Krystal.PAL/TouchpadPan.hpp"
 
 namespace krys::pal
 {
@@ -69,6 +72,8 @@ namespace krys::pal
     /// away from the user, or to the right; then the cursor's position in client space and the modifiers
     /// held.
     using MouseScrollHandler = Func<void(WindowHandle, float, float, float, float, KeyModifiers)>;
+    /// @brief A step of a precision touchpad's two-finger pan.
+    using TouchpadPanHandler = Func<void(WindowHandle, const TouchpadPanInput &)>;
     /// @brief A pen's or a touch's input; the mouse comes as the mouse handlers.
     using PointerHandler = Func<void(WindowHandle, const PointerInput &)>;
     using KeyHandler = Func<void(WindowHandle, Key, KeyState, KeyModifiers, const KeyText &)>;
@@ -91,6 +96,9 @@ namespace krys::pal
     LockedMouseMoveHandler OnLockedMouseMove = nullptr;
     MouseButtonHandler OnMouseButton = nullptr;
     MouseScrollHandler OnMouseScroll = nullptr;
+    /// @brief Called for a precision touchpad's pans, with their phases and momentum; without it (or where
+    /// the system can't report them), they come as `OnMouseScroll`.
+    TouchpadPanHandler OnTouchpadPan = nullptr;
     /// @brief Called for pens and touches; without it, the system turns them into mouse input.
     PointerHandler OnPointer = nullptr;
     KeyHandler OnKey = nullptr;
@@ -128,6 +136,9 @@ namespace krys::pal
 
     KRYS_NODISCARD virtual WindowSize GetSize() const noexcept = 0;
 
+    /// @brief The refresh rate of the display the window is on, in hertz, or null if the system doesn't say.
+    KRYS_NODISCARD virtual Maybe<uint32> DisplayRefreshRate() const noexcept = 0;
+
     virtual void Show() noexcept = 0;
 
     virtual void Hide() noexcept = 0;
@@ -138,7 +149,14 @@ namespace krys::pal
     /// the mouse is there now.
     virtual void SetCursor(CursorShape cursor) noexcept = 0;
 
+    /// @brief Shows @p image as the cursor, as `SetCursor` does a system one, until a cursor is set again.
+    virtual void SetCursorImage(Ref<CursorImage> image) noexcept = 0;
+
+    /// @brief The system cursor last set; an image set since shows in its place.
     KRYS_NODISCARD virtual CursorShape GetCursor() const noexcept = 0;
+
+    /// @brief The image shown as the cursor, or null for a system cursor.
+    KRYS_NODISCARD virtual CursorImage *GetCursorImage() const noexcept = 0;
 
     /// @brief Locks the pointer (@p locked) or unlocks it: while it's locked, the cursor is hidden and kept
     /// in the window, and the mouse's moves come as `OnLockedMouseMove`; unlocking puts the cursor back where

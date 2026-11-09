@@ -634,7 +634,7 @@ Status: reviewed (2026-11-01)
 ##### [7.4.6.1 Updating the traversable](https://html.spec.whatwg.org/#updating-the-traversable)
 
 Status: reviewed (2026-11-01)
-> Follows upstream's `FrameLoader` and `HistoryController` rather than these steps (see `DIFFERENCES.md`). There's no `pageswap` (see `KNOWN-ISSUES.md`).
+> Follows upstream's `FrameLoader` and `HistoryController` rather than these steps (see `DIFFERENCES.md`). There's no `pageswap` (see `DIFFERENCES.md`).
 <!-- definitions: changing-navigable-continuation-state changing-nav-continuation-displayed-document changing-nav-continuation-target-entry changing-nav-continuation-navigable changing-nav-continuation-update-only -->
 
 - [x] [update for navigable creation/destruction](https://html.spec.whatwg.org/#update-for-navigable-creation/destruction) — To update for navigable creation/destruction given a traversable navigable traversable:
@@ -935,7 +935,7 @@ Status: reviewed (2026-11-01)
 ##### [7.4.6.3 Revealing the document](https://html.spec.whatwg.org/#revealing-the-document)
 
 Status: reviewed (2026-11-01)
-> There's no `pagereveal` (see `KNOWN-ISSUES.md`).
+> There's no `pagereveal` (see `DIFFERENCES.md`).
 <!-- definitions: has-been-revealed -->
 
 - [x] [reveal](https://html.spec.whatwg.org/#reveal) — To reveal a Document document:

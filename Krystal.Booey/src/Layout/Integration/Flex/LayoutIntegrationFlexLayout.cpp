@@ -112,7 +112,7 @@ namespace krys::boo::layout_integration
 
   FlexLayout::FlexLayout(RenderFlexibleBox &flexBoxRenderer) noexcept
       : _flexBox(ShareCheckedPtr(BoxTreeUpdater {flexBoxRenderer}.Build().get())),
-        _layoutState(WeakPtr<layout::LayoutState>::WithRef(flexBoxRenderer.View().GetLayoutState()))
+        _layoutState(CreateWeakPtr(&flexBoxRenderer.View().GetLayoutState()))
   {
   }
 

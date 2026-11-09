@@ -38,7 +38,7 @@ namespace krys::boo::dom::tests
 
       KRYS_NODISCARD std::string Markup() const noexcept
       {
-        return InsertedMarkup(Div->InnerHTML());
+        return InsertedMarkup(Div->InnerHTML().ReleaseValue());
       }
     };
 
@@ -100,7 +100,7 @@ namespace krys::boo::dom::tests
       auto script = data.Document->CreateElement(DOMStringAtom(u8"script")).ReleaseValue();
       REQUIRE_FALSE(script->AppendChild(*data.Document->CreateTextNode(u8"keep")).HasException());
       REQUIRE_FALSE(script->SetHTML(u8"<b>x</b>").HasException());
-      CHECK(InsertedMarkup(script->InnerHTML()) == "keep");
+      CHECK(InsertedMarkup(script->InnerHTML().ReleaseValue()) == "keep");
     }
 
     SECTION("goes into a template's contents")
@@ -108,7 +108,7 @@ namespace krys::boo::dom::tests
       auto templateElement = data.Document->CreateElement(DOMStringAtom(u8"template")).ReleaseValue();
       REQUIRE_FALSE(templateElement->SetHTML(u8"<b>x</b><script></script>").HasException());
       CHECK_FALSE(templateElement->HasChildNodes());
-      CHECK(InsertedMarkup(templateElement->InnerHTML()) == "<b>x</b>");
+      CHECK(InsertedMarkup(templateElement->InnerHTML().ReleaseValue()) == "<b>x</b>");
     }
 
     SECTION("an invalid configuration throws a TypeError")
@@ -206,7 +206,7 @@ namespace krys::boo::dom::tests
                       .HasException());
       auto *templateElement = DynamicDowncast<html::HTMLTemplateElement>(div.FirstChild());
       REQUIRE(templateElement);
-      CHECK(InsertedMarkup(templateElement->InnerHTML()) == "<b>s</b>");
+      CHECK(InsertedMarkup(templateElement->InnerHTML().ReleaseValue()) == "<b>s</b>");
     }
 
     SECTION("the default configuration removes declarative shadow roots, as it removes templates")
@@ -227,7 +227,7 @@ namespace krys::boo::dom::tests
                       .HasException());
       auto *shadow = TreeQueries::GetShadowRoot(*div.FirstElementChild());
       REQUIRE(shadow);
-      CHECK(InsertedMarkup(shadow->InnerHTML()) == "<b>s</b>");
+      CHECK(InsertedMarkup(shadow->InnerHTML().ReleaseValue()) == "<b>s</b>");
     }
   }
 
@@ -336,7 +336,7 @@ namespace krys::boo::dom::tests
       REQUIRE(contents.Host() == templateElement.get());
       auto span = contents.FirstElementChild();
       REQUIRE_FALSE(span->AfterHTML(u8"<b>b</b>").HasException());
-      CHECK(InsertedMarkup(templateElement->InnerHTML()) == "<span>a</span><b>b</b>");
+      CHECK(InsertedMarkup(templateElement->InnerHTML().ReleaseValue()) == "<span>a</span><b>b</b>");
     }
 
     SECTION("on a shadow root")
@@ -345,7 +345,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(shadow->SetHTML(u8"<b>1</b><script></script>").HasException());
       REQUIRE_FALSE(shadow->AppendHTMLUnsafe(u8"<i onclick=x>2</i>").HasException());
       REQUIRE_FALSE(shadow->PrependHTML(u8"<u>0</u>").HasException());
-      CHECK(InsertedMarkup(shadow->InnerHTML()) == "<u>0</u><b>1</b><i onclick=\"x\">2</i>");
+      CHECK(InsertedMarkup(shadow->InnerHTML().ReleaseValue()) == "<u>0</u><b>1</b><i onclick=\"x\">2</i>");
     }
   }
 
@@ -362,7 +362,7 @@ namespace krys::boo::dom::tests
     auto p = document.GetElementById(u8"a");
     CHECK_FALSE(p);
     REQUIRE(document.Body());
-    CHECK(InsertedMarkup(document.Body()->InnerHTML()) == "<p>1</p>");
+    CHECK(InsertedMarkup(document.Body()->InnerHTML().ReleaseValue()) == "<p>1</p>");
 
     auto unsafe =
       Document::ParseHTMLUnsafe(*data.Document, u8"<p id=a>1<script></script></p>",
@@ -370,6 +370,6 @@ namespace krys::boo::dom::tests
                                    .RemoveElements = List<html::SanitizerElementNamespace> {u8"script"}}}});
     REQUIRE_FALSE(unsafe.HasException());
     REQUIRE(unsafe.Value()->Body());
-    CHECK(InsertedMarkup(unsafe.Value()->Body()->InnerHTML()) == "<p id=\"a\">1</p>");
+    CHECK(InsertedMarkup(unsafe.Value()->Body()->InnerHTML().ReleaseValue()) == "<p id=\"a\">1</p>");
   }
 }

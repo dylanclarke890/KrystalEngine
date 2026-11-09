@@ -21,7 +21,8 @@ namespace krys::boo
   /// @brief What a page's editor asks of its host: the commands keys run, input methods, and whether
   /// selections and clipboard access are allowed.
   // FIXME: The rest of the editor client: editing delegates (shouldBeginEditing, shouldInsertText,
-  // shouldApplyStyle and their notifications), spelling and grammar, and text checking.
+  // shouldApplyStyle and their notifications). (There's no spelling and grammar or text checking; see
+  // DIFFERENCES.md.)
   class EditorClient
   {
     KRYS_NON_COPY_MOVABLE(EditorClient);

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Backgrounds/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
@@ -10,10 +11,9 @@
 namespace krys::boo::style
 {
   BorderImage::BorderImage() noexcept
-      // FIXME: Use `ComputedStyle`'s initial values once the generated storage is ported.
-      : Source {css::keywords::None {}}, Slice {BorderImageSlice::Value::Percentage {100}},
-        Width {BorderImageWidth::Value::Number {1}}, Outset {BorderImageOutset::Value::Number {0}},
-        Repeat {css::keywords::Stretch {}}
+      : Source {ComputedStyle::InitialBorderImageSource()}, Slice {ComputedStyle::InitialBorderImageSlice()},
+        Width {ComputedStyle::InitialBorderImageWidth()}, Outset {ComputedStyle::InitialBorderImageOutset()},
+        Repeat {ComputedStyle::InitialBorderImageRepeat()}
   {
   }
 

@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::style
 {

@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -171,6 +172,15 @@ namespace krys::boo::tests
       CHECK(field.SelectionStart() == 2);
       CHECK(inputs->Count == 1);
       CHECK(field.LastChangeWasUserEdit());
+    }
+
+    SECTION("Resetting the form shows a typed-in field's default value again")
+    {
+      field.Focus();
+      CHECK(editor.InsertText(u8"cd", nullptr));
+      Downcast<html::HTMLFormElement>(fixture.ById(u8"form")).Reset();
+      CHECK(Narrow(field.Value()) == "ab");
+      CHECK(Narrow(field.InnerTextValue()) == "ab");
     }
 
     SECTION("Typed text goes in at the caret; the value is dirty and change fires on blur")

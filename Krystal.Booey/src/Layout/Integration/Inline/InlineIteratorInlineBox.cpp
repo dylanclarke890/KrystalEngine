@@ -19,7 +19,6 @@ namespace krys::boo::inline_iterator
     {
       return closedEdges;
     }
-    // FIXME: Continuations, once there are any.
     auto writingMode = Style().GetWritingMode();
     bool isFirst = !NextInlineBoxLineLeftward();
     bool isLast = !NextInlineBoxLineRightward();

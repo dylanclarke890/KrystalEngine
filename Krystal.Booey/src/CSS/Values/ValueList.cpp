@@ -206,7 +206,7 @@ namespace krys::boo::css
     result.reserve(size());
     for (auto &value : *this)
     {
-      result.push_back(Ref<Value>::WithRef(const_cast<Value &>(value)));
+      result.push_back(ShareRef(const_cast<Value &>(value)));
     }
     return result;
   }

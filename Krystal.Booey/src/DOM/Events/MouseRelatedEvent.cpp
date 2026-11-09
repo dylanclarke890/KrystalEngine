@@ -3,6 +3,8 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
@@ -15,12 +17,21 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsMoveEventType(DOMStringAtom eventType) noexcept
     {
       return eventType == EventNames::MouseMove || eventType == EventNames::PointerMove
-             || eventType == EventNames::TouchMove;
+             || eventType == EventNames::PointerRawUpdate || eventType == EventNames::TouchMove;
     }
 
     KRYS_NODISCARD double FiniteValue(double value) noexcept
     {
       return std::isfinite(value) ? value : 0;
+    }
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD LocalFrameView *FrameViewOf(const LocalDOMWindow *window) noexcept
+    {
+      auto *frame = window ? window->Frame() : nullptr;
+      return frame ? frame->View() : nullptr;
     }
   }
 
@@ -32,12 +43,17 @@ namespace krys::boo::dom
         _movementY(movementY), _windowLocation(windowLocation), _screenLocation(screenLocation),
         _isSimulated(isSimulated == Simulated::Yes)
   {
+    if (view)
+    {
+      SetView(view->Frame().Window());
+    }
     Init(_isSimulated, windowLocation);
   }
 
   MouseRelatedEvent::MouseRelatedEvent(DOMStringAtom type, const MouseEventInit &initializer) noexcept
-      : UIEventWithKeyState(type, initializer), _movementX(initializer.MovementX),
-        _movementY(initializer.MovementY), _screenLocation(initializer.ScreenX, initializer.ScreenY)
+      : UIEventWithKeyState(type, initializer), _view(ShareRefPtr(FrameViewOf(initializer.View))),
+        _movementX(initializer.MovementX), _movementY(initializer.MovementY),
+        _screenLocation(initializer.ScreenX, initializer.ScreenY)
   {
     SetScreenLocation({FiniteValue(initializer.ScreenX), FiniteValue(initializer.ScreenY)});
     InitCoordinates();
@@ -45,9 +61,14 @@ namespace krys::boo::dom
 
   MouseRelatedEvent::~MouseRelatedEvent() noexcept = default;
 
-  LocalFrameView *MouseRelatedEvent::View() const noexcept
+  LocalFrameView *MouseRelatedEvent::FrameView() const noexcept
   {
     return _view.get();
+  }
+
+  void MouseRelatedEvent::UpdateFrameView() noexcept
+  {
+    _view = ShareRefPtr(FrameViewOf(View()));
   }
 
   void MouseRelatedEvent::Init(bool isSimulated, const DoublePoint &windowLocation) noexcept
@@ -122,7 +143,7 @@ namespace krys::boo::dom
   void MouseRelatedEvent::ComputeRelativePosition() const noexcept
   {
     RefPtr<EventTarget> target = Target();
-    RefPtr<Node> targetNode = ShareRefPtr(DynamicDowncast<Node>(target.get()));
+    RefPtr<Node> targetNode = DynamicDowncast<Node>(target);
     if (!targetNode)
     {
       return;

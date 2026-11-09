@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/TriState.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -26,6 +27,7 @@ namespace krys::boo::dom
   class Element;
   class Event;
   class KeyboardEvent;
+  class Range;
   class StaticRange;
   class Text;
   class TextEvent;
@@ -119,8 +121,9 @@ namespace krys::boo
   /// @brief A document's editor: the commands that act on its selection (moving and extending it, selecting
   /// and copying), the keys bound to them, the clipboard, and the text an input method composes.
   // FIXME: Editing commands (typing, deleting, cutting, pasting, styling, undo and redo), the typing style,
-  // spelling and grammar, text checking, the mark and kill ring, find, and the editor's responses to
-  // selection and content changes, with editing commands, form controls and text input.
+  // and the editor's responses to selection and content changes, with editing commands, form controls and
+  // text input. (There's no spelling and grammar, text checking, mark and kill ring or find; see
+  // DIFFERENCES.md.)
   class Editor
   {
     KRYS_NON_COPY_MOVABLE(Editor);
@@ -134,9 +137,9 @@ namespace krys::boo
     bool _overwriteModeEnabled {false};
     bool _ignoreSelectionChanges {false};
 
-    RefPtr<dom::Text> _compositionNode;
-    uint32 _compositionStart {0};
-    uint32 _compositionEnd {0};
+    // A live range, so the page's edits move it; once they take its text away, the composition is lost.
+    RefPtr<dom::Range> _compositionRange;
+    // Offsets in the composition's text.
     List<CompositionUnderline> _customCompositionUnderlines;
 
   public:
@@ -173,6 +176,13 @@ namespace krys::boo
 
       KRYS_NODISCARD bool IsTextInsertion() const noexcept;
       KRYS_NODISCARD bool AllowExecutionWhenDisabled() const noexcept;
+
+      /// @brief Whether the command's effect is on the current selection (bold text for `Bold`); false for
+      /// an unsupported command or one without a state.
+      KRYS_NODISCARD TriState State(dom::Event *triggeringEvent = nullptr) const noexcept;
+      /// @brief The command's value for the current selection (the font for `FontName`); "true" or "false"
+      /// for a command with a state but no value, and empty for an unsupported command or one with neither.
+      KRYS_NODISCARD utf8_string Value(dom::Event *triggeringEvent = nullptr) const noexcept;
 
     private:
       KRYS_NODISCARD LocalFrame *Frame() const noexcept;
@@ -370,7 +380,10 @@ namespace krys::boo
     bool InsertTextForConfirmedComposition(utf8_stringview text) noexcept;
 
     // International text input composition.
+    /// @brief Whether there's a composition whose text is still in the document.
     KRYS_NODISCARD bool HasComposition() const noexcept;
+    /// @brief Whether the page's edits took the composition's text away, without the composition ending.
+    KRYS_NODISCARD bool HasLostComposition() const noexcept;
     /// @brief Sets the text an input method composes, replacing the composition (or else the selection) with
     /// @p text, underlined by @p underlines, with @p selectionStart to @p selectionEnd selected (offsets in
     /// @p text's code units); empty @p text cancels the composition. Fires `compositionstart` (with the text
@@ -400,19 +413,15 @@ namespace krys::boo
 
     /// @brief The text node the composition is in, for painting it.
     KRYS_NODISCARD dom::Text *CompositionNode() const noexcept;
-    KRYS_NODISCARD uint32 CompositionStart() const noexcept
-    {
-      return _compositionStart;
-    }
-    KRYS_NODISCARD uint32 CompositionEnd() const noexcept
-    {
-      return _compositionEnd;
-    }
+    /// @brief The composition's start offset in its text node, or 0 if there's none.
+    KRYS_NODISCARD uint32 CompositionStart() const noexcept;
+    /// @brief The composition's end offset in its text node, or 0 if there's none.
+    KRYS_NODISCARD uint32 CompositionEnd() const noexcept;
     KRYS_NODISCARD bool CompositionUsesCustomUnderlines() const noexcept
     {
       return !_customCompositionUnderlines.empty();
     }
-    /// @brief The composition's underlines, with offsets in its text node.
+    /// @brief The composition's underlines, with offsets in its text.
     KRYS_NODISCARD const List<CompositionUnderline> &CustomCompositionUnderlines() const noexcept
     {
       return _customCompositionUnderlines;
@@ -447,6 +456,8 @@ namespace krys::boo
 
     void SelectComposition() noexcept;
     void SetComposition(utf8_stringview text, SetCompositionMode mode) noexcept;
+    /// @brief Ends the composition, keeping its text, and tells the client the input method's is discarded.
+    void CancelCompositionAndNotifyClient() noexcept;
 
     KRYS_NODISCARD utf8_string SelectedText(TextIteratorBehaviors behaviors) const noexcept;
 

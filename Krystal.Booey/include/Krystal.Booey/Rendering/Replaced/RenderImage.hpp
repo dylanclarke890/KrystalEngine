@@ -23,8 +23,8 @@ namespace krys::boo
   };
 
   /// @brief The renderer of an image: an `<img>`, or generated content (`content: url(...)`).
-  // FIXME: Shadow content (image overlays and controls), selection geometry, the broken image icon, and
-  // whether the foreground is known to be opaque.
+  // FIXME: Shadow content (controls), selection geometry, the broken image icon, and whether the foreground
+  // is known to be opaque. (There are no image overlays; see DIFFERENCES.md.)
   class RenderImage : public RenderReplaced
   {
     KRYS_NON_COPY_MOVABLE(RenderImage);
@@ -33,6 +33,8 @@ namespace krys::boo
   private:
     // Text to display as long as the image isn't available.
     utf8_string _altText;
+    // Whether the alt text is an attribute's (`alt` or `title`), rather than the `content` property's.
+    bool _altTextIsFromAttribute {false};
     UniquePtr<RenderImageResource> _imageResource;
     bool _needsToSetSizeForAltText {false};
     bool _isGeneratedContent {false};
@@ -61,6 +63,9 @@ namespace krys::boo
     ImageSizeChangeType SetImageSizeForAltText(CachedImage *newImage = nullptr) noexcept;
 
     void UpdateAltText() noexcept;
+
+    /// @brief Updates the alt text, and sizes the box for it if there's no image to show.
+    void UpdateForAltText() noexcept;
 
     void SetIsGeneratedContent(bool generated = true) noexcept
     {

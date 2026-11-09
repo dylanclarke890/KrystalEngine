@@ -65,7 +65,7 @@ namespace krys::boo::css
         static_cast<int>(
           Downcast<PrimitiveValue>(_hotSpot->Second()).ResolveAsNumber(state.CssToLengthConversionData()))};
     }
-    return StyleCursorImage::Create(Ref<StyleImage> {krys::move(styleImage)}, hotSpot,
+    return StyleCursorImage::Create(krys::move(styleImage), hotSpot,
                                     style::ConvertToStyle(_originalURL, state));
   }
 }

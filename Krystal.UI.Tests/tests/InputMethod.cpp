@@ -4,10 +4,11 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
-#include "Krystal.Editor/PageTextInput.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
@@ -55,7 +56,8 @@ namespace krys::ui::tests
     view.LoadHTML(
       u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } input { position: absolute;"
       u8" left: 10px; width: 200px; font: inherit }</style><input id=field style='top: 20px'>"
-      u8"<input id=password type=password style='top: 60px'><div id=plain tabindex=0>x</div>");
+      u8"<input id=password type=password style='top: 60px'><div id=plain tabindex=0>x</div>"
+      u8"<div id=editable contenteditable style='position: absolute; top: 100px; width: 200px'></div>");
     WaitForLoad(view);
     view.UpdateRendering();
 
@@ -64,8 +66,7 @@ namespace krys::ui::tests
                       boo::EventNames::CompositionEnd, boo::EventNames::Input, boo::EventNames::KeyDown,
                       boo::EventNames::KeyPress})
     {
-      view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
-                                       Ref<boo::dom::EventListenerCallback> {log}, true);
+      view.Document().AddEventListener(boo::dom::DOMStringAtom(type), log, true);
     }
     int32 discarded = 0;
     view.SetCompositionDiscardedHandler([&discarded] { ++discarded; });
@@ -182,67 +183,48 @@ namespace krys::ui::tests
       CHECK(discarded == 3);
       CHECK_FALSE(view.AcceptsTextInput());
     }
-  }
 
-  TEST_CASE("View: the editor page's input methods", "[UI]")
-  {
-    boo::MemoryCache::Singleton().EvictResources();
-    View view({1'200, 600});
-    FollowLinks(view);
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    // As the editor makes it once the page has loaded.
-    editor::PageTextInput textInput(document);
-    auto log = [&document]
+    SECTION("The selection going ends the composition")
     {
-      auto element = document.GetElementById(u8"ime-log");
-      REQUIRE(element);
-      return Narrow(element->TextContent().value_or(u8""));
-    };
-    CHECK(log().starts_with("Type into a field"));
-
-    auto focus = [&document, &view](utf8_stringview id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      Downcast<boo::html::HTMLElement>(*element).Focus();
-      CHECK(view.AcceptsTextInput());
-    };
-
-    focus(u8"ime-input");
-    view.SetComposition(u8"か", {}, 3);
-    view.ConfirmComposition(u8"仮");
-    CHECK(log()
-          == "input: compositionstart “”\n"
-             "input: compositionupdate “か”\n"
-             "input: beforeinput insertCompositionText “か” (composing)\n"
-             "input: input insertCompositionText “か” (composing)\n"
-             "input: beforeinput deleteCompositionText (composing)\n"
-             "input: input deleteCompositionText (composing)\n"
-             "input: beforeinput insertFromComposition “仮” (composing)\n"
-             "input: input insertFromComposition “仮” (composing)\n"
-             "input: compositionend “仮”");
-
-    // The other fields log too, and the log keeps the latest events.
-    focus(u8"ime-textarea");
-    (void)view.InsertText(u8"😀");
-    CHECK(log().ends_with("textarea: input insertText “😀”"));
-    focus(u8"ime-editable");
-    for (int i = 0; i < 4; ++i)
-    {
-      view.SetComposition(u8"x", {}, 1);
-      view.SetComposition(u8"", {}, 0);
+      view.SetComposition(u8"ab", {}, 2);
+      log->Events.clear();
+      view.Document().Selection().Clear();
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(value() == "ab");
+      CHECK(log->Events == List<std::string> {"compositionend "});
+      CHECK(discarded == 1);
     }
-    auto lines = log();
-    CHECK(std::ranges::count(lines, '\n') + 1 == editor::PageTextInput::MaxLines);
-    CHECK(lines.ends_with("div: compositionend “”"));
 
-    auto clear = document.GetElementById(u8"ime-clear");
-    REQUIRE(clear);
-    Downcast<boo::html::HTMLElement>(*clear).Click();
-    CHECK(log().starts_with("Type into a field"));
+    SECTION("The page's edits move and end the composition")
+    {
+      auto &editable = Downcast<boo::html::HTMLElement>(*view.Document().GetElementById(u8"editable"));
+      editable.Focus();
+      view.SetComposition(u8"ab", {}, 2);
+      auto *text = DynamicDowncast<boo::dom::Text>(editable.FirstChild());
+      REQUIRE(text);
+      REQUIRE(editor.CompositionNode() == text);
+
+      // Text after it leaves it be.
+      (void)text->AppendData(u8"z");
+      CHECK(editor.HasComposition());
+      CHECK(editor.CompositionStart() == 0);
+      CHECK(editor.CompositionEnd() == 2);
+
+      // Taking its text away loses it, though the selection moves without a notification; the input
+      // method's next update ends it and starts another.
+      log->Events.clear();
+      (void)text->Remove();
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(editor.HasLostComposition());
+      CHECK_FALSE(editor.CompositionRange());
+      view.SetComposition(u8"cd", {}, 2);
+      CHECK(editor.HasComposition());
+      CHECK(Narrow(editable.TextContent().value_or(u8"")) == "cd");
+      CHECK(log->Events.front() == "keydown 229");
+      CHECK(log->Events[1] == "compositionend ");
+      CHECK(log->Events[2] == "compositionstart ");
+      CHECK(discarded == 0);
+    }
   }
+
 }

@@ -234,7 +234,8 @@ namespace krys::boo::html::tests
     CHECK(Sanitized(u8"range", u8"7", u8"min=0 max=10 step=5") == "5");
     CHECK(Sanitized(u8"range", u8"1", u8"min=10 max=5") == "10");
     CHECK(Sanitized(u8"color", u8"#ABCDEF") == "#abcdef");
-    CHECK(Sanitized(u8"color", u8"red") == "#000000");
+    CHECK(Sanitized(u8"color", u8"red") == "#ff0000");
+    CHECK(Sanitized(u8"color", u8"nonsense") == "#000000");
     CHECK(Sanitized(u8"date", u8"2026-02-30").empty());
     CHECK(Sanitized(u8"date", u8"2026-02-28") == "2026-02-28");
     CHECK(Sanitized(u8"time", u8"25:00").empty());
@@ -305,6 +306,23 @@ namespace krys::boo::html::tests
     };
     CHECK(validAs(u8"email", u8"someone@example.com"));
     CHECK_FALSE(validAs(u8"email", u8"someone"));
+
+    SECTION("email addresses")
+    {
+      CHECK(validAs(u8"email", u8"a.b!#$%&'*+/=?^_`{|}~-@localhost"));
+      CHECK(validAs(u8"email", u8"a@x-1.EXAMPLE"));
+      CHECK(validAs(u8"email", dom::DOMString(u8"a@") + dom::DOMString(63, u8'x')));
+      CHECK_FALSE(validAs(u8"email", dom::DOMString(u8"a@") + dom::DOMString(64, u8'x')));
+      CHECK_FALSE(validAs(u8"email", u8"@example.com"));
+      CHECK_FALSE(validAs(u8"email", u8"a@"));
+      CHECK_FALSE(validAs(u8"email", u8"a@b..c"));
+      CHECK_FALSE(validAs(u8"email", u8"a@b."));
+      CHECK_FALSE(validAs(u8"email", u8"a@-b.c"));
+      CHECK_FALSE(validAs(u8"email", u8"a@b-.c"));
+      CHECK_FALSE(validAs(u8"email", u8"a@b@c"));
+      CHECK_FALSE(validAs(u8"email", u8"a(b)@c"));
+      CHECK_FALSE(validAs(u8"email", u8"\u00E9@example.com"));
+    }
     CHECK(validAs(u8"url", u8"https://example.com"));
     CHECK_FALSE(validAs(u8"url", u8"example"));
 
@@ -320,6 +338,25 @@ namespace krys::boo::html::tests
       // An invalid pattern matches anything.
       REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"(").HasException());
       CHECK_FALSE(input.PatternMismatch());
+      // The pattern must compile on its own, before it's anchored.
+      REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"a)|(b").HasException());
+      CHECK_FALSE(input.PatternMismatch());
+      // Unknown escapes are errors, as with the v flag.
+      REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"\\q").HasException());
+      (void)input.SetValue(u8"q");
+      CHECK_FALSE(input.PatternMismatch());
+
+      // Alternatives are anchored as a whole.
+      REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"a|b").HasException());
+      (void)input.SetValue(u8"ab");
+      CHECK(input.PatternMismatch());
+
+      // Patterns match code points, and know Unicode properties.
+      REQUIRE_FALSE(input.SetAttribute(u8"pattern", u8"\\p{L}.").HasException());
+      (void)input.SetValue(u8"\u00E9\U0001F600");
+      CHECK_FALSE(input.PatternMismatch());
+      (void)input.SetValue(u8"1\U0001F600");
+      CHECK(input.PatternMismatch());
     }
 
     SECTION("ranges and steps")
@@ -453,7 +490,7 @@ namespace krys::boo::html::tests
       CHECK(events->Joined() == "click change");
 
       events->PreventDefault = true;
-      b.AddEventListener(dom::DOMStringAtom(u8"click"), Ref<dom::EventListenerCallback> {events}, false);
+      b.AddEventListener(dom::DOMStringAtom(u8"click"), events, false);
       b.Click();
       CHECK(a.Checked());
       CHECK_FALSE(b.Checked());

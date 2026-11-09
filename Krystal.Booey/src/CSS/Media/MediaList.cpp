@@ -10,12 +10,11 @@
 
 namespace krys::boo::css
 {
-  MediaList::MediaList(CSSStyleSheet *parentSheet) noexcept
-      : _parentStyleSheet(WeakPtr<CSSStyleSheet>::WithRef(parentSheet))
+  MediaList::MediaList(CSSStyleSheet *parentSheet) noexcept : _parentStyleSheet(CreateWeakPtr(parentSheet))
   {
   }
 
-  MediaList::MediaList(CSSRule *parentRule) noexcept : _parentRule(WeakPtr<CSSRule>::WithRef(parentRule))
+  MediaList::MediaList(CSSRule *parentRule) noexcept : _parentRule(CreateWeakPtr(parentRule))
   {
   }
 

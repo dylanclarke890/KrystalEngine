@@ -24,8 +24,10 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/Drag/DragState.hpp"
@@ -39,6 +41,7 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -53,6 +56,7 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/UI/Cursor.hpp"
 #include <algorithm>
+#include <ranges>
 
 namespace krys::boo
 {
@@ -61,6 +65,12 @@ namespace krys::boo
     // Match key code of composition keydown event on windows.
     // IE sends VK_PROCESSKEY which has value 229;
     constexpr int32 CompositionEventKeyCode = 229;
+
+    /// @brief The largest a cursor image can be, in CSS pixels each way, as in Chrome.
+    constexpr float MaximumCursorSize = 128;
+    // It's pretty unlikely that a scale of less than one would ever be used. But all we really need to ensure
+    // is that it can't be zero and that there's no possibility of integer overflow.
+    constexpr float MinimumCursorScale = 0.001f;
 
     /// @brief The element key events go to in @p document: its focused element, or its body.
     // FIXME: A fullscreen video, once there is one.
@@ -222,6 +232,63 @@ namespace krys::boo
 
   EventHandler::~EventHandler() noexcept = default;
 
+  namespace
+  {
+    KRYS_NODISCARD bool HasCapturingBoundaryListenerOn(const dom::EventTarget &target,
+                                                       Span<const dom::DOMStringAtom> types) noexcept
+    {
+      return std::ranges::any_of(types, [&](const dom::DOMStringAtom &type)
+                                 { return target.HasCapturingEventListener(type); });
+    }
+
+    KRYS_NODISCARD bool
+      HasCapturingBoundaryListenerOnShadowRoot(const dom::Element &element,
+                                               Span<const dom::DOMStringAtom> types) noexcept
+    {
+      auto &root = element.TreeScope().RootNode();
+      return Is<dom::ShadowRoot>(root) && HasCapturingBoundaryListenerOn(root, types);
+    }
+  }
+
+  bool EventHandler::HasBoundaryListener(const dom::Element &element,
+                                         Span<const dom::DOMStringAtom> types) noexcept
+  {
+    return std::ranges::any_of(types,
+                               [&](const dom::DOMStringAtom &type) { return element.HasEventListener(type); })
+           || HasCapturingBoundaryListenerOnShadowRoot(element, types);
+  }
+
+  bool EventHandler::HasCapturingBoundaryListener(const dom::Element &element,
+                                                  Span<const dom::DOMStringAtom> types) noexcept
+  {
+    return HasCapturingBoundaryListenerOn(element, types)
+           || HasCapturingBoundaryListenerOnShadowRoot(element, types);
+  }
+
+  bool EventHandler::HasCapturingBoundaryListenerAbove(const dom::Element &element,
+                                                       Span<const dom::DOMStringAtom> types) noexcept
+  {
+    if (HasCapturingBoundaryListenerOnShadowRoot(element, types))
+    {
+      return true;
+    }
+    for (auto *ancestor = element.ParentElementInComposedTree(); ancestor;
+         ancestor = ancestor->ParentElementInComposedTree())
+    {
+      if (HasCapturingBoundaryListener(*ancestor, types))
+      {
+        return true;
+      }
+    }
+    const auto &document = element.NodeDocument();
+    if (HasCapturingBoundaryListenerOn(document, types))
+    {
+      return true;
+    }
+    auto *window = document.Window();
+    return window && HasCapturingBoundaryListenerOn(*window, types);
+  }
+
   void EventHandler::ResizeLayerDestroyed() noexcept
   {
     krys_debug_assert(_resizeLayer);
@@ -282,7 +349,7 @@ namespace krys::boo
       document->UpdateHoverActiveState(request, targetElement.get());
     }
 
-    // FIXME: Image overlays (disallowsUserAgentShadowContentExceptForImageOverlays), once there are any.
+    // (There are no image overlays; see DIFFERENCES.md.)
     if (request.DisallowsUserAgentShadowContent())
     {
       result.SetToNonUserAgentShadowAncestor();
@@ -389,6 +456,8 @@ namespace krys::boo
       }
     }
 
+    CancelFakeMouseMoveEvent();
+
     _mousePressed = true;
     _capturesDragging = true;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
@@ -436,6 +505,15 @@ namespace krys::boo
 
     // FIXME: Pan scrolling.
 
+    // A press while panning only stops it: the click mustn't go on to do what it would, like follow a link.
+    bool isPanScrollInProgress = PanScrollInProgress();
+    StopAutoscrollTimer();
+    if (isPanScrollInProgress)
+    {
+      InvalidateClick();
+      return true;
+    }
+
     _clickCount = platformMouseEvent.ClickCount();
     _clickNode = ShareRefPtr(mouseEvent.TargetNode());
 
@@ -444,7 +522,7 @@ namespace krys::boo
     if (layer && layer->IsPointInResizeControl(localPoint))
     {
       layer->SetInResizeMode(true);
-      _resizeLayer = WeakPtr<RenderLayer>::WithRef(*layer);
+      _resizeLayer = CreateWeakPtr(layer);
       _offsetFromResizeCorner = LayoutSize(layer->OffsetFromResizeCorner(localPoint));
       RefPtr<dom::Node> resizedNode = ShareRefPtr(mouseEvent.TargetNode());
       (void)DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), resizedNode.get(), _clickCount,
@@ -518,10 +596,12 @@ namespace krys::boo
   bool EventHandler::HandleMouseMoveEvent(const PlatformMouseEvent &platformMouseEvent,
                                           HitTestResult *hitTestResult) noexcept
   {
+    CancelFakeMouseMoveEvent();
+
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
-    // FIXME: Synthetic touch events, hover timers, fake mouse moves, SVG panning and frame set resizing.
+    // FIXME: Synthetic touch events, hover timers, fake mouse moves and frame set resizing.
 
     if (auto *page = frame->GetPage())
     {
@@ -699,12 +779,14 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Page overlays, synthetic touch events, user gestures and pan scrolling.
+    // FIXME: Page overlays, synthetic touch events and user gestures.
+
+    _autoscrollController->HandleMouseReleaseEvent(platformMouseEvent);
 
     _mousePressed = false;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
 
-    // FIXME: SVG panning, frame set resizing and immediate actions.
+    // FIXME: Frame set resizing and immediate actions.
 
     if (RefPtr<Scrollbar> lastScrollbarUnderMouse = _lastScrollbarUnderMouse)
     {
@@ -750,17 +832,119 @@ namespace krys::boo
                                                                const PlatformMouseEvent &mouseEvent) noexcept
   {
     _lastPlatformMouseEvent = mouseEvent;
+    _lastKnownModifiers = mouseEvent.Modifiers();
     Ref frame = ShareRef(_frame);
     krys_assert(frame->Document());
     return frame->Document()->PrepareMouseEvent(
       request, DocumentPointForWindowPoint(*frame, mouseEvent.Position()), mouseEvent);
   }
 
+  List<ScrollableArea *> EventHandler::ScrollableAreasEnclosing(dom::Node *node) const noexcept
+  {
+    List<ScrollableArea *> areas;
+    auto *frameView = _frame.View();
+    if (!node || !frameView)
+    {
+      return areas;
+    }
+
+    // The innermost scrolling layer, or list box, the node is in.
+    RenderLayer *scrollableLayer = nullptr;
+    for (auto *ancestor = node; ancestor; ancestor = ancestor->ParentOrShadowHostNode())
+    {
+      if (Is<html::HTMLHtmlElement>(*ancestor) || Is<dom::Document>(*ancestor))
+      {
+        break;
+      }
+
+      auto *renderer = ancestor->Renderer();
+      if (!renderer)
+      {
+        continue;
+      }
+
+      if (auto *renderListBox = DynamicDowncast<RenderListBox>(*renderer))
+      {
+        auto *scrollableArea = static_cast<ScrollableArea *>(renderListBox);
+        if (scrollableArea->IsScrollableOrRubberbandable())
+        {
+          areas.push_back(scrollableArea);
+          // The list box's own layer doesn't scroll it: the scrollers around it come next.
+          auto *ownLayer = renderListBox->Layer();
+          scrollableLayer =
+            ownLayer ? ownLayer->EnclosingScrollableLayer(ExcludeSelf, CrossFrameBoundaries::No)
+                     : renderListBox->EnclosingLayer()->EnclosingScrollableLayer(IncludeSelf,
+                                                                                 CrossFrameBoundaries::No);
+          break;
+        }
+      }
+
+      auto *layer = renderer->EnclosingLayer();
+      if (!layer)
+      {
+        return areas;
+      }
+
+      if (auto *enclosing = layer->EnclosingScrollableLayer(IncludeSelf, CrossFrameBoundaries::No);
+          enclosing && !enclosing->IsRenderViewLayer())
+      {
+        scrollableLayer = enclosing;
+        break;
+      }
+    }
+
+    // Then each scroller around it, by containing block, as they clip it.
+    for (auto *layer = scrollableLayer; layer && !layer->IsRenderViewLayer();
+         layer = layer->EnclosingScrollableLayer(ExcludeSelf, CrossFrameBoundaries::No))
+    {
+      if (auto *scrollableArea = layer->GetScrollableArea())
+      {
+        areas.push_back(scrollableArea);
+      }
+    }
+
+    areas.push_back(frameView);
+    return areas;
+  }
+
+  void EventHandler::NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType,
+                                                        dom::Element *lastElementUnderMouse,
+                                                        dom::Element *elementUnderMouse) noexcept
+  {
+    auto lastAreas = ScrollableAreasEnclosing(lastElementUnderMouse);
+    auto areas = ScrollableAreasEnclosing(elementUnderMouse);
+    auto contains = [](const List<ScrollableArea *> &list, ScrollableArea *area)
+    {
+      return std::ranges::find(list, area) != list.end();
+    };
+
+    // The areas the mouse left, innermost first.
+    for (auto *area : lastAreas)
+    {
+      if (!contains(areas, area))
+      {
+        area->MouseExitedContentArea();
+      }
+    }
+
+    // The areas it entered, outermost first; those it was already in hear it moved.
+    for (auto *area : std::ranges::reverse_view(areas))
+    {
+      if (!contains(lastAreas, area))
+      {
+        area->MouseEnteredContentArea();
+      }
+      else if (eventType == EventNames::MouseMove)
+      {
+        area->MouseMovedInContentArea();
+      }
+    }
+  }
+
   void EventHandler::UpdateMouseEventTargetNode(dom::DOMStringAtom eventType, dom::Node *targetNode,
                                                 const PlatformMouseEvent &platformMouseEvent,
                                                 FireMouseOverOut fireMouseOverOut) noexcept
   {
-    (void)eventType;
     Ref frame = ShareRef(_frame);
 
     // If we're capturing, we always go right to that element.
@@ -781,7 +965,7 @@ namespace krys::boo
     // Fire mouseout/mouseover if the mouse has shifted to a different node.
     if (fireMouseOverOut == FireMouseOverOut::Yes)
     {
-      // FIXME: Telling scrollable areas about the mouse (notifyScrollableAreasOfMouseEvents).
+      NotifyScrollableAreasOfMouseEvents(eventType, _lastElementUnderMouse.get(), _elementUnderMouse.get());
 
       if (_lastElementUnderMouse && &_lastElementUnderMouse->NodeDocument() != frame->Document())
       {
@@ -790,9 +974,6 @@ namespace krys::boo
 
       if (_lastElementUnderMouse != _elementUnderMouse)
       {
-        // FIXME: Only dispatch mouseenter and mouseleave when an ancestor has a capturing listener or the
-        // element has a listener for them (they don't bubble), once targets can say which listeners they
-        // have; this optimization avoids O(n^2) capturing event-handler checks.
         List<Ref<dom::Element>> leftElementsChain;
         for (dom::Element *element = _lastElementUnderMouse.get(); element;
              element = element->ParentElementInComposedTree())
@@ -825,6 +1006,15 @@ namespace krys::boo
           enteredElementsChain.erase(enteredElementsChain.end() - static_cast<ptrdiff_t>(i),
                                      enteredElementsChain.end());
         }
+
+        // Enter and leave events (and the pointer events dispatched with them) go only to the elements a
+        // listener would see them on, as they don't bubble.
+        const std::array leaveTypes {dom::DOMStringAtom(EventNames::MouseLeave),
+                                     dom::DOMStringAtom(EventNames::PointerLeave)};
+        const std::array enterTypes {dom::DOMStringAtom(EventNames::MouseEnter),
+                                     dom::DOMStringAtom(EventNames::PointerEnter)};
+        RemoveBoundaryTargetsWithoutListeners(leftElementsChain, leaveTypes);
+        RemoveBoundaryTargetsWithoutListeners(enteredElementsChain, enterTypes);
 
         if (RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse)
         {
@@ -1003,16 +1193,33 @@ namespace krys::boo
   {
     using Type = PlatformEvent::Type;
 
+    // A modifier key's own event says whether it's now held.
+    _lastKnownModifiers = initialKeyEvent.Modifiers();
+
+    if (PanScrollInProgress())
+    {
+      // A key pressed while panning stops it, and panning swallows the keys.
+      if (initialKeyEvent.GetType() == Type::KeyDown || initialKeyEvent.GetType() == Type::RawKeyDown)
+      {
+        StopAutoscrollTimer();
+      }
+      return true;
+    }
+
     if (initialKeyEvent.GetType() == Type::KeyDown && initialKeyEvent.Key() == u8"Escape")
     {
       if (auto *page = _frame.GetPage(); page && page->GetPointerLockController().GetElement())
       {
         page->GetPointerLockController().RequestPointerUnlockAndForceCursorVisible();
       }
+      // Escape hides any validation message.
+      if (auto *page = _frame.GetPage())
+      {
+        page->GetChromeClient().HideAnyValidationMessage();
+      }
     }
 
-    // FIXME: Escape hiding validation messages and leaving fullscreen; the caps lock state of text fields;
-    // pan scrolling.
+    // FIXME: Pan scrolling.
 
     // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
     // the location bar.
@@ -1033,7 +1240,13 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Typing gestures and access keys (handleAccessKey).
+    // FIXME: Typing gestures.
+
+    // NOTE: where the host sends the character separately, an access key replaces its keypress.
+    if (initialKeyEvent.GetType() == Type::Char && HandleAccessKey(initialKeyEvent))
+    {
+      return true;
+    }
 
     // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
     if (initialKeyEvent.GetType() == Type::KeyUp || initialKeyEvent.GetType() == Type::Char)
@@ -1100,6 +1313,13 @@ namespace krys::boo
     // FIXME: The backward compatibility mode, which dispatches a cancelled keypress anyway.
     bool keydownResult =
       keydown->DefaultPrevented() || keydown->DefaultHandled() || DefaultKeyboardEventHandler(*keydown);
+
+    // An access key replaces the keypress, as in Chrome. It runs even if the keydown was cancelled.
+    if (HandleAccessKey(initialKeyEvent))
+    {
+      return true;
+    }
+
     if (keydownResult)
     {
       return keydownResult;
@@ -1132,6 +1352,27 @@ namespace krys::boo
            || DefaultKeyboardEventHandler(*keypress);
   }
 
+  bool EventHandler::HandleAccessKey(const PlatformKeyboardEvent &event) noexcept
+  {
+    using Modifier = PlatformEvent::Modifier;
+    auto modifiers = event.Modifiers();
+    if (!modifiers.Contains(Modifier::AltKey) || modifiers.Contains(Modifier::ControlKey)
+        || modifiers.Contains(Modifier::MetaKey))
+    {
+      return false;
+    }
+
+    auto *document = _frame.Document();
+    auto element = document ? document->ElementForAccessKey(event.UnmodifiedText()) : nullptr;
+    if (!element)
+    {
+      return false;
+    }
+    document->UpdateStyleIfNeeded();
+    (void)element->AccessKeyAction(false);
+    return true;
+  }
+
   bool EventHandler::HandleTextInputEvent(utf8_stringview text, dom::Event *underlyingEvent,
                                           dom::TextEventInputType inputType) noexcept
   {
@@ -1154,7 +1395,7 @@ namespace krys::boo
       return false;
     }
 
-    auto event = dom::TextEvent::Create(text, inputType);
+    auto event = dom::TextEvent::Create(_frame.Window(), text, inputType);
     event->SetUnderlyingEvent(underlyingEvent);
 
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
@@ -1171,8 +1412,6 @@ namespace krys::boo
 
   bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    // FIXME: keyup stops animated keyboard scrolls, once there are any.
-
     if (event.Type() == EventNames::KeyDown)
     {
       if (_frame.Document()->GetEditor().HandleKeyboardEvent(event))
@@ -1226,8 +1465,7 @@ namespace krys::boo
   bool EventHandler::DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &, ScrollLogicalDirection direction,
                                                        ScrollGranularity granularity) noexcept
   {
-    // FIXME: Animated keyboard scrolling (keyboardScrollRecursively), once there are scroll animations.
-    return LogicalScrollRecursively(direction, granularity);
+    return LogicalScrollRecursively(direction, granularity, nullptr, KeyboardScrollIsAnimated());
   }
 
   bool EventHandler::DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept
@@ -1271,7 +1509,7 @@ namespace krys::boo
 
     ScrollLogicalDirection direction = event.ShiftKey() ? ScrollLogicalDirection::ScrollBlockDirectionBackward
                                                         : ScrollLogicalDirection::ScrollBlockDirectionForward;
-    if (LogicalScrollOverflow(direction, ScrollGranularity::Page))
+    if (LogicalScrollOverflow(direction, ScrollGranularity::Page, nullptr, KeyboardScrollIsAnimated()))
     {
       return true;
     }
@@ -1282,8 +1520,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Animated keyboard scrolling (keyboardScroll), once there are scroll animations.
-    return view->LogicalScroll(direction, ScrollGranularity::Page);
+    return view->LogicalScroll(direction, ScrollGranularity::Page, KeyboardScrollIsAnimated());
   }
 
   bool EventHandler::DefaultArrowEventHandler(dom::FocusDirection focusDirection,
@@ -1320,7 +1557,10 @@ namespace krys::boo
 
     // Arrows and other possible directional navigation keys can be used in design
     // mode editing.
-    // FIXME: Design mode, once documents have it.
+    if (_frame.Document()->InDesignMode())
+    {
+      return false;
+    }
 
     return html::FocusAlgorithms::DirectionalNavigation(*_frame.Document(), focusDirection);
   }
@@ -1354,8 +1594,14 @@ namespace krys::boo
     return false;
   }
 
+  ScrollIsAnimated EventHandler::KeyboardScrollIsAnimated() const noexcept
+  {
+    return _frame.Document()->GetSettings().ScrollAnimatorEnabled ? ScrollIsAnimated::Yes
+                                                                  : ScrollIsAnimated::No;
+  }
+
   bool EventHandler::LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                           dom::Node *startingNode) noexcept
+                                           dom::Node *startingNode, ScrollIsAnimated animated) noexcept
   {
     RefPtr<dom::Node> node = ShareRefPtr(startingNode);
 
@@ -1372,7 +1618,7 @@ namespace krys::boo
     if (node)
     {
       auto *r = node->Renderer();
-      if (r && r->EnclosingBox().LogicalScroll(direction, granularity))
+      if (r && r->EnclosingBox().LogicalScroll(direction, granularity, 1, nullptr, animated))
       {
         SetFrameWasScrolledByUser();
         return true;
@@ -1399,20 +1645,20 @@ namespace krys::boo
   }
 
   bool EventHandler::LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                              dom::Node *startingNode) noexcept
+                                              dom::Node *startingNode, ScrollIsAnimated animated) noexcept
   {
     Ref frame = ShareRef(_frame);
 
     // The layout needs to be up to date to determine if we can scroll. We may be
     // here because of an onLoad event, in which case the final layout hasn't been performed yet.
     (void)frame->Document()->UpdateLayout();
-    if (LogicalScrollOverflow(direction, granularity, startingNode))
+    if (LogicalScrollOverflow(direction, granularity, startingNode, animated))
     {
       return true;
     }
 
     RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
-    return view && view->LogicalScroll(direction, granularity);
+    return view && view->LogicalScroll(direction, granularity, animated);
   }
 
   bool EventHandler::DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept
@@ -1431,8 +1677,14 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Tabs can be used in design mode editing; whether the page lets Tab cycle through elements
-    // (tabKeyCyclesThroughElements), once the host can say.
+    // Tabs can be used in design mode editing.
+    if (document->InDesignMode())
+    {
+      return false;
+    }
+
+    // FIXME: Whether the page lets Tab cycle through elements (tabKeyCyclesThroughElements), once the host
+    // can say.
     return html::FocusAlgorithms::SequentialNavigation(
       *document, event.ShiftKey() ? dom::FocusDirection::Backward : dom::FocusDirection::Forward);
   }
@@ -1524,12 +1776,17 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Not while the page is hidden or its focus controller inactive, once there are those; the current
-    // state of the modifier keys rather than the last mouse event's, once the host reports it.
-    PlatformMouseEvent fakeMouseMoveEvent(
-      *_lastKnownMousePosition, _lastKnownMouseGlobalPosition.value_or(*_lastKnownMousePosition),
-      MouseButton::None, PlatformEvent::Type::MouseMoved, 0, _lastPlatformMouseEvent.Modifiers(),
-      html::EventLoop::Current().Now());
+    // Nothing is shown under the mouse in a hidden page. (Unlike WebKit, a page whose view isn't focused
+    // still gets them, as it does real mouse moves.)
+    if (auto *page = frame->GetPage(); page && !page->IsVisible())
+    {
+      return;
+    }
+
+    PlatformMouseEvent fakeMouseMoveEvent(*_lastKnownMousePosition,
+                                          _lastKnownMouseGlobalPosition.value_or(*_lastKnownMousePosition),
+                                          MouseButton::None, PlatformEvent::Type::MouseMoved, 0,
+                                          _lastKnownModifiers, html::EventLoop::Current().Now());
     (void)MouseMoved(fakeMouseMoveEvent);
   }
 
@@ -1588,6 +1845,12 @@ namespace krys::boo
 
   Maybe<Cursor> EventHandler::SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept
   {
+    // Panning sets its own cursor.
+    if (PanScrollInProgress())
+    {
+      return null;
+    }
+
     if (auto *resizeLayer = _resizeLayer.get(); resizeLayer && resizeLayer->InResizeMode())
     {
       return null;
@@ -1622,13 +1885,50 @@ namespace krys::boo
     // own cursor (getCursor).
 
     auto styleCursor = style ? style->GetCursor() : style::Cursor {null, CursorType::Auto};
-    // FIXME: Cursor images, once they load.
+    if (styleCursor.Images)
+    {
+      for (auto &styleCursorImage : *styleCursor.Images)
+      {
+        Ref<StyleImage> styleImage = styleCursorImage.Image;
+        auto *cachedImage = styleImage->GetCachedImage();
+        if (!cachedImage)
+        {
+          continue;
+        }
+        float scale = styleImage->ImageScaleFactor();
+        // Get hotspot and convert from logical pixels to physical pixels.
+        auto hotSpot = styleCursorImage.HotSpot;
+        auto *image = cachedImage->ImageForRenderer(renderer);
+        if (!image || cachedImage->ErrorOccurred())
+        {
+          continue;
+        }
+        auto size = image->Size();
+        // Limit the size of cursors (in UI pixels) so that they cannot be used to cover UI elements in
+        // chrome.
+        size.Scale(1 / scale);
+        if (size.Width() > MaximumCursorSize || size.Height() > MaximumCursorSize)
+        {
+          continue;
+        }
+
+        // (Skipped: falling back when the cursor would reach out of the main frame's visible content, as
+        // there's no browser UI to cover; see DIFFERENCES.md.)
+
+        // Ensure no overflow possible in calculations above.
+        if (scale < MinimumCursorScale)
+        {
+          continue;
+        }
+        return Cursor(*image, hotSpot, scale);
+      }
+    }
 
     switch (styleCursor.Predefined)
     {
       case CursorType::Auto:
       {
-        // FIXME: Image overlay text, once there are image overlays.
+        // (There's no image overlay text; see DIFFERENCES.md.)
         bool editable = node->HasEditableStyle();
 
         if (UseHandCursor(node, result.IsOverLink(), shiftKey))
@@ -1775,7 +2075,13 @@ namespace krys::boo
   bool EventHandler::HandleWheelEvent(const PlatformWheelEvent &event) noexcept
   {
     EnumSet<EventHandling> handling;
-    return HandleWheelEventInternal(event, handling);
+    bool handled = HandleWheelEventInternal(event, handling);
+    // However the event went (a listener may have cancelled it), what the gesture scrolled snaps.
+    if (event.EndsGesture())
+    {
+      DidEndGestureScroll();
+    }
+    return handled;
   }
 
   bool EventHandler::HandleWheelEventInternal(const PlatformWheelEvent &event,
@@ -1818,12 +2124,12 @@ namespace krys::boo
 
     // FIXME: Widgets (isOverWidget, passWheelEventToWidget), once there are any.
 
-    if (element)
+    // The start and end of a touchpad's gesture move nothing, so no event fires for them.
+    if (element && (event.DeltaX() || event.DeltaY()))
     {
       if (!element->DispatchWheelEvent(event, handling))
       {
         _isHandlingWheelEvent = false;
-        // FIXME: Scroll snapping (processWheelEventForScrollSnap), once there's scroll snapping.
         return true;
       }
     }
@@ -1958,7 +2264,17 @@ namespace krys::boo
   bool EventHandler::HandleWheelEventInScrollableArea(const PlatformWheelEvent &wheelEvent,
                                                       ScrollableArea &scrollableArea) noexcept
   {
-    // FIXME: Gesture states (updateWheelGestureState), with touchpad gestures.
+    if (wheelEvent.IsGestureScroll())
+    {
+      auto isArea = [&](const WeakPtr<ScrollableArea> &area)
+      {
+        return area.get() == &scrollableArea;
+      };
+      if (std::none_of(_gestureScrolledAreas.begin(), _gestureScrolledAreas.end(), isArea))
+      {
+        _gestureScrolledAreas.push_back(CreateWeakPtr<ScrollableArea>(&scrollableArea));
+      }
+    }
     return scrollableArea.HandleWheelEventForScrolling(wheelEvent);
   }
 
@@ -1980,15 +2296,29 @@ namespace krys::boo
     return HandleWheelEventInAppropriateEnclosingBox(startNode, wheelEvent, filteredPlatformDelta);
   }
 
-  bool EventHandler::HandleTouchScroll(const PlatformWheelEvent &event) noexcept
+  void EventHandler::DidEndGestureScroll() noexcept
+  {
+    auto areas = krys::move(_gestureScrolledAreas);
+    _gestureScrolledAreas.clear();
+    for (auto &area : areas)
+    {
+      if (area)
+      {
+        area->DidEndGestureScroll();
+      }
+    }
+  }
+
+  bool EventHandler::HandleTouchScroll(const PlatformWheelEvent &wheelEvent) noexcept
   {
     Ref frame = ShareRef(_frame);
     RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
     RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
-    if (!document || !view || (!event.DeltaX() && !event.DeltaY()))
+    if (!document || !view || (!wheelEvent.DeltaX() && !wheelEvent.DeltaY()))
     {
       return false;
     }
+    auto event = wheelEvent.CopyAsTouchScroll();
 
     SetFrameWasScrolledByUser();
 
@@ -2037,8 +2367,8 @@ namespace krys::boo
         type, *node, dom::EventInit {.Bubbles = true, .Cancelable = true});
     }
 
-    // FIXME: Image overlays (ImageOverlay::isInsideOverlay) and nodes that select on mouse down
-    // (shouldSelectOnMouseDown), once there are any.
+    // FIXME: Nodes that select on mouse down (shouldSelectOnMouseDown), once there are any. (There are no
+    // image overlays; see DIFFERENCES.md.)
     KRYS_NODISCARD RefPtr<dom::Node> NodeToSelectOnMouseDownForNode(dom::Node &targetNode) noexcept
     {
       return dom::Position::RootUserSelectAllForNode(&targetNode);
@@ -2490,8 +2820,10 @@ namespace krys::boo
           _originatingTouchPointDocument = ShareRefPtr(&element->NodeDocument());
           freshTouchEvents = false;
         }
-        // FIXME: Skip documents without touch event listeners (hasTouchEventHandlers), once targets can say
-        // which listeners they have.
+        if (!element->NodeDocument().HasTouchRelatedListener())
+        {
+          continue;
+        }
         _originatingTouchPointTargets.insert_or_assign(touchPointTargetKey, element);
         touchTarget = element;
       }
@@ -2533,6 +2865,10 @@ namespace krys::boo
         continue;
       }
       Ref document = ShareRef(touchTargetNode->NodeDocument());
+      if (!document->HasTouchRelatedListener())
+      {
+        continue;
+      }
       RefPtr<LocalFrame> targetFrame = ShareRefPtr(document->Frame());
       if (!targetFrame || !targetFrame->View())
       {
@@ -2697,9 +3033,7 @@ namespace krys::boo
                                                         TextGranularity::ParagraphGranularity);
   }
 
-  // FIXME: Taps put the caret at the nearest word boundary (wordBoundaryForPositionWithoutCrossingLine), once
-  // the visible units have the granularity queries; the editor client's
-  // shouldAllowSingleClickToChangeSelection, with the editor.
+  // FIXME: The editor client's shouldAllowSingleClickToChangeSelection, with the editor.
   bool EventHandler::HandleMousePressEventSingleClick(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);
@@ -2819,8 +3153,8 @@ namespace krys::boo
     return UpdateSelectionForMouseDownDispatchingSelectStart(targetNode.get(), newSelection, granularity);
   }
 
-  // FIXME: The chrome client's shouldUseMouseEventForSelection, quirks and image overlay text, once there are
-  // any.
+  // FIXME: The chrome client's shouldUseMouseEventForSelection and quirks, once there are any. (There's no
+  // image overlay text; see DIFFERENCES.md.)
   bool EventHandler::CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) const noexcept
   {
     auto *node = event.TargetNode();
@@ -2839,8 +3173,7 @@ namespace krys::boo
     return _mouseDownMayStartSelect;
   }
 
-  // FIXME: Widgets, SVG panning and the scrollbar corner (isPointInScrollbarCorner); image overlays' text,
-  // once there are image overlays.
+  // FIXME: Widgets. (There's no image overlay text; see DIFFERENCES.md.)
   bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);
@@ -2851,6 +3184,13 @@ namespace krys::boo
     CancelFakeMouseMoveEvent();
 
     (void)frame->Document()->UpdateLayoutIgnorePendingStylesheets();
+
+    // A press in the scrollbars' corner neither selects nor drags.
+    if (auto *view = frame->View();
+        view && view->IsPointInScrollbarCorner(FlooredIntPoint(event.Event().Position())))
+    {
+      return false;
+    }
 
     // If we got the event back, that must mean it wasn't prevented,
     // so it's allowed to start a drag or selection if it wasn't in a scrollbar.
@@ -3023,7 +3363,7 @@ namespace krys::boo
     UpdateSelectionForMouseDrag(result);
   }
 
-  // FIXME: Image overlays (shouldExtendSelectionToTargetNode), once there are any.
+  // (There are no image overlays; see DIFFERENCES.md.)
   void EventHandler::UpdateSelectionForMouseDrag(const HitTestResult &hitTestResult) noexcept
   {
     if (!MouseDownMayStartSelect())
@@ -3220,9 +3560,28 @@ namespace krys::boo
     return _autoscrollController->AutoscrollRenderer();
   }
 
+  bool EventHandler::PanScrollInProgress() const noexcept
+  {
+    return _autoscrollController->PanScrollInProgress();
+  }
+
+  void EventHandler::StartPanScrolling(RenderBox &renderer) noexcept
+  {
+    if (_lastKnownMousePosition)
+    {
+      _autoscrollController->StartPanScrolling(renderer, FlooredIntPoint(*_lastKnownMousePosition));
+      InvalidateClick();
+    }
+  }
+
   bool EventHandler::AutoscrollInProgress() const noexcept
   {
     return _autoscrollController->AutoscrollInProgress();
+  }
+
+  bool EventHandler::IsAutoscrolling() const noexcept
+  {
+    return _autoscrollController->AutoscrollRenderer() != nullptr;
   }
 
   void EventHandler::StopAutoscrollTimer(bool rendererIsBeingDestroyed) noexcept

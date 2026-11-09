@@ -16,8 +16,8 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 
@@ -41,7 +41,7 @@ namespace krys::boo::css
   }
 
   CSSFontSelector::CSSFontSelector(dom::Document &document) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document)), _cssFontFaceSet(CSSFontFaceSet::Create(this)),
+      : _document(CreateWeakPtr(&document)), _cssFontFaceSet(CSSFontFaceSet::Create(this)),
         _fontFaceClient(*this), _uniqueId(++FontSelectorId)
   {
     FontCache::Singleton().AddClient(*this);
@@ -194,7 +194,7 @@ namespace krys::boo::css
       // the CSSFontFaceSource objects will inspect their CachedFonts, the new CSSFontFace is smart enough
       // to enter the correct state() during the next pump(). This approach of making a new CSSFontFace is
       // simpler than computing and applying a diff of the StyleProperties.
-      // FIXME: Pass the old face's `FontFace` wrapper to the new face, once there's one.
+      // (There's no `FontFace` wrapper to pass to the new face: see DIFFERENCES.md.)
       _cssFontFaceSet->Remove(*existingFace);
     }
 
@@ -506,8 +506,9 @@ namespace krys::boo::css
       resolveAndAssignGenericFamily();
     }
 
-    // FIXME: The palette and feature values, once the font cache takes them.
-    auto font = FontCache::Singleton().FontForFamily(description, familyForLookup);
+    auto font = FontCache::Singleton().FontForFamily(
+      description, familyForLookup, {},
+      FontCreationContext {{}, {}, fontPaletteValues, krys::move(fontFeatureValues), 1.0f});
     return {FontRanges {krys::move(font)}, isGenericFontFamily};
   }
 

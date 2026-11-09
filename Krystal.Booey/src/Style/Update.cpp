@@ -76,6 +76,11 @@ namespace krys::boo::style
       AddPossibleRebuildRoot(element, parent);
     }
 
+    if (elementUpdate.Style && Scope::UsesViewportUnits(*elementUpdate.Style))
+    {
+      Scope::ForNode(element).AddElementWithViewportUnits(element);
+    }
+
     _elements.emplace(ShareRefPtr<const dom::Element>(&element), krys::move(elementUpdate));
   }
 

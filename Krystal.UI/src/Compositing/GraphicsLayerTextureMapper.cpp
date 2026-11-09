@@ -255,6 +255,26 @@ namespace krys::ui
     }
   }
 
+  void GraphicsLayerTextureMapper::SetContentsMinificationFilter(ScalingFilter filter) noexcept
+  {
+    if (filter == ContentsMinificationFilter())
+    {
+      return;
+    }
+    GraphicsLayer::SetContentsMinificationFilter(filter);
+    NotifyChange(ContentsScalingFiltersChange);
+  }
+
+  void GraphicsLayerTextureMapper::SetContentsMagnificationFilter(ScalingFilter filter) noexcept
+  {
+    if (filter == ContentsMagnificationFilter())
+    {
+      return;
+    }
+    GraphicsLayer::SetContentsMagnificationFilter(filter);
+    NotifyChange(ContentsScalingFiltersChange);
+  }
+
   void GraphicsLayerTextureMapper::SetContentsVisible(bool value) noexcept
   {
     if (value == ContentsAreVisible())
@@ -607,6 +627,11 @@ namespace krys::ui
       _layer->SetContentsVisible(ContentsAreVisible());
     }
 
+    if (_changeMask & ContentsScalingFiltersChange)
+    {
+      _layer->SetContentsScalingFilters(ContentsMinificationFilter(), ContentsMagnificationFilter());
+    }
+
     if (_changeMask & ContentsOpaqueChange)
     {
       _layer->SetContentsOpaque(ContentsOpaque());
@@ -660,9 +685,33 @@ namespace krys::ui
       _layer->SetContentsLayer(_contentsLayer);
     }
 
-    if (_changeMask & AnimationChange)
+    if (_changeMask & (AnimationChange | TransformChange | BackdropLayerChange))
     {
-      _layer->SetAnimations(_animations);
+      // The individual transform properties that don't animate keep their static values.
+      auto &client = GraphicsLayer::Client();
+      _animations.SetTranslate(client.TransformMatrixForProperty(boo::AnimatedProperty::Translate));
+      _animations.SetRotate(client.TransformMatrixForProperty(boo::AnimatedProperty::Rotate));
+      _animations.SetScale(client.TransformMatrixForProperty(boo::AnimatedProperty::Scale));
+      _animations.SetTransform(client.TransformMatrixForProperty(boo::AnimatedProperty::Transform));
+
+      // Backdrop filter animations filter the backdrop layer, not this one.
+      auto layerAnimations = _animations;
+      TextureMapperAnimations backdropAnimations;
+      std::erase_if(layerAnimations.Animations(),
+                    [&](const TextureMapperAnimation &animation)
+                    {
+                      if (animation.Keyframes().Property() != boo::AnimatedProperty::WebkitBackdropFilter)
+                      {
+                        return false;
+                      }
+                      backdropAnimations.Add(animation);
+                      return true;
+                    });
+      _layer->SetAnimations(layerAnimations);
+      if (_backdropLayer)
+      {
+        _backdropLayer->SetAnimations(backdropAnimations);
+      }
     }
 
     if (_changeMask & AnimationStarted)
@@ -796,14 +845,31 @@ namespace krys::ui
   {
     krys_debug_assert(!keyframesName.empty());
 
-    if (!animation || animation->IsZeroDuration() || valueList.Size() < 2
-        || (valueList.Property() != boo::AnimatedProperty::Transform
-            && valueList.Property() != boo::AnimatedProperty::Opacity))
+    if (!animation || animation->IsZeroDuration() || valueList.Size() < 2)
     {
       return false;
     }
 
-    if (valueList.Property() == boo::AnimatedProperty::Filter)
+    switch (valueList.Property())
+    {
+      case boo::AnimatedProperty::Translate:
+      case boo::AnimatedProperty::Rotate:
+      case boo::AnimatedProperty::Scale:
+      case boo::AnimatedProperty::Transform:
+      case boo::AnimatedProperty::Opacity:
+      case boo::AnimatedProperty::Filter:    break;
+      case boo::AnimatedProperty::WebkitBackdropFilter:
+        // Without a backdrop layer there's nothing to filter, so the animation runs on the page.
+        if (!NeedsBackdrop())
+        {
+          return false;
+        }
+        break;
+      default: return false;
+    }
+
+    if (valueList.Property() == boo::AnimatedProperty::Filter
+        || valueList.Property() == boo::AnimatedProperty::WebkitBackdropFilter)
     {
       int32 listIndex = ValidateFilterOperations(valueList);
       if (listIndex < 0)
@@ -848,6 +914,18 @@ namespace krys::ui
                                                   double timeOffset) noexcept
   {
     _animations.Pause(animationName, boo::Seconds(timeOffset));
+    NotifyChange(AnimationChange);
+  }
+
+  void GraphicsLayerTextureMapper::SuspendAnimations(MonotonicTime::duration time) noexcept
+  {
+    _animations.Suspend(time);
+    NotifyChange(AnimationChange);
+  }
+
+  void GraphicsLayerTextureMapper::ResumeAnimations() noexcept
+  {
+    _animations.Resume(boo::html::EventLoop::Current().Now());
     NotifyChange(AnimationChange);
   }
 

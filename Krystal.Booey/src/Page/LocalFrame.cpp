@@ -14,8 +14,7 @@
 namespace krys::boo
 {
   LocalFrame::LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept
-      : _page(page ? WeakPtr<Page>::WithRef(*page) : WeakPtr<Page>()),
-        _eventHandler(CreateUnique<EventHandler>(*this)),
+      : _page(CreateWeakPtr(page)), _eventHandler(CreateUnique<EventHandler>(*this)),
         _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient)))
   {
   }
@@ -209,6 +208,7 @@ namespace krys::boo
     }
 
     bool deviceScaleFactorChanged = _mediaEnvironment.DeviceScaleFactor != environment.DeviceScaleFactor;
+    bool darkAppearanceChanged = _mediaEnvironment.UseDarkAppearance != environment.UseDarkAppearance;
     _mediaEnvironment = environment;
 
     RefPtr<dom::Document> document = _document;
@@ -224,5 +224,14 @@ namespace krys::boo
     }
 
     document->StyleScope().DidChangeStyleSheetEnvironment();
+
+    // Scrollbars that follow the page's appearance change with it, though their styles don't.
+    if (darkAppearanceChanged)
+    {
+      if (auto *view = document->View())
+      {
+        view->InvalidateScrollbarsForAllScrollableAreas();
+      }
+    }
   }
 }

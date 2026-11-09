@@ -1,10 +1,13 @@
 ﻿#include "Krystal.Booey/Style/Adjuster.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
@@ -767,6 +770,14 @@ namespace krys::boo::style
       return hasInertAttribute(element);
     };
     if (isInertSubtreeRoot(_element.get()))
+    {
+      style.SetEffectiveInert(true);
+    }
+    // https://html.spec.whatwg.org/#the-button-element
+    // If a button element is the first child which is an element of a select element, then it is inert.
+    if (auto *button = DynamicDowncast<html::HTMLButtonElement>(_element.get());
+        button && Is<html::HTMLSelectElement>(button->ParentNode())
+        && dom::TreeQueries::FirstElementChild(*button->ParentNode()) == button)
     {
       style.SetEffectiveInert(true);
     }

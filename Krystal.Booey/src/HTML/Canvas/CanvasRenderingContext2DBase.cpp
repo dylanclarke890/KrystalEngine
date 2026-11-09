@@ -2531,8 +2531,7 @@ namespace krys::boo::html
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
     }
 
-    // 2. FIXME: If the CanvasRenderingContext2D's origin-clean flag is set to false, then throw a
-    //    "SecurityError" DOMException, once there are origins.
+    // 2. (Skipped: a canvas is always origin-clean, as there are no origins; see DIFFERENCES.md.)
 
     // 3. Let imageData be a new ImageData object.
     // 4. Initialize imageData given sw, sh, settings, and defaultColorSpace set to this's color space.

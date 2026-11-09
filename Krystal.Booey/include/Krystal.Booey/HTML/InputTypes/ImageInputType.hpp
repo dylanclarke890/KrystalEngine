@@ -6,9 +6,8 @@
 
 namespace krys::boo::html
 {
-  /// @brief The image input type: a submit button that submits where it was clicked.
-  // FIXME: Loading and drawing the image (its image loader and RenderImage), its alt text, and its width and
-  // height come with the other controls.
+  /// @brief The image input type: a submit button showing an image, that submits where it was clicked.
+  /// @see https://html.spec.whatwg.org/#image-button-state-(type=image)
   class ImageInputType final : public BaseButtonInputType
   {
   private:
@@ -39,5 +38,8 @@ namespace krys::boo::html
     KRYS_NODISCARD uint32 Height() const noexcept final;
     KRYS_NODISCARD uint32 Width() const noexcept final;
     KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept final;
+    void DidBecomeElementType() noexcept final;
+    void Attach() noexcept final;
+    void AttributeChanged(dom::DOMStringAtom localName) noexcept final;
   };
 }

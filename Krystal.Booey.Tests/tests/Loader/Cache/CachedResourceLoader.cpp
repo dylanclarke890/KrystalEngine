@@ -120,6 +120,40 @@ namespace krys::boo::tests
     CHECK_FALSE(Contains(fixture.Painted(), u8"native-image"));
   }
 
+  TEST_CASE("CachedCSSStyleSheet: a nosniff response is a sheet only if it says it's CSS",
+            "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    auto serve = [&](utf8_stringview url, utf8_stringview mimeType, bool nosniff)
+    {
+      loader.Strategy.AddText(url, u8"p { color: red }", mimeType);
+      if (nosniff)
+      {
+        loader.Strategy.Headers[utf8_string(url)] = {{u8"X-Content-Type-Options", u8"nosniff"}};
+      }
+    };
+    serve(u8"https://example.com/plain.css", u8"text/plain", false);
+    serve(u8"https://example.com/nosniff-plain.css", u8"text/plain", true);
+    serve(u8"https://example.com/nosniff.css", u8"text/css", true);
+
+    PaintFixture fixture(u8"<!DOCTYPE html>");
+    auto sheetText = [&](utf8_stringview url)
+    {
+      auto sheet = fixture.Document->GetCachedResourceLoader().RequestCSSStyleSheet(
+        CachedResourceRequest(ResourceRequest(url::URL(url))));
+      REQUIRE(sheet);
+      RunNetworkingTasks();
+      bool hasValidMIMEType = true;
+      auto text = (*sheet)->SheetText(CachedCSSStyleSheet::MIMETypeCheckHint::Lax, &hasValidMIMEType);
+      return Pair<bool, bool>(text.has_value(), hasValidMIMEType);
+    };
+
+    // A lax check takes any type, unless the response says not to sniff.
+    CHECK(sheetText(u8"https://example.com/plain.css") == Pair<bool, bool>(true, true));
+    CHECK(sheetText(u8"https://example.com/nosniff-plain.css") == Pair<bool, bool>(false, false));
+    CHECK(sheetText(u8"https://example.com/nosniff.css") == Pair<bool, bool>(true, true));
+  }
+
   TEST_CASE("CachedResourceLoader: data URLs load without the host", "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;

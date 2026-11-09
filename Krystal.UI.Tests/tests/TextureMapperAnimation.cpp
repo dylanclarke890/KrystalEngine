@@ -70,6 +70,28 @@ namespace krys::ui::tests
       CHECK_FALSE(animations.HasRunningAnimations());
     }
 
+    SECTION("a suspension holds it where it was, and it plays on from there")
+    {
+      (void)OpacityAt(animations, Start + 200ms);
+      animations.Suspend(Start + 300ms);
+      CHECK(OpacityAt(animations, Start + 800ms) == Catch::Approx(0.3));
+      CHECK_FALSE(animations.HasRunningAnimations());
+
+      // Resumed 500ms later, it's 100ms further on 100ms after that.
+      animations.Resume(Start + 800ms);
+      CHECK(OpacityAt(animations, Start + 900ms) == Catch::Approx(0.4));
+      CHECK(animations.HasRunningAnimations());
+    }
+
+    SECTION("a paused animation stays paused through a suspension")
+    {
+      animations.Pause(u8"fade", boo::Seconds {0.3});
+      animations.Suspend(Start + 500ms);
+      animations.Resume(Start + 600ms);
+      CHECK(OpacityAt(animations, Start + 900ms) == Catch::Approx(0.3));
+      CHECK_FALSE(animations.HasRunningAnimations());
+    }
+
     SECTION("removing it leaves the layer's own values")
     {
       animations.Remove(u8"fade");

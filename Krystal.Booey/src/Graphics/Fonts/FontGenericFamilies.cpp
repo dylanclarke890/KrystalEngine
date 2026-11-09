@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo
 {

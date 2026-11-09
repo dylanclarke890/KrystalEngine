@@ -18,6 +18,7 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
@@ -38,6 +39,7 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
@@ -46,6 +48,7 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
+#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -60,6 +63,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
@@ -89,6 +93,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMetaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLScriptElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTitleElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -100,6 +105,8 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Booey/Loader/DocumentLoader.hpp"
+#include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
@@ -598,13 +605,15 @@ namespace krys::boo::dom
     }
 
     // 3. Adopt node into this.
+    // (Removing node from its parent may drop its last reference.)
+    Ref protectedNode = ShareRef(node);
     if (auto adoptResult = DocumentAlgorithms::AdoptNode(node, *this); adoptResult.HasException())
     {
       return adoptResult.ReleaseException();
     }
 
     // 4. Return node.
-    return ShareRef(node);
+    return protectedNode;
   }
 
   // NOTE: VS says this method can be made const but it's lying, Attr constructor needs a non-const Document
@@ -1024,16 +1033,16 @@ namespace krys::boo::dom
     }
 
     /// @brief The document's collection that @p cache holds, or a new one that it holds from now on.
-    KRYS_NODISCARD Ref<HTMLCollection>
-      CachedDocumentCollection(WeakPtr<HTMLCollection> &cache, Document &document,
-                               LiveHTMLCollectionFilterFunc &&filter) noexcept
+    KRYS_NODISCARD Ref<HTMLCollection> CachedDocumentCollection(
+      WeakPtr<HTMLCollection> &cache, Document &document, LiveHTMLCollectionFilterFunc &&filter,
+      LiveCollectionInvalidation invalidation = LiveCollectionInvalidation::TreeOnly) noexcept
     {
       if (auto collection = cache.lock())
       {
         return ShareRef(*collection.get());
       }
 
-      auto collection = CreateRef<LiveHTMLCollection>(document, krys::move(filter));
+      auto collection = CreateRef<LiveHTMLCollection>(document, krys::move(filter), invalidation);
       cache = CreateWeakPtr(collection.get());
       return collection;
     }
@@ -1124,13 +1133,15 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Document::Links() noexcept
   {
-    return CachedDocumentCollection(_links, *this,
-                                    [](const Element &element)
-                                    {
-                                      return (IsHTMLElementOfType<html::HTMLAnchorElement>(element)
-                                              || IsHTMLElementOfType<html::HTMLAreaElement>(element))
-                                             && element.HasAttribute(u8"href");
-                                    });
+    return CachedDocumentCollection(
+      _links, *this,
+      [](const Element &element)
+      {
+        return (IsHTMLElementOfType<html::HTMLAnchorElement>(element)
+                || IsHTMLElementOfType<html::HTMLAreaElement>(element))
+               && element.HasAttribute(u8"href");
+      },
+      LiveCollectionInvalidation::Href);
   }
 
   Ref<HTMLCollection> Document::Forms() noexcept
@@ -1224,7 +1235,8 @@ namespace krys::boo::dom
   {
     return CachedDocumentCollection(
       _anchors, *this, [](const Element &element)
-      { return IsHTMLElementOfType<html::HTMLAnchorElement>(element) && element.HasAttribute(u8"name"); });
+      { return IsHTMLElementOfType<html::HTMLAnchorElement>(element) && element.HasAttribute(u8"name"); },
+      LiveCollectionInvalidation::Name);
   }
 
   Ref<HTMLCollection> Document::Applets() noexcept
@@ -1234,23 +1246,75 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+  void Document::AddOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept
+  {
+    _ownerTreeLiveCollectionCaches.push_back(&collection);
+  }
+
+  void Document::RemoveOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept
+  {
+    auto it = std::ranges::find(_ownerTreeLiveCollectionCaches, &collection);
+    krys_debug_assert(it != _ownerTreeLiveCollectionCaches.end());
+    *it = _ownerTreeLiveCollectionCaches.back();
+    _ownerTreeLiveCollectionCaches.pop_back();
+  }
+
+  void Document::InvalidateOwnerTreeLiveCollectionCaches() noexcept
+  {
+    // Last first: each removes itself, which moves the last into its place.
+    for (auto i = _ownerTreeLiveCollectionCaches.size(); i-- > 0;)
+    {
+      _ownerTreeLiveCollectionCaches[i]->InvalidateCache();
+    }
+  }
+
+  void Document::InvalidateOwnerTreeLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept
+  {
+    // Last first: each that forgets its items removes itself, which moves the last into its place.
+    for (auto i = _ownerTreeLiveCollectionCaches.size(); i-- > 0;)
+    {
+      _ownerTreeLiveCollectionCaches[i]->InvalidateCacheForAttribute(localName);
+    }
+  }
+
+  bool Document::HasLiveCollectionCaches() const noexcept
+  {
+    return std::ranges::any_of(_liveCollectionCacheCounts, [](uint32 count) { return count != 0; });
+  }
+
+  bool Document::HasLiveCollectionCachesForAttribute(DOMStringAtom localName) const noexcept
+  {
+    for (size_t i = 0; i < _liveCollectionCacheCounts.size(); ++i)
+    {
+      if (_liveCollectionCacheCounts[i]
+          && LiveCollectionDependsOnAttribute(static_cast<LiveCollectionInvalidation>(i), localName))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
   {
-    return CreateRef<LiveNodeList>(*this,
-                                   [name = DOMString(elementName)](const Node &node)
-                                   {
-                                     auto *element = DynamicDowncast<html::HTMLElement>(node);
-                                     return element && element->GetAttribute(u8"name") == name;
-                                   });
+    return CreateRef<LiveNodeList>(
+      *this,
+      [name = DOMString(elementName)](const Node &node)
+      {
+        auto *element = DynamicDowncast<html::HTMLElement>(node);
+        return element && element->GetAttribute(u8"name") == name;
+      },
+      LiveCollectionInvalidation::Name);
   }
 
   DOMString Document::LastModified() const noexcept
   {
-    // FIXME: The response's Last-Modified header, or the file's modification date for a file, once responses
-    // have headers.
-    // When the last modification date and time aren't known, the attribute returns the current date and time.
-    auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
-    auto text = std::format("{:%m/%d/%Y %H:%M:%S}", std::chrono::current_zone()->to_local(now));
+    // The response's Last-Modified header (for a file, the host gives its modification time) is the source's
+    // last modification. When the last modification date and time aren't known, the attribute returns the
+    // current date and time.
+    auto lastModified =
+      _lastModified.value_or(std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now()));
+    auto text = std::format("{:%m/%d/%Y %H:%M:%S}", std::chrono::current_zone()->to_local(lastModified));
     return DOMString(DOMStringView(reinterpret_cast<const char8 *>(text.data()), text.size()));
   }
 
@@ -1962,11 +2026,46 @@ namespace krys::boo::dom
     // The visibility of the document is inherited from the visibility of the page. If there is no page
     // associated with the document, we will assume that the page is hidden, as specified by the spec.
     auto *page = GetPage();
-    if (!page)
+    if (!page || _visibilityHiddenDueToDismissal)
     {
       return html::DocumentVisibilityState::Hidden;
     }
     return page->VisibilityState();
+  }
+
+  void Document::SetVisibilityHiddenDueToDismissal() noexcept
+  {
+    // 1. If document's visibility state equals visibilityState, then return.
+    if (_visibilityHiddenDueToDismissal)
+    {
+      return;
+    }
+    bool wasVisible = VisibilityState() == html::DocumentVisibilityState::Visible;
+
+    // 2. Set document's visibility state to visibilityState.
+    _visibilityHiddenDueToDismissal = true;
+    if (!wasVisible)
+    {
+      return;
+    }
+
+    // 3. (Skipped: there's no performance timeline for a VisibilityStateEntry.)
+    // 4. (Skipped: there's no screen orientation.)
+    // 5. (Skipped: there are no view transitions.)
+    // 6. Run any page visibility change steps which may be defined in other specifications, with visibility
+    //    state and document.
+    auto clients = _visibilityStateCallbackClients;
+    for (auto &client : clients)
+    {
+      if (auto *protectedClient = client.get())
+      {
+        protectedClient->VisibilityStateChanged();
+      }
+    }
+
+    // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
+    (void)EventDispatcher::DispatchToTarget(
+      *Event::Create(DOMStringAtom(EventNames::VisibilityChange), true, false), this);
   }
 
   void Document::VisibilityStateChanged() noexcept
@@ -2439,8 +2538,14 @@ namespace krys::boo::dom
 
   void Document::RunScrollSteps() noexcept
   {
-    // FIXME: Deferring the scroll events (shouldDeferScrollEvents), servicing scroll animations and scroll
-    // anchoring, once there are those.
+    // Service the smooth scrolls before dispatching the events for them.
+    if (RefPtr<LocalFrameView> frameView = ShareRefPtr(View()))
+    {
+      frameView->ServiceScrollAnimations(html::EventLoop::Current().Now());
+    }
+
+    // FIXME: Deferring the scroll events (shouldDeferScrollEvents) and scroll anchoring, once there are
+    // those.
 
     // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/66.
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
@@ -2952,6 +3057,12 @@ namespace krys::boo::dom
       {
         clickedPopover = htmlElement;
       }
+      // A select's picker is as much its target as a button's popover is.
+      if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*htmlElement);
+          select && select->IsPickerOpen() && !targetPopover)
+      {
+        targetPopover = ShareRefPtr(select->SelectPopover());
+      }
       // Let targetPopover be currentNode's target popover. If targetPopover is not null and targetPopover's
       // popover attribute is in the Auto state or the Hint state, and targetPopover's popover visibility
       // state is showing, then return targetPopover.
@@ -3164,8 +3275,14 @@ namespace krys::boo::dom
       }
     }
 
-    // FIXME: The page's overlay scrollbars, the composited layers' pending update and font loading, once
-    // there are those.
+    // The overlay scrollbars stay hidden while the document is suspended.
+    if (RefPtr<LocalFrameView> view = ShareRefPtr(View()))
+    {
+      view->ForEachScrollableArea([](ScrollableArea &area) { area.LockOverlayScrollbarStateToHidden(true); });
+    }
+
+    // FIXME: The composited layers' pending update, once there is one, and media elements' playback, with
+    // media.
     SuspendScheduledTasks(reason);
 
     // The frame's timers: the layout, the animations and autoscrolling stop.
@@ -3178,6 +3295,9 @@ namespace krys::boo::dom
       }
       Frame()->GetEventHandler().StopAutoscrollTimer();
     }
+
+    // Web fonts start no more loads until the document resumes.
+    SuspendFontLoading();
 
     _isSuspended = true;
   }
@@ -3197,12 +3317,18 @@ namespace krys::boo::dom
       }
     }
 
-    if (_timelinesController)
+    ResumeScheduledTasks(reason);
+
+    if (RefPtr<LocalFrameView> view = ShareRefPtr(View()))
     {
-      _timelinesController->ResumeAnimations();
+      view->ForEachScrollableArea([](ScrollableArea &area)
+                                  { area.LockOverlayScrollbarStateToHidden(false); });
     }
 
-    ResumeScheduledTasks(reason);
+    if (_fontLoader)
+    {
+      _fontLoader->ResumeFontLoading();
+    }
 
     _isSuspended = false;
   }
@@ -3268,6 +3394,10 @@ namespace krys::boo::dom
     {
       timer->Suspend();
     }
+    if (_timelinesController)
+    {
+      _timelinesController->SuspendAnimations();
+    }
   }
 
   void Document::ResumeActiveDOMObjects(ReasonForSuspension reason) noexcept
@@ -3282,6 +3412,13 @@ namespace krys::boo::dom
     {
       timer->Resume();
     }
+    // A hidden page's animations stay suspended until it's shown.
+    auto *page = GetPage();
+    if (_timelinesController
+        && !(page && !page->IsVisible() && GetSettings().HiddenPageCSSAnimationSuspensionEnabled))
+    {
+      _timelinesController->ResumeAnimations();
+    }
   }
 
   void Document::StopActiveDOMObjects() noexcept
@@ -3295,6 +3432,8 @@ namespace krys::boo::dom
       timer->Stop();
     }
     _scriptedAnimationController = nullptr;
+
+    WebAnimation::StopAnimationsOfDocument(*this);
 
     // Its close watchers are destroyed.
     if (auto *closeWatcherManager = _domWindow ? _domWindow->CloseWatcherManagerIfExists() : nullptr)
@@ -3546,6 +3685,16 @@ namespace krys::boo::dom
       return;
     }
 
+    // The icons, as the load event's handlers left them.
+    if (auto *documentLoader = Frame()->Loader().GetDocumentLoader())
+    {
+      documentLoader->StartIconLoading();
+    }
+    if (!Frame())
+    {
+      return;
+    }
+
     UpdateStyleIfNeeded();
 
     // Always do a layout after loading if needed.
@@ -3559,6 +3708,18 @@ namespace krys::boo::dom
     if (auto *svgExtensions = SVGExtensionsIfExists())
     {
       svgExtensions->StartAnimations();
+    }
+  }
+
+  void Document::IconLinksMayHaveChanged() noexcept
+  {
+    if (!_loadEventFinished || !Frame())
+    {
+      return;
+    }
+    if (RefPtr<DocumentLoader> documentLoader = ShareRefPtr(Frame()->Loader().GetDocumentLoader()))
+    {
+      documentLoader->StartIconLoading();
     }
   }
 
@@ -3861,7 +4022,7 @@ namespace krys::boo::dom
 
   void Document::DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept
   {
-    _frame = WeakPtr<LocalFrame>::WithRef(frame);
+    _frame = CreateWeakPtr(&frame);
 
     // FIXME: The document loader's writer makes the window as it makes the document, reusing the initial
     // empty document's (takeDOMWindowFrom).
@@ -3882,6 +4043,8 @@ namespace krys::boo::dom
   {
     // FIXME: Unload, page hide and the other steps of unloading the document.
     StopActiveDOMObjects();
+    // The document gets no more events, and its listeners would keep alive whatever they hold.
+    RemoveAllEventListeners();
     _selection->WillBeRemovedFromFrame();
 
     if (HasLivingRenderTree())
@@ -3905,6 +4068,18 @@ namespace krys::boo::dom
     CommonTeardown();
 
     _frame = nullptr;
+  }
+
+  void Document::RemoveAllEventListeners() noexcept
+  {
+    if (auto *window = Window())
+    {
+      EventTargetAlgorithms::RemoveAllEventListeners(*window);
+    }
+    for (Node *node = this; node; node = TreeQueries::NextShadowIncluding(*node))
+    {
+      EventTargetAlgorithms::RemoveAllEventListeners(*node);
+    }
   }
 
   void Document::CommonTeardown() noexcept
@@ -4033,8 +4208,41 @@ namespace krys::boo::dom
     }
   }
 
+  void Document::AddListenerTypeIfNeeded(DOMStringAtom type) noexcept
+  {
+    if (type == EventNames::AnimationIteration)
+    {
+      _hasAnimationIterationListener = true;
+    }
+    else if (type == EventNames::PointerMove)
+    {
+      _hasPointerMoveListener = true;
+    }
+    else if (type == EventNames::PointerRawUpdate)
+    {
+      _hasPointerRawUpdateListener = true;
+    }
+
+    // Touches dispatch pointer events as well as touch events.
+    if (type == EventNames::TouchStart || type == EventNames::TouchMove || type == EventNames::TouchEnd
+        || type == EventNames::TouchCancel || type == EventNames::PointerDown || type == EventNames::PointerUp
+        || type == EventNames::PointerMove || type == EventNames::PointerRawUpdate
+        || type == EventNames::PointerCancel || type == EventNames::PointerOver
+        || type == EventNames::PointerOut || type == EventNames::PointerEnter
+        || type == EventNames::PointerLeave || type == EventNames::GotPointerCapture
+        || type == EventNames::LostPointerCapture)
+    {
+      _hasTouchRelatedListener = true;
+    }
+  }
+
   void Document::UpdateAnimationsAndSendEvents() noexcept
   {
+    if (auto *svgExtensions = SVGExtensionsIfExists())
+    {
+      svgExtensions->ServiceAnimations();
+    }
+
     auto *window = Window();
     if (!window)
     {
@@ -4084,7 +4292,7 @@ namespace krys::boo::dom
     {
       return false;
     }
-    // FIXME: Wait until the view is visually non-empty.
+    // (Browsers also wait until the view is visually non-empty; see DIFFERENCES.md.)
     return true;
   }
 
@@ -4297,6 +4505,11 @@ namespace krys::boo::dom
     if (!_fontLoader)
     {
       _fontLoader = UniquePtr<DocumentFontLoader>(new DocumentFontLoader(const_cast<Document &>(*this)));
+      // A loader made while the document is suspended waits for it to resume too.
+      if (_isSuspended)
+      {
+        _fontLoader->SuspendFontLoading();
+      }
     }
     return *_fontLoader;
   }
@@ -4348,6 +4561,175 @@ namespace krys::boo::dom
     StyleScope().InvalidateMatchedDeclarationsCache();
 
     ScheduleFullStyleRebuild();
+  }
+
+  RefPtr<Element> Document::ElementForAccessKey(DOMStringView key) noexcept
+  {
+    RefPtr<Element> found;
+    if (key.empty())
+    {
+      return found;
+    }
+    auto lowered = text::ToASCIILower(key);
+    for (auto &node : ComposedTreeDescendants(*this))
+    {
+      auto *element = DynamicDowncast<Element>(node);
+      if (!element)
+      {
+        continue;
+      }
+      auto assigned = element->AssignedAccessKey();
+      if (!assigned.empty() && text::ToASCIILower(DOMStringView(assigned)) == lowered)
+      {
+        found = ShareRefPtr(element);
+      }
+    }
+    return found;
+  }
+
+  DOMString Document::DesignMode() const noexcept
+  {
+    return InDesignMode() ? u8"on" : u8"off";
+  }
+
+  void Document::DesignMode(DOMStringView value) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+
+    // 1. Let value be the given value, converted to ASCII lowercase.
+    auto lowered = text::ToASCIILower(value);
+
+    // 2. If value is "on" and this's design mode enabled is false:
+    if (lowered == u8"on" && !_designModeEnabled)
+    {
+      // 2.1. Set this's design mode enabled to true.
+      _designModeEnabled = true;
+      ScheduleFullStyleRebuild();
+
+      // NOTE: only a document in a frame has a selection and a focused area.
+      if (Frame())
+      {
+        // 2.2. Reset this's active range's start and end boundary points to be at the start of this.
+        // NOTE: that's a caret at the first place one can go, which needs the document's boxes.
+        (void)UpdateLayout();
+        Selection().SetSelection(
+          VisibleSelection(FirstPositionInOrBeforeNode(this), VisibleSelection::DefaultAffinity));
+
+        // 2.3. Run the focusing steps for this's document element, if non-null.
+        if (auto documentElement = DocumentElement())
+        {
+          html::FocusAlgorithms::FocusingSteps(*documentElement);
+        }
+      }
+    }
+
+    // 3. If value is "off", then set this's design mode enabled to false.
+    if (lowered == u8"off" && _designModeEnabled)
+    {
+      _designModeEnabled = false;
+      ScheduleFullStyleRebuild();
+    }
+  }
+
+  namespace
+  {
+    /// @brief The editing command @p commandName names for script in @p document; none when the document
+    /// isn't its frame's.
+    KRYS_NODISCARD Editor::Command DOMCommand(Document &document, DOMStringView commandName,
+                                              bool userInterface = false) noexcept
+    {
+      (void)document.UpdateStyleIfNeeded();
+      auto *frame = document.Frame();
+      if (!frame || frame->Document() != &document)
+      {
+        return {};
+      }
+      return document.GetEditor().GetCommand(
+        commandName, userInterface ? EditorCommandSource::DOMWithUserInterface : EditorCommandSource::DOM);
+    }
+
+    KRYS_NODISCARD Exception NotHTMLDocument(utf8_stringview method) noexcept
+    {
+      return Exception {ExceptionCode::InvalidStateError,
+                        utf8_string(method) + u8" is only supported on HTML documents."};
+    }
+  }
+
+  ExceptionOr<bool> Document::ExecCommand(DOMStringView commandId, bool showUI, DOMStringView value) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"execCommand");
+    }
+
+    // As in Chrome, a command doesn't run from within another (a listener for the events the first fires):
+    // that is how attack code nests them.
+    if (_isRunningExecCommand)
+    {
+      return false;
+    }
+    _isRunningExecCommand = true;
+    struct ResetRunning
+    {
+      bool &Running;
+      ~ResetRunning() noexcept
+      {
+        Running = false;
+      }
+    } resetRunning {_isRunningExecCommand};
+
+    // The events the command fires (mutation and input events) are dispatched once it's done, as script they
+    // run could change the tree under it.
+    EventQueueScope eventQueueScope;
+    Ref protectedThis = ShareRef(*this);
+    return DOMCommand(*this, commandId, showUI).Execute(value);
+  }
+
+  ExceptionOr<bool> Document::QueryCommandEnabled(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandEnabled");
+    }
+    return DOMCommand(*this, commandId).IsEnabled();
+  }
+
+  ExceptionOr<bool> Document::QueryCommandIndeterm(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandIndeterm");
+    }
+    return DOMCommand(*this, commandId).State() == TriState::Indeterminate;
+  }
+
+  ExceptionOr<bool> Document::QueryCommandState(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandState");
+    }
+    return DOMCommand(*this, commandId).State() == TriState::True;
+  }
+
+  ExceptionOr<bool> Document::QueryCommandSupported(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandSupported");
+    }
+    return DOMCommand(*this, commandId).IsSupported();
+  }
+
+  ExceptionOr<DOMString> Document::QueryCommandValue(DOMStringView commandId) noexcept
+  {
+    if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
+    {
+      return NotHTMLDocument(u8"queryCommandValue");
+    }
+    return DOMCommand(*this, commandId).Value();
   }
 
   void Document::ScheduleFullStyleRebuild() noexcept
@@ -4434,7 +4816,7 @@ namespace krys::boo::dom
   {
     krys_debug_assert(&element.NodeDocument() == this);
     krys_debug_assert(!HasElementWithPendingUserAgentShadowTreeUpdate(element));
-    _elementsWithPendingUserAgentShadowTreeUpdates.push_back(WeakPtr<Element>::WithRef(element));
+    _elementsWithPendingUserAgentShadowTreeUpdates.push_back(CreateWeakPtr(&element));
   }
 
   void Document::RemoveElementWithPendingUserAgentShadowTreeUpdate(Element &element) noexcept

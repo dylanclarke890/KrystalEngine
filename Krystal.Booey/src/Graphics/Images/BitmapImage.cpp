@@ -23,7 +23,7 @@ namespace krys::boo
     {
       return nullptr;
     }
-    return AdoptRef(*new BitmapImage(Ref<NativeImage>(krys::move(nativeImage))));
+    return AdoptRef(*new BitmapImage(krys::move(nativeImage)));
   }
 
   RefPtr<BitmapImage> BitmapImage::Create(PlatformImagePtr &&platformImage) noexcept

@@ -21,6 +21,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
+#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
@@ -223,7 +224,7 @@ namespace krys::boo::css
       KRYS_NODISCARD CSSOMString SerialiseWhiteSpace() const noexcept;
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseAnimationRange() const noexcept;
       KRYS_NODISCARD CSSOMString
-        SerialiseSingleAnimationRange(const Value &value, SingleAnimationRangeType type,
+        SerialiseSingleAnimationRange(const Value &value, style::SingleAnimationRangeType type,
                                       ValueId startValueId = ValueId::Invalid) const noexcept;
     };
 
@@ -1770,10 +1771,10 @@ namespace krys::boo::css
     }
 
     CSSOMString ShorthandSerialiser::SerialiseSingleAnimationRange(const Value &value,
-                                                                   SingleAnimationRangeType type,
+                                                                   style::SingleAnimationRangeType type,
                                                                    ValueId startValueId) const noexcept
     {
-      auto isDefault = [](const PrimitiveValue &value, SingleAnimationRangeType type)
+      auto isDefault = [](const PrimitiveValue &value, style::SingleAnimationRangeType type)
       {
         if (!value.IsPercentage() || value.IsCalculated())
         {
@@ -1781,7 +1782,7 @@ namespace krys::boo::css
         }
 
         auto percentageValue = value.ResolveAsPercentageNoConversionDataRequired<double>();
-        if (type == SingleAnimationRangeType::Start)
+        if (type == style::SingleAnimationRangeType::Start)
         {
           return percentageValue == 0;
         }
@@ -1797,9 +1798,9 @@ namespace krys::boo::css
       if (auto *pair = DynamicDowncast<ValuePair>(value))
       {
         bool isSameNameAsStart = pair->First().ValueId() == startValueId;
-        bool isStartValue = type == SingleAnimationRangeType::Start;
+        bool isStartValue = type == style::SingleAnimationRangeType::Start;
         bool isDefaultValue =
-          isDefault(Downcast<PrimitiveValue>(pair->Second()), SingleAnimationRangeType::Start);
+          isDefault(Downcast<PrimitiveValue>(pair->Second()), style::SingleAnimationRangeType::Start);
         if (isDefaultValue && (isStartValue || !isSameNameAsStart))
         {
           return NameString(pair->First().ValueId());
@@ -1817,7 +1818,7 @@ namespace krys::boo::css
 
         bool isNormal = primitiveValue->ValueId() == ValueId::Normal;
         bool isSameNameAsStart = primitiveValue->ValueId() == startValueId;
-        bool isStartValue = type == SingleAnimationRangeType::Start;
+        bool isStartValue = type == style::SingleAnimationRangeType::Start;
         if (isStartValue || (!isNormal && !isSameNameAsStart))
         {
           return NameString(primitiveValue->ValueId());
@@ -1848,9 +1849,10 @@ namespace krys::boo::css
           auto *startPair = DynamicDowncast<ValuePair>(*start);
           auto startId = startPair ? startPair->First().ValueId() : start->ValueId();
 
-          auto serialisedStart = SerialiseSingleAnimationRange(*start, SingleAnimationRangeType::Start);
+          auto serialisedStart =
+            SerialiseSingleAnimationRange(*start, style::SingleAnimationRangeType::Start);
           auto serialisedEnd =
-            SerialiseSingleAnimationRange(*endList->Item(i), SingleAnimationRangeType::End, startId);
+            SerialiseSingleAnimationRange(*endList->Item(i), style::SingleAnimationRangeType::End, startId);
           result.Append(serialisedStart);
           if (!serialisedEnd.empty())
           {
@@ -1870,8 +1872,10 @@ namespace krys::boo::css
       auto *startPair = DynamicDowncast<ValuePair>(startValue);
       auto startId = startPair ? startPair->First().ValueId() : startValue.ValueId();
 
-      auto serialisedStart = SerialiseSingleAnimationRange(startValue, SingleAnimationRangeType::Start);
-      auto serialisedEnd = SerialiseSingleAnimationRange(endValue, SingleAnimationRangeType::End, startId);
+      auto serialisedStart =
+        SerialiseSingleAnimationRange(startValue, style::SingleAnimationRangeType::Start);
+      auto serialisedEnd =
+        SerialiseSingleAnimationRange(endValue, style::SingleAnimationRangeType::End, startId);
       if (serialisedEnd.empty())
       {
         return serialisedStart;

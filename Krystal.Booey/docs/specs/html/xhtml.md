@@ -31,7 +31,7 @@ Status: reviewed (2026-11-02)
 ### [14.3 Serializing XML fragments](https://html.spec.whatwg.org/#serialising-xhtml-fragments)
 
 Status: reviewed (2026-11-02)
-> `MarkupAccumulator` with the XML syntax; a template serializes its contents. The error cases don't throw an InvalidStateError (FIXME, see `KNOWN-ISSUES.md`).
+> `MarkupAccumulator` with the XML syntax; a template serializes its contents. With `RequireWellFormed::Yes` (`SerializeFragmentRequiringWellFormed`), the error cases make it throw an InvalidStateError; an element can't have two attributes with the same local name and namespace.
 > Fixed: an element's children in no namespace didn't declare the empty default namespace when the element had one.
 
 - [x] [XML fragment serialization algorithm](https://html.spec.whatwg.org/#xml-fragment-serialisation-algorithm) — The XML fragment serialization algorithm for a Document or Element node either returns a fragment of XML that represents that node or throws an exception.

@@ -42,6 +42,7 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview PointerDown = u8"pointerdown";
   constexpr utf8_stringview PointerUp = u8"pointerup";
   constexpr utf8_stringview PointerMove = u8"pointermove";
+  constexpr utf8_stringview PointerRawUpdate = u8"pointerrawupdate";
   constexpr utf8_stringview PointerCancel = u8"pointercancel";
   constexpr utf8_stringview PointerOver = u8"pointerover";
   constexpr utf8_stringview PointerOut = u8"pointerout";

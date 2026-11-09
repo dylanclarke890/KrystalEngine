@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
+#include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
@@ -14,10 +15,9 @@
 namespace krys::boo::style
 {
   MaskBorder::MaskBorder() noexcept
-      // FIXME: Use `ComputedStyle`'s initial values once the generated storage is ported.
-      : Source {css::keywords::None {}}, Slice {MaskBorderSlice::Value::Number {0}},
-        Width {css::keywords::Auto {}}, Outset {MaskBorderOutset::Value::Number {0}},
-        Repeat {css::keywords::Stretch {}}
+      : Source {ComputedStyle::InitialMaskBorderSource()}, Slice {ComputedStyle::InitialMaskBorderSlice()},
+        Width {ComputedStyle::InitialMaskBorderWidth()}, Outset {ComputedStyle::InitialMaskBorderOutset()},
+        Repeat {ComputedStyle::InitialMaskBorderRepeat()}
   {
   }
 

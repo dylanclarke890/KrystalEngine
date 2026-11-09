@@ -116,8 +116,7 @@ namespace krys::boo
   };
 
   /// @brief An edit made of other edits, which it applies to the composition its top-level command makes.
-  // FIXME: Document markers (replaceTextInNodePreservingMarkers keeping spelling and grammar markers), with
-  // document markers.
+  // (There are no document markers for replaceTextInNodePreservingMarkers to keep; see DIFFERENCES.md.)
   class CompositeEditCommand : public EditCommand, public CanMakeWeakPtr<CompositeEditCommand>
   {
   protected:

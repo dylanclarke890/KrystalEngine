@@ -248,6 +248,7 @@ namespace krys::boo
       case StyleAppearance::None:             return css::ValueId::None;
       case StyleAppearance::Auto:             return css::ValueId::Auto;
       case StyleAppearance::Base:             return css::ValueId::Base;
+      case StyleAppearance::BaseSelect:       return css::ValueId::BaseSelect;
       case StyleAppearance::Checkbox:         return css::ValueId::Checkbox;
       case StyleAppearance::Radio:            return css::ValueId::Radio;
       case StyleAppearance::PushButton:       return css::ValueId::PushButton;
@@ -1140,12 +1141,6 @@ namespace krys::boo
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
 
-#define KRYS_MAPPING_TYPE Order
-#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Logical) CASE(Visual)
-  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
-#undef KRYS_MAPPING_TYPE
-#undef KRYS_MAPPING_FOR_EACH
-
 #define KRYS_MAPPING_TYPE BlendMode
 #define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Normal)                                                                                               \
@@ -1293,12 +1288,6 @@ namespace krys::boo
 #define KRYS_MAPPING_TYPE TransformBox
 #define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(StrokeBox) CASE(ContentBox) CASE(BorderBox) CASE(FillBox) CASE(ViewBox)
-  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
-#undef KRYS_MAPPING_TYPE
-#undef KRYS_MAPPING_FOR_EACH
-
-#define KRYS_MAPPING_TYPE BufferedRendering
-#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Dynamic) CASE(Static)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH

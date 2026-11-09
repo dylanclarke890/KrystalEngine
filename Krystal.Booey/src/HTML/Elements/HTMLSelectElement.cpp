@@ -1,28 +1,37 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Collections/HTMLOptionsCollection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
@@ -35,6 +44,34 @@ namespace krys::boo::html
 {
   namespace
   {
+    /// @brief A select's selected options.
+    class SelectedOptionsCollection final : public dom::LiveHTMLCollection
+    {
+    private:
+      HTMLSelectElement &_select;
+
+    public:
+      explicit SelectedOptionsCollection(HTMLSelectElement &select) noexcept
+          : LiveHTMLCollection(select,
+                               [&select](const dom::Element &element)
+                               {
+                                 auto *option = DynamicDowncast<HTMLOptionElement>(element);
+                                 return option && option->OwnerSelectElement() == &select
+                                        && option->Selected();
+                               }),
+            _select(select)
+      {
+      }
+
+    protected:
+      void WillValidateIndexCache() const noexcept override
+      {
+        // Reading whether an option is selected can update what's selected, invalidating the cache.
+        _select.UpdateListItemSelectedStates();
+        LiveHTMLCollection::WillValidateIndexCache();
+      }
+    };
+
     // Upper limit agreed upon with representatives of Opera and Mozilla.
     constexpr uint32 MaxSelectItems = 100'000u;
 
@@ -56,6 +93,334 @@ namespace krys::boo::html
   HTMLSelectElement::HTMLSelectElement(dom::Document &document) noexcept
       : HTMLFormControlElement(document, HTMLElementInterface::Select), _typeAhead(this)
   {
+  }
+
+  namespace
+  {
+    /// @brief The select popover: a press in it isn't a press on the select, which would close it.
+    class SelectPopoverElement final : public HTMLDivElement
+    {
+      KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SelectPopoverElement);
+
+    public:
+      using HTMLDivElement::HTMLDivElement;
+
+      void DefaultEventHandler(dom::Event &event) noexcept final
+      {
+        if (event.Type() == EventNames::MouseDown)
+        {
+          event.SetDefaultHandled();
+          return;
+        }
+        HTMLDivElement::DefaultEventHandler(event);
+      }
+    };
+  }
+
+  Ref<HTMLSelectElement> HTMLSelectElement::Create(dom::Document &document) noexcept
+  {
+    auto select = CreateRef<HTMLSelectElement>(document);
+    select->EnsureUserAgentShadowRoot();
+    return select;
+  }
+
+  // https://html.spec.whatwg.org/#the-select-element-2
+  void HTMLSelectElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  {
+    auto &document = NodeDocument();
+
+    auto selectButtonSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
+    _selectButtonSlot = CreateWeakPtr(selectButtonSlot.get());
+    auto fallbackButtonText = dom::ElementFactory::CreateHTMLElement<HTMLDivElement>(document, u8"div");
+    _selectFallbackButtonText = CreateWeakPtr<dom::Element>(fallbackButtonText.get());
+    (void)selectButtonSlot->AppendChild(*fallbackButtonText);
+    (void)root.AppendChild(*selectButtonSlot);
+
+    auto selectPopover = CreateRef<SelectPopoverElement>(document);
+    selectPopover->SetUserAgentPart(css::UserAgentParts::InternalSelectPicker());
+    // As an auto popover but without the attribute, whose styles would reach the options of a native select.
+    selectPopover->EnsurePopoverData().SetPopoverState(dom::PopoverState::Auto);
+    _selectPopover = CreateWeakPtr<HTMLElement>(selectPopover.get());
+    auto selectPopoverSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
+    _selectPopoverSlot = CreateWeakPtr(selectPopoverSlot.get());
+    (void)selectPopover->AppendChild(*selectPopoverSlot);
+    (void)root.AppendChild(*selectPopover);
+
+    auto selectListBoxSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
+    _selectListBoxSlot = CreateWeakPtr(selectListBoxSlot.get());
+    (void)root.AppendChild(*selectListBoxSlot);
+  }
+
+  HTMLSlotElement *HTMLSelectElement::SlotForHostChild(const dom::Node &child) const noexcept
+  {
+    krys_debug_assert(child.ParentNode() == this);
+    if (!UsesMenuList())
+    {
+      return _selectListBoxSlot.get();
+    }
+    if (Is<HTMLButtonElement>(child) && dom::TreeQueries::FirstElementChild(*this) == &child)
+    {
+      return _selectButtonSlot.get();
+    }
+    return _selectPopoverSlot.get();
+  }
+
+  void HTMLSelectElement::ReassignSlots() noexcept
+  {
+    // Only for what the slots' names can't say. Inserting and removing other children assigns them already,
+    // and reassigning during a removal would walk the composed tree through a slot that's still to hear of
+    // it.
+    auto *firstChild = dom::TreeQueries::FirstElementChild(*this);
+    auto *selectButton =
+      UsesMenuList() && firstChild && Is<HTMLButtonElement>(*firstChild) ? firstChild : nullptr;
+    if (selectButton == _selectButton.get() && UsesMenuList() == _slotsAreForMenuList)
+    {
+      return;
+    }
+    _selectButton = CreateWeakPtr(selectButton);
+    _slotsAreForMenuList = UsesMenuList();
+    if (auto *root = UserAgentShadowRoot())
+    {
+      dom::SlotAlgorithms::AssignSlottablesForTree(*root);
+    }
+  }
+
+  bool HTMLSelectElement::SetContentsUseBaseAppearance(bool value) noexcept
+  {
+    if (_contentsUseBaseAppearance == value)
+    {
+      return false;
+    }
+    _contentsUseBaseAppearance = value;
+    if (!value && IsPickerOpen())
+    {
+      (void)_selectPopover->HidePopoverInternal(dom::FocusPreviousElement::No, dom::FireEvents::No, false,
+                                                nullptr);
+    }
+    return true;
+  }
+
+  bool HTMLSelectElement::IsPickerOpen() const noexcept
+  {
+    auto *selectPopover = _selectPopover.get();
+    return selectPopover && selectPopover->IsPopoverShowing();
+  }
+
+  void HTMLSelectElement::CloneSelectedOptionIntoSelectButton() noexcept
+  {
+    // 1. Let option be the first element of select's option list whose selectedness is set to true, if such
+    // an
+    //    element exists; otherwise null.
+    auto *option = FirstSelectedOption();
+    // 2. Let text be the empty string.
+    // 3. If option is not null, then set text to option's label.
+    dom::DOMString text = option ? dom::DOMString(option->Label()) : dom::DOMString();
+    // 4. Set select's select fallback button text to text.
+    if (auto *fallbackButtonText = _selectFallbackButtonText.get();
+        fallbackButtonText && fallbackButtonText->TextContent().value_or(dom::DOMString()) != text)
+    {
+      (void)fallbackButtonText->TextContent(krys::move(text));
+    }
+  }
+
+  // https://html.spec.whatwg.org/#select-open-picker
+  void HTMLSelectElement::OpenPicker(bool byKeyboard) noexcept
+  {
+    auto *selectPopover = _selectPopover.get();
+    if (!selectPopover || IsPickerOpen())
+    {
+      return;
+    }
+    // 3. Run the show popover algorithm given select's select popover, false, and select.
+    (void)selectPopover->ShowPopoverInternal(this, false);
+
+    // The focus goes to the selected option, for the keys to move on from.
+    if (!IsPickerOpen())
+    {
+      return;
+    }
+    (void)NodeDocument().UpdateLayout();
+    auto *option = FirstSelectedOption();
+    if (!option || option->IsDisabledFormControl())
+    {
+      for (auto &item : ListItems())
+      {
+        option = DynamicDowncast<HTMLOptionElement>(item.get());
+        if (option && !option->IsDisabledFormControl())
+        {
+          break;
+        }
+        option = nullptr;
+      }
+    }
+    if (option)
+    {
+      // As for any focus by the mouse, it isn't shown after a press.
+      dom::FocusOptions focusOptions;
+      focusOptions.FocusVisible = byKeyboard;
+      option->Focus(focusOptions);
+    }
+  }
+
+  void HTMLSelectElement::ClosePicker() noexcept
+  {
+    if (!IsPickerOpen())
+    {
+      return;
+    }
+    (void)_selectPopover->HidePopoverInternal(dom::FocusPreviousElement::No, dom::FireEvents::Yes, false,
+                                              nullptr);
+    // The options are this element's children, so the popover doesn't see that the focus was inside it.
+    auto *focused = NodeDocument().FocusedElement();
+    if (focused && focused != this && Contains(focused))
+    {
+      Focus();
+    }
+  }
+
+  // https://html.spec.whatwg.org/#concept-select-pick
+  void HTMLSelectElement::PickOption(HTMLOptionElement &option) noexcept
+  {
+    // 1. If select has the multiple attribute or select is disabled, then return.
+    if (_multiple || IsDisabledFormControl())
+    {
+      return;
+    }
+    // (Steps 2 and 3 are the callers'. Disabled options can't be picked.)
+    if (!option.IsDisabledFormControl())
+    {
+      // 4. Set option's selectedness to true.
+      // 5. Set option's dirtiness to true.
+      // 6. Send select update notifications given select.
+      OptionSelectedByUser(option.Index(), true);
+    }
+    // 7. If select is being rendered as a drop-down box with base appearance, then run the hide popover
+    //    algorithm given select's select popover.
+    ClosePicker();
+  }
+
+  // https://html.spec.whatwg.org/#focus-another-option
+  void HTMLSelectElement::FocusOptionForKey(dom::DOMStringView keyIdentifier) noexcept
+  {
+    List<HTMLOptionElement *> options;
+    for (auto &item : ListItems())
+    {
+      if (auto *option = DynamicDowncast<HTMLOptionElement>(item.get());
+          option && !option->IsDisabledFormControl() && option->Renderer())
+      {
+        options.push_back(option);
+      }
+    }
+    if (options.empty())
+    {
+      return;
+    }
+
+    constexpr int32 pageStep = 10;
+    int32 lastIndex = static_cast<int32>(options.size()) - 1;
+    int32 current = -1;
+    auto *focused = NodeDocument().FocusedElement();
+    for (int32 index = 0; index <= lastIndex; ++index)
+    {
+      if (options[static_cast<size_t>(index)] == focused)
+      {
+        current = index;
+        break;
+      }
+    }
+
+    int32 next = current;
+    if (keyIdentifier == u8"Down")
+    {
+      next = current + 1;
+    }
+    else if (keyIdentifier == u8"Up")
+    {
+      next = current < 0 ? lastIndex : current - 1;
+    }
+    else if (keyIdentifier == u8"Home")
+    {
+      next = 0;
+    }
+    else if (keyIdentifier == u8"End")
+    {
+      next = lastIndex;
+    }
+    else if (keyIdentifier == u8"PageDown")
+    {
+      next = current + pageStep;
+    }
+    else
+    {
+      next = current - pageStep;
+    }
+    options[static_cast<size_t>(std::clamp(next, 0, lastIndex))]->Focus();
+  }
+
+  void HTMLSelectElement::BaseAppearanceDefaultEventHandler(dom::Event &event) noexcept
+  {
+    if (event.Type() == EventNames::MouseDown)
+    {
+      auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+      if (!mouseEvent || mouseEvent->Button() != 0)
+      {
+        return;
+      }
+      if (IsPickerOpen())
+      {
+        ClosePicker();
+      }
+      else
+      {
+        OpenPicker(false);
+      }
+      event.SetDefaultHandled();
+      return;
+    }
+
+    if (event.Type() != EventNames::KeyDown)
+    {
+      return;
+    }
+    auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+    if (!keyboardEvent)
+    {
+      return;
+    }
+    auto keyIdentifier = keyboardEvent->KeyIdentifier();
+    bool isActivationKey = keyIdentifier == u8"Enter" || keyboardEvent->Key() == u8" ";
+    bool isOptionKey = keyIdentifier == u8"Down" || keyIdentifier == u8"Up" || keyIdentifier == u8"Home"
+                       || keyIdentifier == u8"End" || keyIdentifier == u8"PageDown"
+                       || keyIdentifier == u8"PageUp";
+
+    if (!IsPickerOpen())
+    {
+      if (isActivationKey || keyIdentifier == u8"Down" || keyIdentifier == u8"Up")
+      {
+        OpenPicker(true);
+        event.SetDefaultHandled();
+      }
+      return;
+    }
+
+    if (isOptionKey)
+    {
+      FocusOptionForKey(keyIdentifier);
+      event.SetDefaultHandled();
+    }
+    else if (isActivationKey)
+    {
+      if (auto *option = DynamicDowncast<HTMLOptionElement>(NodeDocument().FocusedElement()))
+      {
+        PickOption(*option);
+      }
+      event.SetDefaultHandled();
+    }
+    else if (keyIdentifier == u8"U+0009")
+    {
+      // The focus moves on, with the picker closed behind it.
+      ClosePicker();
+    }
   }
 
   HTMLSelectElement *HTMLSelectElement::FindOwnerSelect(dom::ContainerNode *startNode,
@@ -372,6 +737,10 @@ namespace krys::boo::html
     {
       return;
     }
+    if (localName == u8"size" || localName == u8"multiple")
+    {
+      ReassignSlots();
+    }
 
     if (localName == u8"size")
     {
@@ -410,6 +779,10 @@ namespace krys::boo::html
   {
     if (UsesMenuList())
     {
+      if (style.UsedAppearance() == StyleAppearance::BaseSelect)
+      {
+        return HTMLFormControlElement::CreateElementRenderer(krys::move(style));
+      }
       return CreateRenderer<RenderMenuList>(*this, krys::move(style));
     }
     return CreateRenderer<RenderListBox>(*this, krys::move(style));
@@ -421,12 +794,12 @@ namespace krys::boo::html
     {
       return false;
     }
-    // FIXME: Validation message shadow trees, once there are validation bubbles.
     if (!UsesMenuList())
     {
-      return Is<HTMLOptionElement>(child) || Is<HTMLOptGroupElement>(child);
+      return Is<HTMLOptionElement>(child) || Is<HTMLOptGroupElement>(child)
+             || &child == _selectListBoxSlot.get();
     }
-    return false;
+    return _contentsUseBaseAppearance;
   }
 
   Ref<dom::HTMLCollection> HTMLSelectElement::SelectedOptions() noexcept
@@ -435,13 +808,7 @@ namespace krys::boo::html
     {
       return ShareRef(*selectedOptions);
     }
-    Ref<dom::HTMLCollection> selectedOptions = CreateRef<dom::LiveHTMLCollection>(
-      *this,
-      [this](const dom::Element &element)
-      {
-        auto *option = DynamicDowncast<HTMLOptionElement>(element);
-        return option && option->OwnerSelectElement() == this && option->Selected();
-      });
+    Ref<dom::LiveHTMLCollection> selectedOptions = CreateRef<SelectedOptionsCollection>(*this);
     _selectedOptions = CreateWeakPtr<dom::HTMLCollection>(selectedOptions.get());
     return selectedOptions;
   }
@@ -504,6 +871,7 @@ namespace krys::boo::html
 
   void HTMLSelectElement::OnChildrenChanged() noexcept
   {
+    ReassignSlots();
     SetRecalcListItems();
     UpdateValidity();
     _lastOnChangeSelection.clear();
@@ -516,6 +884,7 @@ namespace krys::boo::html
     SetOptionsChangedOnRenderer();
     InvalidateStyleForSubtree();
     UpdateValidity();
+    CloneSelectedOptionIntoSelectButton();
   }
 
   HTMLOptionElement *HTMLSelectElement::NamedItem(dom::DOMStringView name) const noexcept
@@ -957,7 +1326,10 @@ namespace krys::boo::html
 
   void HTMLSelectElement::InvalidateSelectedItems() noexcept
   {
-    // Collections don't cache their items, so there is nothing to invalidate.
+    if (auto *selectedOptions = _selectedOptions.get())
+    {
+      static_cast<dom::LiveHTMLCollection *>(selectedOptions)->InvalidateCache();
+    }
   }
 
   void HTMLSelectElement::ResetSelectedness(bool hasChanged) noexcept
@@ -998,13 +1370,16 @@ namespace krys::boo::html
     _activeSelectionAnchorIndex = -1;
     SetOptionsChangedOnRenderer();
     InvalidateStyleForSubtree();
-    if (!IsConnected())
-    {
-      InvalidateSelectedItems();
-    }
+    InvalidateSelectedItems();
 
-    // FIXME: Tell the chrome client the focused select's options changed
-    // (focusedSelectElementDidChangeOptions), for its popup.
+    auto &document = NodeDocument();
+    if (this == document.FocusedElement())
+    {
+      if (auto *page = document.GetPage())
+      {
+        page->GetChromeClient().FocusedSelectElementDidChangeOptions(*this);
+      }
+    }
   }
 
   void HTMLSelectElement::RecalcListItems(bool updateSelectedStates,
@@ -1020,7 +1395,7 @@ namespace krys::boo::html
     RefPtr<HTMLOptionElement> foundSelected;
     auto handleOptionElement = [&](HTMLOptionElement &option)
     {
-      _listItems.push_back(WeakPtr<HTMLElement>::WithRef(option));
+      _listItems.push_back(CreateWeakPtr(&option));
       if (updateSelectedStates && !_multiple)
       {
         if (option.SelectedWithoutUpdate())
@@ -1056,7 +1431,7 @@ namespace krys::boo::html
       }
       if (Is<HTMLOptGroupElement>(*descendant))
       {
-        _listItems.push_back(WeakPtr<HTMLElement>::WithRef(*descendant));
+        _listItems.push_back(CreateWeakPtr(descendant));
         for (auto *optGroupNode = dom::TreeQueries::Next(*descendant, descendant); optGroupNode;)
         {
           auto *optGroupDescendant = DynamicDowncast<HTMLElement>(*optGroupNode);
@@ -1084,7 +1459,7 @@ namespace krys::boo::html
       }
       if (Is<HTMLHRElement>(*descendant))
       {
-        _listItems.push_back(WeakPtr<HTMLElement>::WithRef(*descendant));
+        _listItems.push_back(CreateWeakPtr(descendant));
         node = dom::TreeQueries::NextSkippingChildren(*node, &select);
         continue;
       }
@@ -1935,7 +2310,9 @@ namespace krys::boo::html
           SetActiveSelectionAnchorIndex(_activeSelectionEndIndex);
         }
 
-        (void)Downcast<RenderListBox>(*renderer).ScrollToRevealElementAtListIndex(endIndex);
+        auto *frame = NodeDocument().Frame();
+        (void)Downcast<RenderListBox>(*renderer).ScrollToRevealElementAtListIndex(
+          endIndex, frame ? frame->GetEventHandler().KeyboardScrollIsAnimated() : ScrollIsAnimated::No);
         if (selectNewItem)
         {
           UpdateListBoxSelection(deselectOthers);
@@ -1993,7 +2370,11 @@ namespace krys::boo::html
       return;
     }
 
-    if (UsesMenuList())
+    if (_contentsUseBaseAppearance)
+    {
+      BaseAppearanceDefaultEventHandler(event);
+    }
+    else if (UsesMenuList())
     {
       MenuListDefaultEventHandler(event);
     }
@@ -2148,7 +2529,14 @@ namespace krys::boo::html
                             u8"Select showPicker() requires a user gesture.");
     }
 
-    ShowPopup();
+    if (_contentsUseBaseAppearance)
+    {
+      OpenPicker(true);
+    }
+    else
+    {
+      ShowPopup();
+    }
     return {};
   }
 

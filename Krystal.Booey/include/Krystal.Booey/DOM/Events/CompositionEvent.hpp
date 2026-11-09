@@ -32,12 +32,13 @@ namespace krys::boo::dom
 
     /// @brief A trusted composition event with @p data, which bubbles, can be cancelled and crosses shadow
     /// boundaries.
-    KRYS_NODISCARD static Ref<CompositionEvent> Create(DOMStringAtom type, DOMStringView data) noexcept;
+    KRYS_NODISCARD static Ref<CompositionEvent> Create(DOMStringAtom type, LocalDOMWindow *view,
+                                                       DOMStringView data) noexcept;
 
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-compositionevent-initcompositionevent
     void InitCompositionEvent(DOMStringAtom type, bool canBubble = false, bool cancelable = false,
-                              DOMStringView data = {}) noexcept;
+                              LocalDOMWindow *view = nullptr, DOMStringView data = {}) noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-compositionevent-data
     KRYS_NODISCARD const DOMString &Data() const noexcept

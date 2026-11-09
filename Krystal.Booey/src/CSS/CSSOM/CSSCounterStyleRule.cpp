@@ -176,7 +176,7 @@ namespace krys::boo::css
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetNegative(NegativeSymbolsFromValue(Ref<Value>(krys::move(newValue))));
+    MutableDescriptors().SetNegative(NegativeSymbolsFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetPrefix(const CSSOMString &text) noexcept
@@ -212,7 +212,7 @@ namespace krys::boo::css
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetRanges(RangeFromValue(Ref<Value>(krys::move(newValue))));
+    MutableDescriptors().SetRanges(RangeFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetPad(const CSSOMString &text) noexcept
@@ -224,7 +224,7 @@ namespace krys::boo::css
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetPad(PadFromValue(Ref<Value>(krys::move(newValue))));
+    MutableDescriptors().SetPad(PadFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetFallback(const CSSOMString &text) noexcept
@@ -236,7 +236,7 @@ namespace krys::boo::css
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetFallbackName(FallbackNameFromValue(Ref<Value>(krys::move(newValue))));
+    MutableDescriptors().SetFallbackName(FallbackNameFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetSymbols(const CSSOMString &text) noexcept
@@ -248,7 +248,7 @@ namespace krys::boo::css
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetSymbols(SymbolsFromValue(Ref<Value>(krys::move(newValue))));
+    MutableDescriptors().SetSymbols(SymbolsFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetAdditiveSymbols(const CSSOMString &text) noexcept
@@ -260,7 +260,7 @@ namespace krys::boo::css
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetAdditiveSymbols(AdditiveSymbolsFromValue(Ref<Value>(krys::move(newValue))));
+    MutableDescriptors().SetAdditiveSymbols(AdditiveSymbolsFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetSpeakAs(const CSSOMString &) noexcept

@@ -10,16 +10,22 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include <algorithm>
 
 namespace krys::boo::html
@@ -75,6 +81,15 @@ namespace krys::boo::html
     if (auto innerSpinButton = _innerSpinButton)
     {
       innerSpinButton->RemoveSpinButtonOwner();
+    }
+    CloseSuggestions();
+    if (auto picker = std::exchange(_suggestionPicker, nullptr))
+    {
+      picker->Detach();
+    }
+    if (auto indicator = _dataListDropdownIndicator)
+    {
+      indicator->RemoveOwner();
     }
   }
 
@@ -182,7 +197,19 @@ namespace krys::boo::html
 
   void TextFieldInputType::HandleClickEvent(dom::MouseEvent &) noexcept
   {
-    // FIXME: Showing the datalist's suggestions, with datalists.
+    auto &element = *Element();
+    if (element.Focused() && element.List())
+    {
+      DisplaySuggestions(DataListSuggestionActivationType::ControlClicked);
+    }
+  }
+
+  void TextFieldInputType::ShowPicker() noexcept
+  {
+    if (Element()->List())
+    {
+      DisplaySuggestions(DataListSuggestionActivationType::ControlClicked);
+    }
   }
 
   InputType::ShouldCallBaseEventHandler
@@ -194,7 +221,14 @@ namespace krys::boo::html
     {
       return ShouldCallBaseEventHandler::Yes;
     }
-    // FIXME: The datalist suggestion picker's keys, with datalists.
+    // The suggestion list's keys go to it.
+    auto key = event.KeyIdentifier();
+    if (auto picker = _suggestionPicker;
+        picker && (key == u8"Enter" || key == u8"Up" || key == u8"Down" || key == u8"U+001B"))
+    {
+      picker->HandleKeydownWithIdentifier(key);
+      event.SetDefaultHandled();
+    }
     if (element->NodeDocument().Frame()
         && element->NodeDocument().GetEditor().DoTextFieldCommandFromEvent(*element, &event))
     {
@@ -210,7 +244,11 @@ namespace krys::boo::html
     {
       return;
     }
-    // FIXME: Not while the datalist suggestion picker is open, with datalists.
+    // The arrow keys move through the suggestion list while it's shown.
+    if (_suggestionPicker)
+    {
+      return;
+    }
     auto key = event.KeyIdentifier();
     if (key == u8"Up")
     {
@@ -233,7 +271,6 @@ namespace krys::boo::html
 
     bool isFocusEvent = event.Type() == EventNames::Focus;
     bool isBlurEvent = event.Type() == EventNames::Blur;
-    // FIXME: The caps lock indicator (capsLockStateMayHaveChanged), with the caps lock indicator.
     if (event.IsMouseEvent() || isFocusEvent || isBlurEvent)
     {
       Element()->ForwardEvent(event);
@@ -243,6 +280,7 @@ namespace krys::boo::html
   void TextFieldInputType::ElementDidBlur() noexcept
   {
     krys_debug_assert(Element());
+    CloseSuggestions();
     auto *renderer = Element()->Renderer();
     if (!renderer)
     {
@@ -267,8 +305,6 @@ namespace krys::boo::html
       Downcast<RenderTextControlSingleLine>(*renderer).Style().IsLeftToRightDirection();
     ScrollOffset scrollOffset(isLeftToRightDirection ? 0 : innerLayerScrollable->ScrollWidth(), 0);
     innerLayerScrollable->ScrollToOffset(scrollOffset);
-
-    // FIXME: Closing the datalist's suggestions, with datalists.
   }
 
   void TextFieldInputType::HandleFocusEvent(dom::Node *oldFocusedNode) noexcept
@@ -328,8 +364,7 @@ namespace krys::boo::html
     Ref<HTMLInputElement> element = ShareRef(*Element());
     auto &document = element->NodeDocument();
     bool shouldHaveSpinButton = ShouldHaveSpinButton();
-    // FIXME: The caps lock indicator, the autofill button and the datalist dropdown also need a container.
-    bool createsContainer = shouldHaveSpinButton || NeedsContainer();
+    bool createsContainer = shouldHaveSpinButton || element->List() || NeedsContainer();
 
     auto innerText = TextControlInnerTextElement::Create(document, element->IsInnerTextElementEditable());
     _innerText = innerText;
@@ -354,7 +389,7 @@ namespace krys::boo::html
       (void)_container->AppendChild(*innerSpinButton);
     }
 
-    // FIXME: The caps lock indicator, the autofill button and the datalist dropdown.
+    DataListMayHaveChanged();
   }
 
   HTMLElement *TextFieldInputType::ContainerElement() const noexcept
@@ -393,6 +428,11 @@ namespace krys::boo::html
       innerSpinButton->RemoveSpinButtonOwner();
     }
     _innerSpinButton = nullptr;
+    if (auto indicator = _dataListDropdownIndicator)
+    {
+      indicator->RemoveOwner();
+    }
+    _dataListDropdownIndicator = nullptr;
     _container = nullptr;
   }
 
@@ -419,7 +459,6 @@ namespace krys::boo::html
     {
       innerSpinButton->ReleaseCapture();
     }
-    // FIXME: The caps lock indicator and the autofill button, with them.
   }
 
   void TextFieldInputType::ReadOnlyStateChanged() noexcept
@@ -433,7 +472,6 @@ namespace krys::boo::html
     {
       innerSpinButton->ReleaseCapture();
     }
-    // FIXME: The caps lock indicator and the autofill button, with them.
   }
 
   void TextFieldInputType::SpinButtonStepDown() noexcept
@@ -640,7 +678,10 @@ namespace krys::boo::html
     {
       element.NodeDocument().GetEditor().TextDidChangeInTextField(element);
     }
-    // FIXME: Showing the datalist's suggestions, with datalists.
+    if (element.List())
+    {
+      DisplaySuggestions(DataListSuggestionActivationType::TextChanged);
+    }
   }
 
   void TextFieldInputType::UpdateInnerTextValue() noexcept
@@ -694,7 +735,7 @@ namespace krys::boo::html
     {
       EventLoop::Current().QueueTask(
         TaskSource::DOMManipulation, element->NodeDocument(),
-        [selectionState = *selectionState, element = WeakPtr<HTMLInputElement>::WithRef(*element)]
+        [selectionState = *selectionState, element = CreateWeakPtr(element.get())]
         {
           if (!element || !element->Focused())
           {
@@ -710,5 +751,217 @@ namespace krys::boo::html
           element->SetSelectionRange(selectionState.Start, selectionState.End, selectionState.Direction);
         });
     }
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool DataListSuggestionStartsWith(dom::DOMStringView value,
+                                                     dom::DOMStringView prefix) noexcept
+    {
+      return text::ToASCIILower(value).starts_with(text::ToASCIILower(prefix));
+    }
+
+    KRYS_NODISCARD bool DataListSuggestionContains(dom::DOMStringView value, dom::DOMStringView part) noexcept
+    {
+      return text::ToASCIILower(value).contains(text::ToASCIILower(part));
+    }
+  }
+
+  void TextFieldInputType::CreateDataListDropdownIndicator() noexcept
+  {
+    krys_debug_assert(!_dataListDropdownIndicator);
+    if (!_container)
+    {
+      CreateContainer();
+    }
+    auto indicator = html::DataListButtonElement::Create(Element()->NodeDocument(), *this);
+    _dataListDropdownIndicator = indicator;
+    (void)_container->AppendChild(*indicator);
+  }
+
+  void TextFieldInputType::DataListMayHaveChanged() noexcept
+  {
+    if (!HasCreatedShadowSubtree())
+    {
+      return;
+    }
+
+    _cachedSuggestions = null;
+
+    RefPtr<HTMLInputElement> element = ShareRefPtr(Element());
+    if (!element)
+    {
+      return;
+    }
+    bool hasDataList = !!element->List();
+    if (!_dataListDropdownIndicator)
+    {
+      CreateDataListDropdownIndicator();
+    }
+    else
+    {
+      // It's displayed while the field has a datalist.
+      _dataListDropdownIndicator->InvalidateStyle();
+    }
+    if (hasDataList && element->Focused())
+    {
+      DisplaySuggestions(DataListSuggestionActivationType::DataListMayHaveChanged);
+    }
+  }
+
+  HTMLElement *TextFieldInputType::DataListButtonElement() const noexcept
+  {
+    return _dataListDropdownIndicator.get();
+  }
+
+  void TextFieldInputType::DataListButtonElementWasClicked() noexcept
+  {
+    Ref<HTMLInputElement> input = ShareRef(*Element());
+    if (input->List())
+    {
+      // The caret goes to the end of the text, as the suggestions complete it.
+      input->SetSelectionRange(std::numeric_limits<uint32>::max(), std::numeric_limits<uint32>::max());
+      DisplaySuggestions(DataListSuggestionActivationType::IndicatorClicked);
+    }
+  }
+
+  IntRect TextFieldInputType::ElementRectInRootViewCoordinates() const noexcept
+  {
+    auto &element = *Element();
+    auto *renderer = element.Renderer();
+    auto *view = element.NodeDocument().View();
+    if (!renderer || !view)
+    {
+      return {};
+    }
+    return view->ContentsToView(renderer->AbsoluteBoundingBoxRect());
+  }
+
+  bool TextFieldInputType::IsElementRTL() const noexcept
+  {
+    auto *renderer = Element()->Renderer();
+    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == TextDirection::RTL;
+  }
+
+  List<DataListSuggestion> TextFieldInputType::Suggestions() noexcept
+  {
+    // FIXME: Suggestions are typing completions, so they should match as find-in-page does rather than by
+    // ignoring ASCII case.
+    Ref<HTMLInputElement> element = ShareRef(*Element());
+    auto elementValue = element->Value();
+    if (_cachedSuggestions
+        && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(_cachedSuggestions->first, elementValue))
+    {
+      return _cachedSuggestions->second;
+    }
+
+    // Those starting with the text, then those containing it (or whose labels do, if they're shown).
+    List<DataListSuggestion> suggestions;
+    List<DataListSuggestion> matchesContainingValue;
+    auto *page = element->NodeDocument().GetPage();
+    bool canShowLabels = page && page->GetChromeClient().CanShowDataListSuggestionLabels();
+    if (auto dataList = element->List())
+    {
+      for (auto &option : dataList->Suggestions())
+      {
+        DataListSuggestion suggestion;
+        suggestion.Value = option->Value();
+        if (!element->IsValidValue(suggestion.Value))
+        {
+          continue;
+        }
+        suggestion.Value = SanitizeValue(suggestion.Value);
+        suggestion.Label = option->Label();
+        if (suggestion.Value == suggestion.Label)
+        {
+          suggestion.Label.clear();
+        }
+
+        if (elementValue.empty() || DataListSuggestionStartsWith(suggestion.Value, elementValue))
+        {
+          suggestions.push_back(krys::move(suggestion));
+        }
+        else if (DataListSuggestionContains(suggestion.Value, elementValue)
+                 || (canShowLabels && DataListSuggestionContains(suggestion.Label, elementValue)))
+        {
+          matchesContainingValue.push_back(krys::move(suggestion));
+        }
+      }
+    }
+
+    suggestions.insert(suggestions.end(), std::make_move_iterator(matchesContainingValue.begin()),
+                       std::make_move_iterator(matchesContainingValue.end()));
+    _cachedSuggestions = Pair<dom::DOMString, List<DataListSuggestion>> {elementValue, suggestions};
+    return suggestions;
+  }
+
+  void TextFieldInputType::DidSelectDataListOption(utf8_stringview value) noexcept
+  {
+    Ref<HTMLInputElement> element = ShareRef(*Element());
+    (void)element->SetValue(value, TextFieldEventBehavior::DispatchInputAndChangeEvent);
+  }
+
+  void TextFieldInputType::DidCloseSuggestions() noexcept
+  {
+    _cachedSuggestions = null;
+    Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
+    if (_suggestionPicker)
+    {
+      styleInvalidation.emplace(*Element(), css::SelectorPseudoClass::Open, false);
+    }
+    if (auto picker = std::exchange(_suggestionPicker, nullptr))
+    {
+      picker->Detach();
+    }
+    if (auto *renderer = Element()->Renderer())
+    {
+      renderer->Repaint();
+    }
+  }
+
+  void TextFieldInputType::DisplaySuggestions(DataListSuggestionActivationType type) noexcept
+  {
+    auto &element = *Element();
+    if (element.IsDisabledFormControl() || !element.Renderer())
+    {
+      return;
+    }
+
+    // A click shows them only for a user's click; changes to the text or the datalist always update them.
+    if ((type == DataListSuggestionActivationType::ControlClicked
+         || type == DataListSuggestionActivationType::IndicatorClicked)
+        && !HasTransientActivation())
+    {
+      return;
+    }
+
+    auto *page = element.NodeDocument().GetPage();
+    if (!page)
+    {
+      return;
+    }
+    if (!_suggestionPicker && !Suggestions().empty())
+    {
+      // The field matches :open while its suggestions are shown.
+      style::PseudoClassChangeInvalidation styleInvalidation(element, css::SelectorPseudoClass::Open, true);
+      _suggestionPicker = page->GetChromeClient().CreateDataListSuggestionPicker(*this);
+    }
+    if (auto picker = _suggestionPicker)
+    {
+      picker->DisplayWithActivationType(type);
+    }
+  }
+
+  void TextFieldInputType::CloseSuggestions() noexcept
+  {
+    if (auto picker = _suggestionPicker)
+    {
+      picker->Close();
+    }
+  }
+
+  bool TextFieldInputType::IsPresentingAttachedView() const noexcept
+  {
+    return !!_suggestionPicker;
   }
 }

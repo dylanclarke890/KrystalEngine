@@ -177,7 +177,7 @@ namespace krys::ui
     _device.WriteTexture(*texture, gfx::TextureRegion::Whole2D(width, height),
                          {reinterpret_cast<const byte *>(pixels.data()), pixels.size_bytes()});
 
-    _uploaded[identifier] = {.Image = WeakPtr<boo::NativeImage>::WithRef(image), .Texture = *texture};
+    _uploaded[identifier] = {.Image = CreateWeakPtr(&image), .Texture = *texture};
     return *texture;
   }
 

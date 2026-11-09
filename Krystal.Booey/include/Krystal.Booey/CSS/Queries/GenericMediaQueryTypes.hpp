@@ -85,7 +85,28 @@ namespace krys::boo::css::mq
     CSSOMString Text;
   };
 
-  using QueryInParens = Variant<Condition, Feature, GeneralEnclosed>;
+  /// @brief A value in a style range: a custom property name, or a value to compare against.
+  struct StyleRangeValue
+  {
+    CSSOMStringAtom CustomPropertyName {CSSOMStringAtom::Null()};
+    /// @brief The value, as a `CustomPropertyValue`, when this isn't a custom property name.
+    RefPtr<css::Value> Value;
+  };
+
+  /// @brief A `<style-range>` in a container `style()` query: two or three values joined by comparisons, like
+  /// `--a > 1px` or `0 < --a <= --b`.
+  struct StyleRange
+  {
+    List<StyleRangeValue> Values;
+    /// @brief The comparison between each pair of adjacent values.
+    List<ComparisonOperator> Operators;
+
+    Maybe<ValueId> FunctionId {};
+
+    const FeatureSchema *Schema {nullptr};
+  };
+
+  using QueryInParens = Variant<Condition, Feature, StyleRange, GeneralEnclosed>;
 
   /// @brief A condition: queries joined by one logical operator, or a single negated query.
   struct Condition
@@ -152,6 +173,12 @@ namespace krys::boo::css::mq
       return EvaluationResult::Unknown;
     }
 
+    KRYS_NODISCARD virtual EvaluationResult
+      EvaluateStyleRange(const StyleRange &, const FeatureEvaluationContext &) const noexcept
+    {
+      return EvaluationResult::Unknown;
+    }
+
     FeatureSchema(const CSSOMStringAtom &name, Type type, ValueType valueType,
                   MediaQueryDynamicDependency dependencies,
                   FixedVector<ValueId> valueIdentifiers = {}) noexcept
@@ -172,6 +199,27 @@ namespace krys::boo::css::mq
     krys::SwitchOn(
       queryInParens, [&](const Condition &condition) { TraverseFeatures(condition, function); },
       [&](const Feature &feature) { function(feature); },
+      [&](const StyleRange &range)
+      {
+        // Visit a range as the features it queries, one per custom property name.
+        bool hasCustomPropertyName = false;
+        for (auto &value : range.Values)
+        {
+          if (!value.CustomPropertyName.View().empty())
+          {
+            hasCustomPropertyName = true;
+            Feature feature {value.CustomPropertyName, Syntax::Range};
+            feature.Schema = range.Schema;
+            function(feature);
+          }
+        }
+        if (!hasCustomPropertyName)
+        {
+          Feature feature {CSSOMStringAtom::Null(), Syntax::Range};
+          feature.Schema = range.Schema;
+          function(feature);
+        }
+      },
       [&](const GeneralEnclosed &)
       {
         Feature dummy {};

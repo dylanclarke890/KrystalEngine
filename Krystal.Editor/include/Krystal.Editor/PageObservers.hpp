@@ -44,8 +44,7 @@ namespace krys::editor
     size_t _imagesLoaded {0};
 
   public:
-    explicit PageObservers(boo::dom::Document &document) noexcept
-        : _document(WeakPtr<boo::dom::Document>::WithRef(document))
+    explicit PageObservers(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       if (auto card = document.GetElementById(u8"resize-card"))
       {

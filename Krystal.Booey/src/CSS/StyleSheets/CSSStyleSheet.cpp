@@ -41,8 +41,7 @@ namespace krys::boo::css
       WeakPtr<CSSStyleSheet> _styleSheet;
 
     public:
-      explicit StyleSheetCSSRuleList(CSSStyleSheet *sheet) noexcept
-          : _styleSheet(WeakPtr<CSSStyleSheet>::WithRef(sheet))
+      explicit StyleSheetCSSRuleList(CSSStyleSheet *sheet) noexcept : _styleSheet(CreateWeakPtr(sheet))
       {
       }
 
@@ -121,12 +120,11 @@ namespace krys::boo::css
 
   CSSStyleSheet::CSSStyleSheet(Ref<StyleSheetContents> &&contents, CSSImportRule *ownerRule,
                                Maybe<bool> isOriginClean) noexcept
-      : _contents(krys::move(contents)), _isOriginClean(isOriginClean),
-        _ownerRule(WeakPtr<CSSImportRule>::WithRef(ownerRule))
+      : _contents(krys::move(contents)), _isOriginClean(isOriginClean), _ownerRule(CreateWeakPtr(ownerRule))
   {
     if (auto *parent = ParentStyleSheet())
     {
-      _styleScope = WeakPtr<style::Scope>::WithRef(parent->StyleScope());
+      _styleScope = CreateWeakPtr(parent->StyleScope());
     }
     _contents->RegisterClient(this);
   }
@@ -134,8 +132,7 @@ namespace krys::boo::css
   CSSStyleSheet::CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Node &ownerNode,
                                Maybe<bool> isOriginClean) noexcept
       : _contents(krys::move(contents)), _isOriginClean(isOriginClean),
-        _styleScope(WeakPtr<style::Scope>::WithRef(style::Scope::ForNode(ownerNode))),
-        _ownerNode(WeakPtr<dom::Node>::WithRef(ownerNode))
+        _styleScope(CreateWeakPtr(&style::Scope::ForNode(ownerNode))), _ownerNode(CreateWeakPtr(&ownerNode))
   {
     _contents->RegisterClient(this);
   }
@@ -144,7 +141,7 @@ namespace krys::boo::css
   CSSStyleSheet::CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Document &document,
                                Init &&options) noexcept
       : _contents(krys::move(contents)), _isDisabled(options.Disabled), _wasConstructedByJS(true),
-        _isOriginClean(true), _constructorDocument(WeakPtr<dom::Document>::WithRef(document))
+        _isOriginClean(true), _constructorDocument(CreateWeakPtr(&document))
   {
     _contents->RegisterClient(this);
     _contents->CheckLoaded();
@@ -424,7 +421,7 @@ namespace krys::boo::css
                                     DynamicDowncast<KeyframesRule>(rule.get()));
 
     bool isNamespace = rule->IsNamespaceRule();
-    bool success = _contents->WrapperInsertRule(Ref<Rule>(krys::move(rule)), index);
+    bool success = _contents->WrapperInsertRule(krys::move(rule), index);
     if (!success)
     {
       if (isNamespace)
@@ -649,7 +646,7 @@ namespace krys::boo::css
       if (cachedContents)
       {
         _contents->UnregisterClient(this);
-        _contents = Ref<StyleSheetContents>(krys::move(cachedContents));
+        _contents = krys::move(cachedContents);
         _contents->RegisterClient(this);
       }
       else
@@ -696,7 +693,7 @@ namespace krys::boo::css
     if (std::ranges::none_of(_adoptingTreeScopes, [&](const WeakPtr<dom::ContainerNode> &scope)
                              { return scope.get() == &treeScope; }))
     {
-      _adoptingTreeScopes.push_back(WeakPtr<dom::ContainerNode>::WithRef(treeScope));
+      _adoptingTreeScopes.push_back(CreateWeakPtr(&treeScope));
     }
     StyleScopeFor(treeScope).DidChangeActiveStyleSheetCandidates();
   }

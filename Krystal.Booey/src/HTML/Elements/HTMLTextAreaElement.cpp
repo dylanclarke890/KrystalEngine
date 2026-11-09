@@ -75,6 +75,11 @@ namespace krys::boo::html
     return CreateRenderer<RenderTextControlMultiLine>(*this, krys::move(style));
   }
 
+  bool HTMLTextAreaElement::AccessKeyAction(bool sendMouseEvents) noexcept
+  {
+    return dom::Element::AccessKeyAction(sendMouseEvents);
+  }
+
   void HTMLTextAreaElement::UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                                   SelectionRevealMode revealMode) noexcept
   {
@@ -429,8 +434,7 @@ namespace krys::boo::html
 
     SetTextAsOfLastFormControlChangeEvent(krys::move(normalizedValue));
 
-    // FIXME: Telling accessibility the value changed, and the chrome client's
-    // didProgrammaticallyClearTextFormControl, with accessibility and the host's autofill.
+    // FIXME: Telling accessibility the value changed, once there's accessibility.
   }
 
   // https://html.spec.whatwg.org/#dom-textarea-defaultvalue

@@ -171,8 +171,7 @@ namespace krys::boo
       float scalingFactor = textBox.Renderer().ScalingFactor();
       krys_debug_assert(scalingFactor);
 
-      TextRun textRun =
-        ConstructTextRun(textBox.Renderer().Text(), textBox.Direction(), textBox.Style(), fragment);
+      TextRun textRun = ConstructTextRun(textBox.Renderer().Text(), textBox.Direction(), fragment);
 
       // Eventually handle lengthAdjust="spacingAndGlyphs".
       // FIXME: Handle vertical text.

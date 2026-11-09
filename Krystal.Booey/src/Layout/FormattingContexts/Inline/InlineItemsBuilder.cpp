@@ -109,8 +109,7 @@ namespace krys::boo::layout
       if (layoutBox.IsInlineBox() && layoutBox.IsInFlow())
       {
         auto &style = layoutBox.Style();
-        return style.GetWritingMode().IsBidiRTL()
-               || (style.RtlOrdering() == Order::Logical && style.GetUnicodeBidi() != UnicodeBidi::Normal);
+        return style.GetWritingMode().IsBidiRTL() || style.GetUnicodeBidi() != UnicodeBidi::Normal;
       }
       return false;
     }
@@ -321,12 +320,6 @@ namespace krys::boo::layout
       HandleEnterExitBidiContext(paragraphContentBuilder, rootStyle.GetUnicodeBidi(),
                                  rootStyle.GetWritingMode().IsBidiLTR(), EnterExitType::EnteringBlock,
                                  bidiContextStack);
-      if (rootStyle.RtlOrdering() != Order::Logical)
-      {
-        HandleEnterExitBidiContext(paragraphContentBuilder, UnicodeBidi::Override,
-                                   rootStyle.GetWritingMode().IsBidiLTR(), EnterExitType::EnteringBlock,
-                                   bidiContextStack);
-      }
 
       const Box *lastInlineTextBox = nullptr;
       size_t inlineTextBoxOffset = 0;
@@ -379,8 +372,7 @@ namespace krys::boo::layout
         {
           // https://drafts.csswg.org/css-writing-modes/#unicode-bidi
           auto &style = inlineItem.Style();
-          auto initiatesControlCharacter =
-            style.RtlOrdering() == Order::Logical && style.GetUnicodeBidi() != UnicodeBidi::Normal;
+          auto initiatesControlCharacter = style.GetUnicodeBidi() != UnicodeBidi::Normal;
           if (!initiatesControlCharacter)
           {
             // Opaque items do not have position in the bidi paragraph. They inherit their bidi level from the
@@ -978,8 +970,7 @@ namespace krys::boo::layout
       {
         auto &inlineItem = inlineItemList[index];
         auto &style = inlineItem.Style();
-        auto initiatesControlCharacter =
-          style.RtlOrdering() == Order::Logical && style.GetUnicodeBidi() != UnicodeBidi::Normal;
+        auto initiatesControlCharacter = style.GetUnicodeBidi() != UnicodeBidi::Normal;
 
         if (inlineItem.IsInlineBoxStart())
         {
@@ -1342,7 +1333,6 @@ namespace krys::boo::layout
     inlineItemList.push_back(InlineItem(inlineBox, InlineItem::Type::InlineBoxEnd));
     // Inline box end item itself can not trigger bidi content.
     krys_debug_assert(ContentRequiresVisualReordering() || inlineBox.GetWritingMode().IsBidiLTR()
-                      || inlineBox.Style().RtlOrdering() == Order::Visual
                       || inlineBox.Style().GetUnicodeBidi() == UnicodeBidi::Normal);
   }
 

@@ -166,6 +166,7 @@ namespace krys::boo::dom
   class DocumentOrShadowRoot;
   class Element;
   class NodeList;
+  class ShadowRoot;
 
   /// @see https://dom.spec.whatwg.org/#interface-node
   /// @see https://dom.spec.whatwg.org/#concept-node
@@ -180,9 +181,11 @@ namespace krys::boo::dom
     friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
+    friend class LiveCollection;
     friend class MutationAlgorithms;
     friend class MutationObserver;
     friend class MutationObserverAlgorithms;
+    friend class ShadowRoot;
     friend class TreeQueries;
 
   private:
@@ -198,6 +201,8 @@ namespace krys::boo::dom
     CheckedPtr<Node> _nextSibling;
     UniquePtr<NodeRareData> _nodeRareData;
     RenderObject *_renderer {nullptr};
+    /// @brief The root of the shadow tree this node is in, if any: its tree scope.
+    ShadowRoot *_containingShadowRoot {nullptr};
 
   protected:
     /// @brief Creates a node whose node document is @p document (a document passes itself).
@@ -631,10 +636,7 @@ namespace krys::boo::dom
     /// @brief Handles @p event after its dispatch when no listener canceled it: called for the event's
     /// target, then for the nodes on its path until one handles it (`Event::SetDefaultHandled`), if it
     /// bubbles.
-    virtual void DefaultEventHandler(Event &event) noexcept
-    {
-      (void)event;
-    }
+    virtual void DefaultEventHandler(Event &event) noexcept;
     /// @brief Whether a position can be inside the node; the content of nodes it can't be inside (images,
     /// `<br>`, form controls) is ignored by editing.
     KRYS_NODISCARD virtual bool CanContainRangeEndPoint() const noexcept
@@ -670,6 +672,7 @@ namespace krys::boo::dom
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
+    void DidAddEventListener(const EventListener &listener) noexcept override;
 
   public:
 #pragma region Tree Scope
@@ -704,6 +707,26 @@ namespace krys::boo::dom
     }
 
 #pragma endregion
+
+    /// @brief Clears the caches of the live collections rooted at the node, as what their filters read has
+    /// changed.
+    void InvalidateLiveCollectionCaches() noexcept;
+
+    /// @brief Clears the caches of the live collections rooted at the node and its ancestors, as a change to
+    /// the node has changed what their filters read.
+    void InvalidateLiveCollectionCachesInAncestors() noexcept;
+
+    /// @brief Clears the caches that the insertion, removal or move of @p child, a child of the node,
+    /// affects.
+    void InvalidateLiveCollectionCachesForChildChange(const Node &child) noexcept;
+
+    /// @brief Clears the caches that a change to the attribute called @p localName of the node affects.
+    void InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept;
+
+    /// @brief Whether an image has been painted for the node (as its content or a background): a later decode
+    /// of a visible one is synchronous, so the image doesn't flicker.
+    KRYS_NODISCARD bool HasEverPaintedImages() const noexcept;
+    void SetHasEverPaintedImages(bool hasEverPaintedImages) noexcept;
 
   protected:
     /// @brief The node's rare data, if it has any; an element's is an `ElementRareData`.

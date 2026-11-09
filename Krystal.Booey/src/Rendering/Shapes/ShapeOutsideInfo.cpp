@@ -320,8 +320,8 @@ namespace krys::boo
       [](const css::keywords::None &) { return false; }, [](const style::ShapeOutside::Shape &)
       { return true; }, [](const style::ShapeOutside::ShapeBox &) { return true; },
       [](const style::ShapeOutside::ShapeAndShapeBox &) { return true; },
-      // FIXME: Valid images whose origin is clean (checkShapeImageOrigin), once image shapes can read pixels:
-      // image buffers record display lists (the raster shape draws the image into one to read its alpha).
+      // FIXME: Valid images, once image shapes can read pixels: image buffers record display lists (the
+      // raster shape draws the image into one to read its alpha). There are no origins to check them against.
       [](const style::ShapeOutside::Image &) { return false; });
   }
 

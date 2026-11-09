@@ -248,7 +248,8 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Dragged and transparent content markers (setAlpha), once there are document markers.
+    // FIXME: Drawing dragged content translucent (setAlpha). (There's no transparent content; see
+    // DIFFERENCES.md.)
 
     if (HasVisibleBoxDecorations() && paintInfo.Phase == PaintPhase::Foreground)
     {

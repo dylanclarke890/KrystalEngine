@@ -164,6 +164,8 @@ namespace krys::boo
   Ref<const Font> FontCascade::PrimaryFont() const noexcept
   {
     auto &font = EnsureFonts().PrimaryFont(_fontDescription, _fontSelector.get());
+    // `from-font` is the first available font's aspect value, so the primary font resolves it.
+    _fontDescription.ResolveFontSizeAdjustFromFontIfNeeded(font);
     return ShareRef(font);
   }
 

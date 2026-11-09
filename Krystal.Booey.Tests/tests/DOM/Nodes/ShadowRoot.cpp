@@ -11,6 +11,52 @@
 
 namespace krys::boo::dom::tests
 {
+  TEST_CASE("Node::TreeScope: the root of a node's shadow tree, or else its document", "[DOM][ShadowRoot]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto scopeOf = [](const Node &node)
+    {
+      return &node.TreeScope();
+    };
+    DocumentOrShadowRoot *documentScope = document.get();
+
+    auto child = document->CreateElement(u8"div").ReleaseValue();
+    auto grandchild = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(child->AppendChild(*grandchild).HasException());
+    CHECK(scopeOf(*grandchild) == documentScope);
+
+    {
+      auto host = document->CreateElement(u8"div").ReleaseValue();
+      auto shadow = host->AttachShadow({}).ReleaseValue();
+      DocumentOrShadowRoot *shadowScope = shadow.get();
+      CHECK(scopeOf(*shadow) == shadowScope);
+
+      // A whole subtree enters, whether or not the host is connected.
+      REQUIRE_FALSE(shadow->AppendChild(*child).HasException());
+      CHECK(scopeOf(*child) == shadowScope);
+      CHECK(scopeOf(*grandchild) == shadowScope);
+
+      // A tree in the tree has its own scope, and its nodes keep it as an ancestor leaves.
+      auto nestedShadow = grandchild->AttachShadow({}).ReleaseValue();
+      auto nested = document->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(nestedShadow->AppendChild(*nested).HasException());
+      DocumentOrShadowRoot *nestedScope = nestedShadow.get();
+      CHECK(scopeOf(*nested) == nestedScope);
+
+      REQUIRE_FALSE(shadow->RemoveChild(*child).HasException());
+      CHECK(scopeOf(*child) == documentScope);
+      CHECK(scopeOf(*grandchild) == documentScope);
+      CHECK(scopeOf(*nested) == nestedScope);
+
+      REQUIRE_FALSE(shadow->AppendChild(*child).HasException());
+      CHECK(scopeOf(*grandchild) == shadowScope);
+    }
+
+    // The nodes something still holds outlive their shadow root.
+    CHECK(scopeOf(*child) == documentScope);
+    CHECK(scopeOf(*grandchild) == documentScope);
+  }
+
   TEST_CASE(
     "ShadowRoot: its getters return what it was attached with",
     "[DOM][ShadowRoot][dom:interface-shadowroot][dom:concept-shadow-root][dom:shadowroot-mode]"

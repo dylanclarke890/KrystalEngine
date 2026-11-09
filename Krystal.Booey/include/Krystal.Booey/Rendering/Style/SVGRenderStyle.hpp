@@ -48,7 +48,6 @@ namespace krys::boo
       unsigned AlignmentBaseline : 4;
       unsigned DominantBaseline : 4;
       unsigned VectorEffect : 1;
-      unsigned BufferedRendering : 2;
       unsigned MaskType : 1;
     };
 

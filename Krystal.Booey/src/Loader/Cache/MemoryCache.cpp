@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 

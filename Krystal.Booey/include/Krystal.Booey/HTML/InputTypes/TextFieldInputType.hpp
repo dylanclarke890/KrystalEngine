@@ -1,14 +1,18 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/HTML/InputTypes/InputType.hpp"
+#include "Krystal.Booey/HTML/Shadow/DataListButtonElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
+#include "Krystal.Booey/Platform/Choosers/DataListSuggestionsClient.hpp"
 
 namespace krys::boo::html
 {
   /// @brief The base of the text-like input types and number: a field with an inner text element the user
   /// edits, and a placeholder.
-  // FIXME: The caps lock indicator, the autofill button and the datalist dropdown and suggestions.
-  class TextFieldInputType : public InputType, protected SpinButtonOwner
+  class TextFieldInputType : public InputType,
+                             protected SpinButtonOwner,
+                             private DataListSuggestionsClient,
+                             private DataListButtonOwner
   {
   private:
     RefPtr<HTMLElement> _container;
@@ -16,11 +20,28 @@ namespace krys::boo::html
     RefPtr<TextControlInnerTextElement> _innerText;
     RefPtr<HTMLElement> _placeholder;
     RefPtr<SpinButtonElement> _innerSpinButton;
+    /// @brief The list button, made once the field's datalist may have changed, and shown while it has one.
+    RefPtr<html::DataListButtonElement> _dataListDropdownIndicator;
+    /// @brief The list of suggestions, while it's shown.
+    RefPtr<DataListSuggestionPicker> _suggestionPicker;
+    /// @brief The suggestions for the text they were found for.
+    Maybe<Pair<dom::DOMString, List<DataListSuggestion>>> _cachedSuggestions;
 
   public:
     ~TextFieldInputType() noexcept override;
+    KRYS_NODISCARD bool ShouldRespectListAttribute() const noexcept override
+    {
+      return true;
+    }
 
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+
+    void DataListMayHaveChanged() noexcept final;
+    KRYS_NODISCARD HTMLElement *DataListButtonElement() const noexcept final;
+    /// @brief Shows the datalist's suggestions.
+    void ShowPicker() noexcept override;
+    /// @brief Whether the suggestions are shown.
+    KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept override;
 
   protected:
     TextFieldInputType(Type type, HTMLInputElement &element) noexcept;
@@ -73,6 +94,20 @@ namespace krys::boo::html
     void SpinButtonStepUp() noexcept final;
 
     KRYS_NODISCARD bool ShouldHaveSpinButton() const noexcept;
+
+    // DataListSuggestionsClient functions.
+    KRYS_NODISCARD IntRect ElementRectInRootViewCoordinates() const noexcept final;
+    KRYS_NODISCARD List<DataListSuggestion> Suggestions() noexcept final;
+    KRYS_NODISCARD bool IsElementRTL() const noexcept final;
+    void DidSelectDataListOption(utf8_stringview value) noexcept final;
+    void DidCloseSuggestions() noexcept final;
+
+    // DataListButtonOwner functions.
+    void DataListButtonElementWasClicked() noexcept final;
+
+    void CreateDataListDropdownIndicator() noexcept;
+    void DisplaySuggestions(DataListSuggestionActivationType type) noexcept;
+    void CloseSuggestions() noexcept;
 
     enum class PreserveSelectionRange : bool
     {

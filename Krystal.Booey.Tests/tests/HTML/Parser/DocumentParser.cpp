@@ -9,9 +9,14 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/HTML/Parser/TreeBuilder.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
@@ -126,6 +131,13 @@ namespace krys::boo::html::tests
         {
           krys::boo::tests::Indent(output, depth);
           output += u8"<!-- " + Downcast<dom::Comment>(node).Data() + u8" -->\n";
+          break;
+        }
+        case dom::NodeType::PROCESSING_INSTRUCTION_NODE:
+        {
+          auto &instruction = Downcast<dom::ProcessingInstruction>(node);
+          krys::boo::tests::Indent(output, depth);
+          output += u8"<?" + instruction.Target() + u8" " + instruction.Data() + u8">\n";
           break;
         }
         case dom::NodeType::DOCUMENT_TYPE_NODE:
@@ -726,6 +738,48 @@ namespace krys::boo::html::tests
     auto href = svg->GetAttributeNodeNS(infra::Namespaces::XLink, u8"href");
     REQUIRE(href);
     CHECK(href->Prefix() == infra::NamespacePrefixes::XLink);
+  }
+
+  TEST_CASE("DocumentParser: form controls join the open form even when they aren't inside it",
+            "[HTML][DocumentParser][html:create-an-element-for-the-token][html:form-element-pointer]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    // The form start tag in a table inserts the form and pops it straight away, so the controls in the cell
+    // aren't its descendants.
+    auto parser = CreateParser(*document, utf8_string(u8"<table><form id=f><tr><td><input id=i>"
+                                                      u8"<input id=attr form=elsewhere><template><input id=t>"
+                                                      u8"</template></td></tr></form></table>"));
+    (void)parser->PumpTokenizer();
+
+    auto &form = Downcast<HTMLFormElement>(*document->GetElementById(u8"f"));
+    CHECK_FALSE(form.Contains(document->GetElementById(u8"i").get()));
+    CHECK(Downcast<HTMLInputElement>(*document->GetElementById(u8"i")).Form() == &form);
+
+    // A listed element with a form attribute goes by the attribute.
+    CHECK_FALSE(Downcast<HTMLInputElement>(*document->GetElementById(u8"attr")).Form());
+
+    // Template contents aren't associated.
+    auto &templateElement =
+      Downcast<HTMLTemplateElement>(*document->QuerySelector(u8"template").ReleaseValue());
+    auto *templated = templateElement.Content()->FirstChild();
+    REQUIRE(templated);
+    CHECK_FALSE(Downcast<HTMLInputElement>(*templated).Form());
+  }
+
+  TEST_CASE("DocumentParser: form controls it creates start out reset",
+            "[HTML][DocumentParser][html:create-an-element-for-the-token]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto parser = CreateParser(*document, utf8_string(u8"<input id=i type=checkbox checked value=v>"
+                                                      u8"<textarea id=t>text</textarea>"
+                                                      u8"<select id=s><option>a<option selected>b</select>"));
+    (void)parser->PumpTokenizer();
+
+    auto &input = Downcast<HTMLInputElement>(*document->GetElementById(u8"i"));
+    CHECK(input.Checked());
+    CHECK(input.Value() == u8"v");
+    CHECK(Downcast<HTMLTextAreaElement>(*document->GetElementById(u8"t")).Value() == u8"text");
+    CHECK(Downcast<HTMLSelectElement>(*document->GetElementById(u8"s")).SelectedIndex() == 1);
   }
 }
 

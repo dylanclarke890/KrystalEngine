@@ -380,7 +380,6 @@ namespace krys::boo
     KRYS_NODISCARD bool HasOutlineAnnotation() const noexcept;
 
     /// @brief The rect cut out of the border when painting it: a fieldset's legend.
-    /// FIXME: Fieldsets (RenderBlock's override, around the legend) come with fieldset layout.
     KRYS_NODISCARD virtual LayoutRect PaintRectToClipOutFromBorder(const LayoutRect &) noexcept
     {
       return {};

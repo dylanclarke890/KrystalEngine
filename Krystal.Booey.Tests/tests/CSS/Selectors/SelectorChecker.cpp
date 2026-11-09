@@ -72,6 +72,8 @@ namespace krys::boo::css::tests
       REQUIRE(Matches(a, u8"[title=Hello]"));
       REQUIRE_FALSE(Matches(a, u8"[title=hello]"));
       REQUIRE(Matches(a, u8"[title=hello i]"));
+      REQUIRE(Matches(a, u8"[title=Hello s]"));
+      REQUIRE_FALSE(Matches(a, u8"[title=hello s]"));
       REQUIRE(Matches(a, u8"[data-v~=bar-baz]"));
       REQUIRE_FALSE(Matches(a, u8"[data-v~=bar]"));
       REQUIRE_FALSE(Matches(a, u8"[data-v~='']"));
@@ -90,6 +92,10 @@ namespace krys::boo::css::tests
       REQUIRE(Matches(b, u8"[type=text]"));
       REQUIRE(Matches(b, u8"[type=TeXt]"));
       REQUIRE(Matches(b, u8"[type=text i]"));
+      // Unless the s flag says otherwise.
+      REQUIRE(Matches(b, u8"[type=TEXT s]"));
+      REQUIRE_FALSE(Matches(b, u8"[type=text s]"));
+      REQUIRE_FALSE(Matches(b, u8"[type=text S]"));
       REQUIRE_FALSE(Matches(b, u8"[id=B]"));
     }
 
@@ -321,5 +327,38 @@ namespace krys::boo::css::tests
     REQUIRE(Matches(s, u8":dir(rtl)"));
     REQUIRE(Matches(ById(*document, u8"b"), u8":dir(ltr)"));
     REQUIRE_FALSE(Matches(s, u8":dir(ltr)"));
+  }
+
+  TEST_CASE("SelectorChecker: :heading and :heading()", "[CSS][Selectors][SelectorChecker]")
+  {
+    auto document = Parse(u8"<!DOCTYPE html><h1 id=h1></h1><h3 id=h3></h3><section headingoffset=2>"
+                          u8"<h2 id=offset></h2></section><p id=p></p>");
+    auto &h1 = ById(*document, u8"h1");
+    auto &offset = ById(*document, u8"offset");
+
+    REQUIRE(Matches(h1, u8":heading"));
+    REQUIRE(Matches(ById(*document, u8"h3"), u8":heading"));
+    REQUIRE_FALSE(Matches(ById(*document, u8"p"), u8":heading"));
+
+    REQUIRE(Matches(h1, u8":heading(1)"));
+    REQUIRE(Matches(h1, u8":heading(3, 1)"));
+    REQUIRE_FALSE(Matches(h1, u8":heading(2)"));
+    // The computed heading level, with the ancestors' headingoffset.
+    REQUIRE(Matches(offset, u8":heading(4)"));
+    REQUIRE_FALSE(Matches(offset, u8":heading(2)"));
+  }
+
+  TEST_CASE("SelectorChecker: :open", "[CSS][Selectors][SelectorChecker]")
+  {
+    auto document =
+      Parse(u8"<!DOCTYPE html><details id=open open></details><details id=closed></details>"
+            u8"<dialog id=dialog open></dialog><select id=select></select><div id=div open></div>");
+
+    REQUIRE(Matches(ById(*document, u8"open"), u8":open"));
+    REQUIRE_FALSE(Matches(ById(*document, u8"closed"), u8":open"));
+    REQUIRE(Matches(ById(*document, u8"dialog"), u8":open"));
+    // A select whose picker isn't showing, and an element that has no open state.
+    REQUIRE_FALSE(Matches(ById(*document, u8"select"), u8":open"));
+    REQUIRE_FALSE(Matches(ById(*document, u8"div"), u8":open"));
   }
 }

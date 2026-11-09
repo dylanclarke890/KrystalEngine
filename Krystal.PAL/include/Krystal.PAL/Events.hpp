@@ -10,6 +10,7 @@
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Pointer.hpp"
 #include "Krystal.PAL/TextInput.hpp"
+#include "Krystal.PAL/TouchpadPan.hpp"
 
 namespace krys::pal
 {
@@ -263,6 +264,25 @@ namespace krys::pal
     PointerInputEvent(WindowHandle window, const PointerInput &input) noexcept;
 
     KRYS_NODISCARD const PointerInput &Input() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief A step of a precision touchpad's two-finger pan over a window.
+  class TouchpadPanEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    TouchpadPanInput _input;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("touchpad-pan-event")
+
+    /// @brief Constructs a `TouchpadPanEvent`.
+    /// @param input The pan's step.
+    TouchpadPanEvent(WindowHandle window, const TouchpadPanInput &input) noexcept;
+
+    KRYS_NODISCARD const TouchpadPanInput &Input() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };

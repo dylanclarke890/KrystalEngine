@@ -15,7 +15,6 @@ namespace krys::boo
   {
     KRYS_NODISCARD bool CanDropAnonymousBlock(const RenderBlock &anonymousBlock) noexcept
     {
-      // FIXME: Continuations, once there are any.
       if (anonymousBlock.BeingDestroyed())
       {
         return false;
@@ -53,8 +52,6 @@ namespace krys::boo
         }
       }
 
-      // FIXME: Merging the pre and post anonymous blocks of a continuation when the box that triggered it
-      // goes away, once there are continuations.
       return true;
     }
 
@@ -151,7 +148,6 @@ namespace krys::boo
   void RenderTreeBuilder::Block::Attach(RenderBlock &parent, RenderPtr<RenderObject> child,
                                         RenderObject *beforeChild) noexcept
   {
-    // FIXME: Inserting into a continuation (insertChildToContinuation), once there are continuations.
     AttachIgnoringContinuation(parent, krys::move(child), beforeChild);
   }
 
@@ -260,8 +256,6 @@ namespace krys::boo
     krys_debug_assert(anonymousBlock.IsAnonymousBlock());
     krys_debug_assert(!anonymousBlock.ChildrenInline());
     krys_debug_assert(anonymousBlock.Parent());
-
-    // FIXME: Continuations, once there are any.
 
     auto *parent = anonymousBlock.Parent();
     if (Is<RenderButton>(*parent) || Is<RenderTextControl>(*parent))

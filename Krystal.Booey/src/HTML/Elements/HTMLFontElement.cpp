@@ -236,7 +236,7 @@ namespace krys::boo::html
         if (auto fontFaceValue =
               css::ValuePool::MainThreadPool().CreateFontFaceValue(css::CSSOMStringAtom(value)))
         {
-          style.SetProperty(css::PropertyId::FontFamily, Ref<css::Value> {krys::move(fontFaceValue)});
+          style.SetProperty(css::PropertyId::FontFamily, krys::move(fontFaceValue));
         }
       }
       return;

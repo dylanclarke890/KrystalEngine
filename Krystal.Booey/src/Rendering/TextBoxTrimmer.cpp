@@ -230,9 +230,7 @@ namespace krys::boo
     }
 
     layoutContext.SetTextBoxTrim(LocalFrameViewLayoutContext::TextBoxTrim {
-      shouldTrimFirstFormattedLineStart, lastFormattedLineRoot
-                                           ? WeakPtr<const RenderBlockFlow>::WithRef(*lastFormattedLineRoot)
-                                           : WeakPtr<const RenderBlockFlow> {}});
+      shouldTrimFirstFormattedLineStart, CreateWeakPtr(lastFormattedLineRoot)});
   }
 
   void TextBoxTrimmer::AdjustTextBoxTrimStatusAfterLayout() noexcept

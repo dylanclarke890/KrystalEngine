@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/Style/TreeResolver.hpp"
+#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
@@ -151,6 +154,29 @@ namespace krys::boo::style::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "TreeResolver: font-size-adjust: from-font is inherited as a number",
+                   "[Style][TreeResolver]")
+  {
+    (void)FontDatabase::Singleton().AddFontFile(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts"
+                                                / "Ahem.ttf");
+    ResolverFixture fixture {u8R"(<!DOCTYPE html>
+      <div id=a style="font: 20px 'Liberation Sans'; font-size-adjust: from-font"><span id=b
+        style="font-family: Ahem">x</span></div>)"};
+
+    // The div's primary font is Liberation Sans, whose x-height is 1082/2048em.
+    auto &a = Rendered(fixture.ById(u8"a"));
+    auto aspect = a.GetFontDescription().GetFontSizeAdjust().Value;
+    REQUIRE(aspect);
+    CHECK(*aspect == Catch::Approx(1082.f / 2048.f));
+    CHECK(a.GetFontCascade().PrimaryFont()->PlatformData().Size() == Catch::Approx(20.f));
+
+    // The span inherits the number, so Ahem (x-height 0.8em) is scaled to match.
+    auto &b = Rendered(fixture.ById(u8"b"));
+    CHECK(b.GetFontDescription().GetFontSizeAdjust().Value == aspect);
+    CHECK(b.GetFontCascade().PrimaryFont()->PlatformData().Size() == Catch::Approx(20.f * *aspect / 0.8f));
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "TreeResolver: the document element and body",
                    "[Style][TreeResolver]")
   {
@@ -260,7 +286,18 @@ namespace krys::boo::style::tests
       @container (width > 0px) { #p { height: 5px } }
       @container foo style(--y: a) { #q { color: rgb(255, 0, 0) } }
       @container bar style(--y: a) { #q { width: 5px } }
-    </style><div id=c><p id=p></p></div><div id=n><p id=q></p></div>)"};
+      @container bar style(--y: a), foo style(--y: a) { #q { height: 7px } }
+      @container bar, style(--y: b) { #q { min-width: 3px } }
+      #r { --len: 20px; --num: 3; --zero: 0; --deg: 90deg; --word: a }
+      @container style(--len > 10px) { #s { width: 1px } }
+      @container style(1em < --len < 2em) { #s { height: 2px } }
+      @container style(--num >= 3) { #s { min-width: 3px } }
+      @container style(--zero < --len) { #s { min-height: 4px } }
+      @container style(0.25turn = --deg) { #s { max-width: 5px } }
+      @container style(--len > 1) { #s { max-height: 6px } }
+      @container style(--word > 1) { #s { padding-top: 7px } }
+      @container style(--missing < 1) { #s { margin-left: 8px } }
+    </style><div id=c><p id=p></p></div><div id=n><p id=q></p></div><div id=r><p id=s></p></div>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
 
@@ -274,6 +311,22 @@ namespace krys::boo::style::tests
     auto &q = Rendered(fixture.ById(u8"q"));
     CHECK(q.GetColor() == Red);
     CHECK(ResolverFixture::Serialised(q, q.Width()) == "auto");
+    // A list applies if any of its queries is true, each against its own container.
+    CHECK(ResolverFixture::Serialised(q, q.Height()) == "7px");
+    CHECK(ResolverFixture::Serialised(q, q.MinWidth()) == "auto");
+
+    // Style ranges compare numeric values of the same type.
+    auto &s = Rendered(fixture.ById(u8"s"));
+    CHECK(ResolverFixture::Serialised(s, s.Width()) == "1px");
+    CHECK(ResolverFixture::Serialised(s, s.Height()) == "2px");
+    CHECK(ResolverFixture::Serialised(s, s.MinWidth()) == "3px");
+    // A unitless zero is a zero length against a length.
+    CHECK(ResolverFixture::Serialised(s, s.MinHeight()) == "4px");
+    CHECK(ResolverFixture::Serialised(s, s.MaxWidth()) == "5px");
+    // Mismatched types, values that aren't numeric and missing properties are false.
+    CHECK(ResolverFixture::Serialised(s, s.MaxHeight()) == "none");
+    CHECK(ResolverFixture::Serialised(s, s.PaddingTop()) == "0px");
+    CHECK(ResolverFixture::Serialised(s, s.MarginLeft()) == "0px");
 
     SECTION("Selecting containers")
     {
@@ -320,5 +373,17 @@ namespace krys::boo::style::tests
 
     CHECK(update->ElementStyle(s) == update->GetElementUpdate(s)->Style.get());
     CHECK(update->ElementStyle(fixture.ById(u8"p")) == fixture.ById(u8"p").GetRenderStyle());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "TreeResolver: trigonometric functions of sibling-index() angles", "[Style][TreeResolver]")
+  {
+    // The angle is only known per element, so the calculation is evaluated unsimplified, in canonical
+    // degrees.
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      div { opacity: sin(sibling-index() * 30deg) }
+    </style><div id=a></div><div id=b></div><div id=c></div>)"};
+    CHECK(Rendered(fixture.ById(u8"a")).GetOpacity().Value.Value == Catch::Approx(0.5f));
+    CHECK(Rendered(fixture.ById(u8"c")).GetOpacity().Value.Value == Catch::Approx(1.0f));
   }
 }

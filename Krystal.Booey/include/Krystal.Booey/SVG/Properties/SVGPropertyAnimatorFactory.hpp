@@ -152,7 +152,6 @@ namespace krys::boo::svg
 
         {&SVGNames::AlignmentBaselineAttr(), string, stringAnimator},
         {&SVGNames::BaselineShiftAttr(), string, stringAnimator},
-        {&SVGNames::BufferedRenderingAttr(), string, stringAnimator},
         {&SVGNames::ClipPathAttr(), string, stringAnimator},
         {&SVGNames::ClipRuleAttr(), string, stringAnimator},
         {&SVGNames::ColorInterpolationAttr(), string, stringAnimator},

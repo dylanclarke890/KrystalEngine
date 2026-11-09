@@ -164,9 +164,9 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->AppendChild(*sibling1.Value()).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
 
-    auto nodeIterator =
-      data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, CreateRefPtr<TextNodeFilter>());
-    CHECK(dynamic_cast<TextNodeFilter *>(nodeIterator->Filter()) != nullptr);
+    RefPtr<NodeFilter> filter = CreateRefPtr<TextNodeFilter>();
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, RefPtr {filter});
+    CHECK(nodeIterator->Filter() == filter.get());
 
     auto nextNodeResult = nodeIterator->NextNode();
     REQUIRE_FALSE(nextNodeResult.HasException());
@@ -405,8 +405,7 @@ namespace krys::boo::dom::tests
   {
     AdjustTestData data;
     auto filter = CreateRef<CallbackNodeFilter>();
-    auto iterator =
-      data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, RefPtr<NodeFilter> {filter});
+    auto iterator = data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, filter);
     List<const Node *> seen;
     filter->Callback = [&](const Node &node)
     {
@@ -442,8 +441,7 @@ namespace krys::boo::dom::tests
     AdjustTestData data;
     auto filter = CreateRef<CallbackNodeFilter>();
     filter->Result = FilterResult::FILTER_ACCEPT;
-    auto iterator =
-      data.Document->CreateNodeIterator(*data.U, WhatToShow::SHOW_ALL, RefPtr<NodeFilter> {filter});
+    auto iterator = data.Document->CreateNodeIterator(*data.U, WhatToShow::SHOW_ALL, filter);
     filter->Callback = [](const Node &) {};
     REQUIRE(iterator->NextNode().ReleaseValue() == data.U.get());
 

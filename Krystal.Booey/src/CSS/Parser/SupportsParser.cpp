@@ -19,9 +19,25 @@ namespace krys::boo::css
     SupportsParser supportsParser(parser);
 
     auto result = supportsParser.ConsumeCondition(tokens);
-    if (mode != ParsingMode::AllowBareDeclarationAndGeneralEnclosed || result != Invalid)
+    if (mode == ParsingMode::ForAtRuleSupports || result != Invalid)
     {
       return result;
+    }
+
+    if (mode == ParsingMode::AllowBareDeclaration)
+    {
+      // A declaration is a property name and a colon; one the parser doesn't support is still valid.
+      auto declaration = tokens;
+      if (declaration.Peek().Type() != TokenType::Ident)
+      {
+        return Invalid;
+      }
+      (void)declaration.ConsumeIncludingWhitespace();
+      if (declaration.Peek().Type() != TokenType::Colon)
+      {
+        return Invalid;
+      }
+      return parser.SupportsDeclaration(tokens) ? Supported : Unsupported;
     }
 
     // window.CSS.supports requires parsing as-if the condition was wrapped in

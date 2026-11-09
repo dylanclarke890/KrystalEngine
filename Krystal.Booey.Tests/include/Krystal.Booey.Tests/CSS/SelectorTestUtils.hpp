@@ -50,7 +50,7 @@ namespace krys::boo::css::tests
       selector->SetMatch(match);
       selector->SetValue(CSSOMStringAtom(value));
       selector->SetAttribute(dom::QualifiedName(dom::StarAtom(), prefix, CSSOMStringAtom(name)),
-                             caseSensitive);
+                             caseSensitive ? AttributeCaseFlag::None : AttributeCaseFlag::Insensitive);
       return selector;
     }
 

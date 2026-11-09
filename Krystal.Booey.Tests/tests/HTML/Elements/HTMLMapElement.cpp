@@ -4,9 +4,12 @@
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -275,5 +278,99 @@ namespace krys::boo::html::tests
     fixture.Area(u8"circle").Focus({.FocusVisible = true});
     fixture.Document->SetFocusedAndActive(false);
     CHECK(fixture.Painted() == unfocused);
+  }
+
+  TEST_CASE("HTMLImageElement::AssociatedMapElement: follows the tree scope's maps",
+            "[HTML][HTMLMapElement][html:rules-for-parsing-a-hash-name-reference]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto parser = CreateRef<html::DocumentParser>(*document);
+    parser->InputStream().Append(u8"<!DOCTYPE html><body><img id=img usemap=#m><map id=first name=m></map>",
+                                 IsEOF(true));
+    (void)parser->PumpTokenizer();
+    auto &body = *document->Body();
+    auto &image = Downcast<HTMLImageElement>(*document->GetElementById(u8"img"));
+    auto &first = Downcast<HTMLMapElement>(*document->GetElementById(u8"first"));
+    REQUIRE(image.AssociatedMapElement() == &first);
+
+    auto create = [&]
+    {
+      return ShareRef(Downcast<HTMLMapElement>(*document->CreateElement(u8"map").ReleaseValue()));
+    };
+
+    SECTION("by ID or name, whichever changes")
+    {
+      first.RemoveAttribute(u8"name");
+      CHECK(image.AssociatedMapElement() == nullptr);
+      first.Id(u8"m");
+      CHECK(image.AssociatedMapElement() == &first);
+      first.Name(u8"m");
+      first.Id(u8"other");
+      CHECK(image.AssociatedMapElement() == &first);
+      first.Name(u8"other");
+      CHECK(image.AssociatedMapElement() == nullptr);
+    }
+
+    SECTION("the first in tree order, as maps come, go and move")
+    {
+      auto later = create();
+      later->Name(u8"m");
+      REQUIRE_FALSE(body.AppendChild(*later).HasException());
+      CHECK(image.AssociatedMapElement() == &first);
+
+      auto earlier = create();
+      earlier->Id(u8"m");
+      REQUIRE_FALSE(body.InsertBefore(*earlier, &first).HasException());
+      CHECK(image.AssociatedMapElement() == earlier.get());
+
+      REQUIRE_FALSE(body.RemoveChild(*earlier).HasException());
+      CHECK(image.AssociatedMapElement() == &first);
+
+      REQUIRE_FALSE(body.MoveBefore(*later, &first).HasException());
+      CHECK(image.AssociatedMapElement() == later.get());
+    }
+
+    SECTION("a map with its ID and name the same counts once")
+    {
+      first.Id(u8"m");
+      CHECK(image.AssociatedMapElement() == &first);
+      first.RemoveAttribute(u8"id");
+      CHECK(image.AssociatedMapElement() == &first);
+      first.RemoveAttribute(u8"name");
+      CHECK(image.AssociatedMapElement() == nullptr);
+    }
+
+    SECTION("a map inside a subtree comes and goes with it")
+    {
+      Ref<dom::Element> wrapper = document->CreateElement(u8"div").ReleaseValue();
+      auto wrapped = create();
+      wrapped->Name(u8"wrapped");
+      REQUIRE_FALSE(wrapper->AppendChild(*wrapped).HasException());
+      image.UseMap(u8"#wrapped");
+      CHECK(image.AssociatedMapElement() == nullptr);
+      REQUIRE_FALSE(body.AppendChild(*wrapper).HasException());
+      CHECK(image.AssociatedMapElement() == wrapped.get());
+      REQUIRE_FALSE(body.RemoveChild(*wrapper).HasException());
+      CHECK(image.AssociatedMapElement() == nullptr);
+    }
+
+    SECTION("in a shadow tree, and in a tree that isn't in a scope")
+    {
+      auto host = document->CreateElement(u8"div").ReleaseValue();
+      auto shadow = host->AttachShadow({.Mode = dom::ShadowRootMode::Open}).ReleaseValue();
+      REQUIRE_FALSE(shadow->AppendChild(image).HasException());
+      // The map outside the shadow tree isn't in the image's tree.
+      CHECK(image.AssociatedMapElement() == nullptr);
+
+      auto inside = create();
+      inside->Name(u8"m");
+      REQUIRE_FALSE(shadow->AppendChild(*inside).HasException());
+      CHECK(image.AssociatedMapElement() == inside.get());
+
+      Ref<dom::Element> detached = document->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(detached->AppendChild(image).HasException());
+      REQUIRE_FALSE(detached->AppendChild(*inside).HasException());
+      CHECK(image.AssociatedMapElement() == inside.get());
+    }
   }
 }

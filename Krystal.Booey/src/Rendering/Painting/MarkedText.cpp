@@ -228,7 +228,7 @@ namespace krys::boo
       appendMarkedTextHighlights(*registry, Type::FragmentHighlight);
     }
 
-    // FIXME: The text extraction and app highlights' registries, once there are any.
+    // (There are no text extraction or app highlights; see DIFFERENCES.md.)
     return markedTexts;
   }
 }

@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 
 namespace krys::boo::tests
 {
@@ -91,6 +92,12 @@ namespace krys::boo::tests
     auto *backdrop = renderer->BackdropRenderer();
     REQUIRE(backdrop);
     CHECK(backdrop->Style().GetPosition() == PositionType::Fixed);
+
+    // Its styleable is the element's ::backdrop.
+    auto styleable = style::Styleable::FromRenderer(*backdrop);
+    REQUIRE(styleable);
+    CHECK(&styleable->Element == &top);
+    CHECK(styleable->PseudoElementIdentifier == style::PseudoElementIdentifier {PseudoElementType::Backdrop});
 
     // The backdrop and the element are the view's last layers, above the z-index.
     REQUIRE(LayerOf(renderer));

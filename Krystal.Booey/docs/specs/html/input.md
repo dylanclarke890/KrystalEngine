@@ -90,7 +90,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.5 Email state (type=email)](https://html.spec.whatwg.org/#email-state-%28type=email%29)
 
 Status: reviewed (2026-11-01)
-> `EmailInputType`; addresses are checked with the specification's pattern. User-facing punycode conversion is left out (no IDN in the UI).
+> `EmailInputType`; addresses are checked against the specification's grammar by hand (`IsValidEmailAddress`). User-facing punycode conversion is left out (no IDN in the UI).
 
 - [x] [Whenever the user changes the element's values, the user agent must run the fol…](https://html.spec.whatwg.org/#email-state-%28type=email%29) — Whenever the user changes the element's values, the user agent must run the following steps:
   - 1. Let latest values be a copy of the element's values.
@@ -150,7 +150,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.14 Color state (type=color)](https://html.spec.whatwg.org/#color-state-%28type=color%29)
 
 Status: reviewed (2026-11-01)
-> `ColorInputType`; no `alpha` or `colorspace` support in the colour well (see `KNOWN-ISSUES.md`), though `colorSpace` reflects.
+> `ColorInputType`: the value is any CSS colour, serialised for the `alpha` and `colorspace` attributes. Parsing follows WebKit: `currentcolor` is black, and components round to the nearest rather than towards +∞.
 <!-- definitions: attr-input-alpha attr-input-colorspace -->
 
 - [x] [update a color well control color](https://html.spec.whatwg.org/#update-a-color-well-control-color) — To update a color well control color, given an element element:
@@ -201,7 +201,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.17 File Upload state (type=file)](https://html.spec.whatwg.org/#file-upload-state-%28type=file%29)
 
 Status: reviewed (2026-11-01)
-> `FileInputType`; no file chooser (see `KNOWN-ISSUES.md`).
+> `FileInputType`; the host shows the file picker (`ChromeClient::RunOpenPanel`, see `DIFFERENCES.md`).
 <!-- definitions: concept-input-type-file-selected concept-input-file-path attr-input-accept -->
 
 - [x] [update the file selection](https://html.spec.whatwg.org/#update-the-file-selection) — To update the file selection for an element element:
@@ -223,7 +223,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.19 Image Button state (type=image)](https://html.spec.whatwg.org/#image-button-state-%28type=image%29)
 
 Status: reviewed (2026-11-01)
-> `ImageInputType`; the image isn't loaded (see `KNOWN-ISSUES.md`).
+> `ImageInputType`, with `HTMLImageLoader` and `RenderImage`. As in Chrome, the label falls back from `alt` to `title`, `value` and "Submit".
 <!-- definitions: input-img-available -->
 
 - [x] [then unless the user agent cannot support images, or its support for images has…](https://html.spec.whatwg.org/#attr-input-src) — then unless the user agent cannot support images, or its support for images has been disabled, or the user agent only fetches images on demand, or the src attribute's value is the empty string, run these steps:
@@ -299,7 +299,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.3.6 The pattern attribute](https://html.spec.whatwg.org/#the-pattern-attribute)
 
 Status: reviewed (2026-11-01)
-> `BaseTextInputType::PatternMismatch`, anchored; matched with `std::wregex` rather than the `v` flag (see `KNOWN-ISSUES.md`).
+> `BaseTextInputType::PatternMismatch`, matching whole values; an ICU regular expression rather than an ECMAScript one with the `v` flag (see `DIFFERENCES.md`).
 <!-- definitions: attr-input-pattern attr-input-title -->
 
 - [x] [compiled pattern regular expression](https://html.spec.whatwg.org/#compiled-pattern-regular-expression) — The compiled pattern regular expression of an input element, if it exists, is a JavaScript RegExp object. It is determined as follows:

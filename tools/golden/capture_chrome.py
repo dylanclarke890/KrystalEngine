@@ -9,6 +9,8 @@ A scene whose script records something when loaded with "?record" (setting data-
 lines of text) also gets <golden>/<name>.chrome-<kind>.txt for each, read from Chrome's DOM: the client rects
 of its elements with ids ("rects", lines of "id x y width height"), say.
 
+A scene with data-hand-captured on its <html> is left alone: it needs something this can't do, which it describes.
+
 A scene that lists input actions (see cdp.py) also gets <golden>/<name>.chrome-input.txt: the actions, sent to
 Chrome as real input, each with the state the scene's recordState() gives after it.
 
@@ -20,9 +22,7 @@ import html as html_module
 import pathlib
 import re
 import shutil
-import subprocess
 import sys
-import tempfile
 
 import cdp
 
@@ -57,52 +57,25 @@ def scene_size(html):
 def capture(chrome, golden, scene):
     width, height = scene_size(scene.read_text(encoding="utf-8-sig"))
     output = golden / f"{scene.stem}.chrome.png"
-    with tempfile.TemporaryDirectory() as profile:
-        subprocess.run(
-            [
-                str(chrome),
-                "--headless=new",
-                "--disable-gpu",
-                "--no-first-run",
-                "--hide-scrollbars",
-                "--force-device-scale-factor=1",
-                "--force-color-profile=srgb",
-                # Scenes load fonts from the repository by relative file URLs, and wait for them.
-                "--allow-file-access-from-files",
-                "--virtual-time-budget=5000",
-                f"--user-data-dir={profile}",
-                f"--window-size={width},{height}",
-                f"--screenshot={output}",
-                scene.as_uri(),
-            ],
-            check=True,
-            capture_output=True,
-        )
+    # Through DevTools rather than --screenshot, whose --window-size isn't the viewport: under 516 wide the viewport is
+    # 500, above that it's 16 narrower, and it's always about 90 shorter, with the image then cropped or padded to size.
+    browser = cdp.Chrome(chrome, width, height)
+    try:
+        browser.load_settled(scene.as_uri())
+        output.write_bytes(browser.screenshot())
+    finally:
+        browser.close()
     print(f"{scene.stem}: {output.relative_to(ROOT)} ({width}x{height})")
 
 
 def capture_records(chrome, golden, scene):
     width, height = scene_size(scene.read_text(encoding="utf-8-sig"))
-    with tempfile.TemporaryDirectory() as profile:
-        result = subprocess.run(
-            [
-                str(chrome),
-                "--headless=new",
-                "--disable-gpu",
-                "--no-first-run",
-                "--hide-scrollbars",
-                "--force-device-scale-factor=1",
-                "--allow-file-access-from-files",
-                "--virtual-time-budget=5000",
-                f"--user-data-dir={profile}",
-                f"--window-size={width},{height}",
-                "--dump-dom",
-                scene.as_uri() + "?record",
-            ],
-            check=True,
-            capture_output=True,
-        )
-    dom = result.stdout.decode("utf-8")
+    browser = cdp.Chrome(chrome, width, height)
+    try:
+        browser.load_settled(scene.as_uri() + "?record")
+        dom = browser.evaluate("document.documentElement.outerHTML")
+    finally:
+        browser.close()
     records = re.findall(r'data-record-([a-z]+)="([^"]*)"', dom)
     if not records:
         sys.exit(f"{scene.stem}: Chrome's DOM has no data-record-* attributes.")
@@ -136,8 +109,11 @@ def main():
         scene = scenes / f"{name}.html"
         if not scene.exists():
             sys.exit(f"No scene {scene.relative_to(ROOT)}.")
-        capture(chrome, golden, scene)
         html = scene.read_text(encoding="utf-8-sig")
+        if "data-hand-captured" in html:
+            print(f"{name}: left alone, as its Chrome golden is captured by hand")
+            continue
+        capture(chrome, golden, scene)
         if '"?record"' in html:
             capture_records(chrome, golden, scene)
         if cdp.actions_of(html):

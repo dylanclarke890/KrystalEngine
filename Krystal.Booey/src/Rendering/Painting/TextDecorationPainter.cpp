@@ -421,8 +421,6 @@ namespace krys::boo
       }
 
       current = current->Parent();
-      // FIXME: Anonymous blocks of inline continuations carry on at the continuation, once there are
-      // continuations.
 
       if (remainingDecorations.IsNone())
       {

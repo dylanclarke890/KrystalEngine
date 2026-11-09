@@ -73,11 +73,6 @@ namespace krys::boo::inline_iterator
       boxes.push_back(box);
     }
 
-    if (lineBox->FormattingContextRoot().Style().RtlOrdering() == Order::Visual)
-    {
-      return boxes;
-    }
-
     // Reverse of reordering of the line (L2 according to Bidi spec):
     // L2. From the highest level found in the text to the lowest odd level on each line,
     // reverse any contiguous sequence of characters that are at that level or higher.

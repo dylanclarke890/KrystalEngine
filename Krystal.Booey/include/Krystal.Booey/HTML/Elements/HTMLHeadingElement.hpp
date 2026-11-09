@@ -40,4 +40,9 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLHeadingElement)
   {
     return target.IsHTMLHeadingElement();
   }
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    return element && element->IsHTMLHeadingElement();
+  }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

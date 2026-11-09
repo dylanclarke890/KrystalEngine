@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
@@ -11,35 +11,74 @@
 
 namespace krys::boo::dom
 {
-  LiveHTMLCollection::LiveHTMLCollection(ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter) noexcept
-      : _root(ShareRef(root)), _filter(krys::move(filter))
+  LiveHTMLCollection::LiveHTMLCollection(ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter,
+                                         LiveCollectionInvalidation invalidation,
+                                         LiveCollectionTraversal traversal) noexcept
+      : LiveCollection(root, invalidation, traversal), _filter(krys::move(filter))
   {
+  }
+
+  LiveHTMLCollection::~LiveHTMLCollection() noexcept
+  {
+    ForgetNamedItems();
+  }
+
+  void LiveHTMLCollection::InvalidateCache() noexcept
+  {
+    _indexCache.Invalidate();
+    ForgetNamedItems();
+    UnregisterCache();
+  }
+
+  void LiveHTMLCollection::InvalidateCacheForAttribute(DOMStringAtom localName) noexcept
+  {
+    if (localName == u8"id" || localName == u8"name")
+    {
+      ForgetNamedItems();
+    }
+    LiveCollection::InvalidateCacheForAttribute(localName);
+  }
+
+  void LiveHTMLCollection::WillValidateIndexCache() const noexcept
+  {
+    RegisterCache();
+  }
+
+  Element *LiveHTMLCollection::FirstMatchFrom(Node *node) const noexcept
+  {
+    for (; node; node = NextNode(*node))
+    {
+      if (auto *element = DynamicDowncast<Element>(node); element && _filter(*element))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *LiveHTMLCollection::CollectionBegin() const noexcept
+  {
+    return FirstMatchFrom(FirstNode());
+  }
+
+  Element *LiveHTMLCollection::CollectionNext(Element &element) const noexcept
+  {
+    return FirstMatchFrom(NextNode(element));
+  }
+
+  void LiveHTMLCollection::ForgetNamedItems() noexcept
+  {
+    if (_hasNamedItems)
+    {
+      _hasNamedItems = false;
+      _namedItems.clear();
+      Root().NodeDocument().LiveCollectionCacheRemoved(LiveCollectionInvalidation::IdOrName);
+    }
   }
 
   RefPtr<Element> LiveHTMLCollection::Item(size_t index) noexcept
   {
-    size_t count = 0uz;
-    for (Node &node : DescendantRange(*_root))
-    {
-      if (!Is<Element>(node))
-      {
-        continue;
-      }
-
-      auto &element = Downcast<Element>(node);
-      if (!_filter(element))
-      {
-        continue;
-      }
-
-      ++count;
-      if (count > index)
-      {
-        return ShareRef(element);
-      }
-    }
-
-    return nullptr;
+    return ShareRefPtr(_indexCache.At(*this, index));
   }
 
   RefPtr<const Element> LiveHTMLCollection::Item(size_t index) const noexcept
@@ -69,32 +108,30 @@ namespace krys::boo::dom
     //    - it has an ID which is key;
     //    - it is in the HTML namespace and has a name attribute whose value is key;
     //    or null if there is no such element.
-    for (Node &node : DescendantRange(*_root))
+    if (!_hasNamedItems)
     {
-      if (!Is<Element>(node))
+      for (size_t i = 0, count = _indexCache.Count(*this); i < count; ++i)
       {
-        continue;
+        auto *element = _indexCache.At(*this, i);
+        if (auto id = element->Id(); !id.empty())
+        {
+          _namedItems.try_emplace(DOMString(id), element);
+        }
+        if (element->NamespaceURI() == infra::Namespaces::HTML)
+        {
+          if (auto elementName = ElementAlgorithms::GetAttributeValue(*element, u8"name");
+              !elementName.empty())
+          {
+            _namedItems.try_emplace(DOMString(elementName), element);
+          }
+        }
       }
-
-      auto &element = Downcast<Element>(node);
-      if (!_filter(element))
-      {
-        continue;
-      }
-
-      if (element.Id() == name)
-      {
-        return ShareRef(element);
-      }
-
-      if (element.NamespaceURI() == infra::Namespaces::HTML
-          && ElementAlgorithms::GetAttributeValue(element, u8"name") == name)
-      {
-        return ShareRef(element);
-      }
+      _hasNamedItems = true;
+      Root().NodeDocument().LiveCollectionCacheAdded(LiveCollectionInvalidation::IdOrName);
     }
 
-    return nullptr;
+    auto it = _namedItems.find(DOMString(name));
+    return it != _namedItems.end() ? ShareRefPtr(it->second) : nullptr;
   }
 
   RefPtr<const Element> LiveHTMLCollection::NamedItem(DOMStringView name) const noexcept
@@ -114,8 +151,7 @@ namespace krys::boo::dom
 
   size_t LiveHTMLCollection::Length() const noexcept
   {
-    return Count(ConstDescendantRange(*_root),
-                 [&](auto &&node) { return Is<Element>(node) && _filter(Downcast<Element>(node)); });
+    return _indexCache.Count(*this);
   }
 
   List<DOMString> LiveHTMLCollection::SupportedPropertyNames() const noexcept
@@ -124,18 +160,9 @@ namespace krys::boo::dom
     List<DOMString> supportedNames;
 
     // 2. For each element represented by the collection, in tree order:
-    for (auto &node : DescendantRange(*_root))
+    for (size_t i = 0, count = _indexCache.Count(*this); i < count; ++i)
     {
-      if (!Is<Element>(node))
-      {
-        continue;
-      }
-
-      auto &element = Downcast<Element>(node);
-      if (!_filter(element))
-      {
-        continue;
-      }
+      auto &element = *_indexCache.At(*this, i);
 
       // 2a. If element has an ID which is not in result, append element's ID to result.
       auto id = element.Id();

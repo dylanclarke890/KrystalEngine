@@ -87,7 +87,7 @@ namespace krys::boo
 
     void SetClient(FontLoadRequestClient *client) noexcept final
     {
-      auto oldClient = std::exchange(_fontLoadRequestClient, WeakPtr<FontLoadRequestClient>::WithRef(client));
+      auto oldClient = std::exchange(_fontLoadRequestClient, CreateWeakPtr(client));
       if (!client && oldClient)
       {
         _font->RemoveClient(*this);

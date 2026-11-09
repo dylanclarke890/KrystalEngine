@@ -69,6 +69,7 @@ namespace krys::boo::svg
     }
 
     void FinishParsingChildren() noexcept final;
+    void NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept final;
 
     KRYS_NODISCARD bool IsLoading() const noexcept
     {

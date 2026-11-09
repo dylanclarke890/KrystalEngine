@@ -117,7 +117,7 @@ namespace krys::boo::css::tests
       descriptors.SetFallbackName(CSSOMStringAtom(u8"disc"));
       CHECK(ToNarrow(descriptors.FallbackCSSText()) == "disc");
 
-      descriptors.SetNegative({{false, u8"-"}, {false, u8"!"}});
+      descriptors.SetNegative({{false, u8"-"}, {false, u8"!"}, true});
       CHECK(ToNarrow(descriptors.NegativeCSSText()) == "\"-\" \"!\"");
     }
 

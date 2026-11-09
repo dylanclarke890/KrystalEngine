@@ -70,10 +70,10 @@ namespace krys::boo::css::tests
 
     SECTION("removeProperty")
     {
-      // Removing a shorthand doesn't return its value yet (FIXME in RemoveShorthandProperty).
+      // Removing a shorthand returns its value.
       auto removed = style.RemoveProperty(u8"margin");
       REQUIRE(removed.HasValue());
-      CHECK(removed.Value().empty());
+      CHECK(ToNarrow(removed.Value()) == "1px 2px");
 
       CHECK(style.Length() == 3);
 

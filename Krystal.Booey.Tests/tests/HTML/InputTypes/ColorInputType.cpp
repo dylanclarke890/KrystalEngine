@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/ColorInputType.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
@@ -15,6 +16,14 @@ namespace krys::boo::tests
 
   namespace
   {
+    /// @brief Clicks @p input as a user does, with the window's transient activation that opening a picker
+    /// needs.
+    void UserClick(HTMLInputElement &input) noexcept
+    {
+      input.NodeDocument().Window()->NotifyActivated();
+      input.Click();
+    }
+
     /// @brief Calls `showPicker()` on @p input during a user gesture, which it needs.
     KRYS_NODISCARD dom::ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
     {
@@ -117,6 +126,42 @@ namespace krys::boo::tests
           == u8"rgb(0, 0, 255)");
   }
 
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "ColorInputType: any CSS colour, with alpha and colorspace",
+    "[HTML][ColorInputType][html:update-a-color-well-control-color]"
+    "[html:serialize-a-color-well-control-color][html:attr-input-alpha][html:attr-input-colorspace]")
+  {
+    EditorFixture fixture(u8"<input type=color id=c>");
+    auto &input = InputById(fixture, u8"c");
+    auto value = [&](const char8_t *text)
+    {
+      (void)input.SetValue(text);
+      return css::tests::ToNarrow(input.Value());
+    };
+
+    // Any CSS colour is parsed; without alpha it's opaque and serialised as a simple colour.
+    CHECK(value(u8"red") == "#ff0000");
+    CHECK(value(u8"rgb(0 128 255 / 0.5)") == "#0080ff");
+    CHECK(value(u8"currentcolor") == "#000000");
+    CHECK(value(u8"nonsense") == "#000000");
+
+    // With alpha, the alpha is kept and the value is a color() function.
+    (void)input.SetAttribute(u8"alpha", u8"");
+    CHECK(input.Value() == u8"color(srgb 0 0 0)");
+    // Components are rounded to 0 to 255, alpha too: 0.4 is 102.
+    CHECK(value(u8"rgb(255 0 0 / 0.4)") == "color(srgb 1 0 0 / 0.4)");
+
+    // In Display P3, the value is in that colour space.
+    (void)input.RemoveAttribute(u8"alpha");
+    (void)input.SetAttribute(u8"colorspace", u8"display-p3");
+    CHECK(value(u8"color(display-p3 1 0 0)") == "color(display-p3 1 0 0)");
+    CHECK(input.ColourSpace() == u8"display-p3");
+
+    // Changing the attributes updates a dirty value.
+    (void)input.RemoveAttribute(u8"colorspace");
+    CHECK(input.Value() == u8"#ff0000");
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "ColorInputType: the colour chooser", "[HTML][ColorInputType]")
   {
     auto chromeClient = CreateUnique<ColorChromeClient>();
@@ -126,9 +171,15 @@ namespace krys::boo::tests
     auto inputs = fixture.Listen(u8"input");
     auto changes = fixture.Listen(u8"change");
 
-    SECTION("a click shows it, with the value")
+    SECTION("a click without the user's activation doesn't show it")
     {
       input.Click();
+      CHECK_FALSE(client->Chooser);
+    }
+
+    SECTION("a click shows it, with the value")
+    {
+      UserClick(input);
       REQUIRE(client->Chooser);
       CHECK(SerialisationForHTML(client->Chooser->Selected) == u8"#336699");
       CHECK(input.IsPresentingAttachedView());
@@ -151,10 +202,24 @@ namespace krys::boo::tests
       CHECK(client->Chooser->Reattached == 1);
     }
 
+    SECTION("input and change fire once the colour is shown")
+    {
+      UserClick(input);
+      REQUIRE(client->Chooser);
+
+      List<dom::DOMString> swatchAtInput;
+      auto handle =
+        input.AddEventListener(dom::DOMStringAtom(u8"input"), [&](dom::Event &)
+                               { swatchAtInput.push_back(*Swatch(input).GetAttribute(u8"style")); });
+      client->Chooser->Client->DidChooseColor(SRGBA<uint8> {255, 0, 0});
+      REQUIRE(swatchAtInput.size() == 1);
+      CHECK(swatchAtInput[0] == u8"background-color: rgb(255, 0, 0);");
+    }
+
     SECTION("losing the focus or the renderer ends it")
     {
       input.Focus();
-      input.Click();
+      UserClick(input);
       REQUIRE(client->Chooser);
       input.Blur();
       CHECK(client->Chooser->Ended);
@@ -170,7 +235,7 @@ namespace krys::boo::tests
     SECTION("disabled inputs have none")
     {
       (void)input.SetAttribute(u8"disabled", u8"");
-      input.Click();
+      UserClick(input);
       CHECK_FALSE(client->Chooser);
       CHECK(ShowPicker(input).HasException());
     }

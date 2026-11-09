@@ -143,6 +143,24 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderStyle: hyphenate-character's hyphen",
+                   "[Layout][Inline][TextUtil]")
+  {
+    RegisterAhem();
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      div { font: 10px Ahem; hyphens: manual }
+      #custom { hyphenate-character: "=" }
+    </style><body><div id=auto>a&shy;b</div><div id=custom>a&shy;b</div>)html"};
+    (void)fixture.Document->UpdateLayout();
+
+    // auto is U+2010 HYPHEN, when the primary font has a glyph for it, as Ahem does.
+    auto &autoStyle = TextBoxOf(fixture, u8"auto").Style();
+    REQUIRE(autoStyle.GetFontCascade().PrimaryFont()->GlyphForCharacter(U'\u2010'));
+    CHECK(autoStyle.HyphenString().View() == utf8_stringview(u8"\u2010"));
+    // A string is used as it is.
+    CHECK(TextBoxOf(fixture, u8"custom").Style().HyphenString().View() == utf8_stringview(u8"="));
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "TextUtil: breaking", "[Layout][Inline][TextUtil]")
   {
     RegisterAhem();

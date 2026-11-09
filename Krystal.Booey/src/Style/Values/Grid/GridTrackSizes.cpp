@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Grid/GridTrackSizes.hpp"
 
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::style
 {

@@ -210,6 +210,13 @@ namespace krys::pal
     _events->Enqueue(CreateUnique<PointerInputEvent>(window, input));
   }
 
+  void Input::OnTouchpadPanEvent(WindowHandle window, const TouchpadPanInput &input) noexcept
+  {
+    _mouse._clientX = input.ClientX;
+    _mouse._clientY = input.ClientY;
+    _events->Enqueue(CreateUnique<TouchpadPanEvent>(window, input));
+  }
+
   void Input::OnDragEvent(WindowHandle window, const DragInput &input) noexcept
   {
     _events->Enqueue(CreateUnique<DragInputEvent>(window, input));

@@ -3,9 +3,89 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 
 namespace krys::boo::html::tests
 {
+  namespace
+  {
+    KRYS_NODISCARD Ref<dom::HTMLDocument> ParseTemplateDocument(utf8_string &&input) noexcept
+    {
+      auto document = CreateRef<dom::HTMLDocument>();
+      auto parser = CreateRef<DocumentParser>(*document);
+      parser->InputStream().Append(krys::move(input), IsEOF(true));
+      (void)parser->PumpTokenizer();
+      return document;
+    }
+
+    KRYS_NODISCARD std::string InnerHTMLOf(dom::Document &document, dom::DOMStringView id) noexcept
+    {
+      auto html = document.GetElementById(id)->InnerHTML().ReleaseValue();
+      return std::string(html.begin(), html.end());
+    }
+  }
+
+  TEST_CASE("HTMLTemplateElement: a template for a marker puts its children in the marker's place",
+            "[HTML][HTMLTemplateElement][html:prepare-content-patching][html:find-markers]")
+  {
+    auto document = ParseTemplateDocument(
+      u8"<!DOCTYPE html><div id=t>a<?marker name=\"x\"?>b</div><template for=x><p>new</p></template>");
+    CHECK(InnerHTMLOf(*document, u8"t") == "a<p>new</p>b");
+    CHECK_FALSE(document->QuerySelector(u8"template").ReleaseValue());
+  }
+
+  TEST_CASE("HTMLTemplateElement: a template for a start marker replaces what's up to its end marker",
+            "[HTML][HTMLTemplateElement][html:prepare-content-patching][html:find-markers]")
+  {
+    SECTION("The end marker after the start ends the range")
+    {
+      auto document =
+        ParseTemplateDocument(u8"<!DOCTYPE html><ul id=t><li>keep</li><?start name=\"list\"?><li>old</li>"
+                              u8"<?end?><li>after</li></ul><template for=list><li>new</li></template>");
+      CHECK(InnerHTMLOf(*document, u8"t") == "<li>keep</li><li>new</li><li>after</li>");
+    }
+
+    SECTION("Nested start and end markers are skipped over")
+    {
+      auto document = ParseTemplateDocument(
+        u8"<!DOCTYPE html><div id=t><?start "
+        u8"name=\"x\"?>a<?start?>b<?end?>c<?end?>d</div><template for=x>new</template>");
+      CHECK(InnerHTMLOf(*document, u8"t") == "newd");
+    }
+
+    SECTION("Without an end marker, everything after the start is replaced")
+    {
+      auto document =
+        ParseTemplateDocument(u8"<!DOCTYPE html><div id=t><?start "
+                              u8"name=\"x\"?>old<span>old</span></div><template for=x>new</template>");
+      CHECK(InnerHTMLOf(*document, u8"t") == "new");
+    }
+  }
+
+  TEST_CASE("HTMLTemplateElement: a template for no marker is an ordinary template",
+            "[HTML][HTMLTemplateElement][html:prepare-content-patching]")
+  {
+    auto check = [](utf8_string &&markup)
+    {
+      auto document =
+        ParseTemplateDocument(u8"<!DOCTYPE html><div id=t><?marker name=\"x\"?></div>" + markup);
+      auto templateElement = document->QuerySelector(u8"template").ReleaseValue();
+      REQUIRE(templateElement);
+      CHECK(Downcast<HTMLTemplateElement>(*templateElement).Content()->FirstChild());
+      CHECK(InnerHTMLOf(*document, u8"t") == "<?marker name=\"x\">");
+    };
+
+    SECTION("A name with no marker")
+    {
+      check(u8"<template for=missing><p>x</p></template>");
+    }
+
+    SECTION("An empty name")
+    {
+      check(u8"<template for><p>x</p></template>");
+    }
+  }
+
   TEST_CASE("HTMLTemplateElement: a deep clone clones the template contents",
             "[HTML][HTMLTemplateElement][dom:concept-node-clone-ext]")
   {

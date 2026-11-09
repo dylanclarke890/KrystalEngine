@@ -183,7 +183,7 @@ namespace krys::boo::tests
       utf8_string path;
       RefPtr<File> file;
       {
-        TemporaryFile temporary("gone.bin", "x");
+        TemporaryFile temporary("gone.dat", "x");
         path = temporary.PathString();
         file = File::Create(path);
       }

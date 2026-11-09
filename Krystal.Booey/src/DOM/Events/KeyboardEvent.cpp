@@ -95,10 +95,10 @@ namespace krys::boo::dom
     _createTime = key.Timestamp();
   }
 
-  Ref<KeyboardEvent> KeyboardEvent::Create(const PlatformKeyboardEvent &key,
-                                           const LocalDOMWindow *view) noexcept
+  Ref<KeyboardEvent> KeyboardEvent::Create(const PlatformKeyboardEvent &key, LocalDOMWindow *view) noexcept
   {
     UIEventInit init;
+    init.View = view;
     init.Bubbles = true;
     init.Cancelable = true;
     init.Composed = true;
@@ -108,15 +108,15 @@ namespace krys::boo::dom
   }
 
   void KeyboardEvent::InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable,
-                                        DOMStringView keyIdentifier, uint32 location, bool ctrlKey,
-                                        bool altKey, bool shiftKey, bool metaKey) noexcept
+                                        LocalDOMWindow *view, DOMStringView keyIdentifier, uint32 location,
+                                        bool ctrlKey, bool altKey, bool shiftKey, bool metaKey) noexcept
   {
     if (_dispatched)
     {
       return;
     }
 
-    InitUIEvent(type, canBubble, cancelable, 0);
+    InitUIEvent(type, canBubble, cancelable, view, 0);
 
     _keyIdentifier = DOMString(keyIdentifier);
     _location = location;

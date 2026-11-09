@@ -1,18 +1,24 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
+#include "Krystal.Booey/DOM/Internals/IdTargetObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
+#include "Krystal.Booey/HTML/Images/HTMLImageLoader.hpp"
 #include "Krystal.Booey/HTML/InputTypes/FileInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/RadioInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/TextInputType.hpp"
@@ -21,6 +27,7 @@
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -488,7 +495,6 @@ namespace krys::boo::html
       SetTextAsOfLastFormControlChangeEvent(sanitizedValue);
     }
 
-    // FIXME: The chrome client's didProgrammaticallyClearTextFormControl, with the host's autofill.
     return {};
   }
 
@@ -856,6 +862,27 @@ namespace krys::boo::html
     return _inputType->IsImageButton();
   }
 
+  HTMLImageLoader &HTMLInputElement::EnsureImageLoader() noexcept
+  {
+    if (!_imageLoader)
+    {
+      _imageLoader = CreateUnique<HTMLImageLoader>(*this);
+    }
+    return *_imageLoader;
+  }
+
+  dom::DOMString HTMLInputElement::AltText() const noexcept
+  {
+    for (auto name : {u8"alt", u8"title", u8"value"})
+    {
+      if (auto text = GetAttribute(name))
+      {
+        return krys::move(*text);
+      }
+    }
+    return SubmitButtonDefaultLabel();
+  }
+
   bool HTMLInputElement::IsNumberField() const noexcept
   {
     return _inputType->IsNumberField();
@@ -984,6 +1011,19 @@ namespace krys::boo::html
     }
   }
 
+  bool HTMLInputElement::AccessKeyAction(bool sendMouseEvents) noexcept
+  {
+    if (IsInputTypeHidden())
+    {
+      return false;
+    }
+    if (IsDateField() || IsDateTimeLocalField() || IsMonthField() || IsTimeField() || IsWeekField())
+    {
+      return dom::Element::AccessKeyAction(sendMouseEvents);
+    }
+    return HTMLTextFormControlElement::AccessKeyAction(sendMouseEvents);
+  }
+
   void HTMLInputElement::UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                                SelectionRevealMode revealMode) noexcept
   {
@@ -1092,13 +1132,11 @@ namespace krys::boo::html
     // Input event is fired by the Node::defaultEventHandler for editable controls.
     if (!IsTextField())
     {
-      auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true);
-      (void)dom::EventDispatcher::DispatchToTarget(*event, this);
+      dom::ScopedEventQueue::DispatchOrQueue(
+        dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true), ShareRef(*this));
     }
 
     UpdateValidity();
-
-    // FIXME: Clearing the autofill flags, with autofill.
   }
 
   RenderPtr<RenderElement> HTMLInputElement::CreateElementRenderer(RenderStyle &&style) noexcept
@@ -1110,13 +1148,13 @@ namespace krys::boo::html
   {
     HTMLTextFormControlElement::DidAttachRenderers();
 
-    // FIXME: Attaching the type (InputType::attach, for image buttons' loaders).
+    _inputType->Attach();
 
     if (NodeDocument().FocusedElement() == this)
     {
       EventLoop::Current().QueueTask(
         TaskSource::UserInteraction, NodeDocument(),
-        [weakThis = WeakPtr<HTMLInputElement>::WithRef(*this)]
+        [weakThis = CreateWeakPtr(this)]
         {
           RefPtr<HTMLInputElement> protectedThis = ShareRefPtr(weakThis.get());
           if (!protectedThis || protectedThis->NodeDocument().FocusedElement() != protectedThis)
@@ -1163,6 +1201,11 @@ namespace krys::boo::html
   HTMLElement *HTMLInputElement::SliderTrackElement() const noexcept
   {
     return _inputType->SliderTrackElement();
+  }
+
+  HTMLElement *HTMLInputElement::DataListButtonElement() const noexcept
+  {
+    return _inputType->DataListButtonElement();
   }
 
   HTMLElement *HTMLInputElement::ResultsButtonElement() const noexcept
@@ -1213,9 +1256,6 @@ namespace krys::boo::html
     textBlockStyle.SetTextOverflow(ShouldTruncateText(style) ? TextOverflow::Ellipsis : TextOverflow::Clip);
 
     textBlockStyle.SetDisplay(DisplayType::Block);
-
-    // FIXME: The strong password AutoFill button's inner text (a masked, translucent inline block), with
-    // autofill.
 
     return textBlockStyle;
   }
@@ -1460,9 +1500,15 @@ namespace krys::boo::html
   {
     if (_inputType->StoresValueSeparateFromAttribute())
     {
-      // Setting the value to null drops the dirty value, so the value follows the attribute again.
+      // Setting the value to null drops the dirty value, so the value follows the attribute again; the inner
+      // editor took the empty value set, so it's given the attribute's.
       (void)SetValue({});
       _valueIfDirty = std::nullopt;
+      SetFormControlValueMatchesRenderer(false);
+      if (_inputType->HasCreatedShadowSubtree())
+      {
+        _inputType->UpdateInnerTextValue();
+      }
       UpdatePlaceholderVisibility();
       UpdateValidity();
     }
@@ -1509,7 +1555,7 @@ namespace krys::boo::html
 
 #pragma region Radio buttons
 
-  List<Ref<HTMLInputElement>> HTMLInputElement::RadioButtonGroup() const noexcept
+  krys::List<Ref<HTMLInputElement>> HTMLInputElement::RadioButtonGroup() const noexcept
   {
     if (auto *buttons = RadioButtonGroups())
     {
@@ -1706,6 +1752,7 @@ namespace krys::boo::html
     // 5. Signal a type change for the element.
     // (Removing it from its radio button group above, and adding it again in RunPostTypeUpdateTasks.)
     RunPostTypeUpdateTasks();
+    _inputType->DidBecomeElementType();
 
     // 8. Let nowSelectable be true if setRangeText() now applies to the element, and false otherwise.
     bool nowSelectable = _inputType->SupportsSelectionAPI();
@@ -1857,7 +1904,15 @@ namespace krys::boo::html
         UpdateValidity();
       }
     }
-    // FIXME: The list attribute (its datalist and target observer), with datalists.
+    else if (localName == u8"list")
+    {
+      _hasNonEmptyList = value && !value->empty();
+      if (_hasNonEmptyList)
+      {
+        ResetListAttributeTargetObserver();
+        DataListMayHaveChanged();
+      }
+    }
 
     _inputType->AttributeChanged(localName);
   }
@@ -1865,7 +1920,7 @@ namespace krys::boo::html
   void HTMLInputElement::OnInsert() noexcept
   {
     HTMLTextFormControlElement::OnInsert();
-    // FIXME: Resetting the list attribute's target observer, with datalists.
+    ResetListAttributeTargetObserver();
     if (IsRadioButton())
     {
       UpdateValidity();
@@ -1914,7 +1969,98 @@ namespace krys::boo::html
     {
       UpdateValidity();
     }
-    // FIXME: Resetting the list attribute's target observer, with datalists.
+    ResetListAttributeTargetObserver();
+  }
+
+  /// @brief Tells its input when the element its `list` attribute names changes, in a task, as the change
+  /// may be in the middle of a tree mutation.
+  class ListAttributeTargetObserver final : private dom::IdTargetObserver
+  {
+  private:
+    WeakPtr<HTMLInputElement> _element;
+
+  public:
+    ListAttributeTargetObserver(dom::DOMStringAtom id, HTMLInputElement &element) noexcept
+        : IdTargetObserver(element.TreeScope().IdTargetObserverRegistry(), id),
+          _element(CreateWeakPtr(&element))
+    {
+    }
+
+  private:
+    void IdTargetChanged(dom::Element &) noexcept override
+    {
+      auto *element = _element.get();
+      if (!element)
+      {
+        return;
+      }
+      EventLoop::Current().QueueTask(TaskSource::DOMManipulation, element->NodeDocument(),
+                                     [weakElement = _element]
+                                     {
+                                       if (RefPtr<HTMLInputElement> element = ShareRefPtr(weakElement.get()))
+                                       {
+                                         element->DataListMayHaveChanged();
+                                       }
+                                     });
+    }
+  };
+
+  RefPtr<HTMLDataListElement> HTMLInputElement::List() const noexcept
+  {
+    if (!_hasNonEmptyList || !_inputType->ShouldRespectListAttribute())
+    {
+      return nullptr;
+    }
+    return DynamicDowncast<HTMLDataListElement>(ElementForAttributeInternal(u8"list"));
+  }
+
+  void HTMLInputElement::DataListMayHaveChanged() noexcept
+  {
+    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    protectedInputType->DataListMayHaveChanged();
+  }
+
+  Maybe<double> HTMLInputElement::ListOptionValueAsDouble(const HTMLOptionElement &option) const noexcept
+  {
+    auto value = option.Value();
+    if (!IsValidValue(value))
+    {
+      return {};
+    }
+    return ParseToDoubleForNumberType(SanitizeValue(dom::DOMStringView(value)).value_or(dom::DOMString()));
+  }
+
+  Maybe<Decimal> HTMLInputElement::FindClosestTickMarkValue(const Decimal &value) noexcept
+  {
+    return _inputType->FindClosestTickMarkValue(value);
+  }
+
+  void HTMLInputElement::ResetListAttributeTargetObserver() noexcept
+  {
+    if (IsConnected())
+    {
+      if (auto list = GetAttribute(u8"list"))
+      {
+        _listAttributeTargetObserver =
+          CreateUnique<ListAttributeTargetObserver>(dom::DOMStringAtom(*list), *this);
+        return;
+      }
+    }
+    _listAttributeTargetObserver = nullptr;
+  }
+
+  void HTMLInputElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    HTMLTextFormControlElement::OnAdopt(oldDocument);
+    if (_imageLoader)
+    {
+      _imageLoader->ElementDidMoveToNewDocument(oldDocument);
+    }
+    // A document without a browsing context loads no images, so it may only start now.
+    if (IsImageButton())
+    {
+      EnsureImageLoader().UpdateFromElement();
+    }
   }
 
   void HTMLInputElement::OnClone(dom::Node &copy, bool subtree) noexcept
@@ -1979,6 +2125,19 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#the-input-element:activation-behaviour
   void HTMLInputElement::ActivationBehavior(dom::Event &event) noexcept
   {
+    // A file input's button (its ::file-selector-button) activates the input, so clicking it opens the
+    // chooser, as in Chrome.
+    if (IsInUserAgentShadowTree() && UserAgentPart() == css::UserAgentParts::FileSelectorButton())
+    {
+      if (RefPtr<HTMLInputElement> host =
+            ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
+          host && host->IsFileUpload())
+      {
+        host->ActivationBehavior(event);
+        return;
+      }
+    }
+
     Ref<InputType> protectedInputType = ShareRef(*_inputType);
 
     // 1. If element is not mutable, and element's type attribute is neither in the Checkbox nor in the Radio
@@ -2096,8 +2255,6 @@ namespace krys::boo::html
 
     if (_inputType->ShouldSubmitImplicitly(event))
     {
-      // FIXME: Adding a recent search (addSearchResult) for search fields, with recent searches.
-
       // Form submission finishes editing, just as loss of focus does. If there was a change, send the event
       // now.
       if (WasChangedSinceLastFormControlChangeEvent())

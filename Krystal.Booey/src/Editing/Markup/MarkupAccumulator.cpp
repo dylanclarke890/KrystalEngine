@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Editing/Markup/MarkupAccumulator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/CDATASection.hpp"
@@ -14,6 +15,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include <algorithm>
 #include <string>
@@ -225,6 +227,46 @@ namespace krys::boo
       result.append(u8"\"?>");
     }
 
+    /// @brief Whether @p data has only characters the XML `Char` production matches.
+    KRYS_NODISCARD constexpr bool IsXMLCharacterData(utf8_stringview data) noexcept
+    {
+      for (size_t i = 0; i < data.size(); ++i)
+      {
+        auto byte = static_cast<uint8>(data[i]);
+        if (byte < 0x20 && byte != u8'\t' && byte != u8'\n' && byte != u8'\r')
+        {
+          return false;
+        }
+        // U+FFFE and U+FFFF (EF BF BE and EF BF BF). Strings hold no surrogates.
+        if (byte == 0xEF && i + 2 < data.size() && static_cast<uint8>(data[i + 1]) == 0xBF
+            && (static_cast<uint8>(data[i + 2]) & 0xFE) == 0xBE)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /// @brief Whether @p id has only characters the XML `PubidChar` production matches.
+    KRYS_NODISCARD constexpr bool IsXMLPublicIdentifier(utf8_stringview id) noexcept
+    {
+      for (auto c : id)
+      {
+        if (!text::IsASCIIAlphanumeric(c)
+            && utf8_stringview(u8" \r\n-'()+,./:=?;!*#@$_%").find(c) == utf8_stringview::npos)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /// @brief Whether a node's @p localName can be serialized: an XML `Name` without a colon.
+    KRYS_NODISCARD bool IsWellFormedLocalName(utf8_stringview localName) noexcept
+    {
+      return localName.find(u8':') == utf8_stringview::npos && dom::NameValidation::IsValidXMLName(localName);
+    }
+
     void AppendDocumentType(utf8_string &result, const dom::DocumentType &documentType) noexcept
     {
       if (documentType.Name().empty())
@@ -303,9 +345,11 @@ namespace krys::boo
   MarkupAccumulator::MarkupAccumulator(List<Ref<dom::Node>> *nodes, ResolveURLs resolveURLs,
                                        SerializationSyntax serializationSyntax,
                                        SerializeShadowRoots serializeShadowRoots,
-                                       List<Ref<dom::ShadowRoot>> &&explicitShadowRoots) noexcept
+                                       List<Ref<dom::ShadowRoot>> &&explicitShadowRoots,
+                                       RequireWellFormed requireWellFormed) noexcept
       : _nodes(nodes), _resolveURLs(resolveURLs), _serializationSyntax(serializationSyntax),
-        _serializeShadowRoots(serializeShadowRoots), _explicitShadowRoots(krys::move(explicitShadowRoots))
+        _serializeShadowRoots(serializeShadowRoots), _explicitShadowRoots(krys::move(explicitShadowRoots)),
+        _requireWellFormed(requireWellFormed)
   {
     krys_debug_assert(serializeShadowRoots != SerializeShadowRoots::AllForInterchange
                       || _explicitShadowRoots.empty());
@@ -751,6 +795,10 @@ namespace krys::boo
   void MarkupAccumulator::AppendOpenTag(utf8_string &result, const dom::Element &element,
                                         Namespaces *namespaces) noexcept
   {
+    // Error cases: a node with a local name containing a U+003A COLON (:), or that does not match the XML
+    // Name production. (An element can't have two attributes with the same local name and namespace.)
+    CheckWellFormed([&] { return IsWellFormedLocalName(element.LocalName().View()); });
+
     result.push_back(u8'<');
     if (InXMLFragmentSerialization() && namespaces && element.Prefix().View().empty())
     {
@@ -866,6 +914,18 @@ namespace krys::boo
     // serialized first
     if (!isSerializingHTML)
     {
+      // Error cases: an Attr node whose local name contains a colon or isn't an XML Name, an Attr node with
+      // no namespace whose local name is "xmlns", and an Attr node whose data contains characters that aren't
+      // XML Chars.
+      CheckWellFormed(
+        [&]
+        {
+          auto localName = attribute.LocalName().View();
+          return IsWellFormedLocalName(localName)
+                 && !(attribute.NamespaceURI().View().empty() && localName == u8"xmlns")
+                 && IsXMLCharacterData(attribute.Value());
+        });
+
       dom::DOMStringAtom prefix = EmptyAtom();
       effectiveXMLName = XMLAttributeSerialization(attribute, namespaces, prefix);
       if (namespaces && ShouldAddNamespaceAttribute(attribute, *namespaces))
@@ -898,24 +958,70 @@ namespace krys::boo
   {
     switch (node.NodeType())
     {
-      case dom::NodeType::TEXT_NODE: AppendText(result, Downcast<dom::Text>(node)); break;
+      case dom::NodeType::TEXT_NODE:
+      {
+        auto &text = Downcast<dom::Text>(node);
+        // Error case: a Text node whose data contains characters that aren't XML Chars.
+        CheckWellFormed([&] { return IsXMLCharacterData(text.Data()); });
+        AppendText(result, text);
+        break;
+      }
       case dom::NodeType::COMMENT_NODE:
-        // FIXME: Comment content is not escaped, but that may be OK because XMLSerializer (and possibly other
-        // callers) should raise an exception if it includes "-->".
+      {
+        // The data isn't escaped: in XML, the error cases rule out data that would end the comment.
+        auto &data = Downcast<dom::Comment>(node).Data();
+        // Error cases: a Comment node whose data contains characters that aren't XML Chars, or two adjacent
+        // U+002D HYPHEN-MINUS characters (-), or ends with one.
+        CheckWellFormed(
+          [&]
+          {
+            return IsXMLCharacterData(data) && data.find(u8"--") == utf8_string::npos
+                   && !data.ends_with(u8'-');
+          });
         result.append(u8"<!--");
-        result.append(Downcast<dom::Comment>(node).Data());
+        result.append(data);
         result.append(u8"-->");
         break;
-      case dom::NodeType::DOCUMENT_NODE:          AppendXMLDeclaration(result, Downcast<dom::Document>(node)); break;
+      }
+      case dom::NodeType::DOCUMENT_NODE:
+        // Error case: a Document node with no child element nodes.
+        CheckWellFormed([&] { return static_cast<bool>(Downcast<dom::Document>(node).DocumentElement()); });
+        AppendXMLDeclaration(result, Downcast<dom::Document>(node));
+        break;
       case dom::NodeType::DOCUMENT_FRAGMENT_NODE: break;
       case dom::NodeType::DOCUMENT_TYPE_NODE:
-        AppendDocumentType(result, Downcast<dom::DocumentType>(node));
+      {
+        auto &documentType = Downcast<dom::DocumentType>(node);
+        // Error cases: a DocumentType node whose public identifier contains characters that aren't XML
+        // PubidChars, or whose system identifier contains both a U+0022 QUOTATION MARK (") and a U+0027
+        // APOSTROPHE ('), or characters that aren't XML Chars.
+        CheckWellFormed(
+          [&]
+          {
+            auto &systemId = documentType.SystemId();
+            return IsXMLPublicIdentifier(documentType.PublicId())
+                   && (systemId.find(u8'"') == utf8_string::npos
+                       || systemId.find(u8'\'') == utf8_string::npos)
+                   && IsXMLCharacterData(systemId);
+          });
+        AppendDocumentType(result, documentType);
         break;
+      }
       case dom::NodeType::PROCESSING_INSTRUCTION_NODE:
       {
         auto &instruction = Downcast<dom::ProcessingInstruction>(node);
-        // FIXME: PI data is not escaped, but XMLSerializer (and possibly other callers) this should raise an
-        // exception if it includes "?>".
+        // The data isn't escaped: in XML, the error cases rule out data that would end the instruction.
+        // Error cases: a ProcessingInstruction node whose target is an ASCII case-insensitive match for "xml"
+        // or contains a U+003A COLON (:), or whose data contains characters that aren't XML Chars, or "?>".
+        CheckWellFormed(
+          [&]
+          {
+            auto &target = instruction.Target();
+            auto &data = instruction.Data();
+            return !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(target, u8"xml")
+                   && target.find(u8':') == utf8_string::npos && IsXMLCharacterData(data)
+                   && data.find(u8"?>") == utf8_string::npos;
+          });
         result.append(u8"<?");
         result.append(instruction.Target());
         result.push_back(u8' ');
@@ -928,8 +1034,10 @@ namespace krys::boo
       case dom::NodeType::CDATA_SECTION_NODE:
         if (InXMLFragmentSerialization())
         {
-          // FIXME: CDATA content is not escaped, but XMLSerializer (and possibly other callers) should raise
-          // an exception if it includes "]]>".
+          // A CDATASection is a Text node, so the data must be XML Chars. The data isn't escaped, and there's
+          // no error case for data containing "]]>" (which createCDATASection() refuses, but the data setter
+          // doesn't).
+          CheckWellFormed([&] { return IsXMLCharacterData(Downcast<dom::CDATASection>(node).Data()); });
           result.append(u8"<![CDATA[");
           result.append(Downcast<dom::CDATASection>(node).Data());
           result.append(u8"]]>");
@@ -940,6 +1048,7 @@ namespace krys::boo
         }
         break;
       case dom::NodeType::ATTRIBUTE_NODE:
+        CheckWellFormed([&] { return IsXMLCharacterData(Downcast<dom::Attr>(node).Value()); });
         AppendAttributeValue(result, Downcast<dom::Attr>(node).Value());
         break;
       default: break;

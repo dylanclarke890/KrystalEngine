@@ -7,7 +7,6 @@
 #include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontPalette.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
-#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
 
 namespace krys::boo::tests
 {
@@ -321,13 +320,4 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("SystemFontDatabase", "[Graphics][FontDescription]")
-  {
-    auto &database = SystemFontDatabase::Singleton();
-    CHECK(&database == &SystemFontDatabase::Singleton());
-    CHECK(database.SystemFontShorthandFamily(SystemFontDatabase::FontShorthand::Caption)
-          == css::GenericFontFamilyNames::StandardFamily());
-    CHECK(database.SystemFontShorthandSize(SystemFontDatabase::FontShorthand::StatusBar) == 16.f);
-    CHECK(database.SystemFontShorthandWeight(SystemFontDatabase::FontShorthand::Menu) == NormalWeightValue());
-  }
 }

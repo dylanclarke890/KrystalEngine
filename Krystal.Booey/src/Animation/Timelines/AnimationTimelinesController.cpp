@@ -27,6 +27,10 @@ namespace krys::boo
         SuspendAnimations();
       }
     }
+    if (document.ActiveDOMObjectsAreSuspended())
+    {
+      SuspendAnimations();
+    }
   }
 
   AnimationTimelinesController::~AnimationTimelinesController() noexcept = default;
@@ -133,9 +137,6 @@ namespace krys::boo
           krys_debug_assert(!animation->Timeline());
           continue;
         }
-
-        // FIXME: Skipping animations whose frame rate doesn't align with this update, once there are
-        // animation frame rates.
 
         // This will notify the animation that timing has changed and will call automatically schedule
         // invalidation if required for this animation.
@@ -360,9 +361,11 @@ namespace krys::boo
     {
       // In order to not have a stale cached current time, we schedule a timer to reset it in the time it
       // would take an animation frame to run under normal circumstances.
-      // FIXME: The page's preferred rendering update interval, once the host reports display refreshes.
-      _cachedCurrentTimeClearanceTimer.StartOneShot(
-        std::chrono::duration_cast<MonotonicTime::duration>(FullSpeedAnimationInterval));
+      auto *page = _document.GetPage();
+      _cachedCurrentTimeClearanceTimer.StartOneShot(page
+                                                      ? page->PreferredRenderingUpdateInterval()
+                                                      : std::chrono::duration_cast<MonotonicTime::duration>(
+                                                          Seconds {1.0 / Page::FullSpeedFramesPerSecond}));
     }
   }
 

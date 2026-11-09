@@ -1,8 +1,10 @@
 ﻿#include "Krystal.Booey/Style/Values/Fonts/FontFamily.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/Graphics/Fonts/SystemFontDatabase.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
@@ -40,11 +42,15 @@ namespace krys::boo::style
 
       if (css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
       {
-        auto family = SystemFontDatabase::Singleton().SystemFontShorthandFamily(
-          css::PropertyParserHelpers::LowerFontShorthand(valueID));
-        krys_debug_assert(!family.View().empty());
-
-        return {family, FontFamilyKind::Generic};
+        // The host's family for the keyword, or else the standard family.
+        const auto &font = state.GetDocument()
+                             .GetSettings()
+                             .Values.SystemFonts[css::PropertyParserHelpers::LowerFontShorthand(valueID)];
+        if (font.Family == StringAtom::Null() || font.Family.View().empty())
+        {
+          return {css::GenericFontFamilyNames::StandardFamily(), FontFamilyKind::Generic};
+        }
+        return {css::CSSOMStringAtom {font.Family}, FontFamilyKind::Specified};
       }
 
       state.SetCurrentPropertyInvalidAtComputedValueTime();

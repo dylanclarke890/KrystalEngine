@@ -86,11 +86,11 @@ namespace krys::boo::css
   {
     krys_debug_assert(other.IsCacheable());
 
-    // FIXME: Copy import rules.
+    // A sheet with import rules isn't cacheable, so isn't copied.
     krys_debug_assert(other._importRules.empty());
 
-    // FIXME: Copy namespace rules.
-    krys_debug_assert(other._namespaceRules.empty());
+    // Namespace rules are immutable, so the copy shares them (as their CSSOM wrappers keep theirs).
+    _namespaceRules = other._namespaceRules;
 
     _layerRulesBeforeImportRules.reserve(other._layerRulesBeforeImportRules.size());
     for (const auto &rule : other._layerRulesBeforeImportRules)
@@ -144,11 +144,6 @@ namespace krys::boo::css
     {
       return false;
     }
-    // FIXME: Support copying namespace rules.
-    if (!_namespaceRules.empty())
-    {
-      return false;
-    }
     // FIXME: Support cached stylesheets in import rules.
     if (_ownerRule)
     {
@@ -168,8 +163,7 @@ namespace krys::boo::css
     {
       return false;
     }
-    // If the header is valid we are not going to need to check the SecurityOrigin.
-    // FIXME: Valid mime type avoids the check too.
+    // A sheet whose header isn't valid isn't reused.
     if (!_hasSyntacticallyValidCSSHeader)
     {
       return false;
@@ -203,7 +197,7 @@ namespace krys::boo::css
     {
       if (layerRule->IsStatement())
       {
-        _layerRulesBeforeImportRules.push_back(Ref<LayerRule>::WithRef(*layerRule));
+        _layerRulesBeforeImportRules.push_back(ShareRef(*layerRule));
         return;
       }
     }
@@ -212,7 +206,7 @@ namespace krys::boo::css
     {
       // Parser enforces that @import rules come before anything else except @charset.
       krys_debug_assert(_childRules.empty());
-      _importRules.push_back(Ref<ImportRule>::WithRef(*importRule));
+      _importRules.push_back(ShareRef(*importRule));
       _importRules.back()->SetParentStyleSheet(this);
       _importRules.back()->RequestStyleSheet();
       return;
@@ -224,7 +218,7 @@ namespace krys::boo::css
       // import/charset rules
       krys_debug_assert(_childRules.empty());
       ParserAddNamespace(namespaceRule->Prefix(), namespaceRule->Uri());
-      _namespaceRules.push_back(Ref<NamespaceRule>::WithRef(*namespaceRule));
+      _namespaceRules.push_back(ShareRef(*namespaceRule));
       return;
     }
 
@@ -359,7 +353,7 @@ namespace krys::boo::css
       if (layerRule->IsStatement())
       {
         _layerRulesBeforeImportRules.insert(_layerRulesBeforeImportRules.begin() + childVectorIndex,
-                                            Ref<LayerRule>::WithRef(*layerRule));
+                                            ShareRef(*layerRule));
         return true;
       }
       if (childVectorIndex < _layerRulesBeforeImportRules.size())
@@ -378,7 +372,7 @@ namespace krys::boo::css
       {
         return false;
       }
-      _importRules.insert(_importRules.begin() + childVectorIndex, Ref<ImportRule>::WithRef(*importRule));
+      _importRules.insert(_importRules.begin() + childVectorIndex, ShareRef(*importRule));
       _importRules[childVectorIndex]->SetParentStyleSheet(this);
       _importRules[childVectorIndex]->RequestStyleSheet();
       // FIXME: Stylesheet doesn't actually change meaningfully before the imported sheets are loaded.
@@ -408,8 +402,7 @@ namespace krys::boo::css
         return false;
       }
 
-      _namespaceRules.insert(_namespaceRules.begin() + childVectorIndex,
-                             Ref<NamespaceRule>::WithRef(*namespaceRule));
+      _namespaceRules.insert(_namespaceRules.begin() + childVectorIndex, ShareRef(*namespaceRule));
 
       // For now to be compatible with IE and Firefox if a namespace rule with the same
       // prefix is added, it overwrites previous ones.
@@ -514,6 +507,7 @@ namespace krys::boo::css
 
   bool StyleSheetContents::ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
+    // Always strict about the sheet's type, in quirks mode too (see DIFFERENCES.md).
     auto mimeTypeCheckHint = CachedCSSStyleSheet::MIMETypeCheckHint::Strict;
     bool hasValidMIMEType = true;
     bool hasHTTPStatusOK = true;
@@ -569,7 +563,7 @@ namespace krys::boo::css
       return;
     }
 
-    auto protectedThis = Ref<StyleSheetContents>::WithRef(*this);
+    auto protectedThis = ShareRef(*this);
     if (auto *parentSheet = ParentStyleSheet())
     {
       parentSheet->CheckLoaded();
@@ -632,7 +626,7 @@ namespace krys::boo::css
       {
         return true;
       }
-      auto importedStyleSheet = RefPtr<StyleSheetContents>::WithRef(importRule->StyleSheet());
+      auto importedStyleSheet = ShareRefPtr(importRule->StyleSheet());
       if (importedStyleSheet && importedStyleSheet->TraverseRules(handler))
       {
         return true;

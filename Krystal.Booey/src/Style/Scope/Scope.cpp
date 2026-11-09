@@ -647,7 +647,17 @@ namespace krys::boo::style
   {
     krys_debug_assert(!_pendingUpdate);
 
-    // FIXME: Wait for a living render tree, and defer the update while style is being resolved.
+    if (_document->InStyleRecalc() || _document->InRenderTreeUpdate())
+    {
+      // Protect against deleting the resolver in the middle of a style resolution.
+      _pendingUpdate = UpdateType::ContentsOrInterpretation;
+      if (_shadowRoot)
+      {
+        DocumentScope()._hasDescendantWithPendingUpdate = true;
+      }
+      _document->ScheduleFullStyleRebuild();
+      return;
+    }
 
     auto collection = CollectActiveStyleSheets();
 
@@ -673,7 +683,12 @@ namespace krys::boo::style
       _usesHasPseudoClass = true;
     }
 
-    InvalidateStyleAfterStyleSheetChange(styleSheetChange);
+    // Nothing is styled without a render tree. The sheets are still kept current above: they're listed by
+    // StyleSheets, and a document parsed before it gets its frame styles with them later.
+    if (_document->HasLivingRenderTree())
+    {
+      InvalidateStyleAfterStyleSheetChange(styleSheetChange);
+    }
   }
 
   void Scope::InvalidateStyleAfterStyleSheetChange(const StyleSheetChange &styleSheetChange) noexcept
@@ -844,6 +859,8 @@ namespace krys::boo::style
   {
     krys_debug_assert(_hasDescendantWithPendingUpdate);
     krys_debug_assert(!_shadowRoot);
+    // Cleared first: an update deferred during style resolution sets it again.
+    _hasDescendantWithPendingUpdate = false;
     for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
     {
       if (descendantShadowRoot)
@@ -851,7 +868,6 @@ namespace krys::boo::style
         descendantShadowRoot->StyleScope().FlushPendingUpdate();
       }
     }
-    _hasDescendantWithPendingUpdate = false;
   }
 
   void Scope::ClearPendingUpdate() noexcept
@@ -976,7 +992,7 @@ namespace krys::boo::style
         resolverScopes.emplace_back(ShareRef(resolver), List<WeakPtr<Scope>> {});
         it = std::prev(resolverScopes.end());
       }
-      it->second.push_back(WeakPtr<Scope>::WithRef(scope));
+      it->second.push_back(CreateWeakPtr(&scope));
     };
 
     if (auto *resolver = ResolverIfExists())
@@ -1076,22 +1092,41 @@ namespace krys::boo::style
       return;
     }
 
-    // FIXME: Ideally, we should save the list of elements that have viewport units and only iterate over
-    // those.
-    // FIXME: Pseudo-elements (nextIncludingPseudo), once they're nodes; their styles are in their element's
-    // pseudo-style cache.
-    for (auto *node = rootNode->FirstChild(); node; node = dom::TreeQueries::Next(*node, rootNode))
+    // An element is noted for its pseudo-elements' styles too (nextIncludingPseudo), as they aren't nodes.
+    std::erase_if(_elementsWithViewportUnits,
+                  [&](const auto &entry)
+                  {
+                    auto *element = entry.second.get();
+                    auto *style = element ? element->GetRenderStyle() : nullptr;
+                    // Those no longer using them, or no longer here, are noted again if they do.
+                    if (!style || !UsesViewportUnits(*style) || &ForNode(*element) != this)
+                    {
+                      return true;
+                    }
+                    element->InvalidateStyle();
+                    return false;
+                  });
+  }
+
+  bool Scope::UsesViewportUnits(const RenderStyle &style) noexcept
+  {
+    if (style.UsesViewportUnits())
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
-      if (!element)
-      {
-        continue;
-      }
-      auto *style = element->GetRenderStyle();
-      if (style && style->UsesViewportUnits())
-      {
-        element->InvalidateStyle();
-      }
+      return true;
+    }
+    auto *pseudoStyles = style.CachedPseudoStyles();
+    return pseudoStyles
+           && std::any_of(pseudoStyles->Styles.begin(), pseudoStyles->Styles.end(),
+                          [](const auto &entry) { return entry.second && UsesViewportUnits(*entry.second); });
+  }
+
+  void Scope::AddElementWithViewportUnits(dom::Element &element) noexcept
+  {
+    _elementsWithViewportUnits.insert_or_assign(&element, CreateWeakPtr<dom::Element>(&element));
+    if (_elementsWithViewportUnits.size() >= _elementsWithViewportUnitsPruneSize)
+    {
+      std::erase_if(_elementsWithViewportUnits, [](const auto &entry) { return !entry.second.get(); });
+      _elementsWithViewportUnitsPruneSize = std::max(64uz, _elementsWithViewportUnits.size() * 2);
     }
   }
 

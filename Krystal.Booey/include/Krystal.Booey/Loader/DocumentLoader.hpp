@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
+#include "Krystal.Booey/Loader/Icons/LinkIcon.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
@@ -10,12 +11,16 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
+  class IconLoader;
   class LocalFrame;
   class SharedBuffer;
 
@@ -39,6 +44,11 @@ namespace krys::boo
     bool _committed {false};
     bool _isStopping {false};
     bool _gotFirstByte {false};
+    /// @brief The icons the document names, as the client was last told.
+    List<LinkIcon> _linkIcons;
+    HashMap<uint64, LinkIcon> _iconsPendingLoadDecision;
+    List<std::pair<Ref<IconLoader>, Func<void(const SharedBuffer *)>>> _iconLoaders;
+    uint64 _nextIconLoadIdentifier {1};
 
     DocumentLoader(ResourceRequest &&request, Maybe<SubstituteData> &&substituteData) noexcept;
 
@@ -122,6 +132,20 @@ namespace krys::boo
     /// @brief Makes the initial empty document (`about:blank`) the frame's at once, without a load.
     void CommitInitialEmptyDocument() noexcept;
 
+    /// @brief Collects the main frame's document's icons and, if they changed, asks the client which to load.
+    void StartIconLoading() noexcept;
+    /// @brief The client's decision on loading the icon of @p loadIdentifier: if it's to load, its bytes are
+    /// handed to @p completionHandler once it's loaded, or null if it can't be.
+    void DidGetLoadDecisionForIcon(bool decision, uint64 loadIdentifier,
+                                   Func<void(const SharedBuffer *)> completionHandler) noexcept;
+    /// @brief @p loader finished, with @p data or none.
+    void FinishedLoadingIcon(IconLoader &loader, const SharedBuffer *data) noexcept;
+    /// @brief The icons the client was last told of.
+    KRYS_NODISCARD const List<LinkIcon> &LinkIcons() const noexcept
+    {
+      return _linkIcons;
+    }
+
   private:
     /// @brief The main resource arrived: commits the load and writes the document.
     void ContinueAfterMainResourceLoad(ResourceResponse &&response, Span<const uint8> data) noexcept;
@@ -131,5 +155,8 @@ namespace krys::boo
 
     /// @brief Commits the load, making the frame show the new document.
     void CommitLoad(Span<const uint8> data) noexcept;
+
+    /// @brief Stops the icon loads, their completion handlers given no data.
+    void StopLoadingIcons() noexcept;
   };
 }

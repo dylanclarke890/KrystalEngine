@@ -58,6 +58,7 @@ namespace krys::boo::html
     dom::DOMString _media;
     bool _relIsStyleSheet {false};
     bool _relIsAlternate {false};
+    bool _relIsIcon {false};
     DisabledState _disabledState {DisabledState::Unset};
     PendingSheetType _pendingSheetType {PendingSheetType::Unknown};
     bool _loading {false};
@@ -207,6 +208,12 @@ namespace krys::boo::html
     {
       return _relIsStyleSheet && _relIsAlternate;
     }
+    /// @brief Whether it names an icon (its `rel` has `icon`).
+    /// @see https://html.spec.whatwg.org/#rel-icon
+    KRYS_NODISCARD bool IsIcon() const noexcept
+    {
+      return _relIsIcon;
+    }
 
     void DispatchPendingEvent(LinkEventSender *eventSender, const StringAtom &eventType) noexcept;
     /// @brief Dispatches the `load` and `error` events waiting to be dispatched soon, of every link.
@@ -231,6 +238,8 @@ namespace krys::boo::html
     void ClearSheet() noexcept;
     void SetDisabledState(bool disabled) noexcept;
     void ParseRel(dom::DOMStringView value) noexcept;
+    /// @brief Tells the document its icons may have changed.
+    void IconMayHaveChanged() noexcept;
     KRYS_NODISCARD url::URL NonEmptyHrefURL() const noexcept;
     /// @brief Whether the `media` attribute matches the environment (an empty list does).
     /// @see https://html.spec.whatwg.org/#matches-the-environment

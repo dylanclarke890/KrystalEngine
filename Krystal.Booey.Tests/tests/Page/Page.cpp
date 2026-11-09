@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
+#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
@@ -7,10 +9,12 @@
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -22,12 +26,16 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -206,6 +214,41 @@ namespace krys::boo::tests
       CHECK(fixture.Document->AutofocusCandidates().empty());
     }
 
+    SECTION("SVG and MathML elements are candidates too")
+    {
+      auto markup = GENERATE(as<utf8_string> {},
+                             u8"<!DOCTYPE html><svg id=target autofocus tabindex=0 width=9 height=9></svg>",
+                             u8"<!DOCTYPE html><svg width=9 height=9><rect id=target autofocus tabindex=0 "
+                             u8"width=9 height=9 /></svg>",
+                             u8"<!DOCTYPE html><math id=target autofocus tabindex=0><mi>x</mi></math>",
+                             u8"<!DOCTYPE html><math><mi id=target autofocus tabindex=0>x</mi></math>");
+      PageFixture fixture {krys::move(markup)};
+      CHECK(fixture.Document->FocusedElement() == &fixture.ById(u8"target"));
+      CHECK(fixture.Document->AutofocusProcessed());
+    }
+
+    SECTION("an SVG or MathML element that can't be focused leaves the next candidate")
+    {
+      auto markup = GENERATE(as<utf8_string> {}, u8"<svg autofocus width=9 height=9></svg>",
+                             u8"<math autofocus><mi>x</mi></math>");
+      PageFixture fixture {u8"<!DOCTYPE html>" + markup + u8"<input id=target autofocus>"};
+      CHECK(fixture.Document->FocusedElement() == &fixture.ById(u8"target"));
+    }
+
+    SECTION("an SVG or MathML element is a candidate once inserted")
+    {
+      auto ns = GENERATE(as<const char8_t *> {}, u8"http://www.w3.org/2000/svg",
+                         u8"http://www.w3.org/1998/Math/MathML");
+      PageFixture fixture {u8"<!DOCTYPE html><body>"};
+      auto &document = *fixture.Document;
+      auto element = document.CreateElementNS(dom::DOMStringAtom(ns), u8"g").ReleaseValue();
+      REQUIRE_FALSE(element->SetAttribute(u8"autofocus", u8"").HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"tabindex", u8"0").HasException());
+      CHECK(document.AutofocusCandidates().empty());
+      REQUIRE_FALSE(document.Body()->AppendChild(*element).HasException());
+      CHECK(document.AutofocusCandidates().size() == 1);
+    }
+
     SECTION("a candidate that isn't a focusable area focuses its focusable area")
     {
       // A shadow host that delegates focus: its focus delegate.
@@ -272,6 +315,44 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "Page: render-blocked documents are left out of the rendering update",
+                   "[Page][RenderingUpdate][html:render-blocked][html:update-the-rendering]")
+  {
+    // An HTML document with no body yet is render-blocked.
+    auto page = Page::Create();
+    auto &frame = page->MainFrame();
+    frame.CreateView({200, 100});
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto html = document->CreateElement(u8"html").ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*html).HasException());
+    frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    REQUIRE(html::RenderBlocking::IsRenderBlocked(*document));
+
+    uint32 calls = 0;
+    (void)document->RequestAnimationFrame([&](dom::DOMHighResTimeStamp) { ++calls; });
+    page->UpdateRendering();
+    CHECK(calls == 0);
+    // The next rendering update tries again.
+    CHECK(page->IsRenderingUpdateScheduled());
+
+    SECTION("until it's unblocked")
+    {
+      REQUIRE_FALSE(html->AppendChild(*document->CreateElement(u8"body").ReleaseValue()).HasException());
+      page->UpdateRendering();
+      CHECK(calls == 1);
+    }
+
+    SECTION("or the block times out")
+    {
+      auto &loop = html::EventLoop::Current();
+      loop.Run(loop.Now() + html::RenderBlocking::Timeout + 1ms);
+      CHECK_FALSE(html::RenderBlocking::IsRenderBlocked(*document));
+      page->UpdateRendering();
+      CHECK(calls == 1);
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Page: focus fixup", "[Page][RenderingUpdate][Focus]")
   {
     PageFixture fixture {u8"<!DOCTYPE html><div id=box tabindex=0></div>"};
@@ -302,6 +383,77 @@ namespace krys::boo::tests
     CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Cross);
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: cursor images",
+                   "[Page][Cursor][css-ui:cursor][css-ui:typedef-cursor-cursor-image]")
+  {
+    constexpr utf8_stringview Small = u8"data:image/"
+                                      u8"png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+"
+                                      u8"AAAAEklEQVR4nGP4z8DwHxkzkC4AADxAH+HggXe0AAAAAElFTkSuQmCC";
+    constexpr utf8_stringview Eight =
+      u8"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAEUlEQVR4nGNgYPj/Hz8eEQoAQ1d/"
+      u8"gZtbdTsAAAAASUVORK5CYII=";
+    constexpr utf8_stringview Big = u8"data:image/"
+                                    u8"png;base64,"
+                                    u8"iVBORw0KGgoAAAANSUhEUgAAAIIAAAABCAYAAAASJ3aLAAAAEklEQVR4nGP4z8DwfxQzjH"
+                                    u8"gMAJrgAwzQzIqPAAAAAElFTkSuQmCC";
+    auto page = [](utf8_stringview cursor)
+    {
+      return u8"<!DOCTYPE html><style>body{margin:0}</style><div id=box "
+             u8"style='width:100px;height:50px;cursor:"
+             + utf8_string(cursor) + u8"'></div>";
+    };
+    auto cursorAt = [](PageFixture &fixture)
+    {
+      // The images load as tasks.
+      fixture.Frame();
+      fixture.MoveMouse(10, 10);
+      return fixture.Handler().CurrentMouseCursor();
+    };
+
+    SECTION("the first image that loads is the cursor, with its hot spot")
+    {
+      PageFixture fixture {page(u8"url(" + utf8_string(Small) + u8") 3 2, crosshair")};
+      auto cursor = cursorAt(fixture);
+      REQUIRE(cursor.GetType() == Cursor::Type::Custom);
+      REQUIRE(cursor.GetImage());
+      CHECK(cursor.GetImage()->Size() == FloatSize(4, 4));
+      CHECK(cursor.HotSpot() == IntPoint(3, 2));
+      CHECK(cursor.ImageScaleFactor() == 1);
+    }
+
+    SECTION("a hot spot outside the image is its top left")
+    {
+      PageFixture fixture {page(u8"url(" + utf8_string(Small) + u8") 4 1, crosshair")};
+      auto cursor = cursorAt(fixture);
+      REQUIRE(cursor.GetType() == Cursor::Type::Custom);
+      CHECK(cursor.HotSpot() == IntPoint(0, 0));
+    }
+
+    SECTION("an image that fails or is too big is passed over")
+    {
+      PageFixture fixture {page(u8"url(data:image/png;base64,AAAA), url(" + utf8_string(Big) + u8"), url("
+                                + utf8_string(Small) + u8"), crosshair")};
+      auto cursor = cursorAt(fixture);
+      REQUIRE(cursor.GetType() == Cursor::Type::Custom);
+      CHECK(cursor.GetImage()->Size() == FloatSize(4, 4));
+    }
+
+    SECTION("with no image to show, the predefined cursor")
+    {
+      PageFixture fixture {page(u8"url(" + utf8_string(Big) + u8"), crosshair")};
+      CHECK(cursorAt(fixture).GetType() == Cursor::Type::Cross);
+    }
+
+    SECTION("an image-set() image has its resolution, and its hot spot is in its natural size")
+    {
+      PageFixture fixture {page(u8"image-set(url(" + utf8_string(Eight) + u8") 2x) 3 3, auto")};
+      auto cursor = cursorAt(fixture);
+      REQUIRE(cursor.GetType() == Cursor::Type::Custom);
+      CHECK(cursor.ImageScaleFactor() == 2);
+      CHECK(cursor.HotSpot() == IntPoint(3, 3));
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture,
                    "Page: hover follows the content under a still mouse after a scroll",
                    "[Page][RenderingUpdate]")
@@ -317,6 +469,24 @@ namespace krys::boo::tests
     fixture.Frame(250ms);
     CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"target"));
     CHECK(fixture.ById(u8"target").Hovered());
+
+    // The fake move has the modifier keys of the latest event, a key press here.
+    Maybe<bool> shiftKey;
+    auto listener = fixture.ById(u8"top").AddEventListener(
+      u8"mousemove", [&](dom::Event &event) { shiftKey = Downcast<dom::MouseEvent>(event).ShiftKey(); });
+    (void)fixture.Handler().KeyEvent(
+      PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", u8"", 16,
+                            false, false, false, {PlatformEvent::Modifier::ShiftKey}, MonotonicTime::Now()));
+    fixture.View().SetScrollPosition({0, 0});
+    fixture.Frame(250ms);
+    CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"top"));
+    CHECK(shiftKey == true);
+
+    // A hidden page gets no fake moves.
+    fixture.TestPage->SetIsVisible(false);
+    fixture.View().SetScrollPosition({0, 300});
+    fixture.Frame(250ms);
+    CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"top"));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Page: page scale", "[Page]")
@@ -447,6 +617,25 @@ namespace krys::boo::tests
       CHECK(events == List<bool> {true, true});
     }
 
+    // https://html.spec.whatwg.org/#update-the-rendering (hidden documents aren't rendered)
+    SECTION("A hidden page's rendering updates wait for it to be shown")
+    {
+      page.SetIsVisible(false);
+      page.ScheduleRenderingUpdate();
+      page.UpdateRendering();
+      CHECK(page.IsRenderingUpdateScheduled());
+
+      page.SetIsVisible(true);
+      CHECK(page.IsRenderingUpdateScheduled());
+      page.UpdateRendering();
+      CHECK_FALSE(page.IsRenderingUpdateScheduled());
+
+      // Shown, a page is updated even if nothing asked while it was hidden.
+      page.SetIsVisible(false);
+      page.SetIsVisible(true);
+      CHECK(page.IsRenderingUpdateScheduled());
+    }
+
     SECTION("A hidden page's animation frame callbacks wait for it to be shown")
     {
       uint32 calls = 0;
@@ -550,5 +739,57 @@ namespace krys::boo::tests
     CHECK(svg.AnimationsPaused());
     fixture.TestPage->SetIsVisible(true);
     CHECK_FALSE(svg.AnimationsPaused());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: holding image animations pauses SMIL animations",
+                   "[Page][SVG]")
+  {
+    PageFixture fixture {u8"<!DOCTYPE html><svg id=svg><rect width=10 height=10><animate attributeName=x "
+                         u8"from=0 to=10 dur=1s></animate></rect></svg>"};
+    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(fixture.ById(u8"svg")));
+    fixture.TestPage->SetImageAnimationEnabled(false);
+    CHECK(svg.AnimationsPaused());
+
+    // Shown again, a page keeps them held.
+    fixture.TestPage->SetIsVisible(false);
+    fixture.TestPage->SetIsVisible(true);
+    CHECK(svg.AnimationsPaused());
+
+    fixture.TestPage->SetImageAnimationEnabled(true);
+    CHECK_FALSE(svg.AnimationsPaused());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: animations follow the host's frame rate",
+                   "[Page][Animation]")
+  {
+    PageFixture fixture {u8"<!DOCTYPE html>"};
+    auto &timeline = fixture.Document->Timeline();
+    CHECK(fixture.TestPage->DisplayNominalFramesPerSecond() == 60u);
+    CHECK(timeline.AnimationInterval().count() == Catch::Approx(1.0 / 60));
+
+    fixture.TestPage->SetDisplayNominalFramesPerSecond(144);
+    CHECK(timeline.AnimationInterval().count() == Catch::Approx(1.0 / 144));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: SMIL animations are sampled in the rendering update",
+                   "[Page][SVG]")
+  {
+    PageFixture fixture {
+      u8"<!DOCTYPE html><svg id=svg><rect id=r width=10 height=10><animate attributeName=x "
+      u8"from=0 to=100 dur=1s></animate></rect></svg>"};
+    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(fixture.ById(u8"svg")));
+    auto &rect = Downcast<svg::SVGRectElement>(Downcast<svg::SVGElement>(fixture.ById(u8"r")));
+    // As the document's load does.
+    fixture.Document->SVGExtensions().StartAnimations();
+    REQUIRE(svg.TimeContainer().IsActive());
+
+    // An animation changing every frame asks for each rendering update, and is sampled in it.
+    for (int i = 0; i < 2; ++i)
+    {
+      CHECK(fixture.TestPage->IsRenderingUpdateScheduled());
+      auto x = rect.X().ValueInSpecifiedUnits();
+      fixture.TestPage->UpdateRendering();
+      CHECK(rect.X().ValueInSpecifiedUnits() > x);
+    }
   }
 }

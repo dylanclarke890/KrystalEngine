@@ -21,6 +21,11 @@ namespace krys::boo::html
                                    private DateTimeEditElementEditControlOwner
   {
   public:
+    KRYS_NODISCARD bool ShouldRespectListAttribute() const noexcept final
+    {
+      return true;
+    }
+
     KRYS_NODISCARD bool TypeMismatchFor(dom::DOMStringView value) const noexcept final;
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
     KRYS_NODISCARD bool TypeMismatch() const noexcept final;
@@ -126,10 +131,7 @@ namespace krys::boo::html
     // DateTimeChooserClient functions:
     void DidChooseValue(utf8_stringview value) noexcept final;
 
-    void DidEndChooser() noexcept final
-    {
-      _dateTimeChooser = nullptr;
-    }
+    void DidEndChooser() noexcept final;
 
     bool SetupDateTimeChooserParameters(DateTimeChooserParameters &parameters) noexcept;
     void CloseDateTimeChooser() noexcept;

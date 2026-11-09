@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/Collections/RadioNodeList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
@@ -254,8 +255,8 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       value=Go><button id=other name=other value=o></button></form>)");
     auto &form = fixture.Get<HTMLFormElement>(u8"f");
     auto events = CreateRef<SubmissionEvents>();
-    form.AddEventListener(dom::DOMStringAtom(u8"submit"), Ref<dom::EventListenerCallback> {events}, false);
-    form.AddEventListener(dom::DOMStringAtom(u8"formdata"), Ref<dom::EventListenerCallback> {events}, false);
+    form.AddEventListener(dom::DOMStringAtom(u8"submit"), events, false);
+    form.AddEventListener(dom::DOMStringAtom(u8"formdata"), events, false);
 
     SECTION("submit() skips the submit event and validation")
     {
@@ -417,6 +418,135 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       form.Reset();
       CHECK(Str(t.Value()) == "changed");
       CHECK_FALSE(c.Checked());
+    }
+  }
+
+  TEST_CASE("HTMLFormElement: images are named items, after listed elements",
+            "[HTML][Forms][html:dom-form-nameditem][html:past-names-map]")
+  {
+    FormFixture fixture(u8R"(<form id=f><img id=i name=n><div><img id=d></div><input id=c name=both>
+      <img id=b name=both><img id=j name=dup><img id=k name=dup></form><img id=o name=out>
+      <table><form id=f2><tr><td><img id=m></td></tr></form></table>)");
+    auto &form = fixture.Get<HTMLFormElement>(u8"f");
+    auto single = [&](dom::DOMStringView name) -> dom::Element *
+    {
+      auto item = form.NamedItem(name);
+      if (!item || !std::holds_alternative<RefPtr<dom::Element>>(*item))
+      {
+        return nullptr;
+      }
+      return std::get<RefPtr<dom::Element>>(*item).get();
+    };
+
+    SECTION("by ID and name, wherever they are in the form")
+    {
+      CHECK(single(u8"i") == &fixture.ById(u8"i"));
+      CHECK(single(u8"n") == &fixture.ById(u8"i"));
+      CHECK(single(u8"d") == &fixture.ById(u8"d"));
+      CHECK_FALSE(form.NamedItem(u8"o"));
+      CHECK_FALSE(form.NamedItem(u8"out"));
+      CHECK(form.IsSupportedPropertyName(u8"n"));
+      CHECK_FALSE(form.IsSupportedPropertyName(u8"out"));
+    }
+
+    SECTION("a listed element comes first")
+    {
+      CHECK(single(u8"both") == &fixture.ById(u8"c"));
+    }
+
+    SECTION("but aren't among its elements")
+    {
+      CHECK(form.Elements()->NamedItem(u8"i").get() == nullptr);
+      CHECK(form.Elements()->NamedItems(u8"n").empty());
+      CHECK(form.Elements()->Length() == 1uz);
+    }
+
+    SECTION("several are a RadioNodeList")
+    {
+      auto item = form.NamedItem(u8"dup");
+      REQUIRE(item);
+      REQUIRE(std::holds_alternative<RefPtr<RadioNodeList>>(*item));
+      auto list = std::get<RefPtr<RadioNodeList>>(*item);
+      REQUIRE(list->Length() == 2uz);
+      CHECK(list->Item(0).get() == &fixture.ById(u8"j"));
+      CHECK(list->Item(1).get() == &fixture.ById(u8"k"));
+
+      // Live, and kept while it lives.
+      REQUIRE_FALSE(fixture.ById(u8"j").SetAttribute(u8"name", u8"other").HasException());
+      CHECK(list->Length() == 1uz);
+      REQUIRE_FALSE(fixture.ById(u8"j").SetAttribute(u8"name", u8"dup").HasException());
+      auto again = form.NamedItem(u8"dup");
+      REQUIRE(again);
+      CHECK(std::get<RefPtr<RadioNodeList>>(*again).get() == list.get());
+    }
+
+    SECTION("a past name goes on working until the image leaves the form")
+    {
+      Ref<dom::Element> image = ShareRef(fixture.ById(u8"i"));
+      CHECK(single(u8"n") == image.get());
+      REQUIRE_FALSE(image->SetAttribute(u8"name", u8"renamed").HasException());
+      CHECK(single(u8"n") == image.get());
+      CHECK(form.IsSupportedPropertyName(u8"n"));
+
+      REQUIRE_FALSE(image->ParentNode()->RemoveChild(*image).HasException());
+      CHECK_FALSE(form.NamedItem(u8"n"));
+      CHECK_FALSE(form.NamedItem(u8"renamed"));
+    }
+
+    SECTION("an image joins and leaves as it moves")
+    {
+      Ref<dom::Element> outside = ShareRef(fixture.ById(u8"o"));
+      REQUIRE_FALSE(form.AppendChild(*outside).HasException());
+      CHECK(single(u8"out") == outside.get());
+
+      auto *parent = form.ParentNode();
+      REQUIRE_FALSE(Downcast<dom::Element>(*parent).MoveBefore(*outside, nullptr).HasException());
+      CHECK_FALSE(form.NamedItem(u8"out"));
+      REQUIRE_FALSE(form.MoveBefore(*outside, nullptr).HasException());
+      CHECK(single(u8"out") == outside.get());
+    }
+
+    SECTION("the parser's form element pointer applies to an image outside the form")
+    {
+      auto &other = fixture.Get<HTMLFormElement>(u8"f2");
+      auto item = other.NamedItem(u8"m");
+      REQUIRE(item);
+      CHECK(std::get<RefPtr<dom::Element>>(*item).get() == &fixture.ById(u8"m"));
+    }
+
+    SECTION("removing a form lets go of images that didn't go with it")
+    {
+      auto &other = fixture.Get<HTMLFormElement>(u8"f2");
+      Ref<dom::Element> kept = ShareRef<dom::Element>(other);
+      auto *image = &Downcast<HTMLImageElement>(Downcast<HTMLElement>(fixture.ById(u8"m")));
+      CHECK(image->Form() == &other);
+      REQUIRE_FALSE(other.ParentNode()->RemoveChild(other).HasException());
+      CHECK(image->Form() == nullptr);
+
+      // While one inside it stays with it.
+      Ref<dom::Element> formKept = ShareRef<dom::Element>(form);
+      auto *inner = &Downcast<HTMLImageElement>(Downcast<HTMLElement>(fixture.ById(u8"i")));
+      REQUIRE_FALSE(form.ParentNode()->RemoveChild(form).HasException());
+      CHECK(inner->Form() == &form);
+    }
+
+    SECTION("a destroyed image, and a destroyed form")
+    {
+      {
+        Ref<dom::Element> image = ShareRef(fixture.ById(u8"i"));
+        REQUIRE_FALSE(image->ParentNode()->RemoveChild(*image).HasException());
+      }
+      CHECK_FALSE(form.NamedItem(u8"n"));
+
+      auto image = fixture.Document->CreateElement(u8"img").ReleaseValue();
+      {
+        auto formElement = fixture.Document->CreateElement(u8"form").ReleaseValue();
+        REQUIRE_FALSE(formElement->AppendChild(*image).HasException());
+        CHECK(Downcast<HTMLImageElement>(Downcast<HTMLElement>(*image)).Form()
+              == &Downcast<HTMLFormElement>(Downcast<HTMLElement>(*formElement)));
+        REQUIRE_FALSE(formElement->RemoveChild(*image).HasException());
+      }
+      CHECK(Downcast<HTMLImageElement>(Downcast<HTMLElement>(*image)).Form() == nullptr);
     }
   }
 }

@@ -38,6 +38,9 @@ namespace krys::boo::css
 
     bool _disallowPseudoElements {false};
     bool _disallowHasPseudoClass {false};
+    // Inside an argument that is a compound selector (`:host()`, `:host-context()`, `::slotted()`), where
+    // nested selector lists can hold only compound selectors.
+    bool _disallowComplexSelectors {false};
     bool _resistDefaultNamespace {false};
     bool _ignoreDefaultNamespace {false};
     bool _disableForgivingParsing {false};
@@ -105,7 +108,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD SelectorRelation ConsumeCombinator(TokenRange &tokens) noexcept;
     KRYS_NODISCARD SelectorMatch ConsumeAttributeMatch(TokenRange &tokens) noexcept;
-    KRYS_NODISCARD IsCaseSensitive ConsumeAttributeFlags(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD AttributeCaseFlag ConsumeAttributeFlags(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &DefaultNamespace() const noexcept;
     KRYS_NODISCARD const CSSOMStringAtom &DetermineNamespace(const CSSOMStringAtom &prefix) const noexcept;

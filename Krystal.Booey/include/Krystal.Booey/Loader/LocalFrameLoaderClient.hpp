@@ -2,9 +2,11 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
+#include "Krystal.Booey/Loader/Icons/LinkIcon.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo
 {
@@ -88,6 +90,14 @@ namespace krys::boo
     /// @brief The frame navigated within its document: to a fragment of its URL.
     virtual void DispatchDidNavigateWithinPage() noexcept
     {
+    }
+
+    /// @brief The main frame's document names @p icons, the largest first: once it's loaded, and again as
+    /// its icons change (an empty list if none are left). The host loads the ones it wants with
+    /// `DocumentLoader::DidGetLoadDecisionForIcon`, each with its identifier.
+    virtual void GetLoadDecisionForIcons(Span<const LinkIconLoadDecision> icons) noexcept
+    {
+      (void)icons;
     }
   };
 

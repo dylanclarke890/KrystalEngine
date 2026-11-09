@@ -3,7 +3,9 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -11,6 +13,7 @@
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp"
 #include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include <charconv>
 #include <cmath>
 
@@ -262,8 +265,8 @@ namespace krys::boo::html
   void BaseDateAndTimeInputType::HandleActivationBehavior(dom::Event &event) noexcept
   {
     krys_debug_assert(Element());
-    // FIXME: Only while processing a user gesture (UserGestureIndicator).
-    if (!Element()->Renderer() || !Element()->IsMutable())
+    // Only for a user's click or key.
+    if (!HasTransientActivation() || !Element()->Renderer() || !Element()->IsMutable())
     {
       return;
     }
@@ -297,7 +300,11 @@ namespace krys::boo::html
       return;
     }
 
-    _dateTimeChooser = chromeClient->CreateDateTimeChooser(*this);
+    {
+      style::PseudoClassChangeInvalidation styleInvalidation(*Element(), css::SelectorPseudoClass::Open,
+                                                             true);
+      _dateTimeChooser = chromeClient->CreateDateTimeChooser(*this);
+    }
     if (RefPtr<DateTimeChooser> dateTimeChooser = _dateTimeChooser)
     {
       dateTimeChooser->ShowChooser(parameters);
@@ -603,9 +610,35 @@ namespace krys::boo::html
     parameters.HasMillisecondField = ShouldHaveMillisecondField(date);
     parameters.WasActivatedByKeyboard = _pickerWasActivatedByKeyboard;
 
-    // FIXME: The suggestions of the input's datalist, once there are datalists.
+    // The datalist's suggestions with valid values, and their labels where they differ from their values.
+    if (auto dataList = element.List())
+    {
+      for (auto &option : dataList->Suggestions())
+      {
+        auto label = option->Label();
+        auto value = option->Value();
+        if (!element.IsValidValue(value))
+        {
+          continue;
+        }
+        parameters.SuggestionValues.push_back(
+          element.SanitizeValue(dom::DOMStringView(value)).value_or(dom::DOMString()));
+        parameters.LocalizedSuggestionValues.push_back(LocalizeValue(value));
+        parameters.SuggestionLabels.push_back(value == label ? dom::DOMString() : krys::move(label));
+      }
+    }
 
     return true;
+  }
+
+  void BaseDateAndTimeInputType::DidEndChooser() noexcept
+  {
+    Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
+    if (auto *element = Element())
+    {
+      styleInvalidation.emplace(*element, css::SelectorPseudoClass::Open, false);
+    }
+    _dateTimeChooser = nullptr;
   }
 
   void BaseDateAndTimeInputType::CloseDateTimeChooser() noexcept

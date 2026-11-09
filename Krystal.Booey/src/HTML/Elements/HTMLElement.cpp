@@ -339,10 +339,7 @@ namespace krys::boo::html
 
   bool HTMLElement::AccessKeyAction(bool sendMouseEvents) noexcept
   {
-    if (FocusAlgorithms::IsFocusableArea(*this))
-    {
-      Focus();
-    }
+    (void)StyledElement::AccessKeyAction(sendMouseEvents);
     return DispatchSimulatedClick(nullptr, sendMouseEvents
                                              ? dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
                                              : dom::SimulatedClickMouseEventOptions::SendNoEvents);
@@ -350,8 +347,9 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::AccessKeyLabel() const noexcept
   {
-    // FIXME: Implement AccessKeyLabel() method.
-    return {};
+    // The modifier is the one EventHandler::HandleAccessKey looks for.
+    auto key = AssignedAccessKey();
+    return key.empty() ? key : dom::DOMString(u8"Alt+") + key;
   }
 
   bool HTMLElement::Draggable() const noexcept
@@ -1564,6 +1562,13 @@ namespace krys::boo::html
     {
       PopoverAttributeChanged(value);
     }
+
+    // The computed heading levels below, which `:heading()` matches, follow these.
+    if (namespaceURI == dom::DOMStringAtom::Null()
+        && (localName == u8"headingoffset" || localName == u8"headingreset") && oldValue != value)
+    {
+      InvalidateStyleForSubtree();
+    }
   }
 
 #pragma endregion
@@ -1614,7 +1619,6 @@ namespace krys::boo::html
 
   dom::Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const dom::Node &node) noexcept
   {
-    // FIXME: A page that's editable as a whole.
     auto *startElement = DynamicDowncast<dom::Element>(node);
     if (!startElement)
     {
@@ -1642,7 +1646,11 @@ namespace krys::boo::html
       return dom::Node::Editability::ReadOnly;
     }
 
-    // FIXME: The document's design mode makes the document tree editable, once there's a design mode.
+    if (node.NodeDocument().InDesignMode() && node.IsInDocumentTree())
+    {
+      return dom::Node::Editability::CanEditRichly;
+    }
+
     return dom::Node::Editability::ReadOnly;
   }
 

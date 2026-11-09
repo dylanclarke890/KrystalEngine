@@ -9,7 +9,6 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Core/Events/EventManager.hpp"
-#include "Krystal.Editor/PageSpatialNavigation.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.PAL/Gamepad.hpp"
 #include "Krystal.PAL/Input.hpp"
@@ -174,8 +173,7 @@ namespace krys::ui::tests
 
     // A clicks the focused element.
     Ref<Counter> clicks = CreateRef<Counter>();
-    byId(u8"r4")->AddEventListener(boo::dom::DOMStringAtom(u8"click"),
-                                   Ref<boo::dom::EventListenerCallback> {clicks}, false);
+    byId(u8"r4")->AddEventListener(boo::dom::DOMStringAtom(u8"click"), clicks, false);
     press(pal::GamepadButton::South, 2s);
     CHECK(clicks->Count == 1);
 
@@ -241,93 +239,5 @@ namespace krys::ui::tests
     view.SetFocused(true);
     press(pal::GamepadButton::RightShoulder, 7s);
     CHECK(focused() != byId(u8"inner").get());
-  }
-  TEST_CASE("View: the editor page's spatial navigation", "[UI]")
-  {
-    EventManager events;
-    auto backend = CreateUnique<FakeGamepad>();
-    auto &fake = *backend;
-    fake.Slot = pal::GamepadReading {};
-    pal::Input input(&events, krys::move(backend));
-    auto &reading = *fake.Slot;
-    // The editor's input has read the pads before the page loads.
-    input.BeginFrame();
-    events.DispatchAll();
-
-    boo::MemoryCache::Singleton().EvictResources();
-    View view({1'200, 600});
-    FollowLinks(view);
-    REQUIRE(
-      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
-        .has_value());
-    WaitForLoad(view);
-    auto &document = view.Document();
-    // As the editor makes it once the page has loaded.
-    editor::PageSpatialNavigation spatialNavigation(document);
-    auto byId = [&](utf8_stringview id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return element;
-    };
-    auto narrow = [](const boo::dom::Node *node)
-    {
-      auto text = node ? node->TextContent().value_or(boo::dom::DOMString {}) : boo::dom::DOMString {};
-      return std::string(text.begin(), text.end());
-    };
-    auto textOf = [&](utf8_stringview id)
-    {
-      return narrow(byId(id).get());
-    };
-    auto focusedText = [&]
-    {
-      return narrow(document.FocusedElement());
-    };
-
-    // The editor's frame: the pads drive the page, then the page runs.
-    auto start = std::max(MonotonicTime::Now(), boo::html::EventLoop::Current().Now());
-    auto frame = [&](MonotonicTime::duration time)
-    {
-      input.BeginFrame();
-      events.DispatchAll();
-      view.GamepadInput(input.GetGamepads(), start + time);
-      (void)view.Update(start + time);
-    };
-    auto set = [&](pal::GamepadButton button, float value)
-    {
-      reading.Buttons[static_cast<size_t>(button)] = value;
-      ++reading.PacketNumber;
-    };
-    auto press = [&](pal::GamepadButton button, MonotonicTime::duration time)
-    {
-      set(button, 1);
-      frame(time);
-      set(button, 0);
-      frame(time + 16ms);
-    };
-
-    frame(0ms);
-
-    // The grid, at the top of the view: the D-pad moves through it, and A presses.
-    auto gridRect = byId(u8"nav-grid")->GetBoundingClientRect();
-    view.ScrollTo(boo::IntPoint(0, view.ScrollPosition().Y() + static_cast<int32>(gridRect->Top()) - 20));
-    view.UpdateRendering();
-    auto espresso = document.QuerySelector(u8"#nav-grid button");
-    REQUIRE_FALSE(espresso.HasException());
-    REQUIRE(espresso.Value());
-    Downcast<boo::html::HTMLElement>(*espresso.Value()).Focus();
-    press(pal::GamepadButton::DPadRight, 100ms);
-    CHECK(focusedText() == "Filter");
-    press(pal::GamepadButton::South, 200ms);
-    CHECK(textOf(u8"nav-log") == "Pressed “Filter”");
-
-    // The arrow keys move through it too, and a radio's choice shows.
-    CHECK(view.KeyPressed(pal::Key::DownArrow));
-    CHECK(focusedText() == "Cold brew");
-    CHECK(view.KeyPressed(pal::Key::DownArrow));
-    REQUIRE(document.FocusedElement());
-    CHECK(document.FocusedElement()->GetAttribute(u8"value") == u8"Almond");
-    press(pal::GamepadButton::South, 300ms);
-    CHECK(textOf(u8"nav-log") == "Chose “Almond”");
   }
 }

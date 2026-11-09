@@ -1445,6 +1445,14 @@ namespace krys::boo
     _renderer.ScheduleRenderingUpdateForImage(image);
   }
 
+  void RenderObject::ScheduleRenderingUpdateForImage(CachedImage &) noexcept
+  {
+    if (auto *page = GetDocument().GetPage())
+    {
+      page->ScheduleRenderingUpdate({RenderingUpdateStep::Images});
+    }
+  }
+
   VisibleInViewportState RenderObject::ImageFrameAvailable(CachedImage &image, ImageAnimatingState,
                                                            const IntRect *changeRect) noexcept
   {
@@ -1970,7 +1978,6 @@ namespace krys::boo
 
     if (auto *node = GetNode())
     {
-      // FIXME: Continuations should be anonymous.
       krys_debug_assert(!node->Renderer() || node->Renderer() == this);
       if (node->Renderer() == this)
       {

@@ -10,11 +10,14 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
@@ -55,6 +58,12 @@ namespace krys::boo::html
       {
         return false;
       }
+      // NOTE: as in Chrome, the body is one in design mode, not just the document element.
+      if (element.NodeDocument().InDesignMode() && IsHTMLElement(element, TagName::body)
+          && element.ParentNode() == element.NodeDocument().DocumentElement())
+      {
+        return true;
+      }
       auto *parent = element.ParentElement();
       return !parent || !Is<HTMLElement>(*parent) || IsHTMLElement(*parent, TagName::input)
              || IsHTMLElement(*parent, TagName::textarea) || !css::MatchesReadWritePseudoClass(*parent);
@@ -88,6 +97,12 @@ namespace krys::boo::html
           }
           default: break;
         }
+      }
+      // The options of a select with base appearance, which the keys move between.
+      if (auto *option = DynamicDowncast<HTMLOptionElement>(element))
+      {
+        auto *select = option->OwnerSelectElement();
+        return select && select->ContentsUseBaseAppearance() && !option->IsDisabledFormControl();
       }
       // FIXME: Elements with a draggable attribute, once a drag can start without a pointing device.
       if (auto *summary = DynamicDowncast<HTMLSummaryElement>(element); summary && summary->IsActiveSummary())
@@ -226,6 +241,13 @@ namespace krys::boo::html
     for (; element; element = element->ParentElementInComposedTree())
     {
       if (Is<HTMLElement>(*element) && element->HasAttribute(u8"inert"))
+      {
+        return true;
+      }
+      // https://html.spec.whatwg.org/#the-button-element
+      // If a button element is the first child which is an element of a select element, then it is inert.
+      if (Is<HTMLButtonElement>(*element) && Is<HTMLSelectElement>(element->ParentNode())
+          && dom::TreeQueries::FirstElementChild(*element->ParentNode()) == element)
       {
         return true;
       }
@@ -635,8 +657,9 @@ namespace krys::boo::html
       // 2.2. If entry is an element, let blur event target be entry. If entry is a Document object, let blur
       //      event target be that Document object's relevant global object. Otherwise, let blur event target
       //      be null.
-      // FIXME: Fire blur at a document's Window.
-      RefPtr<dom::Element> blurEventTarget = ShareRefPtr(DynamicDowncast<dom::Element>(*entry));
+      // (A document stays in a chain only while it doesn't have system focus, without nested navigables.
+      // Its Window gets its events from SystemFocusChanged, when that changes.)
+      RefPtr<dom::Element> blurEventTarget = DynamicDowncast<dom::Element>(entry);
 
       // 2.3. If entry is the last entry in old chain, and entry is an Element, and the last entry in new
       // chain
@@ -689,7 +712,7 @@ namespace krys::boo::html
       // focus
       //      event target be that Document object's relevant global object. Otherwise, let focus event target
       //      be null.
-      // FIXME: Fire focus at a document's Window.
+      // (See the blur event target, above.)
       auto *focusEventTarget = DynamicDowncast<dom::Element>(*entry);
 
       // 4.3. If entry is the last entry in new chain, and entry is an Element, and the last entry in old
@@ -723,10 +746,12 @@ namespace krys::boo::html
   {
     // 1. Let view be target if target is a Window object; otherwise target's node document's relevant global
     //    object.
-    // FIXME: The view (the Window).
+    auto *view = target.NodeDocument().Window();
+
     // 2. Fire an event named e at target, using FocusEvent, with the relatedTarget attribute initialized to
     //    relatedTarget, the view attribute initialized to view, and the composed flag set.
     dom::FocusEventInit attributes;
+    attributes.View = view;
     attributes.RelatedTarget = ShareRefPtr(relatedTarget);
     attributes.Composed = true;
     (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(e, target, attributes);
@@ -804,7 +829,7 @@ namespace krys::boo::html
     auto &candidates = topDocument.AutofocusCandidates();
     std::erase_if(candidates,
                   [&](const WeakPtr<dom::Element> &candidate) { return candidate.get() == &element; });
-    candidates.push_back(WeakPtr<dom::Element>::WithRef(element));
+    candidates.push_back(CreateWeakPtr(&element));
     topDocument.ScheduleRenderingUpdate({RenderingUpdateStep::FlushAutofocusCandidates});
   }
 
@@ -1460,21 +1485,24 @@ namespace krys::boo::html
     document.SetFocusedAndActive(focused);
 
     // The focused element gets `blur` before the window, and `focus` after it.
-    auto fire = [](dom::DOMStringAtom type, dom::Element &target)
+    if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
+        !focused && focusedElement)
+    {
+      FireFocusEvent(dom::DOMStringAtom(u8"blur"), *focusedElement, nullptr);
+    }
+    if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document.Window()))
     {
       dom::FocusEventInit attributes;
+      attributes.View = window.get();
       attributes.Composed = true;
-      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(type, target, attributes);
-    };
-    RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
-    if (!focused && focusedElement)
-    {
-      fire(dom::DOMStringAtom(u8"blur"), *focusedElement);
+      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(
+        dom::DOMStringAtom(focused ? u8"focus" : u8"blur"), *window, attributes);
     }
-    // FIXME: Fire `focus` or `blur` at the document's Window.
-    if (focused && focusedElement)
+    // NOTE: the window's listeners may have moved the focus.
+    if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
+        focused && focusedElement)
     {
-      fire(dom::DOMStringAtom(u8"focus"), *focusedElement);
+      FireFocusEvent(dom::DOMStringAtom(u8"focus"), *focusedElement, nullptr);
     }
   }
 

@@ -95,7 +95,7 @@ namespace krys::boo
       return _computedSize / _usedZoomFactor;
     }
     /// @brief Adjusted size regarding @font-face size-adjust but not regarding font-size-adjust. The latter
-    /// adjustment is done with updateSizeWithFontSizeAdjust() after the font's creation.
+    /// adjustment is done with FontPlatformData::UpdateSizeWithFontSizeAdjust() after the font's creation.
     KRYS_NODISCARD float AdjustedSizeForFontFace(float) const noexcept;
     KRYS_NODISCARD Maybe<FontSelectionValue> FontStyleSlope() const noexcept
     {

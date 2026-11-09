@@ -23,8 +23,8 @@ namespace krys::boo::html
     }
 
     Ref<dom::HTMLCollection> rows = CreateRef<dom::LiveHTMLCollection>(
-      *this, [this](const dom::Element &element)
-      { return element.ParentNode() == this && AsTableElement<HTMLTableRowElement>(&element); });
+      *this, [](const dom::Element &element) { return AsTableElement<HTMLTableRowElement>(&element); },
+      dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _rows = CreateWeakPtr(rows.get());
     return rows;
   }
