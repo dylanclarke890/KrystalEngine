@@ -148,7 +148,6 @@ namespace krys
     }
     _context->Window = krys::move(window.value());
 
-    // FIXME: This needs to be configurable on startup.
     auto cwd = std::filesystem::current_path();
     _context->VFS =
       io::VirtualFileSystemBuilder().Mount<io::NativeFileBackend>(io::Path("/"), io::Path(cwd)).Build();
