@@ -364,7 +364,21 @@ namespace krys::boo
       RenderBlock::ClearPercentHeightDescendantsFrom(*this);
     }
 
-    // FIXME: The scrollable area's scroll position and scrollbar placement.
+    // If our zoom factor changes and we have a defined scrollLeft/Top, we need to adjust that value into the
+    // new zoomed coordinate space.
+    if (HasNonVisibleOverflow() && Layer() && oldStyle && oldStyle->UsedZoom() != newStyle.UsedZoom())
+    {
+      if (auto *scrollableArea = Layer()->GetScrollableArea())
+      {
+        ScrollPosition scrollPosition = scrollableArea->GetScrollPosition();
+        float zoomScaleFactor = newStyle.UsedZoom() / oldStyle->UsedZoom();
+        scrollPosition.Scale(zoomScaleFactor);
+        scrollableArea->SetPostLayoutScrollPosition(scrollPosition);
+      }
+    }
+
+    // (The scrollbars' side, as `direction` changes, moves the scroll origin after the style change:
+    // RenderLayerScrollableArea::UpdateScrollbarsAfterStyleChange.)
     // The scrollbars follow their box's scrollbar-width, scrollbar-color and color-scheme; the root's are
     // the view's.
     if (Layer() && oldStyle)

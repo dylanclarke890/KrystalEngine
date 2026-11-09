@@ -501,6 +501,24 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "LocalFrameView: a box keeps its scroll position as its zoom changes",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}</style>"
+      u8"<div id=s style='width:100px;height:50px;overflow:auto'><div style=height:1000px></div></div>"};
+    auto &scroller = fixture.ById(u8"s");
+    scroller.SetScrollTop(100);
+    REQUIRE(scroller.ScrollTop() == 100);
+
+    // Twice the size, it's scrolled twice as far, so as far in CSS pixels.
+    REQUIRE_FALSE(
+      scroller.SetAttribute(u8"style", u8"width:100px;height:50px;overflow:auto;zoom:2").HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(scroller.ScrollTop() == 100);
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: overlay scrollbars turn light over a dark page",
                    "[Page][LocalFrameView][Scrolling]")
   {
