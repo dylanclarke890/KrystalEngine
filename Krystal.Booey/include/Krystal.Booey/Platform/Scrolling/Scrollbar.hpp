@@ -28,6 +28,7 @@ namespace krys::boo
 
   private:
     WeakPtr<ScrollableArea> _scrollableArea;
+    bool _suppressInvalidation {false};
     ScrollbarOrientation _orientation;
     ScrollbarWidth _widthStyle;
     ScrollbarTheme &_theme;
@@ -177,6 +178,16 @@ namespace krys::boo
 
     void SetSteps(int32 lineStep, int32 pageStep, int32 pixelsPerStep = 1) noexcept;
     void SetProportion(int32 visibleSize, int32 totalSize) noexcept;
+
+    /// @brief Whether the scrollbar asks its scrollable area to repaint it: not while it's suppressed.
+    KRYS_NODISCARD bool SuppressInvalidation() const noexcept
+    {
+      return _suppressInvalidation;
+    }
+    void SetSuppressInvalidation(bool suppress) noexcept
+    {
+      _suppressInvalidation = suppress;
+    }
 
     KRYS_NODISCARD bool Enabled() const noexcept
     {

@@ -479,6 +479,10 @@ namespace krys::boo
 
   void Scrollbar::InvalidateRect(const IntRect &rect) noexcept
   {
+    if (SuppressInvalidation())
+    {
+      return;
+    }
     GetScrollableArea().InvalidateScrollbar(*this, rect);
   }
 

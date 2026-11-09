@@ -865,7 +865,7 @@ namespace krys::boo
     }
 
     // Now paint the scrollbars.
-    if (_horizontalScrollbar || _verticalScrollbar)
+    if (!_scrollbarsSuppressed && (_horizontalScrollbar || _verticalScrollbar))
     {
       GraphicsContextStateSaver stateSaver(context);
       IntRect scrollViewDirtyRect = rect;
@@ -1340,18 +1340,73 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::AdjustScrollbarsForLayout(bool) noexcept
+  void LocalFrameView::AdjustScrollbarsForLayout(bool isFirstLayout) noexcept
   {
     ScrollbarMode hMode;
     ScrollbarMode vMode;
     CalculateScrollbarModesForLayout(hMode, vMode);
 
-    // FIXME: Starting the first layout with a vertical scrollbar (suppressed, with the vertical mode always
-    // on and the horizontal always off), once scrollbars can be suppressed.
-    if (hMode != HorizontalScrollbarMode() || vMode != VerticalScrollbarMode())
+    // The first layout starts with a vertical scrollbar and no horizontal one, as most pages are taller than
+    // they are wide: it's made while the scrollbars are suppressed, then kept as the real modes are set.
+    if (isFirstLayout && !_layoutContext.IsLayoutNested())
+    {
+      SetScrollbarsSuppressed(true);
+      if (vMode == ScrollbarMode::Auto)
+      {
+        SetVerticalScrollbarMode(ScrollbarMode::AlwaysOn);
+      }
+      if (hMode == ScrollbarMode::Auto)
+      {
+        SetHorizontalScrollbarMode(ScrollbarMode::AlwaysOff);
+      }
+      SetScrollbarModes(hMode, vMode);
+      SetScrollbarsSuppressed(false, true);
+    }
+    else if (hMode != HorizontalScrollbarMode() || vMode != VerticalScrollbarMode())
     {
       SetScrollbarModes(hMode, vMode);
     }
+  }
+
+  void LocalFrameView::SetScrollbarsSuppressed(bool suppressed, bool repaintOnUnsuppress) noexcept
+  {
+    if (suppressed == _scrollbarsSuppressed)
+    {
+      return;
+    }
+
+    _scrollbarsSuppressed = suppressed;
+
+    if (repaintOnUnsuppress && !suppressed)
+    {
+      if (_horizontalScrollbar)
+      {
+        _horizontalScrollbar->Invalidate();
+      }
+      if (_verticalScrollbar)
+      {
+        _verticalScrollbar->Invalidate();
+      }
+
+      // Invalidate the scroll corner too on unsuppress.
+      InvalidateRect(ScrollCornerRect());
+    }
+  }
+
+  void LocalFrameView::RestoreScrollbar() noexcept
+  {
+    SetScrollbarsSuppressed(false);
+  }
+
+  void LocalFrameView::Clear() noexcept
+  {
+    // reset(), of what the view keeps.
+    _lastViewportSize = IntSize();
+    _lastUsedZoomFactor = 1;
+    _layoutContext.ResetFirstLayoutFlag();
+    _layoutContext.SetNeedsFullRepaint();
+
+    SetScrollbarsSuppressed(true);
   }
 
   void LocalFrameView::WillDoLayout(const RenderElement &layoutRoot) noexcept
@@ -2102,8 +2157,7 @@ namespace krys::boo
     // If we came in here with the view already needing a layout then do that first. (This will be the common
     // case, e.g., when the page changes due to window resizing for example). This layout will not re-enter
     // updateScrollbars and does not count towards our max layout pass total.
-    // FIXME: Not while the scrollbars are suppressed, once they can be.
-    if (scrollbarCanTakeSpace)
+    if (!_scrollbarsSuppressed && scrollbarCanTakeSpace)
     {
       SetForScope inUpdateScrollbarsScope(_inUpdateScrollbars, true);
       UpdateContentsSize();
@@ -2129,7 +2183,7 @@ namespace krys::boo
 
     bool scrollbarAddedOrRemoved = false;
 
-    if (hScroll != ScrollbarMode::Auto && vScroll != ScrollbarMode::Auto)
+    if (_scrollbarsSuppressed || (hScroll != ScrollbarMode::Auto && vScroll != ScrollbarMode::Auto))
     {
       if (hasHorizontalScrollbar != newHasHorizontalScrollbar
           && SetHasHorizontalScrollbar(newHasHorizontalScrollbar))
@@ -2270,13 +2324,21 @@ namespace krys::boo
         Height() - _horizontalScrollbar->Height(),
         Width() - (_verticalScrollbar ? _verticalScrollbar->OccupiedWidth() : 0),
         _horizontalScrollbar->Height()));
-      if (oldRect != _horizontalScrollbar->FrameRect())
+      if (!_scrollbarsSuppressed && oldRect != _horizontalScrollbar->FrameRect())
       {
         _horizontalScrollbar->Invalidate();
       }
 
+      if (_scrollbarsSuppressed)
+      {
+        _horizontalScrollbar->SetSuppressInvalidation(true);
+      }
       _horizontalScrollbar->SetEnabled(ContentsSize().Width() > clientWidth);
       _horizontalScrollbar->SetProportion(clientWidth, ContentsSize().Width());
+      if (_scrollbarsSuppressed)
+      {
+        _horizontalScrollbar->SetSuppressInvalidation(false);
+      }
     }
 
     if (_verticalScrollbar)
@@ -2287,13 +2349,21 @@ namespace krys::boo
         IntRect(ShouldPlaceVerticalScrollbarOnLeft() ? 0 : Width() - _verticalScrollbar->Width(), 0,
                 _verticalScrollbar->Width(),
                 Height() - (_horizontalScrollbar ? _horizontalScrollbar->OccupiedHeight() : 0)));
-      if (oldRect != _verticalScrollbar->FrameRect())
+      if (!_scrollbarsSuppressed && oldRect != _verticalScrollbar->FrameRect())
       {
         _verticalScrollbar->Invalidate();
       }
 
+      if (_scrollbarsSuppressed)
+      {
+        _verticalScrollbar->SetSuppressInvalidation(true);
+      }
       _verticalScrollbar->SetEnabled(TotalContentsSize().Height() > clientHeight);
       _verticalScrollbar->SetProportion(clientHeight, TotalContentsSize().Height());
+      if (_scrollbarsSuppressed)
+      {
+        _verticalScrollbar->SetSuppressInvalidation(false);
+      }
     }
 
     UpdateScrollbarSteps();
@@ -2337,7 +2407,16 @@ namespace krys::boo
 
     _scrollPosition = newPosition;
 
-    // FIXME: Suppressed scrollbars and deferring the update while the contents size changes.
+    // A view that's loading repaints all of itself; what's fixed moves with its next layout.
+    // FIXME: Deferring the update while the contents size changes.
+    if (_scrollbarsSuppressed)
+    {
+      if (oldPosition != GetScrollPosition())
+      {
+        ScrollPositionChanged(oldPosition, GetScrollPosition());
+      }
+      return;
+    }
 
     // completeUpdatesAfterScrollTo: the fixed layers move with the scroll position, then the painted contents
     // move.

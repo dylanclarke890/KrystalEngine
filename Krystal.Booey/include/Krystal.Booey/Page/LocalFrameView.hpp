@@ -114,6 +114,8 @@ namespace krys::boo
     bool _wasEverScrolledExplicitlyByUser {false};
     IntSize _contentsSize;
     bool _inUpdateScrollbars {false};
+    /// @brief Whether the scrollbars are kept as they are, unpainted, while a document loads.
+    bool _scrollbarsSuppressed {false};
     RefPtr<Scrollbar> _horizontalScrollbar;
     RefPtr<Scrollbar> _verticalScrollbar;
     ScrollbarMode _horizontalScrollbarMode {ScrollbarMode::Auto};
@@ -847,6 +849,23 @@ namespace krys::boo
     /// @brief Scrolls to @p desiredPosition, within the scroll range.
     // FIXME: Adding and removing scrollbars.
     void UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept;
+
+  public:
+    /// @brief Keeps the scrollbars as they are and unpainted (@p suppressed), as while a document loads, so
+    /// they don't come and go as its content arrives; or lets them change again, repainting them if
+    /// @p repaintOnUnsuppress.
+    void SetScrollbarsSuppressed(bool suppressed, bool repaintOnUnsuppress = false) noexcept;
+    KRYS_NODISCARD bool ScrollbarsSuppressed() const noexcept
+    {
+      return _scrollbarsSuppressed;
+    }
+    /// @brief Lets the scrollbars change again, once the document has been parsed.
+    void RestoreScrollbar() noexcept;
+    /// @brief Readies the view for a new document: its next layout is a first layout, and its scrollbars
+    /// are suppressed until the document is parsed.
+    void Clear() noexcept;
+
+  private:
     void ScheduleScrollEvent() noexcept;
     KRYS_NODISCARD LayoutRect GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
                                                            const LayoutRect &exposeRect,

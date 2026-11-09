@@ -241,6 +241,40 @@ namespace krys::boo::tests
     CHECK(Narrow(paragraph->TextContent().value_or(u8"")) == "\xC3\xA9\xEF\xBF\xBD");
   }
 
+  TEST_CASE("A loading document's scrollbars stay as they are until its first layout",
+            "[Loader][DocumentLoader][Scrolling]")
+  {
+    LoadFixture fixture;
+    auto *view = fixture.Frame().View();
+    REQUIRE(view);
+    DocumentWriter writer;
+    writer.SetFrame(fixture.Frame());
+    REQUIRE(writer.Begin(url::URL(u8"about:blank")));
+    CHECK(view->ScrollbarsSuppressed());
+
+    SECTION("a tall page is laid out with its vertical scrollbar from the start")
+    {
+      const char markup[] = "<body style=margin:0><div id=d style=height:5000px></div>";
+      writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup), sizeof(markup) - 1));
+      (void)fixture.Document().UpdateLayout();
+      CHECK_FALSE(view->ScrollbarsSuppressed());
+      REQUIRE(view->VerticalScrollbar());
+      CHECK_FALSE(view->HorizontalScrollbar());
+    }
+
+    SECTION("a short page loses the vertical scrollbar its first layout starts with")
+    {
+      const char markup[] = "<body style=margin:0><div id=d style=height:5px></div>";
+      writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup), sizeof(markup) - 1));
+      (void)fixture.Document().UpdateLayout();
+      CHECK_FALSE(view->ScrollbarsSuppressed());
+      CHECK_FALSE(view->VerticalScrollbar());
+    }
+
+    writer.End();
+    CHECK_FALSE(view->ScrollbarsSuppressed());
+  }
+
   namespace
   {
     /// @brief Records the end of loading's events, on each new document and its window.

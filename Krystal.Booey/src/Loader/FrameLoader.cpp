@@ -578,7 +578,6 @@ namespace krys::boo
 
   void FrameLoader::FinishedParsing() noexcept
   {
-    // FIXME: Unsuppressing the scrollbars, once they're suppressed while a document loads.
     Ref<LocalFrame> frame = ShareRef(_frame);
     if (_state == FrameState::CommittedPage)
     {
@@ -586,6 +585,12 @@ namespace krys::boo
     }
 
     CheckCompleted();
+
+    // Check if the scrollbars are really needed for the content. If not, remove them, relayout, and repaint.
+    if (auto *view = frame->View())
+    {
+      view->RestoreScrollbar();
+    }
 
     if (auto *document = frame->Document())
     {
