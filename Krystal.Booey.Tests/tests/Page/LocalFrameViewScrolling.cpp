@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -479,6 +480,14 @@ namespace krys::boo::tests
       CHECK(view.GetScrollPosition() == ScrollPosition(0, 189));
     }
 
+    SECTION("the corner past the scrollbars is in neither")
+    {
+      CHECK(view.IsPointInScrollbarCorner({190, 90}));
+      CHECK_FALSE(view.IsPointInScrollbarCorner({190, 50}));
+      CHECK_FALSE(view.IsPointInScrollbarCorner({100, 90}));
+      CHECK(view.ScrollbarAtPoint({190, 90}) == nullptr);
+    }
+
     SECTION("pressing a scrollbar leaves the focus alone")
     {
       auto &field = fixture.ById(u8"field");
@@ -488,6 +497,33 @@ namespace krys::boo::tests
       Release(handler, {190, 75});
       CHECK(fixture.Document->FocusedElement() == &field);
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "LocalFrameView: a press in the scrollbars' corner doesn't select",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}</style><div style=width:400px;height:600px>"
+      u8"Some text to select</div>"};
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto &selection = fixture.Document->Selection();
+    REQUIRE(fixture.View().IsPointInScrollbarCorner({190, 90}));
+
+    auto drag = [&](IntPoint from, IntPoint to)
+    {
+      Press(handler, from);
+      DoublePoint point(to.X(), to.Y());
+      (void)handler.MouseMoved(PlatformMouseEvent(
+        point, point, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now()));
+      Release(handler, to);
+    };
+
+    // Dragging from the corner over the text selects none of it; from the content, it does.
+    drag({190, 90}, {2, 5});
+    CHECK_FALSE(selection.Selection().IsRange());
+    drag({150, 5}, {2, 5});
+    CHECK(selection.Selection().IsRange());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a box's scrollbars follow the mouse",

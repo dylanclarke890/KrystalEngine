@@ -1019,6 +1019,32 @@ namespace krys::boo
     return cornerRect;
   }
 
+  bool LocalFrameView::IsPointInScrollbarCorner(const IntPoint &windowPoint) const noexcept
+  {
+    if (!ScrollbarCornerPresent())
+    {
+      return false;
+    }
+
+    // The view is the root of its (absent) widget tree, so the window's coordinates are its own.
+    const auto &viewPoint = windowPoint;
+
+    if (_horizontalScrollbar)
+    {
+      auto &frame = _horizontalScrollbar->FrameRect();
+      return viewPoint.Y() > frame.Y() && viewPoint.Y() < frame.MaxY() && viewPoint.X() > frame.MaxX();
+    }
+
+    auto &frame = _verticalScrollbar->FrameRect();
+    return viewPoint.X() > frame.X() && viewPoint.X() < frame.MaxX() && viewPoint.Y() > frame.MaxY();
+  }
+
+  bool LocalFrameView::ScrollbarCornerPresent() const noexcept
+  {
+    return (_horizontalScrollbar && Width() - _horizontalScrollbar->Width() > 0)
+           || (_verticalScrollbar && Height() - _verticalScrollbar->Height() > 0);
+  }
+
   Scrollbar *LocalFrameView::ScrollbarAtPoint(const IntPoint &windowPoint) const noexcept
   {
     // The view is the root of its (absent) widget tree, so the window's coordinates are its own.
@@ -2163,6 +2189,8 @@ namespace krys::boo
       UpdateContentsSize();
     }
 
+    IntRect oldScrollCornerRect = ScrollCornerRect();
+
     bool hasHorizontalScrollbar = static_cast<bool>(_horizontalScrollbar);
     bool hasVerticalScrollbar = static_cast<bool>(_verticalScrollbar);
 
@@ -2369,8 +2397,15 @@ namespace krys::boo
     UpdateScrollbarSteps();
 
     PositionScrollbarLayers();
-    // FIXME: Repainting the scroll corner when it changes (updateScrollCorner), once there are custom scroll
-    // corners.
+    if (hasHorizontalScrollbar != newHasHorizontalScrollbar
+        || hasVerticalScrollbar != newHasVerticalScrollbar)
+    {
+      // The corner the scrollbars left goes with them. (There are no custom scroll corners to update.)
+      if (!_horizontalScrollbar && !_verticalScrollbar)
+      {
+        InvalidateScrollCorner(oldScrollCornerRect);
+      }
+    }
 
     scrollToPosition(desiredPosition);
 

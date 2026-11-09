@@ -505,6 +505,11 @@ namespace krys::boo
 
     /// @brief The view's scrollbar at @p windowPoint, if any.
     KRYS_NODISCARD Scrollbar *ScrollbarAtPoint(const IntPoint &windowPoint) const noexcept;
+    /// @brief Whether @p windowPoint is in the corner past the end of a scrollbar, where a press does
+    /// nothing.
+    KRYS_NODISCARD bool IsPointInScrollbarCorner(const IntPoint &windowPoint) const noexcept;
+    /// @brief Whether a scrollbar stops short of the view's edge, leaving a corner.
+    KRYS_NODISCARD bool ScrollbarCornerPresent() const noexcept;
 
     KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept override;
     KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept override;

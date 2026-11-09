@@ -3173,8 +3173,7 @@ namespace krys::boo
     return _mouseDownMayStartSelect;
   }
 
-  // FIXME: Widgets and the scrollbar corner (isPointInScrollbarCorner). (There's no image overlay text; see
-  // DIFFERENCES.md.)
+  // FIXME: Widgets. (There's no image overlay text; see DIFFERENCES.md.)
   bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);
@@ -3185,6 +3184,13 @@ namespace krys::boo
     CancelFakeMouseMoveEvent();
 
     (void)frame->Document()->UpdateLayoutIgnorePendingStylesheets();
+
+    // A press in the scrollbars' corner neither selects nor drags.
+    if (auto *view = frame->View();
+        view && view->IsPointInScrollbarCorner(FlooredIntPoint(event.Event().Position())))
+    {
+      return false;
+    }
 
     // If we got the event back, that must mean it wasn't prevented,
     // so it's allowed to start a drag or selection if it wasn't in a scrollbar.
