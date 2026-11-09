@@ -110,6 +110,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Maths/Matrix.cpp
 	PRIVATE tests/Maths/MortonCodes.cpp
 	PRIVATE tests/Maths/Packing.cpp
+	PRIVATE tests/Maths/Project.cpp
 	PRIVATE tests/Maths/Quaternion.cpp
 	PRIVATE tests/Maths/Round.cpp
 	PRIVATE tests/Maths/Swizzle.cpp

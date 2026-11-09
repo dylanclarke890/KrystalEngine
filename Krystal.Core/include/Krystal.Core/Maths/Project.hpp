@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Maths/Conventions.hpp"
 #include "Krystal.Core/Maths/Matrix.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 
@@ -31,7 +32,7 @@ namespace krys
   /// The near and far clip planes correspond to z normalized device coordinates of -1 and +1 respectively.
   template <FloatingPoint T, Number U>
   KRYS_NODISCARD constexpr auto Project_NO(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
-                                           const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport)
+                                           const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport) noexcept
   {
     Vector<T, 4> tmp(obj.x, obj.y, obj.z, T(1));
     tmp = model * tmp;
@@ -45,16 +46,20 @@ namespace krys
     return Vector<T, 3>(tmp);
   }
 
-  // FIXME: Use policy based design to select between ZO and NO at compile time
-  /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
-  template <FloatingPoint T, Number U>
+  /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates, with the depth range
+  /// of the projection matrix.
+  template <FloatingPoint T, Number U, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
   KRYS_NODISCARD constexpr Vector<T, 3> Project(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
-                                                const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport)
+                                                const Matrix<T, 4, 4> &proj,
+                                                const Vector<U, 4> &viewport) noexcept
   {
-#if KRYS_MATRIX_DEPTH_RANGE == KRYS_MATRIX_DEPTH_RANGE_ZERO_TO_ONE
-    return Project_ZO(obj, model, proj, viewport);
-#else
-    return Project_NO(obj, model, proj, viewport);
-#endif
+    if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
+    {
+      return Project_ZO(obj, model, proj, viewport);
+    }
+    else
+    {
+      return Project_NO(obj, model, proj, viewport);
+    }
   }
 }
