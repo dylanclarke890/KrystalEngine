@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Colour/ColourComponents.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
 #include "Krystal.Core/Colour/ColourModels.hpp"
@@ -181,8 +182,7 @@ namespace krys
                                                               ClampedComponent<ColourType, 2>(c3), alpha});
   }
 
-  // FIXME: Enable if asserts are enabled
-#if KRYS_DEBUG
+#if !defined(KRYS_DISABLE_ASSERTS)
 
   template <typename ColourType>
   constexpr void AssertInRange(ColourType color) noexcept
@@ -196,19 +196,18 @@ namespace krys
         continue;
       }
 
-      // "Component at index %d is %f and is less than the allowed minimum %f", i, components[i], ColourType::Model::ComponentInfo[i].Min
-      krys_assert(components[i] >= ColourType::Model::ComponentInfo[i].Min);
-      
-      // "Component at index %d is %f and is greater than the allowed maximum %f", i, components[i], ColourType::Model::ComponentInfo[i].Max)
-      krys_assert(components[i] <= ColourType::Model::ComponentInfo[i].Max);
+      krys_assert_msg(components[i] >= ColourType::Model::ComponentInfo[i].Min,
+                      "A component is less than its model's minimum");
+      krys_assert_msg(components[i] <= ColourType::Model::ComponentInfo[i].Max,
+                      "A component is greater than its model's maximum");
     }
 
     if (!IsNaN(components[3]))
     {
-      // "Alpha is %f and is less than the allowed minimum (transparent) %f", components[3], AlphaTraits<typename ColourType::ComponentType>::Transparent
-      krys_assert(components[3] >= AlphaTraits<typename ColourType::ComponentType>::Transparent);
-      // "Alpha is %f and is greater than the allowed maximum (opaque) %f", components[3], AlphaTraits<typename ColourType::ComponentType>::Opaque
-      krys_assert(components[3] <= AlphaTraits<typename ColourType::ComponentType>::Opaque);
+      krys_assert_msg(components[3] >= AlphaTraits<typename ColourType::ComponentType>::Transparent,
+                      "Alpha is less than transparent");
+      krys_assert_msg(components[3] <= AlphaTraits<typename ColourType::ComponentType>::Opaque,
+                      "Alpha is greater than opaque");
     }
   }
 
