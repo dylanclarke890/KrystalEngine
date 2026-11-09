@@ -80,6 +80,12 @@ namespace krys::boo::url
   class URL;
 }
 
+namespace krys::boo::css
+{
+  class StylePropertyMap;
+  class StylePropertyMapReadOnly;
+}
+
 namespace krys::boo::css::calc
 {
   struct RandomCachingKey;
@@ -282,6 +288,10 @@ namespace krys::boo::dom
     /// @brief The element's `data-*` attributes, by property name.
     /// @see https://html.spec.whatwg.org/#dom-dataset
     KRYS_NODISCARD DatasetDOMStringMap &Dataset() noexcept;
+
+    /// @brief The element's computed style, as a read-only property map.
+    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-element-computedstylemap
+    KRYS_NODISCARD css::StylePropertyMapReadOnly &ComputedStyleMap() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-slot
     void Slot(DOMString slot) noexcept;
@@ -1608,6 +1618,10 @@ namespace krys::boo::dom
     /// @brief Sets the attribute @p name (matched by its namespace and local name) to `value` without running
     /// the attribute change steps or queueing a mutation record, for lazily synchronised attributes.
     void SetSynchronizedLazyAttribute(const QualifiedName &name, DOMString value) noexcept;
+
+    /// @brief The inline style's property map (`attributeStyleMap`), once it's been asked for.
+    KRYS_NODISCARD css::StylePropertyMap *ExistingAttributeStyleMap() const noexcept;
+    void SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept;
 
 #pragma region Parser Hooks
 

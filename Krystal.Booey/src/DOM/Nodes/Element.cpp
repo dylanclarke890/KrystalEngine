@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/CSS/TypedOM/ComputedStylePropertyMapReadOnly.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
@@ -2023,6 +2024,28 @@ namespace krys::boo::dom
       rareData.SetDataset(CreateUnique<DatasetDOMStringMap>(*this));
     }
     return *rareData.Dataset();
+  }
+
+  css::StylePropertyMapReadOnly &Element::ComputedStyleMap() noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#dom-element-computedstylemap
+    auto &rareData = EnsureElementRareData();
+    if (!rareData.ComputedStyleMap())
+    {
+      rareData.SetComputedStyleMap(css::ComputedStylePropertyMapReadOnly::Create(*this));
+    }
+    return *rareData.ComputedStyleMap();
+  }
+
+  css::StylePropertyMap *Element::ExistingAttributeStyleMap() const noexcept
+  {
+    auto *rareData = GetElementRareData();
+    return rareData ? rareData->AttributeStyleMap() : nullptr;
+  }
+
+  void Element::SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept
+  {
+    EnsureElementRareData().SetAttributeStyleMap(krys::move(map));
   }
 
   void Element::Slot(DOMString slot) noexcept

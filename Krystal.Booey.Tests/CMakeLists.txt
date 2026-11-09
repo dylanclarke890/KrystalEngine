@@ -210,6 +210,11 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Rules/KeyframesRule.cpp
 		tests/CSS/Rules/Rule.cpp
 		tests/CSS/TypedOM/CSSNumericValue.cpp
+		tests/CSS/TypedOM/CSSStyleValue.cpp
+		tests/CSS/TypedOM/CSSUnparsedValue.cpp
+		tests/CSS/TypedOM/Color/CSSColorValue.cpp
+		tests/CSS/TypedOM/StylePropertyMap.cpp
+		tests/CSS/TypedOM/Transform/CSSTransformValue.cpp
 		tests/CSS/Values/Aggregates.cpp
 		tests/CSS/Values/Borders/BorderRadius.cpp
 		tests/CSS/Values/Borders/BoxShadow.cpp

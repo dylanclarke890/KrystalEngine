@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Images/ImageFrameWorkQueue.hpp"
+#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImageSource.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"

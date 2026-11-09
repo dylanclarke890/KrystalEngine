@@ -43,6 +43,12 @@ namespace krys::boo
   struct ResizeObserverData;
 }
 
+namespace krys::boo::css
+{
+  class StylePropertyMap;
+  class StylePropertyMapReadOnly;
+}
+
 namespace krys::boo::html
 {
   class CustomElement;
@@ -95,6 +101,8 @@ namespace krys::boo::dom
     UniquePtr<ResizeObserverData> _resizeObserverData;
     UniquePtr<DOMTokenList> _partList;
     UniquePtr<DatasetDOMStringMap> _dataset;
+    RefPtr<css::StylePropertyMap> _attributeStyleMap;
+    RefPtr<css::StylePropertyMapReadOnly> _computedStyleMap;
     Maybe<LayoutUnit> _lastRememberedLogicalWidth;
     Maybe<LayoutUnit> _lastRememberedLogicalHeight;
     Maybe<EnumSet<ContentRelevancy>> _contentRelevancy;
@@ -171,6 +179,20 @@ namespace krys::boo::dom
       return _dataset.get();
     }
     void SetDataset(UniquePtr<DatasetDOMStringMap> &&dataset) noexcept;
+
+    /// @brief The element's `attributeStyleMap`, once it's been asked for.
+    KRYS_NODISCARD css::StylePropertyMap *AttributeStyleMap() const noexcept
+    {
+      return _attributeStyleMap.get();
+    }
+    void SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept;
+
+    /// @brief The element's `computedStyleMap()`, once it's been asked for.
+    KRYS_NODISCARD css::StylePropertyMapReadOnly *ComputedStyleMap() const noexcept
+    {
+      return _computedStyleMap.get();
+    }
+    void SetComputedStyleMap(Ref<css::StylePropertyMapReadOnly> map) noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept
     {

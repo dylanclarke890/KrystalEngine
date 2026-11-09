@@ -28,9 +28,11 @@
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
+#include "Krystal.Booey/CSS/TypedOM/InlineStylePropertyMap.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Invalidation/AttributeChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -51,6 +53,16 @@ namespace krys::boo::dom
   css::CSSStyleProperties &StyledElement::Style() noexcept
   {
     return EnsureMutableInlineStyle()->EnsureInlineCSSStyleProperties(*this);
+  }
+
+  css::StylePropertyMap &StyledElement::AttributeStyleMap() noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#dom-elementcssinlinestyle-attributestylemap
+    if (!ExistingAttributeStyleMap())
+    {
+      SetAttributeStyleMap(css::InlineStylePropertyMap::Create(*this));
+    }
+    return *ExistingAttributeStyleMap();
   }
 
 #pragma endregion

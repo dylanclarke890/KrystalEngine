@@ -30,6 +30,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/TypedOM/DeclaredStylePropertyMap.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
@@ -99,6 +100,16 @@ namespace krys::boo::css
       _propertiesCSSOMWrapper = StyleRuleCSSStyleProperties::Create(_styleRule->MutableProperties(), *this);
     }
     return *_propertiesCSSOMWrapper;
+  }
+
+  StylePropertyMap &CSSStyleRule::StyleMap() noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#dom-cssstylerule-stylemap
+    if (!_styleMap)
+    {
+      _styleMap = DeclaredStylePropertyMap::Create(*this);
+    }
+    return *_styleMap;
   }
 
   CSSOMString CSSStyleRule::GenerateSelectorText() const noexcept

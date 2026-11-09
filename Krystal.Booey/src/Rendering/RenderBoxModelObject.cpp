@@ -34,6 +34,7 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderEdge.hpp"
 #include "Krystal.Booey/Rendering/Painting/ImageQualityController.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"

@@ -143,6 +143,9 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - An unknown `::-webkit-*` pseudo-element is a parse error, where Selectors keeps it valid (matching nothing) for compatibility.
 - `CSSOMString` can't be null, so nullable attributes are empty for null (`Href()`, `Title()`), and the rule model can't tell an empty `supports()` from none (so `@import "a" supports()` serialises without it); `CSSPropertyRule` omits an empty `syntax`.
 - Style sheets from `<link>`, `@import` and processing instructions are always strict about their type: they must be `text/css` or have no type, where the specifications take a same-origin sheet of any type in quirks mode.
+- The Typed OM's numeric factory functions (`CSS.px()` and the rest) are `CSSNumericFactory`'s static functions (`CSSNumericFactory::Px(10)`), not members of the `CSS` namespace (`DOMCSSNamespace`).
+- A Typed OM property map parses and reifies values in its document: a `styleMap` whose rule is in no document's style sheet reads as empty, and setting or appending to it throws a `TypeError`.
+- `StylePropertyMap::Set()` throws a `NotSupportedError` for a value that becomes a pair whose two values are equal, and a `TypeError` for a quad that would coalesce, as WebKit does, as their serialisation wouldn't represent them.
 
 ## Style (cascade and computed values)
 
