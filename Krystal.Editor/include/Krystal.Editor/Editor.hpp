@@ -75,7 +75,7 @@ namespace krys
     gfx::TextureHandle _image {};
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
-    /// @brief Booey's loader, which reads files on the application's IO thread.
+    /// @brief Booey's loader, which reads files on the application's workers.
     UniquePtr<ui::FileLoaderStrategy> _fileLoader {};
     UniquePtr<ui::View> _pageView {};
     /// @brief The page's listeners, which go when the page is loaded again.
@@ -830,10 +830,10 @@ namespace krys
     /// Sans as Booey's fonts.
     void CreatePage() noexcept
     {
-      // Booey's work that can leave the main thread runs on the application's workers, and its files are read
-      // on the IO thread.
+      // Booey's work that can leave the main thread runs on the application's workers, its file reads as
+      // jobs that may block.
       boo::PlatformStrategies::Singleton().SetWorkQueue(_context->Jobs.get());
-      _fileLoader = CreateUnique<ui::FileLoaderStrategy>(_context->IO.get());
+      _fileLoader = CreateUnique<ui::FileLoaderStrategy>(_context->Jobs.get());
       boo::PlatformStrategies::Singleton().SetLoaderStrategy(_fileLoader.get());
       // Overlay scrollbars, which fade in while the mouse is over a scroller or it scrolls.
       boo::ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);

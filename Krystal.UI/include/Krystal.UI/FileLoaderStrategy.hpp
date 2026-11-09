@@ -20,9 +20,9 @@ namespace krys::ui
     WorkQueue *_readQueue;
 
   public:
-    /// @brief Reads files on @p readQueue, whose jobs may block (a one-worker `JobSystem` of its own, not the
-    /// application's workers), and gives Booey each file once it's read, through its event loop's inbox.
-    /// Without a queue, files are read as they're asked for.
+    /// @brief Reads files on @p readQueue, as jobs that may block (so a `JobSystem` keeps its other jobs'
+    /// workers), and gives Booey each file once it's read, through its event loop's inbox. Without a queue,
+    /// files are read as they're asked for.
     explicit FileLoaderStrategy(WorkQueue *readQueue = nullptr) noexcept : _readQueue(readQueue)
     {
     }

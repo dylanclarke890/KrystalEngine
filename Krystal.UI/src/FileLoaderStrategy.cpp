@@ -98,6 +98,7 @@ namespace krys::ui
     _readQueue->Dispatch([path] { return ReadFile(path); }, boo::html::EventLoop::Current().Inbox(),
                          [url = boo::url::URL(url), path, completionHandler = krys::move(completionHandler)](
                            Maybe<FileContents> contents) mutable
-                         { completionHandler(LoadResultFor(url, path, krys::move(contents))); });
+                         { completionHandler(LoadResultFor(url, path, krys::move(contents))); },
+                         {.MayBlock = true});
   }
 }
