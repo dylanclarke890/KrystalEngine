@@ -900,6 +900,7 @@ namespace krys::boo
   void LocalFrameView::SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept
   {
     _baseBackgroundColor = backgroundColor.IsValid() ? backgroundColor : boo::Color(boo::Color::white);
+    RecalculateScrollbarOverlayStyle();
   }
 
   void LocalFrameView::Paint(GraphicsContext &context, const IntRect &rect) noexcept
@@ -1278,7 +1279,41 @@ namespace krys::boo
     {
       return renderer->UseDarkAppearance();
     }
-    return document && document->UseDarkAppearance(nullptr);
+    if (document && document->UseDarkAppearance(nullptr))
+    {
+      return true;
+    }
+    // Overlay scrollbars over a dark page are light, as WebKit's; classic ones keep their appearance, as
+    // Chrome's.
+    return ScrollbarTheme::Theme().UsesOverlayScrollbars()
+           && GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light;
+  }
+
+  void LocalFrameView::RecalculateScrollbarOverlayStyle() noexcept
+  {
+    // FIXME: The client's preferred style (ChromeClient::preferredScrollbarOverlayStyle), once a host wants
+    // one.
+    auto style = [this]
+    {
+      auto background = DocumentBackgroundColor();
+      if (background.IsVisible())
+      {
+        if (background.Lightness() <= .5)
+        {
+          return ScrollbarOverlayStyle::Light;
+        }
+      }
+      else if (auto *document = Frame().Document(); document && document->UseDarkAppearance(nullptr))
+      {
+        return ScrollbarOverlayStyle::Light;
+      }
+      return ScrollbarOverlayStyle::Default;
+    }();
+    if (GetScrollbarOverlayStyle() != style)
+    {
+      // The scroll corner is repainted with the scrollbars, to match their new appearance.
+      SetScrollbarOverlayStyle(style);
+    }
   }
 
   void LocalFrameView::ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept

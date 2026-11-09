@@ -526,6 +526,9 @@ namespace krys::boo
     /// @brief Whether the viewport's scrollbars are dark: the root's `color-scheme` where it sets one, or
     /// else the document's.
     KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept override;
+    /// @brief Makes the overlay scrollbars light over a dark document background (or, with none, a dark
+    /// appearance), as the root's or the body's style, or the base background colour, changes.
+    void RecalculateScrollbarOverlayStyle() noexcept;
     /// @brief Calls @p function with the view and every scroller and list box in it.
     void ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept;
     /// @brief Repaints the scrollbars of the view and of every scroller and list box in it, for a change in

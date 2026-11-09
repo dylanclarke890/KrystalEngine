@@ -21,6 +21,8 @@
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -496,6 +498,40 @@ namespace krys::boo::tests
       Press(handler, {190, 75});
       Release(handler, {190, 75});
       CHECK(fixture.Document->FocusedElement() == &field);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: overlay scrollbars turn light over a dark page",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    auto page = [](utf8_stringview background)
+    {
+      return utf8_string(u8"<!DOCTYPE html><style>body{margin:0;background:") + utf8_string(background)
+             + u8"}</style><div style=height:600px></div>";
+    };
+
+    SECTION("a light page leaves them as they are")
+    {
+      ScrollFixture fixture {page(u8"white")};
+      CHECK(fixture.View().GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Default);
+      CHECK_FALSE(fixture.View().UseDarkAppearanceForScrollbars());
+    }
+
+    SECTION("a dark page makes them light, but not classic ones")
+    {
+      ScrollFixture fixture {page(u8"#202020")};
+      CHECK(fixture.View().GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light);
+      CHECK_FALSE(fixture.View().UseDarkAppearanceForScrollbars());
+
+      ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
+      auto classic = MakeScopeExit([] { ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(false); });
+      CHECK(fixture.View().UseDarkAppearanceForScrollbars());
+
+      // Lightening the page puts them back.
+      REQUIRE_FALSE(fixture.Document->Body()->SetAttribute(u8"style", u8"background:white").HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.View().GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Default);
+      CHECK_FALSE(fixture.View().UseDarkAppearanceForScrollbars());
     }
   }
 

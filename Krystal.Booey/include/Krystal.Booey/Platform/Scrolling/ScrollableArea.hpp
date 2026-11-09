@@ -60,6 +60,7 @@ namespace krys::boo
     bool _scrollOriginChanged {false};
     bool _isAwaitingScrollend {false};
     bool _isGestureScrollInProgress {false};
+    ScrollbarOverlayStyle _scrollbarOverlayStyle {ScrollbarOverlayStyle::Default};
     UniquePtr<ScrollAnimator> _scrollAnimator;
     mutable UniquePtr<ScrollbarsController> _scrollbarsController;
 
@@ -370,6 +371,14 @@ namespace krys::boo
     {
       return false;
     }
+
+    /// @brief Which way overlay scrollbars stand out from what's behind them: light over a dark page.
+    KRYS_NODISCARD ScrollbarOverlayStyle GetScrollbarOverlayStyle() const noexcept
+    {
+      return _scrollbarOverlayStyle;
+    }
+    /// @brief Sets the overlay scrollbars' style, repainting them.
+    void SetScrollbarOverlayStyle(ScrollbarOverlayStyle style) noexcept;
 
     // The scrollbars tell the scrollable area what the mouse does to them.
     // The theme repaints a scrollbar the mouse enters or leaves (InvalidateOnMouseEnterExit), so these do

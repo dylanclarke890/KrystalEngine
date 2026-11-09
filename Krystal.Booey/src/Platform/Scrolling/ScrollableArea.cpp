@@ -93,6 +93,13 @@ namespace krys::boo
     AvailableContentSizeChanged(AvailableSizeChangeReason::ScrollbarsChanged);
   }
 
+  void ScrollableArea::SetScrollbarOverlayStyle(ScrollbarOverlayStyle style) noexcept
+  {
+    _scrollbarOverlayStyle = style;
+    // The theme repaints them (updateScrollbarOverlayStyle), with the corner (invalidateScrollbars).
+    ScrollbarAppearanceChanged();
+  }
+
   void ScrollableArea::ScrollbarAppearanceChanged() noexcept
   {
     for (auto *scrollbar : {HorizontalScrollbar(), VerticalScrollbar()})

@@ -392,7 +392,13 @@ namespace krys::boo
       InvalidateAncestorBackgroundObscurationStatus();
     }
 
-    // FIXME: The view's scrollbar overlay style and the compositor, once there are any.
+    // The root's and the body's backgrounds are the document's, which the view's overlay scrollbars stand out
+    // from.
+    if (IsDocumentElementRenderer() || IsBody())
+    {
+      View().FrameView().RecalculateScrollbarOverlayStyle();
+      // FIXME: Telling the compositor the root's or the body's style changed (rootOrBodyStyleChanged).
+    }
 
     if ((oldStyle && !oldStyle->GetShapeOutside().IsNone()) || !Style().GetShapeOutside().IsNone())
     {
