@@ -15,6 +15,7 @@
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Pointer.hpp"
 #include "Krystal.PAL/TextInput.hpp"
+#include "Krystal.PAL/TouchpadPan.hpp"
 
 namespace krys::pal
 {
@@ -71,6 +72,8 @@ namespace krys::pal
     /// away from the user, or to the right; then the cursor's position in client space and the modifiers
     /// held.
     using MouseScrollHandler = Func<void(WindowHandle, float, float, float, float, KeyModifiers)>;
+    /// @brief A step of a precision touchpad's two-finger pan.
+    using TouchpadPanHandler = Func<void(WindowHandle, const TouchpadPanInput &)>;
     /// @brief A pen's or a touch's input; the mouse comes as the mouse handlers.
     using PointerHandler = Func<void(WindowHandle, const PointerInput &)>;
     using KeyHandler = Func<void(WindowHandle, Key, KeyState, KeyModifiers, const KeyText &)>;
@@ -93,6 +96,9 @@ namespace krys::pal
     LockedMouseMoveHandler OnLockedMouseMove = nullptr;
     MouseButtonHandler OnMouseButton = nullptr;
     MouseScrollHandler OnMouseScroll = nullptr;
+    /// @brief Called for a precision touchpad's pans, with their phases and momentum; without it (or where
+    /// the system can't report them), they come as `OnMouseScroll`.
+    TouchpadPanHandler OnTouchpadPan = nullptr;
     /// @brief Called for pens and touches; without it, the system turns them into mouse input.
     PointerHandler OnPointer = nullptr;
     KeyHandler OnKey = nullptr;

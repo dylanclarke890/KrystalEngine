@@ -200,6 +200,8 @@ namespace krys
       .OnMouseScroll = [&](WindowHandle window, float deltaX, float deltaY, float clientX, float clientY,
                            KeyModifiers modifiers) noexcept
       { _context->Input->OnMouseScrollEvent(window, deltaX, deltaY, clientX, clientY, modifiers); },
+      .OnTouchpadPan = [&](WindowHandle window, const TouchpadPanInput &input) noexcept
+      { _context->Input->OnTouchpadPanEvent(window, input); },
       .OnPointer = [&](WindowHandle window, const PointerInput &input) noexcept
       { _context->Input->OnPointerEvent(window, input); },
 

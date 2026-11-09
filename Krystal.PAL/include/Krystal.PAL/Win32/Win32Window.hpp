@@ -13,6 +13,7 @@
 
 namespace krys::pal::win32
 {
+  class DirectManipulationPan;
   class DropTarget;
 
   class Win32Window final : public IWindow
@@ -54,6 +55,8 @@ namespace krys::pal::win32
     mutable bool _hasCaret {false};
     /// @brief The window's drop target, while the host takes drops.
     DropTarget *_dropTarget {nullptr};
+    /// @brief The window's DirectManipulation viewport, while the host takes touchpad pans.
+    DirectManipulationPan *_touchpadPan {nullptr};
     /// @brief The display the refresh rate was last read for, and its rate; a display change clears them.
     mutable HMONITOR _refreshRateMonitor {nullptr};
     mutable Maybe<uint32> _refreshRate;
@@ -140,5 +143,12 @@ namespace krys::pal::win32
     void UpdateDropTarget() noexcept;
     /// @brief Revokes the window's drop target, if it has one.
     void RevokeDropTarget() noexcept;
+    /// @brief Makes the window's DirectManipulation viewport if the host takes touchpad pans, or destroys it
+    /// if not.
+    void UpdateTouchpadPan() noexcept;
+    /// @brief Destroys the window's DirectManipulation viewport, if it has one.
+    void DestroyTouchpadPan() noexcept;
+    /// @brief Reports a step of a touchpad's pan, where the cursor is.
+    void ReportTouchpadPan(TouchpadPanPhase phase, float deltaX, float deltaY) const noexcept;
   };
 }

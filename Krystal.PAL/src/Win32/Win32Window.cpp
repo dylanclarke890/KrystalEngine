@@ -4,6 +4,7 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/Platform.hpp"
+#include "Krystal.PAL/Win32/DirectManipulationPan.hpp"
 #include "Krystal.PAL/Win32/DropTarget.hpp"
 #include "Krystal.PAL/Win32/Utils.hpp"
 #include <algorithm>
@@ -503,6 +504,7 @@ namespace krys::pal
 
     Win32Window::~Win32Window() noexcept
     {
+      DestroyTouchpadPan();
       RevokeDropTarget();
       ClearCursorImage();
     }
@@ -967,6 +969,28 @@ namespace krys::pal
           }
           break;
         }
+        // A precision touchpad's contact goes to the DirectManipulation viewport, which reports its pans in
+        // place of wheel messages.
+        case DM_POINTERHITTEST:
+        {
+          const UINT32 pointerId = GET_POINTERID_WPARAM(wParam);
+          POINTER_INPUT_TYPE type {};
+          if (_touchpadPan && ::GetPointerType(pointerId, &type) && type == PT_TOUCHPAD)
+          {
+            _touchpadPan->SetContact(pointerId);
+            return 0;
+          }
+          break;
+        }
+        case WM_TIMER:
+        {
+          if (wParam == DirectManipulationPan::TimerId && _touchpadPan)
+          {
+            _touchpadPan->Update();
+            return 0;
+          }
+          break;
+        }
         case WM_MOUSEWHEEL:
         case WM_MOUSEHWHEEL:
         {
@@ -1203,6 +1227,7 @@ namespace krys::pal
     {
       _callbacks = std::move(callbacks);
       UpdateDropTarget();
+      UpdateTouchpadPan();
     }
 
     void Win32Window::SetDropOperation(Maybe<DropOperation> operation) noexcept
@@ -1239,6 +1264,44 @@ namespace krys::pal
         _dropTarget->Release();
         _dropTarget = nullptr;
       }
+    }
+
+    void Win32Window::UpdateTouchpadPan() noexcept
+    {
+      if (!_callbacks.OnTouchpadPan)
+      {
+        DestroyTouchpadPan();
+        return;
+      }
+      if (!_touchpadPan)
+      {
+        _touchpadPan =
+          DirectManipulationPan::Create(_handle, [this](TouchpadPanPhase phase, float deltaX, float deltaY)
+                                        { ReportTouchpadPan(phase, deltaX, deltaY); });
+      }
+    }
+
+    void Win32Window::DestroyTouchpadPan() noexcept
+    {
+      if (_touchpadPan)
+      {
+        std::exchange(_touchpadPan, nullptr)->Destroy();
+      }
+    }
+
+    void Win32Window::ReportTouchpadPan(TouchpadPanPhase phase, float deltaX, float deltaY) const noexcept
+    {
+      if (!_callbacks.OnTouchpadPan)
+      {
+        return;
+      }
+      // The pan is where the cursor is.
+      POINT point {};
+      (void)::GetCursorPos(&point);
+      ::ScreenToClient(_handle, &point);
+      TouchpadPanInput input {
+        phase, deltaX, deltaY, static_cast<float>(point.x), static_cast<float>(point.y), CurrentModifiers()};
+      _callbacks.OnTouchpadPan(GetWindowHandle(), input);
     }
 
     void Win32Window::RevokeDropTarget() noexcept
