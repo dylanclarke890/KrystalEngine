@@ -38,7 +38,11 @@ namespace krys::boo
 
   void RenderLayerScrollableArea::Clear() noexcept
   {
-    // FIXME: Unregister from the frame view's scrollable areas, once it keeps them.
+    if (_registeredScrollableArea)
+    {
+      (void)_layer.Renderer().View().FrameView().RemoveScrollableArea(*this);
+      _registeredScrollableArea = false;
+    }
     (void)StopAnimatedScroll();
 
     auto &renderer = _layer.Renderer();
@@ -1105,8 +1109,11 @@ namespace krys::boo
       ComputeScrollOrigin();
     }
 
-    // FIXME: Register with the frame view's scrollable areas (updateScrollableAreaSet), and the scrollbars'
-    // dark appearance, once the frame view keeps them and there's painting.
+    // Before the box lays out, the overflow is known after it.
+    if (!_scrollDimensionsDirty)
+    {
+      UpdateScrollableAreaSet(HasScrollableHorizontalOverflow() || HasScrollableVerticalOverflow());
+    }
   }
 
   void RenderLayerScrollableArea::UpdateScrollbarsAfterLayout() noexcept
@@ -1183,7 +1190,31 @@ namespace krys::boo
 
     UpdateScrollbarSteps();
 
-    // FIXME: Register with the frame view's scrollable areas (updateScrollableAreaSet), once it keeps them.
+    UpdateScrollableAreaSet(HasScrollableHorizontalOverflow() || HasScrollableVerticalOverflow());
+  }
+
+  void RenderLayerScrollableArea::UpdateScrollableAreaSet(bool hasOverflow) noexcept
+  {
+    // WebKit keeps only those that can scroll and are visible to hit testing; scrollbars that can't scroll,
+    // and hidden ones, are kept too here, so the theme's changes reach them.
+    // FIXME: Touch event listeners for unaccelerated overflow scrolling
+    // (registerAsTouchEventListenerForScrolling).
+    auto &frameView = _layer.Renderer().View().FrameView();
+    bool needsToBeRegistered =
+      hasOverflow || _hBar || _vBar || GetScrollAnimationStatus() == ScrollAnimationStatus::Animating;
+    if (needsToBeRegistered)
+    {
+      if (!_registeredScrollableArea)
+      {
+        (void)frameView.AddScrollableArea(*this);
+        _registeredScrollableArea = true;
+      }
+    }
+    else if (_registeredScrollableArea)
+    {
+      (void)frameView.RemoveScrollableArea(*this);
+      _registeredScrollableArea = false;
+    }
   }
 
   void RenderLayerScrollableArea::UpdateScrollbarSteps() noexcept

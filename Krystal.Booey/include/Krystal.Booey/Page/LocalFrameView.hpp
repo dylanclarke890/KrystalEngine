@@ -116,6 +116,8 @@ namespace krys::boo
     bool _inUpdateScrollbars {false};
     /// @brief Whether the scrollbars are kept as they are, unpainted, while a document loads.
     bool _scrollbarsSuppressed {false};
+    /// @brief The boxes' and list boxes' scrollable areas that can scroll or have scrollbars.
+    HashSet<ScrollableArea *> _scrollableAreas;
     RefPtr<Scrollbar> _horizontalScrollbar;
     RefPtr<Scrollbar> _verticalScrollbar;
     ScrollbarMode _horizontalScrollbarMode {ScrollbarMode::Auto};
@@ -530,6 +532,17 @@ namespace krys::boo
     /// appearance), as the root's or the body's style, or the base background colour, changes.
     void RecalculateScrollbarOverlayStyle() noexcept;
     /// @brief Calls @p function with the view and every scroller and list box in it.
+    /// @brief Adds @p scrollableArea to the view's scrollable areas.
+    /// @return Whether it wasn't there already.
+    bool AddScrollableArea(ScrollableArea &scrollableArea) noexcept;
+    /// @brief Removes @p scrollableArea from the view's scrollable areas.
+    /// @return Whether it was there.
+    bool RemoveScrollableArea(ScrollableArea &scrollableArea) noexcept;
+    KRYS_NODISCARD bool ContainsScrollableArea(const ScrollableArea &scrollableArea) const noexcept;
+    KRYS_NODISCARD const HashSet<ScrollableArea *> &ScrollableAreas() const noexcept
+    {
+      return _scrollableAreas;
+    }
     void ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept;
     /// @brief Repaints the scrollbars of the view and of every scroller and list box in it, for a change in
     /// the page's dark appearance.

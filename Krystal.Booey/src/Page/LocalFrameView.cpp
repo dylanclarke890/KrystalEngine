@@ -1325,23 +1325,38 @@ namespace krys::boo
     }
   }
 
+  bool LocalFrameView::AddScrollableArea(ScrollableArea &scrollableArea) noexcept
+  {
+    // FIXME: Telling the scrolling coordinator (scrollableAreaSetChanged), once there's one.
+    return _scrollableAreas.insert(&scrollableArea).second;
+  }
+
+  bool LocalFrameView::RemoveScrollableArea(ScrollableArea &scrollableArea) noexcept
+  {
+    return _scrollableAreas.erase(&scrollableArea) != 0;
+  }
+
+  bool LocalFrameView::ContainsScrollableArea(const ScrollableArea &scrollableArea) const noexcept
+  {
+    return _scrollableAreas.contains(const_cast<ScrollableArea *>(&scrollableArea));
+  }
+
   void LocalFrameView::ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept
   {
     function(*this);
-    auto *renderView = GetRenderViewForUpdate();
-    if (!renderView)
+    // The function may lay out, which adds and removes areas, or destroy one, so it goes over a copy that
+    // forgets the destroyed.
+    List<WeakPtr<ScrollableArea>> areas;
+    areas.reserve(_scrollableAreas.size());
+    for (auto *area : _scrollableAreas)
     {
-      return;
+      areas.push_back(CreateWeakPtr(area));
     }
-    for (auto &box : DescendantsOfType<RenderBox>(*renderView))
+    for (auto &area : areas)
     {
-      if (auto *listBox = DynamicDowncast<RenderListBox>(box))
+      if (area)
       {
-        function(*listBox);
-      }
-      else if (auto *layer = box.Layer(); layer && layer->GetScrollableArea())
-      {
-        function(*layer->GetScrollableArea());
+        function(*area);
       }
     }
   }

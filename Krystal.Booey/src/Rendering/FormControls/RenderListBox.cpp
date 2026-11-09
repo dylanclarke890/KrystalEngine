@@ -100,7 +100,7 @@ namespace krys::boo
   RenderListBox::RenderListBox(html::HTMLSelectElement &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::ListBox, element, krys::move(style))
   {
-    // FIXME: Register with the frame view's scrollable areas (addScrollableArea), once it keeps them.
+    View().FrameView().AddScrollableArea(*this);
   }
 
   // Do not add any code in below destructor. Add it to WillBeDestroyed() instead.
@@ -108,6 +108,7 @@ namespace krys::boo
 
   void RenderListBox::WillBeDestroyed() noexcept
   {
+    (void)View().FrameView().RemoveScrollableArea(*this);
     DestroyScrollbar();
     RenderBlockFlow::WillBeDestroyed();
   }

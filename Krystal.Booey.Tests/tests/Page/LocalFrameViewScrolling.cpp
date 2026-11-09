@@ -22,6 +22,9 @@
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include <string>
 
@@ -499,6 +502,48 @@ namespace krys::boo::tests
       Release(handler, {190, 75});
       CHECK(fixture.Document->FocusedElement() == &field);
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the view keeps the boxes that scroll",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {u8"<!DOCTYPE html><style>body{margin:0}div{width:50px;height:50px}</style>"
+                           u8"<div id=scrolls style=overflow:auto><div style=height:500px></div></div>"
+                           u8"<div id=bars style=overflow:scroll></div>"
+                           u8"<div id=fits style=overflow:auto></div>"
+                           u8"<select id=list size=2><option>a</option></select>"};
+    auto &view = fixture.View();
+    auto areaOf = [&](utf8_stringview id) -> ScrollableArea *
+    {
+      auto *renderer = fixture.ById(id).Renderer();
+      if (auto *listBox = DynamicDowncast<RenderListBox>(renderer))
+      {
+        return listBox;
+      }
+      auto *layer = Downcast<RenderBox>(*renderer).Layer();
+      return layer ? layer->GetScrollableArea() : nullptr;
+    };
+
+    // A box that can scroll, one with scrollbars, and a list box; not one whose content fits without them.
+    CHECK(view.ContainsScrollableArea(*areaOf(u8"scrolls")));
+    CHECK(view.ContainsScrollableArea(*areaOf(u8"bars")));
+    CHECK(view.ContainsScrollableArea(*areaOf(u8"list")));
+    if (auto *fits = areaOf(u8"fits"))
+    {
+      CHECK_FALSE(view.ContainsScrollableArea(*fits));
+    }
+    CHECK(view.ScrollableAreas().size() == 3uz);
+
+    // Gone with their boxes.
+    fixture.ById(u8"scrolls").Remove();
+    fixture.ById(u8"list").Remove();
+    (void)fixture.Document->UpdateLayout();
+    CHECK(view.ScrollableAreas().size() == 1uz);
+
+    // Visiting the areas visits the view, then each of them.
+    int32 visited = 0;
+    view.ForEachScrollableArea([&](ScrollableArea &) { ++visited; });
+    CHECK(visited == 2);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a page's step leaves out the scroll padding",

@@ -39,6 +39,8 @@ namespace krys::boo
     int32 _scrollHeight {0};
 
     RenderLayer &_layer;
+    /// @brief Whether the area is in the frame view's scrollable areas.
+    bool _registeredScrollableArea {false};
     ScrollPosition _scrollPosition;
     Maybe<ScrollPosition> _postLayoutScrollPosition;
 
@@ -97,6 +99,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ScrollsOverflow() const noexcept;
     KRYS_NODISCARD bool HasScrollableHorizontalOverflow() const noexcept;
+    /// @brief Adds the area to the frame view's scrollable areas while it can scroll (@p hasOverflow), has
+    /// scrollbars or scrolls smoothly, and removes it otherwise.
+    void UpdateScrollableAreaSet(bool hasOverflow) noexcept;
     KRYS_NODISCARD bool HasScrollableVerticalOverflow() const noexcept;
     KRYS_NODISCARD bool HasScrollbars() const noexcept
     {
