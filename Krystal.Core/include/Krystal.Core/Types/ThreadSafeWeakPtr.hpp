@@ -242,8 +242,6 @@ namespace krys
           {
             return false;
           }
-          // FIXME: Add support for AddRef()/SubRef() during destruction like we support for other RefCounted
-          // types.
           krys_assert(!(bits & DestructionStartedFlag));
           bits += RefIncrement;
           return true;
@@ -270,8 +268,6 @@ namespace krys
             return false;
           }
 
-          // FIXME: Add support for AddRef()/SubRef() during destruction like we support for other RefCounted
-          // types.
           krys_assert(!(bits & DestructionStartedFlag));
           bits -= RefIncrement;
           newStrongOnlyRefCount = bits;
@@ -294,15 +290,13 @@ namespace krys
 
     uint32 GetRefCount() const noexcept
     {
-      uint32 bits = _bits.loadRelaxed();
+      uintptr_t bits = _bits.loadRelaxed();
       if (IsStrongOnly(bits))
       {
-        // FIXME: Add support for AddRef()/SubRef() during destruction like we support for other RefCounted
-        // types.
         krys_assert(!(bits & DestructionStartedFlag));
         // Technically, this bit-and isn't needed but it's included for clarity since the compiler will elide
         // it anyway.
-        return (bits & ~StrongOnlyFlag) / RefIncrement;
+        return static_cast<uint32>((bits & ~StrongOnlyFlag) / RefIncrement);
       }
 
       return std::bit_cast<ThreadSafeWeakPtrControlBlock *>(bits)->GetRefCount();
@@ -382,9 +376,6 @@ namespace krys
 
   private:
     TaggedPtr<T, TaggingTraits> _objectOfCorrectType;
-    // FIXME: Use CompactRefPtrTuple to reduce sizeof(ThreadSafeWeakPtr) by storing just an offset
-    // from ThreadSafeWeakPtrControlBlock::_object and don't support structs larger than 65535.
-    // https://bugs.webkit.org/show_bug.cgi?id=283929
     ThreadSafeWeakPtrControlBlockPtr _controlBlock;
 
   public:
@@ -424,8 +415,8 @@ namespace krys
 
     template <typename U>
     ThreadSafeWeakPtr(const Ref<U> &strongReference) noexcept
-        : _objectOfCorrectType(static_cast<const T *>(strongReference.ptr())),
-          _controlBlock(ControlBlock(strongReference.get()))
+        : _objectOfCorrectType(static_cast<const T *>(strongReference.get())),
+          _controlBlock(ControlBlock(*strongReference))
     {
     }
 
@@ -436,8 +427,9 @@ namespace krys
     {
     }
 
-    ThreadSafeWeakPtr(ThreadSafeWeakPtrControlBlock &ControlBlock, const T &objectOfCorrectType) noexcept
-        : _objectOfCorrectType(&objectOfCorrectType), _controlBlock(&ControlBlock)
+    ThreadSafeWeakPtr(ThreadSafeWeakPtrControlBlock &controlBlock, const T &objectOfCorrectType) noexcept
+        : _objectOfCorrectType(&objectOfCorrectType),
+          _controlBlock(ThreadSafeWeakPtrControlBlockPtr::WithRef(controlBlock))
     {
     }
 
@@ -482,8 +474,8 @@ namespace krys
     template <typename U>
     ThreadSafeWeakPtr &operator=(const Ref<U> &strongReference) noexcept
     {
-      _controlBlock = ControlBlock(strongReference);
-      _objectOfCorrectType = static_cast<const T *>(strongReference.ptr());
+      _controlBlock = ControlBlock(*strongReference);
+      _objectOfCorrectType = static_cast<const T *>(strongReference.get());
       return *this;
     }
 
@@ -497,7 +489,7 @@ namespace krys
 
     KRYS_NODISCARD RefPtr<T> get() const noexcept
     {
-      return _controlBlock ? _controlBlock->template TryCreateStrongReference<T>(_objectOfCorrectType.ptr())
+      return _controlBlock ? _controlBlock->template TryCreateStrongReference<T>(_objectOfCorrectType.Ptr())
                            : nullptr;
     }
 
@@ -514,9 +506,9 @@ namespace krys
   private:
     template <typename U>
     requires(ConvertibleTo<U *, T *>)
-    ThreadSafeWeakPtrControlBlock *ControlBlock(const U &classOrChildClass) noexcept
+    static ThreadSafeWeakPtrControlBlockPtr ControlBlock(const U &classOrChildClass) noexcept
     {
-      return &classOrChildClass.ControlBlock();
+      return ThreadSafeWeakPtrControlBlockPtr::WithRef(classOrChildClass.ControlBlock());
     }
   };
 
