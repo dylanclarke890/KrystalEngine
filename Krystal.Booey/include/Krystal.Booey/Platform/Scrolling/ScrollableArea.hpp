@@ -126,8 +126,8 @@ namespace krys::boo
 
     /// @brief Scrolls by @p wheelEvent's deltas, as a user scroll.
     /// @return Whether it scrolled: false if it can't scroll, or is at its end in the event's direction.
-    // FIXME: Animated scrolling and momentum outside a scroll snap container. Without gesture phases, each
-    // wheel event snaps, even a touchpad's.
+    // FIXME: Animated scrolling of notches outside a scroll snap container, and momentum the host doesn't
+    // send.
     virtual bool HandleWheelEventForScrolling(const PlatformWheelEvent &wheelEvent) noexcept;
     KRYS_NODISCARD virtual bool IsScrollableOrRubberbandable() const noexcept = 0;
 
