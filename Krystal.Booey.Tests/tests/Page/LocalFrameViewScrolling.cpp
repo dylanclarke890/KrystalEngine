@@ -500,6 +500,43 @@ namespace krys::boo::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "LocalFrameView: the root's scrollbar-gutter keeps the scrollbar's space",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    // A short page has no scrollbar, but a stable gutter keeps its 21 pixels.
+    auto page = [](utf8_stringview gutter)
+    {
+      return utf8_string(u8"<!DOCTYPE html><style>html{scrollbar-gutter:") + utf8_string(gutter)
+             + u8"}body{margin:0}</style><div id=d style=height:10px></div>";
+    };
+
+    SECTION("auto")
+    {
+      ScrollFixture fixture {page(u8"auto")};
+      CHECK_FALSE(fixture.View().VerticalScrollbar());
+      CHECK(fixture.View().VisibleWidth() == 200);
+      CHECK(fixture.ById(u8"d").ClientWidth() == 200);
+    }
+
+    SECTION("stable")
+    {
+      ScrollFixture fixture {page(u8"stable")};
+      CHECK_FALSE(fixture.View().VerticalScrollbar());
+      CHECK(fixture.View().VisibleWidth() == 179);
+      CHECK(fixture.ById(u8"d").ClientWidth() == 179);
+      CHECK(fixture.View().InsetForLeftScrollbarSpace() == 0);
+    }
+
+    SECTION("stable on both edges")
+    {
+      ScrollFixture fixture {page(u8"stable both-edges")};
+      CHECK(fixture.View().VisibleWidth() == 158);
+      CHECK(fixture.ById(u8"d").ClientWidth() == 158);
+      CHECK(fixture.View().InsetForLeftScrollbarSpace() == 21);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
                    "LocalFrameView: a press in the scrollbars' corner doesn't select",
                    "[Page][LocalFrameView][Scrolling]")
   {

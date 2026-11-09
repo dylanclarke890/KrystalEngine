@@ -314,6 +314,14 @@ namespace krys::boo
     KRYS_NODISCARD boo::Color DocumentBackgroundColor() const noexcept;
 
     KRYS_NODISCARD int32 InsetForLeftScrollbarSpace() const noexcept;
+    /// @brief The root's `scrollbar-gutter`, which the view's scrollbars keep space by.
+    KRYS_NODISCARD style::ScrollbarGutter ScrollbarGutterStyle() const noexcept;
+    /// @brief The space the vertical scrollbar takes, or a stable gutter keeps without it (none for overlay
+    /// scrollbars).
+    KRYS_NODISCARD int32 ScrollbarGutterWidth(bool isHorizontalWritingMode = true) const noexcept;
+    /// @brief The space the scrollbars take from the content, with what a stable gutter keeps.
+    KRYS_NODISCARD IntSize TotalScrollbarSpace() const noexcept;
+    KRYS_NODISCARD bool IsHorizontalWritingMode() const noexcept override;
     KRYS_NODISCARD FloatPoint PositionForRootContentLayer() const noexcept;
     KRYS_NODISCARD LayoutRect
       FixedScrollableAreaBoundsInflatedForScrolling(const LayoutRect &uninflatedBounds) const noexcept;

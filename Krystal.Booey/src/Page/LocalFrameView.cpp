@@ -655,9 +655,70 @@ namespace krys::boo
     return BlendSourceOver(BlendSourceOver(BaseBackgroundColor(), htmlBackgroundColor), bodyBackgroundColor);
   }
 
+  style::ScrollbarGutter LocalFrameView::ScrollbarGutterStyle() const noexcept
+  {
+    auto *document = Frame().Document();
+    auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    if (auto *scrollingObject = documentElement ? documentElement->Renderer() : nullptr)
+    {
+      return scrollingObject->Style().GetScrollbarGutter();
+    }
+    return css::keywords::Auto {};
+  }
+
+  int32 LocalFrameView::ScrollbarGutterWidth(bool isHorizontalWritingMode) const noexcept
+  {
+    if (_verticalScrollbar && _verticalScrollbar->IsOverlayScrollbar())
+    {
+      return 0;
+    }
+
+    // A stable gutter keeps the scrollbar's space without it.
+    auto &theme = ScrollbarTheme::Theme();
+    if (!_verticalScrollbar && !(ScrollbarGutterStyle().IsAuto() || theme.UsesOverlayScrollbars())
+        && isHorizontalWritingMode)
+    {
+      return theme.ScrollbarThickness(ScrollbarWidthStyle());
+    }
+
+    if (!_verticalScrollbar)
+    {
+      return 0;
+    }
+
+    return _verticalScrollbar->Width();
+  }
+
+  IntSize LocalFrameView::TotalScrollbarSpace() const noexcept
+  {
+    IntSize scrollbarGutter(HorizontalScrollbarIntrusion(), VerticalScrollbarIntrusion());
+
+    if (IsHorizontalWritingMode())
+    {
+      if (ScrollbarGutterStyle().IsStableBothEdges())
+      {
+        scrollbarGutter.SetWidth(ScrollbarGutterWidth() * 2);
+      }
+      else
+      {
+        scrollbarGutter.SetWidth(ScrollbarGutterWidth());
+      }
+    }
+    return scrollbarGutter;
+  }
+
+  bool LocalFrameView::IsHorizontalWritingMode() const noexcept
+  {
+    auto *renderView = GetRenderView();
+    return renderView && renderView->GetWritingMode().IsHorizontal();
+  }
+
   int32 LocalFrameView::InsetForLeftScrollbarSpace() const noexcept
   {
-    // FIXME: Stable scrollbar gutters on both edges (scrollbarGutterWidth), once there are scrollbar gutters.
+    if (ScrollbarGutterStyle().IsStableBothEdges())
+    {
+      return ScrollbarGutterWidth();
+    }
     if (ShouldPlaceVerticalScrollbarOnLeft())
     {
       return _verticalScrollbar ? _verticalScrollbar->OccupiedWidth() : 0;
@@ -810,10 +871,12 @@ namespace krys::boo
   IntSize LocalFrameView::SizeForVisibleContent(
     VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept
   {
-    // FIXME: The space a stable `scrollbar-gutter` keeps for the view's scrollbars (totalScrollbarSpace),
-    // once the view reads it.
     IntSize scrollbarSpace;
-    if (scrollbarInclusion == VisibleContentRectIncludesScrollbars::No)
+    if (!ScrollbarGutterStyle().IsAuto() && scrollbarInclusion == VisibleContentRectIncludesScrollbars::No)
+    {
+      scrollbarSpace = TotalScrollbarSpace();
+    }
+    else if (scrollbarInclusion == VisibleContentRectIncludesScrollbars::No)
     {
       scrollbarSpace = ScrollbarIntrusion();
     }
