@@ -36,7 +36,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- Typed OM has only numeric values and `CSSKeywordValue` (`CSS/TypedOM/`). There is no `CSSStyleValue::Parse()`/`ParseAll()`, `CSSStyleValueFactory`, `StylePropertyMap` (`styleMap`, `attributeStyleMap`, `computedStyleMap()`), `CSSUnparsedValue`, image, transform or colour values. `CSSNumericFactory` is a struct of static functions (`CSSNumericFactory::Px(10)`) and there is no `CSS` namespace object.
 - No user or extension style sheets: `ScopeRuleSets::InitializeUserStyle` adds nothing and `Style::Scope` has no injected author sheets (FIXMEs), and user style sheets' `@import`s and load options aren't handled.
 
 ## Style (cascade and computed values)

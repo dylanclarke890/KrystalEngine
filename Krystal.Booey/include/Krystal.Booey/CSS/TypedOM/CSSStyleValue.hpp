@@ -27,13 +27,20 @@
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo::dom
+{
+  class Document;
+}
 
 namespace krys::boo::css
 {
@@ -43,7 +50,7 @@ namespace krys::boo::css
   enum class CSSStyleValueType : uint8
   {
     CSSStyleValue,
-    CSSStyleImageValue,
+    CSSImageValue,
     CSSTransformValue,
     CSSMathClamp,
     CSSMathInvert,
@@ -52,14 +59,14 @@ namespace krys::boo::css
     CSSMathNegate,
     CSSMathProduct,
     CSSMathSum,
-    CSSColorCSSOMColor,
-    CSSColorHSL,
-    CSSColorHWB,
-    CSSColorLab,
-    CSSColorLCH,
-    CSSColorOKLCH,
-    CSSColorOKLab,
-    CSSColorRGB,
+    CSSColor,
+    CSSHSL,
+    CSSHWB,
+    CSSLab,
+    CSSLCH,
+    CSSOKLCH,
+    CSSOKLab,
+    CSSRGB,
     CSSUnitValue,
     CSSUnparsedValue,
     CSSKeywordValue
@@ -81,18 +88,18 @@ namespace krys::boo::css
         return true;
       }
       case CSSStyleValueType::CSSStyleValue:
-      case CSSStyleValueType::CSSStyleImageValue:
+      case CSSStyleValueType::CSSImageValue:
       case CSSStyleValueType::CSSTransformValue:
       case CSSStyleValueType::CSSUnparsedValue:
       case CSSStyleValueType::CSSKeywordValue:
-      case CSSStyleValueType::CSSColorCSSOMColor:
-      case CSSStyleValueType::CSSColorHSL:
-      case CSSStyleValueType::CSSColorHWB:
-      case CSSStyleValueType::CSSColorLab:
-      case CSSStyleValueType::CSSColorLCH:
-      case CSSStyleValueType::CSSColorOKLab:
-      case CSSStyleValueType::CSSColorOKLCH:
-      case CSSStyleValueType::CSSColorRGB:
+      case CSSStyleValueType::CSSColor:
+      case CSSStyleValueType::CSSHSL:
+      case CSSStyleValueType::CSSHWB:
+      case CSSStyleValueType::CSSLab:
+      case CSSStyleValueType::CSSLCH:
+      case CSSStyleValueType::CSSOKLab:
+      case CSSStyleValueType::CSSOKLCH:
+      case CSSStyleValueType::CSSRGB:
       {
         break;
       }
@@ -116,18 +123,18 @@ namespace krys::boo::css
       }
       case CSSStyleValueType::CSSUnitValue:
       case CSSStyleValueType::CSSStyleValue:
-      case CSSStyleValueType::CSSStyleImageValue:
+      case CSSStyleValueType::CSSImageValue:
       case CSSStyleValueType::CSSTransformValue:
       case CSSStyleValueType::CSSUnparsedValue:
       case CSSStyleValueType::CSSKeywordValue:
-      case CSSStyleValueType::CSSColorCSSOMColor:
-      case CSSStyleValueType::CSSColorHSL:
-      case CSSStyleValueType::CSSColorHWB:
-      case CSSStyleValueType::CSSColorLab:
-      case CSSStyleValueType::CSSColorLCH:
-      case CSSStyleValueType::CSSColorOKLab:
-      case CSSStyleValueType::CSSColorOKLCH:
-      case CSSStyleValueType::CSSColorRGB:
+      case CSSStyleValueType::CSSColor:
+      case CSSStyleValueType::CSSHSL:
+      case CSSStyleValueType::CSSHWB:
+      case CSSStyleValueType::CSSLab:
+      case CSSStyleValueType::CSSLCH:
+      case CSSStyleValueType::CSSOKLab:
+      case CSSStyleValueType::CSSOKLCH:
+      case CSSStyleValueType::CSSRGB:
       {
         break;
       }
@@ -139,14 +146,14 @@ namespace krys::boo::css
   {
     switch (type)
     {
-      case CSSStyleValueType::CSSColorCSSOMColor:
-      case CSSStyleValueType::CSSColorHSL:
-      case CSSStyleValueType::CSSColorHWB:
-      case CSSStyleValueType::CSSColorLab:
-      case CSSStyleValueType::CSSColorLCH:
-      case CSSStyleValueType::CSSColorOKLab:
-      case CSSStyleValueType::CSSColorOKLCH:
-      case CSSStyleValueType::CSSColorRGB:
+      case CSSStyleValueType::CSSColor:
+      case CSSStyleValueType::CSSHSL:
+      case CSSStyleValueType::CSSHWB:
+      case CSSStyleValueType::CSSLab:
+      case CSSStyleValueType::CSSLCH:
+      case CSSStyleValueType::CSSOKLab:
+      case CSSStyleValueType::CSSOKLCH:
+      case CSSStyleValueType::CSSRGB:
       {
         return true;
       }
@@ -159,7 +166,7 @@ namespace krys::boo::css
       case CSSStyleValueType::CSSMathSum:
       case CSSStyleValueType::CSSUnitValue:
       case CSSStyleValueType::CSSStyleValue:
-      case CSSStyleValueType::CSSStyleImageValue:
+      case CSSStyleValueType::CSSImageValue:
       case CSSStyleValueType::CSSTransformValue:
       case CSSStyleValueType::CSSUnparsedValue:
       case CSSStyleValueType::CSSKeywordValue:
@@ -184,8 +191,6 @@ namespace krys::boo::css
 {
   /// @brief A CSS value as the Typed OM represents it.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssstylevalue
-  // FIXME: `parse()` and `parseAll()`, which need the style value factory and the kinds of values it reifies
-  // (unparsed, image, transform and colour values) and the property maps that use them.
   class CSSStyleValue : public RefCounted<CSSStyleValue>
   {
     KRYS_NON_COPY_MOVABLE(CSSStyleValue);
@@ -200,6 +205,16 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CSSStyleValue> Create(RefPtr<Value> &&cssValue,
                                                     CSSOMString &&property = {}) noexcept;
     KRYS_NODISCARD static Ref<CSSStyleValue> Create() noexcept;
+
+    /// @brief Parses @p cssText as a value of @p property, reified.
+    /// @return A `TypeError` if @p property isn't a property or @p cssText doesn't parse as its value.
+    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parse
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>>
+      Parse(dom::Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept;
+    /// @brief Parses @p cssText as a value of @p property, each of its iterations reified.
+    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parseall
+    KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>
+      ParseAll(dom::Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#stylevalue-serialization
     KRYS_NODISCARD CSSOMString ToString() const noexcept;

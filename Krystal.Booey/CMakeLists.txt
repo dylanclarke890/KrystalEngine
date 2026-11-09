@@ -493,11 +493,27 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp
   include/Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp
   include/Krystal.Booey/CSS/Values/ToLengthConversionData.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSColor.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSHSL.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSHWB.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSLab.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSLCH.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSOKLab.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSOKLCH.hpp
+  include/Krystal.Booey/CSS/TypedOM/Color/CSSRGB.hpp
+  include/Krystal.Booey/CSS/TypedOM/ComputedStylePropertyMapReadOnly.hpp
+  include/Krystal.Booey/CSS/TypedOM/CSSImageValue.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/CSSStyleValueFactory.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/CSSUnparsedValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/CSSVariableReferenceValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/DeclaredStylePropertyMap.hpp
+  include/Krystal.Booey/CSS/TypedOM/InlineStylePropertyMap.hpp
   include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathClamp.hpp
   include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathInvert.hpp
   include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathMax.hpp
@@ -510,6 +526,18 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericArray.hpp
   include/Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericBaseType.hpp
   include/Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericType.hpp
+  include/Krystal.Booey/CSS/TypedOM/StylePropertyMap.hpp
+  include/Krystal.Booey/CSS/TypedOM/StylePropertyMapReadOnly.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSMatrixComponent.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSPerspective.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSRotate.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSScale.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSSkew.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSSkewX.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSSkewY.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSTransformComponent.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSTransformValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/Transform/CSSTranslate.hpp
   include/Krystal.Booey/CSS/Types/CSSOMString.hpp
   include/Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp
   include/Krystal.Booey/CSS/Values/Aggregates.hpp
@@ -828,10 +856,26 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/StyleSheets/StyleSheetList.cpp
   src/CSS/Values/NumberFormatting.cpp
   src/CSS/Values/ToLengthConversionData.cpp
+  src/CSS/TypedOM/Color/CSSColor.cpp
+  src/CSS/TypedOM/Color/CSSColorValue.cpp
+  src/CSS/TypedOM/Color/CSSHSL.cpp
+  src/CSS/TypedOM/Color/CSSHWB.cpp
+  src/CSS/TypedOM/Color/CSSLab.cpp
+  src/CSS/TypedOM/Color/CSSLCH.cpp
+  src/CSS/TypedOM/Color/CSSOKLab.cpp
+  src/CSS/TypedOM/Color/CSSOKLCH.cpp
+  src/CSS/TypedOM/Color/CSSRGB.cpp
+  src/CSS/TypedOM/ComputedStylePropertyMapReadOnly.cpp
+  src/CSS/TypedOM/CSSImageValue.cpp
   src/CSS/TypedOM/CSSKeywordValue.cpp
   src/CSS/TypedOM/CSSNumericValue.cpp
   src/CSS/TypedOM/CSSStyleValue.cpp
+  src/CSS/TypedOM/CSSStyleValueFactory.cpp
   src/CSS/TypedOM/CSSUnitValue.cpp
+  src/CSS/TypedOM/CSSUnparsedValue.cpp
+  src/CSS/TypedOM/CSSVariableReferenceValue.cpp
+  src/CSS/TypedOM/DeclaredStylePropertyMap.cpp
+  src/CSS/TypedOM/InlineStylePropertyMap.cpp
   src/CSS/TypedOM/Numeric/CSSMathClamp.cpp
   src/CSS/TypedOM/Numeric/CSSMathInvert.cpp
   src/CSS/TypedOM/Numeric/CSSMathMax.cpp
@@ -842,6 +886,18 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/TypedOM/Numeric/CSSMathValue.cpp
   src/CSS/TypedOM/Numeric/CSSNumericArray.cpp
   src/CSS/TypedOM/Numeric/CSSNumericType.cpp
+  src/CSS/TypedOM/StylePropertyMap.cpp
+  src/CSS/TypedOM/StylePropertyMapReadOnly.cpp
+  src/CSS/TypedOM/Transform/CSSMatrixComponent.cpp
+  src/CSS/TypedOM/Transform/CSSPerspective.cpp
+  src/CSS/TypedOM/Transform/CSSRotate.cpp
+  src/CSS/TypedOM/Transform/CSSScale.cpp
+  src/CSS/TypedOM/Transform/CSSSkew.cpp
+  src/CSS/TypedOM/Transform/CSSSkewX.cpp
+  src/CSS/TypedOM/Transform/CSSSkewY.cpp
+  src/CSS/TypedOM/Transform/CSSTransformComponent.cpp
+  src/CSS/TypedOM/Transform/CSSTransformValue.cpp
+  src/CSS/TypedOM/Transform/CSSTranslate.cpp
   src/CSS/Values/AttrValue.cpp
   src/CSS/Values/BackgroundRepeatValue.cpp
   src/CSS/Values/BasicShapeValue.cpp

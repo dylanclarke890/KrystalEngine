@@ -28,11 +28,38 @@
  */
 
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
+#include "Krystal.Booey/CSS/TypedOM/CSSStyleValueFactory.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 
 namespace krys::boo::css
 {
+  dom::ExceptionOr<Ref<CSSStyleValue>> CSSStyleValue::Parse(dom::Document &document, CSSOMStringView property,
+                                                            CSSOMStringView cssText) noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parse
+    auto result = CSSStyleValueFactory::ParseStyleValue(document, property, cssText, false);
+    if (result.HasException())
+    {
+      return result.ReleaseException();
+    }
+    auto values = result.ReleaseValue();
+    // A shorthand that serialises to nothing gives no values.
+    if (values.empty())
+    {
+      return dom::Exception {dom::ExceptionCode::SyntaxError};
+    }
+    return krys::move(values.front());
+  }
+
+  dom::ExceptionOr<List<Ref<CSSStyleValue>>> CSSStyleValue::ParseAll(dom::Document &document,
+                                                                     CSSOMStringView property,
+                                                                     CSSOMStringView cssText) noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parseall
+    return CSSStyleValueFactory::ParseStyleValue(document, property, cssText, true);
+  }
+
   Ref<CSSStyleValue> CSSStyleValue::Create(RefPtr<Value> &&cssValue, CSSOMString &&property) noexcept
   {
     return AdoptRef(*new CSSStyleValue(krys::move(cssValue), krys::move(property)));

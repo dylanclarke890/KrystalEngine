@@ -35,6 +35,7 @@ namespace krys::boo::css
   class ImmutableStyleProperties;
   class MutableStyleProperties;
   class StyleProperties;
+  class StylePropertyMap;
   class Value;
 
   enum class PropertyId : uint16;
@@ -70,6 +71,10 @@ namespace krys::boo::dom
     /// @brief The CSSOM view of the inline style.
     /// @see https://drafts.csswg.org/cssom/#dom-elementcssinlinestyle-style
     KRYS_NODISCARD css::CSSStyleProperties &Style() noexcept;
+
+    /// @brief The inline style, as a property map.
+    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-elementcssinlinestyle-attributestylemap
+    KRYS_NODISCARD css::StylePropertyMap &AttributeStyleMap() noexcept;
 
 #pragma endregion
 

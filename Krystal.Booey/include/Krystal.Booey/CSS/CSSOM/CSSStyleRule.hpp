@@ -33,16 +33,17 @@ namespace krys::boo::css
 {
   class CSSRuleList;
   class CSSStyleProperties;
+  class StylePropertyMap;
   class StyleRuleCSSStyleProperties;
 
   /// @brief A style rule, exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssstylerule-interface
-  // FIXME: styleMap (DeclaredStylePropertyMap) comes with the Typed OM.
   class CSSStyleRule final : public CSSRule
   {
   private:
     Ref<StyleRule> _styleRule;
     RefPtr<StyleRuleCSSStyleProperties> _propertiesCSSOMWrapper;
+    RefPtr<StylePropertyMap> _styleMap;
 
     mutable List<RefPtr<CSSRule>> _childRuleCSSOMWrappers;
     mutable UniquePtr<CSSRuleList> _ruleListCSSOMWrapper;
@@ -60,6 +61,10 @@ namespace krys::boo::css
     void SetSelectorText(const CSSOMString &selectorText) noexcept;
 
     KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
+
+    /// @brief The rule's declarations, as a property map.
+    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssstylerule-stylemap
+    KRYS_NODISCARD StylePropertyMap &StyleMap() noexcept;
 
     // FIXME: Not CSSOM. Remove.
     KRYS_NODISCARD StyleRule &GetStyleRule() const noexcept

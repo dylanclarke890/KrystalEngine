@@ -32,7 +32,6 @@ namespace krys::boo::css
 
   /// @brief Declarations that follow nested rules, exposed to scripts.
   /// @see https://drafts.csswg.org/css-nesting/#the-cssnestrule
-  // FIXME: styleMap (DeclaredStylePropertyMap) comes with the Typed OM.
   class CSSNestedDeclarations final : public CSSRule
   {
   private:

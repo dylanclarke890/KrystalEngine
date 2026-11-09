@@ -30,6 +30,7 @@
 
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
+#include "Krystal.Booey/CSS/TypedOM/StylePropertyMap.hpp"
 #include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
@@ -69,6 +70,16 @@ namespace krys::boo::dom
   void ElementRareData::SetDataset(UniquePtr<DatasetDOMStringMap> &&dataset) noexcept
   {
     _dataset = krys::move(dataset);
+  }
+
+  void ElementRareData::SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept
+  {
+    _attributeStyleMap = krys::move(map);
+  }
+
+  void ElementRareData::SetComputedStyleMap(Ref<css::StylePropertyMapReadOnly> map) noexcept
+  {
+    _computedStyleMap = krys::move(map);
   }
 
   void ElementRareData::SetCustomElementReactionQueue(
