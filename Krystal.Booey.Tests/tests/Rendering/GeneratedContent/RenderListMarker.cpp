@@ -19,7 +19,6 @@ namespace krys::boo::tests
     }
   }
 
-  // FIXME: The markers' positions aren't checked.
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderListMarker: layout", "[Rendering][RenderListMarker]")
   {
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
@@ -56,6 +55,8 @@ namespace krys::boo::tests
       // The font's height rounds to 17 within the line spacing of 18, so the half leading is 0.5.
       CHECK(marker.LayoutBounds() == Pair<float, float> {14.f, 4.f});
       CHECK(marker.LineLogicalOffsetForListItem() == 0);
+      // Its start margin places it, at the top of the first line.
+      CHECK(marker.Location() == LayoutPoint(-17, 0));
 
       CHECK(MarkerOf(fixture, u8"square").LogicalWidth() == 7);
       CHECK(MarkerOf(fixture, u8"square").MarginStart() == -17);
@@ -67,6 +68,7 @@ namespace krys::boo::tests
       CHECK(marker.LogicalWidth() == 7);
       CHECK(marker.MarginStart() == -1);
       CHECK(marker.MarginEnd() == 8);
+      CHECK(marker.Location() == LayoutPoint(-1, 0));
     }
 
     SECTION("Counters and strings are measured")
@@ -79,17 +81,20 @@ namespace krys::boo::tests
       CHECK(nine.LogicalWidth() == LayoutUnit(font.Width(u8"9. ")));
       CHECK(nine.MarginStart() == -nine.LogicalWidth() - 4);
       CHECK(nine.MarginEnd() == 4);
+      CHECK(nine.Location() == LayoutPoint(nine.MarginStart(), 0_lu));
 
       auto &ten = MarkerOf(fixture, u8"ten");
       CHECK(ten.TextWithSuffix() == u8"10. ");
       CHECK(ten.LogicalWidth() == LayoutUnit(font.Width(u8"10. ")));
       CHECK(ten.LogicalWidth() > nine.LogicalWidth());
+      CHECK(ten.Location() == LayoutPoint(ten.MarginStart(), 0_lu));
 
       // A string's outside margins only move it before the line.
       auto &string = MarkerOf(fixture, u8"string");
       CHECK(string.LogicalWidth() == LayoutUnit(font.Width(u8"-> ")));
       CHECK(string.MarginStart() == -string.LogicalWidth());
       CHECK(string.MarginEnd() == 0);
+      CHECK(string.Location() == LayoutPoint(string.MarginStart(), 0_lu));
     }
 
     SECTION("A fixed line height spreads its leading around the text")
@@ -97,6 +102,8 @@ namespace krys::boo::tests
       // (30 - 17) / 2 = 6.5, floored into the ascent and ceiled into the descent.
       CHECK(MarkerOf(fixture, u8"tall").LayoutBounds() == Pair<float, float> {20.f, 10.f});
       CHECK(MarkerOf(fixture, u8"tall").LogicalHeight() == 17);
+      // The marker sits below the line's top by the leading that the ascent took.
+      CHECK(MarkerOf(fixture, u8"tall").Location() == LayoutPoint(-17, 6));
     }
   }
 

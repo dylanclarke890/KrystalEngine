@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLMath.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -72,8 +73,7 @@ namespace krys::boo::tests
     CHECK(Is<RenderMathMLMath>(BoxById(fixture, u8"math")));
     CHECK(BoxById(fixture, u8"row").RenderName() == u8"RenderMathMLRow");
     CHECK(BoxById(fixture, u8"mi").RenderName() == u8"RenderMathMLToken");
-    // FIXME: <mo> is made a RenderMathMLOperator in B12d.
-    CHECK(Is<RenderMathMLToken>(BoxById(fixture, u8"mo")));
+    CHECK(Is<RenderMathMLOperator>(BoxById(fixture, u8"mo")));
     CHECK(BoxById(fixture, u8"space").RenderName() == u8"RenderMathMLSpace");
     CHECK(BoxById(fixture, u8"padded").RenderName() == u8"RenderMathMLPadded");
     // Unknown elements are laid out as rows.

@@ -215,17 +215,36 @@ namespace krys::boo::css::tests
 
     SECTION("A sheet outlives the tree scope that adopted it")
     {
-      // FIXME: Also a document, once documents can be freed (each holds a reference to itself as its node
-      // document).
+      SECTION("A shadow root")
       {
-        auto host = document->CreateElement(u8"div").ReleaseValue();
-        auto shadow = host->AttachShadow({}).ReleaseValue();
-        REQUIRE_FALSE(shadow->SetAdoptedStyleSheets({sheet}).HasException());
-        REQUIRE_FALSE(sheet->IsDetached());
+        {
+          auto host = document->CreateElement(u8"div").ReleaseValue();
+          auto shadow = host->AttachShadow({}).ReleaseValue();
+          REQUIRE_FALSE(shadow->SetAdoptedStyleSheets({sheet}).HasException());
+          REQUIRE_FALSE(sheet->IsDetached());
+        }
+        RunTasks();
+        REQUIRE(sheet->IsDetached());
+        REQUIRE_FALSE(sheet->ReplaceSync(u8"b {}").HasException());
       }
-      RunTasks();
-      REQUIRE(sheet->IsDetached());
-      REQUIRE_FALSE(sheet->ReplaceSync(u8"b {}").HasException());
+
+      SECTION("A document")
+      {
+        RefPtr<CSSStyleSheet> otherSheet;
+        WeakPtr<dom::Document> weakDocument;
+        {
+          auto otherDocument = Parse(u8"<!DOCTYPE html><body>");
+          weakDocument = CreateWeakPtr<dom::Document>(otherDocument.get());
+          otherSheet = ConstructedSheet(*otherDocument);
+          REQUIRE_FALSE(otherDocument->SetAdoptedStyleSheets({ShareRef(*otherSheet)}).HasException());
+          REQUIRE_FALSE(otherSheet->IsDetached());
+        }
+        RunTasks();
+        REQUIRE_FALSE(weakDocument);
+        REQUIRE(otherSheet->IsDetached());
+        REQUIRE(otherSheet->ConstructorDocument() == nullptr);
+        REQUIRE_FALSE(otherSheet->ReplaceSync(u8"b {}").HasException());
+      }
     }
   }
 }

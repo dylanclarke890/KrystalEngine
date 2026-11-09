@@ -600,10 +600,8 @@ namespace krys::boo::tests
     CHECK_THAT(infinite.Y(), WithinULP(static_cast<float>(-std::numeric_limits<float>::max() / 2), 4));
     CHECK_THAT(infinite.Width(), WithinULP(static_cast<float>(std::numeric_limits<float>::max()), 4));
     CHECK_THAT(infinite.Height(), WithinULP(static_cast<float>(std::numeric_limits<float>::max()), 4));
-
-    // FIXME: We have an unusual representation for our infinite rect.
-    // Float::infiniteRect is (negative infinity)/2 for the upper left corner,
-    // while CoreGraphics uses (negative infinity).
+    // The corner is half the lowest float, so the maximum corner doesn't overflow.
+    CHECK(infinite.IsInfinite());
   }
 
   TEST_CASE("FloatRect: EnclosingAndRounding", "[Graphics][FloatRect]")
