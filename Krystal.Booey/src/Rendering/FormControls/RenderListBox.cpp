@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -157,8 +158,6 @@ namespace krys::boo
 
     SetHasScrollbar(ScrollbarOrientationForWritingMode());
 
-    ComputeFirstIndexesVisibleInPaddingBeforeAfterAreas();
-
     SetNeedsLayoutAndPreferredWidthsUpdate();
   }
 
@@ -186,29 +185,31 @@ namespace krys::boo
 
     if (_scrollbar)
     {
-      bool enabled = NumVisibleItems() < NumItems();
-      _scrollbar->SetEnabled(enabled);
-      _scrollbar->SetSteps(1, std::max(1, NumVisibleItems() - 1), ItemLogicalHeight().ToInt());
-      _scrollbar->SetProportion(NumVisibleItems(), NumItems());
-      if (!enabled)
-      {
-        ScrollToOffsetWithoutAnimation(_scrollbar->Orientation(), 0);
-        _scrollPosition = {};
-      }
+      int32 maximumOffset = MaximumLogicalScrollOffset();
+      int32 listHeight = ListLogicalHeight().ToInt();
+      _scrollbar->SetEnabled(maximumOffset > 0);
+      // A line is an item, and a page the items in view less one, so the keys go item by item.
+      int32 itemHeight = ItemLogicalHeight().ToInt();
+      _scrollbar->SetSteps(itemHeight, std::max(1, NumVisibleItems() - 1) * itemHeight);
+      _scrollbar->SetProportion(listHeight - maximumOffset, listHeight);
 
+      // A flipped list starts at the far end, so its positions run from minus the maximum offset to 0.
+      IntPoint scrollOrigin;
       if (GetWritingMode().IsBlockFlipped())
       {
-        auto scrollOrigin = IntPoint(0, NumItems() - NumVisibleItems());
+        scrollOrigin = IntPoint(0, maximumOffset);
         if (_scrollbar->Orientation() == ScrollbarOrientation::Horizontal)
         {
           scrollOrigin = scrollOrigin.TransposedPoint();
         }
-        SetScrollOrigin(scrollOrigin);
-        _scrollbar->OffsetDidChange();
       }
-      else
+      SetScrollOrigin(scrollOrigin);
+      _scrollbar->OffsetDidChange();
+
+      // Fewer or shorter items leave less to scroll.
+      if (LogicalScrollOffset() > maximumOffset)
       {
-        SetScrollOrigin(IntPoint());
+        ScrollToLogicalOffset(maximumOffset);
       }
     }
 
@@ -321,18 +322,11 @@ namespace krys::boo
     return DefaultSize;
   }
 
-  int32 RenderListBox::NumVisibleItems(ConsiderPadding considerPadding) const noexcept
+  int32 RenderListBox::NumVisibleItems() const noexcept
   {
     // Only count fully visible rows. But don't return 0 even if only part of a row shows.
-    int32 visibleItemsExcludingPadding = std::max<int32>(
+    return std::max<int32>(
       1, ((ContentBoxLogicalHeight() + LayoutUnit(ItemBlockSpacing)) / ItemLogicalHeight()).ToInt());
-    if (considerPadding == ConsiderPadding::No)
-    {
-      return visibleItemsExcludingPadding;
-    }
-
-    return NumberOfVisibleItemsInPaddingBefore() + visibleItemsExcludingPadding
-           + NumberOfVisibleItemsInPaddingAfter();
   }
 
   int32 RenderListBox::NumItems() const noexcept
@@ -376,7 +370,7 @@ namespace krys::boo
       x += LayoutUnit(vBar->OccupiedWidth());
     }
 
-    auto itemOffset = ItemLogicalHeight() * (index - IndexOffset());
+    auto itemOffset = ItemLogicalHeight() * index - LayoutUnit(LogicalScrollOffset());
     if (GetWritingMode().IsBlockFlipped())
     {
       itemOffset = ContentBoxLogicalHeight() - ItemLogicalHeight() - itemOffset;
@@ -457,10 +451,12 @@ namespace krys::boo
   void RenderListBox::PaintItem(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
                                 const PaintFunction &paintFunction) noexcept
   {
-    int32 listItemsSize = NumItems();
-    int32 firstVisibleItem = _indexOfFirstVisibleItemInsidePaddingBeforeArea.value_or(IndexOffset());
-    int32 endIndex = firstVisibleItem + NumVisibleItems(ConsiderPadding::Yes);
-    for (int32 i = firstVisibleItem; i < listItemsSize && i < endIndex; ++i)
+    // The items any part of which shows in the content box or the padding around it, which clips them.
+    LayoutUnit offset(LogicalScrollOffset());
+    int32 firstIndex = std::max(0, ItemIndexAtLogicalOffset(offset - PaddingBefore()));
+    int32 endIndex =
+      std::min(NumItems(), ItemIndexAtLogicalOffset(offset + ContentBoxLogicalHeight() + PaddingAfter()) + 1);
+    for (int32 i = firstIndex; i < endIndex; ++i)
     {
       paintFunction(paintInfo, paintOffset, i);
     }
@@ -719,20 +715,12 @@ namespace krys::boo
 
     auto offsetLogicalHeight = GetWritingMode().IsHorizontal() ? offset.Height() : offset.Width();
 
-    int32 newOffset;
-    if (GetWritingMode().IsBlockFlipped())
-    {
-      newOffset =
-        ((LogicalHeight() - BorderAndPaddingBefore() - offsetLogicalHeight) / ItemLogicalHeight()).ToInt()
-        + IndexOffset();
-    }
-    else
-    {
-      newOffset =
-        ((offsetLogicalHeight - BorderAndPaddingBefore()) / ItemLogicalHeight()).ToInt() + IndexOffset();
-    }
-
-    return newOffset < NumItems() ? newOffset : -1;
+    // How far into the content box, from its start, then into the list.
+    auto offsetInContent = GetWritingMode().IsBlockFlipped()
+                             ? LogicalHeight() - BorderAndPaddingBefore() - offsetLogicalHeight
+                             : offsetLogicalHeight - BorderAndPaddingBefore();
+    int32 index = ItemIndexAtLogicalOffset(offsetInContent + LayoutUnit(LogicalScrollOffset()));
+    return index >= 0 && index < NumItems() ? index : -1;
   }
 
   int32 RenderListBox::ScrollToward(const IntPoint &destination) noexcept
@@ -743,35 +731,35 @@ namespace krys::boo
     int32 positionOffsetLogicalHeight =
       GetWritingMode().IsHorizontal() ? positionOffset.Height() : positionOffset.Width();
 
-    int32 rows = NumVisibleItems();
-    int32 offset = IndexOffset();
+    // The items fully in view: past them, the next one either way is revealed.
+    int32 firstIndex = FirstFullyVisibleIndex(LogicalScrollOffset());
+    int32 endIndex = EndOfFullyVisibleIndexes(LogicalScrollOffset());
 
     if (GetWritingMode().IsBlockFlipped())
     {
-      if (positionOffsetLogicalHeight < BorderAndPaddingAfter()
-          && ScrollToRevealElementAtListIndex(offset + rows))
+      if (positionOffsetLogicalHeight < BorderAndPaddingAfter() && ScrollToRevealElementAtListIndex(endIndex))
       {
-        return offset + rows - 1;
+        return endIndex - 1;
       }
 
       if (positionOffsetLogicalHeight > LogicalHeight() - BorderAndPaddingBefore()
-          && ScrollToRevealElementAtListIndex(offset - 1))
+          && ScrollToRevealElementAtListIndex(firstIndex - 1))
       {
-        return offset - 1;
+        return firstIndex - 1;
       }
     }
     else
     {
       if (positionOffsetLogicalHeight < BorderAndPaddingBefore()
-          && ScrollToRevealElementAtListIndex(offset - 1))
+          && ScrollToRevealElementAtListIndex(firstIndex - 1))
       {
-        return offset - 1;
+        return firstIndex - 1;
       }
 
       if (positionOffsetLogicalHeight > LogicalHeight() - BorderAndPaddingAfter()
-          && ScrollToRevealElementAtListIndex(offset + rows))
+          && ScrollToRevealElementAtListIndex(endIndex))
       {
-        return offset + rows - 1;
+        return endIndex - 1;
       }
     }
 
@@ -858,65 +846,99 @@ namespace krys::boo
     SelectElement().ListBoxOnChange();
   }
 
-  bool RenderListBox::ScrollToRevealElementAtListIndex(int32 index) noexcept
+  bool RenderListBox::ScrollToRevealElementAtListIndex(int32 index, ScrollIsAnimated animated) noexcept
   {
-    if (index < 0 || index >= NumItems() || ListIndexIsVisible(index))
+    // Judged by where a smooth scroll is going, so keys pressed in quick succession go on from there.
+    int32 targetOffset = TargetLogicalScrollOffset();
+    if (index < 0 || index >= NumItems() || ListIndexIsVisible(index, targetOffset))
     {
       return false;
     }
 
-    int32 newOffset;
-    if (index < IndexOffset())
-    {
-      newOffset = index;
-    }
-    else
-    {
-      newOffset = index - NumVisibleItems() + 1;
-    }
-
-    if (GetWritingMode().IsBlockFlipped())
-    {
-      newOffset *= -1;
-    }
-
-    ScrollToPosition(newOffset);
+    // To the item's start if it's before what's in view, else to its end.
+    auto itemStart = ItemLogicalHeight() * index;
+    auto newOffset =
+      index < FirstFullyVisibleIndex(targetOffset)
+        ? itemStart
+        : itemStart + ItemLogicalHeight() - LayoutUnit(ItemBlockSpacing) - ContentBoxLogicalHeight();
+    ScrollToLogicalOffset(newOffset.Ceil(),
+                          ScrollPositionChangeOptions::CreateProgrammaticWithOptions(animated));
     return true;
   }
 
   bool RenderListBox::ListIndexIsVisible(int32 index) const noexcept
   {
-    int32 firstIndex = _indexOfFirstVisibleItemInsidePaddingBeforeArea.value_or(IndexOffset());
-    int32 endIndex =
-      _indexOfFirstVisibleItemInsidePaddingAfterArea
-        ? *_indexOfFirstVisibleItemInsidePaddingAfterArea + NumberOfVisibleItemsInPaddingAfter()
-        : IndexOffset() + NumVisibleItems();
+    return ListIndexIsVisible(index, LogicalScrollOffset());
+  }
 
-    return index >= firstIndex && index < endIndex;
+  bool RenderListBox::ListIndexIsVisible(int32 index, int32 offset) const noexcept
+  {
+    if (index < 0 || index >= NumItems())
+    {
+      return false;
+    }
+
+    LayoutUnit scrollOffset(offset);
+    auto itemStart = ItemLogicalHeight() * index;
+    auto itemEnd = itemStart + ItemLogicalHeight() - LayoutUnit(ItemBlockSpacing);
+    return itemStart >= scrollOffset - PaddingBefore()
+           && itemEnd <= scrollOffset + ContentBoxLogicalHeight() + PaddingAfter();
   }
 
   bool RenderListBox::Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                             dom::Element **, ScrollIsAnimated) noexcept
+                             dom::Element **, ScrollIsAnimated animated) noexcept
   {
-    return ScrollableArea::Scroll(direction, granularity, stepCount);
+    return ScrollableArea::Scroll(direction, granularity, stepCount, animated);
   }
 
   bool RenderListBox::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                    uint32 stepCount, dom::Element **, ScrollIsAnimated) noexcept
+                                    uint32 stepCount, dom::Element **, ScrollIsAnimated animated) noexcept
   {
     return ScrollableArea::Scroll(
       LogicalToPhysical(direction, GetWritingMode().IsHorizontal(), GetWritingMode().IsBlockFlipped()),
-      granularity, stepCount);
+      granularity, stepCount, animated);
   }
 
-  int32 RenderListBox::IndexOffset() const noexcept
+  int32 RenderListBox::LogicalScrollOffset() const noexcept
   {
     auto scrollPosition = GetScrollPosition();
-    if (!GetWritingMode().IsHorizontal())
+    return std::abs(GetWritingMode().IsHorizontal() ? scrollPosition.Y() : scrollPosition.X());
+  }
+
+  int32 RenderListBox::TargetLogicalScrollOffset() const noexcept
+  {
+    auto *animator = ExistingScrollAnimator();
+    if (!animator || GetScrollAnimationStatus() != ScrollAnimationStatus::Animating)
     {
-      scrollPosition = scrollPosition.TransposedPoint();
+      return LogicalScrollOffset();
     }
-    return std::abs(scrollPosition.Y());
+
+    auto position = ScrollPositionFromOffset(RoundedIntPoint(animator->DestinationOffset()));
+    return std::abs(GetWritingMode().IsHorizontal() ? position.Y() : position.X());
+  }
+
+  int32 RenderListBox::MaximumLogicalScrollOffset() const noexcept
+  {
+    return std::max(0, (ListLogicalHeight() - ContentBoxLogicalHeight()).Ceil());
+  }
+
+  int32 RenderListBox::FirstFullyVisibleIndex(int32 offset) const noexcept
+  {
+    return (LayoutUnit(offset) / ItemLogicalHeight()).Ceil();
+  }
+
+  int32 RenderListBox::EndOfFullyVisibleIndexes(int32 offset) const noexcept
+  {
+    // The last item has no spacing after it.
+    return std::min(
+      NumItems(),
+      ((LayoutUnit(offset) + ContentBoxLogicalHeight() + LayoutUnit(ItemBlockSpacing)) / ItemLogicalHeight())
+        .Floor());
+  }
+
+  int32 RenderListBox::ItemIndexAtLogicalOffset(LayoutUnit offset) const noexcept
+  {
+    return (offset / ItemLogicalHeight()).Floor();
   }
 
   ScrollPosition RenderListBox::GetScrollPosition() const noexcept
@@ -931,7 +953,7 @@ namespace krys::boo
 
   ScrollPosition RenderListBox::MaximumScrollPosition() const noexcept
   {
-    auto maximumScrollOffset = ScrollOffset(0, NumItems() - NumVisibleItems());
+    auto maximumScrollOffset = ScrollOffset(0, MaximumLogicalScrollOffset());
     if (!GetWritingMode().IsHorizontal())
     {
       maximumScrollOffset = maximumScrollOffset.TransposedPoint();
@@ -944,56 +966,6 @@ namespace krys::boo
     ScrollTo(ScrollPositionFromOffset(offset));
   }
 
-  int32 RenderListBox::MaximumNumberOfItemsThatFitInPaddingAfterArea() const noexcept
-  {
-    return (PaddingAfter() / ItemLogicalHeight()).ToInt();
-  }
-
-  int32 RenderListBox::NumberOfVisibleItemsInPaddingBefore() const noexcept
-  {
-    if (!_indexOfFirstVisibleItemInsidePaddingBeforeArea)
-    {
-      return 0;
-    }
-
-    return IndexOffset() - *_indexOfFirstVisibleItemInsidePaddingBeforeArea;
-  }
-
-  int32 RenderListBox::NumberOfVisibleItemsInPaddingAfter() const noexcept
-  {
-    if (!_indexOfFirstVisibleItemInsidePaddingAfterArea)
-    {
-      return 0;
-    }
-
-    return std::min(MaximumNumberOfItemsThatFitInPaddingAfterArea(),
-                    NumItems() - IndexOffset() - NumVisibleItems());
-  }
-
-  void RenderListBox::ComputeFirstIndexesVisibleInPaddingBeforeAfterAreas() noexcept
-  {
-    _indexOfFirstVisibleItemInsidePaddingBeforeArea = null;
-    _indexOfFirstVisibleItemInsidePaddingAfterArea = null;
-
-    int32 maximumNumberOfItemsThatFitInPaddingBeforeArea = (PaddingBefore() / ItemLogicalHeight()).ToInt();
-    if (maximumNumberOfItemsThatFitInPaddingBeforeArea)
-    {
-      if (IndexOffset())
-      {
-        _indexOfFirstVisibleItemInsidePaddingBeforeArea =
-          std::max(0, IndexOffset() - maximumNumberOfItemsThatFitInPaddingBeforeArea);
-      }
-    }
-
-    if (MaximumNumberOfItemsThatFitInPaddingAfterArea())
-    {
-      if (NumItems() > (IndexOffset() + NumVisibleItems()))
-      {
-        _indexOfFirstVisibleItemInsidePaddingAfterArea = IndexOffset() + NumVisibleItems();
-      }
-    }
-  }
-
   void RenderListBox::ScrollTo(const ScrollPosition &position) noexcept
   {
     if (position == _scrollPosition)
@@ -1003,9 +975,8 @@ namespace krys::boo
 
     _scrollPosition = position;
 
-    ComputeFirstIndexesVisibleInPaddingBeforeAfterAreas();
-
     Repaint();
+    SetIsAwaitingScrollend(true);
     GetDocument().AddPendingScrollEventTarget(SelectElement(), dom::ScrollEventType::Scroll);
   }
 
@@ -1094,14 +1065,14 @@ namespace krys::boo
     return LogicalScrollTop();
   }
 
-  void RenderListBox::SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &) noexcept
+  void RenderListBox::SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options) noexcept
   {
     if (GetWritingMode().IsHorizontal())
     {
       return;
     }
 
-    SetLogicalScrollTop(newLeft);
+    SetLogicalScrollTop(newLeft, options);
   }
 
   int32 RenderListBox::ScrollTop() const noexcept
@@ -1113,65 +1084,54 @@ namespace krys::boo
     return 0;
   }
 
-  void RenderListBox::SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &) noexcept
+  void RenderListBox::SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options) noexcept
   {
     if (!GetWritingMode().IsHorizontal())
     {
       return;
     }
 
-    SetLogicalScrollTop(newTop);
+    SetLogicalScrollTop(newTop, options);
   }
 
   int32 RenderListBox::LogicalScrollTop() const noexcept
   {
-    int32 logicalTop = IndexOffset() * ItemLogicalHeight().ToInt();
-    if (GetWritingMode().IsBlockFlipped())
-    {
-      logicalTop *= -1;
-    }
-    return logicalTop;
+    auto scrollPosition = GetScrollPosition();
+    return GetWritingMode().IsHorizontal() ? scrollPosition.Y() : scrollPosition.X();
   }
 
-  void RenderListBox::ScrollToPosition(int32 positionIndex) noexcept
+  void RenderListBox::SetScrollPosition(const ScrollPosition &position,
+                                        const ScrollPositionChangeOptions &options) noexcept
   {
-    auto orientation = ScrollbarOrientationForWritingMode();
-    auto scrollOrigin = ScrollOrigin();
-
-    int32 offsetIndex = positionIndex;
-
-    switch (orientation)
-    {
-      case ScrollbarOrientation::Vertical:   offsetIndex = positionIndex + scrollOrigin.Y(); break;
-      case ScrollbarOrientation::Horizontal: offsetIndex = positionIndex + scrollOrigin.X(); break;
-    }
-
-    ScrollToOffsetWithoutAnimation(orientation, static_cast<float>(offsetIndex));
+    SetLogicalScrollTop(GetWritingMode().IsHorizontal() ? position.Y() : position.X(), options);
   }
 
-  void RenderListBox::SetLogicalScrollTop(int32 newLogicalScrollTop) noexcept
+  void RenderListBox::ScrollToLogicalOffset(int32 offset, const ScrollPositionChangeOptions &options) noexcept
   {
-    bool isFlipped = GetWritingMode().IsBlockFlipped();
+    offset = std::clamp(offset, 0, MaximumLogicalScrollOffset());
+    int32 logicalPosition = GetWritingMode().IsBlockFlipped() ? -offset : offset;
+    auto position = GetWritingMode().IsHorizontal() ? ScrollPosition(0, logicalPosition)
+                                                    : ScrollPosition(logicalPosition, 0);
 
-    int32 newTop = newLogicalScrollTop;
-    if (isFlipped)
+    // A smooth scroll is retargeted by another, and stopped by any other.
+    if (options.Animated == ScrollIsAnimated::Yes)
     {
-      newTop *= -1;
-    }
-
-    int32 index = newTop / ItemLogicalHeight().ToInt();
-    index = std::clamp(index, 0, std::max(0, NumItems() - 1));
-    if (index == IndexOffset())
-    {
+      ScrollToPositionWithAnimation(position, options);
       return;
     }
 
-    if (isFlipped)
-    {
-      index *= -1;
-    }
+    auto previousScrollType = CurrentScrollType();
+    SetCurrentScrollType(options.Type);
+    (void)ScrollToPositionWithoutAnimation(position);
+    SetCurrentScrollType(previousScrollType);
+  }
 
-    ScrollToPosition(index);
+  void RenderListBox::SetLogicalScrollTop(int32 newLogicalScrollTop,
+                                          const ScrollPositionChangeOptions &options) noexcept
+  {
+    // A flipped list's positions are negative.
+    ScrollToLogicalOffset(GetWritingMode().IsBlockFlipped() ? -newLogicalScrollTop : newLogicalScrollTop,
+                          options);
   }
 
   bool RenderListBox::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
@@ -1239,6 +1199,11 @@ namespace krys::boo
     return LayoutRect {left, top, width, height};
   }
 
+  void RenderListBox::RegisterForAnimatedScroll() noexcept
+  {
+    View().FrameView().AddScrollableAreaForAnimatedScroll(*this);
+  }
+
   void RenderListBox::InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept
   {
     auto scrollRect = rect;
@@ -1262,7 +1227,18 @@ namespace krys::boo
 
   IntSize RenderListBox::ContentsSize() const noexcept
   {
-    return IntSize(ScrollWidth(), ScrollHeight());
+    // What's in view and as much again as the list scrolls, so the scrollable area's maximum is the list
+    // box's.
+    auto size = VisibleSize();
+    if (GetWritingMode().IsHorizontal())
+    {
+      size.Expand(0, MaximumLogicalScrollOffset());
+    }
+    else
+    {
+      size.Expand(MaximumLogicalScrollOffset(), 0);
+    }
+    return size;
   }
 
   ScrollableArea *RenderListBox::EnclosingScrollableArea() const noexcept
@@ -1291,9 +1267,10 @@ namespace krys::boo
   {
     if (!IsAwaitingScrollend())
     {
-      GetDocument().AddPendingScrollEventTarget(SelectElement(), dom::ScrollEventType::Scrollend);
+      return;
     }
     SetIsAwaitingScrollend(false);
+    GetDocument().AddPendingScrollEventTarget(SelectElement(), dom::ScrollEventType::Scrollend);
   }
 
   Ref<Scrollbar> RenderListBox::CreateScrollbar(ScrollbarOrientation orientation) noexcept

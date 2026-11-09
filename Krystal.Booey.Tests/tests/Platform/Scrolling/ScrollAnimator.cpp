@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -10,6 +11,7 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -337,6 +339,78 @@ namespace krys::boo::tests
       CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
       CHECK(scroller.ScrollTop() == 40);
       settings.ScrollAnimatorEnabled = true;
+    }
+  }
+
+  TEST_CASE("ScrollAnimator: a list box's smooth scrolls",
+            "[Platform][Scrolling][ScrollAnimator][RenderListBox]")
+  {
+    AnimationPageFixture fixture {utf8_string(
+      u8"<!DOCTYPE html><style>body{margin:0}</style><select id=s size=3><option>0</option><option>1</option>"
+      u8"<option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>"
+      u8"<option>7</option><option>8</option><option>9</option></select>")};
+    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &listBox = Downcast<RenderListBox>(*select.Renderer());
+    auto &area = static_cast<ScrollableArea &>(listBox);
+    int32 itemHeight =
+      (listBox.ItemBoundingBoxRect({}, 1).Y() - listBox.ItemBoundingBoxRect({}, 0).Y()).ToInt();
+    auto scrollEnd = CreateRef<EventCounter>();
+    select.AddEventListener(dom::DOMStringAtom(EventNames::ScrollEnd),
+                            ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
+
+    SECTION("scrollTop, with scroll-behavior: smooth, moves over frames and ends with one scrollend")
+    {
+      fixture.SetStyle(u8"s", u8"scroll-behavior:smooth");
+      select.SetScrollTop(2 * itemHeight);
+      CHECK(select.ScrollTop() == 0);
+      CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
+
+      fixture.Frame();
+      fixture.Frame(50ms);
+      CHECK(select.ScrollTop() > 0);
+      CHECK(select.ScrollTop() < 2 * itemHeight);
+      CHECK(scrollEnd->Count == 0);
+
+      Finish(fixture);
+      CHECK(select.ScrollTop() == 2 * itemHeight);
+      CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
+      CHECK(scrollEnd->Count == 1);
+    }
+
+    SECTION("an instant one jumps")
+    {
+      select.ScrollTo(ScrollToOptions(0, itemHeight));
+      CHECK(select.ScrollTop() == itemHeight);
+      CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
+    }
+
+    SECTION("the keys reveal the selection smoothly")
+    {
+      select.Focus();
+      CHECK(PressKey(fixture, u8"End", u8"End", vk::End));
+      CHECK(select.SelectedIndex() == 9);
+      CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
+      CHECK_FALSE(listBox.ListIndexIsVisible(9));
+
+      Finish(fixture);
+      CHECK(listBox.ListIndexIsVisible(9));
+      CHECK(select.ScrollTop() == 7 * itemHeight);
+    }
+
+    SECTION("presses in quick succession go on from where the last is going")
+    {
+      select.Focus();
+      for (int32 press = 0; press < 5; ++press)
+      {
+        CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+      }
+      // Revealing the new selection doesn't cut the smooth scroll short.
+      CHECK(select.SelectedIndex() == 4);
+      CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
+
+      Finish(fixture);
+      CHECK(select.ScrollTop() == 2 * itemHeight);
+      CHECK(listBox.ListIndexIsVisible(4));
     }
   }
 }

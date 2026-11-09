@@ -72,6 +72,7 @@
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
@@ -3939,6 +3940,11 @@ namespace krys::boo::dom
       if (auto *renderTextControlSingleLine = DynamicDowncast<RenderTextControlSingleLine>(*renderer))
       {
         return renderTextControlSingleLine->InnerTextElementHasNonVisibleOverflow();
+      }
+      // A list box scrolls its items itself, as Chrome's does, where WebKit's doesn't scroll for scrollTo().
+      if (Is<RenderListBox>(*renderer))
+      {
+        return true;
       }
       return renderer->HasNonVisibleOverflow();
     };

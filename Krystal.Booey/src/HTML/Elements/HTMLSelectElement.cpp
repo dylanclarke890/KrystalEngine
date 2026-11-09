@@ -2310,7 +2310,9 @@ namespace krys::boo::html
           SetActiveSelectionAnchorIndex(_activeSelectionEndIndex);
         }
 
-        (void)Downcast<RenderListBox>(*renderer).ScrollToRevealElementAtListIndex(endIndex);
+        auto *frame = NodeDocument().Frame();
+        (void)Downcast<RenderListBox>(*renderer).ScrollToRevealElementAtListIndex(
+          endIndex, frame ? frame->GetEventHandler().KeyboardScrollIsAnimated() : ScrollIsAnimated::No);
         if (selectNewItem)
         {
           UpdateListBoxSelection(deselectOthers);
