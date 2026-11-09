@@ -90,7 +90,6 @@ layer at (101,1) size 140x10
   TEST_CASE_METHOD(css::tests::ValueFixture, "FloatingObjects: overhanging and intruding floats",
                    "[Rendering][FloatingObjects]")
   {
-    // FIXME: Floats in inline content are placed at its top until inline layout.
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
       body { margin: 0 }
       .f { float: left; width: 40px; height: 50px }
@@ -137,5 +136,34 @@ layer at (0,0) size 800x154
       CHECK(BoxOf(fixture, u8"next").Y() == 0_lu);
       CHECK(BoxOf(fixture, u8"root").Y() == 5_lu);
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FloatingObjects: floats in inline content",
+                   "[Rendering][FloatingObjects]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0; font: 10px/10px monospace }
+      div { width: 200px }
+      .f { float: left; width: 30px; height: 30px }
+      .r { float: right; width: 20px; height: 15px }
+      #fits { clear: both }
+      #below { clear: both; width: 60px }
+    </style><body><div id=line>one<br>two <span class=f id=f1></span>three</div><div id=fits>x<div class=f id=f2></div><div class=r id=r2></div></div><div id=below>aaaa aaaa <span class=f id=f3></span>b</div></body>)html"};
+    (void)fixture.Document->UpdateLayout();
+
+    // A float is placed on the line it's on, and that line's content moves aside.
+    CHECK(BoxOf(fixture, u8"f1").Location() == LayoutPoint(0, 10));
+    CHECK(BlockOf(fixture, u8"line").LogicalLeftOffsetForLine(0_lu, 1_lu) == 0_lu);
+    CHECK(BlockOf(fixture, u8"line").LogicalLeftOffsetForLine(10_lu, 1_lu) == 30_lu);
+    CHECK(Dump(fixture).find(u8R"(text run at (30,9) width 19: "two ")") != utf8_string::npos);
+
+    // Floats that fit beside the first line go to its top, even after its content.
+    CHECK(BoxOf(fixture, u8"f2").Location() == LayoutPoint(0, 0));
+    CHECK(BoxOf(fixture, u8"r2").Location() == LayoutPoint(180, 0));
+
+    // A float that doesn't fit beside its line's content goes below the line; the content after it stays on
+    // the line.
+    CHECK(BoxOf(fixture, u8"f3").Location() == LayoutPoint(0, 10));
+    CHECK(BlockOf(fixture, u8"below").LogicalHeight() == 10_lu);
   }
 }

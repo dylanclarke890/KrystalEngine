@@ -37,7 +37,6 @@ namespace krys::boo::tests
     CHECK(&layoutState.GeometryForRootBox() == &geometry);
 
     // The layout state follows the document's mode.
-    // FIXME: Changing the mode of a document that has a render view, once something can (document.open()).
     ResolverFixture quirks {u8R"html(<body>text</body>)html"};
     (void)quirks.Document->UpdateLayout();
     CHECK(quirks.Document->GetRenderView()->GetLayoutState().InQuirksMode());
