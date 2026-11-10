@@ -649,6 +649,7 @@ namespace krys::boo
 
     void PaintFloats(PaintInfo &, const LayoutPoint &, bool preservePhase = false) noexcept override;
     void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept override;
+    void PaintColumnRules(PaintInfo &, const LayoutPoint &) noexcept override;
     bool HitTestFloats(const HitTestRequest &request, HitTestResult &result,
                        const HitTestLocation &locationInContainer,
                        const LayoutPoint &accumulatedOffset) noexcept override;

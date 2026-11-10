@@ -1098,7 +1098,9 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity RenderText::PositionForPoint(const LayoutPoint &point, HitTestSource) noexcept
+  dom::PositionWithAffinity
+    RenderText::PositionForPoint(const LayoutPoint &point, HitTestSource,
+                                 const RenderFragmentContainer * /*fragment*/) noexcept
   {
     auto firstRun = inline_iterator::LineLeftmostTextBoxFor(*this);
 

@@ -1010,15 +1010,14 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity RenderMultiColumnSet::PositionForPoint(const LayoutPoint &logicalPoint,
-                                                                   HitTestSource source) noexcept
+  dom::PositionWithAffinity
+    RenderMultiColumnSet::PositionForPoint(const LayoutPoint &logicalPoint, HitTestSource source,
+                                           const RenderFragmentContainer * /*fragment*/) noexcept
   {
-    // FIXME: Pass the set, so a box split across columns answers for this one, once positions are
-    // fragment-aware.
     return MultiColumnFlow()->PositionForPoint(
       TranslateFragmentPointToFragmentedFlow(logicalPoint,
                                              ColumnHitTestTranslationMode::ClampHitTestTranslationToColumns),
-      source);
+      source, this);
   }
 
   LayoutPoint RenderMultiColumnSet::TranslateFragmentPointToFragmentedFlow(

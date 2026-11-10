@@ -63,8 +63,9 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual bool ShouldRespectZeroIntrinsicWidth() const noexcept;
 
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                              HitTestSource source) noexcept final;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept final;
 
     KRYS_NODISCARD bool IsSelected() const noexcept;
     // This is in local coordinates, but it's a physical rect (so the top left corner is physical top left).

@@ -897,10 +897,10 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity RenderInline::PositionForPoint(const LayoutPoint &point,
-                                                           HitTestSource source) noexcept
+  dom::PositionWithAffinity RenderInline::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                           const RenderFragmentContainer *fragment) noexcept
   {
-    return ContainingBlock()->PositionForPoint(point, source);
+    return ContainingBlock()->PositionForPoint(point, source, fragment);
   }
 
   bool RenderInline::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,

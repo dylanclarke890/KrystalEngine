@@ -776,7 +776,34 @@ namespace krys::boo
                    rects.DirtyForegroundRect().Rect(),
                    paintsBackgroundSeparately ? LayerPaintPhaseForeground : LayerPaintPhaseAll, behavior);
 
-        // FIXME: The layer's fragments (ShowLayerFragments, collectFragments), once there's fragmentation.
+        if (behavior.Contains(RenderAsTextFlag::ShowLayerFragments))
+        {
+          LayerFragments layerFragments;
+          layer.CollectFragments(layerFragments, &rootLayer, paintDirtyRect,
+                                 RenderLayer::ExcludeCompositedPaginatedLayers, PaintingClipRects,
+                                 RenderLayer::ClipRectTemporaryOptions, offsetFromRoot);
+
+          if (layerFragments.size() > 1)
+          {
+            ts.IncreaseIndent(2);
+            for (uint64 i = 0; i < layerFragments.size(); ++i)
+            {
+              const auto &fragment = layerFragments[i];
+              ts << Indent << " fragment " << i << ": bounds in layer " << fragment.LayerBounds()
+                 << " fragment bounds ";
+              if (auto boundingBox = fragment.BoundingBox())
+              {
+                ts << *boundingBox;
+              }
+              else
+              {
+                ts << "nullopt";
+              }
+              ts << "\n";
+            }
+            ts.DecreaseIndent(2);
+          }
+        }
 
         WriteLayerRenderers(
           ts, layer, paintsBackgroundSeparately ? LayerPaintPhaseForeground : LayerPaintPhaseAll, behavior);

@@ -969,8 +969,9 @@ namespace krys::boo
 
 #pragma region Hit testing
 
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                              HitTestSource source) noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept override;
 
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,

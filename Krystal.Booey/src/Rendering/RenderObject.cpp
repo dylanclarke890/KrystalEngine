@@ -550,13 +550,14 @@ namespace krys::boo
 
 #pragma region Editing
 
-  dom::PositionWithAffinity RenderObject::PositionForPoint(const LayoutPoint &, HitTestSource) noexcept
+  dom::PositionWithAffinity RenderObject::PositionForPoint(const LayoutPoint &, HitTestSource,
+                                                           const RenderFragmentContainer *) noexcept
   {
     return CreatePositionWithAffinity(CaretMinOffset(), Affinity::Downstream);
   }
 
-  VisiblePosition RenderObject::VisiblePositionForPoint(const LayoutPoint &point,
-                                                        HitTestSource source) noexcept
+  VisiblePosition RenderObject::VisiblePositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                        const RenderFragmentContainer * /*fragment*/) noexcept
   {
     auto positionWithAffinity = PositionForPoint(point, source);
     return VisiblePosition(positionWithAffinity.GetPosition(), positionWithAffinity.GetAffinity());

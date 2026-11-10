@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- The "multicol" page golden: content split across columns with rules between them, a spanner, and boxes in their own layers painted in the columns showing them. -->
+<html data-width="480" data-height="360">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 8px; }
+  .multicol {
+    width: 200px; margin: 0 8px 12px 0; padding: 4px; float: left;
+    border: 2px solid #223388; background: #dde4ff;
+    columns: 3; column-gap: 12px; column-rule: 4px solid #cc3355;
+  }
+  .two { columns: 2; column-rule: 6px dashed #228844; }
+  .box { height: 20px; background: #33aa66; }
+  .alt { background: #ee8833; }
+  .tall { height: 70px; background: #6644aa; }
+  .avoid { break-inside: avoid; height: 30px; background: #2299bb; }
+  .break { break-before: column; }
+  .spanner { column-span: all; height: 14px; background: #888888; }
+  .relative { position: relative; left: 4px; top: 4px; height: 20px; background: #dd2266; }
+  .transformed { transform: rotate(10deg); height: 20px; background: #3366cc; }
+  .clip { overflow: hidden; height: 50px; }
+  .fixed { height: 60px; column-fill: auto; }
+</style>
+</head>
+<body>
+  <div class="multicol">
+    <div class="box"></div><div class="box alt"></div><div class="tall"></div>
+    <div class="box"></div><div class="box alt"></div>
+  </div>
+  <div class="multicol two">
+    <div class="box"></div><div class="avoid"></div><div class="box alt break"></div>
+  </div>
+  <div class="multicol">
+    <div class="box"></div><div class="box alt"></div><div class="box"></div><div class="spanner"></div>
+    <div class="box"></div><div class="box alt"></div><div class="box"></div>
+  </div>
+  <div class="multicol two">
+    <div class="relative"></div><div class="box"></div><div class="box alt"></div><div class="transformed"></div>
+  </div>
+  <div class="multicol clip">
+    <div class="tall"></div><div class="tall alt"></div><div class="tall"></div><div class="tall alt"></div>
+  </div>
+  <div class="multicol fixed">
+    <div class="tall"></div><div class="box alt"></div><div class="tall"></div>
+  </div>
+</body>
+</html>

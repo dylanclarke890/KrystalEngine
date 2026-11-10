@@ -561,8 +561,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Multi-column flows (their first column set's hit test result) come with multi-column layout.
-
     if (auto *node = NodeForHitTest())
     {
       result.SetInnerNode(node);

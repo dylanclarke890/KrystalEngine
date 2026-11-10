@@ -6755,8 +6755,8 @@ namespace krys::boo
     return hitTestLocation.Intersects(borderShape.DeprecatedRoundedRect());
   }
 
-  dom::PositionWithAffinity RenderBox::PositionForPoint(const LayoutPoint &point,
-                                                        HitTestSource source) noexcept
+  dom::PositionWithAffinity RenderBox::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                        const RenderFragmentContainer *fragment) noexcept
   {
     // no children...return this render object's element, if there is one, and offset 0
     if (!FirstChild())
@@ -6791,7 +6791,14 @@ namespace krys::boo
 
     for (auto *renderer = FirstChildBox(); renderer; renderer = renderer->NextSiblingBox())
     {
-      // FIXME: Fragmented flows' fragments (objectShouldFragmentInFlowFragment), once there are any.
+      if (auto *fragmentedFlow = DynamicDowncast<RenderFragmentedFlow>(*this))
+      {
+        krys_debug_assert(fragment || fragmentedFlow->IsSkippedContent());
+        if (!fragmentedFlow->ObjectShouldFragmentInFlowFragment(renderer, fragment))
+        {
+          continue;
+        }
+      }
       if ((!renderer->FirstChild() && !renderer->IsInline() && !Is<RenderBlockFlow>(*renderer))
           || (source == HitTestSource::Script ? renderer->Style().GetVisibility()
                                               : renderer->Style().UsedVisibility())
@@ -6811,9 +6818,10 @@ namespace krys::boo
       {
         if (renderer->IsRenderTableRow())
         {
-          return renderer->PositionForPoint(point + adjustedPoint - renderer->LocationOffset(), source);
+          return renderer->PositionForPoint(point + adjustedPoint - renderer->LocationOffset(), source,
+                                            fragment);
         }
-        return renderer->PositionForPoint(point - renderer->LocationOffset(), source);
+        return renderer->PositionForPoint(point - renderer->LocationOffset(), source, fragment);
       }
 
       // Find the distance from (x, y) to the box.  Split the space around the box into 8 pieces
@@ -6873,7 +6881,8 @@ namespace krys::boo
 
     if (closestRenderer)
     {
-      return closestRenderer->PositionForPoint(adjustedPoint - closestRenderer->LocationOffset(), source);
+      return closestRenderer->PositionForPoint(adjustedPoint - closestRenderer->LocationOffset(), source,
+                                               fragment);
     }
 
     return CreatePositionWithAffinity(FirstPositionInOrBeforeNode(NonPseudoElement()));

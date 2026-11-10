@@ -132,8 +132,9 @@ namespace krys::boo
                                const HitTestLocation &locationInContainer,
                                const LayoutPoint &accumulatedOffset, HitTestAction) noexcept override;
 
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &,
-                                                              HitTestSource) noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &, HitTestSource,
+                       const RenderFragmentContainer * = nullptr) noexcept override;
 
     KRYS_NODISCARD bool RequiresLayer() const noexcept override
     {

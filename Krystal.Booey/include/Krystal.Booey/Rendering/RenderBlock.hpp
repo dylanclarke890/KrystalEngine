@@ -61,7 +61,6 @@ namespace krys::boo
   };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Column rules.
   KRYS_NODISCARD LayoutUnit BlockDirectionOffset(const RenderBlock &rootBlock,
                                                  const LayoutSize &offsetFromRootBlock) noexcept;
   KRYS_NODISCARD LayoutUnit InlineDirectionOffset(const RenderBlock &rootBlock,
@@ -371,8 +370,9 @@ namespace krys::boo
     /// @brief The block's `text-indent`, resolved against its content box.
     KRYS_NODISCARD LayoutUnit TextIndentOffset() const noexcept;
 
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                              HitTestSource source) noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept override;
     /// @brief The position nearest @p pointInLogicalContents among the block's lines.
     KRYS_NODISCARD virtual dom::PositionWithAffinity
       PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
@@ -429,6 +429,10 @@ namespace krys::boo
     {
     }
     void PaintContents(PaintInfo &, const LayoutPoint &) noexcept;
+    /// @brief Paints the rules between columns, for a column set.
+    virtual void PaintColumnRules(PaintInfo &, const LayoutPoint &) noexcept
+    {
+    }
 
 #pragma endregion
 

@@ -1607,10 +1607,12 @@ namespace krys::boo
 #pragma region Editing
 
     /// @brief The position nearest @p point (in this renderer's coordinates), for hit testing to positions.
-    KRYS_NODISCARD virtual dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                                      HitTestSource source) noexcept;
-    KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const LayoutPoint &point,
-                                                           HitTestSource source) noexcept;
+    KRYS_NODISCARD virtual dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept;
+    KRYS_NODISCARD VisiblePosition
+      VisiblePositionForPoint(const LayoutPoint &point, HitTestSource source,
+                              const RenderFragmentContainer *fragment = nullptr) noexcept;
     /// @brief The position at @p offset in this renderer's node, or near it if the renderer is anonymous; a
     /// visually equivalent editable position is preferred.
     KRYS_NODISCARD dom::PositionWithAffinity CreatePositionWithAffinity(int32 offset,

@@ -5813,6 +5813,35 @@ namespace krys::boo
 
 #pragma region Painting
 
+  void RenderBlockFlow::PaintColumnRules(PaintInfo &paintInfo, const LayoutPoint &point) noexcept
+  {
+    RenderBlock::PaintColumnRules(paintInfo, point);
+
+    if (!MultiColumnFlow() || paintInfo.Context().PaintingDisabled())
+    {
+      return;
+    }
+
+    // The rules are painted with the background, before the overflow clip applies, but they're part of the
+    // content and clipped with it (as in Chrome; WebKit leaves them unclipped).
+    GraphicsContextStateSaver stateSaver(paintInfo.Context(), false);
+    if (HasNonVisibleOverflow())
+    {
+      auto unscrolledOffset = point;
+      unscrolledOffset.MoveBy(GetScrollPosition());
+      stateSaver.Save();
+      paintInfo.Context().Clip(
+        SnapRectToDevicePixels(OverflowClipRect(unscrolledOffset), GetDocument().DeviceScaleFactor()));
+    }
+
+    // Iterate over our children and paint the column rules as needed.
+    for (auto &columnSet : ChildrenOfType<RenderMultiColumnSet>(*this))
+    {
+      LayoutPoint childPoint = columnSet.Location() + FlipForWritingModeForChild(columnSet, point);
+      columnSet.PaintColumnRules(paintInfo, childPoint);
+    }
+  }
+
   void RenderBlockFlow::PaintFloats(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
                                     bool preservePhase) noexcept
   {

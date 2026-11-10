@@ -2677,7 +2677,14 @@ namespace krys::boo
     LayoutPoint scrolledOffset = paintOffset;
     scrolledOffset.MoveBy(-GetScrollPosition());
 
-    // FIXME: Column rules (paintColumnRules), once there's multi-column layout.
+    // FIXME: Clipping of column rules does not work. We will need a separate paint phase for column rules I
+    // suspect in order to get clipping correct (since it has to paint as background but is still considered
+    // "contents").
+    if ((paintPhase == PaintPhase::BlockBackground || paintPhase == PaintPhase::ChildBlockBackground)
+        && Style().UsedVisibility() == Visibility::Visible)
+    {
+      PaintColumnRules(paintInfo, scrolledOffset);
+    }
 
     // Done with backgrounds, borders and column rules.
     if (paintPhase == PaintPhase::BlockBackground)
@@ -3042,16 +3049,37 @@ namespace krys::boo
     {
       auto visibility =
         source == HitTestSource::Script ? box.Style().GetVisibility() : box.Style().UsedVisibility();
-      return box.Height() && visibility == Visibility::Visible && !box.IsOutOfFlowPositioned();
+      return box.Height() && visibility == Visibility::Visible && !box.IsOutOfFlowPositioned()
+             && !box.IsRenderFragmentedFlow();
+    }
+
+    // Valid candidates in a fragmented flow must be rendered by the fragment.
+    KRYS_NODISCARD bool IsChildHitTestCandidate(const RenderBox &box, const RenderFragmentContainer *fragment,
+                                                const LayoutPoint &point, HitTestSource source) noexcept
+    {
+      if (!IsChildHitTestCandidate(box, source))
+      {
+        return false;
+      }
+      if (!fragment)
+      {
+        return true;
+      }
+      const auto *block = DynamicDowncast<RenderBlock>(box);
+      if (!block)
+      {
+        block = box.ContainingBlock();
+      }
+      return block->FragmentAtBlockOffset(point.Y()) == fragment;
     }
   }
 
-  dom::PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point,
-                                                          HitTestSource source) noexcept
+  dom::PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                          const RenderFragmentContainer *fragment) noexcept
   {
     if (IsRenderTable())
     {
-      return RenderBox::PositionForPoint(point, source);
+      return RenderBox::PositionForPoint(point, source, fragment);
     }
 
     if (IsBlockLevelReplacedOrAtomicInline())
@@ -3079,7 +3107,7 @@ namespace krys::boo
     }
     if (IsRenderFlexibleBox() || IsRenderGrid())
     {
-      return RenderBox::PositionForPoint(point, source);
+      return RenderBox::PositionForPoint(point, source, fragment);
     }
 
     LayoutPoint pointInContents = point;
@@ -3097,8 +3125,13 @@ namespace krys::boo
 
     RenderBox *lastCandidateBox = LastChildBox();
 
-    // FIXME: Fragmented flows' candidates must be rendered by the fragment at the point, once there are any.
-    while (lastCandidateBox && !IsChildHitTestCandidate(*lastCandidateBox, source))
+    if (!fragment)
+    {
+      fragment = FragmentAtBlockOffset(pointInLogicalContents.Y());
+    }
+
+    while (lastCandidateBox
+           && !IsChildHitTestCandidate(*lastCandidateBox, fragment, pointInLogicalContents, source))
     {
       lastCandidateBox = lastCandidateBox->PreviousSiblingBox();
     }
@@ -3114,7 +3147,7 @@ namespace krys::boo
 
       for (auto *childBox = FirstChildBox(); childBox; childBox = childBox->NextSiblingBox())
       {
-        if (!IsChildHitTestCandidate(*childBox, source))
+        if (!IsChildHitTestCandidate(*childBox, fragment, pointInLogicalContents, source))
         {
           continue;
         }
@@ -3133,7 +3166,7 @@ namespace krys::boo
     }
 
     // We only get here if there are no hit test candidate children below the click.
-    return RenderBox::PositionForPoint(point, source);
+    return RenderBox::PositionForPoint(point, source, fragment);
   }
 
   LayoutUnit RenderBlock::TextIndentOffset() const noexcept

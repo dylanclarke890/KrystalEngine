@@ -227,7 +227,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutPoint ColumnTranslationForOffset(LayoutUnit offset) const noexcept;
 
-    void PaintColumnRules(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+    void PaintColumnRules(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept override;
 
     KRYS_NODISCARD LayoutPoint TranslateFragmentPointToFragmentedFlow(
       const LayoutPoint &logicalPoint,
@@ -276,8 +276,9 @@ namespace krys::boo
       FragmentRectsForFlowContentRect(const LayoutRect &rect) const noexcept final;
     KRYS_NODISCARD bool ContentRectSpansFragments(const LayoutRect &rect) const noexcept final;
 
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &logicalPoint,
-                                                              HitTestSource source) noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &logicalPoint, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

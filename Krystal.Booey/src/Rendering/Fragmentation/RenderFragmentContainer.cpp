@@ -110,18 +110,18 @@ namespace krys::boo
       LayoutPoint(pointLogicalLeft + fragmentedFlowLogicalLeft, pointLogicalTop + fragmentedFlowLogicalTop));
   }
 
-  dom::PositionWithAffinity RenderFragmentContainer::PositionForPoint(const LayoutPoint &point,
-                                                                      HitTestSource source) noexcept
+  dom::PositionWithAffinity
+    RenderFragmentContainer::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                              const RenderFragmentContainer *fragment) noexcept
   {
     // Checking for empty fragment blocks.
     if (!IsValid() || !_fragmentedFlow->FirstChild())
     {
-      return RenderBlock::PositionForPoint(point, source);
+      return RenderBlock::PositionForPoint(point, source, fragment);
     }
 
-    // FIXME: Pass the fragment, so a box split across fragments answers for this one, once positions are
-    // fragment-aware.
-    return _fragmentedFlow->PositionForPoint(MapFragmentPointIntoFragmentedFlowCoordinates(point), source);
+    return _fragmentedFlow->PositionForPoint(MapFragmentPointIntoFragmentedFlowCoordinates(point), source,
+                                             this);
   }
 
   LayoutUnit RenderFragmentContainer::PageLogicalWidth() const noexcept

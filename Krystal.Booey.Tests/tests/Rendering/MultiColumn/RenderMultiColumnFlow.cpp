@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
 namespace krys::boo::layout::tests
@@ -236,5 +237,23 @@ layer at (0,0) size 95x20
     CHECK(rectIs(*rects->Item(0), 0, 10, 95, 20));
     CHECK(rectIs(*rects->Item(1), 105, 10, 95, 20));
     CHECK(rectIs(*s.GetBoundingClientRect(), 0, 10, 200, 20));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMultiColumnFlow: hit testing in columns",
+                   "[Rendering][RenderMultiColumnFlow]")
+  {
+    // Points in a column hit the content shown there, whether it's in the flow, in a layer of its own or in a
+    // transformed layer.
+    ResolverFixture fixture {AhemDocument(u8"#m { columns: 2; width: 200px } #m div { height: 10px }"
+                                          u8"#r { position: relative } #x { transform: translateX(0) }",
+                                          u8"<div id=m><div id=a></div><div id=b></div><div id=r></div>"
+                                          u8"<div id=x></div></div>")};
+    auto &document = fixture.ById(u8"m").NodeDocument();
+    CHECK(document.ElementFromPoint(10, 5).get() == &fixture.ById(u8"a"));
+    CHECK(document.ElementFromPoint(10, 15).get() == &fixture.ById(u8"b"));
+    CHECK(document.ElementFromPoint(110, 5).get() == &fixture.ById(u8"r"));
+    CHECK(document.ElementFromPoint(110, 15).get() == &fixture.ById(u8"x"));
+    // The gap between the columns is the container's.
+    CHECK(document.ElementFromPoint(100, 5).get() == &fixture.ById(u8"m"));
   }
 }

@@ -166,8 +166,9 @@ namespace krys::boo
     {
       return true;
     }
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                              HitTestSource source) noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept override;
 
     /// @brief Where @p contentRect (in the flow's coordinates) is shown in the fragment.
     KRYS_NODISCARD virtual List<LayoutRect>

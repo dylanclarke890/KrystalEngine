@@ -4409,9 +4409,39 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Split the box into the fragment boxes of its pagination layers (fragmentsBoundingBox), once
-    // there's fragmentation.
-    (void)ancestorLayer;
+    auto inclusionMode = ExcludeCompositedPaginatedLayers;
+    if (flags.Contains(UseFragmentBoxesIncludingCompositing))
+    {
+      inclusionMode = IncludeCompositedPaginatedLayers;
+    }
+
+    const RenderLayer *paginationLayer = nullptr;
+    if (flags.ContainsAny({UseFragmentBoxesExcludingCompositing, UseFragmentBoxesIncludingCompositing}))
+    {
+      paginationLayer = EnclosingPaginationLayerInSubtree(ancestorLayer, inclusionMode);
+    }
+
+    const RenderLayer *childLayer = this;
+    bool isPaginated = paginationLayer;
+    while (paginationLayer)
+    {
+      // Split our box up into the actual fragment boxes that render in the columns/pages and unite those
+      // together to get our true bounding box.
+      result.Move(childLayer->OffsetFromAncestor(paginationLayer));
+
+      auto &enclosingFragmentedFlow = Downcast<RenderFragmentedFlow>(paginationLayer->Renderer());
+      result = enclosingFragmentedFlow.FragmentsBoundingBox(result);
+
+      childLayer = paginationLayer;
+      paginationLayer =
+        paginationLayer->Parent()->EnclosingPaginationLayerInSubtree(ancestorLayer, inclusionMode);
+    }
+
+    if (isPaginated)
+    {
+      result.Move(childLayer->OffsetFromAncestor(ancestorLayer));
+      return result;
+    }
 
     result.Move(offsetFromRoot);
     return result;
@@ -5096,10 +5126,14 @@ namespace krys::boo
       {
         // The best we can do here is to use enclosed bounding boxes to establish a "fuzzy" enough clip to
         // encompass the transformed layer and all of its children.
-        // FIXME: Transformed layers in a paginated layer (split across its fragments with
-        // fragmentsBoundingBox) come with fragmentation.
-        (void)transparencyMode;
-        LayoutSize delta = layer.OffsetFromAncestor(rootLayer);
+        auto mode = transparencyBehavior == HitTestingTransparencyClipBox
+                      ? RenderLayer::IncludeCompositedPaginatedLayers
+                      : RenderLayer::ExcludeCompositedPaginatedLayers;
+        const RenderLayer *paginationLayer = transparencyMode == DescendantsOfTransparencyClipBox
+                                               ? layer.EnclosingPaginationLayer(mode)
+                                               : nullptr;
+        const RenderLayer *rootLayerForTransform = paginationLayer ? paginationLayer : rootLayer;
+        LayoutSize delta = layer.OffsetFromAncestor(rootLayerForTransform);
 
         TransformationMatrix transform;
         transform.Translate(delta.Width(), delta.Height());
@@ -5112,6 +5146,21 @@ namespace krys::boo
                                                   paintBehavior, paintDirtyRect);
         clipRect.Expand(ToLayoutBoxExtent(layer.FilterOutsets()));
         LayoutRect result = transform.MapRect(clipRect);
+        if (!paginationLayer)
+        {
+          if (paintDirtyRect)
+          {
+            result = Intersection(result, *paintDirtyRect);
+          }
+          return result;
+        }
+
+        // We have to break up the transformed extent across our columns. Split our box up into the actual
+        // fragment boxes that render in the columns/pages and unite those together to get our true bounding
+        // box.
+        auto &enclosingFragmentedFlow = Downcast<RenderFragmentedFlow>(paginationLayer->Renderer());
+        result = enclosingFragmentedFlow.FragmentsBoundingBox(result);
+        result.Move(paginationLayer->OffsetFromAncestor(rootLayer));
         if (paintDirtyRect)
         {
           result = Intersection(result, *paintDirtyRect);
@@ -5484,8 +5533,11 @@ namespace krys::boo
         }
       }
 
-      // FIXME: Transformed layers in a paginated layer (paintTransformedLayerIntoFragments) come with
-      // fragmentation; they paint unfragmented.
+      if (EnclosingPaginationLayer(ExcludeCompositedPaginatedLayers))
+      {
+        PaintTransformedLayerIntoFragments(context, paintingInfo, paintFlags);
+        return;
+      }
 
       // Make sure the parent's clip rects have been calculated.
       ClipRect clipRect = paintingInfo.PaintDirtyRect;
@@ -5886,9 +5938,14 @@ namespace krys::boo
 
     // FIXME: Font subpixel quantization (setupFontSubpixelQuantization).
 
-    // FIXME: Clip paths and filters in a fragmented flow use the column-aware offset
-    // (enclosingFragmentedFlow), once there's fragmentation.
     LayoutSize columnAwareOffsetFromRoot = offsetFromRoot;
+    if (Renderer().EnclosingFragmentedFlow()
+        && (Renderer().HasClipPath()
+            || ShouldHaveFiltersForPainting(context, paintFlags, paintingInfo.PaintBehavior)))
+    {
+      columnAwareOffsetFromRoot =
+        ToLayoutSize(ConvertToLayerCoords(paintingInfo.RootLayer, LayoutPoint(), AdjustForColumns));
+    }
 
     GraphicsContextStateSaver stateSaver(context, false);
 
@@ -5967,7 +6024,8 @@ namespace krys::boo
           clipRectOptions.Add(ClipRectsOption::Temporary);
         }
         CollectFragments(filterLayerFragments, paintingInfo.RootLayer, paintingInfo.PaintDirtyRect,
-                         PaintingClipRects, clipRectOptions, offsetFromRoot);
+                         ExcludeCompositedPaginatedLayers, PaintingClipRects, clipRectOptions,
+                         offsetFromRoot);
         UpdatePaintingInfoForFragments(filterLayerFragments, paintingInfo, localPaintFlags,
                                        shouldPaintContent, offsetFromRoot);
 
@@ -6008,8 +6066,9 @@ namespace krys::boo
         {
           clipRectOptions.Add(ClipRectsOption::Temporary);
         }
-        CollectFragments(layerFragments, localPaintingInfo.RootLayer, paintDirtyRect, PaintingClipRects,
-                         clipRectOptions, offsetFromRoot);
+        CollectFragments(layerFragments, localPaintingInfo.RootLayer, paintDirtyRect,
+                         ExcludeCompositedPaginatedLayers, PaintingClipRects, clipRectOptions,
+                         offsetFromRoot);
         UpdatePaintingInfoForFragments(layerFragments, localPaintingInfo, localPaintFlags, shouldPaintContent,
                                        offsetFromRoot);
       }
@@ -6200,15 +6259,238 @@ namespace krys::boo
     }
   }
 
-  void RenderLayer::CollectFragments(LayerFragments &fragments, const RenderLayer *rootLayer,
-                                     const LayoutRect &dirtyRect, ClipRectsType clipRectsType,
-                                     EnumSet<ClipRectsOption> clipRectOptions,
-                                     const LayoutSize &offsetFromRoot) const noexcept
+  RenderLayer *RenderLayer::EnclosingPaginationLayerInSubtree(const RenderLayer *rootLayer,
+                                                              PaginationInclusionMode mode) const noexcept
   {
-    // FIXME: Paginated layers (one fragment per column or page, from the enclosing fragmented flow) come with
-    // fragmentation; every layer has one fragment.
-    ClipRectsContext clipRectsContext(rootLayer, clipRectsType, clipRectOptions);
-    fragments.push_back(LayerFragment {CalculateRects(clipRectsContext, offsetFromRoot, dirtyRect)});
+    // If we don't have an enclosing layer, or if the root layer is the same as the enclosing layer, then just
+    // return the enclosing pagination layer (it will be 0 in the former case and the rootLayer in the latter
+    // case).
+    auto *paginationLayer = EnclosingPaginationLayer(mode);
+    if (!paginationLayer || rootLayer == paginationLayer)
+    {
+      return paginationLayer;
+    }
+
+    // Walk up the layer tree and see which layer we hit first. If it's the root, then the enclosing
+    // pagination layer isn't in our subtree and we return nullptr. If we hit the enclosing pagination layer
+    // first, then we can return it.
+    for (const auto *layer = this; layer; layer = layer->Parent())
+    {
+      if (layer == rootLayer)
+      {
+        return nullptr;
+      }
+      if (layer == paginationLayer)
+      {
+        return paginationLayer;
+      }
+    }
+
+    // This should never be reached, since an enclosing layer should always either be the rootLayer or be our
+    // enclosing pagination layer.
+    krys_debug_assert(false);
+    return nullptr;
+  }
+
+  void
+    RenderLayer::CollectFragments(LayerFragments &fragments, const RenderLayer *rootLayer,
+                                  const LayoutRect &dirtyRect, PaginationInclusionMode inclusionMode,
+                                  ClipRectsType clipRectsType, EnumSet<ClipRectsOption> clipRectOptions,
+                                  const LayoutSize &offsetFromRoot, const LayoutRect *layerBoundingBox,
+                                  ShouldApplyRootOffsetToFragments applyRootOffsetToFragments) const noexcept
+  {
+    auto *paginationLayer = EnclosingPaginationLayerInSubtree(rootLayer, inclusionMode);
+    if (!paginationLayer || IsTransformed())
+    {
+      // For unpaginated layers, there is only one fragment.
+      ClipRectsContext clipRectsContext(rootLayer, clipRectsType, clipRectOptions);
+      fragments.push_back(LayerFragment {CalculateRects(clipRectsContext, offsetFromRoot, dirtyRect)});
+      return;
+    }
+
+    // Compute our offset within the enclosing pagination layer.
+    LayoutSize offsetWithinPaginatedLayer = OffsetFromAncestor(paginationLayer);
+
+    // Calculate clip rects relative to the enclosingPaginationLayer. The purpose of this call is to determine
+    // our bounds clipped to intermediate layers between us and the pagination context. It's important to
+    // minimize the number of fragments we need to create and this helps with that.
+    clipRectOptions.Add(ClipRectsOption::Temporary);
+    ClipRectsContext paginationClipRectsContext(paginationLayer, PaintingClipRects, clipRectOptions);
+    auto rectsInFragmentedFlow = CalculateRects(paginationClipRectsContext, offsetWithinPaginatedLayer);
+
+    // Take our bounding box within the flow thread and clip it.
+    LayoutRect layerBoundingBoxInFragmentedFlow =
+      layerBoundingBox ? *layerBoundingBox : BoundingBox(paginationLayer, offsetWithinPaginatedLayer);
+    layerBoundingBoxInFragmentedFlow.Intersect(rectsInFragmentedFlow.DirtyBackgroundRect().Rect());
+
+    auto &enclosingFragmentedFlow = Downcast<RenderFragmentedFlow>(paginationLayer->Renderer());
+    auto *parentPaginationLayer =
+      paginationLayer->Parent()->EnclosingPaginationLayerInSubtree(rootLayer, inclusionMode);
+    if (parentPaginationLayer)
+    {
+      // Compute a bounding box accounting for fragments.
+      LayoutRect layerFragmentBoundingBoxInParentPaginationLayer =
+        enclosingFragmentedFlow.FragmentsBoundingBox(layerBoundingBoxInFragmentedFlow);
+
+      // Convert to be in the ancestor pagination context's coordinate space.
+      LayoutSize offsetWithinParentPaginatedLayer =
+        paginationLayer->OffsetFromAncestor(parentPaginationLayer);
+      layerFragmentBoundingBoxInParentPaginationLayer.Move(offsetWithinParentPaginatedLayer);
+
+      // Now collect ancestor fragments.
+      LayerFragments ancestorFragments;
+      parentPaginationLayer->CollectFragments(ancestorFragments, rootLayer, dirtyRect, inclusionMode,
+                                              clipRectsType, clipRectOptions, OffsetFromAncestor(rootLayer),
+                                              &layerFragmentBoundingBoxInParentPaginationLayer,
+                                              ApplyRootOffsetToFragments);
+
+      for (const auto &ancestorFragment : ancestorFragments)
+      {
+        // Shift the dirty rect into flow thread coordinates.
+        LayoutRect dirtyRectInFragmentedFlow(dirtyRect);
+        dirtyRectInFragmentedFlow.Move(-offsetWithinParentPaginatedLayer - ancestorFragment.PaginationOffset);
+
+        auto oldSize = fragments.size();
+
+        // Tell the flow thread to collect the fragments. We pass enough information to create a minimal
+        // number of fragments based off the pages/columns that intersect the actual dirtyRect as well as the
+        // pages/columns that intersect our layer's bounding box.
+        enclosingFragmentedFlow.CollectLayerFragments(fragments, layerBoundingBoxInFragmentedFlow,
+                                                      dirtyRectInFragmentedFlow);
+
+        for (auto i = oldSize; i < fragments.size(); ++i)
+        {
+          auto &fragment = fragments[i];
+
+          // Set our four rects with all clipping applied that was internal to the flow thread.
+          fragment.FragmentRects = {rectsInFragmentedFlow, layerBoundingBoxInFragmentedFlow};
+
+          // Shift to the root-relative physical position used when painting the flow thread in this fragment.
+          fragment.MoveBy(ToLayoutPoint(ancestorFragment.PaginationOffset + fragment.PaginationOffset
+                                        + offsetWithinParentPaginatedLayer));
+
+          // Intersect the fragment with our ancestor's background clip so that e.g., columns in an
+          // overflow:hidden block are properly clipped by the overflow.
+          fragment.Intersect(ancestorFragment.PaginationClip);
+
+          // Now intersect with our pagination clip. This will typically mean we're just intersecting the
+          // dirty rect with the column clip, so the column clip ends up being all we apply.
+          fragment.Intersect(fragment.PaginationClip);
+
+          if (applyRootOffsetToFragments == ApplyRootOffsetToFragments)
+          {
+            fragment.PaginationOffset = fragment.PaginationOffset + offsetWithinParentPaginatedLayer;
+          }
+        }
+      }
+
+      return;
+    }
+
+    // Shift the dirty rect into flow thread coordinates.
+    LayoutSize offsetOfPaginationLayerFromRoot =
+      EnclosingPaginationLayer(inclusionMode)->OffsetFromAncestor(rootLayer);
+    LayoutRect dirtyRectInFragmentedFlow(dirtyRect);
+    dirtyRectInFragmentedFlow.Move(-offsetOfPaginationLayerFromRoot);
+
+    // Tell the flow thread to collect the fragments. We pass enough information to create a minimal number of
+    // fragments based off the pages/columns that intersect the actual dirtyRect as well as the pages/columns
+    // that intersect our layer's bounding box.
+    enclosingFragmentedFlow.CollectLayerFragments(fragments, layerBoundingBoxInFragmentedFlow,
+                                                  dirtyRectInFragmentedFlow);
+
+    if (fragments.empty())
+    {
+      return;
+    }
+
+    // Get the parent clip rects of the pagination layer, since we need to intersect with that when painting
+    // column contents.
+    ClipRect ancestorClipRect = dirtyRect;
+    if (paginationLayer->Parent())
+    {
+      ClipRectsContext clipRectsContext(rootLayer, clipRectsType, clipRectOptions);
+      ancestorClipRect = paginationLayer->BackgroundClipRect(clipRectsContext);
+      ancestorClipRect.Intersect(dirtyRect);
+    }
+
+    for (auto &fragment : fragments)
+    {
+      // Set our four rects with all clipping applied that was internal to the flow thread.
+      fragment.FragmentRects = {rectsInFragmentedFlow, layerBoundingBoxInFragmentedFlow};
+
+      // Shift to the root-relative physical position used when painting the flow thread in this fragment.
+      fragment.MoveBy(ToLayoutPoint(fragment.PaginationOffset + offsetOfPaginationLayerFromRoot));
+
+      // Intersect the fragment with our ancestor's background clip so that e.g., columns in an
+      // overflow:hidden block are properly clipped by the overflow.
+      fragment.Intersect(ancestorClipRect);
+
+      // Now intersect with our pagination clip. This will typically mean we're just intersecting the dirty
+      // rect with the column clip, so the column clip ends up being all we apply.
+      fragment.Intersect(fragment.PaginationClip);
+
+      if (applyRootOffsetToFragments == ApplyRootOffsetToFragments)
+      {
+        fragment.PaginationOffset = fragment.PaginationOffset + offsetOfPaginationLayerFromRoot;
+      }
+    }
+  }
+
+  void RenderLayer::PaintTransformedLayerIntoFragments(GraphicsContext &context,
+                                                       const LayerPaintingInfo &paintingInfo,
+                                                       EnumSet<PaintLayerFlag> paintFlags) noexcept
+  {
+    LayerFragments enclosingPaginationFragments;
+    LayoutSize offsetOfPaginationLayerFromRoot;
+    auto *paginatedLayer = EnclosingPaginationLayer(ExcludeCompositedPaginatedLayers);
+    LayoutRect transformedExtent = TransparencyClipBox(*this, paginatedLayer, PaintingTransparencyClipBox,
+                                                       RootOfTransparencyClipBox, paintingInfo.PaintBehavior);
+
+    auto clipRectOptions = paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents)
+                             ? ClipRectOptionsForPaintingOverflowContents
+                             : ClipRectDefaultOptions;
+    if (ShouldHaveFiltersForPainting(context, paintFlags, paintingInfo.PaintBehavior))
+    {
+      clipRectOptions.Add(ClipRectsOption::OutsideFilter);
+    }
+    if (paintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
+    {
+      clipRectOptions.Add(ClipRectsOption::Temporary);
+    }
+    paginatedLayer->CollectFragments(enclosingPaginationFragments, paintingInfo.RootLayer,
+                                     paintingInfo.PaintDirtyRect, ExcludeCompositedPaginatedLayers,
+                                     PaintingClipRects, clipRectOptions, offsetOfPaginationLayerFromRoot,
+                                     &transformedExtent);
+
+    for (const auto &fragment : enclosingPaginationFragments)
+    {
+      // Apply the page/column clip for this fragment, as well as any clips established by layers in between
+      // us and the enclosing pagination layer.
+      LayoutRect clipRect = fragment.DirtyBackgroundRect().Rect();
+
+      // Now compute the clips within a given fragment
+      if (Parent() != paginatedLayer)
+      {
+        offsetOfPaginationLayerFromRoot = ToLayoutSize(paginatedLayer->ConvertToLayerCoords(
+          paintingInfo.RootLayer, ToLayoutPoint(offsetOfPaginationLayerFromRoot)));
+
+        auto clipRectsContext = ClipRectsContext(paginatedLayer, PaintingClipRects, clipRectOptions);
+        LayoutRect parentClipRect = BackgroundClipRect(clipRectsContext).Rect();
+        parentClipRect.Move(fragment.PaginationOffset + offsetOfPaginationLayerFromRoot);
+        clipRect.Intersect(parentClipRect);
+      }
+
+      EnumSet<PaintBehavior> paintBehavior;
+      if (paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents))
+      {
+        paintBehavior.Add(PaintBehavior::CompositedOverflowScrollContent);
+      }
+
+      GraphicsContextStateSaver stateSaver(context, false);
+      Parent()->ClipToRect(context, stateSaver, paintingInfo, paintBehavior, clipRect);
+      PaintLayerByApplyingTransform(context, paintingInfo, paintFlags, fragment.PaginationOffset);
+    }
   }
 
   void RenderLayer::UpdatePaintingInfoForFragments(LayerFragments &fragments,
@@ -6734,8 +7016,11 @@ namespace krys::boo
     // Apply a transform if we have one.
     if (Transform() && !appliedTransform)
     {
-      // FIXME: Transformed layers in a paginated layer (hitTestTransformedLayerInFragments) come with
-      // fragmentation; they're hit tested unfragmented.
+      if (EnclosingPaginationLayer(IncludeCompositedPaginatedLayers))
+      {
+        return HitTestTransformedLayerInFragments(rootLayer, containerLayer, request, result, hitTestRect,
+                                                  hitTestLocation, transformState, zOffset);
+      }
 
       // Make sure the parent's clip rects have been calculated.
       if (Parent())
@@ -6866,8 +7151,8 @@ namespace krys::boo
 
     // Collect the fragments. This will compute the clip rectangles for each layer fragment.
     LayerFragments layerFragments;
-    CollectFragments(layerFragments, rootLayer, hitTestRect, RootRelativeClipRects,
-                     {ClipRectsOption::RespectOverflowClip}, offsetFromRoot);
+    CollectFragments(layerFragments, rootLayer, hitTestRect, IncludeCompositedPaginatedLayers,
+                     RootRelativeClipRects, {ClipRectsOption::RespectOverflowClip}, offsetFromRoot);
 
     LayoutPoint localPoint;
     if (CanResize() && _scrollableArea
@@ -7012,6 +7297,59 @@ namespace krys::boo
     }
 
     return false;
+  }
+
+  RenderLayer::HitLayer RenderLayer::HitTestTransformedLayerInFragments(
+    RenderLayer *rootLayer, RenderLayer *containerLayer, const HitTestRequest &request, HitTestResult &result,
+    const LayoutRect &hitTestRect, const HitTestLocation &hitTestLocation,
+    const HitTestingTransformState *transformState, double *zOffset) noexcept
+  {
+    LayerFragments enclosingPaginationFragments;
+    LayoutSize offsetOfPaginationLayerFromRoot;
+    auto *paginatedLayer = EnclosingPaginationLayer(IncludeCompositedPaginatedLayers);
+    LayoutRect transformedExtent =
+      TransparencyClipBox(*this, paginatedLayer, HitTestingTransparencyClipBox, RootOfTransparencyClipBox);
+    paginatedLayer->CollectFragments(enclosingPaginationFragments, rootLayer, hitTestRect,
+                                     IncludeCompositedPaginatedLayers, RootRelativeClipRects,
+                                     {ClipRectsOption::RespectOverflowClip}, offsetOfPaginationLayerFromRoot,
+                                     &transformedExtent);
+
+    for (auto i = enclosingPaginationFragments.size(); i-- > 0;)
+    {
+      const auto &fragment = enclosingPaginationFragments[i];
+
+      // Apply the page/column clip for this fragment, as well as any clips established by layers in between
+      // us and the enclosing pagination layer.
+      LayoutRect clipRect = fragment.DirtyBackgroundRect().Rect();
+
+      // Now compute the clips within a given fragment
+      if (Parent() != paginatedLayer)
+      {
+        offsetOfPaginationLayerFromRoot = ToLayoutSize(
+          paginatedLayer->ConvertToLayerCoords(rootLayer, ToLayoutPoint(offsetOfPaginationLayerFromRoot)));
+
+        ClipRectsContext clipRectsContext(paginatedLayer, RootRelativeClipRects,
+                                          {ClipRectsOption::RespectOverflowClip});
+        LayoutRect parentClipRect = BackgroundClipRect(clipRectsContext).Rect();
+        parentClipRect.Move(fragment.PaginationOffset + offsetOfPaginationLayerFromRoot);
+        clipRect.Intersect(parentClipRect);
+      }
+
+      if (!hitTestLocation.Intersects(clipRect))
+      {
+        continue;
+      }
+
+      auto hitLayer =
+        HitTestLayerByApplyingTransform(rootLayer, containerLayer, request, result, hitTestRect,
+                                        hitTestLocation, transformState, zOffset, fragment.PaginationOffset);
+      if (hitLayer.Layer)
+      {
+        return hitLayer;
+      }
+    }
+
+    return {};
   }
 
   RenderLayer::HitLayer RenderLayer::HitTestLayerByApplyingTransform(
