@@ -2288,6 +2288,7 @@ set(KRYSTAL_BOOEY_LAYOUT_HEADERS
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationPagination.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp
   include/Krystal.Booey/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.hpp
   include/Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp
@@ -2366,6 +2367,7 @@ set(KRYSTAL_BOOEY_LAYOUT_SOURCES
   src/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.cpp
   src/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.cpp
   src/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp
+  src/Layout/Integration/Inline/LayoutIntegrationPagination.cpp
   src/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.cpp
   src/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
   src/Layout/Integration/LayoutIntegrationFormattingContextLayout.cpp
@@ -2678,6 +2680,10 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp
   include/Krystal.Booey/Rendering/FormControls/RenderTextControlMultiLine.hpp
   include/Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp
+  include/Krystal.Booey/Rendering/Fragmentation/RenderBoxFragmentInfo.hpp
+  include/Krystal.Booey/Rendering/Fragmentation/RenderFragmentContainer.hpp
+  include/Krystal.Booey/Rendering/Fragmentation/RenderFragmentContainerSet.hpp
+  include/Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp
   include/Krystal.Booey/Rendering/GeneratedContent/CounterNode.hpp
   include/Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp
   include/Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp
@@ -2747,6 +2753,9 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp
   include/Krystal.Booey/Rendering/MathML/RenderMathMLUnderOver.hpp
   include/Krystal.Booey/Rendering/MotionPath.hpp
+  include/Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp
+  include/Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp
+  include/Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp
   include/Krystal.Booey/Rendering/Painting/BackgroundPainter.hpp
   include/Krystal.Booey/Rendering/Painting/BorderEdge.hpp
   include/Krystal.Booey/Rendering/Painting/BorderPainter.hpp
@@ -2935,6 +2944,7 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderFormControls.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderMultiColumn.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderSVG.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp
@@ -2959,6 +2969,9 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/FormControls/RenderTextControl.cpp
   src/Rendering/FormControls/RenderTextControlMultiLine.cpp
   src/Rendering/FormControls/RenderTextControlSingleLine.cpp
+  src/Rendering/Fragmentation/RenderFragmentContainer.cpp
+  src/Rendering/Fragmentation/RenderFragmentContainerSet.cpp
+  src/Rendering/Fragmentation/RenderFragmentedFlow.cpp
   src/Rendering/GeneratedContent/CounterNode.cpp
   src/Rendering/GeneratedContent/RenderCounter.cpp
   src/Rendering/GeneratedContent/RenderListItem.cpp
@@ -3016,6 +3029,9 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/MathML/RenderMathMLToken.cpp
   src/Rendering/MathML/RenderMathMLUnderOver.cpp
   src/Rendering/MotionPath.cpp
+  src/Rendering/MultiColumn/RenderMultiColumnFlow.cpp
+  src/Rendering/MultiColumn/RenderMultiColumnSet.cpp
+  src/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.cpp
   src/Rendering/Painting/BackgroundPainter.cpp
   src/Rendering/Painting/BorderEdge.cpp
   src/Rendering/Painting/BorderPainter.cpp
@@ -3176,6 +3192,7 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Updating/RenderTreeBuilderFormControls.cpp
   src/Rendering/Updating/RenderTreeBuilderInline.cpp
   src/Rendering/Updating/RenderTreeBuilderList.cpp
+  src/Rendering/Updating/RenderTreeBuilderMultiColumn.cpp
   src/Rendering/Updating/RenderTreeBuilderRuby.cpp
   src/Rendering/Updating/RenderTreeBuilderSVG.cpp
   src/Rendering/Updating/RenderTreeBuilderTable.cpp

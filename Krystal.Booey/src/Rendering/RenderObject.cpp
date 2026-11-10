@@ -46,11 +46,14 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -64,6 +67,8 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
@@ -545,13 +550,14 @@ namespace krys::boo
 
 #pragma region Editing
 
-  dom::PositionWithAffinity RenderObject::PositionForPoint(const LayoutPoint &, HitTestSource) noexcept
+  dom::PositionWithAffinity RenderObject::PositionForPoint(const LayoutPoint &, HitTestSource,
+                                                           const RenderFragmentContainer *) noexcept
   {
     return CreatePositionWithAffinity(CaretMinOffset(), Affinity::Downstream);
   }
 
-  VisiblePosition RenderObject::VisiblePositionForPoint(const LayoutPoint &point,
-                                                        HitTestSource source) noexcept
+  VisiblePosition RenderObject::VisiblePositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                        const RenderFragmentContainer * /*fragment*/) noexcept
   {
     auto positionWithAffinity = PositionForPoint(point, source);
     return VisiblePosition(positionWithAffinity.GetPosition(), positionWithAffinity.GetAffinity());
@@ -1098,10 +1104,9 @@ namespace krys::boo
       offset -= ToLayoutSize(LayoutPoint(box->GetScrollPosition()));
     }
 
-    // FIXME: Fragmented flows make the offset depend on the point, once there are those.
     if (offsetDependsOnPoint)
     {
-      *offsetDependsOnPoint = false;
+      *offsetDependsOnPoint = Is<RenderFragmentedFlow>(container);
     }
 
     return offset;
@@ -1538,8 +1543,21 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The enclosing fragmented flow, once there are any. Layers with filters aren't repaint
-    // containers: repaints inside them grow to what the filter paints (RepaintUsingContainer).
+    // If we have a flow thread, then we need to do individual repaints within the RenderFragmentContainers
+    // instead. If we have already found a repaint container then we will repaint into that container only if
+    // it is part of the same flow thread. Otherwise we will need to catch the repaint call and send it to the
+    // flow thread.
+    if (auto *parentRenderFragmentedFlow = EnclosingFragmentedFlow())
+    {
+      auto *repaintContainerFragmentedFlow =
+        repaintContainer ? repaintContainer->EnclosingFragmentedFlow() : nullptr;
+      if (!repaintContainerFragmentedFlow || repaintContainerFragmentedFlow != parentRenderFragmentedFlow)
+      {
+        repaintContainer = parentRenderFragmentedFlow;
+      }
+    }
+    // Layers with filters aren't repaint containers: repaints inside them grow to what the filter paints
+    // (RepaintUsingContainer).
     return {fullRepaintAlreadyScheduled, repaintContainer};
   }
 
@@ -1554,13 +1572,25 @@ namespace krys::boo
     // FIXME: We should really propagate only when the child renderer sticks out.
     bool repaintRectNeedsConverting = false;
     // Issue repaint on the renderer with outline: auto.
-    // FIXME: Column spanner placeholders, once there are multi-column flows.
     for (const auto *renderer = this; renderer; renderer = renderer->Parent())
     {
-      bool rendererHasOutlineAutoAncestor = renderer->HasOutlineAutoAncestor();
+      // A spanner continues up from its placeholder, where it is in the flow.
+      const auto *originalRenderer = renderer;
+      if (auto *previousMultiColumnSet = DynamicDowncast<RenderMultiColumnSet>(renderer->PreviousSibling());
+          previousMultiColumnSet && !renderer->IsRenderMultiColumnSet() && !renderer->IsLegend())
+      {
+        auto *placeholder = previousMultiColumnSet->MultiColumnFlow()->FindColumnSpannerPlaceholder(
+          Downcast<RenderBox>(*renderer));
+        krys_debug_assert(placeholder);
+        renderer = placeholder;
+      }
+
+      bool rendererHasOutlineAutoAncestor =
+        renderer->HasOutlineAutoAncestor() || originalRenderer->HasOutlineAutoAncestor();
       krys_debug_assert(rendererHasOutlineAutoAncestor
-                        || renderer->OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto);
-      if (renderer == &repaintContainer && rendererHasOutlineAutoAncestor)
+                        || originalRenderer->OutlineStyleForRepaint().GetOutlineStyle()
+                             == OutlineStyle::Auto);
+      if (originalRenderer == &repaintContainer && rendererHasOutlineAutoAncestor)
       {
         repaintRectNeedsConverting = true;
       }
@@ -1570,12 +1600,12 @@ namespace krys::boo
       }
       // Issue repaint on the correct repaint container.
       LayoutRect adjustedRepaintRect = repaintRect;
-      adjustedRepaintRect.Inflate(LayoutUnit {renderer->OutlineStyleForRepaint().OutlineSize()});
+      adjustedRepaintRect.Inflate(LayoutUnit {originalRenderer->OutlineStyleForRepaint().OutlineSize()});
       if (!repaintRectNeedsConverting)
       {
         repaintContainer.RepaintRectangle(adjustedRepaintRect);
       }
-      else if (auto *rendererWithOutline = DynamicDowncast<RenderLayerModelObject>(*renderer))
+      else if (auto *rendererWithOutline = DynamicDowncast<RenderLayerModelObject>(*originalRenderer))
       {
         adjustedRepaintRect =
           LayoutRect(repaintContainer
@@ -1601,7 +1631,11 @@ namespace krys::boo
       repaintContainer = &View();
     }
 
-    // FIXME: Fragmented flows repaint in their fragments, once there are any.
+    if (auto *fragmentedFlow = DynamicDowncast<RenderFragmentedFlow>(*repaintContainer))
+    {
+      fragmentedFlow->RepaintRectangleInFragments(rect);
+      return;
+    }
 
     PropagateRepaintToParentWithOutlineAutoIfNeeded(*repaintContainer, rect);
 
@@ -2012,6 +2046,120 @@ namespace krys::boo
     }
 
     View().WillDestroyRenderer();
+  }
+
+  void RenderObject::SetFragmentedFlowStateIncludingDescendants(
+    FragmentedFlowState state, SkipDescendentFragmentedFlow skipDescendentFragmentedFlow) noexcept
+  {
+    SetFragmentedFlowState(state);
+
+    auto *renderElement = DynamicDowncast<RenderElement>(*this);
+    if (!renderElement)
+    {
+      return;
+    }
+
+    for (auto &child : ChildrenOfType<RenderObject>(*renderElement))
+    {
+      // If the child is a fragmentation context it already updated the descendants flag accordingly.
+      if (child.IsRenderFragmentedFlow() && skipDescendentFragmentedFlow == SkipDescendentFragmentedFlow::Yes)
+      {
+        continue;
+      }
+      if (child.IsOutOfFlowPositioned())
+      {
+        // Fragmented status propagation stops at out-of-flow boundary.
+        auto *containingBlock = child.ContainingBlock();
+        krys_debug_assert(containingBlock);
+        if (!containingBlock || containingBlock->GetFragmentedFlowState() != FragmentedFlowState::InsideFlow)
+        {
+          continue;
+        }
+      }
+      krys_debug_assert(skipDescendentFragmentedFlow == SkipDescendentFragmentedFlow::No
+                        || state != child.GetFragmentedFlowState());
+      child.SetFragmentedFlowStateIncludingDescendants(state, skipDescendentFragmentedFlow);
+    }
+  }
+
+  RenderObject::FragmentedFlowState
+    RenderObject::ComputedFragmentedFlowState(const RenderObject &renderer) noexcept
+  {
+    if (!renderer.Parent())
+    {
+      return renderer.GetFragmentedFlowState();
+    }
+
+    if (renderer.IsRenderMultiColumnFlow())
+    {
+      // Multicolumn flows do not inherit the flow state.
+      return FragmentedFlowState::InsideFlow;
+    }
+
+    if (renderer.IsRenderText())
+    {
+      return renderer.Parent()->GetFragmentedFlowState();
+    }
+    if (renderer.IsRenderSVGBlock() || renderer.IsRenderSVGInline()
+        || renderer.IsLegacyRenderSVGModelObject())
+    {
+      // ContainingBlock() skips svg boundary (SVG root is a RenderReplaced).
+      if (const auto *svgRoot = SVGRenderSupport::FindTreeRootObject(Downcast<RenderElement>(renderer)))
+      {
+        return svgRoot->GetFragmentedFlowState();
+      }
+      return FragmentedFlowState::NotInsideFlow;
+    }
+    if (auto *container = renderer.Container())
+    {
+      return container->GetFragmentedFlowState();
+    }
+    // Splitting lines or doing continuation, so just keep the current state.
+    return renderer.GetFragmentedFlowState();
+  }
+
+  void RenderObject::InitializeFragmentedFlowStateOnInsertion() noexcept
+  {
+    krys_debug_assert(Parent());
+
+    // A RenderFragmentedFlow is always considered to be inside itself, so it never has to change its state in
+    // response to parent changes.
+    if (IsRenderFragmentedFlow())
+    {
+      return;
+    }
+
+    auto computedState = ComputedFragmentedFlowState(*this);
+    if (GetFragmentedFlowState() == computedState)
+    {
+      return;
+    }
+
+    SetFragmentedFlowStateIncludingDescendants(computedState, SkipDescendentFragmentedFlow::No);
+  }
+
+  void RenderObject::ResetFragmentedFlowStateOnRemoval() noexcept
+  {
+    krys_debug_assert(!RenderTreeBeingDestroyed());
+
+    if (GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow)
+    {
+      return;
+    }
+
+    if (auto *renderElement = DynamicDowncast<RenderElement>(*this))
+    {
+      renderElement->RemoveFromRenderFragmentedFlow();
+      return;
+    }
+
+    SetFragmentedFlowStateIncludingDescendants(FragmentedFlowState::NotInsideFlow);
+  }
+
+  RenderFragmentedFlow *RenderObject::LocateEnclosingFragmentedFlow() const noexcept
+  {
+    auto *containingBlock = ContainingBlock();
+    return containingBlock ? containingBlock->EnclosingFragmentedFlow() : nullptr;
   }
 
   void RenderObject::InsertedIntoTree() noexcept

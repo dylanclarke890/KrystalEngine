@@ -30,6 +30,7 @@
 
 #include "Krystal.Booey/Rendering/Selection/RenderHighlight.hpp"
 #include "Krystal.Booey/DOM/Highlights/Highlight.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include <limits>
 
@@ -43,8 +44,28 @@ namespace krys::boo
 
   RenderObject *RenderRangeIterator::Next() noexcept
   {
-    _current = _current->NextInPreOrder();
+    auto *span = _spannerStack.empty() ? nullptr : _spannerStack.back()->Spanner();
+    _current = _current->NextInPreOrder(span);
+    CheckForSpanner();
+    if (!_current && span)
+    {
+      auto *placeholder = _spannerStack.back();
+      _spannerStack.pop_back();
+      _current = placeholder->NextInPreOrder();
+      CheckForSpanner();
+    }
     return _current;
+  }
+
+  void RenderRangeIterator::CheckForSpanner() noexcept
+  {
+    auto *placeholder = DynamicDowncast<RenderMultiColumnSpannerPlaceholder>(_current);
+    if (!placeholder)
+    {
+      return;
+    }
+    _spannerStack.push_back(placeholder);
+    _current = placeholder->Spanner();
   }
 
   bool RenderHighlight::SetRenderRange(const dom::HighlightRange &highlightRange) noexcept

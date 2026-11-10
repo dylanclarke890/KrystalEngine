@@ -40,6 +40,13 @@ namespace krys::boo
     Yes
   };
 
+  /// @brief Whether an offset exactly on a page's (or column's) top edge belongs to the page before it.
+  enum class PageBoundaryRule : bool
+  {
+    ExcludePageBoundary,
+    IncludePageBoundary
+  };
+
   using TrackedRendererListHashSet = ListHashSet<RenderBox *>;
 
   class LogicalSelectionOffsetCaches;
@@ -54,7 +61,6 @@ namespace krys::boo
   };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Fragmentation and column rules.
   KRYS_NODISCARD LayoutUnit BlockDirectionOffset(const RenderBlock &rootBlock,
                                                  const LayoutSize &offsetFromRootBlock) noexcept;
   KRYS_NODISCARD LayoutUnit InlineDirectionOffset(const RenderBlock &rootBlock,
@@ -364,8 +370,9 @@ namespace krys::boo
     /// @brief The block's `text-indent`, resolved against its content box.
     KRYS_NODISCARD LayoutUnit TextIndentOffset() const noexcept;
 
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                              HitTestSource source) noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept override;
     /// @brief The position nearest @p pointInLogicalContents among the block's lines.
     KRYS_NODISCARD virtual dom::PositionWithAffinity
       PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
@@ -422,6 +429,54 @@ namespace krys::boo
     {
     }
     void PaintContents(PaintInfo &, const LayoutPoint &) noexcept;
+    /// @brief Paints the rules between columns, for a column set.
+    virtual void PaintColumnRules(PaintInfo &, const LayoutPoint &) noexcept
+    {
+    }
+
+#pragma endregion
+
+#pragma region Fragmentation
+
+  public:
+    /// @brief The enclosing fragmented flow found last, if it's still known.
+    KRYS_NODISCARD RenderFragmentedFlow *CachedEnclosingFragmentedFlow() const noexcept;
+    void SetCachedEnclosingFragmentedFlowNeedsUpdate() noexcept;
+    KRYS_NODISCARD virtual bool CachedEnclosingFragmentedFlowNeedsUpdate() const noexcept;
+    void ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(
+      RenderFragmentedFlow *fragmentedFlow) noexcept final;
+
+    KRYS_NODISCARD LayoutUnit OffsetFromLogicalTopOfFirstPage() const noexcept override;
+
+    /// @brief How far the block's first unsplittable content was pushed down to the next column, for its
+    /// parent to move the block instead, when the block starts at its parent's top.
+    KRYS_NODISCARD LayoutUnit PaginationStrut() const noexcept;
+    void SetPaginationStrut(LayoutUnit strut) noexcept;
+    /// @brief The block's offset from the top of its column when it was last laid out.
+    KRYS_NODISCARD LayoutUnit PageLogicalOffset() const noexcept;
+    void SetPageLogicalOffset(LayoutUnit logicalOffset) noexcept;
+    void MarkForPaginationRelayoutIfNeeded() noexcept override;
+
+    /// @brief The fragment showing the block's content at @p blockOffset, if the block is in a fragmented
+    /// flow.
+    KRYS_NODISCARD RenderFragmentContainer *FragmentAtBlockOffset(LayoutUnit blockOffset) const noexcept;
+    /// @brief Whether @p child mustn't be split across fragments.
+    KRYS_NODISCARD bool ChildBoxIsUnsplittableForFragmentation(const RenderBox &child) const noexcept;
+
+  protected:
+    KRYS_NODISCARD RenderFragmentedFlow *LocateEnclosingFragmentedFlow() const noexcept override;
+
+    /// @brief Lets fragments of different widths make the block lay out its children again.
+    void PreparePaginationBeforeBlockLayout(RelayoutChildren &relayoutChildren) noexcept;
+    /// @brief Gives @p box the fragments it's estimated to cover, before it's laid out.
+    void EstimateFragmentRangeForBoxChild(const RenderBox &box) const noexcept;
+    /// @brief Gives @p box the fragments it covers after layout, and whether it must lay out again.
+    bool UpdateFragmentRangeForBoxChild(const RenderBox &box) const noexcept;
+
+  private:
+    RenderFragmentedFlow *
+      UpdateCachedEnclosingFragmentedFlow(RenderFragmentedFlow *fragmentedFlow) const noexcept;
+    void ComputeFragmentRangeForBoxChild(const RenderBox &box) const noexcept;
 
 #pragma endregion
 

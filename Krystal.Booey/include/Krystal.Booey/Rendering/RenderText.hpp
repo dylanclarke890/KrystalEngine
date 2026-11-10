@@ -173,8 +173,9 @@ namespace krys::boo
     /// @brief Whether any of the text is laid out in a text box.
     KRYS_NODISCARD bool HasRenderedText() const noexcept;
 
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                              HitTestSource source) noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept override;
 
     KRYS_NODISCARD int32 CaretMinOffset() const noexcept final;
     KRYS_NODISCARD int32 CaretMaxOffset() const noexcept final;

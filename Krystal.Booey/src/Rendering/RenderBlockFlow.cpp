@@ -51,6 +51,8 @@
 #include "Krystal.Booey/Rendering/Line/LegacyLineLayout.hpp"
 #include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -84,6 +86,46 @@ namespace krys::boo
       : Margins(PositiveMarginBeforeDefault(block), NegativeMarginBeforeDefault(block),
                 PositiveMarginAfterDefault(block), NegativeMarginAfterDefault(block))
   {
+  }
+
+  RenderMultiColumnFlow *RenderBlockFlow::MultiColumnFlow() const noexcept
+  {
+    return HasRareBlockFlowData() ? RareBlockFlowData()->MultiColumnFlow.get() : nullptr;
+  }
+
+  void RenderBlockFlow::SetMultiColumnFlow(RenderMultiColumnFlow &fragmentedFlow) noexcept
+  {
+    krys_debug_assert(!MultiColumnFlow());
+    EnsureRareBlockFlowData().MultiColumnFlow = CreateWeakPtr(&fragmentedFlow);
+  }
+
+  void RenderBlockFlow::ClearMultiColumnFlow() noexcept
+  {
+    krys_debug_assert(MultiColumnFlow());
+    RareBlockFlowData()->MultiColumnFlow = nullptr;
+  }
+
+  bool RenderBlockFlow::WillCreateColumns() const noexcept
+  {
+    // The following types are not supposed to create multicol context.
+    if (IsRenderFileUploadControl() || IsRenderTextControl() || IsRenderListBox() || IsRenderSVGBlock()
+        || IsRenderMathMLBlock())
+    {
+      return false;
+    }
+    if (Style().Display() == DisplayType::RubyBlock || Style().Display() == DisplayType::RubyAnnotation)
+    {
+      return false;
+    }
+
+    if (!FirstChild() || Style().GetPseudoElementType())
+    {
+      return false;
+    }
+
+    // Columns always progress in the inline direction, so any non-auto column-width or column-count makes
+    // a multi-column container.
+    return Style().SpecifiesColumns();
   }
 
   // Our MarginInfo state used when laying out block children.
@@ -371,15 +413,49 @@ namespace krys::boo
     }
   }
 
+  void RenderBlockFlow::AdjustIntrinsicLogicalWidthsForColumns(LayoutUnit &minLogicalWidth,
+                                                               LayoutUnit &maxLogicalWidth) const noexcept
+  {
+    const auto &style = Style();
+    if (style.GetColumnCount().IsAuto() && style.GetColumnWidth().IsAuto())
+    {
+      return;
+    }
+
+    // The min/max intrinsic widths calculated really tell how much space elements need when laid out inside
+    // the columns. In order to eventually end up with the desired column width, we need to convert them to
+    // values pertaining to the multicol container.
+    auto columnCountValue = style.GetColumnCount().TryValue();
+    int32 columnCount = columnCountValue ? static_cast<int32>(columnCountValue->Value) : 1;
+    LayoutUnit columnWidth;
+    LayoutUnit gapExtra = (columnCount - 1) * ColumnGap();
+    if (auto columnWidthLength = style.GetColumnWidth().TryLength())
+    {
+      columnWidth = style::Evaluate<LayoutUnit>(*columnWidthLength, style::ZoomNeeded {});
+      minLogicalWidth = std::min(minLogicalWidth, columnWidth);
+    }
+    else
+    {
+      minLogicalWidth = minLogicalWidth * columnCount + gapExtra;
+    }
+    // FIXME: If column-count is auto here, we should resolve it to calculate the maximum intrinsic width,
+    // instead of pretending that it's 1. The only way to do that is by performing a layout pass, but this is
+    // not an appropriate time or place for layout. The good news is that if height is unconstrained and
+    // there are no explicit breaks, the resolved column-count really should be 1.
+    maxLogicalWidth = std::max(maxLogicalWidth, columnWidth) * columnCount + gapExtra;
+  }
+
   void RenderBlockFlow::ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                                       LayoutUnit &maxLogicalWidth) const noexcept
   {
+    bool needAdjustIntrinsicLogicalWidthsForColumns = true;
     if (ShouldApplySizeOrInlineSizeContainment())
     {
       if (auto width = ExplicitIntrinsicInnerLogicalWidth())
       {
         minLogicalWidth = *width;
         maxLogicalWidth = *width;
+        needAdjustIntrinsicLogicalWidthsForColumns = false;
       }
     }
     else if (ChildrenInline())
@@ -393,8 +469,12 @@ namespace krys::boo
 
     maxLogicalWidth = std::max(minLogicalWidth, maxLogicalWidth);
 
-    // FIXME: Multi-column widths (adjustIntrinsicLogicalWidthsForColumns) and horizontal marquees, once there
-    // are columns and marquees.
+    if (needAdjustIntrinsicLogicalWidthsForColumns)
+    {
+      AdjustIntrinsicLogicalWidthsForColumns(minLogicalWidth, maxLogicalWidth);
+    }
+
+    // FIXME: Horizontal marquees, once there are marquees.
 
     if (auto *cell = DynamicDowncast<RenderTableCell>(*this))
     {
@@ -414,8 +494,234 @@ namespace krys::boo
 
   bool RenderBlockFlow::RecomputeLogicalWidthAndColumnWidth() noexcept
   {
-    // FIXME: The column count and width (computeColumnCountAndWidth), once there's multi-column layout.
-    return RecomputeLogicalWidth();
+    bool changed = RecomputeLogicalWidth();
+
+    LayoutUnit oldColumnWidth = ComputedColumnWidth();
+    ComputeColumnCountAndWidth();
+
+    return changed || oldColumnWidth != ComputedColumnWidth();
+  }
+
+  LayoutUnit RenderBlockFlow::ColumnGap() const noexcept
+  {
+    const auto &gap = Style().ColumnGap();
+    if (gap.IsNormal())
+    {
+      // "1em" is recommended as the normal gap setting. Matches <p> margins.
+      return LayoutUnit(Style().GetFontDescription().ComputedSize());
+    }
+    return style::Evaluate<LayoutUnit>(gap, ContentBoxLogicalWidth(), style::ZoomNeeded {});
+  }
+
+  void RenderBlockFlow::ComputeColumnCountAndWidth() noexcept
+  {
+    // Calculate our column width and column count.
+    uint32 desiredColumnCount = 1;
+    LayoutUnit desiredColumnWidth = ContentBoxLogicalWidth();
+
+    const auto &style = Style();
+    const auto &columnCount = style.GetColumnCount();
+    const auto &columnWidth = style.GetColumnWidth();
+    if (columnCount.IsAuto() && columnWidth.IsAuto())
+    {
+      SetComputedColumnCountAndWidth(desiredColumnCount, desiredColumnWidth);
+      return;
+    }
+
+    // https://drafts.csswg.org/css-multicol/#pseudo-algorithm
+    LayoutUnit availableWidth = desiredColumnWidth;
+    LayoutUnit gap = ColumnGap();
+    auto columnWidthLength = columnWidth.TryLength();
+    LayoutUnit width = std::max(
+      1_lu, columnWidthLength ? style::Evaluate<LayoutUnit>(*columnWidthLength, style::ZoomNeeded {}) : 0_lu);
+    auto columnCountValue = columnCount.TryValue();
+    uint32 count = std::max<uint32>(1, columnCountValue ? static_cast<uint32>(columnCountValue->Value) : 1);
+
+    if (columnWidth.IsAuto())
+    {
+      desiredColumnCount = count;
+      desiredColumnWidth =
+        std::max(0_lu, (availableWidth - ((desiredColumnCount - 1) * gap)) / desiredColumnCount);
+    }
+    else if (columnCount.IsAuto())
+    {
+      desiredColumnCount = std::max<uint32>(1, ((availableWidth + gap) / (width + gap)).ToUnsigned());
+      desiredColumnWidth = ((availableWidth + gap) / desiredColumnCount) - gap;
+    }
+    else
+    {
+      desiredColumnCount =
+        std::max<uint32>(std::min(count, ((availableWidth + gap) / (width + gap)).ToUnsigned()), 1);
+      desiredColumnWidth = ((availableWidth + gap) / desiredColumnCount) - gap;
+    }
+    SetComputedColumnCountAndWidth(desiredColumnCount, desiredColumnWidth);
+  }
+
+  void RenderBlockFlow::SetComputedColumnCountAndWidth(uint32 count, LayoutUnit width) noexcept
+  {
+    if (auto *multiColumnFlow = MultiColumnFlow())
+    {
+      multiColumnFlow->SetColumnCountAndWidth(count, width);
+    }
+  }
+
+  LayoutUnit RenderBlockFlow::ComputedColumnWidth() const noexcept
+  {
+    if (auto *multiColumnFlow = MultiColumnFlow())
+    {
+      return multiColumnFlow->ColumnWidth();
+    }
+    return ContentBoxLogicalWidth();
+  }
+
+  uint32 RenderBlockFlow::ComputedColumnCount() const noexcept
+  {
+    if (auto *multiColumnFlow = MultiColumnFlow())
+    {
+      return multiColumnFlow->ColumnCount();
+    }
+    return 1;
+  }
+
+  void RenderBlockFlow::LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept
+  {
+    RenderBlock::LayoutExcludedChildren(relayoutChildren);
+
+    auto *fragmentedFlow = MultiColumnFlow();
+    if (!fragmentedFlow)
+    {
+      return;
+    }
+
+    fragmentedFlow->SetIsExcludedFromNormalLayout(true);
+
+    SetLogicalTopForChild(*fragmentedFlow, BorderAndPaddingBefore());
+
+    if (relayoutChildren == RelayoutChildren::Yes)
+    {
+      fragmentedFlow->SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+    }
+
+    if (fragmentedFlow->NeedsLayout())
+    {
+      for (auto *columnSet = fragmentedFlow->FirstMultiColumnSet(); columnSet;
+           columnSet = columnSet->NextSiblingMultiColumnSet())
+      {
+        columnSet->PrepareForLayout(!fragmentedFlow->InBalancingPass());
+      }
+
+      fragmentedFlow->InvalidateFragments(MarkingBehavior::MarkOnlyThis);
+      fragmentedFlow->SetNeedsHeightsRecalculation(true);
+      fragmentedFlow->Layout();
+    }
+    else
+    {
+      // At the end of multicol layout, RelayoutForPagination() is called unconditionally, but if no children
+      // are to be laid out (e.g. fixed width with layout already being up-to-date), we want to prevent it
+      // from doing any work, so that the column balancing machinery doesn't kick in and trigger additional
+      // unnecessary layout passes. Actually, it's not just a good idea in general to not waste time on
+      // balancing content that hasn't been re-laid out; we are actually required to guarantee this. The
+      // calculation of implicit breaks needs to be preceded by a proper layout pass, since it's layout that
+      // sets up content runs, and the runs get deleted right after every pass.
+      fragmentedFlow->SetNeedsHeightsRecalculation(false);
+    }
+    DetermineLogicalLeftPositionForChild(*fragmentedFlow);
+  }
+
+  void RenderBlockFlow::CheckForPaginationLogicalHeightChange(RelayoutChildren &relayoutChildren,
+                                                              LayoutUnit &pageLogicalHeight,
+                                                              bool &pageLogicalHeightChanged) noexcept
+  {
+    // We don't actually update any of the variables. We just subclassed to adjust our column height.
+    if (auto *multiColumnFlow = MultiColumnFlow())
+    {
+      LayoutUnit newColumnHeight;
+      if (HasDefiniteLogicalHeight())
+      {
+        auto computedValues = ComputeLogicalHeight(0_lu, LogicalTop());
+        newColumnHeight = std::max(computedValues.Extent - BorderAndPaddingLogicalHeight()
+                                     - LayoutUnit(ScrollbarLogicalHeight()),
+                                   0_lu);
+        if (multiColumnFlow->ColumnHeightAvailable() != newColumnHeight)
+        {
+          relayoutChildren = RelayoutChildren::Yes;
+        }
+      }
+      multiColumnFlow->SetColumnHeightAvailable(newColumnHeight);
+    }
+    else if (auto *fragmentedFlow = DynamicDowncast<RenderFragmentedFlow>(*this))
+    {
+      // FIXME: This is a hack to always make sure we have a page logical height, if said height is known.
+      // The page logical height thing in RenderLayoutState is meaningless for flow thread-based pagination
+      // (page height isn't necessarily uniform throughout the flow thread), but as long as it is used
+      // universally as a means to determine whether page height is known or not, we need this. Page height
+      // is unknown when column balancing is enabled and flow thread height is still unknown (i.e. during the
+      // first layout pass). When it's unknown, we need to prevent the pagination code from assuming page
+      // breaks everywhere and thereby eating every top margin.
+      pageLogicalHeight = fragmentedFlow->IsPageLogicalHeightKnown() ? 1_lu : 0_lu;
+
+      pageLogicalHeightChanged = fragmentedFlow->PageLogicalSizeChanged();
+    }
+  }
+
+  bool RenderBlockFlow::RelayoutForPagination() noexcept
+  {
+    auto *multiColumnFlow = MultiColumnFlow();
+    if (!multiColumnFlow || !multiColumnFlow->ShouldRelayoutForPagination())
+    {
+      return false;
+    }
+
+    multiColumnFlow->SetNeedsHeightsRecalculation(false);
+    multiColumnFlow->SetInBalancingPass(true); // Prevent re-entering this method (and recursion into layout).
+
+    bool needsRelayout;
+    bool neededRelayout = false;
+    bool firstPass = true;
+    do
+    {
+      // Column heights may change here because of balancing. We may have to do multiple layout passes,
+      // depending on how the contents is fitted to the changed column heights. In most cases, laying out
+      // again twice or even just once will suffice. Sometimes we need more passes than that, though, but the
+      // number of retries should not exceed the number of columns, unless we have a bug.
+      needsRelayout = false;
+      for (auto *multicolSet = multiColumnFlow->FirstMultiColumnSet(); multicolSet;
+           multicolSet = multicolSet->NextSiblingMultiColumnSet())
+      {
+        if (multicolSet->RecalculateColumnHeight(firstPass))
+        {
+          needsRelayout = true;
+        }
+        if (needsRelayout)
+        {
+          // Once a column set gets a new column height, that column set and all successive column sets need
+          // to be laid out over again, since their logical top will be affected by this, and therefore their
+          // column heights may change as well, at least if the multicol height is constrained.
+          multicolSet->SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+        }
+      }
+      if (needsRelayout)
+      {
+        // Layout again. Column balancing resulted in a new height.
+        neededRelayout = true;
+        multiColumnFlow->SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+        SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+        LayoutBlock(RelayoutChildren::No);
+      }
+      firstPass = false;
+    } while (needsRelayout);
+
+    multiColumnFlow->SetInBalancingPass(false);
+
+    return neededRelayout;
+  }
+
+  bool RenderBlockFlow::NeedsLayoutAfterFragmentRangeChange() const noexcept
+  {
+    // A block without floats or that expands to enclose them won't need a relayout after a fragment range
+    // change. There is no overflow content needing relayout in the fragment chain because the fragment range
+    // can only shrink after the estimation.
+    return ContainsFloats() && !CreatesNewFormattingContext();
   }
 
   void RenderBlockFlow::LayoutBlockWithNoChildren() noexcept
@@ -491,8 +797,8 @@ namespace krys::boo
       return false;
     }();
 
-    // FIXME: Multi-column sets always lay out their children, once there are columns.
-    if (!FirstChild() && !isPaginated && (Parent() && Parent()->IsBlockContainer()))
+    if (!FirstChild() && !isPaginated && !Is<RenderMultiColumnSet>(*this)
+        && (Parent() && Parent()->IsBlockContainer()))
     {
       return LayoutBlockWithNoChildren();
     }
@@ -511,21 +817,25 @@ namespace krys::boo
     // for consistency with other render classes?
     ResetLogicalHeightBeforeLayoutIfNeeded();
 
-    // FIXME: The column height of a multi-column flow (checkForPaginationLogicalHeightChange), once there are
-    // columns.
     bool pageLogicalHeightChanged = false;
+    CheckForPaginationLogicalHeightChange(relayoutChildren, pageLogicalHeight, pageLogicalHeightChanged);
 
     LayoutUnit repaintLogicalTop;
     LayoutUnit repaintLogicalBottom;
     LayoutUnit maxFloatLogicalBottom;
+    LayoutUnit pageRemaining;
     const RenderStyle &styleToUse = Style();
+    do
     {
       LayoutStateMaintainer statePusher(*this, LocationOffset(),
                                         IsTransformed() || styleToUse.GetWritingMode().IsBlockFlipped(),
                                         pageLogicalHeight, pageLogicalHeightChanged);
 
-      // FIXME: The fragments' widths (preparePaginationBeforeBlockLayout) and the page's remaining height,
-      // once there's pagination.
+      PreparePaginationBeforeBlockLayout(relayoutChildren);
+      if (isPaginated)
+      {
+        pageRemaining = PageLogicalHeightForOffset(0_lu);
+      }
 
       // We use four values, maxTopPos, maxTopNeg, maxBottomPos, and maxBottomNeg, to track
       // our current maximal positive and negative margins. These values are used when we
@@ -544,7 +854,7 @@ namespace krys::boo
 
         SetHasMarginBeforeQuirk(styleToUse.MarginBefore().HasQuirk());
         SetHasMarginAfterQuirk(styleToUse.MarginAfter().HasQuirk());
-        // FIXME: Clear the pagination strut, once there's pagination.
+        SetPaginationStrut(0_lu);
       }
       if (!FirstChild() && !IsAnonymousBlock())
       {
@@ -559,15 +869,31 @@ namespace krys::boo
       {
         SetLogicalHeight(LowestFloatLogicalBottom() + toAdd);
       }
-      // FIXME: Lay out again to break at a line that avoids a widow (shouldBreakAtLineToAvoidWidow), and
-      // relayout for pagination, once there's pagination.
+      if (ShouldBreakAtLineToAvoidWidow())
+      {
+        SetEverHadLayout();
+        continue;
+      }
+      break;
+    } while (true);
+
+    if (RelayoutForPagination())
+    {
+      krys_debug_assert(!ShouldBreakAtLineToAvoidWidow());
+      return;
     }
 
     // Calculate our new height.
     LayoutUnit oldHeight = LogicalHeight();
     LayoutUnit oldClientAfterEdge = ClientLogicalBottom();
 
-    // FIXME: Apply a forced break after the content of a fragmented flow, once there are fragmented flows.
+    // Before updating the final size of the flow thread make sure a forced break is applied after the
+    // content. This ensures the size information is correctly computed for the last auto-height fragment
+    // receiving content.
+    if (auto *fragmentedFlow = DynamicDowncast<RenderFragmentedFlow>(*this))
+    {
+      fragmentedFlow->ApplyBreakAfterContent(oldClientAfterEdge);
+    }
 
     UpdateLogicalHeight();
     LayoutUnit newHeight = LogicalHeight();
@@ -576,8 +902,7 @@ namespace krys::boo
     auto shouldApplyAlignContent = [&]
     {
       // Alignment isn't supported when fragmenting.
-      // FIXME: Only when the content doesn't fit in the page's remaining height, once there's pagination.
-      if (isPaginated)
+      if (isPaginated && pageRemaining <= newHeight)
       {
         return false;
       }
@@ -649,7 +974,10 @@ namespace krys::boo
     // clipped anyway).
     ComputeOverflow(oldClientAfterEdge);
 
-    // FIXME: The page logical offset, once there's pagination.
+    if (auto *state = LayoutContext().LayoutState(); state && state->PageLogicalHeight())
+    {
+      SetPageLogicalOffset(state->PageLogicalOffset(this, LogicalTop()));
+    }
 
     UpdateLayerTransform();
 
@@ -853,9 +1181,9 @@ namespace krys::boo
     }
 
     // FIXME: We should bail out sooner when subtree layout entry point is _inside_ a skipped subtree.
-    // FIXME: Multi-column flows lay out their skipped content, once there are multi-column flows.
-    if (LayoutContext().IsSkippedContentRootForLayout(*this)
-        || LayoutContext().IsSkippedContentForLayout(*this))
+    if ((LayoutContext().IsSkippedContentRootForLayout(*this)
+         || LayoutContext().IsSkippedContentForLayout(*this))
+        && !(IsRenderMultiColumnFlow() || MultiColumnFlow()))
     {
       ClearNeedsLayoutForSkippedContent();
       return;
@@ -942,7 +1270,8 @@ namespace krys::boo
                   // ruby runs).
       }
 
-      if (LayoutContext().IsSkippedContentForLayout(child))
+      if (LayoutContext().IsSkippedContentForLayout(child)
+          && !(IsRenderMultiColumnFlow() || MultiColumnFlow()))
       {
         krys_debug_assert(child.IsColumnSpanner());
 
@@ -1186,8 +1515,7 @@ namespace krys::boo
 #endif
     // Position the child as though it didn't collapse with the top.
     SetLogicalTopForChild(child, logicalTopEstimate, ApplyLayoutDelta);
-    // FIXME: Estimate the child's fragment range (estimateFragmentRangeForBoxChild), once there are
-    // fragmented flows.
+    EstimateFragmentRangeForBoxChild(child);
 
     auto *childBlockFlow = DynamicDowncast<RenderBlockFlow>(child);
     bool markDescendantsWithFloats = false;
@@ -1228,8 +1556,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Mark the child for relayout when its pagination changed (markForPaginationRelayoutIfNeeded),
-    // once there's pagination.
+    child.MarkForPaginationRelayoutIfNeeded();
 
     bool childHadLayout = child.EverHadLayout();
     bool childNeededLayout = child.NeedsLayout();
@@ -1256,9 +1583,13 @@ namespace krys::boo
     LayoutUnit logicalTopAfterClear =
       ClearFloatsIfNeeded(child, marginInfo, oldPosMarginBefore, oldNegMarginBefore, logicalTopBeforeClear);
 
-    // FIXME: Adjust the child for pagination (adjustBlockChildForPagination), once there's pagination.
-    KRYS_MAYBE_UNUSED auto atBeforeSideOfBlockAndNotCleared =
-      atBeforeSideOfBlock && logicalTopBeforeClear == logicalTopAfterClear;
+    bool paginated = LayoutContext().LayoutState()->IsPaginated();
+    if (paginated)
+    {
+      logicalTopAfterClear =
+        AdjustBlockChildForPagination(logicalTopAfterClear, estimateWithoutPagination, child,
+                                      atBeforeSideOfBlock && logicalTopBeforeClear == logicalTopAfterClear);
+    }
 
     SetLogicalTopForChild(child, logicalTopAfterClear, ApplyLayoutDelta);
 
@@ -1266,7 +1597,8 @@ namespace krys::boo
     // clearFloatsIfNeeded can also mark the child as needing a layout even though we didn't move. This
     // happens when collapseMargins dynamically adds overhanging floats because of a child with negative
     // margins.
-    if (logicalTopAfterClear != logicalTopEstimate || child.NeedsLayout())
+    if (logicalTopAfterClear != logicalTopEstimate || child.NeedsLayout()
+        || (paginated && childBlockFlow && childBlockFlow->ShouldBreakAtLineToAvoidWidow()))
     {
       if (child.ShrinkToAvoidFloats())
       {
@@ -1281,11 +1613,14 @@ namespace krys::boo
         {
           childBlockFlow->MarkAllDescendantsWithFloatsForLayout();
         }
+        child.MarkForPaginationRelayoutIfNeeded();
       }
     }
 
-    // FIXME: Relayout the child when its fragment range changed (updateFragmentRangeForBoxChild), once there
-    // are fragmented flows.
+    if (UpdateFragmentRangeForBoxChild(child))
+    {
+      child.SetNeedsLayout(MarkingBehavior::MarkOnlyThis);
+    }
 
     // In case our guess was wrong, relayout the child.
     child.LayoutIfNeeded();
@@ -1336,7 +1671,19 @@ namespace krys::boo
       child.RepaintOverhangingFloats(true);
     }
 
-    // FIXME: Apply an after page or column break, once there's pagination.
+    if (paginated)
+    {
+      if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+      {
+        fragmentedFlow->FragmentedFlowDescendantBoxLaidOut(&child);
+      }
+      // Check for an after page/column break.
+      LayoutUnit newHeight = ApplyAfterBreak(child, LogicalHeight(), marginInfo);
+      if (newHeight != LogicalHeight())
+      {
+        SetLogicalHeight(newHeight);
+      }
+    }
 
 #if KRYS_DEBUG
     krys_debug_assert(View().FrameView().LayoutContext().LayoutDelta() == oldLayoutDelta);
@@ -1385,7 +1732,6 @@ namespace krys::boo
 
   void RenderBlockFlow::SetStaticInlinePositionForChild(RenderBox &child, LayoutUnit inlinePosition) noexcept
   {
-    // FIXME: Shift the inline position to exclude the fragment offset, once there are fragmented flows.
     child.Layer()->SetStaticInlinePosition(inlinePosition);
   }
 
@@ -1806,8 +2152,16 @@ namespace krys::boo
       }
     }
 
-    // FIXME: If margins would pull us past the top of the next page, then we need to pull back and pretend
-    // like the margins collapsed into the page edge, once there's pagination.
+    // If margins would pull us past the top of the next page, then we need to pull back and pretend like the
+    // margins collapsed into the page edge.
+    auto *layoutState = LayoutContext().LayoutState();
+    if (layoutState->IsPaginated() && layoutState->PageLogicalHeight()
+        && logicalTop > beforeCollapseLogicalTop && HasNextPage(beforeCollapseLogicalTop))
+    {
+      LayoutUnit oldLogicalTop = logicalTop;
+      logicalTop = std::min(logicalTop, NextPageLogicalTop(beforeCollapseLogicalTop));
+      SetLogicalHeight(LogicalHeight() + (logicalTop - oldLogicalTop));
+    }
 
     return logicalTop;
   }
@@ -2010,15 +2364,37 @@ namespace krys::boo
                             - std::max(marginInfo.NegativeMargin(), negativeMarginBefore);
     }
 
-    // FIXME: Adjust logicalTopEstimate down to the next page if the margins are so large that we don't fit on
-    // the current page, once there's pagination.
+    // Adjust logicalTopEstimate down to the next page if the margins are so large that we don't fit on the
+    // current page.
+    auto *layoutState = LayoutContext().LayoutState();
+    if (layoutState->IsPaginated() && layoutState->PageLogicalHeight() && logicalTopEstimate > LogicalHeight()
+        && HasNextPage(LogicalHeight()))
+    {
+      logicalTopEstimate = std::min(logicalTopEstimate, NextPageLogicalTop(LogicalHeight()));
+    }
 
     logicalTopEstimate += ComputedClearDeltaForChild(child, logicalTopEstimate);
 
     estimateWithoutPagination = logicalTopEstimate;
 
-    // FIXME: Apply the child's before break, shift an unsplittable child to the next page and add the
-    // pagination strut, once there's pagination.
+    if (layoutState->IsPaginated())
+    {
+      // If the object has a page or column break value of "before", then we should shift to the top of the
+      // next page.
+      logicalTopEstimate = ApplyBeforeBreak(child, logicalTopEstimate);
+
+      // For replaced elements and scrolled elements, we want to shift them to the next page if they don't fit
+      // on the current one.
+      logicalTopEstimate = AdjustForUnsplittableChild(child, logicalTopEstimate);
+
+      if (!child.SelfNeedsLayout())
+      {
+        if (auto *block = DynamicDowncast<RenderBlock>(child))
+        {
+          logicalTopEstimate += block->PaginationStrut();
+        }
+      }
+    }
 
     return logicalTopEstimate;
   }
@@ -2166,7 +2542,27 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The styles of the multi-column flow's children, once there's multi-column layout.
+    if (MultiColumnFlow())
+    {
+      UpdateStylesForColumnChildren(oldStyle);
+    }
+  }
+
+  void RenderBlockFlow::UpdateStylesForColumnChildren(const RenderStyle *oldStyle) noexcept
+  {
+    auto columnsNeedLayout = oldStyle
+                             && (oldStyle->GetColumnCount() != Style().GetColumnCount()
+                                 || oldStyle->GetColumnWidth() != Style().GetColumnWidth());
+    for (auto *child = FirstChildBox();
+         child && (child->IsRenderFragmentedFlow() || child->IsRenderMultiColumnSet());
+         child = child->NextSiblingBox())
+    {
+      child->SetStyle(RenderStyle::CreateAnonymousStyleWithDisplay(Style(), DisplayType::Block));
+      if (columnsNeedLayout)
+      {
+        child->SetNeedsLayoutAndPreferredWidthsUpdate();
+      }
+    }
   }
 
   void RenderBlockFlow::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
@@ -2250,9 +2646,9 @@ namespace krys::boo
       {
         return;
       }
-      // FIXME: Not in a multi-column flow, once there are columns.
-      auto shouldIncludeFloats = options.Contains(ComputeOverflowOptions::RecomputeFloats)
-                                 || CreatesNewFormattingContext() || HasSelfPaintingLayer();
+      auto shouldIncludeFloats = !MultiColumnFlow()
+                                 && (options.Contains(ComputeOverflowOptions::RecomputeFloats)
+                                     || CreatesNewFormattingContext() || HasSelfPaintingLayer());
       if (!shouldIncludeFloats)
       {
         return;
@@ -2451,7 +2847,6 @@ namespace krys::boo
 
     LayoutUnit floatLogicalLeft;
 
-    // FIXME: Re-evaluate the offsets inside a fragmented flow, once there are fragmented flows.
     bool isInitialLetter = childBox.Style().GetPseudoElementType() == PseudoElementType::FirstLetter
                            && childBox.Style().InitialLetter().Drop() > 0;
 
@@ -2637,11 +3032,47 @@ namespace krys::boo
       }
 
       ComputeLogicalLocationForFloat(floatingObject, logicalTop);
+      LayoutUnit childLogicalTop = LogicalTopForChild(childBox);
 
-      // FIXME: The float's fragment range, and moving an unsplittable float or one with a pagination strut
-      // down to the next page, once there's pagination.
+      EstimateFragmentRangeForBoxChild(childBox);
 
+      childBox.MarkForPaginationRelayoutIfNeeded();
       childBox.LayoutIfNeeded();
+
+      if (LayoutContext().LayoutState()->IsPaginated())
+      {
+        // If we are unsplittable and don't fit, then we need to move down. We include our margins as part of
+        // the unsplittable area.
+        LayoutUnit newLogicalTop = AdjustForUnsplittableChild(
+          childBox, logicalTop, childLogicalTop - logicalTop, MarginAfterForChild(childBox));
+
+        // See if we have a pagination strut that is making us move down further. Note that an unsplittable
+        // child can't also have a pagination strut, so this is exclusive with the case above.
+        auto *childBlock = DynamicDowncast<RenderBlock>(childBox);
+        if (childBlock && childBlock->PaginationStrut())
+        {
+          newLogicalTop += childBlock->PaginationStrut();
+          childBlock->SetPaginationStrut(0_lu);
+        }
+
+        if (newLogicalTop != logicalTop)
+        {
+          floatingObject.SetPaginationStrut(newLogicalTop - logicalTop);
+          ComputeLogicalLocationForFloat(floatingObject, newLogicalTop);
+          if (childBlock)
+          {
+            childBlock->SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+          }
+          childBox.LayoutIfNeeded();
+          logicalTop = newLogicalTop;
+        }
+
+        if (UpdateFragmentRangeForBoxChild(childBox))
+        {
+          childBox.SetNeedsLayout(MarkingBehavior::MarkOnlyThis);
+          childBox.LayoutIfNeeded();
+        }
+      }
 
       SetLogicalHeightForFloat(floatingObject, LogicalHeightForChildForFragmentation(childBox)
                                                  + (LogicalTopForChild(childBox) - logicalTop)
@@ -3192,7 +3623,15 @@ namespace krys::boo
       {
         svgTextLayout->AddOverflowFromInlineChildren();
       }
-      // FIXME: Propagate the visual overflow to the containing fragments, once there are fragmented flows.
+      // If this block is flowed inside a flow thread, make sure its overflow is propagated to the containing
+      // fragments.
+      if (_overflow)
+      {
+        if (auto *flow = EnclosingFragmentedFlow())
+        {
+          flow->AddFragmentsVisualOverflow(*this, _overflow->VisualOverflowRect());
+        }
+      }
       return;
     }
     RenderBlock::AddOverflowFromInFlowChildren(options);
@@ -3308,8 +3747,6 @@ namespace krys::boo
         }
       }
     }
-
-    // FIXME: Flip the allowance for a reversed column progression, once there's multi-column layout.
 
     return allowance;
   }
@@ -4727,7 +5164,683 @@ namespace krys::boo
     }
     return true;
   }
+
+#pragma region Pagination
+
+  // Pagination only comes from fragmented flows (multi-column layout), so a paginated block always has one.
+
+  LayoutUnit RenderBlockFlow::NextPageLogicalTop(LayoutUnit logicalOffset,
+                                                 PageBoundaryRule pageBoundaryRule) const noexcept
+  {
+    LayoutUnit pageLogicalHeight = PageLogicalHeightForOffset(logicalOffset);
+    if (!pageLogicalHeight)
+    {
+      return logicalOffset;
+    }
+
+    // The logicalOffset is in our coordinate space. We can add in our pushed offset.
+    LayoutUnit remainingLogicalHeight = PageRemainingLogicalHeightForOffset(logicalOffset);
+    if (pageBoundaryRule == PageBoundaryRule::ExcludePageBoundary)
+    {
+      return logicalOffset + (remainingLogicalHeight ? remainingLogicalHeight : pageLogicalHeight);
+    }
+    return logicalOffset + remainingLogicalHeight;
+  }
+
+  LayoutUnit RenderBlockFlow::PageLogicalTopForOffset(LayoutUnit offset) const noexcept
+  {
+    // Unsplittable objects clear out the pageLogicalHeight in the layout state as a way of signaling that no
+    // pagination should occur. Therefore we have to check this first and bail if the value has been set to 0.
+    auto *layoutState = LayoutContext().LayoutState();
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    if (!layoutState->PageLogicalHeight() || !fragmentedFlow)
+    {
+      return 0_lu;
+    }
+
+    LayoutUnit firstPageLogicalTop =
+      IsHorizontalWritingMode() ? layoutState->PageOffset().Height() : layoutState->PageOffset().Width();
+    LayoutUnit blockLogicalTop =
+      IsHorizontalWritingMode() ? layoutState->LayoutOffset().Height() : layoutState->LayoutOffset().Width();
+
+    LayoutUnit cumulativeOffset = offset + blockLogicalTop;
+    return firstPageLogicalTop
+           + fragmentedFlow->PageLogicalTopForOffset(cumulativeOffset - firstPageLogicalTop);
+  }
+
+  LayoutUnit RenderBlockFlow::PageLogicalHeightForOffset(LayoutUnit offset) const noexcept
+  {
+    // Unsplittable objects clear out the pageLogicalHeight in the layout state as a way of signaling that no
+    // pagination should occur. Therefore we have to check this first and bail if the value has been set to 0.
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    if (!LayoutContext().LayoutState()->PageLogicalHeight() || !fragmentedFlow)
+    {
+      return 0_lu;
+    }
+    return fragmentedFlow->PageLogicalHeightForOffset(offset + OffsetFromLogicalTopOfFirstPage());
+  }
+
+  LayoutUnit
+    RenderBlockFlow::PageRemainingLogicalHeightForOffset(LayoutUnit offset,
+                                                         PageBoundaryRule pageBoundaryRule) const noexcept
+  {
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    if (!fragmentedFlow)
+    {
+      return 0_lu;
+    }
+    return fragmentedFlow->PageRemainingLogicalHeightForOffset(offset + OffsetFromLogicalTopOfFirstPage(),
+                                                               pageBoundaryRule);
+  }
+
+  bool RenderBlockFlow::HasNextPage(LayoutUnit logicalOffset,
+                                    PageBoundaryRule pageBoundaryRule) const noexcept
+  {
+    krys_debug_assert(LayoutContext().LayoutState() && LayoutContext().LayoutState()->IsPaginated());
+
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    if (!fragmentedFlow)
+    {
+      return false;
+    }
+
+    // See if we're in the last fragment.
+    LayoutUnit pageOffset = OffsetFromLogicalTopOfFirstPage() + logicalOffset;
+    auto *fragment = fragmentedFlow->FragmentAtBlockOffset(this, pageOffset, true);
+    if (!fragment)
+    {
+      return false;
+    }
+
+    if (fragment->IsLastFragment())
+    {
+      // A column set makes as many columns as its content needs.
+      return fragment->IsRenderFragmentContainerSet()
+             || (pageBoundaryRule == PageBoundaryRule::IncludePageBoundary
+                 && pageOffset == fragment->LogicalTopForFragmentedFlowContent());
+    }
+
+    RenderFragmentContainer *startFragment = nullptr;
+    RenderFragmentContainer *endFragment = nullptr;
+    fragmentedFlow->GetFragmentRangeForBox(*this, startFragment, endFragment);
+    return endFragment && fragment != endFragment;
+  }
+
+  void RenderBlockFlow::SetPageBreak(LayoutUnit offset, LayoutUnit spaceShortage) noexcept
+  {
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      fragmentedFlow->SetPageBreak(this, OffsetFromLogicalTopOfFirstPage() + offset, spaceShortage);
+    }
+  }
+
+  void RenderBlockFlow::UpdateMinimumPageHeight(LayoutUnit offset, LayoutUnit minHeight) noexcept
+  {
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      fragmentedFlow->UpdateMinimumPageHeight(this, OffsetFromLogicalTopOfFirstPage() + offset, minHeight);
+    }
+  }
+
+  void RenderBlockFlow::AdjustSizeContainmentChildForPagination(RenderBox &child, LayoutUnit offset) noexcept
+  {
+    if (!child.ShouldApplySizeContainment())
+    {
+      return;
+    }
+
+    LayoutUnit childOverflowHeight =
+      child.IsHorizontalWritingMode() ? child.LayoutOverflowRect().MaxY() : child.LayoutOverflowRect().MaxX();
+    LayoutUnit childLogicalHeight = std::max(child.LogicalHeight(), childOverflowHeight);
+
+    LayoutUnit remainingLogicalHeight =
+      PageRemainingLogicalHeightForOffset(offset, PageBoundaryRule::ExcludePageBoundary);
+
+    LayoutUnit spaceShortage = childLogicalHeight - remainingLogicalHeight;
+    if (spaceShortage <= 0)
+    {
+      return;
+    }
+
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      fragmentedFlow->UpdateSpaceShortageForSizeContainment(this, OffsetFromLogicalTopOfFirstPage() + offset,
+                                                            spaceShortage);
+    }
+  }
+
+  bool RenderBlockFlow::PushToNextPageWithMinimumLogicalHeight(LayoutUnit &adjustment,
+                                                               LayoutUnit logicalOffset,
+                                                               LayoutUnit minimumLogicalHeight) const noexcept
+  {
+    bool checkFragment = false;
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    RenderFragmentContainer *currentFragmentContainer = nullptr;
+    for (auto pageLogicalHeight = PageLogicalHeightForOffset(logicalOffset + adjustment); pageLogicalHeight;
+         pageLogicalHeight = PageLogicalHeightForOffset(logicalOffset + adjustment))
+    {
+      if (minimumLogicalHeight <= pageLogicalHeight)
+      {
+        return true;
+      }
+      auto adjustedOffset = logicalOffset + adjustment;
+      if (!HasNextPage(adjustedOffset))
+      {
+        return false;
+      }
+      if (fragmentedFlow)
+      {
+        // While in layout and the column sets are not balanced yet, we keep finding the same (infinitely
+        // tall) column over and over again.
+        auto *nextFragmentContainer = fragmentedFlow->FragmentAtBlockOffset(this, adjustedOffset, true);
+        krys_debug_assert(nextFragmentContainer);
+        if (nextFragmentContainer == currentFragmentContainer)
+        {
+          return false;
+        }
+        currentFragmentContainer = nextFragmentContainer;
+      }
+      adjustment += pageLogicalHeight;
+      checkFragment = true;
+    }
+    return !checkFragment;
+  }
+
+  LayoutUnit RenderBlockFlow::AdjustForUnsplittableChild(RenderBox &child, LayoutUnit logicalOffset,
+                                                         LayoutUnit childBeforeMargin,
+                                                         LayoutUnit childAfterMargin) noexcept
+  {
+    // When flexboxes are embedded inside a block flow, they don't perform any adjustments for unsplittable
+    // children. We'll treat flexboxes themselves as unsplittable just to get them to paginate properly inside
+    // a block flow.
+    bool isUnsplittable = ChildBoxIsUnsplittableForFragmentation(child);
+    if (!isUnsplittable)
+    {
+      auto *flexibleBox = DynamicDowncast<RenderFlexibleBox>(child);
+      if (!(flexibleBox && !flexibleBox->IsFlexibleBoxImpl()))
+      {
+        return logicalOffset;
+      }
+    }
+
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    LayoutUnit childLogicalHeight = LogicalHeightForChild(child) + childBeforeMargin + childAfterMargin;
+    LayoutUnit pageLogicalHeight = PageLogicalHeightForOffset(logicalOffset);
+    bool hasUniformPageLogicalHeight = !fragmentedFlow || fragmentedFlow->FragmentsHaveUniformLogicalHeight();
+    if (isUnsplittable)
+    {
+      UpdateMinimumPageHeight(logicalOffset, childLogicalHeight);
+    }
+    if (!pageLogicalHeight || (hasUniformPageLogicalHeight && childLogicalHeight > pageLogicalHeight)
+        || !HasNextPage(logicalOffset))
+    {
+      return logicalOffset;
+    }
+    LayoutUnit remainingLogicalHeight =
+      PageRemainingLogicalHeightForOffset(logicalOffset, PageBoundaryRule::ExcludePageBoundary);
+    if (remainingLogicalHeight < childLogicalHeight)
+    {
+      if (!hasUniformPageLogicalHeight
+          && !PushToNextPageWithMinimumLogicalHeight(remainingLogicalHeight, logicalOffset,
+                                                     childLogicalHeight))
+      {
+        return logicalOffset;
+      }
+      auto result = logicalOffset + remainingLogicalHeight;
+      bool isInitialLetter = child.IsFloating()
+                             && child.Style().GetPseudoElementType() == PseudoElementType::FirstLetter
+                             && child.Style().InitialLetter().Drop() > 0;
+      if (isInitialLetter)
+      {
+        // Increase our logical height to ensure that lines all get pushed along with the letter.
+        SetLogicalHeight(logicalOffset + remainingLogicalHeight);
+      }
+      return result;
+    }
+
+    return logicalOffset;
+  }
+
+  void RenderBlockFlow::SetBreakAtLineToAvoidWidow(int32 lineToBreak) noexcept
+  {
+    krys_debug_assert(lineToBreak >= 0);
+    krys_debug_assert(!EnsureRareBlockFlowData().DidBreakAtLineToAvoidWidow);
+    EnsureRareBlockFlowData().LineBreakToAvoidWidow = lineToBreak;
+  }
+
+  void RenderBlockFlow::SetDidBreakAtLineToAvoidWidow() noexcept
+  {
+    krys_debug_assert(!ShouldBreakAtLineToAvoidWidow());
+    if (!HasRareBlockFlowData())
+    {
+      return;
+    }
+    RareBlockFlowData()->DidBreakAtLineToAvoidWidow = true;
+  }
+
+  void RenderBlockFlow::ClearDidBreakAtLineToAvoidWidow() noexcept
+  {
+    if (!HasRareBlockFlowData())
+    {
+      return;
+    }
+    RareBlockFlowData()->DidBreakAtLineToAvoidWidow = false;
+  }
+
+  void RenderBlockFlow::ClearShouldBreakAtLineToAvoidWidow() const noexcept
+  {
+    krys_debug_assert(ShouldBreakAtLineToAvoidWidow());
+    if (!HasRareBlockFlowData())
+    {
+      return;
+    }
+    RareBlockFlowData()->LineBreakToAvoidWidow = -1;
+  }
+
+  namespace
+  {
+    void ClearShouldBreakAtLineToAvoidWidowIfNeeded(RenderBlockFlow &blockFlow) noexcept
+    {
+      if (!blockFlow.ShouldBreakAtLineToAvoidWidow())
+      {
+        return;
+      }
+      blockFlow.ClearShouldBreakAtLineToAvoidWidow();
+      blockFlow.SetDidBreakAtLineToAvoidWidow();
+    }
+
+    KRYS_NODISCARD LayoutUnit CalculateMinimumPageHeight(const RenderStyle &renderStyle,
+                                                         const inline_iterator::LineBoxIterator &lastLine,
+                                                         LayoutUnit lineTop, LayoutUnit lineBottom) noexcept
+    {
+      // We may require a certain minimum number of lines per page in order to satisfy orphans and widows, and
+      // that may affect the minimum page height.
+      auto orphans = renderStyle.GetOrphans().TryValue();
+      auto widows = renderStyle.GetWidows().TryValue();
+      uint32 lineCount = std::max<uint32>(orphans ? orphans->Value : 1, widows ? widows->Value : 1);
+      if (lineCount > 1)
+      {
+        auto line = lastLine;
+        for (uint32 i = 1; i < lineCount && line->Previous(); i++)
+        {
+          line = line->Previous();
+        }
+
+        // FIXME: Paginating using line overflow isn't all fine. See FIXME in
+        // adjustLinePositionForPagination() for more details.
+        lineTop = LayoutUnit {std::min(line->LogicalTop(), line->InkOverflowLogicalTop())};
+      }
+      return lineBottom - lineTop;
+    }
+  }
+
+  RenderBlockFlow::LinePaginationAdjustment RenderBlockFlow::ComputeLineAdjustmentForPagination(
+    const inline_iterator::LineBoxIterator &lineBox, LayoutUnit delta, LayoutUnit floatMinimumBottom) noexcept
+  {
+    // In blocks-in-inline case the nested block has been adjusted already by the block layout code.
+    bool isBlockInInline =
+      lineBox->LineLeftmostLeafBox() && lineBox->LineLeftmostLeafBox()->IsBlockLevelBox();
+    if (isBlockInInline)
+    {
+      ClearShouldBreakAtLineToAvoidWidowIfNeeded(*this);
+      return {};
+    }
+
+    auto computeLeafBoxTopAndBottom = [&]
+    {
+      auto lineTop = LayoutUnit::Max();
+      auto lineBottom = LayoutUnit::Min();
+      for (auto box = lineBox->LineLeftmostLeafBox(); box; box.TraverseLineRightwardOnLine())
+      {
+        if (LayoutUnit {box->LogicalTop()} < lineTop)
+        {
+          lineTop = LayoutUnit {box->LogicalTop()};
+        }
+        if (LayoutUnit {box->LogicalBottom()} > lineBottom)
+        {
+          lineBottom = LayoutUnit {box->LogicalBottom()};
+        }
+      }
+      return Pair {lineTop, lineBottom};
+    };
+
+    auto logicalOverflowTop = LayoutUnit {lineBox->InkOverflowLogicalTop()};
+    auto logicalOverflowBottom = LayoutUnit {lineBox->InkOverflowLogicalBottom()};
+    auto logicalOverflowHeight = logicalOverflowBottom - logicalOverflowTop;
+    auto logicalTop = LayoutUnit {lineBox->LogicalTop()};
+    auto logicalOffset = std::min(logicalTop, logicalOverflowTop);
+
+    if (floatMinimumBottom)
+    {
+      // Don't push a float to the next page if it is taller than the page.
+      auto floatHeight = floatMinimumBottom - logicalTop;
+      if (floatHeight > PageLogicalHeightForOffset(floatMinimumBottom))
+      {
+        floatMinimumBottom = 0_lu;
+      }
+    }
+
+    auto logicalBottom =
+      std::max(std::max(LayoutUnit {lineBox->LogicalBottom()}, logicalOverflowBottom), floatMinimumBottom);
+    auto lineHeight = logicalBottom - logicalOffset;
+
+    UpdateMinimumPageHeight(logicalOffset,
+                            CalculateMinimumPageHeight(Style(), lineBox, logicalOffset, logicalBottom));
+    logicalOffset += delta;
+
+    LayoutUnit pageLogicalHeight = PageLogicalHeightForOffset(logicalOffset);
+
+    if (!pageLogicalHeight || !HasNextPage(logicalOffset))
+    {
+      ClearShouldBreakAtLineToAvoidWidowIfNeeded(*this);
+      return {};
+    }
+
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    bool hasUniformPageLogicalHeight = !fragmentedFlow || fragmentedFlow->FragmentsHaveUniformLogicalHeight();
+
+    if (hasUniformPageLogicalHeight && logicalOverflowHeight > pageLogicalHeight)
+    {
+      // We are so tall that we are bigger than a page. Before we give up and just leave the line where it is,
+      // try drilling into the line and computing a new height that excludes anything we consider "blank
+      // space". We will discard margins, descent, and even overflow. If we are able to fit with the blank
+      // space and overflow excluded, we will give the line its own page with the highest non-blank element
+      // being aligned with the top of the page.
+      // FIXME: We are still honoring gigantic margins, which does leave open the possibility of blank pages
+      // caused by this heuristic. It remains to be seen whether or not this will be a real-world issue. For
+      // now we don't try to deal with this problem.
+      std::tie(logicalOffset, logicalBottom) = computeLeafBoxTopAndBottom();
+      lineHeight = logicalBottom - logicalOffset;
+      if (logicalOffset == LayoutUnit::Max() || lineHeight > pageLogicalHeight)
+      {
+        // Give up. We're genuinely too big even after excluding blank space and overflow.
+        ClearShouldBreakAtLineToAvoidWidowIfNeeded(*this);
+        return {};
+      }
+      pageLogicalHeight = PageLogicalHeightForOffset(logicalOffset);
+    }
+
+    LayoutUnit remainingLogicalHeight =
+      PageRemainingLogicalHeightForOffset(logicalOffset, PageBoundaryRule::ExcludePageBoundary);
+
+    auto lineNumber = static_cast<int32>(lineBox->LineIndex() + 1);
+    if (remainingLogicalHeight < lineHeight
+        || (ShouldBreakAtLineToAvoidWidow() && LineBreakToAvoidWidow() == lineNumber))
+    {
+      if (LineBreakToAvoidWidow() == lineNumber)
+      {
+        ClearShouldBreakAtLineToAvoidWidowIfNeeded(*this);
+      }
+      // If we have a non-uniform page height, then we have to shift further possibly.
+      if (!hasUniformPageLogicalHeight
+          && !PushToNextPageWithMinimumLogicalHeight(remainingLogicalHeight, logicalOffset, lineHeight))
+      {
+        return {};
+      }
+      if (lineHeight > pageLogicalHeight)
+      {
+        // Split the top margin in order to avoid splitting the visible part of the line.
+        remainingLogicalHeight -=
+          std::min(lineHeight - pageLogicalHeight, std::max(0_lu, logicalOverflowTop - logicalTop));
+      }
+      LayoutUnit totalLogicalHeight = lineHeight + std::max(0_lu, logicalOffset);
+      LayoutUnit pageLogicalHeightAtNewOffset =
+        hasUniformPageLogicalHeight ? pageLogicalHeight
+                                    : PageLogicalHeightForOffset(logicalOffset + remainingLogicalHeight);
+
+      SetPageBreak(logicalOffset, lineHeight - remainingLogicalHeight);
+
+      bool avoidFirstLinePageBreak =
+        lineBox->IsFirst() && totalLogicalHeight < pageLogicalHeightAtNewOffset && !floatMinimumBottom;
+      auto orphansValue = Style().GetOrphans().TryValue();
+      bool affectedByOrphans = orphansValue && static_cast<int32>(orphansValue->Value) >= lineNumber;
+
+      if ((avoidFirstLinePageBreak || affectedByOrphans) && !IsOutOfFlowPositioned() && !IsRenderTableCell())
+      {
+        auto firstLineBox = inline_iterator::FirstLineBoxFor(*this);
+        auto firstLineBoxOverflowTop =
+          LayoutUnit {firstLineBox ? firstLineBox->InkOverflowLogicalTop() : 0.f};
+        auto firstLineUpperOverhang = std::max(-firstLineBoxOverflowTop, 0_lu);
+        SetPaginationStrut(remainingLogicalHeight + logicalOffset + firstLineUpperOverhang);
+
+        return {};
+      }
+
+      return {remainingLogicalHeight, true};
+    }
+
+    if (remainingLogicalHeight == pageLogicalHeight)
+    {
+      // We're at the very top of a page or column.
+      bool isFirstLine = lineBox->IsFirst();
+      if (!isFirstLine || OffsetFromLogicalTopOfFirstPage())
+      {
+        SetPageBreak(logicalOffset, lineHeight);
+      }
+
+      return {0_lu, !isFirstLine};
+    }
+
+    return {};
+  }
+
+  namespace
+  {
+    /// @brief Whether @p child is in the normal flow of its fragmented flow, not in a float or out-of-flow
+    /// box inside it.
+    KRYS_NODISCARD bool InNormalFlow(RenderBox &child) noexcept
+    {
+      auto *current = child.ContainingBlock();
+      while (current && current != &child.View())
+      {
+        if (current->IsRenderFragmentedFlow())
+        {
+          return true;
+        }
+        if (current->IsFloatingOrOutOfFlowPositioned())
+        {
+          return false;
+        }
+        current = current->ContainingBlock();
+      }
+      return true;
+    }
+  }
+
+  LayoutUnit RenderBlockFlow::ApplyBeforeBreak(RenderBox &child, LayoutUnit logicalOffset) noexcept
+  {
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    bool checkColumnBreaks = fragmentedFlow && fragmentedFlow->ShouldCheckColumnBreaks()
+                             && (!ShouldApplyLayoutContainment() || child.PreviousSibling());
+    bool checkBeforeAlways = checkColumnBreaks && child.Style().BreakBefore() == BreakBetween::Column;
+    if (checkBeforeAlways && InNormalFlow(child)
+        && HasNextPage(logicalOffset, PageBoundaryRule::IncludePageBoundary))
+    {
+      LayoutUnit offsetBreakAdjustment;
+      if (fragmentedFlow->AddForcedFragmentBreak(this, OffsetFromLogicalTopOfFirstPage() + logicalOffset,
+                                                 &child, true, &offsetBreakAdjustment))
+      {
+        return logicalOffset + offsetBreakAdjustment;
+      }
+      return NextPageLogicalTop(logicalOffset, PageBoundaryRule::IncludePageBoundary);
+    }
+    return logicalOffset;
+  }
+
+  LayoutUnit RenderBlockFlow::ApplyAfterBreak(RenderBox &child, LayoutUnit logicalOffset,
+                                              MarginInfo &marginInfo) noexcept
+  {
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    bool checkColumnBreaks = fragmentedFlow && fragmentedFlow->ShouldCheckColumnBreaks();
+    bool checkAfterAlways = checkColumnBreaks && child.Style().BreakAfter() == BreakBetween::Column;
+    if (checkAfterAlways && InNormalFlow(child)
+        && HasNextPage(logicalOffset, PageBoundaryRule::IncludePageBoundary))
+    {
+      // So our margin doesn't participate in the next collapsing steps.
+      marginInfo.ClearMargin();
+
+      LayoutUnit offsetBreakAdjustment;
+      if (fragmentedFlow->AddForcedFragmentBreak(this, OffsetFromLogicalTopOfFirstPage() + logicalOffset,
+                                                 &child, false, &offsetBreakAdjustment))
+      {
+        return logicalOffset + offsetBreakAdjustment;
+      }
+      return NextPageLogicalTop(logicalOffset, PageBoundaryRule::IncludePageBoundary);
+    }
+    return logicalOffset;
+  }
+
+  LayoutUnit RenderBlockFlow::AdjustBlockChildForPagination(LayoutUnit logicalTopAfterClear,
+                                                            LayoutUnit estimateWithoutPagination,
+                                                            RenderBox &child,
+                                                            bool atBeforeSideOfBlock) noexcept
+  {
+    auto *childRenderBlock = DynamicDowncast<RenderBlock>(child);
+
+    if (estimateWithoutPagination != logicalTopAfterClear)
+    {
+      // Our guess prior to pagination movement was wrong. Before we attempt to paginate, let's try again at
+      // the new position.
+      SetLogicalHeight(logicalTopAfterClear);
+      SetLogicalTopForChild(child, logicalTopAfterClear, ApplyLayoutDelta);
+
+      if (child.ShrinkToAvoidFloats())
+      {
+        // The child's width depends on the line width. When the child shifts to clear an item, its width can
+        // change (because it has more available line width). So mark the item as dirty.
+        child.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+      }
+
+      if (childRenderBlock)
+      {
+        if (!child.AvoidsFloats() && childRenderBlock->ContainsFloats())
+        {
+          Downcast<RenderBlockFlow>(*childRenderBlock).MarkAllDescendantsWithFloatsForLayout();
+        }
+        child.MarkForPaginationRelayoutIfNeeded();
+      }
+
+      // Our guess was wrong. Make the child lay itself out again.
+      child.LayoutIfNeeded();
+    }
+
+    LayoutUnit oldTop = logicalTopAfterClear;
+
+    // If the object has a page or column break value of "before", then we should shift to the top of the next
+    // page.
+    LayoutUnit result = ApplyBeforeBreak(child, logicalTopAfterClear);
+
+    if (child.ShouldApplySizeContainment())
+    {
+      AdjustSizeContainmentChildForPagination(child, result);
+    }
+
+    // For replaced elements and scrolled elements, we want to shift them to the next page if they don't fit
+    // on the current one.
+    LayoutUnit logicalTopBeforeUnsplittableAdjustment = result;
+    LayoutUnit logicalTopAfterUnsplittableAdjustment = AdjustForUnsplittableChild(child, result);
+
+    LayoutUnit paginationStrut;
+    LayoutUnit unsplittableAdjustmentDelta =
+      logicalTopAfterUnsplittableAdjustment - logicalTopBeforeUnsplittableAdjustment;
+    LayoutUnit childLogicalHeight = child.LogicalHeight();
+    if (unsplittableAdjustmentDelta)
+    {
+      SetPageBreak(result, childLogicalHeight - unsplittableAdjustmentDelta);
+      paginationStrut = unsplittableAdjustmentDelta;
+    }
+    else if (childRenderBlock && childRenderBlock->PaginationStrut())
+    {
+      paginationStrut = childRenderBlock->PaginationStrut();
+    }
+
+    if (paginationStrut)
+    {
+      // We are willing to propagate out to our parent block as long as we were at the top of the block prior
+      // to collapsing our margins, and as long as we didn't clear or move as a result of other pagination.
+      if (atBeforeSideOfBlock && oldTop == result && !IsOutOfFlowPositioned() && !IsRenderTableCell())
+      {
+        // FIXME: Should really check if we're exceeding the page height before propagating the strut, but we
+        // don't have all the information to do so (the strut only has the remaining amount to push). Gecko
+        // gets this wrong too and pushes to the next page anyway, so not too concerned about it.
+        SetPaginationStrut(result + paginationStrut);
+        if (childRenderBlock)
+        {
+          childRenderBlock->SetPaginationStrut(0_lu);
+        }
+      }
+      else
+      {
+        result += paginationStrut;
+      }
+    }
+
+    if (!unsplittableAdjustmentDelta)
+    {
+      if (LayoutUnit pageLogicalHeight = PageLogicalHeightForOffset(result))
+      {
+        LayoutUnit remainingLogicalHeight =
+          PageRemainingLogicalHeightForOffset(result, PageBoundaryRule::ExcludePageBoundary);
+        LayoutUnit spaceShortage = child.LogicalHeight() - remainingLogicalHeight;
+        if (spaceShortage > 0)
+        {
+          // If the child crosses a column boundary, report a break, in case nothing inside it has already
+          // done so. The column balancer needs to know how much it has to stretch the columns to make more
+          // content fit. If no breaks are reported (but do occur), the balancer will have no clue. Only
+          // measure the space after the last column boundary, in case it crosses more than one.
+          LayoutUnit spaceShortageInLastColumn = IntMod(spaceShortage, pageLogicalHeight);
+          SetPageBreak(result, spaceShortageInLastColumn ? spaceShortageInLastColumn : spaceShortage);
+        }
+        else if (remainingLogicalHeight == pageLogicalHeight
+                 && OffsetFromLogicalTopOfFirstPage() + child.LogicalTop())
+        {
+          // We're at the very top of a page or column, and it's not the first one. This child may turn out to
+          // be the smallest piece of content that causes a page break, so we need to report it.
+          SetPageBreak(result, childLogicalHeight);
+        }
+      }
+    }
+
+    // Similar to how we apply clearance. Boost height() to be the place where we're going to position the
+    // child.
+    SetLogicalHeight(LogicalHeight() + (result - oldTop));
+
+    // Return the final adjusted logical top.
+    return result;
+  }
+
+#pragma endregion
+
 #pragma region Painting
+
+  void RenderBlockFlow::PaintColumnRules(PaintInfo &paintInfo, const LayoutPoint &point) noexcept
+  {
+    RenderBlock::PaintColumnRules(paintInfo, point);
+
+    if (!MultiColumnFlow() || paintInfo.Context().PaintingDisabled())
+    {
+      return;
+    }
+
+    // The rules are painted with the background, before the overflow clip applies, but they're part of the
+    // content and clipped with it (as in Chrome; WebKit leaves them unclipped).
+    GraphicsContextStateSaver stateSaver(paintInfo.Context(), false);
+    if (HasNonVisibleOverflow())
+    {
+      auto unscrolledOffset = point;
+      unscrolledOffset.MoveBy(GetScrollPosition());
+      stateSaver.Save();
+      paintInfo.Context().Clip(
+        SnapRectToDevicePixels(OverflowClipRect(unscrolledOffset), GetDocument().DeviceScaleFactor()));
+    }
+
+    // Iterate over our children and paint the column rules as needed.
+    for (auto &columnSet : ChildrenOfType<RenderMultiColumnSet>(*this))
+    {
+      LayoutPoint childPoint = columnSet.Location() + FlipForWritingModeForChild(columnSet, point);
+      columnSet.PaintColumnRules(paintInfo, childPoint);
+    }
+  }
 
   void RenderBlockFlow::PaintFloats(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
                                     bool preservePhase) noexcept

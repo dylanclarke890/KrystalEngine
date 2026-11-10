@@ -214,10 +214,19 @@ namespace krys::boo
     LayoutStateMaintainer statePusher(*this, LayoutSize(),
                                       IsTransformed() || GetWritingMode().IsBlockFlipped());
 
-    // FIXME: Lay out cells whose page offset changed (isPaginated, pageLogicalHeightChanged), once there's
-    // pagination.
+    auto *layoutState = LayoutContext().LayoutState();
+    bool paginated = layoutState->IsPaginated();
+
     for (auto *cell = FirstCell(); cell; cell = cell->NextCell())
     {
+      if (!cell->NeedsLayout() && paginated
+          && (layoutState->PageLogicalHeightChanged()
+              || (layoutState->PageLogicalHeight()
+                  && layoutState->PageLogicalOffset(cell, cell->LogicalTop()) != cell->PageLogicalOffset())))
+      {
+        cell->SetChildNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+      }
+
       if (cell->NeedsLayout())
       {
         cell->Layout();

@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Selection/TextBoxSelectableRange.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <utility>
 
@@ -90,16 +91,19 @@ namespace krys::boo
     }
   };
 
-  /// @brief Walks the renderers of a range in pre-order.
-  // FIXME: Column spanners (RenderMultiColumnSpannerPlaceholder), once there are multiple columns.
+  class RenderMultiColumnSpannerPlaceholder;
+
+  /// @brief Walks the renderers of a range in pre-order, visiting a column spanner where its placeholder is.
   class RenderRangeIterator
   {
   private:
     RenderObject *_current {nullptr};
+    List<RenderMultiColumnSpannerPlaceholder *> _spannerStack;
 
   public:
     explicit RenderRangeIterator(RenderObject *start) noexcept : _current(start)
     {
+      CheckForSpanner();
     }
 
     KRYS_NODISCARD RenderObject *Current() const noexcept
@@ -107,6 +111,9 @@ namespace krys::boo
       return _current;
     }
     RenderObject *Next() noexcept;
+
+  private:
+    void CheckForSpanner() noexcept;
   };
 
   /// @brief A highlighted range of the render tree, and which part of it each renderer and text box holds.

@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -181,7 +182,10 @@ namespace krys::boo
           return false;
         }
 
-        // FIXME: Fragmented flows, once there are any.
+        if (current->IsRenderFragmentedFlow())
+        {
+          return false;
+        }
 
         if (current->IsLegacyRenderSVGRoot())
         {

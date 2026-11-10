@@ -550,7 +550,7 @@ namespace krys::boo
       ClearGridItemOverridingSizesBeforeLayout(*this);
       ComputeLayoutRequirementsForItemsBeforeLayout(gridLayoutState);
 
-      // FIXME: The fragments' widths (preparePaginationBeforeBlockLayout), once there's pagination.
+      PreparePaginationBeforeBlockLayout(relayoutChildren);
       BeginUpdateScrollInfoAfterLayoutTransaction();
 
       LayoutSize previousSize = Size();
@@ -738,7 +738,7 @@ namespace krys::boo
 
       ClearGridItemOverridingSizesBeforeLayout(*this);
 
-      // FIXME: The fragments' widths (preparePaginationBeforeBlockLayout), once there's pagination.
+      PreparePaginationBeforeBlockLayout(relayoutChildren);
       BeginUpdateScrollInfoAfterLayoutTransaction();
 
       LayoutSize previousSize = Size();
@@ -3419,7 +3419,10 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: No cache inside fragmented flows (enclosingFragmentedFlow), once there's pagination.
+    if (EnclosingFragmentedFlow())
+    {
+      return false;
+    }
 
     for (auto &gridItem : ChildrenOfType<RenderBox>(*this))
     {

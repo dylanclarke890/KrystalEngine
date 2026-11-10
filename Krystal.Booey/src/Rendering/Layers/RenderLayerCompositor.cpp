@@ -2951,8 +2951,13 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: Fragmented flows, once there are any.
-      return true;
+      if (!layer.IsInsideFragmentedFlow())
+      {
+        return true;
+      }
+
+      // Fragmented flows don't need to be composited: their fragments render them.
+      return !layer.IsRenderFragmentedFlow();
     }
     return false;
   }

@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderEdge.hpp"
 #include "Krystal.Booey/Rendering/Painting/ImageQualityController.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
@@ -1003,8 +1004,7 @@ namespace krys::boo
       // FIXME: Inside an inline formatting context, the position of the inline offset parent's first inline
       // box (firstInlineBoxTopLeft).
 
-      // FIXME: Also when the renderer is in a fragmented flow, once there are fragmented flows.
-      if (!IsOutOfFlowPositioned())
+      if (!IsOutOfFlowPositioned() || EnclosingFragmentedFlow())
       {
         if (IsRelativelyPositioned())
         {
@@ -1019,11 +1019,21 @@ namespace krys::boo
         while (ancestor != offsetParent)
         {
           // FIXME: What are we supposed to do inside SVG content?
-          // FIXME: The translation of a multi-column flow, once there are multi-column flows.
-          if (auto *renderBox = DynamicDowncast<RenderBox>(*ancestor);
-              renderBox && !Is<RenderTableRow>(*ancestor))
+          if (auto *renderMultiColumnFlow = DynamicDowncast<RenderMultiColumnFlow>(*ancestor))
           {
-            referencePoint.MoveBy(renderBox->TopLeftLocation());
+            // We need to apply a translation based off what region we are inside.
+            if (auto *fragment = renderMultiColumnFlow->PhysicalTranslationFromFlowToFragment(referencePoint))
+            {
+              referencePoint.MoveBy(fragment->TopLeftLocation());
+            }
+          }
+          else if (!IsOutOfFlowPositioned())
+          {
+            if (auto *renderBox = DynamicDowncast<RenderBox>(*ancestor);
+                renderBox && !Is<RenderTableRow>(*ancestor))
+            {
+              referencePoint.MoveBy(renderBox->TopLeftLocation());
+            }
           }
 
           ancestor = ancestor->Parent();

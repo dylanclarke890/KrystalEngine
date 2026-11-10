@@ -832,7 +832,7 @@ namespace krys::boo
       LayoutStateMaintainer statePusher(*this, LocationOffset(),
                                         IsTransformed() || GetWritingMode().IsBlockFlipped());
 
-      // FIXME: The fragments' widths (preparePaginationBeforeBlockLayout), once there's pagination.
+      PreparePaginationBeforeBlockLayout(relayoutChildren);
 
       _numberOfFlexItemsOnFirstLine = {};
       _numberOfFlexItemsOnLastLine = {};
@@ -3218,8 +3218,10 @@ namespace krys::boo
         forceFlexItemRelayout = true;
       }
       UpdateFlexItemDirtyBitsBeforeLayout(forceFlexItemRelayout, flexItem);
-      // FIXME: Mark the item for pagination relayout (markForPaginationRelayoutIfNeeded), once there's
-      // pagination.
+      if (!flexItem.NeedsLayout())
+      {
+        flexItem.MarkForPaginationRelayoutIfNeeded();
+      }
       if (flexItem.NeedsLayout())
       {
         _relaidOutFlexItems.insert(&flexItem);

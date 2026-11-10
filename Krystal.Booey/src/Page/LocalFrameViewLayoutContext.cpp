@@ -506,8 +506,6 @@ namespace krys::boo
 
     // FIXME: Update the elements affected by media queries (the active theme colour meta element, and images
     // whose sources depend on media queries), once they're tracked.
-    // FIXME: Apply the pagination of the document element's or <body>'s `overflow` to the view
-    // (applyPaginationToViewport), once there's pagination.
 
     // Always ensure our style info is up-to-date. This can happen in situations where
     // the layout beats any sort of style recalc update that needs to occur.
@@ -617,9 +615,9 @@ namespace krys::boo
                                                     LayoutUnit pageHeight, bool pageHeightChanged) noexcept
   {
     // We push LayoutState even if layoutState is disabled because it stores layoutDelta too.
-    // FIXME: Boxes inside a fragmented flow (enclosingFragmentedFlow) too, once there's fragmentation.
     auto *layoutState = this->LayoutState();
-    if (!layoutState || !NeedsFullRepaint() || layoutState->IsPaginated())
+    if (!layoutState || !NeedsFullRepaint() || layoutState->IsPaginated()
+        || renderer.EnclosingFragmentedFlow())
     {
       _layoutStateStack.push_back(
         CreateUnique<RenderLayoutState>(_layoutStateStack, renderer, offset, pageHeight, pageHeightChanged,

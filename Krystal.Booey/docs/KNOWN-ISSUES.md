@@ -2,7 +2,7 @@
 
 Known bugs and missing features in Krystal.Booey, by area. A bug with a `[!shouldfail]` test names it; most entries also have a `// FIXME:` where the fix goes. Remove an entry when it's fixed, and add one for a bug that's found but not fixed, with a `[!shouldfail]` test when one can be written.
 
-What's out of scope by choice (scripting, the network, frames, workers, accessibility and the rest) is in `OVERVIEW.md` and isn't repeated here. Where Booey deliberately differs from a specification or Chrome, it's in `DIFFERENCES.md`. Issues in Render2D and Krystal.UI are in `Krystal.Gfx/docs/OVERVIEW.md` and `Krystal.UI/docs/OVERVIEW.md`.
+What's out of scope by choice (scripting, the network, frames, workers and the rest), and what's planned for later (video, accessibility and the rest), is in `OVERVIEW.md` and isn't repeated here. Where Booey deliberately differs from a specification or Chrome, it's in `DIFFERENCES.md`. Issues in Render2D and Krystal.UI are in `Krystal.Gfx/docs/OVERVIEW.md` and `Krystal.UI/docs/OVERVIEW.md`.
 
 ## Threads
 
@@ -44,7 +44,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - `Style::PendingResources` has no user agent shadow tree support and no anonymous mode for masks (FIXME).
-- Anchor positioning has no fragmented flows: an anchor's rect isn't the bounding box of its fragments (FIXMEs in `AnchorPositionEvaluator.cpp`). Anchor-positioned viewport-constrained objects need a scrolling coordinator Booey doesn't have.
+- Anchor-positioned viewport-constrained objects need a scrolling coordinator Booey doesn't have.
 
 ## Animations
 
@@ -58,7 +58,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - An unstyled XML document (one with no style sheets, hints or HTML, SVG or MathML elements) is rendered as its text, not as a view of its source or tree.
-- There is no multi-column layout or fragmentation: no column renderers, column rules, fragmented flows or pagination. `collectFragments` makes one fragment, paginated layers paint unfragmented, and out-of-flow boxes, `TextBoxTrimmer`, `RenderView::NodeForHitTest`, the highlight range iterator and repaint containers have no column handling (FIXMEs). Multi-column flows don't lay out `content-visibility` skipped content (FIXME in `RenderBlockFlow.cpp`).
 - `layout_integration::GridLayout::CanUseFor` accepts only single-track spans at explicit unnamed lines and the self-alignments `start`, `flex-start`, `self-start`, `normal` and `stretch`; other grids fall back to `RenderGrid`. Multi-column spans in `ImplicitGrid` are a FIXME.
 
 ## Painting

@@ -416,10 +416,7 @@ namespace krys::boo
 
   LayoutUnit RenderView::AvailableLogicalHeight(AvailableLogicalHeightType) const noexcept
   {
-    // Make sure block progression pagination for percentages uses the column extent and
-    // not the view's extent. See https://bugs.webkit.org/show_bug.cgi?id=135204.
-    // FIXME: The column height of a multi-column view, once there are columns.
-
+    // There are no paginated views (a view laid out in columns), so this is the view's extent.
     auto layoutSize = _frameView.GetLayoutSize();
     return LayoutUnit(IsHorizontalWritingMode() ? layoutSize.Height() : layoutSize.Width());
   }
@@ -563,8 +560,6 @@ namespace krys::boo
     {
       return;
     }
-
-    // FIXME: Multi-column flows (their first column set's hit test result) come with multi-column layout.
 
     if (auto *node = NodeForHitTest())
     {

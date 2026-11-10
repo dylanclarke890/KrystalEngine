@@ -27,6 +27,7 @@
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
@@ -189,7 +190,10 @@ namespace krys::boo
           return;
         }
         newParent = &listItemRenderer;
-        // FIXME: The list item's multi-column flow, once there are multi-column flows.
+        if (auto *multiColumnFlow = listItemRenderer.MultiColumnFlow())
+        {
+          newParent = multiColumnFlow;
+        }
       }
 
       if (newParent == currentParent)
@@ -220,7 +224,10 @@ namespace krys::boo
       // parent was found). It's ok to just leave the marker where it is
       // in this case.
       newParent = &listItemRenderer;
-      // FIXME: The list item's multi-column flow, once there are multi-column flows.
+      if (auto *multiColumnFlow = listItemRenderer.MultiColumnFlow())
+      {
+        newParent = multiColumnFlow;
+      }
     }
     _builder.Attach(*newParent, krys::move(newMarkerRenderer), FirstNonMarkerChild(*newParent));
   }

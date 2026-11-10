@@ -1356,7 +1356,13 @@ namespace krys::boo
 
     auto *ancestorBacking = compositedAncestor->Backing();
     LayoutRect parentGraphicsLayerRect;
-    // FIXME: Fragmented flows (isInsideFragmentedFlow), once there are any.
+    if (_owningLayer.IsInsideFragmentedFlow())
+    {
+      // FIXME: flows/columns need work.
+      LayoutRect ancestorCompositedBounds = ancestorBacking->CompositedBounds();
+      ancestorCompositedBounds.SetLocation(LayoutPoint());
+      parentGraphicsLayerRect = ancestorCompositedBounds;
+    }
 
     auto *ancestorRenderBox = DynamicDowncast<RenderBox>(compositedAncestor->Renderer());
     if (!ancestorRenderBox)

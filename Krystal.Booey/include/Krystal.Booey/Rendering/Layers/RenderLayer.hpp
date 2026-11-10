@@ -189,8 +189,7 @@ namespace krys::boo
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Masks, SVG clip paths, resizing, scrollbars, event regions and fragmentation (paginated
-  // collectFragments) come with effects and fragmentation.
+  // FIXME: Masks, SVG clip paths, resizing, scrollbars and event regions come with effects.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
   {
     KRYS_NON_COPY_MOVABLE(RenderLayer);
@@ -1534,6 +1533,8 @@ namespace krys::boo
 #pragma endregion
 
     KRYS_NODISCARD bool IsRenderFragmentedFlow() const noexcept;
+    /// @brief Whether the layer's renderer is in a fragmented flow, or is one.
+    KRYS_NODISCARD bool IsInsideFragmentedFlow() const noexcept;
 
     void SetIsHiddenByOverflowTruncation(bool isHidden) noexcept;
 
@@ -1759,6 +1760,12 @@ namespace krys::boo
                           HitTestResult &, const LayoutRect &hitTestRect, const HitTestLocation &,
                           bool appliedTransform, const HitTestingTransformState * = nullptr,
                           double *zOffset = nullptr) noexcept;
+    /// @brief Hit tests a transformed layer in a paginated layer in each column, unfragmented.
+    HitLayer HitTestTransformedLayerInFragments(RenderLayer *rootLayer, RenderLayer *containerLayer,
+                                                const HitTestRequest &, HitTestResult &,
+                                                const LayoutRect &hitTestRect, const HitTestLocation &,
+                                                const HitTestingTransformState * = nullptr,
+                                                double *zOffset = nullptr) noexcept;
     HitLayer HitTestLayerByApplyingTransform(RenderLayer *rootLayer, RenderLayer *containerLayer,
                                              const HitTestRequest &, HitTestResult &,
                                              const LayoutRect &hitTestRect, const HitTestLocation &,
@@ -1829,9 +1836,26 @@ namespace krys::boo
                                        const LayoutSize &translationOffset = LayoutSize()) noexcept;
     void PaintList(LayerList, GraphicsContext &, const LayerPaintingInfo &, EnumSet<PaintLayerFlag>) noexcept;
 
+  public:
+    enum ShouldApplyRootOffsetToFragments
+    {
+      ApplyRootOffsetToFragments,
+      IgnoreRootOffsetForFragments
+    };
+    /// @brief The layer's fragments: one, or one per column it's painted in when it's paginated.
     void CollectFragments(LayerFragments &, const RenderLayer *rootLayer, const LayoutRect &dirtyRect,
-                          ClipRectsType, EnumSet<ClipRectsOption>,
-                          const LayoutSize &offsetFromRoot) const noexcept;
+                          PaginationInclusionMode, ClipRectsType, EnumSet<ClipRectsOption>,
+                          const LayoutSize &offsetFromRoot, const LayoutRect *layerBoundingBox = nullptr,
+                          ShouldApplyRootOffsetToFragments = IgnoreRootOffsetForFragments) const noexcept;
+    /// @brief The layer's enclosing pagination layer, if it's @p rootLayer or below it.
+    KRYS_NODISCARD RenderLayer *
+      EnclosingPaginationLayerInSubtree(const RenderLayer *rootLayer,
+                                        PaginationInclusionMode mode) const noexcept;
+
+  private:
+    /// @brief Paints a transformed layer in a paginated layer once per column, unfragmented.
+    void PaintTransformedLayerIntoFragments(GraphicsContext &, const LayerPaintingInfo &,
+                                            EnumSet<PaintLayerFlag>) noexcept;
     void UpdatePaintingInfoForFragments(LayerFragments &, const LayerPaintingInfo &, EnumSet<PaintLayerFlag>,
                                         bool shouldPaintContent,
                                         const LayoutSize &offsetFromRoot) const noexcept;

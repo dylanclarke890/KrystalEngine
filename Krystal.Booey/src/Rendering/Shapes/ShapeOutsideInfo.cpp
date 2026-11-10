@@ -212,8 +212,10 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit LogicalLeftOffset(const RenderBox &renderer) noexcept
     {
-      // FIXME: A fragment container's offset is 0 (isRenderFragmentContainer), once there are fragmented
-      // flows.
+      if (renderer.IsRenderFragmentContainer())
+      {
+        return 0_lu;
+      }
 
       switch (renderer.Style().GetShapeOutside().EffectiveCSSBox())
       {

@@ -578,8 +578,9 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity RenderReplaced::PositionForPoint(const LayoutPoint &point,
-                                                             HitTestSource source) noexcept
+  dom::PositionWithAffinity
+    RenderReplaced::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                     const RenderFragmentContainer * /*fragment*/) noexcept
   {
     auto [top, bottom] = [&]() -> std::pair<float, float>
     {

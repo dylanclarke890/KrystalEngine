@@ -135,9 +135,17 @@ namespace krys::boo
       _pageLogicalHeightChanged = ancestor->PageLogicalHeightChanged();
       _pageOffset = ancestor->PageOffset();
 
-      // FIXME: Disable pagination for objects we don't support (isUnsplittableForPagination), and paginate
-      // inside fragmented flows (enclosingFragmentedFlow), once there's fragmentation.
-      _isPaginated = static_cast<bool>(_pageLogicalHeight);
+      // Disable pagination for objects we don't support. For now this includes overflow:scroll/auto, inline
+      // blocks and writing mode roots.
+      if (renderer.IsUnsplittableForPagination())
+      {
+        _pageLogicalHeight = 0_lu;
+        _isPaginated = false;
+      }
+      else
+      {
+        _isPaginated = _pageLogicalHeight || renderer.EnclosingFragmentedFlow();
+      }
     }
   }
 
