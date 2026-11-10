@@ -1399,12 +1399,12 @@ namespace krys::boo::css
 
         if (!dense)
         {
-          return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(flowDirection));
+          return ValueList::CreateSpaceSeparated({PrimitiveValue::Create(flowDirection)});
         }
 
         if (flowDirection == ValueId::Row)
         {
-          return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(ValueId::Dense));
+          return ValueList::CreateSpaceSeparated({PrimitiveValue::Create(ValueId::Dense)});
         }
 
         return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(flowDirection),

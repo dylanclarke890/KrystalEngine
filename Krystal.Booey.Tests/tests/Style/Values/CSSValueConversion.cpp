@@ -59,7 +59,7 @@ namespace krys::boo::style::tests
     SECTION("A string from a non-primitive value is invalid at computed-value time")
     {
       CHECK(
-        ConvertCSSValueToStyle<css::CSSOMString>(*State, *css::ValueList::CreateSpaceSeparated()).empty());
+        ConvertCSSValueToStyle<css::CSSOMString>(*State, *css::ValueList::CreateSpaceSeparated({})).empty());
       CHECK(IsInvalid());
     }
 
@@ -127,7 +127,7 @@ namespace krys::boo::style::tests
       CHECK(single[0] == Visibility::Collapse);
 
       // A comma-separated list isn't a space-separated one.
-      auto commaList = css::ValueList::CreateCommaSeparated(css::PrimitiveValue::Create(ValueId::Hidden));
+      auto commaList = css::ValueList::CreateCommaSeparated({css::PrimitiveValue::Create(ValueId::Hidden)});
       auto commas = ConvertCSSValueToStyle<css::CommaSeparatedFixedList<Visibility>>(*State, *commaList);
       REQUIRE(commas.size() == 1);
       CHECK(commas[0] == Visibility::Hidden);
@@ -216,7 +216,7 @@ namespace krys::boo::style::tests
     SECTION("A non-primitive value is invalid at computed-value time")
     {
       CHECK(
-        ConvertCSSValueToStyle<Length<>>(*State, *css::ValueList::CreateSpaceSeparated()).UnresolvedValue()
+        ConvertCSSValueToStyle<Length<>>(*State, *css::ValueList::CreateSpaceSeparated({})).UnresolvedValue()
         == 0);
       CHECK(IsInvalid());
     }

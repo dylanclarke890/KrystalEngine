@@ -33,12 +33,12 @@ namespace krys::boo::css::tests
 
     SECTION("Space-separated overloads")
     {
-      auto empty = ValueList::CreateSpaceSeparated();
+      auto empty = ValueList::CreateSpaceSeparated({});
       CHECK(empty->IsValueListValue());
       CHECK(empty->size() == 0u);
       CHECK(CssText(*empty) == "");
 
-      CHECK(CssText(*ValueList::CreateSpaceSeparated(Px(1.0))) == "1px");
+      CHECK(CssText(*ValueList::CreateSpaceSeparated({Px(1.0)})) == "1px");
       CHECK(CssText(*ValueList::CreateSpaceSeparated(Px(1.0), Px(2.0))) == "1px 2px");
       CHECK(CssText(*ValueList::CreateSpaceSeparated(Px(1.0), Px(2.0), Px(3.0))) == "1px 2px 3px");
       CHECK(CssText(*ValueList::CreateSpaceSeparated(Px(1.0), Px(2.0), Px(3.0), Px(4.0)))
@@ -50,7 +50,7 @@ namespace krys::boo::css::tests
 
     SECTION("Comma-separated overloads")
     {
-      auto single = ValueList::CreateCommaSeparated(Px(1.0));
+      auto single = ValueList::CreateCommaSeparated({Px(1.0)});
       CHECK(single->Separator() == ValueSeparator::CommaSeparator);
       CHECK(CssText(*single) == "1px");
       CHECK(CssText(*ValueList::CreateCommaSeparated(ValueListBuilder {Px(1.0), Px(2.0), Px(3.0)}))
@@ -59,7 +59,7 @@ namespace krys::boo::css::tests
 
     SECTION("Slash-separated overloads")
     {
-      auto single = ValueList::CreateSlashSeparated(Px(1.0));
+      auto single = ValueList::CreateSlashSeparated({Px(1.0)});
       CHECK(single->Separator() == ValueSeparator::SlashSeparator);
       CHECK(CssText(*single) == "1px");
       CHECK(CssText(*ValueList::CreateSlashSeparated(Px(1.0), Px(2.0))) == "1px / 2px");
@@ -144,7 +144,7 @@ namespace krys::boo::css::tests
 
     SECTION("A single-item list equals its item")
     {
-      auto single = ValueList::CreateCommaSeparated(Px(1.0));
+      auto single = ValueList::CreateCommaSeparated({Px(1.0)});
       auto item = Px(1.0);
       CHECK(single->ContainsSingleEqualItem(*item));
       CHECK(*single == *item);
@@ -191,7 +191,7 @@ namespace krys::boo::css::tests
     SECTION("Computed style dependencies")
     {
       CHECK(list->ComputedStyleDependencies().Properties == List<PropertyId> {PropertyId::FontSize});
-      CHECK(ValueList::CreateSpaceSeparated(Px(1.0))->ComputedStyleDependencies().Properties.empty());
+      CHECK(ValueList::CreateSpaceSeparated({Px(1.0)})->ComputedStyleDependencies().Properties.empty());
     }
   }
 }

@@ -160,9 +160,7 @@ namespace krys::boo::css
   class ValueList final : public ValueContainingList
   {
   private:
-    explicit ValueList(ValueSeparator separator) noexcept;
     ValueList(ValueSeparator separator, ValueListBuilder values) noexcept;
-    ValueList(ValueSeparator separator, Ref<Value> value) noexcept;
     ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2) noexcept;
     ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2, Ref<Value> value3) noexcept;
     ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2, Ref<Value> value3,
@@ -173,14 +171,8 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<ValueList> Create(char32 separator, ValueListBuilder values) noexcept;
 
     KRYS_NODISCARD static Ref<ValueList> CreateCommaSeparated(ValueListBuilder values) noexcept;
-    // FIXME: Upgrade callers to not use a list at all.
-    KRYS_NODISCARD static Ref<ValueList> CreateCommaSeparated(Ref<Value> value) noexcept;
 
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(ValueListBuilder values) noexcept;
-    // FIXME: Get rid of the caller that needs to create an empty list.
-    KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated() noexcept;
-    // FIXME: Upgrade callers to not use a list at all.
-    KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value) noexcept;
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2) noexcept;
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2,
                                                               Ref<Value> value3) noexcept;
@@ -188,8 +180,6 @@ namespace krys::boo::css
                                                               Ref<Value> value3, Ref<Value> value4) noexcept;
 
     KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(ValueListBuilder values) noexcept;
-    // FIXME: Upgrade callers to not use a list at all.
-    KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(Ref<Value> value) noexcept;
     KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(Ref<Value> value1, Ref<Value> value2) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;

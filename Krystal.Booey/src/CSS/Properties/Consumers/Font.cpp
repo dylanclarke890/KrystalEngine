@@ -791,7 +791,7 @@ namespace krys::boo::css::PropertyParserHelpers
       tokens = tokensAfterAngles;
       return FontStyleRangeValue::Create(
         PrimitiveValue::Create(*keyword),
-        ValueList::CreateSpaceSeparated(ResolveToPrimitiveValue(krys::move(*firstAngle))));
+        ValueList::CreateSpaceSeparated({ResolveToPrimitiveValue(krys::move(*firstAngle))}));
     }
 
     auto secondAngle = ConsumeFontStyleAngleUnresolved(tokensAfterAngles, state);

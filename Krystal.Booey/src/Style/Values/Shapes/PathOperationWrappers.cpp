@@ -157,7 +157,7 @@ namespace krys::boo::style
   {
     if (path.ReferenceBox() == CSSBoxType::BoxMissing)
     {
-      return css::ValueList::CreateSpaceSeparated(CreateCSSValue(pool, style, path.GetShape(), conversion));
+      return css::ValueList::CreateSpaceSeparated({CreateCSSValue(pool, style, path.GetShape(), conversion)});
     }
     return css::ValueList::CreateSpaceSeparated(CreateCSSValue(pool, style, path.GetShape(), conversion),
                                                 CreateCSSValue(pool, style, path.ReferenceBox()));

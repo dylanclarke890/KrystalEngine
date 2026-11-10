@@ -65,7 +65,8 @@ namespace krys::boo::style::tests
     CHECK(Convert<Opacity>(PropertyId::Opacity, u8"-1") == Opacity {0.f});
     CHECK_FALSE(IsInvalid());
 
-    CHECK(ConvertCSSValueToStyle<Opacity>(*State, *css::ValueList::CreateSpaceSeparated()) == Opacity {1.f});
+    CHECK(ConvertCSSValueToStyle<Opacity>(*State, *css::ValueList::CreateSpaceSeparated({}))
+          == Opacity {1.f});
     CHECK(IsInvalid());
   }
 }

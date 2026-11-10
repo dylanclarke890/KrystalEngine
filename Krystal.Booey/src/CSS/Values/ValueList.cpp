@@ -91,18 +91,8 @@ namespace krys::boo::css
     }
   }
 
-  ValueList::ValueList(ValueSeparator separator) noexcept
-      : ValueContainingList(ValueType::ValueList, separator)
-  {
-  }
-
   ValueList::ValueList(ValueSeparator separator, ValueListBuilder values) noexcept
       : ValueContainingList(ValueType::ValueList, separator, krys::move(values))
-  {
-  }
-
-  ValueList::ValueList(ValueSeparator separator, Ref<Value> value) noexcept
-      : ValueContainingList(ValueType::ValueList, separator, krys::move(value))
   {
   }
 
@@ -130,19 +120,9 @@ namespace krys::boo::css
     return AdoptRef(*new ValueList(ValueSeparator::CommaSeparator, krys::move(values)));
   }
 
-  Ref<ValueList> ValueList::CreateCommaSeparated(Ref<Value> value) noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::CommaSeparator, krys::move(value)));
-  }
-
   Ref<ValueList> ValueList::CreateSlashSeparated(ValueListBuilder values) noexcept
   {
     return AdoptRef(*new ValueList(ValueSeparator::SlashSeparator, krys::move(values)));
-  }
-
-  Ref<ValueList> ValueList::CreateSlashSeparated(Ref<Value> value) noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::SlashSeparator, krys::move(value)));
   }
 
   Ref<ValueList> ValueList::CreateSlashSeparated(Ref<Value> value1, Ref<Value> value2) noexcept
@@ -150,19 +130,9 @@ namespace krys::boo::css
     return AdoptRef(*new ValueList(ValueSeparator::SlashSeparator, krys::move(value1), krys::move(value2)));
   }
 
-  Ref<ValueList> ValueList::CreateSpaceSeparated() noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::SpaceSeparator));
-  }
-
   Ref<ValueList> ValueList::CreateSpaceSeparated(ValueListBuilder values) noexcept
   {
     return AdoptRef(*new ValueList(ValueSeparator::SpaceSeparator, krys::move(values)));
-  }
-
-  Ref<ValueList> ValueList::CreateSpaceSeparated(Ref<Value> value) noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::SpaceSeparator, krys::move(value)));
   }
 
   Ref<ValueList> ValueList::CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2) noexcept

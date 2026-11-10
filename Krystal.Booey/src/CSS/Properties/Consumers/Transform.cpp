@@ -277,7 +277,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (tokens.IsAtEnd())
     {
-      return ValueList::CreateSpaceSeparated(krys::move(x));
+      return ValueList::CreateSpaceSeparated({krys::move(x)});
     }
 
     auto y = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
@@ -297,7 +297,7 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       if (!haveNonZeroY)
       {
-        return ValueList::CreateSpaceSeparated(krys::move(x));
+        return ValueList::CreateSpaceSeparated({krys::move(x)});
       }
 
       return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
@@ -314,7 +314,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (!haveNonZeroY && !haveNonZeroZ)
     {
-      return ValueList::CreateSpaceSeparated(krys::move(x));
+      return ValueList::CreateSpaceSeparated({krys::move(x)});
     }
 
     if (!haveNonZeroZ)
@@ -439,7 +439,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
       if (KnownToBeZero(xIsZero) && KnownToBeZero(yIsZero) && KnownToBeNotZero(zIsZero))
       {
-        return ValueList::CreateSpaceSeparated(angle);
+        return ValueList::CreateSpaceSeparated({angle});
       }
 
       list.push_back(krys::move(angle));
@@ -456,7 +456,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return ValueList::CreateSpaceSeparated(krys::move(axisIdentifier), krys::move(angle));
       }
 
-      return ValueList::CreateSpaceSeparated(krys::move(angle));
+      return ValueList::CreateSpaceSeparated({krys::move(angle)});
     }
 
     return nullptr;
@@ -491,7 +491,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (tokens.IsAtEnd())
     {
-      return ValueList::CreateSpaceSeparated(krys::move(x));
+      return ValueList::CreateSpaceSeparated({krys::move(x)});
     }
 
     auto y = ConsumePercentageDividedBy100OrNumber(tokens, state);
@@ -512,7 +512,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
       }
 
-      return ValueList::CreateSpaceSeparated(krys::move(x));
+      return ValueList::CreateSpaceSeparated({krys::move(x)});
     }
 
     auto z = ConsumePercentageDividedBy100OrNumber(tokens, state);
@@ -533,7 +533,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
     }
 
-    return ValueList::CreateSpaceSeparated(krys::move(x));
+    return ValueList::CreateSpaceSeparated({krys::move(x)});
   }
 
   Maybe<style::Transform> ParseTransformRaw(const CSSOMString &string, const ParserContext &context) noexcept

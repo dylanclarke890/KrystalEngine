@@ -45,7 +45,7 @@ namespace krys::boo::style::tests
 
     SECTION("A non-primitive value is invalid at computed-value time")
     {
-      CHECK(ConvertCSSValueToStyle<MarginEdge>(*State, *css::ValueList::CreateSpaceSeparated()).IsAuto());
+      CHECK(ConvertCSSValueToStyle<MarginEdge>(*State, *css::ValueList::CreateSpaceSeparated({})).IsAuto());
       CHECK(IsInvalid());
     }
   }

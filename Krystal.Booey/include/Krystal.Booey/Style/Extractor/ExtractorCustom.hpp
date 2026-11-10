@@ -1982,7 +1982,7 @@ namespace krys::boo::style
     if (itemsEqual(horizontalRadii, verticalRadii))
     {
       return css::ValueList::CreateSlashSeparated(
-        css::ValueList::CreateSpaceSeparated(krys::move(horizontalRadii)));
+        {css::ValueList::CreateSpaceSeparated(krys::move(horizontalRadii))});
     }
     return css::ValueList::CreateSlashSeparated(
       css::ValueList::CreateSpaceSeparated(krys::move(horizontalRadii)),
@@ -2555,7 +2555,7 @@ namespace krys::boo::style
       {
         return ShareRef(*list);
       }
-      return css::ValueList::CreateSpaceSeparated(krys::move(value));
+      return css::ValueList::CreateSpaceSeparated({krys::move(value)});
     };
 
     Ref<css::ValueList> startValue = createRangeValue(range.Start);
@@ -2814,7 +2814,7 @@ namespace krys::boo::style
 
     if (state.Style.GetContainerType() == ContainerType::Normal)
     {
-      return css::ValueList::CreateSlashSeparated(krys::move(name));
+      return css::ValueList::CreateSlashSeparated({krys::move(name)});
     }
 
     return css::ValueList::CreateSlashSeparated(
