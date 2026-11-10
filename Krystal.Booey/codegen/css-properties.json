@@ -7362,7 +7362,7 @@
         "render-style-storage-kind": "enum",
         "render-style-type": "LineJoin",
         "parser-grammar": "<<values>>",
-        "comment": "FIXME: Does not match the specification in either SVG2 or CSS Fill and Stroke Module Level 3"
+        "comment": "SVG 2's values: Fill and Stroke 3's [ crop | arcs | miter ] || [ bevel | round | fallback ] isn't supported."
       },
       "status": "supported",
       "specification": {

@@ -86,6 +86,21 @@ namespace krys::boo::css::tests
     CHECK(ConsumeToText(u8"1 2", parse, quirks, PropertyId::BorderSpacing) == "1px 2px");
   }
 
+  TEST_CASE_METHOD(ValueFixture, "PropertyParsing stroke-linejoin", "[CSS][Properties][PropertyParsing]")
+  {
+    // SVG 2's values.
+    CHECK(LonghandToText(u8"miter", PropertyId::StrokeLinejoin) == "miter");
+    CHECK(LonghandToText(u8"round", PropertyId::StrokeLinejoin) == "round");
+    CHECK(LonghandToText(u8"bevel", PropertyId::StrokeLinejoin) == "bevel");
+
+    // Fill and Stroke 3's other values and two-part form aren't supported.
+    CHECK(LonghandToText(u8"crop", PropertyId::StrokeLinejoin) == "<null>");
+    CHECK(LonghandToText(u8"arcs", PropertyId::StrokeLinejoin) == "<null>");
+    CHECK(LonghandToText(u8"fallback", PropertyId::StrokeLinejoin) == "<null>");
+    CHECK(LonghandToText(u8"miter-clip", PropertyId::StrokeLinejoin) == "<null>");
+    CHECK(LonghandToText(u8"miter bevel", PropertyId::StrokeLinejoin) == "<partial>");
+  }
+
   TEST_CASE_METHOD(ValueFixture, "PropertyParserCustom", "[CSS][Properties][PropertyParserCustom]")
   {
     SECTION("border-radius")
