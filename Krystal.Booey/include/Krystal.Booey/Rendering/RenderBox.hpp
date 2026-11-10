@@ -949,6 +949,12 @@ namespace krys::boo
     {
       return !IsRenderFragmentedFlow();
     }
+    /// @brief Whether the box mustn't be split across columns (replaced boxes, form controls, scrollers,
+    /// writing mode roots and size-contained boxes).
+    KRYS_NODISCARD bool IsUnsplittableForPagination() const noexcept;
+    /// @brief Whether the box scrolls its overflow in the block direction and has a specified height, so
+    /// splitting it would split its scrollbar.
+    KRYS_NODISCARD bool HasUnsplittableScrollingOverflow() const noexcept;
 
 #pragma endregion
 

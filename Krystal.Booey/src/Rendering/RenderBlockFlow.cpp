@@ -51,6 +51,7 @@
 #include "Krystal.Booey/Rendering/Line/LegacyLineLayout.hpp"
 #include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -84,6 +85,46 @@ namespace krys::boo
       : Margins(PositiveMarginBeforeDefault(block), NegativeMarginBeforeDefault(block),
                 PositiveMarginAfterDefault(block), NegativeMarginAfterDefault(block))
   {
+  }
+
+  RenderMultiColumnFlow *RenderBlockFlow::MultiColumnFlow() const noexcept
+  {
+    return HasRareBlockFlowData() ? RareBlockFlowData()->MultiColumnFlow.get() : nullptr;
+  }
+
+  void RenderBlockFlow::SetMultiColumnFlow(RenderMultiColumnFlow &fragmentedFlow) noexcept
+  {
+    krys_debug_assert(!MultiColumnFlow());
+    EnsureRareBlockFlowData().MultiColumnFlow = CreateWeakPtr(&fragmentedFlow);
+  }
+
+  void RenderBlockFlow::ClearMultiColumnFlow() noexcept
+  {
+    krys_debug_assert(MultiColumnFlow());
+    RareBlockFlowData()->MultiColumnFlow = nullptr;
+  }
+
+  bool RenderBlockFlow::WillCreateColumns() const noexcept
+  {
+    // The following types are not supposed to create multicol context.
+    if (IsRenderFileUploadControl() || IsRenderTextControl() || IsRenderListBox() || IsRenderSVGBlock()
+        || IsRenderMathMLBlock())
+    {
+      return false;
+    }
+    if (Style().Display() == DisplayType::RubyBlock || Style().Display() == DisplayType::RubyAnnotation)
+    {
+      return false;
+    }
+
+    if (!FirstChild() || Style().GetPseudoElementType())
+    {
+      return false;
+    }
+
+    // Columns always progress in the inline direction, so any non-auto column-width or column-count makes
+    // a multi-column container.
+    return Style().SpecifiesColumns();
   }
 
   // Our MarginInfo state used when laying out block children.
@@ -2166,7 +2207,27 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The styles of the multi-column flow's children, once there's multi-column layout.
+    if (MultiColumnFlow())
+    {
+      UpdateStylesForColumnChildren(oldStyle);
+    }
+  }
+
+  void RenderBlockFlow::UpdateStylesForColumnChildren(const RenderStyle *oldStyle) noexcept
+  {
+    auto columnsNeedLayout = oldStyle
+                             && (oldStyle->GetColumnCount() != Style().GetColumnCount()
+                                 || oldStyle->GetColumnWidth() != Style().GetColumnWidth());
+    for (auto *child = FirstChildBox();
+         child && (child->IsRenderFragmentedFlow() || child->IsRenderMultiColumnSet());
+         child = child->NextSiblingBox())
+    {
+      child->SetStyle(RenderStyle::CreateAnonymousStyleWithDisplay(Style(), DisplayType::Block));
+      if (columnsNeedLayout)
+      {
+        child->SetNeedsLayoutAndPreferredWidthsUpdate();
+      }
+    }
   }
 
   void RenderBlockFlow::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
@@ -2250,9 +2311,9 @@ namespace krys::boo
       {
         return;
       }
-      // FIXME: Not in a multi-column flow, once there are columns.
-      auto shouldIncludeFloats = options.Contains(ComputeOverflowOptions::RecomputeFloats)
-                                 || CreatesNewFormattingContext() || HasSelfPaintingLayer();
+      auto shouldIncludeFloats = !MultiColumnFlow()
+                                 && (options.Contains(ComputeOverflowOptions::RecomputeFloats)
+                                     || CreatesNewFormattingContext() || HasSelfPaintingLayer());
       if (!shouldIncludeFloats)
       {
         return;
@@ -3308,8 +3369,6 @@ namespace krys::boo
         }
       }
     }
-
-    // FIXME: Flip the allowance for a reversed column progression, once there's multi-column layout.
 
     return allowance;
   }

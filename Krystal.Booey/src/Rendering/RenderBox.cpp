@@ -5482,6 +5482,39 @@ namespace krys::boo
     return fragment ? fragment->GetRenderBoxFragmentInfo(*this) : nullptr;
   }
 
+  bool RenderBox::HasUnsplittableScrollingOverflow() const noexcept
+  {
+    // We will paginate as long as we don't scroll overflow in the pagination direction.
+    bool isHorizontal = IsHorizontalWritingMode();
+    if ((isHorizontal && !ScrollsOverflowY()) || (!isHorizontal && !ScrollsOverflowX()))
+    {
+      return false;
+    }
+
+    // We do have overflow. We'll still be willing to paginate as long as the block has auto logical
+    // height, auto or undefined max-logical-height and a zero or auto min-logical-height. Note this is
+    // just a heuristic, and it's still possible to have overflow under these conditions, but it should
+    // work out to be good enough for common cases.
+    const auto &style = Style();
+    return style.LogicalHeight().IsSpecified()
+           || (style.LogicalMaxHeight().IsSpecified()
+               && (!style.LogicalMaxHeight().IsPercentOrCalculated()
+                   || PercentageLogicalHeightIsResolvable()))
+           || (style.LogicalMinHeight().IsSpecified() && style.LogicalMinHeight().IsPossiblyPositive()
+               && (!style.LogicalMinHeight().IsPercentOrCalculated()
+                   || PercentageLogicalHeightIsResolvable()));
+  }
+
+  bool RenderBox::IsUnsplittableForPagination() const noexcept
+  {
+    return IsBlockLevelReplacedOrAtomicInline()
+           || (Is<html::HTMLFormControlElement>(GetElement()) && !Is<html::HTMLFieldSetElement>(GetElement()))
+           || HasUnsplittableScrollingOverflow() || (Parent() && IsWritingModeRoot())
+           || (IsFloating() && Style().GetPseudoElementType() == PseudoElementType::FirstLetter
+               && Style().InitialLetter().Drop() > 0)
+           || ShouldApplySizeContainment();
+  }
+
 #pragma endregion
 
 #pragma region Aspect ratio

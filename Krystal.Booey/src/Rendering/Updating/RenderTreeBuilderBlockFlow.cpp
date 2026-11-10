@@ -24,8 +24,10 @@
  */
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderMultiColumn.hpp"
 
 namespace krys::boo
 {
@@ -36,9 +38,36 @@ namespace krys::boo
   void RenderTreeBuilder::BlockFlow::Attach(RenderBlockFlow &parent, RenderPtr<RenderObject> child,
                                             RenderObject *beforeChild) noexcept
   {
-    // FIXME: Multi-column flows (and the fieldset legends that avoid them), and children moved into the
-    // enclosing fragmented flow, once there are any.
-    _builder.BlockBuilder().Attach(parent, krys::move(child), beforeChild);
+    if (auto *multicolumnFlow = parent.MultiColumnFlow())
+    {
+      auto legendAvoidsMulticolumn = parent.IsFieldset() && child->IsLegend();
+      if (legendAvoidsMulticolumn)
+      {
+        _builder.BlockBuilder().Attach(parent, krys::move(child), nullptr);
+        return;
+      }
+
+      auto legendBeforeChildIsIncorrect = parent.IsFieldset() && beforeChild && beforeChild->IsLegend();
+      if (legendBeforeChildIsIncorrect)
+      {
+        _builder.BlockBuilder().Attach(*multicolumnFlow, krys::move(child), nullptr);
+        return;
+      }
+
+      // When the before child is set to be the first child of the RenderBlockFlow, we need to readjust it to
+      // be the first child of the multicol container.
+      _builder.Attach(*multicolumnFlow, krys::move(child),
+                      beforeChild == multicolumnFlow ? multicolumnFlow->FirstChild() : beforeChild);
+      return;
+    }
+
+    auto *beforeChildOrPlaceholder = beforeChild;
+    if (auto *containingFragmentedFlow = parent.EnclosingFragmentedFlow())
+    {
+      beforeChildOrPlaceholder =
+        _builder.MultiColumnBuilder().ResolveMovedChild(*containingFragmentedFlow, beforeChild);
+    }
+    _builder.BlockBuilder().Attach(parent, krys::move(child), beforeChildOrPlaceholder);
   }
 
   void RenderTreeBuilder::BlockFlow::MoveAllChildrenIncludingFloats(

@@ -31,6 +31,7 @@
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::layout_integration
 {
@@ -42,6 +43,7 @@ namespace krys::boo
   class LegacyLineLayout;
   class LegacyRootInlineBox;
   class RenderBlockFlow;
+  class RenderMultiColumnFlow;
 
   /// @brief The maximal positive and negative margins on each block-axis side, collapsed so far.
   class MarginValues
@@ -105,6 +107,7 @@ namespace krys::boo
 
     MarginValues Margins;
     LayoutUnit AlignContentShift; // Caches negative shifts for overflow calculation.
+    WeakPtr<RenderMultiColumnFlow> MultiColumnFlow;
 
     explicit RenderBlockFlowRareData(const RenderBlockFlow &block) noexcept;
 
@@ -173,6 +176,16 @@ namespace krys::boo
                      LayoutUnit pageLogicalHeight = 0_lu) noexcept override;
 
     void SetChildrenInline(bool value) noexcept final;
+
+    /// @brief The multi-column flow holding the block's content, if the block is a multi-column container.
+    KRYS_NODISCARD RenderMultiColumnFlow *MultiColumnFlow() const noexcept;
+    void SetMultiColumnFlow(RenderMultiColumnFlow &fragmentedFlow) noexcept;
+    void ClearMultiColumnFlow() noexcept;
+    /// @brief Whether the block's style makes it a multi-column container, so it needs a multi-column flow.
+    KRYS_NODISCARD bool WillCreateColumns() const noexcept;
+    /// @brief Gives the multi-column flow and column sets the block's style, which they're anonymous boxes
+    /// of.
+    void UpdateStylesForColumnChildren(const RenderStyle *oldStyle) noexcept;
 
     KRYS_NODISCARD bool HasContentfulInlineOrBlockLine() const noexcept;
     KRYS_NODISCARD bool HasContentfulInlineLine() const noexcept;

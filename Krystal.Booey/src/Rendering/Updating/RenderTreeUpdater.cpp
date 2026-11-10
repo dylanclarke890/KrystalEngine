@@ -1152,8 +1152,6 @@ namespace krys::boo
     }
 
     pop(0, needsDescendantRepaintAndLayout);
-
-    // FIXME: Leftover pagination renderers, once there's multi-column layout.
   }
 
   void RenderTreeUpdater::TearDownLeftoverChildrenOfComposedTree(dom::Element &element,

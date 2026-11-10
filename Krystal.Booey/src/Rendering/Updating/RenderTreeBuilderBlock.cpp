@@ -28,10 +28,12 @@
 #include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderMultiColumn.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -458,7 +460,14 @@ namespace krys::boo
                                      WillBeDestroyed willBeDestroyed,
                                      CanCollapseAnonymousBlock canCollapseAnonymousBlock) noexcept
   {
-    // FIXME: Multi-column flows, once there are any.
+    if (!parent.RenderTreeBeingDestroyed())
+    {
+      if (auto *fragmentedFlow = parent.MultiColumnFlow(); fragmentedFlow && fragmentedFlow != &child)
+      {
+        _builder.MultiColumnBuilder().MultiColumnRelativeWillBeRemoved(*fragmentedFlow, child,
+                                                                       canCollapseAnonymousBlock);
+      }
+    }
     return Detach(static_cast<RenderBlock &>(parent), child, willBeDestroyed, canCollapseAnonymousBlock);
   }
 

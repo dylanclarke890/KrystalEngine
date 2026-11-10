@@ -52,6 +52,8 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -1557,13 +1559,25 @@ namespace krys::boo
     // FIXME: We should really propagate only when the child renderer sticks out.
     bool repaintRectNeedsConverting = false;
     // Issue repaint on the renderer with outline: auto.
-    // FIXME: Column spanner placeholders, once there are multi-column flows.
     for (const auto *renderer = this; renderer; renderer = renderer->Parent())
     {
-      bool rendererHasOutlineAutoAncestor = renderer->HasOutlineAutoAncestor();
+      // A spanner continues up from its placeholder, where it is in the flow.
+      const auto *originalRenderer = renderer;
+      if (auto *previousMultiColumnSet = DynamicDowncast<RenderMultiColumnSet>(renderer->PreviousSibling());
+          previousMultiColumnSet && !renderer->IsRenderMultiColumnSet() && !renderer->IsLegend())
+      {
+        auto *placeholder = previousMultiColumnSet->MultiColumnFlow()->FindColumnSpannerPlaceholder(
+          Downcast<RenderBox>(*renderer));
+        krys_debug_assert(placeholder);
+        renderer = placeholder;
+      }
+
+      bool rendererHasOutlineAutoAncestor =
+        renderer->HasOutlineAutoAncestor() || originalRenderer->HasOutlineAutoAncestor();
       krys_debug_assert(rendererHasOutlineAutoAncestor
-                        || renderer->OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto);
-      if (renderer == &repaintContainer && rendererHasOutlineAutoAncestor)
+                        || originalRenderer->OutlineStyleForRepaint().GetOutlineStyle()
+                             == OutlineStyle::Auto);
+      if (originalRenderer == &repaintContainer && rendererHasOutlineAutoAncestor)
       {
         repaintRectNeedsConverting = true;
       }
@@ -1573,12 +1587,12 @@ namespace krys::boo
       }
       // Issue repaint on the correct repaint container.
       LayoutRect adjustedRepaintRect = repaintRect;
-      adjustedRepaintRect.Inflate(LayoutUnit {renderer->OutlineStyleForRepaint().OutlineSize()});
+      adjustedRepaintRect.Inflate(LayoutUnit {originalRenderer->OutlineStyleForRepaint().OutlineSize()});
       if (!repaintRectNeedsConverting)
       {
         repaintContainer.RepaintRectangle(adjustedRepaintRect);
       }
-      else if (auto *rendererWithOutline = DynamicDowncast<RenderLayerModelObject>(*renderer))
+      else if (auto *rendererWithOutline = DynamicDowncast<RenderLayerModelObject>(*originalRenderer))
       {
         adjustedRepaintRect =
           LayoutRect(repaintContainer

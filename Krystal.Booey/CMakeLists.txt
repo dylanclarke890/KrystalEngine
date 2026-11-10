@@ -2751,6 +2751,9 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp
   include/Krystal.Booey/Rendering/MathML/RenderMathMLUnderOver.hpp
   include/Krystal.Booey/Rendering/MotionPath.hpp
+  include/Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp
+  include/Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp
+  include/Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp
   include/Krystal.Booey/Rendering/Painting/BackgroundPainter.hpp
   include/Krystal.Booey/Rendering/Painting/BorderEdge.hpp
   include/Krystal.Booey/Rendering/Painting/BorderPainter.hpp
@@ -2939,6 +2942,7 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderFormControls.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderMultiColumn.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderSVG.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp
@@ -3023,6 +3027,9 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/MathML/RenderMathMLToken.cpp
   src/Rendering/MathML/RenderMathMLUnderOver.cpp
   src/Rendering/MotionPath.cpp
+  src/Rendering/MultiColumn/RenderMultiColumnFlow.cpp
+  src/Rendering/MultiColumn/RenderMultiColumnSet.cpp
+  src/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.cpp
   src/Rendering/Painting/BackgroundPainter.cpp
   src/Rendering/Painting/BorderEdge.cpp
   src/Rendering/Painting/BorderPainter.cpp
@@ -3183,6 +3190,7 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Updating/RenderTreeBuilderFormControls.cpp
   src/Rendering/Updating/RenderTreeBuilderInline.cpp
   src/Rendering/Updating/RenderTreeBuilderList.cpp
+  src/Rendering/Updating/RenderTreeBuilderMultiColumn.cpp
   src/Rendering/Updating/RenderTreeBuilderRuby.cpp
   src/Rendering/Updating/RenderTreeBuilderSVG.cpp
   src/Rendering/Updating/RenderTreeBuilderTable.cpp

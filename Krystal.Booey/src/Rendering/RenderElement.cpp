@@ -50,6 +50,7 @@
 #include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/Painting/OutlinePainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
@@ -1014,7 +1015,12 @@ namespace krys::boo
 
   void RenderElement::UpdateOutlineAutoAncestor(bool hasOutlineAuto) noexcept
   {
-    // FIXME: Column spanner placeholders, once there are multi-column flows.
+    if (auto *placeholder = DynamicDowncast<RenderMultiColumnSpannerPlaceholder>(*this))
+    {
+      auto *spanner = placeholder->Spanner();
+      spanner->SetHasOutlineAutoAncestor(hasOutlineAuto);
+      spanner->UpdateOutlineAutoAncestor(hasOutlineAuto);
+    }
 
     for (auto &child : ChildrenOfType<RenderObject>(*this))
     {
@@ -1643,10 +1649,9 @@ namespace krys::boo
 
   bool RenderElement::IsAnonymousBlock() const noexcept
   {
-    // FIXME: Multi-column sets, once there are any.
     return IsAnonymous() && Style().Display() == DisplayType::Block && !Style().GetPseudoElementType()
            && IsRenderBlock() && !IsRenderMathMLBlock() && !IsRenderListMarker() && !IsRenderFragmentedFlow()
-           && !IsRenderView();
+           && !IsRenderMultiColumnSet() && !IsRenderView();
   }
 
   bool RenderElement::IsBlockContainer() const noexcept

@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderMultiColumn.hpp"
 
 namespace krys::boo
 {
@@ -35,8 +36,13 @@ namespace krys::boo
   void RenderTreeBuilder::Inline::Attach(RenderInline &parent, RenderPtr<RenderObject> child,
                                          RenderObject *beforeChild) noexcept
   {
-    // FIXME: Children moved into the enclosing fragmented flow, once there are fragmented flows.
-    AttachIgnoringContinuation(parent, krys::move(child), beforeChild);
+    auto *beforeChildOrPlaceholder = beforeChild;
+    if (auto *fragmentedFlow = parent.EnclosingFragmentedFlow())
+    {
+      beforeChildOrPlaceholder =
+        _builder.MultiColumnBuilder().ResolveMovedChild(*fragmentedFlow, beforeChild);
+    }
+    AttachIgnoringContinuation(parent, krys::move(child), beforeChildOrPlaceholder);
   }
 
   void RenderTreeBuilder::Inline::AttachIgnoringContinuation(RenderInline &parent,
