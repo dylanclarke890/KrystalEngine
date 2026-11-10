@@ -2,7 +2,7 @@
 
 Known bugs and missing features in Krystal.Booey, by area. A bug with a `[!shouldfail]` test names it; most entries also have a `// FIXME:` where the fix goes. Remove an entry when it's fixed, and add one for a bug that's found but not fixed, with a `[!shouldfail]` test when one can be written.
 
-What's out of scope by choice (scripting, the network, frames, workers, accessibility and the rest) is in `OVERVIEW.md` and isn't repeated here. Where Booey deliberately differs from a specification or Chrome, it's in `DIFFERENCES.md`. Issues in Render2D and Krystal.UI are in `Krystal.Gfx/docs/OVERVIEW.md` and `Krystal.UI/docs/OVERVIEW.md`.
+What's out of scope by choice (scripting, the network, frames, workers and the rest), and what's planned for later (video, accessibility, multi-column layout and the rest), is in `OVERVIEW.md` and isn't repeated here. Where Booey deliberately differs from a specification or Chrome, it's in `DIFFERENCES.md`. Issues in Render2D and Krystal.UI are in `Krystal.Gfx/docs/OVERVIEW.md` and `Krystal.UI/docs/OVERVIEW.md`.
 
 ## Threads
 

@@ -506,8 +506,6 @@ namespace krys::boo
 
     // FIXME: Update the elements affected by media queries (the active theme colour meta element, and images
     // whose sources depend on media queries), once they're tracked.
-    // FIXME: Apply the pagination of the document element's or <body>'s `overflow` to the view
-    // (applyPaginationToViewport), once there's pagination.
 
     // Always ensure our style info is up-to-date. This can happen in situations where
     // the layout beats any sort of style recalc update that needs to occur.
