@@ -2677,9 +2677,6 @@ namespace krys::boo
     LayoutPoint scrolledOffset = paintOffset;
     scrolledOffset.MoveBy(-GetScrollPosition());
 
-    // FIXME: Clipping of column rules does not work. We will need a separate paint phase for column rules I
-    // suspect in order to get clipping correct (since it has to paint as background but is still considered
-    // "contents").
     if ((paintPhase == PaintPhase::BlockBackground || paintPhase == PaintPhase::ChildBlockBackground)
         && Style().UsedVisibility() == Visibility::Visible)
     {
