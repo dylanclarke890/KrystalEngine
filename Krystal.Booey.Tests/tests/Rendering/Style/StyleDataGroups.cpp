@@ -24,7 +24,7 @@ namespace krys::boo::tests
 
     auto inherited = StyleInheritedData::Create();
     CHECK(inherited->Color == ComputedStyle::InitialColor());
-    CHECK(inherited->BorderHorizontalSpacing == ComputedStyle::InitialBorderHorizontalSpacing());
+    CHECK(inherited->BorderSpacing == ComputedStyle::InitialBorderSpacing());
 
     auto rareInherited = StyleRareInheritedData::Create();
     CHECK(rareInherited->TabSize == ComputedStyle::InitialTabSize());

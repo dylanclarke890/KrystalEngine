@@ -115,6 +115,90 @@ namespace krys::boo::style::tests
     CHECK(ComputedValue(ea, css::PropertyId::Margin) == "1px 2px");
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: pair shorthands", "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { contain-intrinsic-size: auto 10px; overscroll-behavior: contain }
+      #b { contain-intrinsic-size: 10px auto none }
+    </style><div id=a></div><div id=b></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+
+    CHECK(Computed(ea, css::PropertyId::ContainIntrinsicSize) == "auto 10px");
+    CHECK(Computed(eb, css::PropertyId::ContainIntrinsicSize) == "10px auto none");
+    CHECK(Computed(ea, css::PropertyId::OverscrollBehavior) == "contain");
+    CHECK(Computed(eb, css::PropertyId::OverscrollBehavior) == "auto");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: border-spacing", "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { border-spacing: 1px 2px }
+      #b { border-spacing: 3px }
+    </style><div id=a></div><div id=b></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+
+    CHECK(Computed(ea, css::PropertyId::BorderSpacing) == "1px 2px");
+    CHECK(Computed(eb, css::PropertyId::BorderSpacing) == "3px");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: overscroll-behavior with different longhands",
+                   "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { overscroll-behavior: contain none }
+      #b { overscroll-behavior: auto contain }
+    </style><div id=a></div><div id=b></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+
+    CHECK(Computed(ea, css::PropertyId::OverscrollBehavior) == "contain none");
+    CHECK(Computed(eb, css::PropertyId::OverscrollBehavior) == "auto contain");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: page-break-* with legacy keywords",
+                   "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { break-after: page; break-before: avoid; break-inside: auto }
+      #b { page-break-after: always; page-break-before: auto; page-break-inside: avoid }
+    </style><div id=a></div><div id=b></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+
+    CHECK(Computed(ea, css::PropertyId::PageBreakAfter) == "always");
+    CHECK(Computed(ea, css::PropertyId::PageBreakBefore) == "avoid");
+    CHECK(Computed(ea, css::PropertyId::PageBreakInside) == "auto");
+    CHECK(Computed(eb, css::PropertyId::BreakAfter) == "page");
+    CHECK(Computed(eb, css::PropertyId::PageBreakAfter) == "always");
+    CHECK(Computed(eb, css::PropertyId::PageBreakBefore) == "auto");
+    CHECK(Computed(eb, css::PropertyId::PageBreakInside) == "avoid");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: page-break-* with break-* values",
+                   "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { break-after: left; break-before: right; break-inside: avoid-page }
+      #b { break-after: column; break-before: recto; break-inside: avoid-column }
+      #c { break-after: avoid-page; break-before: verso }
+    </style><div id=a></div><div id=b></div><div id=c></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+    Extractor ec {&fixture.ById(u8"c")};
+
+    CHECK(Computed(ea, css::PropertyId::PageBreakAfter) == "left");
+    CHECK(Computed(ea, css::PropertyId::PageBreakBefore) == "right");
+    CHECK(Computed(ea, css::PropertyId::PageBreakInside).empty());
+    CHECK(Computed(eb, css::PropertyId::PageBreakAfter).empty());
+    CHECK(Computed(eb, css::PropertyId::PageBreakBefore).empty());
+    CHECK(Computed(eb, css::PropertyId::PageBreakInside).empty());
+    CHECK(Computed(ec, css::PropertyId::PageBreakAfter).empty());
+    CHECK(Computed(ec, css::PropertyId::PageBreakBefore).empty());
+    CHECK_FALSE(eb.PropertyValue(css::PropertyId::PageBreakAfter));
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: custom properties and copies", "[Style][Extractor]")
   {
     ResolverFixture fixture {u8R"(<!DOCTYPE html><style>

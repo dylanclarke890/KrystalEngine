@@ -168,9 +168,9 @@ namespace krys::boo
     // In the collapsed border model, there is no cell spacing.
     auto usedZoom = Style().UsedZoomForLength();
     _hSpacing =
-      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().BorderHorizontalSpacing(), usedZoom);
+      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().GetBorderSpacing().Width(), usedZoom);
     _vSpacing =
-      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().BorderVerticalSpacing(), usedZoom);
+      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().GetBorderSpacing().Height(), usedZoom);
     krys_debug_assert(_hSpacing >= 0);
     krys_debug_assert(_vSpacing >= 0);
 

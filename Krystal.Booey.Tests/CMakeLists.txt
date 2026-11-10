@@ -605,6 +605,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Backgrounds/Backgrounds.cpp
 		tests/Style/Values/Borders/Borders.cpp
 		tests/Style/Values/Box/Box.cpp
+		tests/Style/Values/CSS2/BorderSpacing.cpp
 		tests/Style/Values/Color/Color.cpp
 		tests/Style/Values/Color/ColorConversion.cpp
 		tests/Style/Values/Color/DynamicRangeLimit.cpp

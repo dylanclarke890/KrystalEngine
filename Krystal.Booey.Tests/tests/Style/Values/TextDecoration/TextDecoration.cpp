@@ -2,7 +2,6 @@
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"
-#include "Krystal.Booey/Style/Values/NonStandard/WebKitBorderSpacing.hpp"
 #include "Krystal.Booey/Style/Values/NonStandard/WebKitLineBoxContain.hpp"
 #include "Krystal.Booey/Style/Values/NonStandard/WebKitLocale.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
@@ -139,7 +138,5 @@ namespace krys::boo::style::tests
     CHECK(Convert<WebkitLineBoxContain>(PropertyId::InternalLineBoxContain, u8"none").IsNone());
     CHECK(Serialised(Convert<WebkitLineBoxContain>(PropertyId::InternalLineBoxContain, u8"block inline"))
           == "block inline");
-
-    CHECK(Convert<WebkitBorderSpacing>(PropertyId::InternalBorderHorizontalSpacing, u8"4px") == 4_css_px);
   }
 }

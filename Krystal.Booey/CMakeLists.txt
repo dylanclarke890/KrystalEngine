@@ -3371,6 +3371,7 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Values/Content/Content.hpp
   include/Krystal.Booey/Style/Values/Content/Quotes.hpp
   include/Krystal.Booey/Style/Values/CounterStyles/CounterStyle.hpp
+  include/Krystal.Booey/Style/Values/CSS2/BorderSpacing.hpp
   include/Krystal.Booey/Style/Values/CSS2/ZIndex.hpp
   include/Krystal.Booey/Style/Values/CSSValueConversion.hpp
   include/Krystal.Booey/Style/Values/Display/Order.hpp
@@ -3458,7 +3459,6 @@ set(KRYSTAL_BOOEY_STYLE_HEADERS
   include/Krystal.Booey/Style/Values/Motion/RayFunction.hpp
   include/Krystal.Booey/Style/Values/Multicol/ColumnCount.hpp
   include/Krystal.Booey/Style/Values/Multicol/ColumnWidth.hpp
-  include/Krystal.Booey/Style/Values/NonStandard/WebKitBorderSpacing.hpp
   include/Krystal.Booey/Style/Values/NonStandard/WebKitLineBoxContain.hpp
   include/Krystal.Booey/Style/Values/NonStandard/WebKitLocale.hpp
   include/Krystal.Booey/Style/Values/Overflow/BlockEllipsis.hpp
@@ -3708,6 +3708,7 @@ set(KRYSTAL_BOOEY_STYLE_SOURCES
   src/Style/Values/Content/Content.cpp
   src/Style/Values/Content/Quotes.cpp
   src/Style/Values/CounterStyles/CounterStyle.cpp
+  src/Style/Values/CSS2/BorderSpacing.cpp
   src/Style/Values/CSS2/ZIndex.cpp
   src/Style/Values/Easing/CubicBezierEasingFunction.cpp
   src/Style/Values/Easing/EasingFunction.cpp

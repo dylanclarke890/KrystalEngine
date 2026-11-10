@@ -68,7 +68,13 @@ namespace krys::boo::css::tests
       {u8"overflow: hidden auto", PropertyId::Overflow, "hidden auto"},
       {u8"place-items: center", PropertyId::PlaceItems, "center"},
       {u8"margin-block: 1px 2px", PropertyId::MarginBlock, "1px 2px"},
-      {u8"border-spacing: 1px", PropertyId::BorderSpacing, "1px"},
+      {u8"overscroll-behavior: contain", PropertyId::OverscrollBehavior, "contain"},
+      {u8"overscroll-behavior: none none", PropertyId::OverscrollBehavior, "none"},
+      {u8"overscroll-behavior: contain none", PropertyId::OverscrollBehavior, "contain none"},
+      {u8"contain-intrinsic-size: 10px", PropertyId::ContainIntrinsicSize, "10px"},
+      {u8"contain-intrinsic-size: auto 10px", PropertyId::ContainIntrinsicSize, "auto 10px"},
+      {u8"contain-intrinsic-size: auto 10px auto 10px", PropertyId::ContainIntrinsicSize, "auto 10px"},
+      {u8"contain-intrinsic-size: 10px auto none", PropertyId::ContainIntrinsicSize, "10px auto none"},
     });
   }
 
@@ -210,6 +216,13 @@ namespace krys::boo::css::tests
       {u8"break-after: column", PropertyId::PageBreakAfter, ""},
       {u8"page-break-inside: avoid", PropertyId::PageBreakInside, "avoid"},
       {u8"break-inside: avoid-column", PropertyId::PageBreakInside, ""},
+      {u8"page-break-before: right", PropertyId::PageBreakBefore, "right"},
+      {u8"break-before: page", PropertyId::PageBreakBefore, "always"},
+      {u8"break-before: avoid", PropertyId::PageBreakBefore, "avoid"},
+      {u8"break-before: recto", PropertyId::PageBreakBefore, ""},
+      {u8"break-before: avoid-page", PropertyId::PageBreakBefore, ""},
+      {u8"break-inside: auto", PropertyId::PageBreakInside, "auto"},
+      {u8"break-inside: avoid-page", PropertyId::PageBreakInside, ""},
       {u8"white-space: normal", PropertyId::WhiteSpace, "normal"},
       {u8"white-space: pre", PropertyId::WhiteSpace, "pre"},
       {u8"white-space: pre-wrap", PropertyId::WhiteSpace, "pre-wrap"},

@@ -579,8 +579,7 @@ namespace krys::boo::style
     if (&a.InheritedData() != &b.InheritedData())
     {
       if (a.InheritedData().LineHeight != b.InheritedData().LineHeight
-          || a.InheritedData().BorderHorizontalSpacing != b.InheritedData().BorderHorizontalSpacing
-          || a.InheritedData().BorderVerticalSpacing != b.InheritedData().BorderVerticalSpacing)
+          || a.InheritedData().BorderSpacing != b.InheritedData().BorderSpacing)
       {
         return true;
       }
