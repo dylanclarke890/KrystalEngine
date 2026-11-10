@@ -6662,8 +6662,7 @@
     "overscroll-behavior": {
       "codegen-properties": {
         "longhands": ["overscroll-behavior-x", "overscroll-behavior-y"],
-        "parser-function": "ConsumeOverscrollBehaviorShorthand",
-        "parser-function-comment": "FIXME: Can probably use shorthand-pattern Values2",
+        "shorthand-pattern": "CoalescingPair",
         "parser-grammar": "[ contain | none | auto ]{1,2}",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."
@@ -8363,8 +8362,6 @@
       "codegen-properties": {
         "longhands": ["contain-intrinsic-width", "contain-intrinsic-height"],
         "shorthand-pattern": "CoalescingPair",
-        "parser-function": "ConsumeContainIntrinsicSizeShorthand",
-        "parser-function-comment": "FIXME: Can probably use 2Value",
         "parser-grammar": "<'contain-intrinsic-width'>{1,2}",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."

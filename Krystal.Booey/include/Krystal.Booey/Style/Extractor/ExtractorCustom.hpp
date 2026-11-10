@@ -150,7 +150,6 @@ namespace krys::boo::style
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(MaskBorderShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(MaskPositionShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(OffsetShorthand);
-    KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(OverscrollBehaviorShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(PageBreakAfterShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(PageBreakBeforeShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(PageBreakInsideShorthand);
@@ -1055,16 +1054,6 @@ namespace krys::boo::style
     decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
     {
       return functor(state.Style.GetMaskBorder());
-    }
-  };
-
-  template <>
-  struct PropertyExtractorAdaptor<css::PropertyId::OverscrollBehavior>
-  {
-    template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
-    {
-      return functor(std::max(state.Style.OverscrollBehaviorX(), state.Style.OverscrollBehaviorY()));
     }
   };
 
@@ -2671,7 +2660,6 @@ namespace krys::boo::style
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(FontSynthesis)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(LineClamp)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(MaskBorder)
-  KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(OverscrollBehavior)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(PageBreakAfter)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(PageBreakBefore)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(PageBreakInside)

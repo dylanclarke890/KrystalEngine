@@ -128,6 +128,31 @@ namespace krys::boo::css::tests
             == "flex-grow: 1; flex-shrink: 1; flex-basis: stretch");
     }
 
+    SECTION("overscroll-behavior")
+    {
+      CHECK(ShorthandToText(u8"contain", PropertyId::OverscrollBehavior)
+            == "overscroll-behavior-x: contain; overscroll-behavior-y: contain");
+      CHECK(ShorthandToText(u8"contain none", PropertyId::OverscrollBehavior)
+            == "overscroll-behavior-x: contain; overscroll-behavior-y: none");
+      CHECK(ShorthandToText(u8"auto none contain", PropertyId::OverscrollBehavior) == "<null>");
+      CHECK(ShorthandToText(u8"scroll", PropertyId::OverscrollBehavior) == "<null>");
+    }
+
+    SECTION("contain-intrinsic-size")
+    {
+      CHECK(ShorthandToText(u8"10px", PropertyId::ContainIntrinsicSize)
+            == "contain-intrinsic-width: 10px; contain-intrinsic-height: 10px");
+      CHECK(ShorthandToText(u8"auto 10px", PropertyId::ContainIntrinsicSize)
+            == "contain-intrinsic-width: auto 10px; contain-intrinsic-height: auto 10px");
+      CHECK(ShorthandToText(u8"10px auto none", PropertyId::ContainIntrinsicSize)
+            == "contain-intrinsic-width: 10px; contain-intrinsic-height: auto none");
+      CHECK(ShorthandToText(u8"none 10px", PropertyId::ContainIntrinsicSize)
+            == "contain-intrinsic-width: none; contain-intrinsic-height: 10px");
+      CHECK(ShorthandToText(u8"1px 2px 3px", PropertyId::ContainIntrinsicSize) == "<null>");
+      CHECK(ShorthandToText(u8"-1px", PropertyId::ContainIntrinsicSize) == "<null>");
+      CHECK(ShorthandToText(u8"auto", PropertyId::ContainIntrinsicSize) == "<null>");
+    }
+
     SECTION("view-timeline")
     {
       ParserContext context {ParserMode::HTMLStandard};

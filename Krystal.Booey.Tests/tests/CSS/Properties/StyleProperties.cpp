@@ -172,6 +172,18 @@ namespace krys::boo::css::tests
     }
   }
 
+  TEST_CASE_METHOD(ValueFixture, "StyleProperties: a pair shorthand's omitted second value is implicit",
+                   "[CSS][Properties][StyleProperties]")
+  {
+    auto properties = ParseDeclarations(u8"margin-block: 1px; padding-inline: 2px; "
+                                        u8"overscroll-behavior: contain; contain-intrinsic-size: 10px");
+    CHECK_FALSE(properties->IsPropertyImplicit(PropertyId::MarginBlockStart));
+    CHECK(properties->IsPropertyImplicit(PropertyId::MarginBlockEnd));
+    CHECK(properties->IsPropertyImplicit(PropertyId::PaddingInlineEnd));
+    CHECK(properties->IsPropertyImplicit(PropertyId::OverscrollBehaviorY));
+    CHECK(properties->IsPropertyImplicit(PropertyId::ContainIntrinsicHeight));
+  }
+
   TEST_CASE_METHOD(ValueFixture, "StyleProperties::MayDependOnBaseURL", "[CSS][Properties][StyleProperties]")
   {
     CHECK(ParseDeclarations(u8"background-image: url(a.png)")->MayDependOnBaseURL());

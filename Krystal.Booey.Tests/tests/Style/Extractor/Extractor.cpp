@@ -115,6 +115,35 @@ namespace krys::boo::style::tests
     CHECK(ComputedValue(ea, css::PropertyId::Margin) == "1px 2px");
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: pair shorthands", "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { contain-intrinsic-size: auto 10px; overscroll-behavior: contain }
+      #b { contain-intrinsic-size: 10px auto none }
+    </style><div id=a></div><div id=b></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+
+    CHECK(Computed(ea, css::PropertyId::ContainIntrinsicSize) == "auto 10px");
+    CHECK(Computed(eb, css::PropertyId::ContainIntrinsicSize) == "10px auto none");
+    CHECK(Computed(ea, css::PropertyId::OverscrollBehavior) == "contain");
+    CHECK(Computed(eb, css::PropertyId::OverscrollBehavior) == "auto");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: overscroll-behavior with different longhands",
+                   "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { overscroll-behavior: contain none }
+      #b { overscroll-behavior: auto contain }
+    </style><div id=a></div><div id=b></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+
+    CHECK(Computed(ea, css::PropertyId::OverscrollBehavior) == "contain none");
+    CHECK(Computed(eb, css::PropertyId::OverscrollBehavior) == "auto contain");
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: custom properties and copies", "[Style][Extractor]")
   {
     ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
