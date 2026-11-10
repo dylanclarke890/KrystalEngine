@@ -84,6 +84,28 @@ namespace krys::boo::tests
     CHECK_FALSE(fixture.RunningTransition(u8"box", css::PropertyId::Opacity));
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: border-spacing transitions as one property",
+                   "[Animation][CSSTransition]")
+  {
+    TransitionFixture fixture {u8"<!DOCTYPE html><style>#box{border-spacing:0px;"
+                               u8"transition:border-spacing 1s linear}</style><div id=box></div>"};
+
+    fixture.SetStyle(u8"box", u8"border-spacing:10px 20px");
+    fixture.Frame();
+
+    auto *transition = fixture.RunningTransition(u8"box", css::PropertyId::BorderSpacing);
+    REQUIRE(transition);
+    CHECK(transition->Property() == AnimatableCSSProperty {css::PropertyId::BorderSpacing});
+    REQUIRE(transition->GetKeyframeEffect());
+
+    auto keyframes = transition->GetKeyframeEffect()->GetKeyframes();
+    REQUIRE(keyframes.size() == 2);
+    REQUIRE(keyframes[0].StyleStrings.size() == 1);
+    REQUIRE(keyframes[1].StyleStrings.size() == 1);
+    CHECK(css::tests::ToNarrow(keyframes[0].StyleStrings.at(css::PropertyId::BorderSpacing)) == "0px");
+    CHECK(css::tests::ToNarrow(keyframes[1].StyleStrings.at(css::PropertyId::BorderSpacing)) == "10px 20px");
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture,
                    "CSSTransition: important declarations with animations and transitions on one element",
                    "[Animation][CSSTransition][css-cascade:cascade-origin]")

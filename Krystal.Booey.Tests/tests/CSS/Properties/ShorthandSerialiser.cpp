@@ -68,7 +68,6 @@ namespace krys::boo::css::tests
       {u8"overflow: hidden auto", PropertyId::Overflow, "hidden auto"},
       {u8"place-items: center", PropertyId::PlaceItems, "center"},
       {u8"margin-block: 1px 2px", PropertyId::MarginBlock, "1px 2px"},
-      {u8"border-spacing: 1px", PropertyId::BorderSpacing, "1px"},
       {u8"overscroll-behavior: contain", PropertyId::OverscrollBehavior, "contain"},
       {u8"overscroll-behavior: none none", PropertyId::OverscrollBehavior, "none"},
       {u8"overscroll-behavior: contain none", PropertyId::OverscrollBehavior, "contain none"},

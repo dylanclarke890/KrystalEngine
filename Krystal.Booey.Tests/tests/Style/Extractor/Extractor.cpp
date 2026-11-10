@@ -130,6 +130,19 @@ namespace krys::boo::style::tests
     CHECK(Computed(eb, css::PropertyId::OverscrollBehavior) == "auto");
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: border-spacing", "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { border-spacing: 1px 2px }
+      #b { border-spacing: 3px }
+    </style><div id=a></div><div id=b></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+
+    CHECK(Computed(ea, css::PropertyId::BorderSpacing) == "1px 2px");
+    CHECK(Computed(eb, css::PropertyId::BorderSpacing) == "3px");
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: overscroll-behavior with different longhands",
                    "[Style][Extractor]")
   {

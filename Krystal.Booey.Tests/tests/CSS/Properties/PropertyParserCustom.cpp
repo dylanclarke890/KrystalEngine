@@ -62,6 +62,30 @@ namespace krys::boo::css::tests
     CHECK(LonghandToText(u8"10px", PropertyId::Color) == "<null>");
   }
 
+  TEST_CASE_METHOD(ValueFixture, "PropertyParsing border-spacing", "[CSS][Properties][PropertyParsing]")
+  {
+    REQUIRE_FALSE(IsShorthand(PropertyId::BorderSpacing));
+
+    CHECK(LonghandToText(u8"1px", PropertyId::BorderSpacing) == "1px");
+    CHECK(LonghandToText(u8"1px 2px", PropertyId::BorderSpacing) == "1px 2px");
+    CHECK(LonghandToText(u8"1px 1px", PropertyId::BorderSpacing) == "1px");
+    CHECK(LonghandToText(u8"0 calc(1px + 1em)", PropertyId::BorderSpacing) == "0px calc(1em + 1px)");
+    CHECK(LonghandToText(u8"1px 2px 3px", PropertyId::BorderSpacing) == "<partial>");
+    CHECK(LonghandToText(u8"-1px", PropertyId::BorderSpacing) == "<null>");
+    CHECK(LonghandToText(u8"1px -2px", PropertyId::BorderSpacing) == "<partial>");
+    CHECK(LonghandToText(u8"10%", PropertyId::BorderSpacing) == "<null>");
+
+    // Unitless lengths are accepted only in quirks mode.
+    auto parse = [](TokenRange &range, PropertyParserState &state)
+    {
+      return PropertyParsing::ParseStylePropertyLonghand(range, PropertyId::BorderSpacing, state);
+    };
+    ParserContext standard {ParserMode::HTMLStandard};
+    ParserContext quirks {ParserMode::HTMLQuirks};
+    CHECK(ConsumeToText(u8"1 2", parse, standard, PropertyId::BorderSpacing) == "<null>");
+    CHECK(ConsumeToText(u8"1 2", parse, quirks, PropertyId::BorderSpacing) == "1px 2px");
+  }
+
   TEST_CASE_METHOD(ValueFixture, "PropertyParserCustom", "[CSS][Properties][PropertyParserCustom]")
   {
     SECTION("border-radius")

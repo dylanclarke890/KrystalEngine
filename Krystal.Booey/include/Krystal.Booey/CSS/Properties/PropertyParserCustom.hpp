@@ -443,36 +443,6 @@ namespace krys::boo::css
       return true;
     }
 
-    KRYS_NODISCARD static bool ConsumeBorderSpacingShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                             const PropertyShorthand &,
-                                                             PropertyParserResult &result) noexcept
-    {
-      RefPtr horizontalSpacing =
-        PrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
-      if (!horizontalSpacing)
-      {
-        return false;
-      }
-
-      RefPtr verticalSpacing = horizontalSpacing;
-      if (!tokens.IsAtEnd())
-      {
-        verticalSpacing = PrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
-      }
-
-      if (!verticalSpacing || !tokens.IsAtEnd())
-      {
-        return false;
-      }
-
-      result.AddPropertyForCurrentShorthand(state, PropertyId::InternalBorderHorizontalSpacing,
-                                            krys::move(horizontalSpacing));
-      result.AddPropertyForCurrentShorthand(state, PropertyId::InternalBorderVerticalSpacing,
-                                            krys::move(verticalSpacing));
-
-      return true;
-    }
-
     KRYS_NODISCARD static bool ConsumeAnimationShorthand(TokenRange &tokens, PropertyParserState &state,
                                                          const PropertyShorthand &shorthand,
                                                          PropertyParserResult &result) noexcept

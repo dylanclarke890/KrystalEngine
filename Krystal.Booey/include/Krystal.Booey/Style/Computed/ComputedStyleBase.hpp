@@ -276,6 +276,7 @@ namespace krys::boo
     using Animations = CoordinatedValueList<Animation>;
     using BackgroundLayers = CoordinatedValueList<BackgroundLayer>;
     using BorderRadiusValue = css::MinimallySerialisingSpaceSeparatedSize<LengthPercentage<css::NonNegative>>;
+    using BorderSpacing = css::MinimallySerialisingSpaceSeparatedSize<Length<css::NonNegativeUnzoomed>>;
     using BoxShadows = Shadows<BoxShadow>;
     using FlexGrow = Number<css::NonNegative, float>;
     using FlexShrink = Number<css::NonNegative, float>;
@@ -298,7 +299,6 @@ namespace krys::boo
     using TransformOriginY = PositionY;
     using TransformOriginZ = Length<>;
     using Transitions = CoordinatedValueList<Transition>;
-    using WebkitBorderSpacing = Length<css::NonNegativeUnzoomed>;
 
     constexpr auto PublicPseudoIDBits = 13;
     constexpr auto TextDecorationLineBits = 5;
