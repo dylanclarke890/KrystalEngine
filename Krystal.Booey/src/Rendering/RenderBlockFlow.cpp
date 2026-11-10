@@ -3623,7 +3623,15 @@ namespace krys::boo
       {
         svgTextLayout->AddOverflowFromInlineChildren();
       }
-      // FIXME: Propagate the visual overflow to the containing fragments, once there are fragmented flows.
+      // If this block is flowed inside a flow thread, make sure its overflow is propagated to the containing
+      // fragments.
+      if (_overflow)
+      {
+        if (auto *flow = EnclosingFragmentedFlow())
+        {
+          flow->AddFragmentsVisualOverflow(*this, _overflow->VisualOverflowRect());
+        }
+      }
       return;
     }
     RenderBlock::AddOverflowFromInFlowChildren(options);

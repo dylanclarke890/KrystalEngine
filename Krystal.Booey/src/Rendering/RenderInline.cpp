@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
@@ -466,8 +467,8 @@ namespace krys::boo
 
     if (offsetDependsOnPoint)
     {
-      // FIXME: Fragmented flows make the offset depend on the point too, once there are those.
-      *offsetDependsOnPoint = Is<RenderBox>(container) && container.GetWritingMode().IsBlockFlipped();
+      *offsetDependsOnPoint = (Is<RenderBox>(container) && container.GetWritingMode().IsBlockFlipped())
+                              || Is<RenderFragmentedFlow>(container);
     }
 
     return offset;

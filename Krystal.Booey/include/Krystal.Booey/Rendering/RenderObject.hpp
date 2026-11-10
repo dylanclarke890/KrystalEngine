@@ -495,7 +495,7 @@ namespace krys::boo
       const RenderLayerModelObject *Renderer {nullptr};
     };
     /// @brief The renderer whose coordinates the renderer's repaints are in: null for the render view.
-    // FIXME: Compositing layers, filter layers and fragmented flows, once there are any.
+    // FIXME: Compositing layers and filter layers, once there are any.
     KRYS_NODISCARD RepaintContainerStatus ContainerForRepaint() const noexcept;
     /// @brief Repaints @p rect, in @p repaintContainer's coordinates (the render view's if null).
     void RepaintUsingContainer(const RenderLayerModelObject *repaintContainer, const LayoutRect &rect,

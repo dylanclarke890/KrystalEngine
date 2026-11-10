@@ -66,6 +66,7 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerFilters.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -3667,10 +3668,10 @@ namespace krys::boo
   }
 
   // Returns the layer reached on the walk up towards the ancestor.
-  static const RenderLayer *AccumulateOffsetTowardsAncestor(const RenderLayer *layer,
-                                                            const RenderLayer *ancestorLayer,
-                                                            LayoutPoint &location,
-                                                            RenderLayer::ColumnOffsetAdjustment) noexcept
+  static const RenderLayer *
+    AccumulateOffsetTowardsAncestor(const RenderLayer *layer, const RenderLayer *ancestorLayer,
+                                    LayoutPoint &location,
+                                    RenderLayer::ColumnOffsetAdjustment adjustForColumns) noexcept
   {
     krys_debug_assert(ancestorLayer != layer);
 
@@ -3776,7 +3777,19 @@ namespace krys::boo
 
     location.MoveBy(layer->Location());
 
-    // FIXME: Translate from the multi-column flow into its column (AdjustForColumns), once there are columns.
+    if (adjustForColumns == RenderLayer::AdjustForColumns)
+    {
+      if (auto *directParent = layer->Parent(); directParent && directParent != ancestorLayer)
+      {
+        if (auto *multiColumnFlow = DynamicDowncast<RenderMultiColumnFlow>(directParent->Renderer()))
+        {
+          if (auto *fragment = multiColumnFlow->PhysicalTranslationFromFlowToFragment(location))
+          {
+            location.Move(fragment->TopLeftLocation() - directParent->GetRenderBox()->TopLeftLocation());
+          }
+        }
+      }
+    }
 
     return parentLayer;
   }

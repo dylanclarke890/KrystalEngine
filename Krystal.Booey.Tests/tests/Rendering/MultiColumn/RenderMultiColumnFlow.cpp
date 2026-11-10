@@ -1,6 +1,9 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
 namespace krys::boo::layout::tests
 {
@@ -205,5 +208,33 @@ layer at (0,0) size 95x20
         text run at (0,0) width 50: "cc dd"
 )");
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMultiColumnFlow: geometry in columns",
+                   "[Rendering][RenderMultiColumnFlow]")
+  {
+    // The flow's content is mapped into the columns showing it: b is at the top of the second column, and t
+    // is split across both.
+    ResolverFixture fixture {
+      AhemDocument(u8"#m { columns: 2; width: 200px; position: relative } #b { break-before: column }"
+                   u8"#t { columns: 2; width: 200px } #t div { height: 40px }",
+                   u8"<div id=m><div>aa</div><div id=b>bb</div></div>"
+                   u8"<div id=t><div id=s></div></div>")};
+    auto rectIs = [](const dom::DOMRectReadOnly &rect, double x, double y, double width, double height)
+    {
+      return rect.X() == x && rect.Y() == y && rect.Width() == width && rect.Height() == height;
+    };
+
+    auto &b = fixture.ById(u8"b");
+    CHECK(rectIs(*b.GetBoundingClientRect(), 105, 0, 95, 10));
+    CHECK(b.OffsetLeft() == 105);
+    CHECK(b.OffsetTop() == 0);
+
+    auto &s = fixture.ById(u8"s");
+    auto rects = s.GetClientRects();
+    REQUIRE(rects->Length() == 2u);
+    CHECK(rectIs(*rects->Item(0), 0, 10, 95, 20));
+    CHECK(rectIs(*rects->Item(1), 105, 10, 95, 20));
+    CHECK(rectIs(*s.GetBoundingClientRect(), 0, 10, 200, 20));
   }
 }

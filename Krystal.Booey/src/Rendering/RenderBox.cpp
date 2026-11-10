@@ -58,6 +58,7 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/Painting/BackgroundPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
@@ -984,7 +985,12 @@ namespace krys::boo
 
   void RenderBox::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
   {
-    // FIXME: Boxes in a fragmented flow (absoluteQuadsForBox), once there are fragmented flows.
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow();
+        fragmentedFlow && fragmentedFlow->AbsoluteQuadsForBox(quads, wasFixed, *this))
+    {
+      return;
+    }
+
     auto localRect = FloatRect {0, 0, Width().ToFloat(), Height().ToFloat()};
     quads.push_back(LocalToAbsoluteQuad(localRect, MapCoordinatesMode::UseTransforms, wasFixed));
   }
@@ -1126,8 +1132,10 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Fragmented flows make the offset depend on the point, once there are those.
-    (void)offsetDependsOnPoint;
+    if (offsetDependsOnPoint)
+    {
+      *offsetDependsOnPoint |= Is<RenderFragmentedFlow>(container);
+    }
 
     return offset;
   }
@@ -4441,7 +4449,10 @@ namespace krys::boo
 
     AddVisualOverflow(ApplyVisualEffectOverflow(BorderBoxRect()));
 
-    // FIXME: The fragments' visual effect overflow, once there are fragmented flows.
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      fragmentedFlow->AddFragmentsVisualEffectOverflow(*this);
+    }
   }
 
   static void ConvertOutsetsToOverflowCoordinates(LayoutBoxExtent &outsets, WritingMode writingMode) noexcept
@@ -4585,8 +4596,20 @@ namespace krys::boo
 
     auto locationOffset = LocationOffset();
 
-    // FIXME: Widgets (which snap to integral sizes and positions) and multi-column flows (which map the rect
-    // into their fragment), once there are any.
+    if (auto *columnFlow = DynamicDowncast<RenderMultiColumnFlow>(*this))
+    {
+      // We won't normally run this code. Only when the container is null (i.e., we're trying to get the rect
+      // in view coordinates) will we come in here, since normally container will be set and we'll stop at the
+      // flow thread. This case is mainly hit by the check for whether or not images should animate.
+      // FIXME: Just as with offsetFromContainer, we aren't really handling objects that span multiple columns
+      // properly.
+      LayoutPoint physicalPoint(FlipForWritingMode(adjustedRects.ClippedOverflowRect.Location()));
+      if (auto *fragment = columnFlow->PhysicalTranslationFromFlowToFragment(physicalPoint))
+      {
+        adjustedRects.ClippedOverflowRect.SetLocation(fragment->FlipForWritingMode(physicalPoint));
+        return fragment->ComputeVisibleRectsInContainer(adjustedRects, container, context);
+      }
+    }
 
     // We are now in our parent container's coordinate space. Apply our transform to obtain a bounding box
     // in the parent's coordinate space that encloses us.
@@ -4965,7 +4988,11 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The fragments' overflow, once there are fragmented flows.
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    if (fragmentedFlow)
+    {
+      fragmentedFlow->AddFragmentsOverflowFromChild(*this, renderer, offsetFromThis);
+    }
 
     // Only propagate layout overflow from the child if the child isn't clipping its overflow.  If it is, then
     // its overflow is internal to it, and we don't care about it. layoutOverflowRectForPropagation takes care
@@ -5066,11 +5093,18 @@ namespace krys::boo
       return;
     }
 
+    auto childVisualOverflowRect = renderer.VisualOverflowRectForPropagation(Style().GetWritingMode());
+    childVisualOverflowRect.Move(offsetFromThis);
+    // If this block is flowed inside a flow thread, make sure its overflow is propagated to the containing
+    // fragments.
+    if (fragmentedFlow)
+    {
+      fragmentedFlow->AddFragmentsVisualOverflow(*this, childVisualOverflowRect);
+    }
+
     // Update our visual overflow in case the child spills out the block, but only if we were going to paint
     // the child block ourselves.
     // FIXME: Children with a self-painting layer paint themselves.
-    auto childVisualOverflowRect = renderer.VisualOverflowRectForPropagation(Style().GetWritingMode());
-    childVisualOverflowRect.Move(offsetFromThis);
     AddVisualOverflow(childVisualOverflowRect);
   }
 
@@ -5167,7 +5201,10 @@ namespace krys::boo
   void RenderBox::ClearOverflow() noexcept
   {
     _overflow = nullptr;
-    // FIXME: The fragments' overflow, once there are fragmented flows.
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      fragmentedFlow->ClearFragmentsOverflow(*this);
+    }
   }
 
   RenderOverflow &RenderBox::EnsureOverflow() noexcept
@@ -5767,8 +5804,34 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: The first fragment's size when the containing block is a fragmented flow, and the fragment's
-    // width inside one, once there are fragmented flows.
+    if (auto *fragmentedFlow = DynamicDowncast<RenderFragmentedFlow>(*containingBlock))
+    {
+      return isContainerInlineAxis
+               ? LayoutRange(startEdge, fragmentedFlow->ContentLogicalWidthOfFirstFragment())
+               : LayoutRange(startEdge, fragmentedFlow->ContentLogicalHeightOfFirstFragment());
+    }
+
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow();
+        fragmentedFlow && fragmentedFlow->GetWritingMode().InlineAxis() == physicalAxis)
+    {
+      LayoutUnit pageOffset = containingBlock->OffsetFromLogicalTopOfFirstPage();
+      if (auto *fragment = containingBlock->FragmentAtBlockOffset(pageOffset))
+      {
+        if (auto *boxInfo = containingBlock->GetRenderBoxFragmentInfo(fragment))
+        {
+          auto size = boxInfo->LogicalWidth();
+          if (BoxAxis::Horizontal == physicalAxis)
+          {
+            size -= containingBlock->Width() - containingBlock->ClientWidth();
+          }
+          else
+          {
+            size -= containingBlock->Height() - containingBlock->ClientHeight();
+          }
+          return LayoutRange(startEdge, std::max(0_lu, size));
+        }
+      }
+    }
 
     return BoxAxis::Horizontal == physicalAxis ? LayoutRange(startEdge, containingBlock->ClientWidth())
                                                : LayoutRange(startEdge, containingBlock->ClientHeight());
@@ -5859,8 +5922,22 @@ namespace krys::boo
     inlineConstraints.ResolvePosition(computedValues);
     inlineConstraints.FixupLogicalLeftPosition(computedValues);
 
-    // FIXME: Adjust logicalLeft for the flipped version of our writing mode in fragments, once there are
-    // fragmented flows.
+    // Adjust logicalLeft if we need to for the flipped version of our writing mode in fragments.
+    // FIXME: Add support for other types of objects as containerBlock, not only RenderBlock.
+    if (EnclosingFragmentedFlow() && IsWritingModeRoot() && inlineConstraints.IsOrthogonal())
+    {
+      if (auto *container = DynamicDowncast<RenderBlock>(inlineConstraints.Container()))
+      {
+        LayoutUnit cbPageOffset = container->OffsetFromLogicalTopOfFirstPage();
+        if (auto *cbFragment = container->FragmentAtBlockOffset(cbPageOffset))
+        {
+          if (auto *boxInfo = container->GetRenderBoxFragmentInfo(cbFragment))
+          {
+            computedValues.Position += boxInfo->LogicalLeft();
+          }
+        }
+      }
+    }
   }
 
   template <typename SizeType>
@@ -5980,7 +6057,22 @@ namespace krys::boo
     blockConstraints.ResolvePosition(computedValues);
     blockConstraints.AdjustLogicalTopWithLogicalHeightIfNeeded(computedValues);
 
-    // FIXME: Adjust logicalTop for perpendicular writing modes in fragments, once there are fragmented flows.
+    // Adjust logicalTop if we need to for perpendicular writing modes in fragments.
+    // FIXME: Add support for other types of objects as containerBlock, not only RenderBlock.
+    if (EnclosingFragmentedFlow() && blockConstraints.IsOrthogonal())
+    {
+      if (auto *container = DynamicDowncast<RenderBlock>(blockConstraints.Container()))
+      {
+        LayoutUnit cbPageOffset = container->OffsetFromLogicalTopOfFirstPage() - LogicalLeft();
+        if (auto *cbFragment = container->FragmentAtBlockOffset(cbPageOffset))
+        {
+          if (auto *boxInfo = container->GetRenderBoxFragmentInfo(cbFragment))
+          {
+            computedValues.Position += boxInfo->LogicalLeft();
+          }
+        }
+      }
+    }
   }
 
   LayoutUnit RenderBox::ComputeOutOfFlowPositionedLogicalHeightUsing(

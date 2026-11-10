@@ -32,7 +32,6 @@ namespace krys::boo
   class RenderBlockFlow;
 
   /// @brief Attaches children to block flows.
-  // FIXME: Multi-column flows and fieldset legends in them, once there are multi-column flows.
   class RenderTreeBuilder::BlockFlow
   {
     KRYS_NON_COPY_MOVABLE(BlockFlow);

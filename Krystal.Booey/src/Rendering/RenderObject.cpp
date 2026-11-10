@@ -1103,10 +1103,9 @@ namespace krys::boo
       offset -= ToLayoutSize(LayoutPoint(box->GetScrollPosition()));
     }
 
-    // FIXME: Fragmented flows make the offset depend on the point, once there are those.
     if (offsetDependsOnPoint)
     {
-      *offsetDependsOnPoint = false;
+      *offsetDependsOnPoint = Is<RenderFragmentedFlow>(container);
     }
 
     return offset;
@@ -1543,8 +1542,21 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The enclosing fragmented flow, once there are any. Layers with filters aren't repaint
-    // containers: repaints inside them grow to what the filter paints (RepaintUsingContainer).
+    // If we have a flow thread, then we need to do individual repaints within the RenderFragmentContainers
+    // instead. If we have already found a repaint container then we will repaint into that container only if
+    // it is part of the same flow thread. Otherwise we will need to catch the repaint call and send it to the
+    // flow thread.
+    if (auto *parentRenderFragmentedFlow = EnclosingFragmentedFlow())
+    {
+      auto *repaintContainerFragmentedFlow =
+        repaintContainer ? repaintContainer->EnclosingFragmentedFlow() : nullptr;
+      if (!repaintContainerFragmentedFlow || repaintContainerFragmentedFlow != parentRenderFragmentedFlow)
+      {
+        repaintContainer = parentRenderFragmentedFlow;
+      }
+    }
+    // Layers with filters aren't repaint containers: repaints inside them grow to what the filter paints
+    // (RepaintUsingContainer).
     return {fullRepaintAlreadyScheduled, repaintContainer};
   }
 
@@ -1618,7 +1630,11 @@ namespace krys::boo
       repaintContainer = &View();
     }
 
-    // FIXME: Fragmented flows repaint in their fragments, once there are any.
+    if (auto *fragmentedFlow = DynamicDowncast<RenderFragmentedFlow>(*repaintContainer))
+    {
+      fragmentedFlow->RepaintRectangleInFragments(rect);
+      return;
+    }
 
     PropagateRepaintToParentWithOutlineAutoIfNeeded(*repaintContainer, rect);
 

@@ -104,8 +104,6 @@ namespace krys::boo
 
   /// @brief The block flow's fields that rarely differ from their defaults. Allocated only when some of these
   /// fields have non-default values.
-  // FIXME: The line to break at to avoid a widow and the multi-column flow, once there's pagination and
-  // multi-column layout.
   struct RenderBlockFlowRareData
   {
     KRYS_NON_COPY_MOVABLE(RenderBlockFlowRareData);
