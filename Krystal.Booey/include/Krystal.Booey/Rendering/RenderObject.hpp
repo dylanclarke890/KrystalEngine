@@ -1851,6 +1851,8 @@ namespace krys::boo
 
       // From RenderBlock: null when it needs finding again.
       Maybe<WeakPtr<RenderFragmentedFlow>> EnclosingFragmentedFlow;
+      LayoutUnit PaginationStrut;
+      LayoutUnit PageLogicalOffset;
     };
     KRYS_NODISCARD bool HasRareData() const noexcept
     {

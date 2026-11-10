@@ -955,6 +955,15 @@ namespace krys::boo
     /// @brief Whether the box scrolls its overflow in the block direction and has a specified height, so
     /// splitting it would split its scrollbar.
     KRYS_NODISCARD bool HasUnsplittableScrollingOverflow() const noexcept;
+    /// @brief Marks the box for layout when it moved relative to its column, or the columns' height changed.
+    virtual void MarkForPaginationRelayoutIfNeeded() noexcept
+    {
+    }
+    /// @brief Whether the box must be laid out again when its range of fragments changes.
+    KRYS_NODISCARD virtual bool NeedsLayoutAfterFragmentRangeChange() const noexcept
+    {
+      return false;
+    }
 
 #pragma endregion
 

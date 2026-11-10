@@ -1,0 +1,209 @@
+﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+
+namespace krys::boo::layout::tests
+{
+  using style::tests::ResolverFixture;
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMultiColumnFlow: laying out content in columns",
+                   "[Rendering][RenderMultiColumnFlow]")
+  {
+    SECTION("balancing")
+    {
+      // The content is balanced across the columns, which leave a 1em gap between them.
+      ResolverFixture fixture {AhemDocument(u8"#m { columns: 2; width: 200px }",
+                                            u8"<div id=m><p>aa bb cc dd</p><p>ee ff</p></div>")};
+      CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x30
+  RenderBlock {HTML} at (0,0) size 800x30
+    RenderBody {BODY} at (0,0) size 800x30
+layer at (0,0) size 200x30
+  RenderBlock {DIV} at (0,0) size 200x30 id="m"
+    RenderMultiColumnSet at (0,0) size 200x30
+layer at (0,0) size 95x60
+  RenderMultiColumnFlowThread at (0,0) size 95x60
+    RenderBlock {P} at (0,10) size 95x20
+      RenderText {#text} at (0,0) size 80x20
+        text run at (0,0) width 80: "aa bb cc"
+        text run at (0,10) width 20: "dd"
+    RenderBlock {P} at (0,40) size 95x10
+      RenderText {#text} at (0,0) size 50x10
+        text run at (0,0) width 50: "ee ff"
+)");
+    }
+
+    SECTION("column-width")
+    {
+      // A column width makes as many columns as fit, widened to fill the container.
+      ResolverFixture fixture {
+        AhemDocument(u8"#m { column-width: 40px; width: 190px }", u8"<div id=m>aa bb cc dd ee</div>")};
+      CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x20
+  RenderBlock {HTML} at (0,0) size 800x20
+    RenderBody {BODY} at (0,0) size 800x20
+layer at (0,0) size 190x20
+  RenderBlock {DIV} at (0,0) size 190x20 id="m"
+    RenderMultiColumnSet at (0,0) size 190x20
+layer at (0,0) size 40x50
+  RenderMultiColumnFlowThread at (0,0) size 40x50
+    RenderText {#text} at (0,0) size 20x50
+      text run at (0,0) width 20: "aa"
+      text run at (0,10) width 20: "bb"
+      text run at (0,20) width 20: "cc"
+      text run at (0,30) width 20: "dd"
+      text run at (0,40) width 20: "ee"
+)");
+    }
+
+    SECTION("intrinsic")
+    {
+      // A shrink-to-fit multi-column container is as wide as its content's columns and gaps.
+      ResolverFixture fixture {AhemDocument(u8"#m { columns: 2; float: left }", u8"<div id=m>aa bb</div>")};
+      CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x10
+  RenderBlock {HTML} at (0,0) size 800x10
+    RenderBody {BODY} at (0,0) size 800x0
+layer at (0,0) size 110x10
+  RenderBlock (floating) {DIV} at (0,0) size 110x10 id="m"
+    RenderMultiColumnSet at (0,0) size 110x10
+layer at (0,0) size 50x10
+  RenderMultiColumnFlowThread at (0,0) size 50x10
+    RenderText {#text} at (0,0) size 50x10
+      text run at (0,0) width 50: "aa bb"
+)");
+    }
+
+    SECTION("lines")
+    {
+      // A line that doesn't fit in the rest of a column moves to the next one.
+      ResolverFixture fixture {AhemDocument(
+        u8"#m { columns: 2; width: 200px; height: 25px; column-fill: auto; orphans: 1; widows: 1 }",
+        u8"<div id=m>aa bb cc dd ee ff gg hh</div>")};
+      CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x25
+  RenderBlock {HTML} at (0,0) size 800x25
+    RenderBody {BODY} at (0,0) size 800x25
+layer at (0,0) size 200x25
+  RenderBlock {DIV} at (0,0) size 200x25 id="m"
+    RenderMultiColumnSet at (0,0) size 200x25
+layer at (0,0) size 95x35
+  RenderMultiColumnFlowThread at (0,0) size 95x35
+    RenderText {#text} at (0,0) size 80x35
+      text run at (0,0) width 80: "aa bb cc"
+      text run at (0,10) width 80: "dd ee ff"
+      text run at (0,25) width 50: "gg hh"
+)");
+    }
+
+    SECTION("break")
+    {
+      // A forced break moves the box to the next column.
+      ResolverFixture fixture {
+        AhemDocument(u8"#m { columns: 2; width: 200px } #b { break-before: column }",
+                     u8"<div id=m><div>aa</div><div id=b>bb</div><div>cc</div></div>")};
+      CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x20
+  RenderBlock {HTML} at (0,0) size 800x20
+    RenderBody {BODY} at (0,0) size 800x20
+layer at (0,0) size 200x20
+  RenderBlock {DIV} at (0,0) size 200x20 id="m"
+    RenderMultiColumnSet at (0,0) size 200x20
+layer at (0,0) size 95x40
+  RenderMultiColumnFlowThread at (0,0) size 95x40
+    RenderBlock {DIV} at (0,0) size 95x10
+      RenderText {#text} at (0,0) size 20x10
+        text run at (0,0) width 20: "aa"
+    RenderBlock {DIV} at (0,20) size 95x10 id="b"
+      RenderText {#text} at (0,0) size 20x10
+        text run at (0,0) width 20: "bb"
+    RenderBlock {DIV} at (0,30) size 95x10
+      RenderText {#text} at (0,0) size 20x10
+        text run at (0,0) width 20: "cc"
+)");
+    }
+
+    SECTION("avoid")
+    {
+      // A box that mustn't be split moves to the next column when it doesn't fit.
+      ResolverFixture fixture {AhemDocument(u8"#m { columns: 2; width: 200px; height: 30px; column-fill: "
+                                            u8"auto } #u { break-inside: avoid; height: 30px }",
+                                            u8"<div id=m><div>aa</div><div id=u>uu</div></div>")};
+      CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x30
+  RenderBlock {HTML} at (0,0) size 800x30
+    RenderBody {BODY} at (0,0) size 800x30
+layer at (0,0) size 200x30
+  RenderBlock {DIV} at (0,0) size 200x30 id="m"
+    RenderMultiColumnSet at (0,0) size 200x30
+layer at (0,0) size 95x60
+  RenderMultiColumnFlowThread at (0,0) size 95x60
+    RenderBlock {DIV} at (0,0) size 95x10
+      RenderText {#text} at (0,0) size 20x10
+        text run at (0,0) width 20: "aa"
+    RenderBlock {DIV} at (0,30) size 95x30 id="u"
+      RenderText {#text} at (0,0) size 20x10
+        text run at (0,0) width 20: "uu"
+)");
+    }
+
+    SECTION("widows")
+    {
+      // Lines move to the next column to keep the widows together.
+      ResolverFixture fixture {AhemDocument(
+        u8"#m { columns: 2; width: 100px; height: 30px; orphans: 1; widows: 2; column-fill: auto }",
+        u8"<div id=m>aa bb cc dd</div>")};
+      CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x30
+  RenderBlock {HTML} at (0,0) size 800x30
+    RenderBody {BODY} at (0,0) size 800x30
+layer at (0,0) size 100x30
+  RenderBlock {DIV} at (0,0) size 100x30 id="m"
+    RenderMultiColumnSet at (0,0) size 100x30
+layer at (0,0) size 45x50
+  RenderMultiColumnFlowThread at (0,0) size 45x50
+    RenderText {#text} at (0,0) size 20x50
+      text run at (0,0) width 20: "aa"
+      text run at (0,10) width 20: "bb"
+      text run at (0,30) width 20: "cc"
+      text run at (0,40) width 20: "dd"
+)");
+    }
+
+    SECTION("spanner")
+    {
+      // A spanner splits the columns into a set before it and one after it.
+      ResolverFixture fixture {AhemDocument(u8"#m { columns: 2; width: 200px } #s { column-span: all }",
+                                            u8"<div id=m>aa bb<div id=s>ss</div>cc dd</div>")};
+      CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x30
+  RenderBlock {HTML} at (0,0) size 800x30
+    RenderBody {BODY} at (0,0) size 800x30
+layer at (0,0) size 200x30
+  RenderBlock {DIV} at (0,0) size 200x30 id="m"
+    RenderMultiColumnSet at (0,0) size 200x10
+    RenderBlock {DIV} at (0,10) size 200x10 id="s"
+      RenderText {#text} at (0,0) size 20x10
+        text run at (0,0) width 20: "ss"
+    RenderMultiColumnSet at (0,20) size 200x10
+layer at (0,0) size 95x20
+  RenderMultiColumnFlowThread at (0,0) size 95x20
+    RenderBlock (anonymous) at (0,0) size 95x10
+      RenderText {#text} at (0,0) size 50x10
+        text run at (0,0) width 50: "aa bb"
+    RenderMultiColumnSpannerPlaceholder at (0,10) size 0x0
+    RenderBlock (anonymous) at (0,10) size 95x10
+      RenderText {#text} at (0,0) size 50x10
+        text run at (0,0) width 50: "cc dd"
+)");
+    }
+  }
+}

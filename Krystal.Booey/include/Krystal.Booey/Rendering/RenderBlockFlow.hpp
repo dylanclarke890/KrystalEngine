@@ -38,6 +38,11 @@ namespace krys::boo::layout_integration
   class LineLayout;
 }
 
+namespace krys::boo::inline_iterator
+{
+  class LineBoxIterator;
+}
+
 namespace krys::boo
 {
   class LegacyLineLayout;
@@ -108,6 +113,9 @@ namespace krys::boo
     MarginValues Margins;
     LayoutUnit AlignContentShift; // Caches negative shifts for overflow calculation.
     WeakPtr<RenderMultiColumnFlow> MultiColumnFlow;
+    // The 1-based number of the line to move to the next column to keep the widows together, -1 for none.
+    int32 LineBreakToAvoidWidow {-1};
+    bool DidBreakAtLineToAvoidWidow {false};
 
     explicit RenderBlockFlowRareData(const RenderBlockFlow &block) noexcept;
 
@@ -130,7 +138,6 @@ namespace krys::boo
   };
 
   /// @brief A block container that lays out block or inline content.
-  // FIXME: Pagination and multi-column flows.
   class RenderBlockFlow : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderBlockFlow);
@@ -186,6 +193,72 @@ namespace krys::boo
     /// @brief Gives the multi-column flow and column sets the block's style, which they're anonymous boxes
     /// of.
     void UpdateStylesForColumnChildren(const RenderStyle *oldStyle) noexcept;
+    /// @brief The width of the block's columns, or of its content box when it has none.
+    KRYS_NODISCARD LayoutUnit ComputedColumnWidth() const noexcept;
+    /// @brief How many columns the block's content is split into, 1 when it has no columns.
+    KRYS_NODISCARD uint32 ComputedColumnCount() const noexcept;
+    /// @brief The used column-gap.
+    KRYS_NODISCARD LayoutUnit ColumnGap() const noexcept;
+
+    KRYS_NODISCARD bool NeedsLayoutAfterFragmentRangeChange() const noexcept override;
+
+    /// @brief The top of the column after the one @p logicalOffset is in. With @c IncludePageBoundary, an
+    /// offset already at a column's top stays there; with @c ExcludePageBoundary it moves to the next one.
+    KRYS_NODISCARD LayoutUnit NextPageLogicalTop(
+      LayoutUnit logicalOffset,
+      PageBoundaryRule pageBoundaryRule = PageBoundaryRule::ExcludePageBoundary) const noexcept;
+    KRYS_NODISCARD LayoutUnit PageLogicalTopForOffset(LayoutUnit offset) const noexcept;
+    /// @brief The height of the column at @p offset, 0 when it isn't known or the block isn't paginated.
+    KRYS_NODISCARD LayoutUnit PageLogicalHeightForOffset(LayoutUnit offset) const noexcept;
+    /// @brief How much of the column at @p offset is left below it.
+    KRYS_NODISCARD LayoutUnit PageRemainingLogicalHeightForOffset(
+      LayoutUnit offset,
+      PageBoundaryRule pageBoundaryRule = PageBoundaryRule::IncludePageBoundary) const noexcept;
+    /// @brief Whether there's a column after the one at @p logicalOffset to move content to.
+    KRYS_NODISCARD bool
+      HasNextPage(LayoutUnit logicalOffset,
+                  PageBoundaryRule pageBoundaryRule = PageBoundaryRule::ExcludePageBoundary) const noexcept;
+
+    /// @brief Reports a column break at @p offset, where @p spaceShortage more height would have fit the
+    /// content, to the column balancer.
+    void SetPageBreak(LayoutUnit offset, LayoutUnit spaceShortage) noexcept;
+    /// @brief Reports content at @p offset that needs columns at least @p minHeight tall to stay whole, to
+    /// the column balancer.
+    void UpdateMinimumPageHeight(LayoutUnit offset, LayoutUnit minHeight) noexcept;
+    /// @brief Reports how much more height a size-contained @p child at @p offset needs, to the column
+    /// balancer.
+    void AdjustSizeContainmentChildForPagination(RenderBox &child, LayoutUnit offset) noexcept;
+
+    /// @brief Whether layout moves a line to the next column to keep the widows together.
+    KRYS_NODISCARD bool ShouldBreakAtLineToAvoidWidow() const noexcept
+    {
+      return HasRareBlockFlowData() && RareBlockFlowData()->LineBreakToAvoidWidow >= 0;
+    }
+    void ClearShouldBreakAtLineToAvoidWidow() const noexcept;
+    /// @brief The 1-based number of the line moved to the next column for widows, -1 for none.
+    KRYS_NODISCARD int32 LineBreakToAvoidWidow() const noexcept
+    {
+      return HasRareBlockFlowData() ? RareBlockFlowData()->LineBreakToAvoidWidow : -1;
+    }
+    void SetBreakAtLineToAvoidWidow(int32 lineToBreak) noexcept;
+    void ClearDidBreakAtLineToAvoidWidow() noexcept;
+    void SetDidBreakAtLineToAvoidWidow() noexcept;
+    KRYS_NODISCARD bool DidBreakAtLineToAvoidWidow() const noexcept
+    {
+      return HasRareBlockFlowData() && RareBlockFlowData()->DidBreakAtLineToAvoidWidow;
+    }
+
+    /// @brief How far a line moves down to fit in its column.
+    struct LinePaginationAdjustment
+    {
+      LayoutUnit Strut {0_lu};
+      bool IsFirstAfterPageBreak {false};
+    };
+    /// @brief How far @p lineBox, already moved down by @p deltaOffset, moves down to fit in its column with
+    /// the floats it places down to @p floatMinimumBottom.
+    KRYS_NODISCARD LinePaginationAdjustment
+      ComputeLineAdjustmentForPagination(const inline_iterator::LineBoxIterator &lineBox,
+                                         LayoutUnit deltaOffset, LayoutUnit floatMinimumBottom = {}) noexcept;
 
     KRYS_NODISCARD bool HasContentfulInlineOrBlockLine() const noexcept;
     KRYS_NODISCARD bool HasContentfulInlineLine() const noexcept;
@@ -659,6 +732,27 @@ namespace krys::boo
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
 
+    /// @brief Moves @p logicalOffset down by @p adjustment until the column there is at least
+    /// @p minimumLogicalHeight tall, and whether there is one.
+    bool PushToNextPageWithMinimumLogicalHeight(LayoutUnit &adjustment, LayoutUnit logicalOffset,
+                                                LayoutUnit minimumLogicalHeight) const noexcept;
+    /// @brief The top of the next column when @p child is unsplittable and doesn't fit in the rest of the
+    /// column at @p logicalOffset, otherwise @p logicalOffset.
+    LayoutUnit AdjustForUnsplittableChild(RenderBox &child, LayoutUnit logicalOffset,
+                                          LayoutUnit beforeMargin = 0_lu,
+                                          LayoutUnit afterMargin = 0_lu) noexcept;
+    LayoutUnit AdjustBlockChildForPagination(LayoutUnit logicalTopAfterClear,
+                                             LayoutUnit estimateWithoutPagination, RenderBox &child,
+                                             bool atBeforeSideOfBlock) noexcept;
+    /// @brief The top of the next column when @p child has a column break before it, otherwise
+    /// @p logicalOffset.
+    LayoutUnit ApplyBeforeBreak(RenderBox &child, LayoutUnit logicalOffset) noexcept;
+    /// @brief The top of the next column when @p child has a column break after it, otherwise
+    /// @p logicalOffset.
+    LayoutUnit ApplyAfterBreak(RenderBox &child, LayoutUnit logicalOffset, MarginInfo &marginInfo) noexcept;
+
+    void LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept override;
+
     KRYS_NODISCARD LayoutUnit MaxPositiveMarginBefore() const noexcept
     {
       return HasRareBlockFlowData() ? RareBlockFlowData()->Margins.PositiveMarginBefore()
@@ -716,6 +810,16 @@ namespace krys::boo
 
   private:
     bool RecomputeLogicalWidthAndColumnWidth() noexcept;
+    void AdjustIntrinsicLogicalWidthsForColumns(LayoutUnit &minLogicalWidth,
+                                                LayoutUnit &maxLogicalWidth) const noexcept;
+    void ComputeColumnCountAndWidth() noexcept;
+    void SetComputedColumnCountAndWidth(uint32 count, LayoutUnit width) noexcept;
+    void CheckForPaginationLogicalHeightChange(RelayoutChildren &relayoutChildren,
+                                               LayoutUnit &pageLogicalHeight,
+                                               bool &pageLogicalHeightChanged) noexcept;
+    /// @brief Balances the columns, laying the block out again until their heights settle, and whether it
+    /// did.
+    bool RelayoutForPagination() noexcept;
 
     struct InlineContentStatus
     {

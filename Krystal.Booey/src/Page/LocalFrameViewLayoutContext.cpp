@@ -615,9 +615,9 @@ namespace krys::boo
                                                     LayoutUnit pageHeight, bool pageHeightChanged) noexcept
   {
     // We push LayoutState even if layoutState is disabled because it stores layoutDelta too.
-    // FIXME: Boxes inside a fragmented flow (enclosingFragmentedFlow) too, once there's fragmentation.
     auto *layoutState = this->LayoutState();
-    if (!layoutState || !NeedsFullRepaint() || layoutState->IsPaginated())
+    if (!layoutState || !NeedsFullRepaint() || layoutState->IsPaginated()
+        || renderer.EnclosingFragmentedFlow())
     {
       _layoutStateStack.push_back(
         CreateUnique<RenderLayoutState>(_layoutStateStack, renderer, offset, pageHeight, pageHeightChanged,

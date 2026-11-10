@@ -2288,6 +2288,7 @@ set(KRYSTAL_BOOEY_LAYOUT_HEADERS
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationPagination.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp
   include/Krystal.Booey/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.hpp
   include/Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp
@@ -2366,6 +2367,7 @@ set(KRYSTAL_BOOEY_LAYOUT_SOURCES
   src/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.cpp
   src/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.cpp
   src/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp
+  src/Layout/Integration/Inline/LayoutIntegrationPagination.cpp
   src/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.cpp
   src/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
   src/Layout/Integration/LayoutIntegrationFormattingContextLayout.cpp

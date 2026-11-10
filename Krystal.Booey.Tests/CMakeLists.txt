@@ -568,6 +568,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
 		tests/Rendering/Updating/RenderTreeBuilderMultiColumn.cpp
+		tests/Rendering/MultiColumn/RenderMultiColumnFlow.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Page/Settings.cpp
 		tests/Style/Adjuster.cpp
