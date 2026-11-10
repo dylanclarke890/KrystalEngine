@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -20,10 +21,11 @@ namespace krys::boo::tests
     const boo::Color Blue {boo::Color::blue};
     const boo::Color Black {boo::Color::black};
 
-    /// @brief A parsed document shown in a frame with an 800x600 view.
+    /// @brief A parsed document shown in a page's main frame, with an 800x600 view.
     struct FrameFixture : ResolverFixture
     {
-      Ref<LocalFrame> Frame {LocalFrame::Create()};
+      Ref<Page> TestPage {Page::Create()};
+      Ref<LocalFrame> Frame {ShareRef(TestPage->MainFrame())};
 
       explicit FrameFixture(utf8_string &&markup) noexcept : ResolverFixture(krys::move(markup), WithView::No)
       {
@@ -343,7 +345,8 @@ namespace krys::boo::tests
     CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrame: media environment", "[Page][LocalFrame]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: dark appearance and device scale factor",
+                   "[Page][LocalFrame]")
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @media (prefers-color-scheme: dark) { p { color: rgb(0, 0, 255) } }
@@ -362,11 +365,10 @@ namespace krys::boo::tests
     auto hiDPI = document.Window()->MatchMedia(u8"(resolution: 2x)");
     CHECK_FALSE(hiDPI->Matches());
 
-    css::mq::MediaEnvironment environment;
-    environment.UseDarkAppearance = true;
-    environment.DeviceScaleFactor = 2;
-    fixture.Frame->SetMediaEnvironment(environment);
-    CHECK(fixture.Frame->GetMediaEnvironment() == environment);
+    fixture.TestPage->SetUseDarkAppearance(true);
+    fixture.TestPage->SetDeviceScaleFactor(2);
+    CHECK(fixture.TestPage->UseDarkAppearance());
+    CHECK(fixture.TestPage->DeviceScaleFactor() == 2);
 
     document.UpdateStyleIfNeeded();
     CHECK(fixture.Rendered(u8"p").GetColor() == Blue);

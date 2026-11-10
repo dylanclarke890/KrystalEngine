@@ -88,6 +88,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/SVG/PropertyTestUtils.hpp
 		include/Krystal.Booey.Tests/SVG/TestSVGElement.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
+		include/Krystal.Booey.Tests/CSS/MediaTestUtils.hpp
 		include/Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp

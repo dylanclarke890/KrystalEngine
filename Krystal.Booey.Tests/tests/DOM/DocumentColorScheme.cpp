@@ -1,6 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -47,9 +46,7 @@ namespace krys::boo::tests
 
       void SetHostDark(bool dark) noexcept
       {
-        css::mq::MediaEnvironment environment = Frame().GetMediaEnvironment();
-        environment.UseDarkAppearance = dark;
-        Frame().SetMediaEnvironment(environment);
+        TestPage->SetUseDarkAppearance(dark);
       }
 
       KRYS_NODISCARD Ref<dom::Element> AddMeta(dom::DOMStringView name, dom::DOMStringView content) const

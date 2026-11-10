@@ -320,9 +320,7 @@ namespace krys::boo::tests
     CHECK(window.InnerWidth() == 100);
     CHECK(window.DevicePixelRatio() == 2);
 
-    auto environment = fixture.TestPage->MainFrame().GetMediaEnvironment();
-    environment.DeviceScaleFactor = 1.5f;
-    fixture.TestPage->MainFrame().SetMediaEnvironment(environment);
+    fixture.TestPage->SetDeviceScaleFactor(1.5f);
     CHECK(window.DevicePixelRatio() == 3);
   }
 

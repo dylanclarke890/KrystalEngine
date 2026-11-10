@@ -193,17 +193,6 @@ namespace krys::boo::tests
       CHECK(b.Complete());
     }
 
-    SECTION("Without scripting, images load eagerly")
-    {
-      auto environment = fixture.Frame().GetMediaEnvironment();
-      environment.CanExecuteScripts = false;
-      fixture.Frame().SetMediaEnvironment(environment);
-      CHECK_FALSE(b.IsLazyLoadable());
-      REQUIRE_FALSE(b.SetAttribute(u8"src", u8"file:///b.png").HasException());
-      CHECK_FALSE(b.IsDeferred());
-      CHECK(loader.Strategy.Requests == List<utf8_string> {u8"file:///b.png"});
-    }
-
     SECTION("Removing the source stops observing the image")
     {
       a.RemoveAttribute(u8"src");

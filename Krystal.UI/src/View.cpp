@@ -209,6 +209,51 @@ namespace krys::ui
       return _view && _view->_pointingDevices.Mouse;
     }
 
+    // The mouse is the primary pointing device if there's one, else the touch screen, else the pen.
+    KRYS_NODISCARD boo::PointerCharacteristics PrimaryPointingDevice() const noexcept override
+    {
+      if (!_view)
+      {
+        return boo::ChromeClient::PrimaryPointingDevice();
+      }
+      auto &devices = _view->_pointingDevices;
+      if (devices.Mouse || (!devices.Touch && devices.Pen))
+      {
+        return boo::PointerCharacteristics::Fine;
+      }
+      return devices.Touch ? boo::PointerCharacteristics::Coarse : boo::PointerCharacteristics::None;
+    }
+
+    KRYS_NODISCARD bool HoverSupportedByPrimaryPointingDevice() const noexcept override
+    {
+      return PrimaryPointingDevice() == boo::PointerCharacteristics::Fine;
+    }
+
+    KRYS_NODISCARD boo::PointerCharacteristics AllAvailablePointingDevices() const noexcept override
+    {
+      if (!_view)
+      {
+        return boo::ChromeClient::AllAvailablePointingDevices();
+      }
+      auto &devices = _view->_pointingDevices;
+      auto characteristics = boo::PointerCharacteristics::None;
+      if (devices.Mouse || devices.Pen)
+      {
+        characteristics = characteristics | boo::PointerCharacteristics::Fine;
+      }
+      if (devices.Touch)
+      {
+        characteristics = characteristics | boo::PointerCharacteristics::Coarse;
+      }
+      return characteristics;
+    }
+
+    // A pen hovers, as the mouse does.
+    KRYS_NODISCARD bool HoverSupportedByAnyAvailablePointingDevice() const noexcept override
+    {
+      return !_view || _view->_pointingDevices.Mouse || _view->_pointingDevices.Pen;
+    }
+
     void RequestPointerLock(Func<void(boo::PointerLockRequestResult)> &&completionHandler) noexcept override
     {
       completionHandler(_view ? _view->LockPointer() : boo::PointerLockRequestResult::Unsupported);
@@ -1674,37 +1719,16 @@ namespace krys::ui
 
   void View::SetPointingDevices(const pal::PointingDevices &devices) noexcept
   {
-    using boo::css::mq::PointerCharacteristics;
+    if (devices.Mouse == _pointingDevices.Mouse && devices.Pen == _pointingDevices.Pen
+        && devices.Touch == _pointingDevices.Touch
+        && devices.MaxTouchPoints == _pointingDevices.MaxTouchPoints)
+    {
+      return;
+    }
+
+    // The chrome client answers the pointing device media features from these.
     _pointingDevices = devices;
-    auto environment = _frame->GetMediaEnvironment();
-
-    // The mouse is the primary pointing device if there's one, else the touch screen, else the pen.
-    if (devices.Mouse || (!devices.Touch && devices.Pen))
-    {
-      environment.PrimaryPointingDevice = PointerCharacteristics::Fine;
-      environment.HoverSupportedByPrimaryPointingDevice = true;
-    }
-    else
-    {
-      environment.PrimaryPointingDevice =
-        devices.Touch ? PointerCharacteristics::Coarse : PointerCharacteristics::None;
-      environment.HoverSupportedByPrimaryPointingDevice = false;
-    }
-
-    environment.AllAvailablePointingDevices = PointerCharacteristics::None;
-    if (devices.Mouse || devices.Pen)
-    {
-      environment.AllAvailablePointingDevices =
-        environment.AllAvailablePointingDevices | PointerCharacteristics::Fine;
-    }
-    if (devices.Touch)
-    {
-      environment.AllAvailablePointingDevices =
-        environment.AllAvailablePointingDevices | PointerCharacteristics::Coarse;
-    }
-    // A pen hovers, as the mouse does.
-    environment.HoverSupportedByAnyAvailablePointingDevice = devices.Mouse || devices.Pen;
-    _frame->SetMediaEnvironment(environment);
+    _page->UpdateStyleAfterChangeInEnvironment();
   }
 
   pal::CursorShape View::CurrentCursor() const noexcept

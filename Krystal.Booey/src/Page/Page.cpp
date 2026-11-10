@@ -610,7 +610,47 @@ namespace krys::boo
     {
       return false;
     }
-    return MainFrame().GetMediaEnvironment().UseDarkAppearance;
+    return _useDarkAppearance;
+  }
+
+  void Page::SetDeviceScaleFactor(float deviceScaleFactor) noexcept
+  {
+    if (_deviceScaleFactor == deviceScaleFactor)
+    {
+      return;
+    }
+    _deviceScaleFactor = deviceScaleFactor;
+    UpdateStyleAfterChangeInEnvironment();
+  }
+
+  void Page::SetUseDarkAppearance(bool useDarkAppearance) noexcept
+  {
+    if (_useDarkAppearance == useDarkAppearance)
+    {
+      return;
+    }
+    _useDarkAppearance = useDarkAppearance;
+    UpdateStyleAfterChangeInEnvironment();
+
+    // Scrollbars that follow the page's appearance change with it, though their styles don't.
+    ForEachDocument(
+      [](dom::Document &document)
+      {
+        if (auto *view = document.View())
+        {
+          view->InvalidateScrollbarsForAllScrollableAreas();
+        }
+      });
+  }
+
+  void Page::SetDisplayMode(ApplicationDisplayMode displayMode) noexcept
+  {
+    if (_displayMode == displayMode)
+    {
+      return;
+    }
+    _displayMode = displayMode;
+    UpdateStyleAfterChangeInEnvironment();
   }
 
   void Page::UpdateStyleAfterChangeInEnvironment() noexcept

@@ -281,9 +281,7 @@ namespace krys::boo::tests
       (void)fixture.Painted();
       CHECK_FALSE(ScrollableAreaOf(fixture, u8"box")->UseDarkAppearanceForScrollbars());
 
-      auto environment = fixture.TestPage->MainFrame().GetMediaEnvironment();
-      environment.UseDarkAppearance = true;
-      fixture.TestPage->MainFrame().SetMediaEnvironment(environment);
+      fixture.TestPage->SetUseDarkAppearance(true);
       (void)fixture.Painted();
       CHECK(ScrollableAreaOf(fixture, u8"box")->UseDarkAppearanceForScrollbars());
     }

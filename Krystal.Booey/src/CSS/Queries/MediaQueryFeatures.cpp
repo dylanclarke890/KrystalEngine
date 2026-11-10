@@ -24,10 +24,11 @@
 
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
@@ -186,13 +187,22 @@ namespace krys::boo::css::mq::Features
     ValueFunction _valueFunction;
   };
 
-  /// @brief The frame's media environment, which stands in for its page, chrome client and screen.
-  KRYS_NODISCARD static const MediaEnvironment &
-    EnvironmentOf(const FeatureEvaluationContext &context) noexcept
+  /// @brief The document's page, if its frame has one.
+  KRYS_NODISCARD static const Page *PageOf(const FeatureEvaluationContext &context) noexcept
   {
-    auto *frame = context.Document->Frame();
-    krys_assert_msg(frame, "media features are only evaluated for a document with a view");
-    return frame->GetMediaEnvironment();
+    return context.Document->GetPage();
+  }
+
+  /// @brief The chrome client of the document's page, which answers for the screen, the pointing devices
+  /// and the user's preferences; a frame without a page gets an empty chrome client's answers.
+  KRYS_NODISCARD static const ChromeClient &ChromeOf(const FeatureEvaluationContext &context) noexcept
+  {
+    if (auto *page = PageOf(context))
+    {
+      return page->GetChromeClient();
+    }
+    static MainThreadNeverDestroyed<EmptyChromeClient> emptyChromeClient;
+    return emptyChromeClient;
   }
 
   KRYS_NODISCARD static const LocalFrameView &ViewOf(const FeatureEvaluationContext &context) noexcept
@@ -208,7 +218,8 @@ namespace krys::boo::css::mq::Features
 
     if (mediaType == ScreenAtom())
     {
-      return EnvironmentOf(context).DeviceScaleFactor;
+      auto *page = PageOf(context);
+      return page ? page->DeviceScaleFactor() : 1.f;
     }
     if (mediaType == PrintAtom())
     {
@@ -246,7 +257,7 @@ namespace krys::boo::css::mq::Features
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"any-hover", FixedVector {ValueId::None, ValueId::Hover}, Dependency::None, [](auto &context)
       {
-        bool isSupported = EnvironmentOf(context).HoverSupportedByAnyAvailablePointingDevice;
+        bool isSupported = ChromeOf(context).HoverSupportedByAnyAvailablePointingDevice();
         return MatchingIdentifiers {isSupported ? ValueId::Hover : ValueId::None};
       }};
     return schema;
@@ -257,7 +268,7 @@ namespace krys::boo::css::mq::Features
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"any-pointer", FixedVector {ValueId::None, ValueId::Fine, ValueId::Coarse}, Dependency::None,
       [](auto &context)
-      { return IdentifiersForPointerCharacteristics(EnvironmentOf(context).AllAvailablePointingDevices); }};
+      { return IdentifiersForPointerCharacteristics(ChromeOf(context).AllAvailablePointingDevices()); }};
     return schema;
   }
 
@@ -275,8 +286,7 @@ namespace krys::boo::css::mq::Features
   KRYS_NODISCARD static const IntegerSchema &ColorFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IntegerSchema> schema {
-      u8"color", Dependency::None,
-      [](auto &context) { return EnvironmentOf(context).ScreenDepthPerComponent; }};
+      u8"color", Dependency::None, [](auto &context) { return ChromeOf(context).ScreenDepthPerComponent(); }};
     return schema;
   }
 
@@ -288,7 +298,7 @@ namespace krys::boo::css::mq::Features
       {
         // FIXME: At some point we should start detecting displays that support more colors.
         MatchingIdentifiers identifiers {ValueId::SRGB};
-        if (EnvironmentOf(context).ScreenSupportsExtendedColor)
+        if (ChromeOf(context).ScreenSupportsExtendedColor())
         {
           identifiers.push_back(ValueId::P3);
         }
@@ -308,7 +318,7 @@ namespace krys::boo::css::mq::Features
   {
     static MainThreadNeverDestroyed<RatioSchema> schema {u8"device-aspect-ratio", Dependency::None,
                                                          [](auto &context)
-                                                         { return EnvironmentOf(context).ScreenSize; }};
+                                                         { return ChromeOf(context).ScreenSize(); }};
     return schema;
   }
 
@@ -316,7 +326,7 @@ namespace krys::boo::css::mq::Features
   {
     static MainThreadNeverDestroyed<LengthSchema> schema {
       u8"device-height", Dependency::None,
-      [](auto &context) { return LayoutUnit {EnvironmentOf(context).ScreenSize.Height()}; }};
+      [](auto &context) { return LayoutUnit {ChromeOf(context).ScreenSize().Height()}; }};
     return schema;
   }
 
@@ -324,7 +334,7 @@ namespace krys::boo::css::mq::Features
   {
     static MainThreadNeverDestroyed<LengthSchema> schema {
       u8"device-width", Dependency::None,
-      [](auto &context) { return LayoutUnit {EnvironmentOf(context).ScreenSize.Width()}; }};
+      [](auto &context) { return LayoutUnit {ChromeOf(context).ScreenSize().Width()}; }};
     return schema;
   }
 
@@ -334,7 +344,7 @@ namespace krys::boo::css::mq::Features
       u8"dynamic-range", FixedVector {ValueId::Standard, ValueId::High}, Dependency::None, [](auto &context)
       {
         MatchingIdentifiers identifiers {ValueId::Standard};
-        if (EnvironmentOf(context).ScreenSupportsHighDynamicRange)
+        if (ChromeOf(context).ScreenSupportsHighDynamicRange())
         {
           identifiers.push_back(ValueId::High);
         }
@@ -378,7 +388,7 @@ namespace krys::boo::css::mq::Features
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"hover", FixedVector {ValueId::None, ValueId::Hover}, Dependency::None, [](auto &context)
       {
-        bool isSupported = EnvironmentOf(context).HoverSupportedByPrimaryPointingDevice;
+        bool isSupported = ChromeOf(context).HoverSupportedByPrimaryPointingDevice();
         return MatchingIdentifiers {isSupported ? ValueId::Hover : ValueId::None};
       }};
     return schema;
@@ -390,7 +400,7 @@ namespace krys::boo::css::mq::Features
       u8"inverted-colors", FixedVector {ValueId::None, ValueId::Inverted}, Dependency::Accessibility,
       [](auto &context)
       {
-        bool isInverted = EnvironmentOf(context).ColorsAreInverted;
+        bool isInverted = ChromeOf(context).ColorsAreInverted();
         return MatchingIdentifiers {isInverted ? ValueId::Inverted : ValueId::None};
       }};
     return schema;
@@ -401,8 +411,8 @@ namespace krys::boo::css::mq::Features
     static MainThreadNeverDestroyed<IntegerSchema> schema {
       u8"monochrome", Dependency::Accessibility, [](auto &context)
       {
-        auto &environment = EnvironmentOf(context);
-        return environment.ScreenIsMonochrome ? environment.ScreenDepthPerComponent : 0;
+        auto &chrome = ChromeOf(context);
+        return chrome.ScreenIsMonochrome() ? chrome.ScreenDepthPerComponent() : 0;
       }};
     return schema;
   }
@@ -426,7 +436,7 @@ namespace krys::boo::css::mq::Features
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"pointer", FixedVector {ValueId::None, ValueId::Fine, ValueId::Coarse}, Dependency::None,
       [](auto &context)
-      { return IdentifiersForPointerCharacteristics(EnvironmentOf(context).PrimaryPointingDevice); }};
+      { return IdentifiersForPointerCharacteristics(ChromeOf(context).PrimaryPointingDevice()); }};
     return schema;
   }
 
@@ -437,7 +447,7 @@ namespace krys::boo::css::mq::Features
       FixedVector {ValueId::NoPreference, ValueId::More, ValueId::Less, ValueId::Custom},
       Dependency::Accessibility, [](auto &context)
       {
-        bool userPrefersContrast = EnvironmentOf(context).UserPrefersContrast;
+        bool userPrefersContrast = ChromeOf(context).UserPrefersContrast();
         return MatchingIdentifiers {userPrefersContrast ? ValueId::More : ValueId::NoPreference};
       }};
     return schema;
@@ -449,7 +459,7 @@ namespace krys::boo::css::mq::Features
       u8"prefers-reduced-motion", FixedVector {ValueId::NoPreference, ValueId::Reduce},
       Dependency::Accessibility, [](auto &context)
       {
-        bool userPrefersReducedMotion = EnvironmentOf(context).UserPrefersReducedMotion;
+        bool userPrefersReducedMotion = ChromeOf(context).UserPrefersReducedMotion();
         return MatchingIdentifiers {userPrefersReducedMotion ? ValueId::Reduce : ValueId::NoPreference};
       }};
     return schema;
@@ -474,12 +484,9 @@ namespace krys::boo::css::mq::Features
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"scripting", FixedVector {ValueId::None, ValueId::InitialOnly, ValueId::Enabled}, Dependency::None,
-      [](auto &context)
+      [](auto &)
       {
-        if (!EnvironmentOf(context).CanExecuteScripts)
-        {
-          return MatchingIdentifiers {ValueId::None};
-        }
+        // Scripting is always enabled: the application plays the part of scripts.
         return MatchingIdentifiers {ValueId::Enabled};
       }};
     return schema;
@@ -526,12 +533,13 @@ namespace krys::boo::css::mq::Features
       {
         auto identifier = [&]
         {
-          switch (EnvironmentOf(context).DisplayMode)
+          auto *page = PageOf(context);
+          switch (page ? page->DisplayMode() : ApplicationDisplayMode::Browser)
           {
-            case mq::DisplayMode::Fullscreen: return ValueId::Fullscreen;
-            case mq::DisplayMode::Standalone: return ValueId::Standalone;
-            case mq::DisplayMode::MinimalUI:  return ValueId::MinimalUi;
-            case mq::DisplayMode::Browser:    return ValueId::Browser;
+            case ApplicationDisplayMode::Fullscreen: return ValueId::Fullscreen;
+            case ApplicationDisplayMode::Standalone: return ValueId::Standalone;
+            case ApplicationDisplayMode::MinimalUI:  return ValueId::MinimalUi;
+            case ApplicationDisplayMode::Browser:    return ValueId::Browser;
           }
           krys_unreachable();
         }();
@@ -571,7 +579,8 @@ namespace krys::boo::css::mq::Features
       u8"prefers-color-scheme", FixedVector {ValueId::Light, ValueId::Dark}, Dependency::Appearance,
       [](auto &context)
       {
-        bool useDarkAppearance = EnvironmentOf(context).UseDarkAppearance;
+        auto *page = PageOf(context);
+        bool useDarkAppearance = page && page->UseDarkAppearance();
         return MatchingIdentifiers {useDarkAppearance ? ValueId::Dark : ValueId::Light};
       }};
     return schema;
