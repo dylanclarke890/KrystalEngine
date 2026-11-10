@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -975,8 +976,10 @@ namespace krys::boo
   {
     RenderBox::StyleDidChange(diff, oldStyle);
 
-    // FIXME: Adjust the fragmented flow state when the containing block changes, once there are fragmented
-    // flows.
+    if (oldStyle)
+    {
+      AdjustFragmentedFlowStateOnContainingBlockChangeIfNeeded(*oldStyle, Style());
+    }
 
     PropagateStyleToAnonymousChildren(StylePropagationType::BlockAndRubyChildren);
 
@@ -3656,6 +3659,95 @@ namespace krys::boo
       currentCache = info.Cache();
     }
     return logicalRight;
+  }
+
+#pragma endregion
+
+#pragma region Fragmentation
+
+  RenderFragmentedFlow *RenderBlock::CachedEnclosingFragmentedFlow() const noexcept
+  {
+    if (!HasRareData() || !GetRareData().EnclosingFragmentedFlow)
+    {
+      return nullptr;
+    }
+    return GetRareData().EnclosingFragmentedFlow->get();
+  }
+
+  bool RenderBlock::CachedEnclosingFragmentedFlowNeedsUpdate() const noexcept
+  {
+    return !HasRareData() || !GetRareData().EnclosingFragmentedFlow;
+  }
+
+  void RenderBlock::SetCachedEnclosingFragmentedFlowNeedsUpdate() noexcept
+  {
+    if (HasRareData())
+    {
+      EnsureRareData().EnclosingFragmentedFlow = null;
+    }
+  }
+
+  RenderFragmentedFlow *
+    RenderBlock::UpdateCachedEnclosingFragmentedFlow(RenderFragmentedFlow *fragmentedFlow) const noexcept
+  {
+    // Only a found flow is cached, so blocks outside fragmented flows need no rare data.
+    if (!fragmentedFlow)
+    {
+      return nullptr;
+    }
+    const_cast<RenderBlock &>(*this).EnsureRareData().EnclosingFragmentedFlow = CreateWeakPtr(fragmentedFlow);
+    return fragmentedFlow;
+  }
+
+  RenderFragmentedFlow *RenderBlock::LocateEnclosingFragmentedFlow() const noexcept
+  {
+    if (CachedEnclosingFragmentedFlowNeedsUpdate())
+    {
+      return UpdateCachedEnclosingFragmentedFlow(RenderBox::LocateEnclosingFragmentedFlow());
+    }
+    krys_debug_assert(CachedEnclosingFragmentedFlow() == RenderBox::LocateEnclosingFragmentedFlow());
+    return CachedEnclosingFragmentedFlow();
+  }
+
+  void RenderBlock::ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(
+    RenderFragmentedFlow *fragmentedFlow) noexcept
+  {
+    if (GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow)
+    {
+      return;
+    }
+
+    if (auto *cachedFragmentedFlow = CachedEnclosingFragmentedFlow())
+    {
+      fragmentedFlow = cachedFragmentedFlow;
+    }
+    SetCachedEnclosingFragmentedFlowNeedsUpdate();
+    RenderElement::ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(fragmentedFlow);
+  }
+
+  LayoutUnit RenderBlock::OffsetFromLogicalTopOfFirstPage() const noexcept
+  {
+    auto *layoutState = LayoutContext().LayoutState();
+    if (layoutState && !layoutState->IsPaginated())
+    {
+      return 0_lu;
+    }
+
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      return fragmentedFlow->OffsetFromLogicalTopOfFirstFragment(this);
+    }
+
+    if (layoutState)
+    {
+      krys_debug_assert(layoutState->Renderer() == this);
+
+      LayoutSize offsetDelta = layoutState->LayoutOffset() - layoutState->PageOffset();
+      return IsHorizontalWritingMode() ? offsetDelta.Height() : offsetDelta.Width();
+    }
+
+    krys_debug_assert_msg(false, "A block is only paginated during layout or in a fragmented flow.");
+    return 0_lu;
   }
 
 #pragma endregion

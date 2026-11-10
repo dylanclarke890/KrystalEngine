@@ -2678,6 +2678,10 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp
   include/Krystal.Booey/Rendering/FormControls/RenderTextControlMultiLine.hpp
   include/Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp
+  include/Krystal.Booey/Rendering/Fragmentation/RenderBoxFragmentInfo.hpp
+  include/Krystal.Booey/Rendering/Fragmentation/RenderFragmentContainer.hpp
+  include/Krystal.Booey/Rendering/Fragmentation/RenderFragmentContainerSet.hpp
+  include/Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp
   include/Krystal.Booey/Rendering/GeneratedContent/CounterNode.hpp
   include/Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp
   include/Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp
@@ -2959,6 +2963,9 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/FormControls/RenderTextControl.cpp
   src/Rendering/FormControls/RenderTextControlMultiLine.cpp
   src/Rendering/FormControls/RenderTextControlSingleLine.cpp
+  src/Rendering/Fragmentation/RenderFragmentContainer.cpp
+  src/Rendering/Fragmentation/RenderFragmentContainerSet.cpp
+  src/Rendering/Fragmentation/RenderFragmentedFlow.cpp
   src/Rendering/GeneratedContent/CounterNode.cpp
   src/Rendering/GeneratedContent/RenderCounter.cpp
   src/Rendering/GeneratedContent/RenderListItem.cpp

@@ -40,6 +40,13 @@ namespace krys::boo
     Yes
   };
 
+  /// @brief Whether an offset exactly on a page's (or column's) top edge belongs to the page before it.
+  enum class PageBoundaryRule : bool
+  {
+    ExcludePageBoundary,
+    IncludePageBoundary
+  };
+
   using TrackedRendererListHashSet = ListHashSet<RenderBox *>;
 
   class LogicalSelectionOffsetCaches;
@@ -422,6 +429,27 @@ namespace krys::boo
     {
     }
     void PaintContents(PaintInfo &, const LayoutPoint &) noexcept;
+
+#pragma endregion
+
+#pragma region Fragmentation
+
+  public:
+    /// @brief The enclosing fragmented flow found last, if it's still known.
+    KRYS_NODISCARD RenderFragmentedFlow *CachedEnclosingFragmentedFlow() const noexcept;
+    void SetCachedEnclosingFragmentedFlowNeedsUpdate() noexcept;
+    KRYS_NODISCARD virtual bool CachedEnclosingFragmentedFlowNeedsUpdate() const noexcept;
+    void ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(
+      RenderFragmentedFlow *fragmentedFlow) noexcept final;
+
+    KRYS_NODISCARD LayoutUnit OffsetFromLogicalTopOfFirstPage() const noexcept override;
+
+  protected:
+    KRYS_NODISCARD RenderFragmentedFlow *LocateEnclosingFragmentedFlow() const noexcept override;
+
+  private:
+    RenderFragmentedFlow *
+      UpdateCachedEnclosingFragmentedFlow(RenderFragmentedFlow *fragmentedFlow) const noexcept;
 
 #pragma endregion
 

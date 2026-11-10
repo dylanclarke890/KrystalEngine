@@ -81,7 +81,10 @@ namespace krys::boo
   class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
+  class RenderBoxFragmentInfo;
   class RenderElement;
+  class RenderFragmentContainer;
+  class RenderFragmentedFlow;
   class RenderLayer;
   class RenderLayerModelObject;
   class RenderTreeBuilder;
@@ -117,7 +120,15 @@ namespace krys::boo
     HasTransformRelatedProperty,
     ChildrenInline,
     PaintContainmentApplies,
-    WasSkippedDuringLastLayoutDueToContentVisibility
+    WasSkippedDuringLastLayoutDueToContentVisibility,
+    InsideFragmentedFlow
+  };
+
+  /// @brief Whether a renderer is laid out in a fragmented flow.
+  enum class RenderObjectFragmentedFlowState : bool
+  {
+    NotInsideFlow,
+    InsideFlow
   };
 
   /// @brief How coordinates are mapped between a renderer and its ancestors.
@@ -222,7 +233,7 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 20uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 21uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectTypeFlag, 8uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBlockFlowFlag, 4uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectLineBreakFlag, 1uz);
@@ -804,6 +815,48 @@ namespace krys::boo
     virtual void InsertedIntoTree() noexcept;
     virtual void WillBeRemovedFromTree() noexcept;
 
+#pragma region Fragmentation
+
+    using FragmentedFlowState = RenderObjectFragmentedFlowState;
+
+    /// @brief Whether the object is laid out in a fragmented flow (such as a multi-column flow).
+    KRYS_NODISCARD FragmentedFlowState GetFragmentedFlowState() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::InsideFragmentedFlow) ? FragmentedFlowState::InsideFlow
+                                                                   : FragmentedFlowState::NotInsideFlow;
+    }
+    void SetFragmentedFlowState(FragmentedFlowState state) noexcept
+    {
+      _stateFlags.Set(StateFlag::InsideFragmentedFlow, state == FragmentedFlowState::InsideFlow);
+    }
+
+    /// @brief Whether a nested fragmented flow keeps its own state when its ancestor's changes.
+    enum class SkipDescendentFragmentedFlow : bool
+    {
+      No,
+      Yes
+    };
+    void SetFragmentedFlowStateIncludingDescendants(
+      FragmentedFlowState state,
+      SkipDescendentFragmentedFlow skipDescendentFragmentedFlow = SkipDescendentFragmentedFlow::Yes) noexcept;
+
+    /// @brief The fragmented flow the object is laid out in, if any.
+    KRYS_NODISCARD RenderFragmentedFlow *EnclosingFragmentedFlow() const noexcept
+    {
+      if (GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow)
+      {
+        return nullptr;
+      }
+      return LocateEnclosingFragmentedFlow();
+    }
+
+    /// @brief Sets the state of an object just inserted from its new container's.
+    void InitializeFragmentedFlowStateOnInsertion() noexcept;
+    /// @brief Takes an object being removed out of its fragmented flow.
+    void ResetFragmentedFlowStateOnRemoval() noexcept;
+
+#pragma endregion
+
     KRYS_NODISCARD bool IsRenderElement() const noexcept
     {
       return !IsRenderText();
@@ -951,6 +1004,23 @@ namespace krys::boo
     {
       return IsRenderBlockFlow()
              && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsFragmentedFlow);
+    }
+    KRYS_NODISCARD bool IsRenderFragmentContainer() const noexcept
+    {
+      return IsRenderBlockFlow()
+             && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsFragmentContainer);
+    }
+    KRYS_NODISCARD bool IsRenderMultiColumnFlow() const noexcept
+    {
+      return _type == Type::MultiColumnFlow;
+    }
+    KRYS_NODISCARD bool IsRenderMultiColumnSet() const noexcept
+    {
+      return _type == Type::MultiColumnSet;
+    }
+    KRYS_NODISCARD bool IsRenderMultiColumnSpannerPlaceholder() const noexcept
+    {
+      return _type == Type::MultiColumnSpannerPlaceholder;
     }
     KRYS_NODISCARD bool IsRenderTextControl() const noexcept
     {
@@ -1723,6 +1793,12 @@ namespace krys::boo
   protected:
     static void ScheduleLayout(RenderElement *layoutRoot) noexcept;
 
+    /// @brief Finds the fragmented flow the object is laid out in, through its containing blocks.
+    KRYS_NODISCARD virtual RenderFragmentedFlow *LocateEnclosingFragmentedFlow() const noexcept;
+    /// @brief The state @p renderer should have in its current place in the tree.
+    KRYS_NODISCARD static FragmentedFlowState
+      ComputedFragmentedFlowState(const RenderObject &renderer) noexcept;
+
     void SetNeedsOutOfFlowMovementLayoutBit(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::NeedsOutOfFlowMovementLayout, b);
@@ -1772,6 +1848,9 @@ namespace krys::boo
 
       // From RenderBox
       RefPtr<ControlPart> Control;
+
+      // From RenderBlock: null when it needs finding again.
+      Maybe<WeakPtr<RenderFragmentedFlow>> EnclosingFragmentedFlow;
     };
     KRYS_NODISCARD bool HasRareData() const noexcept
     {

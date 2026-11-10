@@ -932,6 +932,26 @@ namespace krys::boo
     }
     KRYS_NODISCARD LayoutRect ClipRect(const LayoutPoint &location) const noexcept;
 
+#pragma region Fragmentation
+
+    /// @brief @p fragment, or the first or last of the box's own fragments when @p fragment is before or
+    /// after them, so lines and blocks that overflow the box size as though the box extended into their
+    /// fragment.
+    KRYS_NODISCARD RenderFragmentContainer *
+      ClampToStartAndEndFragments(RenderFragmentContainer *fragment) const noexcept;
+    /// @brief The box's logical top in its fragmented flow (or the paginated layout), 0 outside one.
+    KRYS_NODISCARD virtual LayoutUnit OffsetFromLogicalTopOfFirstPage() const noexcept;
+    /// @brief What the box has in @p fragment, if it has been laid out there.
+    KRYS_NODISCARD RenderBoxFragmentInfo *
+      GetRenderBoxFragmentInfo(RenderFragmentContainer *fragment) const noexcept;
+    /// @brief Whether the box can extend outside its containing block's fragments.
+    KRYS_NODISCARD bool CanHaveOutsideFragmentRange() const noexcept
+    {
+      return !IsRenderFragmentedFlow();
+    }
+
+#pragma endregion
+
 #pragma region Hit testing
 
     KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,

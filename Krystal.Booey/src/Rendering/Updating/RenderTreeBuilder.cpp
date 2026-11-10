@@ -534,7 +534,8 @@ namespace krys::boo
 
     if (_internalMovesType == IsInternalMove::No)
     {
-      // FIXME: The fragmented flow state and multi-column descendants, once there are fragmented flows.
+      newChild->InitializeFragmentedFlowStateOnInsertion();
+      // FIXME: Multi-column descendants (multiColumnDescendantInserted), once there are multi-column flows.
       if (auto *listItemRenderer = DynamicDowncast<RenderListItem>(*newChild))
       {
         listItemRenderer->UpdateListMarkerNumbers();
@@ -1222,7 +1223,10 @@ namespace krys::boo
       InvalidateLineLayout(child, IsRemoval::Yes);
     }
 
-    // FIXME: The fragmented flow state, once there are fragmented flows.
+    if (_internalMovesType == IsInternalMove::No)
+    {
+      child.ResetFragmentedFlowStateOnRemoval();
+    }
 
     child.WillBeRemovedFromTree();
     // WARNING: There should be no code running between willBeRemovedFromTree() and the actual removal below.

@@ -46,6 +46,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
@@ -64,6 +65,8 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
@@ -2012,6 +2015,120 @@ namespace krys::boo
     }
 
     View().WillDestroyRenderer();
+  }
+
+  void RenderObject::SetFragmentedFlowStateIncludingDescendants(
+    FragmentedFlowState state, SkipDescendentFragmentedFlow skipDescendentFragmentedFlow) noexcept
+  {
+    SetFragmentedFlowState(state);
+
+    auto *renderElement = DynamicDowncast<RenderElement>(*this);
+    if (!renderElement)
+    {
+      return;
+    }
+
+    for (auto &child : ChildrenOfType<RenderObject>(*renderElement))
+    {
+      // If the child is a fragmentation context it already updated the descendants flag accordingly.
+      if (child.IsRenderFragmentedFlow() && skipDescendentFragmentedFlow == SkipDescendentFragmentedFlow::Yes)
+      {
+        continue;
+      }
+      if (child.IsOutOfFlowPositioned())
+      {
+        // Fragmented status propagation stops at out-of-flow boundary.
+        auto *containingBlock = child.ContainingBlock();
+        krys_debug_assert(containingBlock);
+        if (!containingBlock || containingBlock->GetFragmentedFlowState() != FragmentedFlowState::InsideFlow)
+        {
+          continue;
+        }
+      }
+      krys_debug_assert(skipDescendentFragmentedFlow == SkipDescendentFragmentedFlow::No
+                        || state != child.GetFragmentedFlowState());
+      child.SetFragmentedFlowStateIncludingDescendants(state, skipDescendentFragmentedFlow);
+    }
+  }
+
+  RenderObject::FragmentedFlowState
+    RenderObject::ComputedFragmentedFlowState(const RenderObject &renderer) noexcept
+  {
+    if (!renderer.Parent())
+    {
+      return renderer.GetFragmentedFlowState();
+    }
+
+    if (renderer.IsRenderMultiColumnFlow())
+    {
+      // Multicolumn flows do not inherit the flow state.
+      return FragmentedFlowState::InsideFlow;
+    }
+
+    if (renderer.IsRenderText())
+    {
+      return renderer.Parent()->GetFragmentedFlowState();
+    }
+    if (renderer.IsRenderSVGBlock() || renderer.IsRenderSVGInline()
+        || renderer.IsLegacyRenderSVGModelObject())
+    {
+      // ContainingBlock() skips svg boundary (SVG root is a RenderReplaced).
+      if (const auto *svgRoot = SVGRenderSupport::FindTreeRootObject(Downcast<RenderElement>(renderer)))
+      {
+        return svgRoot->GetFragmentedFlowState();
+      }
+      return FragmentedFlowState::NotInsideFlow;
+    }
+    if (auto *container = renderer.Container())
+    {
+      return container->GetFragmentedFlowState();
+    }
+    // Splitting lines or doing continuation, so just keep the current state.
+    return renderer.GetFragmentedFlowState();
+  }
+
+  void RenderObject::InitializeFragmentedFlowStateOnInsertion() noexcept
+  {
+    krys_debug_assert(Parent());
+
+    // A RenderFragmentedFlow is always considered to be inside itself, so it never has to change its state in
+    // response to parent changes.
+    if (IsRenderFragmentedFlow())
+    {
+      return;
+    }
+
+    auto computedState = ComputedFragmentedFlowState(*this);
+    if (GetFragmentedFlowState() == computedState)
+    {
+      return;
+    }
+
+    SetFragmentedFlowStateIncludingDescendants(computedState, SkipDescendentFragmentedFlow::No);
+  }
+
+  void RenderObject::ResetFragmentedFlowStateOnRemoval() noexcept
+  {
+    krys_debug_assert(!RenderTreeBeingDestroyed());
+
+    if (GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow)
+    {
+      return;
+    }
+
+    if (auto *renderElement = DynamicDowncast<RenderElement>(*this))
+    {
+      renderElement->RemoveFromRenderFragmentedFlow();
+      return;
+    }
+
+    SetFragmentedFlowStateIncludingDescendants(FragmentedFlowState::NotInsideFlow);
+  }
+
+  RenderFragmentedFlow *RenderObject::LocateEnclosingFragmentedFlow() const noexcept
+  {
+    auto *containingBlock = ContainingBlock();
+    return containingBlock ? containingBlock->EnclosingFragmentedFlow() : nullptr;
   }
 
   void RenderObject::InsertedIntoTree() noexcept

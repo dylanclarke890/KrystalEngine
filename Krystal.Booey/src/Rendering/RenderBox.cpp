@@ -46,6 +46,8 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderBoxFragmentInfo.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Grid/GridLayoutFunctions.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
@@ -5424,6 +5426,60 @@ namespace krys::boo
     }
     return IsHorizontalWritingMode() ? LayoutSize(offset.Width(), Height() - offset.Height())
                                      : LayoutSize(Width() - offset.Width(), offset.Height());
+  }
+
+#pragma endregion
+
+#pragma region Fragmentation
+
+  RenderFragmentContainer *
+    RenderBox::ClampToStartAndEndFragments(RenderFragmentContainer *fragment) const noexcept
+  {
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+
+    krys_debug_assert(IsRenderView() || (fragment && fragmentedFlow));
+    if (IsRenderView())
+    {
+      return fragment;
+    }
+
+    // We need to clamp to the block, since we want any lines or blocks that overflow out of the
+    // logical top or logical bottom of the block to size as though the border box in the first and
+    // last fragments extended infinitely. Otherwise the lines are going to size according to the fragments
+    // they overflow into, which makes no sense when this block doesn't exist in |fragment| at all.
+    RenderFragmentContainer *startFragment = nullptr;
+    RenderFragmentContainer *endFragment = nullptr;
+    if (!fragmentedFlow->GetFragmentRangeForBox(*this, startFragment, endFragment))
+    {
+      return fragment;
+    }
+
+    if (fragment->LogicalTopForFragmentedFlowContent() < startFragment->LogicalTopForFragmentedFlowContent())
+    {
+      return startFragment;
+    }
+    if (fragment->LogicalTopForFragmentedFlowContent() > endFragment->LogicalTopForFragmentedFlowContent())
+    {
+      return endFragment;
+    }
+
+    return fragment;
+  }
+
+  LayoutUnit RenderBox::OffsetFromLogicalTopOfFirstPage() const noexcept
+  {
+    auto *layoutState = LayoutContext().LayoutState();
+    if ((layoutState && !layoutState->IsPaginated()) || (!layoutState && !EnclosingFragmentedFlow()))
+    {
+      return 0_lu;
+    }
+
+    return ContainingBlock()->OffsetFromLogicalTopOfFirstPage() + LogicalTop();
+  }
+
+  RenderBoxFragmentInfo *RenderBox::GetRenderBoxFragmentInfo(RenderFragmentContainer *fragment) const noexcept
+  {
+    return fragment ? fragment->GetRenderBoxFragmentInfo(*this) : nullptr;
   }
 
 #pragma endregion
