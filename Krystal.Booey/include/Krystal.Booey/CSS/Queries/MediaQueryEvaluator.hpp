@@ -46,7 +46,7 @@ namespace krys::boo::css::mq
   private:
     CSSOMStringAtom _mediaType;
     WeakPtr<const dom::Document> _document;
-    const RenderStyle *_rootElementStyle {nullptr}; // FIXME: Switch to a smart pointer.
+    const RenderStyle *_rootElementStyle {nullptr}; // NOTE: must outlive evaluator.
     EvaluationResult _staticMediaConditionResult {EvaluationResult::Unknown};
 
   public:
