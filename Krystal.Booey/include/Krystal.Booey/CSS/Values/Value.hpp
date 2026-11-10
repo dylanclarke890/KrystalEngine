@@ -68,6 +68,9 @@ namespace krys::boo::css
     ValueSeparator _valueSeparator : BitCount<ValueSeparator>() {ValueSeparator::SpaceSeparator};
     bool _isImplicitInitialValue : 1 {false};
     mutable bool _hasCachedCSSText : 1 {false};
+    // Whether a `ValuePair` or `QuadValue` serialises as one value when its values serialise the same. Kept in
+    // the bit fields so it never costs them space of their own.
+    bool _coalesceIdenticalValues : 1 {true};
 
     explicit Value(ValueType type) noexcept : _type(type)
     {

@@ -30,12 +30,16 @@ namespace krys::boo::css
 {
   ValuePair::ValuePair(ValueSeparator separator, Ref<Value> first, Ref<Value> second,
                        IdenticalValueSerialisation serialisation) noexcept
-      : Value(ValueType::ValuePair),
-        _coalesceIdenticalValues(serialisation != IdenticalValueSerialisation::DoNotCoalesce),
-        _first(krys::move(first)), _second(krys::move(second))
+      : Value(ValueType::ValuePair), _first(krys::move(first)), _second(krys::move(second))
   {
     _valueSeparator = separator;
+    _coalesceIdenticalValues = serialisation != IdenticalValueSerialisation::DoNotCoalesce;
   }
+
+  // A pair is a value and its two references: its coalescing bit is in the value's bit fields.
+  static_assert(sizeof(ValuePair)
+                == ((sizeof(Value) + alignof(Ref<Value>) - 1) / alignof(Ref<Value>) * alignof(Ref<Value>))
+                     + (2 * sizeof(Ref<Value>)));
 
   Ref<ValuePair> ValuePair::Create(Ref<Value> first, Ref<Value> second) noexcept
   {

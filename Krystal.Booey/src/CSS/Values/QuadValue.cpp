@@ -31,6 +31,10 @@ namespace krys::boo::css
   {
   }
 
+  // A quad value is a value and its quad: its coalescing bit is in the value's bit fields.
+  static_assert(sizeof(QuadValue)
+                == ((sizeof(Value) + alignof(Quad) - 1) / alignof(Quad) * alignof(Quad)) + sizeof(Quad));
+
   Ref<QuadValue> QuadValue::Create(Quad quad) noexcept
   {
     return AdoptRef(*new QuadValue(krys::move(quad)));

@@ -35,7 +35,6 @@ namespace krys::boo::css
   class QuadValue final : public Value
   {
   private:
-    bool _coalesceIdenticalValues {true};
     Quad _quad;
 
     explicit QuadValue(Quad quad) noexcept;

@@ -43,8 +43,6 @@ namespace krys::boo::css
     };
 
   private:
-    // FIXME: Store coalesce bit in Value to cut down on object size.
-    bool _coalesceIdenticalValues {true};
     const Ref<Value> _first;
     const Ref<Value> _second;
 
