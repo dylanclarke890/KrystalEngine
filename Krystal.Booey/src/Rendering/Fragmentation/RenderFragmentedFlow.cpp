@@ -872,6 +872,9 @@ namespace krys::boo
       fragment->SetFragmentedFlowPortionRect(IsHorizontalWritingMode() ? fragmentRect
                                                                        : fragmentRect.TransposedRect());
 
+      // FragmentAtBlockOffset's binary search relies on the intervals being contiguous and in order.
+      krys_debug_assert(fragmentLogicalHeight >= 0_lu);
+      krys_debug_assert(_fragmentIntervals.empty() || _fragmentIntervals.back().High == logicalHeight);
       _fragmentIntervals.push_back({logicalHeight, logicalHeight + fragmentLogicalHeight, fragment});
 
       logicalHeight += fragmentLogicalHeight;
