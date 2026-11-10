@@ -7712,10 +7712,10 @@
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::TextShadows",
         "parser-function": "ConsumeTextShadow",
-        "parser-grammar": "none | [ <color>? && <length>{2,3} ]#",
+        "parser-grammar": "none | [ <color>? && [ <length>{2} <length [0,inf]>? ] ]#",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for the strong value representation.",
-        "parser-grammar-comment": "FIXME: Current implementation is a bit closer to box-shadow, where the third (and optional) length representing blur radius is non-negative."
+        "parser-grammar-comment": "Level 3 only: Level 4's spread distance and inset keyword aren't supported."
       },
       "specification": {
         "module": "css-text-decor",
@@ -10019,8 +10019,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "raw",
         "render-style-type": "Style::TextDecorationLine",
-        "parser-grammar": "none | [ underline || overline || line-through || blink ]@(no-single-item-opt) | spelling-error",
-        "comment": "FIXME: Should this be an alias of text-decoration-line?"
+        "parser-grammar": "none | [ underline || overline || line-through || blink ]@(no-single-item-opt) | spelling-error"
       },
       "status": "non-standard"
     },
