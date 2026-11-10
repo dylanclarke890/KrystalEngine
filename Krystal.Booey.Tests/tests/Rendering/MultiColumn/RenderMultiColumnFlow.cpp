@@ -256,4 +256,21 @@ layer at (0,0) size 95x20
     // The gap between the columns is the container's.
     CHECK(document.ElementFromPoint(100, 5).get() == &fixture.ById(u8"m"));
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMultiColumnFlow: anchors split across columns",
+                   "[Rendering][RenderMultiColumnFlow]")
+  {
+    // An anchor split across the columns is the bounding box of its fragments.
+    ResolverFixture fixture {
+      AhemDocument(u8"#m { columns: 2; width: 200px; position: relative }"
+                   u8"#s { height: 40px; anchor-name: --a }"
+                   u8"#p { position: absolute; position-anchor: --a; left: anchor(left);"
+                   u8"top: anchor(top); width: anchor-size(width); height: anchor-size(height) }",
+                   u8"<div id=m><div id=s></div><div id=p></div></div>")};
+    auto rect = fixture.ById(u8"p").GetBoundingClientRect();
+    CHECK(rect->X() == 0);
+    CHECK(rect->Y() == 0);
+    CHECK(rect->Width() == 200);
+    CHECK(rect->Height() == 20);
+  }
 }

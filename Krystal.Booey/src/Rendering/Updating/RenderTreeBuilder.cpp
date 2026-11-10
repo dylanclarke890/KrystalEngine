@@ -954,9 +954,8 @@ namespace krys::boo
   RenderObject *RenderTreeBuilder::SplitAnonymousBoxesAroundChild(RenderBoxModelObject &parent,
                                                                   RenderObject &originalBeforeChild) noexcept
   {
-    // FIXME: Adjust beforeChild if it is a column spanner that has been moved out of its original position,
-    // once there are multi-column flows.
-    auto *beforeChild = &originalBeforeChild;
+    // Adjust beforeChild if it is a column spanner and has been moved out of its original position.
+    auto *beforeChild = MultiColumn::AdjustBeforeChildForMultiColumnSpannerIfNeeded(originalBeforeChild);
     bool didSplitParentAnonymousBoxes = false;
 
     while (beforeChild->Parent() != &parent)

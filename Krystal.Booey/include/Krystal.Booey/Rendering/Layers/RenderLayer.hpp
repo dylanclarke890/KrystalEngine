@@ -1533,6 +1533,8 @@ namespace krys::boo
 #pragma endregion
 
     KRYS_NODISCARD bool IsRenderFragmentedFlow() const noexcept;
+    /// @brief Whether the layer's renderer is in a fragmented flow, or is one.
+    KRYS_NODISCARD bool IsInsideFragmentedFlow() const noexcept;
 
     void SetIsHiddenByOverflowTruncation(bool isHidden) noexcept;
 

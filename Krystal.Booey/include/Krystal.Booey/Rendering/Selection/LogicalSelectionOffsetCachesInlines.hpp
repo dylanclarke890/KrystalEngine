@@ -31,8 +31,8 @@ namespace krys::boo
     bool parentCacheHasFloatsOrFragmentedFlows) noexcept
   {
     _block = block;
-    // FIXME: Fragmented flows (enclosingFragmentedFlow), once there are any.
-    bool blockHasFloatsOrFragmentedFlows = _block ? _block->ContainsFloats() : false;
+    bool blockHasFloatsOrFragmentedFlows =
+      _block ? (_block->ContainsFloats() || _block->EnclosingFragmentedFlow()) : false;
     _hasFloatsOrFragmentedFlows =
       parentCacheHasFloatsOrFragmentedFlows || _hasFloatsOrFragmentedFlows || blockHasFloatsOrFragmentedFlows;
     _cache = cache;

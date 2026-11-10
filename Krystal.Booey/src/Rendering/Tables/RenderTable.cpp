@@ -46,6 +46,7 @@
 #include "Krystal.Booey/Rendering/Tables/RenderTableSection.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 #include <limits>
 
@@ -587,6 +588,7 @@ namespace krys::boo
     RecalcSectionsIfNeeded();
 
     bool sectionMoved = false;
+    uint32 sectionCount = 0;
     LayoutUnit movedSectionLogicalTop;
     bool shouldCacheIntrinsicContentLogicalHeightForFlexItem = true;
 
@@ -725,6 +727,7 @@ namespace krys::boo
       // position the table sections
       for (auto *section = TopSection(); section; section = SectionBelow(section))
       {
+        sectionCount++;
         if (!sectionMoved && section->LogicalTop() != LogicalHeight())
         {
           sectionMoved = true;
@@ -763,7 +766,11 @@ namespace krys::boo
       ComputeOverflow(ClientLogicalBottom());
     }
 
-    // FIXME: The page offset, once there's pagination.
+    auto *layoutState = LayoutContext().LayoutState();
+    if (layoutState && layoutState->PageLogicalHeight())
+    {
+      SetPageLogicalOffset(layoutState->PageLogicalOffset(this, LogicalTop()));
+    }
 
     bool didFullRepaint = repainter.RepaintAfterLayout();
     // Repaint with our new bounds if they are different from our old bounds.
@@ -783,8 +790,22 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Laying the table out again when a section moved in paginated layout
-    // (markForPaginationRelayoutIfNeeded), once there's pagination.
+    bool paginated = layoutState && layoutState->IsPaginated();
+    if (sectionCount && sectionMoved && paginated)
+    {
+      // FIXME: Table layout should always stabilize even when section moves (see webkit.org/b/174412).
+      if (_recursiveSectionMovedWithPaginationLevel < sectionCount)
+      {
+        SetForScope recursiveSectionMovedWithPaginationLevel(_recursiveSectionMovedWithPaginationLevel,
+                                                             _recursiveSectionMovedWithPaginationLevel + 1);
+        MarkForPaginationRelayoutIfNeeded();
+        LayoutIfNeeded();
+      }
+      else
+      {
+        krys_debug_assert(false);
+      }
+    }
 
     // FIXME: This value isn't the intrinsic content logical height, but we need
     // to update the value as its used by flexbox layout. crbug.com/367324
@@ -795,6 +816,28 @@ namespace krys::boo
 
     _columnLogicalWidthChanged = false;
     ClearNeedsLayout();
+  }
+
+  void RenderTable::MarkForPaginationRelayoutIfNeeded() noexcept
+  {
+    auto *layoutState = LayoutContext().LayoutState();
+    if (!layoutState || !layoutState->IsPaginated()
+        || (!layoutState->PageLogicalHeightChanged()
+            && (!layoutState->PageLogicalHeight()
+                || layoutState->PageLogicalOffset(this, LogicalTop()) == PageLogicalOffset())))
+    {
+      return;
+    }
+
+    // When a table moves, we have to dirty all of the sections too.
+    SetChildNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+    for (auto &child : ChildrenOfType<RenderTableSection>(*this))
+    {
+      if (!child.NeedsLayout())
+      {
+        child.SetChildNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+      }
+    }
   }
 
   void RenderTable::InvalidateCollapsedBordersAfterStyleChangeIfNeeded(

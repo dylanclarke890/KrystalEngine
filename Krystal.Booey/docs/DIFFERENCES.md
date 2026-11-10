@@ -199,6 +199,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - A `box-shadow` is painted by clipping the shadow out of the box a pixel inside an opaque box's edge; without that, a light seam shows along every shadowed box's antialiased edge.
 - Chrome's backdrop-filter blur mirrors its edges; Render2D duplicates the nearest edge texel (`EdgeMode2D::Duplicate`), so the `backdrop` golden differs a little along blurred glass edges.
 - Chrome's `mask-border` golden was captured with the prefixed `-webkit-mask-box-image`, which always keeps the middle, so it's report-only.
+- A box with its own layer in a multi-column flow is cut at the column edges where it's painted, as in WebKit: a relatively positioned box offset past the end of its column shows the overflow at the top of the next one. Chrome fragments by layout position and paints the offset box whole, so the `multicol` golden keeps its relatively positioned box clear of a column edge.
 
 ## Compositing and scrolling
 

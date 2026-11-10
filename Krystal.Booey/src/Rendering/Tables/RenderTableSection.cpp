@@ -494,6 +494,7 @@ namespace krys::boo
     // There are no reflections (-webkit-box-reflect was dropped).
     LayoutStateMaintainer statePusher(*this, LocationOffset(),
                                       IsTransformed() || GetWritingMode().IsBlockFlipped());
+    bool paginated = LayoutContext().LayoutState()->IsPaginated();
 
     for (size_t rowIndex = 0; rowIndex < _grid.size(); ++rowIndex)
     {
@@ -523,8 +524,12 @@ namespace krys::boo
 
       if (rowRenderer)
       {
-        // FIXME: Lay out the row again when the page height changed (pageLogicalHeightChanged), once there's
-        // pagination.
+        if (!rowRenderer->NeedsLayout() && paginated
+            && LayoutContext().LayoutState()->PageLogicalHeightChanged())
+        {
+          rowRenderer->SetChildNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+        }
+
         rowRenderer->LayoutIfNeeded();
       }
     }
@@ -778,6 +783,8 @@ namespace krys::boo
         rowRenderer->AddVisualEffectOverflow();
       }
 
+      LayoutUnit rowHeightIncreaseForPagination;
+
       for (size_t columnIndex = 0; columnIndex < numberOfEffectiveColumns; columnIndex++)
       {
         auto &cs = CellAt(static_cast<uint32>(rowIndex), static_cast<uint32>(columnIndex));
@@ -807,8 +814,12 @@ namespace krys::boo
 
         SetLogicalPositionForCell(cell, static_cast<uint32>(columnIndex));
 
-        // FIXME: Lay out cells whose page offset changed, and fit cells that pagination resized into their
-        // row (rowHeightIncreaseForPagination), once there's pagination.
+        auto *layoutState = LayoutContext().LayoutState();
+        if (!cell->NeedsLayout() && layoutState->PageLogicalHeight()
+            && layoutState->PageLogicalOffset(cell, cell->LogicalTop()) != cell->PageLogicalOffset())
+        {
+          cell->SetChildNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+        }
 
         if (cell->IsOrthogonal())
         {
@@ -816,6 +827,21 @@ namespace krys::boo
           cell->SetOverridingBorderBoxLogicalWidth(rowHeight);
         }
         cell->LayoutIfNeeded();
+
+        // FIXME: Make pagination work with vertical tables.
+        if (layoutState->PageLogicalHeight() && cell->LogicalHeight() != rowHeight)
+        {
+          // FIXME: Pagination might have made us change size. For now just shrink or grow the cell to fit
+          // without doing a relayout. We'll also do a basic increase of the row height to accommodate the
+          // cell if it's bigger, but this isn't quite right either. It's at least stable though and won't
+          // result in an infinite # of relayouts that may never stabilize.
+          if (cell->LogicalHeight() > rowHeight)
+          {
+            rowHeightIncreaseForPagination =
+              std::max(rowHeightIncreaseForPagination, cell->LogicalHeight() - rowHeight);
+          }
+          cell->SetLogicalHeight(rowHeight);
+        }
 
         auto childOffset = LayoutSize(cell->Location() - oldCellRect.Location());
         if (childOffset.Width() || childOffset.Height())
@@ -828,6 +854,20 @@ namespace krys::boo
           if (!Table()->SelfNeedsLayout() && cell->CheckForRepaintDuringLayout())
           {
             cell->RepaintDuringLayoutIfMoved(oldCellRect);
+          }
+        }
+      }
+      if (rowHeightIncreaseForPagination)
+      {
+        for (size_t index = rowIndex + 1; index <= numberOfRows; ++index)
+        {
+          _rowPos[index] += rowHeightIncreaseForPagination;
+        }
+        for (size_t index = 0; index < numberOfEffectiveColumns; ++index)
+        {
+          for (auto *rowCell : CellAt(static_cast<uint32>(rowIndex), static_cast<uint32>(index)).Cells)
+          {
+            rowCell->SetLogicalHeight(rowCell->LogicalHeight() + rowHeightIncreaseForPagination);
           }
         }
       }

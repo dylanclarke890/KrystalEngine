@@ -3506,6 +3506,11 @@ namespace krys::boo
     return Renderer().IsRenderFragmentedFlow();
   }
 
+  bool RenderLayer::IsInsideFragmentedFlow() const noexcept
+  {
+    return Renderer().GetFragmentedFlowState() != RenderObject::FragmentedFlowState::NotInsideFlow;
+  }
+
   bool RenderLayer::CanUseOffsetFromAncestor() const noexcept
   {
     // FIXME: This really needs to know if there are transforms on this layer and any of the layers between it

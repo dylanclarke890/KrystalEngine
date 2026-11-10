@@ -61,7 +61,6 @@ namespace krys::boo
 
   /// @brief A renderer that generates a box: its frame rect (relative to its container), margins, overflow
   /// and the computation of its sizes.
-  // FIXME: Fragmentation.
   class RenderBox : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBox);
