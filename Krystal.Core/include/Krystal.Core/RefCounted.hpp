@@ -6,120 +6,68 @@
 #include "Krystal.Core/Numeric.hpp"
 #include <atomic>
 
-namespace krys
-{
-  template <typename TSize>
-  class RefCountedDebugger
-  {
-  private:
-    mutable std::atomic<bool> _deletionHasBegun {false};
-
-  public:
-    RefCountedDebugger() noexcept = default;
-    ~RefCountedDebugger() noexcept
-    {
-      krys_assert_msg(_deletionHasBegun.load(std::memory_order_relaxed),
-                      "RefCountedDebugger: Deletion has not begun, but destructor is being called.");
-    }
-
-    void MarkDeletionHasBegun() const noexcept
-    {
-      _deletionHasBegun.store(true, std::memory_order_relaxed);
-    }
-
-    void UnmarkDeletionHasBegun() const noexcept
-    {
-      _deletionHasBegun.store(false, std::memory_order_relaxed);
-    }
-
-    KRYS_NODISCARD bool DeletionHasBegun() const noexcept
-    {
-      return _deletionHasBegun.load(std::memory_order_relaxed);
-    }
-
-    void WillAddRef(KRYS_MAYBE_UNUSED TSize refCount) const noexcept
-    {
-      krys_assert_msg(!_deletionHasBegun.load(std::memory_order_relaxed),
-                      "RefCountedDebugger: Attempt to add reference after deletion has begun.");
-    }
-
-    void WillSubRef(KRYS_MAYBE_UNUSED TSize refCount) const noexcept
-    {
-      krys_assert_msg(!_deletionHasBegun.load(std::memory_order_relaxed),
-                      "RefCountedDebugger: Attempt to subtract reference after deletion has begun.");
-      krys_assert_msg(refCount > 0,
-                      "RefCountedDebugger: Attempt to subtract reference when ref count is zero.");
-    }
-
-    void WillDestroy(KRYS_MAYBE_UNUSED TSize refCount) const noexcept
-    {
-      krys_assert_msg(refCount == 1,
-                      "RefCountedDebugger: Attempt to destroy object when ref count is not one.");
-    }
-  };
-}
-
 namespace krys::detail
 {
+  /// @brief The top bit of a reference count, set once its object's deletion has begun. Keeping it in the
+  /// count costs no space, so the checks it backs stay in every build.
+  constexpr uint32 DeletionHasBegunFlag = 1u << 31u;
+
   class RefCounted
   {
-    using Debugger = RefCountedDebugger<uint32>;
-
   private:
     mutable uint32 _refCount {1};
-    KRYS_NO_UNIQUE_ADDRESS Debugger _debugger;
 
   protected:
     RefCounted() noexcept = default;
 
     ~RefCounted() noexcept
     {
-      _debugger.WillDestroy(_refCount);
+      krys_assert_msg(_refCount & DeletionHasBegunFlag,
+                      "RefCounted: Deletion has not begun, but destructor is being called.");
+      krys_assert_msg((_refCount & ~DeletionHasBegunFlag) == 1,
+                      "RefCounted: Attempt to destroy object when ref count is not one.");
     }
 
   public:
     void AddRef() const noexcept
     {
-      _debugger.WillAddRef(_refCount);
+      krys_assert_msg(!(_refCount & DeletionHasBegunFlag),
+                      "RefCounted: Attempt to add reference after deletion has begun.");
       ++_refCount;
     }
 
     KRYS_NODISCARD bool HasOneRef() const noexcept
     {
-      return _refCount == 1;
+      return GetRefCount() == 1;
     }
 
     KRYS_NODISCARD uint32 GetRefCount() const noexcept
     {
-      return _refCount;
+      return _refCount & ~DeletionHasBegunFlag;
     }
 
-    KRYS_NODISCARD const Debugger &GetDebugger() const noexcept
+    KRYS_NODISCARD bool DeletionHasBegun() const noexcept
     {
-      return _debugger;
-    }
-
-    KRYS_NODISCARD Debugger &GetDebugger() noexcept
-    {
-      return _debugger;
+      return _refCount & DeletionHasBegunFlag;
     }
 
   protected:
     /// @brief Returns true if the pointer should be deleted.
     bool SubRefBase() const noexcept
     {
-      _debugger.WillSubRef(_refCount);
+      krys_assert_msg(!(_refCount & DeletionHasBegunFlag),
+                      "RefCounted: Attempt to subtract reference after deletion has begun.");
+      krys_assert_msg(_refCount > 0, "RefCounted: Attempt to subtract reference when ref count is zero.");
 
-      auto tempCount = _refCount - 1u;
-      if (tempCount == 0)
+      if (_refCount == 1)
       {
-        _debugger.MarkDeletionHasBegun();
-        // Don't save the decremented count, it allows us to detect if someone tries to AddRef or SubRef after
-        // deletion has begun.
+        // The count stays at one, flagged, so that adding or subtracting a reference after deletion has begun
+        // is caught.
+        _refCount |= DeletionHasBegunFlag;
         return true;
       }
 
-      _refCount = tempCount;
+      --_refCount;
       return false;
     }
 
@@ -128,7 +76,6 @@ namespace krys::detail
     /// gain references again.
     void ResumeFromNoRefs() const noexcept
     {
-      _debugger.UnmarkDeletionHasBegun();
       _refCount = 0;
     }
 
@@ -136,41 +83,38 @@ namespace krys::detail
     void PrepareToDeleteWithNoRefs() const noexcept
     {
       krys_debug_assert(_refCount == 0);
-      _refCount = 1;
-      _debugger.MarkDeletionHasBegun();
+      _refCount = 1 | DeletionHasBegunFlag;
     }
   };
 
   class ThreadSafeRefCounted
   {
-    using Debugger = RefCountedDebugger<uint32>;
-
     KRYS_NON_COPYABLE(ThreadSafeRefCounted);
 
   private:
     mutable std::atomic<uint32> _refCount {1};
-    KRYS_NO_UNIQUE_ADDRESS Debugger _debugger;
 
   public:
     void AddRef() const noexcept
     {
-      _debugger.WillAddRef(_refCount);
+      krys_assert_msg(!(_refCount.load(std::memory_order_relaxed) & DeletionHasBegunFlag),
+                      "ThreadSafeRefCounted: Attempt to add reference after deletion has begun.");
       ++_refCount;
     }
 
-    bool HasOneRef() const noexcept
+    KRYS_NODISCARD bool HasOneRef() const noexcept
     {
-      return _refCount == 1;
+      return GetRefCount() == 1;
     }
 
-    uint32 GetRefCount() const noexcept
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept
     {
-      return _refCount;
+      return _refCount & ~DeletionHasBegunFlag;
     }
 
-    Debugger &GetDebugger() noexcept
+    KRYS_NODISCARD bool DeletionHasBegun() const noexcept
     {
-      return _debugger;
+      return _refCount.load(std::memory_order_relaxed) & DeletionHasBegunFlag;
     }
 
   protected:
@@ -178,19 +122,19 @@ namespace krys::detail
 
     ~ThreadSafeRefCounted() noexcept
     {
-      _debugger.WillDestroy(_refCount);
-      krys_assert(_refCount == 1);
+      krys_assert_msg(_refCount == (1 | DeletionHasBegunFlag),
+                      "ThreadSafeRefCounted: Destroyed when its deletion hadn't begun or it had references.");
     }
 
     // Returns true if the pointer should be freed.
     bool SubRefBase() const noexcept
     {
-      _debugger.WillSubRef(_refCount);
+      krys_assert_msg(!(_refCount.load(std::memory_order_relaxed) & DeletionHasBegunFlag),
+                      "ThreadSafeRefCounted: Attempt to subtract reference after deletion has begun.");
 
       if (!--_refCount) KRYS_UNLIKELY
       {
-        _debugger.MarkDeletionHasBegun();
-        _refCount = 1;
+        _refCount = 1 | DeletionHasBegunFlag;
         return true;
       }
 
@@ -200,26 +144,26 @@ namespace krys::detail
 
   class RefCountedWithInlineWeakPtrBase
   {
-    using Debugger = RefCountedDebugger<uint32>;
-
   private:
     mutable uint32 _strongCount {1};
     mutable uint32 _weakCount {1}; // The strong counts collectively share one weak count.
-    KRYS_NO_UNIQUE_ADDRESS Debugger _debugger;
 
   protected:
     constexpr RefCountedWithInlineWeakPtrBase() noexcept = default;
 
     ~RefCountedWithInlineWeakPtrBase() noexcept
     {
-      _debugger.WillDestroy(_strongCount);
+      krys_assert_msg(
+        _strongCount == (1 | DeletionHasBegunFlag),
+        "RefCountedWithInlineWeakPtr: Destroyed when its deletion hadn't begun or it had references.");
       _strongCount = 0;
     }
 
   public:
     void AddRef() const noexcept
     {
-      _debugger.WillAddRef(_strongCount);
+      krys_assert_msg(!(_strongCount & DeletionHasBegunFlag),
+                      "RefCountedWithInlineWeakPtr: Attempt to add reference after deletion has begun.");
       ++_strongCount;
     }
 
@@ -230,24 +174,27 @@ namespace krys::detail
 
     KRYS_NODISCARD bool HasOneRef() const noexcept
     {
-      return _strongCount == 1;
+      return GetRefCount() == 1;
     }
 
     KRYS_NODISCARD uint32 GetRefCount() const noexcept
     {
-      return _strongCount;
+      return _strongCount & ~DeletionHasBegunFlag;
     }
 
-    KRYS_NODISCARD Debugger &GetDebugger() const noexcept
+    KRYS_NODISCARD bool DeletionHasBegun() const noexcept
     {
-      return const_cast<Debugger &>(_debugger);
+      return _strongCount & DeletionHasBegunFlag;
     }
 
   protected:
     // Returns true if the pointer should be destroyed.
     KRYS_NODISCARD bool SubRefBase() const noexcept
     {
-      _debugger.WillSubRef(_strongCount);
+      krys_assert_msg(!(_strongCount & DeletionHasBegunFlag),
+                      "RefCountedWithInlineWeakPtr: Attempt to subtract reference after deletion has begun.");
+      krys_assert_msg(_strongCount > 0,
+                      "RefCountedWithInlineWeakPtr: Attempt to subtract reference when ref count is zero.");
 
       if (_strongCount != 1)
       {
@@ -255,7 +202,7 @@ namespace krys::detail
         return false;
       }
 
-      _debugger.MarkDeletionHasBegun();
+      _strongCount |= DeletionHasBegunFlag;
       return true;
     }
 

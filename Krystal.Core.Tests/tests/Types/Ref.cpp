@@ -6,12 +6,25 @@
 
 namespace krys::tests
 {
-  class TestRefCounted : public RefCounted<TestRefCounted>
+  namespace
   {
-  public:
-    TestRefCounted() = default;
-    virtual ~TestRefCounted() = default;
-  };
+    class TestRefCounted : public RefCounted<TestRefCounted>
+    {
+    public:
+      /// @brief Whether the last object destroyed had begun deletion first, as it must have.
+      static inline bool DestroyedAfterDeletionBegan = false;
+
+      TestRefCounted() noexcept
+      {
+        DestroyedAfterDeletionBegan = false;
+      }
+
+      virtual ~TestRefCounted() noexcept
+      {
+        DestroyedAfterDeletionBegan = DeletionHasBegun();
+      }
+    };
+  }
 
   TEST_CASE("Ref manages reference count through copy and move", "[Ref]")
   {
@@ -33,7 +46,7 @@ namespace krys::tests
       REQUIRE(obj->GetRefCount() == 1);
     }
 
-    REQUIRE(obj->GetDebugger().DeletionHasBegun());
+    REQUIRE(TestRefCounted::DestroyedAfterDeletionBegan);
   }
 
   TEST_CASE("Ref copy increments and decrements refcount", "[Ref]")
@@ -52,7 +65,7 @@ namespace krys::tests
       REQUIRE(obj->GetRefCount() == 1);
     }
 
-    REQUIRE(obj->GetDebugger().DeletionHasBegun());
+    REQUIRE(TestRefCounted::DestroyedAfterDeletionBegan);
   }
 
   TEST_CASE("Ref move construction does not change refcount", "[Ref]")
@@ -67,7 +80,7 @@ namespace krys::tests
       REQUIRE(obj->GetRefCount() == 1);
     }
 
-    REQUIRE(obj->GetDebugger().DeletionHasBegun());
+    REQUIRE(TestRefCounted::DestroyedAfterDeletionBegan);
   }
 
   TEST_CASE("Ref copy assignment updates refcount correctly", "[Ref]")
@@ -85,7 +98,7 @@ namespace krys::tests
       REQUIRE(obj->GetRefCount() == 2);
     }
 
-    REQUIRE(obj->GetDebugger().DeletionHasBegun());
+    REQUIRE(TestRefCounted::DestroyedAfterDeletionBegan);
   }
 
   TEST_CASE("Ref move assignment transfers ownership", "[Ref]")
@@ -103,7 +116,7 @@ namespace krys::tests
       REQUIRE(obj->GetRefCount() == 1);
     }
 
-    REQUIRE(obj->GetDebugger().DeletionHasBegun());
+    REQUIRE(TestRefCounted::DestroyedAfterDeletionBegan);
   }
 
   TEST_CASE("Ref self-assignment is safe", "[Ref]")
@@ -121,7 +134,7 @@ namespace krys::tests
       REQUIRE(obj->GetRefCount() == 1);
     }
 
-    REQUIRE(obj->GetDebugger().DeletionHasBegun());
+    REQUIRE(TestRefCounted::DestroyedAfterDeletionBegan);
   }
 
   TEST_CASE("Ref release transfers ownership without refcount change", "[Ref]")
@@ -140,7 +153,7 @@ namespace krys::tests
 
     // raw still owns the ref here
     raw->SubRef();
-    REQUIRE(obj->GetDebugger().DeletionHasBegun());
+    REQUIRE(TestRefCounted::DestroyedAfterDeletionBegan);
   }
 
 }
