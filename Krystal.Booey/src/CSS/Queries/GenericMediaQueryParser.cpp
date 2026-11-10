@@ -56,8 +56,7 @@ namespace krys::boo::css::mq
     return CSSOMStringAtom(text::ToASCIILower(name));
   }
 
-  Maybe<Feature> FeatureParser::ConsumeFeature(TokenRange &tokens,
-                                               const MediaQueryParserContext &context) noexcept
+  Maybe<Feature> FeatureParser::ConsumeFeature(TokenRange &tokens, const ParserContext &context) noexcept
   {
     auto rangeCopy = tokens;
     if (auto feature = ConsumeBooleanOrPlainFeature(tokens, context))
@@ -69,9 +68,9 @@ namespace krys::boo::css::mq
     return ConsumeRangeFeature(tokens, context);
   }
 
-  KRYS_NODISCARD static RefPtr<Value>
-    ConsumeCustomPropertyValue(const CSSOMStringAtom &propertyName, TokenRange &tokens,
-                               const MediaQueryParserContext &context) noexcept
+  KRYS_NODISCARD static RefPtr<Value> ConsumeCustomPropertyValue(const CSSOMStringAtom &propertyName,
+                                                                 TokenRange &tokens,
+                                                                 const ParserContext &context) noexcept
   {
     auto valueRange = tokens;
     std::ignore = tokens.ConsumeAll();
@@ -84,11 +83,11 @@ namespace krys::boo::css::mq
       return CustomPropertyValue::CreateEmpty(propertyName);
     }
 
-    return VariableParser::ParseDeclarationValue(propertyName, valueRange, context.Context);
+    return VariableParser::ParseDeclarationValue(propertyName, valueRange, context);
   }
 
   Maybe<Feature> FeatureParser::ConsumeBooleanOrPlainFeature(TokenRange &tokens,
-                                                             const MediaQueryParserContext &context) noexcept
+                                                             const ParserContext &context) noexcept
   {
     auto consumePlainFeatureName = [&]() -> Pair<CSSOMStringAtom, ComparisonOperator>
     {
@@ -156,8 +155,7 @@ namespace krys::boo::css::mq
     return Feature {featureName, Syntax::Plain, {}, Comparison {op, krys::move(value)}};
   }
 
-  Maybe<Feature> FeatureParser::ConsumeRangeFeature(TokenRange &tokens,
-                                                    const MediaQueryParserContext &context) noexcept
+  Maybe<Feature> FeatureParser::ConsumeRangeFeature(TokenRange &tokens, const ParserContext &context) noexcept
   {
     auto consumeRangeOperator = [&]
     {
@@ -291,8 +289,7 @@ namespace krys::boo::css::mq
     }
   }
 
-  RefPtr<Value> FeatureParser::ConsumeValue(TokenRange &tokens,
-                                            const MediaQueryParserContext &context) noexcept
+  RefPtr<Value> FeatureParser::ConsumeValue(TokenRange &tokens, const ParserContext &context) noexcept
   {
     using namespace PropertyParserHelpers;
 
@@ -306,7 +303,7 @@ namespace krys::boo::css::mq
       return value;
     }
 
-    auto state = PropertyParserState {.Context = context.Context};
+    auto state = PropertyParserState {.Context = context};
 
     if (auto value = ConsumeRatioWithBothNumeratorAndDenominator(tokens, state))
     {

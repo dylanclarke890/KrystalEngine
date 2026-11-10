@@ -24,7 +24,7 @@ namespace krys::boo::css::tests
         return {};
       }
 
-      auto query = cq::ContainerQueryParser::ConsumeContainerQuery(tokens, MediaQueryParserContext());
+      auto query = cq::ContainerQueryParser::ConsumeContainerQuery(tokens, StrictParserContext());
       if (!query)
       {
         return {};
@@ -46,7 +46,7 @@ namespace krys::boo::css::tests
       std::ignore = tokenizer.PumpTokenizer();
       auto tokens = tokenizer.Tokens();
       tokens.DiscardWhitespace();
-      auto queries = cq::ContainerQueryParser::ConsumeContainerQueryList(tokens, MediaQueryParserContext());
+      auto queries = cq::ContainerQueryParser::ConsumeContainerQueryList(tokens, StrictParserContext());
       tokens.DiscardWhitespace();
       if (!queries || !tokens.IsAtEnd())
       {

@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
@@ -216,7 +215,6 @@ namespace krys::boo::dom::tests
       auto document = Parse(u8"<p>");
 
       REQUIRE(css::ParserContext(*document) == document->CssParserContext());
-      REQUIRE(css::MediaQueryParserContext(*document).Context == document->CssParserContext());
       REQUIRE(css::SelectorParserContext(*document).Mode == css::ParserMode::HTMLQuirks);
       REQUIRE(css::SelectorParserContext(*document)
               == css::SelectorParserContext(document->CssParserContext()));

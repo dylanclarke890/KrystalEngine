@@ -470,7 +470,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryParser.hpp
-  include/Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp
   include/Krystal.Booey/CSS/Rules/CounterStyleRule.hpp
   include/Krystal.Booey/CSS/Rules/FunctionRule.hpp
   include/Krystal.Booey/CSS/Rules/ImportRule.hpp
@@ -835,7 +834,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Queries/MediaQueryFeatures.cpp
   src/CSS/Queries/MediaQueryMatcher.cpp
   src/CSS/Queries/MediaQueryParser.cpp
-  src/CSS/Queries/MediaQueryParserContext.cpp
   src/CSS/Rules/CounterStyleRule.cpp
   src/CSS/Rules/FunctionRule.cpp
   src/CSS/Rules/ImportRule.cpp

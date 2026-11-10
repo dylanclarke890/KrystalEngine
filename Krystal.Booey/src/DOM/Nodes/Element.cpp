@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/CSS/TypedOM/ComputedStylePropertyMapReadOnly.hpp"
+#include "Krystal.Booey/CSS/TypedOM/StylePropertyMap.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"

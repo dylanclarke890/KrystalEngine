@@ -27,7 +27,6 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -39,13 +38,13 @@ namespace krys::boo::css::mq
   struct FeatureParser
   {
     KRYS_NODISCARD static Maybe<Feature> ConsumeFeature(TokenRange &tokens,
-                                                        const MediaQueryParserContext &context) noexcept;
-    KRYS_NODISCARD static Maybe<Feature>
-      ConsumeBooleanOrPlainFeature(TokenRange &tokens, const MediaQueryParserContext &context) noexcept;
+                                                        const ParserContext &context) noexcept;
+    KRYS_NODISCARD static Maybe<Feature> ConsumeBooleanOrPlainFeature(TokenRange &tokens,
+                                                                      const ParserContext &context) noexcept;
     KRYS_NODISCARD static Maybe<Feature> ConsumeRangeFeature(TokenRange &tokens,
-                                                             const MediaQueryParserContext &context) noexcept;
+                                                             const ParserContext &context) noexcept;
     KRYS_NODISCARD static RefPtr<Value> ConsumeValue(TokenRange &tokens,
-                                                     const MediaQueryParserContext &context) noexcept;
+                                                     const ParserContext &context) noexcept;
     /// @brief Consumes an `<mf-comparison>` and the whitespace after it.
     KRYS_NODISCARD static Maybe<ComparisonOperator> ConsumeComparisonOperator(TokenRange &tokens) noexcept;
 
@@ -66,14 +65,14 @@ namespace krys::boo::css::mq
     };
 
     KRYS_NODISCARD static Maybe<Condition> ConsumeCondition(TokenRange &tokens,
-                                                            const MediaQueryParserContext &context) noexcept
+                                                            const ParserContext &context) noexcept
     {
       State state {};
       return ConsumeCondition(tokens, context, state);
     }
 
-    KRYS_NODISCARD static Maybe<Condition>
-      ConsumeCondition(TokenRange &tokens, const MediaQueryParserContext &context, State &state) noexcept
+    KRYS_NODISCARD static Maybe<Condition> ConsumeCondition(TokenRange &tokens, const ParserContext &context,
+                                                            State &state) noexcept
     {
       if (tokens.Peek().Type() == TokenType::Ident)
       {
@@ -140,7 +139,7 @@ namespace krys::boo::css::mq
     }
 
     KRYS_NODISCARD static Maybe<QueryInParens>
-      ConsumeQueryInParens(TokenRange &tokens, const MediaQueryParserContext &context, State &state) noexcept
+      ConsumeQueryInParens(TokenRange &tokens, const ParserContext &context, State &state) noexcept
     {
       Maybe<ValueId> functionId;
 
@@ -200,9 +199,8 @@ namespace krys::boo::css::mq
                               originalBlockRange.Serialise(TokenSerialisationMode::CustomProperty)};
     }
 
-    KRYS_NODISCARD static Maybe<Feature> ConsumeAndValidateFeature(TokenRange &tokens,
-                                                                   const MediaQueryParserContext &context,
-                                                                   State &state) noexcept
+    KRYS_NODISCARD static Maybe<Feature>
+      ConsumeAndValidateFeature(TokenRange &tokens, const ParserContext &context, State &state) noexcept
     {
       auto feature = FeatureParser::ConsumeFeature(tokens, context);
       if (!feature)
@@ -223,14 +221,14 @@ namespace krys::boo::css::mq
       return false;
     }
 
-    KRYS_NODISCARD static Maybe<StyleRange> ConsumeStyleRange(TokenRange &, const MediaQueryParserContext &,
+    KRYS_NODISCARD static Maybe<StyleRange> ConsumeStyleRange(TokenRange &, const ParserContext &,
                                                               State &) noexcept
     {
       return {};
     }
 
-    KRYS_NODISCARD static const FeatureSchema *
-      SchemaForFeatureName(const CSSOMStringAtom &name, const MediaQueryParserContext &, State &) noexcept
+    KRYS_NODISCARD static const FeatureSchema *SchemaForFeatureName(const CSSOMStringAtom &name,
+                                                                    const ParserContext &, State &) noexcept
     {
       using SchemaMap = HashMap<CSSOMStringAtom, const FeatureSchema *>;
 
@@ -248,7 +246,7 @@ namespace krys::boo::css::mq
       return it == schemas->end() ? nullptr : it->second;
     }
 
-    KRYS_NODISCARD static bool ValidateFeature(Feature &feature, const MediaQueryParserContext &context,
+    KRYS_NODISCARD static bool ValidateFeature(Feature &feature, const ParserContext &context,
                                                State &state) noexcept
     {
       auto *schema = TConcreteParser::SchemaForFeatureName(feature.Name, context, state);

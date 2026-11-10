@@ -3,7 +3,6 @@
 #include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
 #include "Krystal.Booey/CSS/Queries/ContainerQueryParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
@@ -27,8 +26,7 @@ namespace krys::boo::css::tests
     {
       Tokens tokens {text};
       auto range = tokens.Tokenizer.Tokens();
-      auto query = cq::ContainerQueryParser::ConsumeContainerQuery(
-        range, MediaQueryParserContext(StrictParserContext()));
+      auto query = cq::ContainerQueryParser::ConsumeContainerQuery(range, StrictParserContext());
       REQUIRE(query);
       return krys::move(*query);
     }

@@ -32,19 +32,18 @@ namespace krys::boo::css::cq
   /// @brief Parses the prelude of an `@container` rule.
   struct ContainerQueryParser : mq::GenericMediaQueryParser<ContainerQueryParser>
   {
-    KRYS_NODISCARD static Maybe<ContainerQuery>
-      ConsumeContainerQuery(TokenRange &tokens, const MediaQueryParserContext &context) noexcept;
+    KRYS_NODISCARD static Maybe<ContainerQuery> ConsumeContainerQuery(TokenRange &tokens,
+                                                                      const ParserContext &context) noexcept;
     /// @brief `<container-condition>#`, each a query.
     KRYS_NODISCARD static Maybe<ContainerQueryList>
-      ConsumeContainerQueryList(TokenRange &tokens, const MediaQueryParserContext &context) noexcept;
+      ConsumeContainerQueryList(TokenRange &tokens, const ParserContext &context) noexcept;
 
     KRYS_NODISCARD static bool IsValidFunctionId(ValueId functionId) noexcept;
     /// @brief A `<style-range>`, inside `style()`.
     KRYS_NODISCARD static Maybe<mq::StyleRange>
-      ConsumeStyleRange(TokenRange &tokens, const MediaQueryParserContext &context, State &state) noexcept;
+      ConsumeStyleRange(TokenRange &tokens, const ParserContext &context, State &state) noexcept;
     KRYS_NODISCARD static const mq::FeatureSchema *
-      SchemaForFeatureName(const CSSOMStringAtom &name, const MediaQueryParserContext &context,
-                           State &state) noexcept;
+      SchemaForFeatureName(const CSSOMStringAtom &name, const ParserContext &context, State &state) noexcept;
     KRYS_NODISCARD static List<const mq::FeatureSchema *> FeatureSchemas() noexcept;
   };
 }

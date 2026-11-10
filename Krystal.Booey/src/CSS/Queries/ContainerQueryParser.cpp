@@ -35,9 +35,8 @@ namespace krys::boo::css::cq
     return Features::AllSchemas();
   }
 
-  Maybe<ContainerQuery>
-    ContainerQueryParser::ConsumeContainerQuery(TokenRange &tokens,
-                                                const MediaQueryParserContext &context) noexcept
+  Maybe<ContainerQuery> ContainerQueryParser::ConsumeContainerQuery(TokenRange &tokens,
+                                                                    const ParserContext &context) noexcept
   {
     auto consumeName = [&]
     {
@@ -84,8 +83,7 @@ namespace krys::boo::css::cq
   }
 
   Maybe<ContainerQueryList>
-    ContainerQueryParser::ConsumeContainerQueryList(TokenRange &tokens,
-                                                    const MediaQueryParserContext &context) noexcept
+    ContainerQueryParser::ConsumeContainerQueryList(TokenRange &tokens, const ParserContext &context) noexcept
   {
     ContainerQueryList queries;
     while (true)
@@ -121,7 +119,7 @@ namespace krys::boo::css::cq
 
   // https://drafts.csswg.org/css-conditional-5/#typedef-style-range
   Maybe<mq::StyleRange> ContainerQueryParser::ConsumeStyleRange(TokenRange &tokens,
-                                                                const MediaQueryParserContext &context,
+                                                                const ParserContext &context,
                                                                 State &state) noexcept
   {
     if (state.InFunctionId != ValueId::Style)
@@ -165,7 +163,7 @@ namespace krys::boo::css::cq
       // style feature's value. The name has a NUL, which no CSS can give, so it's never a registered
       // property.
       static const CSSOMStringAtom valueName {CSSOMStringView {u8"--\0", 3uz}};
-      auto value = VariableParser::ParseDeclarationValue(valueName, valueRange, context.Context);
+      auto value = VariableParser::ParseDeclarationValue(valueName, valueRange, context);
       if (!value)
       {
         return {};
@@ -227,7 +225,7 @@ namespace krys::boo::css::cq
   }
 
   const mq::FeatureSchema *ContainerQueryParser::SchemaForFeatureName(const CSSOMStringAtom &name,
-                                                                      const MediaQueryParserContext &context,
+                                                                      const ParserContext &context,
                                                                       State &state) noexcept
   {
     if (state.InFunctionId == ValueId::Style)

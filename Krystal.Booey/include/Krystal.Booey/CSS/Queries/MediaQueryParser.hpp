@@ -26,7 +26,6 @@
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::mq
