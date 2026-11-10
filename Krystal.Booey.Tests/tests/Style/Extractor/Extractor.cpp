@@ -157,6 +157,48 @@ namespace krys::boo::style::tests
     CHECK(Computed(eb, css::PropertyId::OverscrollBehavior) == "auto contain");
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: page-break-* with legacy keywords",
+                   "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { break-after: page; break-before: avoid; break-inside: auto }
+      #b { page-break-after: always; page-break-before: auto; page-break-inside: avoid }
+    </style><div id=a></div><div id=b></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+
+    CHECK(Computed(ea, css::PropertyId::PageBreakAfter) == "always");
+    CHECK(Computed(ea, css::PropertyId::PageBreakBefore) == "avoid");
+    CHECK(Computed(ea, css::PropertyId::PageBreakInside) == "auto");
+    CHECK(Computed(eb, css::PropertyId::BreakAfter) == "page");
+    CHECK(Computed(eb, css::PropertyId::PageBreakAfter) == "always");
+    CHECK(Computed(eb, css::PropertyId::PageBreakBefore) == "auto");
+    CHECK(Computed(eb, css::PropertyId::PageBreakInside) == "avoid");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: page-break-* with break-* values",
+                   "[Style][Extractor]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #a { break-after: left; break-before: right; break-inside: avoid-page }
+      #b { break-after: column; break-before: recto; break-inside: avoid-column }
+      #c { break-after: avoid-page; break-before: verso }
+    </style><div id=a></div><div id=b></div><div id=c></div>)"};
+    Extractor ea {&fixture.ById(u8"a")};
+    Extractor eb {&fixture.ById(u8"b")};
+    Extractor ec {&fixture.ById(u8"c")};
+
+    CHECK(Computed(ea, css::PropertyId::PageBreakAfter) == "left");
+    CHECK(Computed(ea, css::PropertyId::PageBreakBefore) == "right");
+    CHECK(Computed(ea, css::PropertyId::PageBreakInside).empty());
+    CHECK(Computed(eb, css::PropertyId::PageBreakAfter).empty());
+    CHECK(Computed(eb, css::PropertyId::PageBreakBefore).empty());
+    CHECK(Computed(eb, css::PropertyId::PageBreakInside).empty());
+    CHECK(Computed(ec, css::PropertyId::PageBreakAfter).empty());
+    CHECK(Computed(ec, css::PropertyId::PageBreakBefore).empty());
+    CHECK_FALSE(eb.PropertyValue(css::PropertyId::PageBreakAfter));
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Extractor: custom properties and copies", "[Style][Extractor]")
   {
     ResolverFixture fixture {u8R"(<!DOCTYPE html><style>

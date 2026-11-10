@@ -6952,7 +6952,7 @@
         "parser-function": "ConsumePageBreakAfterShorthand",
         "parser-grammar": "auto | always | avoid | left | right",
         "parser-grammar-unused": true,
-        "parser-grammar-comment": "FIXME: For these legacy shorthands, we could consider using the aliased-to mechanism to implement the identifier mappings",
+        "parser-grammar-comment": "FIXME: Once shorthand grammars are supported, map always with always@(aliased-to=page).",
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."
       },
       "specification": {
@@ -6966,7 +6966,7 @@
         "parser-function": "ConsumePageBreakBeforeShorthand",
         "parser-grammar": "auto | always | avoid | left | right",
         "parser-grammar-unused": true,
-        "parser-grammar-comment": "FIXME: For these legacy shorthands, we could consider using the aliased-to mechanism to implement the identifier mappings",
+        "parser-grammar-comment": "FIXME: Once shorthand grammars are supported, map always with always@(aliased-to=page).",
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."
       },
       "specification": {
@@ -6980,7 +6980,7 @@
         "parser-function": "ConsumePageBreakInsideShorthand",
         "parser-grammar": "avoid | auto",
         "parser-grammar-unused": true,
-        "parser-grammar-comment": "FIXME: For these legacy shorthands, we could consider using the aliased-to mechanism to implement the identifier mappings",
+        "parser-grammar-comment": "FIXME: Once shorthand grammars are supported, map always with always@(aliased-to=page).",
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."
       },
       "specification": {
