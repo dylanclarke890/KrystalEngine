@@ -100,6 +100,10 @@ namespace krys::boo
     bool LangAttributeAwareFormControlUIEnabled {false};
     /// @brief The platform whose editing and selection conventions documents follow.
     boo::EditingBehaviorType EditingBehaviorType {boo::EditingBehaviorType::Windows};
+    /// @brief Whether submitting a form checks its controls' constraints first, reporting the problems
+    /// (`invalid` events) rather than submitting; off, forms submit as if they had `novalidate`, for hosts
+    /// that validate in their own interface.
+    bool InteractiveFormValidationEnabled {true};
     /// @brief Whether links in editable content act as links.
     boo::EditableLinkBehavior EditableLinkBehavior {boo::EditableLinkBehavior::NeverLive};
 

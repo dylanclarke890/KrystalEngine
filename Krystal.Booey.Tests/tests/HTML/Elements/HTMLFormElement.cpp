@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Events/SubmitEvent.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -363,6 +364,16 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       (void)t.SetValue(u8"x");
       fixture.Get<HTMLInputElement>(u8"go").Click();
       CHECK(fixture.Submissions().size() == 1);
+    }
+
+    SECTION("A host can turn it off")
+    {
+      auto settings = Settings::Create();
+      settings->InteractiveFormValidationEnabled = false;
+      fixture.Document->SetSettings(Ref<Settings>(settings));
+      REQUIRE_FALSE(form.RequestSubmit().HasException());
+      CHECK(fixture.Submissions().size() == 1);
+      CHECK(invalid->Joined() == "invalid");
     }
   }
 
