@@ -766,7 +766,6 @@ namespace krys::boo::layout_integration
     {
       switch (paintInfo.Phase)
       {
-        case PaintPhase::Accessibility:
         case PaintPhase::Foreground:
         case PaintPhase::EventRegion:
         case PaintPhase::TextClip:

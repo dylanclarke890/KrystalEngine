@@ -298,6 +298,8 @@ namespace krys::boo
     _frameView.ScheduleResizeEventIfNeeded();
     _frameView.LayoutOrVisualViewportChanged();
     _frameView.UpdateSnapOffsetsAndResnap();
+    // FIXME: Telling the accessibility cache the layout completed (onLayoutComplete) and scheduling its
+    // deferred update (scheduleDeferredAXObjectCacheUpdate), with accessibility.
   }
 
   bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept

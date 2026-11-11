@@ -2677,7 +2677,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The accessibility and event region phases.
+    // FIXME: The event region phase.
 
     // Adjust our painting position if we're inside a scrolled layer (e.g., an overflow:auto div).
     LayoutPoint scrolledOffset = paintOffset;
@@ -2715,12 +2715,11 @@ namespace krys::boo
     {
       // 4. paint floats.
       if (paintPhase == PaintPhase::Float || paintPhase == PaintPhase::Selection
-          || paintPhase == PaintPhase::TextClip || paintPhase == PaintPhase::EventRegion
-          || paintPhase == PaintPhase::Accessibility)
+          || paintPhase == PaintPhase::TextClip || paintPhase == PaintPhase::EventRegion)
       {
         PaintFloats(paintInfo, scrolledOffset,
                     paintPhase == PaintPhase::Selection || paintPhase == PaintPhase::TextClip
-                      || paintPhase == PaintPhase::EventRegion || paintPhase == PaintPhase::Accessibility);
+                      || paintPhase == PaintPhase::EventRegion);
       }
     }
 

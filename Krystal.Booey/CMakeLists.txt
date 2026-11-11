@@ -204,6 +204,14 @@ add_custom_command(
 )
 
 # Every header and source is listed here; a file that isn't listed isn't built.
+set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
+  include/Krystal.Booey/Accessibility/ARIAMixin.hpp
+)
+
+set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
+  src/Accessibility/ARIAMixin.cpp
+)
+
 set(KRYSTAL_BOOEY_ANIMATION_HEADERS
   include/Krystal.Booey/Animation/AnimationEffect.hpp
   include/Krystal.Booey/Animation/AnimationPromise.hpp
@@ -4311,6 +4319,7 @@ target_sources(Krystal.Booey
     FILES
       ${KRYSTAL_BOOEY_GENERATED_HEADERS}
       ${KRYSTAL_BOOEY_BUNDLED_FONTS_HEADERS}
+      ${KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS}
       ${KRYSTAL_BOOEY_ANIMATION_HEADERS}
       ${KRYSTAL_BOOEY_CSS_HEADERS}
       ${KRYSTAL_BOOEY_DOM_HEADERS}
@@ -4335,6 +4344,7 @@ target_sources(Krystal.Booey
   PRIVATE
     ${KRYSTAL_BOOEY_GENERATED_SOURCES}
     ${KRYSTAL_BOOEY_BUNDLED_FONTS_SOURCES}
+    ${KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES}
     ${KRYSTAL_BOOEY_ANIMATION_SOURCES}
     ${KRYSTAL_BOOEY_CSS_SOURCES}
     ${KRYSTAL_BOOEY_DOM_SOURCES}

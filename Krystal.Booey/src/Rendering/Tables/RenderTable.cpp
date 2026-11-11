@@ -2211,8 +2211,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Accessibility bounds come with accessibility.
-
     // We're done.  We don't bother painting any children.
     if (paintPhase == PaintPhase::BlockBackground)
     {

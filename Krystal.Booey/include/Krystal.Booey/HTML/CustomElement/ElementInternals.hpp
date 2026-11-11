@@ -25,18 +25,22 @@
 
 #pragma once
 
+#include "Krystal.Booey/Accessibility/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementFormValue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ValidityStateFlags.hpp"
 #include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::dom
 {
+  class Element;
   class NodeList;
   class ShadowRoot;
 }
@@ -55,14 +59,21 @@ namespace krys::boo::html
   }
 
   /// @brief What a custom element's behaviour reaches its element through: its closed shadow root, its
-  /// custom states, and, for a form-associated custom element, its form value, validity and labels.
+  /// custom states, its default ARIA semantics, and, for a form-associated custom element, its form value,
+  /// validity and labels.
   /// @see https://html.spec.whatwg.org/#elementinternals
-  class ElementInternals : public RefCounted<ElementInternals>
+  class KRYS_EMPTY_BASE_CLASS ElementInternals : public RefCounted<ElementInternals>,
+                                                 public aria::mixins::ARIAMixin<ElementInternals>
   {
     friend HTMLElement *detail::GetElement(ElementInternals &internals) noexcept;
 
   private:
     WeakPtr<HTMLElement> _target;
+    // The specification gives the element its internal content attribute map, but only its internals, of
+    // which it has one, read and write it.
+    HashMap<dom::DOMStringAtom, dom::DOMString> _internalContentAttributeMap;
+    HashMap<dom::DOMStringAtom, WeakPtr<dom::Element>> _explicitlySetAttrElements;
+    HashMap<dom::DOMStringAtom, List<WeakPtr<dom::Element>>> _explicitlySetAttrElementLists;
 
   public:
     explicit ElementInternals(HTMLElement &element) noexcept;
@@ -120,6 +131,33 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-states
     KRYS_NODISCARD CustomStateSet &States() noexcept;
+
+    /// @brief The value the target element's ARIA defaults give @p name (an ARIA attribute's content
+    /// attribute name), if the internals set one.
+    /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
+    KRYS_NODISCARD Maybe<dom::DOMString> InternalContentAttribute(dom::DOMStringAtom name) const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
+    void SetInternalContentAttribute(dom::DOMStringAtom name, dom::DOMString value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
+    void RemoveInternalContentAttribute(dom::DOMStringAtom name) noexcept;
+
+    /// @brief The element an `Element?` ARIA attribute of the internals refers to.
+    /// @see https://html.spec.whatwg.org/#attr-associated-element
+    KRYS_NODISCARD RefPtr<dom::Element> ElementForAttributeInternal(dom::DOMStringAtom name) const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#attr-associated-element
+    void SetElementAttribute(dom::DOMStringAtom name, dom::Element *element) noexcept;
+
+    /// @brief The elements a `FrozenArray<Element>?` ARIA attribute of the internals refers to.
+    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    KRYS_NODISCARD Maybe<List<Ref<dom::Element>>>
+      ElementsForAttributeInternal(dom::DOMStringAtom name) const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    void SetElementsArrayAttribute(dom::DOMStringAtom name,
+                                   const Maybe<List<Ref<dom::Element>>> &elements) noexcept;
 
   private:
     KRYS_NODISCARD HTMLElement *TargetElement() noexcept

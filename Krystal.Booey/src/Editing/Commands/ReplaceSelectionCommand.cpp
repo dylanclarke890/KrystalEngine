@@ -2095,6 +2095,8 @@ namespace krys::boo
 
     VisibleSelection selectionAfterReplace(_selectReplacement ? start : end, end);
 
+    // FIXME: The accessibility selection of pasted text (m_visibleSelectionForInsertedText), with
+    // accessibility.
     SetEndingSelection(selectionAfterReplace);
 
     return true;

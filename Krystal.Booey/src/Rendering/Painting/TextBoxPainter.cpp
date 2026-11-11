@@ -238,8 +238,8 @@ namespace krys::boo
         _haveSelection(ComputeHaveSelection())
   {
     krys_debug_assert(paintInfo.Phase == PaintPhase::Foreground || paintInfo.Phase == PaintPhase::Selection
-                      || paintInfo.Phase == PaintPhase::TextClip || paintInfo.Phase == PaintPhase::EventRegion
-                      || paintInfo.Phase == PaintPhase::Accessibility);
+                      || paintInfo.Phase == PaintPhase::TextClip
+                      || paintInfo.Phase == PaintPhase::EventRegion);
 
     auto &editor = _renderer.GetDocument().GetEditor();
     _containsComposition = _renderer.TextNode() && editor.CompositionNode() == _renderer.TextNode();
@@ -280,50 +280,43 @@ namespace krys::boo
       _paintInfo.Context().ConcatCTM(Rotation(_paintRect, *glyphRotation));
     }
 
-    if (_paintInfo.Phase == PaintPhase::Accessibility)
+    if (_paintInfo.Phase == PaintPhase::Foreground)
     {
-      // FIXME: Accessibility bounds come with accessibility.
-    }
-    else
-    {
-      if (_paintInfo.Phase == PaintPhase::Foreground)
+      // (There are no document markers to fill, or spelling and grammar errors; see DIFFERENCES.md.)
+      auto shouldPaintBackgroundFill = [&]
       {
-        // (There are no document markers to fill, or spelling and grammar errors; see DIFFERENCES.md.)
-        auto shouldPaintBackgroundFill = [&]
+        if (_isPrinting)
         {
-          if (_isPrinting)
-          {
-            return false;
-          }
-          if (_haveSelection && !_compositionWithCustomUnderlines)
-          {
-            return true;
-          }
-          if (_containsComposition && !_compositionWithCustomUnderlines)
-          {
-            return true;
-          }
-          if (_document.HasHighlight())
-          {
-            return true;
-          }
           return false;
-        };
-        if (shouldPaintBackgroundFill())
-        {
-          PaintBackgroundFill();
         }
-      }
-
-      PaintForegroundAndDecorations();
-
-      if (_paintInfo.Phase == PaintPhase::Foreground && _compositionWithCustomUnderlines)
+        if (_haveSelection && !_compositionWithCustomUnderlines)
+        {
+          return true;
+        }
+        if (_containsComposition && !_compositionWithCustomUnderlines)
+        {
+          return true;
+        }
+        if (_document.HasHighlight())
+        {
+          return true;
+        }
+        return false;
+      };
+      if (shouldPaintBackgroundFill())
       {
-        PaintCompositionUnderlines();
+        PaintBackgroundFill();
       }
-      // FIXME: The page's relevant repainted objects and the document's painted text tracking (didPaintText)
-      // come with paint milestones.
     }
+
+    PaintForegroundAndDecorations();
+
+    if (_paintInfo.Phase == PaintPhase::Foreground && _compositionWithCustomUnderlines)
+    {
+      PaintCompositionUnderlines();
+    }
+    // FIXME: The page's relevant repainted objects and the document's painted text tracking (didPaintText)
+    // come with paint milestones.
 
     if (glyphRotation)
     {

@@ -56,7 +56,6 @@ namespace krys::boo::layout_integration
 
   /// @brief Paints a block's inline content for one paint phase: its display boxes in order (text, inline
   /// boxes, atomic inlines and blocks in inline), culled to the paint rect.
-  /// FIXME: Accessibility bounds come with accessibility.
   class InlineContentPainter
   {
     KRYS_NON_COPY_MOVABLE(InlineContentPainter);

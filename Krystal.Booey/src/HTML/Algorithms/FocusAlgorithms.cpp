@@ -1557,5 +1557,6 @@ namespace krys::boo::html
     {
       editorClient->SetInputMethodState(element);
     }
+    // FIXME: Telling the accessibility cache the focus changed (onFocusChange), with accessibility.
   }
 }

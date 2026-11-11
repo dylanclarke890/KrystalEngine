@@ -369,6 +369,8 @@ namespace krys::boo::dom
     if (assignedNodesChanged)
     {
       SignalSlotChange(slot);
+      // FIXME: Telling the accessibility cache (onSlottedContentChange, and onDetailsSummarySlotChange for a
+      // details element's summary slot), with accessibility.
 
       // The composed tree changed under the host.
       if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(slot))

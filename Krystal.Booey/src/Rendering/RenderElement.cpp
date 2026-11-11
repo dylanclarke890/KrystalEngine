@@ -2843,7 +2843,7 @@ namespace krys::boo
     // This is also used by other elements (e.g. flex items and grid items).
     PaintPhase paintPhaseToUse = IsExcludedAndPlacedInBorder() ? paintInfo.Phase : PaintPhase::Foreground;
     if (paintInfo.Phase == PaintPhase::Selection || paintInfo.Phase == PaintPhase::EventRegion
-        || paintInfo.Phase == PaintPhase::TextClip || paintInfo.Phase == PaintPhase::Accessibility)
+        || paintInfo.Phase == PaintPhase::TextClip)
     {
       Paint(paintInfo, childPoint);
     }

@@ -6668,7 +6668,7 @@ namespace krys::boo
 
     paintInfo.Context().Clip(clipRect);
 
-    // FIXME: Event and accessibility region clips (regionContext).
+    // FIXME: Event region clips (regionContext).
 
     return true;
   }

@@ -202,7 +202,7 @@ namespace krys::boo
 
   void RenderListMarker::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
-    if (paintInfo.Phase != PaintPhase::Foreground && paintInfo.Phase != PaintPhase::Accessibility)
+    if (paintInfo.Phase != PaintPhase::Foreground)
     {
       return;
     }
@@ -224,12 +224,6 @@ namespace krys::boo
 
     auto markerRect = RelativeMarkerRect();
     markerRect.MoveBy(boxOrigin);
-
-    if (paintInfo.Phase == PaintPhase::Accessibility)
-    {
-      // FIXME: Accessibility bounds come with accessibility.
-      return;
-    }
 
     if (markerRect.IsEmpty())
     {

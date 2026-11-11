@@ -64,8 +64,8 @@ namespace krys::boo
 
   /// @brief Paints a text box: its text, with shadows, emphasis marks, decorations, highlights, the selection
   /// and an input method's composition (its underlines, or else its fill).
-  /// FIXME: Event regions, accessibility bounds and contentful paint tracking come with event regions and
-  /// accessibility. There are no document markers (see DIFFERENCES.md).
+  /// FIXME: Event regions and contentful paint tracking come with event regions and paint timing. There are
+  /// no document markers (see DIFFERENCES.md).
   class TextBoxPainter
   {
     KRYS_NON_COPY_MOVABLE(TextBoxPainter);

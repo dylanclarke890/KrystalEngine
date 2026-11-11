@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -68,6 +69,11 @@ namespace krys::boo::dom
   /// @see https://html.spec.whatwg.org/#explicitly-set-attr-element
   using ExplicitlySetAttrElementsMap = HashMap<DOMStringAtom, WeakPtr<Element>>;
 
+  /// @brief The elements set through an element's `FrozenArray<Element>?` reflection attributes, by attribute
+  /// name.
+  /// @see https://html.spec.whatwg.org/#explicitly-set-attr-elements
+  using ExplicitlySetAttrElementListsMap = HashMap<DOMStringAtom, List<WeakPtr<Element>>>;
+
   class ElementRareData : public NodeRareData
   {
     struct PseudoElementIdentifierHash
@@ -97,6 +103,7 @@ namespace krys::boo::dom
     UniquePtr<PopoverData> _popoverData;
     WeakPtr<Element> _invokedPopover;
     ExplicitlySetAttrElementsMap _explicitlySetAttrElementsMap;
+    ExplicitlySetAttrElementListsMap _explicitlySetAttrElementListsMap;
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
     UniquePtr<ResizeObserverData> _resizeObserverData;
     UniquePtr<DOMTokenList> _partList;
@@ -152,6 +159,11 @@ namespace krys::boo::dom
     KRYS_NODISCARD ExplicitlySetAttrElementsMap &GetExplicitlySetAttrElementsMap() noexcept
     {
       return _explicitlySetAttrElementsMap;
+    }
+
+    KRYS_NODISCARD ExplicitlySetAttrElementListsMap &GetExplicitlySetAttrElementListsMap() noexcept
+    {
+      return _explicitlySetAttrElementListsMap;
     }
 
     KRYS_NODISCARD IntersectionObserverData *GetIntersectionObserverData() const noexcept

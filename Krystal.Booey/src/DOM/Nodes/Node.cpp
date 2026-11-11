@@ -77,6 +77,9 @@ namespace krys::boo::dom
 
   Node::~Node() noexcept
   {
+    // FIXME: Removing the node from its document's accessibility cache (willBeDeletedFrom), with
+    // accessibility.
+
     // Before releasing the document, which what the rare data holds may refer to.
     _nodeRareData = nullptr;
 

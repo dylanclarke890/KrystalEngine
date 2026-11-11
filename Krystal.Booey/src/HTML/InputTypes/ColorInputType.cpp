@@ -287,6 +287,7 @@ namespace krys::boo::html
     input->SetValueFromRenderer(serializedColor);
     UpdateColorSwatch();
     input->DispatchFormControlChangeEvent();
+    // FIXME: Telling accessibility the value changed (AXObjectCache::valueChanged), with accessibility.
   }
 
   void ColorInputType::DidEndChooser() noexcept

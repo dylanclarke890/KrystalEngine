@@ -146,6 +146,7 @@ namespace krys::boo::dom
     }
     eventTarget._eventListenerList.push_back(ShareRef(listener));
     eventTarget.DidAddEventListener(listener);
+    // FIXME: Telling a node's accessibility cache (onEventListenerAdded), with accessibility.
 
     // 6. If listener's signal is non-null, then add the following abort steps to it:
     if (listener.Signal() != nullptr)
@@ -185,6 +186,7 @@ namespace krys::boo::dom
       Ref<EventListener> protectedListener = ShareRef(listener);
       eventTarget._eventListenerList.erase(existing);
       eventTarget.DidRemoveEventListener(listener);
+      // FIXME: Telling a node's accessibility cache (onEventListenerRemoved), with accessibility.
     }
   }
 

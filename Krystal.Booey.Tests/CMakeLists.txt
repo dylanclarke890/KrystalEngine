@@ -636,6 +636,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Transforms/Transforms.cpp
 		tests/Style/Values/Types.cpp
 
+		# Accessibility
+		tests/Accessibility/ARIAMixin.cpp
+
 		# DOM
 		tests/DOM/Algorithms/AbortAlgorithms.cpp
 		tests/DOM/Algorithms/DocumentAlgorithms.cpp

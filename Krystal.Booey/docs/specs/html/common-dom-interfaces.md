@@ -13,10 +13,10 @@ Status: reviewed (2026-11-01)
 
 #### [2.6.1 Reflecting content attributes in IDL attributes](https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes)
 
-Status: reviewed (2026-11-01)
-> `HTML/Attributes/ReflectAttribute.hpp`: the getters and setters are its `detail` helpers (`ReflectDOMString`, `ReflectUSVString`, `ReflectBool`, `ReflectLong`, `ReflectUnsignedLong`, `ReflectDouble`); enumerated attributes limited to only known values are `EnumeratedAttribute::ResolveCanonicalKeyword`; `DOMTokenList` attributes are the elements' own (DOM 7.1). Element reflection is `Element::ElementForAttributeInternal` and `SetElementAttribute`.
+Status: reviewed (2026-11-11)
+> `HTML/Attributes/ReflectAttribute.hpp`: the getters and setters are its `detail` helpers (`ReflectDOMString`, `ReflectUSVString`, `ReflectBool`, `ReflectLong`, `ReflectUnsignedLong`, `ReflectDouble`); enumerated attributes limited to only known values are `EnumeratedAttribute::ResolveCanonicalKeyword`; `DOMTokenList` attributes are the elements' own (DOM 7.1). Element reflection is `Element::ElementForAttributeInternal` and `SetElementAttribute`, and element list reflection `ElementsForAttributeInternal` and `SetElementsArrayAttribute` (`ElementInternals` has the same four); `ElementInternals` targets get, set and delete its internal content attribute map.
 > Fixed: the `long` getter didn't check the bottom of the range, the `unsigned long` setter wrote the given value rather than the clamped one, the `double` setter didn't write the best representation of the number (`1e-06` for 0.000001), and a clamped range didn't clamp integers too large for `int64` to its maximum.
-> `ElementInternals` targets and `FrozenArray<T>?` attributes (attr-associated elements) are only for ARIA, which waits on accessibility (not planned).
+> `ElementInternals` targets and `FrozenArray<T>?` attributes are only for ARIA (`aria::mixins::ARIAMixin`). Without script, the `FrozenArray<T>?` getter returns the list rather than caching an array object (its steps 2 to 5).
 <!-- definitions: reflected-target reflected-idl-attribute reflected-content-attribute-name reflect get-the-element get-the-content-attribute set-the-content-attribute delete-the-content-attribute limited-to-only-non-negative-numbers limited-to-only-non-negative-numbers-greater-than-zero limited-to-only-non-negative-numbers-greater-than-zero-with-fallback explicitly-set-attr-element explicitly-set-attr-elements cached-attr-associated-elements cached-attr-associated-elements-object -->
 
 - [x] [The getter steps](https://html.spec.whatwg.org/#limited-to-only-known-values) — The getter steps are:
@@ -156,7 +156,6 @@ Status: reviewed (2026-11-01)
       - 4d.i. Let candidate be the first element, in tree order, that meets the following criteria: candidate's root is the same as element's root;; candidate's ID is id; and; candidate implements T. If no such element exists, then continue.
       - 4d.ii. Append candidate to elements.
   - 5. Return elements.
-  > n/a: only ARIA reflects `FrozenArray<T>?` attributes, and accessibility isn't planned.
 
 - [x] [The getter steps](https://html.spec.whatwg.org/#attr-associated-elements) — The getter steps are:
   - 1. Let elements be the result of running this's get the attr-associated elements.
@@ -165,7 +164,6 @@ Status: reviewed (2026-11-01)
   - 4. Set this's cached attr-associated elements to elements.
   - 5. Set this's cached attr-associated elements object to elementsAsFrozenArray.
   - 6. Return elementsAsFrozenArray.
-  > n/a: only ARIA reflects `FrozenArray<T>?` attributes, and accessibility isn't planned.
 
 - [x] [The setter steps](https://html.spec.whatwg.org/#attr-associated-elements) — The setter steps are:
   - 1. If the given value is null:
@@ -177,12 +175,10 @@ Status: reviewed (2026-11-01)
   - 4. For each element in the given value:
     - 4a. Append a weak reference to element to elements.
   - 5. Set this's explicitly set attr-elements to elements.
-  > n/a: only ARIA reflects `FrozenArray<T>?` attributes, and accessibility isn't planned.
 
 - [x] [For element reflected targets only](https://html.spec.whatwg.org/#attr-associated-elements) — For element reflected targets only: the following attribute change steps, given element, localName, oldValue, value, and namespace, are used to synchronize between the content attribute and the IDL attribute:
   - 1. If localName is not attr or namespace is not null, then return.
   - 2. Set element's explicitly set attr-elements to null.
-  > n/a: only ARIA reflects `FrozenArray<T>?` attributes, and accessibility isn't planned.
 
 #### [2.6.2 Using reflect via IDL extended attributes](https://html.spec.whatwg.org/#using-reflect-via-idl-extended-attributes)
 

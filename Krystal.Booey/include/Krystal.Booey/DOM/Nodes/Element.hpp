@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Accessibility/ARIAMixin.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
@@ -177,7 +178,7 @@ namespace krys::boo::dom
   /// @brief A node with a qualified name and attributes.
   /// @see https://dom.spec.whatwg.org/#interface-element
   /// @see https://dom.spec.whatwg.org/#concept-element
-  class Element : public ContainerNode
+  class KRYS_EMPTY_BASE_CLASS Element : public ContainerNode, public aria::mixins::ARIAMixin<Element>
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
@@ -1518,6 +1519,26 @@ namespace krys::boo::dom
 
     /// @brief Whether @p attributeName (in the null namespace) is reflected by an `Element?` IDL attribute.
     KRYS_NODISCARD static bool IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept;
+
+    /// @brief The elements a `FrozenArray<Element>?` reflection attribute refers to: the ones set through its
+    /// IDL attribute that are still in the element's shadow-including ancestors' trees, else the ones with
+    /// the attribute's IDs in the element's tree; null if neither is set.
+    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    KRYS_NODISCARD Maybe<List<Ref<Element>>>
+      ElementsForAttributeInternal(DOMStringAtom attributeName) const noexcept;
+
+    /// @brief Sets a `FrozenArray<Element>?` reflection attribute's elements: the content attribute becomes
+    /// empty, or is removed if @p elements is null.
+    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    void SetElementsArrayAttribute(DOMStringAtom attributeName,
+                                   const Maybe<List<Ref<Element>>> &elements) noexcept;
+
+    /// @brief Whether @p attributeName (in the null namespace) is reflected by a `FrozenArray<Element>?` IDL
+    /// attribute.
+    KRYS_NODISCARD static bool IsElementsArrayReflectionAttribute(DOMStringAtom attributeName) noexcept;
+
+    /// @brief The first element in tree order whose root is this element's root and whose ID is @p id.
+    KRYS_NODISCARD RefPtr<Element> ElementInTreeWithId(DOMStringView id) const noexcept;
 
 #pragma endregion
 

@@ -367,6 +367,7 @@ namespace krys::boo::html
     {
       select->InvalidateSelectedItems();
     }
+    // FIXME: Telling accessibility the selected option changed (onSelectedOptionChanged), with accessibility.
   }
 
   bool HTMLOptionElement::AccessKeyAction(bool) noexcept

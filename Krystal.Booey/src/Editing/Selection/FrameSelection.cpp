@@ -376,6 +376,8 @@ namespace krys::boo
       return;
     }
 
+    // FIXME: Accessibility's intent for a caret moved by the mouse (a discontiguous selection move), with
+    // accessibility.
     auto options = DefaultSetSelectionOptions();
     options.Add(SetSelectionOption::FireSelectEvent);
     SetSelection(newSelection, options, CursorAlignOnScroll::IfNeeded, granularity);

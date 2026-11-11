@@ -253,6 +253,7 @@ namespace krys::boo::dom
                                                bool onlyReplacedElementsInserted) noexcept
   {
     node.OnChildrenChanged();
+    // FIXME: Telling the accessibility cache (childrenChanged), with accessibility.
 
     if (node.NodeDocument().IsDirAttributeDirty()) KRYS_UNLIKELY
     {
@@ -376,6 +377,8 @@ namespace krys::boo::dom
       NotifyIdTargetObservers(removedNode, oldAncestor.TreeScope());
     }
 
+    // FIXME: Removing a disconnected node from its document's accessibility cache (remove), with
+    // accessibility.
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
 
     // The removed node loses its parent's tree reference (which may delete it).
@@ -392,6 +395,7 @@ namespace krys::boo::dom
 
   void ExtensibilityHooks::NodeAdopted(Node &node, Document &oldDocument) noexcept
   {
+    // FIXME: Removing the node from the old document's accessibility cache (remove), with accessibility.
     node.OnAdopt(oldDocument);
   }
 
@@ -400,5 +404,6 @@ namespace krys::boo::dom
                                                    DOMStringAtom namespaceURI) noexcept
   {
     element.OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    // FIXME: Telling the accessibility cache (deferAttributeChangeIfNeeded), with accessibility.
   }
 }

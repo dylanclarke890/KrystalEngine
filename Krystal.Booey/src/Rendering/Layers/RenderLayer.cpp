@@ -5509,7 +5509,7 @@ namespace krys::boo
     // defer visual updates.
 
     // If this layer is totally invisible then there is nothing to paint.
-    // FIXME: Accessibility and event region paints continue, once there are those.
+    // FIXME: Event region paints continue, once there are those.
     if (!RendererOpacity(Renderer()))
     {
       return;
@@ -5832,7 +5832,6 @@ namespace krys::boo
       return true;
     };
 
-    // FIXME: Accessibility regions come with accessibility.
     bool shouldPaintContent = hasVisibleContent() && isSelfPaintingLayer && !isPaintingOverlayScrollbars
                               && !isCollectingEventRegion && !shouldSkipNonFixedTopDocumentContent();
 
@@ -6106,8 +6105,7 @@ namespace krys::boo
                                     subtreePaintRootForRenderer);
       }
 
-      // FIXME: Event and accessibility regions (collectEventRegionForFragments,
-      // collectAccessibilityRegionsForFragments) come with hit testing and accessibility.
+      // FIXME: Event regions (collectEventRegionForFragments) come with hit testing.
 
       if (shouldPaintOutline)
       {

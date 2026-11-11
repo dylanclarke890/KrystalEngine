@@ -1180,6 +1180,7 @@ namespace krys::boo::html
     {
       QueuePopoverToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
     }
+    // FIXME: Telling accessibility the popover toggled (onPopoverToggle), with accessibility.
     return {};
   }
 
@@ -1359,6 +1360,7 @@ namespace krys::boo::html
 
     // 22. Run cleanupSteps.
     cleanupSteps();
+    // FIXME: Telling accessibility the popover toggled (onPopoverToggle), with accessibility.
     return {};
   }
 
