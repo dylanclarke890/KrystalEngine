@@ -1075,7 +1075,6 @@ namespace krys::boo
 
   void LocalFrameView::PaintScrollCorner(GraphicsContext &context, const IntRect &cornerRect) noexcept
   {
-    // FIXME: Custom scroll corners (::-webkit-scrollbar-corner), dropped as non-standard.
     if (cornerRect.IsEmpty())
     {
       return;
@@ -1234,7 +1233,6 @@ namespace krys::boo
 
   Ref<Scrollbar> LocalFrameView::CreateScrollbar(ScrollbarOrientation orientation) noexcept
   {
-    // FIXME: Custom scrollbars (::-webkit-scrollbar, dropped as non-standard).
     return Scrollbar::CreateNativeScrollbar(*this, orientation, ScrollbarWidthStyle());
   }
 

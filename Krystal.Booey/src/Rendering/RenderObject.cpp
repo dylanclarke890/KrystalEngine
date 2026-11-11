@@ -796,7 +796,6 @@ namespace krys::boo
       return ContainingBlockForPositionType(renderer.Style().GetPosition(), renderer);
     };
 
-    // FIXME: Scrollbar parts, which have no parent, once there are any.
     return containingBlockForRenderer(static_cast<const RenderElement &>(*this));
   }
 

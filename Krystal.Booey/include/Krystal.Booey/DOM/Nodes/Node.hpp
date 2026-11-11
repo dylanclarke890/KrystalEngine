@@ -626,7 +626,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsContentEditable() const noexcept;
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
 
-    /// @brief Whether the node is editable, by the style it has (`-webkit-user-modify`, which
+    /// @brief Whether the node is editable, by the style it has (`-internal-user-modify`, which
     /// `contenteditable` maps to, and `user-select`).
     KRYS_NODISCARD bool
       HasEditableStyle(UserSelectAllTreatment treatment = UserSelectAllTreatment::NotEditable) const noexcept

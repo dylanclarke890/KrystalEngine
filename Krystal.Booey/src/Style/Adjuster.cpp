@@ -642,7 +642,7 @@ namespace krys::boo::style
                                                                               : TextSecurity::None);
       }
 
-      // Disallow -webkit-user-modify on ::pseudo elements, except if that pseudo-element targets a slot,
+      // Disallow -internal-user-modify on ::pseudo elements, except if that pseudo-element targets a slot,
       // in which case we want the editability to be passed onto the slotted contents.
       if (element->IsInUserAgentShadowTree() && element->UserAgentPart() != dom::DOMStringAtom::Null()
           && !Is<html::HTMLSlotElement>(*element))

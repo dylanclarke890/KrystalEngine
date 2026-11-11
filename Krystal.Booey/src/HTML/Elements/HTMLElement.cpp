@@ -1790,7 +1790,6 @@ namespace krys::boo::html
             userModifyValue = css::ValueId::ReadWritePlaintextOnly;
           }
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::OverflowWrap, css::ValueId::BreakWord);
-          // FIXME: -webkit-nbsp-mode: space is dropped with the property.
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::LineBreak,
                                                css::ValueId::AfterWhiteSpace);
           break;

@@ -41,8 +41,6 @@ namespace krys::boo::html
 
   /// @brief The search input type: a text field with a decoration before its text and a cancel button after
   /// it, which Escape also clears.
-  // FIXME: Recent searches (the `results` attribute, which isn't standard, and RenderSearchField's popup) and
-  // the incremental search event.
   class SearchInputType final : public BaseTextInputType
   {
   private:

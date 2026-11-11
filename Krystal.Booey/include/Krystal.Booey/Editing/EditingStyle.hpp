@@ -119,14 +119,11 @@ namespace krys::boo
       OverrideValues
     };
 
-    static constexpr float NoFontDelta = 0.0f;
-
   private:
     RefPtr<css::MutableStyleProperties> _mutableStyle;
     bool _shouldUseFixedDefaultFontSize {false};
     TextDecorationChange _underlineChange {TextDecorationChange::None};
     TextDecorationChange _strikeThroughChange {TextDecorationChange::None};
-    float _fontSizeDelta {NoFontDelta};
 
   public:
     EditingStyle() noexcept;
@@ -216,14 +213,6 @@ namespace krys::boo
     bool ConvertPositionStyle() noexcept;
     KRYS_NODISCARD bool IsFloating() noexcept;
     KRYS_NODISCARD int32 LegacyFontSize(dom::Document &document) const noexcept;
-    KRYS_NODISCARD float FontSizeDelta() const noexcept
-    {
-      return _fontSizeDelta;
-    }
-    KRYS_NODISCARD bool HasFontSizeDelta() const noexcept
-    {
-      return _fontSizeDelta != NoFontDelta;
-    }
     KRYS_NODISCARD bool ShouldUseFixedDefaultFontSize() const noexcept
     {
       return _shouldUseFixedDefaultFontSize;
@@ -272,7 +261,6 @@ namespace krys::boo
       dom::StyledElement &element, css::MutableStyleProperties &styleFromMatchedRules) noexcept;
     void SetProperty(css::PropertyId propertyID, const dom::DOMString &value,
                      css::IsImportant important = css::IsImportant(false)) noexcept;
-    void ExtractFontSizeDelta() noexcept;
     template <typename T>
     KRYS_NODISCARD TriState TriStateOfStyle(
       T &styleToCompare, ShouldIgnoreTextOnlyProperties shouldIgnoreTextOnlyProperties) const noexcept;

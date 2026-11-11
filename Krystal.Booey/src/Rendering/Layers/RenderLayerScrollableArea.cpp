@@ -100,8 +100,6 @@ namespace krys::boo
 
     DestroyScrollbar(ScrollbarOrientation::Horizontal);
     DestroyScrollbar(ScrollbarOrientation::Vertical);
-
-    // FIXME: The custom scroll corner and resizer, once there are any.
   }
 
   void RenderLayerScrollableArea::RestoreScrollPosition() noexcept
@@ -750,9 +748,8 @@ namespace krys::boo
 
   Ref<Scrollbar> RenderLayerScrollableArea::CreateScrollbar(ScrollbarOrientation orientation) noexcept
   {
-    // FIXME: Custom scrollbars for the legacy scrollbar style, and the scrollbars of user agent shadow trees'
-    // hosts (rendererForScrollbar), once there are any. Add the scrollbar to the frame view's widgets, once
-    // it has some.
+    // FIXME: The scrollbars of user agent shadow trees' hosts (rendererForScrollbar), once there are any. Add
+    // the scrollbar to the frame view's widgets, once it has some.
     auto widget = Scrollbar::CreateNativeScrollbar(*this, orientation, ScrollbarWidthStyle());
     DidAddScrollbar(widget.get(), orientation);
     return widget;
@@ -766,10 +763,7 @@ namespace krys::boo
       return;
     }
 
-    if (!scrollbar->IsCustomScrollbar())
-    {
-      WillRemoveScrollbar(*scrollbar, orientation);
-    }
+    WillRemoveScrollbar(*scrollbar, orientation);
 
     scrollbar = nullptr;
   }
@@ -916,7 +910,6 @@ namespace krys::boo
 
   bool RenderLayerScrollableArea::HasOverflowControls() const noexcept
   {
-    // FIXME: The custom scroll corner too, once there are any.
     return _hBar || _vBar || _layer.Renderer().Style().GetResize() != style::Resize::None;
   }
 
@@ -955,7 +948,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The custom scroll corner and resizer, once there are any.
     return changed;
   }
 
@@ -1377,7 +1369,6 @@ namespace krys::boo
     {
       _vBar->StyleChanged();
     }
-    // FIXME: The custom scroll corner and resizer styles, once there are any.
   }
 
   namespace
@@ -1586,7 +1577,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Custom resizers (::-webkit-resizer, dropped as non-standard), and invalidating control tints.
+    // FIXME: Invalidating control tints.
 
     RenderTheme::Singleton().PaintPlatformResizer(renderer, context, resizerAbsRect);
 
@@ -1655,8 +1646,6 @@ namespace krys::boo
     {
       return;
     }
-
-    // FIXME: Custom scroll corners (::-webkit-scrollbar-corner, dropped as non-standard).
 
     // We don't want to paint a corner if we have overlay scrollbars, since we need to see what is behind it.
     if (!HasOverlayScrollbars())

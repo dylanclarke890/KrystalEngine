@@ -118,8 +118,7 @@ namespace krys::boo
   enum class NativeScrollbarVisibility : uint8
   {
     Visible,
-    HiddenByStyle,
-    ReplacedByCustomScrollbar
+    HiddenByStyle
   };
 
   enum class OverlayScrollbarSizeRelevancy : bool

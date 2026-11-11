@@ -8853,7 +8853,7 @@ class GeneratePropertyParsing:
                     f"// Allow internal properties as we use them to parse several internal-only-shorthands (e.g. background-repeat),"
                 )
                 to.write(
-                    f"// and to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta'))."
+                    f"// and to handle certain DOM-exposed values."
                 )
                 to.write(f"krys_debug_assert(false);")
                 to.write("return {};")

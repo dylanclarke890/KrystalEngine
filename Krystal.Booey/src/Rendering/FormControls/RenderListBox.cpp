@@ -1306,7 +1306,6 @@ namespace krys::boo
 
   Ref<Scrollbar> RenderListBox::CreateScrollbar(ScrollbarOrientation orientation) noexcept
   {
-    // FIXME: Custom scrollbars (the legacy scrollbar style), once there are custom scrollbars.
     auto widget = Scrollbar::CreateNativeScrollbar(
       *this, orientation, RenderTheme::Singleton().ScrollbarWidthStyleForPart(StyleAppearance::Listbox));
     DidAddScrollbar(widget.get(), orientation);

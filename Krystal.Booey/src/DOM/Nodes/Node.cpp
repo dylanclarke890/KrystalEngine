@@ -880,7 +880,7 @@ namespace krys::boo::dom
     }
 
     // Style-based editability is always possible (no style sheet records whether it uses
-    // `-webkit-user-modify`), so style is brought up to date.
+    // `-internal-user-modify`), so style is brought up to date.
     if (shouldUpdateStyle == ShouldUpdateStyle::Update && document->NeedsStyleRecalc())
     {
       document->UpdateStyleIfNeeded();

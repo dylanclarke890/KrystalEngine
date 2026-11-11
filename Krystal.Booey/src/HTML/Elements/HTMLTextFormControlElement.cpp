@@ -1059,8 +1059,6 @@ namespace krys::boo::html
     textBlockStyle.SetDirection(parentStyle.GetWritingMode().ComputedTextDirection());
     textBlockStyle.SetUnicodeBidi(parentStyle.GetUnicodeBidi());
 
-    // FIXME: The inner text element's `-webkit-user-modify` presentational hint, which nothing sets.
-
     if (parentStyle.GetFieldSizing() == FieldSizing::Content)
     {
       textBlockStyle.SetLogicalMinWidth(style::MinimumSize::Fixed {static_cast<float>(CaretWidth())});

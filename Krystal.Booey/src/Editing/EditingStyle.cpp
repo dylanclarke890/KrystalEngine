@@ -555,7 +555,6 @@ namespace krys::boo
     {
       _mutableStyle = style->CopyProperties();
     }
-    ExtractFontSizeDelta();
   }
 
   EditingStyle::EditingStyle(const css::StyleProperties *style) noexcept
@@ -564,20 +563,17 @@ namespace krys::boo
     {
       _mutableStyle = style->MutableCopy();
     }
-    ExtractFontSizeDelta();
   }
 
   EditingStyle::EditingStyle(PropertyId propertyID, const dom::DOMString &value) noexcept
   {
     SetProperty(propertyID, value);
-    ExtractFontSizeDelta();
   }
 
   EditingStyle::EditingStyle(PropertyId propertyID, ValueId value) noexcept
   {
     _mutableStyle = css::MutableStyleProperties::Create();
     (void)_mutableStyle->SetProperty(propertyID, value);
-    ExtractFontSizeDelta();
   }
 
   EditingStyle::~EditingStyle() noexcept = default;
@@ -707,7 +703,6 @@ namespace krys::boo
     }
 
     _shouldUseFixedDefaultFontSize = computedStyleAtPosition.UseFixedFontDefaultSize();
-    ExtractFontSizeDelta();
   }
 
   void EditingStyle::SetProperty(PropertyId propertyID, const dom::DOMString &value,
@@ -721,20 +716,9 @@ namespace krys::boo
     (void)_mutableStyle->SetProperty(propertyID, value, important);
   }
 
-  // FIXME: -webkit-font-size-delta, which execCommand's font size changes set, with rich editing commands;
-  // until then there's no font size delta to extract.
-  void EditingStyle::ExtractFontSizeDelta() noexcept
-  {
-    if (!_mutableStyle)
-    {
-      return;
-    }
-  }
-
   bool EditingStyle::IsEmpty() const noexcept
   {
-    return (!_mutableStyle || _mutableStyle->empty()) && _fontSizeDelta == NoFontDelta
-           && UnderlineChange() == TextDecorationChange::None
+    return (!_mutableStyle || _mutableStyle->empty()) && UnderlineChange() == TextDecorationChange::None
            && StrikeThroughChange() == TextDecorationChange::None;
   }
 
@@ -811,7 +795,6 @@ namespace krys::boo
     // We need to check font-family is monospace as in FontDescription but we don't want to duplicate code
     // here.
     _shouldUseFixedDefaultFontSize = false;
-    ExtractFontSizeDelta();
   }
 
   void EditingStyle::OverrideWithStyle(const css::StyleProperties &style) noexcept
@@ -836,8 +819,6 @@ namespace krys::boo
   void EditingStyle::OverrideTypingStyleAt(const EditingStyle &style, const dom::Position &position) noexcept
   {
     MergeStyle(style._mutableStyle.get(), CSSPropertyOverrideMode::OverrideValues);
-
-    _fontSizeDelta += style._fontSizeDelta;
 
     PrepareToApplyAt(position, ShouldPreserveWritingDirection::Yes);
 
@@ -883,7 +864,6 @@ namespace krys::boo
   {
     _mutableStyle = nullptr;
     _shouldUseFixedDefaultFontSize = false;
-    _fontSizeDelta = NoFontDelta;
     SetUnderlineChange(TextDecorationChange::None);
     SetStrikeThroughChange(TextDecorationChange::None);
   }
@@ -898,7 +878,6 @@ namespace krys::boo
     copy->_shouldUseFixedDefaultFontSize = _shouldUseFixedDefaultFontSize;
     copy->_underlineChange = _underlineChange;
     copy->_strikeThroughChange = _strikeThroughChange;
-    copy->_fontSizeDelta = _fontSizeDelta;
     return copy;
   }
 
@@ -906,7 +885,6 @@ namespace krys::boo
   {
     // This is the list of properties we want to copy in the CopyBlockProperties() function.
     // It is the list of CSS properties that apply specially to block-level elements.
-    // FIXME: The legacy -webkit-column-break-* and page-break-* aliases are left out, as Booey has none.
     constexpr std::array BlockProperties {
       PropertyId::Orphans,
       PropertyId::Overflow, // This can be also be applied to replaced elements
@@ -1758,10 +1736,6 @@ namespace krys::boo
                                  css::IsImportant(property.IsImportant()));
       }
     }
-
-    float oldFontSizeDelta = _fontSizeDelta;
-    ExtractFontSizeDelta();
-    _fontSizeDelta += oldFontSizeDelta;
   }
 
   namespace

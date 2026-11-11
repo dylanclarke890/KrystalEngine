@@ -53,7 +53,7 @@ namespace krys::boo::style
       documentStyle.SetPageScaleTransform(frame->FrameScaleFactor());
     }
 
-    // This overrides any -webkit-user-modify inherited from the parent iframe.
+    // This overrides any -internal-user-modify inherited from the parent iframe.
     documentStyle.SetUserModify(document.InDesignMode() ? UserModify::ReadWrite : UserModify::ReadOnly);
 
     Adjuster::AdjustEventListenerRegionTypesForRootStyle(documentStyle, document);

@@ -60,7 +60,7 @@ namespace krys::boo
   /// @brief The scrollable area of a layer whose box can scroll its overflow: its scroll position and
   /// extents, and its scrollbars.
   // FIXME: Marquees, touch, wheel and keyboard scrolling, scroll anchoring,
-  // composited scrolling, custom scroll corners and resizers, painting and hit testing of the overflow
+  // composited scrolling, painting and hit testing of the overflow
   // controls, scroll events and scrolling into view come with input, animations, compositing and painting.
   class RenderLayerScrollableArea final : public ScrollableArea
   {

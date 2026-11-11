@@ -277,7 +277,7 @@ namespace krys::boo::html
 
   void SearchFieldResultsButtonElement::DefaultEventHandler(dom::Event &event) noexcept
   {
-    // On mousedown, bring up a menu, if needed
+    // A press focuses the field and selects its text.
     if (RefPtr<HTMLInputElement> input =
           ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this))))
     {
@@ -286,7 +286,6 @@ namespace krys::boo::html
       {
         input->Focus();
         input->Select();
-        // FIXME: Showing and hiding the recent searches popup (RenderSearchField), with recent searches.
         event.SetDefaultHandled();
       }
     }

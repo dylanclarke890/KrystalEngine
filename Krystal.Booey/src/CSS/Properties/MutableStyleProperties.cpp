@@ -188,8 +188,7 @@ namespace krys::boo::css
   {
     if (!IsExposed(property, &context.PropertySettings) && !IsInternal(property))
     {
-      // Allow internal properties as we use them to handle certain DOM-exposed values
-      // (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta')).
+      // Allow internal properties as we use them to handle certain DOM-exposed values.
       return false;
     }
 

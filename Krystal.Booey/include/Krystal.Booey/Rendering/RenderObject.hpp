@@ -286,7 +286,6 @@ namespace krys::boo
       Progress,
       Quote,
       Replica,
-      ScrollbarPart,
       SearchField,
       Slider,
       SliderContainer,

@@ -52,8 +52,7 @@ namespace krys::boo::css
 
     // Allow anything to be set from a shorthand (e.g. the CSS all property always sets everything,
     // regardless of whether the longhands are enabled), and allow internal properties as we use
-    // them to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from
-    // execCommand('FontSizeDelta')).
+    // them to handle certain DOM-exposed values.
     krys_debug_assert(IsExposed(property, state.Context.PropertySettings) || setFromShorthand
                       || IsInternal(property));
 
