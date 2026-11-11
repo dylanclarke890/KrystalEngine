@@ -1656,6 +1656,14 @@ namespace krys::boo::ax
     return input && (input->IsTextField() || input->IsNumberField());
   }
 
+  bool AccessibilityNodeObject::IsNonNativeTextControl() const noexcept
+  {
+    auto role = AriaRoleAttribute();
+    bool isARIATextControl = role == AccessibilityRole::TextArea || role == AccessibilityRole::TextField
+                             || role == AccessibilityRole::SearchField;
+    return (isARIATextControl || HasContentEditableAttributeSet()) && !IsNativeTextControl();
+  }
+
   bool AccessibilityNodeObject::HasContentEditableAttributeSet() const noexcept
   {
     auto *element = GetElement();

@@ -582,6 +582,7 @@ namespace krys::boo::ax
       _scrollViewID = null;
     }
     _deferredChildrenChangedList.remove(id);
+    _changedLiveRegions.remove(id);
     _deferredRendererChangedList.remove(id);
     _deferredRecomputeTableIsExposedList.remove(id);
     _deferredRecomputeTableCellSlotsList.remove(id);
@@ -633,6 +634,7 @@ namespace krys::boo::ax
     {
       _deferredRecomputeIsIgnoredList.remove(element);
       _deferredSelectedChildrenChangedList.remove(element);
+      _deferredElementAddedOrRemovedList.remove(element);
       std::erase_if(_deferredAttributeChanges,
                     [element](const auto &change) { return change.Element == element; });
     }
@@ -668,9 +670,78 @@ namespace krys::boo::ax
       ChildrenChanged(Get(renderer));
     }
 
-    // FIXME: Deferring the added or removed element's menu-opened and live region checks
-    // (deferElementAddedOrRemoved), with them.
-    (void)newChild;
+    if (newChild)
+    {
+      DeferElementAddedOrRemoved(DynamicDowncast<dom::Element>(newChild->GetNode()));
+    }
+  }
+
+  void AXObjectCache::DeferElementAddedOrRemoved(dom::Element *element) noexcept
+  {
+    if (!element)
+    {
+      return;
+    }
+    _deferredElementAddedOrRemovedList.add(element);
+    StartPerformCacheUpdateTimer();
+  }
+
+  void AXObjectCache::HandleMenuOpened(dom::Element &element) noexcept
+  {
+    if (element.Renderer() && table_helpers::HasRole(element, u8"menu"))
+    {
+      PostNotification(GetOrCreate(element), AXNotification::MenuOpened);
+    }
+  }
+
+  void AXObjectCache::HandleLiveRegionCreated(dom::Element &element) noexcept
+  {
+    // FIXME: A display: contents live region has no renderer, so isn't seen being made.
+    if (!element.Renderer())
+    {
+      return;
+    }
+    auto status = AccessibilityObject::AttributeWithDefaultARIA(element, u8"aria-live");
+    if (status.empty())
+    {
+      auto role = AccessibilityObject::AttributeWithDefaultARIA(element, u8"role");
+      if (!role.empty())
+      {
+        status =
+          AccessibilityObject::DefaultLiveRegionStatusForRole(AccessibilityObject::AriaRoleToRole(role));
+      }
+    }
+    if (AccessibilityObject::LiveRegionStatusIsEnabled(status))
+    {
+      PostNotification(GetOrCreate(element), AXNotification::LiveRegionCreated);
+    }
+  }
+
+  void AXObjectCache::HandleLabelChanged(AccessibilityObject *object) noexcept
+  {
+    if (!object)
+    {
+      return;
+    }
+    auto *element = object->GetElement();
+    if (!element || !UpdateLabelFor(*element))
+    {
+      for (const auto &labeledObject : object->LabelForObjects())
+      {
+        PostNotification(labeledObject.get(), AXNotification::ValueChanged);
+      }
+    }
+    PostNotification(object, AXNotification::LabelChanged);
+  }
+
+  void AXObjectCache::PostLiveRegionChangeNotification(AccessibilityObject &object) noexcept
+  {
+    // A region can change many times in one task (each child added, say): it's told once.
+    _changedLiveRegions.add(object.ObjectID());
+    if (!_notificationPostTimer.IsActive())
+    {
+      _notificationPostTimer.StartOneShot({});
+    }
   }
 
   void AXObjectCache::ChildrenChanged(AccessibilityObject *object) noexcept
@@ -752,12 +823,44 @@ namespace krys::boo::ax
     object.SetNeedsToUpdateSubtree();
     object.RecomputeIsIgnored();
 
-    // Go up the existing ancestors and mark their children out of date.
+    // Go up the existing ancestors, marking their children out of date and telling the ones the change
+    // affects.
+    bool shouldUpdateParent = true;
+    bool foundTableCaption = false;
     for (auto *parent = &object; parent; parent = parent->ParentObject())
     {
-      parent->SetNeedsToUpdateChildren();
-      // FIXME: Live region, non-native text control value, label and description notifications for the
-      // ancestors, with them.
+      if (shouldUpdateParent)
+      {
+        parent->SetNeedsToUpdateChildren();
+      }
+      if (parent->SupportsLiveRegion())
+      {
+        PostLiveRegionChangeNotification(*parent);
+      }
+      if (parent->IsNonNativeTextControl())
+      {
+        // An editable region's value changed; the ancestors of what's being edited keep their children.
+        PostNotification(parent, AXNotification::ValueChanged);
+        shouldUpdateParent = false;
+      }
+      if (parent->Role() == AccessibilityRole::Label)
+      {
+        HandleLabelChanged(parent);
+      }
+      for (const auto &describedObject : parent->DescriptionForObjects())
+      {
+        PostNotification(describedObject.get(), AXNotification::ExtendedDescriptionChanged);
+      }
+      // A table's caption names it.
+      if (auto *element = parent->GetElement(); element && IsHTMLElementNamed(*element, u8"caption"))
+      {
+        foundTableCaption = true;
+      }
+      else if (foundTableCaption && parent->IsTable())
+      {
+        PostNotification(parent, AXNotification::TextChanged);
+        foundTableCaption = false;
+      }
     }
 
     // A list's role depends on its children.
@@ -1157,7 +1260,6 @@ namespace krys::boo::ax
     }
     else if (name == u8"aria-live")
     {
-      // FIXME: Starting or stopping tracking the live region, with live regions.
       PostNotification(&element, AXNotification::LiveRegionStatusChanged);
     }
     else if (name == u8"aria-placeholder")
@@ -1916,10 +2018,18 @@ namespace krys::boo::ax
     Ref protectedObject = ShareRef(*object);
 
     bool isText = object->IsStaticText();
+    bool notifiedNonNativeTextControl = false;
     for (auto *ancestor = object; ancestor; ancestor = ancestor->ParentObject())
     {
-      // FIXME: Live region and non-native text control (contenteditable, role=textbox) value notifications,
-      // with live regions and text ranges.
+      if (ancestor->SupportsLiveRegion())
+      {
+        PostLiveRegionChangeNotification(*ancestor);
+      }
+      if (!notifiedNonNativeTextControl && ancestor->IsNonNativeTextControl())
+      {
+        PostNotification(ancestor, AXNotification::ValueChanged);
+        notifiedNonNativeTextControl = true;
+      }
       if (!isText)
       {
         continue;
@@ -2195,6 +2305,18 @@ namespace krys::boo::ax
 
     HandleAllDeferredChildrenChanged();
 
+    auto elementsAddedOrRemoved = std::exchange(_deferredElementAddedOrRemovedList, {});
+    for (auto *element : elementsAddedOrRemoved)
+    {
+      Ref protectedElement = ShareRef(*element);
+      HandleMenuOpened(*element);
+      HandleLiveRegionCreated(*element);
+      if (Is<html::HTMLLabelElement>(*element))
+      {
+        HandleLabelChanged(GetOrCreate(*element));
+      }
+    }
+
     auto recomputeTableCellSlots = std::exchange(_deferredRecomputeTableCellSlotsList, {});
     for (auto id : recomputeTableCellSlots)
     {
@@ -2443,6 +2565,13 @@ namespace krys::boo::ax
 
     // Posting can queue more notifications; those wait for the next time the timer fires.
     auto notifications = std::exchange(_notificationsToPost, {});
+    for (auto id : std::exchange(_changedLiveRegions, {}))
+    {
+      if (auto *region = ObjectForID(id))
+      {
+        notifications.emplace_back(ShareRef(*region), AXNotification::LiveRegionChanged);
+      }
+    }
     for (auto &[object, notification] : notifications)
     {
       if (object->IsDetached() || !object->AxObjectCache())

@@ -474,6 +474,12 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool IsButton() const noexcept;
     KRYS_NODISCARD bool IsControl() const noexcept;
     KRYS_NODISCARD bool IsTextControl() const noexcept;
+    /// @brief Whether the object edits text without being an `input` or `textarea` (`contenteditable`, or a
+    /// text box role).
+    KRYS_NODISCARD virtual bool IsNonNativeTextControl() const noexcept
+    {
+      return false;
+    }
     KRYS_NODISCARD bool IsGroup() const noexcept;
     KRYS_NODISCARD bool IsLandmark() const noexcept;
     KRYS_NODISCARD bool IsRangeControl() const noexcept;
@@ -576,6 +582,29 @@ namespace krys::boo::ax
     KRYS_NODISCARD int32 IntegralAttribute(dom::DOMStringView name) const noexcept;
     /// @brief Whether the element has any global ARIA state or property.
     KRYS_NODISCARD bool SupportsARIAAttributes() const noexcept;
+
+    // Live regions.
+
+    /// @brief The live region status @p role has when `aria-live` isn't set: "assertive" for alerts, "polite"
+    /// for logs and statuses, "off" for timers and marquees, and empty for the others.
+    KRYS_NODISCARD static dom::DOMStringView DefaultLiveRegionStatusForRole(AccessibilityRole role) noexcept;
+    /// @brief Whether @p status makes a region announce its changes ("polite" or "assertive").
+    KRYS_NODISCARD static bool LiveRegionStatusIsEnabled(dom::DOMStringView status) noexcept;
+    /// @brief `aria-live`, or the role's default.
+    KRYS_NODISCARD dom::DOMString LiveRegionStatus() const noexcept;
+    /// @brief `aria-relevant`, or its default ("additions text").
+    KRYS_NODISCARD dom::DOMString LiveRegionRelevant() const noexcept;
+    /// @brief Whether the region is announced as a whole when part of it changes: `aria-atomic`, true by
+    /// default for alerts and statuses.
+    KRYS_NODISCARD bool LiveRegionAtomic() const noexcept;
+    /// @brief Whether `aria-busy` says the object is being updated (so its changes shouldn't be announced
+    /// yet).
+    KRYS_NODISCARD bool IsBusy() const noexcept;
+    /// @brief Whether the object is a live region: one that announces its changes or, unless
+    /// @p excludeIfOff, one whose status is "off".
+    KRYS_NODISCARD bool SupportsLiveRegion(bool excludeIfOff = true) const noexcept;
+    /// @brief The nearest live region at or above the object.
+    KRYS_NODISCARD AccessibilityObject *LiveRegionAncestor(bool excludeIfOff = true) const noexcept;
 
     // States.
 

@@ -122,6 +122,7 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool IsNativeTextControl() const noexcept;
     /// @brief Whether the element is the top of a `contenteditable` region.
     KRYS_NODISCARD bool HasContentEditableAttributeSet() const noexcept;
+    KRYS_NODISCARD bool IsNonNativeTextControl() const noexcept override;
     /// @brief Whether the element has `aria-label`, `aria-labelledby` or `title`, which give it a name.
     KRYS_NODISCARD bool HasAccNameAttribute() const noexcept;
     /// @brief Whether the element has something that makes it worth exposing even if its kind wouldn't be

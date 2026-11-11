@@ -1309,11 +1309,80 @@ namespace krys::boo::ax
     return static_cast<int32>(result.Value);
   }
 
+  dom::DOMStringView AccessibilityObject::DefaultLiveRegionStatusForRole(AccessibilityRole role) noexcept
+  {
+    switch (role)
+    {
+      case AccessibilityRole::ApplicationAlertDialog:
+      case AccessibilityRole::ApplicationAlert:       return u8"assertive";
+      case AccessibilityRole::ApplicationLog:
+      case AccessibilityRole::ApplicationStatus:      return u8"polite";
+      case AccessibilityRole::ApplicationTimer:
+      case AccessibilityRole::ApplicationMarquee:     return u8"off";
+      default:                                        return {};
+    }
+  }
+
+  bool AccessibilityObject::LiveRegionStatusIsEnabled(dom::DOMStringView status) noexcept
+  {
+    return StringAlgorithms::ASCIICaseInsensitiveMatch(status, u8"polite")
+           || StringAlgorithms::ASCIICaseInsensitiveMatch(status, u8"assertive");
+  }
+
+  dom::DOMString AccessibilityObject::LiveRegionStatus() const noexcept
+  {
+    auto status = GetAttribute(u8"aria-live");
+    return status.empty() ? dom::DOMString(DefaultLiveRegionStatusForRole(Role())) : status;
+  }
+
+  dom::DOMString AccessibilityObject::LiveRegionRelevant() const noexcept
+  {
+    auto relevant = GetAttribute(u8"aria-relevant");
+    return relevant.empty() ? dom::DOMString(u8"additions text") : relevant;
+  }
+
+  bool AccessibilityObject::LiveRegionAtomic() const noexcept
+  {
+    auto atomic = GetAttribute(u8"aria-atomic");
+    if (StringAlgorithms::ASCIICaseInsensitiveMatch(atomic, u8"true"))
+    {
+      return true;
+    }
+    if (StringAlgorithms::ASCIICaseInsensitiveMatch(atomic, u8"false"))
+    {
+      return false;
+    }
+    // Alerts and statuses are atomic unless they say otherwise.
+    return Role() == AccessibilityRole::ApplicationAlert || Role() == AccessibilityRole::ApplicationStatus;
+  }
+
+  bool AccessibilityObject::IsBusy() const noexcept
+  {
+    return StringAlgorithms::ASCIICaseInsensitiveMatch(GetAttribute(u8"aria-busy"), u8"true");
+  }
+
+  bool AccessibilityObject::SupportsLiveRegion(bool excludeIfOff) const noexcept
+  {
+    auto status = LiveRegionStatus();
+    return excludeIfOff ? LiveRegionStatusIsEnabled(status) : !status.empty();
+  }
+
+  AccessibilityObject *AccessibilityObject::LiveRegionAncestor(bool excludeIfOff) const noexcept
+  {
+    for (auto *object = const_cast<AccessibilityObject *>(this); object; object = object->ParentObject())
+    {
+      if (object->SupportsLiveRegion(excludeIfOff))
+      {
+        return object;
+      }
+    }
+    return nullptr;
+  }
+
   bool AccessibilityObject::SupportsARIAAttributes() const noexcept
   {
     // Whether the element has any global ARIA state or property.
-    auto live = GetAttribute(u8"aria-live");
-    if (!live.empty() && !StringAlgorithms::ASCIICaseInsensitiveMatch(live, u8"off"))
+    if (SupportsLiveRegion())
     {
       return true;
     }

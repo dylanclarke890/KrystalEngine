@@ -110,6 +110,10 @@ namespace krys::boo::ax
     };
 
     ListHashSet<AXID> _deferredChildrenChangedList;
+    // Elements added to or removed from the tree, which may be live regions or menus that opened.
+    ListHashSet<dom::Element *> _deferredElementAddedOrRemovedList;
+    // Live regions whose contents changed, each told once when the notifications are next posted.
+    ListHashSet<AXID> _changedLiveRegions;
     List<DeferredAttributeChange> _deferredAttributeChanges;
     // Nodes whose text changed, and elements whose ignored state needs working out again.
     ListHashSet<dom::Node *> _deferredTextChangedList;
@@ -345,6 +349,12 @@ namespace krys::boo::ax
     void HandleMenuItemSelected(dom::Element *element) noexcept;
     void HandleFocusedUIElementChanged(dom::Element *oldElement, dom::Element *newElement) noexcept;
     void HandleChildrenChanged(AccessibilityObject &object) noexcept;
+    void DeferElementAddedOrRemoved(dom::Element *element) noexcept;
+    void HandleMenuOpened(dom::Element &element) noexcept;
+    void HandleLiveRegionCreated(dom::Element &element) noexcept;
+    /// @brief A label (or something labelling an object) changed: the objects it labels are told.
+    void HandleLabelChanged(AccessibilityObject *object) noexcept;
+    void PostLiveRegionChangeNotification(AccessibilityObject &object) noexcept;
     void HandleAllDeferredChildrenChanged() noexcept;
     /// @brief Works out again (later) whether @p element's table is exposed: adding or removing rows can make
     /// a layout table a data table or the other way round.
