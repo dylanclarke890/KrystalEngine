@@ -83,6 +83,7 @@ target_sources(Krystal.Booey.Tests
     BASE_DIRS
       include
     FILES
+		include/Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
 		include/Krystal.Booey.Tests/SVG/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/SVG/PropertyTestUtils.hpp
@@ -638,6 +639,10 @@ target_sources(Krystal.Booey.Tests
 
 		# Accessibility
 		tests/Accessibility/ARIAMixin.cpp
+		tests/Accessibility/AXLogger.cpp
+		tests/Accessibility/AXObjectCache.cpp
+		tests/Accessibility/AccessibilityNodeObject.cpp
+		tests/Accessibility/AccessibilityRenderObject.cpp
 
 		# DOM
 		tests/DOM/Algorithms/AbortAlgorithms.cpp

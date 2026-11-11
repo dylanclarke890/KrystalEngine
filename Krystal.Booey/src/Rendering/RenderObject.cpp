@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
@@ -2036,7 +2037,10 @@ namespace krys::boo
   {
     krys_debug_assert(!_parent);
 
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = GetDocument().ExistingAXObjectCache())
+    {
+      cache->Remove(*this);
+    }
 
     RemoveRareData();
 

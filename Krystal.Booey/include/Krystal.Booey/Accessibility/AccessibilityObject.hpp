@@ -1,0 +1,510 @@
+﻿/*
+ * Copyright (C) 2019-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*
+ * Copyright (C) 2008, 2009, 2011 Apple Inc. All rights reserved.
+ * Copyright (C) 2008 Nuanti Ltd.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ * 3.  Neither the name of Apple Inc. ("Apple") nor the names of
+ *     its contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Booey/Accessibility/AccessibilityRole.hpp"
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/String.hpp"
+
+namespace krys::boo
+{
+  class RenderObject;
+  class RenderStyle;
+  class LocalFrameView;
+  class Page;
+
+  namespace dom
+  {
+    class Document;
+    class Element;
+    class Node;
+  }
+}
+
+namespace krys::boo::ax
+{
+  class AXObjectCache;
+
+  /// @brief An accessibility object's identifier, unique within its cache.
+  enum class AXID : uint64
+  {
+  };
+
+  /// @brief Why an accessibility object is being detached from its cache.
+  enum class AccessibilityDetachmentType : uint8
+  {
+    CacheDestroyed,
+    ElementDestroyed,
+    ElementChanged,
+  };
+
+  /// @brief Whether an object must be in the tree, must be left out, or is left to the usual rules.
+  enum class AccessibilityObjectInclusion : uint8
+  {
+    IncludeObject,
+    IgnoreObject,
+    DefaultBehavior,
+  };
+
+  /// @brief A checkbox's, radio button's or toggle button's state.
+  enum class AccessibilityButtonState : uint8
+  {
+    Off,
+    On,
+    Mixed,
+  };
+
+  /// @brief An object in the accessibility tree: what assistive technology sees of a node or renderer.
+  /// Objects are created and owned by an `AXObjectCache`; an object's children are the unignored objects
+  /// below it, with each ignored object replaced by its own children.
+  /// @note WebKit's `AXCoreObject` and `AccessibilityObject` are one class here: there's no isolated tree
+  /// for `AXCoreObject` to abstract over.
+  class AccessibilityObject : public RefCounted<AccessibilityObject>,
+                              public CanMakeWeakPtr<AccessibilityObject>
+  {
+  public:
+    using AccessibilityChildrenVector = List<Ref<AccessibilityObject>>;
+
+    /// @brief Whether `InsertChild` replaces an ignored child with the child's own children.
+    enum class DescendIfIgnored : bool
+    {
+      No,
+      Yes,
+    };
+
+  private:
+    AXID _id;
+    AXObjectCache *_axObjectCache;
+
+  protected:
+    AccessibilityRole _role {AccessibilityRole::Unknown};
+    AccessibilityObjectInclusion _lastKnownIsIgnoredValue {AccessibilityObjectInclusion::DefaultBehavior};
+    AccessibilityChildrenVector _children;
+    uint32 _indexInParent {0};
+    bool _childrenInitialized {false};
+    bool _childrenDirty {false};
+    bool _subtreeDirty {false};
+
+  public:
+    virtual ~AccessibilityObject() noexcept;
+
+    /// @brief Sets the object up once its cache holds it: its role, then anything that depends on it.
+    virtual void Init() noexcept;
+
+    KRYS_NODISCARD AXID ObjectID() const noexcept
+    {
+      return _id;
+    }
+    KRYS_NODISCARD AccessibilityRole Role() const noexcept
+    {
+      return _role;
+    }
+    /// @brief The cache holding the object; null once it's detached.
+    KRYS_NODISCARD AXObjectCache *AxObjectCache() const noexcept
+    {
+      return _axObjectCache;
+    }
+
+    /// @brief Removes the object from the tree: clears its children, lets go of its node and renderer and
+    /// tells the platform its wrapper is gone.
+    void Detach(AccessibilityDetachmentType detachmentType) noexcept;
+    KRYS_NODISCARD virtual bool IsDetached() const noexcept = 0;
+
+    KRYS_NODISCARD virtual bool IsAccessibilityNodeObject() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsAccessibilityRenderObject() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief A description for debugging: the role, ID, and the renderer or node.
+    KRYS_NODISCARD utf8_string DebugDescription() const noexcept;
+
+    // The DOM and the render tree.
+
+    KRYS_NODISCARD virtual dom::Node *GetNode() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD dom::Element *GetElement() const noexcept;
+    KRYS_NODISCARD virtual RenderObject *Renderer() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual dom::Document *GetDocument() const noexcept;
+    KRYS_NODISCARD Page *GetPage() const noexcept;
+    KRYS_NODISCARD LocalFrameView *DocumentFrameView() const noexcept;
+    /// @brief The style of the object's renderer, or else its element's computed style.
+    KRYS_NODISCARD const RenderStyle *Style() const noexcept;
+
+    // The tree.
+
+    KRYS_NODISCARD virtual AccessibilityObject *ParentObject() const noexcept = 0;
+    /// @brief The nearest ancestor that isn't ignored: the object's parent in the tree.
+    KRYS_NODISCARD AccessibilityObject *ParentObjectUnignored() const noexcept;
+    /// @brief The object's children, added first if they're out of date and @p updateChildrenIfNeeded.
+    KRYS_NODISCARD const AccessibilityChildrenVector &Children(bool updateChildrenIfNeeded = true) noexcept;
+    KRYS_NODISCARD bool ChildrenInitialized() const noexcept
+    {
+      return _childrenInitialized;
+    }
+    KRYS_NODISCARD uint32 IndexInParent() const noexcept
+    {
+      return _indexInParent;
+    }
+    KRYS_NODISCARD bool HasDirtySubtree() const noexcept
+    {
+      return _subtreeDirty;
+    }
+
+    virtual void AddChildren() noexcept
+    {
+    }
+    KRYS_NODISCARD virtual bool CanHaveChildren() const noexcept
+    {
+      return true;
+    }
+    virtual void UpdateChildrenIfNecessary() noexcept;
+    /// @brief Marks the children out of date, so the next `Children()` adds them again.
+    virtual void SetNeedsToUpdateChildren() noexcept
+    {
+    }
+    /// @brief Marks the children and their subtrees out of date.
+    virtual void SetNeedsToUpdateSubtree() noexcept
+    {
+    }
+    KRYS_NODISCARD virtual bool NeedsToUpdateChildren() const noexcept
+    {
+      return false;
+    }
+    virtual void ClearChildren() noexcept;
+
+    /// @brief Inserts @p child at @p index; an ignored child's children instead if @p descendIfIgnored.
+    void InsertChild(AccessibilityObject &child, uint32 index,
+                     DescendIfIgnored descendIfIgnored = DescendIfIgnored::Yes) noexcept;
+    void AddChild(AccessibilityObject *child,
+                  DescendIfIgnored descendIfIgnored = DescendIfIgnored::Yes) noexcept
+    {
+      if (child)
+      {
+        InsertChild(*child, static_cast<uint32>(_children.size()), descendIfIgnored);
+      }
+    }
+
+    KRYS_NODISCARD bool IsDescendantOfObject(const AccessibilityObject &ancestor) const noexcept;
+    KRYS_NODISCARD bool IsAncestorOfObject(const AccessibilityObject &descendant) const noexcept;
+    KRYS_NODISCARD bool IsDescendantOfRole(AccessibilityRole role) const noexcept;
+
+    // Whether the object is in the tree.
+
+    /// @brief Whether the object is left out of the tree (its children take its place).
+    KRYS_NODISCARD bool IsIgnored() const noexcept;
+    /// @brief Works out `IsIgnored()` again, telling the parent its children changed if it did.
+    void RecomputeIsIgnored() noexcept
+    {
+      (void)IsIgnored();
+    }
+    void RecomputeIsIgnoredForDescendants(bool includeSelf = false) noexcept;
+    /// @brief The common reasons to include or ignore an object (inertness, hiddenness, a presentational
+    /// ancestor), before the rules for its kind.
+    KRYS_NODISCARD AccessibilityObjectInclusion DefaultObjectInclusion() const noexcept;
+    /// @brief Whether `aria-hidden="true"` applies to the object itself.
+    KRYS_NODISCARD bool IsARIAHidden() const noexcept;
+    /// @brief Whether `aria-hidden="true"` applies to the object or an ancestor.
+    KRYS_NODISCARD bool IsAXHidden() const noexcept;
+
+    // Roles.
+
+    KRYS_NODISCARD virtual AccessibilityRole AriaRoleAttribute() const noexcept
+    {
+      return AccessibilityRole::Unknown;
+    }
+    KRYS_NODISCARD bool HasExplicitGenericRole() const noexcept
+    {
+      return AriaRoleAttribute() == AccessibilityRole::Generic;
+    }
+    /// @brief Works out the role again, telling the cache if it changed.
+    void UpdateRole() noexcept;
+    /// @brief The first role in @p value (a space-separated list of ARIA roles) that isn't skipped.
+    KRYS_NODISCARD static AccessibilityRole AriaRoleToRole(dom::DOMStringView value) noexcept;
+    KRYS_NODISCARD static AccessibilityRole
+      AriaRoleToRole(dom::DOMStringView value, const Func<bool(AccessibilityRole)> &skipRole) noexcept;
+    /// @brief The ARIA role the object maps to (`computedrole` in WebDriver), empty for none.
+    KRYS_NODISCARD utf8_stringview ComputedRoleString() const noexcept;
+    /// @brief Whether the role makes its descendants presentational (ARIA "children presentational").
+    KRYS_NODISCARD bool AriaRoleHasPresentationalChildren() const noexcept;
+    /// @brief Whether the role is one of those ARIA defines as a widget an author may make (button,
+    /// checkbox and so on).
+    KRYS_NODISCARD static bool IsARIAControl(AccessibilityRole role) noexcept;
+
+    KRYS_NODISCARD bool IsHeading() const noexcept
+    {
+      return _role == AccessibilityRole::Heading;
+    }
+    KRYS_NODISCARD bool IsLink() const noexcept
+    {
+      return _role == AccessibilityRole::Link;
+    }
+    KRYS_NODISCARD bool IsImage() const noexcept
+    {
+      return _role == AccessibilityRole::Image;
+    }
+    KRYS_NODISCARD bool IsWebArea() const noexcept
+    {
+      return _role == AccessibilityRole::WebArea;
+    }
+    KRYS_NODISCARD bool IsCheckbox() const noexcept
+    {
+      return _role == AccessibilityRole::Checkbox;
+    }
+    KRYS_NODISCARD bool IsRadioButton() const noexcept
+    {
+      return _role == AccessibilityRole::RadioButton;
+    }
+    KRYS_NODISCARD bool IsCheckboxOrRadio() const noexcept
+    {
+      return IsCheckbox() || IsRadioButton();
+    }
+    KRYS_NODISCARD bool IsSwitch() const noexcept
+    {
+      return _role == AccessibilityRole::Switch;
+    }
+    KRYS_NODISCARD bool IsToggleButton() const noexcept
+    {
+      return _role == AccessibilityRole::ToggleButton;
+    }
+    KRYS_NODISCARD bool IsListBox() const noexcept
+    {
+      return _role == AccessibilityRole::ListBox;
+    }
+    KRYS_NODISCARD bool IsListItem() const noexcept
+    {
+      return _role == AccessibilityRole::ListItem;
+    }
+    KRYS_NODISCARD bool IsMenu() const noexcept
+    {
+      return _role == AccessibilityRole::Menu;
+    }
+    KRYS_NODISCARD bool IsMenuBar() const noexcept
+    {
+      return _role == AccessibilityRole::MenuBar;
+    }
+    KRYS_NODISCARD bool IsComboBox() const noexcept
+    {
+      return _role == AccessibilityRole::ComboBox;
+    }
+    KRYS_NODISCARD bool IsTree() const noexcept
+    {
+      return _role == AccessibilityRole::Tree;
+    }
+    KRYS_NODISCARD bool IsStaticText() const noexcept
+    {
+      return _role == AccessibilityRole::StaticText;
+    }
+    KRYS_NODISCARD bool IsSummary() const noexcept
+    {
+      return _role == AccessibilityRole::Summary;
+    }
+    KRYS_NODISCARD bool IsProgressIndicator() const noexcept
+    {
+      return _role == AccessibilityRole::ProgressIndicator || _role == AccessibilityRole::Meter;
+    }
+    KRYS_NODISCARD bool IsSlider() const noexcept
+    {
+      return _role == AccessibilityRole::Slider;
+    }
+    KRYS_NODISCARD bool IsMenuItem() const noexcept;
+    KRYS_NODISCARD bool IsMenuRelated() const noexcept;
+    KRYS_NODISCARD bool IsButton() const noexcept;
+    KRYS_NODISCARD bool IsControl() const noexcept;
+    KRYS_NODISCARD bool IsTextControl() const noexcept;
+    KRYS_NODISCARD bool IsGroup() const noexcept;
+    KRYS_NODISCARD bool IsLandmark() const noexcept;
+    KRYS_NODISCARD bool IsRangeControl() const noexcept;
+    KRYS_NODISCARD bool IsRootWebArea() const noexcept;
+
+    // Attributes.
+
+    /// @brief Whether the element has @p name, or (for ARIA attributes) its custom element has a default.
+    KRYS_NODISCARD bool HasAttribute(dom::DOMStringView name) const noexcept;
+    /// @brief The element's @p name attribute, or (for ARIA attributes) its custom element's default;
+    /// empty if neither is set.
+    KRYS_NODISCARD dom::DOMString GetAttribute(dom::DOMStringView name) const noexcept;
+    /// @brief `GetAttribute` with leading and trailing ASCII whitespace stripped.
+    KRYS_NODISCARD dom::DOMString GetAttributeTrimmed(dom::DOMStringView name) const noexcept;
+    /// @brief Whether the element has any global ARIA state or property.
+    KRYS_NODISCARD bool SupportsARIAAttributes() const noexcept;
+
+    // States.
+
+    KRYS_NODISCARD virtual bool IsFocused() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsEnabled() const noexcept
+    {
+      return true;
+    }
+    KRYS_NODISCARD virtual bool IsChecked() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsIndeterminate() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsPressed() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsSelected() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsRequired() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMultiSelectable() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsVisited() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool SupportsExpanded() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsExpanded() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool CanSetFocusAttribute() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual AccessibilityButtonState CheckboxOrRadioValue() const noexcept;
+    /// @brief The heading level, 1 to 6 for HTML headings or `aria-level` for ARIA ones; 0 if not a heading.
+    KRYS_NODISCARD virtual uint32 HeadingLevel() const noexcept
+    {
+      return 0;
+    }
+
+    // Text.
+
+    /// @brief The accessible name, as accname computes it.
+    KRYS_NODISCARD virtual dom::DOMString AccessibleName() const noexcept
+    {
+      return {};
+    }
+    /// @brief The accessible description, as accname computes it.
+    KRYS_NODISCARD virtual dom::DOMString AccessibleDescription() const noexcept
+    {
+      return {};
+    }
+    /// @brief The object's value as text (a text control's value, a static text's text and so on).
+    KRYS_NODISCARD virtual dom::DOMString StringValue() const noexcept
+    {
+      return {};
+    }
+
+    // Geometry.
+
+    /// @brief The object's bounds, in the root view's coordinates.
+    KRYS_NODISCARD virtual LayoutRect ElementRect() const noexcept
+    {
+      return {};
+    }
+
+  protected:
+    AccessibilityObject(AXID id, AXObjectCache &cache) noexcept;
+
+    KRYS_NODISCARD virtual AccessibilityRole DetermineAccessibilityRole() noexcept = 0;
+    virtual void RecomputeAriaRole() noexcept
+    {
+    }
+    /// @brief Whether the rules for the object's kind leave it out of the tree.
+    KRYS_NODISCARD virtual bool ComputeIsIgnored() const noexcept
+    {
+      return true;
+    }
+    /// @brief Lets go of the node and renderer, and of the children.
+    virtual void DetachRemoteParts(AccessibilityDetachmentType detachmentType) noexcept;
+    virtual void DetachFromParent() noexcept
+    {
+    }
+
+    /// @brief The role a `button` (or a button-like input) takes: toggle button if `aria-pressed` is set,
+    /// pop-up button if it or a link around it has a pop-up.
+    KRYS_NODISCARD AccessibilityRole ButtonRoleType() const noexcept;
+    KRYS_NODISCARD bool HasPopup() const noexcept;
+    void ResetChildrenIndexInParent() noexcept;
+
+  private:
+    KRYS_NODISCARD bool IsIgnoredWithoutCache() const noexcept;
+    void PostMenuClosedNotificationIfNecessary() const noexcept;
+  };
+}

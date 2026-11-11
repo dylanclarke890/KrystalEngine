@@ -314,6 +314,12 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `beforeinput` and `input` have the window as their `view`, as UI Events says; Chrome's is null.
 - After a scroll, the hovered element follows the content under a still mouse when a fake mouse move fires, 100 ms later (250 ms once handling a mouse move has taken over 10 ms), as in WebKit; Chrome updates hover in the next frames. Fake moves carry the modifier keys of the latest mouse or keyboard event and are skipped while the page is hidden, but a page whose view isn't focused still gets them, as it does real mouse moves.
 
+## Accessibility
+
+### From Chrome
+
+- Which objects are in the tree and their roles follow WebKit's rules rather than Chrome's (for instance, text-level elements like `span`, `em` and `strong` with no name or ARIA attributes are left out, their text becoming their parent's, and a `div` with inline content is a generic object).
+
 ## Loading, navigation and history
 
 ### From the specs

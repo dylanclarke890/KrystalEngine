@@ -206,10 +206,22 @@ add_custom_command(
 # Every header and source is listed here; a file that isn't listed isn't built.
 set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
   include/Krystal.Booey/Accessibility/ARIAMixin.hpp
+  include/Krystal.Booey/Accessibility/AXLogger.hpp
+  include/Krystal.Booey/Accessibility/AXNotifications.hpp
+  include/Krystal.Booey/Accessibility/AXObjectCache.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityNodeObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityRole.hpp
 )
 
 set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
   src/Accessibility/ARIAMixin.cpp
+  src/Accessibility/AXLogger.cpp
+  src/Accessibility/AXObjectCache.cpp
+  src/Accessibility/AccessibilityNodeObject.cpp
+  src/Accessibility/AccessibilityObject.cpp
+  src/Accessibility/AccessibilityRenderObject.cpp
 )
 
 set(KRYSTAL_BOOEY_ANIMATION_HEADERS

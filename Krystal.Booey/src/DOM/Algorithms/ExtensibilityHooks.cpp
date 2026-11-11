@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/DOM/Algorithms/ExtensibilityHooks.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
@@ -377,8 +378,13 @@ namespace krys::boo::dom
       NotifyIdTargetObservers(removedNode, oldAncestor.TreeScope());
     }
 
-    // FIXME: Removing a disconnected node from its document's accessibility cache (remove), with
-    // accessibility.
+    if (wasConnected)
+    {
+      if (auto *cache = oldAncestor.NodeDocument().ExistingAXObjectCache())
+      {
+        cache->Remove(removedNode);
+      }
+    }
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
 
     // The removed node loses its parent's tree reference (which may delete it).
@@ -395,7 +401,10 @@ namespace krys::boo::dom
 
   void ExtensibilityHooks::NodeAdopted(Node &node, Document &oldDocument) noexcept
   {
-    // FIXME: Removing the node from the old document's accessibility cache (remove), with accessibility.
+    if (auto *cache = oldDocument.ExistingAXObjectCache())
+    {
+      cache->Remove(node);
+    }
     node.OnAdopt(oldDocument);
   }
 

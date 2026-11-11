@@ -77,6 +77,11 @@ namespace krys::text
   class ICodec;
 }
 
+namespace krys::boo::ax
+{
+  class AXObjectCache;
+}
+
 namespace krys::boo
 {
   class AnimationTimelinesController;
@@ -456,6 +461,8 @@ namespace krys::boo::dom
     // The root of the render tree: a document has one while it's shown in a frame with a view.
     RenderPtr<boo::RenderView> _renderView;
     bool _renderTreeBeingDestroyed {false};
+    // The accessibility tree, once accessibility is enabled and something asks for it.
+    UniquePtr<ax::AXObjectCache> _axObjectCache;
     // Renderer updates (of text) that the next style resolution applies.
     UniquePtr<style::Update> _pendingRenderTreeUpdate;
 
@@ -1668,6 +1675,17 @@ namespace krys::boo::dom
     {
       return _renderView.get();
     }
+
+    /// @brief The document's accessibility cache, created if accessibility is enabled and the document is in
+    /// a frame; null otherwise.
+    KRYS_NODISCARD ax::AXObjectCache *AxObjectCache() noexcept;
+    /// @brief The document's accessibility cache, if it has created one.
+    KRYS_NODISCARD ax::AXObjectCache *ExistingAXObjectCache() const noexcept
+    {
+      return _axObjectCache.get();
+    }
+    /// @brief Destroys the accessibility cache (with the render tree it describes).
+    void ClearAXObjectCache() noexcept;
 
     KRYS_NODISCARD bool RenderTreeBeingDestroyed() const noexcept
     {
