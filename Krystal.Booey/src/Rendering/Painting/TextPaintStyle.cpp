@@ -143,8 +143,10 @@ namespace krys::boo
     {
       if (renderer.GetDocument().IsFocusedAndActive())
       {
-        // FIXME: The system appearance (Settings::useSystemAppearance), once there's a setting.
-        paintStyle.FillColor = RenderTheme::Singleton().DefaultButtonTextColor(style::ColorOptions::None);
+        auto options = renderer.GetDocument().GetSettings().UseSystemAppearance
+                         ? style::ColorOptions::UseSystemAppearance
+                         : style::ColorOptions::None;
+        paintStyle.FillColor = RenderTheme::Singleton().DefaultButtonTextColor(options);
         return paintStyle;
       }
     }
