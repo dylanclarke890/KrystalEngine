@@ -699,6 +699,7 @@ namespace krys::boo
       void DidRemoveCachedImageClient(CachedImage &) noexcept final;
       void ImageContentChanged(CachedImage &) noexcept final;
       void ScheduleRenderingUpdateForImage(CachedImage &) noexcept final;
+      KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept final;
     };
 
     mutable UniquePtr<CachedImageListener> _cachedImageClient;

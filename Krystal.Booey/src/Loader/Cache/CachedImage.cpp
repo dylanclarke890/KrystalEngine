@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageCache.hpp"
@@ -56,6 +57,10 @@ namespace krys::boo
 
   void CachedImage::Load(CachedResourceLoader &loader) noexcept
   {
+    if (auto *document = loader.GetDocument())
+    {
+      _settings = ShareRef(document->GetSettings());
+    }
     if (loader.ShouldPerformImageLoad(URL()))
     {
       CachedResource::Load(loader);
@@ -409,6 +414,38 @@ namespace krys::boo
   {
     return std::ranges::any_of(_cachedImages, [&image](const CachedImage *cachedImage)
                                { return cachedImage->AllowsAnimation(image); });
+  }
+
+  Settings *CachedImage::CachedImageObserver::GetSettings() const noexcept
+  {
+    for (const auto *cachedImage : _cachedImages)
+    {
+      if (cachedImage->_settings)
+      {
+        return cachedImage->_settings.get();
+      }
+    }
+    return nullptr;
+  }
+
+  bool CachedImage::CachedImageObserver::UseSystemDarkAppearance() const noexcept
+  {
+    return std::ranges::any_of(_cachedImages, [](const CachedImage *cachedImage)
+                               { return cachedImage->UseSystemDarkAppearance(); });
+  }
+
+  bool CachedImage::UseSystemDarkAppearance() const noexcept
+  {
+    // Not only the first client: an image element's loader comes before its renderer.
+    CachedResourceClientWalker<CachedImageClient> walker(*this);
+    while (auto *client = walker.Next())
+    {
+      if (client->UseSystemDarkAppearance())
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   void CachedImage::ClearImage() noexcept

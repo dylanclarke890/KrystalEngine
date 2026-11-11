@@ -1475,6 +1475,12 @@ namespace krys::boo
     _renderer.ScheduleRenderingUpdateForImage(image);
   }
 
+  bool RenderObject::CachedImageListener::UseSystemDarkAppearance() const noexcept
+  {
+    auto *page = _renderer.GetDocument().GetPage();
+    return page && page->UseDarkAppearance();
+  }
+
   void RenderObject::ScheduleRenderingUpdateForImage(CachedImage &) noexcept
   {
     if (auto *page = GetDocument().GetPage())
