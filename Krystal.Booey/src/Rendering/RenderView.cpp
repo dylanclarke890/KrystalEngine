@@ -210,7 +210,10 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: SVG roots with a clip path (isRenderOrLegacyRenderSVGRoot).
+      if (rootElement.HasClipPath() && rootElement.IsLegacyRenderSVGRoot())
+      {
+        return false;
+      }
 
       auto *rendererForBackground = rootElement.View().RendererForRootBackground();
       if (!rendererForBackground)
@@ -370,7 +373,6 @@ namespace krys::boo
 
       for (auto &box : ChildrenOfType<RenderBox>(*this))
       {
-        // FIXME: SVG roots too.
         if (box.HasRelativeLogicalHeight() || box.Style().LogicalHeight().IsPercentOrCalculated()
             || box.Style().LogicalMinHeight().IsPercentOrCalculated()
             || box.Style().LogicalMaxHeight().IsPercentOrCalculated())
