@@ -25,7 +25,6 @@
 #include "Krystal.Booey/Rendering/Painting/TextBoxPainter.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/Editing/CompositionHighlight.hpp"
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
@@ -109,6 +108,9 @@ namespace krys::boo
 
   namespace
   {
+    /// @brief The fill behind a composition that has no underlines.
+    constexpr auto DefaultCompositionFillColor = SRGBA<uint8> {225, 221, 85};
+
     struct ShapedContent
     {
       StringBuilder Text;
@@ -346,7 +348,6 @@ namespace krys::boo
     return {};
   }
 
-  // FIXME: The composition's custom highlights. (There are no document markers; see DIFFERENCES.md.)
   void TextBoxPainter::PaintBackgroundFill() noexcept
   {
     if (_containsComposition && !_compositionWithCustomUnderlines)
@@ -354,8 +355,7 @@ namespace krys::boo
       auto &editor = _renderer.GetDocument().GetEditor();
       auto [clampedStart, clampedEnd] =
         _selectableRange.Clamp(editor.CompositionStart(), editor.CompositionEnd());
-      PaintBackgroundFillForRange(clampedStart, clampedEnd,
-                                  CompositionHighlight::DefaultCompositionFillColor);
+      PaintBackgroundFillForRange(clampedStart, clampedEnd, DefaultCompositionFillColor);
     }
 
     auto markedTexts =
@@ -605,7 +605,6 @@ namespace krys::boo
     }
   }
 
-  // FIXME: The redesigned text cursor's rounded underlines, which are Cocoa's.
   void TextBoxPainter::FillCompositionUnderline(float start, float width,
                                                 const CompositionUnderline &underline) const noexcept
   {

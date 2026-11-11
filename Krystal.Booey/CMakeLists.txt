@@ -1302,7 +1302,6 @@ set(KRYSTAL_BOOEY_EDITING_HEADERS
   include/Krystal.Booey/Editing/Commands/TypingCommand.hpp
   include/Krystal.Booey/Editing/Commands/UndoStep.hpp
   include/Krystal.Booey/Editing/Commands/WrapContentsInDummySpanCommand.hpp
-  include/Krystal.Booey/Editing/CompositionHighlight.hpp
   include/Krystal.Booey/Editing/CompositionUnderline.hpp
   include/Krystal.Booey/Editing/EditAction.hpp
   include/Krystal.Booey/Editing/Editing.hpp

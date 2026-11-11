@@ -2620,8 +2620,6 @@ namespace krys::boo
 
     if (targetNode && targetNode->Renderer())
     {
-      // FIXME: The system's lookup of the word under the point
-      // (selectClosestWordFromHitTestResultBasedOnLookup), which only the Mac has.
       VisiblePosition pos(
         targetNode->Renderer()->VisiblePositionForPoint(result.LocalPoint(), HitTestSource::User));
       if (pos.IsNotNull())

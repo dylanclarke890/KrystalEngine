@@ -150,7 +150,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 - `EditorClient` is only the selection, clipboard permission, undo/redo, composition and text-field hooks. It has no `shouldInsertText`/`shouldDeleteRange`/`shouldBeginEditing`/`shouldApplyStyle` delegates, so the host cannot veto or observe edits, and no spelling, grammar or text-checking, autocorrection or autofill hooks.
 - The drag caret, the overtype block cursor, caret browsing's focusing of the anchor the caret is in, stopping the blink while typing, beeping on empty cuts and deletes, and spatial navigation's use of the caret are absent.
 - Image documents and writing images to the pasteboard are absent.
-- Input methods are IMM32 only. TSF features (reconversion, inline handwriting, speech), custom highlights and annotations (inline predictions, writing suggestions), `inputmode`, `ime-mode` and an on-screen keyboard are not supported. The page draws no candidate list and the host is not told the candidates; the IME draws its own windows.
+- Input methods are IMM32 only. TSF features (reconversion, inline handwriting, speech), writing suggestions, `inputmode`, `ime-mode` and an on-screen keyboard are not supported. The page draws no candidate list and the host is not told the candidates; the IME draws its own windows.
 - Dragging a selection out to other applications is not supported.
 
 ## Input and events

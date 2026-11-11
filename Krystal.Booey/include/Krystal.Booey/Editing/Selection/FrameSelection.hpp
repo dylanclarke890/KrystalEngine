@@ -225,8 +225,7 @@ namespace krys::boo
 
   /// @brief A document's selection: what's selected, whether the document is focused and active (which picks
   /// the selection's colours), and keeping the render tree's selection (`RenderSelection`) in step with it.
-  // FIXME: The block cursor of overtype mode (paintBlockCursor), with editing commands; the caret colour the
-  // host sets (setCaretColor), which only iOS uses.
+  // FIXME: The block cursor of overtype mode (paintBlockCursor), with editing commands.
   // FIXME: Frames: selecting the frame element in the parent (selectFrameElementInParentIfFullySelected),
   // selections in another frame's document.
   // FIXME: The editor's notifications (selectionWillChange, respondToChangedSelection, shouldChangeSelection

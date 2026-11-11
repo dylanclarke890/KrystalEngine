@@ -657,7 +657,6 @@ namespace krys::boo
     return !event->DefaultPrevented();
   }
 
-  // FIXME: Two-step drops (the editor client's performTwoStepDrop), which are iOS's.
   bool DragController::ConcludeEditDrag(const DragData &dragData) noexcept
   {
     RefPtr<html::HTMLInputElement> fileInput = _fileInputElementUnderMouse;
