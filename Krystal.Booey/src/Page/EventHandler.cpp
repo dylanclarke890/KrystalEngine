@@ -3224,7 +3224,6 @@ namespace krys::boo
     return node->CanStartSelection() || dom::Position::NodeIsUserSelectAll(node);
   }
 
-  // FIXME: The textInteractionEnabled setting, once there's one.
   bool EventHandler::MouseDownMayStartSelect() const noexcept
   {
     return _mouseDownMayStartSelect;

@@ -1708,8 +1708,6 @@ namespace krys::boo::dom
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
 
     /// @brief How a background colour is composited: over what's beneath it.
-    /// FIXME: Punching out white backgrounds in dark mode (`punchOutWhiteBackgroundsInDarkMode`, a setting
-    /// off by default) isn't ported.
     KRYS_NODISCARD CompositeOperator CompositeOperatorForBackgroundColor(const Color &,
                                                                          const RenderElement &) const noexcept
     {

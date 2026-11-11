@@ -242,8 +242,6 @@ namespace krys::boo
       return DragOperation::Generic;
     }
 
-    // FIXME: Multi-representation images, which are Cocoa's; the setting to load images automatically
-    // (loadsImagesAutomatically), whose default (on) this takes, once there's one.
     KRYS_NODISCARD bool ImageElementIsDraggable(const html::HTMLImageElement &, const LocalFrame &) noexcept
     {
       return true;

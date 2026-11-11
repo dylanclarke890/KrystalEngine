@@ -1139,8 +1139,7 @@ namespace krys::boo
 
     // FIXME: Outline counting, once there's any.
 
-    // FIXME: A fixed root background composited on its own isn't slow; and the setting for fixed
-    // backgrounds painting relative to the document, once there are settings for it.
+    // FIXME: A fixed root background composited on its own isn't slow.
     bool newStyleSlowScroll =
       style::HasImageWithAttachment(newStyle.GetBackgroundLayers(), FillAttachment::FixedBackground);
 

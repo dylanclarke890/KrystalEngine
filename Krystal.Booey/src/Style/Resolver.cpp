@@ -162,7 +162,6 @@ namespace krys::boo::style
       : _document(CreateWeakPtr(&document)), _scopeType(scopeType), _ruleSets(*this),
         _matchedDeclarationsCache(*this)
   {
-    // FIXME: Settings: authorAndUserStylesEnabled (on by default).
     Initialize();
   }
 
@@ -737,8 +736,6 @@ namespace krys::boo::style
                                         element && Is<svg::SVGElement>(*element), style.get(), document);
     fontDescription.SetComputedSize(computedFontSize.Size, computedFontSize.UsedZoomFactor);
 
-    // FIXME: The settings' shouldAllowUserInstalledFonts comes with Settings (its default, Yes, is the
-    // description's).
     style->SetFontDescription(krys::move(fontDescription));
 
     return style;

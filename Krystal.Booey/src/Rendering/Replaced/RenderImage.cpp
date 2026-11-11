@@ -735,8 +735,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The incomplete image border setting (incompleteImageBorderEnabled), and recording unpainted and
-    // repainted objects for paint milestones.
+    // FIXME: Recording unpainted and repainted objects for paint milestones.
 
     RefPtr<Image> img = ImageResource().GetImage(FlooredIntSize(contentSize));
     if (!img || img->IsNull())

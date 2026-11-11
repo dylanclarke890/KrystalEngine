@@ -440,7 +440,6 @@ namespace krys::boo::css
   {
     using namespace std::chrono_literals;
 
-    // FIXME: The font load timing override setting, once there are settings for it.
     switch (_loadingBehavior)
     {
       case FontLoadingBehavior::Auto:

@@ -277,8 +277,6 @@ namespace krys::boo
     // if there is a transform on the <html>, or if there is a page scale factor less than 1.
     // Only fill with a background color (typically white) if we're the root document,
     // since iframes/frames with no background in the child document should show the parent's background.
-    // FIXME: The document's background colour when the background extends beyond the page
-    // (backgroundShouldExtendBeyondPage), a setting that isn't ported.
     auto &frameView = FrameView();
     if (!frameView.IsTransparent())
     {

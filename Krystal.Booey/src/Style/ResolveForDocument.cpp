@@ -65,8 +65,6 @@ namespace krys::boo::style
       FontCascadeDescription fontDescription;
       fontDescription.SetSpecifiedLocale(StringAtom(document.ContentLanguage()));
       fontDescription.SetOneFamily(css::GenericFontFamilyNames::StandardFamily());
-      // FIXME: The settings' shouldAllowUserInstalledFonts comes with Settings (its default, Yes, is the
-      // description's).
       // FIXME: We need evaluationTimeZoomEnabled to be accessible from FontDescription, not only from
       // RenderStyle. Would it be weird to move it to FontDescription (which is already accessible from
       // RenderStyle)?

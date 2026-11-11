@@ -889,8 +889,6 @@ namespace krys::boo
     {
       auto &rootLayer = RootRenderLayer();
       CompositingState compositingState(updateRoot);
-      // FIXME: The overlappingBackingStoreProvidersEnabled setting, once there are settings: on, as
-      // upstream's default.
       BackingSharingState backingSharingState(true);
       LayerOverlapMap overlapMap(rootLayer);
 
@@ -4207,7 +4205,6 @@ namespace krys::boo
     Color backgroundColor;
     bool isTransparent = ViewHasTransparentBackground(&backgroundColor);
 
-    // FIXME: Extending the background beyond the page, once there's a setting for it.
     Color extendedBackgroundColor;
 
     bool transparencyChanged = _viewBackgroundIsTransparent != isTransparent;
@@ -4597,7 +4594,6 @@ namespace krys::boo
 
   void RenderLayerCompositor::UpdateRootContentLayerClipping() noexcept
   {
-    // FIXME: Extending the background beyond the page, once there's a setting for it.
     _rootContentsLayer->SetMasksToBounds(true);
   }
 
