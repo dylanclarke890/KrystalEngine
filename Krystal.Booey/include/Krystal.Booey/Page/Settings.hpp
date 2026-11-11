@@ -107,6 +107,13 @@ namespace krys::boo
     /// @brief Whether links in editable content act as links.
     boo::EditableLinkBehavior EditableLinkBehavior {boo::EditableLinkBehavior::NeverLive};
 
+    // Debugging.
+
+    /// @brief Outlining each composited layer, in a colour for what it holds, as the host composites it.
+    bool ShowDebugBorders {false};
+    /// @brief Showing on each composited layer how many times it's been repainted.
+    bool ShowRepaintCounter {false};
+
     SettingsValues Values;
 
     KRYS_NODISCARD static Ref<Settings> Create() noexcept;

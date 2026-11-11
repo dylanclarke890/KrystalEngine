@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/Layers/LayerOverlapMap.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
@@ -611,12 +612,12 @@ namespace krys::boo
 
   void RenderLayerCompositor::CacheAcceleratedCompositingFlags() noexcept
   {
-    // FIXME: The settings (acceleratedCompositingEnabled, showDebugBorders, showRepaintCounter,
-    // acceleratedDrawingEnabled) and the chrome's compositing triggers, once there are settings: compositing
-    // is on whenever the host makes graphics layers, as forceCompositingMode has it.
+    // Compositing is on whenever the host makes graphics layers, as forceCompositingMode has it.
+    // FIXME: The chrome's compositing triggers.
     bool hasAcceleratedCompositing = GetGraphicsLayerFactory() != nullptr;
-    bool showDebugBorders = false;
-    bool showRepaintCounter = false;
+    const auto &settings = _renderView.GetDocument().GetSettings();
+    bool showDebugBorders = settings.ShowDebugBorders;
+    bool showRepaintCounter = settings.ShowRepaintCounter;
     bool acceleratedDrawingEnabled = false;
 
     bool forceCompositingMode = hasAcceleratedCompositing;
