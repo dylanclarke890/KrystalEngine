@@ -193,7 +193,8 @@ namespace krys::boo
     // outline rect into parent coords before drawing.
     // FIXME: This means our focus ring won't share our rotation like it should.
     // We should instead disable our clip during PaintPhase::Outline
-    if (paintInfo.Phase == PaintPhase::SelfOutline
+    // SVG outlines are painted in the foreground phase (LegacyRenderSVGRoot skips the outline phases).
+    if (paintInfo.Phase == PaintPhase::Foreground
         && style::Evaluate<float>(Style().OutlineWidth(), style::ZoomNeeded {})
         && Style().UsedVisibility() == Visibility::Visible)
     {

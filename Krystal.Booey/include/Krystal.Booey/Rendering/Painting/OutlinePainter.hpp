@@ -42,7 +42,7 @@ namespace krys::boo
   struct PaintInfo;
 
   /// @brief Paints a box's outline (`outline`), or its focus ring for `outline-style: auto`.
-  // FIXME: List box and SVG focus rings come with controls and SVG.
+  // FIXME: List box focus rings come with controls.
   class OutlinePainter
   {
   private:

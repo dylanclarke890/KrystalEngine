@@ -45,6 +45,29 @@ namespace krys::boo::tests
   (color #0000FF)))");
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "OutlinePainter: paints focus rings around SVG graphics",
+                   "[Rendering][OutlinePainter]")
+  {
+    // A shape's ring is its bounding box, in the SVG's coordinates; a container's unites what its children
+    // paint.
+    auto painted = Painted(u8"<style>body{margin:0}</style><svg width=100 height=50>"
+                           u8"<rect x=10 y=5 width=20 height=10 style='fill:none;outline:3px auto blue'/>"
+                           u8"<g style='outline:3px auto red'><rect x=40 y=5 width=10 height=10 />"
+                           u8"<rect x=60 y=20 width=10 height=10 /></g></svg>");
+    CHECK(painted.contains(u8R"(
+(draw-focus-ring-rects
+  (rects [at (10,5) size 20x10])
+  (outline-offset 0.00)
+  (outline-width 3.00)
+  (color #0000FF)))"));
+    CHECK(painted.contains(u8R"(
+(draw-focus-ring-rects
+  (rects [at (40,5) size 30x25])
+  (outline-offset 0.00)
+  (outline-width 3.00)
+  (color #FF0000)))"));
+  }
+
   TEST_CASE("OutlinePainter: outlines inline boxes around their line boxes", "[Rendering][OutlinePainter]")
   {
     CHECK(
