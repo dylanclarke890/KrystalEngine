@@ -102,8 +102,7 @@ namespace krys::boo
       RequestImage(CachedResourceRequest &&, ImageLoading = ImageLoading::Immediate) noexcept;
     ResourceErrorOr<CachedResourceHandle<CachedCSSStyleSheet>>
       RequestCSSStyleSheet(CachedResourceRequest &&) noexcept;
-    ResourceErrorOr<CachedResourceHandle<CachedFont>> RequestFont(CachedResourceRequest &&,
-                                                                  bool isSVG) noexcept;
+    ResourceErrorOr<CachedResourceHandle<CachedFont>> RequestFont(CachedResourceRequest &&) noexcept;
     ResourceErrorOr<CachedResourceHandle<CachedSVGDocument>>
       RequestSVGDocument(CachedResourceRequest &&) noexcept;
     /// @brief An icon (`<link rel=icon>`), kept as its bytes.

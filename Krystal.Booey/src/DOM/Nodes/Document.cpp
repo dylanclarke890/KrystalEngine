@@ -4552,11 +4552,11 @@ namespace krys::boo::dom
     return *_fontLoader;
   }
 
-  RefPtr<FontLoadRequest> Document::GetFontLoadRequest(utf8_stringview url, bool isSVG,
+  RefPtr<FontLoadRequest> Document::GetFontLoadRequest(utf8_stringview url,
                                                        bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     CachedResourceHandle<CachedFont> cachedFont =
-      GetFontLoader().GetCachedFont(CompleteURL(url), isSVG, isInitiatingElementInUserAgentShadowTree);
+      GetFontLoader().GetCachedFont(CompleteURL(url), isInitiatingElementInUserAgentShadowTree);
     if (!cachedFont)
     {
       return nullptr;

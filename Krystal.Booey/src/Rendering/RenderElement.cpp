@@ -989,7 +989,6 @@ namespace krys::boo
 
   bool RenderElement::IsInsideEntirelyHiddenLayer() const noexcept
   {
-    // FIXME: Layers inside hidden SVG containers and resources.
     return Style().UsedVisibility() != Visibility::Visible && !EnclosingLayer()->HasVisibleContent();
   }
 
@@ -2077,8 +2076,6 @@ namespace krys::boo
     {
       textRenderer->StyleDidChange(style::DifferenceResult::Equal, nullptr);
     }
-
-    // FIXME: Remove the layers created in hidden SVG subtrees.
   }
 
   RenderObject *RenderElement::AttachRendererInternal(RenderPtr<RenderObject> child,

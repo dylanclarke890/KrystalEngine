@@ -975,7 +975,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD virtual RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept;
 
     /// @brief Whether the element would have a renderer with @p style.
-    // FIXME: The overrides (form controls, frame sets, SVG elements, ...) come with the render tree.
+    // FIXME: The overrides (form controls, frame sets, ...) come with the render tree.
     KRYS_NODISCARD virtual bool RendererIsNeeded(const RenderStyle &style) noexcept;
 
     /// @brief Whether @p child, a child of the element in the composed tree, gets a renderer when the element

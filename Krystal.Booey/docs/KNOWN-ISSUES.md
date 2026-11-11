@@ -103,7 +103,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 - A colour glyph's layers in the foreground colour (`CPAL` entry `0xFFFF`) are drawn black, FreeType's default, rather than in the text's colour (`FontFace2D::Rasterise` sets no foreground colour). The atlas would need to key colour glyphs by that colour.
 - `FontDescription::SetSpecifiedLocale` resolves every Han locale to `zh-hans`, as there are no user language preferences.
 - Right-to-left scripts other than Arabic and Hebrew (Syriac, Thaana, N'Ko and so on) have no bundled font and work only if the host registers one. Kashida justification is not done.
-- Web fonts: SVG fonts, font collections (the item in a collection is not selectable), and a font parsing policy (safe font parser, trusted types) are missing. Font loading has no settings: installed fonts are always allowed and load completions are never ignored.
+- Web fonts: font collections (the item in a collection is not selectable), and a font parsing policy (safe font parser, trusted types) are missing. Font loading has no settings: installed fonts are always allowed and load completions are never ignored.
 - Text search (`findPlainText`, `SearchBuffer`) is absent. The text iterator does not traverse the flat tree or emit text placeholders (FIXMEs in `TextIterator.cpp`).
 
 ## Images and resources

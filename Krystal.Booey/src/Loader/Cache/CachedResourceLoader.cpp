@@ -153,14 +153,8 @@ namespace krys::boo
   }
 
   ResourceErrorOr<CachedResourceHandle<CachedFont>>
-    CachedResourceLoader::RequestFont(CachedResourceRequest &&request, bool isSVG) noexcept
+    CachedResourceLoader::RequestFont(CachedResourceRequest &&request) noexcept
   {
-    // FIXME: SVG fonts, once they're loaded.
-    if (isSVG)
-    {
-      return Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0,
-                                      request.GetResourceRequest().URL(), u8"SVG fonts aren't supported"));
-    }
     auto resource = RequestResource(CachedResource::Type::FontResource, krys::move(request));
     if (!resource)
     {

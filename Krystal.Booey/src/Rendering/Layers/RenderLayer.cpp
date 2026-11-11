@@ -846,7 +846,6 @@ namespace krys::boo
 
     DirtyPaintOrderListsOnChildChange(child);
 
-    child.UpdateAncestorDependentState();
     DirtyAncestorChainVisibleDescendantStatus();
     child.UpdateDescendantDependentFlags();
 
@@ -1952,7 +1951,6 @@ namespace krys::boo
 
   bool RenderLayer::ShouldRepaintAfterLayout() const noexcept
   {
-    // FIXME: SVG containers never repaint after layout (only their contents do).
     if (_repaintStatus == RepaintStatus::NeedsNormalRepaint
         || _repaintStatus == RepaintStatus::NeedsFullRepaint)
     {
@@ -2503,13 +2501,6 @@ namespace krys::boo
 
       layer->_visibleDescendantStatusDirty = true;
     }
-  }
-
-  void RenderLayer::UpdateAncestorDependentState() noexcept
-  {
-    // FIXME: The enclosing SVG hidden or resource container, with the layer-based SVG engine, and whether the
-    // layer is inside an SVG foreign object (whose scrolling isn't composited), once there's composited
-    // scrolling.
   }
 
   void RenderLayer::UpdateDescendantDependentFlags() noexcept
@@ -3816,7 +3807,6 @@ namespace krys::boo
         AccumulateOffsetTowardsAncestor(currLayer, ancestorLayer, locationInLayerCoords, adjustForColumns);
     }
 
-    // FIXME: Snap the whole SVG subtree as one block.
     return locationInLayerCoords;
   }
 
@@ -5224,7 +5214,6 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: SVG clip paths that use clipping masks, once there's the layer-based SVG engine.
     return false;
   }
 
@@ -5283,7 +5272,6 @@ namespace krys::boo
   FloatRect RenderLayer::ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
                                                      const LayoutRect &rootRelativeBounds) const noexcept
   {
-    // FIXME: Layer-aware SVG renderers, once there's the layer-based SVG engine.
     bool isReferenceBox = Renderer().IsRenderBox();
 
     // FIXME: Support different reference boxes for inline content.
@@ -5571,8 +5559,6 @@ namespace krys::boo
           paintBehavior.Add(PaintBehavior::CompositedOverflowScrollContent);
         }
 
-        // FIXME: SVG viewport clipping (shouldApplyViewportClip).
-
         // Push the parent coordinate space's clip.
         Parent()->ClipToRect(context, stateSaver, paintingInfo, paintBehavior, clipRect);
       }
@@ -5804,7 +5790,6 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: Hidden SVG containers and SVG resource layers (painted indirectly).
       return _hasVisibleContent;
     };
 
@@ -6640,8 +6625,6 @@ namespace krys::boo
     bool selectionAndBackgroundsOnly =
       localPaintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionAndBackgroundsOnly);
 
-    // FIXME: SVG renderers that aren't containers (painted in the foreground phase only).
-
     if (!selectionOnly)
     {
       PaintForegroundForFragmentsWithPhase(PaintPhase::ChildBlockBackgrounds, layerFragments, context,
@@ -7013,8 +6996,7 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: SVG resources and hidden SVG containers, and fixed container sampling
-    // (isForFixedContainerSampling) come with SVG and scrolling.
+    // FIXME: Fixed container sampling (isForFixedContainerSampling) comes with scrolling.
 
     // The natural thing would be to keep HitTestingTransformState on the stack, but it's big, so we
     // heap-allocate.

@@ -98,7 +98,6 @@ namespace krys::boo
   enum class Affinity : bool;
   enum class HitTestSource : bool;
 
-  // FIXME: SVG transforms come with SVG.
   enum class RenderObjectStateFlag : uint8
   {
     IsBlock,

@@ -552,7 +552,6 @@ namespace krys::boo
   {
     // Overflow scrolls on layers whenever the page composites, as asyncOverflowScrollingEnabled has it for
     // the compositing drawing areas.
-    // FIXME: Not inside SVG foreign objects.
     auto &renderer = _layer.Renderer();
     bool isVisible = renderer.Style().UsedVisibility() == Visibility::Visible;
     if (_layer.Compositor().HasAcceleratedCompositing())

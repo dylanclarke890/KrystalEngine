@@ -6609,8 +6609,6 @@ namespace krys::boo
 
     LayoutRect paintRect = LayoutRect(paintOffset, Size());
 
-    // FIXME: SVG clipping masks (paintSVGClippingMask) come with the layer-based SVG engine.
-
     paintInfo.Context().FillRect(FloatRect(SnappedIntRect(paintRect)), Color::black);
   }
 

@@ -93,9 +93,6 @@ namespace krys::boo
       return imageSet->SelectBestFitImage(document);
     }
 
-    // FIXME: Use the `href` of the `<cursor>` SVG element the URL refers to, if any, once there's
-    // `SVGCursorElement`.
-
     return {RefPtr<StyleImage> {_image}, 1, std::nullopt};
   }
 

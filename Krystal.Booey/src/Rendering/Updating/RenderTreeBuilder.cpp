@@ -1130,7 +1130,6 @@ namespace krys::boo
 
     auto isAnonymousAndSafeToDelete = [](const RenderElement &renderer)
     {
-      // FIXME: SVG viewport containers.
       return renderer.IsAnonymous() && !renderer.IsRenderView() && !renderer.IsRenderFragmentedFlow();
     };
 
@@ -1233,8 +1232,6 @@ namespace krys::boo
 
   void RenderTreeBuilder::UpdateAfterDescendants(RenderElement &renderer) noexcept
   {
-    // FIXME: Layer-based SVG roots.
-
     // Do not early return here in any case. For example, RenderListItem derives
     // from RenderBlockFlow and indirectly from RenderBlock thus fulfilling all
     // update conditions below.

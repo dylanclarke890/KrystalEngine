@@ -464,7 +464,6 @@ namespace krys::boo
 
   bool RenderObject::IsTransformed() const noexcept
   {
-    // FIXME: SVG transforms (hasSVGTransform) come with the layer-based SVG engine.
     return HasTransformRelatedProperty() && Style().AffectsTransform();
   }
 
@@ -2263,8 +2262,6 @@ namespace krys::boo
     {
       return false;
     }
-
-    // FIXME: Layer-aware SVG renderers.
 
     // Table parts can't be relayout roots since the table is responsible for layouting all the parts.
     if (renderer.IsTablePart())

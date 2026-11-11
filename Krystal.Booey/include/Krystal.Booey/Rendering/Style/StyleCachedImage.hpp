@@ -100,7 +100,6 @@ namespace krys::boo
       UncheckedRenderSVGResource(const RenderElement *) const noexcept;
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
       LegacyRenderSVGResource(const RenderElement *) const noexcept;
-    // FIXME: The layer-based engine's resource (renderSVGResource) isn't ported.
     KRYS_NODISCARD bool IsRenderSVGResource(const RenderElement *) const noexcept;
     StyleCachedImage(const style::URL &, const Ref<css::ImageValue> &, float) noexcept;
   };

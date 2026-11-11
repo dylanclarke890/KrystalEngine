@@ -75,7 +75,6 @@ namespace krys::boo::css
       // An item in the list either specifies a string (local font name) or a URL (remote font to download).
       if (const auto *local = DynamicDowncast<FontFaceSrcLocalValue>(src))
       {
-        // FIXME: Local sources that are SVG `<font-face>` elements, once there are SVG fonts.
         fontFace.AdoptSource(
           UniquePtr<CSSFontFaceSource>(new CSSFontFaceSource(fontFace, local->FontFaceName())));
       }

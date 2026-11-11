@@ -29,7 +29,7 @@ namespace krys::boo::tests
     {
       CachedResourceRequest request(ResourceRequest(url::URL(url)),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
-      auto font = document.GetCachedResourceLoader().RequestFont(krys::move(request), false);
+      auto font = document.GetCachedResourceLoader().RequestFont(krys::move(request));
       REQUIRE(font);
       return *font;
     }

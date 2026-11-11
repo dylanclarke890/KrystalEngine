@@ -45,7 +45,6 @@ namespace krys::boo
 
 namespace krys::boo::css
 {
-  class SVGFontFaceElement;
 
   /// @brief A `local(<family-name>)` source in an `@font-face` rule's `src` descriptor.
   class FontFaceSrcLocalValue final : public Value
@@ -67,11 +66,6 @@ namespace krys::boo::css
     {
       return _fontFaceName;
     }
-
-    // FIXME: not defined until SVG fonts are ported.
-    KRYS_NODISCARD SVGFontFaceElement *GetSVGFontFaceElement() const noexcept;
-    // FIXME: not defined until SVG fonts are ported.
-    void SetSVGFontFaceElement(SVGFontFaceElement &element) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
     KRYS_NODISCARD bool Equals(const FontFaceSrcLocalValue &other) const noexcept;

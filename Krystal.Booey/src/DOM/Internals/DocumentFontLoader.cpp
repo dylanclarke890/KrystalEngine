@@ -44,7 +44,7 @@ namespace krys::boo::dom
     StopLoadingAndClearFonts();
   }
 
-  CachedFont *DocumentFontLoader::GetCachedFont(url::URL url, bool isSVG,
+  CachedFont *DocumentFontLoader::GetCachedFont(url::URL url,
                                                 bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();
@@ -54,7 +54,7 @@ namespace krys::boo::dom
 
     CachedResourceRequest request(ResourceRequest(krys::move(url)), options);
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);
-    auto font = _document.GetCachedResourceLoader().RequestFont(krys::move(request), isSVG);
+    auto font = _document.GetCachedResourceLoader().RequestFont(krys::move(request));
     return font ? font->get() : nullptr;
   }
 

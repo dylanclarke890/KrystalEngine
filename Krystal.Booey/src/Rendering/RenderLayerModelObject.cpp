@@ -167,7 +167,6 @@ namespace krys::boo
 
     if (RequiresLayer())
     {
-      // FIXME: No layers inside hidden SVG subtrees (layerCreationAllowedForSubtree).
       if (!Layer())
       {
         if (s_wasFloating && IsFloating())

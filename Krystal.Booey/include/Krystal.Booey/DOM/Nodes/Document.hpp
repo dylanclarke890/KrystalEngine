@@ -1768,8 +1768,7 @@ namespace krys::boo::dom
     /// @brief A request for the web font file at @p url (resolved against the document), or null if it can't
     /// be requested. The file doesn't load until `BeginLoadingFontSoon`.
     KRYS_NODISCARD RefPtr<FontLoadRequest>
-      GetFontLoadRequest(utf8_stringview url, bool isSVG,
-                         bool isInitiatingElementInUserAgentShadowTree) noexcept;
+      GetFontLoadRequest(utf8_stringview url, bool isInitiatingElementInUserAgentShadowTree) noexcept;
     void BeginLoadingFontSoon(FontLoadRequest &request) noexcept;
     void SuspendFontLoading() noexcept;
 

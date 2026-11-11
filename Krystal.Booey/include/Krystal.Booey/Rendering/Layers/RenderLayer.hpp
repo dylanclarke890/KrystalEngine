@@ -189,7 +189,7 @@ namespace krys::boo
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Masks, SVG clip paths, resizing, scrollbars and event regions come with effects.
+  // FIXME: Event regions.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
   {
     KRYS_NON_COPY_MOVABLE(RenderLayer);
@@ -1602,8 +1602,6 @@ namespace krys::boo
     void SetPreviousSibling(RenderLayer *prev) noexcept;
     void SetFirstChild(RenderLayer *first) noexcept;
     void SetLastChild(RenderLayer *last) noexcept;
-
-    void UpdateAncestorDependentState() noexcept;
 
     void DirtyPaintOrderListsOnChildChange(RenderLayer &child) noexcept;
 
