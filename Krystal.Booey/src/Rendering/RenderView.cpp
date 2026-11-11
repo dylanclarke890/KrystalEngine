@@ -840,7 +840,5 @@ namespace krys::boo
     {
       RemoveRendererWithPausedImageAnimations(*renderer, *image);
     }
-
-    // FIXME: SVG elements with paused animations.
   }
 }
