@@ -3,6 +3,9 @@
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 
 namespace krys::boo::ax::tests
 {
@@ -147,5 +150,70 @@ namespace krys::boo::ax::tests
     auto notifications = page.TakeNotifications();
     CHECK(AccessibilityFixture::WasPosted(notifications, list, AXNotification::SelectedChildrenChanged));
     CHECK(AccessibilityFixture::WasPosted(notifications, second, AXNotification::SelectedStateChanged));
+  }
+
+  TEST_CASE("AXObjectCache changes: focus moving", "[Accessibility][AXObjectCache]")
+  {
+    AccessibilityFixture page(u8"<button id=first>One</button><button id=second>Two</button>");
+    auto &second = page.Object(u8"second");
+    (void)page.TakeNotifications();
+
+    Downcast<html::HTMLElement>(page.ById(u8"second")).Focus();
+    CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), second,
+                                          AXNotification::FocusedUIElementChanged));
+    CHECK(page.Cache().FocusedObject() == &second);
+  }
+
+  TEST_CASE("AXObjectCache changes: form controls", "[Accessibility][AXObjectCache]")
+  {
+    AccessibilityFixture page(
+      u8"<input id=text><input id=box type=checkbox>"
+      u8"<input id=a type=radio name=group><input id=b type=radio name=group>"
+      u8"<select id=select><option id=one>One</option><option id=two>Two</option></select>"
+      u8"<input id=required required>");
+    auto &text = page.Object(u8"text");
+    auto &box = page.Object(u8"box");
+    auto &a = page.Object(u8"a");
+    auto &two = page.Object(u8"two");
+    auto &required = page.Object(u8"required");
+    (void)page.TakeNotifications();
+
+    SECTION("Values")
+    {
+      REQUIRE_FALSE(Downcast<html::HTMLInputElement>(page.ById(u8"text")).SetValue(u8"Hello").HasException());
+      CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), text, AXNotification::ValueChanged));
+    }
+
+    SECTION("Checked states")
+    {
+      Downcast<html::HTMLInputElement>(page.ById(u8"box")).SetChecked(true);
+      CHECK(
+        AccessibilityFixture::WasPosted(page.TakeNotifications(), box, AXNotification::CheckedStateChanged));
+    }
+
+    SECTION("Selected options")
+    {
+      Downcast<html::HTMLOptionElement>(page.ById(u8"two")).Selected(true);
+      CHECK(
+        AccessibilityFixture::WasPosted(page.TakeNotifications(), two, AXNotification::SelectedStateChanged));
+    }
+
+    SECTION("Validity")
+    {
+      REQUIRE_FALSE(
+        Downcast<html::HTMLInputElement>(page.ById(u8"required")).SetValue(u8"Filled in").HasException());
+      CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), required,
+                                            AXNotification::InvalidStatusChanged));
+    }
+
+    SECTION("Radio groups")
+    {
+      auto radio = page.Document->CreateElement(u8"input").ReleaseValue();
+      REQUIRE_FALSE(radio->SetAttribute(u8"type", u8"radio").HasException());
+      REQUIRE_FALSE(radio->SetAttribute(u8"name", u8"group").HasException());
+      REQUIRE_FALSE(page.ById(u8"text").ParentNode()->AppendChild(*radio).HasException());
+      CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), a,
+                                            AXNotification::RadioGroupMembershipChanged));
+    }
   }
 }

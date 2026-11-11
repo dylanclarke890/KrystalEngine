@@ -73,6 +73,8 @@ namespace krys::boo::ax
     }
 
     KRYS_NODISCARD bool IsCollapsed() const noexcept override;
+    /// @brief The select's active option changed to the one at @p optionIndex.
+    void DidUpdateActiveOption(int32 optionIndex) noexcept;
     KRYS_NODISCARD bool CanSetFocusAttribute() const noexcept override;
 
   private:

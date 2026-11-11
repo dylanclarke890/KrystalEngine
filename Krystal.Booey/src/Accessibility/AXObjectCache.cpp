@@ -49,6 +49,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
@@ -584,6 +585,7 @@ namespace krys::boo::ax
     if (auto *element = DynamicDowncast<dom::Element>(node))
     {
       _deferredRecomputeIsIgnoredList.remove(element);
+      _deferredSelectedChildrenChangedList.remove(element);
       std::erase_if(_deferredAttributeChanges,
                     [element](const auto &change) { return change.Element == element; });
     }
@@ -1402,6 +1404,128 @@ namespace krys::boo::ax
     }
   }
 
+  void AXObjectCache::DeferSelectedChildrenChangedIfNeeded(dom::Element &select) noexcept
+  {
+    if (!NodeRendererIsValid(select))
+    {
+      return;
+    }
+    if (RendererNeedsDeferredUpdate(*select.Renderer()))
+    {
+      _deferredSelectedChildrenChangedList.add(&select);
+      StartPerformCacheUpdateTimer();
+      return;
+    }
+    SelectedChildrenChanged(&select);
+  }
+
+  void AXObjectCache::OnSelectedOptionChanged(RenderObject &menuList, int32 optionIndex) noexcept
+  {
+    if (auto menuListObject = ShareRefPtr(DynamicDowncast<AccessibilityMenuList>(Get(menuList))))
+    {
+      menuListObject->DidUpdateActiveOption(optionIndex);
+    }
+  }
+
+  void AXObjectCache::OnEditableTextValueChanged(dom::Element &element) noexcept
+  {
+    PostNotification(&element, AXNotification::ValueChanged);
+  }
+
+  void AXObjectCache::OnValidityChange(dom::Element &element) noexcept
+  {
+    if (auto *object = Get(element))
+    {
+      PostNotification(object, AXNotification::InvalidStatusChanged);
+    }
+  }
+
+  void AXObjectCache::OnRadioGroupMembershipChanged(const dom::Element &radio,
+                                                    const List<Ref<html::HTMLInputElement>> &group) noexcept
+  {
+    for (const auto &sibling : group)
+    {
+      if (sibling.get() == &radio)
+      {
+        continue;
+      }
+      if (auto *object = Get(*sibling))
+      {
+        PostNotification(object, AXNotification::RadioGroupMembershipChanged);
+      }
+    }
+  }
+
+  void AXObjectCache::OnFocusChange(dom::Element *oldElement, dom::Element *newElement) noexcept
+  {
+    // An element whose renderer is out of date (or not made yet) can't say yet whether it's ignored, which
+    // the focus change depends on.
+    auto shouldDefer = [](dom::Element *element)
+    {
+      if (!element)
+      {
+        return false;
+      }
+      auto *renderer = element->Renderer();
+      if (renderer)
+      {
+        return RendererNeedsDeferredUpdate(*renderer);
+      }
+      if (const auto *style = element->ExistingComputedStyle())
+      {
+        return element->RendererIsNeeded(*style);
+      }
+      // With no style, assume the renderer just hasn't been made yet.
+      return true;
+    };
+    if (!shouldDefer(newElement))
+    {
+      HandleFocusedUIElementChanged(oldElement, newElement);
+      return;
+    }
+
+    if (_deferredFocusedNodeChange)
+    {
+      // Focus going back to where it was isn't a change.
+      if (_deferredFocusedNodeChange->first.get() == newElement)
+      {
+        _deferredFocusedNodeChange = null;
+        return;
+      }
+      // The element that was to be focused may have been included only because it was focused.
+      RecomputeIsIgnored(_deferredFocusedNodeChange->second.get());
+      _deferredFocusedNodeChange->second = ShareRefPtr(newElement);
+    }
+    else
+    {
+      _deferredFocusedNodeChange.emplace(ShareRefPtr(oldElement), ShareRefPtr(newElement));
+    }
+
+    // A pending layout updates the tree anyway.
+    auto *renderer = newElement->Renderer();
+    if (!renderer || !renderer->NeedsLayout())
+    {
+      StartPerformCacheUpdateTimer();
+    }
+  }
+
+  void AXObjectCache::HandleFocusedUIElementChanged(dom::Element *oldElement,
+                                                    dom::Element *newElement) noexcept
+  {
+    // FIXME: Updating the modal dialog (updateCurrentModalNode), with the modal tracking; and telling the
+    // tabs that control the old and new focus's tab panels (handleTabPanelSelected), with relations.
+    (void)oldElement;
+    HandleMenuItemSelected(newElement);
+    if (!newElement)
+    {
+      return;
+    }
+    if (auto *focusedObject = FocusedObject())
+    {
+      PostPlatformNotification(*focusedObject, AXNotification::FocusedUIElementChanged);
+    }
+  }
+
   void AXObjectCache::PerformDeferredCacheUpdate() noexcept
   {
     if (_performingDeferredCacheUpdate)
@@ -1473,7 +1597,22 @@ namespace krys::boo::ax
       HandleAttributeChange(*change.Element, change.Name.View(), change.OldValue, change.NewValue);
     }
 
-    // FIXME: The other deferred updates (modals, relations and focus), with the changes they come from.
+    auto selectedChildrenChanged = std::exchange(_deferredSelectedChildrenChangedList, {});
+    for (auto *select : selectedChildrenChanged)
+    {
+      SelectedChildrenChanged(select);
+    }
+
+    if (auto focusChange = std::exchange(_deferredFocusedNodeChange, null))
+    {
+      auto &[oldElement, newElement] = *focusChange;
+      HandleFocusedUIElementChanged(oldElement.get(), newElement.get());
+      // Being focused can change whether an object is ignored.
+      RecomputeIsIgnored(oldElement.get());
+      RecomputeIsIgnored(newElement.get());
+    }
+
+    // FIXME: The other deferred updates (modals and relations), with the changes they come from.
   }
 
   void AXObjectCache::OnRendererCreated(dom::Node &node) noexcept

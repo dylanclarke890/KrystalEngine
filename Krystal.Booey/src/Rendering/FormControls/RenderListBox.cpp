@@ -29,6 +29,7 @@
  */
 
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
@@ -207,7 +208,10 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Tell the accessibility object cache the selected children changed, once there is accessibility.
+    if (auto *cache = GetDocument().ExistingAXObjectCache())
+    {
+      cache->DeferSelectedChildrenChangedIfNeeded(SelectElement());
+    }
   }
 
   void RenderListBox::Layout() noexcept

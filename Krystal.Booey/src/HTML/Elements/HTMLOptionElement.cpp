@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -367,7 +368,10 @@ namespace krys::boo::html
     {
       select->InvalidateSelectedItems();
     }
-    // FIXME: Telling accessibility the selected option changed (onSelectedOptionChanged), with accessibility.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnSelectedOptionChanged(*this);
+    }
   }
 
   bool HTMLOptionElement::AccessKeyAction(bool) noexcept

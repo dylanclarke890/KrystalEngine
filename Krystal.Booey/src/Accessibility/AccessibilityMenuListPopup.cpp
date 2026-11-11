@@ -82,6 +82,19 @@ namespace krys::boo::ax
     }
   }
 
+  void AccessibilityMenuListPopup::DidUpdateActiveOption(int32 optionIndex) noexcept
+  {
+    auto *cache = AxObjectCache();
+    const auto &children = Children();
+    if (!cache || optionIndex < 0 || static_cast<size_t>(optionIndex) >= children.size())
+    {
+      return;
+    }
+    auto child = children[static_cast<size_t>(optionIndex)];
+    cache->PostNotification(child.get(), AXNotification::FocusedUIElementChanged);
+    cache->PostNotification(child.get(), AXNotification::MenuListItemSelected);
+  }
+
   void AccessibilityMenuListPopup::HandleChildrenChanged() noexcept
   {
     auto *cache = AxObjectCache();

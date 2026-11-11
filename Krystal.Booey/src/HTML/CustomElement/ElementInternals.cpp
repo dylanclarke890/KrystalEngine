@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -170,14 +171,32 @@ namespace krys::boo::html
 
   void ElementInternals::SetInternalContentAttribute(dom::DOMStringAtom name, dom::DOMString value) noexcept
   {
+    auto oldValue = InternalContentAttribute(name);
     _internalContentAttributeMap[name] = krys::move(value);
-    // FIXME: Telling the accessibility cache the default changed, with accessibility.
+    InternalContentAttributeChanged(name, oldValue);
   }
 
   void ElementInternals::RemoveInternalContentAttribute(dom::DOMStringAtom name) noexcept
   {
+    auto oldValue = InternalContentAttribute(name);
     _internalContentAttributeMap.erase(name);
-    // FIXME: Telling the accessibility cache the default changed, with accessibility.
+    InternalContentAttributeChanged(name, oldValue);
+  }
+
+  void ElementInternals::InternalContentAttributeChanged(dom::DOMStringAtom name,
+                                                         const Maybe<dom::DOMString> &oldValue) noexcept
+  {
+    // The element's own attribute overrides its default.
+    auto *element = _target.get();
+    if (!element || element->HasAttribute(name))
+    {
+      return;
+    }
+    if (auto *cache = element->NodeDocument().ExistingAXObjectCache())
+    {
+      auto newValue = InternalContentAttribute(name);
+      cache->DeferAttributeChangeIfNeeded(*element, name, oldValue, newValue);
+    }
   }
 
   RefPtr<dom::Element> ElementInternals::ElementForAttributeInternal(dom::DOMStringAtom name) const noexcept

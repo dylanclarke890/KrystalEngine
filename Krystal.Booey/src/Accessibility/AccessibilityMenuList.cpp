@@ -83,6 +83,22 @@ namespace krys::boo::ax
     return !menuList || !menuList->PopupIsVisible();
   }
 
+  void AccessibilityMenuList::DidUpdateActiveOption(int32 optionIndex) noexcept
+  {
+    auto *cache = AxObjectCache();
+    if (!cache)
+    {
+      return;
+    }
+    // The pop-up's children may not have been made yet.
+    auto &popup = Popup();
+    if (optionIndex >= 0 && static_cast<size_t>(optionIndex) < popup.Children().size())
+    {
+      popup.DidUpdateActiveOption(optionIndex);
+    }
+    cache->PostNotification(this, AXNotification::MenuListValueChanged);
+  }
+
   bool AccessibilityMenuList::CanSetFocusAttribute() const noexcept
   {
     auto *element = GetElement();

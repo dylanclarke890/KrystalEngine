@@ -51,6 +51,7 @@ namespace krys::boo
   namespace html
   {
     class HTMLAreaElement;
+    class HTMLInputElement;
   }
 }
 
@@ -104,6 +105,9 @@ namespace krys::boo::ax
     // Nodes whose text changed, and elements whose ignored state needs working out again.
     ListHashSet<dom::Node *> _deferredTextChangedList;
     ListHashSet<dom::Element *> _deferredRecomputeIsIgnoredList;
+    ListHashSet<dom::Element *> _deferredSelectedChildrenChangedList;
+    // A focus change waiting for the newly focused element's renderer: the old and new focused elements.
+    Maybe<Pair<RefPtr<dom::Element>, RefPtr<dom::Element>>> _deferredFocusedNodeChange;
     ListHashSet<AXID> _deferredRendererChangedList;
     // Tables whose exposed state and whose cell slots need working out again.
     ListHashSet<AXID> _deferredRecomputeTableIsExposedList;
@@ -211,6 +215,20 @@ namespace krys::boo::ax
     void OnSelectedOptionChanged(dom::Element &element) noexcept;
     void SelectedChildrenChanged(dom::Node *node) noexcept;
     void SelectedChildrenChanged(RenderObject *renderer) noexcept;
+    /// @brief As above for a select, now if its renderer is up to date.
+    void DeferSelectedChildrenChangedIfNeeded(dom::Element &select) noexcept;
+    /// @brief A menu list's active option changed to the one at @p optionIndex.
+    void OnSelectedOptionChanged(RenderObject &menuList, int32 optionIndex) noexcept;
+    /// @brief The value of @p element (a text control) was edited.
+    void OnEditableTextValueChanged(dom::Element &element) noexcept;
+    /// @brief Whether @p element is valid changed.
+    void OnValidityChange(dom::Element &element) noexcept;
+    /// @brief @p radio joined or left the radio button group of @p group (the other buttons in it).
+    void OnRadioGroupMembershipChanged(const dom::Element &radio,
+                                       const List<Ref<html::HTMLInputElement>> &group) noexcept;
+    /// @brief The focus moved from @p oldElement to @p newElement (either may be null): handled now, or once
+    /// the tree is next updated if the new element's renderer is out of date.
+    void OnFocusChange(dom::Element *oldElement, dom::Element *newElement) noexcept;
 
     /// @brief Brings the tree up to date with the changes deferred since the last update.
     void PerformDeferredCacheUpdate() noexcept;
@@ -258,6 +276,7 @@ namespace krys::boo::ax
     void HandleAriaExpandedChange(dom::Element &element) noexcept;
     void HandleRowCountChanged(AccessibilityObject *object) noexcept;
     void HandleMenuItemSelected(dom::Element *element) noexcept;
+    void HandleFocusedUIElementChanged(dom::Element *oldElement, dom::Element *newElement) noexcept;
     void HandleChildrenChanged(AccessibilityObject &object) noexcept;
     void HandleAllDeferredChildrenChanged() noexcept;
     /// @brief Works out again (later) whether @p element's table is exposed: adding or removing rows can make

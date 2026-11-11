@@ -26,6 +26,7 @@
  */
 
 #include "Krystal.Booey/HTML/InputTypes/InputType.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -855,7 +856,10 @@ namespace krys::boo::html
       case TextFieldEventBehavior::DispatchNoEvent: break;
     }
 
-    // FIXME: Telling accessibility (AXObjectCache::valueChanged), once there's accessibility.
+    if (auto *cache = element->NodeDocument().ExistingAXObjectCache())
+    {
+      cache->ValueChanged(*element);
+    }
   }
 
   dom::DOMString InputType::VisibleValue() const noexcept

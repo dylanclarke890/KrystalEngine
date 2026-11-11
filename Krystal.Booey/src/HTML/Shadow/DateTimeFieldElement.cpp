@@ -48,8 +48,8 @@ namespace krys::boo::html
     field.SetUserAgentPart(part);
     // Fields are focusable, and in sequential navigation.
     (void)field.SetAttribute(u8"tabindex", u8"0");
-    // FIXME: The fields' accessibility attributes (aria-label, role, aria-valuenow, aria-valuetext), with
-    // accessibility.
+    // FIXME: The fields' accessibility attributes (aria-label, role, aria-valuenow, aria-valuetext), once
+    // there are localised strings for their labels.
   }
 
   Maybe<style::UnadjustedStyle>

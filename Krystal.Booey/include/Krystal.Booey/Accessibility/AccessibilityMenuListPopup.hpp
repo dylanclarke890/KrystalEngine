@@ -57,6 +57,8 @@ namespace krys::boo::ax
     /// @brief The select's options changed: removes the objects of the options no longer in the document and
     /// adds the children again.
     void HandleChildrenChanged() noexcept;
+    /// @brief The option at @p optionIndex became the active one: it's focused and selected.
+    void DidUpdateActiveOption(int32 optionIndex) noexcept;
 
   private:
     AccessibilityMenuListPopup(AXID id, AXObjectCache &cache) noexcept;

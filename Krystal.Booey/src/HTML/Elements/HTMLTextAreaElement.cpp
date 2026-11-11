@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -459,7 +460,10 @@ namespace krys::boo::html
 
     SetTextAsOfLastFormControlChangeEvent(krys::move(normalizedValue));
 
-    // FIXME: Telling accessibility the value changed, once there's accessibility.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->ValueChanged(*this);
+    }
   }
 
   // https://html.spec.whatwg.org/#dom-textarea-defaultvalue

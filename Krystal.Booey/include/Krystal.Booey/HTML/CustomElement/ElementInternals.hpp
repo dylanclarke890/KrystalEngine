@@ -166,5 +166,9 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD FormAssociatedCustomElement *ElementAsFormAssociatedCustom() const noexcept;
+    /// @brief Tells accessibility the default for @p name changed from @p oldValue, unless the element's own
+    /// attribute overrides it.
+    void InternalContentAttributeChanged(dom::DOMStringAtom name,
+                                         const Maybe<dom::DOMString> &oldValue) noexcept;
   };
 }
