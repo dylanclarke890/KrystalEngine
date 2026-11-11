@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -419,7 +420,13 @@ namespace krys::boo
 
   void RenderMenuList::ValueChanged(uint32 listIndex, bool fireOnChange) noexcept
   {
-    // FIXME: Check that a page navigation has not occurred while the popup was up.
+    // Check to ensure a page navigation has not occurred while the popup was up.
+    auto *frame = GetDocument().Frame();
+    if (!frame || frame->Document() != &GetDocument())
+    {
+      return;
+    }
+
     auto &select = SelectElement();
     select.OptionSelectedByUser(select.ListToOptionIndex(static_cast<int32>(listIndex)), fireOnChange);
   }

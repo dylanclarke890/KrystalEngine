@@ -187,5 +187,22 @@ layer at (0,0) size 400x23
     CHECK(PressKey(fixture, u8"ArrowUp", u8"Up", vk::Up));
     CHECK(select.SelectedIndex() == 0);
     CHECK(changes->Count == 2);
+
+    SECTION("Replacing the document while the popup is up disconnects it")
+    {
+      select.Focus();
+      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+      REQUIRE(select.SelectedIndex() == 2);
+      (void)fixture.Frame->GetEventHandler().KeyEvent(
+        PlatformKeyboardEvent(PlatformEvent::Type::Char, u8" ", u8" ", u8" ", u8"Space", u8"U+0020", ' ',
+                              false, false, false, {}, {}));
+      REQUIRE(client.Popup);
+      auto &shown = *client.Popup;
+      REQUIRE(shown.Visible);
+
+      fixture.Frame->SetDocument(nullptr);
+      CHECK_FALSE(shown.Client);
+      CHECK(select.SelectedIndex() == 2);
+    }
   }
 }

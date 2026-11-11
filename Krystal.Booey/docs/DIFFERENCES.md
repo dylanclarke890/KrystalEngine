@@ -197,6 +197,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Chrome fills selection only over text and line ends; Booey fills selection gaps in blocks.
 - A broken image without alt text shows Booey's own icon (`BrokenImageIcon`, a torn picture drawn as shapes) centred in a grey outline, and is 20 by 20 (the 16 by 16 icon and 4 units of padding) unless it's sized; the icon is left out where it doesn't fit. Chrome draws its own icon. With alt text, both show only the text.
 - Chrome's wavy underline is taller and its skip-ink gaps a little wider.
+- A dashed rounded border whose sides have different widths spaces its dashes along a slightly shorter centerline than Chrome's (by about 4px on a 105x40 box with a 12px radius), so its gaps come out a little different (`BorderPainter::DrawBoxSideFromPath`).
 - Chrome tiles `border-image-repeat: repeat` and `space` its own way, so the `border-images` golden is report-only. Stripes sliced at a third of a non-square box skew at tile joins in both.
 - Chrome draws an SVG `<pattern>`'s content at its final transform; Booey draws the tile into an image buffer at the scale it's painted at and uses it as a brush, so a pattern with a rotating transform has differing tile edges.
 - Chrome antialiases twice where its rounded border is a clip plus a fill (an edge pixel covered 0.38 shows 0.38 squared); Render2D's single coverage is closer to the true area, so golden comparisons differ there.
