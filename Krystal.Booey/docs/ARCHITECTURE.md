@@ -141,6 +141,7 @@ How each area of Booey is put together, by area. `DIFFERENCES.md` and `KNOWN-ISS
 - The OpenType MATH table is read through HarfBuzz, and `Font::MathData` remembers that it looked even when the font has no MATH table.
 - Locale support is over ICU (`LocaleICU`, `PlatformLocale`, `DateTimeFormat` over LDML formats). ICU reads UTF-8 in place; a text with a prior context is copied after the context into a buffer the iterator owns.
 - Chrome is the reference for right-to-left behaviour. Bidi text drawn outside the line layout uses `GraphicsContext::DrawBidiText`.
+- `text-combine-upright: all` gives an element's text a `RenderCombineText` (`Text::CreateTextRenderer`). In a vertical typographic writing mode, the block flow calls `CombineTextIfNeeded` before layout: the text fits within 1.15em with its own font, or with the half-, third- or quarter-width variant, or else is compressed horizontally to one em (`HorizontalScale`). Layout then sees one U+FFFC an em wide; `TextBoxPainter` draws the original text upright from `ComputeTextOrigin` with `TextCombineFont`, rotating decorations with it, and `TextPainter` applies the compression and draws one emphasis mark over the middle of the box.
 
 ## Images and resources
 

@@ -40,6 +40,7 @@
 #include "Krystal.Booey/Rendering/Painting/TextPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/TextPaintStyle.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -224,8 +225,15 @@ namespace krys::boo
                                              : _textBox.VisualRectIgnoringBlockDirection().TransposedRect()),
         _paintTextRun(_textBox.GetTextRun()), _paintInfo(paintInfo),
         _selectableRange(_textBox.SelectableRange()), _paintOffset(paintOffset),
-        _paintRect(ComputePaintRect(paintOffset)), _isFirstLine(_textBox.IsFirstFormattedLine()),
-        _isPrinting(_document.Printing()), _haveSelection(ComputeHaveSelection())
+        _paintRect(ComputePaintRect(paintOffset)),
+        _isCombinedText(
+          [&]
+          {
+            auto *combineTextRenderer = DynamicDowncast<RenderCombineText>(_renderer);
+            return combineTextRenderer && combineTextRenderer->IsCombined();
+          }()),
+        _isFirstLine(_textBox.IsFirstFormattedLine()), _isPrinting(_document.Printing()),
+        _haveSelection(ComputeHaveSelection())
   {
     krys_debug_assert(paintInfo.Phase == PaintPhase::Foreground || paintInfo.Phase == PaintPhase::Selection
                       || paintInfo.Phase == PaintPhase::TextClip || paintInfo.Phase == PaintPhase::EventRegion
@@ -263,7 +271,7 @@ namespace krys::boo
     }
 
     Maybe<RotationDirection> glyphRotation;
-    if (!TextBox().IsHorizontal())
+    if (!TextBox().IsHorizontal() && !_isCombinedText)
     {
       glyphRotation = TextBox().GetWritingMode().IsLineOverLeft() ? RotationDirection::Counterclockwise
                                                                   : RotationDirection::Clockwise;
@@ -748,7 +756,8 @@ namespace krys::boo
                              markedText.MarkedStyle.TextStyles,
                              markedText.MarkedStyle.TextShadow,
                              emphasisMark,
-                             emphasisMarkOffset};
+                             emphasisMarkOffset,
+                             _isCombinedText ? &Downcast<RenderCombineText>(_renderer) : nullptr};
 
     bool isTransparentMarkedText = markedText.MarkedType == MarkedText::Type::DraggedContent
                                    || markedText.MarkedType == MarkedText::Type::TransparentContent;
@@ -1025,6 +1034,11 @@ namespace krys::boo
                                                   const StyledMarkedText &markedText,
                                                   const FloatRect &textBoxPaintRect) noexcept
   {
+    if (_isCombinedText)
+    {
+      _paintInfo.Context().ConcatCTM(Rotation(_paintRect, RotationDirection::Clockwise));
+    }
+
     auto textRun =
       _paintTextRun.SubRun(markedText.StartOffset, markedText.EndOffset - markedText.StartOffset);
 
@@ -1089,6 +1103,11 @@ namespace krys::boo
                                                    computedTextDecorationType,
                                                    decoratingBox.TextDecorationStyles);
     }
+
+    if (_isCombinedText)
+    {
+      _paintInfo.Context().ConcatCTM(Rotation(_paintRect, RotationDirection::Counterclockwise));
+    }
   }
 
   KRYS_NODISCARD static const RenderStyle &
@@ -1121,6 +1140,11 @@ namespace krys::boo
       return;
     }
 
+    if (_isCombinedText)
+    {
+      _paintInfo.Context().ConcatCTM(Rotation(_paintRect, RotationDirection::Clockwise));
+    }
+
     auto deviceScaleFactor = _document.DeviceScaleFactor();
     auto textDecorationThickness = ComputedTextDecorationThickness(styleForDecoration, deviceScaleFactor);
     auto linethroughCenter =
@@ -1130,6 +1154,11 @@ namespace krys::boo
       {textBoxPaintRect.Location(), textBoxPaintRect.Width(), textDecorationThickness, linethroughCenter,
        GetWavyStrokeParameters(styleForDecoration.ComputedFontSize())},
       markedText.MarkedStyle.TextDecorationStyles);
+
+    if (_isCombinedText)
+    {
+      _paintInfo.Context().ConcatCTM(Rotation(_paintRect, RotationDirection::Counterclockwise));
+    }
   }
 
   FloatRect TextBoxPainter::ComputePaintRect(const LayoutPoint &paintOffset) const noexcept
@@ -1160,6 +1189,10 @@ namespace krys::boo
 
   const FontCascade &TextBoxPainter::GetFontCascade() const noexcept
   {
+    if (_isCombinedText)
+    {
+      return Downcast<RenderCombineText>(_renderer).TextCombineFont();
+    }
     return _style.GetFontCascade();
   }
 
@@ -1178,6 +1211,14 @@ namespace krys::boo
     }
 
     auto textOrigin = FloatPoint {paintRect.X(), paintRect.Y() + ascent};
+
+    if (_isCombinedText)
+    {
+      if (auto newOrigin = Downcast<RenderCombineText>(_renderer).ComputeTextOrigin(paintRect))
+      {
+        textOrigin = *newOrigin;
+      }
+    }
 
     if (GetWritingMode().IsHorizontal())
     {

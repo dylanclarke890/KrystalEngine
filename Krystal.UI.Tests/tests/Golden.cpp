@@ -367,6 +367,12 @@ namespace krys::ui::tests
     CheckPage("text", 360u, 200u, true);
   }
 
+  TEST_CASE("Golden: text combine", "[UI][GPU][Golden]")
+  {
+    // Glyphs rasterise differently from Chrome's (see "text"), so its golden is only reported.
+    CheckPage("text-combine", 360u, 200u, true);
+  }
+
   TEST_CASE("Golden: bidi text", "[UI][GPU][Golden]")
   {
     // Mixed-direction text: Chrome's glyphs are DirectWrite's, so its golden is only reported; its layout is

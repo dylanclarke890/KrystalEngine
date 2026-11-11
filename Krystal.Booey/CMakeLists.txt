@@ -2786,6 +2786,7 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/RenderBlockFlow.hpp
   include/Krystal.Booey/Rendering/RenderBox.hpp
   include/Krystal.Booey/Rendering/RenderBoxModelObject.hpp
+  include/Krystal.Booey/Rendering/RenderCombineText.hpp
   include/Krystal.Booey/Rendering/RenderElement.hpp
   include/Krystal.Booey/Rendering/RenderFlexibleBox.hpp
   include/Krystal.Booey/Rendering/RenderGeometryMap.hpp
@@ -3059,6 +3060,7 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/RenderBlockFlow.cpp
   src/Rendering/RenderBox.cpp
   src/Rendering/RenderBoxModelObject.cpp
+  src/Rendering/RenderCombineText.cpp
   src/Rendering/RenderElement.cpp
   src/Rendering/RenderFlexibleBox.cpp
   src/Rendering/RenderGeometryMap.cpp

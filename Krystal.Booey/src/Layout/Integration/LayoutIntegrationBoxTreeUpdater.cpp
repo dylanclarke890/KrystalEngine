@@ -36,6 +36,7 @@
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
@@ -304,9 +305,9 @@ namespace krys::boo::layout_integration
     {
       auto style = RenderStyle::CreateAnonymousStyleWithDisplay(textRenderer->Style(), DisplayType::Inline);
 
-      // FIXME: Combined text (RenderCombineText) uses its original text, once there's text-combine-upright.
-      auto isCombinedText = false;
-      utf8_string text = textRenderer->Text();
+      auto *combineTextRenderer = DynamicDowncast<RenderCombineText>(*textRenderer);
+      auto isCombinedText = combineTextRenderer && combineTextRenderer->IsCombined();
+      utf8_string text = isCombinedText ? textRenderer->OriginalText() : textRenderer->Text();
 
       auto canUseSimpleFontCodePath = textRenderer->CanUseSimpleFontCodePath();
       auto canUseSimplifiedTextMeasuring = textRenderer->CanUseSimplifiedTextMeasuring();
@@ -544,8 +545,9 @@ namespace krys::boo::layout_integration
     auto &inlineTextBox = const_cast<layout::InlineTextBox &>(*textRenderer.LayoutBox());
     const auto &style = inlineTextBox.Style();
 
-    // FIXME: Combined text (RenderCombineText) uses its original text, once there's text-combine-upright.
-    utf8_string text = textRenderer.Text();
+    auto *combineTextRenderer = DynamicDowncast<RenderCombineText>(textRenderer);
+    utf8_string text = combineTextRenderer && combineTextRenderer->IsCombined() ? textRenderer.OriginalText()
+                                                                                : textRenderer.Text();
 
     using ContentCharacteristic = layout::InlineTextBox::ContentCharacteristic;
     auto contentCharacteristic = EnumSet<ContentCharacteristic> {};

@@ -1210,6 +1210,10 @@ namespace krys::boo
     {
       return _type == Type::SVGInline || _type == Type::SVGTSpan || _type == Type::SVGTextPath;
     }
+    KRYS_NODISCARD bool IsRenderCombineText() const noexcept
+    {
+      return _type == Type::CombineText;
+    }
     KRYS_NODISCARD bool IsRenderSVGInlineText() const noexcept
     {
       return _type == Type::SVGInlineText;

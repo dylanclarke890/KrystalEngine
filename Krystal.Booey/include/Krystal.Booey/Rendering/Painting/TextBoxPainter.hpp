@@ -66,7 +66,6 @@ namespace krys::boo
   /// and an input method's composition (its underlines, or else its fill).
   /// FIXME: The composition's custom highlights, event regions, accessibility bounds and contentful paint
   /// tracking come with event regions and accessibility. There are no document markers (see DIFFERENCES.md).
-  /// FIXME: Combined text (`text-combine-upright`, `RenderCombineText`) is still to come.
   class TextBoxPainter
   {
     KRYS_NON_COPY_MOVABLE(TextBoxPainter);
@@ -83,6 +82,7 @@ namespace krys::boo
     const TextBoxSelectableRange _selectableRange;
     const LayoutPoint _paintOffset;
     const FloatRect _paintRect;
+    const bool _isCombinedText;
     const bool _isFirstLine;
     const bool _isPrinting;
     const bool _haveSelection;

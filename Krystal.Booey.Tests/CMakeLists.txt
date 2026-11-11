@@ -407,6 +407,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Painting/ImageQualityController.cpp
 		tests/Rendering/PaintTestUtils.cpp
 		tests/Rendering/RenderBox.cpp
+		tests/Rendering/RenderCombineText.cpp
 		tests/Rendering/RenderElement.cpp
 		tests/Rendering/RenderLayoutState.cpp
 		tests/Rendering/Replaced/RenderHTMLCanvas.cpp

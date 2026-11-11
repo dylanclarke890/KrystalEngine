@@ -23,7 +23,9 @@
 #include "Krystal.Booey/Rendering/Painting/TextPainter.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Rendering/Painting/TextBoxPainter.hpp"
+#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
@@ -98,9 +100,11 @@ namespace krys::boo
 
   TextPainter::TextPainter(GraphicsContext &context, const FontCascade &font, const RenderStyle &renderStyle,
                            const TextPaintStyle &textPaintStyle, const style::TextShadows &shadow,
-                           const StringAtom &emphasisMark, float emphasisMarkOffset) noexcept
+                           const StringAtom &emphasisMark, float emphasisMarkOffset,
+                           const RenderCombineText *combinedText) noexcept
       : _context(context), _font(font), _renderStyle(renderStyle), _style(textPaintStyle),
-        _emphasisMark(emphasisMark), _shadow(shadow), _emphasisMarkOffset(emphasisMarkOffset)
+        _emphasisMark(emphasisMark), _shadow(shadow), _emphasisMarkOffset(emphasisMarkOffset),
+        _combinedText(combinedText)
   {
   }
 
@@ -154,7 +158,7 @@ namespace krys::boo
     for (const auto &shadow : *shadows)
     {
       ShadowApplier shadowApplier(_renderStyle, _context, &shadow, boxRect, &shadow == &shadows->last(),
-                                  lastShadowIterationShouldDrawText, opaque);
+                                  lastShadowIterationShouldDrawText, opaque, _combinedText != nullptr);
       if (!shadowApplier.NothingToDraw())
       {
         PaintTextOrEmphasisMarks(font, textRun, emphasisMark, emphasisMarkOffset,
@@ -178,6 +182,17 @@ namespace krys::boo
                                                       uint32 endOffset, const TextPaintStyle &paintStyle,
                                                       const style::TextShadows &shadow) noexcept
   {
+    // Combined text too wide for an em is compressed horizontally about its origin.
+    auto compression = _combinedText ? _combinedText->HorizontalScale() : 1.f;
+    GraphicsContextStateSaver compressionSaver(_context, false);
+    if (auto scale = compression; scale != 1.f)
+    {
+      compressionSaver.Save();
+      _context.Translate(textOrigin.X(), 0);
+      _context.Scale(FloatSize(scale, 1));
+      _context.Translate(-textOrigin.X(), 0);
+    }
+
     if (paintStyle.PaintOrder.IsNormal())
     {
       // FIXME: Truncate right-to-left text correctly.
@@ -220,6 +235,11 @@ namespace krys::boo
       }
     }
 
+    if (compression != 1.f)
+    {
+      compressionSaver.Restore();
+    }
+
     if (_emphasisMark.View().empty())
     {
       return;
@@ -227,9 +247,27 @@ namespace krys::boo
 
     UpdateGraphicsContext(_context, paintStyle, UseEmphasisMarkColor);
 
+    // Combined text takes one emphasis mark, over the middle of its box, drawn upright.
+    static const TextRun objectReplacementCharacterTextRun {utf8_stringview {u8"\uFFFC"}};
+    const auto &emphasisMarkTextRun = _combinedText ? objectReplacementCharacterTextRun : textRun;
+    auto emphasisMarkTextOrigin = textOrigin;
+    if (_combinedText)
+    {
+      auto boxOrigin = boxRect.Location();
+      emphasisMarkTextOrigin = {boxOrigin.X() + boxRect.Width() / 2,
+                                boxOrigin.Y() + static_cast<float>(_font.MetricsOfPrimaryFont().IntAscent())};
+      _context.ConcatCTM(Rotation(boxRect, RotationDirection::Clockwise));
+    }
+
     // FIXME: Truncate right-to-left text correctly.
-    PaintTextWithShadows(&shadow, _font, textRun, boxRect, textOrigin, startOffset, endOffset, _emphasisMark,
+    PaintTextWithShadows(&shadow, _combinedText ? _combinedText->OriginalFont() : _font, emphasisMarkTextRun,
+                         boxRect, emphasisMarkTextOrigin, startOffset, endOffset, _emphasisMark,
                          _emphasisMarkOffset, paintStyle.StrokeWidth > 0);
+
+    if (_combinedText)
+    {
+      _context.ConcatCTM(Rotation(boxRect, RotationDirection::Counterclockwise));
+    }
   }
 
   void TextPainter::PaintRange(const TextRun &textRun, const FloatRect &boxRect, const FloatPoint &textOrigin,

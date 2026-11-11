@@ -54,6 +54,7 @@
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -4129,8 +4130,10 @@ namespace krys::boo
         renderer.ClearNeedsLayout();
       }
 
-      // FIXME: Combine the text of text-combine-upright text (RenderCombineText::combineTextIfNeeded), once
-      // there's text-combine-upright.
+      if (auto *renderCombineText = DynamicDowncast<RenderCombineText>(renderer))
+      {
+        renderCombineText->CombineTextIfNeeded();
+      }
     }
     return {hasSimpleOutOfFlowContentOnly,
             hasInFlowBlockLevelElement ? Maybe<bool> {contentNeedsNormalChildLayoutOnly} : null};
@@ -4956,8 +4959,10 @@ namespace krys::boo
       }
       else if (auto *renderText = DynamicDowncast<RenderText>(*child))
       {
-        // FIXME: Combine the text of text-combine-upright text (RenderCombineText::combineTextIfNeeded), once
-        // there's text-combine-upright.
+        if (auto *renderCombineText = DynamicDowncast<RenderCombineText>(*renderText))
+        {
+          renderCombineText->CombineTextIfNeeded();
+        }
 
         // Determine if we have a breakable character. Pass in
         // whether or not we should ignore any spaces at the front
