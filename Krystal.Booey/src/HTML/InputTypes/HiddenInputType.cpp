@@ -62,7 +62,7 @@ namespace krys::boo::html
 
     if (text::IsASCIICaselessEqual(dom::DOMStringView(name), u8"_charset_"))
     {
-      // FIXME: The entry list's encoding, once there are encodings other than UTF-8.
+      // Entry lists are UTF-8 only (see DIFFERENCES.md).
       formData.Append(name, u8"UTF-8");
       return true;
     }

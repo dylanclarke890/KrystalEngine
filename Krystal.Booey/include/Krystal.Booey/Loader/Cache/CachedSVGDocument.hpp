@@ -32,8 +32,7 @@ namespace krys::boo
 
   /// @brief A cached SVG file, parsed into a document of its own (without a frame) for the elements that
   /// reference it (`<use>`).
-  // FIXME: Encodings other than UTF-8 (the response's charset and the XML declaration's), once there are
-  // decoders for them.
+  // SVG documents are UTF-8 only, whatever the response or the XML declaration say (see DIFFERENCES.md).
   class CachedSVGDocument final : public CachedResource
   {
   private:

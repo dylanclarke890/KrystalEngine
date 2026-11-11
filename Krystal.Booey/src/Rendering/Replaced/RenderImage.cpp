@@ -654,7 +654,7 @@ namespace krys::boo
           auto &fontCascade = style.GetFontCascade();
           auto &fontMetrics = fontCascade.MetricsOfPrimaryFont();
           auto isHorizontal = GetWritingMode().IsHorizontal();
-          // FIXME: The display string modified by the document's encoding.
+          // Documents are UTF-8 only, so no encoding modifies the display string (see DIFFERENCES.md).
           auto textRun = RenderBlock::ConstructTextRun(
             _altText, style, ExpansionBehavior::DefaultBehavior(),
             {TextRunFlag::RespectDirection, TextRunFlag::RespectDirectionOverride});

@@ -54,8 +54,8 @@ namespace krys::boo
 
   /// @brief Writes a loaded document into its frame: makes the document (and its window), gives it to the
   /// frame, and feeds its bytes to the parser.
-  // FIXME: Encodings other than UTF-8 (a TextResourceDecoder), and media documents, once there are media
-  // elements.
+  // Documents are decoded as UTF-8 only (see DIFFERENCES.md).
+  // FIXME: Media documents, once there are media elements.
   class DocumentWriter
   {
     KRYS_NON_COPY_MOVABLE(DocumentWriter);

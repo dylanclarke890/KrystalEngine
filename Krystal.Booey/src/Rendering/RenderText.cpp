@@ -552,8 +552,8 @@ namespace krys::boo
 
   bool RenderText::ComputeUseBackslashAsYenSymbol() const noexcept
   {
-    // FIXME: Fonts that use the yen sign for backslash, and the document's encoding (a decoder whose
-    // encoding's currency symbol for backslash isn't backslash), once there are any.
+    // FIXME: Fonts that use the yen sign for backslash, once there are any.
+    // (No encoding shows backslash as a yen sign: documents are UTF-8 only; see DIFFERENCES.md.)
     return false;
   }
 

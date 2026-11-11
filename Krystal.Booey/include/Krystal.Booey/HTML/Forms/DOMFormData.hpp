@@ -47,7 +47,7 @@ namespace krys::boo::html
 
   /// @brief An entry list: the name and value pairs a form submits.
   /// @see https://xhr.spec.whatwg.org/#interface-formdata
-  // FIXME: Encodings other than UTF-8, once there are any.
+  // Entry lists are UTF-8 only (see DIFFERENCES.md).
   class DOMFormData : public RefCounted<DOMFormData>
   {
   public:
