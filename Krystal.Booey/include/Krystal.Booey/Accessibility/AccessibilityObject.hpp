@@ -56,6 +56,8 @@
 
 #include "Krystal.Booey/Accessibility/AccessibilityRole.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Editing/CharacterRange.hpp"
+#include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -584,6 +586,76 @@ namespace krys::boo::ax
     KRYS_NODISCARD int32 IntegralAttribute(dom::DOMStringView name) const noexcept;
     /// @brief Whether the element has any global ARIA state or property.
     KRYS_NODISCARD bool SupportsARIAAttributes() const noexcept;
+
+    // Text ranges: positions in the object's text (a text control's value; the text under it otherwise).
+    // Indexes are bytes of the UTF-8 text a text iterator emits.
+
+    /// @brief A text control's text (its value; nothing for a password) or a static text's; empty otherwise.
+    KRYS_NODISCARD virtual dom::DOMString Text() const noexcept
+    {
+      return {};
+    }
+    /// @brief The positions at the start and end of the object's content.
+    KRYS_NODISCARD virtual VisiblePositionRange GetVisiblePositionRange() const noexcept
+    {
+      return {};
+    }
+    /// @brief The document's selection.
+    KRYS_NODISCARD virtual VisiblePositionRange SelectedVisiblePositionRange() const noexcept
+    {
+      return {};
+    }
+    /// @brief Selects @p range as the user would (in a text control, the part of its value it covers).
+    virtual void SetSelectedVisiblePositionRange(const VisiblePositionRange &range) const noexcept
+    {
+      (void)range;
+    }
+    KRYS_NODISCARD virtual int32 IndexForVisiblePosition(const VisiblePosition &position) const noexcept
+    {
+      (void)position;
+      return 0;
+    }
+    KRYS_NODISCARD virtual VisiblePosition VisiblePositionForIndex(int32 index) const noexcept
+    {
+      (void)index;
+      return {};
+    }
+    /// @brief The selected part of a text control's text.
+    KRYS_NODISCARD virtual CharacterRange SelectedTextRange() const noexcept
+    {
+      return {};
+    }
+    KRYS_NODISCARD virtual dom::DOMString SelectedText() const noexcept
+    {
+      return {};
+    }
+    /// @brief The object that tells the platform about changes in this one: the text control, list box or
+    /// editable region it's in, or the exposed table a row is in.
+    KRYS_NODISCARD virtual AccessibilityObject *ObservableObject() const noexcept
+    {
+      return nullptr;
+    }
+    /// @brief A text control's index of @p position; -1 if the position isn't in it or this isn't a text
+    /// control.
+    KRYS_NODISCARD int32 Index(const VisiblePosition &position) const noexcept;
+    /// @brief The length of the object's text.
+    KRYS_NODISCARD uint64 TextLength() const noexcept
+    {
+      return Text().size();
+    }
+    /// @brief The part of a text control's text @p range covers.
+    KRYS_NODISCARD dom::DOMString DoAXStringForRange(const CharacterRange &range) const noexcept;
+    /// @brief The range of a text control's line @p lineNumber (from 0), with its line break if it has one.
+    KRYS_NODISCARD CharacterRange DoAXRangeForLine(uint32 lineNumber) const noexcept;
+    /// @brief The line @p position is on, from the top of its editable region (from 0); -1 if it's outside
+    /// the object.
+    KRYS_NODISCARD int32 LineForPosition(const VisiblePosition &position) const noexcept;
+    /// @brief @p range as indexes in a text control's text; empty if it isn't all in it.
+    KRYS_NODISCARD CharacterRange
+      PlainTextRangeForVisiblePositionRange(const VisiblePositionRange &range) const noexcept;
+    /// @brief The positions @p range covers in the object's text; null if it goes past the end.
+    KRYS_NODISCARD VisiblePositionRange
+      VisiblePositionRangeForRange(const CharacterRange &range) const noexcept;
 
     // Live regions.
 

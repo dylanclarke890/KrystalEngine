@@ -39,6 +39,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
@@ -53,11 +55,14 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -2008,9 +2013,215 @@ namespace krys::boo::ax
       }
       return {};
     }
-    // FIXME: Non-native text controls' text (contenteditable and role=textbox), with text ranges; and the
-    // values of ranges, colour wells and dates, with the specialised objects.
+    if (IsNonNativeTextControl())
+    {
+      return Text();
+    }
+    // FIXME: The values of ranges, colour wells and dates, with the specialised objects.
     return {};
+  }
+
+  // Text ranges.
+
+  namespace
+  {
+    /// @brief The text form control @p object is, if it's a native text control.
+    KRYS_NODISCARD html::HTMLTextFormControlElement *
+      NativeTextControl(const AccessibilityNodeObject &object) noexcept
+    {
+      return object.IsNativeTextControl()
+               ? DynamicDowncast<html::HTMLTextFormControlElement>(object.GetNode())
+               : nullptr;
+    }
+
+    KRYS_NODISCARD bool IsPasswordField(const AccessibilityNodeObject &object) noexcept
+    {
+      auto *input = DynamicDowncast<html::HTMLInputElement>(object.GetNode());
+      return input && input->IsPasswordField();
+    }
+  }
+
+  dom::DOMString AccessibilityNodeObject::Text() const noexcept
+  {
+    if (IsStaticText())
+    {
+      return StringValue();
+    }
+    if (!IsTextControl())
+    {
+      return {};
+    }
+    if (IsNativeTextControl())
+    {
+      // A password's characters aren't exposed.
+      return StringValue();
+    }
+    auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
+    return element ? element->InnerText() : dom::DOMString {};
+  }
+
+  VisiblePositionRange AccessibilityNodeObject::GetVisiblePositionRange() const noexcept
+  {
+    auto *node = GetNode();
+    if (!node)
+    {
+      return {};
+    }
+    VisiblePosition start(FirstPositionInOrBeforeNode(node));
+    VisiblePosition end(LastPositionInOrAfterNode(node));
+    // The positions are the same for a node like a button: the end is after it.
+    if (start == end)
+    {
+      end = end.Next();
+      if (end.IsNull())
+      {
+        end = start;
+      }
+    }
+    return {start, end};
+  }
+
+  VisiblePositionRange AccessibilityNodeObject::SelectedVisiblePositionRange() const noexcept
+  {
+    auto *document = GetDocument();
+    if (!document || !document->Frame())
+    {
+      return {};
+    }
+    const auto &selection = document->Selection().Selection();
+    if (selection.IsNone())
+    {
+      return {};
+    }
+    return {selection.VisibleStart(), selection.VisibleEnd()};
+  }
+
+  void
+    AccessibilityNodeObject::SetSelectedVisiblePositionRange(const VisiblePositionRange &range) const noexcept
+  {
+    auto *document = GetDocument();
+    if (range.IsNull() || !document || !document->Frame())
+    {
+      return;
+    }
+    // FIXME: Telling the editor client accessibility is changing the selection
+    // (willChangeSelectionForAccessibility), with the host's accessibility bridge.
+    if (auto *textControl = NativeTextControl(*this))
+    {
+      auto start = textControl->IndexForVisiblePosition(range.Start);
+      auto end = textControl->IndexForVisiblePosition(range.End);
+      // A range around the whole control (rather than in its inner text) selects all of it.
+      if (range.Start.DeepEquivalent().AnchorNode() == textControl
+          && range.End.DeepEquivalent().AnchorNode() == textControl)
+      {
+        start = 0;
+        end = static_cast<int32>(Text().size());
+      }
+      Ref protectedControl = ShareRef(*textControl);
+      textControl->Focus();
+      (void)textControl->SetSelectionRange(static_cast<uint32>(std::max(start, 0)),
+                                           static_cast<uint32>(std::max(end, 0)));
+      return;
+    }
+    if (!Renderer())
+    {
+      return;
+    }
+    auto &frameSelection = document->Selection();
+    if (range.Start == range.End)
+    {
+      // A caret outside the object goes to its start.
+      auto start = range.Start;
+      if (auto *node = GetNode(); node && !Contains(GetVisiblePositionRange(), start))
+      {
+        start = VisiblePosition(FirstPositionInOrBeforeNode(node));
+      }
+      frameSelection.MoveTo(start, UserTriggered::Yes);
+    }
+    else
+    {
+      frameSelection.SetSelection(VisibleSelection(range.Start, range.End),
+                                  FrameSelection::DefaultSetSelectionOptions(UserTriggered::Yes));
+    }
+  }
+
+  int32 AccessibilityNodeObject::IndexForVisiblePosition(const VisiblePosition &position) const noexcept
+  {
+    if (auto *textControl = NativeTextControl(*this))
+    {
+      return textControl->IndexForVisiblePosition(position);
+    }
+    auto *node = GetNode();
+    return node ? boo::IndexForVisiblePosition(*node, position, {}) : 0;
+  }
+
+  VisiblePosition AccessibilityNodeObject::VisiblePositionForIndex(int32 index) const noexcept
+  {
+    if (auto *textControl = NativeTextControl(*this))
+    {
+      return textControl->VisiblePositionForIndex(std::clamp(index, 0, static_cast<int32>(Text().size())));
+    }
+    auto *node = GetNode();
+    return node ? VisiblePositionForIndexUsingCharacterIterator(*node, index) : VisiblePosition {};
+  }
+
+  CharacterRange AccessibilityNodeObject::SelectedTextRange() const noexcept
+  {
+    if (auto *textControl = NativeTextControl(*this))
+    {
+      auto start = textControl->SelectionStart();
+      return {start, textControl->SelectionEnd() - start};
+    }
+    // The document's selection, as indexes in the object's text.
+    auto selection = SelectedVisiblePositionRange();
+    if (selection.IsNull())
+    {
+      return {};
+    }
+    auto start = std::max(IndexForVisiblePosition(selection.Start), 0);
+    auto end = std::max(IndexForVisiblePosition(selection.End), start);
+    return {static_cast<uint64>(start), static_cast<uint64>(end - start)};
+  }
+
+  dom::DOMString AccessibilityNodeObject::SelectedText() const noexcept
+  {
+    if (!IsTextControl() || IsPasswordField(*this))
+    {
+      return {};
+    }
+    if (auto *textControl = NativeTextControl(*this))
+    {
+      return textControl->SelectedText();
+    }
+    return DoAXStringForRange(SelectedTextRange());
+  }
+
+  AccessibilityObject *AccessibilityNodeObject::ObservableObject() const noexcept
+  {
+    // A table tells the platform about its rows.
+    if (auto *element = GetElement(); element && table_helpers::IsTableRowElement(*element))
+    {
+      if (auto *table = ParentTable(); table && table->IsExposableTable())
+      {
+        return table;
+      }
+    }
+
+    // The nearest text control, list box or editable region.
+    auto *cache = AxObjectCache();
+    for (auto *renderer = Renderer(); cache && renderer && renderer->GetNode(); renderer = renderer->Parent())
+    {
+      auto *rendererElement = DynamicDowncast<dom::Element>(renderer->GetNode());
+      if (Is<RenderTextControl>(*renderer) || Is<RenderListBox>(*renderer)
+          || (rendererElement
+              && (table_helpers::HasRole(*rendererElement, u8"listbox")
+                  || table_helpers::HasRole(*rendererElement, u8"textbox")
+                  || ContentEditableAttributeIsEnabled(*rendererElement))))
+      {
+        return cache->GetOrCreate(*renderer);
+      }
+    }
+    return nullptr;
   }
 
   // Tables.

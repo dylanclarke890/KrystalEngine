@@ -123,6 +123,16 @@ namespace krys::boo::ax
     /// @brief Whether the element is the top of a `contenteditable` region.
     KRYS_NODISCARD bool HasContentEditableAttributeSet() const noexcept;
     KRYS_NODISCARD bool IsNonNativeTextControl() const noexcept override;
+
+    KRYS_NODISCARD dom::DOMString Text() const noexcept override;
+    KRYS_NODISCARD VisiblePositionRange GetVisiblePositionRange() const noexcept override;
+    KRYS_NODISCARD VisiblePositionRange SelectedVisiblePositionRange() const noexcept override;
+    void SetSelectedVisiblePositionRange(const VisiblePositionRange &range) const noexcept override;
+    KRYS_NODISCARD int32 IndexForVisiblePosition(const VisiblePosition &position) const noexcept override;
+    KRYS_NODISCARD VisiblePosition VisiblePositionForIndex(int32 index) const noexcept override;
+    KRYS_NODISCARD CharacterRange SelectedTextRange() const noexcept override;
+    KRYS_NODISCARD dom::DOMString SelectedText() const noexcept override;
+    KRYS_NODISCARD AccessibilityObject *ObservableObject() const noexcept override;
     /// @brief Whether the element has `aria-label`, `aria-labelledby` or `title`, which give it a name.
     KRYS_NODISCARD bool HasAccNameAttribute() const noexcept;
     /// @brief Whether the element has something that makes it worth exposing even if its kind wouldn't be

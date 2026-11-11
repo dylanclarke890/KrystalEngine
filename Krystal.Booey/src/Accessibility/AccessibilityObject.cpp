@@ -57,10 +57,15 @@
 #include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
+#include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -1390,6 +1395,149 @@ namespace krys::boo::ax
       return 0;
     }
     return static_cast<int32>(result.Value);
+  }
+
+  int32 AccessibilityObject::Index(const VisiblePosition &position) const noexcept
+  {
+    auto *node = GetNode();
+    if (position.IsNull() || !IsTextControl() || !node)
+    {
+      return -1;
+    }
+    auto *positionNode = position.DeepEquivalent().DeprecatedNode();
+    if (!positionNode || !dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*positionNode, *node))
+    {
+      return -1;
+    }
+    return IndexForVisiblePosition(position);
+  }
+
+  dom::DOMString AccessibilityObject::DoAXStringForRange(const CharacterRange &range) const noexcept
+  {
+    if (!range.Length || !IsTextControl())
+    {
+      return {};
+    }
+    auto text = Text();
+    if (range.Location >= text.size())
+    {
+      return {};
+    }
+    return text.substr(range.Location, range.Length);
+  }
+
+  namespace
+  {
+    /// @brief Whether @p position is at the end of a line that ends with a line break (a `br` or a newline).
+    KRYS_NODISCARD bool IsHardLineBreak(const VisiblePosition &position) noexcept
+    {
+      if (!IsEndOfLine(position))
+      {
+        return false;
+      }
+      auto lineBreakRange = MakeSimpleRange(VisiblePositionRange {position, position.Next()});
+      if (!lineBreakRange)
+      {
+        return false;
+      }
+      TextIterator iterator(*lineBreakRange);
+      if (iterator.AtEnd())
+      {
+        return false;
+      }
+      if (auto *element = DynamicDowncast<html::HTMLElement>(iterator.GetNode());
+          element && Is<html::HTMLBRElement>(*element))
+      {
+        return true;
+      }
+      if (iterator.GetNode() != position.DeepEquivalent().AnchorNode())
+      {
+        return false;
+      }
+      return iterator.Text() == u8"\n";
+    }
+  }
+
+  CharacterRange AccessibilityObject::DoAXRangeForLine(uint32 lineNumber) const noexcept
+  {
+    if (!IsTextControl())
+    {
+      return {};
+    }
+    auto lineStart = VisiblePositionForIndex(0);
+    for (auto lineCount = lineNumber; lineCount; --lineCount)
+    {
+      auto nextLineStart = NextLinePosition(lineStart, 0);
+      if (nextLineStart.IsNull() || nextLineStart == lineStart)
+      {
+        return {};
+      }
+      lineStart = nextLineStart;
+    }
+    auto lineEnd = EndOfLine(lineStart);
+    auto lineStartIndex = IndexForVisiblePosition(lineStart);
+    auto lineEndIndex = IndexForVisiblePosition(lineEnd);
+    if (IsHardLineBreak(lineEnd))
+    {
+      ++lineEndIndex;
+    }
+    if (lineStartIndex < 0 || lineEndIndex <= lineStartIndex)
+    {
+      return {};
+    }
+    return {static_cast<uint64>(lineStartIndex), static_cast<uint64>(lineEndIndex - lineStartIndex)};
+  }
+
+  int32 AccessibilityObject::LineForPosition(const VisiblePosition &position) const noexcept
+  {
+    auto *node = GetNode();
+    auto *containerNode = position.IsNull() ? nullptr : position.DeepEquivalent().GetContainerNode();
+    if (!node || !containerNode)
+    {
+      return -1;
+    }
+    // The position must be in the object's editable region.
+    if (!dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*node, *containerNode)
+        && !dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*containerNode, *node))
+    {
+      return -1;
+    }
+    // FIXME: Text box roles count as editable for the lines (WebKit's HasEditableAXRole), which editing
+    // doesn't have.
+    int32 lineCount = -1;
+    auto current = position;
+    VisiblePosition previous;
+    do
+    {
+      previous = current;
+      current = PreviousLinePosition(current, 0);
+      ++lineCount;
+    } while (current.IsNotNull() && !InSameLine(current, previous));
+    return lineCount;
+  }
+
+  CharacterRange AccessibilityObject::PlainTextRangeForVisiblePositionRange(
+    const VisiblePositionRange &range) const noexcept
+  {
+    auto start = Index(range.Start);
+    auto end = Index(range.End);
+    if (start < 0 || end < 0 || start > end)
+    {
+      return {};
+    }
+    return {static_cast<uint64>(start), static_cast<uint64>(end - start)};
+  }
+
+  VisiblePositionRange
+    AccessibilityObject::VisiblePositionRangeForRange(const CharacterRange &range) const noexcept
+  {
+    if (range.Location + range.Length > TextLength())
+    {
+      return {};
+    }
+    auto start = VisiblePositionForIndex(static_cast<int32>(range.Location));
+    start.SetAffinity(Affinity::Downstream);
+    return {start, VisiblePositionForIndex(static_cast<int32>(range.Location + range.Length))};
   }
 
   dom::DOMStringView AccessibilityObject::DefaultLiveRegionStatusForRole(AccessibilityRole role) noexcept
