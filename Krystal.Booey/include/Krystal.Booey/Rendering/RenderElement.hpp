@@ -155,7 +155,6 @@ namespace krys::boo
 
     /// @brief Replaces the renderer's style, doing at least @p minimalStyleDifference of the work a style
     /// change needs.
-    /// @note FIXME: The difference doesn't invalidate layout or painting yet (no layout, painting or layers).
     void SetStyle(RenderStyle &&style,
                   style::DifferenceResult minimalStyleDifference = style::DifferenceResult::Equal) noexcept;
 

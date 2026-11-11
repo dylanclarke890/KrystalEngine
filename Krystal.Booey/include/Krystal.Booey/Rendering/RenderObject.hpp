@@ -245,12 +245,11 @@ namespace krys::boo
   class RenderElement;
   class RenderStyle;
 
-  /// @brief A node of the render tree: the box, text or other object a node (or, for anonymous objects, the
-  /// document) is rendered as.
-  /// @note FIXME: There's no render tree yet: renderers have no parent, children, layout or painting.
   /// @brief An opaque pointer identifying the image data behind a style image.
   using WrappedImagePtr = const void *;
 
+  /// @brief A node of the render tree: the box, text or other object a node (or, for anonymous objects, the
+  /// document) is rendered as.
   class RenderObject : public CanMakeWeakPtr<RenderObject>, public CanMakeCheckedPtr<RenderObject>
   {
     KRYS_NON_COPY_MOVABLE(RenderObject);

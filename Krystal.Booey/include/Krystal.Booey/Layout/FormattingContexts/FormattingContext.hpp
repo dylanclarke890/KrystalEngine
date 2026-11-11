@@ -34,8 +34,7 @@ namespace krys::boo::layout
 
   /// @brief Queries about where a layout box lives: its containing block and its formatting context.
   // FIXME: The formatting context itself (layout, intrinsic widths, the geometry access checks), once the
-  // block, table or flex formatting contexts are ported. Only the inline formatting context exists, and it
-  // isn't one of these.
+  // block or table formatting contexts are ported; the inline, flex and grid ones don't derive from it.
   class FormattingContext
   {
   public:
