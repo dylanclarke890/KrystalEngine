@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
@@ -627,7 +628,10 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = parent.GetDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(parent, newChild);
+    }
 
     if ((parent.HasOutlineAutoAncestor()
          || parent.OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto)
@@ -1343,7 +1347,10 @@ namespace krys::boo
     // and the code running here would force an untimely rebuilding, leaving |child| dangling.
     auto childToTake = parent.DetachRendererInternal(child);
 
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = parent.GetDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(parent);
+    }
 
     return childToTake;
   }

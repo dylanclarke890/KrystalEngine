@@ -1051,6 +1051,66 @@ namespace krys::boo::ax
     }
   }
 
+  bool AccessibilityObject::CanHaveSelectedChildren() const noexcept
+  {
+    switch (_role)
+    {
+      // Containers whose children support aria-selected.
+      case AccessibilityRole::Grid:
+      case AccessibilityRole::ListBox:
+      case AccessibilityRole::TabList:
+      case AccessibilityRole::Tree:
+      case AccessibilityRole::TreeGrid:
+      case AccessibilityRole::List:
+      // Containers whose focused or active descendant is the selected one.
+      case AccessibilityRole::Menu:
+      case AccessibilityRole::MenuBar:
+      case AccessibilityRole::ComboBox: return true;
+      default:                          return false;
+    }
+  }
+
+  bool AccessibilityObject::SupportsRowCountChange() const noexcept
+  {
+    switch (_role)
+    {
+      case AccessibilityRole::Tree:
+      case AccessibilityRole::TreeGrid:
+      case AccessibilityRole::Grid:
+      case AccessibilityRole::Table:    return true;
+      default:                          return false;
+    }
+  }
+
+  bool AccessibilityObject::DependsOnTextUnderElement() const noexcept
+  {
+    switch (_role)
+    {
+      case AccessibilityRole::PopUpButton:
+        // A select's pop-up button's text is its value, not its name.
+        if (auto *element = GetElement(); element && element->LocalName() == u8"select")
+        {
+          break;
+        }
+        [[fallthrough]];
+      case AccessibilityRole::Summary:
+      case AccessibilityRole::Button:
+      case AccessibilityRole::ToggleButton:
+      case AccessibilityRole::Checkbox:
+      case AccessibilityRole::ListBoxOption:
+      case AccessibilityRole::ListItem:
+      case AccessibilityRole::MenuItem:
+      case AccessibilityRole::MenuItemCheckbox:
+      case AccessibilityRole::MenuItemRadio:
+      case AccessibilityRole::RadioButton:
+      case AccessibilityRole::Switch:
+      case AccessibilityRole::Tab:              return true;
+      default:                                  break;
+    }
+    // A heading or link reads as one object, named by its text.
+    return IsHeading() || IsLink() || _role == AccessibilityRole::ApplicationStatus;
+  }
+
   bool AccessibilityObject::IsRangeControl() const noexcept
   {
     switch (_role)

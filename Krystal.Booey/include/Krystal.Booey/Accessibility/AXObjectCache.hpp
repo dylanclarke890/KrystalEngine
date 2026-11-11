@@ -36,7 +36,9 @@
 namespace krys::boo
 {
   class LocalFrameView;
+  class RenderElement;
   class RenderObject;
+  class RenderStyle;
   class Scrollbar;
 
   namespace dom
@@ -88,7 +90,20 @@ namespace krys::boo::ax
     List<Pair<Ref<AccessibilityObject>, AXNotification>> _notificationsToPost;
     Timer _notificationPostTimer;
 
+    // An attribute change waiting for its element's renderer to be up to date.
+    struct DeferredAttributeChange
+    {
+      dom::Element *Element {nullptr};
+      dom::DOMStringAtom Name;
+      dom::DOMString OldValue;
+      dom::DOMString NewValue;
+    };
+
     ListHashSet<AXID> _deferredChildrenChangedList;
+    List<DeferredAttributeChange> _deferredAttributeChanges;
+    // Nodes whose text changed, and elements whose ignored state needs working out again.
+    ListHashSet<dom::Node *> _deferredTextChangedList;
+    ListHashSet<dom::Element *> _deferredRecomputeIsIgnoredList;
     ListHashSet<AXID> _deferredRendererChangedList;
     // Tables whose exposed state and whose cell slots need working out again.
     ListHashSet<AXID> _deferredRecomputeTableIsExposedList;
@@ -164,11 +179,53 @@ namespace krys::boo::ax
     /// @brief Tells the platform @p object's role changed from @p previousRole.
     void HandleRoleChanged(AccessibilityObject &object, AccessibilityRole previousRole) noexcept;
     void RecomputeIsIgnored(dom::Node &node) noexcept;
+    void RecomputeIsIgnored(dom::Node *node) noexcept
+    {
+      if (node)
+      {
+        RecomputeIsIgnored(*node);
+      }
+    }
     void RecomputeIsIgnored(RenderObject &renderer) noexcept;
+    /// @brief Works out again (once the tree is next updated) whether @p element's object is ignored.
+    void DeferRecomputeIsIgnored(dom::Element *element) noexcept;
+    /// @brief As above, now if @p element's renderer is up to date.
+    void DeferRecomputeIsIgnoredIfNeeded(dom::Element *element) noexcept;
 
-    /// @brief Brings the tree up to date with the changes deferred since the last update: children
-    /// changed and renderers lost.
+    /// @brief An attribute of @p element changed from @p oldValue to @p newValue (null when it was or is now
+    /// absent): handled now, or once the tree is next updated if the element's renderer is out of date.
+    void DeferAttributeChangeIfNeeded(dom::Element &element, dom::DOMStringAtom name,
+                                      Maybe<dom::DOMStringView> oldValue,
+                                      Maybe<dom::DOMStringView> newValue) noexcept;
+    /// @brief The text of @p object (or under it) changed: its name and its ancestors' may have too.
+    void HandleTextChanged(AccessibilityObject *object) noexcept;
+    /// @brief As above for @p node's object, now if its renderer is up to date.
+    void DeferTextChangedIfNeeded(dom::Node *node) noexcept;
+
+    // Form controls and selection.
+
+    void CheckedStateChanged(dom::Element &element) noexcept;
+    void ValueChanged(dom::Element &element) noexcept;
+    /// @brief @p element (an option, a cell, or an item in something with selectable children) was selected
+    /// or deselected.
+    void OnSelectedOptionChanged(dom::Element &element) noexcept;
+    void SelectedChildrenChanged(dom::Node *node) noexcept;
+    void SelectedChildrenChanged(RenderObject *renderer) noexcept;
+
+    /// @brief Brings the tree up to date with the changes deferred since the last update.
     void PerformDeferredCacheUpdate() noexcept;
+
+    // Rendering.
+
+    /// @brief @p node has a new renderer: its object (if it has one) is updated for it.
+    void OnRendererCreated(dom::Node &node) noexcept;
+    /// @brief @p element's style changed from @p oldStyle to @p newStyle.
+    void OnStyleChange(dom::Element &element, const RenderStyle *oldStyle,
+                       const RenderStyle *newStyle) noexcept;
+    /// @brief @p renderer became inert or not, or visible or not: its parent's children change.
+    void OnInertOrVisibilityChange(RenderElement &renderer) noexcept;
+    /// @brief A layout of @p layoutRoot's subtree finished.
+    void OnLayoutComplete(RenderObject &layoutRoot) noexcept;
 
     // Notifications.
 
@@ -191,6 +248,16 @@ namespace krys::boo::ax
     /// @brief A focused area's object: its image's child for it.
     KRYS_NODISCARD AccessibilityObject *FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept;
 
+    KRYS_NODISCARD bool ShouldProcessAttributeChange(dom::Element &element,
+                                                     dom::DOMStringView name) const noexcept;
+    void HandleAttributeChange(dom::Element &element, dom::DOMStringView name, dom::DOMStringView oldValue,
+                               dom::DOMStringView newValue) noexcept;
+    /// @brief The `role` attribute changed: an object whose kind depends on it is made again.
+    void HandleRoleChanged(dom::Element &element, dom::DOMStringView oldValue,
+                           dom::DOMStringView newValue) noexcept;
+    void HandleAriaExpandedChange(dom::Element &element) noexcept;
+    void HandleRowCountChanged(AccessibilityObject *object) noexcept;
+    void HandleMenuItemSelected(dom::Element *element) noexcept;
     void HandleChildrenChanged(AccessibilityObject &object) noexcept;
     void HandleAllDeferredChildrenChanged() noexcept;
     /// @brief Works out again (later) whether @p element's table is exposed: adding or removing rows can make

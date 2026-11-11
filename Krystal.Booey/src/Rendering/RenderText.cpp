@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
@@ -603,8 +604,6 @@ namespace krys::boo
       layout_integration::LineLayout::UpdateStyle(*this);
     }
 
-    // FIXME: The accessibility cache, once there is one.
-
     SetHorizontalWritingMode(newStyle.GetWritingMode().IsHorizontal());
   }
 
@@ -777,7 +776,10 @@ namespace krys::boo
     SetRenderedText(krys::move(text));
 
     SetNeedsLayoutAndPreferredWidthsUpdate();
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = GetDocument().ExistingAXObjectCache())
+    {
+      cache->DeferTextChangedIfNeeded(TextNode());
+    }
   }
 
   void RenderText::SetText(utf8_string newContent, bool force) noexcept

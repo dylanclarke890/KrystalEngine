@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Style/TreeResolver.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/Timelines/StyleOriginatedTimelinesController.hpp"
@@ -1625,7 +1626,11 @@ namespace krys::boo::style
         {
           element.DidRecalcStyle(elementUpdate.Changes);
         }
-        // FIXME: The accessibility updates (AXObjectCache).
+        if (auto *cache = element.NodeDocument().ExistingAXObjectCache();
+            cache && !elementUpdate.Changes.IsEmpty())
+        {
+          cache->OnStyleChange(element, style, elementUpdate.Style.get());
+        }
 
         style = elementUpdate.Style.get();
         changes = elementUpdate.Changes;

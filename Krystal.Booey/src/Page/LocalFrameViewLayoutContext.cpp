@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -298,8 +299,14 @@ namespace krys::boo
     _frameView.ScheduleResizeEventIfNeeded();
     _frameView.LayoutOrVisualViewportChanged();
     _frameView.UpdateSnapOffsetsAndResnap();
-    // FIXME: Telling the accessibility cache the layout completed (onLayoutComplete) and scheduling its
-    // deferred update (scheduleDeferredAXObjectCacheUpdate), with accessibility.
+    // The cache brings itself up to date (on its own timer) with the changes it deferred until now.
+    if (auto *document = Document())
+    {
+      if (auto *cache = document->ExistingAXObjectCache(); cache && layoutRoot)
+      {
+        cache->OnLayoutComplete(*layoutRoot);
+      }
+    }
   }
 
   bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept

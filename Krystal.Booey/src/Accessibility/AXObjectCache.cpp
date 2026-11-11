@@ -42,6 +42,7 @@
 #include "Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp"
+#include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -55,8 +56,11 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
@@ -104,6 +108,43 @@ namespace krys::boo::ax
       }
       // A node's renderer may still be one it no longer uses while it's being torn down.
       return !renderer->BeingDestroyed();
+    }
+
+    /// @brief Whether @p renderer is out of date (laid out or styled again soon), so a change to it is better
+    /// handled once it's been brought up to date.
+    KRYS_NODISCARD bool RendererNeedsDeferredUpdate(const RenderObject &renderer) noexcept
+    {
+      auto &document = renderer.GetDocument();
+      auto *view = document.View();
+      return renderer.NeedsLayout() || document.NeedsStyleRecalc() || document.InRenderTreeUpdate()
+             || (view && view->LayoutContext().IsInRenderTreeLayout());
+    }
+
+    /// @brief Whether @p element is part of an HTML table (a row, cell, section, column or caption).
+    KRYS_NODISCARD bool IsHTMLTablePart(const dom::Element &element) noexcept
+    {
+      for (auto localName :
+           {u8"tr", u8"td", u8"th", u8"thead", u8"tbody", u8"tfoot", u8"col", u8"colgroup", u8"caption"})
+      {
+        if (IsHTMLElementNamed(element, localName))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    KRYS_NODISCARD bool HasAnyRole(const dom::Element &element,
+                                   std::initializer_list<dom::DOMStringView> roles) noexcept
+    {
+      for (auto role : roles)
+      {
+        if (table_helpers::HasRole(element, role))
+        {
+          return true;
+        }
+      }
+      return false;
     }
   }
 
@@ -538,7 +579,15 @@ namespace krys::boo::ax
     {
       Remove(*renderer);
     }
-    // FIXME: Removing the element from the deferred attribute, text and modal changes, with them.
+
+    _deferredTextChangedList.remove(&node);
+    if (auto *element = DynamicDowncast<dom::Element>(node))
+    {
+      _deferredRecomputeIsIgnoredList.remove(element);
+      std::erase_if(_deferredAttributeChanges,
+                    [element](const auto &change) { return change.Element == element; });
+    }
+    // FIXME: Removing the element from the deferred modal changes, with the modal tracking.
   }
 
   void AXObjectCache::ChildrenChanged(dom::Node &node) noexcept
@@ -720,6 +769,639 @@ namespace krys::boo::ax
     }
   }
 
+  void AXObjectCache::DeferRecomputeIsIgnored(dom::Element *element) noexcept
+  {
+    if (!element || !NodeRendererIsValid(*element))
+    {
+      return;
+    }
+    _deferredRecomputeIsIgnoredList.add(element);
+    StartPerformCacheUpdateTimer();
+  }
+
+  void AXObjectCache::DeferRecomputeIsIgnoredIfNeeded(dom::Element *element) noexcept
+  {
+    if (!element || !NodeRendererIsValid(*element))
+    {
+      return;
+    }
+    if (RendererNeedsDeferredUpdate(*element->Renderer()))
+    {
+      DeferRecomputeIsIgnored(element);
+      return;
+    }
+    RecomputeIsIgnored(*element->Renderer());
+  }
+
+  void AXObjectCache::DeferAttributeChangeIfNeeded(dom::Element &element, dom::DOMStringAtom name,
+                                                   Maybe<dom::DOMStringView> oldValue,
+                                                   Maybe<dom::DOMStringView> newValue) noexcept
+  {
+    if (oldValue == newValue)
+    {
+      return;
+    }
+    auto oldString = oldValue.value_or(dom::DOMStringView {});
+    auto newString = newValue.value_or(dom::DOMStringView {});
+    if (NodeRendererIsValid(element) && RendererNeedsDeferredUpdate(*element.Renderer()))
+    {
+      _deferredAttributeChanges.push_back(
+        {&element, name, dom::DOMString(oldString), dom::DOMString(newString)});
+      StartPerformCacheUpdateTimer();
+      return;
+    }
+    Ref protectedElement = ShareRef(element);
+    HandleAttributeChange(element, name.View(), oldString, newString);
+    // FIXME: Updating the relations when an id changes (relationsNeedUpdate), with relations.
+  }
+
+  bool AXObjectCache::ShouldProcessAttributeChange(dom::Element &element,
+                                                   dom::DOMStringView name) const noexcept
+  {
+    // aria-modal changes subtrees that are being shown or hidden, which assistive technology may not have
+    // asked about yet.
+    if (name == u8"aria-modal")
+    {
+      return true;
+    }
+    // Changes to elements with no object are of no interest, unless their parent has one (some are handled
+    // there).
+    auto *parent = element.ParentNode();
+    return Get(element) || (parent && Get(*parent));
+  }
+
+  void AXObjectCache::HandleAttributeChange(dom::Element &element, dom::DOMStringView name,
+                                            dom::DOMStringView oldValue, dom::DOMStringView newValue) noexcept
+  {
+    enum class TableProperty : uint8
+    {
+      Exposed,
+      CellSlots,
+    };
+    auto recomputeParentTableProperties = [this, &element](EnumSet<TableProperty> properties)
+    {
+      if (!properties.Contains(TableProperty::CellSlots))
+      {
+        // Only non-ARIA tables (ARIA ones are always exposed) can change whether they're exposed.
+        if (IsHTMLTablePart(element))
+        {
+          for (auto *ancestor = element.ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+          {
+            if (Is<html::HTMLTableElement>(*ancestor))
+            {
+              DeferRecomputeTableIsExposed(ancestor);
+              break;
+            }
+          }
+        }
+        return;
+      }
+      auto *object = GetOrCreate(element);
+      if (!object || !object->IsTableCell())
+      {
+        return;
+      }
+      if (auto *parentTable = DynamicDowncast<AccessibilityNodeObject>(object->ParentTable()))
+      {
+        if (properties.Contains(TableProperty::Exposed) && !parentTable->IsAriaTable())
+        {
+          DeferRecomputeTableIsExposed(parentTable->GetElement());
+        }
+        DeferRecomputeTableCellSlots(*parentTable);
+      }
+    };
+
+    if (!ShouldProcessAttributeChange(element, name))
+    {
+      return;
+    }
+
+    // FIXME: Updating the relations the attribute sets up (updateRelations), with relations.
+    if (name == u8"role")
+    {
+      HandleRoleChanged(element, oldValue, newValue);
+    }
+    else if (name == u8"alt" || name == u8"title")
+    {
+      HandleTextChanged(GetOrCreate(element));
+    }
+    else if (name == u8"contenteditable")
+    {
+      if (auto object = ShareRefPtr(Get(element)))
+      {
+        object->UpdateRole();
+      }
+    }
+    else if (name == u8"disabled")
+    {
+      PostNotification(&element, AXNotification::DisabledStateChanged);
+    }
+    else if (name == u8"for")
+    {
+      // FIXME: Updating the label's labelled control and telling the old and new controls their text changed
+      // (updateLabelFor), with relations.
+    }
+    else if (name == u8"required")
+    {
+      PostNotification(&element, AXNotification::RequiredStatusChanged);
+    }
+    else if (name == u8"tabindex")
+    {
+      // Becoming focusable or not can change whether the object is ignored.
+      if (oldValue.empty() || newValue.empty())
+      {
+        if (auto object = ShareRefPtr(Get(element)))
+        {
+          object->RecomputeIsIgnored();
+        }
+        PostNotification(&element, AXNotification::FocusableStateChanged);
+      }
+    }
+    else if (name == u8"open")
+    {
+      if (IsHTMLElementNamed(element, u8"dialog"))
+      {
+        // FIXME: Updating the modal dialog (deferModalChange), with the modal tracking.
+        RecomputeIsIgnored(element.ParentNode());
+      }
+      else if (IsHTMLElementNamed(element, u8"details"))
+      {
+        if (auto object = ShareRefPtr(Get(element)))
+        {
+          PostNotification(object.get(), AXNotification::ExpandedChanged);
+          ChildrenChanged(object.get());
+          object->RecomputeIsIgnoredForDescendants();
+        }
+      }
+    }
+    else if (name == u8"rowspan")
+    {
+      PostNotification(&element, AXNotification::RowSpanChanged);
+      recomputeParentTableProperties({TableProperty::CellSlots});
+    }
+    else if (name == u8"colspan")
+    {
+      PostNotification(&element, AXNotification::ColumnSpanChanged);
+      recomputeParentTableProperties({TableProperty::CellSlots});
+    }
+    else if (name == u8"command")
+    {
+      PostNotification(&element, AXNotification::CommandChanged);
+    }
+    else if (name == u8"commandfor")
+    {
+      PostNotification(&element, AXNotification::CommandForChanged);
+    }
+    else if (name == u8"popovertarget")
+    {
+      PostNotification(&element, AXNotification::PopoverTargetChanged);
+    }
+    else if (name == u8"scope")
+    {
+      PostNotification(&element, AXNotification::CellScopeChanged);
+    }
+    else if (name == u8"datetime")
+    {
+      PostNotification(&element, AXNotification::DatetimeChanged);
+    }
+    else if (name == u8"abbr")
+    {
+      PostNotification(&element, AXNotification::AbbreviationChanged);
+    }
+    else if (name == u8"hidden")
+    {
+      PostNotification(&element, AXNotification::HiddenStateChanged);
+    }
+    else if (name == u8"draggable")
+    {
+      PostNotification(&element, AXNotification::DraggableStateChanged);
+    }
+    else if (name == u8"lang")
+    {
+      PostNotification(&element, AXNotification::LanguageChanged);
+    }
+    else if (name == u8"name")
+    {
+      PostNotification(&element, AXNotification::NameChanged);
+    }
+    else if (name == u8"placeholder")
+    {
+      PostNotification(&element, AXNotification::PlaceholderChanged);
+    }
+    else if (name == u8"href" || name == u8"src")
+    {
+      PostNotification(&element, AXNotification::URLChanged);
+    }
+    else if (name == u8"accesskey")
+    {
+      PostNotification(&element, AXNotification::AccessKeyChanged);
+    }
+    else if (name == u8"type")
+    {
+      PostNotification(&element, AXNotification::InputTypeChanged);
+    }
+
+    if (!name.starts_with(u8"aria-"))
+    {
+      return;
+    }
+
+    if (name == u8"aria-activedescendant")
+    {
+      // FIXME: Moving the focus to the new active descendant (handleActiveDescendantChange), with relations.
+      PostNotification(&element, AXNotification::ActiveDescendantChanged);
+    }
+    else if (name == u8"aria-atomic")
+    {
+      PostNotification(&element, AXNotification::IsAtomicChanged);
+    }
+    else if (name == u8"aria-busy")
+    {
+      PostNotification(&element, AXNotification::ElementBusyChanged);
+    }
+    else if (name == u8"aria-controls")
+    {
+      PostNotification(&element, AXNotification::ControlledObjectsChanged);
+    }
+    else if (name == u8"aria-valuenow" || name == u8"aria-valuetext")
+    {
+      PostNotification(&element, AXNotification::ValueChanged);
+    }
+    else if (name == u8"aria-label" && element.LocalName() == u8"html")
+    {
+      // The web area's name is the root element's label.
+      HandleTextChanged(Get(_document));
+    }
+    else if (name == u8"aria-label" || name == u8"aria-labelledby")
+    {
+      auto object = ShareRefPtr(Get(element));
+      if (!object)
+      {
+        return;
+      }
+      // A form's or region's role depends on whether it's labelled
+      // (https://w3c.github.io/aria/#document-handling_author-errors_roles).
+      if (HasAnyRole(element, {u8"form", u8"region"}) && (oldValue.empty() || newValue.empty()))
+      {
+        object->UpdateRole();
+      }
+      HandleTextChanged(object.get());
+    }
+    else if (name == u8"aria-checked")
+    {
+      CheckedStateChanged(element);
+    }
+    else if (name == u8"aria-colcount")
+    {
+      PostNotification(&element, AXNotification::ColumnCountChanged);
+      DeferRecomputeTableIsExposed(&element);
+    }
+    else if (name == u8"aria-colindex")
+    {
+      PostNotification(&element, AXNotification::ARIAColumnIndexChanged);
+      recomputeParentTableProperties({TableProperty::Exposed});
+    }
+    else if (name == u8"aria-colindextext")
+    {
+      PostNotification(&element, AXNotification::ARIAColumnIndexTextChanged);
+    }
+    else if (name == u8"aria-colspan")
+    {
+      PostNotification(&element, AXNotification::ColumnSpanChanged);
+      recomputeParentTableProperties({TableProperty::CellSlots, TableProperty::Exposed});
+    }
+    else if (name == u8"aria-describedby")
+    {
+      PostNotification(&element, AXNotification::DescribedByChanged);
+    }
+    else if (name == u8"aria-description")
+    {
+      PostNotification(&element, AXNotification::ExtendedDescriptionChanged);
+    }
+    else if (name == u8"aria-flowto")
+    {
+      PostNotification(&element, AXNotification::FlowToChanged);
+    }
+    else if (name == u8"aria-keyshortcuts")
+    {
+      PostNotification(&element, AXNotification::KeyShortcutsChanged);
+    }
+    else if (name == u8"aria-level")
+    {
+      PostNotification(&element, AXNotification::LevelChanged);
+    }
+    else if (name == u8"aria-live")
+    {
+      // FIXME: Starting or stopping tracking the live region, with live regions.
+      PostNotification(&element, AXNotification::LiveRegionStatusChanged);
+    }
+    else if (name == u8"aria-placeholder")
+    {
+      PostNotification(&element, AXNotification::PlaceholderChanged);
+    }
+    else if (name == u8"aria-rowindex")
+    {
+      PostNotification(&element, AXNotification::ARIARowIndexChanged);
+      recomputeParentTableProperties({TableProperty::CellSlots, TableProperty::Exposed});
+    }
+    else if (name == u8"aria-rowindextext")
+    {
+      PostNotification(&element, AXNotification::ARIARowIndexTextChanged);
+    }
+    else if (name == u8"aria-valuemax")
+    {
+      PostNotification(&element, AXNotification::MaximumValueChanged);
+    }
+    else if (name == u8"aria-valuemin")
+    {
+      PostNotification(&element, AXNotification::MinimumValueChanged);
+    }
+    else if (name == u8"aria-multiline")
+    {
+      // Whether a text control is a text area or a text field depends on it.
+      if (auto object = ShareRefPtr(Get(element)); object
+                                                   && (object->Role() == AccessibilityRole::TextArea
+                                                       || object->Role() == AccessibilityRole::TextField))
+      {
+        object->UpdateRole();
+      }
+    }
+    else if (name == u8"aria-multiselectable")
+    {
+      PostNotification(&element, AXNotification::MultiSelectableStateChanged);
+    }
+    else if (name == u8"aria-orientation")
+    {
+      PostNotification(&element, AXNotification::OrientationChanged);
+    }
+    else if (name == u8"aria-posinset")
+    {
+      PostNotification(&element, AXNotification::PositionInSetChanged);
+    }
+    else if (name == u8"aria-relevant")
+    {
+      PostNotification(&element, AXNotification::LiveRegionRelevantChanged);
+    }
+    else if (name == u8"aria-selected")
+    {
+      OnSelectedOptionChanged(element);
+    }
+    else if (name == u8"aria-setsize")
+    {
+      PostNotification(&element, AXNotification::SetSizeChanged);
+    }
+    else if (name == u8"aria-expanded")
+    {
+      HandleAriaExpandedChange(element);
+    }
+    else if (name == u8"aria-haspopup")
+    {
+      PostNotification(&element, AXNotification::HasPopupChanged);
+    }
+    else if (name == u8"aria-hidden")
+    {
+      if (auto object = ShareRefPtr(GetOrCreate(element)))
+      {
+        object->RecomputeIsIgnoredForDescendants(true);
+      }
+      // FIXME: Updating the modal dialog when it's inside the element (deferModalChange), with the modal
+      // tracking.
+    }
+    else if (name == u8"aria-invalid")
+    {
+      PostNotification(&element, AXNotification::InvalidStatusChanged);
+    }
+    else if (name == u8"aria-modal")
+    {
+      // FIXME: Adding or removing the element from the modal elements (deferModalChange), with the modal
+      // tracking.
+    }
+    else if (name == u8"aria-current")
+    {
+      PostNotification(&element, AXNotification::CurrentStateChanged);
+    }
+    else if (name == u8"aria-disabled")
+    {
+      PostNotification(&element, AXNotification::DisabledStateChanged);
+    }
+    else if (name == u8"aria-pressed")
+    {
+      PostNotification(&element, AXNotification::PressedStateChanged);
+    }
+    else if (name == u8"aria-readonly")
+    {
+      PostNotification(&element, AXNotification::ReadOnlyStatusChanged);
+    }
+    else if (name == u8"aria-required")
+    {
+      PostNotification(&element, AXNotification::RequiredStatusChanged);
+    }
+    else if (name == u8"aria-roledescription")
+    {
+      PostNotification(&element, AXNotification::ARIARoleDescriptionChanged);
+    }
+    else if (name == u8"aria-rowcount")
+    {
+      HandleRowCountChanged(Get(element));
+    }
+    else if (name == u8"aria-rowspan")
+    {
+      PostNotification(&element, AXNotification::RowSpanChanged);
+      recomputeParentTableProperties({TableProperty::CellSlots, TableProperty::Exposed});
+    }
+    else if (name == u8"aria-sort")
+    {
+      PostNotification(&element, AXNotification::SortDirectionChanged);
+    }
+    else if (name == u8"aria-owns")
+    {
+      // FIXME: Moving the owned children (and the objects that stitch text together around them), with
+      // relations.
+    }
+    else if (name == u8"aria-braillelabel")
+    {
+      PostNotification(&element, AXNotification::BrailleLabelChanged);
+    }
+    else if (name == u8"aria-brailleroledescription")
+    {
+      PostNotification(&element, AXNotification::BrailleRoleDescriptionChanged);
+    }
+  }
+
+  void AXObjectCache::HandleRoleChanged(dom::Element &element, dom::DOMStringView oldValue,
+                                        dom::DOMStringView newValue) noexcept
+  {
+    auto object = ShareRefPtr(Get(element));
+    if (!object)
+    {
+      return;
+    }
+    // Which kind of object an element gets depends on its role (a row's especially), so it's made again: its
+    // parent's children are worked out again.
+    if (oldValue.empty() || oldValue == u8"row" || newValue.empty() || newValue == u8"row")
+    {
+      if (auto *parent = object->ParentObject())
+      {
+        Remove(element);
+        ChildrenChanged(parent);
+        return;
+      }
+    }
+    object->UpdateRole();
+  }
+
+  void AXObjectCache::HandleAriaExpandedChange(dom::Element &element) noexcept
+  {
+    auto object = ShareRefPtr(Get(element));
+    if (!object)
+    {
+      return;
+    }
+    // The rows of the tree or table it's in change.
+    for (auto *ancestor = object->ParentObject(); ancestor; ancestor = ancestor->ParentObject())
+    {
+      if (ancestor->SupportsRowCountChange())
+      {
+        HandleRowCountChanged(ancestor);
+        break;
+      }
+    }
+    auto role = object->Role();
+    if (role == AccessibilityRole::Row || role == AccessibilityRole::TreeItem)
+    {
+      PostNotification(object.get(),
+                       object->IsExpanded() ? AXNotification::RowExpanded : AXNotification::RowCollapsed);
+    }
+    else
+    {
+      PostNotification(object.get(), AXNotification::ExpandedChanged);
+    }
+  }
+
+  void AXObjectCache::HandleRowCountChanged(AccessibilityObject *object) noexcept
+  {
+    if (!object)
+    {
+      return;
+    }
+    if (auto *nodeObject = DynamicDowncast<AccessibilityNodeObject>(*object))
+    {
+      nodeObject->RecomputeIsExposableIfNecessary();
+    }
+    PostNotification(object, AXNotification::RowCountChanged);
+  }
+
+  void AXObjectCache::HandleTextChanged(AccessibilityObject *object) noexcept
+  {
+    if (!object)
+    {
+      return;
+    }
+    Ref protectedObject = ShareRef(*object);
+
+    bool isText = object->IsStaticText();
+    for (auto *ancestor = object; ancestor; ancestor = ancestor->ParentObject())
+    {
+      // FIXME: Live region and non-native text control (contenteditable, role=textbox) value notifications,
+      // with live regions and text ranges.
+      if (!isText)
+      {
+        continue;
+      }
+      // A static text's text changed: so did the name of an ancestor named by the text under it.
+      auto role = ancestor->Role();
+      if (ancestor->DependsOnTextUnderElement() || role == AccessibilityRole::Label
+          || role == AccessibilityRole::TextField)
+      {
+        PostNotification(ancestor, AXNotification::TextUnderElementChanged);
+      }
+      // FIXME: The objects the ancestor labels (labelForObjects) need their names again, with relations.
+    }
+
+    PostNotification(object, AXNotification::TextChanged);
+    object->RecomputeIsIgnored();
+  }
+
+  void AXObjectCache::DeferTextChangedIfNeeded(dom::Node *node) noexcept
+  {
+    if (!node || !NodeRendererIsValid(*node))
+    {
+      return;
+    }
+    if (RendererNeedsDeferredUpdate(*node->Renderer()))
+    {
+      _deferredTextChangedList.add(node);
+      StartPerformCacheUpdateTimer();
+      return;
+    }
+    HandleTextChanged(GetOrCreate(*node));
+  }
+
+  void AXObjectCache::CheckedStateChanged(dom::Element &element) noexcept
+  {
+    PostNotification(&element, AXNotification::CheckedStateChanged);
+  }
+
+  void AXObjectCache::ValueChanged(dom::Element &element) noexcept
+  {
+    PostNotification(&element, AXNotification::ValueChanged);
+  }
+
+  void AXObjectCache::OnSelectedOptionChanged(dom::Element &element) noexcept
+  {
+    if (table_helpers::HasCellARIARole(element))
+    {
+      PostNotification(&element, AXNotification::SelectedCellsChanged);
+    }
+    else if (IsHTMLElementNamed(element, u8"option"))
+    {
+      PostNotification(&element, AXNotification::SelectedStateChanged);
+    }
+    else if (auto object = ShareRefPtr(GetOrCreate(element)))
+    {
+      for (auto *ancestor = object->ParentObject(); ancestor; ancestor = ancestor->ParentObject())
+      {
+        if (ancestor->CanHaveSelectedChildren())
+        {
+          SelectedChildrenChanged(ancestor->GetNode());
+          PostNotification(object.get(), AXNotification::SelectedStateChanged);
+          break;
+        }
+      }
+    }
+
+    HandleMenuItemSelected(&element);
+    // FIXME: Telling the tabs that control the selected tab panel (handleTabPanelSelected), with relations.
+  }
+
+  void AXObjectCache::HandleMenuItemSelected(dom::Element *element) noexcept
+  {
+    if (!element || !HasAnyRole(*element, {u8"menuitem", u8"menuitemradio", u8"menuitemcheckbox"}))
+    {
+      return;
+    }
+    if (!element->Focused()
+        && !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
+          element->GetAttribute(u8"aria-selected").value_or(dom::DOMString {}), u8"true"))
+    {
+      return;
+    }
+    PostNotification(GetOrCreate(*element), AXNotification::MenuListItemSelected);
+  }
+
+  void AXObjectCache::SelectedChildrenChanged(dom::Node *node) noexcept
+  {
+    PostNotification(node, AXNotification::SelectedChildrenChanged);
+  }
+
+  void AXObjectCache::SelectedChildrenChanged(RenderObject *renderer) noexcept
+  {
+    if (renderer)
+    {
+      SelectedChildrenChanged(renderer->GetNode());
+    }
+  }
+
   void AXObjectCache::PerformDeferredCacheUpdate() noexcept
   {
     if (_performingDeferredCacheUpdate)
@@ -766,8 +1448,89 @@ namespace krys::boo::ax
       }
     }
 
-    // FIXME: The other deferred updates (attribute changes, text changes, recomputing ignored states,
-    // modals, relations and focus), with the changes they come from.
+    auto textChanged = std::exchange(_deferredTextChangedList, {});
+    for (auto *node : textChanged)
+    {
+      Ref protectedNode = ShareRef(*node);
+      HandleTextChanged(GetOrCreate(*node));
+    }
+
+    auto recomputeIsIgnored = std::exchange(_deferredRecomputeIsIgnoredList, {});
+    for (auto *element : recomputeIsIgnored)
+    {
+      if (auto *renderer = element->Renderer())
+      {
+        RecomputeIsIgnored(*renderer);
+      }
+    }
+
+    // Handling one change can't remove another's element (that needs the DOM to change), but it can defer
+    // more; those wait for the next update.
+    auto attributeChanges = std::exchange(_deferredAttributeChanges, {});
+    for (const auto &change : attributeChanges)
+    {
+      Ref protectedElement = ShareRef(*change.Element);
+      HandleAttributeChange(*change.Element, change.Name.View(), change.OldValue, change.NewValue);
+    }
+
+    // FIXME: The other deferred updates (modals, relations and focus), with the changes they come from.
+  }
+
+  void AXObjectCache::OnRendererCreated(dom::Node &node) noexcept
+  {
+    if (auto *object = DynamicDowncast<AccessibilityRenderObject>(Get(node)))
+    {
+      if (object->SetRendererIfNeeded(node.Renderer()))
+      {
+        _deferredRendererChangedList.add(object->ObjectID());
+        StartPerformCacheUpdateTimer();
+      }
+    }
+  }
+
+  void AXObjectCache::OnStyleChange(dom::Element &element, const RenderStyle *oldStyle,
+                                    const RenderStyle *newStyle) noexcept
+  {
+    if (!oldStyle || !newStyle)
+    {
+      return;
+    }
+    auto *object = Get(element);
+    if (!object)
+    {
+      return;
+    }
+    if (element.Renderer())
+    {
+      // Unlike visibility, content-visibility changes don't reach the tree through the render tree.
+      auto isContentVisibilityHidden = [](const RenderStyle &style)
+      {
+        return style.GetContentVisibility() == ContentVisibility::Hidden;
+      };
+      if (isContentVisibilityHidden(*oldStyle) != isContentVisibilityHidden(*newStyle))
+      {
+        ChildrenChanged(object);
+      }
+    }
+    else if ((oldStyle->UsedVisibility() == Visibility::Visible)
+             != (newStyle->UsedVisibility() == Visibility::Visible))
+    {
+      // A rendered element would hear of it from the render tree.
+      ChildrenChanged(object);
+    }
+  }
+
+  void AXObjectCache::OnInertOrVisibilityChange(RenderElement &renderer) noexcept
+  {
+    if (auto *parent = renderer.Parent())
+    {
+      ChildrenChanged(*parent, &renderer);
+    }
+  }
+
+  void AXObjectCache::OnLayoutComplete(RenderObject &layoutRoot) noexcept
+  {
+    PostNotification(&layoutRoot, AXNotification::LayoutComplete);
   }
 
   void AXObjectCache::PostNotification(AccessibilityObject *object, AXNotification notification) noexcept
@@ -821,6 +1584,8 @@ namespace krys::boo::ax
     {
       return;
     }
+    // The host may ask about the objects, so bring the tree (and the layout it depends on) up to date first.
+    PerformDeferredCacheUpdate();
 
     // Posting can queue more notifications; those wait for the next time the timer fires.
     auto notifications = std::exchange(_notificationsToPost, {});
@@ -862,10 +1627,15 @@ namespace krys::boo::ax
   void AXObjectCache::PostPlatformNotification(AccessibilityObject &object,
                                                AXNotification notification) noexcept
   {
-    // FIXME: Posting the notification to the platform (the chrome client's postAccessibilityNotification),
-    // with the host's accessibility bridge.
-    (void)object;
-    (void)notification;
+    // The host may ask about the object, which mustn't happen in the middle of a layout or with style out of
+    // date.
+    auto *page = _document.GetPage();
+    auto *view = _document.View();
+    if (!page || !view || view->LayoutContext().IsInLayout() || _document.ChildNeedsStyleRecalc())
+    {
+      return;
+    }
+    page->GetChromeClient().PostAccessibilityNotification(object, notification);
   }
 
   utf8_stringview NotificationToString(AXNotification notification) noexcept

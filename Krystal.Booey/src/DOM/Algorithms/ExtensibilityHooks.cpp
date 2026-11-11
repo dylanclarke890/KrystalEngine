@@ -254,7 +254,10 @@ namespace krys::boo::dom
                                                bool onlyReplacedElementsInserted) noexcept
   {
     node.OnChildrenChanged();
-    // FIXME: Telling the accessibility cache (childrenChanged), with accessibility.
+    if (auto *cache = node.NodeDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(node);
+    }
 
     if (node.NodeDocument().IsDirAttributeDirty()) KRYS_UNLIKELY
     {
@@ -413,6 +416,13 @@ namespace krys::boo::dom
                                                    DOMStringAtom namespaceURI) noexcept
   {
     element.OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    // FIXME: Telling the accessibility cache (deferAttributeChangeIfNeeded), with accessibility.
+    // Only attributes in no namespace mean anything to accessibility.
+    if (namespaceURI.View().empty())
+    {
+      if (auto *cache = element.NodeDocument().ExistingAXObjectCache())
+      {
+        cache->DeferAttributeChangeIfNeeded(element, localName, oldValue, value);
+      }
+    }
   }
 }

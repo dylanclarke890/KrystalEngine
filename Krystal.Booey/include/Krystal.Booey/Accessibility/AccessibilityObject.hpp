@@ -455,6 +455,13 @@ namespace krys::boo::ax
     /// @brief Whether the object is an image map's `area`.
     KRYS_NODISCARD bool IsImageMapLink() const noexcept;
     KRYS_NODISCARD bool IsRootWebArea() const noexcept;
+    /// @brief Whether the role is one whose children can be selected (with `aria-selected`, or as the focused
+    /// or active descendant).
+    KRYS_NODISCARD bool CanHaveSelectedChildren() const noexcept;
+    /// @brief Whether the role is one whose row count can change (by expanding or collapsing rows).
+    KRYS_NODISCARD bool SupportsRowCountChange() const noexcept;
+    /// @brief Whether the object's name comes from the text under it, so it changes with that text.
+    KRYS_NODISCARD bool DependsOnTextUnderElement() const noexcept;
 
     // Attributes.
 

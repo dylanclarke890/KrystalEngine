@@ -26,6 +26,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
@@ -291,7 +292,13 @@ namespace krys::boo
       imageSizeChange = SetImageSizeForAltText(GetCachedImage());
     }
     RepaintOrMarkForLayout(imageSizeChange, rect);
-    // FIXME: Tell the accessibility cache and didLoadImage (for largest contentful paint), once they exist.
+    // Whether an image is ignored can depend on its size.
+    if (auto *cache = GetDocument().ExistingAXObjectCache())
+    {
+      cache->DeferRecomputeIsIgnoredIfNeeded(GetElement());
+    }
+    // FIXME: Telling the page the image loaded (didLoadImage, for largest contentful paint), once there's
+    // one.
   }
 
   void RenderImage::UpdateIntrinsicSizeIfNeeded(const LayoutSize &newSize) noexcept

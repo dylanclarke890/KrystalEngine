@@ -5,14 +5,48 @@
 #include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
 #include "Krystal.Booey/Accessibility/AXLogger.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include <utility>
 
 namespace krys::boo::ax::tests
 {
-  /// @brief A laid-out page in a frame with accessibility enabled (for the fixture's lifetime).
-  struct AccessibilityFixture : boo::tests::PageInFrameFixture
+  /// @brief A chrome client that records the accessibility notifications posted to it.
+  class NotificationRecorder final : public ChromeClient
+  {
+  public:
+    List<Pair<Ref<AccessibilityObject>, AXNotification>> Notifications;
+
+    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+    {
+    }
+
+    void PostAccessibilityNotification(AccessibilityObject &object,
+                                       AXNotification notification) noexcept final
+    {
+      Notifications.emplace_back(ShareRef(object), notification);
+    }
+  };
+
+  /// @brief The page an `AccessibilityFixture` is in, made before the fixture's frame.
+  struct AccessibilityPage
+  {
+    NotificationRecorder *Recorder {nullptr};
+    Ref<Page> TestPage {CreatePage()};
+
+    KRYS_NODISCARD Ref<Page> CreatePage() noexcept
+    {
+      auto recorder = CreateUnique<NotificationRecorder>();
+      Recorder = recorder.get();
+      return Page::Create(krys::move(recorder));
+    }
+  };
+
+  /// @brief A laid-out page with accessibility enabled (for the fixture's lifetime), whose notifications to
+  /// the host are recorded.
+  struct AccessibilityFixture : AccessibilityPage, boo::tests::PageInFrameFixture
   {
     explicit AccessibilityFixture(utf8_string &&markup, IntSize viewSize = {400, 300}) noexcept
-        : PageInFrameFixture(krys::move(markup), viewSize)
+        : PageInFrameFixture(*TestPage, krys::move(markup), viewSize)
     {
       AXObjectCache::EnableAccessibility();
       (void)Document->UpdateLayout();
@@ -36,6 +70,29 @@ namespace krys::boo::ax::tests
       auto *object = Cache().GetOrCreate(ById(id));
       REQUIRE(object);
       return *object;
+    }
+
+    /// @brief Runs the tasks the change queued (updating the tree and posting its notifications), then
+    /// returns the notifications posted to the host since the last call.
+    KRYS_NODISCARD List<Pair<Ref<AccessibilityObject>, AXNotification>> TakeNotifications() noexcept
+    {
+      html::EventLoop::Current().RunUntilIdle();
+      return std::exchange(Recorder->Notifications, {});
+    }
+
+    /// @brief Whether @p notification was posted for @p object, among @p notifications.
+    KRYS_NODISCARD static bool
+      WasPosted(const List<Pair<Ref<AccessibilityObject>, AXNotification>> &notifications,
+                const AccessibilityObject &object, AXNotification notification) noexcept
+    {
+      for (const auto &[posted, kind] : notifications)
+      {
+        if (posted.get() == &object && kind == notification)
+        {
+          return true;
+        }
+      }
+      return false;
     }
 
     /// @brief The tree from the root, as `AXLogger` dumps it.

@@ -44,6 +44,12 @@ namespace krys::boo::svg
   class SVGImageElement;
 }
 
+namespace krys::boo::ax
+{
+  class AccessibilityObject;
+  enum class AXNotification : uint8;
+}
+
 namespace krys::boo
 {
   class GraphicsLayer;
@@ -90,6 +96,15 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool IsSVGImageChromeClient() const noexcept
     {
       return false;
+    }
+
+    /// @brief Called when the page's accessibility tree posts @p notification for @p object, for the host to
+    /// pass on to assistive technology.
+    virtual void PostAccessibilityNotification(ax::AccessibilityObject &object,
+                                               ax::AXNotification notification) noexcept
+    {
+      (void)object;
+      (void)notification;
     }
 
     /// @brief Called when an `<image>` in the page has loaded its image.
