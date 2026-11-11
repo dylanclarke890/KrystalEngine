@@ -1234,9 +1234,9 @@ namespace krys::ui
       }
       case pal::PointerAction::Cancelled:
       {
-        // FIXME: End the event handler's press too, without the release's events.
         _penButton = boo::MouseButton::None;
         _penButtons = 0;
+        handler.CancelMousePress();
         _page->GetPointerCaptureController().CancelPointer(boo::PenPointerID,
                                                            _frame->View()->WindowToContents(intPoint));
         break;

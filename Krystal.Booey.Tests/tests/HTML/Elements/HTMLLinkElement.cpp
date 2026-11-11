@@ -123,6 +123,31 @@ namespace krys::boo::html::tests
     CHECK(fixture.RendererSize(u8"box") == IntSize(30, 20));
   }
 
+  TEST_CASE("HTMLLinkElement: an explicitly enabled alternative sheet is active",
+            "[HTML][HTMLLinkElement][html:attr-link-disabled]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddText(u8"file:///alt.css", u8"#box { width: 30px; height: 20px }");
+    loader.Strategy.Defer = true;
+
+    PageInFrameFixture fixture(
+      u8"<head><link id=alt rel='alternate stylesheet' title=alt disabled href='file:///alt.css'></head>"
+      u8"<body><div id=box></div></body>");
+    CHECK(loader.Strategy.Requests.empty());
+
+    // Removing the disabled attribute explicitly enables it: it loads as an active sheet, and applies.
+    auto &alt = Link(fixture, u8"alt");
+    alt.RemoveAttribute(u8"disabled");
+    REQUIRE(alt.StyleSheetIsLoading());
+    CHECK(fixture.Document->StyleScope().HasPendingSheets());
+
+    loader.Strategy.CompleteDeferred();
+    RunNetworkingTasks();
+    REQUIRE(alt.Sheet());
+    CHECK_FALSE(fixture.Document->StyleScope().HasPendingSheets());
+    CHECK(fixture.RendererSize(u8"box") == IntSize(30, 20));
+  }
+
   TEST_CASE("HTMLLinkElement: imports load, nested and with media conditions", "[HTML][HTMLLinkElement]")
   {
     LoaderFixture loader;

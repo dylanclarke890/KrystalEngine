@@ -169,6 +169,26 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderLayer: clip rects through a transformed layer",
+                   "[Rendering][RenderLayer]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0 }
+      #rotated { position: absolute; width: 100px; height: 20px; overflow: hidden; transform: rotate(90deg) }
+      #inner { position: relative; width: 100px; height: 20px }
+    </style><div id=rotated><div id=inner></div></div>)html"};
+    (void)fixture.Document->UpdateLayout();
+    auto &viewLayer = ViewLayer(fixture);
+    auto *inner = LayerOf(fixture, u8"inner");
+    REQUIRE(inner);
+
+    // The rotated overflow clip is the bounding box of the clip turned about its centre, (50, 10).
+    RenderLayer::ClipRectsContext context(&viewLayer, PaintingClipRects,
+                                          RenderLayer::ClipRectTemporaryOptions);
+    auto rects = inner->CalculateRects(context, inner->OffsetFromAncestor(&viewLayer));
+    CHECK(rects.GetBackgroundRect().Rect() == LayoutRect(40, -40, 20, 100));
+  }
+
   TEST_CASE("RenderLayer: paints opacity in a transparency layer", "[Rendering][RenderLayer][Painting]")
   {
     CHECK(

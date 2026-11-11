@@ -3981,10 +3981,15 @@ namespace krys::boo
       // bounding box of the transformed quad.
       // It would be better for callers to transform rects into the coordinate space of the nearest clipped
       // layer, apply the clip in local space, and then repeat until the required coordinate space is reached.
-      // FIXME: Transform the clips into the root's coordinates (localToContainerQuad) when the offset can't
-      // be used.
+      bool needsTransform = clipRectsContext.Type == AbsoluteClipRects
+                              ? _hasTransformedAncestor || !CanUseOffsetFromAncestor()
+                              : !CanUseOffsetFromAncestor(*clipRectsContext.RootLayer);
 
-      auto offset = ToLayoutPoint(OffsetFromAncestor(clipRectsContext.RootLayer, AdjustForColumns));
+      LayoutPoint offset;
+      if (!needsTransform)
+      {
+        offset = ToLayoutPoint(OffsetFromAncestor(clipRectsContext.RootLayer, AdjustForColumns));
+      }
 
       if (clipRects.Fixed() && &clipRectsContext.RootLayer->Renderer() == &Renderer().View())
       {
@@ -3995,6 +4000,13 @@ namespace krys::boo
       {
         ClipRect newOverflowClip =
           RendererOverflowClipRectForChildLayers({}, clipRectsContext.GetOverlayScrollbarSizeRelevancy());
+        if (needsTransform)
+        {
+          newOverflowClip = LayoutRect(Renderer()
+                                         .LocalToContainerQuad(FloatQuad(FloatRect(newOverflowClip.Rect())),
+                                                               &clipRectsContext.RootLayer->Renderer())
+                                         .BoundingBox());
+        }
         newOverflowClip.MoveBy(offset);
         newOverflowClip.SetAffectedByRadius(Renderer().Style().HasBorderRadius());
         clipRects.SetOverflowClipRect(Intersection(newOverflowClip, clipRects.OverflowClipRect()));
@@ -4012,6 +4024,13 @@ namespace krys::boo
         if (auto *box = DynamicDowncast<RenderBox>(Renderer()))
         {
           LayoutRect newPosClip = box->ClipRect({});
+          if (needsTransform)
+          {
+            newPosClip = LayoutRect(Renderer()
+                                      .LocalToContainerQuad(FloatQuad(FloatRect(newPosClip)),
+                                                            &clipRectsContext.RootLayer->Renderer())
+                                      .BoundingBox());
+          }
           newPosClip.MoveBy(offset);
           clipRects.SetPosClipRect(Intersection(newPosClip, clipRects.PosClipRect()));
           clipRects.SetOverflowClipRect(Intersection(newPosClip, clipRects.OverflowClipRect()));

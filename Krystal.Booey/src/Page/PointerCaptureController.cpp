@@ -815,6 +815,8 @@ namespace krys::boo
     capturingData->PendingTargetOverride = nullptr;
     capturingData->CurrentState = CapturingData::State::Cancelled;
     capturingData->PreviousTarget = nullptr;
+    // Nothing is pressed after a cancel: a pen or mouse pointer's next press is a pointerdown again.
+    capturingData->PointerIsPressed = false;
 
     auto target = [&]() -> RefPtr<dom::Element>
     {

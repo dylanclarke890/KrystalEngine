@@ -161,6 +161,7 @@ namespace krys::boo::tests
     SECTION("Without a family that has a font, the primary font is the last resort")
     {
       FontCascade cascade {Description({StringAtom {u8"No Such Family"}})};
+      cascade.Update();
       CHECK(cascade.PrimaryFont()->PlatformData().Face() == &FontDatabase::Singleton().BundledFace());
     }
 

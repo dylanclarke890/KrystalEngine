@@ -914,9 +914,6 @@ namespace krys::boo::html
 
   bool HTMLLinkElement::Disabled() const noexcept
   {
-    // FIXME: Whenever the disabled attribute is removed, set the link element's
-    // explicitly enabled attribute to true. This is more than just changing this method because the attribute
-    // can be set in other ways.
     return Reflect<bool>(*this, u8"disabled");
   }
 

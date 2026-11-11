@@ -717,6 +717,32 @@ namespace krys::boo
     return swallowEvent;
   }
 
+  void EventHandler::CancelMousePress() noexcept
+  {
+    if (auto *document = _frame.Document())
+    {
+      document->Selection().SetCaretBlinkingSuspended(false);
+    }
+    if (AutoscrollInProgress())
+    {
+      StopAutoscrollTimer();
+    }
+
+    _mousePressed = false;
+    _capturesDragging = false;
+    _mouseDownMayStartDrag = false;
+    _mouseDownMayStartSelect = false;
+    _mouseDownMayStartAutoscroll = false;
+
+    if (auto *resizeLayer = _resizeLayer.get())
+    {
+      resizeLayer->SetInResizeMode(false);
+      _resizeLayer = nullptr;
+    }
+
+    InvalidateClick();
+  }
+
   void EventHandler::InvalidateClick() noexcept
   {
     _clickCount = 0;

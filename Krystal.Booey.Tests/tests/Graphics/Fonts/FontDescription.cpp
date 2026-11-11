@@ -280,6 +280,7 @@ namespace krys::boo::tests
     SECTION("primary font metrics")
     {
       // No family is given, so the primary font is the bundled Liberation Sans.
+      cascade.Update();
       const auto &metrics = cascade.MetricsOfPrimaryFont();
       CHECK(metrics.IntAscent() == 18);
       CHECK(metrics.IntLineSpacing() == 23);

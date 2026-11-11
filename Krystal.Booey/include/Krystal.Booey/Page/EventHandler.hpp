@@ -310,6 +310,10 @@ namespace krys::boo
     /// mouse.
     void NodeWillBeRemoved(dom::Node &nodeToBeRemoved) noexcept;
 
+    /// @brief Ends the mouse's press without its release's events, as when the host cancels the pointer: no
+    /// drag, selection or autoscroll continues from it, and it doesn't count towards a click.
+    void CancelMousePress() noexcept;
+
     /// @brief Called when the layer whose resizer is being dragged is destroyed.
     void ResizeLayerDestroyed() noexcept;
 
