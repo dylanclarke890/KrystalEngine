@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
@@ -3563,7 +3564,10 @@ namespace krys::boo::dom
 
     (void)SetAttribute(attributeName, DOMString());
     EnsureElementRareData().GetExplicitlySetAttrElementsMap()[attributeName] = CreateWeakPtr(element);
-    // FIXME: Telling the accessibility cache (updateRelations), with accessibility.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->UpdateRelations(*this, attributeName.View());
+    }
   }
 
   bool Element::IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept
@@ -3666,7 +3670,10 @@ namespace krys::boo::dom
 
     // 5. Set this's explicitly set attr-elements to elements.
     EnsureElementRareData().GetExplicitlySetAttrElementListsMap()[attributeName] = krys::move(weakElements);
-    // FIXME: Telling the accessibility cache (updateRelations), with accessibility.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->UpdateRelations(*this, attributeName.View());
+    }
   }
 
   bool Element::IsElementsArrayReflectionAttribute(DOMStringAtom attributeName) noexcept

@@ -149,6 +149,10 @@ namespace krys::boo::ax
     {
       return AccessibilityNodeObject::ParentObject();
     }
+    if (auto *owner = OwnerParentObject()) KRYS_UNLIKELY
+    {
+      return owner;
+    }
 
     // A list marker is a child of its list item, even when it isn't the item's renderer's direct child.
     if (renderer->IsRenderListMarker())
@@ -281,7 +285,7 @@ namespace krys::boo::ax
 
     AddImageMapChildren();
 
-    // FIXME: aria-owned children (updateOwnedChildrenIfNecessary), with relations.
+    UpdateOwnedChildrenIfNecessary();
     _subtreeDirty = false;
 
     // A row's aria-colindex gives its cells theirs, counting on from it (whether or not they're owned).
@@ -811,7 +815,7 @@ namespace krys::boo::ax
     }
 
     // FIXME: The contents of a checkbox's or radio button's label are part of the control
-    // (controlForLabelElement), with relations.
+    // (controlForLabelElement), once a control can have its label as a separate title element.
 
     if (IsExposedTableRow())
     {

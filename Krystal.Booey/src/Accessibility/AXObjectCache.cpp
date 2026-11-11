@@ -44,13 +44,17 @@
 #include "Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
@@ -136,6 +140,40 @@ namespace krys::boo::ax
       }
       return false;
     }
+
+    /// @brief Whether @p element is named by ARIA (which takes precedence over a label element).
+    KRYS_NODISCARD bool HasAnyARIALabelling(const dom::Element &element) noexcept
+    {
+      return element.HasAttribute(dom::DOMStringAtom(u8"aria-label"))
+             || element.HasAttribute(dom::DOMStringAtom(u8"aria-labelledby"));
+    }
+
+    /// @brief A label's control, unless it's a descendant of the label that's being torn down.
+    KRYS_NODISCARD RefPtr<html::HTMLElement>
+      ControlForLabelElement(const html::HTMLLabelElement &label) noexcept
+    {
+      auto control = label.Control();
+      if (!control || (control->Renderer() && !control->Renderer()->Parent()))
+      {
+        return nullptr;
+      }
+      return control;
+    }
+
+    /// @brief The attributes that relate an element to others.
+    constexpr dom::DOMStringView RelationAttributes[] = {
+      u8"aria-activedescendant",
+      u8"aria-controls",
+      u8"aria-describedby",
+      u8"aria-details",
+      u8"aria-errormessage",
+      u8"aria-flowto",
+      u8"aria-labelledby",
+      u8"aria-owns",
+      u8"commandfor",
+      u8"headers",
+      u8"popovertarget",
+    };
 
     KRYS_NODISCARD bool HasAnyRole(const dom::Element &element,
                                    std::initializer_list<dom::DOMStringView> roles) noexcept
@@ -263,11 +301,18 @@ namespace krys::boo::ax
     {
       return FocusedImageMapUIElement(*area);
     }
-    // FIXME: The active descendant (shouldFocusActiveDescendant), with relations.
     auto *focus = GetOrCreate(node);
     if (!focus)
     {
       return nullptr;
+    }
+    // The focus is on the active descendant of an object that has one.
+    if (focus->ShouldFocusActiveDescendant())
+    {
+      if (auto *descendant = focus->ActiveDescendant())
+      {
+        return descendant;
+      }
     }
     if (focus->IsIgnored())
     {
@@ -458,8 +503,8 @@ namespace krys::boo::ax
     }
 
     bool inCanvasSubtree = IsInCanvasSubtree(*composedParent);
-    // FIXME: Descendants of the targets of relations (isDescendantOfRelatedNode), with relations.
-    if (isPartOfRelation == IsPartOfRelation::No)
+    // A relation's target, or a descendant of one, needs an object whatever it is.
+    if (isPartOfRelation == IsPartOfRelation::No && !IsDescendantOfRelatedNode(node))
     {
       bool insideMeterElement = IsHTMLElementNamed(*composedParent, u8"meter");
       auto *element = DynamicDowncast<dom::Element>(node);
@@ -530,7 +575,7 @@ namespace krys::boo::ax
     auto object = krys::move(found->second);
     _objects.erase(found);
 
-    // FIXME: Removing the object's relations (removeAllRelations), with relations.
+    RemoveAllRelations(id);
     object->Detach(AccessibilityDetachmentType::ElementDestroyed);
     if (_scrollViewID == id)
     {
@@ -805,6 +850,11 @@ namespace krys::boo::ax
     {
       return;
     }
+    // Attributes may refer to other elements by the ID.
+    if (name.View() == u8"id")
+    {
+      RelationsNeedUpdate();
+    }
     auto oldString = oldValue.value_or(dom::DOMStringView {});
     auto newString = newValue.value_or(dom::DOMStringView {});
     if (NodeRendererIsValid(element) && RendererNeedsDeferredUpdate(*element.Renderer()))
@@ -816,7 +866,6 @@ namespace krys::boo::ax
     }
     Ref protectedElement = ShareRef(element);
     HandleAttributeChange(element, name.View(), oldString, newString);
-    // FIXME: Updating the relations when an id changes (relationsNeedUpdate), with relations.
   }
 
   bool AXObjectCache::ShouldProcessAttributeChange(dom::Element &element,
@@ -880,7 +929,11 @@ namespace krys::boo::ax
       return;
     }
 
-    // FIXME: Updating the relations the attribute sets up (updateRelations), with relations.
+    if (IsRelationAttribute(name))
+    {
+      UpdateRelations(element, name);
+    }
+
     if (name == u8"role")
     {
       HandleRoleChanged(element, oldValue, newValue);
@@ -902,8 +955,17 @@ namespace krys::boo::ax
     }
     else if (name == u8"for")
     {
-      // FIXME: Updating the label's labelled control and telling the old and new controls their text changed
-      // (updateLabelFor), with relations.
+      // The old and new controls' names change.
+      if (UpdateLabelFor(element))
+      {
+        for (auto id : {oldValue, newValue})
+        {
+          if (auto control = id.empty() ? nullptr : element.ElementInTreeWithId(id))
+          {
+            PostNotification(control.get(), AXNotification::TextChanged);
+          }
+        }
+      }
     }
     else if (name == u8"required")
     {
@@ -1012,8 +1074,7 @@ namespace krys::boo::ax
 
     if (name == u8"aria-activedescendant")
     {
-      // FIXME: Moving the focus to the new active descendant (handleActiveDescendantChange), with relations.
-      PostNotification(&element, AXNotification::ActiveDescendantChanged);
+      HandleActiveDescendantChange(element);
     }
     else if (name == u8"aria-atomic")
     {
@@ -1219,8 +1280,9 @@ namespace krys::boo::ax
     }
     else if (name == u8"aria-owns")
     {
-      // FIXME: Moving the owned children (and the objects that stitch text together around them), with
-      // relations.
+      // (The owned children move with the relation.)
+      // FIXME: The groups of text runs read as one around the owned elements (setDirtyStitchGroups), with
+      // accessibility text ranges.
     }
     else if (name == u8"aria-braillelabel")
     {
@@ -1229,6 +1291,556 @@ namespace krys::boo::ax
     else if (name == u8"aria-brailleroledescription")
     {
       PostNotification(&element, AXNotification::BrailleRoleDescriptionChanged);
+    }
+  }
+
+  // Relations.
+
+  AXRelation AXObjectCache::AttributeToRelationType(dom::DOMStringView attribute) noexcept
+  {
+    if (attribute == u8"aria-activedescendant")
+    {
+      return AXRelation::ActiveDescendant;
+    }
+    if (attribute == u8"aria-controls" || attribute == u8"commandfor" || attribute == u8"popovertarget")
+    {
+      return AXRelation::ControllerFor;
+    }
+    if (attribute == u8"aria-describedby")
+    {
+      return AXRelation::DescribedBy;
+    }
+    if (attribute == u8"aria-details")
+    {
+      return AXRelation::Details;
+    }
+    if (attribute == u8"aria-errormessage")
+    {
+      return AXRelation::ErrorMessage;
+    }
+    if (attribute == u8"aria-flowto")
+    {
+      return AXRelation::FlowsTo;
+    }
+    if (attribute == u8"aria-labelledby")
+    {
+      return AXRelation::LabeledBy;
+    }
+    if (attribute == u8"aria-owns")
+    {
+      return AXRelation::OwnerFor;
+    }
+    if (attribute == u8"headers")
+    {
+      return AXRelation::Headers;
+    }
+    return AXRelation::None;
+  }
+
+  bool AXObjectCache::IsRelationAttribute(dom::DOMStringView attribute) noexcept
+  {
+    return AttributeToRelationType(attribute) != AXRelation::None;
+  }
+
+  AXRelation AXObjectCache::SymmetricRelation(AXRelation relation) noexcept
+  {
+    switch (relation)
+    {
+      case AXRelation::ActiveDescendant:   return AXRelation::ActiveDescendantOf;
+      case AXRelation::ActiveDescendantOf: return AXRelation::ActiveDescendant;
+      case AXRelation::ControlledBy:       return AXRelation::ControllerFor;
+      case AXRelation::ControllerFor:      return AXRelation::ControlledBy;
+      case AXRelation::DescribedBy:        return AXRelation::DescriptionFor;
+      case AXRelation::DescriptionFor:     return AXRelation::DescribedBy;
+      case AXRelation::Details:            return AXRelation::DetailsFor;
+      case AXRelation::DetailsFor:         return AXRelation::Details;
+      case AXRelation::ErrorMessage:       return AXRelation::ErrorMessageFor;
+      case AXRelation::ErrorMessageFor:    return AXRelation::ErrorMessage;
+      case AXRelation::FlowsFrom:          return AXRelation::FlowsTo;
+      case AXRelation::FlowsTo:            return AXRelation::FlowsFrom;
+      case AXRelation::Headers:            return AXRelation::HeaderFor;
+      case AXRelation::HeaderFor:          return AXRelation::Headers;
+      case AXRelation::LabeledBy:          return AXRelation::LabelFor;
+      case AXRelation::LabelFor:           return AXRelation::LabeledBy;
+      case AXRelation::OwnedBy:            return AXRelation::OwnerFor;
+      case AXRelation::OwnerFor:           return AXRelation::OwnedBy;
+      case AXRelation::None:               return AXRelation::None;
+    }
+    return AXRelation::None;
+  }
+
+  bool AXObjectCache::AddRelation(dom::Element &origin, dom::Element &target, AXRelation relation) noexcept
+  {
+    // Only an element's labelled-by relation can be to itself.
+    if (relation == AXRelation::None || (&origin == &target && relation != AXRelation::LabeledBy))
+    {
+      return false;
+    }
+    // ARIA labelling takes precedence over a label element.
+    if (relation == AXRelation::LabelFor && HasAnyARIALabelling(target))
+    {
+      return false;
+    }
+    auto originObject = ShareRefPtr(GetOrCreate(origin, IsPartOfRelation::Yes));
+    auto targetObject = ShareRefPtr(GetOrCreate(target, IsPartOfRelation::Yes));
+    return AddRelation(originObject.get(), targetObject.get(), relation);
+  }
+
+  bool AXObjectCache::AddRelation(AccessibilityObject *origin, AccessibilityObject *target,
+                                  AXRelation relation, bool addSymmetricRelation) noexcept
+  {
+    if (!origin || !target || relation == AXRelation::None
+        || (origin == target && relation != AXRelation::LabeledBy))
+    {
+      return false;
+    }
+    // aria-owns mustn't make a cycle: an object can't own one of its ancestors.
+    if (relation == AXRelation::OwnerFor || relation == AXRelation::OwnedBy)
+    {
+      auto *descendant = relation == AXRelation::OwnerFor ? origin : target;
+      auto *ancestor = relation == AXRelation::OwnerFor ? target : origin;
+      for (auto *object = descendant; object; object = object->ParentObject())
+      {
+        if (object == ancestor)
+        {
+          return false;
+        }
+      }
+    }
+
+    if (relation == AXRelation::OwnerFor)
+    {
+      // The target leaves its current parent's children.
+      // FIXME: This tells the parent its children changed every time the relations are worked out again, even
+      // when the relation was there before.
+      if (auto *targetParent = target->ParentObject(); targetParent && targetParent != origin)
+      {
+        ChildrenChanged(targetParent);
+      }
+    }
+
+    auto originID = origin->ObjectID();
+    auto targetID = target->ObjectID();
+    auto &targets = _relations[originID][relation];
+    // There's only one active descendant, and only one owner.
+    if (relation == AXRelation::ActiveDescendant || relation == AXRelation::OwnedBy)
+    {
+      targets.clear();
+    }
+    targets.add(targetID);
+    _relationTargets.insert(targetID);
+
+    if (relation == AXRelation::OwnerFor)
+    {
+      // Any other owner loses the target.
+      for (auto &[ownerID, ownerRelations] : _relations)
+      {
+        if (ownerID != originID)
+        {
+          RemoveRelationByID(ownerID, targetID, AXRelation::OwnerFor);
+        }
+      }
+      ChildrenChanged(origin);
+    }
+    else if (relation == AXRelation::OwnedBy)
+    {
+      if (auto *parent = origin->ParentObjectUnignored())
+      {
+        ChildrenChanged(parent);
+      }
+    }
+
+    // The reverse relation, while both objects are still in the cache.
+    if (addSymmetricRelation && _objects.contains(originID) && _objects.contains(targetID))
+    {
+      if (auto symmetric = SymmetricRelation(relation); symmetric != AXRelation::None)
+      {
+        AddRelation(target, origin, symmetric, false);
+      }
+    }
+    return true;
+  }
+
+  bool AXObjectCache::AddRelation(dom::Element &origin, dom::DOMStringView attribute) noexcept
+  {
+    auto relation = AttributeToRelationType(attribute);
+    auto name = dom::DOMStringAtom(attribute);
+    bool addedRelation = false;
+    auto addRelations = [&](const List<Ref<dom::Element>> &targets)
+    {
+      for (const auto &target : targets)
+      {
+        addedRelation |= AddRelation(origin, *target, relation);
+      }
+    };
+
+    // The elements the attribute refers to (set through its IDL attribute, or by ID).
+    if (dom::Element::IsElementReflectionAttribute(name))
+    {
+      if (auto target = origin.ElementForAttributeInternal(name))
+      {
+        return AddRelation(origin, *target, relation);
+      }
+    }
+    else if (dom::Element::IsElementsArrayReflectionAttribute(name))
+    {
+      if (auto targets = origin.ElementsForAttributeInternal(name))
+      {
+        addRelations(*targets);
+        return addedRelation;
+      }
+    }
+
+    auto value = origin.GetAttribute(name);
+    if (!value)
+    {
+      // A custom element's default ARIA relations.
+      auto *queue = origin.ReactionQueue();
+      auto *internals = queue ? queue->AttachedInternals() : nullptr;
+      if (!internals)
+      {
+        return false;
+      }
+      if (auto target = internals->ElementForAttributeInternal(name))
+      {
+        addedRelation |= AddRelation(origin, *target, relation);
+      }
+      else if (auto targets = internals->ElementsForAttributeInternal(name))
+      {
+        addRelations(*targets);
+      }
+      return addedRelation;
+    }
+
+    // Attributes that aren't reflected (headers) are lists of IDs.
+    for (const auto &id : infra::StringAlgorithms::SplitOnWhitespace(*value))
+    {
+      auto target = origin.ElementInTreeWithId(id);
+      if (target && target.get() != &origin)
+      {
+        addedRelation |= AddRelation(origin, *target, relation);
+      }
+    }
+    return addedRelation;
+  }
+
+  bool AXObjectCache::AddLabelForRelation(dom::Element &origin) noexcept
+  {
+    auto *label = DynamicDowncast<html::HTMLLabelElement>(origin);
+    auto control = label ? ControlForLabelElement(*label) : nullptr;
+    return control && AddRelation(origin, *control, AXRelation::LabelFor);
+  }
+
+  bool AXObjectCache::RemoveRelation(dom::Element &origin, AXRelation relation) noexcept
+  {
+    auto object = ShareRefPtr(Get(origin));
+    if (!object)
+    {
+      return false;
+    }
+    auto relations = _relations.find(object->ObjectID());
+    if (relations == _relations.end())
+    {
+      return false;
+    }
+    auto targets = relations->second.find(relation);
+    if (targets == relations->second.end())
+    {
+      return false;
+    }
+    auto targetIDs = krys::move(targets->second);
+    relations->second.erase(targets);
+    bool removedRelation = !targetIDs.isEmpty();
+
+    if (auto symmetric = SymmetricRelation(relation); symmetric != AXRelation::None)
+    {
+      for (auto targetID : targetIDs)
+      {
+        RemoveRelationByID(targetID, object->ObjectID(), symmetric);
+      }
+    }
+
+    if (removedRelation && relation == AXRelation::OwnerFor)
+    {
+      // The owned objects go back to their natural parents.
+      ChildrenChanged(object.get());
+      auto *node = object->GetNode();
+      if (auto *parentNode = node ? node->ParentInComposedTree() : nullptr)
+      {
+        ChildrenChanged(Get(*parentNode));
+      }
+      else if (auto *renderer = object->Renderer())
+      {
+        ChildrenChanged(renderer->Parent() ? Get(*renderer->Parent()) : nullptr);
+      }
+      for (auto targetID : targetIDs)
+      {
+        if (auto *target = ObjectForID(targetID))
+        {
+          if (auto *targetNode = target->GetNode(); targetNode && targetNode->ParentInComposedTree())
+          {
+            ChildrenChanged(Get(*targetNode->ParentInComposedTree()));
+          }
+        }
+      }
+    }
+    return removedRelation;
+  }
+
+  void AXObjectCache::RemoveAllRelations(AXID id) noexcept
+  {
+    auto found = _relations.find(id);
+    if (found == _relations.end())
+    {
+      return;
+    }
+    auto relations = krys::move(found->second);
+    _relations.erase(found);
+    for (const auto &[relation, targetIDs] : relations)
+    {
+      if (auto symmetric = SymmetricRelation(relation); symmetric != AXRelation::None)
+      {
+        for (auto targetID : targetIDs)
+        {
+          RemoveRelationByID(targetID, id, symmetric);
+        }
+      }
+    }
+  }
+
+  void AXObjectCache::RemoveRelationByID(AXID originID, AXID targetID, AXRelation relation) noexcept
+  {
+    auto relations = _relations.find(originID);
+    if (relations == _relations.end())
+    {
+      return;
+    }
+    if (auto targets = relations->second.find(relation); targets != relations->second.end())
+    {
+      targets->second.remove(targetID);
+    }
+  }
+
+  void AXObjectCache::UpdateRelationsIfNeeded() noexcept
+  {
+    if (!_relationsNeedUpdate)
+    {
+      return;
+    }
+    _relationsNeedUpdate = false;
+    _relations.clear();
+    _relationTargets.clear();
+    UpdateRelationsForTree(_document);
+  }
+
+  void AXObjectCache::UpdateRelationsForTree(dom::ContainerNode &root) noexcept
+  {
+    for (auto &node : dom::DescendantRange(root))
+    {
+      auto *elementPointer = DynamicDowncast<dom::Element>(node);
+      if (!elementPointer)
+      {
+        continue;
+      }
+      auto &element = *elementPointer;
+      // Elements that aren't in the tree have no relations.
+      if (IsHTMLElementNamed(element, u8"meta") || IsHTMLElementNamed(element, u8"head")
+          || IsHTMLElementNamed(element, u8"script") || IsHTMLElementNamed(element, u8"html")
+          || IsHTMLElementNamed(element, u8"style"))
+      {
+        continue;
+      }
+      if (auto shadowRoot = element.ShadowRoot();
+          shadowRoot && shadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
+      {
+        UpdateRelationsForTree(*shadowRoot);
+      }
+      for (auto attribute : RelationAttributes)
+      {
+        AddRelation(element, attribute);
+      }
+      // A label's relation to its control.
+      AddLabelForRelation(element);
+    }
+  }
+
+  void AXObjectCache::UpdateRelations(dom::Element &origin, dom::DOMStringView attribute) noexcept
+  {
+    if (IsHTMLElementNamed(origin, u8"meta") || IsHTMLElementNamed(origin, u8"head")
+        || IsHTMLElementNamed(origin, u8"script") || IsHTMLElementNamed(origin, u8"html")
+        || IsHTMLElementNamed(origin, u8"style"))
+    {
+      return;
+    }
+    auto relation = AttributeToRelationType(attribute);
+    if (relation == AXRelation::None)
+    {
+      return;
+    }
+    // commandfor is only a button's; popovertarget only a button's or an input's.
+    if (attribute == u8"commandfor" && !IsHTMLElementNamed(origin, u8"button")) KRYS_UNLIKELY
+    {
+      return;
+    }
+    if (attribute == u8"popovertarget" && !IsHTMLElementNamed(origin, u8"button")
+        && !IsHTMLElementNamed(origin, u8"input")) KRYS_UNLIKELY
+    {
+      return;
+    }
+    // The relations are all worked out when they're next needed anyway.
+    if (_relationsNeedUpdate)
+    {
+      return;
+    }
+    RemoveRelation(origin, relation);
+    AddRelation(origin, attribute);
+  }
+
+  Maybe<ListHashSet<AXID>> AXObjectCache::RelatedObjectIDsFor(const AccessibilityObject &object,
+                                                              AXRelation relation) noexcept
+  {
+    UpdateRelationsIfNeeded();
+    auto relations = _relations.find(object.ObjectID());
+    if (relations == _relations.end())
+    {
+      return null;
+    }
+    auto targets = relations->second.find(relation);
+    if (targets == relations->second.end())
+    {
+      return null;
+    }
+    return targets->second;
+  }
+
+  bool AXObjectCache::IsDescendantOfRelatedNode(dom::Node &node) noexcept
+  {
+    for (auto *parent = node.ParentNode(); parent; parent = parent->ParentNode())
+    {
+      auto *object = Get(*parent);
+      if (object
+          && (_relations.contains(object->ObjectID()) || _relationTargets.contains(object->ObjectID())))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool AXObjectCache::UpdateLabelFor(dom::Element &label) noexcept
+  {
+    auto *labelElement = DynamicDowncast<html::HTMLLabelElement>(label);
+    if (!labelElement)
+    {
+      return false;
+    }
+    if (auto control = ControlForLabelElement(*labelElement); control && HasAnyARIALabelling(*control))
+    {
+      return false;
+    }
+    RemoveRelation(label, AXRelation::LabelFor);
+    AddLabelForRelation(label);
+    return true;
+  }
+
+  void AXObjectCache::HandleActiveDescendantChange(dom::Element &element) noexcept
+  {
+    // Only a focused element's active descendant is of interest.
+    auto *frame = element.NodeDocument().Frame();
+    if (!frame || !element.NodeDocument().IsFocusedAndActive()
+        || element.NodeDocument().FocusedElement() != &element)
+    {
+      return;
+    }
+    auto object = ShareRefPtr(GetOrCreate(element));
+    auto activeDescendant = ShareRefPtr(object ? object->ActiveDescendant() : nullptr);
+    if (!activeDescendant)
+    {
+      return;
+    }
+    if (object->ShouldFocusActiveDescendant())
+    {
+      PostPlatformNotification(*activeDescendant, AXNotification::FocusedUIElementChanged);
+    }
+
+    // The object is told, if it can have an active descendant; otherwise the object it controls that has the
+    // active descendant.
+    RefPtr<AccessibilityObject> target;
+    if (object->SupportsActiveDescendant())
+    {
+      target = object;
+    }
+    else
+    {
+      auto controlledObjects = object->ControlledObjects();
+      for (auto *ancestor = activeDescendant->ParentObject(); ancestor && !target;
+           ancestor = ancestor->ParentObject())
+      {
+        if (std::ranges::any_of(controlledObjects,
+                                [&](const auto &controlled) { return controlled.get() == ancestor; }))
+        {
+          target = ShareRefPtr(ancestor);
+        }
+      }
+    }
+    if (!target)
+    {
+      return;
+    }
+    PostPlatformNotification(*target, AXNotification::ActiveDescendantChanged);
+    // A table cell becoming active changes the table's selected cells.
+    if (target->IsTable() && activeDescendant->IsExposedTableCell())
+    {
+      PostPlatformNotification(*target, AXNotification::SelectedCellsChanged);
+    }
+  }
+
+  void AXObjectCache::HandleTabPanelSelected(dom::Element *oldElement, dom::Element *newElement) noexcept
+  {
+    // The tabs that control the tab panels the focus left and entered change their selected state.
+    auto tabPanelOf = [this](dom::Element *element) -> AccessibilityObject *
+    {
+      auto *object = element ? Get(*element) : nullptr;
+      for (auto *ancestor = object ? object->ParentObject() : nullptr; ancestor;
+           ancestor = ancestor->ParentObject())
+      {
+        if (ancestor->Role() == AccessibilityRole::TabPanel)
+        {
+          return ancestor;
+        }
+      }
+      return nullptr;
+    };
+    auto updateTabs = [this](AccessibilityObject *tabPanel)
+    {
+      if (!tabPanel)
+      {
+        return;
+      }
+      for (const auto &controller : tabPanel->Controllers())
+      {
+        PostNotification(controller.get(), AXNotification::SelectedStateChanged);
+      }
+    };
+
+    auto oldTabPanel = ShareRefPtr(tabPanelOf(oldElement));
+    updateTabs(oldTabPanel.get());
+    auto newTabPanel = ShareRefPtr(tabPanelOf(newElement));
+    if (newTabPanel && newTabPanel != oldTabPanel)
+    {
+      updateTabs(newTabPanel.get());
+    }
+  }
+
+  void AXObjectCache::OnPopoverToggle(dom::Element &popover) noexcept
+  {
+    // Each element whose popovertarget (or commandfor) is the popover is told.
+    if (auto object = ShareRefPtr(Get(popover)))
+    {
+      for (const auto &invoker : object->Controllers())
+      {
+        PostNotification(invoker.get(), AXNotification::ExpandedChanged);
+      }
     }
   }
 
@@ -1319,7 +1931,11 @@ namespace krys::boo::ax
       {
         PostNotification(ancestor, AXNotification::TextUnderElementChanged);
       }
-      // FIXME: The objects the ancestor labels (labelForObjects) need their names again, with relations.
+      // The objects the ancestor labels need their names again.
+      for (const auto &labeledObject : ancestor->LabelForObjects())
+      {
+        PostNotification(labeledObject.get(), AXNotification::TextChanged);
+      }
     }
 
     PostNotification(object, AXNotification::TextChanged);
@@ -1375,7 +1991,7 @@ namespace krys::boo::ax
     }
 
     HandleMenuItemSelected(&element);
-    // FIXME: Telling the tabs that control the selected tab panel (handleTabPanelSelected), with relations.
+    HandleTabPanelSelected(nullptr, &element);
   }
 
   void AXObjectCache::HandleMenuItemSelected(dom::Element *element) noexcept
@@ -1529,10 +2145,9 @@ namespace krys::boo::ax
   void AXObjectCache::HandleFocusedUIElementChanged(dom::Element *oldElement,
                                                     dom::Element *newElement) noexcept
   {
-    // FIXME: Updating the modal dialog (updateCurrentModalNode), with the modal tracking; and telling the
-    // tabs that control the old and new focus's tab panels (handleTabPanelSelected), with relations.
-    (void)oldElement;
+    // FIXME: Updating the modal dialog (updateCurrentModalNode), with the modal tracking.
     HandleMenuItemSelected(newElement);
+    HandleTabPanelSelected(oldElement, newElement);
     if (!newElement)
     {
       return;

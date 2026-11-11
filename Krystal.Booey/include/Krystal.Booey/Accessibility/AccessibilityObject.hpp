@@ -123,6 +123,31 @@ namespace krys::boo::ax
     Horizontal,
   };
 
+  /// @brief How one object relates to another (each relation has its reverse, such as `LabeledBy` and
+  /// `LabelFor`): set up by ARIA's relation attributes, a label's control, and a cell's headers.
+  enum class AXRelation : uint8
+  {
+    None,
+    ActiveDescendant,
+    ActiveDescendantOf,
+    ControlledBy,
+    ControllerFor,
+    DescribedBy,
+    DescriptionFor,
+    Details,
+    DetailsFor,
+    ErrorMessage,
+    ErrorMessageFor,
+    FlowsFrom,
+    FlowsTo,
+    Headers,
+    HeaderFor,
+    LabeledBy,
+    LabelFor,
+    OwnedBy,
+    OwnerFor,
+  };
+
   class AccessibilityObject;
   /// @brief An mmultiscripts element's scripts, as subscript and superscript pairs.
   using AccessibilityMathMultiscriptPairs = List<Pair<AccessibilityObject *, AccessibilityObject *>>;
@@ -455,6 +480,77 @@ namespace krys::boo::ax
     /// @brief Whether the object is an image map's `area`.
     KRYS_NODISCARD bool IsImageMapLink() const noexcept;
     KRYS_NODISCARD bool IsRootWebArea() const noexcept;
+    // Relations.
+
+    /// @brief The objects this one is related to by @p relation.
+    KRYS_NODISCARD AccessibilityChildrenVector RelatedObjects(AXRelation relation) const noexcept;
+    /// @brief The object `aria-activedescendant` makes the active one, if any.
+    KRYS_NODISCARD AccessibilityObject *ActiveDescendant() const noexcept;
+    KRYS_NODISCARD AccessibilityChildrenVector ActiveDescendantOfObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::ActiveDescendantOf);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector ControlledObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::ControllerFor);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector Controllers() const noexcept
+    {
+      return RelatedObjects(AXRelation::ControlledBy);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector DescribedByObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::DescribedBy);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector DescriptionForObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::DescriptionFor);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector DetailedByObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::Details);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector DetailsForObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::DetailsFor);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector ErrorMessageObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::ErrorMessage);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector ErrorMessageForObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::ErrorMessageFor);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector FlowToObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::FlowsTo);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector FlowFromObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::FlowsFrom);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector LabeledByObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::LabeledBy);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector LabelForObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::LabelFor);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector OwnedObjects() const noexcept
+    {
+      return RelatedObjects(AXRelation::OwnerFor);
+    }
+    KRYS_NODISCARD AccessibilityChildrenVector Owners() const noexcept
+    {
+      return RelatedObjects(AXRelation::OwnedBy);
+    }
+    /// @brief Whether the focus is on the active descendant when the object is focused (by its ARIA role).
+    KRYS_NODISCARD bool ShouldFocusActiveDescendant() const noexcept;
+    /// @brief Whether the role is one that can have an active descendant.
+    KRYS_NODISCARD bool SupportsActiveDescendant() const noexcept;
+
     /// @brief Whether the role is one whose children can be selected (with `aria-selected`, or as the focused
     /// or active descendant).
     KRYS_NODISCARD bool CanHaveSelectedChildren() const noexcept;

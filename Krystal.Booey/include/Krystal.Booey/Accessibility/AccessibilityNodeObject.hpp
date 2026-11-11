@@ -76,6 +76,8 @@ namespace krys::boo::ax
     }
 
     KRYS_NODISCARD AccessibilityObject *ParentObject() const noexcept override;
+    /// @brief The object that aria-owns this one, if any: its parent instead of its DOM parent's.
+    KRYS_NODISCARD AccessibilityObject *OwnerParentObject() const noexcept;
     void AddChildren() noexcept override;
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override;
     void UpdateChildrenIfNecessary() noexcept override;
@@ -186,6 +188,9 @@ namespace krys::boo::ax
 
   protected:
     AccessibilityNodeObject(AXID id, dom::Node *node, AXObjectCache &cache) noexcept;
+
+    /// @brief Adds the objects this one aria-owns as its last children (in aria-owns order).
+    void UpdateOwnedChildrenIfNecessary() noexcept;
 
     KRYS_NODISCARD AccessibilityRole DetermineAccessibilityRole() noexcept override;
     void RecomputeAriaRole() noexcept override

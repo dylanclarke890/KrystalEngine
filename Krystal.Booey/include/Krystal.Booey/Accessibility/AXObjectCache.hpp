@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
@@ -43,6 +44,7 @@ namespace krys::boo
 
   namespace dom
   {
+    class ContainerNode;
     class Document;
     class Element;
     class Node;
@@ -90,6 +92,13 @@ namespace krys::boo::ax
 
     List<Pair<Ref<AccessibilityObject>, AXNotification>> _notificationsToPost;
     Timer _notificationPostTimer;
+
+    // Each object's relations to others (both ways round), worked out for the whole document when needed.
+    using AXRelations = HashMap<AXRelation, ListHashSet<AXID>>;
+    HashMap<AXID, AXRelations> _relations;
+    // The objects some other object is related to.
+    HashSet<AXID> _relationTargets;
+    bool _relationsNeedUpdate {true};
 
     // An attribute change waiting for its element's renderer to be up to date.
     struct DeferredAttributeChange
@@ -255,10 +264,29 @@ namespace krys::boo::ax
 
     /// @brief The nodes assigned to @p slot changed.
     void OnSlottedContentChange(dom::Element &slot) noexcept;
+    /// @brief The popover was shown or hidden: the elements that invoke it are told they expanded or
+    /// collapsed.
+    void OnPopoverToggle(dom::Element &popover) noexcept;
     /// @brief The document's design mode was turned on or off.
     void HandlePageEditabilityChanged() noexcept;
     /// @brief The element being dragged changed from @p oldElement to @p newElement.
     void OnDragElementChanged(dom::Element *oldElement, dom::Element *newElement) noexcept;
+
+    // Relations.
+
+    /// @brief The objects @p object is related to by @p relation (null if none), with the relations brought
+    /// up to date first.
+    KRYS_NODISCARD Maybe<ListHashSet<AXID>> RelatedObjectIDsFor(const AccessibilityObject &object,
+                                                                AXRelation relation) noexcept;
+    /// @brief @p origin's @p attribute (a relation attribute) changed its targets: the relation is set up
+    /// again.
+    void UpdateRelations(dom::Element &origin, dom::DOMStringView attribute) noexcept;
+    /// @brief The relations need working out again (an ID changed, so attributes may refer to other
+    /// elements).
+    void RelationsNeedUpdate() noexcept
+    {
+      _relationsNeedUpdate = true;
+    }
 
     // Notifications.
 
@@ -280,6 +308,30 @@ namespace krys::boo::ax
     KRYS_NODISCARD AccessibilityObject *FocusedObjectForNode(dom::Node &node) noexcept;
     /// @brief A focused area's object: its image's child for it.
     KRYS_NODISCARD AccessibilityObject *FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept;
+
+    KRYS_NODISCARD static AXRelation AttributeToRelationType(dom::DOMStringView attribute) noexcept;
+    KRYS_NODISCARD static AXRelation SymmetricRelation(AXRelation relation) noexcept;
+    KRYS_NODISCARD static bool IsRelationAttribute(dom::DOMStringView attribute) noexcept;
+    bool AddRelation(dom::Element &origin, dom::Element &target, AXRelation relation) noexcept;
+    bool AddRelation(AccessibilityObject *origin, AccessibilityObject *target, AXRelation relation,
+                     bool addSymmetricRelation = true) noexcept;
+    /// @brief Sets up the relation @p origin's @p attribute gives it to the elements it refers to.
+    bool AddRelation(dom::Element &origin, dom::DOMStringView attribute) noexcept;
+    /// @brief A label's relation to its control.
+    bool AddLabelForRelation(dom::Element &origin) noexcept;
+    bool RemoveRelation(dom::Element &origin, AXRelation relation) noexcept;
+    void RemoveAllRelations(AXID id) noexcept;
+    void RemoveRelationByID(AXID originID, AXID targetID, AXRelation relation) noexcept;
+    void UpdateRelationsIfNeeded() noexcept;
+    void UpdateRelationsForTree(dom::ContainerNode &root) noexcept;
+    /// @brief Whether an ancestor of @p node is related to something (so @p node may be named by it, and
+    /// needs an object).
+    KRYS_NODISCARD bool IsDescendantOfRelatedNode(dom::Node &node) noexcept;
+    /// @brief A label's control changed: the label's relation is set up again, unless the control is labelled
+    /// by ARIA (which takes precedence).
+    bool UpdateLabelFor(dom::Element &label) noexcept;
+    void HandleActiveDescendantChange(dom::Element &element) noexcept;
+    void HandleTabPanelSelected(dom::Element *oldElement, dom::Element *newElement) noexcept;
 
     KRYS_NODISCARD bool ShouldProcessAttributeChange(dom::Element &element,
                                                      dom::DOMStringView name) const noexcept;

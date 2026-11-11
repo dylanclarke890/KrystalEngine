@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
@@ -1181,7 +1182,10 @@ namespace krys::boo::html
     {
       QueuePopoverToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
     }
-    // FIXME: Telling the popover's invokers they expanded (onPopoverToggle), with accessibility relations.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnPopoverToggle(*this);
+    }
     return {};
   }
 
@@ -1361,7 +1365,10 @@ namespace krys::boo::html
 
     // 22. Run cleanupSteps.
     cleanupSteps();
-    // FIXME: Telling the popover's invokers they collapsed (onPopoverToggle), with accessibility relations.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnPopoverToggle(*this);
+    }
     return {};
   }
 

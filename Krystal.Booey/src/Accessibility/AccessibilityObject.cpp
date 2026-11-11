@@ -452,7 +452,14 @@ namespace krys::boo::ax
   void AccessibilityObject::InsertChild(AccessibilityObject &child, uint32 index,
                                         DescendIfIgnored descendIfIgnored) noexcept
   {
-    // FIXME: Children aria-owned by another object (they're inserted there instead), with relations.
+    // A child aria-owned by another object is that object's child, not this one's.
+    if (auto owners = child.Owners(); !owners.empty())
+    {
+      if (std::ranges::none_of(owners, [this](const auto &owner) { return owner.get() == this; }))
+      {
+        return;
+      }
+    }
 
     // An area is its image's child (not its map's): only the image inserts it.
     if (child.IsImageMapLink() && child.ParentObject() != this) KRYS_UNLIKELY
@@ -972,8 +979,12 @@ namespace krys::boo::ax
       {
         return {};
       }
-      // FIXME: The cells the headers attribute names, which are the column headers when there are any
-      // (relatedObjects(AXRelation::Headers)), with relations.
+      // The cells the headers attribute names are the column headers, when there are any.
+      headers = RelatedObjects(AXRelation::Headers);
+      if (!headers.empty())
+      {
+        return headers;
+      }
 
       auto rowRange = RowIndexRange();
       auto columnRange = ColumnIndexRange();
@@ -1048,6 +1059,69 @@ namespace krys::boo::ax
       case AccessibilityRole::LandmarkRegion:
       case AccessibilityRole::LandmarkSearch:        return true;
       default:                                       return false;
+    }
+  }
+
+  AccessibilityObject::AccessibilityChildrenVector
+    AccessibilityObject::RelatedObjects(AXRelation relation) const noexcept
+  {
+    auto *cache = AxObjectCache();
+    auto ids = cache ? cache->RelatedObjectIDsFor(*this, relation) : null;
+    if (!ids)
+    {
+      return {};
+    }
+    AccessibilityChildrenVector objects;
+    for (auto id : *ids)
+    {
+      if (auto *object = cache->ObjectForID(id))
+      {
+        objects.push_back(ShareRef(*object));
+      }
+    }
+    return objects;
+  }
+
+  AccessibilityObject *AccessibilityObject::ActiveDescendant() const noexcept
+  {
+    auto activeDescendants = RelatedObjects(AXRelation::ActiveDescendant);
+    krys_debug_assert(activeDescendants.size() <= 1);
+    return activeDescendants.empty() ? nullptr : activeDescendants[0].get();
+  }
+
+  bool AccessibilityObject::ShouldFocusActiveDescendant() const noexcept
+  {
+    switch (AriaRoleAttribute())
+    {
+      case AccessibilityRole::Group:
+      case AccessibilityRole::ListBox:
+      case AccessibilityRole::Menu:
+      case AccessibilityRole::MenuBar:
+      case AccessibilityRole::RadioGroup:
+      case AccessibilityRole::Row:
+      case AccessibilityRole::PopUpButton:
+      case AccessibilityRole::Meter:
+      case AccessibilityRole::ProgressIndicator:
+      case AccessibilityRole::Toolbar:
+      case AccessibilityRole::Tree:
+      case AccessibilityRole::Grid:              return true;
+      default:                                   return false;
+    }
+  }
+
+  bool AccessibilityObject::SupportsActiveDescendant() const noexcept
+  {
+    switch (_role)
+    {
+      case AccessibilityRole::ComboBox:
+      case AccessibilityRole::Grid:
+      case AccessibilityRole::List:
+      case AccessibilityRole::ListBox:
+      case AccessibilityRole::TextArea:
+      case AccessibilityRole::TextField:
+      case AccessibilityRole::Tree:
+      case AccessibilityRole::TreeGrid:  return true;
+      default:                           return false;
     }
   }
 

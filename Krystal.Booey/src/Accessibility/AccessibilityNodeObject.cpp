@@ -754,11 +754,29 @@ namespace krys::boo::ax
         // 2F.ii. Name From Generated Content: ...
         // FIXME: ::before and ::after content, with pseudo-element objects.
 
-        // 2F.iii. Determine Child Nodes: ...
-        // FIXME: aria-owns children, with relations.
-        // 2F.iv. Name From Each Child: For each child node of the current node:
+        // 2F.iii. Determine Child Nodes: Set the set of child nodes to contain the children of the current
+        //         node and append the nodes specified by aria-owns on the current node.
+        List<Ref<dom::Node>> childNodes;
         for (auto &child : dom::ComposedTreeChildren(const_cast<dom::Element &>(element)))
         {
+          childNodes.push_back(ShareRef(child));
+        }
+        if (auto owned = element.ElementsForAttributeInternal(dom::DOMStringAtom(u8"aria-owns")))
+        {
+          for (auto &ownedElement : *owned)
+          {
+            // (A child it also owns isn't counted twice.)
+            if (std::ranges::none_of(childNodes,
+                                     [&](const auto &node) { return node.get() == ownedElement.get(); }))
+            {
+              childNodes.push_back(ownedElement);
+            }
+          }
+        }
+        // 2F.iv. Name From Each Child: For each child node of the current node:
+        for (auto &childNode : childNodes)
+        {
+          auto &child = *childNode;
           // 2F.iv.a. Set the current node to the child node.
           // 2F.iv.b. Compute the text alternative of the current node beginning with step 2. Set the result
           //          to that text alternative.
@@ -845,8 +863,42 @@ namespace krys::boo::ax
       return image ? cache->GetOrCreate(*image) : nullptr;
     }
 
-    // FIXME: An aria-owned object's parent is its owner, with relations.
+    if (auto *owner = OwnerParentObject()) KRYS_UNLIKELY
+    {
+      return owner;
+    }
     return cache->GetOrCreate(*parent);
+  }
+
+  AccessibilityObject *AccessibilityNodeObject::OwnerParentObject() const noexcept
+  {
+    auto owners = Owners();
+    krys_debug_assert(owners.size() <= 1);
+    return owners.empty() ? nullptr : owners[0].get();
+  }
+
+  void AccessibilityNodeObject::UpdateOwnedChildrenIfNecessary() noexcept
+  {
+    auto ownedObjects = OwnedObjects();
+    if (ownedObjects.empty())
+    {
+      return;
+    }
+    bool didRemoveChild = false;
+    for (const auto &child : ownedObjects)
+    {
+      // A DOM child it also owns moves to its place in aria-owns order.
+      if (auto found = std::ranges::find(_children, child); found != _children.end())
+      {
+        _children.erase(found);
+        didRemoveChild = true;
+      }
+      AddChild(child.get());
+    }
+    if (didRemoveChild)
+    {
+      ResetChildrenIndexInParent();
+    }
   }
 
   AccessibilityRole AccessibilityNodeObject::DetermineAccessibilityRole() noexcept
@@ -1278,7 +1330,7 @@ namespace krys::boo::ax
           AddChild(cache->GetOrCreate(child));
         }
       }
-      // FIXME: aria-owned children (updateOwnedChildrenIfNecessary), with relations.
+      UpdateOwnedChildrenIfNecessary();
     }
     _subtreeDirty = false;
   }
