@@ -28,15 +28,122 @@
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Values/Motion/OffsetPath.hpp"
+#include "Krystal.Booey/Style/Values/Motion/OffsetPosition.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 
 namespace krys::boo
 {
+  namespace
+  {
+    KRYS_NODISCARD FloatPoint MotionPathOffsetFromContainer(const RenderObject &renderer,
+                                                            const RenderBlock &container,
+                                                            const FloatRect &referenceRect) noexcept
+    {
+      auto offsetFromContainingBlock = renderer.OffsetFromContainer(container, LayoutPoint());
+      return FloatPoint(FloatPoint(offsetFromContainingBlock) - referenceRect.Location());
+    }
+
+    KRYS_NODISCARD FloatRoundedRect
+      ContainingBlockRectForRenderer(const RenderObject &renderer, const RenderBlock &container,
+                                     const style::OffsetPath &offsetPath) noexcept
+    {
+      if (auto box = offsetPath.TryBox())
+      {
+        auto referenceRect = container.ReferenceBoxRect(box->ReferenceBox());
+        auto borderShape = BorderShape::ShapeForBorderRect(container.Style(), LayoutRect(referenceRect));
+        return borderShape.DeprecatedPixelSnappedRoundedRect(container.GetDocument().DeviceScaleFactor());
+      }
+
+      auto referenceBox =
+        offsetPath.SwitchOn([](const css::keywords::None &) { return CSSBoxType::BoxMissing; },
+                            [](const auto &path) { return path.ReferenceBox(); });
+      return FloatRoundedRect {SnapRectToDevicePixelsIfNeeded(container.ReferenceBoxRect(referenceBox),
+                                                              Downcast<RenderLayerModelObject>(renderer))};
+    }
+
+    KRYS_NODISCARD FloatPoint NormalPositionForOffsetPath(const style::OffsetPath &offsetPath,
+                                                          const FloatRect &referenceRect) noexcept
+    {
+      if (offsetPath.IsRay() || offsetPath.IsBasicShape())
+      {
+        return referenceRect.Center();
+      }
+      return {};
+    }
+  }
+
+  Maybe<MotionPathData> MotionPath::MotionPathDataForRenderer(const RenderElement &renderer) noexcept
+  {
+    if (!Is<RenderLayerModelObject>(renderer))
+    {
+      return null;
+    }
+
+    const auto &offsetPath = renderer.Style().GetOffsetPath();
+    if (offsetPath.IsNone())
+    {
+      return null;
+    }
+    if (auto basicShape = offsetPath.TryBasicShape();
+        basicShape && std::holds_alternative<style::PathFunction>(basicShape->GetShape()))
+    {
+      return null;
+    }
+
+    auto *container = renderer.ContainingBlock();
+    if (!container)
+    {
+      return null;
+    }
+
+    auto startingPositionForOffsetPosition = [&](const style::OffsetPosition &offsetPosition,
+                                                 const FloatRect &referenceRect) -> FloatPoint
+    {
+      // If offset-position is normal, the element doesn't have an offset starting position.
+      if (offsetPosition.IsNormal())
+      {
+        return NormalPositionForOffsetPath(offsetPath, referenceRect);
+      }
+      // If offset-position is auto, use the top left corner of the box.
+      if (offsetPosition.IsAuto())
+      {
+        return MotionPathOffsetFromContainer(renderer, *container, referenceRect);
+      }
+      return style::Evaluate<FloatPoint>(*offsetPosition.TryPosition(), referenceRect.Size(),
+                                         style::ZoomNeeded {});
+    };
+
+    MotionPathData data;
+    data.ContainingBlockBoundingRect = ContainingBlockRectForRenderer(renderer, *container, offsetPath);
+    auto referenceRect = data.ContainingBlockBoundingRect.Rect();
+    data.OffsetFromContainingBlock = MotionPathOffsetFromContainer(renderer, *container, referenceRect);
+
+    const auto &offsetPosition = renderer.Style().GetOffsetPosition();
+    if (offsetPath.IsBasicShape())
+    {
+      data.UsedStartingPosition = startingPositionForOffsetPosition(offsetPosition, referenceRect);
+    }
+    else if (auto ray = offsetPath.TryRay())
+    {
+      const auto &startingPosition = ray->Ray()->Position;
+      data.UsedStartingPosition =
+        startingPosition
+          ? style::Evaluate<FloatPoint>(*startingPosition, referenceRect.Size(), style::ZoomNeeded {})
+          : startingPositionForOffsetPosition(offsetPosition, referenceRect);
+    }
+
+    return data;
+  }
+
   KRYS_NODISCARD static PathTraversalState TraversalStateAtDistance(const Path &path,
                                                                     float distanceValue) noexcept
   {

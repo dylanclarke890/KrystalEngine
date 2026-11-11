@@ -345,6 +345,53 @@ namespace krys::boo::style::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "ElementRuleCollector: parts exported with exportparts",
+                   "[Style][ElementRuleCollector]")
+  {
+    RunTasks();
+    auto document = Parse(u8R"(<!DOCTYPE html><style>
+      #outer::part(exported) { --n: exported; }
+      #outer::part(inner) { --n: unexported; }
+    </style><div id=outer></div>)");
+    auto &outer = ById(*document, u8"outer");
+    auto outerShadow = AttachShadow(outer, u8"#mid::part(inner) { --n: mid; }");
+    auto mid = Create(*document, u8"div");
+    REQUIRE_FALSE(mid->SetAttribute(u8"id", u8"mid").HasException());
+    REQUIRE_FALSE(mid->SetAttribute(u8"exportparts", u8"inner : exported, other").HasException());
+    REQUIRE_FALSE(outerShadow->AppendChild(*mid).HasException());
+    auto midShadow = AttachShadow(*mid, u8"");
+    auto inner = Create(*document, u8"span");
+    REQUIRE_FALSE(inner->SetAttribute(u8"part", u8"inner").HasException());
+    REQUIRE_FALSE(midShadow->AppendChild(*inner).HasException());
+
+    auto names = [&]
+    {
+      return Names(MatchAll(*inner)->AuthorDeclarations);
+    };
+
+    // The mid host's scope sees the part by its own name, and the outer one by the name it's exported as.
+    CHECK(names() == Strings {"mid", "exported"});
+
+    SECTION("The mappings follow the attribute")
+    {
+      REQUIRE_FALSE(mid->SetAttribute(u8"exportparts", u8"inner").HasException());
+      CHECK(names() == Strings {"mid", "unexported"});
+      mid->RemoveAttribute(u8"exportparts");
+      CHECK(names() == Strings {"mid"});
+    }
+
+    SECTION("Mappings are parsed as names, optionally exported under another name")
+    {
+      REQUIRE_FALSE(mid->SetAttribute(u8"exportparts", u8" a , b:c, b : d, bad:, :bad, e f,").HasException());
+      const auto &mappings = midShadow->GetPartMappings();
+      REQUIRE(mappings.size() == 2uz);
+      CHECK(mappings.at(dom::DOMStringAtom(u8"a"))
+            == SmallList<dom::DOMStringAtom, 1> {dom::DOMStringAtom(u8"a")});
+      CHECK(mappings.at(dom::DOMStringAtom(u8"b"))
+            == SmallList<dom::DOMStringAtom, 1> {dom::DOMStringAtom(u8"c"), dom::DOMStringAtom(u8"d")});
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "ElementRuleCollector: @scope", "[Style][ElementRuleCollector]")
   {
     RunTasks();

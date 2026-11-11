@@ -6192,8 +6192,7 @@ namespace krys::boo
                                  const FloatRect &boundingBox,
                                  EnumSet<style::TransformResolverOption> options) const noexcept
   {
-    // FIXME: The motion path data of the box (TransformOperationData's renderer constructor).
-    style::TransformResolver::ApplyTransform(t, style, TransformOperationData(boundingBox), options);
+    style::TransformResolver::ApplyTransform(t, style, TransformOperationData(boundingBox, this), options);
   }
 
   FloatRect RenderBox::ReferenceBoxRect(CSSBoxType boxType) const noexcept

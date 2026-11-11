@@ -34,6 +34,8 @@ namespace krys::boo::tests
     struct Recorder
     {
       List<List<Observed>> Rounds;
+      /// @brief Each entry's device pixel content box size (inline, block).
+      List<std::pair<double, double>> DevicePixelSizes;
       Func<void(ResizeObserver &)> OnDeliver;
       Ref<ResizeObserver> Observer;
 
@@ -48,6 +50,8 @@ namespace krys::boo::tests
                   auto &rect = entry->ContentRect();
                   auto &content = entry->ContentBoxSize().front();
                   auto &border = entry->BorderBoxSize().front();
+                  auto &devicePixels = entry->DevicePixelContentBoxSize().front();
+                  DevicePixelSizes.emplace_back(devicePixels->InlineSize(), devicePixels->BlockSize());
                   round.push_back({Narrow(entry->Target().Id()), rect.X(), rect.Y(), rect.Width(),
                                    rect.Height(), content->InlineSize(), content->BlockSize(),
                                    border->InlineSize(), border->BlockSize()});
@@ -144,6 +148,26 @@ namespace krys::boo::tests
       recorder.Observer->Observe(a);
       update();
       CHECK(recorder.Take() == List<List<Observed>> {{{"a", 0, 0, 100, 50, 50, 100, 50, 100}}});
+    }
+
+    SECTION("The device pixel content box is in whole device pixels, snapped where it sits")
+    {
+      auto environment = fixture.TestPage->MainFrame().GetMediaEnvironment();
+      environment.DeviceScaleFactor = 1.5f;
+      fixture.TestPage->MainFrame().SetMediaEnvironment(environment);
+      SetStyle(a, u8"width: 101px; height: 50px; margin-left: 0.5px; writing-mode: vertical-lr");
+      recorder.Observer->Observe(a, {ResizeObserverBoxOptions::DevicePixelContentBox});
+      update();
+      REQUIRE(recorder.Take().size() == 1);
+      // The content box spans 0.5px to 101.5px, 0.75 to 152.25 device pixels: 152 - 1 = 151 once snapped.
+      // Its block axis is horizontal.
+      CHECK(recorder.DevicePixelSizes == List<std::pair<double, double>> {{75, 151}});
+
+      // Moving it a little changes its device pixel size but not its content box.
+      SetStyle(a, u8"width: 101px; height: 50px; margin-left: 0px; writing-mode: vertical-lr");
+      update();
+      CHECK(recorder.Take().size() == 1);
+      CHECK(recorder.DevicePixelSizes.back() == std::pair<double, double> {75, 152});
     }
 
     SECTION("Unobserving, disconnecting and destroying the observer stop the reports")

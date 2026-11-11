@@ -337,6 +337,12 @@ namespace krys::ui::tests
     CheckPage("backgrounds", 360u, 240u);
   }
 
+  TEST_CASE("Golden: background clips", "[UI][GPU][Golden]")
+  {
+    // Text renders differently from Chrome's, so it's only reported against Chrome.
+    CheckPage("background-clips", 360u, 160u, true);
+  }
+
   TEST_CASE("Golden: layers", "[UI][GPU][Golden]")
   {
     CheckPage("layers", 360u, 240u);

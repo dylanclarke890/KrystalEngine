@@ -2194,12 +2194,12 @@ namespace krys::boo::style
 
     if (state.Renderer)
     {
-      // FIXME: The render tree. The transform operation data should come from the renderer (its motion path
-      // data and whether it's an SVG renderer).
       return css::TransformListValue::Create(CreateCSSValue(
         state.Pool, state.Style,
         TransformResolver::ComputeTransform(
-          state.Style, TransformOperationData(state.Renderer->TransformReferenceBoxRect(state.Style)), {})));
+          state.Style,
+          TransformOperationData(state.Renderer->TransformReferenceBoxRect(state.Style), state.Renderer),
+          {})));
     }
 
     // https://w3c.github.io/csswg-drafts/css-transforms-1/#serialization-of-the-computed-value
@@ -2225,11 +2225,12 @@ namespace krys::boo::style
 
     if (state.Renderer)
     {
-      // FIXME: The render tree, as in `ExtractTransform`.
       Serialise(
         builder, context, state.Style,
         TransformResolver::ComputeTransform(
-          state.Style, TransformOperationData(state.Renderer->TransformReferenceBoxRect(state.Style)), {}));
+          state.Style,
+          TransformOperationData(state.Renderer->TransformReferenceBoxRect(state.Style), state.Renderer),
+          {}));
       return;
     }
 

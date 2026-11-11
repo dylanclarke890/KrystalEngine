@@ -29,6 +29,8 @@
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
@@ -37,6 +39,7 @@
 #include "Krystal.Booey/Rendering/Painting/BorderEdge.hpp"
 #include "Krystal.Booey/Rendering/Painting/ImageQualityController.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/Painting/TextBoxPainter.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -1335,6 +1338,38 @@ namespace krys::boo
 
     // Choose a decodingMode such that the image does not flicker.
     return defaultDecodingMode();
+  }
+
+  void RenderBoxModelObject::PaintMaskForTextFillBox(GraphicsContext &context, const FloatRect &paintRect,
+                                                     const inline_iterator::InlineBoxIterator &inlineBox,
+                                                     const LayoutRect &scrolledPaintRect) noexcept
+  {
+    // The text is added to the mask with the text clip phase, which paints it in black.
+    PaintInfo maskInfo(context, LayoutRect(paintRect), PaintPhase::TextClip, {PaintBehavior::ForceBlackText});
+    if (inlineBox)
+    {
+      auto paintOffset =
+        scrolledPaintRect.Location()
+        - ToLayoutSize(LayoutPoint(inlineBox->VisualRectIgnoringBlockDirection().Location()));
+
+      for (auto box = inlineBox->FirstLeafBox(), end = inlineBox->EndLeafBox(); box != end;
+           box.TraverseLineRightwardOnLine())
+      {
+        if (!box->IsText())
+        {
+          continue;
+        }
+        const auto &modernPath = box->ModernPath();
+        TextBoxPainter {modernPath.GetInlineContent(), modernPath.GetBox(), modernPath.GetBox().Style(),
+                        maskInfo, paintOffset}
+          .Paint();
+      }
+      return;
+    }
+
+    auto *renderBox = DynamicDowncast<RenderBox>(*this);
+    auto localOffset = renderBox ? renderBox->LocationOffset() : LayoutSize();
+    Paint(maskInfo, scrolledPaintRect.Location() - localOffset);
   }
 
   InterpolationQuality RenderBoxModelObject::ChooseInterpolationQuality(GraphicsContext &context,

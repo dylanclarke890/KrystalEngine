@@ -53,6 +53,8 @@ namespace krys::boo
       LayoutSize ContentBoxSize;
       LayoutSize ContentBoxLogicalSize;
       LayoutSize BorderBoxLogicalSize;
+      /// @brief The content box's logical size in whole device pixels, snapped where it sits on the page.
+      FloatSize DevicePixelContentBoxLogicalSize;
     };
 
   private:
@@ -77,7 +79,7 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect ComputeContentRect() const noexcept;
     KRYS_NODISCARD FloatSize BorderBoxSize() const noexcept;
     KRYS_NODISCARD FloatSize ContentBoxSize() const noexcept;
-    KRYS_NODISCARD FloatSize SnappedContentBoxSize() const noexcept;
+    KRYS_NODISCARD FloatSize DevicePixelContentBoxSize() const noexcept;
 
     KRYS_NODISCARD dom::Element *Target() const noexcept
     {

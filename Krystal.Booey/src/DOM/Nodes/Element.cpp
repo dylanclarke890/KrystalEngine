@@ -3129,6 +3129,7 @@ namespace krys::boo::dom
     {
       if (auto *shadowRoot = TreeQueries::GetShadowRoot(*this))
       {
+        shadowRoot->InvalidatePartMappings();
         style::Invalidator::InvalidateShadowParts(*shadowRoot);
       }
     }

@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
@@ -308,5 +309,24 @@ namespace krys::boo::tests
         .HasException());
     (void)fixture.Document->UpdateLayout();
     CHECK(scroller.ScrollWidth() == 260);
+  }
+
+  // A box's transform includes its motion path, placed relative to its containing block.
+  TEST_CASE("RenderBox: transforms include the motion path data of the box", "[Rendering][RenderBox]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0 }
+      #container { position: relative; width: 200px; height: 200px }
+      #moving { width: 10px; height: 10px; offset-path: ray(90deg); offset-distance: 50px }
+    </style><div id=container><div id=moving></div></div>)html"};
+    (void)fixture.Document->UpdateLayout();
+    auto *box = DynamicDowncast<RenderBox>(fixture.ById(u8"moving").Renderer());
+    REQUIRE(box);
+
+    // The ray starts at the containing block's centre and points right, and the box's centre follows it.
+    TransformationMatrix matrix;
+    box->ApplyTransform(matrix, box->Style(), box->TransformReferenceBoxRect());
+    CHECK(matrix.M41() == 145);
+    CHECK(matrix.M42() == 95);
   }
 }

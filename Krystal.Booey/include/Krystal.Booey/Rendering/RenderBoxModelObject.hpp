@@ -40,6 +40,11 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
+namespace krys::boo::inline_iterator
+{
+  class InlineBoxIterator;
+}
+
 namespace krys::boo
 {
   class GraphicsContext;
@@ -238,6 +243,12 @@ namespace krys::boo
                                                          const PaintInfo &paintInfo) const noexcept;
 
     /// @brief How @p image is interpolated when drawn at @p size.
+    /// @brief Paints the box's text in black into @p context, as the mask of `background-clip: text`: the
+    /// text of @p inlineBox if it's an inline box's, otherwise all the box's text.
+    void PaintMaskForTextFillBox(GraphicsContext &context, const FloatRect &paintRect,
+                                 const inline_iterator::InlineBoxIterator &inlineBox,
+                                 const LayoutRect &scrolledPaintRect) noexcept;
+
     KRYS_NODISCARD InterpolationQuality ChooseInterpolationQuality(GraphicsContext &, Image &image,
                                                                    const void *layer,
                                                                    const LayoutSize &size) const noexcept;

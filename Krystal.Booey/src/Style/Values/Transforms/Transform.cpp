@@ -79,17 +79,28 @@ namespace krys::boo::style
     return style::CanBlend(from._value, to._value, compositeOperation);
   }
 
+  namespace
+  {
+    KRYS_NODISCARD Transform TransformFromBlendedList(TransformList &&list) noexcept
+    {
+      if (list.isEmpty())
+      {
+        return css::keywords::None {};
+      }
+      return Transform {krys::move(list)};
+    }
+  }
+
   Transform Blending<Transform>::Blend(const Transform &from, const Transform &to,
                                        const BlendingContext &context) noexcept
   {
-    auto blendedTransformList = style::Blend(from._value, to._value, context);
+    return TransformFromBlendedList(Blending<TransformList> {}.Blend(from._value, to._value, context));
+  }
 
-    if (blendedTransformList.isEmpty())
-    {
-      return css::keywords::None {};
-    }
-
-    return Transform {krys::move(blendedTransformList)};
+  Transform Blending<Transform>::Blend(const Transform &from, const Transform &to,
+                                       const interpolation::Context &context) noexcept
+  {
+    return TransformFromBlendedList(Blending<TransformList> {}.Blend(from._value, to._value, context));
   }
 
   // MARK: - Platform

@@ -8,6 +8,8 @@
 #include "Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 
@@ -285,5 +287,28 @@ namespace krys::boo::tests
 
     customAnimation->Cancel(WebAnimation::Silently::Yes);
     otherAnimation->Cancel(WebAnimation::Silently::Yes);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "KeyframeEffect: transforms interpolated as matrices resolve percentages against the box",
+                   "[Animation][KeyframeEffect]")
+  {
+    BoxFixture fixture;
+    fixture.SetStyle(u8"box", u8"width: 200px; height: 100px");
+    // The functions don't match, so the lists are interpolated as matrices, each translating by 100px.
+    auto effect = Valid(fixture.Effect(
+      List<InputKeyframe> {Keyframe(nullptr, {{u8"transform", u8"translateX(50%) scale(1)"}}),
+                           Keyframe(nullptr, {{u8"transform", u8"scale(1) translateX(50%)"}})}));
+    auto animation = WebAnimation::Create(*fixture.Document, effect.get());
+    REQUIRE_FALSE(animation->Play().HasException());
+    fixture.StartAnimations();
+    fixture.Frame(500ms);
+
+    auto *box = DynamicDowncast<RenderBox>(fixture.ById(u8"box").Renderer());
+    REQUIRE(box);
+    TransformationMatrix matrix;
+    box->ApplyTransform(matrix, box->Style(), box->TransformReferenceBoxRect());
+    CHECK(matrix.M41() == Catch::Approx(100));
+    animation->Cancel(WebAnimation::Silently::Yes);
   }
 }

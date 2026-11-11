@@ -3037,8 +3037,7 @@ namespace krys::boo
     }
 
     auto rendererBox = SnapRectToDevicePixels(box->BorderBoxRect(), box->GetDocument().DeviceScaleFactor());
-    // FIXME: The motion path data of the box (TransformOperationData's renderer constructor).
-    TransformOperationData transformOperationData(rendererBox);
+    TransformOperationData transformOperationData(rendererBox, box);
     LayoutRect cumulativeBounds;
 
     const auto *unanimatedStyle = [&]() -> const RenderStyle *

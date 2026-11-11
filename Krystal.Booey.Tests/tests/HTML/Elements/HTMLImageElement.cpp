@@ -152,6 +152,24 @@ namespace krys::boo::tests
     CHECK(Count(painted, u8"draw-native-image") == 0u);
   }
 
+  TEST_CASE("HTMLImageElement: a failed image without alt text shows the broken image icon",
+            "[HTML][HTMLImageElement]")
+  {
+    LoaderFixture loader;
+    ImageFixture fixture(u8"<img id=broken src='file:///none.png'><br>"
+                         u8"<img id=large style='width: 60px; height: 40px' src='file:///none.png'><br>"
+                         u8"<img id=tiny style='width: 10px; height: 10px' src='file:///none.png'>");
+    RunNetworkingTasks();
+
+    // The 16px icon with 4px of padding sizes the box.
+    CHECK(fixture.RendererSize(u8"broken") == IntSize(20, 20));
+
+    // It's drawn (its hill is green) inside the grey outline wherever it fits: not in the tiny image.
+    auto painted = fixture.Painted();
+    CHECK(Count(painted, u8"(color #549662)") == 2u);
+    CHECK(Count(painted, u8"(color #C0C0C0)") >= 1u);
+  }
+
   TEST_CASE("HTMLImageElement: the box follows the alt text when there's no image",
             "[HTML][HTMLImageElement]")
   {

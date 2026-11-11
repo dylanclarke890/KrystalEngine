@@ -114,6 +114,11 @@ namespace krys::boo
     FloatSize imageSize;
     if (newImage->WillPaintBrokenImage())
     {
+      // Alt text stands in for the broken image icon, as in Chrome.
+      if (!_altText.empty())
+      {
+        return IntSize(PaddingWidth, PaddingHeight);
+      }
       auto [brokenImage, imageScaleFactor] = newImage->BrokenImage(GetDocument().DeviceScaleFactor());
       imageSize = brokenImage->Size();
       imageSize.Scale(1 / imageScaleFactor);
@@ -605,13 +610,43 @@ namespace krys::boo
         LayoutUnit leftPadding = PaddingLeft();
         LayoutUnit topPadding = PaddingTop();
 
+        bool errorPictureDrawn = false;
+        LayoutSize imageOffset;
         // When calculating the usable dimensions, exclude the pixels of
         // the outline rect so the error image/alt text doesn't draw on it.
         LayoutSize usableSize =
           contentSize - LayoutSize(2 * missingImageBorderWidth, 2 * missingImageBorderWidth);
 
-        // FIXME: Draw the broken image icon, centred in the content box, once there's one
-        // (CachedImage::BrokenImage).
+        // As Chrome, alt text stands in for the icon.
+        RefPtr<Image> image = ImageResource().GetImage();
+        if (ShouldDisplayBrokenImageIcon() && _altText.empty() && image && !image->IsNull()
+            && usableSize.Width() >= image->Width() && usableSize.Height() >= image->Height())
+        {
+          auto [brokenImage, imageScaleFactor] = GetCachedImage()->BrokenImage(deviceScaleFactor);
+          FloatSize imageSize = brokenImage->Size();
+          imageSize.Scale(1 / imageScaleFactor);
+
+          // Centre the error image, accounting for border and padding.
+          LayoutUnit centerX {(usableSize.Width() - imageSize.Width()) / 2};
+          if (centerX < 0)
+          {
+            centerX = 0;
+          }
+          LayoutUnit centerY {(usableSize.Height() - imageSize.Height()) / 2};
+          if (centerY < 0)
+          {
+            centerY = 0;
+          }
+          imageOffset = LayoutSize(leftBorder + leftPadding + centerX + missingImageBorderWidth,
+                                   topBorder + topPadding + centerY + missingImageBorderWidth);
+
+          context.DrawImage(
+            *brokenImage,
+            SnapRectToDevicePixels(LayoutRect(paintOffset + imageOffset, LayoutSize(imageSize)),
+                                   deviceScaleFactor),
+            ImagePaintingOptions {GetImageOrientation()});
+          errorPictureDrawn = true;
+        }
 
         if (!_altText.empty())
         {
@@ -637,12 +672,16 @@ namespace krys::boo
             // Only draw the alt text if it fits within the content box (content width) and above the error
             // image (content height). Error picture is always visually below the text regardless of writing
             // direction.
-            auto availableLogicalWidth = isHorizontal ? usableSize.Width() : usableSize.Height();
+            auto availableLogicalWidth = isHorizontal
+                                           ? usableSize.Width()
+                                           : (errorPictureDrawn ? imageOffset.Height() : usableSize.Height());
             if (availableLogicalWidth < textWidth)
             {
               return false;
             }
-            auto availableLogicalHeight = isHorizontal ? usableSize.Height() : usableSize.Width();
+            auto availableLogicalHeight = isHorizontal
+                                            ? (errorPictureDrawn ? imageOffset.Height() : usableSize.Height())
+                                            : usableSize.Width();
             return availableLogicalHeight >= fontMetrics.IntHeight();
           };
           if (hasRoomForAltText())

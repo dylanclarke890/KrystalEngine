@@ -1,0 +1,22 @@
+﻿<!doctype html>
+<!-- The "background-clips" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="160">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #e9ecf2; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; }
+  .text { font: bold 44px/1 sans-serif; color: transparent; background: linear-gradient(90deg, #ef476f, #118ab2); background-clip: text; }
+</style>
+</head>
+<body>
+  <!-- Text: a gradient clipped to the glyphs. -->
+  <div class="text" style="left: 16px; top: 16px; width: 328px; height: 48px">Clipped</div>
+
+  <!-- The border area: solid, rounded and dashed borders, each with a transparent border colour. -->
+  <div style="left: 16px; top: 80px; width: 96px; height: 64px; border: 12px solid transparent; background: linear-gradient(135deg, #ffd166, #ef476f) border-area, #ffffff padding-box"></div>
+  <div style="left: 128px; top: 80px; width: 96px; height: 64px; border: 10px solid transparent; border-radius: 20px; background: #06d6a0 border-area"></div>
+  <div style="left: 240px; top: 80px; width: 104px; height: 64px; border: 8px dashed transparent; background: #073b4c border-area"></div>
+</body>
+</html>

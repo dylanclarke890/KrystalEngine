@@ -23,6 +23,7 @@
 
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
+#include "Krystal.Booey/Graphics/Images/BrokenImageIcon.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
@@ -111,8 +112,8 @@ namespace krys::boo
 
   Pair<Image *, float> CachedImage::BrokenImage(float) const noexcept
   {
-    // FIXME: The broken image icon (`missingImage`), at the device scale factor (G7c).
-    return {&Image::NullImage(), 1.f};
+    // The icon is drawn as shapes, so one serves every device scale factor.
+    return {&BrokenImageIcon::Singleton(), 1.f};
   }
 
   bool CachedImage::WillPaintBrokenImage() const noexcept

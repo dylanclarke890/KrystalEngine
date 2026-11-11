@@ -1555,6 +1555,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Images/BitmapImage.hpp
   include/Krystal.Booey/Graphics/Images/BitmapImageDescriptor.hpp
   include/Krystal.Booey/Graphics/Images/BitmapImageSource.hpp
+  include/Krystal.Booey/Graphics/Images/BrokenImageIcon.hpp
   include/Krystal.Booey/Graphics/Images/DecodingOptions.hpp
   include/Krystal.Booey/Graphics/Images/GeneratedImage.hpp
   include/Krystal.Booey/Graphics/Images/GradientImage.hpp
@@ -1752,6 +1753,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Images/BitmapImage.cpp
   src/Graphics/Images/BitmapImageDescriptor.cpp
   src/Graphics/Images/BitmapImageSource.cpp
+  src/Graphics/Images/BrokenImageIcon.cpp
   src/Graphics/Images/GeneratedImage.cpp
   src/Graphics/Images/GradientImage.cpp
   src/Graphics/Images/Image.cpp
@@ -3187,6 +3189,7 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Tables/RenderTableRow.cpp
   src/Rendering/Tables/RenderTableSection.cpp
   src/Rendering/TextBoxTrimmer.cpp
+  src/Rendering/TransformOperationData.cpp
   src/Rendering/Updating/RenderTreeBuilder.cpp
   src/Rendering/Updating/RenderTreeBuilderBlock.cpp
   src/Rendering/Updating/RenderTreeBuilderBlockFlow.cpp

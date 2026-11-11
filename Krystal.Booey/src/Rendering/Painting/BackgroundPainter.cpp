@@ -438,6 +438,30 @@ namespace krys::boo
 
     GraphicsContextStateSaver backgroundClipStateSaver(context, false);
 
+    TransparencyLayerScope backgroundClipOuterLayerScope(context, 1, false);
+    TransparencyLayerScope backgroundClipInnerLayerScope(context, 1, false);
+
+    // Clips the background to what `paintFunction` draws: it's drawn into a layer, and the background is
+    // drawn into a second one composited onto it with source-in.
+    auto setupMaskingBackgroundClip =
+      [&](const LayoutRect &borderRect,
+          const Func<void(GraphicsContext &, const LayoutRect &, const FloatRect &)> &paintFunction)
+    {
+      auto transparencyLayerBounds = SnapRectToDevicePixels(rect, deviceScaleFactor);
+      transparencyLayerBounds.Intersect(SnapRectToDevicePixels(_paintInfo.Rect, deviceScaleFactor));
+      transparencyLayerBounds.Inflate(1);
+
+      backgroundClipStateSaver.Save();
+      context.Clip(transparencyLayerBounds);
+      backgroundClipOuterLayerScope.BeginLayer(1);
+
+      paintFunction(context, borderRect, transparencyLayerBounds);
+      context.SetCompositeOperation(CompositeOperator::SourceIn);
+
+      backgroundClipInnerLayerScope.BeginLayer(1);
+      context.SetCompositeOperation(CompositeOperator::SourceOver);
+    };
+
     switch (layerClip)
     {
       case FillBox::BorderBox: break;
@@ -460,13 +484,38 @@ namespace krys::boo
         break;
       }
       case FillBox::Text:
-        // FIXME: Clipping to the text (a mask of the box's text, painted with the text clip phase); the
-        // background isn't clipped meanwhile.
+      {
+        // The text is drawn into a mask that clips the background, no bigger than the dirty part of the
+        // background.
+        setupMaskingBackgroundClip(
+          rect,
+          [&](GraphicsContext &maskContext, const LayoutRect &, const FloatRect &paintRect)
+          {
+            _renderer.PaintMaskForTextFillBox(maskContext, paintRect, inlineBoxIterator, scrolledPaintRect);
+          });
         break;
+      }
       case FillBox::BorderArea:
-        // FIXME: Clipping to the border area (the border's path, or a mask of the border); the background
-        // isn't clipped meanwhile.
+      {
+        if (auto borderAreaPath =
+              BorderPainter::PathForBorderArea(rect, style, deviceScaleFactor, closedEdges))
+        {
+          backgroundClipStateSaver.Save();
+          context.ClipPath(*borderAreaPath);
+          break;
+        }
+
+        // Borders that can't be made into a path (dotted, dashed and the like) are drawn into a mask.
+        setupMaskingBackgroundClip(
+          rect,
+          [&](GraphicsContext &maskContext, const LayoutRect &borderRect, const FloatRect &paintRect)
+          {
+            PaintInfo borderPaintInfo(maskContext, LayoutRect(paintRect), PaintPhase::BlockBackground,
+                                      {PaintBehavior::ForceBlackBorder});
+            BorderPainter(_renderer, borderPaintInfo).PaintBorder(borderRect, style);
+          });
         break;
+      }
       case FillBox::NoClip: break;
     }
 

@@ -32,6 +32,7 @@ namespace krys::boo
 {
   class BoxPathOperation;
   class Path;
+  class RenderElement;
   class RayPathOperation;
   class ShapePathOperation;
   class TransformationMatrix;
@@ -51,10 +52,14 @@ namespace krys::boo
   };
 
   /// @brief Resolves `offset-path` operations into paths and applies motion path transforms.
-  /// FIXME: `motionPathDataForRenderer`.
   class MotionPath
   {
   public:
+    /// @brief Where @p renderer sits relative to the containing block its `offset-path` is resolved against,
+    /// or nothing if it has no path that needs it (none, a `path()`, or a renderer without a layer model).
+    KRYS_NODISCARD static Maybe<MotionPathData>
+      MotionPathDataForRenderer(const RenderElement &renderer) noexcept;
+
     KRYS_NODISCARD static bool NeedsUpdateAfterContainingBlockLayout(const style::OffsetPath &) noexcept;
 
     static void ApplyMotionPathTransform(TransformationMatrix &, const TransformOperationData &,

@@ -23,10 +23,88 @@
 
 #include "Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Images/GeneratedImage.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include <algorithm>
+#include <chrono>
 
 namespace krys::boo
 {
+  namespace
+  {
+    constexpr auto TimeToKeepCachedGeneratedImages = std::chrono::seconds(3);
+  }
+
+  /// @brief A generated image kept for its size, until it hasn't been asked for in a few seconds.
+  class StyleGeneratedImage::CachedGeneratedImage
+  {
+    KRYS_NON_COPY_MOVABLE(CachedGeneratedImage);
+
+  private:
+    StyleGeneratedImage &_owner;
+    const FloatSize _size;
+    const Ref<GeneratedImage> _image;
+    Timer _evictionTimer;
+
+  public:
+    CachedGeneratedImage(StyleGeneratedImage &owner, FloatSize size, GeneratedImage &image) noexcept
+        : _owner(owner), _size(size), _image(ShareRef(image)),
+          _evictionTimer(*this, &CachedGeneratedImage::EvictionTimerFired)
+    {
+      PuntEvictionTimer();
+    }
+
+    KRYS_NODISCARD FloatSize Size() const noexcept
+    {
+      return _size;
+    }
+    KRYS_NODISCARD GeneratedImage &Image() const noexcept
+    {
+      return *_image;
+    }
+    void PuntEvictionTimer() noexcept
+    {
+      _evictionTimer.StartOneShot(TimeToKeepCachedGeneratedImages);
+    }
+
+  private:
+    void EvictionTimerFired() noexcept
+    {
+      // This destroys this entry.
+      _owner.EvictCachedGeneratedImage(*this);
+    }
+  };
+
+  GeneratedImage *StyleGeneratedImage::CachedImageForSize(FloatSize size) noexcept
+  {
+    if (size.IsEmpty())
+    {
+      return nullptr;
+    }
+
+    auto it = std::ranges::find_if(_images, [&](auto &entry) { return entry->Size() == size; });
+    if (it == _images.end())
+    {
+      return nullptr;
+    }
+    (*it)->PuntEvictionTimer();
+    return &(*it)->Image();
+  }
+
+  void StyleGeneratedImage::SaveCachedImageForSize(FloatSize size, GeneratedImage &image) noexcept
+  {
+    krys_debug_assert(std::ranges::none_of(_images, [&](auto &entry) { return entry->Size() == size; }));
+    _images.push_back(CreateUnique<CachedGeneratedImage>(*this, size, image));
+  }
+
+  void StyleGeneratedImage::EvictCachedGeneratedImage(const CachedGeneratedImage &entry) noexcept
+  {
+    auto it = std::ranges::find_if(_images, [&](auto &cached) { return cached.get() == &entry; });
+    krys_debug_assert(it != _images.end());
+    _images.erase(it);
+  }
+
   StyleGeneratedImage::StyleGeneratedImage(StyleImage::Type type, bool fixedSize) noexcept
       : StyleImage {type}, _fixedSize {fixedSize}
   {
