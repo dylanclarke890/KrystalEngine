@@ -29,19 +29,38 @@
  */
 
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
+#include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Booey/Text/LocaleToScriptMapping.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo
 {
   namespace
   {
+    KRYS_NODISCARD StringAtom ComputeSpecializedChineseLocale() noexcept
+    {
+      for (const auto &language : UserPreferredLanguages())
+      {
+        if (language.size() >= 3
+            && text::IsASCIICaselessEqual(utf8_stringview(language).substr(0, 3), utf8_stringview(u8"zh-")))
+        {
+          return StringAtom {language};
+        }
+      }
+      return StringAtom {u8"zh-hans"}; // We have no signal. Pick one option arbitrarily.
+    }
+
+    // The first `zh-` language the user prefers, recomputed when the host sets the languages.
     const StringAtom &SpecializedChineseLocale() noexcept
     {
-      // FIXME: Pick the first `zh-` language of the user's preferred languages (and recompute it when they
-      // change), once there are user language preferences.
-      static const StringAtom specializedChineseLocale {u8"zh-hans"}; // We have no signal. Pick one option
-                                                                      // arbitrarily.
-      return specializedChineseLocale;
+      static StringAtom locale = StringAtom::Null();
+      static Maybe<uint32> generation;
+      if (generation != UserPreferredLanguagesGeneration())
+      {
+        locale = ComputeSpecializedChineseLocale();
+        generation = UserPreferredLanguagesGeneration();
+      }
+      return locale;
     }
   }
 

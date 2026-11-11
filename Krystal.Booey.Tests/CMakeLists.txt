@@ -364,6 +364,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/TransformationMatrix.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Platform/Locale/DateTimeFormat.cpp
+		tests/Platform/Locale/Language.cpp
 		tests/Platform/Locale/LocaleICU.cpp
 		tests/Text/LocaleToScriptMapping.cpp
 		tests/Text/TextBreakIterator.cpp
