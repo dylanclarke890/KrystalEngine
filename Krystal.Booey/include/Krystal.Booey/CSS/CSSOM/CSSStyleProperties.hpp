@@ -120,12 +120,6 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    // FIXME: To implement.
-    KRYS_NODISCARD CSSRule *CssRules() const noexcept override
-    {
-      return nullptr;
-    }
-
     KRYS_NODISCARD uint32 Length() const noexcept final;
     KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept final;
     KRYS_NODISCARD CSSOMString GetPropertyValue(const CSSOMString &propertyName) noexcept final;

@@ -18,7 +18,6 @@ namespace krys::boo::css::tests
     CHECK(static_cast<PropertySetCSSDescriptors &>(descriptors).GetRuleType() == RuleType::FontFace);
     CHECK(style.ParentRule() == &rule);
     CHECK(style.ParentStyleSheet() == sheet.get());
-    CHECK(style.CssRules() == nullptr);
     CHECK(ToNarrow(style.CssText()) == "font-family: a; src: url(\"a.woff\"); font-weight: 100 200;");
 
     SECTION("length and item")

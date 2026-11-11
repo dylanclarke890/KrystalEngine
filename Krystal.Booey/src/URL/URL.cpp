@@ -128,13 +128,9 @@ namespace krys::boo::url
         }
       }
 
-      // FIXME: Is UTF-8 always the correct encoding?
-      // FIXME: This returns an empty string when we encounter an invalid UTF-8 sequence. Is that OK?
-      if (!text::IsValidUTF8(percentDecoded))
-      {
-        return {};
-      }
-      return percentDecoded;
+      // Everything is UTF-8 (see DIFFERENCES.md), and bytes that don't decode become U+FFFD as in the URL
+      // standard's percent-decoding of strings.
+      return text::ReplaceInvalidUTF8(krys::move(percentDecoded));
     }
 
     // Appends the punycoded hostname identified by the given string and length to the output buffer.

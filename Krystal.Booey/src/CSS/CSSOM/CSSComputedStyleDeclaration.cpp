@@ -163,11 +163,6 @@ namespace krys::boo::css
     return nullptr;
   }
 
-  CSSRule *CSSComputedStyleDeclaration::CssRules() const noexcept
-  {
-    return nullptr;
-  }
-
   CSSOMString CSSComputedStyleDeclaration::GetPropertyValue(const CSSOMString &propertyName) noexcept
   {
     if (_isEmpty)

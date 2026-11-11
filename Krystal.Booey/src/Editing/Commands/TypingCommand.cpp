@@ -678,7 +678,8 @@ namespace krys::boo
           selectionToDelete.End(), selectionToDelete.End().Previous(dom::PositionMoveType::BackwardDeletion));
       }
 
-      if (!StartingSelection().IsRange() || selectionToDelete.Base() != StartingSelection().Start())
+      if (!StartingSelection().IsRange()
+          || selectionToDelete.CanonicalAnchor() != StartingSelection().Start())
       {
         selectionAfterUndo = selectionToDelete;
       }
@@ -687,7 +688,8 @@ namespace krys::boo
         // It's a little tricky to compute what the starting selection would have been in the original
         // document. We can't let the VisibleSelection class's validation kick in or it'll adjust for us based
         // on the current state of the document and we'll get the wrong result.
-        selectionAfterUndo.SetWithoutValidation(StartingSelection().End(), selectionToDelete.Extent());
+        selectionAfterUndo.SetWithoutValidation(StartingSelection().End(),
+                                                selectionToDelete.CanonicalFocus());
       }
     }
 
@@ -795,7 +797,8 @@ namespace krys::boo
       }
 
       selectionToDelete = selection.Selection();
-      if (!StartingSelection().IsRange() || selectionToDelete.Base() != StartingSelection().Start())
+      if (!StartingSelection().IsRange()
+          || selectionToDelete.CanonicalAnchor() != StartingSelection().Start())
       {
         selectionAfterUndo = selectionToDelete;
       }
@@ -807,7 +810,7 @@ namespace krys::boo
         dom::Position extent = StartingSelection().End();
         if (extent.GetContainerNode() != selectionToDelete.End().GetContainerNode())
         {
-          extent = selectionToDelete.Extent();
+          extent = selectionToDelete.CanonicalFocus();
         }
         else
         {

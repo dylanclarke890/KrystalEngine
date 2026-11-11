@@ -748,7 +748,8 @@ namespace krys::boo
         bool smartDelete = editor.SmartInsertDeleteEnabled();
         bool smartInsert = smartDelete && innerSelection.Granularity() == TextGranularity::WordGranularity
                            && dragData.CanSmartReplace();
-        MoveSelectionCommand::Create(ShareRef(*fragment), dragCaret.Base(), smartInsert, smartDelete)
+        MoveSelectionCommand::Create(ShareRef(*fragment), dragCaret.CanonicalAnchor(), smartInsert,
+                                     smartDelete)
           ->Apply();
       }
       else
@@ -1159,7 +1160,7 @@ namespace krys::boo
         // a user can initiate a drag on a link without having any text
         // selected.  In this case, we should expand the selection to
         // the enclosing anchor element
-        dom::Position pos = sourceSelection.Base();
+        dom::Position pos = sourceSelection.CanonicalAnchor();
         if (RefPtr<dom::Element> node = EnclosingAnchorElement(pos))
         {
           selection.SetSelection(VisibleSelection::SelectionFromContentsOfNode(node.get()));

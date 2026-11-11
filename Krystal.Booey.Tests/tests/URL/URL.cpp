@@ -542,6 +542,12 @@ namespace krys::boo::url::tests
     CHECK(S(url.String()) == "https://user%20name:p%40ss@xn--bcher-kva.de/path?query#fragment");
     CHECK(S(url.User()) == "user name");
     CHECK(S(url.Password()) == "p@ss");
+
+    // Percent-encoded bytes that aren't UTF-8 decode to U+FFFD.
+    url.SetUser(u8"%FFa%C3%A9");
+    CHECK(S(url.User())
+          == "\xEF\xBF\xBD"
+             "a\xC3\xA9");
     url.RemoveCredentials();
     CHECK_FALSE(url.HasCredentials());
 

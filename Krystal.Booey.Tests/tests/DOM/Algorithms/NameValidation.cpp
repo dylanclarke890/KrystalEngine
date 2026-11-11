@@ -170,6 +170,19 @@ namespace krys::boo::dom::tests
       REQUIRE(NameValidation::IsValidElementLocalName(u8"\U0010FFFFx"));
     }
 
+    SECTION("Invalid UTF-8 isn't a name")
+    {
+      auto bytes = [](const char *text)
+      {
+        return dom::DOMString(reinterpret_cast<const char8 *>(text));
+      };
+      REQUIRE_FALSE(NameValidation::IsValidElementLocalName(bytes("_\xFF")));
+      REQUIRE_FALSE(NameValidation::IsValidElementLocalName(bytes("\xC3")));
+      REQUIRE_FALSE(NameValidation::IsValidXMLName(bytes("a\xFF"
+                                                         "b")));
+      REQUIRE(NameValidation::IsValidXMLName(u8"a\u00E9b"));
+    }
+
     SECTION("Without an ASCII alpha start, other ASCII punctuation is invalid")
     {
       REQUIRE_FALSE(NameValidation::IsValidElementLocalName(u8"-foo"));

@@ -74,22 +74,19 @@ namespace krys::boo
 
     // FIXME: Consider doing canonicalization only as part of editing operations, and keeping all selection
     // endpoints non-canonical outside of that code.
-    // FIXME: Rename _base to _canonicalAnchor.
-    // FIXME: Rename _extent to _canonicalFocus.
-    dom::Position _anchor; // Where the first click happened.
-    dom::Position _focus;  // Where the end click/release happened.
-    dom::Position _base;   // Anchor, canonical, not yet expended to respect granularity.
-    dom::Position _extent; // Focus, canonical, but not expended to respect granularity.
-    dom::Position _start;  // First of anchor and focus, caonicalized and expanded to respect granularity.
-    dom::Position _end;    // Last of anchor and focus, caonicalized and expanded to respect granularity.
+    dom::Position _anchor;          // Where the first click happened.
+    dom::Position _focus;           // Where the end click/release happened.
+    dom::Position _canonicalAnchor; // Anchor, canonical, not yet expended to respect granularity.
+    dom::Position _canonicalFocus;  // Focus, canonical, but not expended to respect granularity.
+    dom::Position _start; // First of anchor and focus, caonicalized and expanded to respect granularity.
+    dom::Position _end;   // Last of anchor and focus, caonicalized and expanded to respect granularity.
 
     Affinity _affinity {DefaultAffinity};
 
     // These are cached, can be recalculated by Validate()
     Type _type {Type::None};
     // True if the anchor is before the focus.
-    // FIXME: Rename to _anchorIsBeforeFocus since that's what the comment says.
-    bool _anchorIsFirst {true};
+    bool _anchorIsBeforeFocus {true};
     boo::Directionality _directionality {boo::Directionality::None};
 
   public:
@@ -124,12 +121,10 @@ namespace krys::boo
       return _affinity;
     }
 
-    // FIXME: Move to the terms "focus" and "anchor" instead of "base" and "extent".
-
-    void SetBase(const dom::Position &position) noexcept;
-    void SetBase(const VisiblePosition &visiblePosition) noexcept;
-    void SetExtent(const dom::Position &position) noexcept;
-    void SetExtent(const VisiblePosition &visiblePosition) noexcept;
+    void SetAnchor(const dom::Position &position) noexcept;
+    void SetAnchor(const VisiblePosition &visiblePosition) noexcept;
+    void SetFocus(const dom::Position &position) noexcept;
+    void SetFocus(const VisiblePosition &visiblePosition) noexcept;
 
     // These functions return the values that were passed in, without the canonicalization done by
     // VisiblePosition.
@@ -148,14 +143,13 @@ namespace krys::boo
     }
     KRYS_NODISCARD Maybe<dom::SimpleRange> Range() const noexcept;
 
-    // FIXME: Rename these to include the word "canonical" or remove.
-    KRYS_NODISCARD const dom::Position &Base() const noexcept
+    KRYS_NODISCARD const dom::Position &CanonicalAnchor() const noexcept
     {
-      return _base;
+      return _canonicalAnchor;
     }
-    KRYS_NODISCARD const dom::Position &Extent() const noexcept
+    KRYS_NODISCARD const dom::Position &CanonicalFocus() const noexcept
     {
-      return _extent;
+      return _canonicalFocus;
     }
     KRYS_NODISCARD const dom::Position &Start() const noexcept
     {
@@ -176,13 +170,14 @@ namespace krys::boo
     }
     KRYS_NODISCARD VisiblePosition VisibleBase() const noexcept
     {
-      return VisiblePosition(_base, IsRange() ? (IsBaseFirst() ? Affinity::Upstream : Affinity::Downstream)
-                                              : _affinity);
+      return VisiblePosition(_canonicalAnchor, IsRange()
+                                                 ? (IsBaseFirst() ? Affinity::Upstream : Affinity::Downstream)
+                                                 : _affinity);
     }
     KRYS_NODISCARD VisiblePosition VisibleExtent() const noexcept
     {
-      return VisiblePosition(_extent, IsRange() ? (IsBaseFirst() ? Affinity::Downstream : Affinity::Upstream)
-                                                : _affinity);
+      return VisiblePosition(
+        _canonicalFocus, IsRange() ? (IsBaseFirst() ? Affinity::Downstream : Affinity::Upstream) : _affinity);
     }
 
     operator VisiblePositionRange() const noexcept
@@ -219,7 +214,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsBaseFirst() const noexcept
     {
-      return _anchorIsFirst;
+      return _anchorIsBeforeFocus;
     }
 
     KRYS_NODISCARD boo::Directionality GetDirectionality() const noexcept
@@ -279,7 +274,7 @@ namespace krys::boo
     void Validate(TextGranularity granularity = TextGranularity::CharacterGranularity) noexcept;
 
     // Support methods for Validate()
-    void SetBaseAndExtentToDeepEquivalents() noexcept;
+    void SetCanonicalAnchorAndFocusToDeepEquivalents() noexcept;
     void AdjustSelectionRespectingGranularity(TextGranularity granularity) noexcept;
     void AdjustSelectionToAvoidCrossingShadowBoundaries() noexcept;
     void AdjustSelectionToAvoidCrossingEditingBoundaries() noexcept;

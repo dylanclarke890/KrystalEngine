@@ -66,20 +66,6 @@ namespace krys::boo
       return 1;
     }
 
-    /// @brief @p text with each byte that isn't part of well-formed UTF-8 replaced by U+FFFD.
-    KRYS_NODISCARD utf8_string ReplaceInvalidUTF8(utf8_string text) noexcept
-    {
-      if (text::IsValidUTF8(text))
-      {
-        return krys::move(text);
-      }
-      StringBuilder builder;
-      for (text::CodePointIterator it(Span<const char8>(text.data(), text.size())); !it.AtEnd(); ++it)
-      {
-        builder.Append(*it);
-      }
-      return krys::move(builder).ToString();
-    }
   }
 
   namespace
@@ -266,10 +252,10 @@ namespace krys::boo
 
     if (RefPtr<xml::XMLDocumentParser> xmlParser = _xmlParser)
     {
-      xmlParser->Append(ReplaceInvalidUTF8(krys::move(chunk)));
+      xmlParser->Append(text::ReplaceInvalidUTF8(krys::move(chunk)));
       return;
     }
-    _parser->InputStream().Append(ReplaceInvalidUTF8(krys::move(chunk)));
+    _parser->InputStream().Append(text::ReplaceInvalidUTF8(krys::move(chunk)));
     _parser->PumpTokenizer();
   }
 
@@ -290,7 +276,7 @@ namespace krys::boo
     else if (RefPtr<xml::XMLDocumentParser> xmlParser = krys::move(_xmlParser))
     {
       _hasReceivedSomeData = true;
-      xmlParser->Append(ReplaceInvalidUTF8(krys::move(_pendingBytes)));
+      xmlParser->Append(text::ReplaceInvalidUTF8(krys::move(_pendingBytes)));
       _pendingBytes.clear();
       xmlParser->Finish();
       xmlParser->Detach();
@@ -304,7 +290,7 @@ namespace krys::boo
       }
 
       _hasReceivedSomeData = true;
-      parser->InputStream().Append(ReplaceInvalidUTF8(krys::move(_pendingBytes)), IsEOF(true));
+      parser->InputStream().Append(text::ReplaceInvalidUTF8(krys::move(_pendingBytes)), IsEOF(true));
       _pendingBytes.clear();
       parser->PumpTokenizer();
     }

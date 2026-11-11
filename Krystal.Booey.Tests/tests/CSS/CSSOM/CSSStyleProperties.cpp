@@ -15,7 +15,6 @@ namespace krys::boo::css::tests
     CHECK(style.GetStyleDeclarationType() == StyleDeclarationType::Style);
     CHECK(Is<CSSStyleProperties>(style));
     CHECK(style.ParentElement() == nullptr);
-    CHECK(style.CssRules() == nullptr);
     CHECK(ToNarrow(style.CssText()) == "color: red; margin: 1px 2px; --x: foo; float: left;");
 
     SECTION("length and item")

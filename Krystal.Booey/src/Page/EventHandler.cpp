@@ -2441,10 +2441,10 @@ namespace krys::boo
       }
 
       VisibleSelection newSelection(selection);
-      newSelection.SetBase(dom::PositionBeforeNode(nodeToSelect.get())
-                             .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
-      newSelection.SetExtent(dom::PositionAfterNode(nodeToSelect.get())
-                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetAnchor(dom::PositionBeforeNode(nodeToSelect.get())
+                               .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetFocus(dom::PositionAfterNode(nodeToSelect.get())
+                              .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
 
       return newSelection;
     }
@@ -3167,12 +3167,12 @@ namespace krys::boo
       {
         if (newSelection.GetDirectionality() == Directionality::Strong)
         {
-          RefPtr<dom::Node> baseNode =
-            ShareRefPtr(newSelection.IsBaseFirst() ? newSelection.Base().ComputeNodeAfterPosition()
-                                                   : newSelection.Base().ComputeNodeBeforePosition());
+          RefPtr<dom::Node> baseNode = ShareRefPtr(
+            newSelection.IsBaseFirst() ? newSelection.CanonicalAnchor().ComputeNodeAfterPosition()
+                                       : newSelection.CanonicalAnchor().ComputeNodeBeforePosition());
           if (!baseNode)
           {
-            baseNode = ShareRefPtr(newSelection.Base().GetContainerNode());
+            baseNode = ShareRefPtr(newSelection.CanonicalAnchor().GetContainerNode());
           }
           if (baseNode)
           {
@@ -3183,16 +3183,16 @@ namespace krys::boo
             {
               if (newSelection.IsBaseFirst() && pos < newSelection.Start())
               {
-                newSelection.SetBase(expandedBaseSelection.End());
+                newSelection.SetAnchor(expandedBaseSelection.End());
               }
               else if (!newSelection.IsBaseFirst() && newSelection.End() < pos)
               {
-                newSelection.SetBase(expandedBaseSelection.Start());
+                newSelection.SetAnchor(expandedBaseSelection.Start());
               }
             }
           }
         }
-        newSelection.SetExtent(pos);
+        newSelection.SetFocus(pos);
       }
 
       if (selection.Granularity() != TextGranularity::CharacterGranularity)
@@ -3451,7 +3451,7 @@ namespace krys::boo
 
     // Special case to limit selection to the containing block for SVG text.
     // FIXME: Isn't there a better non-SVG-specific way to do this?
-    if (RefPtr<dom::Node> selectionBaseNode = ShareRefPtr(newSelection.Base().DeprecatedNode()))
+    if (RefPtr<dom::Node> selectionBaseNode = ShareRefPtr(newSelection.CanonicalAnchor().DeprecatedNode()))
     {
       if (auto *selectionBaseRenderer = selectionBaseNode->Renderer())
       {
@@ -3485,10 +3485,10 @@ namespace krys::boo
     if (rootUserSelectAllForMousePressNode
         && rootUserSelectAllForMousePressNode == dom::Position::RootUserSelectAllForNode(target.get()))
     {
-      newSelection.SetBase(dom::PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
-                             .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
-      newSelection.SetExtent(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
-                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetAnchor(dom::PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
+                               .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetFocus(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+                              .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
     }
     else
     {
@@ -3505,24 +3505,24 @@ namespace krys::boo
       // Reset base for user select all when base is inside user-select-all area and extent < base.
       if (rootUserSelectAllForMousePressNode && targetVisiblePosition() < dragStart())
       {
-        newSelection.SetBase(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
-                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+        newSelection.SetAnchor(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+                                 .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
 
       RefPtr<dom::Node> rootUserSelectAllForTarget = dom::Position::RootUserSelectAllForNode(target.get());
       if (rootUserSelectAllForTarget && _mousePressNode->Renderer() && targetVisiblePosition() < dragStart())
       {
-        newSelection.SetExtent(dom::PositionBeforeNode(rootUserSelectAllForTarget.get())
-                                 .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+        newSelection.SetFocus(dom::PositionBeforeNode(rootUserSelectAllForTarget.get())
+                                .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
       else if (rootUserSelectAllForTarget && _mousePressNode->Renderer())
       {
-        newSelection.SetExtent(dom::PositionAfterNode(rootUserSelectAllForTarget.get())
-                                 .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+        newSelection.SetFocus(dom::PositionAfterNode(rootUserSelectAllForTarget.get())
+                                .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
       else
       {
-        newSelection.SetExtent(targetPosition);
+        newSelection.SetFocus(targetPosition);
       }
     }
 
@@ -3532,7 +3532,7 @@ namespace krys::boo
       if (!newSelection.IsBaseFirst() && !oldSelection.IsBaseFirst()
           && oldSelection.End() < newSelection.End())
       {
-        newSelection.SetBase(oldSelection.End());
+        newSelection.SetAnchor(oldSelection.End());
       }
       else if (newSelection.IsBaseFirst() && !oldSelection.IsBaseFirst()
                && oldSelection.Start() < newSelection.Start() && _dragStartSelection)
@@ -3541,7 +3541,7 @@ namespace krys::boo
         dragStartSelection.ExpandUsingGranularity(selection.Granularity());
         if (!dragStartSelection.IsNoneOrOrphaned())
         {
-          newSelection.SetBase(dragStartSelection.Start());
+          newSelection.SetAnchor(dragStartSelection.Start());
         }
       }
     }

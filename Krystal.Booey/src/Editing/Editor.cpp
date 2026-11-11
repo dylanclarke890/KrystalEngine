@@ -1860,8 +1860,8 @@ namespace krys::boo
         TypingCommand::TextCompositionType::Pending);
 
       // Find out what node has the composition now.
-      auto base = document->Selection().Selection().Base().Downstream();
-      auto extent = document->Selection().Selection().Extent();
+      auto base = document->Selection().Selection().CanonicalAnchor().Downstream();
+      auto extent = document->Selection().Selection().CanonicalFocus();
       RefPtr<dom::Node> baseNode = ShareRefPtr(base.DeprecatedNode());
       auto baseOffset = static_cast<uint32>(base.DeprecatedEditingOffset());
       RefPtr<dom::Node> extentNode = ShareRefPtr(extent.DeprecatedNode());
