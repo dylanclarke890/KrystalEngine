@@ -80,7 +80,10 @@ namespace krys::boo
       static_cast<CachedImageClient &>(client).ImageChanged(this);
     }
 
-    // FIXME: Start the image's animation asynchronously (G7d).
+    if (_image)
+    {
+      _image->StartAnimationAsynchronously();
+    }
 
     CachedResource::DidAddClient(client);
   }

@@ -370,6 +370,12 @@ namespace krys::boo
 
   void BitmapImageSource::StartAnimation() noexcept
   {
+    // A frame's duration is known once it's decoded, so the frame shown first is decoded before its timer
+    // starts, as drawing it would.
+    if (IsAnimated())
+    {
+      (void)CurrentNativeImage();
+    }
     (void)StartAnimation(SubsamplingLevel::Default, DecodingOptions(DecodingMode::Synchronous));
   }
 

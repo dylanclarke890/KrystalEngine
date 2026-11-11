@@ -64,7 +64,7 @@ namespace krys::boo
 
   /// @brief Loads the image of an element (`<img>`, `<input type=image>`, and later video posters and
   /// `<object>`), keeps its renderer's image up to date, and fires its `load` and `error` events.
-  // FIXME: Archives, and whether the image is visible in the viewport (for animations, G7d).
+  // FIXME: Archives.
   class ImageLoader : public CachedImageClient
   {
     KRYS_NON_COPY_MOVABLE(ImageLoader);

@@ -2249,8 +2249,6 @@ namespace krys::boo
 
   bool RenderElement::AllowsAnimation() const noexcept
   {
-    // FIXME: An image element's own animation control (HTMLImageElement::allowsAnimation), once there are
-    // per-element animation controls.
     auto *page = GetDocument().GetPage();
     return !page || page->ImageAnimationEnabled();
   }

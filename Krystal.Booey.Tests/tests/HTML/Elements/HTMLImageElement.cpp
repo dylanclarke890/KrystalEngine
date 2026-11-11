@@ -454,6 +454,41 @@ namespace krys::boo::tests
     CHECK(backgroundImage.CurrentFrameIndex() == 2u);
   }
 
+  TEST_CASE("HTMLImageElement: a loaded animated image starts animating when another element shows it",
+            "[HTML][HTMLImageElement]")
+  {
+    using namespace std::chrono_literals;
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
+    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+
+    ImageFixture fixture(u8"<img id=animated src='file:///a.gif'><img id=still src='file:///a.png'>"
+                         u8"<img id=second><img id=third>");
+    RunNetworkingTasks();
+    auto &loop = html::EventLoop::Current();
+    auto &animated = Downcast<BitmapImage>(*fixture.Image(u8"animated").GetImage());
+    auto &still = Downcast<BitmapImage>(*fixture.Image(u8"still").GetImage());
+    REQUIRE_FALSE(animated.IsAnimating());
+
+    // The cached image gains a client, and its animation starts once the timers run, unpainted.
+    REQUIRE_FALSE(fixture.Image(u8"second").SetAttribute(u8"src", u8"file:///a.gif").HasException());
+    REQUIRE_FALSE(fixture.Image(u8"third").SetAttribute(u8"src", u8"file:///a.png").HasException());
+    RunNetworkingTasks();
+    REQUIRE(fixture.Image(u8"second").GetImage() == &animated);
+    (void)fixture.Document->UpdateLayout();
+    auto start = loop.Now();
+    loop.Run(start);
+    CHECK(animated.IsAnimating());
+    CHECK_FALSE(still.IsAnimating());
+    CHECK(animated.CurrentFrameIndex() == 0u);
+
+    // Its first frame shows for its whole duration.
+    loop.Run(start + 99ms);
+    CHECK(animated.CurrentFrameIndex() == 0u);
+    loop.Run(start + 100ms);
+    CHECK(animated.CurrentFrameIndex() == 1u);
+  }
+
   TEST_CASE("HTMLImageElement: animations pause out of view and resume in view", "[HTML][HTMLImageElement]")
   {
     using namespace std::chrono_literals;
