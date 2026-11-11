@@ -65,6 +65,7 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -564,9 +565,13 @@ namespace krys::boo::ax
 
   bool AccessibilityObject::IsIgnoredWithoutCache() const noexcept
   {
-    // FIXME: Objects outside the modal dialog that's open (ignoredFromModalPresence), with the modal
-    // tracking.
-    bool ignored = ComputeIsIgnored();
+    // While the modal dialog is being worked out, whether an object is ignored can't depend on it.
+    bool ignored =
+      _axObjectCache && !_axObjectCache->IsRetrievingCurrentModalNode() && IgnoredFromModalPresence();
+    if (!ignored)
+    {
+      ignored = ComputeIsIgnored();
+    }
 
     auto previous = _lastKnownIsIgnoredValue;
     const_cast<AccessibilityObject *>(this)->_lastKnownIsIgnoredValue =
@@ -587,6 +592,84 @@ namespace krys::boo::ax
       }
     }
     return ignored;
+  }
+
+  bool AccessibilityObject::IsModalDescendant(const dom::Node &modalNode) const noexcept
+  {
+    for (const dom::Node *ancestor = GetNode(); ancestor; ancestor = ancestor->ParentInComposedTree())
+    {
+      if (ancestor == &modalNode)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool AccessibilityObject::IgnoredFromModalPresence() const noexcept
+  {
+    // The top node isn't ignored.
+    auto *node = GetNode();
+    if (!node || !node->ParentNode() || !_axObjectCache)
+    {
+      return false;
+    }
+    auto *modalNode = _axObjectCache->ModalNode();
+    if (!modalNode)
+    {
+      return false;
+    }
+
+    // Objects outside the dialog that are tied to something in it aren't ignored.
+    for (auto *ancestor = this; ancestor; ancestor = ancestor->ParentObject())
+    {
+      for (const auto &controller : ancestor->Controllers())
+      {
+        if (controller->IsModalDescendant(*modalNode))
+        {
+          return false;
+        }
+      }
+      for (const auto &activeDescendant : ancestor->ActiveDescendantOfObjects())
+      {
+        if (activeDescendant->IsModalDescendant(*modalNode))
+        {
+          return false;
+        }
+      }
+    }
+
+    // Nor is something stacked above the dialog.
+    auto nearestRenderer = [](const dom::Node &start) -> RenderObject *
+    {
+      for (auto *ancestor = &start; ancestor; ancestor = ancestor->ParentInComposedTree())
+      {
+        if (auto *renderer = ancestor->Renderer())
+        {
+          return renderer;
+        }
+      }
+      return nullptr;
+    };
+    auto zIndex = [](RenderObject &renderer)
+    {
+      for (auto *layer = renderer.EnclosingLayer(); layer; layer = layer->Parent())
+      {
+        if (auto value = layer->ZIndex())
+        {
+          return value;
+        }
+      }
+      return 0;
+    };
+    auto *renderer = nearestRenderer(*node);
+    auto *modalRenderer = nearestRenderer(*modalNode);
+    if (renderer && modalRenderer && zIndex(*renderer) > zIndex(*modalRenderer))
+    {
+      return false;
+    }
+
+    return !IsModalDescendant(*modalNode);
   }
 
   void AccessibilityObject::RecomputeIsIgnoredForDescendants(bool includeSelf) noexcept

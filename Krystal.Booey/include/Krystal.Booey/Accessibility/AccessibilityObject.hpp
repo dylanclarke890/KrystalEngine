@@ -160,6 +160,8 @@ namespace krys::boo::ax
   class AccessibilityObject : public RefCounted<AccessibilityObject>,
                               public CanMakeWeakPtr<AccessibilityObject>
   {
+    friend class AXObjectCache;
+
   public:
     using AccessibilityChildrenVector = List<Ref<AccessibilityObject>>;
 
@@ -1059,6 +1061,11 @@ namespace krys::boo::ax
 
   private:
     KRYS_NODISCARD bool IsIgnoredWithoutCache() const noexcept;
+    /// @brief Whether the object is ignored for being outside the modal dialog that's open: unless it
+    /// controls or is the active descendant of something in it, or is stacked above it.
+    KRYS_NODISCARD bool IgnoredFromModalPresence() const noexcept;
+    /// @brief Whether the object is in @p modalNode (in the composed tree).
+    KRYS_NODISCARD bool IsModalDescendant(const dom::Node &modalNode) const noexcept;
     void PostMenuClosedNotificationIfNecessary() const noexcept;
   };
 }

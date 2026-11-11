@@ -51,6 +51,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -72,6 +73,7 @@
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -635,10 +637,15 @@ namespace krys::boo::ax
       _deferredRecomputeIsIgnoredList.remove(element);
       _deferredSelectedChildrenChangedList.remove(element);
       _deferredElementAddedOrRemovedList.remove(element);
+      _deferredModalChangedList.remove(element);
+      std::erase(_modalElements, element);
+      if (_currentModalElement == element)
+      {
+        _currentModalElement = nullptr;
+      }
       std::erase_if(_deferredAttributeChanges,
                     [element](const auto &change) { return change.Element == element; });
     }
-    // FIXME: Removing the element from the deferred modal changes, with the modal tracking.
   }
 
   void AXObjectCache::ChildrenChanged(dom::Node &node) noexcept
@@ -683,6 +690,168 @@ namespace krys::boo::ax
       return;
     }
     _deferredElementAddedOrRemovedList.add(element);
+    if (IsModalElement(*element))
+    {
+      DeferModalChange(*element);
+    }
+    StartPerformCacheUpdateTimer();
+  }
+
+  bool AXObjectCache::IsModalElement(const dom::Element &element) noexcept
+  {
+    if ((table_helpers::HasRole(element, u8"dialog") || table_helpers::HasRole(element, u8"alertdialog"))
+        && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
+          AccessibilityObject::AttributeWithDefaultARIA(element, u8"aria-modal"), u8"true"))
+    {
+      return true;
+    }
+    auto *dialog = DynamicDowncast<html::HTMLDialogElement>(element);
+    return dialog && dialog->IsModal();
+  }
+
+  void AXObjectCache::FindModalNodes() noexcept
+  {
+    for (auto *node = dom::TreeQueries::Next(_document, nullptr); node;
+         node = dom::TreeQueries::Next(*node, nullptr))
+    {
+      if (auto *element = DynamicDowncast<dom::Element>(node); element && IsModalElement(*element))
+      {
+        _modalElements.push_back(element);
+      }
+    }
+    _modalNodesInitialized = true;
+  }
+
+  bool AXObjectCache::ModalElementHasAccessibleContent(dom::Element &element) noexcept
+  {
+    // Whether an object is ignored depends on the modal dialog, which is being worked out: the DOM is walked
+    // for objects that are unignored in themselves.
+    List<dom::Node *> nodeStack {element.FirstChild()};
+    while (!nodeStack.empty())
+    {
+      auto *node = nodeStack.back();
+      nodeStack.pop_back();
+      for (; node; node = node->NextSibling())
+      {
+        if (auto *object = GetOrCreate(*node); object && !object->ComputeIsIgnored())
+        {
+          return true;
+        }
+        // Hidden subtrees have nothing to expose.
+        if (IsNodeVisible(node))
+        {
+          nodeStack.push_back(node->FirstChild());
+        }
+      }
+    }
+    return false;
+  }
+
+  void AXObjectCache::UpdateCurrentModalNode() noexcept
+  {
+    auto recomputeModalElement = [&]() -> dom::Element *
+    {
+      if (_modalElements.empty())
+      {
+        return nullptr;
+      }
+      if (auto *activeModalDialog = _document.ActiveModalDialog())
+      {
+        return activeModalDialog;
+      }
+
+      SetForScope retrieving(_isRetrievingCurrentModalNode, true);
+      // The deepest of the modal dialogs with the focus in it; there's none if the focus isn't in one.
+      RefPtr<dom::Element> focusedElement = ShareRefPtr(_document.FocusedElement());
+      dom::Element *modalElementToReturn = nullptr;
+      bool foundModalWithFocusInside = false;
+      for (auto *element : _modalElements)
+      {
+        // An element may have stopped being modal without the change being handled yet. Empty or hidden
+        // dialogs are skipped, so the user isn't trapped in nothing.
+        if (!IsModalElement(*element) || !IsNodeVisible(element)
+            || !ModalElementHasAccessibleContent(*element))
+        {
+          continue;
+        }
+        bool focusIsInsideElement = focusedElement && focusedElement->IsInclusiveDescendantOf(*element);
+        if (modalElementToReturn && foundModalWithFocusInside
+            && (modalElementToReturn->IsDescendantOf(*element) || !focusIsInsideElement))
+        {
+          continue;
+        }
+        modalElementToReturn = element;
+        foundModalWithFocusInside |= focusIsInsideElement;
+      }
+      if (!focusedElement || !foundModalWithFocusInside)
+      {
+        return nullptr;
+      }
+      auto *object = GetOrCreate(*modalElementToReturn);
+      return object && !object->IsAXHidden() ? modalElementToReturn : nullptr;
+    };
+
+    auto *previousModal = _currentModalElement;
+    _currentModalElement = recomputeModalElement();
+    if (previousModal != _currentModalElement)
+    {
+      // Whether everything outside the dialog is ignored changed.
+      ChildrenChanged(Get(_document));
+    }
+  }
+
+  bool AXObjectCache::IsNodeVisible(const dom::Node *node) noexcept
+  {
+    auto *element = DynamicDowncast<dom::Element>(node);
+    auto *renderer = element ? element->Renderer() : nullptr;
+    if (!renderer)
+    {
+      return false;
+    }
+    const auto &style = renderer->Style();
+    if (style.EffectiveDisplay() == DisplayType::None)
+    {
+      return false;
+    }
+    if (auto *layer = renderer->EnclosingLayer();
+        style.UsedVisibility() != Visibility::Visible && layer && !layer->HasVisibleContent())
+    {
+      return false;
+    }
+    // An element is transparent if it or any of its ancestors is.
+    for (auto *ancestor = renderer; ancestor; ancestor = ancestor->Parent())
+    {
+      if (ancestor->Style().GetOpacity().IsTransparent())
+      {
+        return false;
+      }
+    }
+    return !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
+             AccessibilityObject::AttributeWithDefaultARIA(*element, u8"aria-hidden"), u8"true")
+           || element->NodeDocument().FocusedElement() == element;
+  }
+
+  dom::Node *AXObjectCache::ModalNode() noexcept
+  {
+    if (!_modalNodesInitialized)
+    {
+      FindModalNodes();
+    }
+    if (_modalElements.empty())
+    {
+      return nullptr;
+    }
+    // Usually the current dialog is still the one; it's worked out again when it's gone or hidden.
+    if (!IsNodeVisible(_currentModalElement))
+    {
+      UpdateCurrentModalNode();
+    }
+    return _currentModalElement;
+  }
+
+  void AXObjectCache::DeferModalChange(dom::Element &element) noexcept
+  {
+    _deferredModalChangedList.add(&element);
     StartPerformCacheUpdateTimer();
   }
 
@@ -1090,7 +1259,7 @@ namespace krys::boo::ax
     {
       if (IsHTMLElementNamed(element, u8"dialog"))
       {
-        // FIXME: Updating the modal dialog (deferModalChange), with the modal tracking.
+        DeferModalChange(element);
         RecomputeIsIgnored(element.ParentNode());
       }
       else if (IsHTMLElementNamed(element, u8"details"))
@@ -1331,8 +1500,10 @@ namespace krys::boo::ax
       {
         object->RecomputeIsIgnoredForDescendants(true);
       }
-      // FIXME: Updating the modal dialog when it's inside the element (deferModalChange), with the modal
-      // tracking.
+      if (_currentModalElement && _currentModalElement->IsDescendantOf(element))
+      {
+        DeferModalChange(*_currentModalElement);
+      }
     }
     else if (name == u8"aria-invalid")
     {
@@ -1340,8 +1511,19 @@ namespace krys::boo::ax
     }
     else if (name == u8"aria-modal")
     {
-      // FIXME: Adding or removing the element from the modal elements (deferModalChange), with the modal
-      // tracking.
+      // The element may have become modal or stopped being.
+      if (IsModalElement(element))
+      {
+        if (std::ranges::find(_modalElements, &element) == _modalElements.end())
+        {
+          _modalElements.push_back(&element);
+        }
+      }
+      else
+      {
+        std::erase(_modalElements, &element);
+      }
+      DeferModalChange(element);
     }
     else if (name == u8"aria-current")
     {
@@ -2252,10 +2434,13 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::HandleFocusedUIElementChanged(dom::Element *oldElement,
-                                                    dom::Element *newElement) noexcept
+  void AXObjectCache::HandleFocusedUIElementChanged(dom::Element *oldElement, dom::Element *newElement,
+                                                    UpdateModal updateModal) noexcept
   {
-    // FIXME: Updating the modal dialog (updateCurrentModalNode), with the modal tracking.
+    if (updateModal == UpdateModal::Yes)
+    {
+      UpdateCurrentModalNode();
+    }
     HandleMenuItemSelected(newElement);
     HandleTabPanelSelected(oldElement, newElement);
     if (!newElement)
@@ -2357,13 +2542,41 @@ namespace krys::boo::ax
       SelectedChildrenChanged(select);
     }
 
+    // A focus change can change the modal dialog, as can the modal changes after it: it's worked out once,
+    // after both.
+    bool shouldRecomputeModal = false;
     if (auto focusChange = std::exchange(_deferredFocusedNodeChange, null))
     {
       auto &[oldElement, newElement] = *focusChange;
-      HandleFocusedUIElementChanged(oldElement.get(), newElement.get());
+      HandleFocusedUIElementChanged(oldElement.get(), newElement.get(), UpdateModal::No);
       // Being focused can change whether an object is ignored.
       RecomputeIsIgnored(oldElement.get());
       RecomputeIsIgnored(newElement.get());
+      shouldRecomputeModal = true;
+    }
+
+    auto modalChanged = std::exchange(_deferredModalChangedList, {});
+    for (auto *element : modalChanged)
+    {
+      if (!Is<html::HTMLDialogElement>(*element) && !table_helpers::HasRole(*element, u8"dialog")
+          && !table_helpers::HasRole(*element, u8"alertdialog"))
+      {
+        continue;
+      }
+      shouldRecomputeModal = true;
+      if (!_modalNodesInitialized)
+      {
+        FindModalNodes();
+      }
+      std::erase(_modalElements, element);
+      if (IsModalElement(*element))
+      {
+        _modalElements.push_back(element);
+      }
+    }
+    if (shouldRecomputeModal)
+    {
+      UpdateCurrentModalNode();
     }
 
     auto notifications = std::exchange(_deferredNotifications, {});
@@ -2371,8 +2584,6 @@ namespace krys::boo::ax
     {
       PostNotification(GetOrCreate(*node), notification);
     }
-
-    // FIXME: The other deferred updates (modals and relations), with the changes they come from.
   }
 
   void AXObjectCache::OnRendererCreated(dom::Node &node) noexcept

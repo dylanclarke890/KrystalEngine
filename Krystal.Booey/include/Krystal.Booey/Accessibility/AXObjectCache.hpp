@@ -130,6 +130,15 @@ namespace krys::boo::ax
     Timer _performCacheUpdateTimer;
     bool _performingDeferredCacheUpdate {false};
 
+    // The modal dialogs (modal `dialog` elements and dialogs with `aria-modal="true"`), found when first
+    // needed; the one that's current, whose outside is ignored; and the dialogs that may have become modal or
+    // stopped being.
+    List<dom::Element *> _modalElements;
+    bool _modalNodesInitialized {false};
+    dom::Element *_currentModalElement {nullptr};
+    bool _isRetrievingCurrentModalNode {false};
+    ListHashSet<dom::Element *> _deferredModalChangedList;
+
   public:
     explicit AXObjectCache(dom::Document &document) noexcept;
     ~AXObjectCache() noexcept;
@@ -148,6 +157,16 @@ namespace krys::boo::ax
     /// @brief The root of the tree: the document's view (above its web area), or its web area if it has no
     /// view.
     KRYS_NODISCARD AccessibilityObject *RootObject() noexcept;
+    /// @brief The modal dialog the user is in, outside which everything is ignored; null if there isn't one.
+    /// It's the active modal `dialog`; otherwise the deepest `aria-modal` dialog with the focus in it, if
+    /// it's visible and has something to expose.
+    KRYS_NODISCARD dom::Node *ModalNode() noexcept;
+    /// @brief Whether the cache is working out which dialog is the modal one (when whether an object is
+    /// ignored mustn't depend on it).
+    KRYS_NODISCARD bool IsRetrievingCurrentModalNode() const noexcept
+    {
+      return _isRetrievingCurrentModalNode;
+    }
     /// @brief The object for the focused element (or its active descendant), or the nearest unignored
     /// ancestor if that object is ignored; the web area if nothing is focused.
     KRYS_NODISCARD AccessibilityObject *FocusedObject() noexcept;
@@ -347,7 +366,25 @@ namespace krys::boo::ax
     void HandleAriaExpandedChange(dom::Element &element) noexcept;
     void HandleRowCountChanged(AccessibilityObject *object) noexcept;
     void HandleMenuItemSelected(dom::Element *element) noexcept;
-    void HandleFocusedUIElementChanged(dom::Element *oldElement, dom::Element *newElement) noexcept;
+    /// @brief Whether a focus change works out the modal dialog again (not when more changes that may change
+    /// it are to follow).
+    enum class UpdateModal : bool
+    {
+      No,
+      Yes,
+    };
+    void HandleFocusedUIElementChanged(dom::Element *oldElement, dom::Element *newElement,
+                                       UpdateModal updateModal = UpdateModal::Yes) noexcept;
+    KRYS_NODISCARD static bool IsModalElement(const dom::Element &element) noexcept;
+    void FindModalNodes() noexcept;
+    /// @brief Whether the modal @p element has anything unignored in it (so it doesn't trap the user in
+    /// nothing).
+    KRYS_NODISCARD bool ModalElementHasAccessibleContent(dom::Element &element) noexcept;
+    void UpdateCurrentModalNode() noexcept;
+    /// @brief Whether @p node is an element that's shown: rendered, not hidden, not transparent and not
+    /// `aria-hidden` (unless it's focused).
+    KRYS_NODISCARD static bool IsNodeVisible(const dom::Node *node) noexcept;
+    void DeferModalChange(dom::Element &element) noexcept;
     void HandleChildrenChanged(AccessibilityObject &object) noexcept;
     void DeferElementAddedOrRemoved(dom::Element *element) noexcept;
     void HandleMenuOpened(dom::Element &element) noexcept;
