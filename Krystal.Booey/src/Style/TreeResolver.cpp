@@ -58,7 +58,6 @@
 namespace krys::boo::style
 {
   // The maximum depth of the render tree; deeper elements aren't styled.
-  // FIXME: `Settings::defaultMaximumRenderTreeDepth`, once there are settings.
   static constexpr uint32 DefaultMaximumRenderTreeDepth = 512;
 
   TreeResolver::TreeResolver(dom::Document &document, UniquePtr<Update> update) noexcept

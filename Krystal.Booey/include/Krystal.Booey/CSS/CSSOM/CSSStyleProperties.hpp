@@ -81,7 +81,6 @@ namespace krys::boo::css
 
     /// @brief The property named by a script property name: camel-cased (`backgroundColor`) or
     /// WebKit-cased (`webkitTransform`).
-    // FIXME: This needs to pass in Settings to work correctly.
     KRYS_NODISCARD static PropertyId
       GetPropertyIdFromJavaScriptPropertyName(const CSSOMStringAtom &propertyName) noexcept;
   };

@@ -50,7 +50,6 @@ namespace krys::boo::css
 
   /// @brief A declaration block exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
-  // FIXME: Settings() comes with Settings.
   class CSSStyleDeclaration : public AbstractRefCountedAndCanMakeWeakPtr<CSSStyleDeclaration>
   {
     KRYS_NON_COPYABLE(CSSStyleDeclaration);
