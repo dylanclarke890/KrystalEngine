@@ -180,6 +180,9 @@ namespace krys::boo::dom
 
     /// @brief Indicates the type of the document is 'svg'.
     IsSVGDocument = 1 << 4,
+
+    /// @brief An HTML document made to show an image (`html::ImageDocument`).
+    IsImageDocument = 1 << 5,
   };
 
   /// @see https://dom.spec.whatwg.org/#concept-document-mode
@@ -201,7 +204,7 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::DocumentFlags, 5uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::DocumentFlags, 6uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::QuirksMode, 3uz);
 
 namespace krys::boo::dom
@@ -2151,6 +2154,11 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsSVGDocument() const noexcept
     {
       return HasFlag(_flags, DocumentFlags::IsSVGDocument);
+    }
+
+    KRYS_NODISCARD bool IsImageDocument() const noexcept
+    {
+      return HasFlag(_flags, DocumentFlags::IsImageDocument);
     }
 
 #pragma endregion

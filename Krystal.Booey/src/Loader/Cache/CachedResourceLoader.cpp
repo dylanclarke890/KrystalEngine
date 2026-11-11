@@ -131,6 +131,16 @@ namespace krys::boo
     return CachedResourceHandle<CachedImage>(Downcast<CachedImage>(resource->get()));
   }
 
+  CachedResourceHandle<CachedImage>
+    CachedResourceLoader::CreateManuallyLoadedImage(CachedResourceRequest &&request) noexcept
+  {
+    Ref<CachedImage> image = AdoptRef(*new CachedImage(krys::move(request)));
+    image->SetStatus(CachedResource::Pending);
+    image->SetLoading(true);
+    _documentResources[image->URL().String()] = CachedResourceHandle<CachedResource>(image.get());
+    return CachedResourceHandle<CachedImage>(image.get());
+  }
+
   ResourceErrorOr<CachedResourceHandle<CachedCSSStyleSheet>>
     CachedResourceLoader::RequestCSSStyleSheet(CachedResourceRequest &&request) noexcept
   {

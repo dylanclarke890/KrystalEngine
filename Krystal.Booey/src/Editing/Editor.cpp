@@ -350,7 +350,7 @@ namespace krys::boo
     return CanCopy() && CanDelete();
   }
 
-  // FIXME: Image documents, with them.
+  // FIXME: An image document can always copy its image, with images on the pasteboard.
   bool Editor::CanCopy() const noexcept
   {
     const VisibleSelection &selection = _document.Selection().Selection();

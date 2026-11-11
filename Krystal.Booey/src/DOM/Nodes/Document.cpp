@@ -1883,7 +1883,10 @@ namespace krys::boo::dom
     {
       _hoveredElement = ShareRefPtr(_hoveredElement->ParentElement());
     }
-    // FIXME: Schedule a hover state update (the event handler's scheduleHoverStateUpdate).
+    if (auto *frame = Frame())
+    {
+      frame->GetEventHandler().ScheduleHoverStateUpdate();
+    }
   }
 
   bool Document::HasFocus() const noexcept
@@ -1949,11 +1952,16 @@ namespace krys::boo::dom
         element = ShareRefPtr(element->ParentElement());
       }
     };
+    const auto *hoveredElement = _hoveredElement.get();
     moveOutOfRemovedSubtree(_hoveredElement);
     moveOutOfRemovedSubtree(_activeElement);
 
     if (auto *frame = Frame())
     {
+      if (_hoveredElement.get() != hoveredElement)
+      {
+        frame->GetEventHandler().ScheduleHoverStateUpdate();
+      }
       frame->GetEventHandler().NodeWillBeRemoved(node);
       _selection->NodeWillBeRemoved(node);
       if (auto *page = frame->GetPage())
@@ -4025,7 +4033,10 @@ namespace krys::boo::dom
         builder.Destroy(*_renderView->FirstChild());
       }
 
-      // FIXME: Delete the layout context's detached renderers.
+      if (auto *view = View())
+      {
+        view->LayoutContext().DeleteDetachedRenderersNow();
+      }
 
       _renderView->Destroy();
     }

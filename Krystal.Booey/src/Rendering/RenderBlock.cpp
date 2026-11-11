@@ -1631,7 +1631,6 @@ namespace krys::boo
         }
         if (auto baseline = child->FirstLineBaseline())
         {
-          // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
           return LayoutUnit(child->LogicalTop().ToInt()) + *baseline;
         }
       }
@@ -1662,7 +1661,6 @@ namespace krys::boo
         }
         if (auto baseline = child->LastLineBaseline())
         {
-          // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
           return LayoutUnit(child->LogicalTop().ToInt()) + *baseline;
         }
       }

@@ -458,6 +458,15 @@ namespace krys::boo
   void Page::RenderingUpdateCompleted() noexcept
   {
     _renderingUpdateRemainingSteps = {};
+    // The renderers destroyed during the update are deleted once it's over (upstream: when the page is idle).
+    ForEachDocument(
+      [](dom::Document &document)
+      {
+        if (auto *view = document.View())
+        {
+          view->LayoutContext().DeleteDetachedRenderersNow();
+        }
+      });
     // A render-blocked document is updated once it's unblocked, or the block times out.
     if (!_unfulfilledRequestedSteps.IsEmpty() || _skippedRenderBlockedDocument)
     {

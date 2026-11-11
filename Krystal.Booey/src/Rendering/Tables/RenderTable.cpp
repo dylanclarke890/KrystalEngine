@@ -2046,7 +2046,6 @@ namespace krys::boo
     {
       return null;
     }
-    // Subpixel inline layout is off, so the section's top is snapped to an integer.
     return LayoutUnit(topNonEmptySection->LogicalTop().ToInt()) + *baseline;
   }
 
@@ -2067,7 +2066,6 @@ namespace krys::boo
 
     if (auto lastLineBaseline = tableSection->LastLineBaseline())
     {
-      // Subpixel inline layout is off, so the section's top is snapped to an integer.
       return LayoutUnit(tableSection->LogicalTop().ToInt()) + *lastLineBaseline;
     }
 
@@ -2075,14 +2073,14 @@ namespace krys::boo
   }
 
   LayoutRect RenderTable::OverflowClipRect(const LayoutPoint &location,
-                                           OverlayScrollbarSizeRelevancy relevancy) const noexcept
+                                           OverlayScrollbarSizeRelevancy relevancy,
+                                           PaintPhase phase) const noexcept
   {
     LayoutRect rect;
     // Don't clip out the table's side of the collapsed borders if we're in the paint phase that will ask the
     // sections to paint them. Likewise, if we're self-painting we avoid clipping them out as the clip rect
     // that will be passed down to child layers from RenderLayer will do that instead.
-    // FIXME: The paint phase that paints the collapsed borders (PaintPhase::ChildBlockBackgrounds).
-    if (Layer() && Layer()->IsSelfPaintingLayer())
+    if (phase == PaintPhase::ChildBlockBackgrounds || (Layer() && Layer()->IsSelfPaintingLayer()))
     {
       rect = BorderBoxRect();
       rect.SetLocation(location + rect.Location());

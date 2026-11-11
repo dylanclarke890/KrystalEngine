@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Debug.hpp"
@@ -102,6 +103,20 @@ namespace krys::boo
       Nested
     };
 
+    /// @brief The renderers the render tree builder detached and destroyed, kept until they're deleted
+    /// together, so pointers to them taken during an update stay valid until it ends.
+    class DetachedRendererList
+    {
+    private:
+      List<UniquePtr<RenderObject>> _renderers;
+
+    public:
+      /// @brief Keeps @p renderer, or destroys it now (returning false) if its render tree is being torn
+      /// down.
+      bool Append(RenderPtr<RenderObject> renderer) noexcept;
+      void Clear() noexcept;
+    };
+
     LocalFrameView &_frameView;
     LayoutPhase _layoutPhase {LayoutPhase::OutsideLayout};
     LayoutNestedState _layoutNestedState {LayoutNestedState::NotInLayout};
@@ -121,6 +136,7 @@ namespace krys::boo
     // Keyed by address: flex layout removes each item it adds.
     HashSet<const RenderBox *> _percentHeightIgnoreList;
     List<AnchorScrollAdjuster> _anchorScrollAdjusters;
+    mutable DetachedRendererList _detachedRendererList;
 
   public:
     explicit LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept;
@@ -267,6 +283,17 @@ namespace krys::boo
     KRYS_NODISCARD LocalFrame &Frame() const noexcept;
     KRYS_NODISCARD dom::Document *Document() const noexcept;
     KRYS_NODISCARD RenderView *GetRenderView() const noexcept;
+
+    /// @brief Keeps a destroyed renderer until `DeleteDetachedRenderersNow`; returns false if it was deleted
+    /// now instead.
+    bool AddToDetachedRendererList(RenderPtr<RenderObject> renderer) const noexcept
+    {
+      return _detachedRendererList.Append(krys::move(renderer));
+    }
+    void DeleteDetachedRenderersNow() const noexcept
+    {
+      _detachedRendererList.Clear();
+    }
 
     KRYS_NODISCARD List<AnchorScrollAdjuster> &AnchorScrollAdjusters() noexcept
     {

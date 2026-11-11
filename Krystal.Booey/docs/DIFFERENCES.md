@@ -172,6 +172,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
+- Inline layout snaps to whole pixels in the block direction: font metrics, line positions, list markers and the baselines that blocks, flex and grid items, tables and MathML take from their lines are integers, which can put lines a fraction of a pixel away from Chrome's. Subpixel inline layout (upstream's `SubpixelInlineLayoutEnabled`) isn't planned.
 - Ordered list markers sit a little further from their text than Chrome's (the `decorations` golden); this is marker layout, not painting.
 
 ## Painting
@@ -317,7 +318,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Dropping a URL on a page that doesn't take it loads nothing, where browsers load the dropped URL.
 - The CSS `crossorigin()` URL modifier is parsed but sets no request mode or credentials, as there's no network. Only a link to a fragment of the document in its own browsing context navigates, within the document.
 - There is no session history: no `History`, `Navigation` or `Location` (`window.location`, `document.location`), no back/forward cache (`pageshow` and `pagehide` are never persisted), and no `popstate`, `hashchange`, `beforeunload` or `BeforeUnloadEvent`. `<meta http-equiv=refresh>` is ignored.
-- A response of a type that's neither HTML, XML nor text (one the specification would hand off to other software, or download) is loaded as an HTML document of that type.
+- A response of a type that's neither HTML, XML, text nor a supported image (one the specification would hand off to other software, or download, or play as media) is loaded as an HTML document of that type.
 - In quirks mode, a fragment finds an `a` element by its `name` ASCII case-insensitively (`Document::FindAnchor`).
 - The window has only what a C++ application uses: no `navigator` (nor `clientInformation`, plugins or protocol handlers), `screen`, bars (`locationbar` and the others), `status`, `external`, `name`, `open()`, `close()`, `closed`, `stop()`, `opener`, `top`, `parent`, `frames`, `length`, `frameElement`, `window`, `self`, user prompts (`alert()`, `confirm()`, `prompt()`), `print()` (nor `beforeprint` and `afterprint`), window geometry (`moveTo()`, `resizeTo()`, `screenX`, `outerWidth` and the others), `postMessage()` (nor `MessageEvent`), `reportError()` (nor `ErrorEvent`), `atob()`/`btoa()`, `origin`, `isSecureContext`, `crossOriginIsolated`, `originAgentCluster` or `navigator.userActivation`. Nor are there `online`, `offline`, `languagechange`, `message`, `messageerror`, `pageswap`, `pagereveal`, `rejectionhandled`, `unhandledrejection` or the gamepad events, or their handlers. The user activation itself is kept.
 - A `ResizeObserver` loop that leaves notifications undelivered reports no error, as there's no script error reporting.

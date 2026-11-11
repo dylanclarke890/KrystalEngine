@@ -359,7 +359,6 @@ namespace krys::boo
   {
     if (IsValid())
     {
-      // Subpixel inline layout is off, so the baseline is rounded.
       return LayoutUnit(std::round((BorderAndPaddingBefore() + FractionAscent()).ToFloat()));
     }
     return RenderMathMLRow::FirstLineBaseline();

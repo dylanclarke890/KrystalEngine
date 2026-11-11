@@ -1955,6 +1955,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/ImageData/ImageDataPixelFormat.hpp
   include/Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp
   include/Krystal.Booey/HTML/Images/HTMLImageLoader.hpp
+  include/Krystal.Booey/HTML/Images/ImageDocument.hpp
   include/Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp
   include/Krystal.Booey/HTML/InputTypes/BaseButtonInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/BaseCheckableInputType.hpp
@@ -2157,6 +2158,7 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Forms/ValidatedFormListedElement.cpp
   src/HTML/ImageData/ImageData.cpp
   src/HTML/Images/HTMLImageLoader.cpp
+  src/HTML/Images/ImageDocument.cpp
   src/HTML/Images/LazyLoadImageObserver.cpp
   src/HTML/InputTypes/BaseButtonInputType.cpp
   src/HTML/InputTypes/BaseCheckableInputType.cpp

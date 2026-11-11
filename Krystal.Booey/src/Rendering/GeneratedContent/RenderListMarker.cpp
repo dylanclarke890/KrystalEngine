@@ -79,8 +79,6 @@ namespace krys::boo
       return TextDirection::RTL;
     }
 
-    // This is temporary and will be removed when subpixel inline layout is enabled.
-    // FIXME: Stop snapping once inline layout is subpixel.
     enum class SnapDirection : uint8
     {
       Floor,

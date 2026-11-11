@@ -42,6 +42,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -169,7 +170,10 @@ namespace krys::boo
 
     ViewportContentsChanged();
 
-    // FIXME: Tell the document its view changed size (didChangeViewSize).
+    if (auto *imageDocument = DynamicDowncast<html::ImageDocument>(Frame().Document()))
+    {
+      imageDocument->DidChangeViewSize();
+    }
   }
 
   void LocalFrameView::Resize(const IntSize &size) noexcept

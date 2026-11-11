@@ -4,7 +4,12 @@
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
+#include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
+#include "Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::tests
 {
@@ -252,5 +257,33 @@ namespace krys::boo::tests
     fixture.Frame(500ms);
     CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.75f));
     animation->Cancel(WebAnimation::Silently::Yes);
+  }
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "KeyframeEffect: registering a custom property recomputes the keyframes that animate it",
+                   "[Animation][KeyframeEffect]")
+  {
+    BoxFixture fixture;
+    auto custom = Valid(fixture.Effect(List<InputKeyframe> {Keyframe(nullptr, {{u8"--x", u8"0px"}}),
+                                                            Keyframe(nullptr, {{u8"--x", u8"100px"}})}));
+    auto other = Valid(fixture.Effect(List<InputKeyframe> {Keyframe(nullptr, {{u8"opacity", u8"0"}}),
+                                                           Keyframe(nullptr, {{u8"opacity", u8"1"}})}));
+    auto customAnimation = WebAnimation::Create(*fixture.Document, custom.get());
+    auto otherAnimation = WebAnimation::Create(*fixture.Document, other.get());
+    REQUIRE_FALSE(customAnimation->Play().HasException());
+    REQUIRE_FALSE(otherAnimation->Play().HasException());
+    fixture.StartAnimations();
+    REQUIRE(custom->GetBlendingKeyframes().Size() == 2);
+    REQUIRE(other->GetBlendingKeyframes().Size() == 2);
+
+    // Its initial value and inheritance may have changed, so the keyframes are made again when next needed.
+    auto syntax = css::CustomPropertySyntax::Parse(u8"<length>");
+    REQUIRE(syntax);
+    auto &registry = fixture.Document->StyleScope().GetCustomPropertyRegistry();
+    REQUIRE(registry.RegisterFromAPI({.Name = css::CSSOMStringAtom(u8"--x"), .Syntax = *syntax}));
+    CHECK(custom->GetBlendingKeyframes().Size() == 0);
+    CHECK(other->GetBlendingKeyframes().Size() == 2);
+
+    customAnimation->Cancel(WebAnimation::Silently::Yes);
+    otherAnimation->Cancel(WebAnimation::Silently::Yes);
   }
 }

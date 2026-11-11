@@ -140,10 +140,9 @@ namespace krys::boo
     }
     if (!_needsYAdjustment)
     {
-      // FIXME: Both branches read align-self; the vertical writing mode one is likely meant to read
-      // justify-self.
+      // Upstream reads align-self in both branches.
       _needsYAdjustment = containingWritingMode.IsHorizontal() ? style.GetAlignSelf().IsAnchorCenter()
-                                                               : style.GetAlignSelf().IsAnchorCenter();
+                                                               : style.GetJustifySelf().IsAnchorCenter();
     }
 
     _isHidden = style.IsForceHidden();

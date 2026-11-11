@@ -23,6 +23,8 @@
  */
 
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -202,10 +204,19 @@ namespace krys::boo::style
   }
 
   void CustomPropertyRegistry::NotifyAnimationsOfCustomPropertyRegistration(
-    const css::CSSOMStringAtom &) noexcept
+    const css::CSSOMStringAtom &customProperty) noexcept
   {
-    // FIXME: Tell the keyframe effects targeting elements in the scope's document
-    // (`KeyframeEffect::customPropertyRegistrationDidChange`).
+    auto &document = _scope.Document();
+    for (auto *animation : WebAnimation::Instances())
+    {
+      if (auto *keyframeEffect = animation->GetKeyframeEffect())
+      {
+        if (auto *target = keyframeEffect->Target(); target && &target->NodeDocument() == &document)
+        {
+          keyframeEffect->CustomPropertyRegistrationDidChange(customProperty);
+        }
+      }
+    }
   }
 
   auto CustomPropertyRegistry::ParseInitialValue(const dom::Document &document,

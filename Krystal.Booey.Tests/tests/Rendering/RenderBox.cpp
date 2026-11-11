@@ -281,4 +281,32 @@ namespace krys::boo::tests
       CHECK(view->CanContainFixedPositionObjects());
     }
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderBox: transforms add to the container's scrollable overflow",
+                   "[Rendering][RenderBox][!shouldfail]")
+  {
+    // FIXME: Transforms aren't in the overflow they propagate yet (see KNOWN-ISSUES.md: they'd stretch
+    // balanced columns).
+    ResolverFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}#s{width:100px;height:100px;overflow:hidden}"
+      u8"#s>div{width:50px;height:50px}</style><div id=s><div id=child></div></div>"};
+    auto &scroller = fixture.ById(u8"s");
+    auto &child = fixture.ById(u8"child");
+    (void)fixture.Document->UpdateLayout();
+    CHECK(scroller.ScrollWidth() == 100);
+    CHECK(scroller.ScrollHeight() == 100);
+
+    REQUIRE_FALSE(child.SetAttribute(u8"style", u8"transform: translate(200px, 300px)").HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(scroller.ScrollWidth() == 250);
+    CHECK(scroller.ScrollHeight() == 350);
+
+    // Relative positioning moves the box before its transform.
+    REQUIRE_FALSE(
+      child.SetAttribute(u8"style", u8"position: relative; left: 10px; transform: translateX(200px)")
+        .HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(scroller.ScrollWidth() == 260);
+  }
 }

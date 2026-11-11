@@ -2050,6 +2050,20 @@ namespace krys::boo
     InvalidateElement(TargetStyleable());
   }
 
+  void
+    KeyframeEffect::CustomPropertyRegistrationDidChange(const css::CSSOMStringAtom &customProperty) noexcept
+  {
+    // If the registration of a custom property is changed, we should recompute keyframes
+    // at the next opportunity as the initial value, inherited value, etc. could have changed.
+    if (!_blendingKeyframes.ContainsProperty(AnimatableCSSProperty(customProperty)))
+    {
+      return;
+    }
+
+    ClearBlendingKeyframes();
+    Invalidate();
+  }
+
   void KeyframeEffect::ComputeAcceleratedPropertiesState() noexcept
   {
     bool hasSomeAcceleratedProperties = false;

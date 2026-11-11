@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
@@ -1257,7 +1258,11 @@ namespace krys::boo
   DecodingMode RenderBoxModelObject::DecodingModeForImageDraw(const Image &image,
                                                               const PaintInfo &paintInfo) const noexcept
   {
-    // (Skipped: image documents decoding synchronously, as there are none; see KNOWN-ISSUES.md.)
+    // Some document types force synchronous decoding.
+    if (Is<html::ImageDocument>(GetDocument()))
+    {
+      return DecodingMode::Synchronous;
+    }
 
     // A PaintBehavior may force synchronous decoding.
     if (paintInfo.PaintBehavior.Contains(PaintBehavior::Snapshotting))

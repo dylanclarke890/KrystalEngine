@@ -64,8 +64,7 @@ namespace krys::boo
 
   /// @brief Loads the image of an element (`<img>`, `<input type=image>`, and later video posters and
   /// `<object>`), keeps its renderer's image up to date, and fires its `load` and `error` events.
-  // FIXME: Loading manually, image documents, archives, and whether the image is visible in the viewport (for
-  // animations, G7d).
+  // FIXME: Archives, and whether the image is visible in the viewport (for animations, G7d).
   class ImageLoader : public CachedImageClient
   {
     KRYS_NON_COPY_MOVABLE(ImageLoader);
@@ -86,11 +85,19 @@ namespace krys::boo
     bool _hasPendingErrorEvent : 1 {false};
     bool _imageComplete : 1 {true};
     bool _elementIsProtected : 1 {false};
+    bool _loadManually : 1 {false};
     LazyImageLoadState _lazyImageLoadState {LazyImageLoadState::None};
     List<DecodePromise> _decodingPromises;
 
   public:
     ~ImageLoader() noexcept override;
+
+    /// @brief While set, a new source makes an image its owner gives the data to (an image document's),
+    /// rather than requesting it.
+    void SetLoadManually(bool loadManually) noexcept
+    {
+      _loadManually = loadManually;
+    }
 
     /// @brief Called when the element is attached to a document; starts loading if a load hasn't already been
     /// started.

@@ -46,6 +46,7 @@
 
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -356,7 +357,8 @@ namespace krys::boo
     }
 
     const auto *repaintContainer = renderer.ContainerForRepaint().Renderer;
-    // FIXME: The caret rect needs to be invalidated after scrolling.
+    // The caret rect needs to be invalidated after scrolling.
+    renderer.GetDocument().Selection().SetCaretRectNeedsUpdate();
 
     auto cachedRect = _layer.CachedClippedOverflowRect();
     auto rectForRepaint = cachedRect ? *cachedRect : renderer.ClippedOverflowRectForRepaint(repaintContainer);

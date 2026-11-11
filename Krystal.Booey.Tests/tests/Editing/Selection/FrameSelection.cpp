@@ -549,6 +549,22 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameSelection: the caret moves with a scrolled container",
+                   "[Editing][FrameSelection][Caret]")
+  {
+    CaretFixture fixture(u8"<div id=scroller style=height:40px;overflow:scroll><div style=height:20px></div>"
+                         u8"<div id=e contenteditable>Text</div><div style=height:200px></div></div>");
+    auto &selection = fixture.Selection();
+    selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&fixture.TextIn(u8"e")), 0),
+                     Affinity::Downstream);
+    fixture.TestPage->UpdateRendering();
+    auto before = selection.AbsoluteCaretBounds();
+
+    // Scrolling lays nothing out, so it's the scroll that makes the caret's rect stale.
+    fixture.ById(u8"scroller").SetScrollTop(10);
+    CHECK(selection.AbsoluteCaretBounds().Y() == before.Y() - 10);
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderBlockFlow: room for the caret at the end of lines",
                    "[Editing][Caret]")
   {

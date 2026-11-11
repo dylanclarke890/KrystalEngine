@@ -106,6 +106,7 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -1317,7 +1318,16 @@ namespace krys::boo::dom
       NodeDocument().UserActionElements().SetActive(*this, value);
     }
 
-    // FIXME: Repaint elements with a used appearance.
+    auto *renderer = Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    if (!IsDisabledFormControl() && renderer->Style().HasUsedAppearance())
+    {
+      renderer->Repaint();
+    }
   }
 
   bool Element::CanContainRangeEndPoint() const noexcept
@@ -1451,7 +1461,13 @@ namespace krys::boo::dom
       NodeDocument().UserActionElements().SetHovered(*this, value);
     }
 
-    // FIXME: Repaint elements with a used appearance whose theme supports hover.
+    if (const auto *style = GetRenderStyle(); style && style->HasUsedAppearance())
+    {
+      if (auto *renderer = Renderer(); renderer && RenderTheme::Singleton().SupportsHover())
+      {
+        renderer->Repaint();
+      }
+    }
   }
 
   void Element::ClearHoverAndActiveStatusBeforeDetachingRenderer() noexcept

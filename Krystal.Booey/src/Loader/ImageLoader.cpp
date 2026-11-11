@@ -212,19 +212,26 @@ namespace krys::boo
       CachedResourceRequest request(ResourceRequest(krys::move(imageURL)), options);
       request.SetInitiatorType(element->LocalName().View());
 
-      if (_lazyImageLoadState == LazyImageLoadState::None && imageElement)
+      if (_loadManually)
       {
-        if (imageElement->IsLazyLoadable() && !CanReuseFromListOfAvailableImages(request))
-        {
-          _lazyImageLoadState = LazyImageLoadState::Deferred;
-          request.SetIgnoreForRequestCount(true);
-        }
+        newImage = document->GetCachedResourceLoader().CreateManuallyLoadedImage(krys::move(request));
       }
-      auto imageLoading = _lazyImageLoadState == LazyImageLoadState::Deferred
-                            ? ImageLoading::DeferredUntilVisible
-                            : ImageLoading::Immediate;
-      auto requested = document->GetCachedResourceLoader().RequestImage(krys::move(request), imageLoading);
-      newImage = requested ? *requested : CachedResourceHandle<CachedImage>();
+      else
+      {
+        if (_lazyImageLoadState == LazyImageLoadState::None && imageElement)
+        {
+          if (imageElement->IsLazyLoadable() && !CanReuseFromListOfAvailableImages(request))
+          {
+            _lazyImageLoadState = LazyImageLoadState::Deferred;
+            request.SetIgnoreForRequestCount(true);
+          }
+        }
+        auto imageLoading = _lazyImageLoadState == LazyImageLoadState::Deferred
+                              ? ImageLoading::DeferredUntilVisible
+                              : ImageLoading::Immediate;
+        auto requested = document->GetCachedResourceLoader().RequestImage(krys::move(request), imageLoading);
+        newImage = requested ? *requested : CachedResourceHandle<CachedImage>();
+      }
 
       // If we do not have an image here, it means that a cross-site
       // violation occurred, or that the image was blocked via Content

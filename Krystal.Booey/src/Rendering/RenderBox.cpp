@@ -1562,7 +1562,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The layout state.
+    LayoutStateMaintainer statePusher(*this, LocationOffset(), GetWritingMode().IsBlockFlipped());
     while (child)
     {
       if (child->NeedsLayout())
@@ -6215,8 +6215,8 @@ namespace krys::boo
     return {};
   }
 
-  LayoutRect RenderBox::OverflowClipRect(const LayoutPoint &location,
-                                         OverlayScrollbarSizeRelevancy relevancy) const noexcept
+  LayoutRect RenderBox::OverflowClipRect(const LayoutPoint &location, OverlayScrollbarSizeRelevancy relevancy,
+                                         PaintPhase) const noexcept
   {
     LayoutRect clipRect = BorderBoxRect();
     clipRect.SetLocation(location + clipRect.Location() + LayoutSize(BorderLeft(), BorderTop()));
@@ -6660,7 +6660,8 @@ namespace krys::boo
     FloatRect clipRect = SnapRectToDevicePixels(
       isControlClip
         ? ControlClipRect(accumulatedOffset)
-        : OverflowClipRect(accumulatedOffset, OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize),
+        : OverflowClipRect(accumulatedOffset, OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
+                           paintInfo.Phase),
       deviceScaleFactor);
     paintInfo.Context().Save();
     if (Style().HasBorderRadius())

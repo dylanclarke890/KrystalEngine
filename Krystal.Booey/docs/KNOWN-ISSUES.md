@@ -55,6 +55,10 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 
 ## Layout
 
+### Bugs
+
+- A transformed box doesn't add its transformed rect to its container's scrollable overflow (FIXME in `RenderBox::LayoutOverflowRectForPropagation`). Porting upstream's transform makes the overflow stretch balanced columns, which Chrome doesn't: the last column set grows to the flow's layout overflow, so `RenderMultiColumnSet::CalculateBalancedHeight` sees more columns than specified and stretches them (the `multicol` golden's rotated box). Fixing it needs balancing to ignore overflow from transforms.
+
 ### Missing
 
 - An unstyled XML document (one with no style sheets, hints or HTML, SVG or MathML elements) is rendered as its text, not as a view of its source or tree.

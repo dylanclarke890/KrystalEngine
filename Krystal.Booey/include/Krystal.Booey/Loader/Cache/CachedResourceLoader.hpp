@@ -108,6 +108,10 @@ namespace krys::boo
       RequestSVGDocument(CachedResourceRequest &&) noexcept;
     /// @brief An icon (`<link rel=icon>`), kept as its bytes.
     ResourceErrorOr<CachedResourceHandle<CachedRawResource>> RequestIcon(CachedResourceRequest &&) noexcept;
+    /// @brief An image whose data its requester gives it (an image document's), loading until it's finished;
+    /// it's one of the document's resources but not in the memory cache.
+    KRYS_NODISCARD CachedResourceHandle<CachedImage>
+      CreateManuallyLoadedImage(CachedResourceRequest &&) noexcept;
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(const url::URL &url) const noexcept;

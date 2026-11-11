@@ -3675,7 +3675,6 @@ namespace krys::boo
 
     if (HasLineIfEmpty())
     {
-      // FIXME: Don't round when subpixel inline layout is enabled.
       return LayoutUnit {BorderAndPaddingBefore() + LineHeightForEmptyContent(FirstLineStyle(), false)};
     }
 
@@ -3706,7 +3705,6 @@ namespace krys::boo
 
     if (HasLineIfEmpty())
     {
-      // FIXME: Don't round when subpixel inline layout is enabled.
       return LayoutUnit {BorderAndPaddingBefore() + LineHeightForEmptyContent(Style(), false)};
     }
 

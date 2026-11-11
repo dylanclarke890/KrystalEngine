@@ -408,6 +408,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/PaintTestUtils.cpp
 		tests/Rendering/RenderBox.cpp
 		tests/Rendering/RenderElement.cpp
+		tests/Rendering/RenderLayoutState.cpp
 		tests/Rendering/Replaced/RenderHTMLCanvas.cpp
 		tests/Rendering/Replaced/RenderImage.cpp
 		tests/DOM/Events/CustomEvent.cpp
@@ -552,6 +553,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Canvas/CanvasRenderingContext2D.cpp
 		tests/HTML/ImageData/ImageData.cpp
 		tests/HTML/Canvas/Path2D.cpp
+		tests/HTML/Images/ImageDocument.cpp
 		tests/HTML/Images/LazyLoadImageObserver.cpp
 		tests/DOM/ContentVisibility/ContentVisibilityDocumentState.cpp
 		tests/Rendering/FormControls/RenderButton.cpp

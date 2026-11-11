@@ -254,7 +254,8 @@ namespace krys::boo
 
   EventHandler::EventHandler(LocalFrame &frame) noexcept
       : _frame(frame), _autoscrollController(CreateUnique<AutoscrollController>()),
-        _fakeMouseMoveEventTimer(*this, &EventHandler::FakeMouseMoveEventTimerFired)
+        _fakeMouseMoveEventTimer(*this, &EventHandler::FakeMouseMoveEventTimerFired),
+        _hoverTimer(*this, &EventHandler::HoverTimerFired)
   {
   }
 
@@ -388,6 +389,7 @@ namespace krys::boo
 
   void EventHandler::Clear() noexcept
   {
+    _hoverTimer.Stop();
     _resizeLayer = nullptr;
     _capturingMouseEventsElement = nullptr;
     ClearElementUnderMouse();
@@ -1816,6 +1818,33 @@ namespace krys::boo
                                           MouseButton::None, PlatformEvent::Type::MouseMoved, 0,
                                           _lastKnownModifiers, html::EventLoop::Current().Now());
     (void)MouseMoved(fakeMouseMoveEvent);
+  }
+
+  void EventHandler::ScheduleHoverStateUpdate() noexcept
+  {
+    if (!_hoverTimer.IsActive())
+    {
+      _hoverTimer.StartOneShot({});
+    }
+  }
+
+  void EventHandler::HoverTimerFired() noexcept
+  {
+    _hoverTimer.Stop();
+
+    RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
+    auto *view = _frame.View();
+    // Unlike upstream, which hit tests at the origin, there's nothing to hover without a known position.
+    if (!document || !view || !_lastKnownMousePosition)
+    {
+      return;
+    }
+
+    HitTestRequest request(
+      {HitTestRequest::Type::Move, HitTestRequest::Type::DisallowUserAgentShadowContent});
+    HitTestResult result(view->WindowToContents(FlooredIntPoint(*_lastKnownMousePosition)));
+    document->HitTest(request, result);
+    document->UpdateHoverActiveState(request, result.TargetElement());
   }
 
   void EventHandler::UpdateCursor() noexcept

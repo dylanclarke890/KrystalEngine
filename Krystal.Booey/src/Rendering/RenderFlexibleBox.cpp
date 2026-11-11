@@ -705,7 +705,6 @@ namespace krys::boo
       baseline = BaselineAlignmentState::SynthesizedBaseline(
         *baselineFlexItem, dominantBaseline, flexboxWritingMode, direction, BaselineSynthesisEdge::BorderBox);
     }
-    // Subpixel inline layout is off: the item's top is snapped to an integer.
     return LayoutUnit(baselineFlexItem->LogicalTop().ToInt()) + *baseline;
   }
 
@@ -745,7 +744,6 @@ namespace krys::boo
       baseline = BaselineAlignmentState::SynthesizedBaseline(
         *baselineFlexItem, dominantBaseline, flexboxWritingMode, direction, BaselineSynthesisEdge::BorderBox);
     }
-    // Subpixel inline layout is off: the item's top is snapped to an integer.
     return LayoutUnit(baselineFlexItem->LogicalTop().ToInt()) + *baseline;
   }
 

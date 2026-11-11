@@ -264,6 +264,9 @@ namespace krys::boo
     void GetAnimatedStyle(UniquePtr<RenderStyle> &animatedStyle) noexcept;
     /// @brief Invalidates the target's style.
     void Invalidate() noexcept;
+    /// @brief Recomputes the keyframes at the next opportunity if they animate @p customProperty, whose
+    /// registration (and so its initial value or inheritance) changed.
+    void CustomPropertyRegistrationDidChange(const css::CSSOMStringAtom &customProperty) noexcept;
 
     void AnimationRelevancyDidChange() noexcept;
 

@@ -47,6 +47,32 @@ namespace krys::boo
 
   LocalFrameViewLayoutContext::~LocalFrameViewLayoutContext() noexcept = default;
 
+  bool LocalFrameViewLayoutContext::DetachedRendererList::Append(RenderPtr<RenderObject> renderer) noexcept
+  {
+    krys_debug_assert(!renderer->Parent());
+    krys_debug_assert(!renderer->BeingDestroyed());
+
+    if (renderer->RenderTreeBeingDestroyed())
+    {
+      return false;
+    }
+
+    constexpr size_t maximumNumberOfDetachedRenderers = 5'000;
+    if (_renderers.size() == maximumNumberOfDetachedRenderers)
+    {
+      Clear();
+    }
+
+    _renderers.push_back(UniquePtr<RenderObject>(renderer.release()));
+    return true;
+  }
+
+  void LocalFrameViewLayoutContext::DetachedRendererList::Clear() noexcept
+  {
+    // Deleting a renderer can't add to the list, but take the list first so it's never walked as it changes.
+    auto renderers = std::exchange(_renderers, {});
+  }
+
   LocalFrame &LocalFrameViewLayoutContext::Frame() const noexcept
   {
     return _frameView.Frame();

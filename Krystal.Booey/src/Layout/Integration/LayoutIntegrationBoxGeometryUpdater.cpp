@@ -64,7 +64,6 @@ namespace krys::boo::layout_integration
       Round
     };
 
-    // Subpixel inline layout is off, so values snap to integers.
     KRYS_NODISCARD LayoutUnit SnapToInt(LayoutUnit value,
                                         SnapDirection direction = SnapDirection::Round) noexcept
     {

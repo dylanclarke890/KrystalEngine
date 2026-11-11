@@ -50,7 +50,6 @@
 
 namespace krys::boo
 {
-  // This is temporary and will be removed when subpixel inline layout is enabled.
   KRYS_NODISCARD static float Snap(float value) noexcept
   {
     return std::round(value);

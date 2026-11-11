@@ -2921,9 +2921,8 @@ namespace krys::boo
                           _anchorScrollAdjustment->Height().ToDouble());
     }
 
-    // FIXME: Snap the reference box to device pixels when the renderer needs it
-    // (snapRectToDevicePixelsIfNeeded).
-    auto referenceBoxRect = Renderer().TransformReferenceBoxRect(style);
+    auto referenceBoxRect = SnapRectToDevicePixels(LayoutRect(Renderer().TransformReferenceBoxRect(style)),
+                                                   Renderer().GetDocument().DeviceScaleFactor());
     Renderer().ApplyTransform(transform, style, referenceBoxRect, options);
 
     // FIXME: 3D rendering (canRender3DTransforms).
@@ -3062,8 +3061,10 @@ namespace krys::boo
     const auto &style = Renderer().Style();
     auto referenceBoxRect = Renderer().TransformReferenceBoxRect(style);
 
-    // FIXME: Snap the origin to device pixels when the renderer needs it (rendererNeedsPixelSnapping).
-    return style::TransformResolver::ComputeTransformOrigin(style, referenceBoxRect);
+    auto origin = style::TransformResolver::ComputeTransformOrigin(style, referenceBoxRect);
+    origin.SetXY(
+      RoundPointToDevicePixels(LayoutPoint(origin.XY()), Renderer().GetDocument().DeviceScaleFactor()));
+    return origin;
   }
 
   FloatPoint RenderLayer::PerspectiveOrigin() const noexcept
