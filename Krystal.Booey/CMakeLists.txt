@@ -212,6 +212,7 @@ set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
   include/Krystal.Booey/Accessibility/AXObjectRareData.hpp
   include/Krystal.Booey/Accessibility/AXTableHelpers.hpp
   include/Krystal.Booey/Accessibility/AccessibilityListBoxOption.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMathMLElement.hpp
   include/Krystal.Booey/Accessibility/AccessibilityMenuList.hpp
   include/Krystal.Booey/Accessibility/AccessibilityMenuListOption.hpp
   include/Krystal.Booey/Accessibility/AccessibilityMenuListPopup.hpp
@@ -221,6 +222,7 @@ set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
   include/Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp
   include/Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp
   include/Krystal.Booey/Accessibility/AccessibilityRole.hpp
+  include/Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp
   include/Krystal.Booey/Accessibility/AccessibilityScrollView.hpp
   include/Krystal.Booey/Accessibility/AccessibilityScrollbar.hpp
   include/Krystal.Booey/Accessibility/AccessibilitySlider.hpp
@@ -236,6 +238,7 @@ set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
   src/Accessibility/AXObjectCache.cpp
   src/Accessibility/AXTableHelpers.cpp
   src/Accessibility/AccessibilityListBoxOption.cpp
+  src/Accessibility/AccessibilityMathMLElement.cpp
   src/Accessibility/AccessibilityMenuList.cpp
   src/Accessibility/AccessibilityMenuListOption.cpp
   src/Accessibility/AccessibilityMenuListPopup.cpp
@@ -244,6 +247,7 @@ set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
   src/Accessibility/AccessibilityObject.cpp
   src/Accessibility/AccessibilityProgressIndicator.cpp
   src/Accessibility/AccessibilityRenderObject.cpp
+  src/Accessibility/AccessibilitySVGObject.cpp
   src/Accessibility/AccessibilityScrollView.cpp
   src/Accessibility/AccessibilityScrollbar.cpp
   src/Accessibility/AccessibilitySlider.cpp

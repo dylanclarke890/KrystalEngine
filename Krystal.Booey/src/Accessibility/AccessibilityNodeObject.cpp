@@ -54,13 +54,17 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
+#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGURIReference.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
@@ -241,9 +245,17 @@ namespace krys::boo::ax
           // with descriptions.
           auto *element = DynamicDowncast<dom::Element>(_root);
           _visited.insert(&_root);
-          return element ? StringAlgorithms::StripAndCollapseASCIIWhitespace(
-                             ComputeFromReferences(*element, u8"aria-describedby"))
-                         : dom::DOMString {};
+          if (!element)
+          {
+            return {};
+          }
+          auto description = StringAlgorithms::StripAndCollapseASCIIWhitespace(
+            ComputeFromReferences(*element, u8"aria-describedby"));
+          if (description.empty() && Is<svg::SVGElement>(*element))
+          {
+            description = StringAlgorithms::StripAndCollapseASCIIWhitespace(SVGDescription(*element));
+          }
+          return description;
         }
         return StringAlgorithms::StripAndCollapseASCIIWhitespace(ComputeNode(_root, {}));
       }
@@ -490,6 +502,115 @@ namespace krys::boo::ax
         return object.StringValue();
       }
 
+      /// @brief @p element's `title` or `desc` child (@p localName) whose language best matches the
+      /// element's; if none matches, the first with no language.
+      /// @see https://w3c.github.io/svg-aam/#mapping_additional_nd
+      KRYS_NODISCARD static const dom::Element *
+        SVGChildWithMatchingLanguage(const dom::Element &element, dom::DOMStringView localName) noexcept
+      {
+        auto language = css::EffectiveLang(element);
+        if (language.empty())
+        {
+          language = dom::DOMString(DefaultLanguage());
+        }
+        auto primary = [](dom::DOMStringView tag)
+        {
+          return tag.substr(0, tag.find(u8'-'));
+        };
+        const dom::Element *fallback = nullptr;
+        const dom::Element *primaryMatch = nullptr;
+        for (auto *child = element.FirstElementChild().get(); child;
+             child = child->NextElementSibling().get())
+        {
+          if (!Is<svg::SVGElement>(*child) || child->LocalName() != localName)
+          {
+            continue;
+          }
+          auto lang = child->GetAttribute(u8"lang").value_or(dom::DOMString {});
+          if (lang.empty())
+          {
+            // The first equally good match is used.
+            fallback = fallback ? fallback : child;
+          }
+          else if (EqualsIgnoringCase(lang, language))
+          {
+            return child;
+          }
+          else if (!primaryMatch && EqualsIgnoringCase(primary(lang), primary(language)))
+          {
+            primaryMatch = child;
+          }
+        }
+        return primaryMatch ? primaryMatch : fallback;
+      }
+
+      /// @brief The element a `use` element refers to.
+      KRYS_NODISCARD static const dom::Element *SVGUseTarget(const dom::Element &element) noexcept
+      {
+        auto *use = DynamicDowncast<svg::SVGElement>(element);
+        if (!use || use->LocalName() != u8"use")
+        {
+          return nullptr;
+        }
+        auto href = element.GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"href");
+        if (!href || href->empty())
+        {
+          href = element.GetAttribute(u8"href");
+        }
+        if (!href)
+        {
+          return nullptr;
+        }
+        return svg::SVGURIReference::TargetElementFromIRIString(*href, element.TreeScopeForSVGReferences())
+          .Element.get();
+      }
+
+      /// @brief SVG-AAM's text alternative for @p element, after aria-labelledby and aria-label: its title
+      /// child, an a's xlink:title, or the text alternative of what a use element refers to.
+      /// @see https://w3c.github.io/svg-aam/#mapping_additional_nd
+      KRYS_NODISCARD static dom::DOMString SVGTextAlternative(const dom::Element &element) noexcept
+      {
+        if (auto *title = SVGChildWithMatchingLanguage(element, u8"title"))
+        {
+          return title->TextContent().value_or(dom::DOMString {});
+        }
+        if (element.LocalName() == u8"a")
+        {
+          if (auto title = element.GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"title");
+              title && !title->empty())
+          {
+            return *title;
+          }
+        }
+        if (auto *target = SVGUseTarget(element))
+        {
+          return SVGTextAlternative(*target);
+        }
+        return {};
+      }
+
+      /// @brief SVG-AAM's description for @p element, after aria-describedby: its desc child, the description
+      /// of what a use element refers to, or its title child if that isn't its name.
+      /// @see https://w3c.github.io/svg-aam/#mapping_additional_nd
+      KRYS_NODISCARD static dom::DOMString SVGDescription(const dom::Element &element) noexcept
+      {
+        if (auto *desc = SVGChildWithMatchingLanguage(element, u8"desc"))
+        {
+          return desc->TextContent().value_or(dom::DOMString {});
+        }
+        if (auto *target = SVGUseTarget(element))
+        {
+          return SVGDescription(*target);
+        }
+        // The title is the name unless aria-labelledby or aria-label gave one.
+        if (auto *title = SVGChildWithMatchingLanguage(element, u8"title");
+            title && (element.HasAttribute(u8"aria-labelledby") || element.HasAttribute(u8"aria-label")))
+        {
+          return title->TextContent().value_or(dom::DOMString {});
+        }
+        return {};
+      }
+
       /// @brief The text alternative HTML-AAM gives @p element from its markup.
       /// @see https://w3c.github.io/html-aam/#accessible-name-computations-by-html-element
       KRYS_NODISCARD dom::DOMString HostLanguageLabel(const dom::Element &element,
@@ -499,7 +620,15 @@ namespace krys::boo::ax
         auto tagName = HTMLTagNameOf(&element);
         if (tagName == TagName::Unknown)
         {
-          // FIXME: SVG's title element and MathML's alttext, with their objects.
+          if (Is<svg::SVGElement>(element))
+          {
+            return SVGTextAlternative(element);
+          }
+          // A math element's text alternative is its alttext.
+          if (Is<mathml::MathMLElement>(element))
+          {
+            return element.GetAttribute(u8"alttext").value_or(dom::DOMString {});
+          }
           return {};
         }
 

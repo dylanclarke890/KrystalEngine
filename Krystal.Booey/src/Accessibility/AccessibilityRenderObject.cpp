@@ -336,7 +336,11 @@ namespace krys::boo::ax
         _role = AccessibilityRole::Generic;
       }
     }
-    // FIXME: An SVG root with no children is an image, with SVG objects.
+    // An SVG root with no children is an image.
+    if (role == AccessibilityRole::SVGRoot && _children.empty())
+    {
+      _role = AccessibilityRole::Image;
+    }
 
     if (IsAccessibilityList())
     {
@@ -417,7 +421,8 @@ namespace krys::boo::ax
       {
         return HasPopup() ? AccessibilityRole::PopUpButton : AccessibilityRole::Button;
       }
-      // FIXME: An image of an SVG document with accessible content is an SVG root, with SVG objects.
+      // FIXME: An image of an SVG document with accessible content is an SVG root (remoteSVGRootElement),
+      // with SVG images.
       return AccessibilityRole::Image;
     }
     if (renderer->IsRenderView())
@@ -705,7 +710,15 @@ namespace krys::boo::ax
       return false;
     }
 
-    // FIXME: MathML elements, with MathML objects.
+    // The math tree's anonymous boxes and unexposed elements are left out; the rest of it is in.
+    if (IsIgnoredElementWithinMathTree())
+    {
+      return true;
+    }
+    if (IsMathElement())
+    {
+      return false;
+    }
 
     // A block of inline content with no lines with content (and nothing clickable) is ignored.
     if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(*renderer);
@@ -846,6 +859,14 @@ namespace krys::boo::ax
     spinButton->SetSpinButtonElement(spinButtonElement);
     spinButton->SetParent(this);
     AddChild(spinButton);
+  }
+
+  bool AccessibilityRenderObject::IsIgnoredElementWithinMathTree() const noexcept
+  {
+    // Anonymous boxes in a MathML block (CSS's, https://www.w3.org/TR/css3-box/#block-level0) are left out.
+    auto *renderer = _renderer.get();
+    return renderer && renderer->IsAnonymous() && renderer->Parent()
+           && renderer->Parent()->IsRenderMathMLBlock();
   }
 
   bool AccessibilityRenderObject::IgnoredByRowAncestor() const noexcept

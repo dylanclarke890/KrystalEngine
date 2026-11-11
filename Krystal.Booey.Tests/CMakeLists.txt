@@ -643,10 +643,12 @@ target_sources(Krystal.Booey.Tests
 		tests/Accessibility/AXObjectCache.cpp
 		tests/Accessibility/AccessibilityImageMap.cpp
 		tests/Accessibility/AccessibilityListBoxOption.cpp
+		tests/Accessibility/AccessibilityMathMLElement.cpp
 		tests/Accessibility/AccessibilityMenuList.cpp
 		tests/Accessibility/AccessibilityNodeObject.cpp
 		tests/Accessibility/AccessibilityProgressIndicator.cpp
 		tests/Accessibility/AccessibilityRenderObject.cpp
+		tests/Accessibility/AccessibilitySVGObject.cpp
 		tests/Accessibility/AccessibilityScrollView.cpp
 		tests/Accessibility/AccessibilitySlider.cpp
 		tests/Accessibility/AccessibilitySpinButton.cpp

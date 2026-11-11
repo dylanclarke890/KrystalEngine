@@ -31,6 +31,7 @@
 namespace krys::boo
 {
   class ScrollableArea;
+  class Scrollbar;
 }
 
 namespace krys::boo::ax

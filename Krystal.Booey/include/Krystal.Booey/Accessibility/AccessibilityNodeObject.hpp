@@ -122,6 +122,9 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool HasContentEditableAttributeSet() const noexcept;
     /// @brief Whether the element has `aria-label`, `aria-labelledby` or `title`, which give it a name.
     KRYS_NODISCARD bool HasAccNameAttribute() const noexcept;
+    /// @brief Whether the element has something that makes it worth exposing even if its kind wouldn't be
+    /// (an accessible name from an attribute, a `title` and so on).
+    KRYS_NODISCARD bool HasAttributesRequiredForInclusion() const noexcept;
 
     KRYS_NODISCARD float ValueForRange() const noexcept override;
     KRYS_NODISCARD float MaxValueForRange() const noexcept override;
@@ -204,7 +207,7 @@ namespace krys::boo::ax
                                            TreatStyleFormatGroupAsInline::No) const noexcept;
     KRYS_NODISCARD AccessibilityRole RoleFromInputElement(const html::HTMLInputElement &input) const noexcept;
     /// @brief The role from the `role` attribute, if it names one that applies here.
-    KRYS_NODISCARD AccessibilityRole DetermineAriaRoleAttribute() const noexcept;
+    KRYS_NODISCARD virtual AccessibilityRole DetermineAriaRoleAttribute() const noexcept;
     KRYS_NODISCARD AccessibilityRole RemapAriaRoleDueToParent(AccessibilityRole role) const noexcept;
 
     KRYS_NODISCARD bool IsDescendantOfElementType(Span<const html::TagName> tagNames) const noexcept;
@@ -212,9 +215,6 @@ namespace krys::boo::ax
     /// @brief A list's role once its children are known: WebKit's heuristic makes a list with no items, or
     /// with no visible markers outside navigation, a group.
     KRYS_NODISCARD AccessibilityRole DetermineListRoleWithCleanChildren() noexcept;
-    /// @brief Whether the element has something that makes it worth exposing even if its kind wouldn't be
-    /// (an accessible name from an attribute, a `title` and so on).
-    KRYS_NODISCARD bool HasAttributesRequiredForInclusion() const noexcept;
     /// @brief Whether the element is focusable but has no role of its own (`<div tabindex=0>`).
     KRYS_NODISCARD bool IsGenericFocusableElement() const noexcept;
     KRYS_NODISCARD bool IsStyleFormatGroup() const noexcept;

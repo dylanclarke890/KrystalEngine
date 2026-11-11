@@ -28,6 +28,7 @@
 
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityListBoxOption.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityMathMLElement.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityMenuList.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityMenuListOption.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityMenuListPopup.hpp"
@@ -38,6 +39,7 @@
 #include "Krystal.Booey/Accessibility/AccessibilitySlider.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilitySpinButton.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilitySpinButtonPart.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -53,6 +55,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
+#include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
@@ -259,8 +262,20 @@ namespace krys::boo::ax
 
   Ref<AccessibilityRenderObject> AXObjectCache::CreateObjectFromRenderer(RenderObject &renderer) noexcept
   {
-    // FIXME: The specialised objects for SVG, images and MathML, with them.
+    // FIXME: The specialised objects for images (toSimpleImage), with them.
     auto *node = renderer.GetNode();
+    if (renderer.IsLegacyRenderSVGRoot())
+    {
+      return AccessibilitySVGObject::Create(GenerateID(), renderer, *this, true);
+    }
+    if (Is<svg::SVGElement>(node) || renderer.IsRenderSVGInlineText())
+    {
+      return AccessibilitySVGObject::Create(GenerateID(), renderer, *this);
+    }
+    if (auto *element = DynamicDowncast<dom::Element>(node); element && Is<mathml::MathMLElement>(*element))
+    {
+      return AccessibilityMathMLElement::Create(GenerateID(), renderer, *this);
+    }
     if (auto *menuList = DynamicDowncast<RenderMenuList>(renderer))
     {
       return AccessibilityMenuList::Create(GenerateID(), *menuList, *this);
@@ -279,11 +294,14 @@ namespace krys::boo::ax
 
   Ref<AccessibilityNodeObject> AXObjectCache::CreateFromNode(dom::Node &node) noexcept
   {
-    // FIXME: The specialised objects for SVG, with them.
     if (auto *element = DynamicDowncast<dom::Element>(node);
         element && (Is<html::HTMLProgressElement>(*element) || Is<html::HTMLMeterElement>(*element)))
     {
       return AccessibilityProgressIndicator::Create(GenerateID(), *element, *this);
+    }
+    if (auto *element = DynamicDowncast<dom::Element>(node); element && Is<svg::SVGElement>(*element))
+    {
+      return AccessibilitySVGObject::Create(GenerateID(), *element, *this);
     }
     return AccessibilityRenderObject::Create(GenerateID(), node, *this);
   }

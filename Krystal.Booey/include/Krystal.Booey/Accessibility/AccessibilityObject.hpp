@@ -123,6 +123,10 @@ namespace krys::boo::ax
     Horizontal,
   };
 
+  class AccessibilityObject;
+  /// @brief An mmultiscripts element's scripts, as subscript and superscript pairs.
+  using AccessibilityMathMultiscriptPairs = List<Pair<AccessibilityObject *, AccessibilityObject *>>;
+
   /// @brief An object in the accessibility tree: what assistive technology sees of a node or renderer.
   /// Objects are created and owned by an `AXObjectCache`; an object's children are the unignored objects
   /// below it, with each ignored object replaced by its own children.
@@ -210,6 +214,20 @@ namespace krys::boo::ax
       return false;
     }
     KRYS_NODISCARD virtual bool IsScrollView() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsAccessibilitySVGObject() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether this is an `svg` root's object.
+    KRYS_NODISCARD virtual bool IsAccessibilitySVGRoot() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether this is a MathML element's object.
+    KRYS_NODISCARD virtual bool IsMathElement() const noexcept
     {
       return false;
     }
@@ -746,6 +764,130 @@ namespace krys::boo::ax
     void EnsureCellIndexesUpToDate() noexcept
     {
       UpdateChildrenIfNecessary();
+    }
+
+    // MathML.
+
+    /// @brief Whether the object is in a math tree but left out of it (an anonymous box, an element such as
+    /// mstyle that isn't exposed).
+    KRYS_NODISCARD virtual bool IsIgnoredElementWithinMathTree() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathFraction() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathSubscriptSuperscript() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathRow() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathUnderOver() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathRoot() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathSquareRoot() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathToken() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathOperator() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathFenceOperator() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathSeparatorOperator() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathText() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathNumber() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathIdentifier() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathMultiscript() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathTable() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathTableRow() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMathTableCell() const noexcept
+    {
+      return false;
+    }
+    /// @brief A root's radicand: a square root's children, or a root's first child.
+    KRYS_NODISCARD virtual Maybe<AccessibilityChildrenVector> MathRadicand() noexcept
+    {
+      return null;
+    }
+    /// @brief A root's index.
+    KRYS_NODISCARD virtual AccessibilityObject *MathRootIndexObject() noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual AccessibilityObject *MathNumeratorObject() noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual AccessibilityObject *MathDenominatorObject() noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual AccessibilityObject *MathUnderObject() noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual AccessibilityObject *MathOverObject() noexcept
+    {
+      return nullptr;
+    }
+    /// @brief A script's or under-over's base.
+    KRYS_NODISCARD virtual AccessibilityObject *MathBaseObject() noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual AccessibilityObject *MathSubscriptObject() noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual AccessibilityObject *MathSuperscriptObject() noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual AccessibilityMathMultiscriptPairs MathPrescripts() noexcept
+    {
+      return {};
+    }
+    KRYS_NODISCARD virtual AccessibilityMathMultiscriptPairs MathPostscripts() noexcept
+    {
+      return {};
     }
 
     // Geometry.

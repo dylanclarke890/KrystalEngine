@@ -70,6 +70,7 @@ namespace krys::boo::ax
 
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
+    KRYS_NODISCARD bool IsIgnoredElementWithinMathTree() const noexcept override;
 
   protected:
     AccessibilityRenderObject(AXID id, RenderObject *renderer, dom::Node *node,
