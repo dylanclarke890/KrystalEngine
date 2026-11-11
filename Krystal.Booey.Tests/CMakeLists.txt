@@ -570,6 +570,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/RenderText.cpp
 		tests/Rendering/RenderTheme.cpp
+		tests/Rendering/RenderView.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
 		tests/Rendering/Updating/RenderTreeBuilderMultiColumn.cpp

@@ -645,7 +645,13 @@ namespace krys::boo
     // positioned renderer maps don't become stale. It would be too slow to do the map lookup on each call.
     krys_debug_assert(&from == child.Parent());
     krys_debug_assert(!beforeChild || &to == beforeChild->Parent());
-    // FIXME: Remove percent height descendants.
+    if (normalizeAfterInsertion == NormalizeAfterInsertion::Yes && from.IsRenderBlock())
+    {
+      if (auto *box = DynamicDowncast<RenderBox>(child))
+      {
+        RenderBlock::RemovePercentHeightDescendant(*box);
+      }
+    }
     if (normalizeAfterInsertion == NormalizeAfterInsertion::Yes
         && (to.IsRenderBlock() || to.IsRenderInline()))
     {

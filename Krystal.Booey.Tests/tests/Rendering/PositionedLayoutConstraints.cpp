@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
@@ -137,5 +138,20 @@ layer at (790,590) size 10x10
     CHECK(box.Location() == LayoutPoint(5, 23));
     CHECK(box.Size() == LayoutSize(10, 10));
     CHECK(HasOutOfFlowBox(*fixture.Document->GetRenderView(), box));
+  }
+
+  // CSS 2 10.1: an RTL inline's containing block starts at the left of the last box the inline generates.
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "PositionedLayoutConstraints: an RTL inline split across lines contains from its last box",
+                   "[Rendering][PositionedLayoutConstraints]")
+  {
+    ResolverFixture fixture {
+      layout::tests::AhemDocument(u8"#line { width: 60px; direction: rtl } #s { position: relative }"
+                                  u8"#a { position: absolute; left: 0; top: 0; width: 5px; height: 5px }",
+                                  u8"<div id=line><span id=s>XXXXX XX<b id=a></b></span></div>")};
+    (void)fixture.Document->UpdateLayout();
+
+    // The first line's box starts at 10px, the last line's at 40px.
+    CHECK(BoxOf(fixture, u8"a").AbsoluteBoundingBoxRect().X() == 40);
   }
 }

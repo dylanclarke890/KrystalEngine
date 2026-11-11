@@ -415,7 +415,10 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Not while the view is painting.
+    if (View().IsPainting())
+    {
+      return false;
+    }
 
     if (!SubtreeLayoutRoot() && !GetRenderView())
     {
@@ -552,6 +555,25 @@ namespace krys::boo
     LocalFrameViewLayoutContext::IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept
   {
     return _percentHeightIgnoreList.contains(&flexItem);
+  }
+
+  void LocalFrameViewLayoutContext::SetBoxNeedsTransformUpdateAfterContainerLayout(
+    RenderBox &box, const RenderBlock &container) noexcept
+  {
+    _containersWithDescendantsNeedingTransformUpdate[&container].push_back(CreateWeakPtr(&box));
+  }
+
+  List<WeakPtr<RenderBox>> LocalFrameViewLayoutContext::TakeBoxesNeedingTransformUpdateAfterContainerLayout(
+    const RenderBlock &container) noexcept
+  {
+    auto it = _containersWithDescendantsNeedingTransformUpdate.find(&container);
+    if (it == _containersWithDescendantsNeedingTransformUpdate.end())
+    {
+      return {};
+    }
+    auto boxes = krys::move(it->second);
+    _containersWithDescendantsNeedingTransformUpdate.erase(it);
+    return boxes;
   }
 
   bool LocalFrameViewLayoutContext::IsSkippedContentForLayout(const RenderElement &renderer) const noexcept

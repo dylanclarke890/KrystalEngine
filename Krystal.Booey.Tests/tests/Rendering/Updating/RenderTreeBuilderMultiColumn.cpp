@@ -268,4 +268,29 @@ namespace krys::boo::tests
     CHECK(marker.IsRenderListMarker());
     CHECK(InsideFlow(marker));
   }
+
+  TEST_CASE("RenderTreeBuilder::MultiColumn: content moved out of a removed flow forgets its percent heights",
+            "[Rendering][RenderTreeBuilder][MultiColumn]")
+  {
+    MultiColumnFixture fixture {
+      u8"<div id=m style='columns:2;height:100px'><div id=a style='height:50%'></div></div>"};
+    (void)fixture.Document->UpdateLayout();
+    auto &container = fixture.Block(u8"m");
+    auto &a = Downcast<RenderBox>(*fixture.ById(u8"a").Renderer());
+    auto isPercentHeightDescendant = [&]
+    {
+      auto *descendants = container.PercentHeightDescendants();
+      return descendants && descendants->contains(&a);
+    };
+    REQUIRE(isPercentHeightDescendant());
+
+    // Moving the content back into the container drops it from the percent height maps, to be added again
+    // by its next layout.
+    fixture.SetStyle(u8"m", u8"height:100px");
+    REQUIRE(fixture.Tree(u8"m") == "a");
+    CHECK_FALSE(isPercentHeightDescendant());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(isPercentHeightDescendant());
+    CHECK(a.Height() == 50_lu);
+  }
 }

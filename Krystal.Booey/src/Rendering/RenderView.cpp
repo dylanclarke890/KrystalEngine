@@ -64,7 +64,10 @@ namespace krys::boo
     // init RenderObject attributes
     SetInline(false);
 
-    // FIXME: The preferred widths.
+    _minPreferredLogicalWidth = 0;
+    _maxPreferredLogicalWidth = 0;
+
+    SetNeedsPreferredWidthsUpdate(MarkingBehavior::MarkOnlyThis);
 
     SetPositionState(PositionType::Absolute); // to 0,0 :)
 

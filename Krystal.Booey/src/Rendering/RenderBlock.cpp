@@ -356,6 +356,7 @@ namespace krys::boo
     RemoveFromUpdateScrollInfoAfterLayoutTransaction();
     RemoveContainerFromTrackedRendererMaps(*this);
     GetOutOfFlowDescendantsMap().RemoveContainingBlock(*this);
+    (void)View().FrameView().LayoutContext().TakeBoxesNeedingTransformUpdateAfterContainerLayout(*this);
     RenderBox::WillBeDestroyed();
   }
 
@@ -1772,8 +1773,15 @@ namespace krys::boo
 
   void RenderBlock::UpdateDescendantTransformsAfterLayout() noexcept
   {
-    // FIXME: Update the transforms of the boxes whose transform depends on this container's size
-    // (takeBoxesNeedingTransformUpdateAfterContainerLayout).
+    auto boxes =
+      View().FrameView().LayoutContext().TakeBoxesNeedingTransformUpdateAfterContainerLayout(*this);
+    for (auto &box : boxes)
+    {
+      if (box && box->HasLayer())
+      {
+        box->Layer()->UpdateTransform();
+      }
+    }
   }
 
   void RenderBlock::LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept

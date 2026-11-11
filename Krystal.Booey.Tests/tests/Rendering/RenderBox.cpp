@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -328,5 +329,26 @@ namespace krys::boo::tests
     box->ApplyTransform(matrix, box->Style(), box->TransformReferenceBoxRect());
     CHECK(matrix.M41() == 145);
     CHECK(matrix.M42() == 95);
+  }
+
+  // The layer's transform waits for the containing block's layout when the motion path depends on its size.
+  TEST_CASE("RenderBox: a motion path transform updates after its containing block's layout",
+            "[Rendering][RenderBox]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0 }
+      #container { position: relative; width: 200px }
+      #moving { width: 10px; height: 10px; offset-path: ray(90deg); offset-distance: 50px }
+    </style><div id=container><div id=moving></div><div style=height:190px></div></div>)html"};
+    (void)fixture.Document->UpdateLayout();
+    auto *box = DynamicDowncast<RenderBox>(fixture.ById(u8"moving").Renderer());
+    REQUIRE(box);
+    REQUIRE(box->HasLayer());
+    auto *transform = box->Layer()->Transform();
+    REQUIRE(transform);
+
+    // The ray starts at the centre of the 200px tall container, which is known only after its layout.
+    CHECK(transform->M41() == 145);
+    CHECK(transform->M42() == 95);
   }
 }

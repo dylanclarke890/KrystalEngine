@@ -1033,13 +1033,6 @@ namespace krys::boo
         computedValues.Position += LayoutUnit(containingBox->VerticalScrollbarWidth());
       }
     }
-
-    // FIXME: This hack is needed to calculate the logical left position for a 'rtl' relatively
-    // positioned, inline because right now, it is using the logical left position
-    // of the first line box when really it should use the last line box. When
-    // this is fixed elsewhere, this adjustment should be removed.
-    // FIXME: Move the box by the distance between the first and last inline boxes of an RTL inline
-    // container (lineLeftmostInlineBoxFor).
   }
 
   namespace

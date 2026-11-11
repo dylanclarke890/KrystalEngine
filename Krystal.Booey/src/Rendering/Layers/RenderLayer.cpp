@@ -2839,7 +2839,6 @@ namespace krys::boo
       // Visibility and scrollability are input to canUseCompositedScrolling().
       if (_scrollableArea)
       {
-        // FIXME: Invalidate the scroll corner when the writing mode changes.
         if (visibilityChanged || oldStyle->IsOverflowVisible() != Renderer().Style().IsOverflowVisible())
         {
           _scrollableArea->ComputeHasCompositedScrollableOverflow(

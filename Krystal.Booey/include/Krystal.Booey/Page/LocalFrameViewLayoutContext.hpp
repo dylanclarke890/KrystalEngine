@@ -34,6 +34,7 @@
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
@@ -135,6 +136,8 @@ namespace krys::boo
     Maybe<UpdateScrollInfoAfterLayoutTransaction> _updateScrollInfoAfterLayoutTransaction;
     // Keyed by address: flex layout removes each item it adds.
     HashSet<const RenderBox *> _percentHeightIgnoreList;
+    // Keyed by address: a container takes its boxes after its layout, or drops them when it's destroyed.
+    HashMap<const RenderBlock *, List<WeakPtr<RenderBox>>> _containersWithDescendantsNeedingTransformUpdate;
     List<AnchorScrollAdjuster> _anchorScrollAdjusters;
     mutable DetachedRendererList _detachedRendererList;
 
@@ -190,6 +193,13 @@ namespace krys::boo
     void DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
     void EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
     KRYS_NODISCARD bool IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept;
+
+    /// @brief Updates @p box's transform after @p container's layout, which its offset path depends on.
+    void SetBoxNeedsTransformUpdateAfterContainerLayout(RenderBox &box,
+                                                        const RenderBlock &container) noexcept;
+    /// @brief The boxes whose transforms update after @p container's layout, which no longer wait for it.
+    KRYS_NODISCARD List<WeakPtr<RenderBox>>
+      TakeBoxesNeedingTransformUpdateAfterContainerLayout(const RenderBlock &container) noexcept;
 
     /// @brief Whether layout skips @p renderer, which content-visibility skips, unless layout is forced into
     /// skipped content.
