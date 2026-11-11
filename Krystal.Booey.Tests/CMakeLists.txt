@@ -641,8 +641,12 @@ target_sources(Krystal.Booey.Tests
 		tests/Accessibility/ARIAMixin.cpp
 		tests/Accessibility/AXLogger.cpp
 		tests/Accessibility/AXObjectCache.cpp
+		tests/Accessibility/AccessibilityListBoxOption.cpp
+		tests/Accessibility/AccessibilityMenuList.cpp
 		tests/Accessibility/AccessibilityNodeObject.cpp
+		tests/Accessibility/AccessibilityProgressIndicator.cpp
 		tests/Accessibility/AccessibilityRenderObject.cpp
+		tests/Accessibility/AccessibilitySlider.cpp
 
 		# DOM
 		tests/DOM/Algorithms/AbortAlgorithms.cpp

@@ -250,14 +250,71 @@ namespace krys::boo::ax
       AddChild(cache->GetOrCreate(*after));
     }
 
-    // FIXME: aria-owned children (updateOwnedChildrenIfNecessary), with relations; and the role changes that
-    // depend on the children (menus with no items, SVG roots with no children, lists), with them.
+    // FIXME: aria-owned children (updateOwnedChildrenIfNecessary), with relations.
     _subtreeDirty = false;
+    UpdateRoleAfterChildrenCreation();
+  }
+
+  void AccessibilityRenderObject::UpdateRoleAfterChildrenCreation() noexcept
+  {
+    auto role = _role;
+    // A menu needs a menu item (or a group of them) to be exposed as a menu
+    // (https://w3c.github.io/aria/#menu).
+    if (role == AccessibilityRole::Menu)
+    {
+      bool hasMenuItemDescendant = false;
+      for (const auto &child : _children)
+      {
+        if (child->IsMenuItem())
+        {
+          hasMenuItemDescendant = true;
+          break;
+        }
+        if (child->IsGroup())
+        {
+          for (const auto &grandchild : child->Children())
+          {
+            if (grandchild->IsMenuItem())
+            {
+              hasMenuItemDescendant = true;
+              break;
+            }
+          }
+        }
+      }
+      if (!hasMenuItemDescendant)
+      {
+        _role = AccessibilityRole::Generic;
+      }
+    }
+    // FIXME: An SVG root with no children is an image, with SVG objects.
+
+    if (IsAccessibilityList())
+    {
+      UpdateRole();
+      return;
+    }
+    if (role != _role)
+    {
+      if (auto *cache = AxObjectCache())
+      {
+        cache->HandleRoleChanged(*this, role);
+      }
+    }
   }
 
   AccessibilityRole AccessibilityRenderObject::DetermineAccessibilityRole() noexcept
   {
-    // FIXME: Lists (from their children) and trees (from their items), with the specialised objects.
+    // A list's role is worked out the same way rendered or not.
+    if (IsAccessibilityList())
+    {
+      if (!_childrenDirty && _childrenInitialized)
+      {
+        return DetermineListRoleWithCleanChildren();
+      }
+      return IsDescriptionList() ? AccessibilityRole::DescriptionList : AccessibilityRole::List;
+    }
+    // FIXME: Trees (from their items), with them.
     auto *renderer = _renderer.get();
     if (!renderer)
     {
@@ -409,8 +466,11 @@ namespace krys::boo::ax
       return true;
     }
 
-    // FIXME: Children of a tree that aren't tree items (isAllowedChildOfTree), with trees; and lists, with
-    // them.
+    // FIXME: Children of a tree that aren't tree items (isAllowedChildOfTree), with trees.
+    if (IsAccessibilityList())
+    {
+      return false;
+    }
 
     // A select's pop-up menu items are its menu list's.
     for (auto *ancestor = renderer->Parent(); ancestor; ancestor = ancestor->Parent())

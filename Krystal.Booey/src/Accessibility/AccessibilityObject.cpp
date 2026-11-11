@@ -877,6 +877,46 @@ namespace krys::boo::ax
     }
   }
 
+  AccessibilityOrientation AccessibilityObject::Orientation() const noexcept
+  {
+    if (auto orientation = ExplicitOrientation())
+    {
+      return *orientation;
+    }
+
+    // ARIA 1.1 made the implicit orientation undefined for the roles without one of their own.
+    switch (_role)
+    {
+      case AccessibilityRole::DescriptionList:
+      case AccessibilityRole::List:
+      case AccessibilityRole::ListBox:
+      case AccessibilityRole::Menu:
+      case AccessibilityRole::ScrollBar:
+      case AccessibilityRole::Tree:            return AccessibilityOrientation::Vertical;
+      case AccessibilityRole::MenuBar:
+      case AccessibilityRole::Slider:
+      case AccessibilityRole::Splitter:
+      case AccessibilityRole::TabList:
+      case AccessibilityRole::Toolbar:         return AccessibilityOrientation::Horizontal;
+      case AccessibilityRole::ComboBox:
+      case AccessibilityRole::RadioGroup:
+      case AccessibilityRole::TreeGrid:        return AccessibilityOrientation::Undefined;
+      default:                                 break;
+    }
+
+    // Lacking concrete evidence of orientation, horizontal means wider than tall.
+    auto rect = ElementRect();
+    if (rect.Width() > rect.Height())
+    {
+      return AccessibilityOrientation::Horizontal;
+    }
+    if (rect.Height() > rect.Width())
+    {
+      return AccessibilityOrientation::Vertical;
+    }
+    return AccessibilityOrientation::Undefined;
+  }
+
   bool AccessibilityObject::IsRootWebArea() const noexcept
   {
     // With no scroll view above it, the root web area is the web area with no parent.

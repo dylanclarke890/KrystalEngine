@@ -33,6 +33,7 @@
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
@@ -44,9 +45,14 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
+#include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Utils/SetForScope.hpp"
+#include <charconv>
+#include <limits>
+#include <numeric>
 
 namespace krys::boo::ax
 {
@@ -65,6 +71,49 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool EqualsIgnoringCase(dom::DOMStringView a, dom::DOMStringView b) noexcept
     {
       return StringAlgorithms::ASCIICaseInsensitiveMatch(a, b);
+    }
+
+    /// @brief @p value as a number, if it's one (ARIA's numeric attributes).
+    KRYS_NODISCARD Maybe<float> ParseFloatAttribute(dom::DOMStringView value) noexcept
+    {
+      if (value.empty())
+      {
+        return null;
+      }
+      float result = 0;
+      const auto *begin = reinterpret_cast<const char *>(value.data());
+      auto [end, error] = std::from_chars(begin, begin + value.size(), result);
+      if (error != std::errc {} || end != begin + value.size())
+      {
+        return null;
+      }
+      return result;
+    }
+
+    /// @brief Whether @p node's ::before draws list markers that are in the tree (a list styled with
+    /// `list-style: none` that draws its own).
+    KRYS_NODISCARD bool ChildHasPseudoVisibleListItemMarkers(const dom::Node &node) noexcept
+    {
+      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *before = element ? element->BeforePseudoElement() : nullptr;
+      auto *cache = before ? before->NodeDocument().ExistingAXObjectCache() : nullptr;
+      auto *object = cache ? cache->GetOrCreate(*before) : nullptr;
+      if (!object)
+      {
+        return false;
+      }
+      if (!object->IsIgnored())
+      {
+        return true;
+      }
+      for (const auto &child : object->Children())
+      {
+        if (!child->IsIgnored())
+        {
+          return true;
+        }
+      }
+      return false;
     }
 
     /// @brief Whether @p element has `aria-label`, `aria-labelledby` or `title`, which name it.
@@ -1104,6 +1153,212 @@ namespace krys::boo::ax
       return true;
     }
     return false;
+  }
+
+  float AccessibilityNodeObject::ValueForRange() const noexcept
+  {
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode()); input && input->IsRangeControl())
+    {
+      return static_cast<float>(input->ValueAsNumber());
+    }
+    if (!IsRangeControl())
+    {
+      return 0;
+    }
+    // In ARIA 1.1, the implicit value for aria-valuenow on a spin button is 0. For other roles, it is half
+    // way between aria-valuemin and aria-valuemax.
+    if (auto value = ParseFloatAttribute(GetAttributeTrimmed(u8"aria-valuenow")))
+    {
+      return *value;
+    }
+    return IsSpinButton() ? 0 : std::midpoint(MinValueForRange(), MaxValueForRange());
+  }
+
+  float AccessibilityNodeObject::MaxValueForRange() const noexcept
+  {
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode()); input && input->IsRangeControl())
+    {
+      return static_cast<float>(input->Maximum());
+    }
+    if (!IsRangeControl())
+    {
+      return 0;
+    }
+    if (auto value = ParseFloatAttribute(GetAttributeTrimmed(u8"aria-valuemax")))
+    {
+      return *value;
+    }
+    // A spin button has no maximum by default; the other roles' is 100.
+    return IsSpinButton() ? std::numeric_limits<float>::max() : 100.0f;
+  }
+
+  float AccessibilityNodeObject::MinValueForRange() const noexcept
+  {
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode()); input && input->IsRangeControl())
+    {
+      return static_cast<float>(input->Minimum());
+    }
+    if (!IsRangeControl())
+    {
+      return 0;
+    }
+    if (auto value = ParseFloatAttribute(GetAttributeTrimmed(u8"aria-valuemin")))
+    {
+      return *value;
+    }
+    // A spin button has no minimum by default; the other roles' is 0.
+    return IsSpinButton() ? -std::numeric_limits<float>::max() : 0.0f;
+  }
+
+  dom::DOMString AccessibilityNodeObject::ValueDescription() const noexcept
+  {
+    return IsRangeControl() ? GetAttribute(u8"aria-valuetext") : dom::DOMString {};
+  }
+
+  Maybe<AccessibilityOrientation> AccessibilityNodeObject::OrientationFromARIA() const noexcept
+  {
+    auto orientation = GetAttribute(u8"aria-orientation");
+    if (EqualsIgnoringCase(orientation, u8"horizontal"))
+    {
+      return AccessibilityOrientation::Horizontal;
+    }
+    if (EqualsIgnoringCase(orientation, u8"vertical"))
+    {
+      return AccessibilityOrientation::Vertical;
+    }
+    if (EqualsIgnoringCase(orientation, u8"undefined"))
+    {
+      return AccessibilityOrientation::Undefined;
+    }
+    return null;
+  }
+
+  bool AccessibilityNodeObject::IsAccessibilityList() const noexcept
+  {
+    if (!GetElement())
+    {
+      return false;
+    }
+    auto role = GetAttribute(u8"role");
+    for (const auto &name : StringAlgorithms::SplitOnWhitespace(role))
+    {
+      if (EqualsIgnoringCase(name, u8"list") || EqualsIgnoringCase(name, u8"directory"))
+      {
+        return true;
+      }
+    }
+    if (!role.empty())
+    {
+      return false;
+    }
+    auto tagName = HTMLTagNameOf(GetNode());
+    return tagName == TagName::ul || tagName == TagName::ol || tagName == TagName::dl
+           || tagName == TagName::menu;
+  }
+
+  bool AccessibilityNodeObject::IsDescriptionList() const noexcept
+  {
+    return HTMLTagNameOf(GetNode()) == TagName::dl;
+  }
+
+  bool AccessibilityNodeObject::IsUnorderedList() const noexcept
+  {
+    if (_ariaRole == AccessibilityRole::List)
+    {
+      return true;
+    }
+    auto tagName = HTMLTagNameOf(GetNode());
+    return tagName == TagName::menu || tagName == TagName::ul;
+  }
+
+  bool AccessibilityNodeObject::IsOrderedList() const noexcept
+  {
+    return _ariaRole == AccessibilityRole::Directory || HTMLTagNameOf(GetNode()) == TagName::ol;
+  }
+
+  AccessibilityRole AccessibilityNodeObject::DetermineListRoleWithCleanChildren() noexcept
+  {
+    if (!IsAccessibilityList())
+    {
+      return AccessibilityRole::Unknown;
+    }
+    // Directory is mapped to list for now, but does not adhere to the same heuristics.
+    if (_ariaRole == AccessibilityRole::Directory)
+    {
+      return AccessibilityRole::List;
+    }
+
+    // Heuristic to determine if an ambiguous list is relevant to convey to the accessibility tree:
+    //   1. If it's an ordered list or has role="list" defined, then it's a list.
+    //      1a. Unless the list has no children, then it's not a list.
+    //   2. If it is contained in <nav> or <el role="navigation">, it's a list.
+    //   3. If it displays visible list markers, it's a list.
+    //   4. If it does not display list markers, it's not a list.
+    //   5. If it has one or zero listitem children, it's not a list.
+    //   6. Otherwise it's a list.
+    auto role = AccessibilityRole::List;
+    // The role is a list while the children are asked for (CanHaveChildren depends on it).
+    SetForScope temporaryRole(_role, role);
+    uint32 listItemCount = 0;
+    bool hasVisibleMarkers = false;
+    const auto &children = Children();
+
+    // Description lists are always semantically description lists.
+    if (IsDescriptionList() && !children.empty())
+    {
+      return AccessibilityRole::DescriptionList;
+    }
+
+    for (const auto &child : children)
+    {
+      if (child->AriaRoleAttribute() == AccessibilityRole::ListItem)
+      {
+        ++listItemCount;
+      }
+      else if (child->Role() == AccessibilityRole::ListItem)
+      {
+        // Rendered list items always count.
+        if (auto *listItem = DynamicDowncast<RenderListItem>(child->Renderer()))
+        {
+          if (!hasVisibleMarkers
+              && (listItem->MarkerRenderer()
+                  || (child->GetNode() && ChildHasPseudoVisibleListItemMarkers(*child->GetNode()))))
+          {
+            hasVisibleMarkers = true;
+          }
+          ++listItemCount;
+        }
+        else if (HTMLTagNameOf(child->GetNode()) == TagName::li)
+        {
+          // Inline list items in a list with an explicit role count too.
+          if (_ariaRole == AccessibilityRole::List)
+          {
+            ++listItemCount;
+          }
+          if (ChildHasPseudoVisibleListItemMarkers(*child->GetNode()))
+          {
+            hasVisibleMarkers = true;
+            ++listItemCount;
+          }
+        }
+      }
+    }
+
+    // Lists with an ARIA role only need one item; <ul> and <ol> lists need visible markers.
+    if (_ariaRole != AccessibilityRole::Unknown)
+    {
+      if (!listItemCount)
+      {
+        role = AccessibilityRole::Group;
+      }
+    }
+    else if (!hasVisibleMarkers)
+    {
+      // Lists inside navigation are still lists (webkit.org/b/193382).
+      role = IsDescendantOfRole(AccessibilityRole::LandmarkNavigation) ? AccessibilityRole::List
+                                                                       : AccessibilityRole::Group;
+    }
+    return role;
   }
 
   bool AccessibilityNodeObject::IsNativeTextControl() const noexcept

@@ -62,6 +62,7 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
@@ -111,6 +112,14 @@ namespace krys::boo::ax
     Off,
     On,
     Mixed,
+  };
+
+  /// @brief Which way a slider, scroll bar, list and so on runs.
+  enum class AccessibilityOrientation : uint8
+  {
+    Undefined,
+    Vertical,
+    Horizontal,
   };
 
   /// @brief An object in the accessibility tree: what assistive technology sees of a node or renderer.
@@ -177,6 +186,28 @@ namespace krys::boo::ax
     {
       return false;
     }
+    /// @brief Whether the object stands for no node or renderer of its own (a slider's thumb, a menu list's
+    /// pop-up), its parent being set by whoever made it.
+    KRYS_NODISCARD virtual bool IsMockObject() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMenuList() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMenuListPopup() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsMenuListOption() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsListBoxOption() const noexcept
+    {
+      return false;
+    }
 
     /// @brief A description for debugging: the role, ID, and the renderer or node.
     KRYS_NODISCARD utf8_string DebugDescription() const noexcept;
@@ -239,6 +270,10 @@ namespace krys::boo::ax
       return false;
     }
     virtual void ClearChildren() noexcept;
+    /// @brief Forgets the parent a mock object was given (its parent is clearing its children).
+    virtual void DetachFromParent() noexcept
+    {
+    }
 
     /// @brief Inserts @p child at @p index; an ignored child's children instead if @p descendIfIgnored.
     void InsertChild(AccessibilityObject &child, uint32 index,
@@ -269,6 +304,10 @@ namespace krys::boo::ax
     /// @brief The common reasons to include or ignore an object (inertness, hiddenness, a presentational
     /// ancestor), before the rules for its kind.
     KRYS_NODISCARD AccessibilityObjectInclusion DefaultObjectInclusion() const noexcept;
+    KRYS_NODISCARD bool IsIgnoredByDefault() const noexcept
+    {
+      return DefaultObjectInclusion() == AccessibilityObjectInclusion::IgnoreObject;
+    }
     /// @brief Whether `aria-hidden="true"` applies to the object itself.
     KRYS_NODISCARD bool IsARIAHidden() const noexcept;
     /// @brief Whether `aria-hidden="true"` applies to the object or an ancestor.
@@ -374,6 +413,14 @@ namespace krys::boo::ax
     {
       return _role == AccessibilityRole::Slider;
     }
+    KRYS_NODISCARD bool IsSpinButton() const noexcept
+    {
+      return _role == AccessibilityRole::SpinButton;
+    }
+    KRYS_NODISCARD bool IsList() const noexcept
+    {
+      return _role == AccessibilityRole::List || _role == AccessibilityRole::DescriptionList;
+    }
     KRYS_NODISCARD bool IsMenuItem() const noexcept;
     KRYS_NODISCARD bool IsMenuRelated() const noexcept;
     KRYS_NODISCARD bool IsButton() const noexcept;
@@ -446,6 +493,15 @@ namespace krys::boo::ax
     {
       return false;
     }
+    KRYS_NODISCARD virtual bool CanSetSelectedAttribute() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether a collapsible object (a menu list's pop-up) is collapsed.
+    KRYS_NODISCARD virtual bool IsCollapsed() const noexcept
+    {
+      return false;
+    }
     KRYS_NODISCARD virtual AccessibilityButtonState CheckboxOrRadioValue() const noexcept;
     /// @brief The heading level, 1 to 6 for HTML headings or `aria-level` for ARIA ones; 0 if not a heading.
     KRYS_NODISCARD virtual uint32 HeadingLevel() const noexcept
@@ -471,6 +527,33 @@ namespace krys::boo::ax
       return {};
     }
 
+    // Ranges (sliders, progress indicators, meters, scroll bars and spin buttons).
+
+    KRYS_NODISCARD virtual float ValueForRange() const noexcept
+    {
+      return 0;
+    }
+    KRYS_NODISCARD virtual float MaxValueForRange() const noexcept
+    {
+      return 0;
+    }
+    KRYS_NODISCARD virtual float MinValueForRange() const noexcept
+    {
+      return 0;
+    }
+    /// @brief The value as text (`aria-valuetext`), if the author gave one.
+    KRYS_NODISCARD virtual dom::DOMString ValueDescription() const noexcept
+    {
+      return {};
+    }
+    /// @brief The orientation the author or the control gives, if any.
+    KRYS_NODISCARD virtual Maybe<AccessibilityOrientation> ExplicitOrientation() const noexcept
+    {
+      return null;
+    }
+    /// @brief The explicit orientation, or else the role's default.
+    KRYS_NODISCARD AccessibilityOrientation Orientation() const noexcept;
+
     // Geometry.
 
     /// @brief The object's bounds, in the root view's coordinates.
@@ -493,9 +576,6 @@ namespace krys::boo::ax
     }
     /// @brief Lets go of the node and renderer, and of the children.
     virtual void DetachRemoteParts(AccessibilityDetachmentType detachmentType) noexcept;
-    virtual void DetachFromParent() noexcept
-    {
-    }
 
     /// @brief The role a `button` (or a button-like input) takes: toggle button if `aria-pressed` is set,
     /// pop-up button if it or a link around it has a pop-up.

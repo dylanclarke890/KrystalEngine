@@ -27,11 +27,26 @@
  */
 
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityListBoxOption.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityMenuList.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityMenuListOption.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityMenuListPopup.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilitySlider.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -180,15 +195,56 @@ namespace krys::boo::ax
 
   Ref<AccessibilityRenderObject> AXObjectCache::CreateObjectFromRenderer(RenderObject &renderer) noexcept
   {
-    // FIXME: The specialised objects (SVG, images, MathML, menu lists, progress indicators, sliders and
-    // lists), with them.
+    // FIXME: The specialised objects for SVG, images and MathML, with them.
+    auto *node = renderer.GetNode();
+    if (auto *menuList = DynamicDowncast<RenderMenuList>(renderer))
+    {
+      return AccessibilityMenuList::Create(GenerateID(), *menuList, *this);
+    }
+    if (Is<RenderProgress>(renderer) || Is<RenderMeter>(renderer) || Is<html::HTMLProgressElement>(node)
+        || Is<html::HTMLMeterElement>(node))
+    {
+      return AccessibilityProgressIndicator::Create(GenerateID(), renderer, *this);
+    }
+    if (Is<RenderSlider>(renderer))
+    {
+      return AccessibilitySlider::Create(GenerateID(), renderer, *this);
+    }
     return AccessibilityRenderObject::Create(GenerateID(), renderer, *this);
   }
 
   Ref<AccessibilityNodeObject> AXObjectCache::CreateFromNode(dom::Node &node) noexcept
   {
-    // FIXME: The specialised objects (image map areas, progress indicators, SVG and lists), with them.
+    // FIXME: The specialised objects for image map areas and SVG, with them.
+    if (auto *element = DynamicDowncast<dom::Element>(node);
+        element && (Is<html::HTMLProgressElement>(*element) || Is<html::HTMLMeterElement>(*element)))
+    {
+      return AccessibilityProgressIndicator::Create(GenerateID(), *element, *this);
+    }
     return AccessibilityRenderObject::Create(GenerateID(), node, *this);
+  }
+
+  AccessibilityObject *AXObjectCache::Create(AccessibilityRole role) noexcept
+  {
+    RefPtr<AccessibilityObject> object;
+    switch (role)
+    {
+      case AccessibilityRole::SliderThumb:
+        object = AccessibilitySliderThumb::Create(GenerateID(), *this);
+        break;
+      case AccessibilityRole::MenuListPopup:
+        object = AccessibilityMenuListPopup::Create(GenerateID(), *this);
+        break;
+      default:
+        // FIXME: Table columns and header containers and spin buttons and their parts, with them.
+        break;
+    }
+    if (!object)
+    {
+      return nullptr;
+    }
+    CacheAndInitializeWrapper(*object, nullptr, nullptr);
+    return object.get();
   }
 
   void AXObjectCache::CacheAndInitializeWrapper(AccessibilityObject &object, const dom::Node *node,
@@ -223,6 +279,34 @@ namespace krys::boo::ax
   {
     krys_debug_assert(&node.NodeDocument() == &_document);
 
+    // An option or option group is its select's, rendered or not: a list box's child, or (for an option) a
+    // child of a menu list's pop-up, as long as the menu list is rendered.
+    auto *option = DynamicDowncast<html::HTMLOptionElement>(node);
+    auto *group = DynamicDowncast<html::HTMLOptGroupElement>(node);
+    if (option || group)
+    {
+      auto *select = option ? option->OwnerSelectElement() : group->OwnerSelectElement();
+      if (!select)
+      {
+        return nullptr;
+      }
+      RefPtr<AccessibilityObject> object;
+      if (select->UsesMenuList())
+      {
+        if (!option || !select->Renderer())
+        {
+          return nullptr;
+        }
+        object = AccessibilityMenuListOption::Create(GenerateID(), *option, *this);
+      }
+      else
+      {
+        object = AccessibilityListBoxOption::Create(GenerateID(), Downcast<html::HTMLElement>(node), *this);
+      }
+      CacheAndInitializeWrapper(*object, &node, nullptr);
+      return object.get();
+    }
+
     if (NodeRendererIsValid(node))
     {
       return GetOrCreate(*node.Renderer());
@@ -238,9 +322,6 @@ namespace krys::boo::ax
     {
       return nullptr;
     }
-
-    // FIXME: Options and option groups, which their select's list box or menu list exposes, with the
-    // specialised objects.
 
     bool inCanvasSubtree = IsInCanvasSubtree(*composedParent);
     // FIXME: Descendants of the targets of relations (isDescendantOfRelatedNode), with relations.
@@ -416,7 +497,17 @@ namespace krys::boo::ax
 
   void AXObjectCache::HandleChildrenChanged(AccessibilityObject &object) noexcept
   {
-    // FIXME: Menu lists, their pop-ups and tables, with the specialised objects.
+    // A menu list's children are its pop-up's.
+    if (auto *menuList = DynamicDowncast<AccessibilityMenuList>(object))
+    {
+      HandleChildrenChanged(menuList->Popup());
+    }
+    else if (auto *popup = DynamicDowncast<AccessibilityMenuListPopup>(object))
+    {
+      popup->HandleChildrenChanged();
+      return;
+    }
+    // FIXME: Tables recomputing their cell slots (deferRecomputeTableCellSlots), with tables.
     if (!object.GetNode() && !object.Renderer())
     {
       return;
@@ -432,6 +523,13 @@ namespace krys::boo::ax
       parent->SetNeedsToUpdateChildren();
       // FIXME: Live region, non-native text control value, label and description notifications for the
       // ancestors, with them.
+    }
+
+    // A list's role depends on its children.
+    if (auto *nodeObject = DynamicDowncast<AccessibilityNodeObject>(object);
+        nodeObject && nodeObject->IsAccessibilityList())
+    {
+      object.UpdateRole();
     }
   }
 

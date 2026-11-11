@@ -80,6 +80,8 @@ namespace krys::boo::ax
     void DetachRemoteParts(AccessibilityDetachmentType detachmentType) noexcept override;
 
   private:
+    /// @brief Updates the roles that depend on the children (a menu with no items, a list).
+    void UpdateRoleAfterChildrenCreation() noexcept;
     /// @brief The list item's marker renderer, if this is an unignored list item with one.
     KRYS_NODISCARD RenderObject *MarkerRenderer() const noexcept;
   };

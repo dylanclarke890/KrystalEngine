@@ -118,6 +118,22 @@ namespace krys::boo::ax
     /// @brief Whether the element has `aria-label`, `aria-labelledby` or `title`, which give it a name.
     KRYS_NODISCARD bool HasAccNameAttribute() const noexcept;
 
+    KRYS_NODISCARD float ValueForRange() const noexcept override;
+    KRYS_NODISCARD float MaxValueForRange() const noexcept override;
+    KRYS_NODISCARD float MinValueForRange() const noexcept override;
+    KRYS_NODISCARD dom::DOMString ValueDescription() const noexcept override;
+    KRYS_NODISCARD Maybe<AccessibilityOrientation> ExplicitOrientation() const noexcept override
+    {
+      return OrientationFromARIA();
+    }
+
+    /// @brief Whether the element is a list: `role=list` or `directory`, or a `ul`, `ol`, `dl` or `menu` with
+    /// no role.
+    KRYS_NODISCARD bool IsAccessibilityList() const noexcept;
+    KRYS_NODISCARD bool IsDescriptionList() const noexcept;
+    KRYS_NODISCARD bool IsUnorderedList() const noexcept;
+    KRYS_NODISCARD bool IsOrderedList() const noexcept;
+
   protected:
     AccessibilityNodeObject(AXID id, dom::Node *node, AXObjectCache &cache) noexcept;
 
@@ -145,6 +161,10 @@ namespace krys::boo::ax
     KRYS_NODISCARD AccessibilityRole RemapAriaRoleDueToParent(AccessibilityRole role) const noexcept;
 
     KRYS_NODISCARD bool IsDescendantOfElementType(Span<const html::TagName> tagNames) const noexcept;
+    KRYS_NODISCARD Maybe<AccessibilityOrientation> OrientationFromARIA() const noexcept;
+    /// @brief A list's role once its children are known: WebKit's heuristic makes a list with no items, or
+    /// with no visible markers outside navigation, a group.
+    KRYS_NODISCARD AccessibilityRole DetermineListRoleWithCleanChildren() noexcept;
     /// @brief Whether the element has something that makes it worth exposing even if its kind wouldn't be
     /// (an accessible name from an attribute, a `title` and so on).
     KRYS_NODISCARD bool HasAttributesRequiredForInclusion() const noexcept;

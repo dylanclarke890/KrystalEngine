@@ -76,6 +76,28 @@ namespace krys::boo::ax::tests
     CHECK(item.Children()[1]->Role() == AccessibilityRole::StaticText);
   }
 
+  TEST_CASE("AccessibilityRenderObject: which lists are lists", "[Accessibility][AccessibilityRenderObject]")
+  {
+    AccessibilityFixture page(u8"<ul id=marked><li>A</li><li>B</li></ul>"
+                              u8"<ul id=unmarked style='list-style:none'><li>A</li><li>B</li></ul>"
+                              u8"<nav><ul id=nav style='list-style:none'><li>A</li><li>B</li></ul></nav>"
+                              u8"<div id=aria role=list><div role=listitem>A</div></div>"
+                              u8"<div id=empty role=list></div>"
+                              u8"<dl id=dl><dt>A</dt><dd>B</dd></dl>");
+    auto roleOf = [&](dom::DOMStringView id)
+    {
+      auto &object = page.Object(id);
+      (void)object.Children();
+      return object.Role();
+    };
+    CHECK(roleOf(u8"marked") == AccessibilityRole::List);
+    CHECK(roleOf(u8"unmarked") == AccessibilityRole::Group);
+    CHECK(roleOf(u8"nav") == AccessibilityRole::List);
+    CHECK(roleOf(u8"aria") == AccessibilityRole::List);
+    CHECK(roleOf(u8"empty") == AccessibilityRole::Group);
+    CHECK(roleOf(u8"dl") == AccessibilityRole::DescriptionList);
+  }
+
   TEST_CASE("AccessibilityRenderObject: generated content", "[Accessibility][AccessibilityRenderObject]")
   {
     AccessibilityFixture page(

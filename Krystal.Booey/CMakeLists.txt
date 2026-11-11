@@ -209,19 +209,33 @@ set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
   include/Krystal.Booey/Accessibility/AXLogger.hpp
   include/Krystal.Booey/Accessibility/AXNotifications.hpp
   include/Krystal.Booey/Accessibility/AXObjectCache.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityListBoxOption.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMenuList.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMenuListOption.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMenuListPopup.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMockObject.hpp
   include/Krystal.Booey/Accessibility/AccessibilityNodeObject.hpp
   include/Krystal.Booey/Accessibility/AccessibilityObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp
   include/Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp
   include/Krystal.Booey/Accessibility/AccessibilityRole.hpp
+  include/Krystal.Booey/Accessibility/AccessibilitySlider.hpp
 )
 
 set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
   src/Accessibility/ARIAMixin.cpp
   src/Accessibility/AXLogger.cpp
   src/Accessibility/AXObjectCache.cpp
+  src/Accessibility/AccessibilityListBoxOption.cpp
+  src/Accessibility/AccessibilityMenuList.cpp
+  src/Accessibility/AccessibilityMenuListOption.cpp
+  src/Accessibility/AccessibilityMenuListPopup.cpp
+  src/Accessibility/AccessibilityMockObject.cpp
   src/Accessibility/AccessibilityNodeObject.cpp
   src/Accessibility/AccessibilityObject.cpp
+  src/Accessibility/AccessibilityProgressIndicator.cpp
   src/Accessibility/AccessibilityRenderObject.cpp
+  src/Accessibility/AccessibilitySlider.cpp
 )
 
 set(KRYSTAL_BOOEY_ANIMATION_HEADERS

@@ -128,6 +128,9 @@ namespace krys::boo::ax
     {
       return renderer ? GetOrCreate(*renderer) : nullptr;
     }
+    /// @brief A new object with no node or renderer of its own, for one of the roles that has one (a slider's
+    /// thumb, a menu list's pop-up); null for the others. Its maker sets its parent.
+    AccessibilityObject *Create(AccessibilityRole role) noexcept;
 
     /// @brief Removes and detaches @p node's object.
     void Remove(dom::Node &node) noexcept;
