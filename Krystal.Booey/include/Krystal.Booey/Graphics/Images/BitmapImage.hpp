@@ -192,6 +192,10 @@ namespace krys::boo
       return _source->CurrentImageFrame().IsComplete();
     }
 
+    void DrawDensityCorrectedPattern(GraphicsContext &, const FloatRect &destinationRect,
+                                     const FloatRect &tileRect, const AffineTransform &,
+                                     const FloatPoint &phase, const FloatSize &spacing,
+                                     ImagePaintingOptions) noexcept;
     void DrawPattern(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &tileRect,
                      const AffineTransform &patternTransform, const FloatPoint &phase,
                      const FloatSize &spacing, ImagePaintingOptions = {}) noexcept final;

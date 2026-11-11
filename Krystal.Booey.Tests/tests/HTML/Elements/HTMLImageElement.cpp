@@ -4,6 +4,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
+#include "Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
@@ -395,6 +396,25 @@ namespace krys::boo::tests
     RunNetworkingTasks();
     CHECK(events->Loads == 3);
     CHECK(loader.Strategy.Requests.size() == 2u);
+  }
+
+  TEST_CASE("HTMLImageElement: the natural size is the density-corrected size, for the selected density",
+            "[HTML][HTMLImageElement][html:density-corrected-intrinsic-width-and-height]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.jpg"] = images::DensityJPEG;
+
+    ImageFixture fixture(u8"<img id=one src='file:///a.jpg'><img id=two srcset='file:///a.jpg 2x'>");
+    RunNetworkingTasks();
+
+    // 16x8 at 144 dots per inch.
+    CHECK(fixture.Image(u8"one").NaturalWidth() == 8u);
+    CHECK(fixture.Image(u8"one").NaturalHeight() == 4u);
+    CHECK(fixture.RendererSize(u8"one") == IntSize(8, 4));
+    // Then halved again for its density.
+    CHECK(fixture.Image(u8"two").NaturalWidth() == 4u);
+    CHECK(fixture.Image(u8"two").NaturalHeight() == 2u);
+    CHECK(fixture.RendererSize(u8"two") == IntSize(4, 2));
   }
 
   TEST_CASE("HTMLImageElement: generated content images", "[HTML][HTMLImageElement]")

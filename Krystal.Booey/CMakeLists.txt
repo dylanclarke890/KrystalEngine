@@ -2574,6 +2574,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/GraphicsClient.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageReader.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp
   include/Krystal.Booey/Platform/ImageDecoders/GIFImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/GIFImageReader.hpp
   include/Krystal.Booey/Platform/ImageDecoders/ICOImageDecoder.hpp
@@ -2629,6 +2630,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Decimal.cpp
   src/Platform/ImageDecoders/BMPImageDecoder.cpp
   src/Platform/ImageDecoders/BMPImageReader.cpp
+  src/Platform/ImageDecoders/EXIFMetadata.cpp
   src/Platform/ImageDecoders/GIFImageDecoder.cpp
   src/Platform/ImageDecoders/GIFImageReader.cpp
   src/Platform/ImageDecoders/ICOImageDecoder.cpp

@@ -807,6 +807,16 @@ namespace krys::ui::tests
               });
   }
 
+  TEST_CASE("Golden: image density", "[UI][GPU][Golden]")
+  {
+    CheckPage("image-density", 360u, 200u, false,
+              [](View &view)
+              {
+                boo::html::EventLoop::Current().RunUntilIdle();
+                view.UpdateRendering();
+              });
+  }
+
   TEST_CASE("Golden: engine textures", "[UI][GPU][Golden]")
   {
     // Each canvas shows a texture of the pattern the scene's script draws for Chrome; half of them declare

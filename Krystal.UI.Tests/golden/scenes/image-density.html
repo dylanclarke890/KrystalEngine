@@ -1,0 +1,31 @@
+﻿<!doctype html>
+<!-- The "image-density" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, its images loaded
+     from images/ by relative file URLs. The "-2x" images carry EXIF metadata at 144 dots per inch, so their
+     density-corrected size is half their pixels'. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #e9ecf2; overflow: hidden; }
+  body { margin: 0; }
+  img, div, svg { position: absolute; }
+</style>
+</head>
+<body>
+  <!-- At their natural sizes: the photo without EXIF, at half size, and with dimensions that don't match its
+       resolution (so they're ignored); a PNG with an eXIf chunk and a WebP with an EXIF chunk, which Chrome
+       and Booey ignore. -->
+  <img src="images/photo.jpg" style="left: 16px; top: 16px">
+  <img src="images/photo-2x.jpg" style="left: 80px; top: 16px">
+  <img src="images/photo-mismatched.jpg" style="left: 120px; top: 16px">
+  <img src="images/landscape-2x.png" style="left: 184px; top: 16px">
+  <img src="images/disc-2x.webp" style="left: 232px; top: 16px; background: #118ab2">
+
+  <!-- Sized by an attribute, through the ratio; tiled as a background; as generated content; in SVG. -->
+  <img src="images/photo-2x.jpg" width="96" style="left: 16px; top: 72px">
+  <div style="left: 128px; top: 72px; width: 96px; height: 48px; background: url(images/photo-2x.jpg)"></div>
+  <div style="left: 240px; top: 72px; content: url(images/photo-2x.jpg)"></div>
+  <svg width="64" height="48" style="left: 280px; top: 72px"><image href="images/photo-2x.jpg"/></svg>
+  <div style="left: 16px; top: 152px; width: 96px; height: 32px; background: url(images/photo-2x.jpg) 0 0 / auto 32px"></div>
+</body>
+</html>

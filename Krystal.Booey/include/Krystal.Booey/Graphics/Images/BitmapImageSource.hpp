@@ -223,8 +223,11 @@ namespace krys::boo
       CurrentNativeImageForDrawing(SubsamplingLevel, const DecodingOptions &) noexcept final;
 
     KRYS_NODISCARD RefPtr<NativeImage> NativeImageAtIndex(uint32 index) noexcept final;
-    KRYS_NODISCARD RefPtr<NativeImage> PreTransformedNativeImageAtIndex(uint32 index,
-                                                                        ImageOrientation) noexcept;
+    /// @brief The frame at @p index laid out as drawn with the orientation and, if
+    /// @p scaleToDensityCorrectedSize, resampled to the density-corrected size.
+    KRYS_NODISCARD RefPtr<NativeImage>
+      PreTransformedNativeImageAtIndex(uint32 index, ImageOrientation,
+                                       bool scaleToDensityCorrectedSize = true) noexcept;
 
     KRYS_NODISCARD RefPtr<NativeImage> CurrentNativeImage() noexcept final
     {
@@ -234,6 +237,10 @@ namespace krys::boo
       CurrentPreTransformedNativeImage(ImageOrientation orientation) noexcept final
     {
       return PreTransformedNativeImageAtIndex(CurrentFrameIndex(), orientation);
+    }
+    KRYS_NODISCARD RefPtr<NativeImage> CurrentOrientedNativeImage(ImageOrientation orientation) noexcept final
+    {
+      return PreTransformedNativeImageAtIndex(CurrentFrameIndex(), orientation, false);
     }
 
     KRYS_NODISCARD EncodedDataStatus GetEncodedDataStatus() const noexcept

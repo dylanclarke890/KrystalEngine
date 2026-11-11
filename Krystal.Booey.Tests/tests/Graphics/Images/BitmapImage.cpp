@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
+#include "Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
@@ -151,6 +152,50 @@ namespace krys::boo::tests
       CHECK(oriented->Size() == IntSize(8, 16));
       auto red = PixelAt(*oriented, 4, 2);
       auto blue = PixelAt(*oriented, 4, 13);
+      CHECK(((red >> 16) & 0xFFu) > 0xE0u);
+      CHECK((red & 0xFFu) < 0x20u);
+      CHECK((blue & 0xFFu) > 0xE0u);
+      CHECK(((blue >> 16) & 0xFFu) < 0x20u);
+    }
+  }
+
+  TEST_CASE("BitmapImage: the density-corrected size sizes and scales the image", "[Graphics][BitmapImage]")
+  {
+    auto image = ImageFrom(images::DensityJPEG);
+    CHECK(image->HasDensityCorrectedSize());
+    CHECK(image->Size() == FloatSize(8, 4));
+    CHECK(image->SourceSize() == FloatSize(16, 8));
+
+    SECTION("Drawing maps the source rectangle to the decoded pixels")
+    {
+      auto displayList = Record(*image, {0, 0, 8, 4});
+      REQUIRE(displayList->Items().size() == 1u);
+      const auto &item = std::get<display_list::DrawNativeImage>(displayList->Items()[0]);
+      CHECK(item.DestinationRect() == FloatRect(0, 0, 8, 4));
+      CHECK(item.Source() == FloatRect(0, 0, 16, 8));
+    }
+
+    SECTION("A pattern tiles the full-resolution pixels, scaled to it")
+    {
+      display_list::RecorderImpl recorder(FloatSize {100, 100});
+      static_cast<Image &>(*image).DrawPattern(recorder, {0, 0, 32, 8}, {0, 0, 8, 4}, AffineTransform(), {},
+                                               {}, {});
+      auto displayList = recorder.TakeDisplayList();
+      REQUIRE(displayList->Items().size() == 1u);
+      const auto &item = std::get<display_list::DrawPatternNativeImage>(displayList->Items()[0]);
+      CHECK(item.GetNativeImage().Size() == IntSize(16, 8));
+      CHECK(item.TileRect() == FloatRect(0, 0, 16, 8));
+      CHECK(item.PatternTransform() == AffineTransform().Scale(0.5, 0.5));
+    }
+
+    SECTION("The pre-transformed image is scaled to it")
+    {
+      // Red on the left and blue on the right, each averaged down.
+      auto scaled = static_cast<Image &>(*image).CurrentPreTransformedNativeImage();
+      REQUIRE(scaled);
+      CHECK(scaled->Size() == IntSize(8, 4));
+      auto red = PixelAt(*scaled, 1, 1);
+      auto blue = PixelAt(*scaled, 6, 1);
       CHECK(((red >> 16) & 0xFFu) > 0xE0u);
       CHECK((red & 0xFFu) < 0x20u);
       CHECK((blue & 0xFFu) > 0xE0u);

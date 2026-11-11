@@ -204,7 +204,7 @@ Status: reviewed (2026-11-01)
 ###### [4.8.4.3.6 Preparing an image for presentation](https://html.spec.whatwg.org/#preparing-an-image-for-presentation)
 
 Status: reviewed (2026-11-01)
-> The image decoder's density-corrected size (`ImageDecoder::FrameDensityCorrectedSizeAtIndex`), from the EXIF resolution. There are no cross-origin images.
+> The image decoder's density-corrected size (`ImageDecoder::FrameDensityCorrectedSizeAtIndex`), from a JPEG's EXIF resolution (`EXIFMetadata::Read`); PNG and WebP EXIF are ignored, as in Chrome. There are no cross-origin images.
 
 - [x] [prepare an image for presentation](https://html.spec.whatwg.org/#prepare-an-image-for-presentation) — To prepare an image for presentation for an image request req given image element img:
   - 1. Let exifTagMap be the EXIF tags obtained from req's image data, as defined by the relevant codec. [EXIF]
