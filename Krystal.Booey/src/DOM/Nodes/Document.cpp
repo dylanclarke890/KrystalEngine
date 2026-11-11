@@ -3750,7 +3750,13 @@ namespace krys::boo::dom
       svgExtensions->StartAnimations();
     }
 
-    // FIXME: Telling the accessibility cache the document loaded (onTopDocumentLoaded), with accessibility.
+    if (Frame() && HasLivingRenderTree() && ax::AXObjectCache::AccessibilityEnabled())
+    {
+      if (auto *cache = AxObjectCache())
+      {
+        cache->OnDocumentLoaded();
+      }
+    }
   }
 
   void Document::IconLinksMayHaveChanged() noexcept
@@ -3910,7 +3916,6 @@ namespace krys::boo::dom
     _isFocusedAndActive = flag;
 
     _selection->SetFocused(flag);
-    // FIXME: Telling the accessibility cache (onPageActivityStateChange), with accessibility.
 
     // `:focus`, `:focus-visible` and `:focus-within` check whether the document is focused and active, so the
     // elements they may match restyle.
@@ -4675,7 +4680,10 @@ namespace krys::boo::dom
       // 2.1. Set this's design mode enabled to true.
       _designModeEnabled = true;
       ScheduleFullStyleRebuild();
-      // FIXME: Telling the accessibility cache (handlePageEditibilityChanged), with accessibility.
+      if (auto *cache = ExistingAXObjectCache())
+      {
+        cache->HandlePageEditabilityChanged();
+      }
 
       // NOTE: only a document in a frame has a selection and a focused area.
       if (Frame())
@@ -4699,7 +4707,10 @@ namespace krys::boo::dom
     {
       _designModeEnabled = false;
       ScheduleFullStyleRebuild();
-      // FIXME: Telling the accessibility cache (handlePageEditibilityChanged), with accessibility.
+      if (auto *cache = ExistingAXObjectCache())
+      {
+        cache->HandlePageEditabilityChanged();
+      }
     }
   }
 

@@ -2,6 +2,7 @@
 #include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -215,5 +216,35 @@ namespace krys::boo::ax::tests
       CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), a,
                                             AXNotification::RadioGroupMembershipChanged));
     }
+  }
+
+  TEST_CASE("AXObjectCache changes: design mode", "[Accessibility][AXObjectCache]")
+  {
+    AccessibilityFixture page(u8"<p>Text</p>");
+    auto *webArea = page.Cache().GetOrCreate(*page.Document);
+    REQUIRE(webArea);
+    (void)page.TakeNotifications();
+
+    page.Document->DesignMode(u8"on");
+    CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), *webArea,
+                                          AXNotification::IsEditableWebAreaChanged));
+  }
+
+  TEST_CASE("AXObjectCache changes: slotted content", "[Accessibility][AXObjectCache]")
+  {
+    AccessibilityFixture page(u8"<div id=host><span>One</span></div>");
+    auto &host = page.ById(u8"host");
+    auto shadow = host.AttachShadow({}).ReleaseValue();
+    auto slot = page.Document->CreateElement(u8"slot").ReleaseValue();
+    REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
+    (void)page.Document->UpdateLayout();
+    auto *slotObject = page.Cache().GetOrCreate(*slot);
+    REQUIRE(slotObject);
+    (void)page.TakeNotifications();
+
+    auto span = page.Document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(host.AppendChild(*span).HasException());
+    CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), *slotObject,
+                                          AXNotification::ChildrenChanged));
   }
 }

@@ -377,7 +377,7 @@ namespace krys::boo
     }
 
     // FIXME: Accessibility's intent for a caret moved by the mouse (a discontiguous selection move), with
-    // accessibility.
+    // accessibility's text state changes.
     auto options = DefaultSetSelectionOptions();
     options.Add(SetSelectionOption::FireSelectEvent);
     SetSelection(newSelection, options, CursorAlignOnScroll::IfNeeded, granularity);
@@ -590,7 +590,8 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Accessibility notifications, with accessibility.
+  // FIXME: Accessibility's selection notifications (postTextStateChangeNotification), with accessibility's
+  // text state changes.
   void FrameSelection::UpdateAndRevealSelection(ScrollBehavior scrollBehavior,
                                                 RevealExtentOption revealExtent,
                                                 ForceCenterScroll forceCenterScroll) noexcept
@@ -1537,7 +1538,8 @@ namespace krys::boo
     return pos;
   }
 
-  // FIXME: Accessibility's text selection intents and boundary notifications, with accessibility.
+  // FIXME: Accessibility's text selection intents and boundary notifications, with accessibility's text state
+  // changes.
   bool FrameSelection::Modify(Alteration alter, SelectionDirection direction, TextGranularity granularity,
                               UserTriggered userTriggered) noexcept
   {

@@ -1277,8 +1277,6 @@ namespace krys::boo::dom
   bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept
   {
     Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent, NodeDocument().Window());
-    // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), once there's
-    // accessibility.
     (void)EventDispatcher::DispatchToTarget(*event, this);
     if (event->DefaultPrevented() || event->DefaultHandled())
     {

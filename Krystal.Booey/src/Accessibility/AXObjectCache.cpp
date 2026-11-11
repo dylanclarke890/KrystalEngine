@@ -43,6 +43,7 @@
 #include "Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -60,6 +61,7 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
@@ -1427,9 +1429,24 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::OnEditableTextValueChanged(dom::Element &element) noexcept
+  void AXObjectCache::OnEditableTextValueChanged(dom::Node &node) noexcept
   {
-    PostNotification(&element, AXNotification::ValueChanged);
+    // The text control the node is in (an input's inner text, an editable element's text) is the one whose
+    // value changed; otherwise the node's (or its nearest ancestor's) object.
+    AccessibilityObject *object = nullptr;
+    for (auto *ancestor = &node; ancestor && !object; ancestor = ancestor->ParentInComposedTree())
+    {
+      object = Get(*ancestor);
+    }
+    for (auto *ancestor = object; ancestor; ancestor = ancestor->ParentObject())
+    {
+      if (ancestor->IsTextControl())
+      {
+        object = ancestor;
+        break;
+      }
+    }
+    PostNotification(object, AXNotification::ValueChanged);
   }
 
   void AXObjectCache::OnValidityChange(dom::Element &element) noexcept
@@ -1612,6 +1629,12 @@ namespace krys::boo::ax
       RecomputeIsIgnored(newElement.get());
     }
 
+    auto notifications = std::exchange(_deferredNotifications, {});
+    for (auto &[node, notification] : notifications)
+    {
+      PostNotification(GetOrCreate(*node), notification);
+    }
+
     // FIXME: The other deferred updates (modals and relations), with the changes they come from.
   }
 
@@ -1670,6 +1693,83 @@ namespace krys::boo::ax
   void AXObjectCache::OnLayoutComplete(RenderObject &layoutRoot) noexcept
   {
     PostNotification(&layoutRoot, AXNotification::LayoutComplete);
+  }
+
+  void AXObjectCache::OnDocumentLoaded() noexcept
+  {
+    // Only a page's main document reports a new document; a frame's reports a layout.
+    auto *frame = _document.Frame();
+    auto *page = frame ? frame->GetPage() : nullptr;
+    auto notification = page && &page->MainFrame() == frame ? AXNotification::NewDocumentLoadComplete
+                                                            : AXNotification::LayoutComplete;
+    // The web area's object may not exist yet, and making it may not be safe now.
+    _deferredNotifications.emplace_back(ShareRef<dom::Node>(_document), notification);
+    StartPerformCacheUpdateTimer();
+  }
+
+  void AXObjectCache::HandleScrolledToAnchor(dom::Node &anchor) noexcept
+  {
+    // The anchor may be ignored: the first object after it that isn't is told.
+    RefPtr<dom::Node> node = ShareRefPtr(&anchor);
+    auto *object = GetOrCreate(*node);
+    while (object && object->IsIgnored())
+    {
+      node = ShareRefPtr(dom::TreeQueries::Next(*node, nullptr));
+      while (node && !node->Renderer())
+      {
+        node = ShareRefPtr(dom::TreeQueries::NextSkippingChildren(*node));
+      }
+      if (!node)
+      {
+        return;
+      }
+      object = GetOrCreate(*node);
+    }
+    if (object)
+    {
+      PostPlatformNotification(*object, AXNotification::ScrolledToAnchor);
+    }
+  }
+
+  void AXObjectCache::OnSlottedContentChange(dom::Element &slot) noexcept
+  {
+    ChildrenChanged(Get(slot));
+
+    // Which of a details element's summaries is its summary (the first) can change: their roles depend on it.
+    auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(slot);
+    auto *details = shadowRoot ? shadowRoot->Host() : nullptr;
+    if (!details || !IsHTMLElementNamed(*details, u8"details"))
+    {
+      return;
+    }
+    for (auto *child = details->FirstElementChild().get(); child; child = child->NextElementSibling().get())
+    {
+      if (auto *object = IsHTMLElementNamed(*child, u8"summary") ? Get(*child) : nullptr)
+      {
+        _deferredRendererChangedList.add(object->ObjectID());
+        StartPerformCacheUpdateTimer();
+      }
+    }
+  }
+
+  void AXObjectCache::HandlePageEditabilityChanged() noexcept
+  {
+    PostNotification(&_document, AXNotification::IsEditableWebAreaChanged);
+  }
+
+  void AXObjectCache::OnDragElementChanged(dom::Element *oldElement, dom::Element *newElement) noexcept
+  {
+    if (oldElement == newElement)
+    {
+      return;
+    }
+    for (auto *element : {oldElement, newElement})
+    {
+      if (auto *object = element ? Get(*element) : nullptr)
+      {
+        PostNotification(object, AXNotification::GrabbedStateChanged);
+      }
+    }
   }
 
   void AXObjectCache::PostNotification(AccessibilityObject *object, AXNotification notification) noexcept

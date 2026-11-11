@@ -27,6 +27,7 @@
  */
 
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
@@ -1357,8 +1358,6 @@ namespace krys::boo
       keydown->SetIsDefaultEventHandlerIgnored();
     }
 
-    // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), with
-    // accessibility.
     (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
     if (handledByInputMethod)
     {
@@ -3688,9 +3687,13 @@ namespace krys::boo
     return GetDragState().Source.get();
   }
 
-  // FIXME: Telling the accessibility tree the drag source changed (onDragElementChanged), with accessibility.
   void EventHandler::SetDragStateSource(dom::Element *element) const noexcept
   {
+    auto *document = _frame.Document();
+    if (auto *cache = document ? document->ExistingAXObjectCache() : nullptr)
+    {
+      cache->OnDragElementChanged(GetDragState().Source.get(), element);
+    }
     GetDragState().Source = ShareRefPtr(element);
   }
 
@@ -3764,8 +3767,6 @@ namespace krys::boo
              &_frame, targetElement, RoundedIntPoint(result.GetHitTestLocation().Point()), state);
   }
 
-  // FIXME: Telling the accessibility tree of the drag events (onDraggingStarted and the others), with
-  // accessibility.
   bool EventHandler::DispatchDragEvent(dom::DOMStringAtom eventType, dom::Element &dragTarget,
                                        const PlatformMouseEvent &event,
                                        dom::DataTransfer &dataTransfer) noexcept
@@ -3786,6 +3787,38 @@ namespace krys::boo
       event.Force(), SyntheticClickType::NoTap, &dataTransfer);
 
     (void)dragTarget.DispatchEvent(*dragEvent);
+
+    if (auto *cache = frame->Document() ? frame->Document()->ExistingAXObjectCache() : nullptr)
+    {
+      auto notification = [&]() -> Maybe<ax::AXNotification>
+      {
+        if (eventType == u8"dragstart")
+        {
+          return ax::AXNotification::DraggingStarted;
+        }
+        if (eventType == u8"dragend")
+        {
+          return ax::AXNotification::DraggingEnded;
+        }
+        if (eventType == u8"dragenter")
+        {
+          return ax::AXNotification::DraggingEnteredDropZone;
+        }
+        if (eventType == u8"dragleave")
+        {
+          return ax::AXNotification::DraggingExitedDropZone;
+        }
+        if (eventType == u8"drop")
+        {
+          return ax::AXNotification::DraggingDropped;
+        }
+        return null;
+      }();
+      if (notification)
+      {
+        cache->PostNotification(&dragTarget, *notification);
+      }
+    }
 
     return dragEvent->DefaultPrevented();
   }

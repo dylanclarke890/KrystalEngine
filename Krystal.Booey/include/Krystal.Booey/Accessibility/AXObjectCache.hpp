@@ -108,6 +108,8 @@ namespace krys::boo::ax
     ListHashSet<dom::Element *> _deferredSelectedChildrenChangedList;
     // A focus change waiting for the newly focused element's renderer: the old and new focused elements.
     Maybe<Pair<RefPtr<dom::Element>, RefPtr<dom::Element>>> _deferredFocusedNodeChange;
+    // Notifications for objects that may not exist yet, posted once the tree is up to date.
+    List<Pair<Ref<dom::Node>, AXNotification>> _deferredNotifications;
     ListHashSet<AXID> _deferredRendererChangedList;
     // Tables whose exposed state and whose cell slots need working out again.
     ListHashSet<AXID> _deferredRecomputeTableIsExposedList;
@@ -219,8 +221,8 @@ namespace krys::boo::ax
     void DeferSelectedChildrenChangedIfNeeded(dom::Element &select) noexcept;
     /// @brief A menu list's active option changed to the one at @p optionIndex.
     void OnSelectedOptionChanged(RenderObject &menuList, int32 optionIndex) noexcept;
-    /// @brief The value of @p element (a text control) was edited.
-    void OnEditableTextValueChanged(dom::Element &element) noexcept;
+    /// @brief The value of the text control (or editable content) @p node is in was edited.
+    void OnEditableTextValueChanged(dom::Node &node) noexcept;
     /// @brief Whether @p element is valid changed.
     void OnValidityChange(dom::Element &element) noexcept;
     /// @brief @p radio joined or left the radio button group of @p group (the other buttons in it).
@@ -244,6 +246,19 @@ namespace krys::boo::ax
     void OnInertOrVisibilityChange(RenderElement &renderer) noexcept;
     /// @brief A layout of @p layoutRoot's subtree finished.
     void OnLayoutComplete(RenderObject &layoutRoot) noexcept;
+    /// @brief The document finished loading.
+    void OnDocumentLoaded() noexcept;
+    /// @brief The view scrolled to @p anchor (the fragment's target): its first unignored object is told.
+    void HandleScrolledToAnchor(dom::Node &anchor) noexcept;
+
+    // DOM.
+
+    /// @brief The nodes assigned to @p slot changed.
+    void OnSlottedContentChange(dom::Element &slot) noexcept;
+    /// @brief The document's design mode was turned on or off.
+    void HandlePageEditabilityChanged() noexcept;
+    /// @brief The element being dragged changed from @p oldElement to @p newElement.
+    void OnDragElementChanged(dom::Element *oldElement, dom::Element *newElement) noexcept;
 
     // Notifications.
 

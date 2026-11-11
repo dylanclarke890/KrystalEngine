@@ -1815,7 +1815,7 @@ namespace krys::boo
   }
 
   // FIXME: The accessibility selection of the inserted text (m_visibleSelectionForInsertedText), with
-  // accessibility.
+  // accessibility's text state changes.
   void ReplaceSelectionCommand::CompleteHTMLReplacement(const dom::Position &lastPositionToSelect) noexcept
   {
     dom::Position start = PositionAtStartOfInsertedContent().DeepEquivalent();
@@ -2096,7 +2096,7 @@ namespace krys::boo
     VisibleSelection selectionAfterReplace(_selectReplacement ? start : end, end);
 
     // FIXME: The accessibility selection of pasted text (m_visibleSelectionForInsertedText), with
-    // accessibility.
+    // accessibility's text state changes.
     SetEndingSelection(selectionAfterReplace);
 
     return true;

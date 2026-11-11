@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -3241,7 +3242,10 @@ namespace krys::boo
     }
     ScrollRectToVisible(rect, renderer, insideFixed, options);
 
-    // FIXME: Telling accessibility (handleScrolledToAnchor), with accessibility.
+    if (auto *cache = Frame().Document() ? Frame().Document()->ExistingAXObjectCache() : nullptr)
+    {
+      cache->HandleScrolledToAnchor(*anchorNode);
+    }
 
     // scrollRectToVisible can call into setScrollPosition(), which resets _maintainScrollPositionAnchor.
     _maintainScrollPositionAnchor = CreateWeakPtr(anchorNode.get());

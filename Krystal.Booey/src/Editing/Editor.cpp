@@ -26,6 +26,7 @@
  */
 
 #include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
@@ -945,10 +946,18 @@ namespace krys::boo
     return _lastEditCommand.get();
   }
 
-  // FIXME: Accessibility's notification of the change, with accessibility. (There are no spelling or
-  // grammar markers to update; see DIFFERENCES.md.)
-  void Editor::RespondToChangedContents(const VisibleSelection &) noexcept
+  // (There are no spelling or grammar markers to update; see DIFFERENCES.md.)
+  void Editor::RespondToChangedContents(const VisibleSelection &endingSelection) noexcept
   {
+    if (ax::AXObjectCache::AccessibilityEnabled())
+    {
+      auto *node = endingSelection.Start().DeprecatedNode();
+      if (auto *cache = node ? _document.ExistingAXObjectCache() : nullptr)
+      {
+        cache->OnEditableTextValueChanged(*node);
+      }
+    }
+
     if (auto *client = Client())
     {
       client->RespondToChangedContents();
@@ -1469,8 +1478,8 @@ namespace krys::boo
   }
 
   // FIXME: Waiting for the inserted images to load before revealing the selection; and accessibility's
-  // notifications of the pasted text, with accessibility. (There's no spell checking; see
-  // DIFFERENCES.md.)
+  // notifications of the pasted text, with accessibility's text state changes. (There's no spell checking;
+  // see DIFFERENCES.md.)
   void Editor::ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
                                             bool smartReplace, bool matchStyle,
                                             EditAction editingAction) noexcept
@@ -1690,7 +1699,8 @@ namespace krys::boo
     };
   }
 
-  // FIXME: Accessibility's composition notifications (onTextCompositionChange), with accessibility.
+  // FIXME: Accessibility's composition notifications (onTextCompositionChange), with accessibility's text
+  // state changes.
   void Editor::SetComposition(utf8_stringview text, SetCompositionMode mode) noexcept
   {
     Ref<dom::Document> document = ShareRef(_document);
@@ -1750,7 +1760,8 @@ namespace krys::boo
     TypingCommand::CloseTyping(_document);
   }
 
-  // FIXME: Accessibility's composition notifications (onTextCompositionChange), with accessibility.
+  // FIXME: Accessibility's composition notifications (onTextCompositionChange), with accessibility's text
+  // state changes.
   void Editor::SetComposition(utf8_stringview text, const List<CompositionUnderline> &underlines,
                               uint32 selectionStart, uint32 selectionEnd) noexcept
   {

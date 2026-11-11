@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -369,8 +370,10 @@ namespace krys::boo::dom
     if (assignedNodesChanged)
     {
       SignalSlotChange(slot);
-      // FIXME: Telling the accessibility cache (onSlottedContentChange, and onDetailsSummarySlotChange for a
-      // details element's summary slot), with accessibility.
+      if (auto *cache = slot.NodeDocument().ExistingAXObjectCache())
+      {
+        cache->OnSlottedContentChange(slot);
+      }
 
       // The composed tree changed under the host.
       if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(slot))

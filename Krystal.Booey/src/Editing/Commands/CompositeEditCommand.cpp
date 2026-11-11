@@ -163,7 +163,7 @@ namespace krys::boo
 
     _document->GetEditor().UnappliedEditing(*this);
     // FIXME: Accessibility's notification of the undone text (postTextStateChangeNotificationForUnapply),
-    // with accessibility.
+    // with accessibility's text state changes.
   }
 
   void EditCommandComposition::Unapply() noexcept
@@ -205,7 +205,7 @@ namespace krys::boo
 
     _document->GetEditor().ReappliedEditing(*this);
     // FIXME: Accessibility's notification of the redone text (postTextStateChangeNotificationForReapply),
-    // with accessibility.
+    // with accessibility's text state changes.
   }
 
   void EditCommandComposition::Append(SimpleEditCommand *command) noexcept
