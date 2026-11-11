@@ -474,6 +474,27 @@ namespace krys::boo::tests
       CHECK_FALSE(selection.IsCaretBlinkingSuspended());
     }
 
+    SECTION("A page that prefers a caret that doesn't blink keeps it shown")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
+
+      // A hidden caret is shown at its next blink, and stays shown.
+      fixture.TestPage->SetPrefersNonBlinkingCaret(true);
+      CHECK(selection.IsCaretBlinkingSuspended());
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+
+      // It blinks again once the preference is gone.
+      fixture.TestPage->SetPrefersNonBlinkingCaret(false);
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
+    }
+
     SECTION("An unfocused document hides the caret")
     {
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);

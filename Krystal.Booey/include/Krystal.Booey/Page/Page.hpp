@@ -109,6 +109,7 @@ namespace krys::boo
     mutable bool _skippedRenderBlockedDocument {false};
     bool _isVisible {true};
     bool _imageAnimationEnabled {true};
+    bool _prefersNonBlinkingCaret {false};
     bool _scriptedAnimationsSuspended {false};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
     uint32 _displayNominalFramesPerSecond {FullSpeedFramesPerSecond};
@@ -246,6 +247,17 @@ namespace krys::boo
     /// stop at the frame they show, and SMIL animations pause, in the page's documents and its SVG images. A
     /// page starts with them playing.
     void SetImageAnimationEnabled(bool enabled) noexcept;
+
+    /// @brief Keeps carets shown rather than blinking, for users who prefer a caret that doesn't blink (an
+    /// accessibility preference the host reports). A page starts with carets blinking.
+    void SetPrefersNonBlinkingCaret(bool prefers) noexcept
+    {
+      _prefersNonBlinkingCaret = prefers;
+    }
+    KRYS_NODISCARD bool PrefersNonBlinkingCaret() const noexcept
+    {
+      return _prefersNonBlinkingCaret;
+    }
     KRYS_NODISCARD bool ImageAnimationEnabled() const noexcept
     {
       return _imageAnimationEnabled;
