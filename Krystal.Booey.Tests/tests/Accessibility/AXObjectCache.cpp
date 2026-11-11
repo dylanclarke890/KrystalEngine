@@ -30,15 +30,24 @@ namespace krys::boo::ax::tests
     AXObjectCache::DisableAccessibility();
   }
 
-  TEST_CASE("AXObjectCache: the root is the document's web area", "[Accessibility][AXObjectCache]")
+  TEST_CASE("AXObjectCache: the root is the document's view, above its web area",
+            "[Accessibility][AXObjectCache]")
   {
     AccessibilityFixture page(u8"<p>Hello</p>");
     auto *root = page.Cache().RootObject();
     REQUIRE(root);
-    CHECK(root->Role() == AccessibilityRole::WebArea);
-    CHECK(root->IsRootWebArea());
+    CHECK(root->Role() == AccessibilityRole::ScrollArea);
     CHECK_FALSE(root->IsIgnored());
-    CHECK(page.Cache().Get(*page.Document) == root);
+    CHECK(root->ParentObject() == nullptr);
+    CHECK(page.Cache().RootObject() == root);
+
+    auto *webArea = page.Cache().Get(*page.Document);
+    REQUIRE(webArea);
+    CHECK(webArea->Role() == AccessibilityRole::WebArea);
+    CHECK(webArea->IsRootWebArea());
+    CHECK(webArea->ParentObject() == root);
+    REQUIRE_FALSE(root->Children().empty());
+    CHECK(root->Children()[0].get() == webArea);
   }
 
   TEST_CASE("AXObjectCache: GetOrCreate creates one object per node", "[Accessibility][AXObjectCache]")
@@ -119,7 +128,9 @@ namespace krys::boo::ax::tests
 
     SECTION("the web area while nothing is focused")
     {
-      CHECK(page.Cache().FocusedObject() == page.Cache().RootObject());
+      auto *focused = page.Cache().FocusedObject();
+      CHECK(focused == page.Cache().Get(*page.Document));
+      CHECK(focused->IsRootWebArea());
     }
 
     SECTION("the focused element's object")

@@ -35,13 +35,20 @@
 
 namespace krys::boo
 {
+  class LocalFrameView;
   class RenderObject;
+  class Scrollbar;
 
   namespace dom
   {
     class Document;
     class Element;
     class Node;
+  }
+
+  namespace html
+  {
+    class HTMLAreaElement;
   }
 }
 
@@ -75,6 +82,8 @@ namespace krys::boo::ax
     // Renderers with no node (anonymous ones, such as list markers) are looked up by renderer.
     HashMap<const RenderObject *, AXID> _renderObjectIdMapping;
     uint64 _nextID {1};
+    // The document's view's object.
+    Maybe<AXID> _scrollViewID;
 
     List<Pair<Ref<AccessibilityObject>, AXNotification>> _notificationsToPost;
     Timer _notificationPostTimer;
@@ -102,8 +111,8 @@ namespace krys::boo::ax
       return _document;
     }
 
-    /// @brief The root of the tree: the document's web area.
-    // FIXME: A scroll view object above the web area, with the specialised objects.
+    /// @brief The root of the tree: the document's view (above its web area), or its web area if it has no
+    /// view.
     KRYS_NODISCARD AccessibilityObject *RootObject() noexcept;
     /// @brief The object for the focused element (or its active descendant), or the nearest unignored
     /// ancestor if that object is ignored; the web area if nothing is focused.
@@ -131,6 +140,10 @@ namespace krys::boo::ax
     {
       return renderer ? GetOrCreate(*renderer) : nullptr;
     }
+    /// @brief The object for the document's view (its scroll view), made if needed.
+    AccessibilityObject *GetOrCreate(LocalFrameView &view) noexcept;
+    /// @brief A new object for one of the view's scroll bars; its maker sets its parent.
+    AccessibilityObject *Create(Scrollbar &scrollbar) noexcept;
     /// @brief A new object with no node or renderer of its own, for one of the roles that has one (a slider's
     /// thumb, a menu list's pop-up); null for the others. Its maker sets its parent.
     AccessibilityObject *Create(AccessibilityRole role) noexcept;
@@ -175,6 +188,8 @@ namespace krys::boo::ax
                                    const RenderObject *renderer) noexcept;
     AccessibilityObject *GetOrCreateSlow(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept;
     KRYS_NODISCARD AccessibilityObject *FocusedObjectForNode(dom::Node &node) noexcept;
+    /// @brief A focused area's object: its image's child for it.
+    KRYS_NODISCARD AccessibilityObject *FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept;
 
     void HandleChildrenChanged(AccessibilityObject &object) noexcept;
     void HandleAllDeferredChildrenChanged() noexcept;

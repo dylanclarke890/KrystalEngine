@@ -33,13 +33,19 @@
 #include "Krystal.Booey/Accessibility/AccessibilityMenuListPopup.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityScrollbar.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityScrollView.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilitySlider.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilitySpinButton.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilitySpinButtonPart.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
@@ -47,6 +53,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
@@ -137,7 +144,36 @@ namespace krys::boo::ax
     {
       return nullptr;
     }
+    if (auto *view = _document.View())
+    {
+      return GetOrCreate(*view);
+    }
     return GetOrCreate(_document.GetRenderView());
+  }
+
+  AccessibilityObject *AXObjectCache::GetOrCreate(LocalFrameView &view) noexcept
+  {
+    if (_scrollViewID)
+    {
+      auto *existing = DynamicDowncast<AccessibilityScrollView>(ObjectForID(*_scrollViewID));
+      if (existing && existing->ScrollView() == &view)
+      {
+        return existing;
+      }
+      // A view that's gone, or another view the document has now.
+      Remove(*_scrollViewID);
+    }
+    auto object = AccessibilityScrollView::Create(GenerateID(), view, *this);
+    CacheAndInitializeWrapper(*object, nullptr, nullptr);
+    _scrollViewID = object->ObjectID();
+    return object.get();
+  }
+
+  AccessibilityObject *AXObjectCache::Create(Scrollbar &scrollbar) noexcept
+  {
+    auto object = AccessibilityScrollbar::Create(GenerateID(), scrollbar, *this);
+    CacheAndInitializeWrapper(*object, nullptr, nullptr);
+    return object.get();
   }
 
   AccessibilityObject *AXObjectCache::FocusedObject() noexcept
@@ -155,10 +191,32 @@ namespace krys::boo::ax
     return FocusedObjectForNode(_document);
   }
 
+  AccessibilityObject *AXObjectCache::FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept
+  {
+    auto image = area.ImageElement();
+    auto *imageObject = image ? GetOrCreate(*image) : nullptr;
+    if (!imageObject)
+    {
+      return nullptr;
+    }
+    for (const auto &child : imageObject->Children())
+    {
+      if (child->IsImageMapLink() && child->GetNode() == &area)
+      {
+        return child.get();
+      }
+    }
+    return nullptr;
+  }
+
   AccessibilityObject *AXObjectCache::FocusedObjectForNode(dom::Node &node) noexcept
   {
-    // FIXME: The image map's area object for a focused area element (focusedImageMapUIElement), with image
-    // maps; and the active descendant (shouldFocusActiveDescendant), with relations.
+    // A focused area's object is its image's child.
+    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(node))
+    {
+      return FocusedImageMapUIElement(*area);
+    }
+    // FIXME: The active descendant (shouldFocusActiveDescendant), with relations.
     auto *focus = GetOrCreate(node);
     if (!focus)
     {
@@ -221,7 +279,7 @@ namespace krys::boo::ax
 
   Ref<AccessibilityNodeObject> AXObjectCache::CreateFromNode(dom::Node &node) noexcept
   {
-    // FIXME: The specialised objects for image map areas and SVG, with them.
+    // FIXME: The specialised objects for SVG, with them.
     if (auto *element = DynamicDowncast<dom::Element>(node);
         element && (Is<html::HTMLProgressElement>(*element) || Is<html::HTMLMeterElement>(*element)))
     {
@@ -245,9 +303,13 @@ namespace krys::boo::ax
       case AccessibilityRole::TableHeaderContainer:
         object = AccessibilityTableHeaderContainer::Create(GenerateID(), *this);
         break;
-      default:
-        // FIXME: Spin buttons and their parts, with them.
+      case AccessibilityRole::SpinButton:
+        object = AccessibilitySpinButton::Create(GenerateID(), *this);
         break;
+      case AccessibilityRole::SpinButtonPart:
+        object = AccessibilitySpinButtonPart::Create(GenerateID(), *this);
+        break;
+      default: break;
     }
     if (!object)
     {
@@ -408,6 +470,10 @@ namespace krys::boo::ax
 
     // FIXME: Removing the object's relations (removeAllRelations), with relations.
     object->Detach(AccessibilityDetachmentType::ElementDestroyed);
+    if (_scrollViewID == id)
+    {
+      _scrollViewID = null;
+    }
     _deferredChildrenChangedList.remove(id);
     _deferredRendererChangedList.remove(id);
     _deferredRecomputeTableIsExposedList.remove(id);

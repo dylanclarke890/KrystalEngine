@@ -221,7 +221,11 @@ set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
   include/Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp
   include/Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp
   include/Krystal.Booey/Accessibility/AccessibilityRole.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityScrollView.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityScrollbar.hpp
   include/Krystal.Booey/Accessibility/AccessibilitySlider.hpp
+  include/Krystal.Booey/Accessibility/AccessibilitySpinButton.hpp
+  include/Krystal.Booey/Accessibility/AccessibilitySpinButtonPart.hpp
   include/Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp
   include/Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp
 )
@@ -240,7 +244,11 @@ set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
   src/Accessibility/AccessibilityObject.cpp
   src/Accessibility/AccessibilityProgressIndicator.cpp
   src/Accessibility/AccessibilityRenderObject.cpp
+  src/Accessibility/AccessibilityScrollView.cpp
+  src/Accessibility/AccessibilityScrollbar.cpp
   src/Accessibility/AccessibilitySlider.cpp
+  src/Accessibility/AccessibilitySpinButton.cpp
+  src/Accessibility/AccessibilitySpinButtonPart.cpp
   src/Accessibility/AccessibilityTableColumn.cpp
   src/Accessibility/AccessibilityTableHeaderContainer.cpp
 )

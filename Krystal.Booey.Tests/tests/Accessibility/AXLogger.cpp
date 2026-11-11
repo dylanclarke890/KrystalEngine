@@ -12,19 +12,20 @@ namespace krys::boo::ax::tests
     SECTION("roles and names")
     {
       CHECK(page.Tree()
-            == u8"WebArea\n"
-               u8"  LandmarkMain\n"
-               u8"    Heading name=\"Title\"\n"
-               u8"      StaticText name=\"Title\"\n"
-               u8"    Paragraph\n"
-               u8"      StaticText name=\"Some\"\n"
-               u8"      Link name=\"link\"\n"
-               u8"        StaticText name=\"link\"\n"
-               u8"      StaticText name=\".\"\n"
-               u8"    Label\n"
-               u8"      StaticText name=\"Name\"\n"
-               u8"      TextField name=\"Name\"\n"
-               u8"    Button name=\"Save\"\n");
+            == u8"ScrollArea\n"
+               u8"  WebArea\n"
+               u8"    LandmarkMain\n"
+               u8"      Heading name=\"Title\"\n"
+               u8"        StaticText name=\"Title\"\n"
+               u8"      Paragraph\n"
+               u8"        StaticText name=\"Some\"\n"
+               u8"        Link name=\"link\"\n"
+               u8"          StaticText name=\"link\"\n"
+               u8"        StaticText name=\".\"\n"
+               u8"      Label\n"
+               u8"        StaticText name=\"Name\"\n"
+               u8"        TextField name=\"Name\"\n"
+               u8"      Button name=\"Save\"\n");
     }
 
     SECTION("values and identifiers")

@@ -114,6 +114,7 @@ namespace krys::boo::ax
     KRYS_NODISCARD dom::DOMString AccessibleName() const noexcept override;
     KRYS_NODISCARD dom::DOMString AccessibleDescription() const noexcept override;
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+    KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
     /// @brief Whether the node is an `input` or `textarea` that edits text.
     KRYS_NODISCARD bool IsNativeTextControl() const noexcept;

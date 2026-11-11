@@ -209,6 +209,10 @@ namespace krys::boo::ax
     {
       return false;
     }
+    KRYS_NODISCARD virtual bool IsScrollView() const noexcept
+    {
+      return false;
+    }
 
     /// @brief A description for debugging: the role, ID, and the renderer or node.
     KRYS_NODISCARD utf8_string DebugDescription() const noexcept;
@@ -430,6 +434,8 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool IsGroup() const noexcept;
     KRYS_NODISCARD bool IsLandmark() const noexcept;
     KRYS_NODISCARD bool IsRangeControl() const noexcept;
+    /// @brief Whether the object is an image map's `area`.
+    KRYS_NODISCARD bool IsImageMapLink() const noexcept;
     KRYS_NODISCARD bool IsRootWebArea() const noexcept;
 
     // Attributes.

@@ -454,6 +454,12 @@ namespace krys::boo::ax
   {
     // FIXME: Children aria-owned by another object (they're inserted there instead), with relations.
 
+    // An area is its image's child (not its map's): only the image inserts it.
+    if (child.IsImageMapLink() && child.ParentObject() != this) KRYS_UNLIKELY
+    {
+      return;
+    }
+
     // If the parent is asking for this child's children, then either it's the first time (and clearing is a
     // no-op), or its visibility has changed. In the latter case, this child may have a stale child cached.
     // This can prevent aria-hidden changes from working correctly. Hence, whenever a parent is getting
@@ -861,6 +867,12 @@ namespace krys::boo::ax
     }
   }
 
+  bool AccessibilityObject::IsImageMapLink() const noexcept
+  {
+    auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
+    return element && element->TagQualifiedName().TagName() == html::TagName::area;
+  }
+
   bool AccessibilityObject::HasCellRole() const noexcept
   {
     return _role == AccessibilityRole::Cell || _role == AccessibilityRole::GridCell
@@ -1095,8 +1107,13 @@ namespace krys::boo::ax
 
   bool AccessibilityObject::IsRootWebArea() const noexcept
   {
-    // With no scroll view above it, the root web area is the web area with no parent.
-    return IsWebArea() && !ParentObject();
+    // The web area of the root scroll view (or with no scroll view above it, of no parent).
+    if (!IsWebArea())
+    {
+      return false;
+    }
+    auto *parent = ParentObject();
+    return !parent || (parent->IsScrollView() && !parent->ParentObject());
   }
 
   bool AccessibilityObject::HasAttribute(dom::DOMStringView name) const noexcept

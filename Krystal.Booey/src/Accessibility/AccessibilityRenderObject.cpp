@@ -27,18 +27,25 @@
  */
 
 #include "Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilitySpinButton.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
+#include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -46,6 +53,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
 namespace krys::boo::ax
@@ -153,6 +161,13 @@ namespace krys::boo::ax
         }
       }
     }
+    // The web area's parent is the view it's in.
+    if (Is<RenderView>(*renderer))
+    {
+      auto *view = DocumentFrameView();
+      return view ? cache->GetOrCreate(*view) : nullptr;
+    }
+
     // Other anonymous renderers are under the nearest renderer with a node.
     for (auto *ancestor = renderer->Parent(); ancestor; ancestor = ancestor->Parent())
     {
@@ -197,6 +212,14 @@ namespace krys::boo::ax
     if (IsExposableTable())
     {
       AddTableChildrenAndCellSlots();
+      return;
+    }
+
+    // A native text control's only child is its spin button, if it has one.
+    if (IsNativeTextControl())
+    {
+      AddTextFieldChildren();
+      _subtreeDirty = false;
       return;
     }
 
@@ -255,6 +278,8 @@ namespace krys::boo::ax
     {
       AddChild(cache->GetOrCreate(*after));
     }
+
+    AddImageMapChildren();
 
     // FIXME: aria-owned children (updateOwnedChildrenIfNecessary), with relations.
     _subtreeDirty = false;
@@ -782,6 +807,45 @@ namespace krys::boo::ax
 
     // By default, objects should be ignored so that the tree isn't filled with unnecessary items.
     return true;
+  }
+
+  void AccessibilityRenderObject::AddImageMapChildren() noexcept
+  {
+    auto *image = DynamicDowncast<RenderImage>(_renderer.get());
+    auto *map = image ? image->ImageMap() : nullptr;
+    auto *cache = AxObjectCache();
+    if (!map || !cache)
+    {
+      return;
+    }
+    // The map's areas that are links.
+    for (auto &node : dom::DescendantRange(*map))
+    {
+      if (auto *area = DynamicDowncast<html::HTMLAreaElement>(node); area && css::IsLink(*area))
+      {
+        AddChild(cache->GetOrCreate(*area));
+      }
+    }
+  }
+
+  void AccessibilityRenderObject::AddTextFieldChildren() noexcept
+  {
+    auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode());
+    auto *spinButtonElement =
+      input ? DynamicDowncast<html::SpinButtonElement>(input->InnerSpinButtonElement()) : nullptr;
+    auto *cache = AxObjectCache();
+    if (!spinButtonElement || !cache)
+    {
+      return;
+    }
+    auto *spinButton = DynamicDowncast<AccessibilitySpinButton>(cache->Create(AccessibilityRole::SpinButton));
+    if (!spinButton)
+    {
+      return;
+    }
+    spinButton->SetSpinButtonElement(spinButtonElement);
+    spinButton->SetParent(this);
+    AddChild(spinButton);
   }
 
   bool AccessibilityRenderObject::IgnoredByRowAncestor() const noexcept

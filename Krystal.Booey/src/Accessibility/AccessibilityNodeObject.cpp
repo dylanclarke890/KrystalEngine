@@ -40,9 +40,12 @@
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
@@ -264,6 +267,12 @@ namespace krys::boo::ax
         if (!element)
         {
           return false;
+        }
+        // An area isn't rendered, but is drawn as part of its image.
+        if (auto *area = DynamicDowncast<html::HTMLAreaElement>(*element))
+        {
+          auto image = area->ImageElement();
+          return !image || IsHidden(*image);
         }
         if (!node.Renderer() && !element->HasDisplayContents())
         {
@@ -700,8 +709,14 @@ namespace krys::boo::ax
       return nullptr;
     }
 
-    // FIXME: An area's parent is its image map's image (not the map), with image maps; and an aria-owned
-    // object's parent is its owner, with relations.
+    // An area's parent is its image map's image, not the map.
+    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(*node))
+    {
+      auto image = area->ImageElement();
+      return image ? cache->GetOrCreate(*image) : nullptr;
+    }
+
+    // FIXME: An aria-owned object's parent is its owner, with relations.
     return cache->GetOrCreate(*parent);
   }
 
@@ -719,7 +734,11 @@ namespace krys::boo::ax
     {
       return AccessibilityRole::Row;
     }
-    // FIXME: Image map links, with them.
+    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(GetNode()))
+    {
+      // FIXME: Working the role out again when the area's URL changes.
+      return !area->Href().empty() ? AccessibilityRole::Link : AccessibilityRole::Generic;
+    }
 
     auto roleFromNode = DetermineAccessibilityRoleFromNode();
     if (IsTableCell() && roleFromNode != AccessibilityRole::ColumnHeader
@@ -1144,10 +1163,12 @@ namespace krys::boo::ax
       return false;
     }
 
-    // A native text control's text is its value: what's in its user agent shadow tree isn't in the tree.
+    // A native text control's text is its value: what's in its user agent shadow tree isn't in the tree,
+    // except a spin button (which a mock object stands for).
     if (IsNativeTextControl())
     {
-      return false;
+      auto *input = DynamicDowncast<html::HTMLInputElement>(node);
+      return input && input->InnerSpinButtonElement();
     }
 
     // Elements that should not have children.
@@ -1205,6 +1226,11 @@ namespace krys::boo::ax
     if (decision == AccessibilityObjectInclusion::IgnoreObject)
     {
       return true;
+    }
+
+    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(*node); area && !area->Href().empty())
+    {
+      return false;
     }
 
     auto role = Role();
@@ -1547,6 +1573,10 @@ namespace krys::boo::ax
 
   bool AccessibilityNodeObject::IsEnabled() const noexcept
   {
+    if (IsImageMapLink())
+    {
+      return true;
+    }
     // ARIA says that the disabled status applies to the current element and all descendant elements.
     for (const AccessibilityObject *object = this; object; object = object->ParentObject())
     {
@@ -2892,5 +2922,25 @@ namespace krys::boo::ax
       }
     }
     return 1;
+  }
+
+  LayoutRect AccessibilityNodeObject::ElementRect() const noexcept
+  {
+    // An area's rect is its shape's, in its image.
+    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(GetNode()))
+    {
+      for (auto *ancestor = area->ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+      {
+        if (Is<html::HTMLMapElement>(*ancestor))
+        {
+          auto *renderer = ancestor->Renderer();
+          return renderer ? area->ComputeRect(renderer) : LayoutRect();
+        }
+      }
+      return {};
+    }
+    // FIXME: A node's bounding box (its display: contents children's, or its nearest rendered ancestor's)
+    // (boundingBoxRect), with geometry.
+    return {};
   }
 }
