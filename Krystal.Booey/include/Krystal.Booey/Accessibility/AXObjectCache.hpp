@@ -81,6 +81,9 @@ namespace krys::boo::ax
 
     ListHashSet<AXID> _deferredChildrenChangedList;
     ListHashSet<AXID> _deferredRendererChangedList;
+    // Tables whose exposed state and whose cell slots need working out again.
+    ListHashSet<AXID> _deferredRecomputeTableIsExposedList;
+    ListHashSet<AXID> _deferredRecomputeTableCellSlotsList;
     Timer _performCacheUpdateTimer;
     bool _performingDeferredCacheUpdate {false};
 
@@ -175,6 +178,11 @@ namespace krys::boo::ax
 
     void HandleChildrenChanged(AccessibilityObject &object) noexcept;
     void HandleAllDeferredChildrenChanged() noexcept;
+    /// @brief Works out again (later) whether @p element's table is exposed: adding or removing rows can make
+    /// a layout table a data table or the other way round.
+    void DeferRecomputeTableIsExposed(dom::Element *element) noexcept;
+    void DeferRecomputeTableCellSlots(AccessibilityNodeObject &table) noexcept;
+    void StartPerformCacheUpdateTimer() noexcept;
     void NotificationPostTimerFired() noexcept;
     void PerformCacheUpdateTimerFired() noexcept
     {

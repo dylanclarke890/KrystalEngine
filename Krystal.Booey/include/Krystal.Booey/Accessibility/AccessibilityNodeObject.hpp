@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::html
@@ -40,6 +41,8 @@ namespace krys::boo::html
 
 namespace krys::boo::ax
 {
+  class AXObjectRareData;
+
   /// @brief An accessibility object for a DOM node: its role, states and name come from the node, and its
   /// children from the node's children in the composed tree. Nodes with no renderer that accessibility
   /// still needs (`display: contents`, canvas fallback content) get one of these; rendered ones get an
@@ -48,6 +51,7 @@ namespace krys::boo::ax
   {
   private:
     WeakPtr<dom::Node> _node;
+    UniquePtr<AXObjectRareData> _rareData;
 
   protected:
     AccessibilityRole _ariaRole {AccessibilityRole::Unknown};
@@ -134,6 +138,48 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool IsUnorderedList() const noexcept;
     KRYS_NODISCARD bool IsOrderedList() const noexcept;
 
+    KRYS_NODISCARD bool IsTable() const noexcept override;
+    KRYS_NODISCARD bool IsExposableTable() const noexcept override;
+    KRYS_NODISCARD bool IsAriaTable() const noexcept override;
+    KRYS_NODISCARD bool IsTableRow() const noexcept override;
+    KRYS_NODISCARD bool IsExposedTableRow() const noexcept override;
+    KRYS_NODISCARD bool IsARIAGridRow() const noexcept override;
+    KRYS_NODISCARD bool IsTableCell() const noexcept override;
+    KRYS_NODISCARD bool IsExposedTableCell() const noexcept override;
+    KRYS_NODISCARD bool IsColumnHeader() const noexcept override;
+    KRYS_NODISCARD bool IsRowHeader() const noexcept override;
+    KRYS_NODISCARD AccessibilityObject *ParentTable() const noexcept override;
+    KRYS_NODISCARD AccessibilityChildrenVector Rows() noexcept override;
+    KRYS_NODISCARD AccessibilityChildrenVector Columns() noexcept override;
+    KRYS_NODISCARD AccessibilityChildrenVector Cells() noexcept override;
+    KRYS_NODISCARD uint32 RowCount() noexcept override;
+    KRYS_NODISCARD uint32 ColumnCount() noexcept override;
+    KRYS_NODISCARD AccessibilityObject *CellForColumnAndRow(uint32 column, uint32 row) noexcept override;
+    KRYS_NODISCARD AccessibilityObject *TableHeaderContainer() noexcept override;
+    KRYS_NODISCARD AccessibilityChildrenVector RowHeaders() noexcept override;
+    KRYS_NODISCARD int32 AxRowCount() const noexcept override;
+    KRYS_NODISCARD int32 AxColumnCount() const noexcept override;
+    KRYS_NODISCARD Maybe<uint32> AxRowIndex() const noexcept override;
+    KRYS_NODISCARD Maybe<uint32> AxColumnIndex() const noexcept override;
+    KRYS_NODISCARD dom::DOMString AxRowIndexText() const noexcept override;
+    KRYS_NODISCARD dom::DOMString AxColumnIndexText() const noexcept override;
+    KRYS_NODISCARD Pair<uint32, uint32> RowIndexRange() const noexcept override;
+    KRYS_NODISCARD Pair<uint32, uint32> ColumnIndexRange() const noexcept override;
+    /// @brief A cell's `colspan` (or else `aria-colspan`), clamped to 1 to 1000.
+    KRYS_NODISCARD uint32 ColSpan() const noexcept;
+    /// @brief A cell's `rowspan` (or else `aria-rowspan`), 0 meaning the rest of its row group.
+    KRYS_NODISCARD uint32 RowSpan() const noexcept;
+    /// @brief The row a cell is in, if the row is exposed.
+    KRYS_NODISCARD AccessibilityNodeObject *ParentRow() const noexcept;
+    /// @brief A row's table, if the table is exposed.
+    KRYS_NODISCARD AccessibilityObject *ParentTableIfExposedTableRow() const noexcept;
+    /// @brief Marks a table's cell slots out of date (with its children, which they're worked out with).
+    void SetCellSlotsDirty() noexcept;
+    /// @brief Works out again whether a table is exposed, updating its role and its cells' if it changed.
+    void RecomputeIsExposableIfNecessary() noexcept;
+    /// @brief Gives a row's cells their `aria-colindex`, from the row's.
+    void SetAXColIndexFromRow(int32 index) noexcept;
+
   protected:
     AccessibilityNodeObject(AXID id, dom::Node *node, AXObjectCache &cache) noexcept;
 
@@ -173,6 +219,37 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool IsStyleFormatGroup() const noexcept;
     /// @brief Whether the element is hidden by `display: none` or `visibility: hidden`.
     KRYS_NODISCARD bool IsRenderHidden() const noexcept;
+
+    KRYS_NODISCARD AXObjectRareData &EnsureRareData() noexcept;
+    /// @brief An exposed table's rows, then its columns and header container (which are ignored), working
+    /// out its cell slots.
+    void AddTableChildrenAndCellSlots() noexcept;
+    /// @brief Whether the table is exposed: an ARIA table, or a data table rather than one for layout.
+    KRYS_NODISCARD bool ComputeIsTableExposableThroughAccessibility() const noexcept
+    {
+      return IsAriaTable() || IsDataTable();
+    }
+
+  private:
+    /// @brief The largest `rowspan` (https://html.spec.whatwg.org/#attr-tdth-rowspan).
+    constexpr static uint32 MaxRowSpan = 65'534;
+
+    /// @brief WebKit's heuristic for whether a table is for data (exposed) or for layout.
+    KRYS_NODISCARD bool IsDataTable() const noexcept;
+    KRYS_NODISCARD bool IsARIAGridCell() const noexcept;
+    KRYS_NODISCARD bool IsTableHeaderCell() const noexcept;
+    /// @brief The table's rare data, with its children (and so its rows, columns and cell slots) up to date.
+    KRYS_NODISCARD AXObjectRareData *RareDataWithCleanTableChildren() noexcept;
+    /// @brief Works out the table's cell slots and adds its caption and rows as children; returns the number
+    /// of columns.
+    uint32 ComputeCellSlots() noexcept;
+    /// @brief Updates the roles of the table's rows and cells, which depend on whether it's exposed.
+    void UpdateRowDescendantRoles() noexcept;
+    void SetRowIndex(uint32 rowIndex) noexcept;
+    void SetColumnIndex(uint32 columnIndex) noexcept;
+    void IncrementEffectiveRowSpan() noexcept;
+    void ResetEffectiveRowSpan() noexcept;
+    void EnsureIndexesUpToDate() const noexcept;
   };
 }
 

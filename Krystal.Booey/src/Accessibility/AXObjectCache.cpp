@@ -34,6 +34,8 @@
 #include "Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilitySlider.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -43,6 +45,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
@@ -104,7 +108,9 @@ namespace krys::boo::ax
     _notificationPostTimer.Stop();
     _performCacheUpdateTimer.Stop();
 
-    for (const auto &[id, object] : _objects)
+    // Moved out: detaching an object can remove the objects it made (a table's columns) from the cache.
+    auto objects = std::exchange(_objects, {});
+    for (const auto &[id, object] : objects)
     {
       object->Detach(AccessibilityDetachmentType::CacheDestroyed);
     }
@@ -235,8 +241,12 @@ namespace krys::boo::ax
       case AccessibilityRole::MenuListPopup:
         object = AccessibilityMenuListPopup::Create(GenerateID(), *this);
         break;
+      case AccessibilityRole::Column: object = AccessibilityTableColumn::Create(GenerateID(), *this); break;
+      case AccessibilityRole::TableHeaderContainer:
+        object = AccessibilityTableHeaderContainer::Create(GenerateID(), *this);
+        break;
       default:
-        // FIXME: Table columns and header containers and spin buttons and their parts, with them.
+        // FIXME: Spin buttons and their parts, with them.
         break;
     }
     if (!object)
@@ -400,6 +410,8 @@ namespace krys::boo::ax
     object->Detach(AccessibilityDetachmentType::ElementDestroyed);
     _deferredChildrenChangedList.remove(id);
     _deferredRendererChangedList.remove(id);
+    _deferredRecomputeTableIsExposedList.remove(id);
+    _deferredRecomputeTableCellSlotsList.remove(id);
   }
 
   void AXObjectCache::Remove(RenderObject &renderer) noexcept
@@ -487,8 +499,40 @@ namespace krys::boo::ax
     }
     _deferredChildrenChangedList.add(object->ObjectID());
 
-    // FIXME: Recomputing whether a table changing rows is exposed (deferRecomputeTableIsExposed), with
-    // tables.
+    // Adding or removing rows can make a layout table a data table or the other way round.
+    auto *element = object->GetElement();
+    if (Is<html::HTMLTableElement>(element))
+    {
+      DeferRecomputeTableIsExposed(element);
+    }
+    else if (auto *section = DynamicDowncast<html::HTMLTableSectionElement>(element))
+    {
+      DeferRecomputeTableIsExposed(const_cast<html::HTMLTableElement *>(section->FindParentTable()));
+    }
+    StartPerformCacheUpdateTimer();
+  }
+
+  void AXObjectCache::DeferRecomputeTableIsExposed(dom::Element *element) noexcept
+  {
+    // A table with no object yet works it out when it gets one.
+    auto *table = DynamicDowncast<html::HTMLTableElement>(element);
+    auto *object = table ? Get(*table) : nullptr;
+    if (!object)
+    {
+      return;
+    }
+    _deferredRecomputeTableIsExposedList.add(object->ObjectID());
+    StartPerformCacheUpdateTimer();
+  }
+
+  void AXObjectCache::DeferRecomputeTableCellSlots(AccessibilityNodeObject &table) noexcept
+  {
+    _deferredRecomputeTableCellSlotsList.add(table.ObjectID());
+    StartPerformCacheUpdateTimer();
+  }
+
+  void AXObjectCache::StartPerformCacheUpdateTimer() noexcept
+  {
     if (!_performCacheUpdateTimer.IsActive())
     {
       _performCacheUpdateTimer.StartOneShot({});
@@ -507,7 +551,16 @@ namespace krys::boo::ax
       popup->HandleChildrenChanged();
       return;
     }
-    // FIXME: Tables recomputing their cell slots (deferRecomputeTableCellSlots), with tables.
+    else if (auto *nodeObject = DynamicDowncast<AccessibilityNodeObject>(object);
+             nodeObject && nodeObject->IsTable())
+    {
+      DeferRecomputeTableCellSlots(*nodeObject);
+    }
+    else if (auto *parentTable = DynamicDowncast<AccessibilityNodeObject>(
+               nodeObject ? nodeObject->ParentTableIfExposedTableRow() : nullptr))
+    {
+      DeferRecomputeTableCellSlots(*parentTable);
+    }
     if (!object.GetNode() && !object.Renderer())
     {
       return;
@@ -609,10 +662,28 @@ namespace krys::boo::ax
       }
     }
 
+    auto recomputeTableIsExposed = std::exchange(_deferredRecomputeTableIsExposedList, {});
+    for (auto id : recomputeTableIsExposed)
+    {
+      if (auto table = ShareRefPtr(DynamicDowncast<AccessibilityNodeObject>(ObjectForID(id))))
+      {
+        table->RecomputeIsExposableIfNecessary();
+      }
+    }
+
     HandleAllDeferredChildrenChanged();
 
-    // FIXME: The other deferred updates (attribute changes, table exposure and cell slots, text changes,
-    // recomputing ignored states, modals, relations and focus), with the changes they come from.
+    auto recomputeTableCellSlots = std::exchange(_deferredRecomputeTableCellSlotsList, {});
+    for (auto id : recomputeTableCellSlots)
+    {
+      if (auto table = ShareRefPtr(DynamicDowncast<AccessibilityNodeObject>(ObjectForID(id))))
+      {
+        table->SetCellSlotsDirty();
+      }
+    }
+
+    // FIXME: The other deferred updates (attribute changes, text changes, recomputing ignored states,
+    // modals, relations and focus), with the changes they come from.
   }
 
   void AXObjectCache::PostNotification(AccessibilityObject *object, AXNotification notification) noexcept

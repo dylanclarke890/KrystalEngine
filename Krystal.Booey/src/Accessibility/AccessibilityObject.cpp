@@ -62,6 +62,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
@@ -70,7 +71,9 @@
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include <algorithm>
 #include <format>
+#include <limits>
 
 namespace krys::boo::ax
 {
@@ -467,7 +470,10 @@ namespace krys::boo::ax
 
     auto insert = [this](Ref<AccessibilityObject> object, uint32 at)
     {
-      object->_indexInParent = at;
+      if (ShouldSetChildIndexInParent())
+      {
+        object->_indexInParent = at;
+      }
       _children.insert(_children.begin() + at, krys::move(object));
     };
 
@@ -497,6 +503,10 @@ namespace krys::boo::ax
 
   void AccessibilityObject::ResetChildrenIndexInParent() noexcept
   {
+    if (!ShouldSetChildIndexInParent())
+    {
+      return;
+    }
     uint32 index = 0;
     for (const auto &child : _children)
     {
@@ -737,8 +747,18 @@ namespace krys::boo::ax
       case AccessibilityRole::PopUpButton:
       case AccessibilityRole::ToggleButton:      return ReverseAriaRole(AccessibilityRole::Button);
       case AccessibilityRole::LandmarkDocRegion: return ReverseAriaRole(AccessibilityRole::LandmarkRegion);
-      default:                                   return ReverseAriaRole(_role);
+      default:                                   break;
     }
+    // A header cell is a cell whose role says which kind of header it is.
+    if (IsColumnHeader())
+    {
+      return ReverseAriaRole(AccessibilityRole::ColumnHeader);
+    }
+    if (IsRowHeader())
+    {
+      return ReverseAriaRole(AccessibilityRole::RowHeader);
+    }
+    return ReverseAriaRole(_role);
   }
 
   bool AccessibilityObject::AriaRoleHasPresentationalChildren() const noexcept
@@ -839,6 +859,162 @@ namespace krys::boo::ax
       case AccessibilityRole::TextField:   return true;
       default:                             return false;
     }
+  }
+
+  bool AccessibilityObject::HasCellRole() const noexcept
+  {
+    return _role == AccessibilityRole::Cell || _role == AccessibilityRole::GridCell
+           || _role == AccessibilityRole::ColumnHeader || _role == AccessibilityRole::RowHeader;
+  }
+
+  bool AccessibilityObject::HasRowGroupTag() const noexcept
+  {
+    auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
+    if (!element)
+    {
+      return false;
+    }
+    auto tagName = element->TagQualifiedName().TagName();
+    return tagName == html::TagName::thead || tagName == html::TagName::tbody
+           || tagName == html::TagName::tfoot;
+  }
+
+  AccessibilityObject *AccessibilityObject::ExposedTableAncestor(bool includeSelf) const noexcept
+  {
+    for (auto *ancestor = includeSelf ? const_cast<AccessibilityObject *>(this) : ParentObject(); ancestor;
+         ancestor = ancestor->ParentObject())
+    {
+      if (ancestor->IsExposableTable())
+      {
+        return ancestor;
+      }
+    }
+    return nullptr;
+  }
+
+  AccessibilityObject *AccessibilityObject::ColumnHeader() noexcept
+  {
+    if (!IsTableColumn())
+    {
+      return nullptr;
+    }
+    auto *parent = ParentObject();
+    if (!parent || !parent->IsExposableTable())
+    {
+      return nullptr;
+    }
+    for (const auto &cell : Children())
+    {
+      if (cell->IsColumnHeader())
+      {
+        return cell.get();
+      }
+    }
+    return nullptr;
+  }
+
+  AccessibilityObject *AccessibilityObject::RowHeader() noexcept
+  {
+    const auto &rowChildren = Children();
+    if (rowChildren.empty())
+    {
+      return nullptr;
+    }
+
+    auto isTH = [](const AccessibilityObject &object)
+    {
+      auto *element = DynamicDowncast<html::HTMLElement>(object.GetElement());
+      return element && element->TagQualifiedName().TagName() == html::TagName::th;
+    };
+    bool isARIAGridRow = IsARIAGridRow();
+    auto *firstCell = rowChildren[0].get();
+    if (!isARIAGridRow && !isTH(*firstCell))
+    {
+      return nullptr;
+    }
+
+    // A row of nothing but headers (outside a grid) is unlikely to have a row header.
+    for (const auto &child : rowChildren)
+    {
+      // A cell that isn't a header: the first cell is the row's header.
+      if (!isARIAGridRow && !isTH(*child))
+      {
+        return firstCell;
+      }
+      // In a grid row, the first row header.
+      if (isARIAGridRow && child->IsRowHeader())
+      {
+        return child.get();
+      }
+    }
+    return nullptr;
+  }
+
+  AccessibilityObject::AccessibilityChildrenVector AccessibilityObject::ColumnHeaders() noexcept
+  {
+    AccessibilityChildrenVector headers;
+    if (HasCellRole())
+    {
+      auto parentTable = ShareRefPtr(ExposedTableAncestor());
+      if (!parentTable)
+      {
+        return {};
+      }
+      // FIXME: The cells the headers attribute names, which are the column headers when there are any
+      // (relatedObjects(AXRelation::Headers)), with relations.
+
+      auto rowRange = RowIndexRange();
+      auto columnRange = ColumnIndexRange();
+      auto rowGroupAncestor = RowGroupAncestorID();
+      for (uint32 row = 0; row < rowRange.first; ++row)
+      {
+        auto *tableCell = parentTable->CellForColumnAndRow(columnRange.first, row);
+        if (!tableCell || tableCell == this
+            || std::ranges::any_of(headers, [&](const auto &header) { return header.get() == tableCell; }))
+        {
+          continue;
+        }
+        if ((tableCell->CellScope() == u8"colgroup" && tableCell->RowGroupAncestorID() == rowGroupAncestor)
+            || tableCell->IsColumnHeader())
+        {
+          headers.emplace_back(ShareRef(*tableCell));
+        }
+      }
+    }
+    else if (IsTable())
+    {
+      for (const auto &column : Columns())
+      {
+        if (auto *header = column->ColumnHeader())
+        {
+          headers.emplace_back(ShareRef(*header));
+        }
+      }
+    }
+    return headers;
+  }
+
+  Maybe<AXID> AccessibilityObject::RowGroupAncestorID() const noexcept
+  {
+    if (!HasCellRole())
+    {
+      return null;
+    }
+    for (auto *ancestor = ParentObject(); ancestor; ancestor = ancestor->ParentObject())
+    {
+      if (ancestor->HasRowGroupTag())
+      {
+        return ancestor->ObjectID();
+      }
+    }
+    return null;
+  }
+
+  bool
+    AccessibilityObject::IsTableCellInSameRowGroup(const AccessibilityObject &otherTableCell) const noexcept
+  {
+    auto ancestorID = RowGroupAncestorID();
+    return ancestorID && ancestorID == otherTableCell.RowGroupAncestorID();
   }
 
   bool AccessibilityObject::IsGroup() const noexcept
@@ -943,19 +1119,21 @@ namespace krys::boo::ax
   dom::DOMString AccessibilityObject::GetAttribute(dom::DOMStringView name) const noexcept
   {
     auto *element = GetElement();
-    if (!element)
-    {
-      return {};
-    }
+    return element ? AttributeWithDefaultARIA(*element, name) : dom::DOMString {};
+  }
+
+  dom::DOMString AccessibilityObject::AttributeWithDefaultARIA(const dom::Element &element,
+                                                               dom::DOMStringView name) noexcept
+  {
     auto atom = dom::DOMStringAtom(name);
-    if (auto value = element->GetAttribute(atom))
+    if (auto value = element.GetAttribute(atom))
     {
       return krys::move(*value);
     }
     // A custom element's default ARIA semantics
     // (https://html.spec.whatwg.org/#the-aria-role-and-states-and-properties-defaults); the internals'
     // content attribute map holds only role and aria-* attributes.
-    auto *queue = element->ReactionQueue();
+    auto *queue = element.ReactionQueue();
     auto *internals = queue ? queue->AttachedInternals() : nullptr;
     if (!internals)
     {
@@ -967,6 +1145,17 @@ namespace krys::boo::ax
   dom::DOMString AccessibilityObject::GetAttributeTrimmed(dom::DOMStringView name) const noexcept
   {
     return dom::DOMString(StringAlgorithms::StripLeadingAndTrailingWhitespace(GetAttribute(name)));
+  }
+
+  int32 AccessibilityObject::IntegralAttribute(dom::DOMStringView name) const noexcept
+  {
+    auto result = html::Numbers::ParseInteger(GetAttribute(name));
+    if (!result.Success() || result.Value < std::numeric_limits<int32>::min()
+        || result.Value > std::numeric_limits<int32>::max())
+    {
+      return 0;
+    }
+    return static_cast<int32>(result.Value);
   }
 
   bool AccessibilityObject::SupportsARIAAttributes() const noexcept

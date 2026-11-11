@@ -63,6 +63,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
@@ -433,6 +434,10 @@ namespace krys::boo::ax
 
     // Attributes.
 
+    /// @brief @p element's @p name attribute, or (for ARIA attributes) its custom element's default; empty if
+    /// neither is set.
+    KRYS_NODISCARD static dom::DOMString AttributeWithDefaultARIA(const dom::Element &element,
+                                                                  dom::DOMStringView name) noexcept;
     /// @brief Whether the element has @p name, or (for ARIA attributes) its custom element has a default.
     KRYS_NODISCARD bool HasAttribute(dom::DOMStringView name) const noexcept;
     /// @brief The element's @p name attribute, or (for ARIA attributes) its custom element's default;
@@ -440,6 +445,8 @@ namespace krys::boo::ax
     KRYS_NODISCARD dom::DOMString GetAttribute(dom::DOMStringView name) const noexcept;
     /// @brief `GetAttribute` with leading and trailing ASCII whitespace stripped.
     KRYS_NODISCARD dom::DOMString GetAttributeTrimmed(dom::DOMStringView name) const noexcept;
+    /// @brief `GetAttribute` as an integer, 0 if it isn't one.
+    KRYS_NODISCARD int32 IntegralAttribute(dom::DOMStringView name) const noexcept;
     /// @brief Whether the element has any global ARIA state or property.
     KRYS_NODISCARD bool SupportsARIAAttributes() const noexcept;
 
@@ -554,6 +561,187 @@ namespace krys::boo::ax
     /// @brief The explicit orientation, or else the role's default.
     KRYS_NODISCARD AccessibilityOrientation Orientation() const noexcept;
 
+    // Tables, rows and cells.
+
+    /// @brief Whether the object is a table (a `table` element, a table renderer or a table role), whether
+    /// or not it's exposed as one.
+    KRYS_NODISCARD virtual bool IsTable() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether the object is a table that's exposed as one: an ARIA table, or a data table rather
+    /// than one for layout.
+    KRYS_NODISCARD virtual bool IsExposableTable() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether the object has the `grid`, `table` or `treegrid` role.
+    KRYS_NODISCARD virtual bool IsAriaTable() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsTableRow() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether the object is a row of an exposed table.
+    KRYS_NODISCARD virtual bool IsExposedTableRow() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether the object has the `row` role.
+    KRYS_NODISCARD virtual bool IsARIAGridRow() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsTableCell() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether the object is a cell of an exposed table.
+    KRYS_NODISCARD virtual bool IsExposedTableCell() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsColumnHeader() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsRowHeader() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD bool IsTableColumn() const noexcept
+    {
+      return _role == AccessibilityRole::Column;
+    }
+    KRYS_NODISCARD bool IsTreeGrid() const noexcept
+    {
+      return _role == AccessibilityRole::TreeGrid;
+    }
+    KRYS_NODISCARD bool HasGridRole() const noexcept
+    {
+      return _role == AccessibilityRole::Grid || _role == AccessibilityRole::TreeGrid;
+    }
+    KRYS_NODISCARD bool HasCellRole() const noexcept;
+    KRYS_NODISCARD bool HasCellOrRowRole() const noexcept
+    {
+      return HasCellRole() || _role == AccessibilityRole::Row;
+    }
+    /// @brief Whether the object is a `thead`, `tbody` or `tfoot`.
+    KRYS_NODISCARD bool HasRowGroupTag() const noexcept;
+
+    /// @brief A row's or cell's table.
+    KRYS_NODISCARD virtual AccessibilityObject *ParentTable() const noexcept
+    {
+      return nullptr;
+    }
+    /// @brief The nearest exposed table above the object (or the object itself, if @p includeSelf).
+    KRYS_NODISCARD AccessibilityObject *ExposedTableAncestor(bool includeSelf = false) const noexcept;
+    /// @brief A table's rows.
+    KRYS_NODISCARD virtual AccessibilityChildrenVector Rows() noexcept
+    {
+      return {};
+    }
+    /// @brief A table's columns (which aren't in the tree).
+    KRYS_NODISCARD virtual AccessibilityChildrenVector Columns() noexcept
+    {
+      return {};
+    }
+    /// @brief A table's cells, row by row.
+    KRYS_NODISCARD virtual AccessibilityChildrenVector Cells() noexcept
+    {
+      return {};
+    }
+    KRYS_NODISCARD virtual uint32 RowCount() noexcept
+    {
+      return 0;
+    }
+    KRYS_NODISCARD virtual uint32 ColumnCount() noexcept
+    {
+      return 0;
+    }
+    /// @brief The table's cell covering the slot at @p column and @p row, if any.
+    KRYS_NODISCARD virtual AccessibilityObject *CellForColumnAndRow(uint32 column, uint32 row) noexcept
+    {
+      (void)column;
+      (void)row;
+      return nullptr;
+    }
+    /// @brief A table's column headers, together in an object that isn't in the tree.
+    KRYS_NODISCARD virtual AccessibilityObject *TableHeaderContainer() noexcept
+    {
+      return nullptr;
+    }
+    /// @brief A cell's column headers (the headers above it in its column), or a table's (each column's).
+    KRYS_NODISCARD AccessibilityChildrenVector ColumnHeaders() noexcept;
+    /// @brief A cell's row headers (the headers before it in its row), or a table's or row's (each row's).
+    KRYS_NODISCARD virtual AccessibilityChildrenVector RowHeaders() noexcept
+    {
+      return {};
+    }
+    /// @brief A column's header cell.
+    KRYS_NODISCARD AccessibilityObject *ColumnHeader() noexcept;
+    /// @brief A row's header cell: its first cell, if that's a `th` and the rest aren't; for a grid row, its
+    /// first row header.
+    KRYS_NODISCARD AccessibilityObject *RowHeader() noexcept;
+    /// @brief A table's `aria-rowcount`, if valid (-1 for an unknown count); 0 otherwise.
+    KRYS_NODISCARD virtual int32 AxRowCount() const noexcept
+    {
+      return 0;
+    }
+    /// @brief A table's `aria-colcount`, if valid (-1 for an unknown count); 0 otherwise.
+    KRYS_NODISCARD virtual int32 AxColumnCount() const noexcept
+    {
+      return 0;
+    }
+    /// @brief A row's or cell's `aria-rowindex` (a cell's falling back to its row's).
+    KRYS_NODISCARD virtual Maybe<uint32> AxRowIndex() const noexcept
+    {
+      return null;
+    }
+    /// @brief A row's or cell's `aria-colindex` (a cell's falling back to the one its row gives it).
+    KRYS_NODISCARD virtual Maybe<uint32> AxColumnIndex() const noexcept
+    {
+      return null;
+    }
+    KRYS_NODISCARD virtual dom::DOMString AxRowIndexText() const noexcept
+    {
+      return {};
+    }
+    KRYS_NODISCARD virtual dom::DOMString AxColumnIndexText() const noexcept
+    {
+      return {};
+    }
+    /// @brief A column's index in its table.
+    KRYS_NODISCARD virtual uint32 ColumnIndex() const noexcept
+    {
+      return 0;
+    }
+    /// @brief A cell's first row and the number of rows it spans.
+    KRYS_NODISCARD virtual Pair<uint32, uint32> RowIndexRange() const noexcept
+    {
+      return {0, 1};
+    }
+    /// @brief A cell's first column and the number of columns it spans.
+    KRYS_NODISCARD virtual Pair<uint32, uint32> ColumnIndexRange() const noexcept
+    {
+      return {0, 1};
+    }
+    /// @brief A cell's `scope`.
+    KRYS_NODISCARD dom::DOMString CellScope() const noexcept
+    {
+      return GetAttribute(u8"scope");
+    }
+    /// @brief The ID of a cell's nearest `thead`, `tbody` or `tfoot`.
+    KRYS_NODISCARD Maybe<AXID> RowGroupAncestorID() const noexcept;
+    KRYS_NODISCARD bool IsTableCellInSameRowGroup(const AccessibilityObject &otherTableCell) const noexcept;
+    /// @brief Brings a table's cell slots, and so its cells' indexes, up to date.
+    void EnsureCellIndexesUpToDate() noexcept
+    {
+      UpdateChildrenIfNecessary();
+    }
+
     // Geometry.
 
     /// @brief The object's bounds, in the root view's coordinates.
@@ -582,6 +770,12 @@ namespace krys::boo::ax
     KRYS_NODISCARD AccessibilityRole ButtonRoleType() const noexcept;
     KRYS_NODISCARD bool HasPopup() const noexcept;
     void ResetChildrenIndexInParent() noexcept;
+    /// @brief Whether the object's children are its own: a column's and a table header container's cells
+    /// are their rows', which set their index.
+    KRYS_NODISCARD bool ShouldSetChildIndexInParent() const noexcept
+    {
+      return _role != AccessibilityRole::Column && _role != AccessibilityRole::TableHeaderContainer;
+    }
 
   private:
     KRYS_NODISCARD bool IsIgnoredWithoutCache() const noexcept;

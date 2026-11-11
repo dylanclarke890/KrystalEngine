@@ -28,6 +28,7 @@
 
 #include "Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -192,7 +193,12 @@ namespace krys::boo::ax
       return;
     }
 
-    // FIXME: Exposed tables' rows, columns and header container (addTableChildrenAndCellSlots), with tables.
+    // An exposed table's children are its caption and rows (and its columns and header container).
+    if (IsExposableTable())
+    {
+      AddTableChildrenAndCellSlots();
+      return;
+    }
 
     auto *node = DynamicDowncast<dom::ContainerNode>(GetNode());
     auto *element = DynamicDowncast<dom::Element>(GetNode());
@@ -252,6 +258,24 @@ namespace krys::boo::ax
 
     // FIXME: aria-owned children (updateOwnedChildrenIfNecessary), with relations.
     _subtreeDirty = false;
+
+    // A row's aria-colindex gives its cells theirs, counting on from it (whether or not they're owned).
+    if (IsExposedTableRow())
+    {
+      if (auto columnIndex = AxColumnIndex())
+      {
+        int32 index = 0;
+        for (const auto &child : _children)
+        {
+          if (auto *cell = DynamicDowncast<AccessibilityNodeObject>(child.get()); cell && cell->IsTableCell())
+          {
+            cell->SetAXColIndexFromRow(static_cast<int32>(*columnIndex) + index);
+          }
+          ++index;
+        }
+      }
+    }
+
     UpdateRoleAfterChildrenCreation();
   }
 
@@ -330,7 +354,14 @@ namespace krys::boo::ax
       return _ariaRole;
     }
 
-    // FIXME: Exposed tables and rows, with tables.
+    if (IsExposableTable())
+    {
+      return AccessibilityRole::Table;
+    }
+    if (IsExposedTableRow())
+    {
+      return AccessibilityRole::Row;
+    }
 
     auto *node = renderer->GetNode();
     if (renderer->IsRenderListItem())
@@ -411,6 +442,17 @@ namespace krys::boo::ax
 
     auto roleFromNode = DetermineAccessibilityRoleFromNode(
       renderer->IsRenderInline() ? TreatStyleFormatGroupAsInline::Yes : TreatStyleFormatGroupAsInline::No);
+
+    // A cell is a text group unless its table is exposed.
+    if (IsTableCell())
+    {
+      auto *parentTable = ParentTable();
+      if (parentTable && parentTable->IsExposableTable())
+      {
+        return parentTable->HasGridRole() ? AccessibilityRole::GridCell : AccessibilityRole::Cell;
+      }
+    }
+
     if (roleFromNode != AccessibilityRole::Unknown)
     {
       return roleFromNode;
@@ -458,7 +500,25 @@ namespace krys::boo::ax
       return true;
     }
 
-    // FIXME: Table cells and rows (exposed when their table is), with tables.
+    // Before the presentational role check: an exposed table's cells are in the tree even with a
+    // presentational role.
+    if (IsTableCell())
+    {
+      // Anonymous cells (display: table-cell) outside a table are ignored.
+      auto *parentTable = ParentTable();
+      auto *parentElement = parentTable ? parentTable->GetElement() : nullptr;
+      bool inTable = parentElement
+                     && (RenderObjectTagName(parentElement) == html::TagName::table
+                         || table_helpers::HasTableRole(*parentElement));
+      if (!inTable && !GetElement())
+      {
+        return true;
+      }
+      if (IsExposedTableCell())
+      {
+        return false;
+      }
+    }
 
     // A presentational role leaves the object out (its children stay).
     if (_ariaRole == AccessibilityRole::Presentational)
@@ -467,7 +527,7 @@ namespace krys::boo::ax
     }
 
     // FIXME: Children of a tree that aren't tree items (isAllowedChildOfTree), with trees.
-    if (IsAccessibilityList())
+    if (IsAccessibilityList() || IsExposableTable())
     {
       return false;
     }
@@ -589,7 +649,11 @@ namespace krys::boo::ax
       return false;
     }
 
-    // FIXME: Objects between a table row and its cells (ignoredByRowAncestor), with tables.
+    // What's between an exposed row and its cells is ignored.
+    if (!IsTableCell() && CanHaveChildren() && IgnoredByRowAncestor())
+    {
+      return true;
+    }
 
     if (_ariaRole != AccessibilityRole::Unknown)
     {
@@ -711,8 +775,31 @@ namespace krys::boo::ax
     // FIXME: The contents of a checkbox's or radio button's label are part of the control
     // (controlForLabelElement), with relations.
 
+    if (IsExposedTableRow())
+    {
+      return IsRenderHidden() || _ariaRole == AccessibilityRole::Presentational;
+    }
+
     // By default, objects should be ignored so that the tree isn't filled with unnecessary items.
     return true;
+  }
+
+  bool AccessibilityRenderObject::IgnoredByRowAncestor() const noexcept
+  {
+    // A cell above the object (before a row) means it's a cell's contents; a table above it (before a row)
+    // means it could be a row, a row group or another container: neither is ignored.
+    for (auto *ancestor = ParentObject(); ancestor; ancestor = ancestor->ParentObject())
+    {
+      if (ancestor->IsTableCell() || ancestor->IsTable())
+      {
+        return false;
+      }
+      if (ancestor->IsExposedTableRow())
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   dom::DOMString AccessibilityRenderObject::StringValue() const noexcept

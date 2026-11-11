@@ -80,6 +80,9 @@ namespace krys::boo::ax
     void DetachRemoteParts(AccessibilityDetachmentType detachmentType) noexcept override;
 
   private:
+    /// @brief Whether an exposed row is above the object, with no cell or table between: what's between a
+    /// row and its cells is ignored.
+    KRYS_NODISCARD bool IgnoredByRowAncestor() const noexcept;
     /// @brief Updates the roles that depend on the children (a menu with no items, a list).
     void UpdateRoleAfterChildrenCreation() noexcept;
     /// @brief The list item's marker renderer, if this is an unignored list item with one.
