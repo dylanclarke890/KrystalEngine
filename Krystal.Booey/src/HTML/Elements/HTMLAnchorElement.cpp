@@ -33,6 +33,7 @@
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 
 #include "Krystal.Core/Text/ASCII.hpp"
 
@@ -44,16 +45,51 @@ namespace krys::boo::html
     SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
   }
 
+  namespace
+  {
+    KRYS_NODISCARD bool IsShiftKeyDown(const dom::Event &event) noexcept
+    {
+      const auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+      return mouseEvent && mouseEvent->ShiftKey();
+    }
+  }
+
   void HTMLAnchorElement::ActivationBehavior(dom::Event &event) noexcept
   {
+    if (!TreatLinkAsLive(IsShiftKeyDown(event)))
+    {
+      return;
+    }
     HyperlinkAlgorithms::ActivationBehavior(*this, event);
+  }
+
+  bool HTMLAnchorElement::TreatLinkAsLive(bool shiftKey) const noexcept
+  {
+    return !HasEditableStyle()
+           || IsEditableLinkLive(NodeDocument().GetSettings().EditableLinkBehavior, shiftKey);
+  }
+
+  bool HTMLAnchorElement::IsLiveLink() const noexcept
+  {
+    return css::IsLink(*this) && TreatLinkAsLive(_wasShiftKeyDownOnMouseDown);
   }
 
   void HTMLAnchorElement::DefaultEventHandler(dom::Event &event) noexcept
   {
     if (css::IsLink(*this))
     {
-      if (Focused() && HyperlinkAlgorithms::IsEnterKeyKeydownEvent(event))
+      // The shift key at the press is kept for the drag it may start; a drag comes after the mouse leaves, so
+      // it's cleared when the mouse comes over the link again.
+      if (event.Type() == EventNames::MouseDown)
+      {
+        _wasShiftKeyDownOnMouseDown = IsShiftKeyDown(event);
+      }
+      else if (event.Type() == EventNames::MouseOver)
+      {
+        _wasShiftKeyDownOnMouseDown = false;
+      }
+
+      if (Focused() && HyperlinkAlgorithms::IsEnterKeyKeydownEvent(event) && TreatLinkAsLive(false))
       {
         event.SetDefaultHandled();
         (void)DispatchSimulatedClick(&event);
@@ -62,7 +98,8 @@ namespace krys::boo::html
 
       // A click is followed as the activation behaviour; other buttons' clicks (the middle button opening the
       // link elsewhere) are followed here, and the host decides from the button.
-      if (event.Type() == EventNames::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
+      if (event.Type() == EventNames::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event)
+          && TreatLinkAsLive(IsShiftKeyDown(event)))
       {
         HyperlinkAlgorithms::FollowTheHyperlink(*this, event);
         return;

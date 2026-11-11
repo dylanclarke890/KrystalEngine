@@ -36,6 +36,9 @@ namespace krys::boo::html
 
   private:
     UniquePtr<dom::DOMTokenList> _relList;
+    /// @brief Whether the shift key was down when the mouse was last pressed on the link, for a drag it
+    /// starts.
+    bool _wasShiftKeyDownOnMouseDown {false};
 
   public:
     /// @brief Links start a selection only when editable.
@@ -49,6 +52,13 @@ namespace krys::boo::html
 
     /// @brief Follows a focused link on Enter (as a simulated click), and on a click of the middle button.
     void DefaultEventHandler(dom::Event &event) noexcept override;
+
+    /// @brief Whether the link is followed by a click with or without @p shiftKey: always outside editable
+    /// content, and inside it as `Settings::EditableLinkBehavior` says.
+    KRYS_NODISCARD bool TreatLinkAsLive(bool shiftKey) const noexcept;
+
+    /// @brief Whether the element is a link that acts as one for the last mouse press on it.
+    KRYS_NODISCARD bool IsLiveLink() const noexcept;
 
     /// @brief A link is interactive content.
     KRYS_NODISCARD bool IsInteractiveContent() const noexcept override;

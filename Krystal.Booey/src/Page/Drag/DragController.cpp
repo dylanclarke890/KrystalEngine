@@ -66,13 +66,11 @@
 
 namespace krys::boo
 {
-  // FIXME: Editable links, which are live only as the editable link behavior setting says, with that
-  // setting; data detector links, which are Cocoa's.
   bool IsDraggableLink(const dom::Element &element) noexcept
   {
     if (auto *anchorElement = DynamicDowncast<html::HTMLAnchorElement>(element))
     {
-      return anchorElement->HasAttribute(u8"href") && !anchorElement->HasEditableStyle();
+      return anchorElement->HasAttribute(u8"href") && anchorElement->IsLiveLink();
     }
     if (element.NamespaceURI().View() == infra::Namespaces::SVG && element.LocalName().View() == u8"a")
     {

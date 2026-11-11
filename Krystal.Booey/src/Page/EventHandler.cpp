@@ -1890,14 +1890,18 @@ namespace krys::boo
 
   bool EventHandler::UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) const noexcept
   {
-    (void)shiftKey;
     if (!node)
     {
       return false;
     }
 
-    // FIXME: Editable links (hasEditableStyle and the editable link behavior setting) and submit images.
-    return isOverLink;
+    // A link in editable content shows the hand only while it acts as a link.
+    bool editableLinkEnabled =
+      !node->HasEditableStyle()
+      || IsEditableLinkLive(node->NodeDocument().GetSettings().EditableLinkBehavior, shiftKey);
+    const auto *input = DynamicDowncast<html::HTMLInputElement>(*node);
+    bool isSubmitImage = input && input->IsImageButton();
+    return (isOverLink || isSubmitImage) && editableLinkEnabled;
   }
 
   Maybe<Cursor> EventHandler::SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept

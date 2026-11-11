@@ -168,8 +168,6 @@ namespace krys::boo::html
     // 7. Otherwise, follow the hyperlink created by element with hyperlinkSuffix set to hyperlinkSuffix and
     //    userInvolvement set to userInvolvement.
     // (Both follow it: the loader gives a download to the host.)
-    // FIXME: Links in editable content follow the editable link behaviour setting (Settings::
-    // editableLinkBehavior), once there is one; by default they're live, as here.
     FollowTheHyperlink(element, event, hyperlinkSuffix);
   }
 

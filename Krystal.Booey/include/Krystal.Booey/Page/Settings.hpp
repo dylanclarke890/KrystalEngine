@@ -10,6 +10,30 @@
 
 namespace krys::boo
 {
+  /// @brief Whether links in editable content act as links: whether a click follows one, a drag drags it and
+  /// the pointer over it is a hand. Outside editable content, links always do.
+  enum class EditableLinkBehavior : uint8
+  {
+    /// @brief Always.
+    AlwaysLive,
+    /// @brief Only with the shift key down.
+    OnlyLiveWithShiftKey,
+    /// @brief Never: a click places the caret in the link, as in browsers.
+    NeverLive,
+  };
+
+  /// @brief Whether a link in editable content acts as one under @p behavior, with or without @p shiftKey.
+  KRYS_NODISCARD constexpr bool IsEditableLinkLive(EditableLinkBehavior behavior, bool shiftKey) noexcept
+  {
+    switch (behavior)
+    {
+      case EditableLinkBehavior::AlwaysLive:           return true;
+      case EditableLinkBehavior::OnlyLiveWithShiftKey: return shiftKey;
+      case EditableLinkBehavior::NeverLive:            return false;
+    }
+    return false;
+  }
+
   /// @brief The settings values that style resolution reads.
   struct SettingsValues
   {
@@ -76,6 +100,8 @@ namespace krys::boo
     bool LangAttributeAwareFormControlUIEnabled {false};
     /// @brief The platform whose editing and selection conventions documents follow.
     boo::EditingBehaviorType EditingBehaviorType {boo::EditingBehaviorType::Windows};
+    /// @brief Whether links in editable content act as links.
+    boo::EditableLinkBehavior EditableLinkBehavior {boo::EditableLinkBehavior::NeverLive};
 
     SettingsValues Values;
 
