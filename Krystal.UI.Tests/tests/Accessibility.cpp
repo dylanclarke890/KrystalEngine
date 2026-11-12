@@ -306,6 +306,53 @@ namespace krys::ui::tests
       CHECK(window.Tree == nullptr);
     }
   }
+
+  TEST_CASE("View: accessibility of overlays", "[UI][Accessibility]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
+                  u8"<select id=menu aria-label=Fruit><option>Apple</option><option>Plum</option></select>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 50});
+    auto &tree = *window.Tree;
+    auto root = tree.Root();
+    auto menu = FindByName(tree, root, u8"Fruit");
+    REQUIRE(menu != 0);
+    auto pageChildren = tree.Children(root).size();
+    CHECK(FindByName(tree, root, u8"Plum") == 0);
+
+    // Opening the menu list's popup adds its page as the root's last child.
+    REQUIRE(tree.PerformAction(menu, pal::AccessibilityAction::Press));
+    auto *overlay = view.ShownOverlay();
+    REQUIRE(overlay);
+    view.UpdateRendering();
+    auto children = tree.Children(root);
+    REQUIRE(children.size() == pageChildren + 1);
+    auto popup = children.back();
+    CHECK(tree.Parent(popup) == root);
+    CHECK(window.HasEvent(root, pal::AccessibilityEvent::ChildrenChanged));
+    CHECK(window.HasEvent(popup, pal::AccessibilityEvent::MenuOpened));
+    auto plum = FindByName(tree, popup, u8"Plum");
+    REQUIRE(plum != 0);
+    CHECK(tree.Parent(plum) != 0);
+
+    // Its nodes are where the overlay is in the window, and hit testing finds them there.
+    auto bounds = tree.Node(plum)->Bounds;
+    CHECK(bounds.Y >= static_cast<float>(overlay->Rect().Y() + 50));
+    auto hit = tree.HitTest(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2);
+    CHECK((hit == plum || tree.Parent(hit) == plum));
+
+    // Closing it removes them.
+    overlay->Hide();
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(std::ranges::find(window.Removed, popup) != window.Removed.end());
+    CHECK(tree.Children(root).size() == pageChildren);
+    CHECK_FALSE(tree.Node(plum));
+    CHECK_FALSE(tree.Node(popup));
+  }
 #ifdef _WIN32
   namespace
   {

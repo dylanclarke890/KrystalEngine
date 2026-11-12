@@ -20,9 +20,16 @@ namespace krys::ui
     using boo::ax::AccessibilityRole;
     using boo::ax::AXNotification;
 
-    KRYS_NODISCARD pal::AccessibilityNodeID ID(const AccessibilityObject *object) noexcept
+    // An overlay's node IDs have the top bit set and the overlay's generation above its objects' IDs.
+    constexpr pal::AccessibilityNodeID OverlayNodeBit = 1ull << 63;
+    constexpr uint32 OverlayGenerationShift = 40;
+    constexpr pal::AccessibilityNodeID OverlayObjectIDMask = (1ull << OverlayGenerationShift) - 1;
+
+    KRYS_NODISCARD constexpr pal::AccessibilityNodeID OverlayNodeID(uint32 generation,
+                                                                    uint64 objectID) noexcept
     {
-      return object ? static_cast<pal::AccessibilityNodeID>(object->ObjectID()) : 0;
+      return OverlayNodeBit | (static_cast<pal::AccessibilityNodeID>(generation) << OverlayGenerationShift)
+             | (objectID & OverlayObjectIDMask);
     }
 
     KRYS_NODISCARD pal::AccessibilityRole ToPalRole(const AccessibilityObject &object) noexcept
@@ -224,6 +231,102 @@ namespace krys::ui
     }
   }
 
+  View *ViewAccessibility::OverlayView() const noexcept
+  {
+    auto *overlay = _view.ShownOverlay();
+    return overlay ? &overlay->ContentView() : nullptr;
+  }
+
+  boo::ax::AXObjectCache *ViewAccessibility::OverlayCache() const noexcept
+  {
+    auto *view = OverlayView();
+    return view && boo::ax::AXObjectCache::AccessibilityEnabled() ? view->Document().AxObjectCache()
+                                                                  : nullptr;
+  }
+
+  bool ViewAccessibility::IsInOverlay(const AccessibilityObject &object) const noexcept
+  {
+    auto *overlayCache = OverlayCache();
+    return overlayCache && object.AxObjectCache() == overlayCache;
+  }
+
+  pal::AccessibilityNodeID ViewAccessibility::ID(const AccessibilityObject *object) const noexcept
+  {
+    if (!object)
+    {
+      return 0;
+    }
+    auto id = static_cast<pal::AccessibilityNodeID>(object->ObjectID());
+    if (IsInOverlay(*object))
+    {
+      krys_debug_assert(id <= OverlayObjectIDMask);
+      return OverlayNodeID(_overlayGeneration, id);
+    }
+    return id;
+  }
+
+  Pair<View *, boo::IntPoint>
+    ViewAccessibility::ViewAndOrigin(const AccessibilityObject &object) const noexcept
+  {
+    if (IsInOverlay(object))
+    {
+      auto location = _view.ShownOverlay()->Rect().Location();
+      return {OverlayView(), boo::IntPoint(_origin.X() + location.X(), _origin.Y() + location.Y())};
+    }
+    return {&_view, _origin};
+  }
+
+  void ViewAccessibility::OverlayShown(Overlay &overlay) noexcept
+  {
+    // The new overlay's nodes are new nodes, whatever its objects' IDs.
+    ++_overlayGeneration;
+    if (!_window || !_window->IsAccessibilityActive())
+    {
+      return;
+    }
+    // The overlay's page joins the tree as the root's last child.
+    _window->RaiseAccessibilityEvent(Root(), pal::AccessibilityEvent::ChildrenChanged);
+    auto *cache = OverlayCache();
+    if (!cache)
+    {
+      return;
+    }
+    if (auto *root = cache->RootObject())
+    {
+      _window->RaiseAccessibilityEvent(ID(root), pal::AccessibilityEvent::MenuOpened);
+    }
+    if (overlay.IsModal())
+    {
+      if (auto *focused = cache->FocusedObject())
+      {
+        _window->RaiseAccessibilityEvent(ID(focused), pal::AccessibilityEvent::Focused);
+      }
+    }
+  }
+
+  void ViewAccessibility::OverlayHidden(Overlay &overlay) noexcept
+  {
+    if (!_window || !_window->IsAccessibilityActive())
+    {
+      return;
+    }
+    // The overlay's nodes go with it (its page may outlive it, but isn't exposed).
+    auto *cache = boo::ax::AXObjectCache::AccessibilityEnabled()
+                    ? overlay.ContentView().Document().AxObjectCache()
+                    : nullptr;
+    if (auto *root = cache ? cache->RootObject() : nullptr)
+    {
+      auto id = OverlayNodeID(_overlayGeneration, static_cast<uint64>(root->ObjectID()));
+      _window->RaiseAccessibilityEvent(id, pal::AccessibilityEvent::MenuClosed);
+      _window->AccessibilityNodeRemoved(id);
+    }
+    _window->RaiseAccessibilityEvent(Root(), pal::AccessibilityEvent::ChildrenChanged);
+    if (auto *focused = Cache() ? Cache()->FocusedObject() : nullptr)
+    {
+      _window->RaiseAccessibilityEvent(ID(focused), pal::AccessibilityEvent::Focused);
+    }
+  }
+
   boo::ax::AXObjectCache *ViewAccessibility::Cache() noexcept
   {
     // Assistive technology asking for the tree is what turns accessibility on.
@@ -237,7 +340,24 @@ namespace krys::ui
   AccessibilityObject *ViewAccessibility::Object(pal::AccessibilityNodeID node) noexcept
   {
     auto *cache = Cache();
-    auto *object = cache && node ? cache->ObjectForID(static_cast<boo::ax::AXID>(node)) : nullptr;
+    if (!cache || !node)
+    {
+      return nullptr;
+    }
+    AccessibilityObject *object = nullptr;
+    if (node & OverlayNodeBit)
+    {
+      // Only the shown overlay's nodes are still nodes.
+      auto *overlayCache = OverlayCache();
+      if (overlayCache && ((node & ~OverlayNodeBit) >> OverlayGenerationShift) == _overlayGeneration)
+      {
+        object = overlayCache->ObjectForID(static_cast<boo::ax::AXID>(node & OverlayObjectIDMask));
+      }
+    }
+    else
+    {
+      object = cache->ObjectForID(static_cast<boo::ax::AXID>(node));
+    }
     return object && !object->IsDetached() ? object : nullptr;
   }
 
@@ -246,13 +366,14 @@ namespace krys::ui
   {
     // The view and its scroll bars are in the view's coordinates; everything else is in the document's,
     // which the view is scrolled into.
+    auto [view, origin] = ViewAndOrigin(object);
     if (!object.IsScrollView() && object.Role() != AccessibilityRole::ScrollBar)
     {
-      auto scroll = _view.ScrollPosition();
+      auto scroll = view->ScrollPosition();
       x -= static_cast<float>(scroll.X());
       y -= static_cast<float>(scroll.Y());
     }
-    return {x + static_cast<float>(_origin.X()), y + static_cast<float>(_origin.Y()), width, height};
+    return {x + static_cast<float>(origin.X()), y + static_cast<float>(origin.Y()), width, height};
   }
 
   void ViewAccessibility::NotificationPosted(AccessibilityObject &object,
@@ -437,7 +558,16 @@ namespace krys::ui
   pal::AccessibilityNodeID ViewAccessibility::Parent(pal::AccessibilityNodeID node) noexcept
   {
     auto *object = Object(node);
-    return ID(object ? object->ParentObjectUnignored() : nullptr);
+    if (!object)
+    {
+      return 0;
+    }
+    // The overlay's page is the view's root's last child.
+    if (auto *overlayCache = OverlayCache(); overlayCache && object == overlayCache->RootObject())
+    {
+      return Root();
+    }
+    return ID(object->ParentObjectUnignored());
   }
 
   List<pal::AccessibilityNodeID> ViewAccessibility::Children(pal::AccessibilityNodeID node) noexcept
@@ -449,12 +579,30 @@ namespace krys::ui
       {
         children.push_back(ID(child.get()));
       }
+      if (auto *overlayCache = OverlayCache(); overlayCache && object == Cache()->RootObject())
+      {
+        if (auto *overlayRoot = overlayCache->RootObject())
+        {
+          children.push_back(ID(overlayRoot));
+        }
+      }
     }
     return children;
   }
 
   pal::AccessibilityNodeID ViewAccessibility::Focus() noexcept
   {
+    // A modal overlay has the focus.
+    if (auto *overlay = _view.ShownOverlay(); overlay && overlay->IsModal())
+    {
+      if (auto *overlayCache = OverlayCache())
+      {
+        if (auto *focused = overlayCache->FocusedObject())
+        {
+          return ID(focused);
+        }
+      }
+    }
     auto *cache = Cache();
     return ID(cache ? cache->FocusedObject() : nullptr);
   }
@@ -462,32 +610,52 @@ namespace krys::ui
   pal::AccessibilityNodeID ViewAccessibility::HitTest(float x, float y) noexcept
   {
     auto *cache = Cache();
-    auto *root = cache ? cache->RootObject() : nullptr;
-    if (!root)
+    if (!cache)
     {
       return 0;
     }
     boo::IntPoint viewPoint(static_cast<int32>(std::floor(x)) - _origin.X(),
                             static_cast<int32>(std::floor(y)) - _origin.Y());
+    // The overlay is over the page.
+    if (auto *overlay = _view.ShownOverlay(); overlay && overlay->Rect().Contains(viewPoint))
+    {
+      if (auto *overlayCache = OverlayCache())
+      {
+        auto location = overlay->Rect().Location();
+        return ID(HitTestIn(*overlayCache, overlay->ContentView(),
+                            boo::IntPoint(viewPoint.X() - location.X(), viewPoint.Y() - location.Y())));
+      }
+    }
+    return ID(HitTestIn(*cache, _view, viewPoint));
+  }
+
+  AccessibilityObject *ViewAccessibility::HitTestIn(boo::ax::AXObjectCache &cache, View &view,
+                                                    const boo::IntPoint &viewPoint) noexcept
+  {
+    auto *root = cache.RootObject();
+    if (!root)
+    {
+      return nullptr;
+    }
     // The view's scroll bars are in its coordinates; the page is in the document's.
     for (const auto &child : root->Children())
     {
       if (child->Role() == AccessibilityRole::ScrollBar
           && child->ElementRect().Contains(boo::LayoutPoint(viewPoint)))
       {
-        return ID(child.get());
+        return child.get();
       }
     }
     auto *webArea =
       root->IsScrollView() ? DynamicDowncast<boo::ax::AccessibilityScrollView>(*root)->WebAreaObject() : root;
     if (!webArea)
     {
-      return 0;
+      return nullptr;
     }
-    auto scroll = _view.ScrollPosition();
+    auto scroll = view.ScrollPosition();
     auto *hit =
       webArea->AccessibilityHitTest(boo::IntPoint(viewPoint.X() + scroll.X(), viewPoint.Y() + scroll.Y()));
-    return ID(hit ? hit : webArea);
+    return hit ? hit : webArea;
   }
 
   List<pal::AccessibilityNodeID> ViewAccessibility::SelectedChildren(pal::AccessibilityNodeID node) noexcept
@@ -631,10 +799,11 @@ namespace krys::ui
       return bounds;
     }
     // The rects are in the viewport's coordinates, so only the view's origin moves them.
+    auto origin = ViewAndOrigin(*object).second;
     for (const auto &rect : boo::RenderObject::ClientBorderAndTextRects(*simpleRange))
     {
-      bounds.push_back({rect.X() + static_cast<float>(_origin.X()),
-                        rect.Y() + static_cast<float>(_origin.Y()), rect.Width(), rect.Height()});
+      bounds.push_back({rect.X() + static_cast<float>(origin.X()), rect.Y() + static_cast<float>(origin.Y()),
+                        rect.Width(), rect.Height()});
     }
     return bounds;
   }

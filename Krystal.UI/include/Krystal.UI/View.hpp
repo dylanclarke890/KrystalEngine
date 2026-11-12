@@ -198,6 +198,9 @@ namespace krys::ui
     bool _pointerLocked {false};
     /// @brief Exposes the page to assistive technology through the host's window, while attached.
     UniquePtr<ViewAccessibility> _accessibility;
+    /// @brief The view whose overlay this view is the content of, while it's shown: its accessibility gets
+    /// this view's notifications.
+    View *_overlayOwner {nullptr};
 
     /// @brief A drag that started in the page, which the view runs until it's dropped or cancelled.
     struct ActiveDrag
@@ -633,7 +636,7 @@ namespace krys::ui
     /// @brief Exposes the page to assistive technology through @p window, whose client area has the view's
     /// top left at @p origin. The page's accessibility tree is built when assistive technology first asks for
     /// it.
-    /// @note Overlays (a menu list's popup, the pickers) aren't exposed yet.
+    /// @note A shown overlay's page (a menu list's popup, a picker) is the tree's root's last child.
     void AttachAccessibility(pal::IWindow &window, const boo::IntPoint &origin = {}) noexcept;
     /// @brief Stops exposing the page to assistive technology.
     void DetachAccessibility() noexcept;

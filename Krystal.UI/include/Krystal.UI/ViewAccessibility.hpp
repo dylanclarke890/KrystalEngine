@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.PAL/Accessibility.hpp"
 
 namespace krys::pal
@@ -18,13 +19,16 @@ namespace krys::boo::ax
 
 namespace krys::ui
 {
+  class Overlay;
   class View;
 
   /// @brief Exposes a view's page to assistive technology through the window showing it: the page's
   /// accessibility tree (Booey's, turned on the first time it's asked for) as Krystal.PAL's nodes, with the
   /// page's notifications passed on as the window's events.
   /// @note Nodes are the page's accessibility objects, by ID; a node's bounds are in the window's client
-  /// area, where the view's top left is at the origin the host gives.
+  /// area, where the view's top left is at the origin the host gives. While an overlay (a menu list's
+  /// popup, a picker) is shown, its page's tree is the root's last child, its nodes' IDs marked as the
+  /// overlay's; a modal one has the focus and is hit first.
   class ViewAccessibility final : public pal::IAccessibilityTree
   {
     KRYS_NON_COPY_MOVABLE(ViewAccessibility);
@@ -33,6 +37,8 @@ namespace krys::ui
     View &_view;
     pal::IWindow *_window {nullptr};
     boo::IntPoint _origin;
+    /// @brief Counts the overlays shown, so a node of one that's gone isn't taken for one of the next.
+    uint32 _overlayGeneration {0};
 
   public:
     explicit ViewAccessibility(View &view) noexcept;
@@ -59,6 +65,10 @@ namespace krys::ui
     void TextChanged(boo::ax::AccessibilityObject &object, boo::ax::AXTextChange change, uint64 offset,
                      utf8_stringview text) noexcept;
     void ObjectDetached(boo::ax::AccessibilityObject &object) noexcept;
+    /// @brief The view showed @p overlay: its page's tree joins the view's, and its notifications come here.
+    void OverlayShown(Overlay &overlay) noexcept;
+    /// @brief The view hid @p overlay.
+    void OverlayHidden(Overlay &overlay) noexcept;
 
     // pal::IAccessibilityTree.
 
@@ -83,10 +93,24 @@ namespace krys::ui
   private:
     /// @brief The page's accessibility tree, turning accessibility on if it's off.
     KRYS_NODISCARD boo::ax::AXObjectCache *Cache() noexcept;
+    /// @brief The shown overlay's page's view, if there's an overlay.
+    KRYS_NODISCARD View *OverlayView() const noexcept;
+    /// @brief The shown overlay's page's accessibility tree, if there's an overlay.
+    KRYS_NODISCARD boo::ax::AXObjectCache *OverlayCache() const noexcept;
+    /// @brief Whether @p object is in the shown overlay's page.
+    KRYS_NODISCARD bool IsInOverlay(const boo::ax::AccessibilityObject &object) const noexcept;
+    /// @brief @p object's node ID (marked as the overlay's for an object in the overlay); 0 for none.
+    KRYS_NODISCARD pal::AccessibilityNodeID ID(const boo::ax::AccessibilityObject *object) const noexcept;
     /// @brief The unignored object for @p node; null if it's gone.
     KRYS_NODISCARD boo::ax::AccessibilityObject *Object(pal::AccessibilityNodeID node) noexcept;
+    /// @brief The view @p object's page is in, and its top left in the window's client area.
+    KRYS_NODISCARD Pair<View *, boo::IntPoint>
+      ViewAndOrigin(const boo::ax::AccessibilityObject &object) const noexcept;
     /// @brief @p rect (in the page's coordinates for @p object) in the window's client area.
     KRYS_NODISCARD pal::AccessibilityRect ToWindow(const boo::ax::AccessibilityObject &object, float x,
                                                    float y, float width, float height) const noexcept;
+    /// @brief The deepest unignored object at @p viewPoint (in @p view's coordinates) in @p cache's tree.
+    KRYS_NODISCARD boo::ax::AccessibilityObject *HitTestIn(boo::ax::AXObjectCache &cache, View &view,
+                                                           const boo::IntPoint &viewPoint) noexcept;
   };
 }

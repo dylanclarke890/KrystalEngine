@@ -223,28 +223,42 @@ namespace krys::ui
     void PostAccessibilityNotification(boo::ax::AccessibilityObject &object,
                                        boo::ax::AXNotification notification) noexcept override
     {
-      if (_view && _view->_accessibility)
+      if (auto *accessibility = Accessibility())
       {
-        _view->_accessibility->NotificationPosted(object, notification);
+        accessibility->NotificationPosted(object, notification);
       }
     }
 
     void AccessibilityObjectDetached(boo::ax::AccessibilityObject &object,
                                      boo::ax::AccessibilityDetachmentType) noexcept override
     {
-      if (_view && _view->_accessibility)
+      if (auto *accessibility = Accessibility())
       {
-        _view->_accessibility->ObjectDetached(object);
+        accessibility->ObjectDetached(object);
       }
     }
 
     void PostAccessibilityTextChange(boo::ax::AccessibilityObject &object, boo::ax::AXTextChange change,
                                      uint64 offset, utf8_stringview text) noexcept override
     {
-      if (_view && _view->_accessibility)
+      if (auto *accessibility = Accessibility())
       {
-        _view->_accessibility->TextChanged(object, change, offset, text);
+        accessibility->TextChanged(object, change, offset, text);
       }
+    }
+
+    /// @brief What exposes the page: the view's, or for an overlay's page, its owner's.
+    KRYS_NODISCARD ViewAccessibility *Accessibility() const noexcept
+    {
+      if (!_view)
+      {
+        return nullptr;
+      }
+      if (_view->_accessibility)
+      {
+        return _view->_accessibility.get();
+      }
+      return _view->_overlayOwner ? _view->_overlayOwner->_accessibility.get() : nullptr;
     }
 
     void SetView(View *view) noexcept
@@ -935,9 +949,18 @@ namespace krys::ui
       RefPtr<Overlay> previous = _overlay;
       previous->Hide();
     }
+    bool isNew = _overlay.get() != &overlay;
     _overlay = ShareRefPtr(&overlay);
     _pageOwnsPress = _buttons != 0;
     _needsPaint = true;
+    if (isNew)
+    {
+      overlay.ContentView()._overlayOwner = this;
+      if (_accessibility)
+      {
+        _accessibility->OverlayShown(overlay);
+      }
+    }
   }
 
   void View::OverlayHidden(Overlay &overlay) noexcept
@@ -946,6 +969,11 @@ namespace krys::ui
     {
       _overlay = nullptr;
       _needsPaint = true;
+      overlay.ContentView()._overlayOwner = nullptr;
+      if (_accessibility)
+      {
+        _accessibility->OverlayHidden(overlay);
+      }
     }
   }
 
