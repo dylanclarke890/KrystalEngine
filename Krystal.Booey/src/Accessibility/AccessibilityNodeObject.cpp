@@ -35,7 +35,9 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -47,6 +49,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp"
@@ -71,6 +74,8 @@
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
@@ -251,9 +256,8 @@ namespace krys::boo::ax
         // (The result is a flat string: whitespace collapsed and trimmed.)
         if (_kind == Kind::Description)
         {
-          // A description is the text of the elements aria-describedby refers to (step 2B for descriptions).
-          // FIXME: aria-description, and the host language's description (title when the name didn't use it),
-          // with descriptions.
+          // A description is the text of the elements aria-describedby refers to (step 2B for descriptions);
+          // AccessibleDescription falls back to aria-description and the host language's.
           auto *element = DynamicDowncast<dom::Element>(_root);
           _visited.insert(&_root);
           if (!element)
@@ -494,10 +498,23 @@ namespace krys::boo::ax
         {
           return object.StringValue();
         }
-        // FIXME: The chosen option of an ARIA listbox (aria-selected), with list boxes.
+        // (Like Chrome, a list box that has several chosen options gives all their names.)
         if (object.IsListBox())
         {
-          return {};
+          dom::DOMString chosen;
+          for (const auto &option : const_cast<AccessibilityObject &>(object).SelectedChildren())
+          {
+            auto name = option->AccessibleName();
+            if (!name.empty())
+            {
+              if (!chosen.empty())
+              {
+                chosen += u8' ';
+              }
+              chosen += name;
+            }
+          }
+          return chosen;
         }
         // 2C. ... range: if the embedded control has aria-valuetext, return its value; otherwise, if it has
         //     aria-valuenow, return its value; otherwise, use the value as specified by a host language
@@ -762,8 +779,11 @@ namespace krys::boo::ax
       {
         // 2F.i. Set the accumulated text to the empty string.
         dom::DOMString accumulated;
-        // 2F.ii. Name From Generated Content: ...
-        // FIXME: ::before and ::after content, with pseudo-element objects.
+        // 2F.ii. Name From Generated Content: Set the result to the empty string. For each of the current
+        //        node's ::before and ::after pseudo elements: ... If the pseudo element has an alternative
+        //        text, use it; otherwise, its textual content. Prepend ::before's result and append
+        //        ::after's to the accumulated text (block-level ones separated by a space).
+        auto [before, after] = GeneratedContentText(element);
 
         // 2F.iii. Determine Child Nodes: Set the set of child nodes to contain the children of the current
         //         node and append the nodes specified by aria-owns on the current node.
@@ -808,7 +828,46 @@ namespace krys::boo::ax
             accumulated += u8' ';
           }
         }
-        return accumulated;
+        return before + accumulated + after;
+      }
+
+      /// @brief The text of @p element's `::before` and `::after` content (their CSS alt text where given),
+      /// with a space around a block-level one.
+      KRYS_NODISCARD static Pair<dom::DOMString, dom::DOMString>
+        GeneratedContentText(const dom::Element &element) noexcept
+      {
+        auto textOf = [](const dom::PseudoElement *pseudo) -> dom::DOMString
+        {
+          auto *renderer = pseudo ? pseudo->Renderer() : nullptr;
+          if (!renderer)
+          {
+            return {};
+          }
+          dom::DOMString text;
+          for (auto *descendant = renderer->FirstChildSlow(); descendant;
+               descendant = descendant->NextInPreOrder(renderer))
+          {
+            if (auto *fragment = DynamicDowncast<RenderTextFragment>(*descendant);
+                fragment && fragment->AltText())
+            {
+              text += *fragment->AltText();
+            }
+            else if (auto *renderText = DynamicDowncast<RenderText>(*descendant))
+            {
+              text += renderText->Text();
+            }
+            else if (auto *image = DynamicDowncast<RenderImage>(*descendant))
+            {
+              text += image->AltText();
+            }
+          }
+          if (!text.empty() && !renderer->IsInline())
+          {
+            text = u8' ' + text + u8' ';
+          }
+          return text;
+        };
+        return {textOf(element.BeforePseudoElement()), textOf(element.AfterPseudoElement())};
       }
     };
   }
@@ -928,7 +987,7 @@ namespace krys::boo::ax
     }
     if (auto *area = DynamicDowncast<html::HTMLAreaElement>(GetNode()))
     {
-      // FIXME: Working the role out again when the area's URL changes.
+      // (The cache works the role out again when the href changes.)
       return !area->Href().empty() ? AccessibilityRole::Link : AccessibilityRole::Generic;
     }
 
@@ -1393,8 +1452,44 @@ namespace krys::boo::ax
                || style->UsedVisibility() != Visibility::Visible);
   }
 
+  bool AccessibilityNodeObject::IsValidTree() const noexcept
+  {
+    // https://w3c.github.io/aria/#tree: a tree's children are tree items, or groups of them.
+    auto *node = GetNode();
+    if (!node)
+    {
+      return false;
+    }
+    List<dom::Node *> queue;
+    for (auto *child = node->FirstChild(); child; child = child->NextSibling())
+    {
+      queue.push_back(child);
+    }
+    for (size_t index = 0; index < queue.size(); ++index)
+    {
+      auto *element = DynamicDowncast<dom::Element>(queue[index]);
+      if (!element || table_helpers::HasRole(*element, u8"treeitem"))
+      {
+        continue;
+      }
+      if (!table_helpers::HasRole(*element, u8"group") && !table_helpers::HasRole(*element, u8"presentation"))
+      {
+        return false;
+      }
+      for (auto *child = element->FirstChild(); child; child = child->NextSibling())
+      {
+        queue.push_back(child);
+      }
+    }
+    return true;
+  }
+
   bool AccessibilityNodeObject::ComputeIsIgnored() const noexcept
   {
+    if (IsTree())
+    {
+      return IsIgnoredByDefault();
+    }
     auto *node = GetNode();
     if (!node)
     {
@@ -1766,9 +1861,13 @@ namespace krys::boo::ax
     {
       return false;
     }
-    // FIXME: A web area is focused when its frame's selection is focused and active (the document isn't
-    // focusable), with the selection.
-    return focusedElement == node;
+    if (focusedElement == node)
+    {
+      return true;
+    }
+    // A web area is the document, which isn't focusable: it's focused when its selection is focused and
+    // active.
+    return Role() == AccessibilityRole::WebArea && node->NodeDocument().Selection().IsFocusedAndActive();
   }
 
   bool AccessibilityNodeObject::IsEnabled() const noexcept
@@ -1864,8 +1963,25 @@ namespace krys::boo::ax
     {
       return option->Selected();
     }
-    // FIXME: Selected tabs (isTabItemSelected) and the selection of ARIA grids, with them.
-    return EqualsIgnoringCase(GetAttribute(u8"aria-selected"), u8"true");
+    if (EqualsIgnoringCase(GetAttribute(u8"aria-selected"), u8"true"))
+    {
+      return true;
+    }
+    if (IsTabItem() && IsTabItemSelected())
+    {
+      return true;
+    }
+    // Assistive technologies treat the focused or active menu item as the selected one.
+    if (IsMenuItem())
+    {
+      if (IsFocused())
+      {
+        return true;
+      }
+      auto *parent = ParentObjectUnignored();
+      return parent && parent->ActiveDescendant() == this;
+    }
+    return false;
   }
 
   bool AccessibilityNodeObject::IsRequired() const noexcept
@@ -1879,8 +1995,16 @@ namespace krys::boo::ax
 
   bool AccessibilityNodeObject::IsMultiSelectable() const noexcept
   {
-    // FIXME: Grids and tree grids (multi-selectable unless aria-multiselectable is false) and tables (never),
-    // with tables.
+    // ARIA: tables don't support selection; grids and tree grids are multi-selectable unless
+    // aria-multiselectable says otherwise.
+    if (HasGridRole())
+    {
+      return !EqualsIgnoringCase(GetAttribute(u8"aria-multiselectable"), u8"false");
+    }
+    if (IsTable())
+    {
+      return false;
+    }
     auto multiSelectable = GetAttribute(u8"aria-multiselectable");
     if (EqualsIgnoringCase(multiSelectable, u8"true"))
     {
@@ -1894,14 +2018,71 @@ namespace krys::boo::ax
     return select && select->Multiple();
   }
 
+  namespace
+  {
+    /// @brief The popover @p node (a button) shows and hides, if it's one whose expanded state is the
+    /// popover's: a `commandfor` popover it sends a popover command, or (without `commandfor`) its
+    /// `popovertarget`. HTML-AAM maps both to `aria-expanded`.
+    KRYS_NODISCARD RefPtr<dom::Element> ExpandedStatePopover(const dom::Node *node) noexcept
+    {
+      if (auto *button = DynamicDowncast<html::HTMLButtonElement>(node))
+      {
+        if (auto target = button->CommandForElement())
+        {
+          switch (button->GetCommandType())
+          {
+            case dom::CommandType::ShowPopover:
+            case dom::CommandType::HidePopover:
+            case dom::CommandType::TogglePopover:
+              if (target->GetPopoverState() != dom::PopoverState::None)
+              {
+                return target;
+              }
+              return nullptr;
+            default: return nullptr;
+          }
+        }
+      }
+      if (auto *control = DynamicDowncast<html::HTMLFormControlElement>(node))
+      {
+        return control->PopoverTargetElement();
+      }
+      return nullptr;
+    }
+  }
+
   bool AccessibilityNodeObject::SupportsExpanded() const noexcept
   {
-    if (HTMLTagNameOf(GetNode()) == TagName::details || Role() == AccessibilityRole::Summary)
+    if (ExpandedStatePopover(GetNode()) || HTMLTagNameOf(GetNode()) == TagName::details
+        || Role() == AccessibilityRole::Summary)
     {
       return true;
     }
-    // FIXME: Pop-up buttons and the popover invokers (popovertarget, commandfor), with them.
-    return HasAttribute(u8"aria-expanded");
+    // Undefined values aren't exposed, and only the roles ARIA allows aria-expanded on support it.
+    auto expanded = GetAttribute(u8"aria-expanded");
+    bool hasValidValue = EqualsIgnoringCase(expanded, u8"true") || EqualsIgnoringCase(expanded, u8"false");
+    if (IsColumnHeader() || IsRowHeader())
+    {
+      return hasValidValue;
+    }
+    switch (Role())
+    {
+      case AccessibilityRole::Details:          return true;
+      case AccessibilityRole::Button:
+      case AccessibilityRole::Checkbox:
+      case AccessibilityRole::ComboBox:
+      case AccessibilityRole::GridCell:
+      case AccessibilityRole::Link:
+      case AccessibilityRole::MenuItem:
+      case AccessibilityRole::MenuItemCheckbox:
+      case AccessibilityRole::MenuItemRadio:
+      case AccessibilityRole::Row:
+      case AccessibilityRole::Switch:
+      case AccessibilityRole::Tab:
+      case AccessibilityRole::TreeItem:
+      case AccessibilityRole::WebApplication:   return hasValidValue;
+      default:                                  return false;
+    }
   }
 
   bool AccessibilityNodeObject::IsExpanded() const noexcept
@@ -1916,6 +2097,14 @@ namespace krys::boo::ax
       // A summary is expanded when its details is open.
       auto *details = node ? node->ParentElement() : nullptr;
       return details && HTMLTagNameOf(details) == TagName::details && details->HasAttribute(u8"open");
+    }
+    if (!SupportsExpanded())
+    {
+      return false;
+    }
+    if (auto popover = ExpandedStatePopover(node))
+    {
+      return popover->IsPopoverShowing();
     }
     return EqualsIgnoringCase(GetAttribute(u8"aria-expanded"), u8"true");
   }
@@ -2090,8 +2279,24 @@ namespace krys::boo::ax
         return DynamicDowncast<dom::Element>(*node);
       default: break;
     }
-    // FIXME: An ancestor with a click handler (clickableSelfOrAncestor), with event handler checks.
-    return AnchorElement();
+    if (auto *anchor = AnchorElement())
+    {
+      return anchor;
+    }
+    if (auto *clickable = ClickableSelfOrAncestor())
+    {
+      return clickable->GetElement();
+    }
+    return nullptr;
+  }
+
+  bool AccessibilityNodeObject::HasClickHandler() const noexcept
+  {
+    auto *element = GetElement();
+    return element
+           && (element->HasEventListener(dom::DOMStringAtom(EventNames::Click))
+               || element->HasEventListener(dom::DOMStringAtom(EventNames::MouseDown))
+               || element->HasEventListener(dom::DOMStringAtom(EventNames::MouseUp)));
   }
 
   void AccessibilityNodeObject::SetFocused(bool focused) noexcept
@@ -2258,13 +2463,27 @@ namespace krys::boo::ax
 
   dom::DOMString AccessibilityNodeObject::AccessibleName() const noexcept
   {
+    // A web area (the document's view, which has no node) is named by the html element's aria-label, or else
+    // the document's title. (WebKit's order; a frame's web area would be named by its owner element first.)
+    if (auto *document = IsWebArea() ? GetDocument() : nullptr)
+    {
+      if (auto root = document->DocumentElement())
+      {
+        if (auto label = StringAlgorithms::StripAndCollapseASCIIWhitespace(
+              AttributeWithDefaultARIA(*root, u8"aria-label"));
+            !label.empty())
+        {
+          return label;
+        }
+      }
+      return document->Title();
+    }
     auto *node = GetNode();
     auto *cache = AxObjectCache();
     if (!node || !cache)
     {
       return {};
     }
-    // FIXME: The web area's name (the document's title), with the web area's specialised parts.
     return TextAlternativeComputation(*cache, TextAlternativeComputation::Kind::Name, *node).Compute();
   }
 
@@ -2276,7 +2495,31 @@ namespace krys::boo::ax
     {
       return {};
     }
-    return TextAlternativeComputation(*cache, TextAlternativeComputation::Kind::Description, *node).Compute();
+    // HTML-AAM's accessible description: aria-describedby, then aria-description, then the title if it isn't
+    // the name.
+    // https://w3c.github.io/html-aam/#accdesc-computation
+    auto description =
+      TextAlternativeComputation(*cache, TextAlternativeComputation::Kind::Description, *node).Compute();
+    if (!description.empty())
+    {
+      return description;
+    }
+    if (auto ariaDescription =
+          StringAlgorithms::StripAndCollapseASCIIWhitespace(GetAttribute(u8"aria-description"));
+        !ariaDescription.empty())
+    {
+      return ariaDescription;
+    }
+    if (Is<svg::SVGElement>(*node))
+    {
+      return {};
+    }
+    auto title = StringAlgorithms::StripAndCollapseASCIIWhitespace(GetAttribute(u8"title"));
+    if (!title.empty() && title != AccessibleName())
+    {
+      return title;
+    }
+    return {};
   }
 
   dom::DOMString AccessibilityNodeObject::StringValue() const noexcept
@@ -2310,16 +2553,39 @@ namespace krys::boo::ax
       {
         if (auto *option = DynamicDowncast<html::HTMLOptionElement>(select->ListItems()[index].get()))
         {
+          // The option's aria-label overrides its text.
+          if (auto label = AttributeWithDefaultARIA(*option, u8"aria-label"); !label.empty())
+          {
+            return dom::DOMString(StringAlgorithms::StripLeadingAndTrailingWhitespace(label));
+          }
           return option->Label();
         }
       }
       return {};
     }
+    // An ARIA combo box's value is its list box's selected option's (its name, if it has no value: an ARIA
+    // option has none, though WebKit leaves the combo box's value empty then).
+    if (IsComboBox())
+    {
+      for (const auto &child : const_cast<AccessibilityNodeObject *>(this)->Children())
+      {
+        if (child->IsListBox())
+        {
+          if (auto selected = child->SelectedChildren(); !selected.empty())
+          {
+            auto value = selected.front()->StringValue();
+            return value.empty() ? selected.front()->AccessibleName() : value;
+          }
+          break;
+        }
+      }
+    }
     if (IsNonNativeTextControl())
     {
       return Text();
     }
-    // FIXME: The values of ranges, colour wells and dates, with the specialised objects.
+    // (Range, colour and date inputs give their values above; ARIA ranges theirs through ValueForRange and
+    // ValueDescription.)
     return {};
   }
 
@@ -3641,8 +3907,41 @@ namespace krys::boo::ax
       }
       return {};
     }
-    // FIXME: A node's bounding box (its display: contents children's, or its nearest rendered ancestor's)
-    // (boundingBoxRect), with geometry.
-    return {};
+    // A display: contents element covers its children.
+    if (auto *element = GetElement(); element && element->HasDisplayContents())
+    {
+      LayoutRect contentsRect;
+      for (const auto &child : const_cast<AccessibilityNodeObject *>(this)->Children())
+      {
+        contentsRect.Unite(child->ElementRect());
+      }
+      if (!contentsRect.IsEmpty())
+      {
+        return contentsRect;
+      }
+    }
+    return NonEmptyAncestorBoundingBox();
+  }
+
+  LayoutRect AccessibilityNodeObject::NonEmptyAncestorBoundingBox() const noexcept
+  {
+    // An object with no box of its own gets one at its nearest rendered ancestor's position, as wide as it
+    // and about a line of text high, so it's clearly inside that ancestor.
+    for (auto *ancestor = ParentObject(); ancestor; ancestor = ancestor->ParentObject())
+    {
+      if (!ancestor->Renderer())
+      {
+        continue;
+      }
+      auto ancestorRect = ancestor->ElementRect();
+      if (ancestorRect.IsEmpty())
+      {
+        continue;
+      }
+      return {ancestorRect.Location(),
+              LayoutSize(ancestorRect.Width(), LayoutUnit(std::min(10.0f, ancestorRect.Height().ToFloat())))};
+    }
+    // A non-empty rect at the origin, failing that.
+    return {0, 0, 1, 1};
   }
 }

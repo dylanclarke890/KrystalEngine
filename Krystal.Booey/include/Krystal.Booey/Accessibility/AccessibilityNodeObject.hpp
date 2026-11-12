@@ -101,6 +101,7 @@ namespace krys::boo::ax
     }
 
     KRYS_NODISCARD bool IsFocused() const noexcept override;
+    KRYS_NODISCARD bool HasClickHandler() const noexcept override;
     KRYS_NODISCARD bool IsEnabled() const noexcept override;
     KRYS_NODISCARD bool IsChecked() const noexcept override;
     KRYS_NODISCARD bool IsIndeterminate() const noexcept override;
@@ -125,6 +126,9 @@ namespace krys::boo::ax
     KRYS_NODISCARD dom::DOMString AccessibleDescription() const noexcept override;
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
+    /// @brief A box for an object with none of its own: at its nearest rendered ancestor's position, as wide
+    /// as it and at most 10 high.
+    KRYS_NODISCARD LayoutRect NonEmptyAncestorBoundingBox() const noexcept;
 
     /// @brief Whether the node is an `input` or `textarea` that edits text.
     KRYS_NODISCARD bool IsNativeTextControl() const noexcept;
@@ -159,6 +163,9 @@ namespace krys::boo::ax
     /// @brief Whether the element is a list: `role=list` or `directory`, or a `ul`, `ol`, `dl` or `menu` with
     /// no role.
     KRYS_NODISCARD bool IsAccessibilityList() const noexcept;
+    /// @brief Whether the element's children are all tree items, or groups (or presentational elements) of
+    /// them, as a `tree`'s must be.
+    KRYS_NODISCARD bool IsValidTree() const noexcept;
     KRYS_NODISCARD bool IsDescriptionList() const noexcept;
     KRYS_NODISCARD bool IsUnorderedList() const noexcept;
     KRYS_NODISCARD bool IsOrderedList() const noexcept;

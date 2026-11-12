@@ -443,8 +443,9 @@ namespace krys::boo::ax
   {
     if (!_childrenInitialized)
     {
-      // FIXME: Caching each object's ignored state while the children are added (AXAttributeCacheScope),
-      // so a deep tree doesn't work it out again for each ancestor.
+      // Each object's ignored state is cached while the children are added, so a deep tree doesn't work it
+      // out again for each ancestor.
+      AXAttributeCacheScope cacheScope(_axObjectCache);
       AddChildren();
     }
   }
@@ -570,8 +571,21 @@ namespace krys::boo::ax
 
   bool AccessibilityObject::IsIgnored() const noexcept
   {
-    // FIXME: The cache of computed attributes (AXComputedObjectAttributeCache), while the tree is built.
-    return IsIgnoredWithoutCache();
+    auto *cache = _axObjectCache;
+    if (cache)
+    {
+      if (auto cached = cache->CachedIgnoredState(_id))
+      {
+        return *cached;
+      }
+    }
+    bool ignored = IsIgnoredWithoutCache();
+    // (Working it out may have started the cache.)
+    if (cache)
+    {
+      cache->CacheIgnoredState(_id, ignored);
+    }
+    return ignored;
   }
 
   bool AccessibilityObject::IsIgnoredWithoutCache() const noexcept
@@ -1232,9 +1246,261 @@ namespace krys::boo::ax
       // Containers whose focused or active descendant is the selected one.
       case AccessibilityRole::Menu:
       case AccessibilityRole::MenuBar:
-      case AccessibilityRole::ComboBox: return true;
-      default:                          return false;
+      case AccessibilityRole::ComboBox:
+      // A menu list's pop-up's selected option (as on WebKit's ATSPI port).
+      case AccessibilityRole::MenuListPopup: return true;
+      default:                               return false;
     }
+  }
+
+  AccessibilityObject *AccessibilityObject::ClickableSelfOrAncestor(bool includeBody) const noexcept
+  {
+    for (auto *object = const_cast<AccessibilityObject *>(this); object; object = object->ParentObject())
+    {
+      if (!includeBody)
+      {
+        if (auto *element = object->GetElement(); element && element->LocalName() == u8"body")
+        {
+          return nullptr;
+        }
+      }
+      if (object->HasClickHandler())
+      {
+        // Presentational objects can't be clicked.
+        return object->Role() == AccessibilityRole::Presentational ? nullptr : object;
+      }
+    }
+    return nullptr;
+  }
+
+  AccessibilityObject::AccessibilityChildrenVector AccessibilityObject::SelectedChildren() noexcept
+  {
+    if (!CanHaveSelectedChildren())
+    {
+      return {};
+    }
+    auto single = [](AccessibilityObject *object) -> AccessibilityChildrenVector
+    {
+      if (!object)
+      {
+        return {};
+      }
+      return {ShareRef(*object)};
+    };
+    auto selectedOf = [this](auto &&include, bool stopAtFirst)
+    {
+      AccessibilityChildrenVector selected;
+      for (const auto &child : Children())
+      {
+        if (include(*child))
+        {
+          selected.push_back(child);
+          if (stopAtFirst)
+          {
+            break;
+          }
+        }
+      }
+      return selected;
+    };
+
+    switch (_role)
+    {
+      case AccessibilityRole::ComboBox: return single(ActiveDescendant());
+      case AccessibilityRole::ListBox:
+        return selectedOf([](AccessibilityObject &child)
+                          { return child.Role() == AccessibilityRole::ListBoxOption && child.IsSelected(); },
+                          !IsMultiSelectable());
+      case AccessibilityRole::Grid:
+      case AccessibilityRole::Tree:
+      case AccessibilityRole::TreeGrid:
+      {
+        bool isMulti = IsMultiSelectable();
+        AccessibilityChildrenVector selected;
+        // The active descendant comes before the rows with aria-selected.
+        if (auto *activeDescendant = ActiveDescendant();
+            activeDescendant && (activeDescendant->IsTreeItem() || activeDescendant->IsExposedTableRow()))
+        {
+          selected.push_back(ShareRef(*activeDescendant));
+          if (!isMulti)
+          {
+            return selected;
+          }
+        }
+        AccessibilityChildrenVector rows;
+        if (IsTree())
+        {
+          rows = AriaTreeRows();
+        }
+        else if (IsExposableTable() && HasGridRole())
+        {
+          rows = Rows();
+        }
+        for (auto &row : rows)
+        {
+          if ((row->IsSelected() || row->IsActiveDescendantOfFocusedContainer())
+              && std::ranges::none_of(selected, [&](const auto &item) { return item.get() == row.get(); }))
+          {
+            selected.push_back(row);
+            if (!isMulti)
+            {
+              break;
+            }
+          }
+        }
+        return selected;
+      }
+      case AccessibilityRole::TabList: return single(SelectedTabItem());
+      case AccessibilityRole::List:
+        return selectedOf([](AccessibilityObject &child) { return child.IsListItem() && child.IsSelected(); },
+                          false);
+      case AccessibilityRole::Menu:
+      case AccessibilityRole::MenuBar:
+        if (auto *activeDescendant = ActiveDescendant())
+        {
+          return single(activeDescendant);
+        }
+        return single(AxObjectCache() ? AxObjectCache()->FocusedObject() : nullptr);
+      case AccessibilityRole::MenuListPopup:
+        return selectedOf([](AccessibilityObject &child) { return child.IsSelected(); }, false);
+      default: return {};
+    }
+  }
+
+  AccessibilityObject *AccessibilityObject::SelectedRadioButton() noexcept
+  {
+    if (!IsRadioGroup())
+    {
+      return nullptr;
+    }
+    for (const auto &child : Children())
+    {
+      if (child->IsRadioButton() && child->CheckboxOrRadioValue() == AccessibilityButtonState::On)
+      {
+        return child.get();
+      }
+    }
+    return nullptr;
+  }
+
+  AccessibilityObject *AccessibilityObject::SelectedTabItem() noexcept
+  {
+    if (!IsTabList())
+    {
+      return nullptr;
+    }
+    for (const auto &child : Children())
+    {
+      if (child->IsTabItem() && (child->IsChecked() || child->IsSelected()))
+      {
+        return child.get();
+      }
+    }
+    return nullptr;
+  }
+
+  namespace
+  {
+    void AddAriaTreeRows(AccessibilityObject &object, AccessibilityObject::AccessibilityChildrenVector &rows,
+                         List<AccessibilityObject *> &ancestors) noexcept
+    {
+      auto contains = [](const auto &list, const AccessibilityObject &item)
+      {
+        return std::ranges::any_of(list, [&](const auto &entry) { return &*entry == &item; });
+      };
+      auto ownedObjects = object.OwnedObjects();
+      ancestors.push_back(&object);
+
+      // The children not in aria-owns come first, then those it lists.
+      for (const auto &child : object.Children())
+      {
+        if (child->IsTreeItem() && !contains(ownedObjects, *child) && !contains(rows, *child))
+        {
+          rows.push_back(child);
+        }
+        // Rows can be inside the child (in a group, or a tree item's subtree).
+        AddAriaTreeRows(*child, rows, ancestors);
+      }
+      for (const auto &child : ownedObjects)
+      {
+        // aria-owns can make a cycle.
+        if (contains(ancestors, *child))
+        {
+          continue;
+        }
+        if (child->IsTreeItem())
+        {
+          // An owned item listed earlier at the top of the tree moves to where aria-owns puts it.
+          std::erase_if(rows, [&](const auto &row) { return row.get() == child.get(); });
+          rows.push_back(child);
+        }
+        AddAriaTreeRows(*child, rows, ancestors);
+      }
+      ancestors.pop_back();
+    }
+  }
+
+  AccessibilityObject::AccessibilityChildrenVector AccessibilityObject::AriaTreeRows() noexcept
+  {
+    AccessibilityChildrenVector rows;
+    List<AccessibilityObject *> ancestors;
+    AddAriaTreeRows(*this, rows, ancestors);
+    return rows;
+  }
+
+  AccessibilityObject::AccessibilityChildrenVector AccessibilityObject::AriaTreeItemContent() noexcept
+  {
+    AccessibilityChildrenVector content;
+    for (const auto &child : Children())
+    {
+      if (!child->IsGroup() && !child->IsTreeItem())
+      {
+        content.push_back(child);
+      }
+    }
+    return content;
+  }
+
+  bool AccessibilityObject::IsActiveDescendantOfFocusedContainer() const noexcept
+  {
+    for (const auto &container : ActiveDescendantOfObjects())
+    {
+      if (container->IsFocused())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool AccessibilityObject::IsTabItemSelected() const noexcept
+  {
+    // ARIA: a tab is also selected when the focus is inside a tab panel it controls.
+    auto *cache = AxObjectCache();
+    if (!IsTabItem() || !cache)
+    {
+      return false;
+    }
+    auto *focused = cache->FocusedObject();
+    if (!focused)
+    {
+      return false;
+    }
+    for (const auto &tabPanel : ControlledObjects())
+    {
+      if (tabPanel->Role() != AccessibilityRole::TabPanel)
+      {
+        continue;
+      }
+      for (auto *object = focused; object; object = object->ParentObject())
+      {
+        if (object == tabPanel.get())
+        {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   bool AccessibilityObject::SupportsRowCountChange() const noexcept
@@ -1641,15 +1907,14 @@ namespace krys::boo::ax
     {
       return -1;
     }
-    // FIXME: Text box roles count as editable for the lines (WebKit's HasEditableAXRole), which editing
-    // doesn't have.
+    // Text box roles count as editable for the lines.
     int32 lineCount = -1;
     auto current = position;
     VisiblePosition previous;
     do
     {
       previous = current;
-      current = PreviousLinePosition(current, 0);
+      current = PreviousLinePosition(current, 0, EditableType::HasEditableAXRole);
       ++lineCount;
     } while (current.IsNotNull() && !InSameLine(current, previous));
     return lineCount;

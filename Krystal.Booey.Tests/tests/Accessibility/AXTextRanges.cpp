@@ -66,4 +66,13 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"list").ObservableObject() == &page.Object(u8"list"));
     CHECK(page.Object(u8"paragraph").ObservableObject() == nullptr);
   }
+
+  TEST_CASE("AXTextRanges: an ARIA text box's lines", "[Accessibility][AXTextRanges]")
+  {
+    AccessibilityFixture page(u8"<p>Before</p><div id=box role=textbox>one<br>two</div>");
+    auto &box = page.Object(u8"box");
+    // The text box is editable to assistive technology, so its lines count from its own first line.
+    CHECK(box.LineForPosition(box.VisiblePositionForIndex(5)) == 1);
+    CHECK(page.Cache().RootAXEditableElement(*page.ById(u8"box").FirstChild()) == &page.ById(u8"box"));
+  }
 }

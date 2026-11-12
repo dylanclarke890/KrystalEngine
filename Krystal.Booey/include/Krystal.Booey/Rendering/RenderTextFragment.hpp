@@ -46,7 +46,7 @@ namespace krys::boo
     size_t _start;
     size_t _end;
     // Alternative description that can be used for accessibility instead of the native text.
-    utf8_string _altText;
+    Maybe<utf8_string> _altText;
     utf8_string _contentString;
     WeakPtr<RenderBoxModelObject> _firstLetter;
 
@@ -84,11 +84,12 @@ namespace krys::boo
       return _contentString;
     }
 
-    KRYS_NODISCARD const utf8_string &AltText() const noexcept
+    /// @brief The alt text CSS `content` gives the generated text, if any (empty marks it decorative).
+    KRYS_NODISCARD const Maybe<utf8_string> &AltText() const noexcept
     {
       return _altText;
     }
-    void SetAltText(utf8_string altText) noexcept
+    void SetAltText(Maybe<utf8_string> altText) noexcept
     {
       _altText = krys::move(altText);
     }

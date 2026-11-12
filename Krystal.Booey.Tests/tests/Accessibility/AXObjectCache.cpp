@@ -139,4 +139,29 @@ namespace krys::boo::ax::tests
       CHECK(page.Cache().FocusedObject() == &page.Object(u8"button"));
     }
   }
+
+  TEST_CASE("AXObjectCache: ignored states are cached while a tree is built",
+            "[Accessibility][AXObjectCache]")
+  {
+    AccessibilityFixture page(u8"<div id=outer><p id=paragraph>Text</p></div>");
+    auto &cache = page.Cache();
+    auto &paragraph = page.Object(u8"paragraph");
+    CHECK_FALSE(cache.IsCachingComputedIgnoredStates());
+    {
+      AXAttributeCacheScope scope(&cache);
+      REQUIRE(cache.IsCachingComputedIgnoredStates());
+      bool ignored = paragraph.IsIgnored();
+      CHECK(cache.CachedIgnoredState(paragraph.ObjectID()) == ignored);
+      {
+        // A nested scope leaves the outer one caching.
+        AXAttributeCacheScope nested(&cache);
+      }
+      CHECK(cache.IsCachingComputedIgnoredStates());
+      // A change to the tree stops the caching.
+      cache.ChildrenChanged(&page.Object(u8"outer"));
+      CHECK_FALSE(cache.IsCachingComputedIgnoredStates());
+      CHECK_FALSE(cache.CachedIgnoredState(paragraph.ObjectID()));
+    }
+    CHECK_FALSE(cache.IsCachingComputedIgnoredStates());
+  }
 }

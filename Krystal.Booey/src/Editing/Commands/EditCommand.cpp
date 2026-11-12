@@ -125,7 +125,7 @@ namespace krys::boo
     }
     if (auto *cache = _document->ExistingAXObjectCache())
     {
-      auto node = HighestEditableRoot(position.DeepEquivalent());
+      auto node = HighestEditableRoot(position.DeepEquivalent(), EditableType::HasEditableAXRole);
       cache->PostTextStateChangeNotification(node.get(), change, text, position);
     }
   }

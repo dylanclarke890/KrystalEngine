@@ -98,10 +98,10 @@ namespace krys::boo
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Text &value,
-                                                       const utf8_string &altText, dom::Document &document,
-                                                       const RenderStyle &) noexcept
+                                                       const Maybe<utf8_string> &altText,
+                                                       dom::Document &document, const RenderStyle &) noexcept
   {
-    if (value.Value.empty() && altText.empty())
+    if (value.Value.empty() && (!altText || altText->empty()))
     {
       return {};
     }
@@ -112,26 +112,27 @@ namespace krys::boo
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Image &value,
-                                                       const utf8_string &altText, dom::Document &document,
+                                                       const Maybe<utf8_string> &altText,
+                                                       dom::Document &document,
                                                        const RenderStyle &pseudoStyle) noexcept
   {
     auto contentRenderer = CreateRenderer<RenderImage>(
       RenderObject::Type::Image, document, RenderStyle::CreateStyleInheritingFromPseudoStyle(pseudoStyle),
       value.Value.Value.get());
     contentRenderer->InitializeStyle();
-    contentRenderer->SetAltText(altText);
+    contentRenderer->SetAltText(altText.value_or(utf8_string {}));
     return contentRenderer;
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Counter &value,
-                                                       const utf8_string &, dom::Document &document,
+                                                       const Maybe<utf8_string> &, dom::Document &document,
                                                        const RenderStyle &) noexcept
   {
     return CreateRenderer<RenderCounter>(document, value);
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Quote &value,
-                                                       const utf8_string &, dom::Document &document,
+                                                       const Maybe<utf8_string> &, dom::Document &document,
                                                        const RenderStyle &pseudoStyle) noexcept
   {
     auto contentRenderer = CreateRenderer<RenderQuote>(
@@ -170,7 +171,7 @@ namespace krys::boo
   {
     if (auto *contentData = style.GetContent().TryData())
     {
-      auto altText = contentData->AltText.value_or(utf8_string {});
+      const auto &altText = contentData->AltText;
       for (auto &contentItem : contentData->List)
       {
         krys::SwitchOn(contentItem,

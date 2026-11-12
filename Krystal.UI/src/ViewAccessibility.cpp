@@ -196,20 +196,6 @@ namespace krys::ui
         default:                                      return null;
       }
     }
-
-    /// @brief Adds the selected items in @p object's subtree to @p selected.
-    void AddSelectedDescendants(AccessibilityObject &object,
-                                List<pal::AccessibilityNodeID> &selected) noexcept
-    {
-      for (const auto &child : object.Children())
-      {
-        if (child->IsSelected())
-        {
-          selected.push_back(ID(child.get()));
-        }
-        AddSelectedDescendants(*child, selected);
-      }
-    }
   }
 
   ViewAccessibility::ViewAccessibility(View &view) noexcept : _view(view)
@@ -509,7 +495,10 @@ namespace krys::ui
     List<pal::AccessibilityNodeID> selected;
     if (auto *object = Object(node))
     {
-      AddSelectedDescendants(*object, selected);
+      for (const auto &child : object->SelectedChildren())
+      {
+        selected.push_back(ID(child.get()));
+      }
     }
     return selected;
   }

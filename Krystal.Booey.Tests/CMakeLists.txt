@@ -653,6 +653,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Accessibility/AccessibilityMathMLElement.cpp
 		tests/Accessibility/AccessibilityMenuList.cpp
 		tests/Accessibility/AccessibilityNodeObject.cpp
+		tests/Accessibility/AccessibilityObject.cpp
 		tests/Accessibility/AccessibilityProgressIndicator.cpp
 		tests/Accessibility/AccessibilityRenderObject.cpp
 		tests/Accessibility/AccessibilitySVGObject.cpp

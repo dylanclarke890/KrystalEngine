@@ -133,4 +133,22 @@ namespace krys::boo::ax::tests
     CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), page.Object(u8"menu"),
                                           AXNotification::MenuOpened));
   }
+
+  TEST_CASE("AXLiveRegions: a display: contents region being added", "[Accessibility][AXLiveRegions]")
+  {
+    AccessibilityFixture page(u8"<div id=container>Text</div>");
+    (void)page.Object(u8"container");
+    (void)page.TakeNotifications();
+
+    auto status = page.Document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(status->SetAttribute(u8"aria-live", u8"polite").HasException());
+    REQUIRE_FALSE(status->SetAttribute(u8"id", u8"status").HasException());
+    REQUIRE_FALSE(status->SetAttribute(u8"style", u8"display: contents").HasException());
+    REQUIRE_FALSE(status->AppendChild(*page.Document->CreateTextNode(u8"Saved")).HasException());
+    REQUIRE_FALSE(page.ById(u8"container").AppendChild(*status).HasException());
+    (void)page.Document->UpdateLayout();
+    auto notifications = page.TakeNotifications();
+    CHECK(AccessibilityFixture::WasPosted(notifications, page.Object(u8"status"),
+                                          AXNotification::LiveRegionCreated));
+  }
 }

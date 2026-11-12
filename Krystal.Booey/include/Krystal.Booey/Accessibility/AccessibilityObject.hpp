@@ -485,6 +485,22 @@ namespace krys::boo::ax
       return false;
     }
     KRYS_NODISCARD bool IsGroup() const noexcept;
+    KRYS_NODISCARD bool IsTreeItem() const noexcept
+    {
+      return _role == AccessibilityRole::TreeItem;
+    }
+    KRYS_NODISCARD bool IsTabList() const noexcept
+    {
+      return _role == AccessibilityRole::TabList;
+    }
+    KRYS_NODISCARD bool IsTabItem() const noexcept
+    {
+      return _role == AccessibilityRole::Tab;
+    }
+    KRYS_NODISCARD bool IsRadioGroup() const noexcept
+    {
+      return _role == AccessibilityRole::RadioGroup;
+    }
     KRYS_NODISCARD bool IsLandmark() const noexcept;
     KRYS_NODISCARD bool IsRangeControl() const noexcept;
     /// @brief Whether the object is an image map's `area`.
@@ -564,6 +580,23 @@ namespace krys::boo::ax
     /// @brief Whether the role is one whose children can be selected (with `aria-selected`, or as the focused
     /// or active descendant).
     KRYS_NODISCARD bool CanHaveSelectedChildren() const noexcept;
+    /// @brief A container's selected items: a list box's selected options, a grid's or tree's selected rows,
+    /// a tab list's selected tab, a list's selected items, a menu list pop-up's selected options, and the
+    /// active (or focused) item of a menu or combo box. Empty for objects that can't have any.
+    KRYS_NODISCARD AccessibilityChildrenVector SelectedChildren() noexcept;
+    /// @brief A radio group's checked radio button.
+    KRYS_NODISCARD AccessibilityObject *SelectedRadioButton() noexcept;
+    /// @brief A tab list's selected tab.
+    KRYS_NODISCARD AccessibilityObject *SelectedTabItem() noexcept;
+    /// @brief The tree items below the object in tree order: those in its children (and their groups),
+    /// then those `aria-owns` adds.
+    KRYS_NODISCARD AccessibilityChildrenVector AriaTreeRows() noexcept;
+    /// @brief A tree item's content: its children other than tree items and the groups that hold them.
+    KRYS_NODISCARD AccessibilityChildrenVector AriaTreeItemContent() noexcept;
+    /// @brief Whether the object is the active descendant of a focused container.
+    KRYS_NODISCARD bool IsActiveDescendantOfFocusedContainer() const noexcept;
+    /// @brief Whether a tab is selected because the focus is inside a tab panel it controls.
+    KRYS_NODISCARD bool IsTabItemSelected() const noexcept;
     /// @brief Whether the role is one whose row count can change (by expanding or collapsing rows).
     KRYS_NODISCARD bool SupportsRowCountChange() const noexcept;
     /// @brief Whether the object's name comes from the text under it, so it changes with that text.
@@ -689,6 +722,14 @@ namespace krys::boo::ax
     {
       return false;
     }
+    /// @brief Whether the element has a `click`, `mousedown` or `mouseup` listener.
+    KRYS_NODISCARD virtual bool HasClickHandler() const noexcept
+    {
+      return false;
+    }
+    /// @brief The nearest object at or above this one with a click handler, stopping at the body unless
+    /// @p includeBody; null if there's none or it's presentational.
+    KRYS_NODISCARD AccessibilityObject *ClickableSelfOrAncestor(bool includeBody = false) const noexcept;
     KRYS_NODISCARD virtual bool IsEnabled() const noexcept
     {
       return true;

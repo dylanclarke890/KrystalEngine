@@ -42,6 +42,7 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
@@ -61,6 +62,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -380,7 +382,15 @@ namespace krys::boo::ax
       }
       return IsDescriptionList() ? AccessibilityRole::DescriptionList : AccessibilityRole::List;
     }
-    // FIXME: Trees (from their items), with them.
+    // A tree item outside a tree loses its role; a tree with other children isn't one.
+    if (_ariaRole == AccessibilityRole::TreeItem)
+    {
+      _isValidTreeItem = ContainingTree() != nullptr;
+    }
+    if (_ariaRole == AccessibilityRole::Tree)
+    {
+      return IsValidTree() ? AccessibilityRole::Tree : AccessibilityRole::Generic;
+    }
     auto *renderer = _renderer.get();
     if (!renderer)
     {
@@ -391,7 +401,8 @@ namespace krys::boo::ax
       return AccessibilityRole::StaticText;
     }
 
-    if (_ariaRole != AccessibilityRole::Unknown)
+    if (_ariaRole != AccessibilityRole::Unknown
+        && !(_ariaRole == AccessibilityRole::TreeItem && !_isValidTreeItem))
     {
       return _ariaRole;
     }
@@ -525,7 +536,10 @@ namespace krys::boo::ax
       return AccessibilityNodeObject::ComputeIsIgnored();
     }
 
-    // FIXME: Trees (isIgnoredByDefault), with tree objects.
+    if (IsTree())
+    {
+      return IsIgnoredByDefault();
+    }
 
     // The common reasons first, then the rules for each kind of object.
     auto decision = DefaultObjectInclusion();
@@ -569,7 +583,11 @@ namespace krys::boo::ax
       return true;
     }
 
-    // FIXME: Children of a tree that aren't tree items (isAllowedChildOfTree), with trees.
+    // A tree's children are its tree items (and their content) and text.
+    if (!IsAllowedChildOfTree())
+    {
+      return true;
+    }
     if (IsAccessibilityList() || IsExposableTable())
     {
       return false;
@@ -604,7 +622,19 @@ namespace krys::boo::ax
       {
         return true;
       }
-      // FIXME: Alt text from CSS on generated text (RenderTextFragment::altText), with generated content.
+      // The alt text CSS content gives generated text decides (an empty one marks it decorative).
+      if (auto *fragment = DynamicDowncast<RenderTextFragment>(*text))
+      {
+        auto inclusion = ObjectInclusionFromAltText(fragment->AltText());
+        if (inclusion == AccessibilityObjectInclusion::IgnoreObject)
+        {
+          return true;
+        }
+        if (inclusion == AccessibilityObjectInclusion::IncludeObject)
+        {
+          return false;
+        }
+      }
 
       bool checkForIgnored = true;
       for (auto *ancestor = ParentObject(); ancestor; ancestor = ancestor->ParentObject())
@@ -738,9 +768,7 @@ namespace krys::boo::ax
         blockFlow && renderer->ChildrenInline() && !CanSetFocusAttribute()
         && !blockFlow->HasBlocksInInlineLayout())
     {
-      // FIXME: An ancestor with a click handler keeps it (clickableSelfOrAncestor), with event handler
-      // checks.
-      return !blockFlow->HasContentfulInlineLine();
+      return !blockFlow->HasContentfulInlineLine() && !ClickableSelfOrAncestor();
     }
 
     if (Role() == AccessibilityRole::Canvas)
@@ -823,8 +851,13 @@ namespace krys::boo::ax
       }
     }
 
-    // FIXME: The contents of a checkbox's or radio button's label are part of the control
-    // (controlForLabelElement), once a control can have its label as a separate title element.
+    // Inside the label of a checkbox or radio button that has no label relation (a title element), the
+    // label's contents are part of the control.
+    if (auto *control = ControlForLabelElement();
+        control && control->IsCheckboxOrRadio() && control->LabeledByObjects().empty())
+    {
+      return true;
+    }
 
     if (IsExposedTableRow())
     {
@@ -874,6 +907,60 @@ namespace krys::boo::ax
     AddChild(spinButton);
   }
 
+  AccessibilityObject *AccessibilityRenderObject::ControlForLabelElement() const noexcept
+  {
+    // The control isn't part of its own label.
+    auto *cache = AxObjectCache();
+    if (IsControl() || !cache)
+    {
+      return nullptr;
+    }
+    for (auto *node = GetNode(); node; node = node->ParentNode())
+    {
+      if (auto *label = DynamicDowncast<html::HTMLLabelElement>(*node))
+      {
+        auto control = label->Control();
+        // A control that's a descendant of the label, being destroyed, doesn't count.
+        if (!control || (control->Renderer() && !control->Renderer()->Parent()))
+        {
+          return nullptr;
+        }
+        return cache->GetOrCreate(*control);
+      }
+    }
+    return nullptr;
+  }
+
+  AccessibilityObject *AccessibilityRenderObject::ContainingTree() const noexcept
+  {
+    for (auto *ancestor = ParentObject(); ancestor; ancestor = ancestor->ParentObject())
+    {
+      if (ancestor->IsTree())
+      {
+        return ancestor;
+      }
+    }
+    return nullptr;
+  }
+
+  bool AccessibilityRenderObject::IsAllowedChildOfTree() const noexcept
+  {
+    // Inside a tree, only tree items, their descendants and static text are exposed.
+    bool isTreeItemDescendant = false;
+    for (auto *ancestor = ParentObject(); ancestor; ancestor = ancestor->ParentObject())
+    {
+      if (ancestor->IsTreeItem())
+      {
+        isTreeItemDescendant = true;
+      }
+      if (ancestor->IsTree())
+      {
+        return isTreeItemDescendant || IsTreeItem() || IsStaticText();
+      }
+    }
+    return true;
+  }
+
   bool AccessibilityRenderObject::IsIgnoredElementWithinMathTree() const noexcept
   {
     // Anonymous boxes in a MathML block (CSS's, https://www.w3.org/TR/css3-box/#block-level0) are left out.
@@ -906,6 +993,11 @@ namespace krys::boo::ax
     if (!renderer)
     {
       return AccessibilityNodeObject::StringValue();
+    }
+    // Generated text's CSS alt text stands in for it.
+    if (auto *fragment = DynamicDowncast<RenderTextFragment>(*renderer); fragment && fragment->AltText())
+    {
+      return *fragment->AltText();
     }
     if (auto *text = DynamicDowncast<RenderText>(*renderer))
     {
@@ -1026,8 +1118,12 @@ namespace krys::boo::ax
     {
       return AccessibilityNodeObject::ElementRect();
     }
-    // FIXME: The union of an inline's continuations' rects, with continuations; and the boxes of the text
-    // runs for text, with text ranges.
-    return LayoutRect(renderer->AbsoluteBoundingBoxRect());
+    // (The quads cover each of an inline's line boxes and a text's text boxes; Booey has no continuations.)
+    LayoutRect rect(renderer->AbsoluteBoundingBoxRect());
+    if (rect.IsEmpty() && !IsWebArea())
+    {
+      return NonEmptyAncestorBoundingBox();
+    }
+    return rect;
   }
 }

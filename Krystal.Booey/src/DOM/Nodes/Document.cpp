@@ -949,8 +949,6 @@ namespace krys::boo::dom
     }
   }
 
-  // FIXME: Telling the accessibility cache the title changed (onTitleChange) when the title element or its
-  // text changes, once documents track their title element.
   ExceptionOr<void> Document::Title(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;

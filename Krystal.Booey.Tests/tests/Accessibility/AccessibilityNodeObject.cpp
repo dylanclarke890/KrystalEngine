@@ -165,6 +165,43 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"pressed").IsPressed());
   }
 
+  TEST_CASE("AccessibilityNodeObject: expanded states", "[Accessibility][AccessibilityNodeObject]")
+  {
+    AccessibilityFixture page(u8"<button id=target popovertarget=popover>Open</button>"
+                              u8"<button id=command commandfor=popover command=toggle-popover>Toggle</button>"
+                              u8"<button id=dialog-command commandfor=dialog command=show-modal>Show</button>"
+                              u8"<div id=popover popover>Popover</div><dialog id=dialog>D</dialog>"
+                              u8"<div id=generic aria-expanded=true>G</div>"
+                              u8"<div id=invalid role=button aria-expanded=maybe>I</div>");
+
+    // A popover invoker's expanded state is whether the popover is showing.
+    CHECK(page.Object(u8"target").SupportsExpanded());
+    CHECK_FALSE(page.Object(u8"target").IsExpanded());
+    CHECK(page.Object(u8"command").SupportsExpanded());
+    REQUIRE_FALSE(Downcast<html::HTMLElement>(page.ById(u8"popover")).ShowPopover().HasException());
+    CHECK(page.Object(u8"target").IsExpanded());
+    CHECK(page.Object(u8"command").IsExpanded());
+    // A command that isn't a popover's doesn't make it expandable.
+    CHECK_FALSE(page.Object(u8"dialog-command").SupportsExpanded());
+
+    // aria-expanded only applies to the roles that support it, with a valid value.
+    CHECK_FALSE(page.Object(u8"generic").SupportsExpanded());
+    CHECK_FALSE(page.Object(u8"generic").IsExpanded());
+    CHECK_FALSE(page.Object(u8"invalid").SupportsExpanded());
+  }
+
+  TEST_CASE("AccessibilityNodeObject: an area's role follows its URL",
+            "[Accessibility][AccessibilityNodeObject]")
+  {
+    AccessibilityFixture page(u8"<img src='data:,' usemap=#map width=20 height=20>"
+                              u8"<map name=map><area id=area shape=rect coords=0,0,10,10></map>");
+    auto &area = page.Object(u8"area");
+    CHECK(area.Role() != AccessibilityRole::Link);
+    REQUIRE_FALSE(page.ById(u8"area").SetAttribute(u8"href", u8"#target").HasException());
+    (void)page.TakeNotifications();
+    CHECK(area.Role() == AccessibilityRole::Link);
+  }
+
   TEST_CASE("AccessibilityNodeObject: focus", "[Accessibility][AccessibilityNodeObject]")
   {
     AccessibilityFixture page(
@@ -233,6 +270,64 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"password").AccessibleDescription() == u8"Must be 8 characters");
   }
 
+  TEST_CASE("AccessibilityNodeObject: descriptions from aria-description and title",
+            "[Accessibility][AccessibilityNodeObject][accname]")
+  {
+    AccessibilityFixture page(u8"<button id=described aria-description='Saves the file'>Save</button>"
+                              u8"<button id=titled title='Saves the file'>Save</button>"
+                              u8"<button id=title-is-name title=Tooltip></button>"
+                              u8"<span id=help>Help</span>"
+                              u8"<button id=both aria-describedby=help aria-description=Ignored>B</button>");
+    CHECK(page.Object(u8"described").AccessibleDescription() == u8"Saves the file");
+    // The title describes the element when it isn't its name.
+    CHECK(page.Object(u8"titled").AccessibleDescription() == u8"Saves the file");
+    CHECK(page.Object(u8"title-is-name").AccessibleName() == u8"Tooltip");
+    CHECK(page.Object(u8"title-is-name").AccessibleDescription().empty());
+    CHECK(page.Object(u8"both").AccessibleDescription() == u8"Help");
+  }
+
+  TEST_CASE("AccessibilityNodeObject: a list box's chosen options are part of a name",
+            "[Accessibility][AccessibilityNodeObject][accname]")
+  {
+    AccessibilityFixture page(u8"<label id=label>Fruit <div role=listbox>"
+                              u8"<div role=option>Apple</div><div role=option aria-selected=true>Pear</div>"
+                              u8"</div></label><div id=check role=checkbox aria-labelledby=label></div>");
+    CHECK(page.Object(u8"check").AccessibleName() == u8"Fruit Pear");
+  }
+
+  TEST_CASE("AccessibilityNodeObject: generated content is part of a name",
+            "[Accessibility][AccessibilityNodeObject][accname]")
+  {
+    AccessibilityFixture page(
+      u8"<style>#gen::before { content: 'Hello ' } #gen::after { content: '!' }"
+      u8"#alt::before { content: '*' / 'Starred' } #decorative::before { content: '*' / '' }</style>"
+      u8"<button id=gen>World</button><button id=alt> file</button><button id=decorative>Plain</button>");
+    CHECK(page.Object(u8"gen").AccessibleName() == u8"Hello World!");
+    // CSS alt text stands in for the content.
+    CHECK(page.Object(u8"alt").AccessibleName() == u8"Starred file");
+    CHECK(page.Object(u8"decorative").AccessibleName() == u8"Plain");
+  }
+
+  TEST_CASE("AccessibilityNodeObject: the web area's name",
+            "[Accessibility][AccessibilityNodeObject][accname]")
+  {
+    AccessibilityFixture page(u8"<title id=title>Document</title><p>Text</p>");
+    auto *webArea = page.Cache().GetOrCreate(*page.Document);
+    REQUIRE(webArea);
+    CHECK(webArea->AccessibleName() == u8"Document");
+    (void)page.TakeNotifications();
+
+    // A new title is a text change of the web area.
+    REQUIRE_FALSE(page.Document->Title(u8"Renamed").HasException());
+    CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), *webArea, AXNotification::TextChanged));
+    CHECK(webArea->AccessibleName() == u8"Renamed");
+
+    // The html element's aria-label comes first.
+    REQUIRE_FALSE(
+      page.Document->DocumentElement()->SetAttribute(u8"aria-label", u8"Labelled").HasException());
+    CHECK(webArea->AccessibleName() == u8"Labelled");
+  }
+
   TEST_CASE("AccessibilityNodeObject: values", "[Accessibility][AccessibilityNodeObject]")
   {
     AccessibilityFixture page(u8"<input id=text value=Typed><input id=password type=password value=secret>"
@@ -242,5 +337,18 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"password").StringValue().empty());
     CHECK(page.Object(u8"textarea").StringValue() == u8"Area");
     CHECK(page.Object(u8"select").StringValue() == u8"B");
+  }
+
+  TEST_CASE("AccessibilityNodeObject: values of combo boxes and labelled options",
+            "[Accessibility][AccessibilityNodeObject]")
+  {
+    AccessibilityFixture page(u8"<div id=combo role=combobox><div role=listbox>"
+                              u8"<div role=option>Apple</div><div role=option aria-selected=true>Pear</div>"
+                              u8"</div></div>"
+                              u8"<select id=labelled size=2><option>A</option>"
+                              u8"<option selected aria-label='Banana fruit'>B</option></select>");
+    CHECK(page.Object(u8"combo").StringValue() == u8"Pear");
+    // A selected option's aria-label overrides its text.
+    CHECK(page.Object(u8"labelled").StringValue() == u8"Banana fruit");
   }
 }

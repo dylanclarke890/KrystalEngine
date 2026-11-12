@@ -306,7 +306,7 @@ namespace krys::boo
     void PostUndoRedoTextChange(ax::AXObjectCache &cache, const VisiblePosition &position,
                                 utf8_stringview appearedText, utf8_stringview disappearedText) noexcept
     {
-      auto node = HighestEditableRoot(position.DeepEquivalent());
+      auto node = HighestEditableRoot(position.DeepEquivalent(), EditableType::HasEditableAXRole);
       if (!node)
       {
         return;

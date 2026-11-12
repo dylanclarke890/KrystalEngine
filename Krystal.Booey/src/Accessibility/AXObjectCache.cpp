@@ -570,6 +570,7 @@ namespace krys::boo::ax
 
   void AXObjectCache::Remove(AXID id) noexcept
   {
+    StopCachingComputedObjectAttributes();
     auto found = _objects.find(id);
     if (found == _objects.end())
     {
@@ -680,7 +681,16 @@ namespace krys::boo::ax
 
     if (newChild)
     {
-      DeferElementAddedOrRemoved(DynamicDowncast<dom::Element>(newChild->GetNode()));
+      auto *node = newChild->GetNode();
+      DeferElementAddedOrRemoved(DynamicDowncast<dom::Element>(node));
+      // The display: contents elements between the child and its parent renderer's element have no renderers
+      // of their own, so were added with it.
+      for (auto *ancestor = node ? node->ParentElement() : nullptr;
+           ancestor && ancestor != renderer.GetNode() && ancestor->HasDisplayContents();
+           ancestor = ancestor->ParentElement())
+      {
+        DeferElementAddedOrRemoved(ancestor);
+      }
     }
   }
 
@@ -866,8 +876,8 @@ namespace krys::boo::ax
 
   void AXObjectCache::HandleLiveRegionCreated(dom::Element &element) noexcept
   {
-    // FIXME: A display: contents live region has no renderer, so isn't seen being made.
-    if (!element.Renderer())
+    // (A display: contents live region has no renderer, but is in the tree.)
+    if (!element.Renderer() && !element.HasDisplayContents())
     {
       return;
     }
@@ -914,8 +924,28 @@ namespace krys::boo::ax
     }
   }
 
+  Maybe<bool> AXObjectCache::CachedIgnoredState(AXID id) const noexcept
+  {
+    if (!_computedIgnoredStates)
+    {
+      return null;
+    }
+    auto found = _computedIgnoredStates->find(id);
+    return found != _computedIgnoredStates->end() ? Maybe<bool>(found->second) : null;
+  }
+
+  void AXObjectCache::CacheIgnoredState(AXID id, bool ignored) noexcept
+  {
+    if (_computedIgnoredStates)
+    {
+      (*_computedIgnoredStates)[id] = ignored;
+    }
+  }
+
   void AXObjectCache::ChildrenChanged(AccessibilityObject *object) noexcept
   {
+    // The tree is changing: what's cached may be out of date.
+    StopCachingComputedObjectAttributes();
     if (!object)
     {
       return;
@@ -1069,6 +1099,7 @@ namespace krys::boo::ax
 
   void AXObjectCache::HandleRoleChanged(AccessibilityObject &object, AccessibilityRole previousRole) noexcept
   {
+    StopCachingComputedObjectAttributes();
     // The new role may change whether the object is ignored and what its parent's children are.
     (void)previousRole;
     object.RecomputeIsIgnored();
@@ -1329,6 +1360,14 @@ namespace krys::boo::ax
     }
     else if (name == u8"href" || name == u8"src")
     {
+      // An area is a link only while it has a URL.
+      if (name == u8"href" && IsHTMLElementNamed(element, u8"area"))
+      {
+        if (auto object = ShareRefPtr(Get(element)))
+        {
+          object->UpdateRole();
+        }
+      }
       PostNotification(&element, AXNotification::URLChanged);
     }
     else if (name == u8"accesskey")
@@ -1695,10 +1734,11 @@ namespace krys::boo::ax
 
     if (relation == AXRelation::OwnerFor)
     {
-      // The target leaves its current parent's children.
-      // FIXME: This tells the parent its children changed every time the relations are worked out again, even
-      // when the relation was there before.
-      if (auto *targetParent = target->ParentObject(); targetParent && targetParent != origin)
+      // The target leaves its current parent's children (unless the relations are being worked out again and
+      // it already had this owner).
+      auto previousOwner = _previousOwners.find(target->ObjectID());
+      bool hadOwner = previousOwner != _previousOwners.end() && previousOwner->second == origin->ObjectID();
+      if (auto *targetParent = target->ParentObject(); !hadOwner && targetParent && targetParent != origin)
       {
         ChildrenChanged(targetParent);
       }
@@ -1913,9 +1953,20 @@ namespace krys::boo::ax
       return;
     }
     _relationsNeedUpdate = false;
+    for (const auto &[originID, relations] : _relations)
+    {
+      if (auto owned = relations.find(AXRelation::OwnerFor); owned != relations.end())
+      {
+        for (auto targetID : owned->second)
+        {
+          _previousOwners[targetID] = originID;
+        }
+      }
+    }
     _relations.clear();
     _relationTargets.clear();
     UpdateRelationsForTree(_document);
+    _previousOwners.clear();
   }
 
   void AXObjectCache::UpdateRelationsForTree(dom::ContainerNode &root) noexcept
@@ -2358,6 +2409,33 @@ namespace krys::boo::ax
     PostNotification(object, AXNotification::ValueChanged);
   }
 
+  dom::Element *AXObjectCache::RootAXEditableElement(const dom::Node &node) noexcept
+  {
+    auto &mutableNode = const_cast<dom::Node &>(node);
+    dom::Element *result = mutableNode.RootEditableElement();
+    auto *element = DynamicDowncast<dom::Element>(mutableNode);
+    if (!element)
+    {
+      element = mutableNode.ParentElement();
+    }
+    for (; element; element = element->ParentElement())
+    {
+      if (auto *object = GetOrCreate(*element); object && object->IsTextControl())
+      {
+        result = element;
+      }
+    }
+    return result;
+  }
+
+  void AXObjectCache::OnTitleChange(dom::Document &document) noexcept
+  {
+    if (auto *object = Get(document))
+    {
+      PostNotification(object, AXNotification::TextChanged);
+    }
+  }
+
   void AXObjectCache::OnValidityChange(dom::Element &element) noexcept
   {
     if (auto *object = Get(element))
@@ -2723,6 +2801,7 @@ namespace krys::boo::ax
 
   void AXObjectCache::PostNotification(AccessibilityObject *object, AXNotification notification) noexcept
   {
+    StopCachingComputedObjectAttributes();
     if (!object)
     {
       object = Get(_document);
@@ -2926,7 +3005,7 @@ namespace krys::boo::ax
     // After the inserted text (the start of a caret selection, the end of the inserted text if it's
     // selected).
     auto position = selection.VisibleEnd();
-    auto node = HighestEditableRoot(position.DeepEquivalent());
+    auto node = HighestEditableRoot(position.DeepEquivalent(), EditableType::HasEditableAXRole);
     if (!_replacedText.empty())
     {
       cache->PostTextReplacementNotification(node.get(), _replacedText, insertedText, position);

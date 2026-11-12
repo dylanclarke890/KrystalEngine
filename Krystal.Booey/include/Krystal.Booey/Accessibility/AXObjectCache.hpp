@@ -108,6 +108,12 @@ namespace krys::boo::ax
     HashMap<AXID, AXRelations> _relations;
     // The objects some other object is related to.
     HashSet<AXID> _relationTargets;
+    // While the relations are worked out again, each owned object's owner before (so an unchanged aria-owns
+    // doesn't change any children).
+    HashMap<AXID, AXID> _previousOwners;
+    // While a tree is being built, each object's ignored state, so it isn't worked out again for each
+    // descendant (WebKit's AXComputedObjectAttributeCache); null when not caching.
+    Maybe<HashMap<AXID, bool>> _computedIgnoredStates;
     bool _relationsNeedUpdate {true};
 
     // An attribute change waiting for its element's renderer to be up to date.
@@ -177,6 +183,24 @@ namespace krys::boo::ax
     {
       return _isRetrievingCurrentModalNode;
     }
+    /// @brief Whether objects' ignored states are being cached (while a tree is being built).
+    KRYS_NODISCARD bool IsCachingComputedIgnoredStates() const noexcept
+    {
+      return _computedIgnoredStates.has_value();
+    }
+    /// @brief Starts caching objects' ignored states, until stopped or the tree changes.
+    void StartCachingComputedObjectAttributesUntilTreeMutates() noexcept
+    {
+      _computedIgnoredStates.emplace();
+    }
+    void StopCachingComputedObjectAttributes() noexcept
+    {
+      _computedIgnoredStates.reset();
+    }
+    /// @brief The cached ignored state of the object with @p id, if it's cached.
+    KRYS_NODISCARD Maybe<bool> CachedIgnoredState(AXID id) const noexcept;
+    /// @brief Caches the ignored state of the object with @p id, if caching.
+    void CacheIgnoredState(AXID id, bool ignored) noexcept;
     /// @brief The object for the focused element (or its active descendant), or the nearest unignored
     /// ancestor if that object is ignored; the web area if nothing is focused.
     KRYS_NODISCARD AccessibilityObject *FocusedObject() noexcept;
@@ -267,6 +291,11 @@ namespace krys::boo::ax
     void OnEditableTextValueChanged(dom::Node &node) noexcept;
     /// @brief Whether @p element is valid changed.
     void OnValidityChange(dom::Element &element) noexcept;
+    /// @brief The outermost element editable to assistive technology at or above @p node: its root editable
+    /// element, or the outermost text control (an ARIA text box too) above it; null if there's neither.
+    KRYS_NODISCARD dom::Element *RootAXEditableElement(const dom::Node &node) noexcept;
+    /// @brief @p document's title (the web area's name) may have changed.
+    void OnTitleChange(dom::Document &document) noexcept;
     /// @brief @p radio joined or left the radio button group of @p group (the other buttons in it).
     void OnRadioGroupMembershipChanged(const dom::Element &radio,
                                        const List<Ref<html::HTMLInputElement>> &group) noexcept;
@@ -442,6 +471,39 @@ namespace krys::boo::ax
 
   /// @brief The text an edit replaces (the selection it started with), so inserting the edit's text can be
   /// posted as a replacement.
+  /// @brief Caches objects' ignored states for its lifetime (unless the tree changes first), if the cache
+  /// wasn't already: while a tree is built.
+  class AXAttributeCacheScope final
+  {
+    KRYS_NON_COPY_MOVABLE(AXAttributeCacheScope);
+
+  private:
+    // (The scope is shorter than the cache's life, like an object's.)
+    AXObjectCache *_cache;
+    bool _wasAlreadyCaching {false};
+
+  public:
+    explicit AXAttributeCacheScope(AXObjectCache *cache) noexcept : _cache(cache)
+    {
+      if (cache)
+      {
+        _wasAlreadyCaching = cache->IsCachingComputedIgnoredStates();
+        if (!_wasAlreadyCaching)
+        {
+          cache->StartCachingComputedObjectAttributesUntilTreeMutates();
+        }
+      }
+    }
+
+    ~AXAttributeCacheScope() noexcept
+    {
+      if (_cache && !_wasAlreadyCaching)
+      {
+        _cache->StopCachingComputedObjectAttributes();
+      }
+    }
+  };
+
   class AccessibilityReplacedText
   {
   private:

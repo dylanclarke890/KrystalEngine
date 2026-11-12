@@ -205,12 +205,22 @@ namespace krys::boo::ax::table_helpers
     {
       return table;
     }
-    // FIXME: This might find an unrelated ancestor table element.
+    // The table element is between the child and the element the anonymous table is in (a table element with
+    // another display type, say); one further out is another table's.
+    dom::Node *container = nullptr;
+    for (auto *parent = renderTable->Parent(); parent && !container; parent = parent->Parent())
+    {
+      container = parent->GetNode();
+    }
     for (auto *ancestor = firstChildNode->ParentElement(); ancestor; ancestor = ancestor->ParentElement())
     {
       if (auto *table = DynamicDowncast<html::HTMLTableElement>(*ancestor))
       {
         return table;
+      }
+      if (ancestor == container)
+      {
+        break;
       }
     }
     return nullptr;

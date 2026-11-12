@@ -39,6 +39,8 @@ namespace krys::boo::ax
   {
   private:
     WeakPtr<RenderObject> _renderer;
+    /// @brief Whether a `treeitem` is in a tree (one that isn't loses its role).
+    bool _isValidTreeItem {false};
 
   public:
     /// @brief An object for @p renderer, and its node if it has one.
@@ -85,6 +87,12 @@ namespace krys::boo::ax
     void DetachRemoteParts(AccessibilityDetachmentType detachmentType) noexcept override;
 
   private:
+    /// @brief The control of the label the object is in (not the control itself), if any.
+    KRYS_NODISCARD AccessibilityObject *ControlForLabelElement() const noexcept;
+    /// @brief The tree the object is in, if any.
+    KRYS_NODISCARD AccessibilityObject *ContainingTree() const noexcept;
+    /// @brief Whether the object can be in the tree it's in: tree items, their descendants and static text.
+    KRYS_NODISCARD bool IsAllowedChildOfTree() const noexcept;
     /// @brief Whether an exposed row is above the object, with no cell or table between: what's between a
     /// row and its cells is ignored.
     KRYS_NODISCARD bool IgnoredByRowAncestor() const noexcept;
