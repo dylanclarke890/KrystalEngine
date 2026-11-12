@@ -768,6 +768,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Sanitizer/Sanitizer.cpp
 		tests/HTML/Popover.cpp
 		tests/HTML/Collections/RadioNodeList.cpp
+		tests/HTML/Shadow/SliderThumbElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
 		tests/HTML/Mixins/URLDecomposition.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp

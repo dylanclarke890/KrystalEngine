@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 
 namespace krys::boo::dom
 {
@@ -74,7 +74,7 @@ namespace krys::boo::html
     void DefaultEventHandler(dom::Event &) noexcept final;
 
   private:
-    // FIXME: Releasing the capture when the renderer is detached (willDetachRenderers), once there's a hook.
+    void WillDetachRenderers() noexcept final;
     KRYS_NODISCARD Maybe<style::UnadjustedStyle> ResolveCustomStyle(const style::ResolutionContext &,
                                                                     const RenderStyle *) noexcept final;
 

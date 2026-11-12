@@ -184,6 +184,11 @@ namespace krys::boo::html
     }
   }
 
+  void SpinButtonElement::WillDetachRenderers() noexcept
+  {
+    ReleaseCapture();
+  }
+
   void SpinButtonElement::ReleaseCapture() noexcept
   {
     StopRepeatingTimer();

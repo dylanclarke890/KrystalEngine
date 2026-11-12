@@ -647,7 +647,7 @@ namespace krys::boo::dom
       return;
     }
 
-    // FIXME: willResetComputedStyle for elements with custom style resolve callbacks.
+    WillResetComputedStyle();
     GetElementRareData()->SetComputedStyle(nullptr);
     for (auto *descendant = TreeQueries::Next(*this, this); descendant;
          descendant = TreeQueries::Next(*descendant, this))
@@ -658,6 +658,7 @@ namespace krys::boo::dom
       {
         continue;
       }
+      child->WillResetComputedStyle();
       child->GetElementRareData()->SetComputedStyle(nullptr);
     }
   }
