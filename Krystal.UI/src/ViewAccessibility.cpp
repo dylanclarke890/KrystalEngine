@@ -21,17 +21,12 @@ namespace krys::ui
     using boo::ax::AccessibilityRole;
     using boo::ax::AXNotification;
 
-    // An overlay's node IDs have the top bit set and the overlay's generation above its objects' IDs.
-    constexpr pal::AccessibilityNodeID OverlayNodeBit = 1ull << 63;
-    constexpr uint32 OverlayGenerationShift = 40;
-    constexpr pal::AccessibilityNodeID OverlayObjectIDMask = (1ull << OverlayGenerationShift) - 1;
-
-    KRYS_NODISCARD constexpr pal::AccessibilityNodeID OverlayNodeID(uint32 generation,
-                                                                    uint64 objectID) noexcept
-    {
-      return OverlayNodeBit | (static_cast<pal::AccessibilityNodeID>(generation) << OverlayGenerationShift)
-             | (objectID & OverlayObjectIDMask);
-    }
+    // Each page's cache numbers its objects from the same counter, so the nodes of other pages than the
+    // view's (an overlay's, an SVG image's) have the top bit set and their cache's tag above their objects'
+    // IDs.
+    constexpr pal::AccessibilityNodeID ForeignNodeBit = 1ull << 63;
+    constexpr uint32 ForeignTagShift = 40;
+    constexpr pal::AccessibilityNodeID ForeignObjectIDMask = (1ull << ForeignTagShift) - 1;
 
     KRYS_NODISCARD pal::AccessibilityRole ToPalRole(const AccessibilityObject &object) noexcept
     {
@@ -245,10 +240,22 @@ namespace krys::ui
                                                                   : nullptr;
   }
 
-  bool ViewAccessibility::IsInOverlay(const AccessibilityObject &object) const noexcept
+  boo::ax::AXObjectCache *ViewAccessibility::ForeignCache::Get() const noexcept
   {
-    auto *overlayCache = OverlayCache();
-    return overlayCache && object.AxObjectCache() == overlayCache;
+    auto *document = Document.get();
+    auto *cache = document ? document->ExistingAXObjectCache() : nullptr;
+    return cache && cache == Cache ? cache : nullptr;
+  }
+
+  void ViewAccessibility::ForgetForeignCache(const boo::ax::AXObjectCache &cache) noexcept
+  {
+    for (auto &slot : _foreignCaches)
+    {
+      if (slot.Cache == &cache)
+      {
+        slot = {};
+      }
+    }
   }
 
   pal::AccessibilityNodeID ViewAccessibility::ID(const AccessibilityObject *object) const noexcept
@@ -258,29 +265,48 @@ namespace krys::ui
       return 0;
     }
     auto id = static_cast<pal::AccessibilityNodeID>(object->ObjectID());
-    if (IsInOverlay(*object))
+    auto *cache = object->AxObjectCache();
+    if (!cache || cache == _view.Document().ExistingAXObjectCache())
     {
-      krys_debug_assert(id <= OverlayObjectIDMask);
-      return OverlayNodeID(_overlayGeneration, id);
+      return id;
     }
-    return id;
+    krys_debug_assert(id <= ForeignObjectIDMask);
+    // Another page's cache gets a tag the first time one of its objects is a node.
+    size_t index = 0;
+    while (index < _foreignCaches.size() && _foreignCaches[index].Get() != cache)
+    {
+      ++index;
+    }
+    if (index == _foreignCaches.size())
+    {
+      _foreignCaches.push_back({CreateWeakPtr(&cache->GetDocument()), cache});
+    }
+    return ForeignNodeBit | (static_cast<pal::AccessibilityNodeID>(index + 1) << ForeignTagShift) | id;
   }
 
   Pair<View *, boo::IntPoint>
     ViewAccessibility::ViewAndOrigin(const AccessibilityObject &object) const noexcept
   {
-    if (IsInOverlay(object))
+    // An object is in the overlay if its page, or the page of the image it's in, is the overlay's.
+    auto *overlayCache = OverlayCache();
+    auto *cache = _view.Document().ExistingAXObjectCache();
+    for (const auto *ancestor = &object; overlayCache && ancestor; ancestor = ancestor->ParentObject())
     {
-      auto location = _view.ShownOverlay()->Rect().Location();
-      return {OverlayView(), boo::IntPoint(_origin.X() + location.X(), _origin.Y() + location.Y())};
+      if (ancestor->AxObjectCache() == overlayCache)
+      {
+        auto location = _view.ShownOverlay()->Rect().Location();
+        return {OverlayView(), boo::IntPoint(_origin.X() + location.X(), _origin.Y() + location.Y())};
+      }
+      if (ancestor->AxObjectCache() == cache)
+      {
+        break;
+      }
     }
     return {&_view, _origin};
   }
 
   void ViewAccessibility::OverlayShown(Overlay &overlay) noexcept
   {
-    // The new overlay's nodes are new nodes, whatever its objects' IDs.
-    ++_overlayGeneration;
     if (!_window || !_window->IsAccessibilityActive())
     {
       return;
@@ -307,19 +333,26 @@ namespace krys::ui
 
   void ViewAccessibility::OverlayHidden(Overlay &overlay) noexcept
   {
+    // The overlay's nodes go with it (its page may outlive it, but isn't exposed; if it's shown again, its
+    // nodes are new nodes).
+    auto *cache = overlay.ContentView().Document().ExistingAXObjectCache();
     if (!_window || !_window->IsAccessibilityActive())
     {
+      if (cache)
+      {
+        ForgetForeignCache(*cache);
+      }
       return;
     }
-    // The overlay's nodes go with it (its page may outlive it, but isn't exposed).
-    auto *cache = boo::ax::AXObjectCache::AccessibilityEnabled()
-                    ? overlay.ContentView().Document().AxObjectCache()
-                    : nullptr;
     if (auto *root = cache ? cache->RootObject() : nullptr)
     {
-      auto id = OverlayNodeID(_overlayGeneration, static_cast<uint64>(root->ObjectID()));
+      auto id = ID(root);
       _window->RaiseAccessibilityEvent(id, pal::AccessibilityEvent::MenuClosed);
       _window->AccessibilityNodeRemoved(id);
+    }
+    if (cache)
+    {
+      ForgetForeignCache(*cache);
     }
     _window->RaiseAccessibilityEvent(Root(), pal::AccessibilityEvent::ChildrenChanged);
     if (auto *focused = Cache() ? Cache()->FocusedObject() : nullptr)
@@ -346,13 +379,13 @@ namespace krys::ui
       return nullptr;
     }
     AccessibilityObject *object = nullptr;
-    if (node & OverlayNodeBit)
+    if (node & ForeignNodeBit)
     {
-      // Only the shown overlay's nodes are still nodes.
-      auto *overlayCache = OverlayCache();
-      if (overlayCache && ((node & ~OverlayNodeBit) >> OverlayGenerationShift) == _overlayGeneration)
+      auto tag = static_cast<size_t>((node & ~ForeignNodeBit) >> ForeignTagShift);
+      auto *foreignCache = tag && tag <= _foreignCaches.size() ? _foreignCaches[tag - 1].Get() : nullptr;
+      if (foreignCache)
       {
-        object = overlayCache->ObjectForID(static_cast<boo::ax::AXID>(node & OverlayObjectIDMask));
+        object = foreignCache->ObjectForID(static_cast<boo::ax::AXID>(node & ForeignObjectIDMask));
       }
     }
     else

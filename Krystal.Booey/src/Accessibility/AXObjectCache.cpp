@@ -355,7 +355,6 @@ namespace krys::boo::ax
 
   Ref<AccessibilityRenderObject> AXObjectCache::CreateObjectFromRenderer(RenderObject &renderer) noexcept
   {
-    // FIXME: The specialised objects for images (toSimpleImage), with them.
     auto *node = renderer.GetNode();
     if (renderer.IsLegacyRenderSVGRoot())
     {

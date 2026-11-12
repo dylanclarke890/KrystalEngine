@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
+#include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityScrollView.hpp"
 
 namespace krys::boo::ax::tests
 {
@@ -64,5 +66,89 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"labelled").AccessibleDescription() == u8"Tip");
     CHECK(page.Object(u8"link").AccessibleName() == u8"Onward");
     CHECK(page.Object(u8"use").AccessibleName() == u8"Shape");
+  }
+
+  namespace
+  {
+    /// @brief The first object under @p object (itself included) with @p role, if any.
+    KRYS_NODISCARD AccessibilityObject *FindRole(AccessibilityObject &object, AccessibilityRole role) noexcept
+    {
+      if (object.Role() == role)
+      {
+        return &object;
+      }
+      for (const auto &child : object.Children())
+      {
+        if (auto *found = FindRole(*child, role))
+        {
+          return found;
+        }
+      }
+      return nullptr;
+    }
+  }
+
+  TEST_CASE("AccessibilitySVGObject: an SVG image's content is the image's",
+            "[Accessibility][AccessibilitySVGObject]")
+  {
+    boo::tests::LoaderFixture loader;
+    loader.Strategy.AddText(u8"file:///chart.svg",
+                            u8R"svg(<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40">)svg"
+                            u8R"svg(<title>Chart</title><text x="2" y="20">Sales</text></svg>)svg",
+                            u8"image/svg+xml");
+    loader.Strategy.AddText(u8"file:///plain.svg",
+                            u8R"svg(<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20">)svg"
+                            u8R"svg(<rect width="40" height="20" fill="green"/></svg>)svg",
+                            u8"image/svg+xml");
+    AccessibilityFixture page(
+      u8"<body style='margin: 0'><div style='height: 30px'></div>"
+      u8"<img id=chart src='file:///chart.svg'><img id=plain alt=Plain src='file:///plain.svg'>");
+    boo::tests::RunNetworkingTasks();
+    (void)page.Document->UpdateLayout();
+
+    // An image of an SVG document with something to expose is that document's root, whose objects are its
+    // children (in the SVG document's own cache).
+    auto &chart = page.Object(u8"chart");
+    CHECK(chart.Role() == AccessibilityRole::SVGRoot);
+    const auto &children = chart.Children();
+    REQUIRE(children.size() == 1);
+    auto &root = *children.front();
+    CHECK(root.IsAccessibilitySVGRoot());
+    CHECK(root.ParentObject() == &chart);
+    CHECK(root.AxObjectCache() != &page.Cache());
+    CHECK(root.AccessibleName() == u8"Chart");
+
+    // Its objects are where the image is.
+    auto *text = FindRole(root, AccessibilityRole::StaticText);
+    REQUIRE(text);
+    CHECK(text->ElementRect().Y() >= 30);
+    auto &webArea = *Downcast<AccessibilityScrollView>(*page.Cache().RootObject()).WebAreaObject();
+    auto rect = text->ElementRect();
+    auto *hit = webArea.AccessibilityHitTest(
+      IntPoint((rect.X() + rect.Width() / 2).ToInt(), (rect.Y() + rect.Height() / 2).ToInt()));
+    REQUIRE(hit);
+    CHECK(hit->AxObjectCache() == root.AxObjectCache());
+    CHECK((hit == text || hit->ParentObjectUnignored() == text));
+
+    // One without stays an image.
+    CHECK(page.Object(u8"plain").Role() == AccessibilityRole::Image);
+  }
+
+  TEST_CASE("AccessibilitySVGObject: SVG elements' bounds", "[Accessibility][AccessibilitySVGObject]")
+  {
+    AccessibilityFixture page(u8"<body style='margin: 0'><svg width=200 height=100>"
+                              u8"<text id=text x=10 y=50 font-size=16>Hello</text></svg>");
+
+    // An SVG text's bounds are where its text is, and hit testing finds it there.
+    auto &text = page.Object(u8"text");
+    auto rect = text.ElementRect();
+    CHECK(rect.X() >= 9);
+    CHECK(rect.Y() >= 30);
+    CHECK(rect.MaxY() <= 60);
+    auto &webArea = *Downcast<AccessibilityScrollView>(*page.Cache().RootObject()).WebAreaObject();
+    auto *hit = webArea.AccessibilityHitTest(
+      IntPoint((rect.X() + rect.Width() / 2).ToInt(), (rect.Y() + rect.Height() / 2).ToInt()));
+    REQUIRE(hit);
+    CHECK((hit == &text || hit->ParentObjectUnignored() == &text));
   }
 }

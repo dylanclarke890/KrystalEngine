@@ -5,6 +5,8 @@
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
+#include <filesystem>
+#include <fstream>
 
 #ifdef _WIN32
   #include "Krystal.PAL/Platform.hpp"
@@ -339,6 +341,47 @@ namespace krys::ui::tests
     auto paraStarts = tree.TextLineStarts(para);
     REQUIRE_FALSE(paraStarts.empty());
     CHECK(tree.Text(para)[paraStarts.front() - 1] == u8' ');
+  }
+
+  TEST_CASE("View: accessibility of SVG images", "[UI][Accessibility]")
+  {
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-accessibility-svg-image";
+    std::filesystem::create_directories(directory);
+    {
+      std::ofstream image(directory / "chart.svg", std::ios::binary);
+      image << "<svg xmlns='http://www.w3.org/2000/svg' width='80' height='40'>"
+               "<title>Chart</title><text x='2' y='20' font-size='16'>Sales</text></svg>";
+      std::ofstream page(directory / "page.html", std::ios::binary);
+      page << "<!DOCTYPE html><style>body { margin: 0 }</style><div style='height: 30px'></div>"
+              "<img src=chart.svg>";
+    }
+    View view({400, 300});
+    REQUIRE(LoadAndSettle(view, directory / "page.html"));
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 50});
+    auto &tree = *window.Tree;
+    auto root = tree.Root();
+
+    // The image's SVG document is under the image, its nodes kept apart from the page's.
+    auto chart = FindByName(tree, root, u8"Chart");
+    REQUIRE(chart != 0);
+    auto image = tree.Parent(chart);
+    REQUIRE(image != 0);
+    CHECK(tree.Children(image) == List<pal::AccessibilityNodeID> {chart});
+    CHECK(chart != image);
+    auto sales = FindByName(tree, chart, u8"Sales");
+    REQUIRE(sales != 0);
+    REQUIRE(tree.Node(sales));
+
+    // Its nodes are where the image is, and hit testing finds them there.
+    auto bounds = tree.Node(sales)->Bounds;
+    CHECK(bounds.Y >= 80);
+    auto hit = tree.HitTest(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2);
+    CHECK((hit == sales || tree.Parent(hit) == sales));
+
+    view.DetachAccessibility();
+    std::filesystem::remove_all(directory);
   }
 
   TEST_CASE("View: accessibility of overlays", "[UI][Accessibility]")

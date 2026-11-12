@@ -32,6 +32,8 @@
 
 namespace krys::boo::ax
 {
+  class AccessibilitySVGObject;
+
   /// @brief An accessibility object for a renderer: what the renderer adds to its node's object (whether
   /// it's in the tree given how it's rendered, its role from the kind of renderer, and its bounds). Its
   /// children still come from the DOM, apart from what only the render tree has (list markers).
@@ -74,6 +76,11 @@ namespace krys::boo::ax
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
     KRYS_NODISCARD bool IsOffScreen() const noexcept override;
     KRYS_NODISCARD AccessibilityObject *AccessibilityHitTest(const IntPoint &point) const noexcept override;
+    KRYS_NODISCARD AccessibilityObject *
+      ElementAccessibilityHitTest(const IntPoint &point) const noexcept override;
+    /// @brief The object of the root of the SVG document this image shows, in that document's cache (made if
+    /// @p create and it doesn't exist yet); null if it isn't showing an SVG image.
+    KRYS_NODISCARD AccessibilitySVGObject *RemoteSVGRoot(bool create = true) const noexcept;
     using AccessibilityNodeObject::SetValue;
     bool SetValue(dom::DOMStringView value) noexcept override;
     KRYS_NODISCARD bool IsIgnoredElementWithinMathTree() const noexcept override;
@@ -100,6 +107,10 @@ namespace krys::boo::ax
     void AddImageMapChildren() noexcept;
     /// @brief A number input's spin button.
     void AddTextFieldChildren() noexcept;
+    /// @brief The root of the SVG document an image shows.
+    void AddRemoteSVGChildren() noexcept;
+    /// @brief Moves @p rect, in an SVG image's document's coordinates, to where the image showing it is.
+    void OffsetForRemoteSVGElement(LayoutRect &rect) const noexcept;
     /// @brief Updates the roles that depend on the children (a menu with no items, a list).
     void UpdateRoleAfterChildrenCreation() noexcept;
     /// @brief The list item's marker renderer, if this is an unignored list item with one.

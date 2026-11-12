@@ -1158,7 +1158,8 @@ namespace krys::boo::ax
     /// @brief The unignored object at @p point (in the root view's coordinates) in this one's subtree.
     KRYS_NODISCARD virtual AccessibilityObject *AccessibilityHitTest(const IntPoint &point) const noexcept;
     /// @brief The object at @p point among this one and the children it makes itself (a slider's thumb).
-    KRYS_NODISCARD AccessibilityObject *ElementAccessibilityHitTest(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD virtual AccessibilityObject *
+      ElementAccessibilityHitTest(const IntPoint &point) const noexcept;
 
     // Actions: what assistive technology does with an object, as the user would.
 

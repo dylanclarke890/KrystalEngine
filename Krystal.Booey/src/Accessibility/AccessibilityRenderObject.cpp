@@ -28,6 +28,7 @@
 
 #include "Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilitySpinButton.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
@@ -50,6 +51,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
@@ -66,6 +68,9 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 
 namespace krys::boo::ax
 {
@@ -128,8 +133,96 @@ namespace krys::boo::ax
 
   void AccessibilityRenderObject::DetachRemoteParts(AccessibilityDetachmentType detachmentType) noexcept
   {
+    // An SVG image's root stops being this image's child.
+    if (auto *root = RemoteSVGRoot(false); root && root->RemoteParent() == this)
+    {
+      root->SetRemoteParent(nullptr);
+    }
     AccessibilityNodeObject::DetachRemoteParts(detachmentType);
     _renderer = nullptr;
+  }
+
+  AccessibilitySVGObject *AccessibilityRenderObject::RemoteSVGRoot(bool create) const noexcept
+  {
+    auto *renderImage = DynamicDowncast<RenderImage>(_renderer.get());
+    auto *cachedImage = renderImage ? renderImage->GetCachedImage() : nullptr;
+    if (!cachedImage || !cachedImage->HasImage())
+    {
+      return nullptr;
+    }
+    auto *svgImage = DynamicDowncast<svg::SVGImage>(cachedImage->GetImage());
+    auto root = svgImage ? svgImage->RootElement() : nullptr;
+    auto *rootRenderer = root ? root->Renderer() : nullptr;
+    if (!rootRenderer)
+    {
+      return nullptr;
+    }
+    // The SVG document's objects are in its own cache, as each document's are.
+    auto &document = root->NodeDocument();
+    auto *cache = create ? document.AxObjectCache() : document.ExistingAXObjectCache();
+    if (!cache)
+    {
+      return nullptr;
+    }
+    return DynamicDowncast<AccessibilitySVGObject>(create ? cache->GetOrCreate(*rootRenderer)
+                                                          : cache->Get(*rootRenderer));
+  }
+
+  void AccessibilityRenderObject::AddRemoteSVGChildren() noexcept
+  {
+    auto *root = RemoteSVGRoot();
+    if (!root)
+    {
+      return;
+    }
+    // An SVG image shown by more than one image is the first one's child (WebKit's rule too).
+    if (auto *parent = root->RemoteParent(); parent && parent != this)
+    {
+      return;
+    }
+    root->SetRemoteParent(this);
+    AddChild(root);
+  }
+
+  void AccessibilityRenderObject::OffsetForRemoteSVGElement(LayoutRect &rect) const noexcept
+  {
+    for (const AccessibilityObject *object = this; object; object = object->ParentObject())
+    {
+      auto *svgObject = DynamicDowncast<AccessibilitySVGObject>(*object);
+      if (auto *image = svgObject ? svgObject->RemoteParent() : nullptr)
+      {
+        rect.MoveBy(image->ElementRect().Location());
+        return;
+      }
+    }
+  }
+
+  AccessibilityObject *
+    AccessibilityRenderObject::ElementAccessibilityHitTest(const IntPoint &point) const noexcept
+  {
+    // An SVG image's document has no view of its own to hit test (it's drawn at each image's size), so its
+    // objects are found by their bounds, which are where the image is: the last child containing the point,
+    // as it's drawn on top, then its children.
+    if (auto *root = RemoteSVGRoot(); root && root->RemoteParent() == this)
+    {
+      AccessibilityObject *found = root;
+      for (bool descended = true; descended;)
+      {
+        descended = false;
+        const auto &children = found->Children();
+        for (auto child = children.rbegin(); child != children.rend(); ++child)
+        {
+          if ((*child)->ElementRect().Contains(LayoutPoint(point)))
+          {
+            found = child->get();
+            descended = true;
+            break;
+          }
+        }
+      }
+      return found;
+    }
+    return AccessibilityNodeObject::ElementAccessibilityHitTest(point);
   }
 
   dom::Document *AccessibilityRenderObject::GetDocument() const noexcept
@@ -295,6 +388,7 @@ namespace krys::boo::ax
     }
 
     AddImageMapChildren();
+    AddRemoteSVGChildren();
 
     UpdateOwnedChildrenIfNecessary();
     _subtreeDirty = false;
@@ -445,8 +539,11 @@ namespace krys::boo::ax
       {
         return HasPopup() ? AccessibilityRole::PopUpButton : AccessibilityRole::Button;
       }
-      // FIXME: An image of an SVG document with accessible content is an SVG root (remoteSVGRootElement),
-      // with SVG images.
+      // An image of an SVG document with something to expose is that document's root.
+      if (auto *svgRoot = RemoteSVGRoot(); svgRoot && svgRoot->IsRootWithAccessibleContent())
+      {
+        return AccessibilityRole::SVGRoot;
+      }
       return AccessibilityRole::Image;
     }
     if (renderer->IsRenderView())
@@ -1120,9 +1217,27 @@ namespace krys::boo::ax
     }
     // (The quads cover each of an inline's line boxes and a text's text boxes; Booey has no continuations.)
     LayoutRect rect(renderer->AbsoluteBoundingBoxRect());
+    // An SVG element's box is its bounding box, as for getBoundingClientRect (an SVG text renderer's quads
+    // leave out where its text is).
+    if (auto *svgElement = DynamicDowncast<svg::SVGElement>(GetElement());
+        svgElement && svgElement->HasAssociatedSVGLayoutBox())
+    {
+      if (auto box = svgElement->GetBoundingBox())
+      {
+        rect = LayoutRect(EnclosingIntRect(renderer->LocalToAbsoluteQuad(*box).BoundingBox()));
+      }
+    }
     if (rect.IsEmpty() && !IsWebArea())
     {
       return NonEmptyAncestorBoundingBox();
+    }
+    // An SVG image's objects are where the image showing it is.
+    auto *document = GetDocument();
+    auto documentElement = document ? document->DocumentElement() : nullptr;
+    auto *svgElement = DynamicDowncast<svg::SVGElement>(documentElement.get());
+    if (svgElement && Is<svg::SVGSvgElement>(*svgElement))
+    {
+      OffsetForRemoteSVGElement(rect);
     }
     return rect;
   }

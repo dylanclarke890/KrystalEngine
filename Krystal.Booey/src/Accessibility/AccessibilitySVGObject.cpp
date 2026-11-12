@@ -26,10 +26,12 @@
  */
 
 #include "Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
 
 namespace krys::boo::ax
 {
@@ -60,6 +62,49 @@ namespace krys::boo::ax
                                                              AXObjectCache &cache) noexcept
   {
     return AdoptRef(*new AccessibilitySVGObject(id, nullptr, &element, cache, false));
+  }
+
+  AccessibilityObject *AccessibilitySVGObject::ParentObject() const noexcept
+  {
+    // An SVG image's root is a child of the image showing it, in another document.
+    if (auto *parent = _remoteParent.get())
+    {
+      return parent;
+    }
+    return AccessibilityRenderObject::ParentObject();
+  }
+
+  bool AccessibilitySVGObject::IsRootWithAccessibleContent() const noexcept
+  {
+    auto *root = _isSVGRoot ? GetElement() : nullptr;
+    if (!root)
+    {
+      return false;
+    }
+    auto hasValue = [](const dom::Element &element, dom::DOMStringView name)
+    {
+      auto value = element.GetAttribute(name);
+      return value && !value->empty();
+    };
+    auto isAccessible = [&](const dom::Node &node)
+    {
+      auto *element = DynamicDowncast<dom::Element>(node);
+      if (!element || !Is<svg::SVGElement>(*element))
+      {
+        return false;
+      }
+      return IsSVGElementNamed(element, u8"title") || IsSVGElementNamed(element, u8"desc")
+             || Is<svg::SVGTextContentElement>(Downcast<svg::SVGElement>(*element)) || hasValue(*element, u8"role")
+             || hasValue(*element, u8"aria-label");
+    };
+    for (const dom::Node *node = root; node; node = dom::TreeQueries::Next(*node, root))
+    {
+      if (isAccessible(*node))
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   bool AccessibilitySVGObject::HasTitleOrDescriptionChild() const noexcept

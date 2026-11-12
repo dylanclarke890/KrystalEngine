@@ -33,12 +33,24 @@ namespace krys::ui
   {
     KRYS_NON_COPY_MOVABLE(ViewAccessibility);
 
+    /// @brief Another page's cache, by its document (a cache offers no weak pointers): still the one if the
+    /// document still has it.
+    struct ForeignCache
+    {
+      WeakPtr<boo::dom::Document> Document;
+      const boo::ax::AXObjectCache *Cache {nullptr};
+
+      KRYS_NODISCARD boo::ax::AXObjectCache *Get() const noexcept;
+    };
+
   private:
     View &_view;
     pal::IWindow *_window {nullptr};
     boo::IntPoint _origin;
-    /// @brief Counts the overlays shown, so a node of one that's gone isn't taken for one of the next.
-    uint32 _overlayGeneration {0};
+    /// @brief The other pages' caches whose objects are nodes (a shown overlay's page, SVG images'
+    /// documents), by their tag in node IDs less one. A slot is cleared, never reused, when its nodes go, so
+    /// a stale ID can't be taken for a node of another page.
+    mutable List<ForeignCache> _foreignCaches;
 
   public:
     explicit ViewAccessibility(View &view) noexcept;
@@ -98,9 +110,9 @@ namespace krys::ui
     KRYS_NODISCARD View *OverlayView() const noexcept;
     /// @brief The shown overlay's page's accessibility tree, if there's an overlay.
     KRYS_NODISCARD boo::ax::AXObjectCache *OverlayCache() const noexcept;
-    /// @brief Whether @p object is in the shown overlay's page.
-    KRYS_NODISCARD bool IsInOverlay(const boo::ax::AccessibilityObject &object) const noexcept;
-    /// @brief @p object's node ID (marked as the overlay's for an object in the overlay); 0 for none.
+    /// @brief Forgets @p cache's nodes: its objects' IDs stop resolving, and later ones are new.
+    void ForgetForeignCache(const boo::ax::AXObjectCache &cache) noexcept;
+    /// @brief @p object's node ID (tagged with its cache for an object of another page); 0 for none.
     KRYS_NODISCARD pal::AccessibilityNodeID ID(const boo::ax::AccessibilityObject *object) const noexcept;
     /// @brief The unignored object for @p node; null if it's gone.
     KRYS_NODISCARD boo::ax::AccessibilityObject *Object(pal::AccessibilityNodeID node) noexcept;

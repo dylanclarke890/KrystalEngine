@@ -37,6 +37,8 @@ namespace krys::boo::ax
   {
   private:
     bool _isSVGRoot {false};
+    /// @brief For the root of an SVG image's document, the object of the image showing it, if any.
+    WeakPtr<AccessibilityObject> _remoteParent;
 
   public:
     KRYS_NODISCARD static Ref<AccessibilitySVGObject>
@@ -54,6 +56,21 @@ namespace krys::boo::ax
     {
       return _isSVGRoot;
     }
+    KRYS_NODISCARD AccessibilityObject *ParentObject() const noexcept override;
+    /// @brief The object of the image showing this SVG image's root, if one is (its parent then).
+    KRYS_NODISCARD AccessibilityObject *RemoteParent() const noexcept
+    {
+      return _remoteParent.get();
+    }
+    /// @brief Makes @p parent (an image's object) the parent of this SVG image's root.
+    void SetRemoteParent(AccessibilityObject *parent) noexcept
+    {
+      krys_debug_assert(_isSVGRoot);
+      _remoteParent = parent ? CreateWeakPtr(parent) : nullptr;
+    }
+    /// @brief Whether this is a root with something to expose: a title, description, text, role or label in
+    /// it.
+    KRYS_NODISCARD bool IsRootWithAccessibleContent() const noexcept;
 
   protected:
     AccessibilitySVGObject(AXID id, RenderObject *renderer, dom::Node *node, AXObjectCache &cache,
