@@ -579,8 +579,8 @@ namespace krys::boo::html
   bool HTMLImageElement::IsLazyLoadable() const noexcept
   {
     // 1. If scripting is disabled for element, then return false.
-    auto *frame = NodeDocument().Frame();
-    if (!frame || !frame->GetMediaEnvironment().CanExecuteScripts)
+    //    (Scripting is enabled for any element in a frame: the application plays the part of scripts.)
+    if (!NodeDocument().Frame())
     {
       return false;
     }

@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/MediaTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -59,18 +59,12 @@ namespace krys::boo::css::tests
       return frame;
     }
 
-    /// @brief A parsed document, evaluated against an 800x600 screen view.
+    /// @brief A parsed document, evaluated against an 800x600 screen view in a page on a 1920x1080 screen.
     struct MatchMediaFixture : ValueFixture
     {
       Ref<dom::HTMLDocument> Document {Parse(u8"<!DOCTYPE html><p>")};
-      Ref<LocalFrame> Frame {ShowInFrame(*Document)};
-
-      MatchMediaFixture()
-      {
-        mq::MediaEnvironment environment;
-        environment.ScreenSize = FloatSize {1'920, 1'080};
-        Frame->SetMediaEnvironment(environment);
-      }
+      MediaPage Media {*Document};
+      Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
 
       /// @brief Resizes the view to be @p width wide.
       void Resize(int32 width)

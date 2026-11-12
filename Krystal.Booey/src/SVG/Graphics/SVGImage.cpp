@@ -452,9 +452,7 @@ namespace krys::boo::svg
       mainFrame.CreateView({});
       if (observer && observer->UseSystemDarkAppearance())
       {
-        auto environment = mainFrame.GetMediaEnvironment();
-        environment.UseDarkAppearance = true;
-        mainFrame.SetMediaEnvironment(environment);
+        _page->SetUseDarkAppearance(true);
       }
       auto &loader = mainFrame.Loader();
       loader.Init();

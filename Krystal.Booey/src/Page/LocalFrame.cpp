@@ -228,39 +228,4 @@ namespace krys::boo
       }
     }
   }
-
-  void LocalFrame::SetMediaEnvironment(const css::mq::MediaEnvironment &environment) noexcept
-  {
-    if (_mediaEnvironment == environment)
-    {
-      return;
-    }
-
-    bool deviceScaleFactorChanged = _mediaEnvironment.DeviceScaleFactor != environment.DeviceScaleFactor;
-    bool darkAppearanceChanged = _mediaEnvironment.UseDarkAppearance != environment.UseDarkAppearance;
-    _mediaEnvironment = environment;
-
-    RefPtr<dom::Document> document = _document;
-    if (!document)
-    {
-      return;
-    }
-
-    // The root style holds the device scale factor.
-    if (deviceScaleFactorChanged)
-    {
-      document->ScheduleFullStyleRebuild();
-    }
-
-    document->StyleScope().DidChangeStyleSheetEnvironment();
-
-    // Scrollbars that follow the page's appearance change with it, though their styles don't.
-    if (darkAppearanceChanged)
-    {
-      if (auto *view = document->View())
-      {
-        view->InvalidateScrollbarsForAllScrollableAreas();
-      }
-    }
-  }
 }

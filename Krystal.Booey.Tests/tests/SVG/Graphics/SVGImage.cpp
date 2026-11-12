@@ -212,9 +212,7 @@ namespace krys::boo::svg::tests
       u8R"svg(<rect width="40" height="20"/></svg>)svg",
       u8"image/svg+xml");
     auto page = Page::Create();
-    auto environment = page->MainFrame().GetMediaEnvironment();
-    environment.UseDarkAppearance = true;
-    page->MainFrame().SetMediaEnvironment(environment);
+    page->SetUseDarkAppearance(true);
     PageInFrameFixture fixture(*page, u8R"html(<body style="margin: 0"></body>)html");
 
     auto settings = Settings::Create();

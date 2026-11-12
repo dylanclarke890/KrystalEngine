@@ -27,7 +27,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
@@ -62,7 +61,6 @@ namespace krys::boo
     RefPtr<LocalFrameView> _view;
     UniquePtr<EventHandler> _eventHandler;
     UniquePtr<FrameLoader> _loader;
-    css::mq::MediaEnvironment _mediaEnvironment;
     float _pageZoomFactor {1};
     float _textZoomFactor {1};
     CachePolicy _subresourceCachePolicy {CachePolicy::Use};
@@ -163,15 +161,5 @@ namespace krys::boo
     KRYS_NODISCARD float FrameScaleFactor() const noexcept;
     /// @brief Tells the frame's compositor the device or page scale changed.
     void DeviceOrPageScaleFactorChanged() noexcept;
-
-    /// @brief The device and user state the frame's document is presented with.
-    KRYS_NODISCARD const css::mq::MediaEnvironment &GetMediaEnvironment() const noexcept
-    {
-      return _mediaEnvironment;
-    }
-
-    /// @brief Changes the media environment, and re-evaluates the document's style sheets if it changed. The
-    /// host then reports the changes to `MediaQueryList`s (`Document::EvaluateMediaQueriesAndReportChanges`).
-    void SetMediaEnvironment(const css::mq::MediaEnvironment &environment) noexcept;
   };
 }

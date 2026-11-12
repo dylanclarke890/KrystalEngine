@@ -440,8 +440,8 @@ namespace krys::boo
     // Page zoom applies to all frames synchronously, so include it in devicePixelRatio
     // for both main frame and iframes. FrameScaleFactor() doesn't include page zoom
     // since page zoom is applied globally for rendering.
-    return frame->GetMediaEnvironment().DeviceScaleFactor * frame->FrameScaleFactor()
-           * frame->PageZoomFactor();
+    auto *page = frame->GetPage();
+    return (page ? page->DeviceScaleFactor() : 1.f) * frame->FrameScaleFactor() * frame->PageZoomFactor();
   }
 
   Ref<css::CSSStyleDeclaration>

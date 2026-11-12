@@ -23,6 +23,7 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Booey/Page/PointerCharacteristics.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/DataListSuggestionPicker.hpp"
@@ -255,6 +256,82 @@ namespace krys::boo
     /// @brief Whether the system has a mouse, whose movement the host can report before the system's
     /// acceleration (pointer lock's unadjusted movement).
     KRYS_NODISCARD virtual bool HasAccessoryMousePointingDevice() const noexcept
+    {
+      return false;
+    }
+
+    // MARK: - Media features
+    // What the media features evaluate against, besides the page and its view. When an answer changes, the
+    // host calls `Page::UpdateStyleAfterChangeInEnvironment`.
+
+    /// @brief What the primary pointing device can do (`pointer`).
+    KRYS_NODISCARD virtual PointerCharacteristics PrimaryPointingDevice() const noexcept
+    {
+      return PointerCharacteristics::Fine;
+    }
+
+    /// @brief Whether the primary pointing device can hover (`hover`).
+    KRYS_NODISCARD virtual bool HoverSupportedByPrimaryPointingDevice() const noexcept
+    {
+      return true;
+    }
+
+    /// @brief What the available pointing devices can do, together (`any-pointer`).
+    KRYS_NODISCARD virtual PointerCharacteristics AllAvailablePointingDevices() const noexcept
+    {
+      return PointerCharacteristics::Fine;
+    }
+
+    /// @brief Whether any available pointing device can hover (`any-hover`).
+    KRYS_NODISCARD virtual bool HoverSupportedByAnyAvailablePointingDevice() const noexcept
+    {
+      return true;
+    }
+
+    /// @brief The screen's size, in CSS pixels (`device-width`, `device-height`, `device-aspect-ratio`).
+    KRYS_NODISCARD virtual FloatSize ScreenSize() const noexcept
+    {
+      return {};
+    }
+
+    /// @brief The screen's bits per colour component (`color`).
+    KRYS_NODISCARD virtual int32 ScreenDepthPerComponent() const noexcept
+    {
+      return 8;
+    }
+
+    /// @brief Whether the screen shows only shades of one colour (`monochrome`).
+    KRYS_NODISCARD virtual bool ScreenIsMonochrome() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the screen shows colours beyond sRGB, as Display P3 does (`color-gamut`).
+    KRYS_NODISCARD virtual bool ScreenSupportsExtendedColor() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the screen supports high dynamic range (`dynamic-range`).
+    KRYS_NODISCARD virtual bool ScreenSupportsHighDynamicRange() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the system inverts colours (`inverted-colors`).
+    KRYS_NODISCARD virtual bool ColorsAreInverted() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the user asked for more contrast (`prefers-contrast`).
+    KRYS_NODISCARD virtual bool UserPrefersContrast() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the user asked for less motion (`prefers-reduced-motion`).
+    KRYS_NODISCARD virtual bool UserPrefersReducedMotion() const noexcept
     {
       return false;
     }

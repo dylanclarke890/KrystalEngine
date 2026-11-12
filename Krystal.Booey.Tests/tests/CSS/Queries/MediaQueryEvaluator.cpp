@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/MediaTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -44,13 +44,15 @@ namespace krys::boo::css::tests
       return frame;
     }
 
-    /// @brief Evaluates queries against a document with a root element and an 800x600 screen view.
+    /// @brief Evaluates queries against a document with a root element and an 800x600 screen view, in a page
+    /// on a 1920x1080 screen whose chrome client's answers the test sets (`Chrome`).
     struct EvaluationFixture : ValueFixture
     {
       Ref<dom::Document> Document {CreateRef<dom::Document>()};
-      Ref<LocalFrame> Frame {ShowInFrame(*Document)};
+      MediaPage Media {*Document};
+      Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
+      MediaChromeClient &Chrome {*Media.Chrome};
       RenderStyle RootStyle {RenderStyle::Create()};
-      mq::MediaEnvironment Environment {};
       IntSize ViewSize {800, 600};
       CSSOMStringAtom ViewMediaType {Screen()};
 
@@ -58,14 +60,11 @@ namespace krys::boo::css::tests
       {
         auto root = CreateRef<dom::tests::TestElement>(*Document);
         REQUIRE_FALSE(Document->AppendChild(*root).HasException());
-        Environment.ScreenSize = FloatSize {1'920, 1'080};
-        Frame->SetMediaEnvironment(Environment);
       }
 
-      /// @brief Whether @p text matches with the current `Environment` and view, for @p mediaType.
+      /// @brief Whether @p text matches with the current page, chrome client and view, for @p mediaType.
       KRYS_NODISCARD bool Matches(utf8_stringview text, const CSSOMStringAtom &mediaType = Screen())
       {
-        Frame->SetMediaEnvironment(Environment);
         auto &view = *Frame->View();
         view.Resize(ViewSize);
         view.SetMediaType(ViewMediaType);
@@ -297,7 +296,7 @@ namespace krys::boo::css::tests
       CHECK(fixture.Matches(u8"(resolution: 96dpi)"));
       CHECK(fixture.Matches(u8"(resolution)"));
 
-      fixture.Environment.DeviceScaleFactor = 2.f;
+      fixture.Media.TestPage->SetDeviceScaleFactor(2.f);
       CHECK(fixture.Matches(u8"(resolution: 2x)"));
       CHECK(fixture.Matches(u8"(min-resolution: 192dpi)"));
       CHECK_FALSE(fixture.Matches(u8"(min-resolution: 3dppx)"));
@@ -320,7 +319,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(fixture.Matches(u8"(monochrome)"));
       CHECK(fixture.Matches(u8"(monochrome: 0)"));
 
-      fixture.Environment.ScreenIsMonochrome = true;
+      fixture.Chrome.Monochrome = true;
       CHECK(fixture.Matches(u8"(monochrome)"));
       CHECK(fixture.Matches(u8"(monochrome: 8)"));
     }
@@ -333,8 +332,8 @@ namespace krys::boo::css::tests
       CHECK(fixture.Matches(u8"(dynamic-range: standard)"));
       CHECK_FALSE(fixture.Matches(u8"(dynamic-range: high)"));
 
-      fixture.Environment.ScreenSupportsExtendedColor = true;
-      fixture.Environment.ScreenSupportsHighDynamicRange = true;
+      fixture.Chrome.ExtendedColor = true;
+      fixture.Chrome.HighDynamicRange = true;
       CHECK(fixture.Matches(u8"(color-gamut: srgb)"));
       CHECK(fixture.Matches(u8"(color-gamut: p3)"));
       CHECK_FALSE(fixture.Matches(u8"(color-gamut: rec2020)"));
@@ -385,10 +384,9 @@ namespace krys::boo::css::tests
 
     SECTION("A touch screen with a stylus")
     {
-      fixture.Environment.HoverSupportedByPrimaryPointingDevice = false;
-      fixture.Environment.PrimaryPointingDevice = mq::PointerCharacteristics::Coarse;
-      fixture.Environment.AllAvailablePointingDevices =
-        mq::PointerCharacteristics::Coarse | mq::PointerCharacteristics::Fine;
+      fixture.Chrome.PrimaryHovers = false;
+      fixture.Chrome.Primary = PointerCharacteristics::Coarse;
+      fixture.Chrome.AllAvailable = PointerCharacteristics::Coarse | PointerCharacteristics::Fine;
 
       CHECK_FALSE(fixture.Matches(u8"(hover)"));
       CHECK(fixture.Matches(u8"(hover: none)"));
@@ -401,10 +399,10 @@ namespace krys::boo::css::tests
 
     SECTION("No pointing device")
     {
-      fixture.Environment.HoverSupportedByPrimaryPointingDevice = false;
-      fixture.Environment.HoverSupportedByAnyAvailablePointingDevice = false;
-      fixture.Environment.PrimaryPointingDevice = mq::PointerCharacteristics::None;
-      fixture.Environment.AllAvailablePointingDevices = mq::PointerCharacteristics::None;
+      fixture.Chrome.PrimaryHovers = false;
+      fixture.Chrome.AnyHovers = false;
+      fixture.Chrome.Primary = PointerCharacteristics::None;
+      fixture.Chrome.AllAvailable = PointerCharacteristics::None;
 
       CHECK_FALSE(fixture.Matches(u8"(any-hover)"));
       CHECK(fixture.Matches(u8"(pointer: none)"));
@@ -433,10 +431,10 @@ namespace krys::boo::css::tests
 
     SECTION("With preferences")
     {
-      fixture.Environment.UseDarkAppearance = true;
-      fixture.Environment.UserPrefersContrast = true;
-      fixture.Environment.UserPrefersReducedMotion = true;
-      fixture.Environment.ColorsAreInverted = true;
+      fixture.Media.TestPage->SetUseDarkAppearance(true);
+      fixture.Chrome.PrefersContrast = true;
+      fixture.Chrome.PrefersReducedMotion = true;
+      fixture.Chrome.Inverted = true;
 
       CHECK(fixture.Matches(u8"(prefers-color-scheme: dark)"));
       CHECK(fixture.Matches(u8"(prefers-contrast: more)"));
@@ -452,15 +450,14 @@ namespace krys::boo::css::tests
   {
     EvaluationFixture fixture;
 
+    // Scripting is always enabled: the application plays the part of scripts.
     CHECK(fixture.Matches(u8"(scripting: enabled)"));
     CHECK(fixture.Matches(u8"(scripting)"));
     CHECK_FALSE(fixture.Matches(u8"(scripting: initial-only)"));
+    CHECK_FALSE(fixture.Matches(u8"(scripting: none)"));
     CHECK(fixture.Matches(u8"(display-mode: browser)"));
 
-    fixture.Environment.CanExecuteScripts = false;
-    fixture.Environment.DisplayMode = mq::DisplayMode::Standalone;
-    CHECK(fixture.Matches(u8"(scripting: none)"));
-    CHECK_FALSE(fixture.Matches(u8"(scripting)"));
+    fixture.Media.TestPage->SetDisplayMode(ApplicationDisplayMode::Standalone);
     CHECK(fixture.Matches(u8"(display-mode: standalone)"));
     CHECK_FALSE(fixture.Matches(u8"(display-mode: browser)"));
   }

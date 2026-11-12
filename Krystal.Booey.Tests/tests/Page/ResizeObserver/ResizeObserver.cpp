@@ -152,9 +152,7 @@ namespace krys::boo::tests
 
     SECTION("The device pixel content box is in whole device pixels, snapped where it sits")
     {
-      auto environment = fixture.TestPage->MainFrame().GetMediaEnvironment();
-      environment.DeviceScaleFactor = 1.5f;
-      fixture.TestPage->MainFrame().SetMediaEnvironment(environment);
+      fixture.TestPage->SetDeviceScaleFactor(1.5f);
       SetStyle(a, u8"width: 101px; height: 50px; margin-left: 0.5px; writing-mode: vertical-lr");
       recorder.Observer->Observe(a, {ResizeObserverBoxOptions::DevicePixelContentBox});
       update();

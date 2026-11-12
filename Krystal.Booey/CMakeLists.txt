@@ -517,7 +517,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Queries/GenericMediaQueryParser.hpp
   include/Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp
   include/Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp
-  include/Krystal.Booey/CSS/Queries/MediaEnvironment.hpp
   include/Krystal.Booey/CSS/Queries/MediaQuery.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp
@@ -2557,6 +2556,7 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/MouseEventWithHitTestResults.hpp
   include/Krystal.Booey/Page/Page.hpp
   include/Krystal.Booey/Page/PointerCaptureController.hpp
+  include/Krystal.Booey/Page/PointerCharacteristics.hpp
   include/Krystal.Booey/Page/PointerLockController.hpp
   include/Krystal.Booey/Page/ResizeObserver/ResizeObservation.hpp
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp

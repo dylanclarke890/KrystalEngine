@@ -80,6 +80,19 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 16uz);
 
 namespace krys::boo
 {
+  /// @brief How the page is presented, as an application manifest's `display` member (`display-mode`).
+  /// @see https://w3c.github.io/manifest/#display-modes
+  enum class ApplicationDisplayMode : uint8
+  {
+    Fullscreen,
+    Standalone,
+    MinimalUI,
+    Browser
+  };
+}
+
+namespace krys::boo
+{
   /// @brief A page: its main frame, and the rendering update that brings the page's documents up to date
   /// before the host paints them (the specification's "update the rendering"). Something that changes what
   /// the page shows schedules a rendering update; the host runs it at its next rendering opportunity.
@@ -103,6 +116,7 @@ namespace krys::boo
     EnumSet<RenderingUpdateStep> _unfulfilledRequestedSteps;
     uint32 _renderingUpdateDepth {0};
     float _pageScaleFactor {1};
+    float _deviceScaleFactor {1};
     bool _renderingUpdateIsScheduled {false};
     /// @brief Whether the rendering update in progress skipped a render-blocked document, which the next one
     /// tries again.
@@ -111,6 +125,8 @@ namespace krys::boo
     bool _imageAnimationEnabled {true};
     bool _prefersNonBlinkingCaret {false};
     bool _scriptedAnimationsSuspended {false};
+    bool _useDarkAppearance {false};
+    ApplicationDisplayMode _displayMode {ApplicationDisplayMode::Browser};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
     uint32 _displayNominalFramesPerSecond {FullSpeedFramesPerSecond};
 
@@ -151,9 +167,30 @@ namespace krys::boo
       return *_mainFrame;
     }
 
+    /// @brief Device pixels per CSS pixel.
+    KRYS_NODISCARD float DeviceScaleFactor() const noexcept
+    {
+      return _deviceScaleFactor;
+    }
+
+    /// @brief Changes the device scale factor, as the host's screen reports, and restyles the page.
+    void SetDeviceScaleFactor(float deviceScaleFactor) noexcept;
+
     /// @brief Whether the page is drawn with the dark appearance: the host's appearance, while the page is
     /// shown on a screen.
     KRYS_NODISCARD bool UseDarkAppearance() const noexcept;
+
+    /// @brief Changes the host's appearance, and restyles the page.
+    void SetUseDarkAppearance(bool useDarkAppearance) noexcept;
+
+    /// @brief How the page is presented.
+    KRYS_NODISCARD ApplicationDisplayMode DisplayMode() const noexcept
+    {
+      return _displayMode;
+    }
+
+    /// @brief Changes how the page is presented, and restyles the page.
+    void SetDisplayMode(ApplicationDisplayMode displayMode) noexcept;
 
     /// @brief Shows or hides the page, as its host reports: hidden while its window is minimised or another
     /// view is shown in its place. A hidden page suspends its animation frame callbacks and SMIL animations,

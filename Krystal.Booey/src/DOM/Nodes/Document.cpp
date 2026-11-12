@@ -4339,12 +4339,8 @@ namespace krys::boo::dom
 
   float Document::DeviceScaleFactor() const noexcept
   {
-    float deviceScaleFactor = 1.0;
-    if (auto *frame = Frame())
-    {
-      deviceScaleFactor = frame->GetMediaEnvironment().DeviceScaleFactor;
-    }
-    return deviceScaleFactor;
+    auto *page = GetPage();
+    return page ? page->DeviceScaleFactor() : 1.f;
   }
 
   bool Document::ShouldScheduleLayout() const noexcept

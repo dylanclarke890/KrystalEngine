@@ -186,7 +186,7 @@ Status: n/a (no JavaScript)
 ##### [8.1.3.4 Enabling and disabling scripting](https://html.spec.whatwg.org/#enabling-and-disabling-scripting)
 
 Status: reviewed (2026-11-01)
-> There's no script engine, so scripting is disabled for the parser (`<noscript>` is parsed as markup); the host says whether scripting counts as enabled for lazy loading (`MediaEnvironment::CanExecuteScripts`, see `DIFFERENCES.md`).
+> There's no script engine, so scripting is disabled for the parser (`<noscript>` is parsed as markup); for lazy loading and the `scripting` media feature, scripting counts as enabled for an element in a frame, the application playing the part of scripts (see `DIFFERENCES.md`).
 
 - [x] [Scripting is enabled](https://html.spec.whatwg.org/#concept-environment-script) — Scripting is enabled for an environment settings object settings when all of the following conditions are true:
 
