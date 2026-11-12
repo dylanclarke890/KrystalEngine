@@ -30,6 +30,7 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -43,13 +44,30 @@ namespace krys::boo::html
   {
   }
 
-  void DateTimeFieldElement::Initialize(DateTimeFieldElement &field, dom::DOMStringAtom part) noexcept
+  void DateTimeFieldElement::Initialize(DateTimeFieldElement &field, dom::DOMStringAtom part,
+                                        utf8_stringview label) noexcept
   {
     field.SetUserAgentPart(part);
     // Fields are focusable, and in sequential navigation.
     (void)field.SetAttribute(u8"tabindex", u8"0");
-    // FIXME: The fields' accessibility attributes (aria-label, role, aria-valuenow, aria-valuetext), once
-    // there are localised strings for their labels.
+    (void)field.SetAttribute(u8"role", u8"spinbutton");
+    if (!label.empty())
+    {
+      (void)field.SetAttribute(u8"aria-label", dom::DOMString(label));
+    }
+    field.UpdateAriaValueAttributes();
+  }
+
+  void DateTimeFieldElement::UpdateAriaValueAttributes() noexcept
+  {
+    if (!HasValue())
+    {
+      RemoveAttribute(dom::DOMStringAtom(u8"aria-valuenow"));
+      RemoveAttribute(dom::DOMStringAtom(u8"aria-valuetext"));
+      return;
+    }
+    (void)SetAttribute(u8"aria-valuenow", detail::IntegerToString(ValueAsInteger()));
+    (void)SetAttribute(u8"aria-valuetext", VisibleValue());
   }
 
   Maybe<style::UnadjustedStyle>
@@ -223,6 +241,8 @@ namespace krys::boo::html
       // The placeholder's colour comes and goes with the value.
       InvalidateStyle();
     }
+
+    UpdateAriaValueAttributes();
 
     if (eventBehavior == EventBehavior::DispatchInputAndChangeEvents && _fieldOwner)
     {

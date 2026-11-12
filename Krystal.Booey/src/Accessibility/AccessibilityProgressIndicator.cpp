@@ -102,8 +102,7 @@ namespace krys::boo::ax
     {
       return description;
     }
-    // A meter's value text is its content.
-    // FIXME: The gauge region (optimum, suboptimal or worse), once there are localised strings for it.
+    // A meter's value text is its content (WebKit adds the gauge region on Cocoa only; Chrome doesn't).
     if (auto *meter = MeterElement())
     {
       return meter->TextContent().value_or(dom::DOMString {});

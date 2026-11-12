@@ -351,4 +351,56 @@ namespace krys::boo::ax::tests
     // A selected option's aria-label overrides its text.
     CHECK(page.Object(u8"labelled").StringValue() == u8"Banana fruit");
   }
+
+  namespace
+  {
+    /// @brief The names of the objects under @p object with @p role, in order and separated by commas.
+    KRYS_NODISCARD std::string NamesWithRole(AccessibilityObject &object, AccessibilityRole role) noexcept
+    {
+      std::string names;
+      for (const auto &child : object.Children())
+      {
+        if (child->Role() == role)
+        {
+          auto name = child->AccessibleName();
+          names += (names.empty() ? "" : ",") + std::string(name.begin(), name.end());
+        }
+        auto nested = NamesWithRole(*child, role);
+        if (!nested.empty())
+        {
+          names += (names.empty() ? "" : ",") + nested;
+        }
+      }
+      return names;
+    }
+  }
+
+  TEST_CASE("AccessibilityNodeObject: form controls' internal parts are named",
+            "[Accessibility][AccessibilityNodeObject]")
+  {
+    AccessibilityFixture page(u8"<input id=date type=date value=2026-11-05><input id=time type=time>"
+                              u8"<input id=search type=search value=Query>");
+
+    // A date or time input's fields are spin buttons named after their units, valued while they have one.
+    CHECK(NamesWithRole(page.Object(u8"date"), AccessibilityRole::SpinButton) == "year,month,day");
+    CHECK(NamesWithRole(page.Object(u8"time"), AccessibilityRole::SpinButton).starts_with("hour,minutes"));
+    auto *dateShadow = page.ById(u8"date").UserAgentShadowRoot();
+    REQUIRE(dateShadow);
+    auto day = dateShadow->QuerySelector(u8"[aria-label=day]").Value();
+    REQUIRE(day);
+    CHECK(day->GetAttribute(u8"aria-valuenow") == u8"5");
+    CHECK(day->GetAttribute(u8"aria-valuetext") == u8"05");
+    auto *timeShadow = page.ById(u8"time").UserAgentShadowRoot();
+    REQUIRE(timeShadow);
+    auto hour = timeShadow->QuerySelector(u8"[aria-label=hour]").Value();
+    REQUIRE(hour);
+    CHECK_FALSE(hour->HasAttribute(u8"aria-valuenow"));
+
+    // A search field's cancel button is named (for when its shadow tree is exposed; a text field's isn't).
+    auto *searchShadow = page.ById(u8"search").UserAgentShadowRoot();
+    REQUIRE(searchShadow);
+    auto cancel = searchShadow->QuerySelector(u8"[role=button]").Value();
+    REQUIRE(cancel);
+    CHECK(cancel->GetAttribute(u8"aria-label") == u8"cancel");
+  }
 }

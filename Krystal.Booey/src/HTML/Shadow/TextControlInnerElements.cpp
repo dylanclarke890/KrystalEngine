@@ -33,6 +33,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
@@ -309,7 +310,7 @@ namespace krys::boo::html
   {
     auto element = CreateRef<SearchFieldCancelButtonElement>(document);
     element->SetUserAgentPart(css::UserAgentParts::WebkitSearchCancelButton());
-    // FIXME: The accessibility label (aria-label), once there are localised strings.
+    (void)element->SetAttribute(u8"aria-label", AXSearchFieldCancelButtonText());
     (void)element->SetAttribute(u8"role", u8"button");
     return element;
   }
