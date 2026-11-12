@@ -11,7 +11,7 @@ namespace krys::boo::ax::tests
   {
     AccessibilityFixture page(u8"<div style='height:2000px'>Tall</div>");
     auto &root = Downcast<AccessibilityScrollView>(*page.Cache().RootObject());
-    CHECK(root.IsRoot());
+    CHECK(root.ParentObject() == nullptr);
     CHECK(root.ScrollView() == page.Document->View());
     auto *webArea = root.WebAreaObject();
     CHECK(webArea == page.Cache().Get(*page.Document));

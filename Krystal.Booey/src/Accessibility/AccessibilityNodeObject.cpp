@@ -2672,8 +2672,6 @@ namespace krys::boo::ax
     {
       return;
     }
-    // FIXME: Telling the editor client accessibility is changing the selection
-    // (willChangeSelectionForAccessibility), with the host's accessibility bridge.
     if (auto *textControl = NativeTextControl(*this))
     {
       auto start = textControl->IndexForVisiblePosition(range.Start);

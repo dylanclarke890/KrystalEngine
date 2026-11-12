@@ -60,13 +60,6 @@ namespace krys::boo::ax
     return static_cast<LocalFrameView *>(_scrollView.get());
   }
 
-  bool AccessibilityScrollView::IsRoot() const noexcept
-  {
-    // The root of this cache's frame (each document has its own cache).
-    auto *cache = AxObjectCache();
-    return cache && GetDocument() == &cache->GetDocument();
-  }
-
   dom::Document *AccessibilityScrollView::GetDocument() const noexcept
   {
     auto *view = ScrollView();
@@ -75,8 +68,7 @@ namespace krys::boo::ax
 
   AccessibilityObject *AccessibilityScrollView::ParentObject() const noexcept
   {
-    // FIXME: A frame's view's parent is its owner element, in the parent document's tree
-    // (crossFrameParentObject), with frames.
+    // A view is the top of its document's tree: with no subframes, it's never in another document's.
     return nullptr;
   }
 
@@ -159,12 +151,7 @@ namespace krys::boo::ax
   {
     krys_debug_assert(!_childrenInitialized);
     _childrenInitialized = true;
-    // FIXME: A frame's view (not the root) has its frame's root as its child (addLocalFrameChild), with
-    // frames.
-    if (IsRoot())
-    {
-      AddChild(WebAreaObject());
-    }
+    AddChild(WebAreaObject());
     UpdateScrollbars();
   }
 
@@ -173,13 +160,6 @@ namespace krys::boo::ax
     auto *view = ScrollView();
     if (!view)
     {
-      return;
-    }
-    // FIXME: A view in a hidden web area (isWithinHiddenWebArea) has no scroll bars, with frames.
-    if (!IsRoot())
-    {
-      RemoveScrollbar(_horizontalScrollbar);
-      RemoveScrollbar(_verticalScrollbar);
       return;
     }
     UpdateScrollbar(_horizontalScrollbar, view->HorizontalScrollbar());
@@ -239,7 +219,6 @@ namespace krys::boo::ax
 
   bool AccessibilityScrollView::ComputeIsIgnored() const noexcept
   {
-    // FIXME: A frame's view (not the root) is ignored in favour of its frame's root, with frames.
     auto *webArea = WebAreaObject();
     return !webArea || webArea->IsIgnored();
   }

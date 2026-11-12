@@ -61,8 +61,6 @@ namespace krys::boo::ax
     KRYS_NODISCARD AccessibilityObject *WebAreaObject() const noexcept;
     /// @brief The view's scroll bar running in @p orientation (vertical if undefined), if it has one.
     KRYS_NODISCARD AccessibilityObject *ScrollBar(AccessibilityOrientation orientation) noexcept;
-    /// @brief Whether this is the view of the cache's document (rather than of a frame in it).
-    KRYS_NODISCARD bool IsRoot() const noexcept;
 
     KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;
     KRYS_NODISCARD AccessibilityObject *ParentObject() const noexcept override;
