@@ -215,7 +215,14 @@ namespace krys::pal::win32
     }
 
     // Text units, for the text pattern. Word boundaries are where a run of letters and digits, or a mark,
-    // starts; line boundaries are the paragraphs'.
+    // starts; line boundaries are where the host lays out lines, and paragraph boundaries follow line breaks.
+
+    /// @brief A node's text, and where its lines start (as UTF-16 offsets).
+    struct UnitText
+    {
+      std::wstring Text;
+      List<int32> LineStarts;
+    };
 
     KRYS_NODISCARD int32 CharacterClass(wchar_t character) noexcept
     {
@@ -226,8 +233,9 @@ namespace krys::pal::win32
       return ::iswalnum(character) ? 1 : 2;
     }
 
-    KRYS_NODISCARD bool IsBoundary(const std::wstring &text, int32 position, TextUnit unit) noexcept
+    KRYS_NODISCARD bool IsBoundary(const UnitText &unitText, int32 position, TextUnit unit) noexcept
     {
+      const auto &text = unitText.Text;
       auto length = static_cast<int32>(text.size());
       if (position <= 0 || position >= length)
       {
@@ -243,14 +251,19 @@ namespace krys::pal::win32
           return current != 0 && (current != previous || current == 2);
         }
         case TextUnit_Line:
+          if (std::ranges::binary_search(unitText.LineStarts, position))
+          {
+            return true;
+          }
+          KRYS_FALLTHROUGH;
         case TextUnit_Paragraph: return text[static_cast<size_t>(position) - 1] == L'\n';
         default:                 return false;
       }
     }
 
-    KRYS_NODISCARD int32 NextBoundary(const std::wstring &text, int32 position, TextUnit unit) noexcept
+    KRYS_NODISCARD int32 NextBoundary(const UnitText &text, int32 position, TextUnit unit) noexcept
     {
-      auto length = static_cast<int32>(text.size());
+      auto length = static_cast<int32>(text.Text.size());
       for (int32 next = position + 1; next < length; ++next)
       {
         if (IsBoundary(text, next, unit))
@@ -261,7 +274,7 @@ namespace krys::pal::win32
       return length;
     }
 
-    KRYS_NODISCARD int32 PreviousBoundary(const std::wstring &text, int32 position, TextUnit unit) noexcept
+    KRYS_NODISCARD int32 PreviousBoundary(const UnitText &text, int32 position, TextUnit unit) noexcept
     {
       for (int32 previous = position - 1; previous > 0; --previous)
       {
@@ -1198,12 +1211,12 @@ namespace krys::pal::win32
 
     IFACEMETHODIMP ExpandToEnclosingUnit(TextUnit unit) noexcept override
     {
-      std::wstring text;
-      if (auto failure = ReadText(text); FAILED(failure))
+      UnitText text;
+      if (auto failure = ReadUnitText(text); FAILED(failure))
       {
         return failure;
       }
-      auto length = static_cast<int32>(text.size());
+      auto length = static_cast<int32>(text.Text.size());
       Clamp(length);
       if (unit == TextUnit_Format || unit == TextUnit_Page || unit == TextUnit_Document)
       {
@@ -1362,12 +1375,12 @@ namespace krys::pal::win32
         return E_POINTER;
       }
       *moved = 0;
-      std::wstring text;
-      if (auto failure = ReadText(text); FAILED(failure))
+      UnitText text;
+      if (auto failure = ReadUnitText(text); FAILED(failure))
       {
         return failure;
       }
-      auto length = static_cast<int32>(text.size());
+      auto length = static_cast<int32>(text.Text.size());
       Clamp(length);
       if (unit == TextUnit_Format || unit == TextUnit_Page || unit == TextUnit_Document)
       {
@@ -1405,12 +1418,12 @@ namespace krys::pal::win32
         return E_POINTER;
       }
       *moved = 0;
-      std::wstring text;
-      if (auto failure = ReadText(text); FAILED(failure))
+      UnitText text;
+      if (auto failure = ReadUnitText(text); FAILED(failure))
       {
         return failure;
       }
-      auto length = static_cast<int32>(text.size());
+      auto length = static_cast<int32>(text.Text.size());
       Clamp(length);
       auto position = Endpoint(endpoint);
       if (unit == TextUnit_Format || unit == TextUnit_Page || unit == TextUnit_Document)
@@ -1545,6 +1558,24 @@ namespace krys::pal::win32
         return UIA_E_ELEMENTNOTAVAILABLE;
       }
       text = Widen(owner->Tree().Text(_element->Node()));
+      return S_OK;
+    }
+
+    /// @brief Reads the node's text with its lines, for moving by units.
+    HRESULT ReadUnitText(UnitText &text) const noexcept
+    {
+      auto *owner = _element->Owner();
+      if (!owner || !_element->Info())
+      {
+        return UIA_E_ELEMENTNOTAVAILABLE;
+      }
+      auto &tree = owner->Tree();
+      auto utf8 = tree.Text(_element->Node());
+      text.Text = Widen(utf8);
+      for (auto start : tree.TextLineStarts(_element->Node()))
+      {
+        text.LineStarts.push_back(ToUTF16Offset(utf8, start));
+      }
       return S_OK;
     }
 

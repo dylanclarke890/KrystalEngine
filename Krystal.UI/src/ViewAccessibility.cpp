@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Accessibility/AXNotifications.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -806,5 +807,41 @@ namespace krys::ui
                         rect.Width(), rect.Height()});
     }
     return bounds;
+  }
+
+  List<uint64> ViewAccessibility::TextLineStarts(pal::AccessibilityNodeID node) noexcept
+  {
+    List<uint64> starts;
+    auto *object = Object(node);
+    if (!object || IsPassword(*object))
+    {
+      return starts;
+    }
+    auto range = object->GetVisiblePositionRange();
+    if (range.IsNull())
+    {
+      return starts;
+    }
+    // Each line starts where moving down from the previous one's start lands, at its start.
+    auto length = Text(node).size();
+    auto lineStart = object->VisiblePositionForIndex(0);
+    int32 previous = 0;
+    while (true)
+    {
+      auto next = boo::StartOfLine(boo::NextLinePosition(lineStart, 0, boo::EditableType::ContentIsEditable));
+      if (next.IsNull() || next == lineStart)
+      {
+        break;
+      }
+      auto index = object->IndexForVisiblePosition(next);
+      if (index <= previous || static_cast<uint64>(index) >= length)
+      {
+        break;
+      }
+      starts.push_back(static_cast<uint64>(index));
+      previous = index;
+      lineStart = next;
+    }
+    return starts;
   }
 }

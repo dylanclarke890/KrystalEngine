@@ -275,5 +275,8 @@ namespace krys::pal
     /// @brief The bounds of each line of @p range of @p node's text, in the window's client area.
     KRYS_NODISCARD virtual List<AccessibilityRect> TextBounds(AccessibilityNodeID node,
                                                               AccessibilityTextRange range) noexcept = 0;
+    /// @brief Where each line of @p node's text after the first starts, as ascending offsets in its text, as
+    /// it's laid out (wrapped lines included).
+    KRYS_NODISCARD virtual List<uint64> TextLineStarts(AccessibilityNodeID node) noexcept = 0;
   };
 }

@@ -89,6 +89,7 @@ namespace krys::ui
     bool SetTextSelection(pal::AccessibilityNodeID node, pal::AccessibilityTextRange range) noexcept override;
     KRYS_NODISCARD List<pal::AccessibilityRect>
       TextBounds(pal::AccessibilityNodeID node, pal::AccessibilityTextRange range) noexcept override;
+    KRYS_NODISCARD List<uint64> TextLineStarts(pal::AccessibilityNodeID node) noexcept override;
 
   private:
     /// @brief The page's accessibility tree, turning accessibility on if it's off.

@@ -307,6 +307,40 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: accessibility of text lines", "[UI][Accessibility]")
+  {
+    View view({400, 300});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; font: 16px monospace } * { width: 100px }</style>"
+      u8"<textarea id=area aria-label=Notes>aaaa bbbb cccc dddd\neeee</textarea>"
+      u8"<p id=para aria-label=Para>aaaa bbbb cccc dddd</p>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 0});
+    auto &tree = *window.Tree;
+    auto root = tree.Root();
+
+    // Wrapped lines start lines, as line breaks do.
+    auto area = FindByName(tree, root, u8"Notes");
+    REQUIRE(area != 0);
+    auto text = tree.Text(area);
+    auto starts = tree.TextLineStarts(area);
+    REQUIRE(starts.size() >= 2);
+    CHECK(std::ranges::is_sorted(starts));
+    CHECK(std::ranges::find(starts, text.find(u8'e')) != starts.end());
+    CHECK(starts.front() < text.find(u8'e'));
+    CHECK(text[starts.front() - 1] == u8' ');
+
+    // A paragraph's lines too.
+    auto para = FindByRole(tree, root, pal::AccessibilityRole::Paragraph);
+    REQUIRE(para != 0);
+    auto paraStarts = tree.TextLineStarts(para);
+    REQUIRE_FALSE(paraStarts.empty());
+    CHECK(tree.Text(para)[paraStarts.front() - 1] == u8' ');
+  }
+
   TEST_CASE("View: accessibility of overlays", "[UI][Accessibility]")
   {
     View view({400, 300});
@@ -413,7 +447,9 @@ namespace krys::ui::tests
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 }</style>"
                   u8"<button id=button style='width: 100px; height: 40px'>Go</button>"
                   u8"<input id=field aria-label=Name value=Hello>"
-                  u8"<input id=box type=checkbox aria-label=Agree>");
+                  u8"<input id=box type=checkbox aria-label=Agree>"
+                  u8"<textarea aria-label=Notes style='width: 100px; font: 16px monospace'>"
+                  u8"aaaa bbbb cccc</textarea>");
     WaitForLoad(view);
     view.UpdateRendering();
     int32 clicks = 0;
@@ -483,6 +519,24 @@ namespace krys::ui::tests
       CHECK(SUCCEEDED(range->GetText(-1, &all)));
       CHECK(std::wstring(all ? all : L"") == L"Changed");
       ::SysFreeString(all);
+
+      // The line unit follows wrapped lines.
+      ComRef<IUIAutomationElement> notes;
+      FindByName(*automation.Pointer, *root.Pointer, L"Notes", notes);
+      REQUIRE(notes);
+      ComRef<IUIAutomationTextPattern> notesText;
+      REQUIRE(SUCCEEDED(notes->GetCurrentPatternAs(UIA_TextPatternId, __uuidof(IUIAutomationTextPattern),
+                                                   reinterpret_cast<void **>(&notesText))));
+      REQUIRE(notesText);
+      ComRef<IUIAutomationTextRange> line;
+      REQUIRE(SUCCEEDED(notesText->get_DocumentRange(&line)));
+      CHECK(SUCCEEDED(line->MoveEndpointByRange(TextPatternRangeEndpoint_End, line.Pointer,
+                                                TextPatternRangeEndpoint_Start)));
+      CHECK(SUCCEEDED(line->ExpandToEnclosingUnit(TextUnit_Line)));
+      BSTR firstLine = nullptr;
+      CHECK(SUCCEEDED(line->GetText(-1, &firstLine)));
+      CHECK(std::wstring(firstLine ? firstLine : L"") == L"aaaa bbbb ");
+      ::SysFreeString(firstLine);
 
       ComRef<IUIAutomationElement> box;
       FindByName(*automation.Pointer, *root.Pointer, L"Agree", box);
