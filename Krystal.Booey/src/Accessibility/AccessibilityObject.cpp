@@ -697,7 +697,6 @@ namespace krys::boo::ax
       {
         return AccessibilityObjectInclusion::IgnoreObject;
       }
-      // FIXME: Including hidden="until-found" content (isHiddenUntilFoundContainer), with search.
       if (style->UsedVisibility() != Visibility::Visible)
       {
         return AccessibilityObjectInclusion::IgnoreObject;
