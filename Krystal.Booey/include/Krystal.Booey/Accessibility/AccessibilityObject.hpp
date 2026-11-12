@@ -1106,6 +1106,65 @@ namespace krys::boo::ax
     {
       return {};
     }
+    /// @brief Where a press lands: the middle of the object (of its one child, for a heading, which is
+    /// usually much wider than its text).
+    KRYS_NODISCARD IntPoint ClickPoint() noexcept;
+    /// @brief Whether none of the object is in the view's visible content.
+    KRYS_NODISCARD virtual bool IsOffScreen() const noexcept
+    {
+      return false;
+    }
+    /// @brief The unignored object at @p point (in the root view's coordinates) in this one's subtree.
+    KRYS_NODISCARD virtual AccessibilityObject *AccessibilityHitTest(const IntPoint &point) const noexcept;
+    /// @brief The object at @p point among this one and the children it makes itself (a slider's thumb).
+    KRYS_NODISCARD AccessibilityObject *ElementAccessibilityHitTest(const IntPoint &point) const noexcept;
+
+    // Actions: what assistive technology does with an object, as the user would.
+
+    /// @brief The element a press acts on: the object's control (or one the author hid inside an ARIA
+    /// control), its link, or null if pressing it does nothing.
+    KRYS_NODISCARD virtual dom::Element *ActionElement() const noexcept
+    {
+      return nullptr;
+    }
+    /// @brief Presses the object as a click would (on the element under its click point, if that's in it);
+    /// whether anything was pressed.
+    virtual bool Press() noexcept;
+    /// @brief Focuses (or unfocuses) the object's element, first focusing the page.
+    virtual void SetFocused(bool focused) noexcept;
+    /// @brief Whether the object's value can be set (an editable text control, a range control).
+    KRYS_NODISCARD virtual bool CanSetValueAttribute() const noexcept
+    {
+      return false;
+    }
+    /// @brief Sets a text control's value as typing would, or a slider's value; whether it was set.
+    virtual bool SetValue(dom::DOMStringView value) noexcept
+    {
+      (void)value;
+      return false;
+    }
+    /// @brief Sets a range control's value; whether it was set.
+    virtual bool SetValue(float value) noexcept;
+    /// @brief Steps a slider or spin button up.
+    virtual void Increment() noexcept
+    {
+    }
+    /// @brief Steps a slider or spin button down.
+    virtual void Decrement() noexcept
+    {
+    }
+    /// @brief Selects (or deselects) an option.
+    virtual void SetSelected(bool selected) noexcept
+    {
+      (void)selected;
+    }
+    /// @brief Opens (or closes) a disclosure (`details`).
+    virtual void SetIsExpanded(bool expanded) noexcept
+    {
+      (void)expanded;
+    }
+    /// @brief Scrolls the object into view.
+    void ScrollToMakeVisible() const noexcept;
 
   protected:
     AccessibilityObject(AXID id, AXObjectCache &cache) noexcept;

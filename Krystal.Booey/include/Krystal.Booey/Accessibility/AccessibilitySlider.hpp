@@ -50,6 +50,8 @@ namespace krys::boo::ax
     KRYS_NODISCARD float MaxValueForRange() const noexcept override;
     KRYS_NODISCARD float MinValueForRange() const noexcept override;
     KRYS_NODISCARD Maybe<AccessibilityOrientation> ExplicitOrientation() const noexcept override;
+    using AccessibilityRenderObject::SetValue;
+    bool SetValue(dom::DOMStringView value) noexcept override;
 
   private:
     AccessibilitySlider(AXID id, RenderObject &renderer, AXObjectCache &cache) noexcept;

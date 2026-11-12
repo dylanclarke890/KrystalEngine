@@ -639,6 +639,7 @@ target_sources(Krystal.Booey.Tests
 
 		# Accessibility
 		tests/Accessibility/ARIAMixin.cpp
+		tests/Accessibility/AXActions.cpp
 		tests/Accessibility/AXLiveRegions.cpp
 		tests/Accessibility/AXLogger.cpp
 		tests/Accessibility/AXModal.cpp

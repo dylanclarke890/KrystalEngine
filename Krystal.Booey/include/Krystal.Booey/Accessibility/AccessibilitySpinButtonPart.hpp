@@ -48,7 +48,7 @@ namespace krys::boo::ax
       _isIncrementor = value;
     }
     /// @brief Steps the spin button's input up or down; false if the part has no spin button.
-    bool Press() noexcept;
+    bool Press() noexcept override;
 
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 

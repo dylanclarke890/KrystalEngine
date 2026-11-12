@@ -76,6 +76,7 @@ namespace krys::boo::ax
       return IsEnabled();
     }
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+    void SetSelected(bool selected) noexcept override;
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
   private:

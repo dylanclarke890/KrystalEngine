@@ -64,7 +64,12 @@ namespace krys::boo::ax
       return 1;
     }
     /// @brief Scrolls to @p value, a fraction of the most the view can scroll.
-    bool SetValue(float value) noexcept;
+    KRYS_NODISCARD bool CanSetValueAttribute() const noexcept override
+    {
+      return true;
+    }
+    using AccessibilityMockObject::SetValue;
+    bool SetValue(float value) noexcept override;
 
   private:
     AccessibilityScrollbar(AXID id, Scrollbar &scrollbar, AXObjectCache &cache) noexcept;

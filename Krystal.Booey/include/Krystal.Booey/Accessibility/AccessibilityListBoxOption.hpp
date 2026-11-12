@@ -64,6 +64,7 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool IsEnabled() const noexcept override;
     KRYS_NODISCARD bool IsSelected() const noexcept override;
     KRYS_NODISCARD bool CanSetSelectedAttribute() const noexcept override;
+    void SetSelected(bool selected) noexcept override;
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 

@@ -112,6 +112,16 @@ namespace krys::boo::ax
     return option && option->Selected();
   }
 
+  void AccessibilityListBoxOption::SetSelected(bool selected) noexcept
+  {
+    auto *select = ListBoxOptionParentNode();
+    if (!select || !CanSetSelectedAttribute() || IsSelected() == selected)
+    {
+      return;
+    }
+    select->AccessKeySetSelectedIndex(select->ListToOptionIndex(ListBoxOptionIndex()));
+  }
+
   bool AccessibilityListBoxOption::CanSetSelectedAttribute() const noexcept
   {
     auto *option = DynamicDowncast<html::HTMLOptionElement>(GetNode());

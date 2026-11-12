@@ -38,19 +38,28 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
@@ -908,6 +917,106 @@ namespace krys::boo::ax
       return dom::DOMString(marker->TextWithSuffix());
     }
     return AccessibilityNodeObject::StringValue();
+  }
+
+  bool AccessibilityRenderObject::IsOffScreen() const noexcept
+  {
+    auto *renderer = _renderer.get();
+    auto *view = renderer ? renderer->GetDocument().View() : nullptr;
+    if (!view)
+    {
+      return true;
+    }
+    auto contentRect = SnappedIntRect(renderer->AbsoluteClippedOverflowRectForSpatialNavigation());
+    auto viewRect = view->VisibleContentRect();
+    viewRect.Intersect(contentRect);
+    return viewRect.IsEmpty();
+  }
+
+  AccessibilityObject *AccessibilityRenderObject::AccessibilityHitTest(const IntPoint &point) const noexcept
+  {
+    auto *renderer = DynamicDowncast<RenderLayerModelObject>(_renderer.get());
+    if (!renderer || !renderer->HasLayer())
+    {
+      return nullptr;
+    }
+    (void)renderer->GetDocument().UpdateLayout();
+    // Layout may have destroyed the renderer or its layer.
+    renderer = DynamicDowncast<RenderLayerModelObject>(_renderer.get());
+    if (!renderer || !renderer->HasLayer())
+    {
+      return nullptr;
+    }
+
+    HitTestResult hitTestResult {LayoutPoint(point)};
+    (void)renderer->Layer()->HitTest(HitTestRequest(EnumSet<HitTestRequest::Type> {
+                                       HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+                                       HitTestRequest::Type::AccessibilityHitTest}),
+                                     hitTestResult);
+    dom::Node *node = hitTestResult.InnerNode();
+    if (!node)
+    {
+      return nullptr;
+    }
+    // An option is part of its list box.
+    if (auto *option = DynamicDowncast<html::HTMLOptionElement>(*node))
+    {
+      node = option->OwnerSelectElement();
+    }
+    auto *cache = node ? node->NodeDocument().AxObjectCache() : nullptr;
+    RefPtr<AccessibilityObject> result = ShareRefPtr(cache ? cache->GetOrCreate(*node) : nullptr);
+    if (!result)
+    {
+      return nullptr;
+    }
+    result->UpdateChildrenIfNecessary();
+
+    // A list box's options have no renderers: the hit one is found from their rows.
+    if (auto *listBox = DynamicDowncast<RenderListBox>(result->Renderer()); listBox && result->IsListBox())
+    {
+      auto parentRect = result->ElementRect();
+      const auto &children = result->Children();
+      for (size_t i = 0; i < children.size(); ++i)
+      {
+        if (listBox->ItemBoundingBoxRect(parentRect.Location(), static_cast<int32>(i))
+              .Contains(LayoutPoint(point)))
+        {
+          return children[i].get();
+        }
+      }
+      return result.get();
+    }
+
+    auto *hit = result->ElementAccessibilityHitTest(point);
+    return hit && hit->IsIgnored() ? hit->ParentObjectUnignored() : hit;
+  }
+
+  bool AccessibilityRenderObject::SetValue(dom::DOMStringView value) noexcept
+  {
+    RefPtr<dom::Element> element = ShareRefPtr(GetElement());
+    if (!element)
+    {
+      return false;
+    }
+    // A focused editable element is typed into, replacing what's there.
+    auto &document = element->NodeDocument();
+    if (document.Frame() && document.FocusedElement() == element && element->ShouldUseInputMethod())
+    {
+      document.Selection().SelectAll();
+      (void)document.GetEditor().InsertText(value, nullptr);
+      return true;
+    }
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*element); input && input->IsTextField())
+    {
+      (void)input->SetValue(value, html::TextFieldEventBehavior::DispatchInputAndChangeEvent);
+      return true;
+    }
+    if (auto *textArea = DynamicDowncast<html::HTMLTextAreaElement>(*element))
+    {
+      (void)textArea->SetValue(value, html::TextFieldEventBehavior::DispatchInputAndChangeEvent);
+      return true;
+    }
+    return false;
   }
 
   LayoutRect AccessibilityRenderObject::ElementRect() const noexcept

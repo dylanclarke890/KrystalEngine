@@ -111,6 +111,14 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool SupportsExpanded() const noexcept override;
     KRYS_NODISCARD bool IsExpanded() const noexcept override;
     KRYS_NODISCARD bool CanSetFocusAttribute() const noexcept override;
+    KRYS_NODISCARD bool CanSetValueAttribute() const noexcept override;
+    KRYS_NODISCARD dom::Element *ActionElement() const noexcept override;
+    void SetFocused(bool focused) noexcept override;
+    void Increment() noexcept override;
+    void Decrement() noexcept override;
+    void SetIsExpanded(bool expanded) noexcept override;
+    /// @brief The nearest link at or above the object's node.
+    KRYS_NODISCARD dom::Element *AnchorElement() const noexcept;
     KRYS_NODISCARD uint32 HeadingLevel() const noexcept override;
 
     KRYS_NODISCARD dom::DOMString AccessibleName() const noexcept override;

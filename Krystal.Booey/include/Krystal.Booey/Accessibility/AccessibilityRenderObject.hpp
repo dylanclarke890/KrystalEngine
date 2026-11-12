@@ -70,6 +70,10 @@ namespace krys::boo::ax
 
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
+    KRYS_NODISCARD bool IsOffScreen() const noexcept override;
+    KRYS_NODISCARD AccessibilityObject *AccessibilityHitTest(const IntPoint &point) const noexcept override;
+    using AccessibilityNodeObject::SetValue;
+    bool SetValue(dom::DOMStringView value) noexcept override;
     KRYS_NODISCARD bool IsIgnoredElementWithinMathTree() const noexcept override;
 
   protected:

@@ -99,6 +99,34 @@ namespace krys::boo::ax
     cache->PostNotification(this, AXNotification::MenuListValueChanged);
   }
 
+  bool AccessibilityMenuList::Press() noexcept
+  {
+    auto *menuList = DynamicDowncast<RenderMenuList>(Renderer());
+    if (!menuList)
+    {
+      return false;
+    }
+    auto *element = GetElement();
+    auto notification = AXNotification::PressDidFail;
+    if (element && !element->IsDisabledFormControl())
+    {
+      if (menuList->PopupIsVisible())
+      {
+        menuList->HidePopup();
+      }
+      else
+      {
+        menuList->ShowPopup();
+      }
+      notification = AXNotification::PressDidSucceed;
+    }
+    if (auto *cache = AxObjectCache())
+    {
+      cache->PostNotification(element, notification);
+    }
+    return true;
+  }
+
   bool AccessibilityMenuList::CanSetFocusAttribute() const noexcept
   {
     auto *element = GetElement();

@@ -33,7 +33,9 @@
 #include "Krystal.Booey/Accessibility/AXObjectRareData.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -42,7 +44,10 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
@@ -60,6 +65,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
@@ -1927,6 +1933,302 @@ namespace krys::boo::ax
     }
     auto *element = DynamicDowncast<dom::Element>(*node);
     return element && !element->IsDisabledFormControl() && html::FocusAlgorithms::IsFocusableArea(*element);
+  }
+
+  bool AccessibilityNodeObject::CanSetValueAttribute() const noexcept
+  {
+    auto *node = GetNode();
+    if (!node)
+    {
+      return false;
+    }
+    // The host language's readonly beats aria-readonly.
+    if (auto *textArea = DynamicDowncast<html::HTMLTextAreaElement>(*node))
+    {
+      return !textArea->ReadOnly();
+    }
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*node); input && input->IsTextField())
+    {
+      return !input->ReadOnly();
+    }
+    auto readOnly = GetAttributeTrimmed(u8"aria-readonly");
+    if (!readOnly.empty())
+    {
+      return !EqualsIgnoringCase(readOnly, u8"true");
+    }
+    if (IsNonNativeTextControl())
+    {
+      return true;
+    }
+    if (Role() == AccessibilityRole::Meter)
+    {
+      return false;
+    }
+    if (IsProgressIndicator() || IsSlider() || Role() == AccessibilityRole::ScrollBar)
+    {
+      return true;
+    }
+    if (IsWebArea())
+    {
+      auto *document = GetDocument();
+      auto body = document ? document->Body() : nullptr;
+      return document && ((body && body->HasEditableStyle()) || document->HasEditableStyle());
+    }
+    return node->HasEditableStyle();
+  }
+
+  namespace
+  {
+    /// @brief @p node, if it's a control a press acts on itself.
+    KRYS_NODISCARD dom::Element *NodeActionElement(dom::Node &node) noexcept
+    {
+      if (auto *input = DynamicDowncast<html::HTMLInputElement>(node))
+      {
+        if (!input->IsDisabledFormControl()
+            && (input->IsRadioButton() || input->IsCheckbox() || input->IsTextButton()
+                || input->IsFileUpload() || input->IsImageButton() || input->IsTextField()
+                || input->IsDateField() || input->IsDateTimeLocalField()))
+        {
+          return input;
+        }
+      }
+      else if (auto tag = HTMLTagNameOf(&node); tag == TagName::button || tag == TagName::select)
+      {
+        return &Downcast<dom::Element>(node);
+      }
+      // Editable content takes presses too.
+      auto *element = DynamicDowncast<dom::Element>(node);
+      return element && ContentEditableAttributeIsEnabled(*element) ? element : nullptr;
+    }
+
+    /// @brief A control the author hid inside an ARIA control (a group with role=button around a button).
+    KRYS_NODISCARD dom::Element *NativeActionElement(dom::Node &start) noexcept
+    {
+      for (auto *child = start.FirstChild(); child; child = child->NextSibling())
+      {
+        if (auto *element = NodeActionElement(*child))
+        {
+          return element;
+        }
+        if (auto *element = NativeActionElement(*child))
+        {
+          return element;
+        }
+      }
+      return nullptr;
+    }
+
+    KRYS_NODISCARD bool IsARIAInputRole(AccessibilityRole role) noexcept
+    {
+      switch (role)
+      {
+        case AccessibilityRole::RadioButton:
+        case AccessibilityRole::Checkbox:
+        case AccessibilityRole::TextField:
+        case AccessibilityRole::Switch:
+        case AccessibilityRole::SearchField: return true;
+        default:                             return false;
+      }
+    }
+
+    enum class StepAction : bool
+    {
+      Decrement,
+      Increment,
+    };
+  }
+
+  dom::Element *AccessibilityNodeObject::AnchorElement() const noexcept
+  {
+    auto *cache = AxObjectCache();
+    for (auto *node = GetNode(); node; node = node->ParentNode())
+    {
+      if (Is<html::HTMLAnchorElement>(*node))
+      {
+        return &Downcast<dom::Element>(*node);
+      }
+      if (auto *renderer = node->Renderer(); renderer && cache)
+      {
+        if (auto *object = cache->GetOrCreate(*renderer); object && object->IsLink())
+        {
+          return DynamicDowncast<dom::Element>(*node);
+        }
+      }
+    }
+    return nullptr;
+  }
+
+  dom::Element *AccessibilityNodeObject::ActionElement() const noexcept
+  {
+    auto *node = GetNode();
+    if (!node)
+    {
+      return nullptr;
+    }
+    if (auto *element = NodeActionElement(*node))
+    {
+      return element;
+    }
+    if (IsARIAInputRole(_ariaRole))
+    {
+      return DynamicDowncast<dom::Element>(*node);
+    }
+    switch (Role())
+    {
+      case AccessibilityRole::Button:
+      case AccessibilityRole::PopUpButton:
+      case AccessibilityRole::ToggleButton:
+      case AccessibilityRole::Tab:
+      case AccessibilityRole::MenuItem:
+      case AccessibilityRole::MenuItemCheckbox:
+      case AccessibilityRole::MenuItemRadio:
+      case AccessibilityRole::ListItem:
+        if (auto *element = NativeActionElement(*node))
+        {
+          return element;
+        }
+        return DynamicDowncast<dom::Element>(*node);
+      default: break;
+    }
+    // FIXME: An ancestor with a click handler (clickableSelfOrAncestor), with event handler checks.
+    return AnchorElement();
+  }
+
+  void AccessibilityNodeObject::SetFocused(bool focused) noexcept
+  {
+    AccessibilityObject::SetFocused(focused);
+    if (!CanSetFocusAttribute())
+    {
+      return;
+    }
+    RefPtr<dom::Document> document = ShareRefPtr(GetDocument());
+    if (!document)
+    {
+      return;
+    }
+    Ref protectedThis = ShareRef(*this);
+    if (auto *window = document->Window())
+    {
+      window->NotifyActivated();
+    }
+    auto *element = DynamicDowncast<dom::Element>(GetNode());
+    auto *focusedElement = document->FocusedElement();
+    // Focusing the focused element does nothing, so it's unfocused first (focus may have gone to the host's
+    // chrome and come back).
+    if (focusedElement && (!focused || !element || focusedElement == element))
+    {
+      html::FocusAlgorithms::UnfocusingSteps(*focusedElement);
+    }
+    if (focused && element)
+    {
+      html::FocusAlgorithms::FocusingSteps(*element);
+    }
+  }
+
+  namespace
+  {
+    /// @brief Simulates the arrow key that steps @p object (one whose value can't be set), for the author to
+    /// handle; whether the keys were handled.
+    bool PostKeyboardKeysForValueChange(AccessibilityNodeObject &object, StepAction action) noexcept
+    {
+      auto *node = object.GetNode();
+      auto *document = object.GetDocument();
+      if (!node || !document)
+      {
+        return false;
+      }
+      // A spin button steps with the up and down arrows (https://w3c.github.io/aria/#spinbutton).
+      bool vertical = object.Orientation() == AccessibilityOrientation::Vertical
+                      || object.Role() == AccessibilityRole::SpinButton;
+      bool increment = action == StepAction::Increment;
+      dom::KeyboardEventInit init;
+      init.Key =
+        vertical ? (increment ? u8"ArrowUp" : u8"ArrowDown") : (increment ? u8"ArrowRight" : u8"ArrowLeft");
+      init.Code = init.Key;
+      init.KeyIdentifier = vertical ? (increment ? u8"Up" : u8"Down") : (increment ? u8"Right" : u8"Left");
+      init.KeyCode = vertical ? (increment ? 38u : 40u) : (increment ? 39u : 37u);
+      init.Which = init.KeyCode;
+      init.View = document->Window();
+      init.Bubbles = true;
+      init.Cancelable = true;
+      init.Composed = true;
+
+      Ref protectedNode = ShareRef(*node);
+      bool handled =
+        !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keydown"), *node, init);
+      handled |=
+        !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keyup"), *node, init);
+      return handled;
+    }
+
+    void SetNodeValue(AccessibilityNodeObject &object, StepAction action, float value) noexcept
+    {
+      if (object.SetValue(value))
+      {
+        if (auto *cache = object.AxObjectCache())
+        {
+          cache->PostNotification(&object, AXNotification::ValueChanged);
+        }
+        return;
+      }
+      (void)PostKeyboardKeysForValueChange(object, action);
+    }
+
+    void AlterRangeValue(AccessibilityNodeObject &object, StepAction action) noexcept
+    {
+      if (object.Role() != AccessibilityRole::Slider && object.Role() != AccessibilityRole::SpinButton)
+      {
+        return;
+      }
+      auto *element = object.GetElement();
+      if (!element || element->IsDisabledFormControl())
+      {
+        return;
+      }
+      if (auto *document = object.GetDocument(); document && document->Window())
+      {
+        document->Window()->NotifyActivated();
+      }
+
+      auto value = object.ValueForRange();
+      auto stepAttribute = object.GetAttributeTrimmed(u8"step");
+      if (auto step = html::Numbers::ParseFloatingPoint(stepAttribute);
+          !stepAttribute.empty() && step.Success())
+      {
+        value +=
+          action == StepAction::Increment ? static_cast<float>(step.Value) : -static_cast<float>(step.Value);
+      }
+      else
+      {
+        // Five percent of the range, and at least one.
+        auto change = (object.MaxValueForRange() - object.MinValueForRange()) * 0.05f;
+        if (std::abs(change) < 1)
+        {
+          change = 1;
+        }
+        value += action == StepAction::Increment ? change : -change;
+      }
+      SetNodeValue(object, action, value);
+    }
+  }
+
+  void AccessibilityNodeObject::Increment() noexcept
+  {
+    AlterRangeValue(*this, StepAction::Increment);
+  }
+
+  void AccessibilityNodeObject::Decrement() noexcept
+  {
+    AlterRangeValue(*this, StepAction::Decrement);
+  }
+
+  void AccessibilityNodeObject::SetIsExpanded(bool expanded) noexcept
+  {
+    if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(GetNode());
+        details && expanded != details->HasAttribute(dom::DOMStringAtom(u8"open")))
+    {
+      details->ToggleOpen();
+    }
   }
 
   uint32 AccessibilityNodeObject::HeadingLevel() const noexcept

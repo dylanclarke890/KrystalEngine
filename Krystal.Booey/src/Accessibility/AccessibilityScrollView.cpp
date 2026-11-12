@@ -117,6 +117,23 @@ namespace krys::boo::ax
     return webArea && webArea->CanSetFocusAttribute();
   }
 
+  AccessibilityObject *AccessibilityScrollView::AccessibilityHitTest(const IntPoint &point) const noexcept
+  {
+    auto *webArea = WebAreaObject();
+    if (!webArea)
+    {
+      return nullptr;
+    }
+    for (const auto &scrollbar : {_horizontalScrollbar, _verticalScrollbar})
+    {
+      if (scrollbar && scrollbar->ElementRect().Contains(LayoutPoint(point)))
+      {
+        return scrollbar.get();
+      }
+    }
+    return webArea->AccessibilityHitTest(point);
+  }
+
   LayoutRect AccessibilityScrollView::ElementRect() const noexcept
   {
     auto *view = ScrollView();

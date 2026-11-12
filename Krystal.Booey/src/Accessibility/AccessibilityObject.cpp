@@ -60,6 +60,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
@@ -69,7 +70,12 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -1394,6 +1400,133 @@ namespace krys::boo::ax
       return 0;
     }
     return static_cast<int32>(result.Value);
+  }
+
+  IntPoint AccessibilityObject::ClickPoint() noexcept
+  {
+    if (IsHeading())
+    {
+      const auto &children = Children();
+      if (children.size() == 1)
+      {
+        return children[0]->ClickPoint();
+      }
+    }
+    return RoundedIntPoint(ElementRect().Center());
+  }
+
+  AccessibilityObject *AccessibilityObject::AccessibilityHitTest(const IntPoint &point) const noexcept
+  {
+    return ElementAccessibilityHitTest(point);
+  }
+
+  AccessibilityObject *AccessibilityObject::ElementAccessibilityHitTest(const IntPoint &point) const noexcept
+  {
+    // The objects an object makes itself have no renderer for a hit test to find.
+    for (const auto &child : const_cast<AccessibilityObject *>(this)->Children(false))
+    {
+      if (child->IsMockObject() && child->ElementRect().Contains(LayoutPoint(point)))
+      {
+        return child->ElementAccessibilityHitTest(point);
+      }
+    }
+    return const_cast<AccessibilityObject *>(this);
+  }
+
+  bool AccessibilityObject::Press() noexcept
+  {
+    // Pressing does nothing without an element to act on.
+    RefPtr<dom::Element> actionElement = ShareRefPtr(ActionElement());
+    if (!actionElement)
+    {
+      return false;
+    }
+
+    // The element under the click point, if it's inside the one pressed, takes the press.
+    RefPtr<dom::Element> hitTestElement;
+    RefPtr<dom::Document> document = ShareRefPtr(GetDocument());
+    if (document)
+    {
+      HitTestResult result {LayoutPoint(ClickPoint())};
+      (void)document->HitTest(HitTestRequest(EnumSet<HitTestRequest::Type> {
+                                HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+                                HitTestRequest::Type::AccessibilityHitTest}),
+                              result);
+      if (auto *innerNode = result.InnerNode())
+      {
+        if (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*innerNode))
+        {
+          hitTestElement = ShareRefPtr(shadowRoot->Host());
+        }
+        else if (auto *element = DynamicDowncast<dom::Element>(*innerNode))
+        {
+          hitTestElement = ShareRefPtr(element);
+        }
+        else
+        {
+          hitTestElement = ShareRefPtr(innerNode->ParentElement());
+        }
+      }
+    }
+
+    // The action element is pressed if it's inside the object's element.
+    RefPtr<dom::Element> pressElement = ShareRefPtr(GetElement());
+    if (!pressElement || actionElement->IsDescendantOf(*pressElement))
+    {
+      pressElement = actionElement;
+    }
+    if (hitTestElement && hitTestElement->IsDescendantOf(*pressElement))
+    {
+      pressElement = hitTestElement;
+    }
+
+    // A press is the user's activation.
+    if (auto *window = document ? document->Window() : nullptr)
+    {
+      window->NotifyActivated();
+    }
+    return pressElement->AccessKeyAction(true)
+           || pressElement->DispatchSimulatedClick(
+             nullptr, dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);
+  }
+
+  void AccessibilityObject::SetFocused(bool focused) noexcept
+  {
+    if (!focused)
+    {
+      return;
+    }
+    // Focusing anything in the page needs the page focused and active.
+    auto *document = GetDocument();
+    if (!document || document->IsFocusedAndActive())
+    {
+      return;
+    }
+    if (auto *page = document->GetPage())
+    {
+      page->GetChromeClient().Focus();
+    }
+  }
+
+  bool AccessibilityObject::SetValue(float value) noexcept
+  {
+    auto text = std::format("{}", value);
+    return SetValue(dom::DOMStringView(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+  }
+
+  void AccessibilityObject::ScrollToMakeVisible() const noexcept
+  {
+    if (IsScrollView())
+    {
+      if (auto *parent = ParentObject())
+      {
+        parent->ScrollToMakeVisible();
+      }
+    }
+    if (auto *renderer = Renderer())
+    {
+      (void)LocalFrameView::ScrollRectToVisible(ElementRect(), *renderer, false, {});
+    }
   }
 
   dom::DOMString

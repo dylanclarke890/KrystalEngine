@@ -434,7 +434,6 @@ namespace krys::boo::ax
     }
 
     // The platform's side: the host's accessibility bridge.
-    void AttachWrapper(AccessibilityObject &object) noexcept;
     void DetachWrapper(AccessibilityObject &object, AccessibilityDetachmentType detachmentType) noexcept;
     void PostPlatformNotification(AccessibilityObject &object, AXNotification notification) noexcept;
 

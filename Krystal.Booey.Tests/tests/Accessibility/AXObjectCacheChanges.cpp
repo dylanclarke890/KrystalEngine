@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include <algorithm>
 
 namespace krys::boo::ax::tests
 {
@@ -246,5 +247,14 @@ namespace krys::boo::ax::tests
     REQUIRE_FALSE(host.AppendChild(*span).HasException());
     CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), *slotObject,
                                           AXNotification::ChildrenChanged));
+  }
+
+  TEST_CASE("AXObjectCache changes: the host hears an object go", "[Accessibility][AXObjectCache]")
+  {
+    AccessibilityFixture page(u8"<p id=text>Text</p>");
+    auto id = page.Object(u8"text").ObjectID();
+    page.ById(u8"text").Remove();
+    (void)page.TakeNotifications();
+    CHECK(std::ranges::find(page.Recorder->DetachedObjects, id) != page.Recorder->DetachedObjects.end());
   }
 }

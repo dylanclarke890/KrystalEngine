@@ -121,6 +121,20 @@ namespace krys::boo::ax
   {
   }
 
+  bool AccessibilitySlider::SetValue(dom::DOMStringView value) noexcept
+  {
+    RefPtr<html::HTMLInputElement> input = ShareRefPtr(InputElement());
+    if (!input)
+    {
+      return false;
+    }
+    if (input->Value() != value)
+    {
+      (void)input->SetValue(value, html::TextFieldEventBehavior::DispatchInputAndChangeEvent);
+    }
+    return true;
+  }
+
   LayoutRect AccessibilitySliderThumb::ElementRect() const noexcept
   {
     auto *parent = _parent.get();

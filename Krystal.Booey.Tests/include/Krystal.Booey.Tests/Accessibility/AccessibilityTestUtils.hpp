@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
-#include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXLogger.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
@@ -24,6 +24,7 @@ namespace krys::boo::ax::tests
       utf8_string Text;
     };
     List<TextChange> TextChanges;
+    List<AXID> DetachedObjects;
 
     void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
     {
@@ -33,6 +34,11 @@ namespace krys::boo::ax::tests
                                        AXNotification notification) noexcept final
     {
       Notifications.emplace_back(ShareRef(object), notification);
+    }
+
+    void AccessibilityObjectDetached(AccessibilityObject &object, AccessibilityDetachmentType) noexcept final
+    {
+      DetachedObjects.push_back(object.ObjectID());
     }
 
     void PostAccessibilityTextChange(AccessibilityObject &object, AXTextChange change, uint64 offset,

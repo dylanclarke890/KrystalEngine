@@ -445,7 +445,6 @@ namespace krys::boo::ax
 
     _objects.insert_or_assign(id, ShareRef(object));
     object.Init();
-    AttachWrapper(object);
   }
 
   AccessibilityObject *AXObjectCache::GetOrCreate(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept
@@ -2938,20 +2937,15 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::AttachWrapper(AccessibilityObject &object) noexcept
-  {
-    // FIXME: Creating the platform's wrapper for the object (the chrome client's attachWrapper), with the
-    // host's accessibility bridge.
-    (void)object;
-  }
-
   void AXObjectCache::DetachWrapper(AccessibilityObject &object,
                                     AccessibilityDetachmentType detachmentType) noexcept
   {
-    // FIXME: Releasing the platform's wrapper for the object (the chrome client's detachWrapper), with the
-    // host's accessibility bridge.
-    (void)object;
-    (void)detachmentType;
+    // The host refers to objects by ID, so it has nothing to make for a new one; it's told when one goes, to
+    // let go of what it made for it.
+    if (auto *page = _document.GetPage())
+    {
+      page->GetChromeClient().AccessibilityObjectDetached(object, detachmentType);
+    }
   }
 
   void AXObjectCache::PostPlatformNotification(AccessibilityObject &object,

@@ -58,6 +58,14 @@ namespace krys::boo::ax
     return option && option->Selected();
   }
 
+  void AccessibilityMenuListOption::SetSelected(bool selected) noexcept
+  {
+    if (auto *option = OptionElement(); option && CanSetSelectedAttribute())
+    {
+      option->Selected(selected);
+    }
+  }
+
   dom::DOMString AccessibilityMenuListOption::StringValue() const noexcept
   {
     auto *option = OptionElement();

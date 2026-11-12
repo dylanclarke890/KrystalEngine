@@ -49,6 +49,7 @@ namespace krys::boo::ax
   class AccessibilityObject;
   enum class AXNotification : uint8;
   enum class AXTextChange : uint8;
+  enum class AccessibilityDetachmentType : uint8;
 }
 
 namespace krys::boo
@@ -106,6 +107,14 @@ namespace krys::boo
     {
       (void)object;
       (void)notification;
+    }
+    /// @brief Called when @p object leaves the page's accessibility tree (its node or renderer went, or the
+    /// tree is being destroyed), for the host to let go of what it made for it.
+    virtual void AccessibilityObjectDetached(ax::AccessibilityObject &object,
+                                             ax::AccessibilityDetachmentType detachmentType) noexcept
+    {
+      (void)object;
+      (void)detachmentType;
     }
     /// @brief Called when @p text was inserted into or deleted from @p object's text (an editable region's,
     /// or the web area's) at @p offset, a byte index in its UTF-8 text.

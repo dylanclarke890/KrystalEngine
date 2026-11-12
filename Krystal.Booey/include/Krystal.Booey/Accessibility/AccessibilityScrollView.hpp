@@ -73,6 +73,7 @@ namespace krys::boo::ax
     KRYS_NODISCARD bool IsFocused() const noexcept override;
     KRYS_NODISCARD bool CanSetFocusAttribute() const noexcept override;
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
+    KRYS_NODISCARD AccessibilityObject *AccessibilityHitTest(const IntPoint &point) const noexcept override;
 
     void AddChildren() noexcept override;
     void ClearChildren() noexcept override;
