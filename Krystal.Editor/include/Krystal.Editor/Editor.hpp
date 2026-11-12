@@ -517,6 +517,9 @@ namespace krys
           settings.WindowSettings.VSync
             ? _context->Window->DisplayRefreshRate().value_or(settings.RenderFramerate)
             : settings.RenderFramerate);
+        // The page view sits below the header, wherever the window is on the screen.
+        auto origin = _context->Window->ClientOriginOnScreen();
+        _pageView->SetScreenOrigin(boo::IntPoint(origin.X, origin.Y + static_cast<int32>(HeaderHeight)));
         // The pads drive the page as the keyboard does, before its frame runs.
         _pageView->GamepadInput(_context->Input->GetGamepads(), _pageTime);
         if (_cube)

@@ -69,10 +69,10 @@ namespace krys::boo::dom
           // If there is no underlying event, we only populate the coordinates for events coming from the user
           // agent. For those coming from script (element.click()), the coordinates will be 0, similarly to
           // Firefox and Chrome.
-          // FIXME: The target's screen rect (ChromeClient::rootViewToScreen), once the host maps to the
-          // screen.
           auto center = target.BoundingClientRect().Center();
-          SetScreenLocation({center.X(), center.Y()});
+          // The client rect lays the target out, which its screen rect needs.
+          auto screenCenter = target.ScreenRect().Center();
+          SetScreenLocation({static_cast<double>(screenCenter.X()), static_cast<double>(screenCenter.Y())});
           InitCoordinates({center.X(), center.Y()});
         }
       }

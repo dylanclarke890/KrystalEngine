@@ -850,6 +850,12 @@ namespace krys::boo
     KRYS_NODISCARD IntPoint WindowToContents(const IntPoint &point) const noexcept;
     KRYS_NODISCARD IntPoint ContentsToWindow(const IntPoint &point) const noexcept;
     KRYS_NODISCARD IntRect ContentsToWindow(const IntRect &rect) const noexcept;
+    /// @brief Where @p rect, in the contents' (absolute) coordinates, is on the screen, as the chrome client
+    /// maps it; empty without a page.
+    KRYS_NODISCARD IntRect ContentsToScreen(const IntRect &rect) const noexcept;
+    /// @brief Where @p point, on the screen, is in the contents' (absolute) coordinates; the origin without a
+    /// page.
+    KRYS_NODISCARD IntPoint ScreenToContents(const IntPoint &point) const noexcept;
     KRYS_NODISCARD FloatRect DocumentToClientRect(FloatRect rect) const noexcept;
     KRYS_NODISCARD FloatRect AbsoluteToClientRect(FloatRect rect,
                                                   Maybe<float> usedZoom = null) const noexcept;

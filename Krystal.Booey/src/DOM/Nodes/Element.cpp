@@ -4084,6 +4084,17 @@ namespace krys::boo::dom
     return result;
   }
 
+  IntRect Element::ScreenRect() const noexcept
+  {
+    auto *renderer = Renderer();
+    auto *view = NodeDocument().View();
+    if (!renderer || !view)
+    {
+      return {};
+    }
+    return view->ContentsToScreen(renderer->AbsoluteBoundingBoxRect());
+  }
+
   Ref<DOMRect> Element::GetBoundingClientRect() noexcept
   {
     return DOMRect::Create(BoundingClientRect());

@@ -11,7 +11,9 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/Events/Touch.hpp"
 #include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
+#include "Krystal.Booey/DOM/Events/TouchList.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -629,6 +631,61 @@ namespace krys::ui::tests
     CHECK(records
           == List<std::string> {"mousedown:a/1/1", "mouseup:a/1/0", "click:a/1/0", "mousedown:a/1/2",
                                 "mouseup:a/1/0", "auxclick:a/1/0"});
+  }
+
+  TEST_CASE("View: events' screen coordinates are offset by the view's screen origin", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px; touch-action: none }"
+                  u8"</style><div id=a></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    CHECK(view.ScreenOrigin() == boo::IntPoint());
+    view.SetScreenOrigin({100, 200});
+
+    // Each event as `type:screenX,screenY`.
+    List<std::string> records;
+    auto record = [&](boo::dom::Event &event)
+    {
+      auto type = event.Type().View();
+      std::string text = std::string(type.begin(), type.end()) + ":";
+      if (auto *touch = DynamicDowncast<boo::dom::TouchEvent>(event))
+      {
+        auto *first = touch->ChangedTouches()->Item(0);
+        text += std::to_string(static_cast<int>(first->ScreenX())) + ","
+                + std::to_string(static_cast<int>(first->ScreenY()));
+      }
+      else
+      {
+        auto &mouse = Downcast<boo::dom::MouseEvent>(event);
+        text += std::to_string(static_cast<int>(mouse.ScreenX())) + ","
+                + std::to_string(static_cast<int>(mouse.ScreenY()));
+      }
+      records.push_back(text);
+    };
+    List<boo::dom::EventListenerHandle> handles;
+    for (auto type : {u8"mousedown", u8"wheel", u8"touchstart"})
+    {
+      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
+                                                         Func<void(boo::dom::Event &)>(record)));
+    }
+
+    view.MousePressed({10, 20}, pal::MouseButton::Left);
+    view.MouseReleased({10, 20}, pal::MouseButton::Left);
+    (void)view.MouseWheel({30, 40}, 0, 1);
+    pal::PointerInput touch;
+    touch.Id = 3;
+    touch.Type = pal::PointerType::Touch;
+    touch.Action = pal::PointerAction::Pressed;
+    touch.InContact = true;
+    (void)view.TouchInput({5, 6}, touch);
+    touch.Action = pal::PointerAction::Released;
+    touch.InContact = false;
+    (void)view.TouchInput({5, 6}, touch);
+    // The tap's compatibility mouse events are where the touch was.
+    CHECK(
+      records
+      == List<std::string> {"mousedown:110,220", "wheel:130,240", "touchstart:105,206", "mousedown:105,206"});
   }
 
   TEST_CASE("View: pointer lock", "[UI]")

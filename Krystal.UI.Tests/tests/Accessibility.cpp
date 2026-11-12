@@ -56,6 +56,10 @@ namespace krys::ui::tests
       {
         return {};
       }
+      KRYS_NODISCARD pal::WindowPosition ClientOriginOnScreen() const noexcept override
+      {
+        return {};
+      }
       KRYS_NODISCARD Maybe<uint32> DisplayRefreshRate() const noexcept override
       {
         return null;

@@ -75,14 +75,16 @@ namespace krys::ui::input
 
   /// @brief A turn of the wheel at @p point by @p notchesX and @p notchesY (positive is away from the user,
   /// or to the right), scrolling @p settings' lines (or a page) per notch, at 100 pixels per three lines;
-  /// with Shift, the vertical wheel scrolls sideways.
-  KRYS_NODISCARD boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point, float notchesX,
+  /// with Shift, the vertical wheel scrolls sideways. @p screenPoint is where @p point is on the screen.
+  KRYS_NODISCARD boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point,
+                                                    const boo::IntPoint &screenPoint, float notchesX,
                                                     float notchesY, pal::KeyModifiers modifiers,
                                                     const pal::WheelScrollSettings &settings) noexcept;
 
   /// @brief A step of a touchpad's pan at @p point: deltas in the pixels the content follows, in the phase of
-  /// the gesture or of the momentum after it.
+  /// the gesture or of the momentum after it. @p screenPoint is where @p point is on the screen.
   KRYS_NODISCARD boo::PlatformWheelEvent TouchpadPanEvent(const boo::IntPoint &point,
+                                                          const boo::IntPoint &screenPoint,
                                                           const pal::TouchpadPanInput &input) noexcept;
 
   /// @brief The system cursor nearest to a Booey cursor.

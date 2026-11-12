@@ -255,6 +255,21 @@ namespace krys::ui
       return !_view || _view->_pointingDevices.Mouse || _view->_pointingDevices.Pen;
     }
 
+    // The root view is the view, wherever the host put it on the screen.
+    KRYS_NODISCARD boo::IntPoint RootViewToScreen(const boo::IntPoint &point) const noexcept override
+    {
+      return _view ? _view->ToScreen(point) : point;
+    }
+
+    KRYS_NODISCARD boo::IntPoint ScreenToRootView(const boo::IntPoint &point) const noexcept override
+    {
+      if (!_view)
+      {
+        return point;
+      }
+      return point - boo::IntSize(_view->_screenOrigin.X(), _view->_screenOrigin.Y());
+    }
+
     void RequestPointerLock(Func<void(boo::PointerLockRequestResult)> &&completionHandler) noexcept override
     {
       completionHandler(_view ? _view->LockPointer() : boo::PointerLockRequestResult::Unsupported);
@@ -1243,7 +1258,7 @@ namespace krys::ui
                                      notchesY);
     }
     bool handled = _frame->GetEventHandler().HandleWheelEvent(
-      input::WheelEvent(point, notchesX, notchesY, modifiers, settings));
+      input::WheelEvent(point, ToScreen(point), notchesX, notchesY, modifiers, settings));
     PerformMicrotaskCheckpoint();
     return handled;
   }
@@ -1261,7 +1276,8 @@ namespace krys::ui
              && _overlay->MouseWheel(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()), notchesX,
                                      notchesY);
     }
-    bool handled = _frame->GetEventHandler().HandleWheelEvent(input::TouchpadPanEvent(point, input));
+    bool handled =
+      _frame->GetEventHandler().HandleWheelEvent(input::TouchpadPanEvent(point, ToScreen(point), input));
     PerformMicrotaskCheckpoint();
     return handled;
   }
@@ -1408,12 +1424,11 @@ namespace krys::ui
     // A cancellation from the host may come without a position: the touch stays where it was.
     bool hasPosition = input.Action != pal::PointerAction::Cancelled || point.X() || point.Y();
     auto &previous = it->Point;
-    // FIXME: The screen position, once the host reports where the page is on the screen.
     boo::DoublePoint position = hasPosition ? point : previous.Pos();
     boo::DoubleSize radius =
       hasPosition ? boo::DoubleSize(input.Width / 2, input.Height / 2) : previous.Radius();
     float force = hasPosition ? input.Pressure.value_or(0.f) : previous.Force();
-    it->Point = boo::PlatformTouchPoint(it->Id, state, position, position, radius, 0, force);
+    it->Point = boo::PlatformTouchPoint(it->Id, state, ToScreen(position), position, radius, 0, force);
 
     List<boo::PlatformTouchPoint> points;
     for (auto &touch : _touches)
@@ -1657,7 +1672,7 @@ namespace krys::ui
   {
     auto point = boo::FlooredIntPoint(position);
     bool scrolled = _frame->GetEventHandler().HandleTouchScroll(boo::PlatformWheelEvent(
-      point, point, static_cast<float>(delta.Width()), static_cast<float>(delta.Height()), 0, 0,
+      point, ToScreen(point), static_cast<float>(delta.Width()), static_cast<float>(delta.Height()), 0, 0,
       boo::PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {},
       boo::html::EventLoop::Current().Now()));
     PerformMicrotaskCheckpoint();
@@ -1742,14 +1757,13 @@ namespace krys::ui
     // compatibility mouse events don't fire if the page cancelled its pointerdown.
     auto point = boo::FlooredIntPoint(position);
     int32 clickCount = CountClick(point, boo::MouseButton::Left, DoubleTapDistance);
-    boo::PlatformTouchPoint touchPoint(id, boo::PlatformTouchPoint::TouchReleased, position, position, {}, 0,
-                                       0);
+    boo::PlatformTouchPoint touchPoint(id, boo::PlatformTouchPoint::TouchReleased, ToScreen(position),
+                                       position, {}, 0, 0);
     auto pointerId = boo::dom::PointerEvent::PointerIdForTouch(touchPoint);
     auto event = [&](boo::PlatformEvent::Type type, boo::MouseButton button, uint16 buttons, int32 count)
     {
-      // FIXME: The screen position, once the host reports where the page is on the screen.
-      return boo::PlatformMouseEvent(boo::DoublePoint(point), boo::DoublePoint(point), button, type, count,
-                                     {}, boo::html::EventLoop::Current().Now(), buttons, {}, 0,
+      return boo::PlatformMouseEvent(boo::DoublePoint(point), boo::DoublePoint(ToScreen(point)), button, type,
+                                     count, {}, boo::html::EventLoop::Current().Now(), buttons, {}, 0,
                                      boo::SyntheticClickType::OneFingerTap, pointerId,
                                      boo::dom::TouchPointerEventType());
     };
@@ -1776,11 +1790,10 @@ namespace krys::ui
   {
     // As the right button's press asks for a context menu: there's none, but the page gets `contextmenu`.
     auto point = boo::FlooredIntPoint(position);
-    boo::PlatformTouchPoint touchPoint(id, boo::PlatformTouchPoint::TouchReleased, position, position, {}, 0,
-                                       0);
-    // FIXME: The screen position, once the host reports where the page is on the screen.
+    boo::PlatformTouchPoint touchPoint(id, boo::PlatformTouchPoint::TouchReleased, ToScreen(position),
+                                       position, {}, 0, 0);
     boo::PlatformMouseEvent event(
-      boo::DoublePoint(point), boo::DoublePoint(point), boo::MouseButton::Right,
+      boo::DoublePoint(point), boo::DoublePoint(ToScreen(point)), boo::MouseButton::Right,
       boo::PlatformEvent::Type::MousePressed, 1, {}, boo::html::EventLoop::Current().Now(), 0, {}, 0,
       boo::SyntheticClickType::NoTap, boo::dom::PointerEvent::PointerIdForTouch(touchPoint),
       boo::dom::TouchPointerEventType());
@@ -2488,7 +2501,7 @@ namespace krys::ui
     }
     drag.Position = point;
     drag.Modifiers = modifiers;
-    boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(modifiers),
+    boo::DragData data(&drag.Data, point, ToScreen(point), drag.SourceOperationMask, DragFlags(modifiers),
                        input::ToBooey(modifiers));
 
     auto size = ViewportSize();
@@ -2520,8 +2533,8 @@ namespace krys::ui
     EnumSet<boo::DragOperation> operation;
     if (drag.InView)
     {
-      boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(drag.Modifiers),
-                         input::ToBooey(drag.Modifiers));
+      boo::DragData data(&drag.Data, point, ToScreen(point), drag.SourceOperationMask,
+                         DragFlags(drag.Modifiers), input::ToBooey(drag.Modifiers));
       if (drop && drag.Operation)
       {
         if (controller.PerformDragOperation(krys::move(data)))
@@ -2625,9 +2638,9 @@ namespace krys::ui
                                            const boo::DoublePoint &movement,
                                            const boo::DoublePoint &unadjustedMovement) const noexcept
   {
-    // FIXME: The screen position, once the host reports where the page is on the screen.
-    boo::PlatformMouseEvent event(boo::DoublePoint(point), boo::DoublePoint(point), button, type, clickCount,
-                                  modifiers, boo::html::EventLoop::Current().Now(), _buttons, movement);
+    boo::PlatformMouseEvent event(boo::DoublePoint(point), boo::DoublePoint(ToScreen(point)), button, type,
+                                  clickCount, modifiers, boo::html::EventLoop::Current().Now(), _buttons,
+                                  movement);
     event.SetUnadjustedMovementDelta(unadjustedMovement);
     // Moves aren't merged, so each stands for itself alone (its pointermove's coalesced events).
     if (type == boo::PlatformEvent::Type::MouseMoved)
@@ -2643,10 +2656,9 @@ namespace krys::ui
   {
     // A pen without pressure presses at half pressure.
     double force = input.Pressure ? *input.Pressure : (input.InContact ? 0.5 : 0);
-    // FIXME: The screen position, once the host reports where the page is on the screen.
-    boo::PlatformMouseEvent event(point, point, button, type, clickCount, input::ToBooey(input.Modifiers),
-                                  boo::html::EventLoop::Current().Now(), _penButtons, {}, force,
-                                  boo::SyntheticClickType::NoTap, boo::PenPointerID,
+    boo::PlatformMouseEvent event(point, ToScreen(point), button, type, clickCount,
+                                  input::ToBooey(input.Modifiers), boo::html::EventLoop::Current().Now(),
+                                  _penButtons, {}, force, boo::SyntheticClickType::NoTap, boo::PenPointerID,
                                   boo::dom::PenPointerEventType());
     event.SetPenOrientation({static_cast<int32>(std::round(input.TiltX)),
                              static_cast<int32>(std::round(input.TiltY)),

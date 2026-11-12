@@ -192,6 +192,8 @@ namespace krys::ui
     boo::MouseButton _penButton {boo::MouseButton::None};
     /// @brief The pointing devices the system has, as the host last said.
     pal::PointingDevices _pointingDevices;
+    /// @brief Where the view's top-left corner is on the screen, as the host last said.
+    boo::IntPoint _screenOrigin;
     /// @brief Locks the pointer (true) or unlocks it (false) for the page, returning whether it did.
     Func<bool(bool)> _pointerLockHandler;
     /// @brief Whether the host has locked the pointer for the page.
@@ -504,6 +506,19 @@ namespace krys::ui
     /// host does, it's a mouse alone.
     void SetPointingDevices(const pal::PointingDevices &devices) noexcept;
 
+    /// @brief Tells the page where the view's top-left corner is on the screen (@p origin, in the view's
+    /// coordinates' units): events' screen coordinates (`screenX`, `screenY`) are relative to the screen's.
+    /// Until the host does, the view is at the screen's origin.
+    void SetScreenOrigin(const boo::IntPoint &origin) noexcept
+    {
+      _screenOrigin = origin;
+    }
+    /// @brief Where the view's top-left corner is on the screen, as the host last said.
+    KRYS_NODISCARD const boo::IntPoint &ScreenOrigin() const noexcept
+    {
+      return _screenOrigin;
+    }
+
     /// @brief The cursor the page wants over it, as of the last mouse move (none while the pointer is
     /// locked); while a drag runs, the drag and drop cursor for what a drop would do.
     KRYS_NODISCARD pal::CursorShape CurrentCursor() const noexcept;
@@ -721,6 +736,16 @@ namespace krys::ui
     static void PerformMicrotaskCheckpoint() noexcept;
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
+    /// @brief Where @p point, in the view's coordinates, is on the screen.
+    KRYS_NODISCARD boo::IntPoint ToScreen(const boo::IntPoint &point) const noexcept
+    {
+      return point + boo::IntSize(_screenOrigin.X(), _screenOrigin.Y());
+    }
+    KRYS_NODISCARD boo::DoublePoint ToScreen(const boo::DoublePoint &point) const noexcept
+    {
+      return boo::DoublePoint(point.X() + _screenOrigin.X(), point.Y() + _screenOrigin.Y());
+    }
+
     KRYS_NODISCARD boo::PlatformMouseEvent PenEvent(boo::PlatformEvent::Type type,
                                                     const boo::DoublePoint &point, boo::MouseButton button,
                                                     int32 clickCount,

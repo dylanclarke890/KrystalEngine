@@ -3390,6 +3390,28 @@ namespace krys::boo
     return ContentsToView(rect);
   }
 
+  IntRect LocalFrameView::ContentsToScreen(const IntRect &rect) const noexcept
+  {
+    auto *frame = _frame.get();
+    auto *page = frame ? frame->GetPage() : nullptr;
+    if (!page)
+    {
+      return {};
+    }
+    return page->GetChromeClient().RootViewToScreen(ContentsToWindow(rect));
+  }
+
+  IntPoint LocalFrameView::ScreenToContents(const IntPoint &point) const noexcept
+  {
+    auto *frame = _frame.get();
+    auto *page = frame ? frame->GetPage() : nullptr;
+    if (!page)
+    {
+      return {};
+    }
+    return WindowToContents(page->GetChromeClient().ScreenToRootView(point));
+  }
+
   void LocalFrameView::ResetScrollAnchor() noexcept
   {
     krys_assert(Frame().Document());

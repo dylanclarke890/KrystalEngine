@@ -77,6 +77,8 @@ namespace krys::pal::win32
 
     KRYS_NODISCARD virtual WindowSize GetSize() const noexcept override;
 
+    KRYS_NODISCARD WindowPosition ClientOriginOnScreen() const noexcept override;
+
     KRYS_NODISCARD Maybe<uint32> DisplayRefreshRate() const noexcept override;
 
     void Show() noexcept override;

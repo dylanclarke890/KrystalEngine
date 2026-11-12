@@ -288,6 +288,23 @@ namespace krys::boo
       return true;
     }
 
+    /// @brief Where @p point, in the root view's coordinates, is on the screen. The base puts the root view
+    /// at the screen's origin.
+    KRYS_NODISCARD virtual IntPoint RootViewToScreen(const IntPoint &point) const noexcept
+    {
+      return point;
+    }
+    /// @brief Where @p rect, in the root view's coordinates, is on the screen.
+    KRYS_NODISCARD virtual IntRect RootViewToScreen(const IntRect &rect) const noexcept
+    {
+      return IntRect(RootViewToScreen(rect.Location()), rect.Size());
+    }
+    /// @brief Where @p point, on the screen, is in the root view's coordinates.
+    KRYS_NODISCARD virtual IntPoint ScreenToRootView(const IntPoint &point) const noexcept
+    {
+      return point;
+    }
+
     /// @brief The screen's size, in CSS pixels (`device-width`, `device-height`, `device-aspect-ratio`).
     KRYS_NODISCARD virtual FloatSize ScreenSize() const noexcept
     {

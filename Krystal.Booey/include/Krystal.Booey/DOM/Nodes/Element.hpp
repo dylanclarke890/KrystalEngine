@@ -539,6 +539,8 @@ namespace krys::boo::dom
     /// @brief The union of the element's boxes, in client coordinates.
     KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() noexcept;
     KRYS_NODISCARD FloatRect BoundingClientRect() noexcept;
+    /// @brief Where the element's renderer's bounding box is on the screen; empty without a renderer.
+    KRYS_NODISCARD IntRect ScreenRect() const noexcept;
     /// @brief The element's renderer and the union of its boxes in absolute coordinates, without updating
     /// layout; null if it has no boxes.
     KRYS_NODISCARD Maybe<Pair<RenderElement *, FloatRect>> BoundingAbsoluteRectWithoutLayout() const noexcept;

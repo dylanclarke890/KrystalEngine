@@ -1203,6 +1203,16 @@ namespace krys::pal
       return WindowSize {0, 0};
     }
 
+    WindowPosition Win32Window::ClientOriginOnScreen() const noexcept
+    {
+      POINT origin {0, 0};
+      if (::ClientToScreen(_handle, &origin))
+      {
+        return WindowPosition {static_cast<int32>(origin.x), static_cast<int32>(origin.y)};
+      }
+      return WindowPosition {};
+    }
+
     Maybe<uint32> Win32Window::DisplayRefreshRate() const noexcept
     {
       auto *monitor = ::MonitorFromWindow(_handle, MONITOR_DEFAULTTONEAREST);

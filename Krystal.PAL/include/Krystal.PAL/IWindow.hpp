@@ -31,6 +31,12 @@ namespace krys::pal
     uint32 Width {800}, Height {600};
   };
 
+  /// @brief A point on the screen, in its pixels.
+  struct WindowPosition
+  {
+    int32 X {0}, Y {0};
+  };
+
   struct WindowSizeBounds
   {
     /// @brief Whether the window can be resized. If false, Min and Max are ignored.
@@ -136,6 +142,9 @@ namespace krys::pal
     KRYS_NODISCARD virtual const string &GetTitle() const noexcept = 0;
 
     KRYS_NODISCARD virtual WindowSize GetSize() const noexcept = 0;
+
+    /// @brief Where the client area's top-left corner is on the screen.
+    KRYS_NODISCARD virtual WindowPosition ClientOriginOnScreen() const noexcept = 0;
 
     /// @brief The refresh rate of the display the window is on, in hertz, or null if the system doesn't say.
     KRYS_NODISCARD virtual Maybe<uint32> DisplayRefreshRate() const noexcept = 0;

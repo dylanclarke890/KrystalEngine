@@ -367,8 +367,8 @@ namespace krys::ui::input
     }
   }
 
-  boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point, float notchesX, float notchesY,
-                                     pal::KeyModifiers palModifiers,
+  boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point, const boo::IntPoint &screenPoint,
+                                     float notchesX, float notchesY, pal::KeyModifiers palModifiers,
                                      const pal::WheelScrollSettings &settings) noexcept
   {
     // As a Windows wheel message: one wheel at a time, the horizontal one if it turned.
@@ -413,12 +413,11 @@ namespace krys::ui::input
       }
     }
 
-    // FIXME: The screen position, once the host reports where the page is on the screen.
-    return boo::PlatformWheelEvent(point, point, deltaX, deltaY, wheelTicksX, wheelTicksY, granularity,
+    return boo::PlatformWheelEvent(point, screenPoint, deltaX, deltaY, wheelTicksX, wheelTicksY, granularity,
                                    modifiers, boo::html::EventLoop::Current().Now());
   }
 
-  boo::PlatformWheelEvent TouchpadPanEvent(const boo::IntPoint &point,
+  boo::PlatformWheelEvent TouchpadPanEvent(const boo::IntPoint &point, const boo::IntPoint &screenPoint,
                                            const pal::TouchpadPanInput &input) noexcept
   {
     using Phase = boo::PlatformWheelEventPhase;
@@ -437,9 +436,8 @@ namespace krys::ui::input
     // The content moves with the fingers, as Booey's deltas go. The ticks are the notches a wheel would
     // have turned, at 100 pixels per three lines a notch (right and away from the user positive).
     constexpr float pixelsPerNotch = 3 * boo::ScrollbarPixelsPerLine;
-    // FIXME: The screen position, once the host reports where the page is on the screen.
-    return boo::PlatformWheelEvent(point, point, input.DeltaX, input.DeltaY, -input.DeltaX / pixelsPerNotch,
-                                   input.DeltaY / pixelsPerNotch,
+    return boo::PlatformWheelEvent(point, screenPoint, input.DeltaX, input.DeltaY,
+                                   -input.DeltaX / pixelsPerNotch, input.DeltaY / pixelsPerNotch,
                                    boo::PlatformWheelEventGranularity::ScrollByPixelWheelEvent,
                                    ToBooey(input.Modifiers), boo::html::EventLoop::Current().Now())
       .CopyAsTouchpadPan(phase, momentumPhase);
