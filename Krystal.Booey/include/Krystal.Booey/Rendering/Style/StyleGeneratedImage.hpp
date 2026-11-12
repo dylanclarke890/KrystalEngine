@@ -103,12 +103,8 @@ namespace krys::boo
     /// @brief Keeps @p image, made for @p size, until it hasn't been asked for in a few seconds.
     void SaveCachedImageForSize(FloatSize size, GeneratedImage &image) noexcept;
 
-    // All generated images must be able to compute their fixed size.
-    // FIXME: Pure upstream; the generated images other than gradients implement it with their drawing.
-    KRYS_NODISCARD virtual FloatSize FixedSize(const RenderElement &) const noexcept
-    {
-      return {};
-    }
+    /// @brief The image's size when it's fixed-size (it doesn't take the size of its container).
+    KRYS_NODISCARD virtual FloatSize FixedSize(const RenderElement &) const noexcept = 0;
 
   private:
     void EvictCachedGeneratedImage(const CachedGeneratedImage &) noexcept;

@@ -335,6 +335,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/TransformOperations.cpp
 		tests/Rendering/Style/BorderValues.cpp
 		tests/Rendering/Style/RenderStyle.cpp
+		tests/Rendering/Style/StyleCrossfadeImage.cpp
+		tests/Rendering/Style/StyleFilterImage.cpp
 		tests/Rendering/Style/StyleDataGroups.cpp
 		tests/Style/Computed/ComputedStyleInitial.cpp
 		tests/Style/CustomProperty.cpp
