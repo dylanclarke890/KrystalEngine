@@ -759,8 +759,6 @@ namespace krys::boo::style
       {
         // If we don't have any transitions in the map, this means that the initial value "all 0s" was set and
         // thus all properties match.
-        // FIXME: The quirk for sites relying on resetting transitions not canceling running ones
-        // (needsResettingTransitionCancelsRunningTransitionQuirk), once there are quirks.
         hasMatchingTransitionProperty = true;
       }
 

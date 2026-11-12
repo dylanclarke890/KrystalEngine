@@ -191,6 +191,41 @@ namespace krys::boo::tests
     CHECK_FALSE(states(u8"check").Contains(ControlStyle::State::WindowActive));
   }
 
+  TEST_CASE("RenderTheme: controls repaint when they're hovered or pressed", "[Rendering][RenderTheme]")
+  {
+    // The theme draws hover and press states without a style change, so the control repaints itself.
+    PaintFixture fixture(u8"<!DOCTYPE html><style>body{margin:0}</style><button id=button>Go</button>"
+                         u8"<button id=off disabled>No</button><div id=plain>x</div>");
+    (void)fixture.PaintedDisplayList();
+    auto &view = *fixture.Frame->View();
+    (void)view.TakeDamage();
+
+    SECTION("Hovering")
+    {
+      fixture.ById(u8"button").SetHovered(true);
+      CHECK(view.HasDamage());
+    }
+
+    SECTION("Pressing")
+    {
+      fixture.ById(u8"button").SetActive(true);
+      CHECK(view.HasDamage());
+    }
+
+    SECTION("A disabled control doesn't repaint for a press")
+    {
+      fixture.ById(u8"off").SetActive(true);
+      CHECK_FALSE(view.HasDamage());
+    }
+
+    SECTION("An element without an appearance waits for its style")
+    {
+      fixture.ById(u8"plain").SetHovered(true);
+      fixture.ById(u8"plain").SetActive(true);
+      CHECK_FALSE(view.HasDamage());
+    }
+  }
+
   TEST_CASE("RenderTheme: controls are painted by the theme", "[Rendering][RenderTheme]")
   {
     // The theme draws checkboxes and buttons instead of their CSS backgrounds and borders, and text fields'

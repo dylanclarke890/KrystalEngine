@@ -1604,10 +1604,16 @@ namespace krys::boo::css
                 break;
               }
 
-              // FIXME: The shadow root's part mappings (the host's exportparts attribute); until then no name
-              // is exported.
               List<CSSOMStringAtom> newMappedNames;
-              mappedNames = newMappedNames;
+              const auto &partMappings = shadowRoot->GetPartMappings();
+              for (auto &name : mappedNames)
+              {
+                if (auto it = partMappings.find(name); it != partMappings.end())
+                {
+                  newMappedNames.insert(newMappedNames.end(), it->second.begin(), it->second.end());
+                }
+              }
+              mappedNames = krys::move(newMappedNames);
 
               if (mappedNames.empty())
               {

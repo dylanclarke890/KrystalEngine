@@ -369,10 +369,10 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit
       ConvertStyleLogicalHeightToComputedHeight(const TSize &styleLogicalHeight) noexcept;
 
-    KRYS_NODISCARD LayoutRect
-      OverflowClipRect(const LayoutPoint &location,
-                       OverlayScrollbarSizeRelevancy relevancy =
-                         OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize) const noexcept final;
+    KRYS_NODISCARD LayoutRect OverflowClipRect(
+      const LayoutPoint &location,
+      OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
+      PaintPhase phase = PaintPhase::BlockBackground) const noexcept final;
     KRYS_NODISCARD LayoutRect OverflowClipRectForChildLayers(
       const LayoutPoint &location, OverlayScrollbarSizeRelevancy relevancy) const noexcept override
     {

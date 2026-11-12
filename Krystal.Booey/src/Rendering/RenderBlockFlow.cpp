@@ -23,6 +23,7 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
@@ -54,6 +55,8 @@
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
+#include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
@@ -3675,7 +3678,6 @@ namespace krys::boo
 
     if (HasLineIfEmpty())
     {
-      // FIXME: Don't round when subpixel inline layout is enabled.
       return LayoutUnit {BorderAndPaddingBefore() + LineHeightForEmptyContent(FirstLineStyle(), false)};
     }
 
@@ -3706,7 +3708,6 @@ namespace krys::boo
 
     if (HasLineIfEmpty())
     {
-      // FIXME: Don't round when subpixel inline layout is enabled.
       return LayoutUnit {BorderAndPaddingBefore() + LineHeightForEmptyContent(Style(), false)};
     }
 
@@ -3829,8 +3830,10 @@ namespace krys::boo
     switch (invalidationReason)
     {
       case InvalidationReason::InternalMove:
-        // FIXME: Defer recomputing whether the element is ignored (the accessibility cache), once there is
-        // one.
+        if (auto *cache = GetDocument().ExistingAXObjectCache())
+        {
+          cache->DeferRecomputeIsIgnored(GetElement());
+        }
         break;
       case InvalidationReason::ContentChange:
       {
@@ -4130,8 +4133,10 @@ namespace krys::boo
         renderer.ClearNeedsLayout();
       }
 
-      // FIXME: Combine the text of text-combine-upright text (RenderCombineText::combineTextIfNeeded), once
-      // there's text-combine-upright.
+      if (auto *renderCombineText = DynamicDowncast<RenderCombineText>(renderer))
+      {
+        renderCombineText->CombineTextIfNeeded();
+      }
     }
     return {hasSimpleOutOfFlowContentOnly,
             hasInFlowBlockLevelElement ? Maybe<bool> {contentNeedsNormalChildLayoutOnly} : null};
@@ -4253,7 +4258,8 @@ namespace krys::boo
                                          oldContentTopAndBottomIncludingInkOverflow, repaintLogicalTop,
                                          repaintLogicalBottom);
 
-    // FIXME: Tell the accessibility cache the inline content was laid out, once there is one.
+    // FIXME: Telling the accessibility cache the inline content was laid out (onLaidOutInlineContent, for the
+    // groups of text runs it reads as one), with accessibility text ranges.
   }
 
   void RenderBlockFlow::SetStaticPositionsForSimpleOutOfFlowContent() noexcept
@@ -4957,8 +4963,10 @@ namespace krys::boo
       }
       else if (auto *renderText = DynamicDowncast<RenderText>(*child))
       {
-        // FIXME: Combine the text of text-combine-upright text (RenderCombineText::combineTextIfNeeded), once
-        // there's text-combine-upright.
+        if (auto *renderCombineText = DynamicDowncast<RenderCombineText>(*renderText))
+        {
+          renderCombineText->CombineTextIfNeeded();
+        }
 
         // Determine if we have a breakable character. Pass in
         // whether or not we should ignore any spaces at the front

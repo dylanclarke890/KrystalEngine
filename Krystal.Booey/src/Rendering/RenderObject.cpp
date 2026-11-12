@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
@@ -464,7 +465,6 @@ namespace krys::boo
 
   bool RenderObject::IsTransformed() const noexcept
   {
-    // FIXME: SVG transforms (hasSVGTransform) come with the layer-based SVG engine.
     return HasTransformRelatedProperty() && Style().AffectsTransform();
   }
 
@@ -797,7 +797,6 @@ namespace krys::boo
       return ContainingBlockForPositionType(renderer.Style().GetPosition(), renderer);
     };
 
-    // FIXME: Scrollbar parts, which have no parent, once there are any.
     return containingBlockForRenderer(static_cast<const RenderElement &>(*this));
   }
 
@@ -1476,6 +1475,12 @@ namespace krys::boo
     _renderer.ScheduleRenderingUpdateForImage(image);
   }
 
+  bool RenderObject::CachedImageListener::UseSystemDarkAppearance() const noexcept
+  {
+    auto *page = _renderer.GetDocument().GetPage();
+    return page && page->UseDarkAppearance();
+  }
+
   void RenderObject::ScheduleRenderingUpdateForImage(CachedImage &) noexcept
   {
     if (auto *page = GetDocument().GetPage())
@@ -2032,7 +2037,10 @@ namespace krys::boo
   {
     krys_debug_assert(!_parent);
 
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = GetDocument().ExistingAXObjectCache())
+    {
+      cache->Remove(*this);
+    }
 
     RemoveRareData();
 
@@ -2263,8 +2271,6 @@ namespace krys::boo
     {
       return false;
     }
-
-    // FIXME: Layer-aware SVG renderers.
 
     // Table parts can't be relayout roots since the table is responsible for layouting all the parts.
     if (renderer.IsTablePart())

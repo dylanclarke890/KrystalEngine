@@ -194,7 +194,6 @@ namespace krys::boo
     KRYS_NODISCARD static bool HasPercentHeightContainerMap() noexcept;
     static void ClearPercentHeightDescendantsFrom(RenderBox &parent) noexcept;
 
-    // FIXME: Floats come with block layout.
     KRYS_NODISCARD virtual bool ContainsFloats() const noexcept
     {
       return false;

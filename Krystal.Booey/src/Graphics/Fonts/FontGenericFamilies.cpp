@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
+#include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo
@@ -62,10 +63,10 @@ namespace krys::boo
     }
     // Content using USCRIPT_HAN doesn't tell us if we should be using Simplified Chinese or Traditional
     // Chinese. In the absence of all other signals, we consult with the user's system preferences.
-    // FIXME: There are no user language preferences, so Traditional Chinese is used.
     if (script == USCRIPT_HAN)
     {
-      it = fontMap.find(static_cast<int32>(USCRIPT_TRADITIONAL_HAN));
+      it = fontMap.find(static_cast<int32>(UserPrefersSimplifiedChinese() ? USCRIPT_SIMPLIFIED_HAN
+                                                                          : USCRIPT_TRADITIONAL_HAN));
       if (it != fontMap.end())
       {
         return it->second;

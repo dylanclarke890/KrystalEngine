@@ -38,16 +38,6 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Theme &Singleton() noexcept;
 
-    KRYS_NODISCARD virtual bool UserPrefersContrast() const noexcept
-    {
-      return false;
-    }
-
-    KRYS_NODISCARD virtual bool UserPrefersReducedMotion() const noexcept
-    {
-      return false;
-    }
-
     KRYS_NODISCARD virtual bool UserPrefersOnOffLabels() const noexcept
     {
       return false;

@@ -79,8 +79,6 @@ namespace krys::boo
       return TextDirection::RTL;
     }
 
-    // This is temporary and will be removed when subpixel inline layout is enabled.
-    // FIXME: Stop snapping once inline layout is subpixel.
     enum class SnapDirection : uint8
     {
       Floor,
@@ -204,7 +202,7 @@ namespace krys::boo
 
   void RenderListMarker::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
-    if (paintInfo.Phase != PaintPhase::Foreground && paintInfo.Phase != PaintPhase::Accessibility)
+    if (paintInfo.Phase != PaintPhase::Foreground)
     {
       return;
     }
@@ -226,12 +224,6 @@ namespace krys::boo
 
     auto markerRect = RelativeMarkerRect();
     markerRect.MoveBy(boxOrigin);
-
-    if (paintInfo.Phase == PaintPhase::Accessibility)
-    {
-      // FIXME: Accessibility bounds come with accessibility.
-      return;
-    }
 
     if (markerRect.IsEmpty())
     {

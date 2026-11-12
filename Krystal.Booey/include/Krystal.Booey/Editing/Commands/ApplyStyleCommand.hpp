@@ -136,7 +136,6 @@ namespace krys::boo
 
     // style-application helpers
     void ApplyBlockStyle(EditingStyle &style) noexcept;
-    void ApplyRelativeFontStyleChange(EditingStyle *style) noexcept;
     void ApplyInlineStyle(EditingStyle &style) noexcept;
     void FixRangeAndApplyInlineStyle(EditingStyle &style, const dom::Position &start,
                                      const dom::Position &end) noexcept;
@@ -159,8 +158,6 @@ namespace krys::boo
     bool MergeEndWithNextIfIdentical(const dom::Position &start, const dom::Position &end) noexcept;
     void CleanupUnstyledStyleSpans(dom::ContainerNode *dummySpanAncestor) noexcept;
     bool SurroundNodeRangeWithElement(dom::Node &start, dom::Node &end, Ref<dom::Element> &&element) noexcept;
-    KRYS_NODISCARD float ComputedFontSize(dom::Node *node) noexcept;
-    void JoinChildTextNodes(dom::Node *node, const dom::Position &start, const dom::Position &end) noexcept;
 
     RefPtr<html::HTMLElement> SplitAncestorsWithUnicodeBidi(dom::Node *node, bool before,
                                                             WritingDirection allowedDirection) noexcept;

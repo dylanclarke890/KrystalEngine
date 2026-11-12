@@ -50,7 +50,6 @@ namespace krys::boo::css
 
   /// @brief A declaration block exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
-  // FIXME: Settings() comes with Settings.
   class CSSStyleDeclaration : public AbstractRefCountedAndCanMakeWeakPtr<CSSStyleDeclaration>
   {
     KRYS_NON_COPYABLE(CSSStyleDeclaration);
@@ -70,7 +69,6 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD virtual CSSRule *ParentRule() const noexcept = 0;
-    KRYS_NODISCARD virtual CSSRule *CssRules() const noexcept = 0;
     KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
     virtual dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept = 0;
     KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;

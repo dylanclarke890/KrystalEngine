@@ -474,6 +474,27 @@ namespace krys::boo::tests
       CHECK_FALSE(selection.IsCaretBlinkingSuspended());
     }
 
+    SECTION("A page that prefers a caret that doesn't blink keeps it shown")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
+
+      // A hidden caret is shown at its next blink, and stays shown.
+      fixture.TestPage->SetPrefersNonBlinkingCaret(true);
+      CHECK(selection.IsCaretBlinkingSuspended());
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+
+      // It blinks again once the preference is gone.
+      fixture.TestPage->SetPrefersNonBlinkingCaret(false);
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
+    }
+
     SECTION("An unfocused document hides the caret")
     {
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
@@ -547,6 +568,22 @@ namespace krys::boo::tests
       CHECK(fixture.Document->FocusedElement() == &host);
       CHECK(selection.IsCaret());
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameSelection: the caret moves with a scrolled container",
+                   "[Editing][FrameSelection][Caret]")
+  {
+    CaretFixture fixture(u8"<div id=scroller style=height:40px;overflow:scroll><div style=height:20px></div>"
+                         u8"<div id=e contenteditable>Text</div><div style=height:200px></div></div>");
+    auto &selection = fixture.Selection();
+    selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&fixture.TextIn(u8"e")), 0),
+                     Affinity::Downstream);
+    fixture.TestPage->UpdateRendering();
+    auto before = selection.AbsoluteCaretBounds();
+
+    // Scrolling lays nothing out, so it's the scroll that makes the caret's rect stale.
+    fixture.ById(u8"scroller").SetScrollTop(10);
+    CHECK(selection.AbsoluteCaretBounds().Y() == before.Y() - 10);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderBlockFlow: room for the caret at the end of lines",

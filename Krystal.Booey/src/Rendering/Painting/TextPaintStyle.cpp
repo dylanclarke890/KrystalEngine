@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
@@ -143,8 +144,10 @@ namespace krys::boo
     {
       if (renderer.GetDocument().IsFocusedAndActive())
       {
-        // FIXME: The system appearance (Settings::useSystemAppearance), once there's a setting.
-        paintStyle.FillColor = RenderTheme::Singleton().DefaultButtonTextColor(style::ColorOptions::None);
+        auto options = renderer.GetDocument().GetSettings().UseSystemAppearance
+                         ? style::ColorOptions::UseSystemAppearance
+                         : style::ColorOptions::None;
+        paintStyle.FillColor = RenderTheme::Singleton().DefaultButtonTextColor(options);
         return paintStyle;
       }
     }

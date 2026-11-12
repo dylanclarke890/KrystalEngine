@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -331,5 +333,27 @@ namespace krys::boo::tests
       document.UpdateStyleIfNeeded();
       CHECK(Tree(renderer(u8"norm")) == "nb anon(ns)");
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderTreeBuilder: destroyed renderers are kept until the rendering update is over",
+                   "[Rendering][RenderTreeBuilder]")
+  {
+    PaintFixture fixture(u8"<!DOCTYPE html><div id=a>x</div>", {200, 100}, true);
+    fixture.TestPage->UpdateRendering();
+    Ref<dom::Element> element = ShareRef(fixture.ById(u8"a"));
+    auto *renderer = element->Renderer();
+    REQUIRE(renderer);
+    auto weak = CreateWeakPtr(renderer);
+    REQUIRE(weak);
+
+    // Destroyed but not yet deleted: a pointer taken during the update still reaches it, being destroyed, and
+    // weak pointers have already let it go. The rendering update deletes it.
+    REQUIRE_FALSE(element->Remove().HasException());
+    fixture.Document->UpdateStyleIfNeeded();
+    CHECK_FALSE(element->Renderer());
+    CHECK_FALSE(weak);
+    CHECK(renderer->BeingDestroyed());
+    fixture.TestPage->UpdateRendering();
   }
 }

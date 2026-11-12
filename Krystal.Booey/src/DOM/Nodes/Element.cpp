@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
@@ -106,6 +107,7 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -1276,8 +1278,6 @@ namespace krys::boo::dom
   bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept
   {
     Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent, NodeDocument().Window());
-    // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), once there's
-    // accessibility.
     (void)EventDispatcher::DispatchToTarget(*event, this);
     if (event->DefaultPrevented() || event->DefaultHandled())
     {
@@ -1317,7 +1317,16 @@ namespace krys::boo::dom
       NodeDocument().UserActionElements().SetActive(*this, value);
     }
 
-    // FIXME: Repaint elements with a used appearance.
+    auto *renderer = Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    if (!IsDisabledFormControl() && renderer->Style().HasUsedAppearance())
+    {
+      renderer->Repaint();
+    }
   }
 
   bool Element::CanContainRangeEndPoint() const noexcept
@@ -1451,7 +1460,13 @@ namespace krys::boo::dom
       NodeDocument().UserActionElements().SetHovered(*this, value);
     }
 
-    // FIXME: Repaint elements with a used appearance whose theme supports hover.
+    if (const auto *style = GetRenderStyle(); style && style->HasUsedAppearance())
+    {
+      if (auto *renderer = Renderer(); renderer && RenderTheme::Singleton().SupportsHover())
+      {
+        renderer->Repaint();
+      }
+    }
   }
 
   void Element::ClearHoverAndActiveStatusBeforeDetachingRenderer() noexcept
@@ -3012,6 +3027,10 @@ namespace krys::boo::dom
     {
       GetElementRareData()->GetExplicitlySetAttrElementsMap().erase(localName);
     }
+    if (GetElementRareData() && IsElementsArrayReflectionAttribute(localName))
+    {
+      GetElementRareData()->GetExplicitlySetAttrElementListsMap().erase(localName);
+    }
 
     // https://dom.spec.whatwg.org/#concept-id
     // 1. If localName is id, namespace is null, and value is null or the empty string, then unset element's
@@ -3113,6 +3132,7 @@ namespace krys::boo::dom
     {
       if (auto *shadowRoot = TreeQueries::GetShadowRoot(*this))
       {
+        shadowRoot->InvalidatePartMappings();
         style::Invalidator::InvalidateShadowParts(*shadowRoot);
       }
     }
@@ -3499,18 +3519,28 @@ namespace krys::boo::dom
     {
       return nullptr;
     }
+    return ElementInTreeWithId(*id);
+  }
+
+  RefPtr<Element> Element::ElementInTreeWithId(DOMStringView id) const noexcept
+  {
+    if (id.empty())
+    {
+      return nullptr;
+    }
     auto &root = TreeQueries::Root(const_cast<Element &>(*this));
     if (auto *document = DynamicDowncast<Document>(root))
     {
-      return document->GetElementById(*id);
+      return document->GetElementById(id);
     }
     if (auto *fragment = DynamicDowncast<DocumentFragment>(root))
     {
-      return fragment->GetElementById(*id);
+      return fragment->GetElementById(id);
     }
     for (auto *node = &root; node; node = TreeQueries::Next(*node, &root))
     {
-      if (auto *element = DynamicDowncast<Element>(*node); element && element->GetAttribute(u8"id") == id)
+      if (auto *element = DynamicDowncast<Element>(*node);
+          element && element->GetAttribute(u8"id") == DOMString(id))
       {
         return ShareRefPtr(element);
       }
@@ -3534,12 +3564,124 @@ namespace krys::boo::dom
 
     (void)SetAttribute(attributeName, DOMString());
     EnsureElementRareData().GetExplicitlySetAttrElementsMap()[attributeName] = CreateWeakPtr(element);
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->UpdateRelations(*this, attributeName.View());
+    }
   }
 
   bool Element::IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept
   {
-    // FIXME: The ARIA element reflection attributes, once there's accessibility.
-    return attributeName == u8"popovertarget" || attributeName == u8"commandfor";
+    return attributeName == u8"popovertarget" || attributeName == u8"commandfor"
+           || attributeName == u8"aria-activedescendant";
+  }
+
+  Maybe<List<Ref<Element>>> Element::ElementsForAttributeInternal(DOMStringAtom attributeName) const noexcept
+  {
+    // 1. Let elements be an empty list.
+    List<Ref<Element>> elements;
+
+    // 2. Let element be the result of running reflectedTarget's get the element.
+    // 3. If reflectedTarget's explicitly set attr-elements is not null:
+    if (GetElementRareData())
+    {
+      auto &map = GetElementRareData()->GetExplicitlySetAttrElementListsMap();
+      if (auto it = map.find(attributeName); it != map.end())
+      {
+        // 3a. For each attrElement in reflectedTarget's explicitly set attr-elements:
+        for (auto &weakElement : it->second)
+        {
+          // 3a.i. If attrElement is not a descendant of any of element's shadow-including ancestors, then
+          //       continue.
+          auto *attrElement = weakElement.get();
+          if (!attrElement
+              || !TreeQueries::IsShadowIncludingDescendant(*this, TreeQueries::Root(*attrElement)))
+          {
+            continue;
+          }
+
+          // 3a.ii. Append attrElement to elements.
+          elements.push_back(ShareRef(*attrElement));
+        }
+        // 5. Return elements.
+        return elements;
+      }
+    }
+
+    // 4. Otherwise:
+    // 4a. Let contentAttributeValue be the result of running reflectedTarget's get the content attribute.
+    auto contentAttributeValue = GetAttribute(attributeName);
+
+    // 4b. If contentAttributeValue is null, then return null.
+    if (!contentAttributeValue)
+    {
+      return null;
+    }
+
+    // 4c. Let tokens be contentAttributeValue, split on ASCII whitespace.
+    // 4d. For each id of tokens:
+    for (const auto &id : infra::StringAlgorithms::SplitOnWhitespace(*contentAttributeValue))
+    {
+      // 4d.i. Let candidate be the first element, in tree order, that meets the following criteria:
+      //       candidate's root is the same as element's root; candidate's ID is id; and candidate implements
+      //       T. If no such element exists, then continue.
+      // 4d.ii. Append candidate to elements.
+      if (auto candidate = ElementInTreeWithId(id))
+      {
+        elements.push_back(ShareRef(*candidate));
+      }
+    }
+
+    // 5. Return elements.
+    return elements;
+  }
+
+  void Element::SetElementsArrayAttribute(DOMStringAtom attributeName,
+                                          const Maybe<List<Ref<Element>>> &elements) noexcept
+  {
+    krys_debug_assert(IsElementsArrayReflectionAttribute(attributeName));
+
+    // 1. If the given value is null:
+    if (!elements)
+    {
+      // 1a. Set this's explicitly set attr-elements to null.
+      if (GetElementRareData())
+      {
+        GetElementRareData()->GetExplicitlySetAttrElementListsMap().erase(attributeName);
+      }
+      // 1b. Run this's delete the content attribute.
+      RemoveAttribute(attributeName);
+      // 1c. Return.
+      return;
+    }
+
+    // 2. Run this's set the content attribute with the empty string.
+    (void)SetAttribute(attributeName, DOMString());
+
+    // 3. Let elements be an empty list.
+    // 4. For each element in the given value:
+    // 4a. Append a weak reference to element to elements.
+    List<WeakPtr<Element>> weakElements;
+    weakElements.reserve(elements->size());
+    for (auto &element : *elements)
+    {
+      weakElements.push_back(CreateWeakPtr(element.get()));
+    }
+
+    // 5. Set this's explicitly set attr-elements to elements.
+    EnsureElementRareData().GetExplicitlySetAttrElementListsMap()[attributeName] = krys::move(weakElements);
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->UpdateRelations(*this, attributeName.View());
+    }
+  }
+
+  bool Element::IsElementsArrayReflectionAttribute(DOMStringAtom attributeName) noexcept
+  {
+    return attributeName == u8"aria-controls" || attributeName == u8"aria-describedby"
+           || attributeName == u8"aria-details" || attributeName == u8"aria-errormessage"
+           || attributeName == u8"aria-flowto" || attributeName == u8"aria-labelledby"
+           || attributeName == u8"aria-owns";
   }
 
 #pragma endregion

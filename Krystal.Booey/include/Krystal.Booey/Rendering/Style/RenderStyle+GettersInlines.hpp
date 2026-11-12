@@ -120,12 +120,6 @@ namespace krys::boo
     return HasTransform() || HasOffsetPath() || HasRotate() || HasScale() || HasTranslate();
   }
 
-  // ignore non-standard ::-webkit-scrollbar when standard properties are in use
-  inline bool RenderStyle::UsesStandardScrollbarStyle() const noexcept
-  {
-    return GetScrollbarWidth() != style::ScrollbarWidth::Auto || !GetScrollbarColor().IsAuto();
-  }
-
   inline bool RenderStyle::ShouldPlaceVerticalScrollbarOnLeft() const noexcept
   {
     return !GetWritingMode().IsAnyLeftToRight();

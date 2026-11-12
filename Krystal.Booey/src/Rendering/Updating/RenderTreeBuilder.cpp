@@ -25,9 +25,12 @@
  */
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
@@ -249,8 +252,18 @@ namespace krys::boo
     // FIXME: webkit.org/b/182909.
     tearDownSubTreeIfApplicable();
 
-    // FIXME: Renderers detached during layout wait in the layout context's detached renderer list; for now
-    // `toDestroy` is destroyed here.
+    auto delayDestroyRendererIfApplicable = [&]
+    {
+      auto &rendererToDelete = *toDestroy;
+      if (rendererToDelete.View().FrameView().LayoutContext().AddToDetachedRendererList(
+            krys::move(toDestroy)))
+      {
+        rendererToDelete._isBeingDestroyed = true;
+        rendererToDelete.WillBeDestroyed();
+        rendererToDelete.GetWeakPtrFactory().RevokeAll();
+      }
+    };
+    delayDestroyRendererIfApplicable();
   }
 
   void RenderTreeBuilder::Attach(RenderElement &parent, RenderPtr<RenderObject> child,
@@ -519,7 +532,8 @@ namespace krys::boo
   void RenderTreeBuilder::AttachToRenderElementInternal(RenderElement &parent, RenderPtr<RenderObject> child,
                                                         RenderObject *beforeChild) noexcept
   {
-    // FIXME: Assert layout isn't mutating the render tree.
+    krys_assert_msg(!parent.View().FrameView().LayoutContext().LayoutState(),
+                    "Layout must not mutate render tree");
     krys_debug_assert(parent.CanHaveChildren() || parent.CanHaveGeneratedChildren());
     krys_debug_assert(!child->Parent());
     krys_debug_assert(
@@ -614,7 +628,10 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = parent.GetDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(parent, newChild);
+    }
 
     if ((parent.HasOutlineAutoAncestor()
          || parent.OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto)
@@ -632,7 +649,13 @@ namespace krys::boo
     // positioned renderer maps don't become stale. It would be too slow to do the map lookup on each call.
     krys_debug_assert(&from == child.Parent());
     krys_debug_assert(!beforeChild || &to == beforeChild->Parent());
-    // FIXME: Remove percent height descendants.
+    if (normalizeAfterInsertion == NormalizeAfterInsertion::Yes && from.IsRenderBlock())
+    {
+      if (auto *box = DynamicDowncast<RenderBox>(child))
+      {
+        RenderBlock::RemovePercentHeightDescendant(*box);
+      }
+    }
     if (normalizeAfterInsertion == NormalizeAfterInsertion::Yes
         && (to.IsRenderBlock() || to.IsRenderInline()))
     {
@@ -1117,7 +1140,6 @@ namespace krys::boo
 
     auto isAnonymousAndSafeToDelete = [](const RenderElement &renderer)
     {
-      // FIXME: SVG viewport containers.
       return renderer.IsAnonymous() && !renderer.IsRenderView() && !renderer.IsRenderFragmentedFlow();
     };
 
@@ -1220,8 +1242,6 @@ namespace krys::boo
 
   void RenderTreeBuilder::UpdateAfterDescendants(RenderElement &renderer) noexcept
   {
-    // FIXME: Layer-based SVG roots.
-
     // Do not early return here in any case. For example, RenderListItem derives
     // from RenderBlockFlow and indirectly from RenderBlock thus fulfilling all
     // update conditions below.
@@ -1294,7 +1314,8 @@ namespace krys::boo
                                                                      RenderObject &child,
                                                                      WillBeDestroyed willBeDestroyed) noexcept
   {
-    // FIXME: Assert layout isn't mutating the render tree.
+    krys_assert_msg(!parent.View().FrameView().LayoutContext().LayoutState(),
+                    "Layout must not mutate render tree");
     krys_debug_assert(parent.CanHaveChildren() || parent.CanHaveGeneratedChildren());
     krys_debug_assert(child.Parent() == &parent);
 
@@ -1326,7 +1347,10 @@ namespace krys::boo
     // and the code running here would force an untimely rebuilding, leaving |child| dangling.
     auto childToTake = parent.DetachRendererInternal(child);
 
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = parent.GetDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(parent);
+    }
 
     return childToTake;
   }

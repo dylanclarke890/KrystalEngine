@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
@@ -209,6 +210,13 @@ namespace krys::boo::dom
       if (MIMETypeRegistry::IsXMLMIMEType(contentType))
       {
         auto document = CreateRef<XMLDocument>();
+        document->_contentType = DOMString(contentType);
+        return document;
+      }
+      // https://html.spec.whatwg.org/#navigate-media
+      if (MIMETypeRegistry::IsSupportedImageMIMEType(contentType))
+      {
+        Ref<Document> document = CreateRef<html::ImageDocument>();
         document->_contentType = DOMString(contentType);
         return document;
       }

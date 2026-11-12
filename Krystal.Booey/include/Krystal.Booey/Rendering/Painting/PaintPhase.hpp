@@ -54,7 +54,6 @@ namespace krys::boo
     Mask = 1 << 10,
     ClippingMask = 1 << 11,
     EventRegion = 1 << 12,
-    Accessibility = 1 << 13,
   };
 
   enum class PaintBehavior : uint32

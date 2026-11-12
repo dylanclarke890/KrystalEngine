@@ -181,4 +181,49 @@ namespace krys::boo
   {
     return u8"Enter a number";
   }
+
+  utf8_string AXSearchFieldCancelButtonText() noexcept
+  {
+    return u8"cancel";
+  }
+
+  utf8_string AXDateFieldDayText() noexcept
+  {
+    return u8"day";
+  }
+
+  utf8_string AXDateFieldMonthText() noexcept
+  {
+    return u8"month";
+  }
+
+  utf8_string AXDateFieldWeekText() noexcept
+  {
+    return u8"week";
+  }
+
+  utf8_string AXDateFieldYearText() noexcept
+  {
+    return u8"year";
+  }
+
+  utf8_string AXTimeFieldHourText() noexcept
+  {
+    return u8"hour";
+  }
+
+  utf8_string AXTimeFieldMinuteText() noexcept
+  {
+    return u8"minutes";
+  }
+
+  utf8_string AXTimeFieldSecondText() noexcept
+  {
+    return u8"seconds";
+  }
+
+  utf8_string AXTimeFieldMillisecondText() noexcept
+  {
+    return u8"milliseconds";
+  }
 }

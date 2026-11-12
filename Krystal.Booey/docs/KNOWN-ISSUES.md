@@ -18,7 +18,6 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 
 - `title` is never shown (nor an SVG `<a>`'s `xlink:title`, which Chrome shows): there's no advisory information, no `HitTestResult::Title`, no tooltip hook on the chrome client, and Krystal.UI draws no tooltips.
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
-- `ElementInternals` has no ARIA reflection members (`detail::GetContentAttribute` in `ReflectAttribute.hpp` returns null for them) and no `CustomElementDefaultARIA`.
 - `DocumentTouch` (`createTouch`, `createTouchList`) is not implemented; `Touch` has no constructor and there is no `TouchInit`.
 - `DataTransferItem` has no `getAsEntry` (no file system API).
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).
@@ -54,6 +53,10 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 - Image animations pause out of view and resume (`RenderView::AddRendererWithPausedImageAnimations`), and there is no per-element animation control (`RenderElement::AllowsAnimation` follows only the page's `SetImageAnimationEnabled`; FIXME).
 
 ## Layout
+
+### Bugs
+
+- A transformed box doesn't add its transformed rect to its container's scrollable overflow (FIXME in `RenderBox::LayoutOverflowRectForPropagation`). Porting upstream's transform makes the overflow stretch balanced columns, which Chrome doesn't: the last column set grows to the flow's layout overflow, so `RenderMultiColumnSet::CalculateBalancedHeight` sees more columns than specified and stretches them (the `multicol` golden's rotated box). Fixing it needs balancing to ignore overflow from transforms.
 
 ### Missing
 
@@ -99,7 +102,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 - A colour glyph's layers in the foreground colour (`CPAL` entry `0xFFFF`) are drawn black, FreeType's default, rather than in the text's colour (`FontFace2D::Rasterise` sets no foreground colour). The atlas would need to key colour glyphs by that colour.
 - `FontDescription::SetSpecifiedLocale` resolves every Han locale to `zh-hans`, as there are no user language preferences.
 - Right-to-left scripts other than Arabic and Hebrew (Syriac, Thaana, N'Ko and so on) have no bundled font and work only if the host registers one. Kashida justification is not done.
-- Web fonts: SVG fonts, font collections (the item in a collection is not selectable), and a font parsing policy (safe font parser, trusted types) are missing. Font loading has no settings: installed fonts are always allowed and load completions are never ignored.
+- Web fonts: font collections (the item in a collection is not selectable), and a font parsing policy (safe font parser, trusted types) are missing. Font loading has no settings: installed fonts are always allowed and load completions are never ignored.
 - Text search (`findPlainText`, `SearchBuffer`) is absent. The text iterator does not traverse the flat tree or emit text placeholders (FIXMEs in `TextIterator.cpp`).
 
 ## Images and resources
@@ -111,8 +114,8 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 - Without a work queue from the host, every frame decodes on the main thread as it's drawn. Images still decoding aren't redrawn synchronously for a host's snapshot (`invalidateImagesWithAsyncDecodes`; FIXMEs in `Page.cpp`, `RenderImage.cpp` and `BackgroundPainter.cpp`).
 - Animated images (GIF, APNG, animated WebP) have no `allowsAnimation` override or system animation controls, and no controls for suspended documents or off-screen views.
 - Images are sRGB only: ICC profiles are ignored (FIXME in `PNGImageDecoder.cpp`), and there is no HDR, headroom or gain map support. `NativeImage` has no colour spaces.
-- Orientation is applied to the pixels, not by drawing; density-corrected sizes are not applied (FIXME in `BitmapImageSource.cpp`). `GraphicsContext`'s default `DrawImageBuffer` and `DrawPattern` for image buffers draw nothing (FIXMEs in `GraphicsContext.cpp`: `nativeImageForDrawing`).
-- SVG images keep the light appearance and do not copy the embedding page's settings (generic font families, dark appearance), because image observers cannot reach them (FIXME in `SVGImage.cpp`). The page of an SVG image has no loader strategy, so it loads only `data:` URLs.
+- Orientation is applied to the pixels, not by drawing. `GraphicsContext`'s default `DrawImageBuffer` and `DrawPattern` for image buffers draw nothing (FIXMEs in `GraphicsContext.cpp`: `nativeImageForDrawing`).
+- An SVG image takes the dark appearance of what shows it when its document is made, and doesn't follow it when the appearance changes later. The page of an SVG image has no loader strategy, so it loads only `data:` URLs.
 - Drags: no drag icon for a dragged image's file (`CreateDragImageIconForCachedImageFilename` returns none), the response's suggested filename is not parsed, and there are no text indicators or visible paths. `PasteboardImage` and `SelectionData` carry no image, so nothing prefers images' types when pasting.
 
 ## MathML
@@ -146,7 +149,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 - `EditorClient` is only the selection, clipboard permission, undo/redo, composition and text-field hooks. It has no `shouldInsertText`/`shouldDeleteRange`/`shouldBeginEditing`/`shouldApplyStyle` delegates, so the host cannot veto or observe edits, and no spelling, grammar or text-checking, autocorrection or autofill hooks.
 - The drag caret, the overtype block cursor, caret browsing's focusing of the anchor the caret is in, stopping the blink while typing, beeping on empty cuts and deletes, and spatial navigation's use of the caret are absent.
 - Image documents and writing images to the pasteboard are absent.
-- Input methods are IMM32 only. TSF features (reconversion, inline handwriting, speech), custom highlights and annotations (inline predictions, writing suggestions), `inputmode`, `ime-mode` and an on-screen keyboard are not supported. The page draws no candidate list and the host is not told the candidates; the IME draws its own windows.
+- Input methods are IMM32 only. TSF features (reconversion, inline handwriting, speech), writing suggestions, `inputmode`, `ime-mode` and an on-screen keyboard are not supported. The page draws no candidate list and the host is not told the candidates; the IME draws its own windows.
 - Dragging a selection out to other applications is not supported.
 
 ## Input and events

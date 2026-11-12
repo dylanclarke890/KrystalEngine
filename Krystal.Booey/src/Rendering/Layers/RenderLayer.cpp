@@ -846,7 +846,6 @@ namespace krys::boo
 
     DirtyPaintOrderListsOnChildChange(child);
 
-    child.UpdateAncestorDependentState();
     DirtyAncestorChainVisibleDescendantStatus();
     child.UpdateDescendantDependentFlags();
 
@@ -1952,7 +1951,6 @@ namespace krys::boo
 
   bool RenderLayer::ShouldRepaintAfterLayout() const noexcept
   {
-    // FIXME: SVG containers never repaint after layout (only their contents do).
     if (_repaintStatus == RepaintStatus::NeedsNormalRepaint
         || _repaintStatus == RepaintStatus::NeedsFullRepaint)
     {
@@ -2505,13 +2503,6 @@ namespace krys::boo
     }
   }
 
-  void RenderLayer::UpdateAncestorDependentState() noexcept
-  {
-    // FIXME: The enclosing SVG hidden or resource container, with the layer-based SVG engine, and whether the
-    // layer is inside an SVG foreign object (whose scrolling isn't composited), once there's composited
-    // scrolling.
-  }
-
   void RenderLayer::UpdateDescendantDependentFlags() noexcept
   {
     if (_visibleDescendantStatusDirty || _hasSelfPaintingLayerDescendantDirty
@@ -2848,7 +2839,6 @@ namespace krys::boo
       // Visibility and scrollability are input to canUseCompositedScrolling().
       if (_scrollableArea)
       {
-        // FIXME: Invalidate the scroll corner when the writing mode changes.
         if (visibilityChanged || oldStyle->IsOverflowVisible() != Renderer().Style().IsOverflowVisible())
         {
           _scrollableArea->ComputeHasCompositedScrollableOverflow(
@@ -2921,9 +2911,8 @@ namespace krys::boo
                           _anchorScrollAdjustment->Height().ToDouble());
     }
 
-    // FIXME: Snap the reference box to device pixels when the renderer needs it
-    // (snapRectToDevicePixelsIfNeeded).
-    auto referenceBoxRect = Renderer().TransformReferenceBoxRect(style);
+    auto referenceBoxRect = SnapRectToDevicePixels(LayoutRect(Renderer().TransformReferenceBoxRect(style)),
+                                                   Renderer().GetDocument().DeviceScaleFactor());
     Renderer().ApplyTransform(transform, style, referenceBoxRect, options);
 
     // FIXME: 3D rendering (canRender3DTransforms).
@@ -3062,8 +3051,10 @@ namespace krys::boo
     const auto &style = Renderer().Style();
     auto referenceBoxRect = Renderer().TransformReferenceBoxRect(style);
 
-    // FIXME: Snap the origin to device pixels when the renderer needs it (rendererNeedsPixelSnapping).
-    return style::TransformResolver::ComputeTransformOrigin(style, referenceBoxRect);
+    auto origin = style::TransformResolver::ComputeTransformOrigin(style, referenceBoxRect);
+    origin.SetXY(
+      RoundPointToDevicePixels(LayoutPoint(origin.XY()), Renderer().GetDocument().DeviceScaleFactor()));
+    return origin;
   }
 
   FloatPoint RenderLayer::PerspectiveOrigin() const noexcept
@@ -3815,7 +3806,6 @@ namespace krys::boo
         AccumulateOffsetTowardsAncestor(currLayer, ancestorLayer, locationInLayerCoords, adjustForColumns);
     }
 
-    // FIXME: Snap the whole SVG subtree as one block.
     return locationInLayerCoords;
   }
 
@@ -3991,10 +3981,15 @@ namespace krys::boo
       // bounding box of the transformed quad.
       // It would be better for callers to transform rects into the coordinate space of the nearest clipped
       // layer, apply the clip in local space, and then repeat until the required coordinate space is reached.
-      // FIXME: Transform the clips into the root's coordinates (localToContainerQuad) when the offset can't
-      // be used.
+      bool needsTransform = clipRectsContext.Type == AbsoluteClipRects
+                              ? _hasTransformedAncestor || !CanUseOffsetFromAncestor()
+                              : !CanUseOffsetFromAncestor(*clipRectsContext.RootLayer);
 
-      auto offset = ToLayoutPoint(OffsetFromAncestor(clipRectsContext.RootLayer, AdjustForColumns));
+      LayoutPoint offset;
+      if (!needsTransform)
+      {
+        offset = ToLayoutPoint(OffsetFromAncestor(clipRectsContext.RootLayer, AdjustForColumns));
+      }
 
       if (clipRects.Fixed() && &clipRectsContext.RootLayer->Renderer() == &Renderer().View())
       {
@@ -4005,6 +4000,13 @@ namespace krys::boo
       {
         ClipRect newOverflowClip =
           RendererOverflowClipRectForChildLayers({}, clipRectsContext.GetOverlayScrollbarSizeRelevancy());
+        if (needsTransform)
+        {
+          newOverflowClip = LayoutRect(Renderer()
+                                         .LocalToContainerQuad(FloatQuad(FloatRect(newOverflowClip.Rect())),
+                                                               &clipRectsContext.RootLayer->Renderer())
+                                         .BoundingBox());
+        }
         newOverflowClip.MoveBy(offset);
         newOverflowClip.SetAffectedByRadius(Renderer().Style().HasBorderRadius());
         clipRects.SetOverflowClipRect(Intersection(newOverflowClip, clipRects.OverflowClipRect()));
@@ -4022,6 +4024,13 @@ namespace krys::boo
         if (auto *box = DynamicDowncast<RenderBox>(Renderer()))
         {
           LayoutRect newPosClip = box->ClipRect({});
+          if (needsTransform)
+          {
+            newPosClip = LayoutRect(Renderer()
+                                      .LocalToContainerQuad(FloatQuad(FloatRect(newPosClip)),
+                                                            &clipRectsContext.RootLayer->Renderer())
+                                      .BoundingBox());
+          }
           newPosClip.MoveBy(offset);
           clipRects.SetPosClipRect(Intersection(newPosClip, clipRects.PosClipRect()));
           clipRects.SetOverflowClipRect(Intersection(newPosClip, clipRects.OverflowClipRect()));
@@ -5223,7 +5232,6 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: SVG clip paths that use clipping masks, once there's the layer-based SVG engine.
     return false;
   }
 
@@ -5282,7 +5290,6 @@ namespace krys::boo
   FloatRect RenderLayer::ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
                                                      const LayoutRect &rootRelativeBounds) const noexcept
   {
-    // FIXME: Layer-aware SVG renderers, once there's the layer-based SVG engine.
     bool isReferenceBox = Renderer().IsRenderBox();
 
     // FIXME: Support different reference boxes for inline content.
@@ -5502,7 +5509,7 @@ namespace krys::boo
     // defer visual updates.
 
     // If this layer is totally invisible then there is nothing to paint.
-    // FIXME: Accessibility and event region paints continue, once there are those.
+    // FIXME: Event region paints continue, once there are those.
     if (!RendererOpacity(Renderer()))
     {
       return;
@@ -5569,8 +5576,6 @@ namespace krys::boo
         {
           paintBehavior.Add(PaintBehavior::CompositedOverflowScrollContent);
         }
-
-        // FIXME: SVG viewport clipping (shouldApplyViewportClip).
 
         // Push the parent coordinate space's clip.
         Parent()->ClipToRect(context, stateSaver, paintingInfo, paintBehavior, clipRect);
@@ -5803,7 +5808,6 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: Hidden SVG containers and SVG resource layers (painted indirectly).
       return _hasVisibleContent;
     };
 
@@ -5828,7 +5832,6 @@ namespace krys::boo
       return true;
     };
 
-    // FIXME: Accessibility regions come with accessibility.
     bool shouldPaintContent = hasVisibleContent() && isSelfPaintingLayer && !isPaintingOverlayScrollbars
                               && !isCollectingEventRegion && !shouldSkipNonFixedTopDocumentContent();
 
@@ -6102,8 +6105,7 @@ namespace krys::boo
                                     subtreePaintRootForRenderer);
       }
 
-      // FIXME: Event and accessibility regions (collectEventRegionForFragments,
-      // collectAccessibilityRegionsForFragments) come with hit testing and accessibility.
+      // FIXME: Event regions (collectEventRegionForFragments) come with hit testing.
 
       if (shouldPaintOutline)
       {
@@ -6639,8 +6641,6 @@ namespace krys::boo
     bool selectionAndBackgroundsOnly =
       localPaintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionAndBackgroundsOnly);
 
-    // FIXME: SVG renderers that aren't containers (painted in the foreground phase only).
-
     if (!selectionOnly)
     {
       PaintForegroundForFragmentsWithPhase(PaintPhase::ChildBlockBackgrounds, layerFragments, context,
@@ -7012,8 +7012,7 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: SVG resources and hidden SVG containers, and fixed container sampling
-    // (isForFixedContainerSampling) come with SVG and scrolling.
+    // FIXME: Fixed container sampling (isForFixedContainerSampling) comes with scrolling.
 
     // The natural thing would be to keep HitTestingTransformState on the stack, but it's big, so we
     // heap-allocate.

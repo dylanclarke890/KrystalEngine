@@ -26,6 +26,8 @@
  */
 
 #include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
@@ -350,7 +352,7 @@ namespace krys::boo
     return CanCopy() && CanDelete();
   }
 
-  // FIXME: Image documents, with them.
+  // FIXME: An image document can always copy its image, with images on the pasteboard.
   bool Editor::CanCopy() const noexcept
   {
     const VisibleSelection &selection = _document.Selection().Selection();
@@ -658,9 +660,9 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Image documents (writeImageToPasteboard), with images on the pasteboard; the editor client's
-  // notifications around writing the selection; and accessibility's notification of the cut text, with
-  // accessibility. (There are no image overlays or spelling markers; see DIFFERENCES.md.)
+  // FIXME: Image documents (writeImageToPasteboard), with images on the pasteboard; and the editor client's
+  // notifications around writing the selection. (There are no image overlays or spelling markers; see
+  // DIFFERENCES.md.)
   void Editor::PerformCutOrCopy(EditorActionSpecifier action) noexcept
   {
     auto selection = SelectedRange();
@@ -682,7 +684,20 @@ namespace krys::boo
 
     if (action == EditorActionSpecifier::CutAction)
     {
+      dom::DOMString text;
+      if (ax::AXObjectCache::AccessibilityEnabled())
+      {
+        const auto &cutSelection = _document.Selection().Selection();
+        text = ax::AccessibilityObject::StringForVisiblePositionRange(
+          {cutSelection.VisibleStart(), cutSelection.VisibleEnd()});
+      }
       DeleteSelectionWithSmartDelete(CanSmartCopyOrDelete(), EditAction::Cut);
+      if (auto *cache = text.empty() ? nullptr : _document.ExistingAXObjectCache())
+      {
+        auto start = _document.Selection().Selection().VisibleStart();
+        cache->PostTextStateChangeNotification(start.DeepEquivalent().AnchorNode(), ax::AXTextChange::Deleted,
+                                               text, start);
+      }
     }
   }
 
@@ -945,10 +960,18 @@ namespace krys::boo
     return _lastEditCommand.get();
   }
 
-  // FIXME: Accessibility's notification of the change, with accessibility. (There are no spelling or
-  // grammar markers to update; see DIFFERENCES.md.)
-  void Editor::RespondToChangedContents(const VisibleSelection &) noexcept
+  // (There are no spelling or grammar markers to update; see DIFFERENCES.md.)
+  void Editor::RespondToChangedContents(const VisibleSelection &endingSelection) noexcept
   {
+    if (ax::AXObjectCache::AccessibilityEnabled())
+    {
+      auto *node = endingSelection.Start().DeprecatedNode();
+      if (auto *cache = node ? _document.ExistingAXObjectCache() : nullptr)
+      {
+        cache->OnEditableTextValueChanged(*node);
+      }
+    }
+
     if (auto *client = Client())
     {
       client->RespondToChangedContents();
@@ -1468,9 +1491,8 @@ namespace krys::boo
     DeleteSelectionWithSmartDelete(CanSmartCopyOrDelete());
   }
 
-  // FIXME: Waiting for the inserted images to load before revealing the selection; and accessibility's
-  // notifications of the pasted text, with accessibility. (There's no spell checking; see
-  // DIFFERENCES.md.)
+  // FIXME: Waiting for the inserted images to load before revealing the selection. (There's no spell
+  // checking; see DIFFERENCES.md.)
   void Editor::ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
                                             bool smartReplace, bool matchStyle,
                                             EditAction editingAction) noexcept
@@ -1479,6 +1501,13 @@ namespace krys::boo
     if (selection.IsNone() || !selection.IsContentEditable())
     {
       return;
+    }
+
+    ax::AccessibilityReplacedText replacedText;
+    if (ax::AXObjectCache::AccessibilityEnabled()
+        && (editingAction == EditAction::Paste || editingAction == EditAction::Insert))
+    {
+      replacedText = ax::AccessibilityReplacedText(selection);
     }
 
     EnumSet<ReplaceSelectionCommand::CommandOption> options {
@@ -1501,6 +1530,33 @@ namespace krys::boo
     command->Apply();
 
     RevealSelectionAfterEditingOperation();
+
+    // Accessibility is told the inserted text (not a password's).
+    if (!ax::AXObjectCache::AccessibilityEnabled() || _document.Selection().Selection().IsInPasswordField())
+    {
+      return;
+    }
+    dom::DOMString text;
+    if (editingAction == EditAction::Paste)
+    {
+      const auto &inserted = command->VisibleSelectionForInsertedText();
+      text = ax::AccessibilityObject::StringForVisiblePositionRange(
+        {inserted.VisibleStart(), inserted.VisibleEnd()});
+    }
+    else if (editingAction == EditAction::Insert)
+    {
+      text = command->DocumentFragmentPlainText();
+    }
+    else
+    {
+      return;
+    }
+    replacedText.PostTextStateChangeNotification(_document.ExistingAXObjectCache(), text,
+                                                 _document.Selection().Selection());
+    if (auto *composition = command->Composition())
+    {
+      composition->SetRangeDeletedByUnapply(replacedText.ReplacedRange());
+    }
   }
 
   void Editor::ReplaceSelectionWithText(utf8_stringview text, bool selectReplacement, bool smartReplace,
@@ -1690,7 +1746,6 @@ namespace krys::boo
     };
   }
 
-  // FIXME: Accessibility's composition notifications (onTextCompositionChange), with accessibility.
   void Editor::SetComposition(utf8_stringview text, SetCompositionMode mode) noexcept
   {
     Ref<dom::Document> document = ShareRef(_document);
@@ -1750,7 +1805,6 @@ namespace krys::boo
     TypingCommand::CloseTyping(_document);
   }
 
-  // FIXME: Accessibility's composition notifications (onTextCompositionChange), with accessibility.
   void Editor::SetComposition(utf8_stringview text, const List<CompositionUnderline> &underlines,
                               uint32 selectionStart, uint32 selectionEnd) noexcept
   {
@@ -1860,8 +1914,8 @@ namespace krys::boo
         TypingCommand::TextCompositionType::Pending);
 
       // Find out what node has the composition now.
-      auto base = document->Selection().Selection().Base().Downstream();
-      auto extent = document->Selection().Selection().Extent();
+      auto base = document->Selection().Selection().CanonicalAnchor().Downstream();
+      auto extent = document->Selection().Selection().CanonicalFocus();
       RefPtr<dom::Node> baseNode = ShareRefPtr(base.DeprecatedNode());
       auto baseOffset = static_cast<uint32>(base.DeprecatedEditingOffset());
       RefPtr<dom::Node> extentNode = ShareRefPtr(extent.DeprecatedNode());

@@ -25,6 +25,8 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
+#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
@@ -105,6 +107,7 @@ namespace krys::boo
         _endingRootEditableElement(ShareRefPtr(endingSelection.RootEditableElement())),
         _editAction(editAction)
   {
+    _replacedText.ConfigureRangeDeletedByReapplyWithStartingSelection(startingSelection);
   }
 
   bool EditCommandComposition::AreRootEditabledElementsConnected() noexcept
@@ -136,6 +139,8 @@ namespace krys::boo
       return;
     }
 
+    _replacedText.CaptureTextForUnapply();
+
     // Changes to the document may have been made since the last editing operation that require a layout, as
     // in <rdar://problem/5658603>. Low level operations, like RemoveNodeCommand, don't require a layout
     // because the high level operations that use them perform one if one is necessary (like for the creation
@@ -162,6 +167,10 @@ namespace krys::boo
     }
 
     _document->GetEditor().UnappliedEditing(*this);
+    if (ax::AXObjectCache::AccessibilityEnabled())
+    {
+      _replacedText.PostTextStateChangeNotificationForUnapply(_document->ExistingAXObjectCache());
+    }
   }
 
   void EditCommandComposition::Unapply() noexcept
@@ -180,6 +189,8 @@ namespace krys::boo
     {
       return;
     }
+
+    _replacedText.CaptureTextForReapply();
 
     // Changes to the document may have been made since the last editing operation that require a layout, as
     // in <rdar://problem/5658603>. Low level operations, like RemoveNodeCommand, don't require a layout
@@ -202,6 +213,10 @@ namespace krys::boo
     }
 
     _document->GetEditor().ReappliedEditing(*this);
+    if (ax::AXObjectCache::AccessibilityEnabled())
+    {
+      _replacedText.PostTextStateChangeNotificationForReapply(_document->ExistingAXObjectCache());
+    }
   }
 
   void EditCommandComposition::Append(SimpleEditCommand *command) noexcept
@@ -213,12 +228,154 @@ namespace krys::boo
   {
     _startingSelection = selection;
     _startingRootEditableElement = ShareRefPtr(selection.RootEditableElement());
+    _replacedText.ConfigureRangeDeletedByReapplyWithStartingSelection(selection);
   }
 
   void EditCommandComposition::SetEndingSelection(const VisibleSelection &selection) noexcept
   {
     _endingSelection = selection;
     _endingRootEditableElement = ShareRefPtr(selection.RootEditableElement());
+    _replacedText.ConfigureRangeDeletedByReapplyWithEndingSelection(selection);
+  }
+
+  void AccessibilityUndoReplacedText::ConfigureRangeDeletedByReapplyWithStartingSelection(
+    const VisibleSelection &selection) noexcept
+  {
+    if (!ax::AXObjectCache::AccessibilityEnabled() || selection.IsNone())
+    {
+      return;
+    }
+    if (_rangeDeletedByReapply.StartIndex.Value == -1 && selection.Start().IsNotNull())
+    {
+      _rangeDeletedByReapply.StartIndex.Value =
+        IndexForVisiblePosition(VisiblePosition(selection.Start()), _rangeDeletedByReapply.StartIndex.Scope);
+    }
+  }
+
+  void AccessibilityUndoReplacedText::ConfigureRangeDeletedByReapplyWithEndingSelection(
+    const VisibleSelection &selection) noexcept
+  {
+    if (!ax::AXObjectCache::AccessibilityEnabled() || selection.IsNone() || selection.End().IsNull())
+    {
+      return;
+    }
+    _rangeDeletedByReapply.EndIndex.Value =
+      IndexForVisiblePosition(VisiblePosition(selection.End()), _rangeDeletedByReapply.EndIndex.Scope);
+  }
+
+  void
+    AccessibilityUndoReplacedText::SetRangeDeletedByUnapply(const VisiblePositionIndexRange &range) noexcept
+  {
+    if (_rangeDeletedByUnapply.IsNull())
+    {
+      _rangeDeletedByUnapply = range;
+    }
+  }
+
+  void AccessibilityUndoReplacedText::CaptureTextForUnapply() noexcept
+  {
+    if (ax::AXObjectCache::AccessibilityEnabled())
+    {
+      _replacedText = TextDeletedByReapply();
+    }
+  }
+
+  void AccessibilityUndoReplacedText::CaptureTextForReapply() noexcept
+  {
+    if (ax::AXObjectCache::AccessibilityEnabled())
+    {
+      _replacedText = TextDeletedByUnapply();
+    }
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD dom::DOMString
+      StringForVisiblePositionIndexRange(const VisiblePositionIndexRange &range) noexcept
+    {
+      if (range.IsNull())
+      {
+        return {};
+      }
+      return ax::AccessibilityObject::StringForVisiblePositionRange(
+        {VisiblePositionForIndex(range.StartIndex.Value, range.StartIndex.Scope.get()),
+         VisiblePositionForIndex(range.EndIndex.Value, range.EndIndex.Scope.get())});
+    }
+
+    /// @brief An undo or redo at @p position made @p appearedText appear and @p disappearedText disappear.
+    void PostUndoRedoTextChange(ax::AXObjectCache &cache, const VisiblePosition &position,
+                                utf8_stringview appearedText, utf8_stringview disappearedText) noexcept
+    {
+      auto node = HighestEditableRoot(position.DeepEquivalent(), EditableType::HasEditableAXRole);
+      if (!node)
+      {
+        return;
+      }
+      if (!appearedText.empty() && !disappearedText.empty())
+      {
+        cache.PostTextReplacementNotification(node.get(), disappearedText, appearedText, position);
+      }
+      else if (!appearedText.empty())
+      {
+        cache.PostTextStateChangeNotification(node.get(), ax::AXTextChange::Inserted, appearedText, position);
+      }
+      else if (!disappearedText.empty())
+      {
+        cache.PostTextStateChangeNotification(node.get(), ax::AXTextChange::Deleted, disappearedText,
+                                              position);
+      }
+    }
+  }
+
+  dom::DOMString AccessibilityUndoReplacedText::TextDeletedByUnapply() const noexcept
+  {
+    return ax::AXObjectCache::AccessibilityEnabled()
+             ? StringForVisiblePositionIndexRange(_rangeDeletedByUnapply)
+             : dom::DOMString {};
+  }
+
+  dom::DOMString AccessibilityUndoReplacedText::TextDeletedByReapply() const noexcept
+  {
+    return ax::AXObjectCache::AccessibilityEnabled()
+             ? StringForVisiblePositionIndexRange(_rangeDeletedByReapply)
+             : dom::DOMString {};
+  }
+
+  void AccessibilityUndoReplacedText::PostTextStateChangeNotificationForUnapply(
+    ax::AXObjectCache *cache) noexcept
+  {
+    if (!cache || !ax::AXObjectCache::AccessibilityEnabled() || _rangeDeletedByUnapply.IsNull())
+    {
+      return;
+    }
+    auto position = VisiblePositionForIndex(_rangeDeletedByUnapply.EndIndex.Value,
+                                            _rangeDeletedByUnapply.EndIndex.Scope.get());
+    if (position.IsNull())
+    {
+      return;
+    }
+    // The undo put back the text the edit replaced, and took away what the edit inserted.
+    PostUndoRedoTextChange(*cache, position, TextDeletedByUnapply(), _replacedText);
+    _replacedText = {};
+  }
+
+  void AccessibilityUndoReplacedText::PostTextStateChangeNotificationForReapply(
+    ax::AXObjectCache *cache) noexcept
+  {
+    if (!cache || !ax::AXObjectCache::AccessibilityEnabled() || _rangeDeletedByReapply.IsNull())
+    {
+      return;
+    }
+    // The end of what the redo put back.
+    auto position = VisiblePositionForIndex(_rangeDeletedByReapply.EndIndex.Value,
+                                            _rangeDeletedByReapply.EndIndex.Scope.get());
+    if (position.IsNull())
+    {
+      return;
+    }
+    // The redo put back the text the edit inserted, and took away what it replaced.
+    PostUndoRedoTextChange(*cache, position, TextDeletedByReapply(), _replacedText);
+    _replacedText = {};
   }
 
   utf8_string EditCommandComposition::Label() const noexcept

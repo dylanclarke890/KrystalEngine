@@ -40,7 +40,7 @@ namespace krys::boo
   /// @brief A cached web font: the font file a load brought, and the font made from it.
   /// @note The file isn't loaded when the font is requested, but when something first needs it
   /// (`BeginLoadIfNeeded`).
-  // FIXME: SVG fonts, and a safe font parser for fonts that aren't trusted.
+  // FIXME: A safe font parser for fonts that aren't trusted.
   class CachedFont : public CachedResource
   {
   private:
@@ -98,7 +98,6 @@ namespace krys::boo
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CachedFont)
   KRYS_NODISCARD static bool IsType(const krys::boo::CachedResource &resource) noexcept
   {
-    return resource.GetType() == krys::boo::CachedResource::Type::FontResource
-           || resource.GetType() == krys::boo::CachedResource::Type::SVGFontResource;
+    return resource.GetType() == krys::boo::CachedResource::Type::FontResource;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

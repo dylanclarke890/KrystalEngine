@@ -98,7 +98,6 @@ namespace krys::boo
   enum class Affinity : bool;
   enum class HitTestSource : bool;
 
-  // FIXME: SVG transforms come with SVG.
   enum class RenderObjectStateFlag : uint8
   {
     IsBlock,
@@ -246,12 +245,11 @@ namespace krys::boo
   class RenderElement;
   class RenderStyle;
 
-  /// @brief A node of the render tree: the box, text or other object a node (or, for anonymous objects, the
-  /// document) is rendered as.
-  /// @note FIXME: There's no render tree yet: renderers have no parent, children, layout or painting.
   /// @brief An opaque pointer identifying the image data behind a style image.
   using WrappedImagePtr = const void *;
 
+  /// @brief A node of the render tree: the box, text or other object a node (or, for anonymous objects, the
+  /// document) is rendered as.
   class RenderObject : public CanMakeWeakPtr<RenderObject>, public CanMakeCheckedPtr<RenderObject>
   {
     KRYS_NON_COPY_MOVABLE(RenderObject);
@@ -288,7 +286,6 @@ namespace krys::boo
       Progress,
       Quote,
       Replica,
-      ScrollbarPart,
       SearchField,
       Slider,
       SliderContainer,
@@ -700,6 +697,7 @@ namespace krys::boo
       void DidRemoveCachedImageClient(CachedImage &) noexcept final;
       void ImageContentChanged(CachedImage &) noexcept final;
       void ScheduleRenderingUpdateForImage(CachedImage &) noexcept final;
+      KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept final;
     };
 
     mutable UniquePtr<CachedImageListener> _cachedImageClient;
@@ -1209,6 +1207,10 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderSVGInline() const noexcept
     {
       return _type == Type::SVGInline || _type == Type::SVGTSpan || _type == Type::SVGTextPath;
+    }
+    KRYS_NODISCARD bool IsRenderCombineText() const noexcept
+    {
+      return _type == Type::CombineText;
     }
     KRYS_NODISCARD bool IsRenderSVGInlineText() const noexcept
     {

@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
@@ -256,6 +257,22 @@ namespace krys::boo::tests
     CHECK(fixture.LayerOf(u8"blurred").IsComposited());
     CHECK_FALSE(fixture.LayerOf(u8"flat").IsComposited());
     CHECK(fixture.LayerOf(u8"turned").IsComposited());
+  }
+
+  TEST_CASE("RenderLayerCompositor: the debug settings reach the layers",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<div id=blurred style='width:30px;height:30px;filter:blur(2px)'></div>");
+    CHECK_FALSE(fixture.GraphicsLayerOf(u8"blurred").IsShowingDebugBorder());
+    CHECK_FALSE(fixture.GraphicsLayerOf(u8"blurred").IsShowingRepaintCounter());
+
+    auto settings = Settings::Create();
+    settings->ShowDebugBorders = true;
+    settings->ShowRepaintCounter = true;
+    fixture.Document->SetSettings(Ref<Settings>(settings));
+    fixture.TestPage->UpdateRendering();
+    CHECK(fixture.GraphicsLayerOf(u8"blurred").IsShowingDebugBorder());
+    CHECK(fixture.GraphicsLayerOf(u8"blurred").IsShowingRepaintCounter());
   }
 
   TEST_CASE("RenderLayerCompositor: layers above a composited layer composite for overlap",

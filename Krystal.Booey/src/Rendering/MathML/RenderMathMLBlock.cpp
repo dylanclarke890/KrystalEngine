@@ -105,7 +105,6 @@ namespace krys::boo
 
   LayoutUnit RenderMathMLBlock::AscentForChild(const RenderBox &child) noexcept
   {
-    // Subpixel inline layout is off, so the height is snapped to an integer.
     auto logicalHeight = LayoutUnit(child.LogicalHeight().ToInt());
     return child.FirstLineBaseline().value_or(logicalHeight);
   }
@@ -162,7 +161,6 @@ namespace krys::boo
     // This is different than RenderTable::firstLineBoxBaseline, which returns the baseline of the first row
     // of a <table>.
     auto baseline = LogicalHeight() / 2 + MathMLAxisHeight(Style());
-    // Subpixel inline layout is off, so the baseline is snapped to an integer.
     return LayoutUnit(baseline.ToInt());
   }
 

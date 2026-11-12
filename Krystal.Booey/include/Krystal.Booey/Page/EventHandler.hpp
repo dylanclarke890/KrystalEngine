@@ -251,6 +251,7 @@ namespace krys::boo
     /// interval.
     MonotonicTime::duration _maxMouseMovedDuration {};
     Timer _fakeMouseMoveEventTimer;
+    Timer _hoverTimer;
     bool _hasScheduledCursorUpdate {false};
     bool _isHandlingWheelEvent {false};
     /// @brief What a gesture (a touch's or a touchpad's pan, or its momentum) has scrolled, to snap when it
@@ -308,6 +309,10 @@ namespace krys::boo
     /// @brief Forgets @p nodeToBeRemoved and its descendants as the click node and the element under the
     /// mouse.
     void NodeWillBeRemoved(dom::Node &nodeToBeRemoved) noexcept;
+
+    /// @brief Ends the mouse's press without its release's events, as when the host cancels the pointer: no
+    /// drag, selection or autoscroll continues from it, and it doesn't count towards a click.
+    void CancelMousePress() noexcept;
 
     /// @brief Called when the layer whose resizer is being dragged is destroyed.
     void ResizeLayerDestroyed() noexcept;
@@ -451,6 +456,9 @@ namespace krys::boo
     void UpdateCursor() noexcept;
     /// @brief Asks for the cursor to be chosen again in the next rendering update, as after a style change.
     void ScheduleCursorUpdate() noexcept;
+    /// @brief Updates the hover and active states for the last known mouse position soon, as after the
+    /// hovered element is removed.
+    void ScheduleHoverStateUpdate() noexcept;
     /// @brief Chooses the cursor again if an update was scheduled (the rendering update's cursor step).
     void UpdateCursorIfNeeded() noexcept;
 
@@ -617,6 +625,7 @@ namespace krys::boo
     KRYS_NODISCARD bool UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) const noexcept;
 
     void FakeMouseMoveEventTimerFired() noexcept;
+    void HoverTimerFired() noexcept;
 
     bool HandleWheelEventInternal(const PlatformWheelEvent &event, EnumSet<EventHandling> &handling) noexcept;
     bool ProcessWheelEventForScrolling(const PlatformWheelEvent &event) noexcept;

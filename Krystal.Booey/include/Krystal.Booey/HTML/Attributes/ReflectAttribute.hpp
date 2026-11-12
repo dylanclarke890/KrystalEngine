@@ -21,7 +21,7 @@
 namespace krys::boo::html
 {
   template <typename T>
-  concept ReflectTarget = DerivedFrom<T, HTMLElement> || SameType<T, ElementInternals>;
+  concept ReflectTarget = DerivedFrom<T, dom::Element> || SameType<T, ElementInternals>;
 
   template <typename T>
   concept ReflectTypeDOMString = OneOf<T, dom::DOMString, Maybe<dom::DOMString>>;
@@ -29,9 +29,9 @@ namespace krys::boo::html
   template <typename T>
   concept ReflectURLType = OneOf<T, dom::USVString>;
 
-  // FIXME: FrozenArray<T>? is also one of the possible types.
-  // NOTE: DOMTokenList is also a possible type for reflection but it just consists of returning a
-  // DOMTokenList, would be harder to handle here.
+  // NOTE: `Element?` and `FrozenArray<Element>?` attributes reflect through their target's
+  // `ElementForAttributeInternal` and `ElementsForAttributeInternal`. DOMTokenList is also a possible type
+  // for reflection but it just consists of returning a DOMTokenList, would be harder to handle here.
   template <typename T>
   concept ReflectType = ReflectTypeDOMString<T> || ReflectURLType<T> || OneOf<T, bool, int32, uint32, double>;
 
@@ -118,16 +118,16 @@ namespace krys::boo::html
       return dom::DOMString(dom::DOMStringView(reinterpret_cast<const char8 *>(buffer), end - buffer));
     }
 
-#pragma region HTMLElement ReflectTarget
+#pragma region Element ReflectTarget
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#get-the-element
-    KRYS_NODISCARD inline HTMLElement *GetElement(HTMLElement &element) noexcept
+    KRYS_NODISCARD inline dom::Element *GetElement(dom::Element &element) noexcept
     {
       return &element;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#get-the-content-attribute
-    KRYS_NODISCARD inline Maybe<dom::DOMString> GetContentAttribute(const HTMLElement &element,
+    KRYS_NODISCARD inline Maybe<dom::DOMString> GetContentAttribute(const dom::Element &element,
                                                                     dom::DOMStringAtom name) noexcept
     {
       auto attribute =
@@ -141,14 +141,14 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
-    inline void SetContentAttribute(HTMLElement &element, dom::DOMStringAtom name,
+    inline void SetContentAttribute(dom::Element &element, dom::DOMStringAtom name,
                                     dom::DOMString value) noexcept
     {
       dom::ElementAlgorithms::SetAttributeValue(element, name, krys::move(value));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
-    inline void DeleteContentAttribute(HTMLElement &element, dom::DOMStringAtom name) noexcept
+    inline void DeleteContentAttribute(dom::Element &element, dom::DOMStringAtom name) noexcept
     {
       dom::ElementAlgorithms::RemoveAttributeByNamespace(dom::DOMStringAtom::Null(), name, element);
     }
@@ -167,28 +167,23 @@ namespace krys::boo::html
     KRYS_NODISCARD inline Maybe<dom::DOMString> GetContentAttribute(const ElementInternals &internals,
                                                                     dom::DOMStringAtom name) noexcept
     {
-      // FIXME: The internals' ARIA attributes, with accessibility.
-      (void)internals;
-      (void)name;
-      return null;
+      // The target element's internal content attribute map's value for the name, if it has one.
+      return internals.InternalContentAttribute(name);
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
     inline void SetContentAttribute(ElementInternals &internals, dom::DOMStringAtom name,
                                     dom::DOMString value) noexcept
     {
-      // FIXME: The internals' ARIA attributes, with accessibility.
-      (void)internals;
-      (void)name;
-      (void)value;
+      // The target element's internal content attribute map's value for the name.
+      internals.SetInternalContentAttribute(name, krys::move(value));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
     inline void DeleteContentAttribute(ElementInternals &internals, dom::DOMStringAtom name) noexcept
     {
-      // FIXME: The internals' ARIA attributes, with accessibility.
-      (void)internals;
-      (void)name;
+      // Removed from the target element's internal content attribute map.
+      internals.RemoveInternalContentAttribute(name);
     }
 
 #pragma endregion

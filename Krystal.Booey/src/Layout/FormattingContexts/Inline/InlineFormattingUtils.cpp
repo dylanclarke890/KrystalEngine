@@ -859,8 +859,6 @@ namespace krys::boo::layout
     return lineClamp->MaximumLines == inlineLayoutState.LineCountWithInlineContentIncludingNestedBlocks();
   }
 
-  // Subpixel inline layout (in the block direction) is off: vertical metrics are snapped to integers.
-
   InlineLayoutUnit InlineFormattingUtils::Ascent(const FontMetrics &fontMetrics, FontBaseline fontBaseline,
                                                  const InlineLevelBox &inlineLevelBox) noexcept
   {

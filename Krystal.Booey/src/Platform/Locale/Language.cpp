@@ -24,6 +24,8 @@
  */
 
 #include "Krystal.Booey/Platform/Locale/Language.hpp"
+#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo
 {
@@ -34,11 +36,48 @@ namespace krys::boo
       static List<utf8_string> languages;
       return languages;
     }
+
+    KRYS_NODISCARD uint32 &PreferredLanguagesGeneration() noexcept
+    {
+      static uint32 generation {0};
+      return generation;
+    }
   }
 
   void OverrideUserPreferredLanguages(List<utf8_string> languages) noexcept
   {
     PreferredLanguagesOverride() = krys::move(languages);
+    ++PreferredLanguagesGeneration();
+  }
+
+  List<utf8_string> UserPreferredLanguages() noexcept
+  {
+    if (auto &override = PreferredLanguagesOverride(); !override.empty())
+    {
+      return override;
+    }
+    return {DefaultLanguage()};
+  }
+
+  uint32 UserPreferredLanguagesGeneration() noexcept
+  {
+    return PreferredLanguagesGeneration();
+  }
+
+  bool UserPrefersSimplifiedChinese() noexcept
+  {
+    for (const auto &language : UserPreferredLanguages())
+    {
+      if (text::IsASCIICaselessEqual(language, utf8_stringview(u8"zh-tw")))
+      {
+        return false;
+      }
+      if (text::IsASCIICaselessEqual(language, utf8_stringview(u8"zh-cn")))
+      {
+        return true;
+      }
+    }
+    return true;
   }
 
   const List<utf8_string> &UserPreferredLanguagesOverride() noexcept

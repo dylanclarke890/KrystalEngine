@@ -27,6 +27,9 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Style/Interpolation/InterpolationClient.hpp"
+#include "Krystal.Booey/Style/Interpolation/InterpolationContext.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/Matrix3DTransformFunction.hpp"
 
 namespace krys::boo::style
@@ -108,6 +111,33 @@ namespace krys::boo::style
   TransformList Blending<TransformList>::Blend(const TransformList &from, const TransformList &to,
                                                const BlendingContext &context) noexcept
   {
+    return BlendTransformLists(from, to, context, LayoutSize(), null);
+  }
+
+  TransformList Blending<TransformList>::Blend(const TransformList &from, const TransformList &to,
+                                               const interpolation::Context &context) noexcept
+  {
+    auto *renderBox = DynamicDowncast<RenderBox>(context.Client.Renderer());
+    auto boxSize = renderBox ? renderBox->BorderBoxRect().Size() : LayoutSize();
+
+    // The precomputed prefix can't be used when accumulating, as the values accumulated may differ from those
+    // of the keyframes, nor for properties other than `transform`, as it's only computed for that one.
+    Maybe<uint32> prefixLengthFromContext;
+    if (context.CompositeOperation != CompositeOperation::Accumulate
+        && context.Property == AnimatableCSSProperty(css::PropertyId::Transform))
+    {
+      prefixLengthFromContext = context.Client.TransformFunctionListPrefix();
+    }
+
+    return BlendTransformLists(from, to, context, boxSize, prefixLengthFromContext);
+  }
+
+  TransformList Blending<TransformList>::BlendTransformLists(const TransformList &from,
+                                                             const TransformList &to,
+                                                             const BlendingContext &context,
+                                                             LayoutSize boxSize,
+                                                             Maybe<uint32> prefixLengthFromContext) noexcept
+  {
     auto fromLength = static_cast<uint32>(from.size());
     auto toLength = static_cast<uint32>(to.size());
     auto maxLength = std::max(fromLength, toLength);
@@ -126,10 +156,6 @@ namespace krys::boo::style
                                                                      return to[index - fromLength];
                                                                    });
     }
-
-    // FIXME: Blend against the border box of the interpolation client's renderer; until then, size-dependent
-    // functions blend against an empty box.
-    LayoutSize boxSize;
 
     bool shouldFallBackToDiscrete = ShouldFallBackToDiscreteInterpolation(from, to, boxSize);
 
@@ -173,10 +199,6 @@ namespace krys::boo::style
     {
       return TransformList {createBlendedMatrixFunctionFromOperationsSuffix(0)};
     }
-
-    // FIXME: Use the interpolation client's precomputed prefix of shared primitives (for `transform`, when
-    // not accumulating); until then the prefix comes from the two lists.
-    Maybe<uint32> prefixLengthFromContext;
 
     auto prefixLength = [&]() -> Maybe<uint32>
     {

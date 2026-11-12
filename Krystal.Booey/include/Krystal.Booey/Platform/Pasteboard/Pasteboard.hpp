@@ -131,7 +131,6 @@ namespace krys::boo
   /// the data of a drag.
   // FIXME: Writing images, colours and buffers, with images on the pasteboard; the smart paste type, with
   // writing it; reading items by index, with the async clipboard API.
-  // FIXME: Trustworthy web URLs (canWriteTrustworthyWebURLsPboardType), which are Cocoa's.
   class Pasteboard
   {
     KRYS_NON_COPY_MOVABLE(Pasteboard);

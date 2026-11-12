@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/MotionPath.hpp"
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -167,7 +168,6 @@ namespace krys::boo
 
     if (RequiresLayer())
     {
-      // FIXME: No layers inside hidden SVG subtrees (layerCreationAllowedForSubtree).
       if (!Layer())
       {
         if (s_wasFloating && IsFloating())
@@ -265,8 +265,16 @@ namespace krys::boo
 
   void RenderLayerModelObject::UpdateLayerTransform() noexcept
   {
-    // FIXME: Boxes with an offset path that depends on the containing block's layout update after it
-    // (setBoxNeedsTransformUpdateAfterContainerLayout).
+    if (auto *box = DynamicDowncast<RenderBox>(*this);
+        box && MotionPath::NeedsUpdateAfterContainingBlockLayout(Style().GetOffsetPath()))
+    {
+      if (auto *containingBlock = ContainingBlock())
+      {
+        View().FrameView().LayoutContext().SetBoxNeedsTransformUpdateAfterContainerLayout(*box,
+                                                                                          *containingBlock);
+        return;
+      }
+    }
     // Transform-origin depends on box size, so we need to update the layer transform after layout.
     if (HasLayer())
     {

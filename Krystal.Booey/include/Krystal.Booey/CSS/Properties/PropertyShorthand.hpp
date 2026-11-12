@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
@@ -78,7 +79,7 @@ namespace krys::boo::css
   /// @note The implementation is generated in PropertyShorthandFunctions.cpp.
   KRYS_NODISCARD PropertyShorthand ShorthandForProperty(PropertyId id) noexcept;
 
-  using PropertyShorthandList = SmallList<PropertyShorthand, 4uz>;
+  using PropertyShorthandList = SmallList<PropertyShorthand, MaxShorthandsForLonghand>;
 
   /// @brief Returns the list of shorthands for a given longhand.
   /// @note The implementation is generated in PropertyShorthandFunctions.cpp.

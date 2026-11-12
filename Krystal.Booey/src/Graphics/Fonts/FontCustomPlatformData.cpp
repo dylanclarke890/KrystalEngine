@@ -108,7 +108,7 @@ namespace krys::boo
   bool FontCustomPlatformData::SupportsFormat(css::CSSOMStringView format) noexcept
   {
     for (auto supported : {u8"truetype", u8"opentype", u8"woff2", u8"woff2-variations", u8"woff-variations",
-                           u8"truetype-variations", u8"opentype-variations", u8"woff", u8"svg"})
+                           u8"truetype-variations", u8"opentype-variations", u8"woff"})
     {
       if (text::IsASCIICaselessEqual(format, utf8_stringview(supported)))
       {

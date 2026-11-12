@@ -542,6 +542,57 @@ layer at (0,0) size 800x10
   (should-antialias 1)))");
   }
 
+  TEST_CASE("RenderTable: a table that clips its overflow keeps its side of the collapsed borders",
+            "[Rendering][RenderTable]")
+  {
+    // The collapsed borders paint in the child block backgrounds phase, clipped to the border box rather than
+    // the padding box, which would cut off the table's half of them.
+    CHECK(
+      Painted(
+        u8"<style>body{margin:0}table{border-collapse:collapse;overflow:hidden;border:4px solid "
+        u8"red}td{width:20px;height:10px;padding:0;border:2px solid blue}</style><table><tr><td></td></tr>"
+        u8"</table>")
+      == Canvas() + u8R"(
+(save)
+(clip
+  (rect at (0,0) size 28x18))
+(set-state
+  (change-flags [fill-brush, stroke-style, should-antialias])
+  (fill-brush 
+    (color #FF0000))
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (0,0) size 28x4)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,14) size 28x4)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,0) size 4x18)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (24,0) size 4x18)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1))
+(restore)
+(save)
+(clip
+  (rect at (2,2) size 24x14))
+(restore)
+(save)
+(clip
+  (rect at (2,2) size 24x14))
+(restore)
+(save)
+(clip
+  (rect at (2,2) size 24x14))
+(restore))");
+  }
+
   TEST_CASE("RenderTable: paints column group, column, row group and row backgrounds behind cells",
             "[Rendering][RenderTable]")
   {

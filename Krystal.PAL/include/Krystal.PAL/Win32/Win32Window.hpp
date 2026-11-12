@@ -15,6 +15,7 @@ namespace krys::pal::win32
 {
   class DirectManipulationPan;
   class DropTarget;
+  class UIAutomation;
 
   class Win32Window final : public IWindow
   {
@@ -60,6 +61,8 @@ namespace krys::pal::win32
     /// @brief The display the refresh rate was last read for, and its rate; a display change clears them.
     mutable HMONITOR _refreshRateMonitor {nullptr};
     mutable Maybe<uint32> _refreshRate;
+    /// @brief Exposes the host's accessibility tree to UI Automation, while the host gives one.
+    UniquePtr<UIAutomation> _uiAutomation;
 
   public:
     Win32Window(const WindowSettings &settings);
@@ -105,6 +108,17 @@ namespace krys::pal::win32
     void CancelComposition() noexcept override;
 
     void SetDropOperation(Maybe<DropOperation> operation) noexcept override;
+
+    void SetAccessibilityTree(IAccessibilityTree *tree) noexcept override;
+
+    KRYS_NODISCARD bool IsAccessibilityActive() const noexcept override;
+
+    void RaiseAccessibilityEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept override;
+
+    void RaiseAccessibilityTextChange(AccessibilityNodeID node, AccessibilityTextChange change, uint64 offset,
+                                      utf8_stringview text) noexcept override;
+
+    void AccessibilityNodeRemoved(AccessibilityNodeID node) noexcept override;
 
     LRESULT HandleMessage(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
 

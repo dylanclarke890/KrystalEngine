@@ -356,6 +356,7 @@ namespace krys::boo
     RemoveFromUpdateScrollInfoAfterLayoutTransaction();
     RemoveContainerFromTrackedRendererMaps(*this);
     GetOutOfFlowDescendantsMap().RemoveContainingBlock(*this);
+    (void)View().FrameView().LayoutContext().TakeBoxesNeedingTransformUpdateAfterContainerLayout(*this);
     RenderBox::WillBeDestroyed();
   }
 
@@ -1631,7 +1632,6 @@ namespace krys::boo
         }
         if (auto baseline = child->FirstLineBaseline())
         {
-          // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
           return LayoutUnit(child->LogicalTop().ToInt()) + *baseline;
         }
       }
@@ -1662,7 +1662,6 @@ namespace krys::boo
         }
         if (auto baseline = child->LastLineBaseline())
         {
-          // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
           return LayoutUnit(child->LogicalTop().ToInt()) + *baseline;
         }
       }
@@ -1774,8 +1773,15 @@ namespace krys::boo
 
   void RenderBlock::UpdateDescendantTransformsAfterLayout() noexcept
   {
-    // FIXME: Update the transforms of the boxes whose transform depends on this container's size
-    // (takeBoxesNeedingTransformUpdateAfterContainerLayout).
+    auto boxes =
+      View().FrameView().LayoutContext().TakeBoxesNeedingTransformUpdateAfterContainerLayout(*this);
+    for (auto &box : boxes)
+    {
+      if (box && box->HasLayer())
+      {
+        box->Layer()->UpdateTransform();
+      }
+    }
   }
 
   void RenderBlock::LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept
@@ -2671,7 +2677,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The accessibility and event region phases.
+    // FIXME: The event region phase.
 
     // Adjust our painting position if we're inside a scrolled layer (e.g., an overflow:auto div).
     LayoutPoint scrolledOffset = paintOffset;
@@ -2709,12 +2715,11 @@ namespace krys::boo
     {
       // 4. paint floats.
       if (paintPhase == PaintPhase::Float || paintPhase == PaintPhase::Selection
-          || paintPhase == PaintPhase::TextClip || paintPhase == PaintPhase::EventRegion
-          || paintPhase == PaintPhase::Accessibility)
+          || paintPhase == PaintPhase::TextClip || paintPhase == PaintPhase::EventRegion)
       {
         PaintFloats(paintInfo, scrolledOffset,
                     paintPhase == PaintPhase::Selection || paintPhase == PaintPhase::TextClip
-                      || paintPhase == PaintPhase::EventRegion || paintPhase == PaintPhase::Accessibility);
+                      || paintPhase == PaintPhase::EventRegion);
       }
     }
 

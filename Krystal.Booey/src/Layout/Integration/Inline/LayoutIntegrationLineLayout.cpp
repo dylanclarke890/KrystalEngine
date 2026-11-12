@@ -435,8 +435,7 @@ namespace krys::boo::layout_integration
 
   RenderBlockFlow *LineLayout::BlockContainer(const RenderObject &renderer) noexcept
   {
-    // FIXME: Renderer replicas and scrollbar parts have their parent set but are not actually in the tree,
-    // once there are any.
+    // FIXME: Renderer replicas have their parent set but are not actually in the tree, once there are any.
     for (auto *parent = renderer.Parent(); parent; parent = parent->Parent())
     {
       if (!parent->ChildrenInline())
@@ -767,7 +766,6 @@ namespace krys::boo::layout_integration
     {
       switch (paintInfo.Phase)
       {
-        case PaintPhase::Accessibility:
         case PaintPhase::Foreground:
         case PaintPhase::EventRegion:
         case PaintPhase::TextClip:

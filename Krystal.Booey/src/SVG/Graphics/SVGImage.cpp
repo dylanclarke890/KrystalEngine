@@ -38,6 +38,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
@@ -441,11 +442,20 @@ namespace krys::boo::svg
       // SVGImage objects, but we're safe now, because SVGImage can only be
       // loaded by a top-level document.
       _page = Page::Create(CreateUnique<SVGImageChromeClient>(this));
-      // FIXME: The embedding page's settings (its generic font families) and dark appearance, once image
-      // observers can reach them.
+
+      // The image's document takes the settings of the document that loaded it, and the appearance of what
+      // shows it.
+      auto observer = GetImageObserver();
+      RefPtr<Settings> settings = observer ? ShareRefPtr(observer->GetSettings()) : nullptr;
 
       auto &mainFrame = _page->MainFrame();
       mainFrame.CreateView({});
+      if (observer && observer->UseSystemDarkAppearance())
+      {
+        auto environment = mainFrame.GetMediaEnvironment();
+        environment.UseDarkAppearance = true;
+        mainFrame.SetMediaEnvironment(environment);
+      }
       auto &loader = mainFrame.Loader();
       loader.Init();
 
@@ -459,6 +469,11 @@ namespace krys::boo::svg
       activeDocumentLoader->Writer().SetMIMEType(u8"image/svg+xml");
       if (activeDocumentLoader->Writer().Begin(url::URL())) // create the empty document
       {
+        if (auto *document = mainFrame.Document(); document && settings)
+        {
+          Ref<Settings> documentSettings = settings;
+          document->SetSettings(krys::move(documentSettings));
+        }
         activeDocumentLoader->Writer().AddData(Data()->GetSpan());
         activeDocumentLoader->Writer().End();
       }

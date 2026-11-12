@@ -49,8 +49,7 @@ namespace krys::boo::css
 
   /// @brief One source of a font face: an installed font (`local()`) or a web font file (`url()`).
   /// @note Owned by its font face, which it shares its reference count with.
-  // FIXME: SVG fonts (`<font-face>` elements), once there are those. There are no fonts from array buffers,
-  // as there's no `FontFace` interface (see DIFFERENCES.md).
+  // There are no fonts from array buffers, as there's no `FontFace` interface (see DIFFERENCES.md).
   class CSSFontFaceSource final : public FontLoadRequestClient
   {
     KRYS_NON_COPY_MOVABLE(CSSFontFaceSource);

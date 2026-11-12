@@ -876,8 +876,6 @@ namespace krys::boo::html
 
   List<DataListSuggestion> TextFieldInputType::Suggestions() noexcept
   {
-    // FIXME: Suggestions are typing completions, so they should match as find-in-page does rather than by
-    // ignoring ASCII case.
     Ref<HTMLInputElement> element = ShareRef(*Element());
     auto elementValue = element->Value();
     if (_cachedSuggestions
@@ -886,7 +884,8 @@ namespace krys::boo::html
       return _cachedSuggestions->second;
     }
 
-    // Those starting with the text, then those containing it (or whose labels do, if they're shown).
+    // Those starting with the text, then those containing it (or whose labels do, if they're shown), ignoring
+    // ASCII case (see DIFFERENCES.md).
     List<DataListSuggestion> suggestions;
     List<DataListSuggestion> matchesContainingValue;
     auto *page = element->NodeDocument().GetPage();

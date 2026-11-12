@@ -534,9 +534,8 @@ namespace krys::boo::style
       CollectMatchingRulesForList(&hostRules->PartPseudoElementRules(), scopeMatchRequest);
 
       // Element may only be exposed to styling from enclosing scopes via exportparts attributes.
-      // FIXME: The shadow root's part mappings (the host's exportparts attribute); until then no shadow root
-      // has any, so parts are never exposed beyond the host's scope.
-      if (element != &partMatchingElement)
+      if (element != &partMatchingElement
+          && dom::TreeQueries::GetShadowRoot(*element)->GetPartMappings().empty())
       {
         break;
       }

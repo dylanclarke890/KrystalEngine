@@ -64,7 +64,7 @@ namespace krys::boo
 
       /// @brief The cached font for the file at @p url, or null if it can't be requested. Its file doesn't
       /// load until `BeginLoadingFontSoon`.
-      KRYS_NODISCARD CachedFont *GetCachedFont(url::URL url, bool isSVG,
+      KRYS_NODISCARD CachedFont *GetCachedFont(url::URL url,
                                                bool isInitiatingElementInUserAgentShadowTree) noexcept;
       void BeginLoadingFontSoon(CachedFont &font) noexcept;
 

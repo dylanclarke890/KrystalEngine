@@ -54,11 +54,16 @@ namespace krys::boo::svg
       return {};
     }
 
-    // FIXME: Cache the built path on the stream (see `SVGPathByteStream`).
+    if (const auto &cached = stream.CachedPath())
+    {
+      return *cached;
+    }
+
     Path path;
     SVGPathBuilder builder(path);
     SVGPathByteStreamSource source(stream);
     (void)SVGPathParser::Parse(source, builder);
+    stream.CachePath(path);
     return path;
   }
 

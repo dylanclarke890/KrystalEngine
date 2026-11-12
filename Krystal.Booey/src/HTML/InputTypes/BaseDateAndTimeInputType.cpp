@@ -30,6 +30,7 @@
  */
 
 #include "Krystal.Booey/HTML/InputTypes/BaseDateAndTimeInputType.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -513,8 +514,12 @@ namespace krys::boo::html
 
     if (!valueChanged)
     {
-      // FIXME: Telling accessibility about the partial value (AXObjectCache::valueChanged), with
-      // accessibility.
+      // The input's value only changes once every field is filled in, but assistive technology reads the
+      // partial value as it's typed.
+      if (auto *cache = input->NodeDocument().ExistingAXObjectCache())
+      {
+        cache->ValueChanged(*input);
+      }
       return;
     }
 

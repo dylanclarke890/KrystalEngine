@@ -30,6 +30,7 @@
  */
 
 #include "Krystal.Booey/HTML/InputTypes/ColorInputType.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorInlines.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
@@ -213,7 +214,13 @@ namespace krys::boo::html
     if (name == u8"value")
     {
       UpdateColorSwatch();
-      // FIXME: Telling accessibility the value changed (AXObjectCache::valueChanged), with accessibility.
+      if (auto *input = Element())
+      {
+        if (auto *cache = input->NodeDocument().ExistingAXObjectCache())
+        {
+          cache->ValueChanged(*input);
+        }
+      }
     }
 
     InputType::AttributeChanged(name);
@@ -287,6 +294,10 @@ namespace krys::boo::html
     input->SetValueFromRenderer(serializedColor);
     UpdateColorSwatch();
     input->DispatchFormControlChangeEvent();
+    if (auto *cache = input->NodeDocument().ExistingAXObjectCache())
+    {
+      cache->ValueChanged(*input);
+    }
   }
 
   void ColorInputType::DidEndChooser() noexcept

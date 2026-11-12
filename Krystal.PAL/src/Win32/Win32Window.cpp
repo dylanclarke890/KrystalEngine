@@ -6,6 +6,7 @@
 #include "Krystal.PAL/Platform.hpp"
 #include "Krystal.PAL/Win32/DirectManipulationPan.hpp"
 #include "Krystal.PAL/Win32/DropTarget.hpp"
+#include "Krystal.PAL/Win32/UIAutomation.hpp"
 #include "Krystal.PAL/Win32/Utils.hpp"
 #include <algorithm>
 #include <cstring>
@@ -504,6 +505,11 @@ namespace krys::pal
 
     Win32Window::~Win32Window() noexcept
     {
+      if (_uiAutomation)
+      {
+        _uiAutomation->WindowDestroyed();
+        _uiAutomation.reset();
+      }
       DestroyTouchpadPan();
       RevokeDropTarget();
       ClearCursorImage();
@@ -748,6 +754,17 @@ namespace krys::pal
             _callbacks.OnFocusChange(handle, message == WM_SETFOCUS);
           }
           return 0;
+        }
+        case WM_GETOBJECT:
+        {
+          if (_uiAutomation)
+          {
+            if (auto result = _uiAutomation->HandleGetObject(wParam, lParam))
+            {
+              return *result;
+            }
+          }
+          break;
         }
         case WM_CLOSE:
         {
@@ -1234,6 +1251,46 @@ namespace krys::pal
       if (_dropTarget)
       {
         _dropTarget->SetOperation(operation);
+      }
+    }
+
+    void Win32Window::SetAccessibilityTree(IAccessibilityTree *tree) noexcept
+    {
+      _uiAutomation.reset();
+      if (tree)
+      {
+        _uiAutomation = CreateUnique<UIAutomation>(_handle, *tree);
+      }
+    }
+
+    bool Win32Window::IsAccessibilityActive() const noexcept
+    {
+      return _uiAutomation && UIAutomation::ClientsAreListening();
+    }
+
+    void Win32Window::RaiseAccessibilityEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept
+    {
+      if (IsAccessibilityActive())
+      {
+        _uiAutomation->RaiseEvent(node, event);
+      }
+    }
+
+    void Win32Window::RaiseAccessibilityTextChange(AccessibilityNodeID node, AccessibilityTextChange, uint64,
+                                                   utf8_stringview) noexcept
+    {
+      // UI Automation's text changed event doesn't say what changed: clients read the text again.
+      if (IsAccessibilityActive())
+      {
+        _uiAutomation->RaiseTextChange(node);
+      }
+    }
+
+    void Win32Window::AccessibilityNodeRemoved(AccessibilityNodeID node) noexcept
+    {
+      if (_uiAutomation)
+      {
+        _uiAutomation->NodeRemoved(node);
       }
     }
 

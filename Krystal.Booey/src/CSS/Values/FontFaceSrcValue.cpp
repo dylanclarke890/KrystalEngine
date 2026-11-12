@@ -84,7 +84,6 @@ namespace krys::boo::css
       return CachedFontLoadRequest::Create(*_cachedFont);
     }
 
-    bool isFormatSVG;
     if (_format.empty())
     {
       // In order to avoid conflicts with the old WinIE style of font-face, if there is no format specified,
@@ -97,11 +96,9 @@ namespace krys::boo::css
       {
         return nullptr;
       }
-      isFormatSVG = false;
     }
     else
     {
-      isFormatSVG = text::IsASCIICaselessEqual(_format, u8"svg");
       if (!FontCustomPlatformData::SupportsFormat(_format))
       {
         return nullptr;
@@ -116,8 +113,8 @@ namespace krys::boo::css
       }
     }
 
-    RefPtr<FontLoadRequest> request = context.GetFontLoadRequest(_location.Resolved.String(), isFormatSVG,
-                                                                 isInitiatingElementInUserAgentShadowTree);
+    RefPtr<FontLoadRequest> request =
+      context.GetFontLoadRequest(_location.Resolved.String(), isInitiatingElementInUserAgentShadowTree);
     if (auto *cachedRequest = DynamicDowncast<CachedFontLoadRequest>(request.get()))
     {
       _cachedFont = &cachedRequest->GetCachedFont();

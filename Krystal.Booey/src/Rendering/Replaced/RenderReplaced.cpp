@@ -266,12 +266,6 @@ namespace krys::boo
       return;
     }
 
-    if (paintInfo.Phase == PaintPhase::Accessibility)
-    {
-      // FIXME: Accessibility bounds come with accessibility.
-      return;
-    }
-
     // FIXME: Drawing dragged content translucent (setAlpha). (There's no transparent content; see
     // DIFFERENCES.md.)
 
@@ -381,7 +375,7 @@ namespace krys::boo
     if (paintInfo.Phase != PaintPhase::Foreground && paintInfo.Phase != PaintPhase::Outline
         && paintInfo.Phase != PaintPhase::SelfOutline && paintInfo.Phase != PaintPhase::Selection
         && paintInfo.Phase != PaintPhase::Mask && paintInfo.Phase != PaintPhase::ClippingMask
-        && paintInfo.Phase != PaintPhase::EventRegion && paintInfo.Phase != PaintPhase::Accessibility)
+        && paintInfo.Phase != PaintPhase::EventRegion)
     {
       return false;
     }

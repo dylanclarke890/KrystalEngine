@@ -7,9 +7,12 @@
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
 #include "Krystal.UI/Render2DConversions.hpp"
+#include <algorithm>
+#include <string>
 
 namespace krys::ui
 {
@@ -162,10 +165,65 @@ namespace krys::ui
     _renderer->Restore();
   }
 
-  void TextureMapper::DrawNumber(int32, const boo::Color &, const boo::FloatPoint &,
-                                 const boo::TransformationMatrix &) noexcept
+  namespace
   {
-    // FIXME: Repaint counters, which draw the count as text.
+    // The segments lit for the digits 0 to 9: bit 0 is the top one, then clockwise (right top, right bottom,
+    // bottom, left bottom, left top), and bit 6 is the middle one.
+    constexpr Array<uint8, 10> DigitSegments {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F};
+  }
+
+  void TextureMapper::DrawNumber(int32 number, const boo::Color &color, const boo::FloatPoint &targetPoint,
+                                 const boo::TransformationMatrix &modelViewMatrix) noexcept
+  {
+    if (ClipBounds().IsEmpty())
+    {
+      return;
+    }
+
+    // White seven-segment digits on a box of the colour (black when the layer shows no border), so the
+    // compositor needs no font.
+    constexpr float DigitWidth = 5;
+    constexpr float DigitHeight = 9;
+    constexpr float Stroke = 1;
+    constexpr float Gap = 2;
+    constexpr float Padding = 2;
+    constexpr float Half = (DigitHeight - Stroke) / 2;
+
+    auto digits = std::to_string(std::max(number, 0));
+    auto count = static_cast<float>(digits.size());
+    float width = 2 * Padding + count * DigitWidth + (count - 1) * Gap;
+    float height = 2 * Padding + DigitHeight;
+
+    _renderer->Save();
+    SetTransform(modelViewMatrix);
+    auto boxColor = color.IsVisible() ? color : boo::Color(boo::Color::black);
+    _renderer->FillRect({targetPoint.X(), targetPoint.Y(), width, height}, gfx::Paint2D(ToColour(boxColor)));
+
+    gfx::Paint2D white(SRGBA<uint8> {255, 255, 255, 255});
+    float x = targetPoint.X() + Padding;
+    float y = targetPoint.Y() + Padding;
+    for (char digit : digits)
+    {
+      const Array<gfx::Rect2D, 7> segments {{
+        {x, y, DigitWidth, Stroke},
+        {x + DigitWidth - Stroke, y, Stroke, Half + Stroke},
+        {x + DigitWidth - Stroke, y + Half, Stroke, Half + Stroke},
+        {x, y + DigitHeight - Stroke, DigitWidth, Stroke},
+        {x, y + Half, Stroke, Half + Stroke},
+        {x, y, Stroke, Half + Stroke},
+        {x, y + Half, DigitWidth, Stroke},
+      }};
+      auto lit = DigitSegments[static_cast<size_t>(digit - '0')];
+      for (size_t segment = 0; segment < segments.size(); ++segment)
+      {
+        if (lit & (1u << segment))
+        {
+          _renderer->FillRect(segments[segment], white);
+        }
+      }
+      x += DigitWidth + Gap;
+    }
+    _renderer->Restore();
   }
 
   namespace

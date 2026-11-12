@@ -558,7 +558,8 @@ Status: reviewed (2026-11-01)
 
 #### [3.2.9 Requirements related to ARIA and to platform accessibility APIs](https://html.spec.whatwg.org/#wai-aria)
 
-Status: n/a (accessibility isn't planned)
+Status: n/a (later: the accessibility tree)
+> The default semantics are read by the accessibility tree; `ElementInternals` holds them (`InternalContentAttribute`, `ElementForAttributeInternal`, `ElementsForAttributeInternal`).
 
 - [x] [Similarly, for a custom element element, the default ARIA state and property se…](https://html.spec.whatwg.org/#wai-aria) — Similarly, for a custom element element, the default ARIA state and property semantics, for a state or property named stateOrProperty, are determined as follows:
   - 1. If element's attached internals is non-null:

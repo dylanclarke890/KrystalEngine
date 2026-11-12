@@ -23,6 +23,7 @@
  */
 
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
@@ -32,6 +33,7 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -167,9 +169,12 @@ namespace krys::boo
     return Downcast<html::HTMLSelectElement>(NodeForNonAnonymous());
   }
 
-  void RenderMenuList::DidAttachChild(RenderObject &, RenderObject *) noexcept
+  void RenderMenuList::DidAttachChild(RenderObject &child, RenderObject *) noexcept
   {
-    // FIXME: Tell the accessibility object cache, once there is accessibility.
+    if (auto *cache = GetDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(*this, &child);
+    }
   }
 
   void RenderMenuList::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
@@ -419,7 +424,13 @@ namespace krys::boo
 
   void RenderMenuList::ValueChanged(uint32 listIndex, bool fireOnChange) noexcept
   {
-    // FIXME: Check that a page navigation has not occurred while the popup was up.
+    // Check to ensure a page navigation has not occurred while the popup was up.
+    auto *frame = GetDocument().Frame();
+    if (!frame || frame->Document() != &GetDocument())
+    {
+      return;
+    }
+
     auto &select = SelectElement();
     select.OptionSelectedByUser(select.ListToOptionIndex(static_cast<int32>(listIndex)), fireOnChange);
   }
@@ -442,13 +453,23 @@ namespace krys::boo
 
   void RenderMenuList::DidUpdateActiveOption(int32 optionIndex) noexcept
   {
-    if (_lastActiveIndex == optionIndex)
+    if (!ax::AXObjectCache::AccessibilityEnabled())
+    {
+      return;
+    }
+    auto *cache = GetDocument().ExistingAXObjectCache();
+    if (!cache || _lastActiveIndex == optionIndex)
     {
       return;
     }
     _lastActiveIndex = optionIndex;
 
-    // FIXME: Tell the accessibility object cache the selected option changed, once there is accessibility.
+    auto listIndex = SelectElement().OptionToListIndex(optionIndex);
+    if (listIndex < 0 || static_cast<size_t>(listIndex) >= SelectElement().ListItems().size())
+    {
+      return;
+    }
+    cache->OnSelectedOptionChanged(*this, optionIndex);
   }
 
   utf8_string RenderMenuList::ItemText(uint32 listIndex) const noexcept

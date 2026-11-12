@@ -28,11 +28,13 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
@@ -102,6 +104,20 @@ namespace krys::boo
       Nested
     };
 
+    /// @brief The renderers the render tree builder detached and destroyed, kept until they're deleted
+    /// together, so pointers to them taken during an update stay valid until it ends.
+    class DetachedRendererList
+    {
+    private:
+      List<UniquePtr<RenderObject>> _renderers;
+
+    public:
+      /// @brief Keeps @p renderer, or destroys it now (returning false) if its render tree is being torn
+      /// down.
+      bool Append(RenderPtr<RenderObject> renderer) noexcept;
+      void Clear() noexcept;
+    };
+
     LocalFrameView &_frameView;
     LayoutPhase _layoutPhase {LayoutPhase::OutsideLayout};
     LayoutNestedState _layoutNestedState {LayoutNestedState::NotInLayout};
@@ -120,7 +136,10 @@ namespace krys::boo
     Maybe<UpdateScrollInfoAfterLayoutTransaction> _updateScrollInfoAfterLayoutTransaction;
     // Keyed by address: flex layout removes each item it adds.
     HashSet<const RenderBox *> _percentHeightIgnoreList;
+    // Keyed by address: a container takes its boxes after its layout, or drops them when it's destroyed.
+    HashMap<const RenderBlock *, List<WeakPtr<RenderBox>>> _containersWithDescendantsNeedingTransformUpdate;
     List<AnchorScrollAdjuster> _anchorScrollAdjusters;
+    mutable DetachedRendererList _detachedRendererList;
 
   public:
     explicit LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept;
@@ -174,6 +193,13 @@ namespace krys::boo
     void DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
     void EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
     KRYS_NODISCARD bool IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept;
+
+    /// @brief Updates @p box's transform after @p container's layout, which its offset path depends on.
+    void SetBoxNeedsTransformUpdateAfterContainerLayout(RenderBox &box,
+                                                        const RenderBlock &container) noexcept;
+    /// @brief The boxes whose transforms update after @p container's layout, which no longer wait for it.
+    KRYS_NODISCARD List<WeakPtr<RenderBox>>
+      TakeBoxesNeedingTransformUpdateAfterContainerLayout(const RenderBlock &container) noexcept;
 
     /// @brief Whether layout skips @p renderer, which content-visibility skips, unless layout is forced into
     /// skipped content.
@@ -267,6 +293,17 @@ namespace krys::boo
     KRYS_NODISCARD LocalFrame &Frame() const noexcept;
     KRYS_NODISCARD dom::Document *Document() const noexcept;
     KRYS_NODISCARD RenderView *GetRenderView() const noexcept;
+
+    /// @brief Keeps a destroyed renderer until `DeleteDetachedRenderersNow`; returns false if it was deleted
+    /// now instead.
+    bool AddToDetachedRendererList(RenderPtr<RenderObject> renderer) const noexcept
+    {
+      return _detachedRendererList.Append(krys::move(renderer));
+    }
+    void DeleteDetachedRenderersNow() const noexcept
+    {
+      _detachedRendererList.Clear();
+    }
 
     KRYS_NODISCARD List<AnchorScrollAdjuster> &AnchorScrollAdjusters() noexcept
     {

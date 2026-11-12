@@ -53,7 +53,7 @@ namespace krys::boo::style
       documentStyle.SetPageScaleTransform(frame->FrameScaleFactor());
     }
 
-    // This overrides any -webkit-user-modify inherited from the parent iframe.
+    // This overrides any -internal-user-modify inherited from the parent iframe.
     documentStyle.SetUserModify(document.InDesignMode() ? UserModify::ReadWrite : UserModify::ReadOnly);
 
     Adjuster::AdjustEventListenerRegionTypesForRootStyle(documentStyle, document);
@@ -65,8 +65,6 @@ namespace krys::boo::style
       FontCascadeDescription fontDescription;
       fontDescription.SetSpecifiedLocale(StringAtom(document.ContentLanguage()));
       fontDescription.SetOneFamily(css::GenericFontFamilyNames::StandardFamily());
-      // FIXME: The settings' shouldAllowUserInstalledFonts comes with Settings (its default, Yes, is the
-      // description's).
       // FIXME: We need evaluationTimeZoomEnabled to be accessible from FontDescription, not only from
       // RenderStyle. Would it be weird to move it to FontDescription (which is already accessible from
       // RenderStyle)?

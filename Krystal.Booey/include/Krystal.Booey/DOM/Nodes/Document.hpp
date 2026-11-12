@@ -77,6 +77,11 @@ namespace krys::text
   class ICodec;
 }
 
+namespace krys::boo::ax
+{
+  class AXObjectCache;
+}
+
 namespace krys::boo
 {
   class AnimationTimelinesController;
@@ -180,6 +185,9 @@ namespace krys::boo::dom
 
     /// @brief Indicates the type of the document is 'svg'.
     IsSVGDocument = 1 << 4,
+
+    /// @brief An HTML document made to show an image (`html::ImageDocument`).
+    IsImageDocument = 1 << 5,
   };
 
   /// @see https://dom.spec.whatwg.org/#concept-document-mode
@@ -201,7 +209,7 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::DocumentFlags, 5uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::DocumentFlags, 6uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::QuirksMode, 3uz);
 
 namespace krys::boo::dom
@@ -453,6 +461,8 @@ namespace krys::boo::dom
     // The root of the render tree: a document has one while it's shown in a frame with a view.
     RenderPtr<boo::RenderView> _renderView;
     bool _renderTreeBeingDestroyed {false};
+    // The accessibility tree, once accessibility is enabled and something asks for it.
+    UniquePtr<ax::AXObjectCache> _axObjectCache;
     // Renderer updates (of text) that the next style resolution applies.
     UniquePtr<style::Update> _pendingRenderTreeUpdate;
 
@@ -1666,6 +1676,17 @@ namespace krys::boo::dom
       return _renderView.get();
     }
 
+    /// @brief The document's accessibility cache, created if accessibility is enabled and the document is in
+    /// a frame; null otherwise.
+    KRYS_NODISCARD ax::AXObjectCache *AxObjectCache() noexcept;
+    /// @brief The document's accessibility cache, if it has created one.
+    KRYS_NODISCARD ax::AXObjectCache *ExistingAXObjectCache() const noexcept
+    {
+      return _axObjectCache.get();
+    }
+    /// @brief Destroys the accessibility cache (with the render tree it describes).
+    void ClearAXObjectCache() noexcept;
+
     KRYS_NODISCARD bool RenderTreeBeingDestroyed() const noexcept
     {
       return _renderTreeBeingDestroyed;
@@ -1705,8 +1726,6 @@ namespace krys::boo::dom
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
 
     /// @brief How a background colour is composited: over what's beneath it.
-    /// FIXME: Punching out white backgrounds in dark mode (`punchOutWhiteBackgroundsInDarkMode`, a setting
-    /// off by default) isn't ported.
     KRYS_NODISCARD CompositeOperator CompositeOperatorForBackgroundColor(const Color &,
                                                                          const RenderElement &) const noexcept
     {
@@ -1765,8 +1784,7 @@ namespace krys::boo::dom
     /// @brief A request for the web font file at @p url (resolved against the document), or null if it can't
     /// be requested. The file doesn't load until `BeginLoadingFontSoon`.
     KRYS_NODISCARD RefPtr<FontLoadRequest>
-      GetFontLoadRequest(utf8_stringview url, bool isSVG,
-                         bool isInitiatingElementInUserAgentShadowTree) noexcept;
+      GetFontLoadRequest(utf8_stringview url, bool isInitiatingElementInUserAgentShadowTree) noexcept;
     void BeginLoadingFontSoon(FontLoadRequest &request) noexcept;
     void SuspendFontLoading() noexcept;
 
@@ -2151,6 +2169,11 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsSVGDocument() const noexcept
     {
       return HasFlag(_flags, DocumentFlags::IsSVGDocument);
+    }
+
+    KRYS_NODISCARD bool IsImageDocument() const noexcept
+    {
+      return HasFlag(_flags, DocumentFlags::IsImageDocument);
     }
 
 #pragma endregion

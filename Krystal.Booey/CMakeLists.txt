@@ -204,6 +204,59 @@ add_custom_command(
 )
 
 # Every header and source is listed here; a file that isn't listed isn't built.
+set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
+  include/Krystal.Booey/Accessibility/ARIAMixin.hpp
+  include/Krystal.Booey/Accessibility/AXLogger.hpp
+  include/Krystal.Booey/Accessibility/AXNotifications.hpp
+  include/Krystal.Booey/Accessibility/AXObjectCache.hpp
+  include/Krystal.Booey/Accessibility/AXObjectRareData.hpp
+  include/Krystal.Booey/Accessibility/AXTableHelpers.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityListBoxOption.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMathMLElement.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMenuList.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMenuListOption.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMenuListPopup.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityMockObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityNodeObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityRole.hpp
+  include/Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityScrollView.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityScrollbar.hpp
+  include/Krystal.Booey/Accessibility/AccessibilitySlider.hpp
+  include/Krystal.Booey/Accessibility/AccessibilitySpinButton.hpp
+  include/Krystal.Booey/Accessibility/AccessibilitySpinButtonPart.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp
+  include/Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp
+)
+
+set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
+  src/Accessibility/ARIAMixin.cpp
+  src/Accessibility/AXLogger.cpp
+  src/Accessibility/AXObjectCache.cpp
+  src/Accessibility/AXTableHelpers.cpp
+  src/Accessibility/AccessibilityListBoxOption.cpp
+  src/Accessibility/AccessibilityMathMLElement.cpp
+  src/Accessibility/AccessibilityMenuList.cpp
+  src/Accessibility/AccessibilityMenuListOption.cpp
+  src/Accessibility/AccessibilityMenuListPopup.cpp
+  src/Accessibility/AccessibilityMockObject.cpp
+  src/Accessibility/AccessibilityNodeObject.cpp
+  src/Accessibility/AccessibilityObject.cpp
+  src/Accessibility/AccessibilityProgressIndicator.cpp
+  src/Accessibility/AccessibilityRenderObject.cpp
+  src/Accessibility/AccessibilitySVGObject.cpp
+  src/Accessibility/AccessibilityScrollView.cpp
+  src/Accessibility/AccessibilityScrollbar.cpp
+  src/Accessibility/AccessibilitySlider.cpp
+  src/Accessibility/AccessibilitySpinButton.cpp
+  src/Accessibility/AccessibilitySpinButtonPart.cpp
+  src/Accessibility/AccessibilityTableColumn.cpp
+  src/Accessibility/AccessibilityTableHeaderContainer.cpp
+)
+
 set(KRYSTAL_BOOEY_ANIMATION_HEADERS
   include/Krystal.Booey/Animation/AnimationEffect.hpp
   include/Krystal.Booey/Animation/AnimationPromise.hpp
@@ -1302,7 +1355,6 @@ set(KRYSTAL_BOOEY_EDITING_HEADERS
   include/Krystal.Booey/Editing/Commands/TypingCommand.hpp
   include/Krystal.Booey/Editing/Commands/UndoStep.hpp
   include/Krystal.Booey/Editing/Commands/WrapContentsInDummySpanCommand.hpp
-  include/Krystal.Booey/Editing/CompositionHighlight.hpp
   include/Krystal.Booey/Editing/CompositionUnderline.hpp
   include/Krystal.Booey/Editing/EditAction.hpp
   include/Krystal.Booey/Editing/Editing.hpp
@@ -1555,6 +1607,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Images/BitmapImage.hpp
   include/Krystal.Booey/Graphics/Images/BitmapImageDescriptor.hpp
   include/Krystal.Booey/Graphics/Images/BitmapImageSource.hpp
+  include/Krystal.Booey/Graphics/Images/BrokenImageIcon.hpp
   include/Krystal.Booey/Graphics/Images/DecodingOptions.hpp
   include/Krystal.Booey/Graphics/Images/GeneratedImage.hpp
   include/Krystal.Booey/Graphics/Images/GradientImage.hpp
@@ -1752,6 +1805,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Images/BitmapImage.cpp
   src/Graphics/Images/BitmapImageDescriptor.cpp
   src/Graphics/Images/BitmapImageSource.cpp
+  src/Graphics/Images/BrokenImageIcon.cpp
   src/Graphics/Images/GeneratedImage.cpp
   src/Graphics/Images/GradientImage.cpp
   src/Graphics/Images/Image.cpp
@@ -1955,6 +2009,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/ImageData/ImageDataPixelFormat.hpp
   include/Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp
   include/Krystal.Booey/HTML/Images/HTMLImageLoader.hpp
+  include/Krystal.Booey/HTML/Images/ImageDocument.hpp
   include/Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp
   include/Krystal.Booey/HTML/InputTypes/BaseButtonInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/BaseCheckableInputType.hpp
@@ -2157,6 +2212,7 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Forms/ValidatedFormListedElement.cpp
   src/HTML/ImageData/ImageData.cpp
   src/HTML/Images/HTMLImageLoader.cpp
+  src/HTML/Images/ImageDocument.cpp
   src/HTML/Images/LazyLoadImageObserver.cpp
   src/HTML/InputTypes/BaseButtonInputType.cpp
   src/HTML/InputTypes/BaseCheckableInputType.cpp
@@ -2570,6 +2626,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/GraphicsClient.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageReader.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp
   include/Krystal.Booey/Platform/ImageDecoders/GIFImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/GIFImageReader.hpp
   include/Krystal.Booey/Platform/ImageDecoders/ICOImageDecoder.hpp
@@ -2625,6 +2682,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Decimal.cpp
   src/Platform/ImageDecoders/BMPImageDecoder.cpp
   src/Platform/ImageDecoders/BMPImageReader.cpp
+  src/Platform/ImageDecoders/EXIFMetadata.cpp
   src/Platform/ImageDecoders/GIFImageDecoder.cpp
   src/Platform/ImageDecoders/GIFImageReader.cpp
   src/Platform/ImageDecoders/ICOImageDecoder.cpp
@@ -2782,6 +2840,7 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/RenderBlockFlow.hpp
   include/Krystal.Booey/Rendering/RenderBox.hpp
   include/Krystal.Booey/Rendering/RenderBoxModelObject.hpp
+  include/Krystal.Booey/Rendering/RenderCombineText.hpp
   include/Krystal.Booey/Rendering/RenderElement.hpp
   include/Krystal.Booey/Rendering/RenderFlexibleBox.hpp
   include/Krystal.Booey/Rendering/RenderGeometryMap.hpp
@@ -3055,6 +3114,7 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/RenderBlockFlow.cpp
   src/Rendering/RenderBox.cpp
   src/Rendering/RenderBoxModelObject.cpp
+  src/Rendering/RenderCombineText.cpp
   src/Rendering/RenderElement.cpp
   src/Rendering/RenderFlexibleBox.cpp
   src/Rendering/RenderGeometryMap.cpp
@@ -3185,6 +3245,7 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Tables/RenderTableRow.cpp
   src/Rendering/Tables/RenderTableSection.cpp
   src/Rendering/TextBoxTrimmer.cpp
+  src/Rendering/TransformOperationData.cpp
   src/Rendering/Updating/RenderTreeBuilder.cpp
   src/Rendering/Updating/RenderTreeBuilderBlock.cpp
   src/Rendering/Updating/RenderTreeBuilderBlockFlow.cpp
@@ -4303,6 +4364,7 @@ target_sources(Krystal.Booey
     FILES
       ${KRYSTAL_BOOEY_GENERATED_HEADERS}
       ${KRYSTAL_BOOEY_BUNDLED_FONTS_HEADERS}
+      ${KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS}
       ${KRYSTAL_BOOEY_ANIMATION_HEADERS}
       ${KRYSTAL_BOOEY_CSS_HEADERS}
       ${KRYSTAL_BOOEY_DOM_HEADERS}
@@ -4327,6 +4389,7 @@ target_sources(Krystal.Booey
   PRIVATE
     ${KRYSTAL_BOOEY_GENERATED_SOURCES}
     ${KRYSTAL_BOOEY_BUNDLED_FONTS_SOURCES}
+    ${KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES}
     ${KRYSTAL_BOOEY_ANIMATION_SOURCES}
     ${KRYSTAL_BOOEY_CSS_SOURCES}
     ${KRYSTAL_BOOEY_DOM_SOURCES}

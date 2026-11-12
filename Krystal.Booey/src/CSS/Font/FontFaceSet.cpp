@@ -115,7 +115,6 @@ namespace krys::boo::css
       return;
     }
 
-    // FIXME: A setting that disallows user installed fonts, once there's one.
     auto capabilities =
       FontCache::Singleton().GetFontSelectionCapabilitiesInFamily(familyName, AllowUserInstalledFonts::Yes);
     if (capabilities.empty())

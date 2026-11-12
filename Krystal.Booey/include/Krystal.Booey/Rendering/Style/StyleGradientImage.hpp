@@ -36,7 +36,8 @@ namespace krys::boo
   {
   private:
     style::Gradient _gradient;
-    // FIXME: Decides whether the generated image may be cached per size, once it is.
+    /// @brief Whether the images made for a size can be kept: they can unless a colour stop depends on the
+    /// style (`currentcolor`).
     bool _knownCacheableBarringFilter {false};
 
   public:

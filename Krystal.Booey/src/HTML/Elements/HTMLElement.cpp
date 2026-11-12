@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
@@ -817,7 +818,7 @@ namespace krys::boo::html
     }
 
     // 5. If this's attached internals is non-null, then throw a "NotSupportedError" DOMException.
-    if (queue->IsElementInternalsAttached())
+    if (queue->AttachedInternals())
     {
       return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
@@ -831,8 +832,9 @@ namespace krys::boo::html
 
     // 7. Set this's attached internals to a new ElementInternals instance whose target element is this.
     // 8. Return this's attached internals.
-    queue->SetElementInternalsAttached();
-    return ElementInternals::Create(*this);
+    auto internals = ElementInternals::Create(*this);
+    queue->SetAttachedInternals(internals);
+    return internals;
   }
 
   // https://html.spec.whatwg.org/#dom-showpopover
@@ -1180,6 +1182,10 @@ namespace krys::boo::html
     {
       QueuePopoverToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
     }
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnPopoverToggle(*this);
+    }
     return {};
   }
 
@@ -1359,6 +1365,10 @@ namespace krys::boo::html
 
     // 22. Run cleanupSteps.
     cleanupSteps();
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnPopoverToggle(*this);
+    }
     return {};
   }
 
@@ -1790,7 +1800,6 @@ namespace krys::boo::html
             userModifyValue = css::ValueId::ReadWritePlaintextOnly;
           }
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::OverflowWrap, css::ValueId::BreakWord);
-          // FIXME: -webkit-nbsp-mode: space is dropped with the property.
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::LineBreak,
                                                css::ValueId::AfterWhiteSpace);
           break;

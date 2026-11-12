@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
@@ -47,6 +48,7 @@
 #include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
 #include "Krystal.Booey/Rendering/MathML/MathVariant.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -551,8 +553,8 @@ namespace krys::boo
 
   bool RenderText::ComputeUseBackslashAsYenSymbol() const noexcept
   {
-    // FIXME: Fonts that use the yen sign for backslash, and the document's encoding (a decoder whose
-    // encoding's currency symbol for backslash isn't backslash), once there are any.
+    // FIXME: Fonts that use the yen sign for backslash, once there are any.
+    // (No encoding shows backslash as a yen sign: documents are UTF-8 only; see DIFFERENCES.md.)
     return false;
   }
 
@@ -601,8 +603,6 @@ namespace krys::boo
     {
       layout_integration::LineLayout::UpdateStyle(*this);
     }
-
-    // FIXME: The accessibility cache, once there is one.
 
     SetHorizontalWritingMode(newStyle.GetWritingMode().IsHorizontal());
   }
@@ -776,7 +776,10 @@ namespace krys::boo
     SetRenderedText(krys::move(text));
 
     SetNeedsLayoutAndPreferredWidthsUpdate();
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = GetDocument().ExistingAXObjectCache())
+    {
+      cache->DeferTextChangedIfNeeded(TextNode());
+    }
   }
 
   void RenderText::SetText(utf8_string newContent, bool force) noexcept
@@ -1320,12 +1323,33 @@ namespace krys::boo
     return IntPoint {first->VisualRectIgnoringBlockDirection().Location()};
   }
 
+  namespace
+  {
+    /// @brief Combined text's width: one em.
+    KRYS_NODISCARD Maybe<float> CombineTextWidth(const RenderText &renderer, const FontCascade &fontCascade,
+                                                 const RenderStyle &style) noexcept
+    {
+      if (!style.HasTextCombine())
+      {
+        return null;
+      }
+      auto *combineTextRenderer = DynamicDowncast<RenderCombineText>(renderer);
+      if (!combineTextRenderer || !combineTextRenderer->IsCombined())
+      {
+        return null;
+      }
+      return combineTextRenderer->CombinedTextWidth(fontCascade);
+    }
+  }
+
   float RenderText::WidthFromCache(const FontCascade &fontCascade, size_t start, size_t length, float xPos,
                                    HashSet<RefPtr<const Font>> *fallbackFonts, GlyphOverflow *glyphOverflow,
                                    const RenderStyle &style) const noexcept
   {
-    // FIXME: The combined text's width (RenderCombineText::combinedTextWidth), once there's
-    // text-combine-upright.
+    if (auto width = CombineTextWidth(*this, fontCascade, style))
+    {
+      return *width;
+    }
     auto run = RenderBlock::ConstructTextRun(*this, start, length, style);
     run.SetCharacterScanForCodePath(!CanUseSimpleFontCodePath());
     run.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
@@ -1997,8 +2021,10 @@ namespace krys::boo
     }
 
     auto &style = Style();
-    // FIXME: The combined text's width (RenderCombineText::combinedTextWidth), once there's
-    // text-combine-upright.
+    if (auto width = CombineTextWidth(*this, fontCascade, style))
+    {
+      return *width;
+    }
 
     if (length == 1 && _text[from] == ' ')
     {

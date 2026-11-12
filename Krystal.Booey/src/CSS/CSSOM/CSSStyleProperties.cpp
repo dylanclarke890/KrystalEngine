@@ -179,7 +179,6 @@ namespace krys::boo::css
   PropertyId
     CSSStyleProperties::GetPropertyIdFromJavaScriptPropertyName(const CSSOMStringAtom &propertyName) noexcept
   {
-    // FIXME: This exposes properties disabled by settings. Pass the result of Settings instead of null?
     auto property = ParseJavaScriptCSSPropertyName(propertyName);
     return property != PropertyId::Invalid && css::IsExposed(property, nullptr) ? property
                                                                                 : PropertyId::Invalid;

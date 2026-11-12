@@ -46,25 +46,28 @@ namespace krys::boo
     // hold one.
     List<Ref<ResizeObserverSize>> _borderBoxSizes;
     List<Ref<ResizeObserverSize>> _contentBoxSizes;
+    List<Ref<ResizeObserverSize>> _devicePixelContentBoxSizes;
 
     ResizeObserverEntry(Ref<dom::Element> &&target, const FloatRect &contentRect, FloatSize borderBoxSize,
-                        FloatSize contentBoxSize) noexcept
+                        FloatSize contentBoxSize, FloatSize devicePixelContentBoxSize) noexcept
         : _target(krys::move(target)),
           _contentRect(dom::DOMRectReadOnly::Create(contentRect.X(), contentRect.Y(), contentRect.Width(),
                                                     contentRect.Height())),
           _borderBoxSizes({ResizeObserverSize::Create(borderBoxSize.Width(), borderBoxSize.Height())}),
-          _contentBoxSizes({ResizeObserverSize::Create(contentBoxSize.Width(), contentBoxSize.Height())})
+          _contentBoxSizes({ResizeObserverSize::Create(contentBoxSize.Width(), contentBoxSize.Height())}),
+          _devicePixelContentBoxSizes({ResizeObserverSize::Create(devicePixelContentBoxSize.Width(),
+                                                                  devicePixelContentBoxSize.Height())})
     {
     }
 
   public:
     KRYS_NODISCARD static Ref<ResizeObserverEntry> Create(Ref<dom::Element> &&target,
                                                           const FloatRect &contentRect,
-                                                          FloatSize borderBoxSize,
-                                                          FloatSize contentBoxSize) noexcept
+                                                          FloatSize borderBoxSize, FloatSize contentBoxSize,
+                                                          FloatSize devicePixelContentBoxSize) noexcept
     {
-      return AdoptRef(
-        *new ResizeObserverEntry(krys::move(target), contentRect, borderBoxSize, contentBoxSize));
+      return AdoptRef(*new ResizeObserverEntry(krys::move(target), contentRect, borderBoxSize, contentBoxSize,
+                                               devicePixelContentBoxSize));
     }
 
     /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserverentry-target
@@ -89,6 +92,12 @@ namespace krys::boo
     KRYS_NODISCARD const List<Ref<ResizeObserverSize>> &ContentBoxSize() const noexcept
     {
       return _contentBoxSizes;
+    }
+
+    /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserverentry-devicepixelcontentboxsize
+    KRYS_NODISCARD const List<Ref<ResizeObserverSize>> &DevicePixelContentBoxSize() const noexcept
+    {
+      return _devicePixelContentBoxSizes;
     }
   };
 }

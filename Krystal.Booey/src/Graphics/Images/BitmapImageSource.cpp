@@ -64,6 +64,66 @@ namespace krys::boo
       }
       return AdoptRef(*new PlatformImage(size, krys::move(pixels), image.PremultipliedAlpha()));
     }
+
+    /// @brief @p image's pixels resampled to @p size, each the average of the area of the source it covers.
+    /// @note Unpremultiplied colours are weighted by their alpha, so transparent pixels add no colour.
+    PlatformImagePtr ScaledPlatformImage(const PlatformImage &image, const IntSize &size) noexcept
+    {
+      const auto &sourceSize = image.Size();
+      const auto source = image.Pixels();
+      const bool premultiplied = image.PremultipliedAlpha();
+      const double scaleX = static_cast<double>(sourceSize.Width()) / size.Width();
+      const double scaleY = static_cast<double>(sourceSize.Height()) / size.Height();
+      auto pixels = AdoptRef(*new PixelData(static_cast<size_t>(size.UnclampedArea())));
+
+      for (int32 y = 0; y < size.Height(); ++y)
+      {
+        const double top = y * scaleY;
+        const double bottom = (y + 1) * scaleY;
+        for (int32 x = 0; x < size.Width(); ++x)
+        {
+          const double left = x * scaleX;
+          const double right = (x + 1) * scaleX;
+          double area = 0;
+          double colourWeight = 0;
+          double sums[4] {};
+          for (auto sourceY = static_cast<int32>(top);
+               sourceY < std::min(static_cast<int32>(std::ceil(bottom)), sourceSize.Height()); ++sourceY)
+          {
+            const double height =
+              std::min(bottom, sourceY + 1.0) - std::max(top, static_cast<double>(sourceY));
+            for (auto sourceX = static_cast<int32>(left);
+                 sourceX < std::min(static_cast<int32>(std::ceil(right)), sourceSize.Width()); ++sourceX)
+            {
+              const double weight =
+                height * (std::min(right, sourceX + 1.0) - std::max(left, static_cast<double>(sourceX)));
+              const auto pixel = source[static_cast<size_t>(sourceY) * static_cast<size_t>(sourceSize.Width())
+                                        + static_cast<size_t>(sourceX)];
+              const double alpha = (pixel >> 24) & 0xFF;
+              const double weightOfColour = premultiplied ? weight : weight * alpha / 255;
+              area += weight;
+              colourWeight += weightOfColour;
+              sums[0] += alpha * weight;
+              sums[1] += ((pixel >> 16) & 0xFF) * weightOfColour;
+              sums[2] += ((pixel >> 8) & 0xFF) * weightOfColour;
+              sums[3] += (pixel & 0xFF) * weightOfColour;
+            }
+          }
+
+          uint32 result = 0;
+          for (size_t channel = 0; channel < 4; ++channel)
+          {
+            const double divisor = channel ? colourWeight : area;
+            const auto value = divisor > 0 ? std::lround(sums[channel] / divisor) : 0l;
+            result = (result << 8) | static_cast<uint32>(std::clamp(value, 0l, 255l));
+          }
+          pixels
+            ->Pixels[static_cast<size_t>(y) * static_cast<size_t>(size.Width()) + static_cast<size_t>(x)] =
+            result;
+        }
+      }
+      return AdoptRef(*new PlatformImage(size, krys::move(pixels), premultiplied));
+    }
   }
 
   Ref<BitmapImageSource>
@@ -370,6 +430,12 @@ namespace krys::boo
 
   void BitmapImageSource::StartAnimation() noexcept
   {
+    // A frame's duration is known once it's decoded, so the frame shown first is decoded before its timer
+    // starts, as drawing it would.
+    if (IsAnimated())
+    {
+      (void)CurrentNativeImage();
+    }
     (void)StartAnimation(SubsamplingLevel::Default, DecodingOptions(DecodingMode::Synchronous));
   }
 
@@ -818,7 +884,8 @@ namespace krys::boo
   }
 
   RefPtr<NativeImage>
-    BitmapImageSource::PreTransformedNativeImageAtIndex(uint32 index, ImageOrientation orientation) noexcept
+    BitmapImageSource::PreTransformedNativeImageAtIndex(uint32 index, ImageOrientation orientation,
+                                                        bool scaleToDensityCorrectedSize) noexcept
   {
     RefPtr<NativeImage> nativeImage = NativeImageAtIndex(index);
     if (!nativeImage)
@@ -834,21 +901,32 @@ namespace krys::boo
       orientation = FrameOrientationAtIndex(index);
     }
 
-    if (orientation == ImageOrientation::Orientation::None && size == sourceSize)
+    if (orientation == ImageOrientation::Orientation::None
+        && (size == sourceSize || !scaleToDensityCorrectedSize))
     {
       return nativeImage;
     }
 
-    // FIXME: Scale to a density-corrected size; for now only the orientation is applied.
-    const auto &platformImage = nativeImage->GetPlatformImage();
-    if (!platformImage)
+    // Laid out as drawn with the orientation, then scaled to the density-corrected size.
+    PlatformImagePtr platformImage = nativeImage->GetPlatformImage();
+    if (!platformImage || platformImage->Pixels().empty())
     {
       return nativeImage;
     }
 
-    auto orientedSize =
-      orientation.UsesWidthAsHeight() ? platformImage->Size().TransposedSize() : platformImage->Size();
-    return NativeImage::Create(OrientedPlatformImage(*platformImage, orientation, orientedSize));
+    if (orientation != ImageOrientation::Orientation::None)
+    {
+      auto orientedSize =
+        orientation.UsesWidthAsHeight() ? platformImage->Size().TransposedSize() : platformImage->Size();
+      platformImage = OrientedPlatformImage(*platformImage, orientation, orientedSize);
+    }
+
+    if (auto targetSize = Size(orientation);
+        scaleToDensityCorrectedSize && targetSize != platformImage->Size() && !targetSize.IsEmpty())
+    {
+      platformImage = ScaledPlatformImage(*platformImage, targetSize);
+    }
+    return NativeImage::Create(krys::move(platformImage));
   }
 
   IntSize BitmapImageSource::FrameSizeAtIndex(uint32 index, SubsamplingLevel subsamplingLevel) const noexcept

@@ -24,10 +24,12 @@
  */
 
 #include "Krystal.Booey/Page/ResizeObserver/ResizeObservation.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include <cmath>
 
 namespace krys::boo
 {
@@ -39,7 +41,7 @@ namespace krys::boo
 
   ResizeObservation::ResizeObservation(dom::Element &target, ResizeObserverBoxOptions observedBox) noexcept
       : _target(CreateWeakPtr(&target)),
-        _lastObservationSizes {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1)},
+        _lastObservationSizes {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1), FloatSize(-1, -1)},
         _observedBox(observedBox)
   {
   }
@@ -53,7 +55,17 @@ namespace krys::boo
 
   void ResizeObservation::ResetObservationSize() noexcept
   {
-    _lastObservationSizes = {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1)};
+    _lastObservationSizes = {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1), FloatSize(-1, -1)};
+  }
+
+  namespace
+  {
+    /// @brief @p size in whole device pixels.
+    KRYS_NODISCARD FloatSize ResizeObserverDevicePixels(FloatSize size, float deviceScaleFactor) noexcept
+    {
+      return FloatSize(std::round(size.Width() * deviceScaleFactor),
+                       std::round(size.Height() * deviceScaleFactor));
+    }
   }
 
   Maybe<ResizeObservation::BoxSizes> ResizeObservation::ComputeObservedSizes() const noexcept
@@ -68,7 +80,9 @@ namespace krys::boo
           size.SetWidth(svgRect->Width());
           size.SetHeight(svgRect->Height());
         }
-        return BoxSizes {size, size, size};
+        return BoxSizes {
+          size, size, size,
+          ResizeObserverDevicePixels(FloatSize(size), svg->NodeDocument().DeviceScaleFactor())};
       }
     }
 
@@ -78,10 +92,24 @@ namespace krys::boo
       {
         return null;
       }
+      // The device pixel size is the content box snapped to device pixels where it sits on the page, so it's
+      // the size the box actually draws at. Device pixels aren't zoomed CSS pixels, so zoom doesn't apply.
+      auto deviceScaleFactor = box->GetDocument().DeviceScaleFactor();
+      auto contentBox = box->ContentBoxRect();
+      auto absoluteOrigin = box->LocalToAbsolute(FloatPoint(contentBox.Location()));
+      auto snapped =
+        SnapRectToDevicePixels(LayoutRect(LayoutPoint(absoluteOrigin), contentBox.Size()), deviceScaleFactor);
+      auto devicePixelSize = ResizeObserverDevicePixels(snapped.Size(), deviceScaleFactor);
+      if (!box->Style().GetWritingMode().IsHorizontal())
+      {
+        devicePixelSize = devicePixelSize.TransposedSize();
+      }
+
       return BoxSizes {
         AdjustLayoutSizeForAbsoluteZoom(box->ContentBoxSize(), box->Style()),
         AdjustLayoutSizeForAbsoluteZoom(box->ContentBoxLogicalSize(), box->Style()),
         AdjustLayoutSizeForAbsoluteZoom(box->BorderBoxLogicalSize(), box->Style()),
+        devicePixelSize,
       };
     }
     return BoxSizes {};
@@ -116,9 +144,9 @@ namespace krys::boo
     return FloatSize(_lastObservationSizes.ContentBoxLogicalSize);
   }
 
-  FloatSize ResizeObservation::SnappedContentBoxSize() const noexcept
+  FloatSize ResizeObservation::DevicePixelContentBoxSize() const noexcept
   {
-    return FloatSize(_lastObservationSizes.ContentBoxLogicalSize); // FIXME: Need to pixel snap.
+    return _lastObservationSizes.DevicePixelContentBoxLogicalSize;
   }
 
   Maybe<ResizeObservation::BoxSizes> ResizeObservation::ElementSizeChanged() const noexcept
@@ -139,6 +167,13 @@ namespace krys::boo
         break;
       case ResizeObserverBoxOptions::ContentBox:
         if (_lastObservationSizes.ContentBoxLogicalSize != currentSizes->ContentBoxLogicalSize)
+        {
+          return currentSizes;
+        }
+        break;
+      case ResizeObserverBoxOptions::DevicePixelContentBox:
+        if (_lastObservationSizes.DevicePixelContentBoxLogicalSize
+            != currentSizes->DevicePixelContentBoxLogicalSize)
         {
           return currentSizes;
         }

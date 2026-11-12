@@ -83,11 +83,13 @@ target_sources(Krystal.Booey.Tests
     BASE_DIRS
       include
     FILES
+		include/Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
 		include/Krystal.Booey.Tests/SVG/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/SVG/PropertyTestUtils.hpp
 		include/Krystal.Booey.Tests/SVG/TestSVGElement.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
+		include/Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp
 		include/Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp
@@ -363,6 +365,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/TransformationMatrix.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Platform/Locale/DateTimeFormat.cpp
+		tests/Platform/Locale/Language.cpp
 		tests/Platform/Locale/LocaleICU.cpp
 		tests/Text/LocaleToScriptMapping.cpp
 		tests/Text/TextBreakIterator.cpp
@@ -407,7 +410,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Painting/ImageQualityController.cpp
 		tests/Rendering/PaintTestUtils.cpp
 		tests/Rendering/RenderBox.cpp
+		tests/Rendering/RenderCombineText.cpp
 		tests/Rendering/RenderElement.cpp
+		tests/Rendering/RenderLayoutState.cpp
 		tests/Rendering/Replaced/RenderHTMLCanvas.cpp
 		tests/Rendering/Replaced/RenderImage.cpp
 		tests/DOM/Events/CustomEvent.cpp
@@ -552,6 +557,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Canvas/CanvasRenderingContext2D.cpp
 		tests/HTML/ImageData/ImageData.cpp
 		tests/HTML/Canvas/Path2D.cpp
+		tests/HTML/Images/ImageDocument.cpp
 		tests/HTML/Images/LazyLoadImageObserver.cpp
 		tests/DOM/ContentVisibility/ContentVisibilityDocumentState.cpp
 		tests/Rendering/FormControls/RenderButton.cpp
@@ -565,6 +571,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/RenderText.cpp
 		tests/Rendering/RenderTheme.cpp
+		tests/Rendering/RenderView.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
 		tests/Rendering/Updating/RenderTreeBuilderMultiColumn.cpp
@@ -629,6 +636,31 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/TextDecoration/TextDecoration.cpp
 		tests/Style/Values/Transforms/Transforms.cpp
 		tests/Style/Values/Types.cpp
+
+		# Accessibility
+		tests/Accessibility/ARIAMixin.cpp
+		tests/Accessibility/AXActions.cpp
+		tests/Accessibility/AXLiveRegions.cpp
+		tests/Accessibility/AXLogger.cpp
+		tests/Accessibility/AXModal.cpp
+		tests/Accessibility/AXObjectCache.cpp
+		tests/Accessibility/AXObjectCacheChanges.cpp
+		tests/Accessibility/AXRelations.cpp
+		tests/Accessibility/AXTextRanges.cpp
+		tests/Accessibility/AXTextStateChanges.cpp
+		tests/Accessibility/AccessibilityImageMap.cpp
+		tests/Accessibility/AccessibilityListBoxOption.cpp
+		tests/Accessibility/AccessibilityMathMLElement.cpp
+		tests/Accessibility/AccessibilityMenuList.cpp
+		tests/Accessibility/AccessibilityNodeObject.cpp
+		tests/Accessibility/AccessibilityObject.cpp
+		tests/Accessibility/AccessibilityProgressIndicator.cpp
+		tests/Accessibility/AccessibilityRenderObject.cpp
+		tests/Accessibility/AccessibilitySVGObject.cpp
+		tests/Accessibility/AccessibilityScrollView.cpp
+		tests/Accessibility/AccessibilitySlider.cpp
+		tests/Accessibility/AccessibilitySpinButton.cpp
+		tests/Accessibility/AccessibilityTable.cpp
 
 		# DOM
 		tests/DOM/Algorithms/AbortAlgorithms.cpp

@@ -27,6 +27,7 @@
  */
 
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -187,7 +188,11 @@ namespace krys::boo::html
       renderer->Repaint();
     }
     UpdateValidity();
-    // FIXME: Telling accessibility the checked state changed, with accessibility.
+    // (The render tree doesn't say, as there's no renderer for checkboxes.)
+    if (auto *cache = NodeDocument().ExistingAXObjectCache(); cache && Renderer())
+    {
+      cache->CheckedStateChanged(*this);
+    }
   }
 
   dom::DOMString HTMLInputElement::ColourSpace() const noexcept
@@ -310,7 +315,10 @@ namespace krys::boo::html
     {
       renderer->Repaint();
     }
-    // FIXME: Telling accessibility the value changed, with accessibility.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->ValueChanged(*this);
+    }
   }
 
   dom::DOMString HTMLInputElement::Max() const noexcept

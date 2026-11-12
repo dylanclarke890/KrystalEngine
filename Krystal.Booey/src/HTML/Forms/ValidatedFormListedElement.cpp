@@ -28,6 +28,7 @@
  */
 
 #include "Krystal.Booey/HTML/Forms/ValidatedFormListedElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -358,7 +359,10 @@ namespace krys::boo::html
         }
       }
 
-      // FIXME: Telling accessibility (AXObjectCache::onValidityChange), once there's accessibility.
+      if (auto *cache = element.NodeDocument().ExistingAXObjectCache())
+      {
+        cache->OnValidityChange(element);
+      }
     }
 
     // Updates only if this control already has a validation message.

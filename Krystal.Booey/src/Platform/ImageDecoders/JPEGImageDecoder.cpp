@@ -90,7 +90,7 @@ namespace krys::boo
     struct DecoderErrorManager
     {
       struct jpeg_error_mgr Pub; // "public" fields for IJG library
-      jmp_buf SetjmpBuffer; // For handling catastropic errors
+      jmp_buf SetjmpBuffer;      // For handling catastropic errors
     };
 
     enum class JState : uint8
@@ -109,109 +109,25 @@ namespace krys::boo
     void TermSource(j_decompress_ptr jd);
     void ErrorExit(j_common_ptr cinfo);
 
-    KRYS_NODISCARD unsigned ReadUint16(const JOCTET *data, bool isBigEndian) noexcept
+    /// @brief The EXIF metadata of an image of @p size, from its first APP1 block that holds it.
+    KRYS_NODISCARD EXIFMetadata ReadEXIFMetadata(jpeg_decompress_struct *info, const IntSize &size) noexcept
     {
-      if (isBigEndian)
-      {
-        return (GETJOCTET(data[0]) << 8) | GETJOCTET(data[1]);
-      }
-      return (GETJOCTET(data[1]) << 8) | GETJOCTET(data[0]);
-    }
-
-    KRYS_NODISCARD unsigned ReadUint32(const JOCTET *data, bool isBigEndian) noexcept
-    {
-      if (isBigEndian)
-      {
-        return (GETJOCTET(data[0]) << 24) | (GETJOCTET(data[1]) << 16) | (GETJOCTET(data[2]) << 8)
-               | GETJOCTET(data[3]);
-      }
-      return (GETJOCTET(data[3]) << 24) | (GETJOCTET(data[2]) << 16) | (GETJOCTET(data[1]) << 8)
-             | GETJOCTET(data[0]);
-    }
-
-    bool CheckExifHeader(jpeg_saved_marker_ptr marker, bool &isBigEndian, unsigned &ifdOffset) noexcept
-    {
-      // For exif data, the APP1 block is followed by 'E', 'x', 'i', 'f', '\0',
-      // then a fill byte, and then a tiff file that contains the metadata.
-      // A tiff file starts with 'I', 'I' (intel / little endian byte order) or
-      // 'M', 'M' (motorola / big endian byte order), followed by (uint16_t)42,
-      // followed by an uint32_t with the offset to the tag block, relative to the
-      // tiff file start.
-      constexpr unsigned exifHeaderSize = 14;
-      const JOCTET *data = marker->data;
-      if (!(marker->marker == ExifMarker && marker->data_length >= exifHeaderSize && data[0] == 'E'
-            && data[1] == 'x' && data[2] == 'i' && data[3] == 'f'
-            && data[4] == '\0'
-            // data[5] is a fill byte
-            && ((data[6] == 'I' && data[7] == 'I') || (data[6] == 'M' && data[7] == 'M'))))
-      {
-        return false;
-      }
-
-      isBigEndian = data[6] == 'M';
-      if (ReadUint16(data + 8, isBigEndian) != 42)
-      {
-        return false;
-      }
-
-      ifdOffset = ReadUint32(data + 10, isBigEndian);
-      return true;
-    }
-
-    KRYS_NODISCARD ImageOrientation ReadImageOrientation(jpeg_decompress_struct *info) noexcept
-    {
-      // The JPEG decoder looks at EXIF metadata.
+      // An EXIF APP1 block is "Exif\0", a fill byte, then the TIFF block that holds the metadata.
       // FIXME: Possibly implement XMP and IPTC support.
-      constexpr unsigned orientationTag = 0x112;
-      constexpr unsigned shortType = 3;
+      constexpr size_t exifHeaderSize = 6;
       for (jpeg_saved_marker_ptr marker = info->marker_list; marker; marker = marker->next)
       {
-        bool isBigEndian;
-        unsigned ifdOffset;
-        if (!CheckExifHeader(marker, isBigEndian, ifdOffset))
+        const JOCTET *data = marker->data;
+        if (marker->marker != ExifMarker || marker->data_length < exifHeaderSize
+            || std::memcmp(data, "Exif\0", 5) != 0)
         {
           continue;
         }
-        constexpr unsigned offsetToTiffData = 6; // Account for 'Exif\0<fill byte>' header.
-        if (marker->data_length < offsetToTiffData || ifdOffset >= marker->data_length - offsetToTiffData)
-        {
-          continue;
-        }
-        ifdOffset += offsetToTiffData;
-
-        // The jpeg exif container format contains a tiff block for metadata.
-        // A tiff image file directory (ifd) consists of a uint16_t describing
-        // the number of ifd entries, followed by that many entries.
-        // When touching this code, it's useful to look at the tiff spec:
-        // http://partners.adobe.com/public/developer/en/tiff/TIFF6.pdf
-        const JOCTET *data = marker->data + ifdOffset;
-        size_t remaining = marker->data_length - ifdOffset;
-        if (remaining < 2)
-        {
-          continue;
-        }
-        unsigned tagCount = ReadUint16(data, isBigEndian);
-        data += 2; // Skip over the uint16 that was just read.
-        remaining -= 2;
-
-        // Every ifd entry is 2 bytes of tag, 2 bytes of contents datatype,
-        // 4 bytes of number-of-elements, and 4 bytes of either offset to the
-        // tag data, or if the data is small enough, the inlined data itself.
-        constexpr size_t ifdEntrySize = 12;
-        for (unsigned i = 0; i < tagCount && remaining >= ifdEntrySize;
-             ++i, data += ifdEntrySize, remaining -= ifdEntrySize)
-        {
-          unsigned tag = ReadUint16(data, isBigEndian);
-          unsigned type = ReadUint16(data + 2, isBigEndian);
-          unsigned count = ReadUint32(data + 4, isBigEndian);
-          if (tag == orientationTag && type == shortType && count == 1)
-          {
-            return ImageOrientation::FromEXIFValue(static_cast<int>(ReadUint16(data + 8, isBigEndian)));
-          }
-        }
+        return EXIFMetadata::Read(Span<const uint8>(reinterpret_cast<const uint8 *>(data) + exifHeaderSize,
+                                                    marker->data_length - exifHeaderSize),
+                                  size);
       }
-
-      return ImageOrientation::Orientation::None;
+      return {};
     }
   }
 
@@ -355,7 +271,8 @@ namespace krys::boo
             return false;
           }
 
-          _decoder->SetOrientation(ReadImageOrientation(Info()));
+          _decoder->SetEXIFMetadata(ReadEXIFMetadata(
+            Info(), IntSize(static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height))));
 
           // Don't allocate a giant and superfluous memory buffer when the
           // image is a sequential JPEG.

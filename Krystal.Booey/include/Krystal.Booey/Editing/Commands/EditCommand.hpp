@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Accessibility/AXNotifications.hpp"
 #include "Krystal.Booey/Editing/EditAction.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -55,8 +56,6 @@ namespace krys::boo
 
   /// @brief An edit: a change to the document that's applied once, then undone and redone through the
   /// composition its top-level command makes.
-  // FIXME: Accessibility's text state change notifications (postTextStateChangeNotification), with
-  // accessibility.
   class EditCommand : public RefCounted<EditCommand>
   {
     KRYS_NON_COPY_MOVABLE(EditCommand);
@@ -113,6 +112,12 @@ namespace krys::boo
     {
       return *_document;
     }
+
+    /// @brief Tells accessibility @p text was inserted or deleted at @p position (the selection's start if
+    /// it isn't given).
+    void PostTextStateChangeNotification(ax::AXTextChange change, utf8_stringview text) noexcept;
+    void PostTextStateChangeNotification(ax::AXTextChange change, utf8_stringview text,
+                                         const VisiblePosition &position) noexcept;
     KRYS_NODISCARD CompositeEditCommand *Parent() const noexcept
     {
       return _parent.get();

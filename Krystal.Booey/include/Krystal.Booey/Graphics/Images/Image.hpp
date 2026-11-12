@@ -36,6 +36,7 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys
@@ -47,9 +48,9 @@ namespace krys::boo
 {
   class GraphicsContext;
   class NativeImage;
+  class Timer;
 
   /// @brief Something drawable as an image: a bitmap image, an SVG image or a generated image (a gradient).
-  /// FIXME: The image adapter, animation controls and the asynchronous animation start (G7d).
   class Image : public RefCounted<Image>, public CanMakeWeakPtr<Image>
   {
     friend class GraphicsContext;
@@ -57,6 +58,7 @@ namespace krys::boo
   private:
     RefPtr<SharedBuffer> _encodedImageData;
     WeakPtr<ImageObserver> _imageObserver;
+    UniquePtr<Timer> _animationStartTimer;
 
   public:
     enum TileRule
@@ -212,6 +214,8 @@ namespace krys::boo
     virtual void StartAnimation() noexcept
     {
     }
+    /// @brief Starts the animation the next time the event loop runs its timers.
+    void StartAnimationAsynchronously() noexcept;
     virtual void StopAnimation() noexcept
     {
     }

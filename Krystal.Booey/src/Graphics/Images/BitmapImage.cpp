@@ -172,10 +172,45 @@ namespace krys::boo
     {
       DrawLuminanceMaskPattern(context, destinationRect, tileRect, transform, phase, spacing, options);
     }
+    else if (HasDensityCorrectedSize())
+    {
+      DrawDensityCorrectedPattern(context, destinationRect, tileRect, transform, phase, spacing, options);
+    }
     else
     {
       Image::DrawPattern(context, destinationRect, tileRect, transform, phase, spacing,
                          {options, ImageOrientation(ImageOrientation::Orientation::FromImage)});
+    }
+  }
+
+  void BitmapImage::DrawDensityCorrectedPattern(GraphicsContext &context, const FloatRect &destinationRect,
+                                                const FloatRect &tileRect, const AffineTransform &transform,
+                                                const FloatPoint &phase, const FloatSize &spacing,
+                                                ImagePaintingOptions options) noexcept
+  {
+    // As Chrome, the pattern tiles the full-resolution pixels, scaled to the density-corrected size, rather
+    // than pixels resampled to it (upstream's pre-transformed image).
+    const ImageOrientation orientation = ImageOrientation::Orientation::FromImage;
+    RefPtr<NativeImage> tileImage = _source->CurrentOrientedNativeImage(orientation);
+    if (!tileImage)
+    {
+      return;
+    }
+
+    // The tile rectangle is in the density-corrected size's units; map it to the pixels, and the pattern's
+    // transform back.
+    auto pixelsPerUnit = FloatSize(_source->SourceSize(orientation)) / FloatSize(_source->Size(orientation));
+    auto pixelTileRect = tileRect;
+    pixelTileRect.Scale(pixelsPerUnit.Width(), pixelsPerUnit.Height());
+    auto pixelTransform = transform;
+    pixelTransform.Scale(1 / pixelsPerUnit.Width(), 1 / pixelsPerUnit.Height());
+
+    context.DrawPattern(*tileImage, destinationRect, pixelTileRect, pixelTransform, phase, spacing,
+                        {options, orientation});
+
+    if (auto observer = GetImageObserver())
+    {
+      observer->DidDraw(*this);
     }
   }
 

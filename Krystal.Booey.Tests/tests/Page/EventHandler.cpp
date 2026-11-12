@@ -622,6 +622,32 @@ namespace krys::boo::tests
     CHECK(fixture.Take() == Strings {"mouseover:outer(inner)", "mousemove:outer"});
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "EventHandler: removing the hovered element updates the hover state under a still mouse",
+                   "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=outer style=padding:10px><div id=inner style=height:20px></div>"
+                          u8"<div id=next style=height:20px></div></div>",
+                          false};
+    auto &outer = fixture.ById(u8"outer");
+    auto &next = fixture.ById(u8"next");
+    fixture.Move(15, 15);
+    REQUIRE(fixture.ById(u8"inner").Hovered());
+
+    // Removing the hovered element hovers its parent, and schedules a hover update for the mouse's position,
+    // where the next element now is.
+    REQUIRE_FALSE(outer.RemoveChild(fixture.ById(u8"inner")).HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(outer.Hovered());
+    CHECK_FALSE(next.Hovered());
+
+    // The update is due straight away, ahead of any fake mouse move.
+    auto &loop = html::EventLoop::Current();
+    loop.Run(loop.Now());
+    CHECK(next.Hovered());
+    CHECK(outer.Hovered());
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: chooses the cursor", "[Page][EventHandler]")
   {
     MouseFixture fixture {

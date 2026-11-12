@@ -30,6 +30,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
+#include "Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -197,6 +198,12 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<IntSize> FrameDensityCorrectedSizeAtIndex(size_t) const noexcept final
     {
       return _densityCorrectedSize;
+    }
+    /// @brief Takes the image's orientation and density-corrected size from its EXIF metadata.
+    void SetEXIFMetadata(const EXIFMetadata &metadata) noexcept
+    {
+      _orientation = metadata.Orientation;
+      _densityCorrectedSize = metadata.DensityCorrectedSize;
     }
 
     static constexpr size_t ICCColorProfileHeaderLength = 128;

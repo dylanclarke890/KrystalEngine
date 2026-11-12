@@ -127,6 +127,34 @@ namespace krys::text
 
   /// @brief Iterates the code points of UTF-8 text. Each invalid byte reads as U+FFFD and advances by one
   /// byte.
+  /// @brief `text` with each byte that isn't part of well-formed UTF-8 replaced by U+FFFD (UTF-8 decode
+  /// without BOM, of text that's already UTF-8).
+  KRYS_NODISCARD constexpr utf8_string ReplaceInvalidUTF8(utf8_string text) noexcept
+  {
+    if (IsValidUTF8(text))
+    {
+      return text;
+    }
+
+    utf8_string result;
+    result.reserve(text.size() + 2uz);
+    Span<const char8> data {text.data(), text.size()};
+    while (!data.empty())
+    {
+      auto decoded = DecodeUTF8(data);
+      if (decoded.IsValid)
+      {
+        result.append(data.data(), decoded.Length);
+      }
+      else
+      {
+        result.append(u8"\uFFFD");
+      }
+      data = data.subspan(decoded.Length);
+    }
+    return result;
+  }
+
   class CodePointIterator
   {
   private:

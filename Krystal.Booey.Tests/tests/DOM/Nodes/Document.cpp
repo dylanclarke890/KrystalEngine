@@ -37,7 +37,8 @@
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Text/EncodingRegistry.hpp"
+#include "Krystal.Core/Text/Encodings/Windows.hpp"
+#include "Krystal.Core/Text/ICodec.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -350,9 +351,9 @@ namespace krys::boo::dom::tests
 
     SECTION("The one its loader gives it, which a clone keeps")
     {
-      auto *windows1252 = EncodingRegistry().Find(u8"windows-1252");
-      REQUIRE(windows1252);
-      document->SetEncoding(*windows1252);
+      // Booey registers UTF-8 only, so the loader's encoding is one of Krystal.Core's codecs.
+      static const krys::text::Codec<krys::text::Windows1252> windows1252;
+      document->SetEncoding(windows1252);
       CHECK(document->CharacterSet() == u8"windows-1252");
       CHECK(document->InputEncoding() == u8"windows-1252");
 

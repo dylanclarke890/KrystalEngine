@@ -55,7 +55,7 @@ namespace krys::boo::css
       const auto &defaultValue = parameter.DefaultValue;
       result.push_back({
         .Name = CSSOMString(parameter.Name.View()),
-        .Type = u8"*", // FIXME: Implement.
+        .Type = parameter.Type.SyntaxString(),
         .DefaultValue = defaultValue ? Maybe<CSSOMString>(defaultValue->Serialise()) : null,
       });
     }
@@ -65,7 +65,7 @@ namespace krys::boo::css
 
   CSSOMString CSSFunctionRule::ReturnType() const noexcept
   {
-    return u8"*";
+    return GetFunctionRule().ReturnType().SyntaxString();
   }
 
   CSSOMString CSSFunctionRule::CssText() const noexcept
@@ -80,7 +80,10 @@ namespace krys::boo::css
     {
       builder.Append(separator);
       SerialiseIdentifier(CSSOMString(parameter.Name.View()), builder);
-      // FIMXE: Serialize the type.
+      if (!parameter.Type.IsUniversal())
+      {
+        builder.Append(u8' ', parameter.Type.CSSTypeString());
+      }
       if (const auto &defaultValue = parameter.DefaultValue)
       {
         builder.Append(u8": ", defaultValue->Serialise());
@@ -88,7 +91,12 @@ namespace krys::boo::css
       separator = u8", ";
     }
 
-    builder.Append(u8") { ");
+    builder.Append(u8')');
+    if (const auto &returnType = GetFunctionRule().ReturnType(); !returnType.IsUniversal())
+    {
+      builder.Append(u8" returns ", returnType.CSSTypeString());
+    }
+    builder.Append(u8" { ");
     for (uint32 index = 0; index < Length(); ++index)
     {
       auto ruleText = Item(index)->CssText();

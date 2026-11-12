@@ -28,7 +28,9 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
 namespace krys::boo::style
@@ -84,8 +86,12 @@ namespace krys::boo::style
     {
       return update->Style.get();
     }
-    // FIXME: The renderer's mutable style; there's no render tree, so it's the style kept on the element.
-    return const_cast<RenderStyle *>(element.GetRenderStyle());
+    auto *renderer = element.Renderer();
+    if (!renderer)
+    {
+      return nullptr;
+    }
+    return &renderer->MutableStyle();
   }
 
   void Update::AddElement(dom::Element &element, dom::Element *parent, ElementUpdate &&elementUpdate) noexcept

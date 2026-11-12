@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -358,14 +359,14 @@ namespace krys::boo
     if (newBase != base || newExtent != extent)
     {
       _originalBase = base;
-      newSelection.SetBase(newBase);
-      newSelection.SetExtent(newExtent);
+      newSelection.SetAnchor(newBase);
+      newSelection.SetFocus(newExtent);
     }
     else if (_originalBase.IsNotNull())
     {
-      if (_selection.Base() == newSelection.Base())
+      if (_selection.CanonicalAnchor() == newSelection.CanonicalAnchor())
       {
-        newSelection.SetBase(_originalBase);
+        newSelection.SetAnchor(_originalBase);
       }
       _originalBase = {};
     }
@@ -412,7 +413,7 @@ namespace krys::boo
     }
 
     bool selectionEndpointsBelongToMultipleDocuments =
-      newSelection.Base().GetDocument() && !newSelection.GetDocument();
+      newSelection.CanonicalAnchor().GetDocument() && !newSelection.GetDocument();
     bool selectionIsInAnotherDocument =
       newSelection.GetDocument() && newSelection.GetDocument().get() != document;
     bool selectionIsInDetachedDocument = newSelection.GetDocument() && !newSelection.GetDocument()->Frame();
@@ -588,7 +589,6 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Accessibility notifications, with accessibility.
   void FrameSelection::UpdateAndRevealSelection(ScrollBehavior scrollBehavior,
                                                 RevealExtentOption revealExtent,
                                                 ForceCenterScroll forceCenterScroll) noexcept
@@ -624,6 +624,23 @@ namespace krys::boo
 
       RevealSelection({_selectionRevealMode, alignment, revealExtent, scrollBehavior});
     }
+    if (!_document->GetEditor().IgnoreSelectionChanges())
+    {
+      NotifyAccessibilityForSelectionChange();
+    }
+  }
+
+  void FrameSelection::NotifyAccessibilityForSelectionChange() noexcept
+  {
+    if (!ax::AXObjectCache::AccessibilityEnabled() || _selection.Start().IsNull()
+        || _selection.End().IsNull())
+    {
+      return;
+    }
+    if (auto *cache = _document->ExistingAXObjectCache())
+    {
+      cache->PostTextSelectionChangeNotification(_selection.Start());
+    }
   }
 
   void FrameSelection::RevealSelection(const RevealSelectionOptions &revealSelectionOptions) noexcept
@@ -649,7 +666,7 @@ namespace krys::boo
     else
     {
       rect = revealSelectionOptions.RevealExtent == RevealExtentOption::RevealExtent
-               ? LayoutRect(VisiblePosition(_selection.Extent()).AbsoluteCaretBounds())
+               ? LayoutRect(VisiblePosition(_selection.CanonicalFocus()).AbsoluteCaretBounds())
                : LayoutRect(EnclosingIntRect(SelectionBounds(ClipToVisibleContent::No)));
     }
 
@@ -686,8 +703,8 @@ namespace krys::boo
     }
     SetNodeContainsSelectionEndPoint(selection.Anchor(), value);
     SetNodeContainsSelectionEndPoint(selection.Focus(), value);
-    SetNodeContainsSelectionEndPoint(selection.Base(), value);
-    SetNodeContainsSelectionEndPoint(selection.Extent(), value);
+    SetNodeContainsSelectionEndPoint(selection.CanonicalAnchor(), value);
+    SetNodeContainsSelectionEndPoint(selection.CanonicalFocus(), value);
     SetNodeContainsSelectionEndPoint(selection.Start(), value);
     SetNodeContainsSelectionEndPoint(selection.End(), value);
   }
@@ -705,8 +722,8 @@ namespace krys::boo
     {
       krys_debug_assert(!RemovingNodeRemovesPosition(node, _selection.Anchor()));
       krys_debug_assert(!RemovingNodeRemovesPosition(node, _selection.Focus()));
-      krys_debug_assert(!RemovingNodeRemovesPosition(node, _selection.Base()));
-      krys_debug_assert(!RemovingNodeRemovesPosition(node, _selection.Extent()));
+      krys_debug_assert(!RemovingNodeRemovesPosition(node, _selection.CanonicalAnchor()));
+      krys_debug_assert(!RemovingNodeRemovesPosition(node, _selection.CanonicalFocus()));
       krys_debug_assert(!RemovingNodeRemovesPosition(node, _selection.Start()));
       krys_debug_assert(!RemovingNodeRemovesPosition(node, _selection.End()));
       return;
@@ -714,8 +731,8 @@ namespace krys::boo
 
     RespondToNodeModification(node, RemovingNodeRemovesPosition(node, _selection.Anchor()),
                               RemovingNodeRemovesPosition(node, _selection.Focus()),
-                              RemovingNodeRemovesPosition(node, _selection.Base()),
-                              RemovingNodeRemovesPosition(node, _selection.Extent()),
+                              RemovingNodeRemovesPosition(node, _selection.CanonicalAnchor()),
+                              RemovingNodeRemovesPosition(node, _selection.CanonicalFocus()),
                               RemovingNodeRemovesPosition(node, _selection.Start()),
                               RemovingNodeRemovesPosition(node, _selection.End()));
 
@@ -850,8 +867,8 @@ namespace krys::boo
 
     dom::Position anchor = _selection.Anchor();
     dom::Position focus = _selection.Focus();
-    dom::Position base = _selection.Base();
-    dom::Position extent = _selection.Extent();
+    dom::Position base = _selection.CanonicalAnchor();
+    dom::Position extent = _selection.CanonicalFocus();
     dom::Position start = _selection.Start();
     dom::Position end = _selection.End();
     UpdatePositionAfterAdoptingTextReplacement(anchor, node, offset, oldLength, newLength);
@@ -861,8 +878,8 @@ namespace krys::boo
     UpdatePositionAfterAdoptingTextReplacement(start, node, offset, oldLength, newLength);
     UpdatePositionAfterAdoptingTextReplacement(end, node, offset, oldLength, newLength);
 
-    if ((anchor != _selection.Anchor() || focus != _selection.Focus()) || base != _selection.Base()
-        || extent != _selection.Extent() || start != _selection.Start() || end != _selection.End())
+    if ((anchor != _selection.Anchor() || focus != _selection.Focus()) || base != _selection.CanonicalAnchor()
+        || extent != _selection.CanonicalFocus() || start != _selection.Start() || end != _selection.End())
     {
       VisibleSelection newSelection;
       newSelection.SetWithoutValidation(anchor, focus);
@@ -898,7 +915,7 @@ namespace krys::boo
 
   TextDirection FrameSelection::DirectionOfEnclosingBlock() noexcept
   {
-    return boo::DirectionOfEnclosingBlock(_selection.Extent());
+    return boo::DirectionOfEnclosingBlock(_selection.CanonicalFocus());
   }
 
   TextDirection FrameSelection::DirectionOfSelection() noexcept
@@ -948,13 +965,13 @@ namespace krys::boo
     SetNodeFlags(_selection, false);
     if (baseIsStart)
     {
-      _selection.SetBase(start);
-      _selection.SetExtent(end);
+      _selection.SetAnchor(start);
+      _selection.SetFocus(end);
     }
     else
     {
-      _selection.SetBase(end);
-      _selection.SetExtent(start);
+      _selection.SetAnchor(end);
+      _selection.SetFocus(start);
     }
     SetNodeFlags(_selection, true);
     if (SelectionIsOrphanedOrBelongsToWrongDocument(_selection, _document))
@@ -968,7 +985,7 @@ namespace krys::boo
     // FIXME: VisibleSelection should be fixed to ensure as an invariant that
     // base/extent always point to the same nodes as start/end, but which points
     // to which depends on the value of IsBaseFirst. Then this can be changed
-    // to just return _selection.Extent().
+    // to just return _selection.CanonicalFocus().
     if (Behavior(_document).ShouldAlwaysExtendSelectionFromExtentEndpoint())
     {
       return _selection.IsBaseFirst() ? _selection.VisibleEnd() : _selection.VisibleStart();
@@ -1031,7 +1048,7 @@ namespace krys::boo
   VisiblePosition FrameSelection::ModifyExtendingRight(TextGranularity granularity,
                                                        UserTriggered userTriggered) noexcept
   {
-    VisiblePosition pos(_selection.Extent(), _selection.GetAffinity());
+    VisiblePosition pos(_selection.CanonicalFocus(), _selection.GetAffinity());
 
     // The difference between ModifyExtendingRight and ModifyExtendingForward is:
     // ModifyExtendingForward always extends forward logically.
@@ -1088,7 +1105,7 @@ namespace krys::boo
   VisiblePosition FrameSelection::ModifyExtendingForward(TextGranularity granularity,
                                                          UserTriggered userTriggered) noexcept
   {
-    VisiblePosition pos(_selection.Extent(), _selection.GetAffinity());
+    VisiblePosition pos(_selection.CanonicalFocus(), _selection.GetAffinity());
     switch (granularity)
     {
       case TextGranularity::CharacterGranularity:
@@ -1148,7 +1165,7 @@ namespace krys::boo
         {
           // The caret moves logically, by the enclosing block's direction, rather than visually through runs
           // of the other direction.
-          VisiblePosition current(_selection.Extent(), _selection.GetAffinity());
+          VisiblePosition current(_selection.CanonicalFocus(), _selection.GetAffinity());
           if (DirectionOfEnclosingBlock() == TextDirection::LTR)
           {
             pos = current.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
@@ -1162,7 +1179,7 @@ namespace krys::boo
       case TextGranularity::WordGranularity:
       {
         // Like characters, words are moved through logically.
-        VisiblePosition currentPosition(_selection.Extent(), _selection.GetAffinity());
+        VisiblePosition currentPosition(_selection.CanonicalFocus(), _selection.GetAffinity());
         if (DirectionOfEnclosingBlock() == TextDirection::LTR)
         {
           pos = NextWordPositionForPlatform(currentPosition);
@@ -1206,7 +1223,7 @@ namespace krys::boo
     {
       case TextGranularity::WordGranularity:
       case TextGranularity::SentenceGranularity:
-        currentPosition = VisiblePosition(_selection.Extent(), _selection.GetAffinity());
+        currentPosition = VisiblePosition(_selection.CanonicalFocus(), _selection.GetAffinity());
         break;
       case TextGranularity::LineGranularity:
       case TextGranularity::ParagraphGranularity:
@@ -1226,7 +1243,7 @@ namespace krys::boo
         }
         else
         {
-          pos = VisiblePosition(_selection.Extent(), _selection.GetAffinity())
+          pos = VisiblePosition(_selection.CanonicalFocus(), _selection.GetAffinity())
                   .Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
         }
         break;
@@ -1285,7 +1302,7 @@ namespace krys::boo
   VisiblePosition FrameSelection::ModifyExtendingLeft(TextGranularity granularity,
                                                       UserTriggered userTriggered) noexcept
   {
-    VisiblePosition pos(_selection.Extent(), _selection.GetAffinity());
+    VisiblePosition pos(_selection.CanonicalFocus(), _selection.GetAffinity());
 
     // The difference between ModifyExtendingLeft and ModifyExtendingBackward is:
     // ModifyExtendingBackward always extends backward logically.
@@ -1341,7 +1358,7 @@ namespace krys::boo
   VisiblePosition FrameSelection::ModifyExtendingBackward(TextGranularity granularity,
                                                           UserTriggered userTriggered) noexcept
   {
-    VisiblePosition pos(_selection.Extent(), _selection.GetAffinity());
+    VisiblePosition pos(_selection.CanonicalFocus(), _selection.GetAffinity());
 
     // Extending a selection backward by word or character from just after a table selects
     // the table.  This "makes sense" from the user perspective, esp. when deleting.
@@ -1407,7 +1424,7 @@ namespace krys::boo
         {
           // The caret moves logically, by the enclosing block's direction, rather than visually through runs
           // of the other direction.
-          VisiblePosition current(_selection.Extent(), _selection.GetAffinity());
+          VisiblePosition current(_selection.CanonicalFocus(), _selection.GetAffinity());
           if (DirectionOfEnclosingBlock() == TextDirection::RTL)
           {
             pos = current.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
@@ -1421,7 +1438,7 @@ namespace krys::boo
       case TextGranularity::WordGranularity:
       {
         // Like characters, words are moved through logically.
-        VisiblePosition currentPosition(_selection.Extent(), _selection.GetAffinity());
+        VisiblePosition currentPosition(_selection.CanonicalFocus(), _selection.GetAffinity());
         if (DirectionOfEnclosingBlock() == TextDirection::RTL)
         {
           pos = NextWordPositionForPlatform(currentPosition);
@@ -1465,7 +1482,7 @@ namespace krys::boo
     {
       case TextGranularity::WordGranularity:
       case TextGranularity::SentenceGranularity:
-        currentPosition = VisiblePosition(_selection.Extent(), _selection.GetAffinity());
+        currentPosition = VisiblePosition(_selection.CanonicalFocus(), _selection.GetAffinity());
         break;
       case TextGranularity::LineGranularity:
       case TextGranularity::ParagraphGranularity:
@@ -1484,7 +1501,7 @@ namespace krys::boo
         }
         else
         {
-          pos = VisiblePosition(_selection.Extent(), _selection.GetAffinity())
+          pos = VisiblePosition(_selection.CanonicalFocus(), _selection.GetAffinity())
                   .Previous(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
         }
         break;
@@ -1535,7 +1552,6 @@ namespace krys::boo
     return pos;
   }
 
-  // FIXME: Accessibility's text selection intents and boundary notifications, with accessibility.
   bool FrameSelection::Modify(Alteration alter, SelectionDirection direction, TextGranularity granularity,
                               UserTriggered userTriggered) noexcept
   {
@@ -1657,10 +1673,10 @@ namespace krys::boo
           // the middle of a word and then word-selecting forward, leaving the caret in the
           // same place where it was, instead of directly selecting to the end of the word.
           VisibleSelection newSelection = _selection;
-          newSelection.SetExtent(position);
+          newSelection.SetFocus(position);
           if (_selection.IsBaseFirst() != newSelection.IsBaseFirst())
           {
-            position = VisiblePosition(_selection.Base());
+            position = VisiblePosition(_selection.CanonicalAnchor());
           }
         }
 
@@ -1743,7 +1759,7 @@ namespace krys::boo
                                                                   : Affinity::Downstream);
         break;
       case Alteration::Extend:
-        pos = VisiblePosition(_selection.Extent(), _selection.GetAffinity());
+        pos = VisiblePosition(_selection.CanonicalFocus(), _selection.GetAffinity());
         xPos = LineDirectionPointForBlockDirectionNavigation(PositionType::Extent);
         _selection.SetAffinity(Affinity::Downstream);
         break;
@@ -1832,7 +1848,7 @@ namespace krys::boo
     {
       case PositionType::Start:  position = _selection.Start(); break;
       case PositionType::End:    position = _selection.End(); break;
-      case PositionType::Extent: position = _selection.Extent(); break;
+      case PositionType::Extent: position = _selection.CanonicalFocus(); break;
     }
 
     // FIXME: Why is this check needed? What's the harm in doing a little more work without a frame?
@@ -1858,7 +1874,7 @@ namespace krys::boo
 
   bool FrameSelection::DispatchSelectStart() noexcept
   {
-    RefPtr<dom::Node> selectStartTarget = ShareRefPtr(_selection.Extent().GetContainerNode());
+    RefPtr<dom::Node> selectStartTarget = ShareRefPtr(_selection.CanonicalFocus().GetContainerNode());
     if (!selectStartTarget)
     {
       return true;
@@ -1895,29 +1911,29 @@ namespace krys::boo
 
   void FrameSelection::SetBase(const VisiblePosition &position, UserTriggered userTriggered) noexcept
   {
-    SetSelection(VisibleSelection(position.DeepEquivalent(), _selection.Extent(), position.GetAffinity(),
-                                  Directionality::Strong),
+    SetSelection(VisibleSelection(position.DeepEquivalent(), _selection.CanonicalFocus(),
+                                  position.GetAffinity(), Directionality::Strong),
                  DefaultSetSelectionOptions(userTriggered));
   }
 
   void FrameSelection::SetExtent(const VisiblePosition &position, UserTriggered userTriggered) noexcept
   {
-    SetSelection(VisibleSelection(_selection.Base(), position.DeepEquivalent(), position.GetAffinity(),
-                                  Directionality::Strong),
+    SetSelection(VisibleSelection(_selection.CanonicalAnchor(), position.DeepEquivalent(),
+                                  position.GetAffinity(), Directionality::Strong),
                  DefaultSetSelectionOptions(userTriggered));
   }
 
   void FrameSelection::SetBase(const dom::Position &position, Affinity affinity,
                                UserTriggered userTriggered) noexcept
   {
-    SetSelection(VisibleSelection(position, _selection.Extent(), affinity, Directionality::Strong),
+    SetSelection(VisibleSelection(position, _selection.CanonicalFocus(), affinity, Directionality::Strong),
                  DefaultSetSelectionOptions(userTriggered));
   }
 
   void FrameSelection::SetExtent(const dom::Position &position, Affinity affinity,
                                  UserTriggered userTriggered) noexcept
   {
-    SetSelection(VisibleSelection(_selection.Base(), position, affinity, Directionality::Strong),
+    SetSelection(VisibleSelection(_selection.CanonicalAnchor(), position, affinity, Directionality::Strong),
                  DefaultSetSelectionOptions(userTriggered));
   }
 

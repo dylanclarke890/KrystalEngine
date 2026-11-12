@@ -66,13 +66,11 @@
 
 namespace krys::boo
 {
-  // FIXME: Editable links, which are live only as the editable link behavior setting says, with that
-  // setting; data detector links, which are Cocoa's.
   bool IsDraggableLink(const dom::Element &element) noexcept
   {
     if (auto *anchorElement = DynamicDowncast<html::HTMLAnchorElement>(element))
     {
-      return anchorElement->HasAttribute(u8"href") && !anchorElement->HasEditableStyle();
+      return anchorElement->HasAttribute(u8"href") && anchorElement->IsLiveLink();
     }
     if (element.NamespaceURI().View() == infra::Namespaces::SVG && element.LocalName().View() == u8"a")
     {
@@ -242,8 +240,6 @@ namespace krys::boo
       return DragOperation::Generic;
     }
 
-    // FIXME: Multi-representation images, which are Cocoa's; the setting to load images automatically
-    // (loadsImagesAutomatically), whose default (on) this takes, once there's one.
     KRYS_NODISCARD bool ImageElementIsDraggable(const html::HTMLImageElement &, const LocalFrame &) noexcept
     {
       return true;
@@ -661,7 +657,6 @@ namespace krys::boo
     return !event->DefaultPrevented();
   }
 
-  // FIXME: Two-step drops (the editor client's performTwoStepDrop), which are iOS's.
   bool DragController::ConcludeEditDrag(const DragData &dragData) noexcept
   {
     RefPtr<html::HTMLInputElement> fileInput = _fileInputElementUnderMouse;
@@ -748,7 +743,8 @@ namespace krys::boo
         bool smartDelete = editor.SmartInsertDeleteEnabled();
         bool smartInsert = smartDelete && innerSelection.Granularity() == TextGranularity::WordGranularity
                            && dragData.CanSmartReplace();
-        MoveSelectionCommand::Create(ShareRef(*fragment), dragCaret.Base(), smartInsert, smartDelete)
+        MoveSelectionCommand::Create(ShareRef(*fragment), dragCaret.CanonicalAnchor(), smartInsert,
+                                     smartDelete)
           ->Apply();
       }
       else
@@ -1159,7 +1155,7 @@ namespace krys::boo
         // a user can initiate a drag on a link without having any text
         // selected.  In this case, we should expand the selection to
         // the enclosing anchor element
-        dom::Position pos = sourceSelection.Base();
+        dom::Position pos = sourceSelection.CanonicalAnchor();
         if (RefPtr<dom::Element> node = EnclosingAnchorElement(pos))
         {
           selection.SetSelection(VisibleSelection::SelectionFromContentsOfNode(node.get()));

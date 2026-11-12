@@ -283,7 +283,6 @@ namespace krys::boo
     KRYS_NODISCARD inline bool BorderTopIsTransparent() const noexcept;
     KRYS_NODISCARD inline bool BorderBottomIsTransparent() const noexcept;
 
-    KRYS_NODISCARD inline bool UsesStandardScrollbarStyle() const noexcept;
     KRYS_NODISCARD inline bool ShouldPlaceVerticalScrollbarOnLeft() const noexcept;
 
     KRYS_NODISCARD inline bool AutoWrap() const noexcept;

@@ -52,9 +52,6 @@
 
 namespace krys::boo::css
 {
-  // FIXME: Generate this from the property definitions.
-  constexpr size_t MaxShorthandLength = 18uz;
-
   namespace
   {
     class ShorthandSerialiser

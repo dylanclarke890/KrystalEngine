@@ -25,8 +25,8 @@
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Booey/CSS/Values/ValueSeparator.hpp"
 #include "Krystal.Booey/CSS/Values/ValueType.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
@@ -52,15 +52,20 @@ namespace krys::boo::css
   enum class PropertyId : uint16;
   enum class ValueId : uint16;
 
-  class Value : public RefCounted<Value>
+  class Value
   {
-    // Needs access to the protected operator delete.
-    friend class RefCounted<Value>;
-
     KRYS_NON_COPYABLE(Value);
 
   public:
     KRYS_TYPE_CAST_TRAITS_ACCESS();
+
+  private:
+    // The count goes up and down in steps of two, leaving the lowest bit to mark static values, whose count
+    // never reaches zero.
+    constexpr static uint32 RefCountFlagIsStatic = 1u;
+    constexpr static uint32 RefCountIncrement = 2u;
+
+    mutable uint32 _refCount {RefCountIncrement};
 
   protected:
     ValueType _type : BitCount<ValueType>();
@@ -68,8 +73,8 @@ namespace krys::boo::css
     ValueSeparator _valueSeparator : BitCount<ValueSeparator>() {ValueSeparator::SpaceSeparator};
     bool _isImplicitInitialValue : 1 {false};
     mutable bool _hasCachedCSSText : 1 {false};
-    // Whether a `ValuePair` or `QuadValue` serialises as one value when its values serialise the same. Kept in
-    // the bit fields so it never costs them space of their own.
+    // Whether a `ValuePair` or `QuadValue` serialises as one value when its values serialise the same. Kept
+    // in the bit fields so it never costs them space of their own.
     bool _coalesceIdenticalValues : 1 {true};
 
     explicit Value(ValueType type) noexcept : _type(type)
@@ -82,7 +87,42 @@ namespace krys::boo::css
 
     constexpr static StaticValueTag StaticValue {};
 
+    /// @brief Marks a value of the static value pool, which is never destroyed.
+    void MakeStatic() noexcept
+    {
+      _refCount |= RefCountFlagIsStatic;
+    }
+
   public:
+    void AddRef() const noexcept
+    {
+      _refCount += RefCountIncrement;
+    }
+
+    void SubRef() const noexcept
+    {
+      krys_debug_assert(_refCount >= RefCountIncrement);
+      if (_refCount -= RefCountIncrement; !_refCount)
+      {
+        delete const_cast<Value *>(this);
+      }
+    }
+
+    KRYS_NODISCARD bool HasOneRef() const noexcept
+    {
+      return GetRefCount() == 1u;
+    }
+
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept
+    {
+      return _refCount / RefCountIncrement;
+    }
+
+    KRYS_NODISCARD bool IsStatic() const noexcept
+    {
+      return _refCount & RefCountFlagIsStatic;
+    }
+
     // NOTE: intentionally not virtual for performance reasons.
     // virtual ~Value() noexcept;
 

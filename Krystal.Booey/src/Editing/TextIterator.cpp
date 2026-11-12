@@ -2182,8 +2182,7 @@ namespace krys::boo
       it.AppendTextToString(builder);
     }
 
-    // FIXME: Modifying display strings by the document's encoding (displayStringModifiedByEncoding), once
-    // documents have encodings other than UTF-8.
+    // Documents are UTF-8 only, so no encoding modifies the display string (see DIFFERENCES.md).
     builder.shrink_to_fit();
     return builder;
   }

@@ -1,6 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -126,5 +129,39 @@ layer at (0,0) size 800x104
     CHECK(fixture.Document->ElementFromPoint(250, 50).get() != &s);
     // Not with `pointer-events: none`.
     CHECK(fixture.Document->ElementFromPoint(250, 50).get() != &SvgById(*fixture.Document, u8"n"));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGRoot: the document element",
+                   "[Rendering][SVG][LegacyRenderSVGRoot]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html>)html"};
+    auto svg = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+    REQUIRE_FALSE(fixture.Document->ReplaceChild(*svg, *fixture.Document->DocumentElement()).HasException());
+    (void)fixture.Document->UpdateLayout();
+
+    // An <svg> document element without a width or height fills the view (both default to 100%)...
+    auto &root = Downcast<LegacyRenderSVGRoot>(*svg->Renderer());
+    CHECK(root.Size() == LayoutSize(800, 600));
+
+    // ...and follows it when it's resized.
+    fixture.Frame->View()->Resize({400, 300});
+    (void)fixture.Document->UpdateLayout();
+    CHECK(root.Size() == LayoutSize(400, 300));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGRoot: a clipped document element",
+                   "[Rendering][SVG][LegacyRenderSVGRoot]")
+  {
+    PaintFixture fixture {u8R"html(<!DOCTYPE html>)html"};
+    auto svg = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+    REQUIRE_FALSE(svg->SetAttribute(u8"style", u8"background: lime").HasException());
+    REQUIRE_FALSE(fixture.Document->ReplaceChild(*svg, *fixture.Document->DocumentElement()).HasException());
+
+    // An opaque root that fills the view hides the view's base colour, which isn't painted...
+    CHECK_FALSE(fixture.Painted().starts_with(BaseCanvas()));
+
+    // ...unless a clip path leaves part of the view uncovered.
+    REQUIRE_FALSE(svg->SetAttribute(u8"style", u8"background: lime; clip-path: inset(10px)").HasException());
+    CHECK(fixture.Painted().starts_with(BaseCanvas()));
   }
 }

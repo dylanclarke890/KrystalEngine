@@ -74,9 +74,23 @@ namespace krys::boo
       return nullptr;
     }
 
+    auto &self = const_cast<StyleGradientImage &>(*this);
+    if (_knownCacheableBarringFilter)
+    {
+      if (auto *result = self.CachedImageForSize(size))
+      {
+        return ShareRefPtr(result);
+      }
+    }
+
     const auto &style = isForFirstLine ? renderer->FirstLineStyle() : renderer->Style();
     auto gradient = style::CreatePlatformGradient(_gradient, size, style);
-    return GradientImage::Create(*gradient, size);
+    auto newImage = GradientImage::Create(*gradient, size);
+    if (_knownCacheableBarringFilter)
+    {
+      self.SaveCachedImageForSize(size, *newImage);
+    }
+    return newImage;
   }
 
   bool StyleGradientImage::KnownToBeOpaque(const RenderElement &renderer) const noexcept

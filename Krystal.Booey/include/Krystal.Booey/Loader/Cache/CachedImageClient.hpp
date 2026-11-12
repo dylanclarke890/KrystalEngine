@@ -93,6 +93,12 @@ namespace krys::boo
       return true;
     }
 
+    /// @brief Whether the client is drawn with the dark appearance.
+    KRYS_NODISCARD virtual bool UseSystemDarkAppearance() const noexcept
+    {
+      return false;
+    }
+
   protected:
     CachedImageClient() noexcept = default;
   };

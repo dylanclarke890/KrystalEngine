@@ -8853,7 +8853,7 @@ class GeneratePropertyParsing:
                     f"// Allow internal properties as we use them to parse several internal-only-shorthands (e.g. background-repeat),"
                 )
                 to.write(
-                    f"// and to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta'))."
+                    f"// and to handle certain DOM-exposed values."
                 )
                 to.write(f"krys_debug_assert(false);")
                 to.write("return {};")
@@ -8979,6 +8979,7 @@ class GeneratePropertyShorthandFunctions:
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Core/Attributes.hpp",
+                    "Krystal.Core/Numeric.hpp",
                 ],
             )
 
@@ -8986,6 +8987,31 @@ class GeneratePropertyShorthandFunctions:
                 writer.forward_declarations(classes=["PropertyShorthand"])
                 for property in self.style_properties.all_shorthands:
                     writer.write(f"KRYS_NODISCARD PropertyShorthand {property.id_without_prefix}Shorthand() noexcept;")
+
+                writer.newline()
+                writer.write("/// @brief The most shorthands any longhand belongs to.")
+                writer.write(f"constexpr size_t MaxShorthandsForLonghand = {self._max_shorthands_for_longhand()}uz;")
+                writer.newline()
+                writer.write("/// @brief The most longhands of any shorthand but `all`.")
+                max_length = max(
+                    len(p.codegen_properties.longhands) for p in self.style_properties.all_shorthands if p.name != "all"
+                )
+                writer.write(f"constexpr size_t MaxShorthandLength = {max_length}uz;")
+
+    def _max_shorthands_for_longhand(self):
+        # Counted as _generate_style_property_shorthand_functions_accessors maps longhands to shorthands.
+        counts = {}
+        for property in self.style_properties.all_shorthands:
+            for longhand in property.codegen_properties.longhands:
+                if longhand.name == "all":
+                    targets = [
+                        p for p in self.style_properties.all_non_shorthands if p.name not in ("direction", "unicode-bidi")
+                    ]
+                else:
+                    targets = [longhand]
+                for target in targets:
+                    counts[target.name] = counts.get(target.name, 0) + 1
+        return max(counts.values())
 
     def _generate_style_property_shorthand_functions_cpp(self):
         with open(self.generation_context.output_cpp_path("CSS/Properties/PropertyShorthandFunctions.cpp"), "w") as output_file:

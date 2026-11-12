@@ -55,7 +55,6 @@ namespace krys::boo
       return null;
     }
 
-    // Subpixel inline layout is off, so the baseline is rounded.
     return LayoutUnit(std::round(
       (baselineChild->MarginBefore() + baselineChild->LogicalTop() + AscentForChild(*baselineChild))
         .ToFloat()));

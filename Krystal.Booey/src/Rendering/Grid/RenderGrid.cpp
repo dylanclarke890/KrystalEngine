@@ -2595,7 +2595,6 @@ namespace krys::boo
       baseline = BaselineAlignmentState::SynthesizedBaseline(
         *baselineGridItem, dominantBaseline, gridWritingMode, direction, BaselineSynthesisEdge::BorderBox);
     }
-    // Subpixel inline layout is off: the item's top is snapped to an integer.
     return LayoutUnit(LogicalTopForChild(*baselineGridItem).ToInt()) + *baseline;
   }
 
@@ -2626,7 +2625,6 @@ namespace krys::boo
       baseline = BaselineAlignmentState::SynthesizedBaseline(
         *baselineGridItem, dominantBaseline, gridWritingMode, direction, BaselineSynthesisEdge::BorderBox);
     }
-    // Subpixel inline layout is off: the item's top is snapped to an integer.
     return LayoutUnit(LogicalTopForChild(*baselineGridItem).ToInt()) + *baseline;
   }
 

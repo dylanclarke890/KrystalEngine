@@ -38,7 +38,8 @@ namespace krys::boo
 
   bool CaretAnimator::IsBlinkingSuspended() const noexcept
   {
-    return _isBlinkingSuspended;
+    auto *page = GetPage();
+    return _isBlinkingSuspended || (page && page->PrefersNonBlinkingCaret());
   }
 
   Page *CaretAnimator::GetPage() const noexcept

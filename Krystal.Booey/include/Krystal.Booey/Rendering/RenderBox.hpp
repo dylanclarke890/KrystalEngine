@@ -919,10 +919,10 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatRect ReferenceBoxRect(CSSBoxType boxType) const noexcept override;
 
-    KRYS_NODISCARD virtual LayoutRect
-      OverflowClipRect(const LayoutPoint &location,
-                       OverlayScrollbarSizeRelevancy relevancy =
-                         OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize) const noexcept;
+    KRYS_NODISCARD virtual LayoutRect OverflowClipRect(
+      const LayoutPoint &location,
+      OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
+      PaintPhase phase = PaintPhase::BlockBackground) const noexcept;
     KRYS_NODISCARD virtual LayoutRect
       OverflowClipRectForChildLayers(const LayoutPoint &location,
                                      OverlayScrollbarSizeRelevancy relevancy) const noexcept

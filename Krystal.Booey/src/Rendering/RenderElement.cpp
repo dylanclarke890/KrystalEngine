@@ -23,6 +23,7 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
@@ -989,7 +990,6 @@ namespace krys::boo
 
   bool RenderElement::IsInsideEntirelyHiddenLayer() const noexcept
   {
-    // FIXME: Layers inside hidden SVG containers and resources.
     return Style().UsedVisibility() != Visibility::Visible && !EnclosingLayer()->HasVisibleContent();
   }
 
@@ -1092,8 +1092,16 @@ namespace krys::boo
           (void)lineLayout->StyleWillChange(*this, newStyle, diff);
         }
       }
-      // FIXME: The stacking context's z-order lists, rendering-dependent regions, the accessibility cache and
-      // the enclosing layer's visible content status and event region, once there are any.
+      // FIXME: The stacking context's z-order lists, rendering-dependent regions and the enclosing layer's
+      // visible content status and event region, once there are any.
+      if (_style.UsedVisibility() != newStyle.UsedVisibility()
+          || _style.EffectiveInert() != newStyle.EffectiveInert())
+      {
+        if (auto *cache = GetDocument().ExistingAXObjectCache())
+        {
+          cache->OnInertOrVisibilityChange(*this);
+        }
+      }
 
       if (IsFloating() && _style.Floating() != newStyle.Floating())
       {
@@ -1140,8 +1148,7 @@ namespace krys::boo
 
     // FIXME: Outline counting, once there's any.
 
-    // FIXME: A fixed root background composited on its own isn't slow; and the setting for fixed
-    // backgrounds painting relative to the document, once there are settings for it.
+    // FIXME: A fixed root background composited on its own isn't slow.
     bool newStyleSlowScroll =
       style::HasImageWithAttachment(newStyle.GetBackgroundLayers(), FillAttachment::FixedBackground);
 
@@ -2077,8 +2084,6 @@ namespace krys::boo
     {
       textRenderer->StyleDidChange(style::DifferenceResult::Equal, nullptr);
     }
-
-    // FIXME: Remove the layers created in hidden SVG subtrees.
   }
 
   RenderObject *RenderElement::AttachRendererInternal(RenderPtr<RenderObject> child,
@@ -2249,8 +2254,6 @@ namespace krys::boo
 
   bool RenderElement::AllowsAnimation() const noexcept
   {
-    // FIXME: An image element's own animation control (HTMLImageElement::allowsAnimation), once there are
-    // per-element animation controls.
     auto *page = GetDocument().GetPage();
     return !page || page->ImageAnimationEnabled();
   }
@@ -2849,7 +2852,7 @@ namespace krys::boo
     // This is also used by other elements (e.g. flex items and grid items).
     PaintPhase paintPhaseToUse = IsExcludedAndPlacedInBorder() ? paintInfo.Phase : PaintPhase::Foreground;
     if (paintInfo.Phase == PaintPhase::Selection || paintInfo.Phase == PaintPhase::EventRegion
-        || paintInfo.Phase == PaintPhase::TextClip || paintInfo.Phase == PaintPhase::Accessibility)
+        || paintInfo.Phase == PaintPhase::TextClip)
     {
       Paint(paintInfo, childPoint);
     }

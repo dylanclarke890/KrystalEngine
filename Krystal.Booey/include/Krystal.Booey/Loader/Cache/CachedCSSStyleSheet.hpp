@@ -34,7 +34,7 @@ namespace krys::boo::css
 namespace krys::boo
 {
   /// @brief A cached style sheet: the text a load brought, and the sheet parsed from it, kept for reuse.
-  // FIXME: Encodings other than UTF-8 (the request's charset, the response's and `@charset`).
+  // Style sheets are UTF-8 only, whatever the request, the response or `@charset` say (see DIFFERENCES.md).
   class CachedCSSStyleSheet final : public CachedResource
   {
   private:

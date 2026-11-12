@@ -343,24 +343,6 @@ namespace krys::boo::url
       return result;
     }
 
-    /// @brief Decodes `bytes` as UTF-8, replacing each invalid byte with U+FFFD.
-    utf8_string ReplaceInvalidUTF8(utf8_stringview bytes) noexcept
-    {
-      if (text::IsValidUTF8(bytes))
-      {
-        return utf8_string {bytes};
-      }
-      utf8_string result;
-      result.reserve(bytes.size());
-      for (CodePointIterator it {bytes}; !it.AtEnd(); ++it)
-      {
-        Array<uint8, 4> buffer;
-        uint8 length = EncodeUTF8(*it, buffer);
-        result.append(reinterpret_cast<const char8 *>(buffer.data()), length);
-      }
-      return result;
-    }
-
     void SerialiseURLEncodedForm(utf8_stringview input, utf8_string &output) noexcept
     {
       for (char8 byte : input)
@@ -3157,7 +3139,7 @@ namespace krys::boo::url
       return null;
     }
     auto percentDecoded = PercentDecode(input);
-    return ReplaceInvalidUTF8(percentDecoded);
+    return text::ReplaceInvalidUTF8(krys::move(percentDecoded));
   }
 
   // https://url.spec.whatwg.org/#concept-urlencoded-parser
