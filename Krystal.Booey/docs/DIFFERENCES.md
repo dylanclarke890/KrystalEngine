@@ -319,6 +319,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 ### From Chrome
 
 - Which objects are in the tree and their roles follow WebKit's rules rather than Chrome's (for instance, text-level elements like `span`, `em` and `strong` with no name or ARIA attributes are left out, their text becoming their parent's, and a `div` with inline content is a generic object).
+- ARIA trees are repaired as WebKit does: a `tree` whose children aren't all tree items (or groups of them) is a generic object, a `treeitem` outside a tree loses its role, and inside a tree only tree items, their content and text are exposed.
 
 ## Loading, navigation and history
 
