@@ -63,6 +63,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/SystemPasteboardStrategy.hpp
       include/Krystal.UI/ValidationMessageOverlay.hpp
       include/Krystal.UI/View.hpp
+      include/Krystal.UI/ViewAccessibility.hpp
 
   PRIVATE
     src/Compositing/BitmapTexture.cpp
@@ -93,4 +94,5 @@ target_sources(Krystal.UI
     src/Render2DConversions.cpp
     src/SystemPasteboardStrategy.cpp
     src/View.cpp
+    src/ViewAccessibility.cpp
 )

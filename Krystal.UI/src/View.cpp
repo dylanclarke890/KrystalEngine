@@ -1,4 +1,5 @@
 ﻿#include "Krystal.UI/View.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
@@ -217,6 +218,33 @@ namespace krys::ui
     void RequestPointerUnlock(Func<void(bool)> &&completionHandler) noexcept override
     {
       completionHandler(_view && _view->UnlockPointer());
+    }
+
+    void PostAccessibilityNotification(boo::ax::AccessibilityObject &object,
+                                       boo::ax::AXNotification notification) noexcept override
+    {
+      if (_view && _view->_accessibility)
+      {
+        _view->_accessibility->NotificationPosted(object, notification);
+      }
+    }
+
+    void AccessibilityObjectDetached(boo::ax::AccessibilityObject &object,
+                                     boo::ax::AccessibilityDetachmentType) noexcept override
+    {
+      if (_view && _view->_accessibility)
+      {
+        _view->_accessibility->ObjectDetached(object);
+      }
+    }
+
+    void PostAccessibilityTextChange(boo::ax::AccessibilityObject &object, boo::ax::AXTextChange change,
+                                     uint64 offset, utf8_stringview text) noexcept override
+    {
+      if (_view && _view->_accessibility)
+      {
+        _view->_accessibility->TextChanged(object, change, offset, text);
+      }
     }
 
     void SetView(View *view) noexcept
@@ -506,11 +534,26 @@ namespace krys::ui
     {
       _overlay->Hide();
     }
+    _accessibility.reset();
     _chromeClient->SetView(nullptr);
     _frameLoaderClient->SetView(nullptr);
     _dragClient->SetView(nullptr);
     // The layers go before the texture mapper that holds their textures.
     _frame->SetDocument(nullptr);
+  }
+
+  void View::AttachAccessibility(pal::IWindow &window, const boo::IntPoint &origin) noexcept
+  {
+    if (!_accessibility)
+    {
+      _accessibility = CreateUnique<ViewAccessibility>(*this);
+    }
+    _accessibility->Attach(window, origin);
+  }
+
+  void View::DetachAccessibility() noexcept
+  {
+    _accessibility.reset();
   }
 
   boo::dom::HTMLDocument &View::Document() const noexcept

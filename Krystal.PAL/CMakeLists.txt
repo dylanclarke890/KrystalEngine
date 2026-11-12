@@ -27,6 +27,7 @@ target_sources(Krystal.PAL
     BASE_DIRS
       include
     FILES
+      include/Krystal.PAL/Accessibility.hpp
       include/Krystal.PAL/CursorShapes.hpp
       include/Krystal.PAL/DragAndDrop.hpp
       include/Krystal.PAL/KeyModifiers.hpp

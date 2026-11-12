@@ -44,6 +44,7 @@ target_sources(Krystal.UI.Tests
   PRIVATE
     ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/src/Golden.cpp
 
+    tests/Accessibility.cpp
     tests/Benchmark.cpp
     tests/BidiEditing.cpp
     tests/Canvas2D.cpp

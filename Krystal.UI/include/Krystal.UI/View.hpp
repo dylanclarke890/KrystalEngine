@@ -44,6 +44,7 @@
 #include "Krystal.UI/ImageBufferRender2DBackend.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
 #include "Krystal.UI/Overlay.hpp"
+#include "Krystal.UI/ViewAccessibility.hpp"
 #include <chrono>
 #include <filesystem>
 
@@ -195,6 +196,8 @@ namespace krys::ui
     Func<bool(bool)> _pointerLockHandler;
     /// @brief Whether the host has locked the pointer for the page.
     bool _pointerLocked {false};
+    /// @brief Exposes the page to assistive technology through the host's window, while attached.
+    UniquePtr<ViewAccessibility> _accessibility;
 
     /// @brief A drag that started in the page, which the view runs until it's dropped or cancelled.
     struct ActiveDrag
@@ -626,6 +629,19 @@ namespace krys::ui
     /// shows its file picker with the chooser's `Settings()`, then answers it, now or later, with
     /// `ChooseFiles` or `Cancel`. A view without a handler cancels at once, so the input gets `cancel`.
     void SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept;
+
+    /// @brief Exposes the page to assistive technology through @p window, whose client area has the view's
+    /// top left at @p origin. The page's accessibility tree is built when assistive technology first asks for
+    /// it.
+    /// @note Overlays (a menu list's popup, the pickers) aren't exposed yet.
+    void AttachAccessibility(pal::IWindow &window, const boo::IntPoint &origin = {}) noexcept;
+    /// @brief Stops exposing the page to assistive technology.
+    void DetachAccessibility() noexcept;
+    /// @brief What exposes the page to assistive technology; null if it isn't attached.
+    KRYS_NODISCARD ViewAccessibility *Accessibility() const noexcept
+    {
+      return _accessibility.get();
+    }
 
     /// @brief The view's document: the main frame's.
     KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept;

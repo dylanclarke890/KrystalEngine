@@ -1237,6 +1237,29 @@ namespace krys::pal
       }
     }
 
+    void Win32Window::SetAccessibilityTree(IAccessibilityTree *tree) noexcept
+    {
+      _accessibilityTree = tree;
+    }
+
+    bool Win32Window::IsAccessibilityActive() const noexcept
+    {
+      return false;
+    }
+
+    void Win32Window::RaiseAccessibilityEvent(AccessibilityNodeID, AccessibilityEvent) noexcept
+    {
+    }
+
+    void Win32Window::RaiseAccessibilityTextChange(AccessibilityNodeID, AccessibilityTextChange, uint64,
+                                                   utf8_stringview) noexcept
+    {
+    }
+
+    void Win32Window::AccessibilityNodeRemoved(AccessibilityNodeID) noexcept
+    {
+    }
+
     void Win32Window::UpdateDropTarget() noexcept
     {
       if (!_callbacks.OnDrag)
