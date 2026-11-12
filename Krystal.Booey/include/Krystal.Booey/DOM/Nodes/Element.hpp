@@ -548,6 +548,9 @@ namespace krys::boo::dom
     /// @brief Scrolls the element's ancestors so its start (or, if @p alignToTop is false, its end) is
     /// aligned with theirs.
     void ScrollIntoView(bool alignToTop) noexcept;
+    /// @brief Scrolls the element's ancestors so the element is visible, if it isn't: centred in them if
+    /// @p centerIfNotVisible, otherwise to their nearest edge.
+    void ScrollIntoViewIfNotVisible(bool centerIfNotVisible = true) noexcept;
 
     void Scroll(const ScrollToOptions &options = {}) noexcept;
     void Scroll(double x, double y) noexcept;

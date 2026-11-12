@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/FormattingContextBoxIterator.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
@@ -83,8 +84,10 @@ namespace krys::boo::layout_integration
                                            : layout::Box::NodeType::ReplacedElement;
         }
 
-        // FIXME: Buttons, menu lists, sliders and slider containers.
-        if (Is<RenderTextControlInnerContainer>(renderer))
+        // The slider container is a flex box of its own element (upstream's RenderSliderContainer).
+        if (renderer.IsRenderButton() || renderer.IsRenderMenuList()
+            || Is<RenderTextControlInnerContainer>(renderer) || renderer.IsRenderSlider()
+            || Is<html::SliderContainerElement>(renderer.GetElement()))
         {
           return layout::Box::NodeType::ImplicitFlexBox;
         }

@@ -4131,6 +4131,27 @@ namespace krys::boo::dom
     LocalFrameView::ScrollRectToVisible(absoluteBounds, *renderer, insideFixed, visibleOptions);
   }
 
+  void Element::ScrollIntoViewIfNotVisible(bool centerIfNotVisible) noexcept
+  {
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+
+    auto *renderer = Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    bool insideFixed = false;
+    auto absoluteBounds = renderer->AbsoluteAnchorRectWithScrollMargin(&insideFixed).first;
+    auto align = centerIfNotVisible ? ScrollAlignment::AlignCenterIfNotVisible
+                                    : ScrollAlignment::AlignToEdgeIfNotVisible;
+    ScrollRectToVisibleOptions options;
+    options.RevealMode = SelectionRevealMode::Reveal;
+    options.AlignX = align;
+    options.AlignY = align;
+    LocalFrameView::ScrollRectToVisible(absoluteBounds, *renderer, insideFixed, options);
+  }
+
   void Element::ScrollIntoView(bool alignToTop) noexcept
   {
     ScrollIntoViewOptions options;

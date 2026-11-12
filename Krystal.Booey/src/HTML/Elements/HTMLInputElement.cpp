@@ -874,7 +874,6 @@ namespace krys::boo::html
     return _inputType->ReceiveDroppedFiles(dragData);
   }
 
-  // FIXME: Updating the renderer (updateFromElement), once file inputs draw their button and file name.
   void HTMLInputElement::SetCanReceiveDroppedFiles(bool canReceiveDroppedFiles) noexcept
   {
     if (_canReceiveDroppedFiles == canReceiveDroppedFiles)
