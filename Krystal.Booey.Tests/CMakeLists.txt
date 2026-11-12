@@ -335,6 +335,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/TransformOperations.cpp
 		tests/Rendering/Style/BorderValues.cpp
 		tests/Rendering/Style/RenderStyle.cpp
+		tests/Rendering/Style/StyleCrossfadeImage.cpp
+		tests/Rendering/Style/StyleFilterImage.cpp
 		tests/Rendering/Style/StyleDataGroups.cpp
 		tests/Style/Computed/ComputedStyleInitial.cpp
 		tests/Style/CustomProperty.cpp
@@ -486,6 +488,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/LayoutState.cpp
 		tests/Layout/LayoutTree/LayoutBoxGeometry.cpp
 		tests/Layout/Floats/FloatingContext.cpp
+		tests/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.cpp
 		tests/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
 		tests/Layout/Integration/LayoutIntegrationUtils.cpp
 		tests/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp
@@ -757,6 +760,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/InputTypes/FileInputType.cpp
 		tests/HTML/InputTypes/ImageInputType.cpp
 		tests/HTML/InputTypes/NumberInputType.cpp
+		tests/HTML/InputTypes/RadioInputType.cpp
 		tests/HTML/CustomElement/CustomElementRegistry.cpp
 		tests/HTML/CloseWatcher/CloseWatcher.cpp
 		tests/HTML/CustomElement/ElementInternals.cpp
@@ -764,6 +768,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Sanitizer/Sanitizer.cpp
 		tests/HTML/Popover.cpp
 		tests/HTML/Collections/RadioNodeList.cpp
+		tests/HTML/Shadow/SliderThumbElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
 		tests/HTML/Mixins/URLDecomposition.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp

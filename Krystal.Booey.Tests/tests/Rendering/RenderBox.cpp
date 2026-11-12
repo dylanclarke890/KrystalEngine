@@ -215,6 +215,23 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderBox: size containment of a menu list",
+                   "[Rendering][RenderBox]")
+  {
+    // A size-contained menu list keeps the height its theme gives it, as if it had no options; a block is as
+    // tall as its border and padding.
+    ResolverFixture fixture {
+      u8"<style>select,div{margin:0;contain:size}</style><select id=contained><option>a</option></select>"
+      u8"<select id=empty></select><div id=block style='padding:2px'>a</div>"};
+    (void)fixture.Document->UpdateLayout();
+    auto &contained = Downcast<RenderBox>(*fixture.ById(u8"contained").Renderer());
+    auto &empty = Downcast<RenderBox>(*fixture.ById(u8"empty").Renderer());
+    auto &block = Downcast<RenderBox>(*fixture.ById(u8"block").Renderer());
+    CHECK(contained.Height() > 4_lu);
+    CHECK(contained.Height() == empty.Height());
+    CHECK(block.Height() == 4_lu);
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderBox: containing blocks", "[Rendering][RenderBox]")
   {
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>

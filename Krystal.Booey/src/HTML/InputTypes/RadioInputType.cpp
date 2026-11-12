@@ -185,7 +185,9 @@ namespace krys::boo::html
       {
         Ref<HTMLInputElement> protectedInput = ShareRef(*inputElement);
         inputElement->Focus();
-        // FIXME: Scrolling the button into view if it isn't visible (scrollIntoViewIfNotVisible).
+        // If the focused radio button is not visible (e.g., during arrow key navigation), scroll it into
+        // view.
+        inputElement->ScrollIntoViewIfNotVisible(false);
         (void)inputElement->DispatchSimulatedClick(&event, dom::SimulatedClickMouseEventOptions::SendNoEvents,
                                                    dom::SimulatedClickVisualOptions::DoNotShowPressedLook);
         event.SetDefaultHandled();

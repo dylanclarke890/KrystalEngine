@@ -79,4 +79,13 @@ namespace krys::boo
   {
     return _image && _image->IsPending();
   }
+
+  FloatSize StyleFilterImage::FixedSize(const RenderElement &renderer) const noexcept
+  {
+    if (_image)
+    {
+      return _image->ImageSize(&renderer, 1);
+    }
+    return {};
+  }
 }

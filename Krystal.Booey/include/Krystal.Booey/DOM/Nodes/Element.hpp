@@ -548,6 +548,9 @@ namespace krys::boo::dom
     /// @brief Scrolls the element's ancestors so its start (or, if @p alignToTop is false, its end) is
     /// aligned with theirs.
     void ScrollIntoView(bool alignToTop) noexcept;
+    /// @brief Scrolls the element's ancestors so the element is visible, if it isn't: centred in them if
+    /// @p centerIfNotVisible, otherwise to their nearest edge.
+    void ScrollIntoViewIfNotVisible(bool centerIfNotVisible = true) noexcept;
 
     void Scroll(const ScrollToOptions &options = {}) noexcept;
     void Scroll(double x, double y) noexcept;
@@ -986,15 +989,31 @@ namespace krys::boo::dom
       return true;
     }
 
+    /// @brief Called by the render tree updater before the element's renderer is created.
+    virtual void WillAttachRenderers() noexcept
+    {
+    }
+
     /// @brief Called by the render tree updater after the element's renderer (and its descendants') was
     /// created or replaced.
     virtual void DidAttachRenderers() noexcept
     {
     }
 
+    /// @brief Called by the render tree updater before the element's renderer (and its descendants') is torn
+    /// down (a control releases the mouse it captured).
+    virtual void WillDetachRenderers() noexcept
+    {
+    }
+
     /// @brief Called by the render tree updater after the element's renderer was torn down (a control closes
     /// its picker).
     virtual void DidDetachRenderers() noexcept
+    {
+    }
+
+    /// @brief Called before the element's computed style (kept for elements without a renderer) is dropped.
+    virtual void WillResetComputedStyle() noexcept
     {
     }
 

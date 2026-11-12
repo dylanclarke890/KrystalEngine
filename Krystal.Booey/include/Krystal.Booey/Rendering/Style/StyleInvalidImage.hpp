@@ -58,6 +58,10 @@ namespace krys::boo
       return false;
     }
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
+    KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final
+    {
+      return {};
+    }
   };
 }
 

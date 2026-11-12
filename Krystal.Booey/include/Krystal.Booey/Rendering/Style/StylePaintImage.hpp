@@ -63,6 +63,10 @@ namespace krys::boo
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final
     {
     }
+    KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final
+    {
+      return {};
+    }
   };
 }
 

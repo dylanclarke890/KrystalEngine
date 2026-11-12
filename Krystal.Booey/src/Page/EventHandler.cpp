@@ -1637,9 +1637,8 @@ namespace krys::boo
 
     if (node)
     {
-      // FIXME: List boxes, which scroll themselves.
       auto *r = node->Renderer();
-      if (r && r->EnclosingBox().Scroll(direction, granularity))
+      if (r && !r->IsRenderListBox() && r->EnclosingBox().Scroll(direction, granularity))
       {
         SetFrameWasScrolledByUser();
         return true;
@@ -1673,7 +1672,8 @@ namespace krys::boo
     if (node)
     {
       auto *r = node->Renderer();
-      if (r && r->EnclosingBox().LogicalScroll(direction, granularity, 1, nullptr, animated))
+      if (r && !r->IsRenderListBox()
+          && r->EnclosingBox().LogicalScroll(direction, granularity, 1, nullptr, animated))
       {
         SetFrameWasScrolledByUser();
         return true;

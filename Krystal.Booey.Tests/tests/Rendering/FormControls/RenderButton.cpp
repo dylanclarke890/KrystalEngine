@@ -12,7 +12,8 @@ namespace krys::boo::layout::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderButton: buttons and button inputs",
                    "[Rendering][RenderButton]")
   {
-    // A button's children and a button input's value go in an anonymous block, centred in the button.
+    // A button's children and a button input's value go in an anonymous block, centred in the button. A
+    // button's baseline is its text's, or without any, its content box's bottom.
     ResolverFixture fixture {
       AhemDocument(u8"button,input{padding:2px 4px}",
                    u8"<button id=button>Go</button><input type=submit id=submit value=Send>"
@@ -30,7 +31,7 @@ layer at (0,0) size 800x18
         RenderBlock (anonymous) at (6,4) size 40x10
           RenderTextFragment at (0,0) size 40x10
             text run at (0,0) width 40: "Send"
-      RenderButton {BUTTON} at (84,4) size 12x8 [color=#000000CC] [bgcolor=#C0C0C0] [border: (2px outset #C0C0C0)] id="empty"
+      RenderButton {BUTTON} at (84,8) size 12x8 [color=#000000CC] [bgcolor=#C0C0C0] [border: (2px outset #C0C0C0)] id="empty"
 )");
 
     // Changing the value changes the text.

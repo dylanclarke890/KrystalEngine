@@ -268,6 +268,24 @@ namespace krys::boo::tests
     CHECK_FALSE(initialContainingBlock.FirstChild());
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "BoxTreeUpdater: form controls drawn as flex boxes",
+                   "[Layout][Integration][BoxTreeUpdater]")
+  {
+    // Buttons, menu lists and sliders are flex boxes, whatever their display; so are their inner text
+    // containers and slider containers (which aren't in inline content).
+    ResolverFixture fixture {u8"<!DOCTYPE html><div id=root>a<button id=button>b</button><select id=menu>"
+                             u8"<option>c</option></select><input type=range id=slider><span id=span>d</span>"
+                             u8"</div>"};
+    (void)fixture.Document->UpdateLayout();
+    layout::tests::DetachLineLayouts(fixture);
+    (void)layout::tests::BuildBoxTree(BlockOf(fixture, u8"root"));
+
+    CHECK(BoxOf(fixture, u8"button").IsFlexBox());
+    CHECK(BoxOf(fixture, u8"menu").IsFlexBox());
+    CHECK(BoxOf(fixture, u8"slider").IsFlexBox());
+    CHECK_FALSE(BoxOf(fixture, u8"span").IsFlexBox());
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "BoxTreeUpdater: anonymous blocks and list markers",
                    "[Layout][Integration][BoxTreeUpdater]")
   {

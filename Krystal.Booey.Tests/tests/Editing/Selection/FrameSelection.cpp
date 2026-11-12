@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -9,6 +10,7 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -123,6 +125,29 @@ namespace krys::boo::tests
     CHECK(selection.Contains(LayoutPoint(10_lu, 20_lu)));
     CHECK(!selection.Contains(LayoutPoint(10_lu, 70_lu)));
     CHECK(!selection.SelectionBounds().IsEmpty());
+  }
+
+  TEST_CASE("FrameSelection: selecting all in a focused list box", "[Editing][FrameSelection]")
+  {
+    FrameSelectionFixture fixture(u8"<p id=a>Text.</p><select id=multiple multiple><option>a</option>"
+                                  u8"<option>b</option></select><select id=single size=2><option>a</option>"
+                                  u8"<option>b</option></select>");
+    auto &selection = fixture.Selection();
+    auto &multiple = Downcast<html::HTMLSelectElement>(fixture.ById(u8"multiple"));
+    auto &single = Downcast<html::HTMLSelectElement>(fixture.ById(u8"single"));
+
+    // A focused list box that can select several options selects them all, and the document's selection
+    // stays as it was.
+    multiple.Focus();
+    selection.SelectAll();
+    CHECK(multiple.SelectedOptions()->Length() == 2u);
+    CHECK(selection.IsNone());
+
+    // One that can't select several options takes the select-all too, and selects nothing.
+    single.Focus();
+    selection.SelectAll();
+    CHECK(single.SelectedOptions()->Length() == 0u);
+    CHECK(selection.IsNone());
   }
 
   TEST_CASE("FrameSelection: DOM changes", "[Editing][FrameSelection]")

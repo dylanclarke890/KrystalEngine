@@ -575,7 +575,7 @@ namespace krys::boo
            && GetRenderTreePosition().Parent().Style().IsSkippedRootOrSkippedContent());
     if (shouldCreateNewRenderer)
     {
-      // FIXME: Custom style resolve callbacks (willAttachRenderers), once there are any.
+      element.WillAttachRenderers();
       CreateRenderer(element, krys::move(elementUpdateStyle));
 
       RenderingParent().DidCreateOrDestroyChildRenderer = true;
@@ -1046,7 +1046,7 @@ namespace krys::boo
 
     auto push = [&](dom::Element &element)
     {
-      // FIXME: Custom style resolve callbacks (willDetachRenderers), once there are any.
+      element.WillDetachRenderers();
       teardownStack.push_back(&element);
     };
 

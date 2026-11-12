@@ -34,6 +34,7 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -141,7 +142,6 @@ namespace krys::boo
     frame.GetEventHandler().SetCurrentMouseCursor(Cursor(type));
   }
 
-  // FIXME: List boxes (RenderListBox).
   void AutoscrollController::StartAutoscrollForSelection(RenderObject *renderer) noexcept
   {
     // We don't want to trigger the autoscroll or the panScroll if it's already active
@@ -149,7 +149,11 @@ namespace krys::boo
     {
       return;
     }
-    auto *scrollable = RenderBox::FindAutoscrollable(renderer);
+    RenderBox *scrollable = RenderBox::FindAutoscrollable(renderer);
+    if (!scrollable)
+    {
+      scrollable = DynamicDowncast<RenderListBox>(renderer);
+    }
     if (!scrollable)
     {
       return;
